@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-006",
+  "kind": "negative",
+  "expected": "ClearHistory with no selection -> Missing(history object); closing the window while a recipe is Pending -> Busy, document untouched",
+  "verified_by": [
+    "the_command_line_drives_the_switches_report_and_clear",
+    "closing_the_window_is_refused_while_a_recipe_is_pending"
+  ]
+}

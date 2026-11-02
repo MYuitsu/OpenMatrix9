@@ -1,0 +1,18 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-19-005",
+  "kind": "positive",
+  "input": "reject unsupported geometry and preserve the previous valid report",
+  "expected": "open shell, invalid B-Rep and missing density are typed errors; the document, Undo journal and previous report stay unchanged",
+  "verified_by": [
+    "an_open_shell_or_an_empty_solid_never_gets_a_volume",
+    "non_finite_and_zero_volumes_are_refused",
+    "a_duplicate_body_id_without_an_explicit_count_is_refused",
+    "an_open_shell_is_refused_and_the_previous_report_is_preserved",
+    "a_missing_density_is_a_typed_refusal_not_a_zero_mass"
+  ],
+  "notes": [
+    "The report is computed into a local value and stored only after every body succeeds.",
+    "A kernel measurement failure is mapped to Invalid(\"metal weight geometry\") rather than an I/O string, so the caller sees a typed refusal."
+  ]
+}

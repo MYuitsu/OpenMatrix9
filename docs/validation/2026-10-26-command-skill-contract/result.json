@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-26",
+  "scope": "Authorized skill update: command icon mapping, default invocation and Polyline-style underlined option shortcuts",
+  "consent": "Direct user request in this chat to save this exact integration rule; broader previous proposals are not automatically approved.",
+  "quick_validation": [
+    {
+      "path": "H:\\OpenMatrix9\\skills\\openmatrix9-feature-port",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "path": "H:\\OpenMatrix9\\skills\\openmatrix9-ui",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "path": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-feature-port",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "path": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-ui",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    }
+  ],
+  "new_rule_sections_synced": true,
+  "reference_bytes_synced": true,
+  "new_reference_links_valid": true,
+  "unrelated_installed_feature_skill_difference_preserved": true,
+  "files": {
+    "H:\\OpenMatrix9\\skills\\openmatrix9-feature-port\\SKILL.md": "b454adb9f8aad683f0c988dea734358c1f296cac616d204ee41570fffb7e668b",
+    "H:\\OpenMatrix9\\skills\\openmatrix9-ui\\SKILL.md": "988e173b72351d0396b5a4e772a9d89fb0aa543dfd38560fe586f0ecb1e2cda2",
+    "H:\\OpenMatrix9\\skills\\openmatrix9-feature-port\\references\\command-integration-contract.md": "81fd584dc53a34595698264f5721caa542357c53a567cacaa1547cd5707e0ea3",
+    "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-feature-port\\SKILL.md": "2df32639fabbe0c965938a07cad924e174596cc39bdb1aaa3ee29891aabdcbd5",
+    "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-ui\\SKILL.md": "988e173b72351d0396b5a4e772a9d89fb0aa543dfd38560fe586f0ecb1e2cda2",
+    "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-feature-port\\references\\command-integration-contract.md": "81fd584dc53a34595698264f5721caa542357c53a567cacaa1547cd5707e0ea3"
+  },
+  "manual_scope_review": [
+    "Full command implementation requires icon/binding, real default action and working owner parameters before a completion claim.",
+    "Artwork-only or documentation-only task retains its authorized partial scope.",
+    "Undefined mouse variants and commands without options do not acquire invented bindings/parameters.",
+    "Correct binary runtime proof and actual geometry/effect remain separate from skill metadata validation."
+  ],
+  "product_implementation_status_promoted": false,
+  "public_source_audit": {
+    "exit_code": 0,
+    "source_files": 12464,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "git_diff_check": {
+    "exit_code": 0
+  }
+}

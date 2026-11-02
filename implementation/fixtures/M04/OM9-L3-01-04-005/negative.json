@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-005",
+  "case": "negative",
+  "input": "a cache entry whose recorded input stamp is one revision old; a parameter edit without a revision bump",
+  "expected": "both are cache misses and A is planned even while the graph still calls it Clean",
+  "tests": [
+    "only_the_affected_chain_recomputes_and_independent_cache_entries_are_untouched",
+    "a_cache_entry_with_an_outdated_input_stamp_is_a_miss_even_when_the_graph_is_clean"
+  ]
+}

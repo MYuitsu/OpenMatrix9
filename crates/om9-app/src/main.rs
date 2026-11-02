@@ -108,6 +108,22 @@ fn export_3dm(source: &Path, target: &Path) -> Result<()> {
     report(document, &receipt.diagnostics)
 }
 
+/// Renders every workspace viewport into a PNG under `out`, without starting the application.
+fn render_views(project: &Path, out: &Path, width: u32, height: u32) -> Result<()> {
+    let written = om9_app::headless::render_project(project, out, width, height)?;
+    for path in written {
+        println!("{}", path.display());
+    }
+    Ok(())
+}
+
+/// Renders the four workspace viewports into one 2x2 sheet.
+fn render_sheet(project: &Path, out: &Path, width: u32, height: u32) -> Result<()> {
+    let path = om9_app::headless::render_sheet(project, out, width, height)?;
+    println!("{}", path.display());
+    Ok(())
+}
+
 fn migrate(path: &Path, version: u8) -> Result<()> {
     let limits = Limits::default();
     let cancellation = Cancellation::default();
@@ -218,9 +234,50 @@ fn run() -> std::result::Result<(), om9_app::startup::StartupFailure> {
         Some("--export-3dm") if args.len() == 3 => {
             document_stage(export_3dm(Path::new(&args[1]), Path::new(&args[2])))
         }
+        // Headless Model Context Protocol server: an agent client drives the same Controller as
+        // CMD and reads typed state instead of screenshots.
+        Some("--mcp") if args.len() == 1 => document_stage(om9_app::mcp::serve_stdio()),
+        // Headless viewport capture: one PNG per workspace camera, no window or egui.
+        Some("--render") if args.len() == 3 || args.len() == 4 => {
+            let size = if args.len() == 4 {
+                match om9_app::headless::parse_size(&args[3].to_string_lossy()) {
+                    Ok(size) => size,
+                    Err(error) => {
+                        return Err(StartupFailure::from_error(StartupStage::Document, &error));
+                    }
+                }
+            } else {
+                (1280, 720)
+            };
+            document_stage(render_views(
+                Path::new(&args[1]),
+                Path::new(&args[2]),
+                size.0,
+                size.1,
+            ))
+        }
+        // One 2x2 sheet of all four workspace cameras (tile size WIDTHxHEIGHT).
+        Some("--render-4") if args.len() == 3 || args.len() == 4 => {
+            let size = if args.len() == 4 {
+                match om9_app::headless::parse_size(&args[3].to_string_lossy()) {
+                    Ok(size) => size,
+                    Err(error) => {
+                        return Err(StartupFailure::from_error(StartupStage::Document, &error));
+                    }
+                }
+            } else {
+                (640, 400)
+            };
+            document_stage(render_sheet(
+                Path::new(&args[1]),
+                Path::new(&args[2]),
+                size.0,
+                size.1,
+            ))
+        }
         _ if args.len() != 2 => Err(StartupFailure::new(
             StartupStage::Document,
-            "usage: om9 --create-fixture|--inspect|--audit|--migrate-v1|--migrate-v2|--migrate-v3 path.om9 | --import-3dm source.3dm target.om9 | --export-3dm source.om9 target.3dm | --plugin-run package.om9p command args.json output.om9 | --plugin-run-on package.om9p command args.json input.om9 output.om9",
+            "usage: om9 --create-fixture|--inspect|--audit|--migrate-v1|--migrate-v2|--migrate-v3 path.om9 | --import-3dm source.3dm target.om9 | --export-3dm source.om9 target.3dm | --plugin-run package.om9p command args.json output.om9 | --plugin-run-on package.om9p command args.json input.om9 output.om9 | --mcp | --render project.om9 out-dir [WIDTHxHEIGHT] | --render-4 project.om9 out.png [WIDTHxHEIGHT]",
         )),
         _ => {
             let path = Path::new(&args[1]);

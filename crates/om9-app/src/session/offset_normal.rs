@@ -54,7 +54,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Distance=") {
-            let Some(distance) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value != 0.0) else {
+            let Some(distance) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value != 0.0)
+            else {
                 self.offset_normal_pending = Some(pending);
                 return Some(Err(Error::Invalid("distance must be non-zero")));
             };
@@ -64,7 +68,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.offset_normal_pending = Some(pending);
-            return Some(Err(Error::Invalid("Offset Normal accepts Distance= or Enter")));
+            return Some(Err(Error::Invalid(
+                "Offset Normal accepts Distance= or Enter",
+            )));
         }
         let samples = match om9_core::surface_kernel::sample_curve(
             &pending.curve,

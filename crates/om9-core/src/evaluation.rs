@@ -172,14 +172,28 @@ fn evaluate_admitted(
     Ok(derivatives)
 }
 fn nurbs_derivatives(n: &NurbsCurve, u: f64, order: usize, limits: &Limits) -> Result<Vec<Point3>> {
+    nurbs_derivatives_side(n,u,order,limits,None)
+}
+/// Exact one-sided jet at a knot. The caller must compare both sides before
+/// claiming a derivative-independent geometric quantity there.
+pub fn nurbs_one_sided_derivatives(n:&NurbsCurve,u:f64,order:usize,from_left:bool,limits:&Limits)->Result<Vec<Point3>>{
+    n.validate(limits)?;
+    if order>3||!u.is_finite()||u<n.domain[0]||u>n.domain[1]{return Err(Error::Invalid("one-sided derivative parameter/order"));}
+    nurbs_derivatives_side(n,u,order,limits,Some(from_left))
+}
+fn nurbs_derivatives_side(n:&NurbsCurve,u:f64,order:usize,limits:&Limits,side:Option<bool>)->Result<Vec<Point3>>{
     if n.periodic {
-        return Err(Error::Unsupported(
-            "periodic derivative continuity not yet certified",
-        ));
+        n.certify_repeated_periodic(limits)?;
+        // Knot multiplicity limits continuity at the periodic seam.
+        if side.is_none() && (u==n.domain[0] || u==n.domain[1]) {
+            let seam=n.domain[0];
+            let mult=n.knots.partition_point(|k|*k<=seam)-n.knots.partition_point(|k|*k<seam);
+            if order>n.degree.saturating_sub(mult) {return Err(Error::Unsupported("periodic seam derivative continuity"));}
+        }
     }
     let degree = n.degree;
     let count = n.poles.len();
-    if u > n.domain[0] && u < n.domain[1] {
+    if side.is_none() && u > n.domain[0] && u < n.domain[1] {
         let multiplicity =
             n.knots.partition_point(|k| *k <= u) - n.knots.partition_point(|k| *k < u);
         if multiplicity > 0 && order > degree.saturating_sub(multiplicity) {
@@ -189,10 +203,13 @@ fn nurbs_derivatives(n: &NurbsCurve, u: f64, order: usize, limits: &Limits) -> R
         }
     }
     let span = if u == n.knots[count] {
-        count - 1
+        // The active span at the right boundary is the last nonempty span
+        // to its left, even when that boundary knot has multiplicity > 1.
+        n.knots.partition_point(|k| *k < u).checked_sub(1)
+            .ok_or(Error::Invalid("knot span"))?.min(count-1)
     } else {
         n.knots
-            .partition_point(|k| *k <= u)
+            .partition_point(|k| if side==Some(true) && u>n.domain[0] {*k<u} else {*k<=u})
             .checked_sub(1)
             .ok_or(Error::Invalid("knot span"))?
             .min(count - 1)

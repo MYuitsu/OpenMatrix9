@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-024",
+  "case": "rows x columns above MAX_CURVE_ITEMS (512)",
+  "expected": "rows x columns above MAX_CURVE_ITEMS (512) -> Error::Invalid(\"array count\"); a count below 2 is refused at its prompt",
+  "test": "m03_04_01_reference_rows_refuse_a_selection_without_their_reference"
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-14-005",
+  "cases": [
+    {
+      "input": "Mode=UnderBezel and Mode=GalleryRail",
+      "expect": "the lowest vertex of both bodies sits below the girdle bottom, both bodies are closed and both Boolean grooves are cut",
+      "oracle": "om9-core src/settings/bezel.rs::the_under_bezel_and_gallery_rail_sit_below_the_girdle"
+    },
+    {
+      "input": "the same two modes through the icon",
+      "expect": "one Bezel body each, lowest vertex below zero, plus the Finger Rail body",
+      "oracle": "om9-app tests/head_commands.rs::the_three_bezel_modes_build_and_the_boolean_cuts_a_finger_rail"
+    }
+  ],
+  "automated_tests": [
+    "the_three_bezel_modes_build_and_the_boolean_cuts_a_finger_rail",
+    "the_under_bezel_and_gallery_rail_sit_below_the_girdle"
+  ]
+}

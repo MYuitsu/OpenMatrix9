@@ -4,14 +4,34 @@
   "milestone": "M03",
   "parent_l3_id": "OM9-L3-03-18-015",
   "owner_l2_id": "OM9-L2-03-18",
-  "title": "Wire Ui \u2014 Solid \u00b7 Torus \u2014 menu binding",
+  "title": "Wire Ui — Solid · Torus — menu binding",
   "task_role": "WIRE_UI",
   "planning_state": "IMPLEMENTED",
   "execution_stage": "E07",
   "mini_gate_id": "G03-D",
   "risk": "HIGH",
   "purpose": "Wire both menu and commandline to owned command",
-  "parent_l3_file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid \u00b7 Torus - menu binding/l3.json",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "ROOT_GROUP",
+    "interaction": {
+      "mode": "COMMAND_INLINE_ROOT_GROUP",
+      "handler": "Controller::submit",
+      "option_count": 15,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid · Torus - menu binding/l3.json#/parameter_contract",
+    "catalog_command": {
+      "menu": "Solid",
+      "command": "(root)"
+    },
+    "option_count": 15,
+    "missing_option_count": 0,
+    "domain_input_count": 1,
+    "implementation_l4": null
+  },
+  "parent_l3_file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid · Torus - menu binding/l3.json",
   "preconditions": {
     "milestone": "M00,M01,M02 approved and passing actual tests; previous M03 mini-gates approved",
     "required_l4_verified_ids": [
@@ -62,18 +82,18 @@
       "Test disabled/invalid owner/empty selection and Esc; no success toast on zero document delta unless read-only command is explicitly documented."
     ],
     "role_checklist": [
-      "Connect the menu item `Solid \u00b7 Torus \u2014 menu binding` and command line to the same dispatch descriptor. Preserve original L3 ID.",
+      "Connect the menu item `Solid · Torus — menu binding` and command line to the same dispatch descriptor. Preserve original L3 ID.",
       "Validate backend owner and its focused test before enabling the command. If the service is absent, keep disabled and BLOCKED_OWNER.",
       "Capture one successful call and one rejected/cancel case; verify exactly one transaction per command."
     ],
     "input_fixture": "explicit typed selection and deterministic numerical inputs for Torus",
     "expected_positive": "valid exact BRep and explicit positive volume/shape status",
-    "expected_negative": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
+    "expected_negative": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
     "required_technical_decisions": [
-      "Matrix menu item ch\u1ec9 dispatch qua qymcad/src/command_catalog.rs / command bus; kh\u00f4ng t\u1ea1o m\u1ed9t kernel thao t\u00e1c song song.",
-      "D\u00f9ng c\u00f9ng command descriptor, typed options v\u00e0 selection gi\u1eefa menu, command line v\u00e0 toolbar; ki\u1ec3m tra disable state khi backend v\u1eafng m\u1eb7t.",
-      "N\u1ebfu kh\u00f4ng c\u00f3 owner L3 x\u00e1c minh \u0111\u01b0\u1ee3c, tr\u1ea1ng th\u00e1i BLOCKED_OWNER, kh\u00f4ng coi m\u1ed9t menu item render th\u00e0nh PASS.",
-      "\u1ee8ng vi\u00ean owner L3: OM9-L3-01-09-001; ph\u1ea3i ki\u1ec3m ch\u1ee9ng API v\u00e0 test tr\u01b0\u1edbc khi b\u1eadt menu."
+      "Matrix menu item chỉ dispatch qua qymcad/src/command_catalog.rs / command bus; không tạo một kernel thao tác song song.",
+      "Dùng cùng command descriptor, typed options và selection giữa menu, command line và toolbar; kiểm tra disable state khi backend vắng mặt.",
+      "Nếu không có owner L3 xác minh được, trạng thái BLOCKED_OWNER, không coi một menu item render thành PASS.",
+      "Ứng viên owner L3: OM9-L3-01-09-001; phải kiểm chứng API và test trước khi bật menu."
     ],
     "suggested_commands": [
       "cargo check -p qymcad",
@@ -161,7 +181,7 @@
   },
   "execution_handoff": {
     "schema": "om9.m03.luna.hardened.task",
-    "read_l3_file_first": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid \u00b7 Torus - menu binding/l3.json",
+    "read_l3_file_first": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-015 - Solid · Torus - menu binding/l3.json",
     "task_role": "WIRE_UI",
     "role_artifact_kind": "ui_dispatch_with_safe_disabled_fallback",
     "mandatory_artifact_fields": [
@@ -174,7 +194,7 @@
       "ui_smoke_test"
     ],
     "proof_scope": "Only a verified disabled placeholder or functioning end-to-end UI command can pass, as stated in outcome.",
-    "specific_task_title": "Wire Ui \u2014 Solid \u00b7 Torus \u2014 menu binding",
+    "specific_task_title": "Wire Ui — Solid · Torus — menu binding",
     "domain": "UI_COMMAND",
     "parent_fixture_reference": "m03_luna_execution_contract.golden_test_design",
     "focused_test_reference": "m03_luna_execution_contract.focused_test_handoff",
@@ -219,12 +239,12 @@
     "policy_id": "om9.reference_supplement.matrix9_rhino5.v1",
     "crosswalk_date": "2026-10-15",
     "status": "requirements_only_not_runtime_evidence",
-    "focus": "Menu binding Solid ph\u1ea3i g\u1ecdi \u0111\u00fang l\u1ec7nh/kernel owner; sheet manual cho \u0111\u01b0\u1eddng l\u1ec7nh v\u00e0 option.",
+    "focus": "Menu binding Solid phải gọi đúng lệnh/kernel owner; sheet manual cho đường lệnh và option.",
     "rhino5_core_chapters": [
       {
         "anchor_id": "RCORE-01",
         "kind": "rhino5_core_chapter",
-        "title": "Ki\u1ec3u \u0111\u1ed1i t\u01b0\u1ee3ng v\u00e0 ranh gi\u1edbi kernel",
+        "title": "Kiểu đối tượng và ranh giới kernel",
         "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
         "guide_pdf_pages": "25-31 / in 17-23",
         "capability_ids": [
@@ -263,7 +283,7 @@
       {
         "anchor_id": "RCORE-07",
         "kind": "rhino5_core_chapter",
-        "title": "NURBS editing v\u00e0 modeling",
+        "title": "NURBS editing và modeling",
         "spec_source": "ref/rhino5/CORE_REFERENCE_INDEX.json",
         "guide_pdf_pages": "53-67 / in 45-59; 69-71 / in 61-63; 73-91 / in 65-83",
         "capability_ids": [
@@ -388,18 +408,18 @@
       }
     ],
     "usage_rules": [
-      "Ch\u1ec9 d\u00f9ng \u0111\u1ec3 \u0111\u1ecbnh v\u1ecb ngu\u1ed3n v\u00e0 \u0111\u1ed1i chi\u1ebfu h\u00e0nh vi; kh\u00f4ng thay th\u1ebf test/\u0111o runtime.",
-      "Kh\u00f4ng copy m\u00e3, \u1ea3nh, resource hay n\u1ed9i dung manual v\u00e0o repository.",
-      "Identifier quan s\u00e1t \u0111\u01b0\u1ee3c ch\u1ec9 l\u00e0 t\u00ean/\u0111\u01b0\u1eddng d\u1eabn; symbol ph\u1ea3i ki\u1ec3m l\u1ea1i t\u1ea1i checkout tr\u01b0\u1edbc khi d\u00f9ng.",
-      "Ngu\u1ed3n Matrix9 l\u00e0 private reference: kh\u00f4ng \u0111\u01b0a path private v\u00e0o t\u00e0i li\u1ec7u public hay g\u00f3i ph\u00e1t h\u00e0nh.",
-      "Sheet manual: \u0111\u1ecdc l\u1ea1i \u0111\u00fang sheet tr\u01b0\u1edbc khi d\u00f9ng option/default; sheet kh\u00f4ng ph\u1ea3i model hay solver.",
-      "Ngu\u1ed3n Rhino 5: ch\u1ec9 l\u00e0 b\u1ec1 m\u1eb7t type/thao t\u00e1c v\u00e0 C ABI; kh\u00f4ng ch\u1ee9ng minh thu\u1eadt to\u00e1n, dung sai hay gi\u00e1 tr\u1ecb m\u1eb7c \u0111\u1ecbnh c\u1ee7a native."
+      "Chỉ dùng để định vị nguồn và đối chiếu hành vi; không thay thế test/đo runtime.",
+      "Không copy mã, ảnh, resource hay nội dung manual vào repository.",
+      "Identifier quan sát được chỉ là tên/đường dẫn; symbol phải kiểm lại tại checkout trước khi dùng.",
+      "Nguồn Matrix9 là private reference: không đưa path private vào tài liệu public hay gói phát hành.",
+      "Sheet manual: đọc lại đúng sheet trước khi dùng option/default; sheet không phải model hay solver.",
+      "Nguồn Rhino 5: chỉ là bề mặt type/thao tác và C ABI; không chứng minh thuật toán, dung sai hay giá trị mặc định của native."
     ],
     "does_not_establish": [
-      "Kh\u00f4ng ch\u1ee9ng minh Matrix9 parity cho capability n\u00e0y.",
-      "Kh\u00f4ng x\u00e1c nh\u1eadn API Rust n\u00e0o \u0111\u00e3 t\u1ed3n t\u1ea1i trong QymCAD.",
-      "Kh\u00f4ng n\u00e2ng tr\u1ea1ng th\u00e1i L4/M00/M01/M02/M04 th\u00e0nh PASS.",
-      "Kh\u00f4ng ch\u1ee9ng minh default/option \u0111\u00e3 \u0111\u00fang cho b\u1ea3n Matrix9 \u0111ang c\u00e0i."
+      "Không chứng minh Matrix9 parity cho capability này.",
+      "Không xác nhận API Rust nào đã tồn tại trong QymCAD.",
+      "Không nâng trạng thái L4/M00/M01/M02/M04 thành PASS.",
+      "Không chứng minh default/option đã đúng cho bản Matrix9 đang cài."
     ]
   },
   "reference_source_policy": {
@@ -409,7 +429,7 @@
         "family": "rhino5_core",
         "source_id": "ref/rhino5/CORE_REFERENCE_INDEX.json",
         "access_class": "public_official_documentation_user_approved_exception",
-        "use": "\u0110\u1ecbnh tuy\u1ebfn ch\u01b0\u01a1ng RCORE, d\u1ea3i trang Guide, Help URL ch\u00ednh th\u1ee9c, capability/fixture ID."
+        "use": "Định tuyến chương RCORE, dải trang Guide, Help URL chính thức, capability/fixture ID."
       },
       {
         "family": "matrix9_recovered",
@@ -425,7 +445,7 @@
           "Matrix90 (VB6 EXE)",
           "MatrixCmdBar (VB6 OCX)"
         ],
-        "use": "\u0110\u1ed1i chi\u1ebfu b\u1ec1 m\u1eb7t UI, t\u00ean form/class/control/procedure v\u00e0 export provenance."
+        "use": "Đối chiếu bề mặt UI, tên form/class/control/procedure và export provenance."
       },
       {
         "family": "rhino5_geometry",
@@ -436,9 +456,9 @@
           "Rhino 5 RhinoCommon",
           "Rhino 5 ghidra export"
         ],
-        "use": "B\u1ec1 m\u1eb7t type/thao t\u00e1c h\u00ecnh h\u1ecdc openNURBS v\u00e0 C ABI native: d\u00f9ng \u0111\u1ec3 r\u00e0ng bu\u1ed9c t\u00ean v\u00e0 ph\u00e2n r\u00e3 thao t\u00e1c cho l\u1edbp FFI/geometry c\u1ee7a OM9.",
-        "does_not_contain": "Thu\u1eadt to\u00e1n domain c\u1ee7a t\u1eadp l\u1ec7nh gem (prong/pave/halo/azure/milgrain). Nh\u1eefng th\u1ee9 \u0111\u00f3 n\u1eb1m \u1edf code Matrix9, kh\u00f4ng \u1edf \u0111\u00e2y.",
-        "known_limit": "Struct trong listing Ghidra l\u00e0 placeholder: kh\u00f4ng thu h\u1ed3i \u0111\u01b0\u1ee3c layout member hay offset. RhinoCommon l\u00e0 wrapper P/Invoke m\u1ecfng: kh\u00f4ng ch\u1ee9ng minh \u0111\u00e1nh gi\u00e1 NURBS, giao, boolean hay trim."
+        "use": "Bề mặt type/thao tác hình học openNURBS và C ABI native: dùng để ràng buộc tên và phân rã thao tác cho lớp FFI/geometry của OM9.",
+        "does_not_contain": "Thuật toán domain của tập lệnh gem (prong/pave/halo/azure/milgrain). Những thứ đó nằm ở code Matrix9, không ở đây.",
+        "known_limit": "Struct trong listing Ghidra là placeholder: không thu hồi được layout member hay offset. RhinoCommon là wrapper P/Invoke mỏng: không chứng minh đánh giá NURBS, giao, boolean hay trim."
       }
     ],
     "forbidden_in_deliverables": [
@@ -463,9 +483,9 @@
     "not_runtime_evidence": true,
     "must_not_be_reported_as_implemented": true,
     "reference_note": "compose owners; re-check each owner's contract at its own revision",
-    "sketch": "// Wire Ui \u2014 Solid \u00b7 Torus \u2014 menu binding\n// ROLE: INTEGRATE - wire owners together; do not reimplement their logic.\n//\n// Purpose: Wire both menu and commandline to owned command\n// Boundary: this task may only orchestrate; each step below must already be owned\n//           and tested by the module named in the record's external_owner_interfaces.\n//\n// Order: None\n//\n// Integration checklist:\n//   1. resolve owners through the parent service contract, not through UI handles\n//   2. keep one transaction boundary: either the whole sequence commits or nothing does\n//   3. on any step error, roll back what this sequence already changed and report the failing step\n//   4. assert identity survives: same stable IDs before and after, no stale scene reference\n//\n// Contract under test: (see owner contracts)\n// Oracle: measured positive oracle\n// Negative oracle: typed error with unchanged state"
+    "sketch": "// Wire Ui — Solid · Torus — menu binding\n// ROLE: INTEGRATE - wire owners together; do not reimplement their logic.\n//\n// Purpose: Wire both menu and commandline to owned command\n// Boundary: this task may only orchestrate; each step below must already be owned\n//           and tested by the module named in the record's external_owner_interfaces.\n//\n// Order: None\n//\n// Integration checklist:\n//   1. resolve owners through the parent service contract, not through UI handles\n//   2. keep one transaction boundary: either the whole sequence commits or nothing does\n//   3. on any step error, roll back what this sequence already changed and report the failing step\n//   4. assert identity survives: same stable IDs before and after, no stale scene reference\n//\n// Contract under test: (see owner contracts)\n// Oracle: measured positive oracle\n// Negative oracle: typed error with unchanged state"
   },
-  "implementation_sample_guide": "## Code m\u1eabu / thu\u1eadt to\u00e1n m\u1eabu (sketch, kh\u00f4ng ph\u1ea3i b\u1eb1ng ch\u1ee9ng)\n\n**Tr\u1ea1ng th\u00e1i:** `author_skeleton_untrusted` \u2014 code m\u1eabu \u0111\u1ec3 b\u1eaft \u0111\u1ea7u, KH\u00d4NG ph\u1ea3i b\u1eb1ng ch\u1ee9ng v\u00e0 kh\u00f4ng \u0111\u01b0\u1ee3c b\u00e1o c\u00e1o l\u00e0 \u0111\u00e3 tri\u1ec3n khai.\n\n**Vai tr\u00f2 \u0111\u01b0\u1ee3c sinh m\u1eabu:** `INTEGRATE` x1.\n\n### Quy t\u1eafc d\u00f9ng code m\u1eabu\n\n- M\u1eabu ch\u1ec9 n\u00eau t\u00ean nh\u1eefng th\u1ee9 \u0111\u00e3 c\u00f3 trong ch\u00ednh b\u1ea3n ghi n\u00e0y (API \u0111\u1ec1 xu\u1ea5t / `implementation_algorithm` / `source_paths`) ho\u1eb7c th\u01b0 vi\u1ec7n chu\u1ea9n Rust \u2014 kh\u00f4ng c\u00f3 symbol b\u1ecba.\n- `unimplemented!()` l\u00e0 c\u1ed1 \u00fd: m\u1eabu l\u00e0 khung, kh\u00f4ng ch\u1ea1y \u0111\u01b0\u1ee3c v\u00e0 kh\u00f4ng ch\u1ee9ng minh h\u00e0nh vi n\u00e0o.\n- Code tham chi\u1ebfu t\u1eeb QymCAD (revision \u0111\u00e3 kh\u00f3a) v\u00e0 t\u1eeb Matrix9 ph\u1ea3i **\u0111\u1ecdc r\u1ed3i ADAPT**, kh\u00f4ng copy nguy\u00ean v\u0103n; ph\u1ea1m vi license l\u1ea5y t\u1eeb M00.\n- Oracle d\u01b0\u01a1ng/\u00e2m trong m\u1eabu l\u1ea5y t\u1eeb b\u1ea3n ghi; \u0111i\u1ec1u ki\u1ec7n PASS v\u1eabn l\u00e0 command receipt exit 0 c\u1ed9ng oracle \u0111o \u0111\u01b0\u1ee3c t\u1eeb l\u1ea7n ch\u1ea1y th\u1eadt.\n\n> Kh\u00f4ng thay placeholder b\u1eb1ng s\u1ed1 li\u1ec7u suy \u0111o\u00e1n. Kh\u00f4ng x\u00f3a c\u1ea3nh b\u00e1o n\u00e0y \u0111\u1ec3 bi\u1ebfn m\u1eabu th\u00e0nh b\u1eb1ng ch\u1ee9ng.\n",
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `INTEGRATE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n",
   "runtime_implementation": {
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-10-002",
+  "title": "Gem On Curve Advanced",
+  "cases": [
+    "the tapered row keeps the requested station count and changes diameter monotonically",
+    "the first gem keeps the start size and the last gem the end size",
+    "each intermediate spec still passes `GemSpec::validate`"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

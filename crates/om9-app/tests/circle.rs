@@ -64,12 +64,15 @@ fn circle_three_point_uses_the_circumcircle() {
     assert!((radius_of(&c) - 1.0).abs() < 1e-9);
 }
 
-
 #[test]
 fn circle_preview_and_tokens_follow_the_pending_points() {
     let mut c = controller();
     c.submit("Circle").unwrap();
-    assert!(c.circle_option_tokens().iter().any(|(_, command)| *command == "2Point"));
+    assert!(
+        c.circle_option_tokens()
+            .iter()
+            .any(|(_, command)| *command == "2Point")
+    );
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
     let wire = c.circle_preview([5.0, 0.0, 0.0]);
     assert_eq!(wire.len(), 64);
@@ -77,7 +80,6 @@ fn circle_preview_and_tokens_follow_the_pending_points() {
         assert!((point[0].powi(2) + point[1].powi(2) + point[2].powi(2)).sqrt() - 5.0 < 1e-9);
     }
 }
-
 
 #[test]
 fn circle_center_follows_the_active_cplane() {
@@ -98,7 +100,6 @@ fn circle_center_follows_the_active_cplane() {
     assert!((y[2]).abs() > 0.9);
 }
 
-
 #[test]
 fn circle_accepts_diameter_and_area_sizes() {
     let mut c = controller();
@@ -112,25 +113,26 @@ fn circle_accepts_diameter_and_area_sizes() {
     c.submit("Circle").unwrap();
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
     c.submit("Size=Area").unwrap();
-    c.submit(&(std::f64::consts::PI * 25.0).to_string()).unwrap();
+    c.submit(&(std::f64::consts::PI * 25.0).to_string())
+        .unwrap();
     assert!((radius_of(&c) - 5.0).abs() < 1e-9);
 }
-
 
 #[test]
 fn circle_accepts_circumference_size_and_exposes_size_tokens() {
     let mut c = controller();
     c.submit("Circle").unwrap();
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
-    assert!(c
-        .circle_option_tokens()
-        .iter()
-        .any(|(_, command)| *command == "Size=Diameter"));
+    assert!(
+        c.circle_option_tokens()
+            .iter()
+            .any(|(_, command)| *command == "Size=Diameter")
+    );
     c.submit("Size=Circumference").unwrap();
-    c.submit(&(std::f64::consts::TAU * 5.0).to_string()).unwrap();
+    c.submit(&(std::f64::consts::TAU * 5.0).to_string())
+        .unwrap();
     assert!((radius_of(&c) - 5.0).abs() < 1e-9);
 }
-
 
 #[test]
 fn circle_vertical_mode_uses_a_vertical_plane() {
@@ -176,7 +178,6 @@ fn circle_vertical_mode_pick_sets_the_plane_from_the_point() {
     assert!(normal[1].abs() > 0.99, "{normal:?}");
 }
 
-
 #[test]
 fn circle_vertical_preview_is_a_closed_ring() {
     let mut c = controller();
@@ -190,7 +191,6 @@ fn circle_vertical_preview_is_a_closed_ring() {
         assert!((radius - 5.0).abs() < 1e-9);
     }
 }
-
 
 #[test]
 fn circle_center_preview_follows_the_active_cplane() {
@@ -207,7 +207,6 @@ fn circle_center_preview_follows_the_active_cplane() {
         assert!((radius - 5.0).abs() < 1e-9);
     }
 }
-
 
 #[test]
 fn circle_two_point_preview_follows_the_active_cplane() {
@@ -226,7 +225,6 @@ fn circle_two_point_preview_follows_the_active_cplane() {
     }
 }
 
-
 #[test]
 fn circle_fit_points_fits_a_circle() {
     let mut c = controller();
@@ -244,7 +242,6 @@ fn circle_fit_points_fits_a_circle() {
     assert!((radius_of(&c) - 5.0).abs() < 1e-6, "{}", radius_of(&c));
 }
 
-
 #[test]
 fn circle_fit_points_preview_is_a_ring() {
     let mut c = controller();
@@ -259,7 +256,6 @@ fn circle_fit_points_preview_is_a_ring() {
         assert!((radius - 5.0).abs() < 1e-6);
     }
 }
-
 
 #[test]
 fn circle_accepts_diameter_and_area_prefixes() {
@@ -276,7 +272,6 @@ fn circle_accepts_diameter_and_area_prefixes() {
     assert!((radius_of(&c) - 5.0).abs() < 1e-6);
 }
 
-
 #[test]
 fn circle_around_curve_uses_the_path() {
     let mut doc = Document::new("circle around");
@@ -292,10 +287,11 @@ fn circle_around_curve_uses_the_path() {
     c.select_objects(&[id]).unwrap();
     c.submit("Circle").unwrap();
     c.submit("AroundCurve").unwrap();
-    assert!(c
-        .circle_option_tokens()
-        .iter()
-        .any(|(_, command)| *command == "OnCurve="));
+    assert!(
+        c.circle_option_tokens()
+            .iter()
+            .any(|(_, command)| *command == "OnCurve=")
+    );
     c.submit("OnCurve=0.5").unwrap();
     c.submit("5").unwrap();
     let circle = c
@@ -304,8 +300,7 @@ fn circle_around_curve_uses_the_path() {
         .values()
         .find(|entity| entity.label == "Circle")
         .unwrap();
-    let Geometry::Curve(om9_core::geometry::Curve::Circle { center, x, y, .. }) =
-        &circle.geometry
+    let Geometry::Curve(om9_core::geometry::Curve::Circle { center, x, y, .. }) = &circle.geometry
     else {
         panic!("circle");
     };
@@ -317,7 +312,6 @@ fn circle_around_curve_uses_the_path() {
     ];
     assert!(normal[0].abs() > 0.99, "{normal:?}");
 }
-
 
 #[test]
 fn circle_around_curve_preview_uses_the_path_normal() {
@@ -343,7 +337,6 @@ fn circle_around_curve_preview_uses_the_path_normal() {
         assert!((radius - 5.0).abs() < 1e-9);
     }
 }
-
 
 #[test]
 fn circle_tangent_to_two_lines() {
@@ -389,7 +382,6 @@ fn circle_tangent_to_two_lines() {
     assert!((center[1].abs() - 5.0).abs() < 1e-6);
 }
 
-
 #[test]
 fn circle_tangent_preview_is_a_ring() {
     let mut doc = Document::new("circle tangent preview");
@@ -415,7 +407,6 @@ fn circle_tangent_preview_is_a_ring() {
     let wire = c.circle_preview([0.0, 0.0, 0.0]);
     assert_eq!(wire.len(), 64);
 }
-
 
 #[test]
 fn circle_tangent_to_a_line_and_point() {
@@ -452,7 +443,6 @@ fn circle_tangent_to_a_line_and_point() {
     assert!((distance - 5.0).abs() < 1e-6, "{center:?}");
 }
 
-
 #[test]
 fn circle_tangent_point_preview_is_a_ring() {
     let mut doc = Document::new("circle tangent point preview");
@@ -472,7 +462,6 @@ fn circle_tangent_point_preview_is_a_ring() {
     c.submit("Point=5,5,0").unwrap();
     assert_eq!(c.circle_preview([0.0, 0.0, 0.0]).len(), 64);
 }
-
 
 #[test]
 fn circle_tangent_accepts_a_bare_radius() {
@@ -509,7 +498,6 @@ fn circle_tangent_accepts_a_bare_radius() {
     assert!((radius - 5.0).abs() < 1e-9);
 }
 
-
 #[test]
 fn circle_deformable_rebuilds_to_point_count() {
     let mut c = controller();
@@ -532,7 +520,6 @@ fn circle_deformable_rebuilds_to_point_count() {
     assert_eq!(curve.degree, 3);
 }
 
-
 #[test]
 fn circle_deformable_rejects_point_count_not_above_degree() {
     let mut c = controller();
@@ -544,15 +531,15 @@ fn circle_deformable_rejects_point_count_not_above_degree() {
     assert!(c.accept_world_point([5.0, 0.0, 0.0]).is_err());
 }
 
-
 #[test]
 fn circle_accepts_approx_alias() {
     let mut c = controller();
     c.submit("Circle").unwrap();
-    assert!(c
-        .circle_option_tokens()
-        .iter()
-        .any(|(_, command)| *command == "Approx"));
+    assert!(
+        c.circle_option_tokens()
+            .iter()
+            .any(|(_, command)| *command == "Approx")
+    );
     c.submit("Approx=on").unwrap();
     c.submit("PointCount=12").unwrap();
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
@@ -568,7 +555,6 @@ fn circle_accepts_approx_alias() {
     };
     assert_eq!(curve.poles.len(), 12);
 }
-
 
 #[test]
 fn circle_accepts_bare_deformable_option() {
@@ -590,7 +576,6 @@ fn circle_accepts_bare_deformable_option() {
     assert_eq!(curve.poles.len(), 12);
 }
 
-
 #[test]
 fn circle_deformable_token_toggles_off() {
     let mut c = controller();
@@ -611,7 +596,6 @@ fn circle_deformable_token_toggles_off() {
     ));
 }
 
-
 #[test]
 fn circle_deformable_preview_uses_the_rebuilt_curve() {
     let mut c = controller();
@@ -625,4 +609,24 @@ fn circle_deformable_preview_uses_the_rebuilt_curve() {
         let radius = (point[0].powi(2) + point[1].powi(2)).sqrt();
         assert!((radius - 5.0).abs() < 1e-6);
     }
+}
+
+#[test]
+fn circle_area_size_uses_the_shared_choice_option() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    let mut c = controller();
+    c.submit("Circle").unwrap();
+    c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
+    let area = c
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Size=Area")
+        .expect("Size=Area option");
+    assert_eq!(
+        c.activate_command_option(area.id).unwrap(),
+        CommandOptionEffect::Applied
+    );
+    c.submit(&(std::f64::consts::PI * 25.0).to_string())
+        .unwrap();
+    assert!((radius_of(&c) - 5.0).abs() < 1e-9);
 }

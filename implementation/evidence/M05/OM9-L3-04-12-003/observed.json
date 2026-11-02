@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-12-003",
+  "title": "Pave Azure Builder",
+  "scope": "opens the Azure Builder on a surface + gems",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": [
+    "round azures emit top/through/bottom/seat profiles as closed curves",
+    "hexagonal azures emit six-point profiles; Angle rotates them",
+    "Azure Depth, Size, Through Hole and Seat Angle alter the planned profiles",
+    "Apply inserts all profiles in one Undo step"
+  ],
+  "negative": [
+    "azure placement without any selected gem is refused",
+    "a zero or negative azure size is refused",
+    "a through hole deeper than the stone is refused"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-12-003-03"
+    ],
+    "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_pave.rs",
+    "crates/om9-app/tests/gem_pave_panel.rs"
+  ]
+}

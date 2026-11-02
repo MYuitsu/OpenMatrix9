@@ -1,0 +1,50 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-02-006",
+  "title": "Profile Edit Merge And Endcap",
+  "owner": "om9-app Controller ring/profile tools over om9-core producer chain",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/curve_ops.rs",
+      "symbols": [
+        "merge_profile_sections",
+        "profile_plane",
+        "signed_area"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/surface_ops.rs",
+      "symbols": [
+        "planar_surface_from_curves"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/surface_kernel.rs",
+      "symbols": [
+        "surface",
+        "cap_planar"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/ring_tools.rs",
+      "symbols": [
+        "PROFILE_MERGE",
+        "PROFILE_END_CAP",
+        "dispatch_profile_merge",
+        "dispatch_profile_endcap"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "Winding is measured in the first section's fixed plane frame; a per-section basis would flip twice for a reversed loop and hide the change.",
+    "A curve selection gets a planar cap surface. An open B-Rep selection uses the kernel planar cap under the occt-brep feature and otherwise reports Unsupported."
+  ]
+}

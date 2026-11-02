@@ -1,0 +1,14 @@
+{
+  "l3_id": "OM9-L3-03-20-004",
+  "title": "Jewelry Object Count And Type Summary",
+  "owner": "OM9-L2-03-20",
+  "date": "2026-10-26",
+  "sources": [
+    "OM9_Milestones/M03 - Geometry 3DM/L2-03-20 - 12-febe-matrix/L3-004 - Jewelry Object Count And Type Summary/l3.json",
+    "crates/om9-app/src/session/measure.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/tests/measure.rs"
+  ],
+  "qymcad_source_paths_verified": []
+}

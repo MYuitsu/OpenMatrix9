@@ -1,0 +1,42 @@
+{
+  "schema": "om9.m04.ui-review.v1",
+  "task_id": "OM9-L4-01-04-003-06",
+  "l3_id": "OM9-L3-01-04-003",
+  "title": "Dirty Propagation And Topological Order",
+  "oracle": {
+    "positive": "dirty set {A,B,C,D}, producer before consumer, no duplicate evaluation",
+    "negative": "Invalid('History cycle') from execution_order, plan_recompute and typed_edges"
+  },
+  "manual_test_gate": "AUTO_ONLY",
+  "implementer": "agent session (implementer never signs as a human reviewer)",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY",
+    "role": "plan gate: this item requires no manual test",
+    "date_utc": "2026-10-26",
+    "statement": "The plan records manual_test_gate=AUTO_ONLY and acceptance_gate=AUTO for every L3 of OM9-L2-01-04, so acceptance rests on the automated checks below; no human item is requested and no human approval is claimed.",
+    "scope": "history backend: no on-screen behaviour of its own"
+  },
+  "checks_run": [
+    "cargo test -p om9-core --test associative_rebuild -j 2 -> test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+    "cargo test -p om9-core -j 2 -> exit 0 (no FAILED line)",
+    "cargo check --workspace --all-targets -j 2 -> exit 0",
+    "cargo clippy -p om9-core --all-targets -j 2 -- -D warnings -> exit 0",
+    "cargo test --workspace -j 2 --no-fail-fast -> 2234 passed, 13 failed, 101 ignored across 357 test binaries"
+  ],
+  "code_change": [
+    "crates/om9-core/src/history_ops.rs: stale_recipes, mark_stale, mark_document_stale, plan_recompute, plan_document_recompute",
+    "crates/om9-core/src/history.rs: HistoryGraph::execution_order (Kahn, cycle refusal)"
+  ],
+  "artefacts": [
+    "OM9-L4-01-04-003-03.target-test.log",
+    "OM9-L4-01-04-003-04.integration.log",
+    "OM9-L4-01-04-003-05.regression.log",
+    "OM9-L4-01-04-003-07.adversarial.log",
+    "OM9-L4-01-04-003-08.parameter.log"
+  ],
+  "gate": {
+    "l3_scope": "ACCEPTED_ON_AUTOMATED_EVIDENCE",
+    "implementation_status_promoted": false,
+    "plan_tree_modified": false
+  }
+}

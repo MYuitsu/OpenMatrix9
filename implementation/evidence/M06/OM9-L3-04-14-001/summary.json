@@ -1,0 +1,69 @@
+{
+  "schema": "om9.evidence_summary.v1",
+  "module": "OM9-L2-04-14",
+  "recorded_at": "2026-10-28T03:27:42+00:00",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "git_head": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "runs": [
+    {
+      "command": "cargo test -p om9-core --lib settings::head -j 2",
+      "exit_code": 0,
+      "seconds": 0.34,
+      "tests_passed": 12,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-14-001/logs/core_head.log",
+      "at": "2026-10-28T03:27:38+00:00"
+    },
+    {
+      "command": "cargo test -p om9-core --lib settings::bezel -j 2",
+      "exit_code": 0,
+      "seconds": 0.21,
+      "tests_passed": 10,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-14-001/logs/core_bezel.log",
+      "at": "2026-10-28T03:27:39+00:00"
+    },
+    {
+      "command": "cargo test -p om9-app --test head_commands -j 2",
+      "exit_code": 0,
+      "seconds": 1.16,
+      "tests_passed": 9,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-14-001/logs/app_head.log",
+      "at": "2026-10-28T03:27:40+00:00"
+    },
+    {
+      "command": "cargo test -p om9-core --lib -j 2",
+      "exit_code": 0,
+      "seconds": 0.37,
+      "tests_passed": 171,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-14-001/logs/core_lib.log",
+      "at": "2026-10-28T03:27:40+00:00"
+    },
+    {
+      "command": "cargo check -p om9-app -j 2",
+      "exit_code": 0,
+      "seconds": 1.85,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-14-001/logs/app_check.log",
+      "at": "2026-10-28T03:27:42+00:00"
+    }
+  ],
+  "sources": {
+    "crates/om9-core/src/settings/mod.rs": "d674a0982c215c2318136007116aa12dc654088b7c7fb560c7d6f66aec47d593",
+    "crates/om9-core/src/settings/head.rs": "ca24131bb9901bea70a088f11ffd1d36604830a7cadc7e6d32864bac56d26d0e",
+    "crates/om9-core/src/settings/bezel.rs": "ce6f3b548aa468e163b59de5325a934ab8fcf03928cfb7c8e2d1c85fc7c76e45",
+    "crates/om9-core/src/model.rs": "4c4d230979904c37ae8519b7d5c58675976ef6678c5b4a1dddd53cb022ea8e90",
+    "crates/om9-core/src/gem.rs": "6dcec9b1097a1f0b60d134fc248c5c0c0bc17b1b188eb5dc980c49491a7434b8",
+    "crates/om9-app/src/session/head_commands.rs": "309aaf28a26368e75a14cce26d69dcca97ca636ca09b576ce85af8244d69158a",
+    "crates/om9-app/src/session.rs": "d044262b46cfed73dc02c55f79197a9345513bda1420f0a726004f5b5f1c1853",
+    "crates/om9-app/src/command_options.rs": "2ffc6b993ac853412efe0424224b6d104a3e97258d99f6710427954572fe4028",
+    "crates/om9-app/tests/head_commands.rs": "5625670a7cdc7a4655178856672c109dddf2d90d4fb84f9b775bc3033cda51f5"
+  },
+  "manual_gate": {
+    "gate": "M06-UI",
+    "signed": false
+  }
+}

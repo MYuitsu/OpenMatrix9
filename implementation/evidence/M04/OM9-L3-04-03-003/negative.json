@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "expect": "Invalid(\"ring raised height\")",
+      "raised_height_mm": 3.5
+    },
+    {
+      "expect": "Invalid(\"ring raised width\")",
+      "raised_width_mm": 0.0
+    }
+  ]
+}

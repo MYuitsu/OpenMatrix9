@@ -39,6 +39,7 @@
     {"id": "LayerInfoDemo", "title": "Read one layer record"},
     {"id": "ToleranceDemo", "title": "Set the document tolerance"},
     {"id": "ProvenanceDemo", "title": "Read import provenance"},
-    {"id": "PickableDemo", "title": "Test if an object is pickable"}
+    {"id": "PickableDemo", "title": "Test if an object is pickable"},
+    {"id": "HistoryDemo", "title": "Read associative history and its rebuild plan"}
   ]
 }

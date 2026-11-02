@@ -1,0 +1,23 @@
+{
+  "status": "PASSED_OWN_APP_RELEASE_UI_REPLAY",
+  "manual_gate_signed": false,
+  "launch": {
+    "pid": 60568,
+    "binary": "L:\\om9-target\\release\\om9.exe",
+    "sha256": "924b96be04efca0cc03d969b6d7eba48d1a2761b80bd0aee5b0596904e6c7461",
+    "profile": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\command-polyline-shortcuts-release-20261025"
+  },
+  "observed": [
+    "Curve menu starts PolyLine",
+    "Two viewport points then M changes Line to Arc",
+    "Viewport arc accepted and visibly curved",
+    "M changes Arc to Line at three points without panic",
+    "Click Close commits a mixed curve and returns to idle Command"
+  ],
+  "screenshots": [
+    "implementation/evidence/M03/command-polyline-shortcuts-20261025/native-release-closed.png",
+    "implementation/evidence/M03/command-polyline-shortcuts-20261025/native-release-line-after-arc.png",
+    "implementation/evidence/M03/command-polyline-shortcuts-20261025/native-release-mode-arc.png"
+  ],
+  "stderr": ""
+}

@@ -4,6 +4,51 @@
   "milestone": "M04",
   "parent_l2_id": "OM9-L2-04-02",
   "title": "Four Rail Profile Tool",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "4 rails with consistent start parameter/direction and span",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-005 - Four Rail Profile Tool/l3.json#l3.m04_execution_handoff.positive_fixture.input"
+      },
+      {
+        "raw": "four rails ordered oppositely or unequal continuity",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-005 - Four Rail Profile Tool/l3.json#l3.m04_execution_handoff.positive_fixture.negative_input"
+      }
+    ],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [
+      "input:4 rails with consistent start parameter/direction and span: type/default/range",
+      "input:four rails ordered oppositely or unequal continuity: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M04",
   "execution_stage": "E09",
@@ -184,5 +229,14 @@
     "requires_human_review": true,
     "source_pin": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
     "special_manual_flags": []
-  }
+  },
+  "task_ids": [
+    "OM9-L4-04-02-005-01",
+    "OM9-L4-04-02-005-02",
+    "OM9-L4-04-02-005-03",
+    "OM9-L4-04-02-005-04",
+    "OM9-L4-04-02-005-05",
+    "OM9-L4-04-02-005-07",
+    "OM9-L4-04-02-005-06"
+  ]
 }

@@ -1,0 +1,7 @@
+{
+  "task_id": "task-m01-l3-002-closeout",
+  "task_description": "Close out every remaining item of OM9 M01 > L2-01-01 > L3-002 Workbench Docking Regions (OM9-L3-01-01-002): status-bar overlap fix, simulated size/DPI matrix, scoped public source audit, skill record, BLOCKED_DEPENDENCY wording, QymCAD no-copy confirmation, planning_state explanation, ledger and final report. Human gates (M01-UI, M00, legal) stay open.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-023-01",
+  "l3_id": "OM9-L3-04-01-023",
+  "kind": "Automated Runtime",
+  "date": "2026-10-26",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Array Linear: golden case 'box 1x1x1 at the world origin, count 3, spacing 10' -> two copies at x = 10 and x = 20, the source keeps its placement, one Undo entry",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_023_array_linear_spaces_the_copies_along_the_plane_x"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-016",
+  "case": "a selection without a curve, or with two curves",
+  "expected": "`Error::Missing(\"path curve selection\")` / `Error::Invalid(\"one path curve\")` before the first prompt; the document and the Undo journal are untouched",
+  "test": "m03_04_01_016_orient_perpendicular_to_curve_stands_the_object_on_the_path"
+}

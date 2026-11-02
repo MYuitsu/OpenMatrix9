@@ -1,0 +1,16 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-15-003",
+  "cases": [
+    {
+      "input": "plane at z=0, UV=0.4,0.6, Diameter=1.2",
+      "expect": "one closed prong on the plane (origin z = 0) that carries the prong payload",
+      "oracle": "om9-app tests/settings_commands.rs::prong_on_surface_stages_from_a_surface_and_commits_one_prong"
+    }
+  ],
+  "automated_tests": [
+    "prong_on_surface_stages_from_a_surface_and_commits_one_prong",
+    "settings::prong::tests::a_surface_prong_uses_the_surface_normal",
+    "tests/settings_family.rs::a_surface_prong_uses_the_surface_normal_and_the_shared_drop"
+  ]
+}

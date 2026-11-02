@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-007",
+  "case": "circle of radius 5",
+  "expected": "circle of radius 5 -> the label reads 5",
+  "test": "crates/om9-app/tests/annotation.rs::diameter_and_radius_use_the_placed_circle_and_keep_source"
+}

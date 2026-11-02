@@ -1,0 +1,48 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-13-005",
+  "title": "Edit Existing Builder By History",
+  "owner": "om9-app Controller history API over om9-core HistoryGraph",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/builder.rs",
+      "symbols": [
+        "BuilderSession::adopt_history",
+        "BuilderSession::plan",
+        "BuilderSession::refresh"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/history.rs",
+      "symbols": [
+        "Controller::begin_builder_from_history",
+        "Controller::begin_builder_from_selected_history"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "symbols": [
+        "Controller::builder_apply"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "symbols": [
+        "MatrixApp::history_window_ui"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "The plan adopts the selected object's ObjectId and recipe id, so Apply writes Geometry + HistoryUpdate instead of Insert + History.",
+    "Only the five builder commands are re-openable from history; another command or a schema_version other than 1 is a typed refusal.",
+    "The published geometry_revision is advanced to the revision the Geometry mutation will produce before the transaction is prepared."
+  ]
+}

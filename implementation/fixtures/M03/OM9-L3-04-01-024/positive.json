@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-024",
+  "case": "10 x 10 reference plane, box 0..2, 2 rows x 2 columns, switch 0",
+  "expected": "10 x 10 reference plane, box 0..2, 2 rows x 2 columns, switch 0 -> four objects with centres (1,1,1), (1,11,1), (11,1,1) and (11,11,1), one Undo entry",
+  "test": "m03_04_01_024_array_along_surface_places_copies_on_the_surface_grid"
+}

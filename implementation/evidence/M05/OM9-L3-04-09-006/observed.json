@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-09-006",
+  "title": "Gem Instance Create Rotate And Position",
+  "scope": "`Controller::dispatch(OM9-GEM-033)` / `gvGemPositioner`; `GemSession` positioner fields; `GemInstance::transform`; `apply_gem_positioner`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "move/rotate keeps identity; a duplicate shares one definition and undoes as one step",
+  "negative": "a non-gem and a definition-owned instance cannot be edited in place",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-09-006-03"
+    ],
+    "fixture_manifest_sha256": "223a7a95902092d7fcc4e043b4aabb93b5e21250e77d0a664643d8690eeaaf31"
+  },
+  "tests": [
+    "the_positioner_moves_and_rotates_the_instance_in_place",
+    "the_positioner_duplicates_with_one_shared_definition",
+    "the_positioner_refuses_a_non_gem",
+    "the_positioner_preview_mirrors_move_rotate_and_scale"
+  ]
+}

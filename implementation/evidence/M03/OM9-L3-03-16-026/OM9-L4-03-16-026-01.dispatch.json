@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-026-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-026",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-026",
   "source_command": "Through Points",
   "menu_icon": "CurveFreeFormThroughPoints",
   "owner_candidate": "OM9-L3-02-04-001",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Through Points command session is not wired; owner candidate OM9-L3-02-04-001 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-026/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-026/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-026/dispatch_contract.json": "5ffc4779cf35994097a810d766a79a04a4395c87552646fb2e39dc76c8a80f12",
-    "implementation/design/M03/OM9-L3-03-16-026/dispatch_contract.md": "df9a546f9303223b9f3e5eab709096c380a7d5a8d1dda9f59ce01245c39cf916"
+    "implementation/design/M03/OM9-L3-03-16-026/dispatch_contract.json": "4b328d07790cc1f9d18aafc63a1a36f06b8963f0a316103e26f172c800ff4ec3",
+    "implementation/design/M03/OM9-L3-03-16-026/dispatch_contract.md": "1a242b40379a727e93a5c4cd88d48ba8a3c659cfcf26c7594ae929c1ca9311ce"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "CurveThroughPt"
 }

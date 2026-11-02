@@ -58,6 +58,11 @@ impl Transcript {
         self.history.chars().count() + self.prompt.chars().count()
     }
     pub fn set_prompt(&mut self, prompt: &str) {
+        let mut prompt = prompt.trim_end().to_owned();
+        if !prompt.ends_with(':') {
+            prompt.push(':');
+        }
+        prompt.push(' ');
         self.prompt = prompt.chars().take(512).collect();
         self.rebuild();
     }

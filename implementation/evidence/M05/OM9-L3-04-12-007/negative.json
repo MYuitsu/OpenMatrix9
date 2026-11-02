@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-12-007",
+  "title": "Pave Region Controls And Preview",
+  "cases": [
+    "an unknown option is a typed error and the session stays open",
+    "a parameter outside its range is refused, not clamped silently",
+    "closing or canceling the window drops the preview without document changes"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

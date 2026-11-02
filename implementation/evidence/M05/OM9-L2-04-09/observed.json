@@ -1,0 +1,166 @@
+{
+  "schema": "om9.m05.l2_gem_evidence.v1",
+  "l2_id": "OM9-L2-04-09",
+  "title": "Gem Asset Shapes And Loader",
+  "date": "2026-10-27",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "code": [
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/transaction.rs",
+    "crates/om9-core/tests/gem_assets.rs",
+    "crates/om9-kernel/src/brep.rs",
+    "crates/om9-kernel/src/gem.rs",
+    "crates/om9-kernel/src/lib.rs",
+    "crates/om9-kernel/src/brep_bridge.cpp",
+    "crates/om9-kernel/Cargo.toml",
+    "crates/om9-kernel/tests/gem_brep.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/f6.rs",
+    "crates/om9-app/src/icons.rs",
+    "crates/om9-app/tests/gem_panel.rs",
+    "tools/record_m05_l2_04_09_gem_assets.py"
+  ],
+  "checks": [
+    {
+      "artifact": "core-gem-assets.log",
+      "command": "cargo test -p om9-core --test gem_assets -j 2",
+      "exit_code": 0,
+      "sha256": "bf8a890ee59c01667c9bee4640a1b84841fee372af341e0951fb40ffbf29953e"
+    },
+    {
+      "artifact": "app-gem-panel.log",
+      "command": "cargo test -p om9-app --test gem_panel -j 2",
+      "exit_code": 0,
+      "sha256": "c8876341d19f134706aabdc06750e2eea89285f2eec3b9c5fff3e361ca438b8f"
+    },
+    {
+      "artifact": "core-transaction-regression.log",
+      "command": "cargo test -p om9-core --test atomic_transactions --test transaction_scopes -j 2",
+      "exit_code": 0,
+      "sha256": "4d16e4ac57fef260cce42023202316ac4f8c0679107d968953525b28b40de63b"
+    },
+    {
+      "artifact": "workspace-check.log",
+      "command": "cargo check --workspace --all-targets -j 2",
+      "exit_code": 0,
+      "sha256": "f91d58d9cb4843d3e8d7bedb81c61cc484a0e5ac9c468d5130a08465181ab320"
+    },
+    {
+      "artifact": "clippy-gem.log",
+      "command": "cargo clippy -p om9-core -p om9-app -p om9-kernel --all-targets -j 2 -- -D warnings",
+      "exit_code": 0,
+      "sha256": "867b32c9840af845507c6b789073eaadce85e7f04deaffb2e0a810355d2c9b4d"
+    },
+    {
+      "artifact": "kernel-gem-brep.log",
+      "command": "cargo test -p om9-kernel --features 3dm-brep --test gem_brep -j 2",
+      "exit_code": 0,
+      "sha256": "a8dadc4a23fdff2c00e9bda2040f3ad8a0a331d5df7050ffcebe40e23943d0eb"
+    }
+  ],
+  "l3": {
+    "OM9-L3-04-09-001": {
+      "manual_gate": "AUTO_ONLY",
+      "l4_receipts": [],
+      "fixture_manifest_sha256": "904724c8fcaff59d4f748073af672d561ea543ed3e47dea8b4521ce973dbbdca",
+      "tests": [
+        "crates/om9-core/tests/gem_assets.rs"
+      ]
+    },
+    "OM9-L3-04-09-002": {
+      "manual_gate": "AUTO_ONLY",
+      "l4_receipts": [],
+      "fixture_manifest_sha256": "88c51f9918137379c691059069a11a33df83b5e55a8112666a7363581b415859",
+      "tests": [
+        "crates/om9-core/tests/gem_assets.rs",
+        "crates/om9-kernel/tests/gem_brep.rs",
+        "crates/om9-app/tests/gem_panel.rs",
+        "crates/om9-app/src/ui/gem.rs (preview_tests)"
+      ]
+    },
+    "OM9-L3-04-09-003": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-09-003-03"
+      ],
+      "fixture_manifest_sha256": "fe1835a0145b9eb8685c0515ba3c035341b335eb445c23a3be0ea01d05d5205e",
+      "tests": [
+        "the_loader_previews_without_creating_an_object_and_cancel_leaves_no_phantom",
+        "applying_the_loader_inserts_one_gem_in_one_transaction_and_undo_restores",
+        "loader_options_change_the_cut_shape_size_and_depth",
+        "keep_original_size_keeps_the_replaced_gems_dimensions",
+        "a_bad_loader_option_is_refused_and_the_session_stays_open",
+        "the_loader_preview_is_world_space_and_never_committed",
+        "the_loader_commits_an_editable_brep_with_the_mesh_volume",
+        "the_brep_option_keeps_the_portable_mesh_body"
+      ]
+    },
+    "OM9-L3-04-09-004": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-09-004-03"
+      ],
+      "fixture_manifest_sha256": "c68bb43813faa1e9637b6349ff9872bcc171c76dc3588566e6670b911568a186",
+      "tests": [
+        "the_custom_builder_uses_a_closed_planar_profile",
+        "the_custom_builder_refuses_an_open_or_non_planar_curve"
+      ]
+    },
+    "OM9-L3-04-09-005": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-09-005-03"
+      ],
+      "fixture_manifest_sha256": "5a2950cb7d9e2cf59fe9a970acaf734e639e5ff2529de017c99a04e00242c289",
+      "tests": [
+        "the_emerald_builder_commits_the_requested_dimensions",
+        "the_baguette_builder_refuses_a_degenerate_girdle_and_an_oversized_corner"
+      ]
+    },
+    "OM9-L3-04-09-006": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-09-006-03"
+      ],
+      "fixture_manifest_sha256": "223a7a95902092d7fcc4e043b4aabb93b5e21250e77d0a664643d8690eeaaf31",
+      "tests": [
+        "the_positioner_moves_and_rotates_the_instance_in_place",
+        "the_positioner_duplicates_with_one_shared_definition",
+        "the_positioner_refuses_a_non_gem",
+        "the_positioner_preview_mirrors_move_rotate_and_scale"
+      ]
+    },
+    "OM9-L3-04-09-007": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-09-007-03"
+      ],
+      "fixture_manifest_sha256": "29acd3d377146da6133d562808d7d34c45482625d13dada500846368da1f2f12",
+      "tests": [
+        "the_property_editor_is_one_transaction_and_undo_restores_every_field",
+        "the_property_editor_refuses_a_shared_instance",
+        "a_property_edit_never_recolours_the_rest_of_the_scene",
+        "gems_route_to_the_gem_layer_default_even_from_another_current_layer"
+      ]
+    },
+    "OM9-L3-04-09-008": {
+      "manual_gate": "AUTO_ONLY",
+      "l4_receipts": [],
+      "fixture_manifest_sha256": "9daa8e8336af8f66de5e3870128ca0fac0060936462029007b4704f25f76df42",
+      "tests": [
+        "crates/om9-core/tests/gem_assets.rs"
+      ]
+    }
+  },
+  "uncertainties": [
+    "The five UI L3 keep the M05-UI manual gate open: no human has reviewed the gem window or the viewport preview on screen and no reviewer signature is claimed.",
+    "The gem B-Rep conversion requires the OCCT SDK; `BRep=No` keeps the portable mesh body, and only Windows x64 was exercised in this run.",
+    "The sewn B-Rep is planar-facet topology of the authored gem; analytic curved faces and gem-specific surface editing belong to a later kernel owner."
+  ]
+}

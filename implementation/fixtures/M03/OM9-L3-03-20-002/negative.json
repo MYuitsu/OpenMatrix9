@@ -1,0 +1,5 @@
+{
+  "l3_id": "OM9-L3-03-20-002",
+  "case": "zero-length direction; Radius on a NURBS curve",
+  "expected": "Error::Invalid and Error::Unsupported, no label, document unchanged"
+}

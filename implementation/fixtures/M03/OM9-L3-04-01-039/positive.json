@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-039",
+  "case": "flat 10 x 10 plane, normal offset 1",
+  "expected": "every pole moves to z = 1; a U offset of 2 slides every pole two along +X",
+  "test": "m03_04_01_039_move_uvn_offsets_the_control_net_along_u_v_and_the_normal"
+}

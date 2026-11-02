@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-19-004",
+  "kind": "negative",
+  "expected": "the same body id twice without an explicit count is refused; an assignment that omits a selected body is refused",
+  "verified_by": [
+    "multi_material_breakdown_sums_per_body_and_avoids_double_counting",
+    "a_duplicate_body_id_without_an_explicit_count_is_refused",
+    "a_breakdown_refuses_unknown_materials_and_bad_counts",
+    "a_multi_material_selection_reports_each_body_and_the_total",
+    "an_assignment_that_omits_a_selected_body_is_refused"
+  ]
+}

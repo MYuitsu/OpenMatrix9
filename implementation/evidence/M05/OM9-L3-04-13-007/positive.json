@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-13-007",
+  "title": "Gem Map Viewport Overlay",
+  "cases": [
+    "three selected stones are numbered `#1`..`#3` in selection order",
+    "each row carries the stone shape, cut, girdle size and world position",
+    "the viewport overlay projects one numbered caption per visible stone and keeps every caption inside the rectangle",
+    "a stone outside the current view is skipped rather than drawn at the edge",
+    "the map never changes the document revision"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

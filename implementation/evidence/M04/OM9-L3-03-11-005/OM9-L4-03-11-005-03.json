@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-11-005",
+  "title": "Builder Viewport Control Handles",
+  "generated_at_utc": "2026-10-27T02:20:24Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "323fbe699f2cea452de5b7a725a7eaf53d7bc150da8943444c79acbeb725dcf2",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "drag projects onto the CPlane axis and updates the same field as the panel",
+    "negative": "handles hidden / typed refusal; committed document unchanged"
+  },
+  "l4_id": "OM9-L4-03-11-005-03",
+  "role": "IMPLEMENT",
+  "kind": "implementation",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-core/tests/builder_session.rs",
+    "crates/om9-app/tests/builder_controls.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "-j",
+        "2",
+        "a_ring_rail_builder_previews_its_field_and_exposes_a_diameter_handle"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "6058200fc07c0c966b06994642210e14d98cb493b108caea0f686649e0ce1d88",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "a_ring_rail_builder_previews_its_field_and_exposes_a_diameter_handle",
+      "package": "om9-core",
+      "binary": "builder_session"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "a_locked_input_makes_the_builder_read_only_and_hides_its_handles"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "b08f231c76959df8dbda74719c4eafba48d978accef266d12f0dc43e4adc801c",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "a_locked_input_makes_the_builder_read_only_and_hides_its_handles",
+      "package": "om9-app",
+      "binary": "builder_controls"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

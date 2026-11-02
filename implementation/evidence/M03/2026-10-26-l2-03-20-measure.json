@@ -1,0 +1,53 @@
+{
+  "module": "OM9-L2-03-20",
+  "date": "2026-10-26",
+  "tests": {
+    "app_measure": "5 passed; 0 failed",
+    "app_measure_ui": "3 passed; 0 failed",
+    "public_source_audit": "0 errors"
+  },
+  "commands": [
+    "cargo test -p om9-app --test measure",
+    "cargo test -p om9-app --test measure_ui"
+  ],
+  "l3": [
+    {
+      "l3_id": "OM9-L3-03-20-001",
+      "l4": 5,
+      "source_crosswalk": true
+    },
+    {
+      "l3_id": "OM9-L3-03-20-002",
+      "l4": 5,
+      "source_crosswalk": true
+    },
+    {
+      "l3_id": "OM9-L3-03-20-003",
+      "l4": 5,
+      "source_crosswalk": true
+    },
+    {
+      "l3_id": "OM9-L3-03-20-004",
+      "l4": 5,
+      "source_crosswalk": true
+    },
+    {
+      "l3_id": "OM9-L3-03-20-005",
+      "l4": 5,
+      "source_crosswalk": true
+    }
+  ],
+  "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "manual_gate": "M03-UI_PENDING",
+  "checks": {
+    "clippy_lib": "cargo clippy -p om9-app --lib -- -D warnings: clean",
+    "clippy_measure_tests": "cargo clippy -p om9-app --test measure --test measure_ui -- -D warnings: clean",
+    "rustfmt": "rustfmt --edition 2024 --check on measure.rs, tests/measure.rs and tests/measure_ui.rs: clean",
+    "public_source_audit": "python tools/public_source_audit.py: 12667 source files, 0 errors"
+  },
+  "unrelated_red_suites": {
+    "file_widgets": "7 failures (Stale(\"file operation document/context\"), stale picker reply): the save prompt publishes document resources through the uncommitted project-state staging work; no measurement path is involved",
+    "global_status_surface::x1": "status shows Info instead of the preserved Error after starting Line; the measure label branch is inert without a measurement, so this suite is red in the working tree independent of OM9-L2-03-20"
+  },
+  "note": "Read-only commands: every golden case asserts the document revision and the Undo journal are unchanged."
+}

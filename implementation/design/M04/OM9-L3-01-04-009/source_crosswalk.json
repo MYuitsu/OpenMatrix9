@@ -1,0 +1,47 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-04-009-01",
+  "l3_id": "OM9-L3-01-04-009",
+  "l3_title": "Associative Rebuild Geometry Fixtures",
+  "owner_module_id": "OM9-L2-01-04",
+  "milestone": "M04",
+  "gate": "AUTO_ONLY",
+  "goal": "reference ring/gem/settings history regression fixtures",
+  "positive_oracle": "fixture graph ring rail->profile->sweep with a gem placeholder -> deterministic baseline hash across sessions; an edited rebuild matches a fresh build",
+  "negative_oracle": "corrupt fixture JSON, a wrong node index, an edge outside the record, a tampered hash -> load/verify fails with Io/Invalid('feature baseline node order'/'feature baseline edge')/Stale('feature baseline hash')",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "source_dirty": true,
+  "checkout": "QymCAD/ (vendored subtree of the main repository; no independent .git)",
+  "method": "bounded file reads with line numbers; decisions are OM9-owned and no upstream code is copied",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-kernel/src/shape/edges.rs",
+      "line": 10,
+      "observed_symbols": [
+        "persistent ids survive a rebuild, which is what lets a regression compare two rebuilds"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "no deterministic baseline record; OM9 hashes content order, parameters and output geometry",
+      "om9_owner": "om9-core/src/associative.rs (FeatureGraphBaseline)"
+    },
+    {
+      "path": "crates/qymcad-acceptance/tests/acceptance/chains.rs",
+      "line": 125,
+      "observed_symbols": [
+        "a chain check keeps stepping the scenario and notices when rebuilding everything never comes to rest"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the chain is an acceptance script; OM9 keeps a machine-readable baseline that a later run can verify",
+      "om9_owner": "om9-core/src/associative.rs (load_baseline)"
+    }
+  ],
+  "implemented_api": [
+    "crates/om9-core/src/associative.rs: BaselineNode, BaselineEdge, FeatureGraphBaseline, feature_graph_baseline, load_baseline, node_content_key"
+  ],
+  "reuse_decision": "ADAPT the rebuild/dirty/persistent-id ideas; ADD the typed durable ports, the persisted semantic reference and the content baselines.",
+  "evidence": [
+    "crates/om9-core/tests/associative_rebuild.rs (the_baseline_is_deterministic_across_sessions_and_round_trips, editing_a_parameter_and_rebuilding_matches_a_fresh_build, corrupt_or_missing_fixture_data_fails_to_load, options_are_hashed_by_content_not_by_allocation)",
+    "implementation/fixtures/M04/OM9-L3-01-04-009/positive.json",
+    "implementation/fixtures/M04/OM9-L3-01-04-009/negative.json"
+  ]
+}

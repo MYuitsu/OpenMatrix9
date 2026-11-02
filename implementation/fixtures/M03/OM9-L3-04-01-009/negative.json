@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-009",
+  "case": "count 1",
+  "expected": "`Error::Invalid(\"array count\")`; an array needs at least two items",
+  "test": "m03_04_01_009_array_polar_creates_the_requested_count"
+}

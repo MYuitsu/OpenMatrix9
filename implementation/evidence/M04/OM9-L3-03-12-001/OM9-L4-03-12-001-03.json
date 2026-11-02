@@ -1,0 +1,73 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-12-001",
+  "title": "Builder Style Param Snapshot Schema",
+  "generated_at_utc": "2026-10-27T02:48:26Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the Builder Styles window at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "fee758f6c24aab406f3737f52ba6fd39e24906729071cccf12d490529b960688",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "a typed v1 style roundtrips through the file and drives the circle preset",
+    "negative": "unknown schema version, invalid numeric and unknown profile reference are typed errors"
+  },
+  "l4_id": "OM9-L4-03-12-001-03",
+  "role": "IMPLEMENT",
+  "kind": "implementation",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/tests/builder_style.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_style",
+        "-j",
+        "2",
+        "a_style_roundtrip_keeps_the_values_their_unit_and_the_schema"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "8c8364d7003a18ffd18075c7605a1218fe4677aa1ec6e5ac6b29cd146f85f024",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s"
+      ],
+      "test": "a_style_roundtrip_keeps_the_values_their_unit_and_the_schema",
+      "package": "om9-core",
+      "binary": "builder_style"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_style",
+        "-j",
+        "2",
+        "a_profile_reference_name_is_translated_to_the_builder_preset"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "532ce0fd56fd97e97df9719e0dd54ca6ab3fc0d74fc9d8db27a6838a09b90e7b",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s"
+      ],
+      "test": "a_profile_reference_name_is_translated_to_the_builder_preset",
+      "package": "om9-core",
+      "binary": "builder_style"
+    }
+  ],
+  "manual_gate_note": "Implementation: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

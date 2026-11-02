@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-003",
+  "kind": "positive",
+  "input": "place a typed profile on the selected rail with a stable tangent/normal frame",
+  "expected": "rail radius 9 with a closed 2 x 1 profile: position 0.00 sits at the rail start, 0.25 moves to the quarter station, and a 90 degree roll moves the section corner while the profile centre stays on the rail",
+  "verified_by": [
+    "a_profile_placer_moves_the_section_along_the_rail_and_rolls_it_without_flipping",
+    "a_profile_placer_refuses_a_missing_rail_selection",
+    "the_profile_placer_and_outside_rail_icons_open_the_existing_builder_modes"
+  ],
+  "notes": [
+    "Position is a Ratio in 0..1 and roll is an Angle in degrees; both are optional so older recipes replay at position 0 / roll 0.",
+    "The third builder handle carries scale 0.01 because the value is a ratio, not millimetres."
+  ]
+}

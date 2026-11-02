@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_placement_evidence.v1",
+  "l3_id": "OM9-L3-04-10-005",
+  "title": "Gem On Curve Multi",
+  "command": "BuilderGemOnCrvMulti / gvGemOnCrvMulti",
+  "scope": "`gem_placement::place_on_curves`; `GemPlacementTool::OnCurveMulti`; `Controller::gem_placement_apply`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "one atomic transaction for a run on every selected curve",
+  "negative": "missing curves and unplaceable curves are typed refusals",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-10-005-03"
+    ],
+    "fixture_manifest_sha256": "ffbaf87573bbe742d2dcfa6a1247223b745e835ffd0b5cd60b1a2caff034b567"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/tests/gem_placement.rs"
+  ],
+  "test": "the_multi_tool_places_one_run_per_curve_in_one_transaction"
+}

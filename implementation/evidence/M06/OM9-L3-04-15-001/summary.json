@@ -1,0 +1,86 @@
+{
+  "schema": "om9.recording_summary.v1",
+  "module": "OM9-L2-04-15",
+  "recorded_at": "2026-10-27T09:00:56+00:00",
+  "host": {
+    "system": "Windows",
+    "release": "11",
+    "machine": "AMD64"
+  },
+  "git_head": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "runs": [
+    {
+      "command": "cargo check -p om9-core -j 2",
+      "exit_code": 0,
+      "seconds": 2.08,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/check-core.log",
+      "at": "2026-10-27T08:59:11+00:00"
+    },
+    {
+      "command": "cargo check -p om9-app -j 2",
+      "exit_code": 0,
+      "seconds": 0.36,
+      "tests_passed": 0,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/check-app.log",
+      "at": "2026-10-27T08:59:11+00:00"
+    },
+    {
+      "command": "cargo test -p om9-core --lib -j 2 settings::",
+      "exit_code": 0,
+      "seconds": 2.93,
+      "tests_passed": 90,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/core-settings.log",
+      "at": "2026-10-27T08:59:14+00:00"
+    },
+    {
+      "command": "cargo test -p om9-core --test settings_family -j 2",
+      "exit_code": 0,
+      "seconds": 4.41,
+      "tests_passed": 14,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/core-family.log",
+      "at": "2026-10-27T08:59:18+00:00"
+    },
+    {
+      "command": "cargo test -p om9-app --test settings_commands -j 2",
+      "exit_code": 0,
+      "seconds": 40.86,
+      "tests_passed": 24,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/app-settings.log",
+      "at": "2026-10-27T08:59:59+00:00"
+    },
+    {
+      "command": "cargo test -p om9-core -j 2",
+      "exit_code": 0,
+      "seconds": 56.63,
+      "tests_passed": 781,
+      "tests_failed": 0,
+      "log": "implementation/evidence/M06/OM9-L3-04-15-001/logs/core-all.log",
+      "at": "2026-10-27T09:00:56+00:00"
+    }
+  ],
+  "source_hashes": {
+    "crates/om9-core/src/settings/mod.rs": "9cbc0727db98c22e18773884f731448672311c2f26bc781f90f56505b6f445a6",
+    "crates/om9-core/src/settings/gems.rs": "3f29e9d889dc7debaa197c4235e4d4ca1d3ceba1fbfd5a9a990e47db90edad72",
+    "crates/om9-core/src/settings/prong.rs": "5ef2c40563edcf03f44dfc24443811d9fcc7809fd05f98e82e5cd9a97140e154",
+    "crates/om9-core/src/settings/metal_piece.rs": "5afb2e994dd19e04e5b7bc8164552cd58ef8a9bd2daa4245129501baa24b3e88",
+    "crates/om9-core/src/settings/channel_border.rs": "54857bbf1ccd5ec1abaff9469473a0a5e8c0a838bc15b1a3e09264fe08a6dab3",
+    "crates/om9-core/src/settings/bead.rs": "1a2edbdce1a1dd66be516b6f1a55dee21392e90c02929fafd3b39ef638423abf",
+    "crates/om9-core/src/settings/rail.rs": "d42f7689be3185e1faf7003fe09cc352652a7595a23fd60fdc5b246e86d54cb6",
+    "crates/om9-core/src/settings/associative.rs": "458c5f8205f477743f0779f449ffe71d40132e2385b6e410665bae3a57b5de5c",
+    "crates/om9-app/src/session/settings_commands.rs": "ce5a2bf0b346b6ff64c8e6daa90a3273fb638b5a2f69593a54983534cad8fa56",
+    "crates/om9-core/tests/settings_family.rs": "286f90f42293a63a69c3dad549c7e40df236708f113be9adc994db2d7aa684ca",
+    "crates/om9-app/tests/settings_commands.rs": "df16317c3ab62caf57d816ea0b177f4aa2e2d408fee02c6499cf85bbb0164c2d"
+  },
+  "limitations": [
+    "4 Prongs Close is refused with Error::Unsupported('4 prongs close layout'): the documented cluster cannot be expressed without intersecting prong bodies.",
+    "6 Prongs 0 Degrees on a two-stone row is refused with Error::Invalid('duplicate prong') for the default 1.0 mm prong; a thinner prong or a wider row places it.",
+    "The metal piece Curve mode is refused with Error::Unsupported('metal piece curve mode').",
+    "SettingsMass and the row end modes have no toolbar icon; they are a text command and options on the prong commands."
+  ]
+}

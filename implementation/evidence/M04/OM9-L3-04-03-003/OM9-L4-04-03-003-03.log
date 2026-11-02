@@ -1,0 +1,41 @@
+$ cargo test -p om9-core --lib -j 2 ring_builder::tests::a_raised_band_keeps_a_positive_section_thickness
+# exit code: 0
+# captured: 2026-10-27T09:35:21Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test ring_builder::tests::a_raised_band_keeps_a_positive_section_thickness ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 130 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)
+
+$ cargo test -p om9-core --test ring_family -j 2 the_four_ring_modes_expose_their_own_parameters
+# exit code: 0
+# captured: 2026-10-27T09:35:21Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_four_ring_modes_expose_their_own_parameters ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\ring_family.rs (L:\om9-target\debug\deps\ring_family-96685c27dfebd318.exe)
+
+$ cargo test -p om9-core --test ring_family -j 2 each_ring_mode_paints_handles_that_edit_their_own_fields
+# exit code: 0
+# captured: 2026-10-27T09:35:21Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test each_ring_mode_paints_handles_that_edit_their_own_fields ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\ring_family.rs (L:\om9-target\debug\deps\ring_family-96685c27dfebd318.exe)

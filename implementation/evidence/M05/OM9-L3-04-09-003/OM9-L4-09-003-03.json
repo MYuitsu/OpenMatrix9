@@ -1,0 +1,89 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-09-003",
+  "l4_id": "OM9-L4-09-003-03",
+  "title": "Gem Loader Shape Cut Size Picker",
+  "generated_at_utc": "2026-10-27T09:23:20Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the gem window at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "fe1835a0145b9eb8685c0515ba3c035341b335eb445c23a3be0ea01d05d5205e",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "one gemstone with the selected shape, cut and size in one Undo step; its preview is painted in the viewport and the committed body is an editable B-Rep",
+    "negative": "invalid sizes/options and a locked layer never mutate the document"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/transaction.rs",
+    "crates/om9-core/tests/gem_assets.rs",
+    "crates/om9-kernel/src/brep.rs",
+    "crates/om9-kernel/src/gem.rs",
+    "crates/om9-kernel/src/lib.rs",
+    "crates/om9-kernel/src/brep_bridge.cpp",
+    "crates/om9-kernel/Cargo.toml",
+    "crates/om9-kernel/tests/gem_brep.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/f6.rs",
+    "crates/om9-app/src/icons.rs",
+    "crates/om9-app/tests/gem_panel.rs",
+    "tools/record_m05_l2_04_09_gem_assets.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_panel",
+        "-j",
+        "2",
+        "the_loader_previews_without_creating_an_object_and_cancel_leaves_no_phantom"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "b9b01d8e8d065cf208f8d8043c63ad0b5e21ef571b02a60320a0ad5ee0b604ab",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s"
+      ],
+      "test": "the_loader_previews_without_creating_an_object_and_cancel_leaves_no_phantom",
+      "package": "om9-app",
+      "binary": "gem_panel"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_panel",
+        "-j",
+        "2",
+        "applying_the_loader_inserts_one_gem_in_one_transaction_and_undo_restores"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "396be7fd23eb6aeacd36457edc05af424456646a9f994f0427978011403341e8",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.32s"
+      ],
+      "test": "applying_the_loader_inserts_one_gem_in_one_transaction_and_undo_restores",
+      "package": "om9-app",
+      "binary": "gem_panel"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

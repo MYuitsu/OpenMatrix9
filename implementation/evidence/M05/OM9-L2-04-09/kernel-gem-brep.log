@@ -1,0 +1,15 @@
+$ cargo test -p om9-kernel --features 3dm-brep --test gem_brep -j 2
+# exit code: 0
+# captured: 2026-10-27T09:23:05Z
+# target dir: L:\om9-target
+
+
+running 2 tests
+test an_open_mesh_is_refused_instead_of_being_sealed ... ok
+test every_gem_cut_becomes_one_closed_editable_solid ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.81s
+
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.45s
+     Running tests\gem_brep.rs (L:\om9-target\debug\deps\gem_brep-659e3e149d151b91.exe)

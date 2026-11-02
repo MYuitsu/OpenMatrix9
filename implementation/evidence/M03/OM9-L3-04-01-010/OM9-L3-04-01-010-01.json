@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-010-01",
+  "l3_id": "OM9-L3-04-01-010",
+  "kind": "Automated Runtime",
+  "date": "2026-10-26",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Project To C-Plane: golden case 'one box on the CPlane and one raised 10 mm, both selected' -> each object moves along the normal by its own signed height, so both end on the plane, in one Undo entry",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_010_project_to_cplane_drops_each_object_onto_the_plane"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

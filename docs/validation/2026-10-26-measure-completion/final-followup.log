@@ -1,0 +1,38 @@
+[rtk] /!\ No hook installed — run `rtk init -g` for automatic token savings
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.83s
+     Running tests\annotation_ui.rs (L:/om9-target\debug\deps\annotation_ui-5540a0fb407ff88e.exe)
+
+running 3 tests
+test object_summary_is_reached_by_the_analyze_menu ... ok
+test hovering_distance_draws_a_value_before_commit_and_keeps_the_document_unchanged ... ok
+test the_measure_palette_horizontal_icon_creates_a_visible_dimension_label ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+
+     Running tests\measure_extended.rs (L:/om9-target\debug\deps\measure_extended-95f953457a857744.exe)
+
+running 7 tests
+test placed_arc_keeps_its_trim_under_nonuniform_scale ... ok
+test object_distance_uses_trimmed_curves_and_finite_surface_domains ... ok
+test summary_groups_instances_and_counts_only_placed_explicit_carats ... ok
+test dynamic_ortho_and_continuous_distance_are_read_only ... ok
+test isocurve_and_surface_area_use_world_placement ... ok
+test radius_on_an_ellipse_is_pointwise_and_a_line_has_no_finite_curvature ... ok
+test canonical_brep_edges_area_volume_and_object_distance_have_numeric_oracles ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests\transform_corrections.rs (L:/om9-target\debug\deps\transform_corrections-cda138d9bdb2c8dc.exe)
+
+running 7 tests
+test inverse_surface_routines_exist_and_return_measured_projection ... ok
+test blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing ... ok
+test roadlike_follows_the_tangent_and_preserves_cplane_up ... ok
+test setpt_cplane_axes_and_cancel_are_read_only_until_commit ... ok
+test setpt_edits_only_the_requested_control_coordinates_and_keeps_placement ... ok
+test spacing_with_no_copy_refuses_and_the_same_run_can_retry ... ok
+test spacing_is_in_mm_and_preserves_the_original_in_one_undo ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

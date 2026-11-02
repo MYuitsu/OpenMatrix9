@@ -1,0 +1,122 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-19-001",
+  "title": "Metal Volume From Closed B-Rep",
+  "generated_at_utc": "2026-10-27T07:12:44Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "AUTO_ONLY",
+  "signature": null,
+  "not_claimed": [
+    "a human signature",
+    "a visual builder-panel review"
+  ],
+  "fixture_manifest_sha256": "80a8ee80863ae8726c018d71f5e1b1bc35e255ae5639bd1854d9f9c6a51401bf",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "a closed 10 x 5 x 2 mm box measures 100 mm^3; 100 cm^3 converts to 100,000 mm^3 before aggregation",
+    "negative": "an open shell, zero solids, NaN, infinite and zero/negative volumes are typed refusals; no mass is ever reported"
+  },
+  "l4_id": "OM9-L4-04-19-001-05",
+  "role": "REGRESSION",
+  "kind": "regression",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/metal_weight.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-app/src/session/metal.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-core/tests/metal_weight.rs",
+    "crates/om9-app/tests/metal_weights.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "a_closed_box_volume_is_admitted_and_project_units_convert_to_mm"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "c4604dbd26f1c90bafbbe761945ab761d2f25a16bbf643f6913d59ce55c698d0",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "a_closed_box_volume_is_admitted_and_project_units_convert_to_mm",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "an_open_shell_or_an_empty_solid_never_gets_a_volume"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "4b9029bd54afb4f600f3811a585f573132281d25978472023ba2eff94504ff61",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "an_open_shell_or_an_empty_solid_never_gets_a_volume",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "metal_weight",
+        "-j",
+        "2",
+        "non_finite_and_zero_volumes_are_refused"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "20e528105cebdc0d9ea8639c91642a1d865340b5f365211db2bae1573cd23ac5",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s"
+      ],
+      "test": "non_finite_and_zero_volumes_are_refused",
+      "package": "om9-core",
+      "binary": "metal_weight"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "metal_weights",
+        "-j",
+        "2",
+        "the_icon_reports_a_closed_box_in_grams_and_pennyweights_without_editing"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "4c36f1af3c49c3b5adc4bdf97eb614e10d1bd097c270b2cc52c1d56db6273960",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.02s"
+      ],
+      "test": "the_icon_reports_a_closed_box_in_grams_and_pennyweights_without_editing",
+      "package": "om9-app",
+      "binary": "metal_weights"
+    }
+  ]
+}

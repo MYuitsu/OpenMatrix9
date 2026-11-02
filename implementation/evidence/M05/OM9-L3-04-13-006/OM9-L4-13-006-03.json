@@ -1,0 +1,59 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-13-006",
+  "l4_id": "OM9-L4-13-006-03",
+  "title": "Gem Update And Regenerate",
+  "generated_at_utc": "2026-10-28T04:07:37Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "M05-UI",
+  "signature": null,
+  "not_claimed": [
+    "manual review of Gem Update And Regenerate at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "260604f349a6a5be5a7fbf0d0c49a55e67af2a9ac524f8db20a2a5573603fff5",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "geometry regenerated from the stored record, identity and record kept",
+    "negative": "a spec that cannot rebuild a closed mesh is refused"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem_edits.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/src/session/gem_edits.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem_edits.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/gem_edits.rs",
+    "tools/record_m05_l2_04_13_gem_instance_edits.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_edits",
+        "-j",
+        "2",
+        "update_rebuilds_the_geometry_from_the_stored_record"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "143e686dbf1dc1cf6b1de261f1e4600424371649517c33f5aa4cdd6776f9a15d",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.01s"
+      ],
+      "test": "update_rebuilds_the_geometry_from_the_stored_record",
+      "package": "om9-app",
+      "binary": "gem_edits"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

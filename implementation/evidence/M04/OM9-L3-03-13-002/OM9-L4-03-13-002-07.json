@@ -1,0 +1,78 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-13-002",
+  "title": "Matrix History Update Toggle",
+  "generated_at_utc": "2026-10-27T03:41:04Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/icon/window review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "0fba3d5721c56d245c5b4bf6bd06dc4b6d4689f764c9665f89aef7a35f940c98",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "with update off a parameter edit leaves the rail geometry and marks the recipe Dirty; re-enabling update rebuilds the edited feature and its downstream profile once",
+    "negative": "re-enable with a broken dependency -> Invalid(history dependency broken) and the switch stays off"
+  },
+  "l4_id": "OM9-L4-03-13-002-07",
+  "role": "ADVERSARIAL",
+  "kind": "adversarial",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/history_ops.rs",
+    "crates/om9-app/src/session/history.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/sidebar_palettes.rs",
+    "crates/om9-app/tests/history_updates.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "history_updates",
+        "-j",
+        "2",
+        "update_off_marks_dirty_and_rebuilds_only_after_update_is_reenabled"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "6dc81a0d2a3227eb49320fd4f081e6e96d5d15aea1a6a13b4f925ed121cf40a9",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.02s"
+      ],
+      "test": "update_off_marks_dirty_and_rebuilds_only_after_update_is_reenabled",
+      "package": "om9-app",
+      "binary": "history_updates"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "history_updates",
+        "-j",
+        "2",
+        "reenabling_update_refuses_a_broken_dependency"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "c1c1c40810af10fc77ac9fab6c2376fe9af15eb22bdf2b3acda9c202a93f25ce",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "reenabling_update_refuses_a_broken_dependency",
+      "package": "om9-app",
+      "binary": "history_updates"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

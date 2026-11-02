@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-042-01",
+  "l3_id": "OM9-L3-04-01-042",
+  "kind": "Automated Runtime",
+  "date": "2026-10-26",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Transform menu action availability: golden case 'ask availability for all 41 catalogued Transform rows' -> 14 rows answer Ok because their body exists; the other 27 answer `Unsupported(reason)` with a non-empty reason that the menu shows as a disabled row",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_042_every_catalogued_row_is_enabled_or_refused_with_a_reason"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

@@ -1,0 +1,7 @@
+# Ellipsoid Diameter — 2026-10-29
+
+The normalized manual describes two ends of the first axis, the second axis and the third axis. The recovered menu export maps right click on `SolidEllipsoidFromCenter` to `_Ellipsoid _D`. OM9 now supports Diameter through that right-click binding, the command option and `_Ellipsoid _D`; both menu and CMD use the same pending state and exact rational BRep constructor.
+
+OM9 projects the second diameter end to the captured CPlane, centers the ellipsoid at the midpoint, measures the second radius along the in-plane perpendicular and the third along the normal. These projection choices are OM9 interpretations; the native Matrix solver has not been verified. Invalid points retain the preceding picks, Undo steps backward and the final result is one transaction. Typed positive length at the second pick defines the full first diameter.
+
+Windows, `CARGO_TARGET_DIR=L:/om9-target`, `-j 2`: five focused Ellipsoid controller tests passed, one unrelated native-UI fixture ignored. The new tests cover menu alias and CMD variants, invalid retry, selection Undo, a translated midpoint, a rotated first axis, analytical volume and document Undo. An egui test verified secondary-click dispatch; two egui viewport workflows verified Center and Diameter point picking and side-view height. Actual desktop behavior, numeric/point snapping edge cases, live preview and original Matrix geometry remain unverified. Corner, FromFoci, AroundCurve and MarkFoci remain open.

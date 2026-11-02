@@ -1,0 +1,123 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-02-006",
+  "title": "Profile Edit Merge And Endcap",
+  "generated_at_utc": "2026-10-27T04:25:55Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "5208f9a74223c176f62f82da660611d006b6589d3e37bb56e6ac6982049bd62c",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "two half-sections of one circle merge into a closed polycurve; a closed rectangular profile produces a planar cap surface; a closed profile path is checked before the cap",
+    "negative": "one section is refused; reversed winding is refused with profile section winding; an open curve has no cap boundary and the document is unchanged"
+  },
+  "l4_id": "OM9-L4-04-02-006-05",
+  "role": "REGRESSION",
+  "kind": "regression",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/curve_ops.rs",
+    "crates/om9-app/src/session/ring_tools.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/ring_tools.rs",
+    "crates/om9-app/tests/ring_tools.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "profile_sections_merge_when_they_are_connected_and_consistently_wound"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "44d6c216a326b78b4d9257c591bbed931d538f53092cb52b74db721883807a2b",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s"
+      ],
+      "test": "profile_sections_merge_when_they_are_connected_and_consistently_wound",
+      "package": "om9-core",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "the_profile_merge_icon_joins_compatible_sections_and_refuses_one_section"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "6f94686aa5d8b608ad54085a260a370a89e1765f7ca55907534761ff2edfbb8a",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "the_profile_merge_icon_joins_compatible_sections_and_refuses_one_section",
+      "package": "om9-app",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "the_profile_end_cap_icon_builds_a_planar_cap_from_closed_sections"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "eed0c8cd1acc9c37c0955305c4ffe28a5ffa756633aeb21e2d1eb82cf52dbea9",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "the_profile_end_cap_icon_builds_a_planar_cap_from_closed_sections",
+      "package": "om9-app",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "the_profile_end_cap_refuses_an_open_curve_without_changing_the_document"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "4fade0c6aed0f3de659df723200839165d8e2fb82f94b076b49447b9e4e3ae24",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "the_profile_end_cap_refuses_an_open_curve_without_changing_the_document",
+      "package": "om9-app",
+      "binary": "ring_tools"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

@@ -1,0 +1,16 @@
+=== cargo test -p om9-app --test gem_cutters -j 2 ===
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.92s
+     Running tests\gem_cutters.rs (L:\om9-target\debug\deps\gem_cutters-5c43d286cdb74d6e.exe)
+
+running 7 tests
+test the_builder_needs_a_selected_gem ... ok
+test a_removed_body_without_a_boolean_is_refused_and_the_preview_survives ... ok
+test a_typed_cutter_command_reaches_the_same_handler ... ok
+test the_library_command_builds_each_preset_and_records_the_seat ... ok
+test the_gem_cutter_icon_stages_a_preview_and_enter_commits_cutter_bodies ... ok
+test the_dimensional_bezel_cutter_options_reach_the_shared_scallop_command ... ok
+test the_interactive_boolean_cuts_the_metal_and_the_preserve_answer_removes_the_bodies ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.65s
+

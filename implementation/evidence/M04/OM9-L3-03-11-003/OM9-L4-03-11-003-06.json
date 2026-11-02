@@ -1,0 +1,76 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-11-003",
+  "title": "Builder Parameter Controls And Sliders",
+  "generated_at_utc": "2026-10-27T02:20:24Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "fb491b1ef58edf9b73947df3405b3ec95ccfe64277eca34b58aa7a83a14392eb",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "stored value 2.5 mm; display, model and preview agree",
+    "negative": "stored value clamps to the field min/max (0.1 / 20 mm); no value outside the domain is stored"
+  },
+  "l4_id": "OM9-L4-03-11-003-06",
+  "role": "ACCEPTANCE",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/builder_controls.rs",
+    "crates/om9-app/tests/builder_controls.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "a_slider_move_lands_exactly_on_the_field_step"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "bb83df642edf224f057357149ac61d387fd4d3afbabc7a1272a533700ab3d0ef",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s"
+      ],
+      "test": "a_slider_move_lands_exactly_on_the_field_step",
+      "package": "om9-core",
+      "binary": "builder_controls"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "a_slider_edit_from_the_panel_quantises_and_previews_the_same_value"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "81a8e4ec210795db1a273928884626c7b4791ad9dd5912d0f16e597156604178",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "a_slider_edit_from_the_panel_quantises_and_previews_the_same_value",
+      "package": "om9-app",
+      "binary": "builder_controls"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

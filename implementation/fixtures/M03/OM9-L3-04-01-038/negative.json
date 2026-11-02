@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-038",
+  "case": "source X point equal to the source origin",
+  "expected": "`Error::Invalid` from the align solve; the object keeps its placement",
+  "test": "m03_04_01_038_remap_maps_the_source_plane_onto_the_cplane"
+}

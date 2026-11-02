@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-004",
+  "kind": "positive",
+  "input": "drag width 2 -> 3 -> 4 mm, then Escape",
+  "expected": "no history/Undo entry from the previews; Escape returns the original state",
+  "verified_by": [
+    "escape_after_preview_edits_leaves_the_document_bytewise_unchanged",
+    "cancel_and_reset_leave_the_document_untouched"
+  ],
+  "receipts": [
+    {
+      "test": "escape_after_preview_edits_leaves_the_document_bytewise_unchanged",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "escape_after_preview_edits_leaves_the_document_bytewise_unchanged"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "21169fb092dee2350bd6ffc2fccc785351728d9fc53b986f7c1fb4979027d6ef"
+    },
+    {
+      "test": "cancel_and_reset_leave_the_document_untouched",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "cancel_and_reset_leave_the_document_untouched"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "b5f6399d7663a81e2390afc8807b41ae19c56c0b9002648e8aad55b06a4fd09f"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-004",
+  "kind": "negative",
+  "expected": "an open line is refused with ring rail not closed; a bow-tie polyline is refused with ring rail self-intersection; the advanced icon refuses an open rail without inserting geometry",
+  "verified_by": [
+    "a_custom_rail_must_be_closed_planar_and_non_self_intersecting",
+    "a_builder_ring_sweep_refuses_an_open_rail_and_accepts_a_custom_closed_one",
+    "the_custom_rail_icon_records_a_validated_closed_rail_and_refuses_an_open_one"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "expect": {
+    "roundtrip": "parameters equal",
+    "volume": "matches the baseline body"
+  },
+  "preset": {
+    "builder": "signet_ring",
+    "family": "signet",
+    "name": "Signet 8x10"
+  }
+}

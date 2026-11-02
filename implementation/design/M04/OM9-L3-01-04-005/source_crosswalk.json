@@ -1,0 +1,47 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-04-005-01",
+  "l3_id": "OM9-L3-01-04-005",
+  "l3_title": "Incremental Recompute And Cache",
+  "owner_module_id": "OM9-L2-01-04",
+  "milestone": "M04",
+  "gate": "AUTO_ONLY",
+  "goal": "only recompute affected features and cache unchanged outputs",
+  "positive_oracle": "independent features X,Y and chain A->B; edit the source of A -> only A and B recalculate; X and Y cache entries (revision and sha256) are unchanged",
+  "negative_oracle": "a cache entry whose recorded input stamp is one revision old; a parameter edit without a revision bump -> both are cache misses and A is planned even while the graph still calls it Clean",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "source_dirty": true,
+  "checkout": "QymCAD/ (vendored subtree of the main repository; no independent .git)",
+  "method": "bounded file reads with line numbers; decisions are OM9-owned and no upstream code is copied",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-ui-state/src/rebuild.rs",
+      "line": 332,
+      "observed_symbols": [
+        "pub fn rebuild_if_dirty(rc: &mut RebuildCtx): computes only when the rebuild key or the dirty node set moved"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the key is the document rebuild key; OM9 keys each feature by (revision, parameters, input stamps) so an unrelated edit cannot invalidate it",
+      "om9_owner": "om9-core/src/associative.rs (RecomputeCache)"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/jobs.rs",
+      "line": 176,
+      "observed_symbols": [
+        "Project::rebuild_key is the fingerprint of the document the rebuild computes"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "one fingerprint for the whole document; OM9 keeps one entry per recipe",
+      "om9_owner": "om9-core/src/associative.rs (CacheEntry)"
+    }
+  ],
+  "implemented_api": [
+    "crates/om9-core/src/associative.rs: CacheEntry, RecomputeCache::{is_valid, record, invalidate, plan}, output_hash (SHA-256 over canonical geometry)"
+  ],
+  "reuse_decision": "ADAPT the rebuild/dirty/persistent-id ideas; ADD the typed durable ports, the persisted semantic reference and the content baselines.",
+  "evidence": [
+    "crates/om9-core/tests/associative_rebuild.rs (only_the_affected_chain_recomputes_and_independent_cache_entries_are_untouched, a_cache_entry_with_an_outdated_input_stamp_is_a_miss_even_when_the_graph_is_clean)",
+    "implementation/fixtures/M04/OM9-L3-01-04-005/positive.json",
+    "implementation/fixtures/M04/OM9-L3-01-04-005/negative.json"
+  ]
+}

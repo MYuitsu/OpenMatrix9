@@ -4,7 +4,167 @@
   "milestone": "M07",
   "parent_l2_id": "OM9-L2-04-16",
   "title": "Bezel Cutter Builder",
-  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "IMPLEMENTED",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "RESOLVED_FULL_NAME",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "height",
+        "type": "mm above the stone",
+        "unit": "mm",
+        "default": 0.2,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-004/api.md"
+      },
+      {
+        "raw": "length",
+        "type": "mm from the stone centre to the outer end",
+        "unit": "mm",
+        "default": 4.2,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-004/api.md"
+      },
+      {
+        "raw": "2d scale",
+        "type": "percent",
+        "unit": "%",
+        "default": 100,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-004/api.md"
+      },
+      {
+        "raw": "cutter length",
+        "type": "mm",
+        "unit": "mm",
+        "default": 1.2,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-004/api.md"
+      },
+      {
+        "raw": "x inside / x outside",
+        "type": "tangential end widths",
+        "unit": "mm",
+        "default": 0.6875,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-004/api.md"
+      },
+      {
+        "raw": "y inside / y outside",
+        "type": "axial end heights",
+        "unit": "mm",
+        "default": 0.6666666666666667,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-004/api.md"
+      },
+      {
+        "raw": "cutter angle",
+        "type": "degrees",
+        "unit": "deg",
+        "default": 12,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-004/api.md"
+      },
+      {
+        "raw": "number of cutters",
+        "type": "count",
+        "unit": "count",
+        "default": 12,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-004/api.md"
+      },
+      {
+        "raw": "position",
+        "type": "enum odd|even",
+        "unit": null,
+        "default": "odd",
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-004/api.md"
+      }
+    ],
+    "command_options": [
+      "Dims=",
+      "Height=",
+      "Length=",
+      "Scale2D=",
+      "CutterLength=",
+      "XInside=",
+      "XOutside=",
+      "YInside=",
+      "YOutside=",
+      "CutterAngle=",
+      "XOffset=",
+      "YOffset=",
+      "ZOffset=",
+      "Count=",
+      "Position=",
+      "Profile=",
+      "Angle=",
+      "Offset=",
+      "Depth=",
+      "Enter",
+      "Cancel"
+    ],
+    "missing_options": [],
+    "missing": [],
+    "implementation_l4": {
+      "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+      "feature": "BuilderBezelCutter",
+      "owner": [
+        "crates/om9-core/src/cutters/bezel.rs",
+        "crates/om9-core/src/settings/bezel.rs",
+        "crates/om9-app/src/session/head_commands.rs"
+      ],
+      "evidence": [
+        "implementation/design/M07/OM9-L3-04-16-004/source_crosswalk.json",
+        "implementation/design/M07/OM9-L3-04-16-004/api.md",
+        "implementation/fixtures/M07/OM9-L3-04-16-004/positive.json",
+        "implementation/fixtures/M07/OM9-L3-04-16-004/negative.json",
+        "implementation/evidence/M07/OM9-L3-04-16-004/OM9-L4-04-16-004-03.json",
+        "implementation/evidence/M07/OM9-L3-04-16-004/OM9-L4-04-16-004-04.json"
+      ]
+    },
+    "option_order": [
+      "Dims=",
+      "Height=",
+      "Length=",
+      "Scale2D=",
+      "CutterLength=",
+      "XInside=",
+      "XOutside=",
+      "YInside=",
+      "YOutside=",
+      "CutterAngle=",
+      "XOffset=",
+      "YOffset=",
+      "ZOffset=",
+      "Count=",
+      "Position=",
+      "Profile=",
+      "Angle=",
+      "Offset=",
+      "Depth=",
+      "Enter",
+      "Cancel"
+    ],
+    "option_count": 21
+  },
+  "planning_state": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
   "target_implementation_milestone": "M07",
   "execution_stage": "E12",
   "source_original_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/004-febe-bezel-cutter-builder/l3.json",
@@ -23,7 +183,7 @@
     "milestone_id": "M07",
     "target_milestone": "M07",
     "delivery": "mainline",
-    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
     "origin_source_taxonomy": "04-matrix8-book2",
     "goal": "cut seats around bezel and gem",
     "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
@@ -89,13 +249,14 @@
       "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
     ],
     "qymcad_source_paths_verified": [],
-    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
-    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "reuse_decision": "ADD_NEW_CUTTER_OWNER",
+    "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
     "execution_stage": "E12",
     "planning_release": "CORE_MVP",
     "planning_risk": "HIGH",
     "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
-    "execution_status": "L4_PLANNED_NOT_EXECUTED"
+    "execution_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
+    "implementation_role_note": "ui_command_adapter: the command dispatches to the om9_core::cutters service; it never creates a second geometry kernel, gem store or settings store."
   },
   "children_l4": [
     {
@@ -134,5 +295,75 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED"
+  "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
+  "task_ids": [
+    "OM9-L4-04-16-004-01",
+    "OM9-L4-04-16-004-02",
+    "OM9-L4-04-16-004-03",
+    "OM9-L4-04-16-004-04"
+  ],
+  "planning_state_before": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "implementation": {
+    "schema": "om9.l3_implementation.v1",
+    "recorded_at": "2026-10-28",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+    "feature": "BuilderBezelCutter",
+    "command_options": [
+      "Dims=",
+      "Height=",
+      "Length=",
+      "Scale2D=",
+      "CutterLength=",
+      "XInside=",
+      "XOutside=",
+      "YInside=",
+      "YOutside=",
+      "CutterAngle=",
+      "XOffset=",
+      "YOffset=",
+      "ZOffset=",
+      "Count=",
+      "Position=",
+      "Profile=",
+      "Angle=",
+      "Offset=",
+      "Depth=",
+      "Enter",
+      "Cancel"
+    ],
+    "owner": [
+      "crates/om9-core/src/cutters/bezel.rs",
+      "crates/om9-core/src/settings/bezel.rs",
+      "crates/om9-app/src/session/head_commands.rs"
+    ],
+    "evidence": [
+      "implementation/design/M07/OM9-L3-04-16-004/source_crosswalk.json",
+      "implementation/design/M07/OM9-L3-04-16-004/api.md",
+      "implementation/fixtures/M07/OM9-L3-04-16-004/positive.json",
+      "implementation/fixtures/M07/OM9-L3-04-16-004/negative.json",
+      "implementation/evidence/M07/OM9-L3-04-16-004/OM9-L4-04-16-004-03.json",
+      "implementation/evidence/M07/OM9-L3-04-16-004/OM9-L4-04-16-004-04.json"
+    ],
+    "automated_tests": {
+      "core": [
+        "cargo test -p om9-core --lib cutters::bezel",
+        "cargo test -p om9-core --test cutters the_dimensional_bezel_builder_makes_a_closed_block_per_cutter"
+      ],
+      "app": [
+        "cargo test -p om9-app --test gem_cutters the_dimensional_bezel_cutter_options_reach_the_shared_scallop_command",
+        "cargo test -p om9-app --test head_commands"
+      ]
+    },
+    "manual_gate": {
+      "required": true,
+      "gate": "M07-UI",
+      "signed": false,
+      "open": "preview/commit/cancel of Bezel Cutter Builder in the OpenMatrix9 window"
+    },
+    "limitations": [
+      "Ownership stays with the one gvBezelCutter command of M06 (OM9-L2-04-14): this owner publishes the dimensional parameter contract and the block geometry that the shared scallop command dispatches to, so no second command kernel exists.",
+      "The block is an eight-corner tapered prism; Edge Profiles/Styles for the dimensional mode are not in this owner (the swept contract keeps the M06 profile library).",
+      "The manual's X/Y Inside/Outside sizes are tangential widths and axial heights of the two ends; Cutter Angle lifts the outer end."
+    ]
+  }
 }

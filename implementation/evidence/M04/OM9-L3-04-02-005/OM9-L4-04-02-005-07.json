@@ -1,0 +1,100 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-02-005",
+  "title": "Four Rail Profile Tool",
+  "generated_at_utc": "2026-10-27T04:25:55Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "3d6faa40c555441b18b2a9d3853f091f779251d7916b5d67dbfc29bd08354572",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "four rails with consistent start/direction/span tag both profiles with om9.four-rail-profile metadata, and Sweep4 consumes them as one four-boundary surface",
+    "negative": "a selection that is not four rails plus two profiles is refused; the command does not insert metadata or a partial surface"
+  },
+  "l4_id": "OM9-L4-04-02-005-07",
+  "role": "ADVERSARIAL",
+  "kind": "adversarial",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-app/src/session/surface_edit.rs",
+    "crates/om9-app/src/session/ring_tools.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/tests/ring_tools.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "the_four_profile_icon_reaches_the_existing_four_rail_metadata_command"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "a8c0ff95743a266e3a4a47b72db879545d71edd025d653d7f5b6056c7278e2fb",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "the_four_profile_icon_reaches_the_existing_four_rail_metadata_command",
+      "package": "om9-app",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "the_four_profile_icon_refuses_an_inconsistent_selection"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "376df41d9e01b5786d0d0cc9d37455e697e6042460faa06e5707ec1b6770d220",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "the_four_profile_icon_refuses_an_inconsistent_selection",
+      "package": "om9-app",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "surface_menu",
+        "-j",
+        "2",
+        "four_rail_profile_command_tags_profiles_then_sweep4_uses_them"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "9fb54f2ccd750cb811737fdfbb68546de741ed70394a6facde15b0dc0b3d1fd7",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 61 filtered out; finished in 3.73s"
+      ],
+      "test": "four_rail_profile_command_tags_profiles_then_sweep4_uses_them",
+      "package": "om9-app",
+      "binary": "surface_menu"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

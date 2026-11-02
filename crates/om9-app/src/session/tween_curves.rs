@@ -52,7 +52,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Count=") {
-            let Some(count) = value.parse::<usize>().ok().filter(|value| (1..=64).contains(value)) else {
+            let Some(count) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|value| (1..=64).contains(value))
+            else {
                 self.tween_curves_pending = Some(pending);
                 return Some(Err(Error::Invalid("count must be 1..64")));
             };

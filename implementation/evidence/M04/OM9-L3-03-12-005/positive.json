@@ -1,0 +1,12 @@
+{
+  "expect": {
+    "disabled": 1,
+    "enabled": 2
+  },
+  "mode": "RingRail",
+  "styles": [
+    "Classic 2.2 (band)",
+    "Signet 3.0 (band)",
+    "Brilliant Gem 1.9 (gem)"
+  ]
+}

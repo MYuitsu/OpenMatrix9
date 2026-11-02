@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-09-005",
+  "title": "Gem Emerald And Baguette Builders",
+  "cases": [
+    "Girdle=0 -> Invalid(\"gem dimension range\")",
+    "Corner=9 -> Invalid(\"gem corner exceeds the girdle\")"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

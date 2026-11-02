@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-11-001",
+  "title": "Halo Builder",
+  "cases": [
+    "auto halo closes the ring and every gap equals the realized pitch",
+    "Fix Position pins the first stone at 12:00; off starts at 3:00",
+    "Channel/prong parameters (wall height, blend, prong dome/taper/nudge) are typed and validated",
+    "Apply inserts the accents in one Undo step and Cancel leaves no phantom"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

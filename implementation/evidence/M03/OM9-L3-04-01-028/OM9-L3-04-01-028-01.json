@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-028-01",
+  "l3_id": "OM9-L3-04-01-028",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Flow Along Surface: golden case 'source plane over 10 x 10 z=0, target plane (10u, 10v, 10u), curve (1,1,0)->(3,1,0), source pick (9,9,0) -> the ends land on (1,1,1) and (3,1,3), one Undo entry'",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_028_flow_along_surface_maps_the_source_parameters_onto_the_target"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

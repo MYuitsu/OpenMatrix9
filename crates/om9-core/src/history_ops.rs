@@ -25,6 +25,21 @@ pub struct StaleRecipe {
     pub reason: String,
 }
 
+/// [`mark_stale`] for a caller that holds the whole document: the graph lives in
+/// `document.history`, so the borrow is split by moving the graph aside for the duration
+/// of the call (no clone, no second document).
+pub fn mark_document_stale(document: &mut Document) -> Result<Vec<HistoryId>> {
+    let mut graph = std::mem::take(&mut document.history);
+    let result = mark_stale(document, &mut graph);
+    document.history = graph;
+    result
+}
+
+/// [`plan_recompute`] over the document's own graph.
+pub fn plan_document_recompute(document: &Document) -> Result<Vec<HistoryId>> {
+    plan_recompute(&document.history)
+}
+
 /// Recipes whose recorded inputs no longer match the document: a changed source, a deleted
 /// source, or a state the graph already records. Detached recipes are never stale.
 pub fn stale_recipes(document: &Document, graph: &HistoryGraph) -> Vec<StaleRecipe> {
@@ -216,6 +231,139 @@ pub fn freeze(graph: &mut HistoryGraph, id: HistoryId, frozen: bool) -> Result<(
         return Err(Error::Invalid("detached recipe freeze"));
     }
     recipe.policy.lock = frozen;
+    Ok(())
+}
+
+/// A recipe whose recorded inputs or outputs no longer resolve. One row per recipe,
+/// with the roles the report should name; a `Clean` recipe with every binding intact
+/// never appears.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct BrokenLink {
+    pub recipe: HistoryId,
+    pub command: String,
+    pub state: EvaluationState,
+    /// Objects the recipe names but the document no longer has.
+    pub missing_inputs: Vec<String>,
+    /// The source object ids matching `missing_inputs`, in the same order.
+    pub missing_sources: Vec<crate::identity::ObjectId>,
+    /// Objects that exist but changed under the recipe since it was recorded.
+    pub changed_inputs: Vec<String>,
+    /// The source object ids matching `changed_inputs`, in the same order.
+    pub changed_sources: Vec<crate::identity::ObjectId>,
+    pub missing_outputs: Vec<crate::identity::ObjectId>,
+}
+
+/// Every recipe the history panel must warn about, sorted by recipe id. The row carries
+/// the same answers the state label does — a missing source is `source missing`, a changed
+/// source is `source changed`, a deleted output is listed by id — so a UI never re-derives
+/// the categories by hand.
+pub fn broken_links(document: &Document, graph: &HistoryGraph) -> Vec<BrokenLink> {
+    let mut rows = Vec::new();
+    for recipe in graph.recipes.values() {
+        if recipe.state == EvaluationState::Detached {
+            continue;
+        }
+        let mut missing_inputs = Vec::new();
+        let mut missing_sources = Vec::new();
+        let mut changed_inputs = Vec::new();
+        let mut changed_sources = Vec::new();
+        for input in &recipe.inputs {
+            match document.resolve(&input.source) {
+                Ok(_) => {}
+                Err(Error::Missing(_)) => {
+                    missing_inputs.push(input.role.clone());
+                    missing_sources.push(input.source.object);
+                }
+                Err(Error::Stale(_)) => {
+                    changed_inputs.push(input.role.clone());
+                    changed_sources.push(input.source.object);
+                }
+                Err(_) => {
+                    missing_inputs.push(input.role.clone());
+                    missing_sources.push(input.source.object);
+                }
+            }
+        }
+        let missing_outputs: Vec<_> = recipe
+            .outputs
+            .iter()
+            .copied()
+            .filter(|output| !document.entities.contains_key(output))
+            .collect();
+        let flagged = !missing_inputs.is_empty()
+            || !changed_inputs.is_empty()
+            || !missing_outputs.is_empty()
+            || matches!(
+                recipe.state,
+                EvaluationState::Unresolved(_)
+                    | EvaluationState::Failed(_)
+                    | EvaluationState::Dirty(_)
+            );
+        if flagged {
+            rows.push(BrokenLink {
+                recipe: recipe.id,
+                command: recipe.command.clone(),
+                state: recipe.state.clone(),
+                missing_inputs,
+                missing_sources,
+                changed_inputs,
+                changed_sources,
+                missing_outputs,
+            });
+        }
+    }
+    rows.sort_by_key(|row| row.recipe);
+    rows
+}
+
+/// Detach the recipe that owns `object`: the output stays a plain object and the rest of
+/// the graph keeps its associations. A frozen recipe is refused so "clear history" never
+/// bypasses the lock.
+pub fn detach_object(
+    graph: &mut HistoryGraph,
+    object: crate::identity::ObjectId,
+) -> Result<HistoryId> {
+    let id = graph
+        .owner(object)
+        .ok_or(Error::Missing("history recipe"))?;
+    if graph.recipes.get(&id).is_some_and(|recipe| recipe.policy.lock) {
+        return Err(Error::Invalid("history recipe locked"));
+    }
+    detach(graph, id)?;
+    Ok(id)
+}
+
+/// A recipe that owns nothing yet is still waiting for its output insert; close/open must
+/// not race it (`OM9-L3-03-13-006`).
+pub fn has_pending(graph: &HistoryGraph) -> bool {
+    graph
+        .recipes
+        .values()
+        .any(|recipe| recipe.state == EvaluationState::Pending)
+}
+
+/// Re-stamp a recipe's inputs from the current document. A consumer that stayed `Dirty`
+/// while update was off must consume the source as it is *now* when it is rebuilt; without
+/// this its recorded stamp still names the previous geometry revision and replay would
+/// refuse its own upstream result as stale (`OM9-L3-03-13-002`). A missing object is left
+/// as it is so the recipe stays `Unresolved` instead of pretending to resolve.
+pub fn refresh_inputs(
+    document: &Document,
+    graph: &mut HistoryGraph,
+    id: HistoryId,
+) -> Result<()> {
+    let recipe = graph
+        .recipes
+        .get_mut(&id)
+        .ok_or(Error::Missing("history recipe"))?;
+    if recipe.state == EvaluationState::Detached {
+        return Ok(());
+    }
+    for input in &mut recipe.inputs {
+        if let Ok(stamp) = document.stamp(input.source.object) {
+            input.source = stamp;
+        }
+    }
     Ok(())
 }
 

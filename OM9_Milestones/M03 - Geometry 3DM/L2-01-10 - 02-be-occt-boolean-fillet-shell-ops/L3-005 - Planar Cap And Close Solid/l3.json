@@ -4,6 +4,60 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-01-10",
   "title": "Planar Cap And Close Solid",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "open box shell missing top z=10 face",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-005 - Planar Cap And Close Solid/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      },
+      {
+        "raw": "closed box",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-005 - Planar Cap And Close Solid/l3.json#l3.proposed_fixture.negative.input"
+      },
+      {
+        "raw": "open shell with a skewed non-planar top loop",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-01-10 - 02-be-occt-boolean-fillet-shell-ops/L3-005 - Planar Cap And Close Solid/l3.json#l3.proposed_fixture.negative.input"
+      }
+    ],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [
+      "input:open box shell missing top z=10 face: type/default/range",
+      "input:closed box: type/default/range",
+      "input:open shell with a skewed non-planar top loop: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E07",
@@ -379,6 +433,70 @@
       "OM9-L4-01-10-005-03": "1/1",
       "OM9-L4-01-10-005-04": "1/1",
       "OM9-L4-01-10-005-05": "1/1"
+    },
+    "standalone_cap_selection_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_MULTI_BREP_SELECTION_AUTOMATED_CHECKS_PASSED",
+      "evidence": [
+        "docs/features/OM9-SOLID-005.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-cap-source-map.md"
+      ],
+      "scope": "Menu and CMD stage multiple BRep shells, then prepare all caps and commit one atomic transaction preserving identity and placement.",
+      "remaining": [
+        "Native cap supports one boundary chain per BRep and closed-solid output; multiple loops and general curved boundaries remain open.",
+        "Fixed tolerance and native intermediate peak memory need verification.",
+        "F6, SDK/History, actual desktop and M03 human UI acceptance remain open."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_cap_loops_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_INDEPENDENT_PLANAR_LOOPS_AUTOMATED_CHECKS_PASSED",
+      "scope": "Cap tested independent planar loops and circular boundary with closed solid result; reject nested coplanar regions.",
+      "evidence": [
+        "docs/features/OM9-SOLID-005.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-cap-source-map.md"
+      ],
+      "remaining": [
+        "Nested coplanar loops, arbitrary curved boundaries, partial caps and other input types are unverified or unsupported.",
+        "Fixed application tolerance, pairwise intersection cost and native intermediate peak memory require review.",
+        "F6, SDK/History, actual desktop and M03 human UI acceptance remain open."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_cap_annulus_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_ANNULAR_CAP_AUTOMATED_CHECKS_PASSED",
+      "scope": "Construct a face with an inner boundary for tested coplanar annular opening, preserving existing transaction behavior.",
+      "evidence": [
+        "docs/features/OM9-SOLID-005.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-cap-source-map.md"
+      ],
+      "remaining": [
+        "Multiple holes, deeper nested and crossing loops, arbitrary curves, partial caps and other input types require validation.",
+        "Fixed application tolerance, area-based containment, quadratic native intersection cost and intermediate peak memory require review.",
+        "F6, SDK/History, actual desktop and M03 human UI acceptance remain open."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_cap_partial_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_MIXED_BOUNDARY_AUTOMATED_CHECKS_PASSED",
+      "scope": "Cap supported planar boundaries while retaining nonplanar openings; test a face with two holes.",
+      "evidence": [
+        "docs/features/OM9-SOLID-005.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-cap-source-map.md"
+      ],
+      "remaining": [
+        "General nested and crossing loops, arbitrary curved boundaries and other input types need validation.",
+        "Fixed application tolerance, area-based containment, quadratic native intersection cost and intermediate peak memory require review.",
+        "F6, SDK/History, actual desktop and M03 human UI acceptance remain open."
+      ],
+      "manual_gate": "M03-UI_PENDING"
     }
   }
 }

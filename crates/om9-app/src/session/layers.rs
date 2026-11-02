@@ -228,6 +228,10 @@ impl Controller {
     }
     pub(super) fn auxiliary_usage(&self) -> Result<om9_core::budget::Usage> {
         let mut usage = om9_core::budget::Usage::btree::<ObjectId, ()>(self.selection.len())?;
+        usage.add(
+            om9_core::budget::Usage::array::<ObjectId>(self.selection_order.capacity())?,
+            self.coordinator.limits(),
+        )?;
         if let Some(pending) = &self.solid_pending {
             usage.add(pending.usage()?, self.coordinator.limits())?;
         }
@@ -304,6 +308,7 @@ impl Controller {
             self.selection_revision = self.selection_revision.saturating_add(1);
         }
         self.selection.clear();
+        self.selection_order.clear();
     }
     /// Adds objects to the selection without dropping the ones already there (Shift + window).
     pub fn add_objects(&mut self, ids: &[ObjectId]) -> Result<()> {
@@ -318,6 +323,7 @@ impl Controller {
         for id in ids {
             self.selection.remove(id);
         }
+        self.selection_order.retain(|id| self.selection.contains(id));
         self.selection_revision = self.selection_revision.saturating_add(1);
         Ok(())
     }
@@ -352,9 +358,13 @@ impl Controller {
             om9_core::budget::Usage::btree::<ObjectId, ()>(self.selection.len() + added)?,
             self.coordinator.limits(),
         )?;
+        held.add(om9_core::budget::Usage::array::<ObjectId>(added)?, self.coordinator.limits())?;
         self.coordinator.retained_usage_with_held_usage(held)?;
+        self.selection_order.try_reserve_exact(added).map_err(|_| Error::Budget("selection order"))?;
         for id in ids {
-            self.selection.insert(*id);
+            if self.selection.insert(*id) {
+                self.selection_order.push(*id);
+            }
         }
         self.selection_revision = self.selection_revision.saturating_add(1);
         Ok(())
@@ -364,6 +374,7 @@ impl Controller {
     pub fn toggle_selection(&mut self, id: ObjectId) -> Result<()> {
         if self.selection.contains(&id) {
             self.selection.remove(&id);
+            self.selection_order.retain(|selected| *selected != id);
             self.selection_revision = self.selection_revision.saturating_add(1);
             return Ok(());
         }
@@ -386,8 +397,11 @@ impl Controller {
             om9_core::budget::Usage::btree::<ObjectId, ()>(self.selection.len() + 1)?,
             self.coordinator.limits(),
         )?;
+        held.add(om9_core::budget::Usage::array::<ObjectId>(1)?, self.coordinator.limits())?;
         self.coordinator.retained_usage_with_held_usage(held)?;
+        self.selection_order.try_reserve_exact(1).map_err(|_| Error::Budget("selection order"))?;
         self.selection.insert(id);
+        self.selection_order.push(id);
         self.selection_revision = self.selection_revision.saturating_add(1);
         Ok(())
     }
@@ -423,15 +437,17 @@ impl Controller {
             om9_core::budget::Usage::btree::<ObjectId, ()>(next.len())?,
             self.coordinator.limits(),
         )?;
+        held.add(om9_core::budget::Usage::array::<ObjectId>(ids.len())?, self.coordinator.limits())?;
         self.coordinator.retained_usage_with_held_usage(held)?;
-        if next != self.selection {
-            self.selection_revision = self.selection_revision.saturating_add(1);
-        }
-        let mut order = Vec::with_capacity(ids.len());
+        let mut order = Vec::new();
+        order.try_reserve_exact(ids.len()).map_err(|_| Error::Budget("selection order"))?;
         for id in ids {
             if !order.contains(id) {
                 order.push(*id);
             }
+        }
+        if next != self.selection || order != self.selection_order {
+            self.selection_revision = self.selection_revision.saturating_add(1);
         }
         self.selection_order = order;
         self.selection = next;
@@ -468,13 +484,17 @@ impl Controller {
             om9_core::budget::Usage::btree::<ObjectId, ()>(count)?,
             self.coordinator.limits(),
         )?;
+        held.add(om9_core::budget::Usage::array::<ObjectId>(usize::from(root.is_some()))?, self.coordinator.limits())?;
         self.coordinator.retained_usage_with_held_usage(held)?;
+        self.selection_order.try_reserve_exact(usize::from(root.is_some())).map_err(|_| Error::Budget("selection order"))?;
         if extend {
             // Shift means ADD (Rhino p33: "Hold the Shift key while clicking the objects"), not toggle:
             // clicking an already selected object again must leave it selected. Ctrl is the toggle gesture
             // and lives in `toggle_selection`.
             if let Some(id) = root {
-                self.selection.insert(id);
+                if self.selection.insert(id) {
+                    self.selection_order.push(id);
+                }
             }
         } else {
             let mut selection = std::collections::BTreeSet::new();
@@ -482,6 +502,8 @@ impl Controller {
                 selection.insert(id);
             }
             self.selection = selection;
+            self.selection_order.clear();
+            self.selection_order.extend(root);
         }
         self.selection_revision = self.selection_revision.saturating_add(1);
         Ok(())
@@ -500,7 +522,8 @@ impl Controller {
         )?;
         self.coordinator.retained_usage_with_held_usage(held)?;
         let ids = self.selectable_layer_members(slot)?;
-        self.selection = ids.into_iter().collect();
+        self.selection = ids.iter().copied().collect();
+        self.selection_order = ids;
         self.selection_revision = self.selection_revision.saturating_add(1);
         Ok(())
     }

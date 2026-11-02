@@ -1,0 +1,16 @@
+$ cargo test -p om9-kernel --test ring_family_brep --features 3dm-brep -j 2
+# exit code: 0
+# captured: 2026-10-27T09:34:27Z
+# target dir: L:\om9-target
+
+
+running 4 tests
+test a_ring_body_with_a_missing_face_is_refused_instead_of_published_open ... ok
+test a_brep_ring_snapshot_binds_to_its_source_and_budget ... ok
+test every_ring_kind_sews_into_one_closed_brep_matching_the_mesh_volume ... ok
+test the_occt_registry_rebuilds_the_ring_family_as_brep ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.87s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\ring_family_brep.rs (L:\om9-target\debug\deps\ring_family_brep-978ce2d9e95264df.exe)

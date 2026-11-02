@@ -466,7 +466,7 @@ impl Controller {
     }
 
     /// The command-line prompt while a builder is open.
-    pub(super) fn builder_prompt(&self) -> Option<String> {
+    pub(super) fn addon_builder_prompt(&self) -> Option<String> {
         let b = self.addon_builder.as_ref()?;
         let curves = self
             .selection

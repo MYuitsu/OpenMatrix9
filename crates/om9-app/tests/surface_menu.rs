@@ -140,6 +140,13 @@ fn the_surface_catalog_covers_every_l3_owner() {
         .count();
     assert_eq!(implemented, 38);
     assert_eq!(session_missing + owner_missing + implemented, 38);
+    for row in surface_menu::BINDINGS {
+        assert!(
+            row.owner.starts_with("OM9-L3-") || row.owner == "OM9-L2-03-17",
+            "{} has no owner candidate",
+            row.l3_id
+        );
+    }
 }
 
 #[test]
@@ -496,8 +503,14 @@ fn match_surfaces_waits_for_edge_names_and_commits_one_surface() {
     controller
         .dispatch("OM9-SURFACE-128", InvocationOrigin::Menu)
         .unwrap();
-    assert!(controller.prompt().contains("Match edges"));
+    assert!(controller.prompt().contains("Match source edge"));
     controller.submit("U1,U0").unwrap();
+    assert!(
+        controller.prompt().contains("Continuity=Position"),
+        "{}",
+        controller.prompt()
+    );
+    controller.submit("").unwrap();
     assert_eq!(controller.document().entities.len(), 3);
 
     assert_eq!(controller.coordinator().undo_len(), 1);
@@ -570,11 +583,24 @@ fn soft_edit_moves_nearby_poles_and_commits_one_surface() {
         .unwrap();
     assert!(controller.prompt().contains("Soft edit"));
     assert!(
-        controller.submit("0.5,0.5").is_err(),
-        "incomplete input is refused"
+        controller.submit("").is_err(),
+        "Enter before the base point is refused"
     );
     assert!(controller.is_running());
-    controller.submit("0.5,0.5,0.5,0.5,0,0,1").unwrap();
+    controller.submit("U=0.5,V=0.5").unwrap();
+    assert!(
+        controller.prompt().contains("Dx"),
+        "{}",
+        controller.prompt()
+    );
+    controller.submit("0,0,1").unwrap();
+    assert!(
+        controller.prompt().contains("UDistance=1"),
+        "{}",
+        controller.prompt()
+    );
+    controller.submit("UDistance=0.5,VDistance=0.5").unwrap();
+    controller.submit("").unwrap();
     assert_eq!(controller.document().entities.len(), 2);
     assert_eq!(controller.coordinator().undo_len(), 1);
     let added = controller
@@ -584,6 +610,186 @@ fn soft_edit_moves_nearby_poles_and_commits_one_surface() {
         .find(|entity| entity.id != source)
         .expect("soft edited surface");
     assert!(matches!(added.geometry, Geometry::Surface(_)));
+}
+
+#[test]
+fn soft_edit_copy_no_edits_the_selected_surface_in_place() {
+    let limits = Limits::default();
+    let source_surface = surface_kernel::plane(
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        10.0,
+        10.0,
+        &limits,
+    )
+    .unwrap();
+    let before = source_surface.poles.clone();
+    let mut document = Document::new("surface soft edit in place");
+    let entity = Entity::new("plane", Geometry::Surface(source_surface), None);
+    let source = entity.id;
+    document.entities.insert(source, entity);
+    let mut controller = Controller::new(document, limits).unwrap();
+    controller.select_objects(&[source]).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-037", InvocationOrigin::Menu)
+        .unwrap();
+    controller.submit("U=0.5,V=0.5,Dx=0,Dy=0,Dz=2").unwrap();
+    controller.submit("Copy=No").unwrap();
+    controller.submit("").unwrap();
+    assert_eq!(controller.document().entities.len(), 1);
+    assert_eq!(controller.coordinator().undo_len(), 1);
+    let Geometry::Surface(after) = &controller
+        .document()
+        .entities
+        .get(&source)
+        .expect("edited surface")
+        .geometry
+    else {
+        panic!("surface kept");
+    };
+    assert_ne!(before, after.poles, "the selected surface moved");
+}
+
+#[test]
+fn soft_edit_fix_edges_keeps_the_boundary_poles() {
+    let limits = Limits::default();
+    // A 4x4 bicubic patch: the interior poles are distinct from the boundary rows.
+    let mut poles = Vec::new();
+    for i in 0..4 {
+        for j in 0..4 {
+            poles.push([i as f64 * 10.0, j as f64 * 10.0, 0.0]);
+        }
+    }
+    let surface = om9_core::geometry::NurbsSurface {
+        degree: [3, 3],
+        size: [4, 4],
+        poles,
+        weights: vec![1.0; 16],
+        knots: [
+            vec![0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0],
+            vec![0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0],
+        ],
+        domain: [[0.0, 1.0], [0.0, 1.0]],
+        periodic: [false, false],
+        reversed: false,
+    };
+    let boundary = [0usize, 3, 12, 15, 4, 8, 1, 2];
+    let interior = 5;
+    let before = surface.poles.clone();
+    let mut document = Document::new("surface soft edit fixed edges");
+    let entity = Entity::new("patch", Geometry::Surface(surface), None);
+    let source = entity.id;
+    document.entities.insert(source, entity);
+    let mut controller = Controller::new(document, limits).unwrap();
+    controller.select_objects(&[source]).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-037", InvocationOrigin::Menu)
+        .unwrap();
+    controller
+        .submit("U=0.5,V=0.5,Dx=0,Dy=0,Dz=2,FixEdges=Yes")
+        .unwrap();
+    controller.submit("").unwrap();
+    let Geometry::Surface(edited) = &controller
+        .document()
+        .entities
+        .values()
+        .find(|entity| entity.id != source)
+        .expect("soft edited surface")
+        .geometry
+    else {
+        panic!("surface");
+    };
+    for index in boundary {
+        assert_eq!(before[index], edited.poles[index], "boundary pole {index}");
+    }
+    assert_ne!(
+        before[interior], edited.poles[interior],
+        "interior pole moved"
+    );
+}
+
+#[test]
+fn soft_edit_direction_constraint_projects_the_move() {
+    let limits = Limits::default();
+    let source_surface = surface_kernel::plane(
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        10.0,
+        10.0,
+        &limits,
+    )
+    .unwrap();
+    let before = source_surface.poles.clone();
+    let mut document = Document::new("surface soft edit constraint");
+    let entity = Entity::new("plane", Geometry::Surface(source_surface), None);
+    let source = entity.id;
+    document.entities.insert(source, entity);
+    let mut controller = Controller::new(document, limits).unwrap();
+    controller.select_objects(&[source]).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-037", InvocationOrigin::Menu)
+        .unwrap();
+    controller
+        .submit("U=0.5,V=0.5,Dx=2,Dy=3,Dz=5,DirConstraint=SrfNormal")
+        .unwrap();
+    controller.submit("").unwrap();
+    let Geometry::Surface(edited) = &controller
+        .document()
+        .entities
+        .values()
+        .find(|entity| entity.id != source)
+        .expect("soft edited surface")
+        .geometry
+    else {
+        panic!("surface");
+    };
+    let index = edited
+        .poles
+        .iter()
+        .zip(&before)
+        .position(|(after, before)| after != before)
+        .expect("a moved pole");
+    assert_eq!(
+        [edited.poles[index][0], edited.poles[index][1]],
+        [before[index][0], before[index][1]],
+        "SrfNormal keeps the move along +Z"
+    );
+    assert!(edited.poles[index][2] > before[index][2]);
+}
+
+#[test]
+fn soft_edit_rejects_an_unknown_option_and_keeps_running() {
+    let limits = Limits::default();
+    let surface = surface_kernel::plane(
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        10.0,
+        10.0,
+        &limits,
+    )
+    .unwrap();
+    let mut document = Document::new("surface soft edit invalid option");
+    let entity = Entity::new("plane", Geometry::Surface(surface), None);
+    let source = entity.id;
+    document.entities.insert(source, entity);
+    let mut controller = Controller::new(document, limits).unwrap();
+    controller.select_objects(&[source]).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-037", InvocationOrigin::Menu)
+        .unwrap();
+    assert!(controller.submit("UDistance=0").is_err());
+    assert!(controller.submit("Copy=maybe").is_err());
+    assert!(controller.submit("DirConstraint=Sideways").is_err());
+    assert!(controller.submit("RadiusU=1").is_err());
+    assert!(
+        controller.submit("U=0.5").is_ok(),
+        "the refused options keep the command running"
+    );
+    assert_eq!(controller.document().entities.len(), 1);
+    assert_eq!(controller.coordinator().undo_len(), 0);
 }
 
 #[test]
@@ -1082,7 +1288,7 @@ fn variable_offset_waits_for_two_distances_and_an_axis() {
     controller
         .dispatch("OM9-SURFACE-026", InvocationOrigin::Menu)
         .unwrap();
-    assert!(controller.prompt().contains("Distances start,end,axis"));
+    assert!(controller.prompt().contains("Variable offset start"));
     assert!(controller.submit("1,5,W").is_err(), "bad axis is refused");
     assert!(controller.is_running());
     controller.submit("1,5,U").unwrap();
@@ -1118,7 +1324,7 @@ fn shrink_surface_waits_for_a_uv_subdomain() {
     controller
         .dispatch("OM9-SURFACE-012", InvocationOrigin::Menu)
         .unwrap();
-    assert!(controller.prompt().contains("Shrink u0,u1,v0,v1"));
+    assert!(controller.prompt().contains("Shrink u0"));
     assert!(
         controller.submit("0.75,0.25,0,1").is_err(),
         "empty range is refused"
@@ -1162,7 +1368,7 @@ fn variable_blend_waits_for_tangent_scales() {
     controller
         .dispatch("OM9-SURFACE-008", InvocationOrigin::Menu)
         .unwrap();
-    assert!(controller.prompt().contains("Tangent scales"));
+    assert!(controller.prompt().contains("Blend start scale"));
     assert!(controller.submit("1").is_err(), "one scale is refused");
     assert!(controller.is_running());
     controller.submit("1,2").unwrap();
@@ -1392,6 +1598,19 @@ fn sweep1_history_builds_a_multi_profile_brep_and_records_history() {
         .dispatch("OM9-SURFACE-102", InvocationOrigin::Menu)
         .expect("sweep 1 history");
     assert!(controller.prompt().contains("Sweep options"));
+    {
+        use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+        let closed = controller
+            .command_options()
+            .into_iter()
+            .find(|option| option.id.name() == "Flip")
+            .expect("Flip option");
+        assert_eq!(
+            controller.activate_command_option(closed.id).unwrap(),
+            CommandOptionEffect::Applied
+        );
+        assert!(controller.prompt().contains("Flip=Yes"));
+    }
     controller.submit("").expect("sweep options");
     assert_eq!(controller.document().entities.len(), 4);
     assert_eq!(controller.coordinator().undo_len(), 1);
@@ -1655,9 +1874,33 @@ fn sweep2_slash_collects_two_alignment_points() {
         .expect("sweep 2 history");
     controller.submit("slash").expect("slash option");
     assert!(controller.prompt().contains("Slash point"));
-    controller.accept_world_point([5.0, 0.0, 0.0]).unwrap();
+    {
+        use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+        let first_point = controller
+            .command_options()
+            .into_iter()
+            .find(|option| option.id.name() == "First")
+            .expect("First option");
+        assert_eq!(
+            controller.activate_command_option(first_point.id).unwrap(),
+            CommandOptionEffect::Draft("First=".into())
+        );
+        controller.submit("First=5,0,0").unwrap();
+    }
     assert!(controller.prompt().contains("second rail"));
-    controller.accept_world_point([5.0, 10.0, 0.0]).unwrap();
+    {
+        use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+        let second_point = controller
+            .command_options()
+            .into_iter()
+            .find(|option| option.id.name() == "Second")
+            .expect("Second option");
+        assert_eq!(
+            controller.activate_command_option(second_point.id).unwrap(),
+            CommandOptionEffect::Draft("Second=".into())
+        );
+        controller.submit("Second=5,10,0").unwrap();
+    }
     assert_eq!(controller.document().entities.len(), 5);
     assert_eq!(controller.document().history.recipes.len(), 1);
 }
@@ -1727,4 +1970,844 @@ fn four_rail_profile_command_tags_profiles_then_sweep4_uses_them() {
         .dispatch("OM9-SURFACE-119", InvocationOrigin::Menu)
         .expect("sweep 4 metadata");
     assert_eq!(controller.document().entities.len(), 7);
+}
+
+#[test]
+fn extrude_all_height_uses_the_shared_option_entry() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    fn line(start: [f64; 3], end: [f64; 3]) -> Entity {
+        Entity::new(
+            "line",
+            Geometry::Curve(om9_core::geometry::Curve::Line {
+                start,
+                end,
+                domain: [0.0, 1.0],
+            }),
+            None,
+        )
+    }
+    let mut document = Document::new("extrude all option");
+    let first = line([0.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    let second = line([0.0, 5.0, 0.0], [10.0, 5.0, 0.0]);
+    let ids = [first.id, second.id];
+    for entity in [first, second] {
+        document.entities.insert(entity.id, entity);
+    }
+    let mut controller = Controller::new(document, Limits::default()).unwrap();
+    controller.select_objects(&ids).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-117", InvocationOrigin::Menu)
+        .unwrap();
+    let option = controller
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Height")
+        .expect("Height option");
+    assert_eq!(
+        controller.activate_command_option(option.id).unwrap(),
+        CommandOptionEffect::Draft("Height=".into())
+    );
+    controller.submit("Height=5").unwrap();
+    assert_eq!(controller.document().entities.len(), 4);
+    assert_eq!(controller.coordinator().undo_len(), 1);
+}
+
+#[test]
+fn chamfer_setback_uses_the_shared_option_entry() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    fn line(start: [f64; 3], end: [f64; 3]) -> Entity {
+        Entity::new(
+            "line",
+            Geometry::Curve(om9_core::geometry::Curve::Line {
+                start,
+                end,
+                domain: [0.0, 1.0],
+            }),
+            None,
+        )
+    }
+    let mut document = Document::new("chamfer option");
+    let first = line([0.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    let second = line([0.0, 5.0, 0.0], [10.0, 5.0, 0.0]);
+    let ids = [first.id, second.id];
+    for entity in [first, second] {
+        document.entities.insert(entity.id, entity);
+    }
+    let mut controller = Controller::new(document, Limits::default()).unwrap();
+    controller.select_objects(&ids).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-023", InvocationOrigin::Menu)
+        .unwrap();
+    let option = controller
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Setback")
+        .expect("Setback option");
+    assert_eq!(
+        controller.activate_command_option(option.id).unwrap(),
+        CommandOptionEffect::Draft("Setback=".into())
+    );
+    controller.submit("Setback=1").unwrap();
+    assert_eq!(controller.document().entities.len(), 3);
+    assert_eq!(controller.coordinator().undo_len(), 1);
+}
+
+#[test]
+fn fillet_radius_options_use_the_shared_entry() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    fn line(start: [f64; 3], end: [f64; 3]) -> Entity {
+        Entity::new(
+            "line",
+            Geometry::Curve(om9_core::geometry::Curve::Line {
+                start,
+                end,
+                domain: [0.0, 1.0],
+            }),
+            None,
+        )
+    }
+    let mut document = Document::new("fillet option");
+    let first = line([0.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    let second = line([0.0, 10.0, 0.0], [10.0, 10.0, 0.0]);
+    let ids = [first.id, second.id];
+    for entity in [first, second] {
+        document.entities.insert(entity.id, entity);
+    }
+    let mut controller = Controller::new(document, Limits::default()).unwrap();
+    controller.select_objects(&ids).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-020", InvocationOrigin::Menu)
+        .unwrap();
+    let radius = controller
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Radius")
+        .expect("Radius option");
+    assert_eq!(
+        controller.activate_command_option(radius.id).unwrap(),
+        CommandOptionEffect::Draft("Radius=".into())
+    );
+    controller.submit("Radius=6").unwrap();
+    assert_eq!(controller.document().entities.len(), 3);
+
+    let mut document = Document::new("variable fillet option");
+    let first = line([0.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    let second = line([0.0, 10.0, 0.0], [10.0, 10.0, 0.0]);
+    let ids = [first.id, second.id];
+    for entity in [first, second] {
+        document.entities.insert(entity.id, entity);
+    }
+    let mut variable = Controller::new(document, Limits::default()).unwrap();
+    variable.select_objects(&ids).unwrap();
+    variable
+        .dispatch("OM9-SURFACE-022", InvocationOrigin::Menu)
+        .unwrap();
+    let start = variable
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Start")
+        .expect("Start option");
+    assert_eq!(
+        variable.activate_command_option(start.id).unwrap(),
+        CommandOptionEffect::Draft("Start=".into())
+    );
+    variable.submit("Start=5").unwrap();
+    let end = variable
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "End")
+        .expect("End option");
+    assert_eq!(
+        variable.activate_command_option(end.id).unwrap(),
+        CommandOptionEffect::Draft("End=".into())
+    );
+    variable.submit("End=7").unwrap();
+    assert_eq!(variable.document().entities.len(), 3);
+}
+
+#[test]
+fn variable_chamfer_options_stage_start_then_end() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    fn line(start: [f64; 3], end: [f64; 3]) -> Entity {
+        Entity::new(
+            "line",
+            Geometry::Curve(om9_core::geometry::Curve::Line {
+                start,
+                end,
+                domain: [0.0, 1.0],
+            }),
+            None,
+        )
+    }
+    let mut document = Document::new("variable chamfer option");
+    let first = line([0.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    let second = line([0.0, 10.0, 0.0], [10.0, 10.0, 0.0]);
+    let ids = [first.id, second.id];
+    for entity in [first, second] {
+        document.entities.insert(entity.id, entity);
+    }
+    let mut controller = Controller::new(document, Limits::default()).unwrap();
+    controller.select_objects(&ids).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-024", InvocationOrigin::Menu)
+        .unwrap();
+    let start = controller
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Start")
+        .expect("Start option");
+    assert_eq!(
+        controller.activate_command_option(start.id).unwrap(),
+        CommandOptionEffect::Draft("Start=".into())
+    );
+    controller.submit("Start=1").unwrap();
+    assert!(controller.is_running());
+    let end = controller
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "End")
+        .expect("End option");
+    assert_eq!(
+        controller.activate_command_option(end.id).unwrap(),
+        CommandOptionEffect::Draft("End=".into())
+    );
+    controller.submit("End=3").unwrap();
+    assert_eq!(controller.document().entities.len(), 3);
+    assert_eq!(controller.coordinator().undo_len(), 1);
+}
+
+#[test]
+fn variable_blend_options_stage_start_then_end() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    fn line(start: [f64; 3], end: [f64; 3]) -> Entity {
+        Entity::new(
+            "line",
+            Geometry::Curve(om9_core::geometry::Curve::Line {
+                start,
+                end,
+                domain: [0.0, 1.0],
+            }),
+            None,
+        )
+    }
+    let mut document = Document::new("variable blend option");
+    let first = line([0.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    let second = line([0.0, 5.0, 5.0], [10.0, 5.0, 5.0]);
+    let ids = [first.id, second.id];
+    for entity in [first, second] {
+        document.entities.insert(entity.id, entity);
+    }
+    let mut controller = Controller::new(document, Limits::default()).unwrap();
+    controller.select_objects(&ids).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-008", InvocationOrigin::Menu)
+        .unwrap();
+    let start = controller
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Start")
+        .expect("Start option");
+    assert_eq!(
+        controller.activate_command_option(start.id).unwrap(),
+        CommandOptionEffect::Draft("Start=".into())
+    );
+    controller.submit("Start=1").unwrap();
+    assert!(controller.is_running());
+    let end = controller
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "End")
+        .expect("End option");
+    assert_eq!(
+        controller.activate_command_option(end.id).unwrap(),
+        CommandOptionEffect::Draft("End=".into())
+    );
+    controller.submit("End=2").unwrap();
+    assert_eq!(controller.document().entities.len(), 3);
+    assert_eq!(controller.coordinator().undo_len(), 1);
+}
+
+#[test]
+fn variable_offset_options_stage_start_end_axis() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    let mut document = Document::new("variable offset option");
+    let surface = surface_kernel::plane(
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        10.0,
+        10.0,
+        &Limits::default(),
+    )
+    .unwrap();
+    let entity = Entity::new("plane", Geometry::Surface(surface), None);
+    let source = entity.id;
+    document.entities.insert(source, entity);
+    let mut controller = Controller::new(document, Limits::default()).unwrap();
+    controller.select_objects(&[source]).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-026", InvocationOrigin::Menu)
+        .unwrap();
+    for (name, draft, value) in [
+        ("Start", "Start=", "Start=1"),
+        ("End", "End=", "End=5"),
+        ("Axis", "Axis=", "Axis=U"),
+    ] {
+        let option = controller
+            .command_options()
+            .into_iter()
+            .find(|option| option.id.name() == name)
+            .unwrap_or_else(|| panic!("{name} option"));
+        assert_eq!(
+            controller.activate_command_option(option.id).unwrap(),
+            CommandOptionEffect::Draft(draft.into())
+        );
+        controller.submit(value).unwrap();
+    }
+    assert_eq!(controller.document().entities.len(), 2);
+    assert_eq!(controller.coordinator().undo_len(), 1);
+}
+
+#[test]
+fn soft_edit_options_stage_the_base_point_and_documented_options() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    let mut document = Document::new("soft edit option");
+    let surface = surface_kernel::plane(
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        10.0,
+        10.0,
+        &Limits::default(),
+    )
+    .unwrap();
+    let entity = Entity::new("plane", Geometry::Surface(surface), None);
+    let source = entity.id;
+    document.entities.insert(source, entity);
+    let mut controller = Controller::new(document, Limits::default()).unwrap();
+    controller.select_objects(&[source]).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-037", InvocationOrigin::Menu)
+        .unwrap();
+    for (name, value) in [
+        ("U", "U=0.5"),
+        ("V", "V=0.5"),
+        ("Dx", "Dx=0"),
+        ("Dy", "Dy=0"),
+        ("Dz", "Dz=1"),
+        ("UDistance", "UDistance=0.5"),
+        ("VDistance", "VDistance=0.5"),
+    ] {
+        let option = controller
+            .command_options()
+            .into_iter()
+            .find(|option| option.id.name() == name)
+            .unwrap_or_else(|| panic!("{name} option"));
+        assert_eq!(
+            controller.activate_command_option(option.id).unwrap(),
+            CommandOptionEffect::Draft(format!("{name}="))
+        );
+        controller.submit(value).unwrap();
+    }
+    // The documented toggles and the direction constraint stay rows after staging.
+    let copy = controller
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Copy")
+        .expect("Copy option");
+    assert_eq!(copy.label, "Copy=Yes");
+    assert_eq!(
+        controller.activate_command_option(copy.id).unwrap(),
+        CommandOptionEffect::Applied
+    );
+    controller.submit("Copy=Yes").unwrap();
+    let fix_edges = controller
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "FixEdges")
+        .expect("FixEdges option");
+    assert_eq!(
+        controller.activate_command_option(fix_edges.id).unwrap(),
+        CommandOptionEffect::Applied
+    );
+    controller.submit("FixEdges=No").unwrap();
+    let constraint = controller
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "DirConstraint")
+        .expect("DirConstraint option");
+    assert_eq!(constraint.label, "DirConstraint=None");
+    assert_eq!(
+        controller.activate_command_option(constraint.id).unwrap(),
+        CommandOptionEffect::Applied
+    );
+    controller.submit("DirConstraint=None").unwrap();
+    controller.submit("").unwrap();
+    assert_eq!(controller.document().entities.len(), 2);
+    assert_eq!(controller.coordinator().undo_len(), 1);
+}
+
+#[test]
+fn every_surface_row_declares_its_matrix_command_line_name() {
+    let mut names = std::collections::BTreeSet::new();
+    for binding in surface_menu::BINDINGS {
+        assert!(
+            !binding.command_line.is_empty(),
+            "{} has no command name",
+            binding.l3_id
+        );
+        assert!(
+            names.insert(binding.command_line.to_ascii_lowercase()),
+            "duplicate command name {}",
+            binding.command_line
+        );
+        assert_eq!(
+            surface_menu::by_command_line(binding.command_line).map(|row| row.l3_id),
+            Some(binding.l3_id)
+        );
+        // The authored scripts read `! _Sweep1`; a pasted script must reach the row.
+        assert_eq!(
+            surface_menu::by_command_line(&format!("! _{}", binding.command_line))
+                .map(|row| row.l3_id),
+            Some(binding.l3_id)
+        );
+        assert_eq!(
+            surface_menu::by_label(binding.label).map(|row| row.l3_id),
+            Some(binding.l3_id)
+        );
+    }
+    assert_eq!(names.len(), 38);
+}
+
+#[test]
+fn every_surface_command_line_name_resolves_like_its_menu_row() {
+    for binding in surface_menu::BINDINGS {
+        if binding.command_line.eq_ignore_ascii_case("Rebuild") {
+            // Edit ▸ Rebuild and Others ▸ Rebuild share the Matrix script `_Rebuild`; the
+            // registry keeps the curve command and a surface selection picks the surface row.
+            assert_eq!(
+                Controller::resolve_alias(binding.command_line),
+                Some("OM9-CURVE-009")
+            );
+            continue;
+        }
+        assert_eq!(
+            Controller::resolve_alias(binding.command_line),
+            Some(binding.feature),
+            "{} ({})",
+            binding.label,
+            binding.command_line
+        );
+        if binding.label != "Soft Edit" {
+            // `Soft Edit` is also a Curve menu row; the selection disambiguates it.
+            assert_eq!(
+                Controller::resolve_alias(binding.label),
+                Some(binding.feature),
+                "{} label",
+                binding.label
+            );
+        }
+    }
+    let resolved = surface_menu::BINDINGS
+        .iter()
+        .filter(|binding| Controller::resolve_alias(binding.command_line) == Some(binding.feature))
+        .count();
+    assert_eq!(resolved, 37);
+    assert_eq!(
+        Controller::resolve_alias("Soft Edit"),
+        Some("OM9-CURVE-055"),
+        "the Curve row keeps the shared label without a surface selection"
+    );
+}
+
+#[test]
+fn typed_shared_labels_follow_the_selected_object() {
+    let limits = Limits::default();
+    let surface = surface_kernel::plane(
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        10.0,
+        10.0,
+        &limits,
+    )
+    .unwrap();
+    let mut document = Document::new("shared labels");
+    let entity = Entity::new("plane", Geometry::Surface(surface), None);
+    let source = entity.id;
+    document.entities.insert(source, entity);
+    let mut controller = Controller::new(document, limits).unwrap();
+    controller.select_objects(&[source]).unwrap();
+    assert_eq!(
+        controller.resolve_typed_command("Soft Edit"),
+        Some("OM9-SURFACE-037")
+    );
+    assert_eq!(
+        controller.resolve_typed_command("Rebuild"),
+        Some("OM9-SURFACE-006")
+    );
+    controller.submit("Soft Edit").expect("surface soft edit");
+    assert!(controller.prompt().contains("Soft edit"));
+    controller.cancel();
+    assert!(!controller.is_running());
+
+    let mut curve_document = Document::new("shared labels curve");
+    let curve = Entity::new(
+        "line",
+        Geometry::Curve(om9_core::geometry::Curve::Line {
+            start: [0.0, 0.0, 0.0],
+            end: [1.0, 0.0, 0.0],
+            domain: [0.0, 1.0],
+        }),
+        None,
+    );
+    let curve_id = curve.id;
+    curve_document.entities.insert(curve_id, curve);
+    let mut curve_controller = Controller::new(curve_document, limits).unwrap();
+    curve_controller.select_objects(&[curve_id]).unwrap();
+    assert_eq!(
+        curve_controller.resolve_typed_command("Soft Edit"),
+        Some("OM9-CURVE-055")
+    );
+    assert_eq!(
+        curve_controller.resolve_typed_command("Rebuild"),
+        Some("OM9-CURVE-009")
+    );
+}
+
+#[test]
+fn menu_and_command_line_dispatch_the_same_surface_command() {
+    for binding in surface_menu::BINDINGS {
+        let mut menu = Controller::new(Document::new("parity menu"), Limits::default()).unwrap();
+        let mut typed = Controller::new(Document::new("parity cmd"), Limits::default()).unwrap();
+        let menu_result = menu.dispatch(binding.feature, InvocationOrigin::Menu);
+        let typed_result = typed.dispatch(binding.feature, InvocationOrigin::Cmd);
+        assert_eq!(
+            menu_result.is_err(),
+            typed_result.is_err(),
+            "{} dispatch parity",
+            binding.label
+        );
+        assert_eq!(menu.prompt(), typed.prompt(), "{} prompt", binding.label);
+        assert_eq!(menu.is_running(), typed.is_running(), "{}", binding.label);
+        assert_eq!(
+            menu.document().entities.len(),
+            typed.document().entities.len(),
+            "{}",
+            binding.label
+        );
+        assert_eq!(
+            menu.coordinator().undo_len(),
+            typed.coordinator().undo_len(),
+            "{}",
+            binding.label
+        );
+    }
+}
+
+#[test]
+fn typed_rebuild_uses_the_surface_owner_when_a_surface_is_selected() {
+    let limits = Limits::default();
+    let surface = surface_kernel::plane(
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        10.0,
+        10.0,
+        &limits,
+    )
+    .unwrap();
+    let mut document = Document::new("typed rebuild surface");
+    let entity = Entity::new("plane", Geometry::Surface(surface), None);
+    let source = entity.id;
+    document.entities.insert(source, entity);
+    let mut controller = Controller::new(document, limits).unwrap();
+    controller.select_objects(&[source]).unwrap();
+    controller.submit("Rebuild").expect("typed surface rebuild");
+    assert_eq!(controller.document().entities.len(), 2);
+    assert_eq!(controller.coordinator().undo_len(), 1);
+    let added = controller
+        .document()
+        .entities
+        .values()
+        .find(|entity| entity.id != source)
+        .expect("rebuilt surface");
+    assert!(matches!(added.geometry, Geometry::Surface(_)));
+}
+
+#[test]
+fn typed_offset_srf_runs_the_same_service_as_the_menu_row() {
+    let limits = Limits::default();
+    let build = || {
+        let surface = surface_kernel::plane(
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            10.0,
+            10.0,
+            &limits,
+        )
+        .unwrap();
+        let mut document = Document::new("typed offset parity");
+        let entity = Entity::new("plane", Geometry::Surface(surface), None);
+        let source = entity.id;
+        document.entities.insert(source, entity);
+        let mut controller = Controller::new(document, limits).unwrap();
+        controller.select_objects(&[source]).unwrap();
+        controller
+    };
+
+    let mut menu = build();
+    menu.dispatch("OM9-SURFACE-025", InvocationOrigin::Menu)
+        .unwrap();
+    menu.submit("2").unwrap();
+    let mut typed = build();
+    typed.submit("OffsetSrf").expect("typed offset");
+    assert!(typed.prompt().contains("Offset distance"));
+    typed.submit("2").unwrap();
+
+    assert_eq!(
+        typed.document().entities.len(),
+        menu.document().entities.len()
+    );
+    assert_eq!(
+        typed.coordinator().undo_len(),
+        menu.coordinator().undo_len()
+    );
+    assert_eq!(typed.document().entities.len(), 2);
+    let added = typed
+        .document()
+        .entities
+        .values()
+        .filter(|entity| matches!(entity.geometry, Geometry::Surface(_)))
+        .count();
+    assert_eq!(added, 2);
+}
+
+#[test]
+fn sweep_history_offers_closed_only_for_a_closed_rail_and_two_profiles() {
+    fn closed_square(x: f64) -> Entity {
+        Entity::new(
+            "profile",
+            Geometry::Curve(
+                curve_build::polyline(&[
+                    [x, -1.0, -1.0],
+                    [x, 1.0, -1.0],
+                    [x, 1.0, 1.0],
+                    [x, -1.0, 1.0],
+                    [x, -1.0, -1.0],
+                ])
+                .expect("profile"),
+            ),
+            None,
+        )
+    }
+    let limits = Limits::default();
+    let mut document = Document::new("closed sweep options");
+    let rail = Entity::new(
+        "rail",
+        Geometry::Curve(
+            curve_build::circle_on_frame([0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], 10.0)
+                .expect("circle rail"),
+        ),
+        None,
+    );
+    let first = closed_square(10.0);
+    let second = closed_square(-10.0);
+    let ids = [rail.id, first.id, second.id];
+    for entity in [rail, first, second] {
+        document.entities.insert(entity.id, entity);
+    }
+    let mut controller = Controller::new(document, limits).unwrap();
+    controller.select_objects(&ids).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-102", InvocationOrigin::Menu)
+        .expect("sweep 1 history");
+    // Matrix p183: Closed=Yes is the default when the rail is closed and two profiles exist.
+    assert!(
+        controller.prompt().contains("Closed=Yes"),
+        "{}",
+        controller.prompt()
+    );
+    let closed_token = controller
+        .history_options_tokens()
+        .into_iter()
+        .find(|(name, _)| *name == "Closed")
+        .expect("Closed token");
+    assert_eq!(closed_token.1, "Closed=No");
+    controller.submit("Closed=No").expect("toggle closed");
+    assert!(
+        controller.prompt().contains("Closed=No"),
+        "{}",
+        controller.prompt()
+    );
+    controller.submit("").expect("open history sweep");
+    assert_eq!(controller.document().entities.len(), 4);
+    assert_eq!(controller.coordinator().undo_len(), 1);
+    let added = controller
+        .document()
+        .entities
+        .values()
+        .find(|entity| !ids.contains(&entity.id))
+        .expect("history surface");
+    assert!(matches!(added.geometry, Geometry::Brep(_)));
+}
+
+#[test]
+fn sweep_history_hides_closed_for_an_open_rail() {
+    let limits = Limits::default();
+    let mut document = Document::new("open rail sweep options");
+    let entities = [
+        Entity::new(
+            "rail",
+            Geometry::Curve(
+                curve_build::polyline(&[[0.0, 0.0, 0.0], [10.0, 0.0, 0.0]]).expect("rail"),
+            ),
+            None,
+        ),
+        Entity::new(
+            "first",
+            Geometry::Curve(
+                curve_build::polyline(&[
+                    [0.0, -1.0, -1.0],
+                    [0.0, 1.0, -1.0],
+                    [0.0, 1.0, 1.0],
+                    [0.0, -1.0, 1.0],
+                    [0.0, -1.0, -1.0],
+                ])
+                .expect("profile"),
+            ),
+            None,
+        ),
+        Entity::new(
+            "second",
+            Geometry::Curve(
+                curve_build::polyline(&[
+                    [10.0, -1.0, -1.0],
+                    [10.0, 1.0, -1.0],
+                    [10.0, 1.0, 1.0],
+                    [10.0, -1.0, 1.0],
+                    [10.0, -1.0, -1.0],
+                ])
+                .expect("profile"),
+            ),
+            None,
+        ),
+    ];
+    let ids: Vec<_> = entities.iter().map(|entity| entity.id).collect();
+    for entity in entities {
+        document.entities.insert(entity.id, entity);
+    }
+    let mut controller = Controller::new(document, limits).unwrap();
+    controller.select_objects(&ids).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-102", InvocationOrigin::Menu)
+        .expect("sweep 1 history");
+    assert!(
+        !controller.prompt().contains("Closed="),
+        "{}",
+        controller.prompt()
+    );
+    assert!(
+        controller
+            .history_options_tokens()
+            .iter()
+            .all(|(name, _)| *name != "Closed")
+    );
+    assert!(controller.submit("Closed=Yes").is_err());
+    assert!(
+        controller.submit("").is_ok(),
+        "the default open sweep still builds"
+    );
+}
+
+#[test]
+fn match_surfaces_accepts_the_documented_continuity_option() {
+    let limits = Limits::default();
+    let first = surface_kernel::plane(
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        10.0,
+        10.0,
+        &limits,
+    )
+    .unwrap();
+    let second = surface_kernel::plane(
+        [10.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        10.0,
+        10.0,
+        &limits,
+    )
+    .unwrap();
+    let mut document = Document::new("match surfaces continuity");
+    let first = Entity::new("first", Geometry::Surface(first), None);
+    let second = Entity::new("second", Geometry::Surface(second), None);
+    let ids = [first.id, second.id];
+    document.entities.insert(first.id, first);
+    document.entities.insert(second.id, second);
+    let mut controller = Controller::new(document, limits).unwrap();
+    controller.select_objects(&ids).unwrap();
+    controller
+        .dispatch("OM9-SURFACE-128", InvocationOrigin::Menu)
+        .unwrap();
+    assert!(controller.submit("Continuity=Sideways").is_err());
+    assert!(controller.prompt().contains("Match source edge"));
+    controller.submit("Continuity=Tangency").unwrap();
+    controller.submit("U1,U0").unwrap();
+    assert!(
+        controller.prompt().contains("Continuity=Tangency"),
+        "{}",
+        controller.prompt()
+    );
+    controller.submit("").unwrap();
+    assert_eq!(controller.document().entities.len(), 3);
+    assert_eq!(controller.coordinator().undo_len(), 1);
+    let added = controller
+        .document()
+        .entities
+        .values()
+        .find(|entity| !ids.contains(&entity.id))
+        .expect("matched surface");
+    assert!(matches!(added.geometry, Geometry::Surface(_)));
+    assert!(controller.submit("U1,U0").is_err(), "no active match");
+}
+
+/// The authored Surface menu (`[Menu8]` of `Resources/menu/MainMenu.ini`) carries 40 icons while
+/// the milestone plans 38 L3 rows: 36 menu commands plus the Sweep 1/2 History sub-commands. Every
+/// one of the 40 icons must reach a command: the catalog rows for the 38 L3 commands plus the four
+/// menu-only commands with their own owner sessions (Revolve, Heightfield from Image, Smash and
+/// Refit to Tolerance).
+#[test]
+fn every_authored_surface_menu_icon_maps_to_an_available_command() {
+    assert_eq!(menu_catalog::SURFACE.len(), 40);
+    let mut wired = 0;
+    for &icon in menu_catalog::SURFACE {
+        let feature = surface_menu::by_icon(icon)
+            .map(|binding| binding.feature)
+            .or_else(|| om9_app::icons::feature_for(icon))
+            .unwrap_or_else(|| panic!("{icon} has no command"));
+        assert!(
+            Controller::availability(feature).is_ok(),
+            "{icon} -> {feature} is unavailable"
+        );
+        wired += 1;
+    }
+    assert_eq!(wired, 40);
+    // The four menu-only commands answer on the typed command line too.
+    assert_eq!(
+        Controller::resolve_alias("Revolve"),
+        Some("OM9-SURFACE-018")
+    );
+    assert_eq!(
+        Controller::resolve_alias("Heightfield"),
+        Some("OM9-SURFACE-031")
+    );
+    assert_eq!(Controller::resolve_alias("Smash"), Some("OM9-SURFACE-141"));
+    assert_eq!(
+        Controller::resolve_alias("RefitSrf"),
+        Some("OM9-SURFACE-142")
+    );
 }

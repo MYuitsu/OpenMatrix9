@@ -3,7 +3,246 @@
   "id": "OM9-L3-03-18-003",
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-18",
-  "title": "Solid \u00b7 Boolean Intersection \u2014 menu binding",
+  "title": "Solid · Boolean Intersection — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Union",
+        "Difference",
+        "Intersection",
+        "Boolean Two Object",
+        "Boolean Split",
+        "Create Solid"
+      ],
+      "option_count": 6
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Solid",
+      "command": "Boolean Tools",
+      "option": "Intersection",
+      "root_group": false,
+      "path": [
+        "Solid",
+        "Boolean Tools"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "10mm cube crossed by plane x=5; expected rectangular section area 100 mm²",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-003 - Solid · Boolean Intersection - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Union",
+        "command_id": "SolidUnion",
+        "script": "! _BooleanUnion",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-18-001",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Union",
+          "typed_forms": [
+            "Union"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Difference",
+        "command_id": "SolidDifference",
+        "script": "! _BooleanDifference",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-18-002",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Difference",
+          "typed_forms": [
+            "Difference"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Intersection",
+        "command_id": "SolidIntersection",
+        "script": "! _BooleanIntersection",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-18-003",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Intersection",
+          "typed_forms": [
+            "Intersection"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Boolean Two Object",
+        "command_id": "SolidBooleanTwoObjects",
+        "script": "! _Boolean2Objects",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-18-004",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Boolean Two Object",
+          "typed_forms": [
+            "Boolean Two Object"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Boolean Split",
+        "command_id": "SolidBooleanSplit",
+        "script": "! _BooleanSplit",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Boolean Split",
+          "typed_forms": [
+            "Boolean Split"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Create Solid",
+        "command_id": "SolidCreateSolid",
+        "script": "! _CreateSolid",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Create Solid",
+          "typed_forms": [
+            "Create Solid"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [
+      "Boolean Split",
+      "Create Solid"
+    ],
+    "missing": [
+      "option:Boolean Split: type/default/range/unit/prompt",
+      "option:Create Solid: type/default/range/unit/prompt",
+      "input:10mm cube crossed by plane x=5; expected rectangular section area 100 mm²: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-03-18-003-04"
+  },
   "planning_state": "IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E07",
@@ -13,7 +252,7 @@
     "l3_id": "OM9-L3-03-18-003",
     "capability_id": "cap.03-18.solid-command-boolean-intersection",
     "stable_owner_key": "OM9-L2-03-18/solid-command-boolean-intersection",
-    "title": "Solid \u00b7 Boolean Intersection \u2014 menu binding",
+    "title": "Solid · Boolean Intersection — menu binding",
     "slug": "solid-command-boolean-intersection",
     "module_id": "OM9-L2-03-18",
     "module_path": "specs/03-ms03-curve-surface-solid-3dm/10-febe-matrix-solid-menu-workflows/",
@@ -25,10 +264,10 @@
     "delivery": "mainline",
     "status": "L3_SPEC_WITH_L4_PLANNED_NOT_EXECUTED",
     "origin_source_taxonomy": "03-matrix8-book1",
-    "goal": "Bind menu/commandline for documented Solid Tools command \u201cBoolean Intersection\u201d; reuse owning geometry service rather than reimplement its algorithm",
+    "goal": "Bind menu/commandline for documented Solid Tools command “Boolean Intersection”; reuse owning geometry service rather than reimplement its algorithm",
     "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
-    "parent_scope": "Solid menu ph\u00f9 h\u1ee3p trang s\u1ee9c: primitives, bool, extrusion, shell, text geometry",
-    "parent_exclusions": "Kh\u00f4ng th\u00eam c\u01a1 kh\u00ed thu\u1ea7n t\u00fay Boss/Rib/Slab d\u1ea1ng feature chuy\u00ean bi\u1ec7t.",
+    "parent_scope": "Solid menu phù hợp trang sức: primitives, bool, extrusion, shell, text geometry",
+    "parent_exclusions": "Không thêm cơ khí thuần túy Boss/Rib/Slab dạng feature chuyên biệt.",
     "depends_on_module_ids": [
       "OM9-L2-01-09",
       "OM9-L2-01-10",
@@ -70,18 +309,18 @@
       "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
     },
     "acceptance_tests_auto": [
-      "Automated: valid input exercises \u201cSolid \u00b7 Boolean Intersection \u2014 menu binding\u201d without panic, leaked handle or stale scene reference.",
+      "Automated: valid input exercises “Solid · Boolean Intersection — menu binding” without panic, leaked handle or stale scene reference.",
       "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
       "Automated: geometry fixture checks BRep validity/tolerance/closedness or documented intentional open output."
     ],
     "acceptance_tests_manual": [
-      "Manual gate M03: run OpenMatrix9 UI; perform \u201cSolid \u00b7 Boolean Intersection \u2014 menu binding\u201d; observe preview/feedback and commit/cancel behavior.",
+      "Manual gate M03: run OpenMatrix9 UI; perform “Solid · Boolean Intersection — menu binding”; observe preview/feedback and commit/cancel behavior.",
       "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
     ],
     "requires_manual_test": true,
     "manual_test_gate": "M03-UI",
     "invariants": [
-      "No `90-after` dependency for any M01\u2013M09 deliverable.",
+      "No `90-after` dependency for any M01–M09 deliverable.",
       "No implementation may be assumed from QymCAD until source paths are checked.",
       "Existing document IDs/layer flags/units/history remain consistent after operation.",
       "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
@@ -99,15 +338,15 @@
   "children_l4": [
     {
       "id": "OM9-L4-03-18-003-01",
-      "title": "Dispatch Contract \u2014 Solid \u00b7 Boolean Intersection \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-003 - Solid \u00b7 Boolean Intersection - menu binding/L4-01 - Command Dispatch Contract/l4.json",
+      "title": "Dispatch Contract — Solid · Boolean Intersection — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-003 - Solid · Boolean Intersection - menu binding/L4-01 - Command Dispatch Contract/l4.json",
       "role": "DISPATCH_CONTRACT",
       "depends_on_task_ids": []
     },
     {
       "id": "OM9-L4-03-18-003-02",
-      "title": "Wire Ui \u2014 Solid \u00b7 Boolean Intersection \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-003 - Solid \u00b7 Boolean Intersection - menu binding/L4-02 - Menu and Command UI Integration/l4.json",
+      "title": "Wire Ui — Solid · Boolean Intersection — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-003 - Solid · Boolean Intersection - menu binding/L4-02 - Menu and Command UI Integration/l4.json",
       "role": "WIRE_UI",
       "depends_on_task_ids": [
         "OM9-L4-03-18-003-01",
@@ -117,11 +356,22 @@
     },
     {
       "id": "OM9-L4-03-18-003-03",
-      "title": "Acceptance \u2014 Solid \u00b7 Boolean Intersection \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-003 - Solid \u00b7 Boolean Intersection - menu binding/L4-03 - Acceptance and Evidence/l4.json",
+      "title": "Acceptance — Solid · Boolean Intersection — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-003 - Solid · Boolean Intersection - menu binding/L4-03 - Acceptance and Evidence/l4.json",
       "role": "ACCEPTANCE",
       "depends_on_task_ids": [
         "OM9-L4-03-18-003-02"
+      ]
+    },
+    {
+      "id": "OM9-L4-03-18-003-04",
+      "title": "Parameter Implementation — Solid · Boolean Intersection — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-003 - Solid · Boolean Intersection - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-03-18-003-01",
+        "OM9-L4-03-18-003-02",
+        "OM9-L4-03-18-003-03"
       ]
     }
   ],
@@ -129,7 +379,8 @@
   "task_ids": [
     "OM9-L4-03-18-003-01",
     "OM9-L4-03-18-003-02",
-    "OM9-L4-03-18-003-03"
+    "OM9-L4-03-18-003-03",
+    "OM9-L4-03-18-003-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -164,17 +415,17 @@
     ],
     "api_owner_resolution_status": "CANDIDATE_REQUIRES_LOCAL_TEST",
     "technical_decisions": [
-      "Matrix menu item ch\u1ec9 dispatch qua qymcad/src/command_catalog.rs / command bus; kh\u00f4ng t\u1ea1o m\u1ed9t kernel thao t\u00e1c song song.",
-      "D\u00f9ng c\u00f9ng command descriptor, typed options v\u00e0 selection gi\u1eefa menu, command line v\u00e0 toolbar; ki\u1ec3m tra disable state khi backend v\u1eafng m\u1eb7t.",
-      "N\u1ebfu kh\u00f4ng c\u00f3 owner L3 x\u00e1c minh \u0111\u01b0\u1ee3c, tr\u1ea1ng th\u00e1i BLOCKED_OWNER, kh\u00f4ng coi m\u1ed9t menu item render th\u00e0nh PASS.",
-      "\u1ee8ng vi\u00ean owner L3: OM9-L3-02-04-009, OM9-L3-01-10-001; ph\u1ea3i ki\u1ec3m ch\u1ee9ng API v\u00e0 test tr\u01b0\u1edbc khi b\u1eadt menu."
+      "Matrix menu item chỉ dispatch qua qymcad/src/command_catalog.rs / command bus; không tạo một kernel thao tác song song.",
+      "Dùng cùng command descriptor, typed options và selection giữa menu, command line và toolbar; kiểm tra disable state khi backend vắng mặt.",
+      "Nếu không có owner L3 xác minh được, trạng thái BLOCKED_OWNER, không coi một menu item render thành PASS.",
+      "Ứng viên owner L3: OM9-L3-02-04-009, OM9-L3-01-10-001; phải kiểm chứng API và test trước khi bật menu."
     ],
     "fixture_design": {
       "case_id": "OM9-L3-03-18-003-GOLDEN",
       "status": "DESIGN_ONLY_NOT_EXECUTED",
       "input": {
-        "command": "Solid \u00b7 Boolean Intersection \u2014 menu binding",
-        "purpose": "Bind menu/commandline for documented Solid Tools command \u201cBoolean Intersection\u201d; reuse owning geometry service rather than reimplement its algorithm",
+        "command": "Solid · Boolean Intersection — menu binding",
+        "purpose": "Bind menu/commandline for documented Solid Tools command “Boolean Intersection”; reuse owning geometry service rather than reimplement its algorithm",
         "units": "mm",
         "document": "empty_or_specific_fixture",
         "command_id_to_define": "M03.boolean-intersection",
@@ -200,10 +451,10 @@
     },
     "golden_test_design": {
       "fixture_id": "OM9-L3-03-18-003-POSITIVE",
-      "input": "10mm cube crossed by plane x=5; expected rectangular section area 100 mm\u00b2",
-      "positive_assertions": "BRep volume=500 mm\u00b3",
+      "input": "10mm cube crossed by plane x=5; expected rectangular section area 100 mm²",
+      "positive_assertions": "BRep volume=500 mm³",
       "negative_fixture_id": "OM9-L3-03-18-003-NEGATIVE",
-      "negative_assertions": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
+      "negative_assertions": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
       "status": "DESIGN_ONLY_NOT_EXECUTED",
       "rust_test_name_to_create": "m03_03_18_003"
     },
@@ -247,9 +498,9 @@
       "register_test_in_existing_crate_first": true,
       "expected_positive_fixture_ref": "OM9-L3-03-18-003-POSITIVE",
       "expected_negative_fixture_ref": "OM9-L3-03-18-003-NEGATIVE",
-      "source_golden_input_from_parent": "10mm cube crossed by plane x=5; expected rectangular section area 100 mm\u00b2",
-      "parent_golden_positive_oracle": "BRep volume=500 mm\u00b3",
-      "parent_golden_negative_oracle": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
+      "source_golden_input_from_parent": "10mm cube crossed by plane x=5; expected rectangular section area 100 mm²",
+      "parent_golden_positive_oracle": "BRep volume=500 mm³",
+      "parent_golden_negative_oracle": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
       "independent_domain_example_proposed_not_always_applicable": "command invoked with valid selection and chosen options, and with no selection/locked layer/unavailable backend",
       "domain_specific_assertions_to_select_when_applicable": [
         "command ID resolves to one backend handler or explicit disabled fallback",
@@ -302,6 +553,11 @@
       "solid 64 passed, 1 ignored"
     ],
     "remaining": [],
-    "manual_gate": "M03-UI"
+    "manual_gate": "M03-UI",
+    "intersection_staged_sets_2026_10_28": {
+      "status": "BREP_STAGED_SETS_OPTIONS_PARTIAL_AUTOMATED_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-28-solid-audit.md",
+      "manual_gate_promoted": false
+    }
   }
 }

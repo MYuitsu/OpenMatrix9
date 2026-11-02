@@ -1,0 +1,19 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-14-004",
+  "cases": [
+    {
+      "input": "Finger rail size 0",
+      "error": "invalid finger rail size"
+    },
+    {
+      "input": "Height below 0.1 mm",
+      "error": "invalid bezel height"
+    },
+    {
+      "input": "Seat length above half the base thickness",
+      "error": "invalid bezel seat length"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

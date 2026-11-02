@@ -4,7 +4,51 @@
   "milestone": "M06",
   "parent_l2_id": "OM9-L2-04-15",
   "title": "Channel Border Curve",
-  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "DOMAIN_IMPLEMENTED_AUTOMATED_UI_REVIEW_OPEN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [
+        "Offset=",
+        "EndOffset=",
+        "VOffset=",
+        "Corner=",
+        "Extension=",
+        "Enter",
+        "Cancel"
+      ],
+      "option_count": 7
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "GemRow + ChannelBorderParams {side_offset, end_offset, v_offset, corner_angle, extension, tweak_corners, snap_to_corners, show_prongs}",
+        "type": "row: GemRow; params (mm, degrees, bool)",
+        "status": "RESOLVED_BY_IMPLEMENTATION"
+      }
+    ],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [],
+    "implementation_l4": [
+      "OM9-L4-15-005-01",
+      "OM9-L4-15-005-02",
+      "OM9-L4-15-005-03",
+      "OM9-L4-15-005-04"
+    ]
+  },
+  "planning_state": "IMPLEMENTED_AUTOMATED_EVIDENCE_UI_REVIEW_OPEN",
   "target_implementation_milestone": "M06",
   "execution_stage": "E11",
   "source_original_path": "specs/06-ms06-settings-and-prongs/02-febe-prong-channel-metal-and-bead-settings/005-febe-channel-border-curve/l3.json",
@@ -23,7 +67,7 @@
     "milestone_id": "M06",
     "target_milestone": "M06",
     "delivery": "mainline",
-    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "status": "L3_IMPLEMENTED_AUTOMATED_EVIDENCE_UI_REVIEW_OPEN",
     "origin_source_taxonomy": "04-matrix8-book2",
     "goal": "guide curves around gems for channel metal",
     "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
@@ -87,12 +131,12 @@
     ],
     "qymcad_source_paths_verified": [],
     "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
-    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "l4_status": "L4_AUTOMATED_EVIDENCE_RECORDED",
     "execution_stage": "E11",
     "planning_release": "CORE_MVP",
     "planning_risk": "HIGH",
     "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
-    "execution_status": "L4_PLANNED_NOT_EXECUTED"
+    "execution_status": "IMPLEMENTED_AUTOMATED_EVIDENCE_UI_REVIEW_OPEN"
   },
   "children_l4": [
     {
@@ -130,5 +174,44 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED"
+  "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
+  "task_ids": [
+    "OM9-L4-15-005-01",
+    "OM9-L4-15-005-02",
+    "OM9-L4-15-005-03",
+    "OM9-L4-15-005-04"
+  ],
+  "implementation": {
+    "schema": "om9.l3_implementation.v1",
+    "recorded_at": "2026-10-27",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+    "feature": "BuilderChannelBorderCurve",
+    "command_options": "Offset/EndOffset/VOffset/Corner/Extension Line|Arc|Smooth",
+    "evidence": [
+      "implementation/design/M06/OM9-L3-04-15-005/source_crosswalk.json",
+      "implementation/design/M06/OM9-L3-04-15-005/api.md",
+      "implementation/fixtures/M06/OM9-L3-04-15-005/positive.json",
+      "implementation/fixtures/M06/OM9-L3-04-15-005/negative.json",
+      "implementation/evidence/M06/OM9-L3-04-15-005/OM9-L4-15-005-03.json",
+      "implementation/evidence/M06/OM9-L3-04-15-005/OM9-L4-15-005-04.json"
+    ],
+    "automated_tests": {
+      "core": [
+        "cargo test -p om9-core --lib settings:: (OM9-L3-04-15-005)",
+        "cargo test -p om9-core --test settings_family"
+      ],
+      "app": [
+        "cargo test -p om9-app --test settings_commands"
+      ]
+    },
+    "manual_gate": {
+      "required": true,
+      "gate": "M06-UI",
+      "signed": false,
+      "open": "preview/commit/cancel of Channel Border Curve on the OpenMatrix9 window"
+    },
+    "limitations": [
+      "Corner smoothing is the documented 0..1 angle; the exact Matrix corner radius law is not verified."
+    ]
+  }
 }

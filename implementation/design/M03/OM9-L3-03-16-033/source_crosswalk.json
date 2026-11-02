@@ -6,7 +6,7 @@
   "command_id": "OM9-CURVE-032",
   "menu_icon": "CurvePointObjectMarkCurveEnd",
   "owner_candidate": "",
-  "decision": "BLOCKED_OWNER",
+  "decision": "IMPLEMENTED",
   "reviewed_upstream": [
     {
       "path": "crates/qymcad/src/command_catalog.rs",
@@ -39,5 +39,7 @@
       "Controller::availability"
     ]
   },
-  "rationale": "no verified backend owner for Mark Curve End; menu stays disabled"
+  "rationale": "the local Curve menu binding dispatches the Rust command session; the documented Matrix command spelling is accepted as an alias",
+  "menu_label": "Mark Curve End",
+  "documented_script": "CrvEnd"
 }

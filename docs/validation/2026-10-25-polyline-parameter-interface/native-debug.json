@@ -1,0 +1,22 @@
+{
+  "status": "PASSED_SCOPED_OWN_APP_UI_REPLAY",
+  "manual_gate_signed": false,
+  "launch": {
+    "pid": 22840,
+    "binary": "L:\\om9-target\\debug\\om9.exe",
+    "sha256": "e79f71325f803472b5577a0e3207ff8a81b415549d1088375721cb9ea021b878",
+    "profile": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\polyline-parameter-interface-debug-20261025"
+  },
+  "observed": [
+    "Menu PolyLine starts",
+    "P toggles PersistentClose=Yes; clicking it restores No",
+    "H toggles Helpers=Yes",
+    "L enters Length; numeric 5 updates Length=5",
+    "M switches to Arc; D requests direction",
+    "Direction pick updates Direction=1,0,0",
+    "C requests Center and a pick updates its coordinates",
+    "U clears the pending Center value",
+    "Escape cancels without a document object; clean window closed"
+  ],
+  "stderr": ""
+}

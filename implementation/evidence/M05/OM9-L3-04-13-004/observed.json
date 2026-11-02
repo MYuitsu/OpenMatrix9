@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_edits_evidence.v1",
+  "l3_id": "OM9-L3-04-13-004",
+  "title": "Gem Style Save",
+  "command": "OthersSaveStyle / gvSaveStyle",
+  "scope": "`gem_edits::GemStyle`; `GemStyleStore`; `GemStyleStore::{save_to,load_or_empty}`; `GemStyle::validate`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "versioned named gem style written atomically to the shared store file",
+  "negative": "invalid style names are typed refusals",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-13-004-03"
+    ],
+    "fixture_manifest_sha256": "df0bffe2d302f0c8c19135ffccf7c6d9bd92698e6ec79aa8864b681c2ac891b3"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/tests/gem_edits.rs"
+  ],
+  "test": "save_and_load_style_roundtrip_through_the_style_file"
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-15-004",
+  "cases": [
+    {
+      "input": "2 stones, Mode=Top",
+      "expect": "preview reports a cutter and Enter commits the metal bodies with a recorded volume",
+      "oracle": "om9-app tests/settings_commands.rs::metal_piece_top_mode_stages_a_cutter_and_commits_bodies"
+    },
+    {
+      "input": "8 stones, ClosedOutside",
+      "expect": "closed ring, watertight metal bodies",
+      "oracle": "om9-core tests/settings_family.rs::the_closed_row_builds_a_closed_metal_ring_and_keeps_the_prong_order"
+    }
+  ],
+  "automated_tests": [
+    "metal_piece_top_mode_stages_a_cutter_and_commits_bodies",
+    "metal_piece_can_follow_a_committed_channel_border",
+    "metal_piece_border_without_a_border_is_refused",
+    "metal_piece_curve_mode_uses_the_committed_border",
+    "metal_piece_curve_mode_without_a_border_is_refused",
+    "metal_piece_curve_mode_uses_the_picked_curve",
+    "settings::metal_piece::tests",
+    "tests/settings_family.rs::an_unsupported_metal_mode_is_a_typed_refusal_not_a_different_body"
+  ]
+}

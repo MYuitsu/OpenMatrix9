@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-005",
+  "kind": "positive",
+  "input": "selected rail with diameter/width and height handles",
+  "expected": "drag projects onto the CPlane axis and updates the same field as the panel",
+  "verified_by": [
+    "a_ring_rail_builder_previews_its_field_and_exposes_a_diameter_handle",
+    "a_locked_input_makes_the_builder_read_only_and_hides_its_handles"
+  ],
+  "receipts": [
+    {
+      "test": "a_ring_rail_builder_previews_its_field_and_exposes_a_diameter_handle",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "-j",
+        "2",
+        "a_ring_rail_builder_previews_its_field_and_exposes_a_diameter_handle"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "6058200fc07c0c966b06994642210e14d98cb493b108caea0f686649e0ce1d88"
+    },
+    {
+      "test": "a_locked_input_makes_the_builder_read_only_and_hides_its_handles",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "a_locked_input_makes_the_builder_read_only_and_hides_its_handles"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "b08f231c76959df8dbda74719c4eafba48d978accef266d12f0dc43e4adc801c"
+    }
+  ]
+}

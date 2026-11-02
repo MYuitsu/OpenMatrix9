@@ -1,10 +1,12 @@
 # OM9 Milestone Dashboard
 
-> Sinh tự động lúc **2026-10-24T08:28:33Z** · mã nguồn `75c1ab05` · nguồn: `OM9_Milestones/` + `implementation/{evidence,design,fixtures}/`
+> Sinh tự động lúc **2026-10-28T08:34:39Z** · mã nguồn `71852257` · nguồn: `OM9_Milestones/` + `implementation/{evidence,design,fixtures}/`
 >
 > Cập nhật: chạy lại `python tools/om9_milestone_dashboard.py` sau mỗi mục hoàn thành.
 >
-> **101** L3 đã nghiệm thu · **284** có bằng chứng chưa ký · **406** mới ở mức kế hoạch (tổng 791 L3).
+> **118** L3 đã nghiệm thu · **451** có bằng chứng chưa ký · **235** mới ở mức kế hoạch (tổng 804 L3).
+>
+> Hợp đồng tham số M03–M07: **375/388** L3 · **1622/1661** L4 · **113** L4 `PARAMETER_IMPLEMENTATION` (104 catalog + 9 domain) · **91** option còn thiếu metadata.
 >
 > Dashboard chỉ đọc bằng chứng thật; cây kế hoạch vẫn giữ `SPEC_ONLY_NOT_IMPLEMENTED` và không trạng thái nào được nâng thay cho nghiệm thu.
 >
@@ -19,14 +21,31 @@ Chú giải: ✅ đã nghiệm thu · 🟡 có bằng chứng, chưa ký · ⬜ 
 | **M00** Feasibility, QymCAD source, OCCT, legal and environment | `M00 - Feasibility, Legal` | 7 | 19 | 8 | 7 | 4 | — |
 | **M01** CAD shell, OCCT bridge, document, undo, GPU and viewport foundation | `M01 - CAD Shell, Viewport` | 13 | 117 | 45 | 71 | 1 | M00 |
 | **M02** Viewport picking, snapping, navigation, gumball and Matrix interaction | `M02 - Viewport, Gumball` | 9 | 59 | 0 | 59 | 0 | M00, M01 |
-| **M03** Curve, Surface, Solid và trao đổi 3DM | `M03 - Geometry 3DM` | 14 | 243 | 48 | 147 | 48 | M01 |
-| **M04** Builder, History và Ring | `M04 - Builder and History` | 7 | 51 | 0 | 0 | 51 | M01 |
-| **M05** Gems và Layout | `M05 - Gems and Layout` | 5 | 43 | 0 | 0 | 43 | M03 |
-| **M06** Settings và Prongs | `M06 - Settings and Prongs` | 2 | 19 | 0 | 0 | 19 | M03, M05 |
-| **M07** Cutters và kiểm tra chế tạo | `M07 - Cutters` | 3 | 19 | 0 | 0 | 19 | M03 |
+| **M03** Curve, Surface, Solid và trao đổi 3DM | `M03 - Geometry 3DM` | 15 | 256 | 48 | 205 | 3 | M01 |
+| **M04** Builder, History và Ring | `M04 - Builder and History` | 7 | 51 | 14 | 37 | 0 | M01 |
+| **M05** Gems và Layout | `M05 - Gems and Layout` | 5 | 43 | 3 | 40 | 0 | M03 |
+| **M06** Settings và Prongs | `M06 - Settings and Prongs` | 2 | 19 | 0 | 19 | 0 | M03, M05 |
+| **M07** Cutters và kiểm tra chế tạo | `M07 - Cutters` | 3 | 19 | 0 | 13 | 6 | M03 |
 | **M08** Advanced Jewelry Modeling | `M08 - Jewelry Modeling` | 8 | 51 | 0 | 0 | 51 | M03, M05, M06 |
 | **M09** Cổng nghiệm thu và phát hành (không phát sinh L2 owner) | `M09 - Acceptance and Release Gates` | 0 | 0 | 0 | 0 | 0 | M00, M01, M02, M03, M04, M05, M06, M07, M08 |
 | **ZAFTER** Phạm vi mở rộng sau các release gate chính | `ZAFTER - Extensions` | 34 | 170 | 0 | 0 | 170 | M09 |
+
+## Hợp đồng tham số M03–M07 (planning coverage)
+
+| Milestone | L3 | L3 có contract | L4 | L4 có contract | L4 tham số mới |
+|---|---:|---:|---:|---:|---:|
+| **M03** | 256 | 243 | 1049 | 1010 | 112 |
+| **M04** | 51 | 51 | 341 | 341 | 1 |
+| **M05** | 43 | 43 | 126 | 126 | 0 |
+| **M06** | 19 | 19 | 76 | 76 | 0 |
+| **M07** | 19 | 19 | 69 | 69 | 0 |
+| **Tổng** | **388** | **375** | **1661** | **1622** | **113** |
+
+- 1486 L4 dùng contract rút gọn `om9.parameter_contract.ref.v1`; 136 L4 dùng contract đầy đủ `om9.parameter_contract.v1`.
+- 104 L4 command-inline thuộc catalog; 9 L4 xử lý L3 domain không có input máy đọc được.
+- Số L4 tính theo thư mục milestone (gồm L4 hosted); cột `L4 (bằng chứng)` trong cây chi tiết chỉ hiển thị L4 thuộc L3 của milestone đó.
+- Curve (`L2-03-16`): **58** L3 · **51** L4 tham số · **60** option thiếu; **7** L3 root-group không có option family.
+- `type`/`default`/`range`/`unit` chưa xác minh vẫn ghi `UNRESOLVED`; đây là planning coverage, không phải bằng chứng thực thi hay nâng trạng thái gate.
 
 ## Cấu trúc chi tiết (Mxx → L1 → L2 → L3)
 
@@ -38,7 +57,7 @@ Bằng chứng cấp milestone: `G00-01`, `G00-02`, `G00-03`, `G00-04`, `G00-05`
 
 **OM9-M00-L2-01 — QymCAD GitHub & source reuse** · ✅0 🟡0 ⬜3
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-M00-L3-01-01` | Repository provenance & pinned checkout |  |  | 0/4 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-M00-L3-01-02` | Workspace map and dependency audit |  |  | 0/4 | ⬜ mới ở mức kế hoạch | — |
@@ -46,7 +65,7 @@ Bằng chứng cấp milestone: `G00-01`, `G00-02`, `G00-03`, `G00-04`, `G00-05`
 
 **OM9-M00-L2-02 — OCCT bridge & numerical geometry** · ✅3 🟡0 ⬜0
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-M00-L3-02-01` | Toolchain and C ABI bridge proof |  |  | 4/4 | ✅ đã nghiệm thu — ký bởi project owner | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-M00-L3-02-02` | Lifetime, threading and error safety |  |  | 4/4 | ✅ đã nghiệm thu — ký bởi project owner | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -54,7 +73,7 @@ Bằng chứng cấp milestone: `G00-01`, `G00-02`, `G00-03`, `G00-04`, `G00-05`
 
 **OM9-M00-L2-03 — UI/Viewport/GPU technology** · ✅3 🟡0 ⬜0
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-M00-L3-03-01` | Source UI architecture and constraints |  |  | 3/3 | ✅ đã nghiệm thu — ký bởi project owner | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-M00-L3-03-02` | GPU renderer stability and performance |  |  | 4/4 | ✅ đã nghiệm thu — ký bởi project owner | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -62,7 +81,7 @@ Bằng chứng cấp milestone: `G00-01`, `G00-02`, `G00-03`, `G00-04`, `G00-05`
 
 **OM9-M00-L2-04 — 3DM / openNURBS interoperability** · ✅0 🟡2 ⬜1
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-M00-L3-04-01` | 3DM capability gap and dependency candidate |  |  | 0/4 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-M00-L3-04-02` | NURBS / trimmed BRep / units proof |  |  | 2/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -70,21 +89,21 @@ Bằng chứng cấp milestone: `G00-01`, `G00-02`, `G00-03`, `G00-04`, `G00-05`
 
 **OM9-M00-L2-05 — Associative history & stable topology** · ✅0 🟡2 ⬜0
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-M00-L3-05-01` | Naming and reference architecture audit |  |  | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-M00-L3-05-02` | Regeneration and persistence stress proof |  |  | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
 **OM9-M00-L2-06 — License / redistribution compliance** · ✅2 🟡0 ⬜0
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-M00-L3-06-01` | Software license and reuse strategy |  |  | 3/4 | ✅ đã nghiệm thu — ký bởi project owner | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-M00-L3-06-02` | Assets, trademarks and release notices |  |  | 2/4 | ✅ đã nghiệm thu — ký bởi project owner | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
 **OM9-M00-L2-07 — Reproducible build, CI and release baseline** · ✅0 🟡3 ⬜0
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-M00-L3-07-01` | Windows 10/11 x64 baseline |  |  | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-M00-L3-07-02` | Linux optional & packaged OCCT |  |  | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -96,13 +115,13 @@ Bằng chứng cấp milestone: `G00-01`, `G00-02`, `G00-03`, `G00-04`, `G00-05`
 
 **L1** — CAD shell, OCCT bridge, document, undo, GPU and viewport foundation · phụ thuộc: M00
 
-Bằng chứng cấp milestone: `OM9-L2-01-01`, `OM9-L2-01-02`, `OM9-L2-01-03`, `OM9-L2-01-05`, `OM9-L2-03-14`
+Bằng chứng cấp milestone: `OM9-L2-01-01`, `OM9-L2-01-02`, `OM9-L2-01-03`, `OM9-L2-01-05`, `OM9-L2-03-14`, `command-parameter-interface-20261025`, `polyline-option-owner-20261026`, `polyline-parameter-interface-20261025`
 
 **OM9-L2-01-01 — Febe Application Shell Docking** · ✅3 🟡5 ⬜0
 
 _Khởi động/đóng ứng dụng, cửa sổ chính, docking cơ bản để bố trí giao diện Matrix._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-01-001` | Application Startup And Main Window *(thủ công)* | E02 | NORMAL | 4/4 | ✅ đã nghiệm thu — ký bởi project owner (human reviewer), running the app on Windows | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-01-002` | Workbench Docking Regions *(thủ công)* | E02 | NORMAL | 4/4 | ✅ đã nghiệm thu — ký bởi project owner (human reviewer) running the app on Windows | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -117,7 +136,7 @@ _Khởi động/đóng ứng dụng, cửa sổ chính, docking cơ bản để 
 
 _Registry lệnh, state-machine nhận điểm/đối tượng, transaction, Undo/Redo/Cancel thống nhất._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-02-001` | Command IDs And Alias Registry | E01 | NORMAL | 4/4 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-02-002` | Typed Command Descriptor | E01 | NORMAL | 4/4 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -135,7 +154,7 @@ _Registry lệnh, state-machine nhận điểm/đối tượng, transaction, Und
 
 _Document, EntityID, FeatureID, layers, blocks/instances, metadata đá và tham chiếu đối tượng._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-03-001` | Document Entity IDs | E01 | NORMAL | 4/4 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-03-002` | Typed Scene Entity Records | E01 | NORMAL | 4/4 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -155,7 +174,7 @@ _Document, EntityID, FeatureID, layers, blocks/instances, metadata đá và tham
 
 _Adapter OCCT, BRep, NURBS evaluation, tolerances, memory ownership/FFI safety._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-05-001` | OCCT FFI Safe Handle Lifecycle | E01 | HIGH | 4/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-05-002` | B-Rep Shape Type And Validation | E01 | NORMAL | 4/4 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -173,7 +192,7 @@ _Adapter OCCT, BRep, NURBS evaluation, tolerances, memory ownership/FFI safety._
 
 _GPU viewport wireframe/shaded, gem display, camera draw, overlays và mesh tessellation._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-06-001` | GPU Device And Render Loop *(thủ công)* | E02 | HIGH | 3/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence` |
 | `OM9-L3-01-06-002` | Shared Scene Graphics Resources *(thủ công)* | E02 | HIGH | 3/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence` |
@@ -189,7 +208,7 @@ _GPU viewport wireframe/shaded, gem display, camera draw, overlays và mesh tess
 
 _Millimeter, degrees, tolerances, numeric input và tham số builder đơn giản._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-08-001` | Millimeter World Unit Model | E01 | NORMAL | 4/4 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-08-002` | Angle Conversion And Degrees | E01 | NORMAL | 4/4 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -203,7 +222,7 @@ _Millimeter, degrees, tolerances, numeric input và tham số builder đơn gi�
 
 _Save/load native document đầy đủ geometry/history/layer/gem instance; xuất STL watertight và báo lỗi hình học._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-12-001` | Native Project Container Format | E02 | HIGH | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 | `OM9-L3-01-12-002` | Scene And Layer State Encoding | E02 | HIGH | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
@@ -220,7 +239,7 @@ _Save/load native document đầy đủ geometry/history/layer/gem instance; xu�
 
 _Định nghĩa Rhino-like Curve/Surface/TrimmedSurface/Polysurface/solid/block và seam, UV/normal._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-02-01-001` | Point And Polyline Semantic Types | E02 | HIGH | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 | `OM9-L3-02-01-002` | NURBS Curve Control Points Knots Weights | E02 | HIGH | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
@@ -237,7 +256,7 @@ _Định nghĩa Rhino-like Curve/Surface/TrimmedSurface/Polysurface/solid/block 
 
 _Viewport Looking Down/Perspective/Side/Through Finger, grid trang sức, active view_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-01-001` | Matrix Four Viewport Grid Layout *(thủ công)* | E02 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-01-002` | Jewelry Viewport Camera Presets *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -251,7 +270,7 @@ _Viewport Looking Down/Perspective/Side/Through Finger, grid trang sức, active
 
 _Main Menu, Icon History, panel arrangement Matrix_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-07-001` | Matrix Left Sidebar Stack And Order *(thủ công)* | E02 | HIGH | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-07-002` | Matrix Main Menu Category Tabs *(thủ công)* | E02 | HIGH | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -266,7 +285,7 @@ _Main Menu, Icon History, panel arrangement Matrix_
 
 _Command Line kiểu Rhino/Matrix, prompt, options/history_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-10-001` | Commandline Entry And Submit *(thủ công)* | E02 | HIGH | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-10-002` | Interactive Command Prompts *(thủ công)* | E02 | HIGH | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -279,7 +298,7 @@ _Command Line kiểu Rhino/Matrix, prompt, options/history_
 
 _Layers palette, Object Info, SuperSelect cần modeling_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-14-001` | Matrix Layer Category Palette *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-14-002` | Current Layer And Assignment UI *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -294,7 +313,7 @@ _Layers palette, Object Info, SuperSelect cần modeling_
 
 _File menu, native Open/Save, Import .3dm action, Job Bags/Project Manager_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-15-001` | Matrix File New Open Save Actions *(thủ công)* | E02 | NORMAL | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-15-002` | Matrix File Import Export Entrypoints *(thủ công)* | E02 | MEDIUM | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -316,7 +335,7 @@ _File menu, native Open/Save, Import .3dm action, Job Bags/Project Manager_
 
 _Picking object/face/edge/vertex, selection set, gizmo hooks và hover hit-tests._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-07-001` | Screen Ray And Hit Test Query *(thủ công)* | E03 | NORMAL | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-07-002` | Object Selection Set Core *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -331,7 +350,7 @@ _Picking object/face/edge/vertex, selection set, gizmo hooks và hover hit-tests
 
 _CPlane/World coordinates, gốc F4, nhập điểm chính xác, dựng hình theo view._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-02-02-001` | World And Construction Plane Coordinate Context *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-02-002` | CPlane Preset Worldtop Front Right *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -345,7 +364,7 @@ _CPlane/World coordinates, gốc F4, nhập điểm chính xác, dựng hình th
 
 _End/Mid/Cen/Near/Point/Int/Tan/Perp/Quad và SmartTrack cơ bản._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-02-03-001` | Osnap End Mid Center Quadrant *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-03-002` | Osnap Near Point Intersection *(thủ công)* | E03 | NORMAL | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -359,7 +378,7 @@ _End/Mid/Cen/Near/Point/Int/Tan/Perp/Quad và SmartTrack cơ bản._
 
 _Pan/Zoom/Orbit, double-click maximize, view resets_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-02-001` | Perspective Right Drag Orbit *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-02-002` | Orthographic Right Drag Pan *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -373,7 +392,7 @@ _Pan/Zoom/Orbit, double-click maximize, view resets_
 
 _Chọn đối tượng theo khung và Gumball trực quan_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-03-001` | Matrix Click Shift Ctrl Select *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-03-002` | Matrix Left Right Drag Selection *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -386,7 +405,7 @@ _Chọn đối tượng theo khung và Gumball trực quan_
 
 _Snaps palette, Ortho/Project/Planar UI_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-04-001` | Matrix Snap Toggle Panel *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-04-002` | Matrix Ortho Planar Project Toggles *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -398,7 +417,7 @@ _Snaps palette, Ortho/Project/Planar UI_
 
 _Wireframe/Shaded/Gem View, display presets khi modeling_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-05-001` | Wireframe Shaded Mode Switcher *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-05-002` | Gem View Material Color Cues *(thủ công)* | E03 | MEDIUM | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -411,7 +430,7 @@ _Wireframe/Shaded/Gem View, display presets khi modeling_
 
 _Picture Frame và scale tham chiếu ảnh_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-06-001` | Pictureframe Image Import *(thủ công)* | E03 | MEDIUM | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-06-002` | Pictureframe Position And Scale *(thủ công)* | E03 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -423,7 +442,7 @@ _Picture Frame và scale tham chiếu ảnh_
 
 _F6 menu theo selection type, auto-prefill builder_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-09-001` | F6 Selected Object Class Dispatch *(thủ công)* | E03 | MEDIUM | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-09-002` | F6 Default General Mode *(thủ công)* | E03 | MEDIUM | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -436,17 +455,17 @@ _F6 menu theo selection type, auto-prefill builder_
 
 </details>
 
-<details><summary><b>M03 — Curve, Surface, Solid và trao đổi 3DM</b> · ✅48 🟡147 ⬜48 · `OM9-M03` · NOT_STARTED</summary>
+<details><summary><b>M03 — Curve, Surface, Solid và trao đổi 3DM</b> · ✅48 🟡205 ⬜3 · `OM9-M03` · NOT_STARTED</summary>
 
 **L1** — Curve, Surface, Solid và trao đổi 3DM · phụ thuộc: M01
 
-Bằng chứng cấp milestone: `L3-001`, `L3-002`, `L3-003`, `L3-004`, `L3-005`, `L3-006`, `L3-007`, `OM9-L2-02-04`, `OM9-L2-03-08`, `OM9-L2-03-18`, `ellipsoid-exact-2026-10-23`, `solid-ui-followup-2026-10-23`
+Bằng chứng cấp milestone: `L3-001`, `L3-002`, `L3-003`, `L3-004`, `L3-005`, `L3-006`, `L3-007`, `OM9-L2-02-04`, `OM9-L2-03-08`, `OM9-L2-03-18`, `command-polyline-shortcuts-20261025`, `ellipsoid-exact-2026-10-23`, `solid-ui-followup-2026-10-23`
 
 **OM9-L2-01-09 — 01-be-occt-geometry-creation-ops** · ✅9 🟡0 ⬜0
 
 _Primitives, pipe, extrude, revolve, loft/sweep BRep và curve/surface adapters phục vụ trang sức._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-09-001` | Analytic Solid Primitive Factories | E04 | NORMAL | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-09-002` | Curve To Solid Extrusion | E06 | NORMAL | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -462,7 +481,7 @@ _Primitives, pipe, extrude, revolve, loft/sweep BRep và curve/surface adapters 
 
 _Union/Difference/Intersection, trim/split support, fillet/chamfer, shell/offset cần cho nhẫn và cutter._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-10-001` | B-Rep Boolean Union | E07 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-10-002` | B-Rep Boolean Difference | E07 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -478,7 +497,7 @@ _Union/Difference/Intersection, trim/split support, fillet/chamfer, shell/offset
 
 _Move/Rotate/Scale/Mirror/Array transformations + transform matrices làm primitive dịch vụ dùng chung._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-11-001` | Translation Rotation Scaling Matrices | E04 | NORMAL | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-11-002` | Mirror Across Plane | E07 | NORMAL | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -493,14 +512,14 @@ _Move/Rotate/Scale/Mirror/Array transformations + transform matrices làm primit
 
 _Đọc file Rhino .3dm (NURBS/trimmed BRep, layers, units, blocks, meshes), chuyển sang scene OCCT, giao dịch atomic; lệnh Import được gắn qua File Menu Matrix._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-01-13-001` | .3dm File Signature And Version Probe | E08 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-13-002` | Opennurbs Reader Bridge Contract | E08 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-13-003` | .3dm Document Units Tolerance Mapping | E08 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-13-004` | .3dm Layer And Object Attribute Mapping | E08 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-13-005` | .3dm Analytic And NURBS Curves | E08 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-01-13-006` | .3dm NURBS Surface And Trimmed B-Rep | E08 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-01-13-006` | .3dm NURBS Surface And Trimmed B-Rep | E08 | HIGH | 6/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-13-007` | .3dm Mesh And Instance Blocks | E08 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-13-008` | .3dm Unsupported Proprietary Object Policy | E08 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-01-13-009` | .3dm Import Atomic Scene Transaction | E08 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -512,18 +531,18 @@ _Đọc file Rhino .3dm (NURBS/trimmed BRep, layers, units, blocks, meshes), chu
 
 _Line/Polyline/InterpCurve/Circle/Arc/Offset/Fillet/Blend/Rebuild/Match và point edit, G0/G1/G2 theo scope Curve cần cho Matrix._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-02-04-001` | Line Polyline Point Creation *(thủ công)* | E04 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-04-002` | Circle Arc Ellipse Polygon Creation *(thủ công)* | E04 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-02-04-003` | Interpolated And Controlpoint NURBS Curve *(thủ công)* | E05 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-02-04-003` | Interpolated And Controlpoint NURBS Curve *(thủ công)* | E05 | HIGH | 6/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-04-004` | Curve Edit Points And Grips *(thủ công)* | E05 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-02-04-005` | Join Explode Close And Split Curves *(thủ công)* | E05 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-02-04-005` | Join Explode Close And Split Curves *(thủ công)* | E05 | HIGH | 6/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-04-006` | Offset Fillet Chamfer Curves *(thủ công)* | E05 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-04-007` | Blend Arcblend And Match Curve Continuity *(thủ công)* | E05 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-04-008` | Rebuild Refit And Knot Operations *(thủ công)* | E05 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-04-009` | Project Pullback And Curve Intersections *(thủ công)* | E05 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-02-04-010` | Duplicate Edge Border Isocurve *(thủ công)* | E05 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-02-04-010` | Duplicate Edge Border Isocurve *(thủ công)* | E05 | HIGH | 5/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-04-011` | Curve Seams Directions And Divisions *(thủ công)* | E05 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-04-012` | Sketch On Surface Mesh And Two Views *(thủ công)* | E05 | HIGH | 5/5 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
@@ -531,7 +550,7 @@ _Line/Polyline/InterpCurve/Circle/Arc/Offset/Fillet/Blend/Rebuild/Match và poin
 
 _Sweep1/2, Loft, Network, Patch, RailRevolve, Trim/Split/Untrim/MatchSurface/Offset cùng UV surface._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-02-05-001` | Sweep1 Sweep2 And Profile Sweep Workflows *(thủ công)* | E06 | MEDIUM | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-05-002` | Loft And Curve Network Workflows *(thủ công)* | E06 | MEDIUM | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -548,7 +567,7 @@ _Sweep1/2, Loft, Network, Patch, RailRevolve, Trim/Split/Untrim/MatchSurface/Off
 
 _Command sessions cho Move/Scale/Rotate/Array/Orient với pivot/ref/copy/preview kiểu Rhino._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-02-06-001` | Interactive Move Copy And Rotate *(thủ công)* | E04 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-02-06-002` | Interactive Scale 1d 2d 3d *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -561,145 +580,145 @@ _Command sessions cho Move/Scale/Rotate/Array/Orient với pivot/ref/copy/previe
 
 _11 lệnh thường dùng theo toolbar Matrix_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-03-08-001` | Top11 Duplicate Action *(thủ công)* | E04 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-08-002` | Top11 Editpoints And Controlpoints *(thủ công)* | E05 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-08-003` | Top11 Mirror Move Rotate Actions *(thủ công)* | E04 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-08-004` | Top11 Explode Join Split Trim Actions *(thủ công)* | E07 | NORMAL | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-08-005` | Top11 Ringrail Entrypoint *(thủ công)* | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-03-08-005` | Top11 Ringrail Entrypoint *(thủ công)* | E09 | NORMAL | 0/1 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-03-08-006` | Top11 Toolbar Availability State *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
 **OM9-L2-03-16 — 08-febe-matrix-curve-menu-workflows** · ✅0 🟡58 ⬜0
 
 _Curve menu và lệnh chỉnh curve của Matrix8 Book1_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-03-16-001` | Curve · PolyLine — menu binding *(thủ công)* | E04 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-002` | Curve · Line — menu binding *(thủ công)* | E04 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-003` | Curve · Interp Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-004` | Curve · Rectangle — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-005` | Curve · Circle — menu binding *(thủ công)* | E04 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-006` | Curve · Ellipse — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-007` | Curve · Arc — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-008` | Curve · Arc Direction — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-001` | Curve · PolyLine — menu binding *(thủ công)* | E04 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-002` | Curve · Line — menu binding *(thủ công)* | E04 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-003` | Curve · Interp Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-004` | Curve · Rectangle — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-005` | Curve · Circle — menu binding *(thủ công)* | E04 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-006` | Curve · Ellipse — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-007` | Curve · Arc — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-008` | Curve · Arc Direction — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-16-009` | Curve · Rebuild — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-010` | Curve · Refit to Tolerance — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-011` | Curve · Quick Curve Blend — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-012` | Curve · Adjustable Curve Blend — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-010` | Curve · Refit to Tolerance — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-011` | Curve · Quick Curve Blend — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-012` | Curve · Adjustable Curve Blend — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-16-013` | Curve · Curve from 2 Views — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-16-014` | Curve · Curve 2 Views with History — menu binding *(thủ công)* | E05 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-015` | Curve · Pullback — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-016` | Curve · Project — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-017` | Curve · Intersection — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-018` | Curve · Offset Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-019` | Curve · Offset Curve on Surface — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-020` | Curve · Extract Isocurve — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-021` | Curve · Fillet Curves — menu binding *(thủ công)* | E05 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-022` | Curve · Fillet Corners — menu binding *(thủ công)* | E05 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-023` | Curve · Chamfer Curves — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-024` | Curve · Create UV Curves — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-025` | Curve · Apply UV Curves — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-026` | Curve · Through Points — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-027` | Curve · Extend Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-028` | Curve · Polygon — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-015` | Curve · Pullback — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-016` | Curve · Project — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-017` | Curve · Intersection — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-018` | Curve · Offset Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-019` | Curve · Offset Curve on Surface — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-020` | Curve · Extract Isocurve — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-021` | Curve · Fillet Curves — menu binding *(thủ công)* | E05 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-022` | Curve · Fillet Corners — menu binding *(thủ công)* | E05 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-023` | Curve · Chamfer Curves — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-024` | Curve · Create UV Curves — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-025` | Curve · Apply UV Curves — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-026` | Curve · Through Points — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-027` | Curve · Extend Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-028` | Curve · Polygon — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-16-029` | Curve · Spiral — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-16-030` | Curve · Helix — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-031` | Curve · Point — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-032` | Curve · Mark Curve Start — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-033` | Curve · Mark Curve End — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-034` | Curve · Adjust Closed Curve Seam — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-035` | Curve · Continue Interpolated Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-036` | Curve · Divide Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-037` | Curve · Curve Boolean — menu binding *(thủ công)* | E05 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-031` | Curve · Point — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-032` | Curve · Mark Curve Start — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-033` | Curve · Mark Curve End — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-034` | Curve · Adjust Closed Curve Seam — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-035` | Curve · Continue Interpolated Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-036` | Curve · Divide Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-037` | Curve · Curve Boolean — menu binding *(thủ công)* | E05 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-16-038` | Curve · Tween Curves — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-039` | Curve · Duplicate Edge — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-040` | Curve · Duplicate Border — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-041` | Curve · Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-042` | Curve · Continue Control Point Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-043` | Curve · Extract Angle Isocurve — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-039` | Curve · Duplicate Edge — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-040` | Curve · Duplicate Border — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-041` | Curve · Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-042` | Curve · Continue Control Point Curve — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-043` | Curve · Extract Angle Isocurve — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-16-044` | Curve · Cross Section Profiles — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-045` | Curve · Sketch — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-046` | Curve · Sketch on Surface — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-047` | Curve · Sketch on Mesh — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-048` | Curve · Polyline on Surface — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-049` | Curve · Interp Curve on Surface — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-050` | Curve · Curve to Lines — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-051` | Curve · Section — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-052` | Curve · Match — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-053` | Curve · Silhouette — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-054` | Curve · Extract Wire Frame — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-055` | Curve · Soft Edit — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-056` | Curve · Offset Normal to Surface — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-057` | Curve · Arc Blend — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-16-058` | Curve · Intersect Two Sets — menu binding *(thủ công)* | E05 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-045` | Curve · Sketch — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-046` | Curve · Sketch on Surface — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-047` | Curve · Sketch on Mesh — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-048` | Curve · Polyline on Surface — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-049` | Curve · Interp Curve on Surface — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-050` | Curve · Curve to Lines — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-051` | Curve · Section — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-052` | Curve · Match — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-053` | Curve · Silhouette — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-054` | Curve · Extract Wire Frame — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-055` | Curve · Soft Edit — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-056` | Curve · Offset Normal to Surface — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-057` | Curve · Arc Blend — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-16-058` | Curve · Intersect Two Sets — menu binding *(thủ công)* | E05 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
 **OM9-L2-03-17 — 09-febe-matrix-surface-menu-workflows** · ✅0 🟡38 ⬜0
 
 _Surface menu, Sweep/Loft/Trim settings theo Matrix_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-03-17-001` | Surface · Sweep 1 — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-002` | Surface · Sweep 1 History — menu binding *(thủ công)* | E06 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-003` | Surface · Sweep 2 — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-004` | Surface · Sweep 2 History — menu binding *(thủ công)* | E06 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-005` | Surface · Profile Sweep — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-006` | Surface · Rebuild — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-001` | Surface · Sweep 1 — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-002` | Surface · Sweep 1 History — menu binding *(thủ công)* | E06 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-003` | Surface · Sweep 2 — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-004` | Surface · Sweep 2 History — menu binding *(thủ công)* | E06 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-005` | Surface · Profile Sweep — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-006` | Surface · Rebuild — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-007` | Surface · Blend Surface — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-008` | Surface · Variable Blend Surfaces — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-008` | Surface · Variable Blend Surfaces — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-009` | Surface · Loft — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-010` | Surface · Curve Network — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-011` | Surface · Shrink Trimmed Surface — menu binding *(thủ công)* | E06 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-011` | Surface · Shrink Trimmed Surface — menu binding *(thủ công)* | E06 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-012` | Surface · Patch — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-013` | Surface · Planar Curves — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-014` | Surface · Edge Curves — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-015` | Surface · Plane from Corners — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-016` | Surface · Untrim — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-017` | Surface · Surface Extrude All — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-015` | Surface · Plane from Corners — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-016` | Surface · Untrim — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-017` | Surface · Surface Extrude All — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-018` | Surface · Rail Revolve — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-019` | Surface · Sweep 4 — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-019` | Surface · Sweep 4 — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-020` | Surface · Fillet Surfaces — menu binding *(thủ công)* | E06 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-021` | Surface · Variable Fillet Surfaces — menu binding *(thủ công)* | E06 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-021` | Surface · Variable Fillet Surfaces — menu binding *(thủ công)* | E06 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-022` | Surface · Chamfer Surfaces — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-023` | Surface · Variable Chamfer Surfaces — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-023` | Surface · Variable Chamfer Surfaces — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-024` | Surface · Offset Surface — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-025` | Surface · Variable Offset Surface — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-026` | Surface · Tween Surfaces — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-027` | Surface · Merge Surfaces — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-028` | Surface · Match Surfaces — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-027` | Surface · Merge Surfaces — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-028` | Surface · Match Surfaces — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-029` | Surface · Drape — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-030` | Surface · Sweep Multi — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-031` | Surface · Split at Isocurve — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-030` | Surface · Sweep Multi — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-031` | Surface · Split at Isocurve — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-032` | Surface · Extend Surface — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-033` | Surface · Extrude Normal to Surface — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-033` | Surface · Extrude Normal to Surface — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-17-034` | Surface · Unroll Surface — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-035` | Surface · Soft Edit — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-036` | Surface · Cutting Plane — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-037` | Surface · Adjust Closed Surface Seam — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-17-038` | Surface · Set Surface Tangent — menu binding *(thủ công)* | E06 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-035` | Surface · Soft Edit — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-036` | Surface · Cutting Plane — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-037` | Surface · Adjust Closed Surface Seam — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-17-038` | Surface · Set Surface Tangent — menu binding *(thủ công)* | E06 | MEDIUM | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
 **OM9-L2-03-18 — 10-febe-matrix-solid-menu-workflows** · ✅0 🟡21 ⬜0
 
 _Solid menu phù hợp trang sức: primitives, bool, extrusion, shell, text geometry_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-03-18-001` | Solid · Boolean Union — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-18-002` | Solid · Boolean Difference — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-18-003` | Solid · Boolean Intersection — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-18-004` | Solid · Boolean Two Objects — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-18-001` | Solid · Boolean Union — menu binding *(thủ công)* | E07 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-18-002` | Solid · Boolean Difference — menu binding *(thủ công)* | E07 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-18-003` | Solid · Boolean Intersection — menu binding *(thủ công)* | E07 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-18-004` | Solid · Boolean Two Objects — menu binding *(thủ công)* | E07 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-18-005` | Solid · Cap Planar — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-18-006` | Solid · Extract Surface — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-18-007` | Solid · Fillet Edge — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-18-007` | Solid · Fillet Edge — menu binding *(thủ công)* | E07 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-18-008` | Solid · Text — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-18-009` | Solid · Extrude Curve Straight — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-18-010` | Solid · Solid Extrude All — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-18-009` | Solid · Extrude Curve Straight — menu binding *(thủ công)* | E07 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-18-010` | Solid · Solid Extrude All — menu binding *(thủ công)* | E07 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-18-011` | Solid · Pipe — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-18-012` | Solid · Box — menu binding *(thủ công)* | E04 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-18-013` | Solid · Sphere — menu binding *(thủ công)* | E04 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-18-014` | Solid · Ellipsoid — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-18-012` | Solid · Box — menu binding *(thủ công)* | E04 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-18-013` | Solid · Sphere — menu binding *(thủ công)* | E04 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-18-014` | Solid · Ellipsoid — menu binding *(thủ công)* | E07 | HIGH | 3/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-18-015` | Solid · Torus — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-18-016` | Solid · Cylinder — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-18-017` | Solid · Tube — menu binding *(thủ công)* | E07 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
@@ -712,351 +731,377 @@ _Solid menu phù hợp trang sức: primitives, bool, extrusion, shell, text geo
 
 _Check/ShowEdges/validity, mesh inspection, model health_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-03-19-001` | Check Object Validity And Bad Objects *(thủ công)* | E07 | NORMAL | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-19-002` | Show And Classify Naked Edges *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-19-001` | Check Object Validity And Bad Objects *(thủ công)* | E07 | NORMAL | 6/7 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-19-002` | Show And Classify Naked Edges *(thủ công)* | E07 | NORMAL | 5/6 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-19-003` | Bounding Box And Center Object *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
-| `OM9-L3-03-19-004` | Group And Ungroup Selection *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-19-004` | Group And Ungroup Selection *(thủ công)* | E07 | NORMAL | 5/6 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-19-005` | Mesh From NURBS For Production *(thủ công)* | E07 | NORMAL | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-19-006` | Mesh Reduce Basic *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-03-19-007` | Object Health Report Panel *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
-**OM9-L2-03-20 — 12-febe-matrix-measure-and-model-statistics** · ✅0 🟡0 ⬜5
+**OM9-L2-03-20 — 12-febe-matrix-measure-and-model-statistics** · ✅0 🟡5 ⬜0
 
 _Distance/Angle/Length/Radius, kích thước và thống kê mẫu_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-03-20-001` | Distance And Length Measurement *(thủ công)* | E04 | NORMAL | 0/5 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-20-002` | Angle And Radius Measurement *(thủ công)* | E07 | NORMAL | 0/5 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-20-003` | Bounding Size And Center Measurement *(thủ công)* | E07 | NORMAL | 0/5 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-20-004` | Jewelry Object Count And Type Summary *(thủ công)* | E07 | NORMAL | 0/5 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-20-005` | Measurement Label And Command Feedback *(thủ công)* | E07 | NORMAL | 0/5 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-03-20-001` | Distance And Length Measurement *(thủ công)* | E04 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-20-002` | Angle And Radius Measurement *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-20-003` | Bounding Size And Center Measurement *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-20-004` | Jewelry Object Count And Type Summary *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-20-005` | Measurement Label And Command Feedback *(thủ công)* | E07 | NORMAL | 5/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
-**OM9-L2-04-01 — 13-febe-matrix-transform-toolbar-bridges** · ✅0 🟡0 ⬜42
+**OM9-L2-04-01 — 13-febe-matrix-transform-toolbar-bridges** · ✅0 🟡40 ⬜2
 
 _Matrix Transform menu binds to Rhino/OCCT transforms_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-01-001` | Transform · Scale 3D — menu binding *(thủ công)* | E04 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-002` | Transform · Scale2D — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-003` | Transform · Scale1D — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-004` | Transform · Scale Non-Uniform — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-005` | Transform · Orient 2 Points — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-006` | Transform · Orient 3 Points — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-007` | Transform · Rotate3D — menu binding *(thủ công)* | E04 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-008` | Transform · Bend — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-009` | Transform · Array Polar — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-010` | Transform · Project To C-Plane — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-011` | Transform · Smart Flow — menu binding *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-012` | Transform · Smart Flow Rigid — menu binding *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-013` | Transform · Smart Flow Break — menu binding *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-014` | Transform · Smart Flow Pull Down Curves — menu binding *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-015` | Transform · Orient on Surface — menu binding *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-016` | Transform · Orient Perpendicular to Curve — menu binding *(thủ công)* | E07 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-017` | Transform · Orient on Curve — menu binding *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-018` | Transform · Symmetry — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-01-001` | Transform · Scale 3D — menu binding *(thủ công)* | E04 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-002` | Transform · Scale2D — menu binding *(thủ công)* | E07 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-003` | Transform · Scale1D — menu binding *(thủ công)* | E07 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-004` | Transform · Scale Non-Uniform — menu binding *(thủ công)* | E07 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-005` | Transform · Orient 2 Points — menu binding *(thủ công)* | E07 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-006` | Transform · Orient 3 Points — menu binding *(thủ công)* | E07 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-007` | Transform · Rotate3D — menu binding *(thủ công)* | E04 | NORMAL | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-008` | Transform · Bend — menu binding *(thủ công)* | E13 | NORMAL | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-009` | Transform · Array Polar — menu binding *(thủ công)* | E07 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-010` | Transform · Project To C-Plane — menu binding *(thủ công)* | E07 | NORMAL | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-011` | Transform · Smart Flow — menu binding *(thủ công)* | E13 | HIGH | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-012` | Transform · Smart Flow Rigid — menu binding *(thủ công)* | E13 | HIGH | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-013` | Transform · Smart Flow Break — menu binding *(thủ công)* | E13 | HIGH | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-014` | Transform · Smart Flow Pull Down Curves — menu binding *(thủ công)* | E13 | HIGH | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-015` | Transform · Orient on Surface — menu binding *(thủ công)* | E13 | MEDIUM | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-016` | Transform · Orient Perpendicular to Curve — menu binding *(thủ công)* | E07 | MEDIUM | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-017` | Transform · Orient on Curve — menu binding *(thủ công)* | E13 | MEDIUM | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-018` | Transform · Symmetry — menu binding *(thủ công)* | E13 | NORMAL | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-04-01-019` | Transform · Solid Points ON — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-020` | Transform · Cage Edit — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-021` | Transform · ReleaseFromCage — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-022` | Transform · Array Along Curve — menu binding *(thủ công)* | E07 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-023` | Transform · Array Linear — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-024` | Transform · Array Along Surface — menu binding *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-025` | Transform · Array Curve on Surface — menu binding *(thủ công)* | E07 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-026` | Transform · Array — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-027` | Transform · Flow Along Curve — menu binding *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-028` | Transform · Flow Along Surface — menu binding *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-029` | Transform · Splop — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-030` | Transform · Set Points — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-031` | Transform · Scale By Plane — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-032` | Transform · Stretch — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-033` | Transform · Taper — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-034` | Transform · Shear — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-035` | Transform · Twist — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-036` | Transform · Maelstrom — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-01-020` | Transform · Cage Edit — menu binding *(thủ công)* | E13 | NORMAL | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-021` | Transform · ReleaseFromCage — menu binding *(thủ công)* | E13 | NORMAL | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-022` | Transform · Array Along Curve — menu binding *(thủ công)* | E07 | MEDIUM | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-023` | Transform · Array Linear — menu binding *(thủ công)* | E07 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-024` | Transform · Array Along Surface — menu binding *(thủ công)* | E13 | MEDIUM | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-025` | Transform · Array Curve on Surface — menu binding *(thủ công)* | E07 | MEDIUM | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-026` | Transform · Array — menu binding *(thủ công)* | E07 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-027` | Transform · Flow Along Curve — menu binding *(thủ công)* | E13 | MEDIUM | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-028` | Transform · Flow Along Surface — menu binding *(thủ công)* | E13 | MEDIUM | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-029` | Transform · Splop — menu binding *(thủ công)* | E13 | NORMAL | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-030` | Transform · Set Points — menu binding *(thủ công)* | E07 | NORMAL | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-031` | Transform · Scale By Plane — menu binding *(thủ công)* | E07 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-032` | Transform · Stretch — menu binding *(thủ công)* | E13 | NORMAL | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-033` | Transform · Taper — menu binding *(thủ công)* | E13 | NORMAL | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-034` | Transform · Shear — menu binding *(thủ công)* | E13 | NORMAL | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-035` | Transform · Twist — menu binding *(thủ công)* | E13 | NORMAL | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-036` | Transform · Maelstrom — menu binding *(thủ công)* | E13 | NORMAL | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 | `OM9-L3-04-01-037` | Transform · Make Down Facing — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-038` | Transform · Remap to C-Plane — menu binding *(thủ công)* | E07 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-039` | Transform · MoveUVN — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-040` | Transform · Soft Move — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-041` | Transform · Create Cage — menu binding *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-01-042` | Transform menu action availability *(thủ công)* | E07 | NORMAL | 0/5 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-01-038` | Transform · Remap to C-Plane — menu binding *(thủ công)* | E07 | NORMAL | 2/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-039` | Transform · MoveUVN — menu binding *(thủ công)* | E13 | NORMAL | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-040` | Transform · Soft Move — menu binding *(thủ công)* | E13 | NORMAL | 2/2 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-041` | Transform · Create Cage — menu binding *(thủ công)* | E13 | NORMAL | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-01-042` | Transform menu action availability *(thủ công)* | E07 | NORMAL | 2/5 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+
+**OM9-L2-03-21 — Model-space annotation and dimensions** · ✅0 🟡13 ⬜0
+
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
+|---|---|---|---|---:|---|---|
+| `OM9-L3-03-21-001` | Horizontal Dimension |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-002` | Vertical Dimension |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-003` | Angle Dimension |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-004` | Rotated Dimension |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-005` | Aligned Dimension |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-006` | Diameter Dimension |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-007` | Radial Dimension |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-008` | Leader |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-009` | Text Block |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-010` | Edit Dimension |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-011` | Edit Text |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-012` | Dimension Options |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-03-21-013` | Recenter Dimension Text |  |  | 2/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
 </details>
 
-<details><summary><b>M04 — Builder, History và Ring</b> · ✅0 🟡0 ⬜51 · `OM9-M04` · L1_L4_SPECIFIED_NOT_IMPLEMENTED</summary>
+<details><summary><b>M04 — Builder, History và Ring</b> · ✅14 🟡37 ⬜0 · `OM9-M04` · L1_L4_SPECIFIED_NOT_IMPLEMENTED</summary>
 
 **L1** — Builder, History và Ring · phụ thuộc: M01
 
-**OM9-L2-01-04 — 01-be-associative-dependency-rebuild** · ✅0 🟡0 ⬜9
+Bằng chứng cấp milestone: `OM9-L2-01-04-FOLLOWUP`, `OM9-L2-03-11`, `OM9-L2-03-11-COMPLETION`, `OM9-L2-03-12`, `OM9-L2-03-13`, `OM9-L2-03-13-COMPLETION`, `OM9-L2-04-02`, `OM9-L2-04-02-COMPLETION`, `OM9-L2-04-03`, `OM9-L2-04-19-COMPLETION`
+
+**OM9-L2-01-04 — 01-be-associative-dependency-rebuild** · ✅9 🟡0 ⬜0
 
 _DAG/history tối thiểu cho rail/profile/gems/settings/cutters, dirty propagation, rollback, stable semantic references._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-01-04-001` | Feature Record And Typed Dependency Edges | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-01-04-002` | Feature Provenance From Command | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-01-04-003` | Dirty Propagation And Topological Order | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-01-04-004` | Stable Semantic Reference Linking | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-01-04-005` | Incremental Recompute And Cache | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-01-04-006` | Builder Preview Vs Committed Features | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-01-04-007` | History Recompute Failure Rollback | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-01-04-008` | Delete Parent Or Change Input Policy | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-01-04-009` | Associative Rebuild Geometry Fixtures | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-01-04-001` | Feature Record And Typed Dependency Edges | E09 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-01-04-002` | Feature Provenance From Command | E09 | HIGH | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-01-04-003` | Dirty Propagation And Topological Order | E09 | HIGH | 8/8 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-01-04-004` | Stable Semantic Reference Linking | E09 | HIGH | 7/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-01-04-005` | Incremental Recompute And Cache | E09 | HIGH | 7/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-01-04-006` | Builder Preview Vs Committed Features | E09 | HIGH | 7/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-01-04-007` | History Recompute Failure Rollback | E09 | HIGH | 7/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-01-04-008` | Delete Parent Or Change Input Policy | E09 | HIGH | 7/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-01-04-009` | Associative Rebuild Geometry Fixtures | E09 | HIGH | 7/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
-**OM9-L2-03-11 — 02-febe-matrix-builder-ui-and-live-handles** · ✅0 🟡0 ⬜9
+**OM9-L2-03-11 — 02-febe-matrix-builder-ui-and-live-handles** · ✅0 🟡9 ⬜0
 
 _Builder panel, live preview, viewport control handles_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-03-11-001` | Builder Typed Input Boxes *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-11-002` | Builder Mode Tabs And Context *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-11-003` | Builder Parameter Controls And Sliders *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-11-004` | Builder Live Preview Lifecycle *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-11-005` | Builder Viewport Control Handles *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-11-006` | Builder Handle And Panel Bidirectional Sync *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-11-007` | Builder Profile Selector Window *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-11-008` | Builder Accept Cancel Reset And Undo *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-11-009` | Builder F6 And Commandline Input Binding *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-03-11-001` | Builder Typed Input Boxes *(thủ công)* | E09 | MEDIUM | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-11-002` | Builder Mode Tabs And Context *(thủ công)* | E09 | MEDIUM | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-11-003` | Builder Parameter Controls And Sliders *(thủ công)* | E09 | MEDIUM | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-11-004` | Builder Live Preview Lifecycle *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-11-005` | Builder Viewport Control Handles *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-11-006` | Builder Handle And Panel Bidirectional Sync *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-11-007` | Builder Profile Selector Window *(thủ công)* | E09 | MEDIUM | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-11-008` | Builder Accept Cancel Reset And Undo *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-11-009` | Builder F6 And Commandline Input Binding *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 
-**OM9-L2-03-12 — 03-febe-matrix-builder-styles-and-presets** · ✅0 🟡0 ⬜6
+**OM9-L2-03-12 — 03-febe-matrix-builder-styles-and-presets** · ✅0 🟡6 ⬜0
 
 _Preset/Style theo Builder, snapshot các tham số thiết kế_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-03-12-001` | Builder Style Param Snapshot Schema | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-12-002` | Builder Style Browser And Thumbnail *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-12-003` | Builder Style Apply And Preview *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-12-004` | Builder Style Save New Name *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-12-005` | Builder Style Mode And Shape Filter *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-12-006` | Builder Style Match Attributes *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-03-12-001` | Builder Style Param Snapshot Schema | E09 | NORMAL | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-12-002` | Builder Style Browser And Thumbnail *(thủ công)* | E09 | MEDIUM | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-12-003` | Builder Style Apply And Preview *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-12-004` | Builder Style Save New Name *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-12-005` | Builder Style Mode And Shape Filter *(thủ công)* | E09 | MEDIUM | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-12-006` | Builder Style Match Attributes *(thủ công)* | E09 | MEDIUM | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 
-**OM9-L2-03-13 — 04-febe-matrix-history-associative-updates** · ✅0 🟡0 ⬜6
+**OM9-L2-03-13 — 04-febe-matrix-history-associative-updates** · ✅0 🟡6 ⬜0
 
 _UI bật/tắt và chỉnh association của builder history_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-03-13-001` | Matrix History Record Toggle *(thủ công)* | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-13-002` | Matrix History Update Toggle *(thủ công)* | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-13-003` | Matrix History Broken Link Report *(thủ công)* | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-13-004` | Matrix Clear Single Object History *(thủ công)* | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-13-005` | Edit Existing Builder By History *(thủ công)* | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-03-13-006` | History Commandline And Preview Status *(thủ công)* | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-03-13-001` | Matrix History Record Toggle *(thủ công)* | E09 | HIGH | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-13-002` | Matrix History Update Toggle *(thủ công)* | E09 | HIGH | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-13-003` | Matrix History Broken Link Report *(thủ công)* | E09 | HIGH | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-13-004` | Matrix Clear Single Object History *(thủ công)* | E09 | HIGH | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-13-005` | Edit Existing Builder By History *(thủ công)* | E09 | HIGH | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-03-13-006` | History Commandline And Preview Status *(thủ công)* | E09 | HIGH | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 
-**OM9-L2-04-02 — 05-febe-ring-rail-profile-and-resize-tools** · ✅0 🟡0 ⬜9
+**OM9-L2-04-02 — 05-febe-ring-rail-profile-and-resize-tools** · ✅0 🟡9 ⬜0
 
 _Ring rail, outside rail, profile placer, ring resizer_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-02-001` | Ring Rail Jewelry Size Standard *(thủ công)* | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-02-002` | Outside Ring Rail Generator *(thủ công)* | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-02-003` | Profile Placer On Rail *(thủ công)* | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-02-004` | Custom Rail And Advanced Rail *(thủ công)* | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-02-005` | Four Rail Profile Tool *(thủ công)* | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-02-006` | Profile Edit Merge And Endcap *(thủ công)* | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-02-007` | Ring Resizer Builder *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-02-008` | Rail Profile Sweep Associative Output *(thủ công)* | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-02-009` | Rail And Profile Viewport Handles *(thủ công)* | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-02-001` | Ring Rail Jewelry Size Standard *(thủ công)* | E09 | NORMAL | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-02-002` | Outside Ring Rail Generator *(thủ công)* | E09 | NORMAL | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-02-003` | Profile Placer On Rail *(thủ công)* | E09 | NORMAL | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-02-004` | Custom Rail And Advanced Rail *(thủ công)* | E09 | NORMAL | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-02-005` | Four Rail Profile Tool *(thủ công)* | E09 | NORMAL | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-02-006` | Profile Edit Merge And Endcap *(thủ công)* | E09 | NORMAL | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-02-007` | Ring Resizer Builder *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-02-008` | Rail Profile Sweep Associative Output *(thủ công)* | E09 | NORMAL | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-02-009` | Rail And Profile Viewport Handles *(thủ công)* | E09 | NORMAL | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 
-**OM9-L2-04-03 — 06-febe-jewelry-ring-builder-family** · ✅0 🟡0 ⬜7
+**OM9-L2-04-03 — 06-febe-jewelry-ring-builder-family** · ✅0 🟡7 ⬜0
 
 _Eternity/Signet/Raised/Award ring builders theo NURBS_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-03-001` | Eternity Band Builder *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-03-002` | Signet Ring Builder *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-03-003` | Raised Band Builder *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-03-004` | Award Ring Builder *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-03-005` | Ring Builder Style Presets *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-03-006` | Ring Builder History Updates *(thủ công)* | E09 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-03-007` | Ring Builder Final B-Rep Validation *(thủ công)* | E09 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-03-001` | Eternity Band Builder *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-03-002` | Signet Ring Builder *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-03-003` | Raised Band Builder *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-03-004` | Award Ring Builder *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-03-005` | Ring Builder Style Presets *(thủ công)* | E09 | MEDIUM | 6/6 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-03-006` | Ring Builder History Updates *(thủ công)* | E09 | HIGH | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-03-007` | Ring Builder Final B-Rep Validation *(thủ công)* | E09 | MEDIUM | 7/7 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 
-**OM9-L2-04-19 — 07-be-jewelry-metal-weight-calculations** · ✅0 🟡0 ⬜5
+**OM9-L2-04-19 — 07-be-jewelry-metal-weight-calculations** · ✅5 🟡0 ⬜0
 
 _Tính thể tích, vật liệu, trọng lượng kim loại trang sức_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-19-001` | Metal Volume From Closed B-Rep | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-19-002` | Metal Material Density Registry | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-19-003` | Metal Estimated Mass Calculation | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-19-004` | Multi Material Model Mass Breakdown | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-19-005` | Metal Weight Error And Open B-Rep Policy | E09 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-19-001` | Metal Volume From Closed B-Rep | E09 | NORMAL | 7/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/evidence` |
+| `OM9-L3-04-19-002` | Metal Material Density Registry | E09 | NORMAL | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/evidence` |
+| `OM9-L3-04-19-003` | Metal Estimated Mass Calculation | E09 | NORMAL | 6/6 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/evidence` |
+| `OM9-L3-04-19-004` | Multi Material Model Mass Breakdown | E09 | NORMAL | 7/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/evidence` |
+| `OM9-L3-04-19-005` | Metal Weight Error And Open B-Rep Policy | E09 | NORMAL | 7/7 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/evidence` |
 
 </details>
 
-<details><summary><b>M05 — Gems và Layout</b> · ✅0 🟡0 ⬜43 · `OM9-M05` · L1_L4_SPECIFIED_NOT_IMPLEMENTED</summary>
+<details><summary><b>M05 — Gems và Layout</b> · ✅3 🟡40 ⬜0 · `OM9-M05` · L1_L4_SPECIFIED_NOT_IMPLEMENTED</summary>
 
 **L1** — Gems và Layout · phụ thuộc: M03
 
-**OM9-L2-04-09 — 01-febe-gem-asset-shapes-and-loader** · ✅0 🟡0 ⬜8
+Bằng chứng cấp milestone: `OM9-L2-04-09`, `OM9-L2-04-10`, `OM9-L2-04-11`, `OM9-L2-04-12`, `OM9-L2-04-13`
+
+**OM9-L2-04-09 — 01-febe-gem-asset-shapes-and-loader** · ✅3 🟡5 ⬜0
 
 _Gem shapes/cuts, size, loader/instances_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-09-001` | Gem Shape Cut Dimension Schema | E10 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-09-002` | Gem Reference Mesh And B-Rep Assets | E10 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-09-003` | Gem Loader Shape Cut Size Picker *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-09-004` | Gem Custom Shape From Profile *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-09-005` | Gem Emerald And Baguette Builders *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-09-006` | Gem Instance Create Rotate And Position *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-09-007` | Gem Asset Properties And Layer Defaults *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-09-008` | Gem Facet Outline Girdle Reference API | E10 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-09-001` | Gem Shape Cut Dimension Schema | E10 | NORMAL | 2/2 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/evidence` |
+| `OM9-L3-04-09-002` | Gem Reference Mesh And B-Rep Assets | E10 | NORMAL | 2/2 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/evidence` |
+| `OM9-L3-04-09-003` | Gem Loader Shape Cut Size Picker *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-09-004` | Gem Custom Shape From Profile *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-09-005` | Gem Emerald And Baguette Builders *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-09-006` | Gem Instance Create Rotate And Position *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-09-007` | Gem Asset Properties And Layer Defaults *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-09-008` | Gem Facet Outline Girdle Reference API | E10 | NORMAL | 2/2 | ✅ đã nghiệm thu — ký bởi cổng AUTO_ONLY (bằng chứng tự động) | `implementation/evidence` |
 
-**OM9-L2-04-10 — 02-febe-gem-on-curves-and-surfaces** · ✅0 🟡0 ⬜11
+**OM9-L2-04-10 — 02-febe-gem-on-curves-and-surfaces** · ✅0 🟡11 ⬜0
 
 _Gems on Curve/Surface, spacing, orientation, history_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-10-001` | Gem On Curve Basic *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-10-002` | Gem On Curve Advanced *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-10-003` | Gem Count On Curve *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-10-004` | Gem List On Curve *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-10-005` | Gem On Curve Multi *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-10-006` | Gem Profile Curve And Guides *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-10-007` | Gem On Surface *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-10-008` | Gem Follow Underlying Curve *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-10-009` | Gem Flow Placement *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-10-010` | Gem Splop On Surface *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-10-011` | Gem To Curve Surface History Links *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-10-001` | Gem On Curve Basic *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-10-002` | Gem On Curve Advanced *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-10-003` | Gem Count On Curve *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-10-004` | Gem List On Curve *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-10-005` | Gem On Curve Multi *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-10-006` | Gem Profile Curve And Guides *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-10-007` | Gem On Surface *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-10-008` | Gem Follow Underlying Curve *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-10-009` | Gem Flow Placement *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-10-010` | Gem Splop On Surface *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-10-011` | Gem To Curve Surface History Links *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 
-**OM9-L2-04-11 — 03-febe-gem-halo-cluster-baguette-layouts** · ✅0 🟡0 ⬜7
+**OM9-L2-04-11 — 03-febe-gem-halo-cluster-baguette-layouts** · ✅0 🟡7 ⬜0
 
 _Halo/Cluster/Baguette Channel/Between Curves_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-11-001` | Halo Builder *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-11-002` | Cluster Builder *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-11-003` | Baguette Channel Layout *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-11-004` | Tapered Baguettes Between Two Curves *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-11-005` | Gems Between Two Curves *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-11-006` | Orient To Gem *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-11-007` | Halo Cluster Edit Parameters *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-11-001` | Halo Builder *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-11-002` | Cluster Builder *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-11-003` | Baguette Channel Layout *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-11-004` | Tapered Baguettes Between Two Curves *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-11-005` | Gems Between Two Curves *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-11-006` | Orient To Gem *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-11-007` | Halo Cluster Edit Parameters *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 
-**OM9-L2-04-12 — 04-febe-gem-pave-layout-and-azure** · ✅0 🟡0 ⬜8
+**OM9-L2-04-12 — 04-febe-gem-pave-layout-and-azure** · ✅0 🟡8 ⬜0
 
 _Auto Pavé/Pavé/Azure layout_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-12-001` | Auto Pave Builder *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-12-002` | Manual Pave Builder *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-12-003` | Pave Azure Builder *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-12-004` | Pave Prong Layout *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-12-005` | Pave Sphere Layout *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-12-006` | Gem Springs And Relaxation *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-12-007` | Pave Region Controls And Preview *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-12-008` | Pave History Geometry Refresh *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-12-001` | Auto Pave Builder *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-12-002` | Manual Pave Builder *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-12-003` | Pave Azure Builder *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-12-004` | Pave Prong Layout *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-12-005` | Pave Sphere Layout *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-12-006` | Gem Springs And Relaxation *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-12-007` | Pave Region Controls And Preview *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-12-008` | Pave History Geometry Refresh *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 
-**OM9-L2-04-13 — 05-febe-gem-instance-edits-and-reports** · ✅0 🟡0 ⬜9
+**OM9-L2-04-13 — 05-febe-gem-instance-edits-and-reports** · ✅0 🟡9 ⬜0
 
 _Gem Control/Map/Reporter, gemstone editing_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-13-001` | Gem Positioner MSR *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-13-002` | Gem Control And Size Edits *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-13-003` | Gem Match Attributes *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-13-004` | Gem Style Save *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-13-005` | Gem Style Load *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-13-006` | Gem Update And Regenerate *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-13-007` | Gem Map Viewport Overlay *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-13-008` | Gem Reporter Count And Weight *(thủ công)* | E10 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-13-009` | Gem Attribute History And ID Preservation *(thủ công)* | E10 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-13-001` | Gem Positioner MSR *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-13-002` | Gem Control And Size Edits *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-13-003` | Gem Match Attributes *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-13-004` | Gem Style Save *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-13-005` | Gem Style Load *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-13-006` | Gem Update And Regenerate *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-13-007` | Gem Map Viewport Overlay *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-13-008` | Gem Reporter Count And Weight *(thủ công)* | E10 | MEDIUM | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
+| `OM9-L3-04-13-009` | Gem Attribute History And ID Preservation *(thủ công)* | E10 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/evidence` |
 
 </details>
 
-<details><summary><b>M06 — Settings và Prongs</b> · ✅0 🟡0 ⬜19 · `OM9-M06` · L1_L4_SPECIFIED_NOT_IMPLEMENTED</summary>
+<details><summary><b>M06 — Settings và Prongs</b> · ✅0 🟡19 ⬜0 · `OM9-M06` · M06_L2_04_14_AND_04_15_IMPLEMENTED_AUTOMATED_UI_REVIEW_OPEN</summary>
 
 **L1** — Settings và Prongs · phụ thuộc: M03, M05
 
-**OM9-L2-04-14 — 01-febe-head-and-bezel-brep-settings** · ✅0 🟡0 ⬜9
+Bằng chứng cấp milestone: `OM9-L2-04-14-COMPLETION`, `OM9-L2-04-15-COMPLETION`
+
+**OM9-L2-04-14 — 01-febe-head-and-bezel-brep-settings** · ✅0 🟡9 ⬜0
 
 _Head Builder, Bezel Builder với NURBS/BRep_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-14-001` | Head Builder Basket *(thủ công)* | E11 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-14-002` | Head Builder Half Bezel Mode *(thủ công)* | E11 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-14-003` | Head Builder Prong Rail Level Edit *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-14-004` | Bezel Builder Full *(thủ công)* | E11 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-14-005` | Bezel Builder Under Bezel And Gallery *(thủ công)* | E11 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-14-006` | Scallop Bezel Builder *(thủ công)* | E11 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-14-007` | Head Bezel Profile Browser *(thủ công)* | E11 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-14-008` | Head Bezel Girdle Seat Attachment *(thủ công)* | E11 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-14-009` | Head Bezel Geometry Validity And Update *(thủ công)* | E11 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-14-001` | Head Builder Basket *(thủ công)* | E11 | MEDIUM | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-14-002` | Head Builder Half Bezel Mode *(thủ công)* | E11 | MEDIUM | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-14-003` | Head Builder Prong Rail Level Edit *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-14-004` | Bezel Builder Full *(thủ công)* | E11 | MEDIUM | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-14-005` | Bezel Builder Under Bezel And Gallery *(thủ công)* | E11 | MEDIUM | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-14-006` | Scallop Bezel Builder *(thủ công)* | E11 | MEDIUM | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-14-007` | Head Bezel Profile Browser *(thủ công)* | E11 | MEDIUM | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-14-008` | Head Bezel Girdle Seat Attachment *(thủ công)* | E11 | MEDIUM | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-14-009` | Head Bezel Geometry Validity And Update *(thủ công)* | E11 | MEDIUM | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
-**OM9-L2-04-15 — 02-febe-prong-channel-metal-and-bead-settings** · ✅0 🟡0 ⬜10
+**OM9-L2-04-15 — 02-febe-prong-channel-metal-and-bead-settings** · ✅0 🟡10 ⬜0
 
 _Prong/Channel/Metal Piece/Bead settings_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-15-001` | Prong Builder Gem Line *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-15-002` | Prong Editor Selected *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-15-003` | Prong On Surface *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-15-004` | Metal Piece From Gems *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-15-005` | Channel Border Curve *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-15-006` | Bead On Curve Milgrain *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-15-007` | Bead On Surface *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-15-008` | Pull Object To Rail Setting *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-15-009` | Setting Row End Modes And Prong Spacing *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-15-010` | Settings Associative Edit And Mass *(thủ công)* | E11 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-15-001` | Prong Builder Gem Line *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-15-002` | Prong Editor Selected *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-15-003` | Prong On Surface *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-15-004` | Metal Piece From Gems *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-15-005` | Channel Border Curve *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-15-006` | Bead On Curve Milgrain *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-15-007` | Bead On Surface *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-15-008` | Pull Object To Rail Setting *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-15-009` | Setting Row End Modes And Prong Spacing *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-15-010` | Settings Associative Edit And Mass *(thủ công)* | E11 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
 </details>
 
-<details><summary><b>M07 — Cutters và kiểm tra chế tạo</b> · ✅0 🟡0 ⬜19 · `OM9-M07` · L1_L4_SPECIFIED_NOT_IMPLEMENTED</summary>
+<details><summary><b>M07 — Cutters và kiểm tra chế tạo</b> · ✅0 🟡13 ⬜6 · `OM9-M07` · L1_L4_SPECIFIED_NOT_IMPLEMENTED</summary>
 
 **L1** — Cutters và kiểm tra chế tạo · phụ thuộc: M03
 
-**OM9-L2-04-16 — 01-febe-single-gem-seat-cutter-workflows** · ✅0 🟡0 ⬜7
+Bằng chứng cấp milestone: `OM9-L2-04-16-COMPLETION`, `OM9-L2-04-17-COMPLETION`
+
+**OM9-L2-04-16 — 01-febe-single-gem-seat-cutter-workflows** · ✅0 🟡7 ⬜0
 
 _Gem Seat/Gem Cutters cho 1 viên đá_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-16-001` | Gem Cutter Azure For Single Stone *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-16-002` | Gem Cutter Multiple Stones *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-16-003` | Gem Cutter Library Profiles *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-16-004` | Bezel Cutter Builder *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-16-005` | Cutter Pavilion Clearance And Depth Controls *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-16-006` | Interactive Boolean On Metal *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-16-007` | Cutter Body Preserve Remove Option *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-16-001` | Gem Cutter Azure For Single Stone *(thủ công)* | E12 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-16-002` | Gem Cutter Multiple Stones *(thủ công)* | E12 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-16-003` | Gem Cutter Library Profiles *(thủ công)* | E12 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-16-004` | Bezel Cutter Builder *(thủ công)* | E12 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-16-005` | Cutter Pavilion Clearance And Depth Controls *(thủ công)* | E12 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-16-006` | Interactive Boolean On Metal *(thủ công)* | E12 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-16-007` | Cutter Body Preserve Remove Option *(thủ công)* | E12 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
-**OM9-L2-04-17 — 02-febe-channel-microprong-brightcut-cutters** · ✅0 🟡0 ⬜6
+**OM9-L2-04-17 — 02-febe-channel-microprong-brightcut-cutters** · ✅0 🟡6 ⬜0
 
 _Channel/MicroProng/Bright Cut cutters_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-17-001` | Channel Builder Cutter *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-17-002` | Microprong Cutter *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-17-003` | Bright Cut Channel Builder *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-17-004` | Bright Cutter Single Gem *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-17-005` | Channel Cutter Profile And End Controls *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-17-006` | Multiple Stone Interactive Boolean *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-17-001` | Channel Builder Cutter *(thủ công)* | E12 | HIGH | 4/4 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-17-002` | Microprong Cutter *(thủ công)* | E12 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-17-003` | Bright Cut Channel Builder *(thủ công)* | E12 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-17-004` | Bright Cutter Single Gem *(thủ công)* | E12 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-17-005` | Channel Cutter Profile And End Controls *(thủ công)* | E12 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
+| `OM9-L3-04-17-006` | Multiple Stone Interactive Boolean *(thủ công)* | E12 | HIGH | 3/3 | 🟡 có bằng chứng, chưa ký | `implementation/design`, `implementation/evidence`, `implementation/fixtures` |
 
 **OM9-L2-04-18 — 03-febe-ring-finger-plane-quad-cutters** · ✅0 🟡0 ⬜6
 
 _Cut to finger rail/plane/cube/quad cut jewelry_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-18-001` | Cut To Finger Rail *(thủ công)* | E12 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-18-002` | Plane And Cube Cutters *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-18-003` | Quad Flip Routines *(thủ công)* | E12 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-18-004` | Boolean Builder Operations *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-18-005` | Cutting Plane Mirror History *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-18-006` | Cutters Geometry Watertight Check *(thủ công)* | E12 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-18-001` | Cut To Finger Rail *(thủ công)* | E12 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-18-002` | Plane And Cube Cutters *(thủ công)* | E12 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-18-003` | Quad Flip Routines *(thủ công)* | E12 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-18-004` | Boolean Builder Operations *(thủ công)* | E12 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-18-005` | Cutting Plane Mirror History *(thủ công)* | E12 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-18-006` | Cutters Geometry Watertight Check *(thủ công)* | E12 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
 
 </details>
 
@@ -1068,108 +1113,108 @@ _Cut to finger rail/plane/cube/quad cut jewelry_
 
 _Smart Target/MSR/Blend curve networks phục vụ form nhẫn_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-04-001` | Smart Target Place And Add *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-04-002` | Smart Target Curve End *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-04-003` | Smart Blend Curve Network *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-04-004` | Smart MSR Control Handles *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-04-005` | Smart Target Selection And Update *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-04-001` | Smart Target Place And Add *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-04-002` | Smart Target Curve End *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-04-003` | Smart Blend Curve Network *(thủ công)* | E13 | MEDIUM | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-04-004` | Smart MSR Control Handles *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-04-005` | Smart Target Selection And Update *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
 
 **OM9-L2-04-05 — 02-febe-matrix-smartflow-history-morph** · ✅0 🟡0 ⬜8
 
 _Smart Flow auto-base/surface mapping, rigid objects, associative history_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-05-001` | Smartflow Autobase Surface Generation *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-05-002` | Smartflow Mapping Base To Target *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-05-003` | Smartflow Rigid Object Placement *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-05-004` | Smartflow History Recompute *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-05-005` | Smartflow Break And Reconnect *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-05-006` | Smartflow Pulldown Reference Curves *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-05-007` | Smartflow UV Normal Align Assistance *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-05-008` | Smartflow Overhang Tolerance Controls *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-05-001` | Smartflow Autobase Surface Generation *(thủ công)* | E13 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-05-002` | Smartflow Mapping Base To Target *(thủ công)* | E13 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-05-003` | Smartflow Rigid Object Placement *(thủ công)* | E13 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-05-004` | Smartflow History Recompute *(thủ công)* | E13 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-05-005` | Smartflow Break And Reconnect *(thủ công)* | E13 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-05-006` | Smartflow Pulldown Reference Curves *(thủ công)* | E13 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-05-007` | Smartflow UV Normal Align Assistance *(thủ công)* | E13 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-05-008` | Smartflow Overhang Tolerance Controls *(thủ công)* | E13 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
 
 **OM9-L2-04-06 — 03-febe-jewelry-ornament-builder-family** · ✅0 🟡0 ⬜6
 
 _Knot/FreeformKnot/JumpRing/Nautilus và pattern ornaments_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-06-001` | Knot Builder *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-06-002` | Freeform Knot Builder *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-06-003` | Jump Ring Builder *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-06-004` | Nautilus Builder *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-06-005` | Ornament Pattern Builder *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-06-006` | Ornament Builder Style And History *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-06-001` | Knot Builder *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-06-002` | Freeform Knot Builder *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-06-003` | Jump Ring Builder *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-06-004` | Nautilus Builder *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-06-005` | Ornament Pattern Builder *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-06-006` | Ornament Builder Style And History *(thủ công)* | E13 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
 
 **OM9-L2-04-07 — 04-febe-jewelry-surface-object-placement-tools** · ✅0 🟡0 ⬜9
 
 _Orient/array và đặt chi tiết trên curve/surface trang sức_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-07-001` | Orient Object On Curve *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-07-002` | Orient Object On Surface *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-07-003` | Array Along Curve Jewelry *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-07-004` | Array Along Surface UV *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-07-005` | Array Curve On Surface *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-07-006` | Flow Along Curve Jewelry *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-07-007` | Flow Along Surface Jewelry *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-07-008` | Splop Object On Surface *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-07-009` | Object On Curve Tool *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-07-001` | Orient Object On Curve *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-07-002` | Orient Object On Surface *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-07-003` | Array Along Curve Jewelry *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-07-004` | Array Along Surface UV *(thủ công)* | E13 | MEDIUM | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-07-005` | Array Curve On Surface *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-07-006` | Flow Along Curve Jewelry *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-07-007` | Flow Along Surface Jewelry *(thủ công)* | E13 | MEDIUM | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-07-008` | Splop Object On Surface *(thủ công)* | E13 | MEDIUM | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-07-009` | Object On Curve Tool *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
 
 **OM9-L2-04-08 — 05-febe-matrix-advanced-deformation-ux** · ✅0 🟡0 ⬜8
 
 _Bend/Twist/Taper/CageEdit/SoftMove dùng thiết kế đường nét trang sức_
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-04-08-001` | Bend Deformation Command *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-08-002` | Stretch And Taper Deformation *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-08-003` | Twist And Maelstrom Deformation *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-08-004` | Shear And Softmove Deformation *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-08-005` | Cage Edit And Release Command *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-08-006` | Move Uvn And Setpoints *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-08-007` | Symmetry And Live Mirror *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-04-08-008` | Deformation Preview And Undo *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-08-001` | Bend Deformation Command *(thủ công)* | E13 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-08-002` | Stretch And Taper Deformation *(thủ công)* | E13 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-08-003` | Twist And Maelstrom Deformation *(thủ công)* | E13 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-08-004` | Shear And Softmove Deformation *(thủ công)* | E13 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-08-005` | Cage Edit And Release Command *(thủ công)* | E13 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-08-006` | Move Uvn And Setpoints *(thủ công)* | E13 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-08-007` | Symmetry And Live Mirror *(thủ công)* | E13 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-04-08-008` | Deformation Preview And Undo *(thủ công)* | E13 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
 
 **OM9-L2-05-01 — 06-febe-matrix9-smart-pattern-builder** · ✅0 🟡0 ⬜5
 
 _Smart Pattern trên surface: phân phối chi tiết trang sức, group/mesh, attraction và preview._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-05-01-001` | Smartpattern Source Pattern Choice *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-01-002` | Smartpattern UV Distribution *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-01-003` | Smartpattern Group And Segment Controls *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-01-004` | Smartpattern Attractor Region Controls *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-01-005` | Smartpattern History And Viewport Preview *(thủ công)* | E13 | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-01-001` | Smartpattern Source Pattern Choice *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-01-002` | Smartpattern UV Distribution *(thủ công)* | E13 | MEDIUM | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-01-003` | Smartpattern Group And Segment Controls *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-01-004` | Smartpattern Attractor Region Controls *(thủ công)* | E13 | MEDIUM | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-01-005` | Smartpattern History And Viewport Preview *(thủ công)* | E13 | HIGH | 0/4 | ⬜ mới ở mức kế hoạch | — |
 
 **OM9-L2-05-02 — 07-febe-matrix9-rope-builder** · ✅0 🟡0 ⬜5
 
 _Rope Builder: braided rope quanh rail curve; cỡ sợi, xoắn, spacing, cap._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-05-02-001` | Rope Builder Curve Input *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-02-002` | Rope Builder Thread Count And Diameter *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-02-003` | Rope Builder Twists And Spacing *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-02-004` | Rope Builder End Cap Modes *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-02-005` | Rope Builder Interactive Preview *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-02-001` | Rope Builder Curve Input *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-02-002` | Rope Builder Thread Count And Diameter *(thủ công)* | E13 | MEDIUM | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-02-003` | Rope Builder Twists And Spacing *(thủ công)* | E13 | MEDIUM | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-02-004` | Rope Builder End Cap Modes *(thủ công)* | E13 | MEDIUM | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-02-005` | Rope Builder Interactive Preview *(thủ công)* | E13 | MEDIUM | 0/4 | ⬜ mới ở mức kế hoạch | — |
 
 **OM9-L2-05-03 — 08-febe-user-design-libraries** · ✅0 🟡0 ⬜5
 
 _User Library chứa cả mẫu thiết kế; import/open model và phân loại thư mục riêng._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
-| `OM9-L3-05-03-001` | User Library Folder Catalog *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-03-002` | User Library Asset Register And Preview *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-03-003` | User Library Insert Model *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-03-004` | User Library Search And Select *(thủ công)* | E13 | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
-| `OM9-L3-05-03-005` | User Library Save And Import *(thủ công)* | E13 | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-03-001` | User Library Folder Catalog *(thủ công)* | E13 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-03-002` | User Library Asset Register And Preview *(thủ công)* | E13 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-03-003` | User Library Insert Model *(thủ công)* | E13 | NORMAL | 0/4 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-03-004` | User Library Search And Select *(thủ công)* | E13 | NORMAL | 0/3 | ⬜ mới ở mức kế hoạch | — |
+| `OM9-L3-05-03-005` | User Library Save And Import *(thủ công)* | E13 | MEDIUM | 0/4 | ⬜ mới ở mức kế hoạch | — |
 
 </details>
 
@@ -1187,7 +1232,7 @@ _User Library chứa cả mẫu thiết kế; import/open model và phân loại
 
 _Remap tham chiếu faces/edges khi hình học thay đổi phức tạp._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-06-01-001` | Advanced Topological Name Recovery | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-06-01-002` | Shape History Graph Reconciliation | AFTER | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1199,7 +1244,7 @@ _Remap tham chiếu faces/edges khi hình học thay đổi phức tạp._
 
 _Các adapter bổ sung như STEP/IGES khi cần trao đổi với xưởng/đối tác trang sức._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-06-02-001` | Step Part Model Import Adapter | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-06-02-002` | Iges Surface Import Adapter | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1210,7 +1255,7 @@ _Các adapter bổ sung như STEP/IGES khi cần trao đổi với xưởng/đ�
 
 _Cấu hình giao diện chi tiết, hệ phím tắt và bản dịch mở rộng._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-06-03-001` | Advanced Preferences Dialog *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-06-03-002` | Hotkey Mapping Editor *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1222,7 +1267,7 @@ _Cấu hình giao diện chi tiết, hệ phím tắt và bản dịch mở rộ
 
 _Profiling GPU/OCCT long-run; benchmark chuyên sâu, không phải kiểm thử bắt buộc L4._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-06-04-001` | OCCT Performance Microbenchmarks | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-06-04-002` | GPU Tessellation Frame Profiling | AFTER | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1233,7 +1278,7 @@ _Profiling GPU/OCCT long-run; benchmark chuyên sâu, không phải kiểm thử
 
 _Scripting/macro nâng cao để tự động hóa modeling sau._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-07-01-001` | Rhino Command Alias Script Editor *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-07-01-002` | Macro Recording And Replay *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1244,7 +1289,7 @@ _Scripting/macro nâng cao để tự động hóa modeling sau._
 
 _Rhino detailed selection filters beyond jewelry Super Select._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-07-02-001` | Selection Filter By Rhino Object Class *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-07-02-002` | Selection Filter By Color Name Layer *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1255,7 +1300,7 @@ _Rhino detailed selection filters beyond jewelry Super Select._
 
 _Một nơi lưu/phục hồi camera/view names và UI Matrix View Manager._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-07-03-001` | Named View Camera Save *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-07-03-002` | Named View Manager Palette *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1266,7 +1311,7 @@ _Một nơi lưu/phục hồi camera/view names và UI Matrix View Manager._
 
 _Zebra, EMap, heatmap curvature và các visual analysis nâng cao._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-07-04-001` | Zebra Surface Continuity Analysis *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-07-04-002` | Curvature Heatmap Analysis *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1278,7 +1323,7 @@ _Zebra, EMap, heatmap curvature và các visual analysis nâng cao._
 
 _Rhino manager nâng cao cho layers/groups/blocks._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-07-05-001` | Advanced Layer Hierarchy Editor *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-07-05-002` | Rhino Group Management Panel *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1289,7 +1334,7 @@ _Rhino manager nâng cao cho layers/groups/blocks._
 
 _Offline renderer, scene lights and PBR material engine._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-08-01-001` | Offline Renderer Scene Translation | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-08-01-002` | PBR Material And Shader Schema | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1301,7 +1346,7 @@ _Offline renderer, scene lights and PBR material engine._
 
 _Jewelry lighting/metal/gem lookdev._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-08-02-001` | Jewelry Metal Lookdev Material Picker *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-08-02-002` | Gem Refraction And Caustic Lookdev *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1313,7 +1358,7 @@ _Jewelry lighting/metal/gem lookdev._
 
 _Animations / movie maker._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-08-03-001` | Animation Turntable Builder *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-08-03-002` | Animation Keyframe Timeline *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1324,7 +1369,7 @@ _Animations / movie maker._
 
 _Batch render and postprocess._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-08-04-001` | Batch Render Design Variants *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-08-04-002` | Render Job Queue And Scheduler *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1336,7 +1381,7 @@ _Batch render and postprocess._
 
 _Rendered images in catalogs/layout/report._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-08-05-001` | Design Report Cover And Template *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-08-05-002` | Report Render Images And Gem Table *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1347,7 +1392,7 @@ _Rendered images in catalogs/layout/report._
 
 _Legacy T-Splines HUD and command workflow._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-01-001` | T-Splines Legacy Hud Activation *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-01-002` | T-Splines Select Vertex Edge Face Object Mode *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1360,7 +1405,7 @@ _Legacy T-Splines HUD and command workflow._
 
 _T-Splines primitive builders incl. T-Spline Signet, Bezel._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-02-001` | T-Spline Box Sphere Cylinder Cone Torus *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-02-002` | T-Spline Plane And Tube From Curves *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1373,7 +1418,7 @@ _T-Splines primitive builders incl. T-Spline Signet, Bezel._
 
 _T-spline topological model including T-junctions._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-03-001` | T-Spline Control Mesh Topology | AFTER | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-03-002` | T-Spline Tjunction And Extraordinary Points | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1387,7 +1432,7 @@ _T-spline topological model including T-junctions._
 
 _Legacy T-spline conversion/interoperability._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-04-001` | T-Spline To Rhino Surface Converter | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-04-002` | Rhino Surface To T-Spline Eligibility | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1398,7 +1443,7 @@ _Legacy T-spline conversion/interoperability._
 
 _Clayoo sub-object HUD/controls._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-05-001` | Clayoo Clayedit Enable Hud *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-05-002` | Clayoo Object Vertex Edge Face Modes *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1411,7 +1456,7 @@ _Clayoo sub-object HUD/controls._
 
 _Clayoo SubD primitives._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-06-001` | Clayoo Box And Plane Generators *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-06-002` | Clayoo Sphere Quad And Polygonal *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1423,7 +1468,7 @@ _Clayoo SubD primitives._
 
 _Clayoo topology editing._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-07-001` | Clayoo Divide And Split Sides *(thủ công)* | AFTER | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-07-002` | Clayoo Inset And Knife *(thủ công)* | AFTER | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1437,7 +1482,7 @@ _Clayoo topology editing._
 
 _Clayoo Sweep/Loft/Pipe curve-driven meshes._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-08-001` | Clayoo Pipe From Curves *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-08-002` | Clayoo Sweep One Rail *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1450,7 +1495,7 @@ _Clayoo Sweep/Loft/Pipe curve-driven meshes._
 
 _Clayoo Ring, Signet, Bezel builders._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-09-001` | Clayoo Ring Builder *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-09-002` | Clayoo Signet Ring Builder *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1461,7 +1506,7 @@ _Clayoo Ring, Signet, Bezel builders._
 
 _Clayoo crease/weld/symmetry._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-10-001` | Clayoo Crease And Uncrease Edges *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-10-002` | Clayoo Weld Vertices With Tolerance *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1474,7 +1519,7 @@ _Clayoo crease/weld/symmetry._
 
 _Clayoo SubD to mesh/NURBS/legacy TSpline conversions._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-11-001` | Clayoo Controlmesh To SubD Evaluator | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-11-002` | Clayoo SubD To NURBS Surfaces | AFTER | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1487,7 +1532,7 @@ _Clayoo SubD to mesh/NURBS/legacy TSpline conversions._
 
 _Clayoo selection sets and growth/loop operations._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-12-001` | Clayoo Ring Edge Loop And UV Select *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-12-002` | Clayoo Select All None Invert *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1500,7 +1545,7 @@ _Clayoo selection sets and growth/loop operations._
 
 _ClayEmboss profile/relief procedural operations._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-13-001` | Clayemboss Main Procedural Relief *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-13-002` | Clayemboss By Profile *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1512,7 +1557,7 @@ _ClayEmboss profile/relief procedural operations._
 
 _ClayEmboss brush/sculpt/stamp._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-14-001` | Clayemboss Stamp Brush *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-14-002` | Clayemboss Carbon Copy And Brush *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1524,7 +1569,7 @@ _ClayEmboss brush/sculpt/stamp._
 
 _ClayEmboss texture, heightfield and decimation._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-15-001` | Clayemboss Texture From Image *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-15-002` | Clayemboss Heightfield Image *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1536,7 +1581,7 @@ _ClayEmboss texture, heightfield and decimation._
 
 _Command gốc ClayEmbossTextOnCurve, text 2D/3D chạy theo curve._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-16-001` | Clayemboss Text On Curve 2d *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-16-002` | Clayemboss Text On Curve 3d *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1547,7 +1592,7 @@ _Command gốc ClayEmbossTextOnCurve, text 2D/3D chạy theo curve._
 
 _Blueprint tham chiếu ảnh 3D theo các mặt, command gốc ClayBluePrint._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-09-17-001` | Clay Blueprint Multiview Image Placement *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-09-17-002` | Clay Blueprint Image Alignment *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1558,7 +1603,7 @@ _Blueprint tham chiếu ảnh 3D theo các mặt, command gốc ClayBluePrint._
 
 _Bitmap/heightfield Matrix Art + Texture Builder mesh-on-surface theo grayscale, dùng shared heightfield utilities._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-10-01-001` | Matrix Art Bitmap To Heightfield *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-10-01-002` | Matrix Art Relief Region Mask *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1570,7 +1615,7 @@ _Bitmap/heightfield Matrix Art + Texture Builder mesh-on-surface theo grayscale,
 
 _Advanced repair/decimation for casting or jewelry additive manufacture._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-10-02-001` | Mesh Weld Normals Repair *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-10-02-002` | Mesh Manifold And Hole Repair *(thủ công)* | AFTER | HIGH | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1582,7 +1627,7 @@ _Advanced repair/decimation for casting or jewelry additive manufacture._
 
 _Supports, sprues and manufacturing aids for casting/printing jewelry._
 
-| L3 | Tiêu đề | Stage | Risk | L4 | Trạng thái | Bằng chứng |
+| L3 | Tiêu đề | Stage | Risk | L4 (bằng chứng) | Trạng thái | Bằng chứng |
 |---|---|---|---|---:|---|---|
 | `OM9-L3-10-03-001` | Ring Support Sprue Builder *(thủ công)* | AFTER | MEDIUM | 0/0 | ⬜ mới ở mức kế hoạch | — |
 | `OM9-L3-10-03-002` | Support Base And Support Ring *(thủ công)* | AFTER | NORMAL | 0/0 | ⬜ mới ở mức kế hoạch | — |
@@ -1597,15 +1642,22 @@ _Supports, sprues and manufacturing aids for casting/printing jewelry._
 
 | Ngày | Mục | Trạng thái | Phạm vi |
 |---|---|---|---|
-| 2026-10-23 | `m03-l2-03-18-solid-menu-2026-10-23` | AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING | 21 Solid menu commands bound to OCCT owners with interactive dimension prompts. |
-| 2026-10-23 | `` | documentation_validated |  |
-| 2026-10-23 | `` | blocked |  |
-| 2026-10-23 | `` | geometry_validated_native_ui_observed_human_signoff_pending |  |
-| 2026-10-23 | `m03-l2-01-13-r5a-2026-10-23` | automated_target_validated_manual_ui_pending | R5-A retained NativeBrep display proxy; EditableBestEffort default; explicit strict retained. |
-| 2026-10-23 | `m03-l2-03-08-top11-2026-10-22` | automated_target_validated_manual_ui_pending | OM9-L2-03-08, 5 M03 L3 / 26 L4: Duplicate (In Place, base-point flow and four placement options), grips for lines/NURBS/ |
-| 2026-10-23 | `m03-l2-03-17-surface-menu-2026-10-23` | automated_target_validated_manual_ui_pending | OM9-L2-03-17, 38 L3 / 114 L4: one catalog row per documented Surface Tools command, stable command id/icon, Rebuild and  |
-| 2026-10-23 | `m03-l2-03-16-curve-menu-2026-10-23` | automated_target_validated_manual_ui_pending | OM9-L2-03-16, 58 L3 / 174 L4: one catalog row per documented Curve Tools command, stable command id/icon, Line/Point fun |
+| 2026-10-28 | `m07-channel-cutters-2026-10-28` | implemented_automated_evidence_recorded_manual_review_not_claimed | M07 L2-04-17 (02-febe-channel-microprong-brightcut-cutters): Channel Builder trench through a row of stones, Micro Prong |
+| 2026-10-28 | `m07-gem-cutters-2026-10-28` | implemented_automated_evidence_recorded_manual_review_not_claimed | M07 L2-04-16 (01-febe-single-gem-seat-cutter-workflows): Gem Cutter in Gem/Azure/Advanced mode for one stone and for a s |
+| 2026-10-28 | `m05-l2-04-13-gem-instance-edits-2026-10-28` | gem_instance_edits_automated_verified_manual_gates_open | M05 OM9-L2-04-13 gem instance edits and reports: typed edit/match/style/report owner in om9-core::gem_edits plus the om9 |
+| 2026-10-28 | `m05-l2-04-12-gem-pave-2026-10-28` | gem_pave_layout_azure_automated_verified_manual_gates_open | M05 OM9-L2-04-12 pavé layout and azure: typed UV-lattice pavé (Auto/Manual) with curve attractor, closed-edge clipping a |
+| 2026-10-27 | `m06-head-bezel-2026-10-27` | implemented_automated_evidence_recorded_manual_review_not_claimed | M06 L2-04-14 (01-febe-head-and-bezel-brep-settings): Head Builder basket + half bezel + four edit levels + seat cut into |
+| 2026-10-27 | `m05-l2-04-10-gem-placement-2026-10-27` | gem_placement_automated_verified_manual_gates_open | M05 OM9-L2-04-10 gems on curves and surfaces: typed placement owner in om9-core::gem_placement (arc-length rows, taper,  |
+| 2026-10-27 | `m05-l2-04-11-gem-halo-cluster-2026-10-27` | gem_halo_cluster_baguette_layouts_automated_verified_manual_gates_open | M05 OM9-L2-04-11 halo/cluster/baguette layouts: typed plans in om9-core::gem_cluster (halo ring incl. closing-pair spaci |
+| 2026-10-27 | `m04-l2-04-03-brep-handles-2026-10-27` | ring_family_automated_verified_manual_gates_open | M04 OM9-L2-04-03 jewelry ring builder family: 4 builder mode (Eternity/Signet/Raised/Award) sinh body từ surface of revo |
+
+### Ghi chú gần đây
+
+- **2026-10-28** — Quy tắc cutter theo dãy (L2-04-17): (1) mm; Scale2D %; girdle z=0. (2) Thứ tự chọn = dãy: A viên đầu, B viên cuối. (3) Kênh rộng ≥ viên rộng nhất, sâu ≤ 1.6×pavilion; sai báo channel width/depth. (4) Start/End và độ sâu hai đầu độc lập; Mirror lấy profile rộng/sâu nhất cho hai đầu nên Flip vô hiệu; Flip chỉ hoán A↔B khi Mirror tắt; Middle thêm station giữa. (5) Micro prong: Count=0 = 1 scallop/khe; Count>0 dàn đều, không theo viên; Angle nghiêng theo tiếp tuyến dãy. (6) Bright facet: mép trong trên girdle, ngoài cách Length, đỉnh mang Angle; chạm quá Depth hạ đáy cutter; Mirror dựng hai bên kênh. (7) Boolean cắt mọi thân kín đang chọn trong một transaction; Preserve=Remove cần Boolean bật. (8) Mỗi cutter/cut ghi om9.cutter (kind, row, volume, Boolean, Preserve); tham số hỏng = lỗi có tên.
+- **2026-10-28** — Audit found the Cutters chapter unimplemented: the menu catalog listed BuilderGemCutter/BuilderGemCutterLibrary, display.rs already expected an om9.cutter payload and the icons existed, but no session resolved, dispatched or built a cutter. The delivery adds one cutter kernel in om9-core (cutters::{mod,gem,library,bezel,boolean}), one staged app owner with a window and viewport preview (session/gem_cutters.rs, ui/gem_cutters.rs) and the dimensional Dims= contract of the Bezel Cutter Builder through the existing M06 gvBezelCutter command. 48 new tests (26 core unit, 15 core integration, 7 app) cover the manual's options; the core suite is 901/901 and the app library 197/197. The dashboard now counts 4/4, 3/3 or 4/4 L4 evidence per L3 and keeps the seven L3 at WIP until a human signs M07-UI.
+- **2026-10-28** — ghi chú: (1) GemEdit là bản sửa một phần — trường vắng mặt là 'giữ nguyên', không phải 'về mặc định'; (2) Match Attributes sao chép theo mask cut/shape/dimensions/finish và giữ GemId của đích; (3) gem style dùng schema om9.gem_style.v1, store om9.gem_style_file.v1, ghi atomic và tái dùng validate_style_name của builder style; (4) reporter tính khối lượng từ volume lưới kín × density theo bảng density gemological (kim cương 3.52, corundum 4.00, beryl 2.72, …), đối chiếu công thức thương mại L×W×depth×factor theo shape trong dung sai ±15%, và in 'NOT A CERTIFICATE' vì chỉ gemologist mới chứng nhận được; (5) Gem Map vẽ overlay trong viewport: mỗi viên một caption đánh số kèm size girdle, viên ngoài khung bị bỏ qua, kèm cửa sổ key liệt kê cùng số; (6) cả 9 L3 đều có gate M05-UI nên dashboard c…
+- **2026-10-28** — ghi chú: (1) pave_surface dùng metric cục bộ trên UV nên spacing là mm trên mặt; (2) Auto/Manual nhận một open curve làm attractor và các closed curve làm biên vùng; attractor thêm 128 điểm chiếu + falloff Gaussian, biên clip theo union; (3) style lưu pattern/spacing/correction/quantity, built-in + user, persist qua OM9_PAVE_STYLE_LIBRARY; style Auto áp vào Manual giữ count hiện có; count của style Manual chỉ áp vào Manual; (4) azure là 4 curve kín mỗi stone, prong là curve marker — cắt azure và solid prong thuộc M06/M07; (5) sphere có drag handle Radius/Count dùng chung builder_handles; (6) spring_relax đẩy 3D rồi project lại surface; (7) Refresh resolve source curve id, giữ GemId, báo conflict/stale thay vì bỏ stone; (8) cả 8 L3 vẫn gate M05-UI 🟡, checklist thủ công ở MANUAL_UI_CHECKLIST…
 
 ## Việc kế tiếp
 
-Implement Text/Shell owners and interactive prompts; then manual M03-UI review.
+Human M07-UI review of the four row cutter windows (preview, options, commit/cancel, Boolean on a metal body), then sign the gate and flip the six L3 from WIP to DONE; the B-Rep kernel swap stays with the kernel adapter milestone.

@@ -3,8 +3,8 @@
   "task_id": "OM9-L4-03-16-031-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-031",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-034",
   "source_command": "Point",
   "menu_icon": "CurvePointObjectSinglePoint",
@@ -16,8 +16,9 @@
     "implementation/design/M03/OM9-L3-03-16-031/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-031/dispatch_contract.json": "10c3403ada4be639835c4a4fbad0982a7b238c4230718ed7e3ad0a4d76cfc1e5",
-    "implementation/design/M03/OM9-L3-03-16-031/dispatch_contract.md": "6209a7215d91784d969d224ab5f15a0b5b4f65db35670788ee3f147b428f59e4"
+    "implementation/design/M03/OM9-L3-03-16-031/dispatch_contract.json": "99209ca19474ee0cbb91493f816b4f77f484e80e9804283fa71b17136ebd33aa",
+    "implementation/design/M03/OM9-L3-03-16-031/dispatch_contract.md": "ab1597fe3a6c843082b3b27ea867956795ed4ab9fff49ffcacf534ba933f0cdc"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Point"
 }

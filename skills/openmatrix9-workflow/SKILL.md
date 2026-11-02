@@ -50,4 +50,6 @@ Quy tắc người dùng duyệt ngày 2026-10-12; áp dụng khi làm launcher/
 
 ## Cập nhật nghiệp vụ sau khi code
 
+Trong mục tiêu Solid hiện tại, người dùng đã yêu cầu ngày 2026-10-28 tự động cập nhật skill sau khi triển khai và kiểm thử, không hỏi từng quy tắc. Chỉ ghi phạm vi đã kiểm thử, nêu rõ suy luận OM9 và bằng chứng gốc còn thiếu; đồng bộ bản nguồn và bản cài đặt. Chỉ áp dụng chỉ dẫn này cho mục tiêu Solid hiện tại.
+
 Sau khi hoàn tất code và kiểm tra, nếu có đổi nghiệp vụ, hỏi người dùng có cập nhật nghiệp vụ đó vào skill không. Chỉ ghi quy tắc mới khi có đồng ý; nếu người dùng đã yêu cầu cập nhật skill cho chính thay đổi này thì không hỏi lại. Áp dụng [quy tắc xác nhận cập nhật nghiệp vụ](references/business-rule-updates.md) để phân biệt nghiệp vụ mới với sửa kỹ thuật, chuẩn bị đề xuất cụ thể và đồng bộ skill sau khi được đồng ý.

@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-025",
+  "case": "no surface (or no curve) in the selection",
+  "expected": "no surface (or no curve) in the selection -> Error::Missing(\"reference surface selection\") / Error::Missing(\"path curve selection\") before the first prompt; a path of zero length -> Error::Invalid(\"array path length\")",
+  "test": "m03_04_01_reference_rows_refuse_a_selection_without_their_reference"
+}

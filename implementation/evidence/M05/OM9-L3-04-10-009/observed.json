@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_placement_evidence.v1",
+  "l3_id": "OM9-L3-04-10-009",
+  "title": "Gem Flow Placement",
+  "command": "BuilderGVDGemFlow / gvGemFlow",
+  "scope": "`gem_placement::flow_station`; `gem_placement::flow_placement` / `flow_surface_placement`; `gem_placement::rigid_flow`; `GemPlacementTool::Flow`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "rigid flow from a base curve/surface to a curve/surface target with a retargeted link",
+  "negative": "missing targets and unmappable stations are typed refusals/conflicts",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-10-009-03"
+    ],
+    "fixture_manifest_sha256": "5fb0cd0d67b8853029c6d92f61f13575b22614eea2c39694b4d03b7376dff895"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/tests/gem_placement.rs"
+  ],
+  "test": "flow_carries_the_same_stones_onto_a_target_curve"
+}

@@ -2,7 +2,9 @@
 /build/
 /cmake-build-*/
 /rust/target/
+/cargo-target/
 /target/
+/cargo-target/
 /.superpowers/
 
 # Python caches

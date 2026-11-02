@@ -1,0 +1,58 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-04-003-01",
+  "l3_id": "OM9-L3-01-04-003",
+  "l3_title": "Dirty Propagation And Topological Order",
+  "owner_module_id": "OM9-L2-01-04",
+  "milestone": "M04",
+  "gate": "AUTO_ONLY",
+  "goal": "invalidate dependent outputs and recompute in DAG order",
+  "positive_oracle": "DAG A->B->C and A->D; edit the source of A -> dirty set {A,B,C,D}, producer before consumer, no duplicate evaluation",
+  "negative_oracle": "cycle C->A -> Invalid('History cycle') from execution_order, plan_recompute and typed_edges",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "source_dirty": true,
+  "checkout": "QymCAD/ (vendored subtree of the main repository; no independent .git)",
+  "method": "bounded file reads with line numbers; decisions are OM9-owned and no upstream code is copied",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-ui-state/src/rebuild.rs",
+      "line": 414,
+      "observed_symbols": [
+        "pub fn mark_dirty_for_rebuild(rc: &mut RebuildCtx): the document is marked, the scheduler does the counting"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the dirty flag lives on the timeline node and the order is the timeline order; OM9 derives the order from recorded output->input edges and refuses a cycle",
+      "om9_owner": "om9-core/src/history_ops.rs + history.rs::execution_order"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/rebuild.rs",
+      "line": 375,
+      "observed_symbols": [
+        "rebuild_if_dirty compares (rebuild_key, dirty node ids, live shape count)"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the dirty set is not expressed as a graph edge set, so a reloaded document cannot re-derive it",
+      "om9_owner": "om9-core/src/history_ops.rs (stale_recipes/mark_stale)"
+    },
+    {
+      "path": "crates/qymcad-part/src/topology.rs",
+      "line": 85,
+      "observed_symbols": [
+        "deletion cascade marks the nodes that actually need rebuilding, then regenerate_all"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the cascade is per workbench operation; OM9 keeps it in the graph kernel so every builder shares it",
+      "om9_owner": "om9-core/src/history.rs::invalidate + history_ops::mark_stale"
+    }
+  ],
+  "implemented_api": [
+    "crates/om9-core/src/history_ops.rs: stale_recipes, mark_stale, mark_document_stale, plan_recompute, plan_document_recompute",
+    "crates/om9-core/src/history.rs: HistoryGraph::execution_order (Kahn, cycle refusal)"
+  ],
+  "reuse_decision": "ADAPT the rebuild/dirty/persistent-id ideas; ADD the typed durable ports, the persisted semantic reference and the content baselines.",
+  "evidence": [
+    "crates/om9-core/tests/associative_rebuild.rs (editing_the_source_dirties_b_and_d_then_c_in_topological_order, a_cycle_is_refused_instead_of_being_ordered_or_planned)",
+    "implementation/fixtures/M04/OM9-L3-01-04-003/positive.json",
+    "implementation/fixtures/M04/OM9-L3-01-04-003/negative.json"
+  ]
+}

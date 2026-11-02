@@ -1,0 +1,17 @@
+    Blocking waiting for file lock on build directory
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Checking om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+    Checking om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Checking om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+    Checking om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Checking om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+    Checking om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+error[E0063]: missing field `published` in initializer of `om9_core::transaction::Mutation`
+    --> crates\om9-app\src\session.rs:5921:21
+     |
+5921 |                     Mutation::History {
+     |                     ^^^^^^^^^^^^^^^^^ missing `published`
+
+For more information about this error, try `rustc --explain E0063`.
+error: could not compile `om9-app` (lib) due to 1 previous error

@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-005",
+  "case": "witness points (0,0) and (3,4)",
+  "expected": "witness points (0,0) and (3,4) -> the label reads 5",
+  "test": "crates/om9-app/tests/annotation.rs::five_dimension_families_have_independent_value_oracles_and_one_undo"
+}

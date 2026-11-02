@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-26",
+  "scope": "Running-version diagnosis and Line-to-Polyline option-owner regression",
+  "production_sources_unchanged_since_previous_verified_interface": true,
+  "tests_passed": 8,
+  "failed": 0,
+  "added_tests": 1,
+  "menu_and_cmd_scenarios": 2,
+  "clippy": "passed",
+  "launch": {
+    "pid": 63392,
+    "binary": "L:\\om9-target\\debug\\om9.exe",
+    "sha256": "28915c56c1b2ab659624360939356c8a10dfcf8fafb0e96765ee5779cae76494",
+    "profile": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\polyline-option-owner-20261026"
+  },
+  "old_release": {
+    "pid": 39648,
+    "binary": "L:/om9-target/release/om9.exe",
+    "sha256": "f6b75cee2f871c1ba816928cae1dbf426994cdd719c56d20f2fd4ddfca0a75a4",
+    "user_window_preserved": true
+  },
+  "test_sha256": "5ae5f78c73ddf76c14c8da0152d03ccd3252c12677212c668b6639188553a29d",
+  "profile": "build/standalone-validation/ui-artifacts/polyline-option-owner-20261026",
+  "native_observed": [
+    "Completed Line from menu with two viewport points",
+    "Polyline from menu shows PersistentClose/Mode/Helpers without BothSides or premature Length",
+    "First Polyline point exposes Length/Undo without BothSides",
+    "Cancelled pending Polyline; one scratch Line retained in the owned debug window"
+  ],
+  "manual_gate_promoted": false,
+  "new_release_built": false
+}

@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-006-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-006",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
-  "command_id": "OM9-CURVE-106",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
+  "command_id": "OM9-CURVE-006",
   "source_command": "Ellipse",
   "menu_icon": "CurveEllipseFromCenter",
   "owner_candidate": "OM9-L3-02-04-002",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Ellipse command session is not wired; owner candidate OM9-L3-02-04-002 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-006/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-006/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-006/dispatch_contract.json": "e286c1c3f32b497be96e8e8929e06628c1cb6b1c3ba40fce7813802690fc2aae",
-    "implementation/design/M03/OM9-L3-03-16-006/dispatch_contract.md": "dc36c5696c20b815a243022965fb1a888057f9dc78cafc4346fbc4c8b7704b82"
+    "implementation/design/M03/OM9-L3-03-16-006/dispatch_contract.json": "1c2f25b40e8331765cdba4d535ceea12a3348a72f0ebc4c20a86adc5473f1927",
+    "implementation/design/M03/OM9-L3-03-16-006/dispatch_contract.md": "b14ef863ec6853daa4855bcbcbb6d1cf46c2c3e23ca2df8387d15103a0871809"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Ellipse"
 }

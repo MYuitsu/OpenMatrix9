@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-011",
+  "case": "leader text changed to \"Gem B\"",
+  "expected": "leader text changed to \"Gem B\" -> same tip/elbow strokes and the same object id, one Undo entry",
+  "test": "crates/om9-app/tests/annotation.rs::text_and_leader_edit_text_without_flattening_semantics"
+}

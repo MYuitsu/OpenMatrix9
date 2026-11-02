@@ -1,0 +1,29 @@
+$ cargo test -p om9-app --test gem_panel -j 2 the_emerald_builder_commits_the_requested_dimensions
+# exit code: 0
+# captured: 2026-10-27T09:23:23Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_emerald_builder_commits_the_requested_dimensions ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.12s
+
+    Blocking waiting for file lock on package cache
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.33s
+     Running tests\gem_panel.rs (L:\om9-target\debug\deps\gem_panel-2401e69851f3ef48.exe)
+
+$ cargo test -p om9-app --test gem_panel -j 2 the_baguette_builder_refuses_a_degenerate_girdle_and_an_oversized_corner
+# exit code: 0
+# captured: 2026-10-27T09:23:29Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_baguette_builder_refuses_a_degenerate_girdle_and_an_oversized_corner ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.08s
+
+    Blocking waiting for file lock on build directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.75s
+     Running tests\gem_panel.rs (L:\om9-target\debug\deps\gem_panel-2401e69851f3ef48.exe)

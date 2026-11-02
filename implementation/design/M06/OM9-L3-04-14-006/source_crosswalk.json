@@ -1,0 +1,62 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "task_id": "OM9-L3-04-14-006",
+  "title": "Scallop Bezel Builder",
+  "l3_json": "OM9_Milestones/M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-006 - Scallop Bezel Builder/l3.json",
+  "git_head": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "sources": [
+    {
+      "path": "crates/om9-core/src/settings/mod.rs",
+      "sha256": "d674a0982c215c2318136007116aa12dc654088b7c7fb560c7d6f66aec47d593",
+      "role": "shared settings domain"
+    },
+    {
+      "path": "crates/om9-core/src/settings/head.rs",
+      "sha256": "ca24131bb9901bea70a088f11ffd1d36604830a7cadc7e6d32864bac56d26d0e",
+      "role": "shared settings domain"
+    },
+    {
+      "path": "crates/om9-core/src/settings/bezel.rs",
+      "sha256": "ce6f3b548aa468e163b59de5325a934ab8fcf03928cfb7c8e2d1c85fc7c76e45",
+      "role": "shared settings domain"
+    },
+    {
+      "path": "crates/om9-core/src/model.rs",
+      "sha256": "4c4d230979904c37ae8519b7d5c58675976ef6678c5b4a1dddd53cb022ea8e90",
+      "role": "regression test"
+    },
+    {
+      "path": "crates/om9-core/src/gem.rs",
+      "sha256": "6dcec9b1097a1f0b60d134fc248c5c0c0bc17b1b188eb5dc980c49491a7434b8",
+      "role": "regression test"
+    },
+    {
+      "path": "crates/om9-app/src/session/head_commands.rs",
+      "sha256": "309aaf28a26368e75a14cce26d69dcca97ca636ca09b576ce85af8244d69158a",
+      "role": "app command adapter"
+    },
+    {
+      "path": "crates/om9-app/src/session.rs",
+      "sha256": "d044262b46cfed73dc02c55f79197a9345513bda1420f0a726004f5b5f1c1853",
+      "role": "app command adapter"
+    },
+    {
+      "path": "crates/om9-app/src/command_options.rs",
+      "sha256": "2ffc6b993ac853412efe0424224b6d104a3e97258d99f6710427954572fe4028",
+      "role": "app command adapter"
+    },
+    {
+      "path": "crates/om9-app/tests/head_commands.rs",
+      "sha256": "5625670a7cdc7a4655178856672c109dddf2d90d4fb84f9b775bc3033cda51f5",
+      "role": "regression test"
+    }
+  ],
+  "shared_input": "the gem owner's om9.gem record: GemSpec + document placement -> GemGirdle",
+  "shared_output": "closed head/bezel meshes with the om9.settings.head/bezel/scallop payload",
+  "l4_tasks": [
+    "OM9-L4-14-006-01",
+    "OM9-L4-14-006-02",
+    "OM9-L4-14-006-03",
+    "OM9-L4-14-006-04"
+  ]
+}

@@ -1,0 +1,5 @@
+# Top 11 Mirror CPlane axes — work in progress
+
+The normalized M03 Mirror reference documents X Axis and Y Axis relative to the CPlane. Work in progress adds inline XAxis, YAxis and 3Point options and dispatches axis reflection through the existing Mirror owner, with the CPlane origin and corresponding perpendicular in-plane normal. Copy state and one transaction are reused. A test was authored with a translated, rotated CPlane and Copy=No, Undo and Redo for both axes.
+
+These changes have not been compiled or run. Scoped rustfmt checking and `tools/public_source_audit.py` pass, but do not establish runtime behavior. A targeted `cargo test -p om9-app -j 2 --test top11_brep --test top11 --test top11_options` has been queued on `L:\om9-target`, where another full app test holds the lock. Test output must be inspected and any failures fixed after the lock is released. Verify Copy=Yes, invalid/cancel paths, actual mouse and CMD interaction, option shortcuts, alternate right-click script, non-XY CPlanes and BRep cases before claiming full Mirror parity. The broader Top 11 work remains open.

@@ -1,0 +1,18 @@
+{
+  "cases": [
+    {
+      "expect": "Missing(\"style source\")",
+      "source": "no declared slot"
+    },
+    {
+      "expect": "Invalid(\"style attribute\")",
+      "source": {
+        "width_mm": "wide"
+      }
+    },
+    {
+      "expect": "Missing(\"style source\")",
+      "selection": "empty"
+    }
+  ]
+}

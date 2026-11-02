@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-040",
+  "case": "a displacement of zero or a radius of 0 or below",
+  "expected": "a displacement of zero or a radius of 0 or below -> refused at its own prompt; a solid -> Error::Unsupported(\"deformation of a solid\")",
+  "test": "m03_04_01_deform_rows_refuse_a_solid"
+}

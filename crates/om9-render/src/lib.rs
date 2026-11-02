@@ -35,6 +35,33 @@ impl MeshData {
     pub fn new(positions: Vec<[f32; 3]>, indices: Vec<u32>) -> Self {
         Self { positions, indices }
     }
+}
+
+/// One mesh plus the world transform and colour a headless render draws it with.
+#[derive(Debug, Clone)]
+pub struct LayerMesh {
+    pub mesh: MeshData,
+    pub model: [[f32; 4]; 4],
+    pub tint: [f32; 4],
+}
+
+/// One world-space line for the headless overlay pass (curves, B-Rep edges, grid).
+#[derive(Debug, Clone, Copy)]
+pub struct LayerLine {
+    pub start: [f64; 3],
+    pub end: [f64; 3],
+    pub colour: [f32; 4],
+}
+
+/// One world-space point marker for the headless overlay pass.
+#[derive(Debug, Clone, Copy)]
+pub struct LayerPoint {
+    pub point: [f64; 3],
+    pub size: f64,
+    pub colour: [f32; 4],
+}
+
+impl MeshData {
 
     pub fn triangle_count(&self) -> usize {
         self.indices.len() / 3
@@ -826,6 +853,139 @@ impl Renderer {
             .expect("map");
         let data = slice.get_mapped_range().expect("mapped range");
         // Strip the row padding so callers always get tightly packed RGBA8 rows.
+        let mut pixels = Vec::with_capacity((row_bytes * height) as usize);
+        for row in 0..height {
+            let start = (row * padded_row) as usize;
+            pixels.extend_from_slice(&data[start..start + row_bytes as usize]);
+        }
+        drop(data);
+        readback.unmap();
+        Ok(Frame {
+            width,
+            height,
+            pixels,
+        })
+    }
+
+    /// Renders mesh layers, then curve/point overlay lines, into an offscreen target and returns the
+    /// pixels. This is the headless viewport path: no window, no egui, no swapchain — the caller can
+    /// write the frame to a PNG and read it.
+    #[allow(clippy::too_many_arguments)]
+    pub fn render_layers(
+        &mut self,
+        meshes: &[LayerMesh],
+        lines: &[LayerLine],
+        points: &[LayerPoint],
+        camera: Camera,
+        width: u32,
+        height: u32,
+    ) -> Result<Frame, RenderError> {
+        assert!(width > 0 && height > 0, "the target must have a size");
+        if self.lost {
+            return Err(RenderError::Lost);
+        }
+        let colour = self.device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("headless colour"),
+            size: wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8Unorm,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
+            view_formats: &[],
+        });
+        let depth = self.device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("headless depth"),
+            size: wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Depth32Float,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+            view_formats: &[],
+        });
+        let colour_view = colour.create_view(&wgpu::TextureViewDescriptor::default());
+        let depth_view = depth.create_view(&wgpu::TextureViewDescriptor::default());
+        let mut batch =
+            crate::scene::SceneBatch::with_samples(self.device.clone(), self.queue.clone(), 1);
+        for layer in meshes {
+            batch.add_mesh(&layer.mesh, layer.model, layer.tint);
+        }
+        batch.flush_uploads();
+        batch.render_into(&colour_view, &depth_view, camera, width, height)?;
+        let mut overlay = crate::overlay::OverlayBatch::with_samples(
+            self.device.clone(),
+            self.queue.clone(),
+            1,
+        );
+        for line in lines {
+            overlay.line(line.start, line.end, line.colour);
+        }
+        for point in points {
+            overlay.point(point.point, point.size, point.colour);
+        }
+        if !overlay.is_empty() {
+            overlay.upload();
+            overlay.render(&colour_view, &depth_view, camera, width, height);
+        }
+        let row_bytes = width * 4;
+        let padded_row = row_bytes.div_ceil(256) * 256;
+        let readback = self.device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("headless readback"),
+            size: u64::from(padded_row) * u64::from(height),
+            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            mapped_at_creation: false,
+        });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("headless readback"),
+            });
+        encoder.copy_texture_to_buffer(
+            wgpu::TexelCopyTextureInfo {
+                texture: &colour,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            wgpu::TexelCopyBufferInfo {
+                buffer: &readback,
+                layout: wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(padded_row),
+                    rows_per_image: Some(height),
+                },
+            },
+            wgpu::Extent3d {
+                width,
+                height,
+                depth_or_array_layers: 1,
+            },
+        );
+        self.queue.submit(std::iter::once(encoder.finish()));
+        self.device
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .expect("poll");
+        let slice = readback.slice(..);
+        slice.map_async(wgpu::MapMode::Read, |_| {});
+        self.device
+            .poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .expect("map");
+        let data = slice.get_mapped_range().expect("mapped range");
         let mut pixels = Vec::with_capacity((row_bytes * height) as usize);
         for row in 0..height {
             let start = (row * padded_row) as usize;

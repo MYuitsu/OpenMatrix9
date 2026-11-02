@@ -1,0 +1,61 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-04-19-003",
+  "reviewer": {
+    "name": "OM9 automated evidence gate",
+    "role": "automated acceptance; no human signature",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "ACCEPTED_BY_AUTOMATED_EVIDENCE",
+  "approved_at_utc": "2026-10-27T07:12:44Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "100 mm^3 at 10.0 g/cm^3 gives 1.0 g (100/1000*10) and 0.643 dwt; a 10,000 kg/m^3 material is converted to 10 g/cm^3 before the same calculation Negative: a kg/m^3 number read as g/cm^3 is refused by the density guard; a missing material and non-positive volume are refused",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-003/api.md",
+      "sha256": "7cb45ea2f618d590c9ef7493a26c7b831c36e19123c044446b90456342e3f642",
+      "bytes": 760
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-003/negative.json",
+      "sha256": "3b5cc7896eebe417d3d09c027fc0683ab263f7c8f7317b777e18c771fd44f542",
+      "bytes": 449
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-003/OM9-L4-04-19-003-03.json",
+      "sha256": "5abe8110a267d34511ef957d2e495cbd5d6f1b007910fdcd4b9f9aacc036d1d8",
+      "bytes": 3367
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-003/OM9-L4-04-19-003-04.json",
+      "sha256": "4dc9013158cd9f56fb0c8d6c6a2d8941d37a287580942fe0063c8313e44af454",
+      "bytes": 3364
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-003/OM9-L4-04-19-003-05.json",
+      "sha256": "9aba225513aa30f871a64beb2e5910010cbeafa4be71525ffbf215b4b7c02827",
+      "bytes": 3364
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-003/OM9-L4-04-19-003-06.json",
+      "sha256": "d879260b92ce05b5823a8b2d1b17265630df8cf1efe784a497722fa12bd82934",
+      "bytes": 3360
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-003/positive.json",
+      "sha256": "622eb81e973babb7b054d6d91dffb72de47d854de1c92867142b9e6eb9f81dd0",
+      "bytes": 785
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-003/README.md",
+      "sha256": "09dcd948bceb7ea9b2823512c4cbc7d6785953e1967ad1fd6c0c761b324a474f",
+      "bytes": 1360
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-003/source_crosswalk.json",
+      "sha256": "0cbf448d04cc3a30f39b868fed12d468b05b481d7009ebc3f089b2c871a9e277",
+      "bytes": 1344
+    }
+  ],
+  "note": "Generated from the passing receipts. The L3 plan sets manual_test_gate AUTO_ONLY; this record is not a human signature and does not approve a manual builder-panel review."
+}

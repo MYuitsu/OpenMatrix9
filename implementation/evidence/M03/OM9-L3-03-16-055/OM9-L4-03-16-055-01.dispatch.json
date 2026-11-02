@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-055-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-055",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-055",
   "source_command": "Soft Edit",
   "menu_icon": "CurveCurveEditToolsSoftEdit",
   "owner_candidate": "",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "no verified backend owner for Soft Edit; menu stays disabled",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-055/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-055/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-055/dispatch_contract.json": "6a267c19e5200afcc5ae7e548d8f9ce661c82e9136b0697dd3e276f124d9d8ee",
-    "implementation/design/M03/OM9-L3-03-16-055/dispatch_contract.md": "d899d439e89fe769a2855c5d2c266afbe345f2f94b60065707b6c79d7cb62030"
+    "implementation/design/M03/OM9-L3-03-16-055/dispatch_contract.json": "ee38871f0d907b812864299bc22264a37fc4dc4a114ac761609a5b6528fe2445",
+    "implementation/design/M03/OM9-L3-03-16-055/dispatch_contract.md": "4540399a4b77f33f76b7642001a6c721473eee401507d092959df91138dbf7fd"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "SoftEditCrv"
 }

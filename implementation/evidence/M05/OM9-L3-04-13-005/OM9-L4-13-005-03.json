@@ -1,0 +1,59 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-13-005",
+  "l4_id": "OM9-L4-13-005-03",
+  "title": "Gem Style Load",
+  "generated_at_utc": "2026-10-28T04:07:36Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "M05-UI",
+  "signature": null,
+  "not_claimed": [
+    "manual review of Gem Style Load at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "af40e53413e06a044ddc0e349805d4a8400b626ef6aba39e3ba25d5af96877c8",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "named style applied to every selected stone with identity kept",
+    "negative": "an absent name or a malformed store is a typed refusal"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem_edits.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/src/session/gem_edits.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem_edits.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/gem_edits.rs",
+    "tools/record_m05_l2_04_13_gem_instance_edits.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_edits",
+        "-j",
+        "2",
+        "save_and_load_style_roundtrip_through_the_style_file"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "11523cef286b8b59e683af9adb1f1b288faa680065685868f74e4b253c612f7f",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.02s"
+      ],
+      "test": "save_and_load_style_roundtrip_through_the_style_file",
+      "package": "om9-app",
+      "binary": "gem_edits"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

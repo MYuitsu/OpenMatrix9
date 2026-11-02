@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-051-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-051",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-051",
   "source_command": "Section",
   "menu_icon": "CurveCurveFromObjectsSection",
   "owner_candidate": "",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "no verified backend owner for Section; menu stays disabled",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-051/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-051/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-051/dispatch_contract.json": "e81095013fd1a41a2956e2a1d080245bb0109eaf1c7a3f481bae8ca15cc51604",
-    "implementation/design/M03/OM9-L3-03-16-051/dispatch_contract.md": "39dfa6b6e7a725a65f9a462e9f4f36de3fe7824724bb2f129e1f4470e71e0405"
+    "implementation/design/M03/OM9-L3-03-16-051/dispatch_contract.json": "f642da67f720d8fa471c1737b972ebf2e1cfae47ab02654bc47b4981f70e1d7e",
+    "implementation/design/M03/OM9-L3-03-16-051/dispatch_contract.md": "ba78ef6141a51e9128dc300199c31769271f9c0a0fc1344232b7d3108d20e974"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Section"
 }

@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-001",
+  "case": "two witness points 10 mm apart in X and 3 mm apart in Y",
+  "expected": "two witness points 10 mm apart in X and 3 mm apart in Y -> the label reads 10, one Undo entry",
+  "test": "crates/om9-app/tests/annotation.rs::five_dimension_families_have_independent_value_oracles_and_one_undo"
+}

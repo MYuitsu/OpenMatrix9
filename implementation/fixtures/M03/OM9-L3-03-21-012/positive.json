@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-012",
+  "case": "an annotation edited through the option form keeps its geometry and commits once",
+  "expected": "an annotation edited through the option form keeps its geometry and commits once",
+  "test": "crates/om9-app/tests/annotation.rs::edits_options_and_recenter_preserve_identity_and_are_atomic"
+}

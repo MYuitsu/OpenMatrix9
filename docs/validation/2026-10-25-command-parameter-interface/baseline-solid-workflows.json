@@ -1,0 +1,12 @@
+{
+  "baseline": "Byte-exact four-file snapshot immediately before this interface expansion; prior Polyline work retained.",
+  "exit_code": 101,
+  "test": "remaining_primitive_menu_prompts_produce_analytic_volumes",
+  "restored": true,
+  "restored_sha256": {
+    "lib.rs": "fb699ce21de5fec9c0004b39782c3aa284696e09ff250c40eb0871424fa8ab97",
+    "session.rs": "f89af1a70ae7aa2ef52361cfd3f9805085a5106005f2671b4dfe425995729aad",
+    "ui.rs": "42c6acfea4ea15424e2a11b30d1dd2b5276771e5400aa11d395823894e6bc4d4",
+    "ui/command.rs": "152c1018cbcde68a7874a765e9219ad03ea249de3b1b511ed2694d14d51d1c8d"
+  }
+}

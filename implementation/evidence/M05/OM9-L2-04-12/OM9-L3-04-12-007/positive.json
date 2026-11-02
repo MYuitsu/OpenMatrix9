@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-12-007",
+  "title": "Pave Region Controls And Preview",
+  "cases": [
+    "margin/border, density and angle change the candidate set interactively",
+    "the preview chooses Stones or the nearest-neighbour Framework",
+    "the same options work from the typed command line and the window",
+    "Apply is one transaction; Reset restores the typed defaults"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

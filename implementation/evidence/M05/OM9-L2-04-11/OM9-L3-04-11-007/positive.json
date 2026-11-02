@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-11-007",
+  "title": "Halo Cluster Edit Parameters",
+  "cases": [
+    "the feature stores typed params, host and ordered child GemIds under om9.gem.cluster",
+    "reopening a builder edits the plan and keeps the child ids that still exist",
+    "a document JSON round trip keeps the feature and its child ids",
+    "one Undo restores both the previous layout and the previous feature record"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

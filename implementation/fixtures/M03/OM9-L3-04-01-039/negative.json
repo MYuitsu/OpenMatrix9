@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-039",
+  "case": "a solid in the selection",
+  "expected": "Error::Invalid(\"MoveUVN edits surfaces; select surfaces only\") before the first question",
+  "test": "m03_04_01_039_move_uvn_refuses_a_non_surface_selection"
+}

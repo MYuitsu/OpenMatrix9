@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-002",
+  "kind": "negative",
+  "input": "remove the selected profile preset, then switch tabs",
+  "expected": "switch is refused with Missing(profile preset); the previous tab stays active",
+  "verified_by": [
+    "tabs_keep_each_mode_parameters_and_switch_safely",
+    "a_failed_tab_switch_restores_the_previous_tab"
+  ],
+  "document_unchanged": true
+}

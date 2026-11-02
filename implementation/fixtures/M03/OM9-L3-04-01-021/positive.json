@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-021",
+  "case": "mesh caged and edited, then released from the object",
+  "expected": "mesh caged and edited, then released from the object -> the om9.cage slot is gone and the vertex positions are byte-identical to the caged ones",
+  "test": "m03_04_01_021_release_from_cage_keeps_the_geometry"
+}

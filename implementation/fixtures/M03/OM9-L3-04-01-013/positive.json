@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-013",
+  "case": "curve flowed, then broken",
+  "expected": "curve flowed, then broken -> state BROKEN at revision 2 and the ends are unchanged",
+  "test": "m03_04_01_014_smart_flow_break_marks_the_link_broken"
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-14-002",
+  "cases": [
+    {
+      "input": "Mode=HalfBezel, Span=120",
+      "expect": "no prongs, prong_profile_ignored true, one closed band with the 120 degree span, rails kept",
+      "oracle": "om9-core src/settings/head.rs::the_half_bezel_band_replaces_the_prongs_and_ignores_the_profile"
+    },
+    {
+      "input": "toggle the head icon to half bezel",
+      "expect": "the preview reports the half-bezel span; Enter commits a Half Bezel body and no Prong body",
+      "oracle": "om9-app tests/head_commands.rs::the_half_bezel_toggle_replaces_the_prongs_and_keeps_rails"
+    }
+  ],
+  "automated_tests": [
+    "the_half_bezel_toggle_replaces_the_prongs_and_keeps_rails",
+    "the_half_bezel_band_replaces_the_prongs_and_ignores_the_profile"
+  ]
+}

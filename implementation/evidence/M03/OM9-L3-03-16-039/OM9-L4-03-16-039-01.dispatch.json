@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-039-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-039",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-040",
   "source_command": "Duplicate Edge",
   "menu_icon": "CurveCurveFromObjectsDuplicateEdge",
   "owner_candidate": "OM9-L3-02-04-010",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Duplicate Edge command session is not wired; owner candidate OM9-L3-02-04-010 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-039/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-039/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-039/dispatch_contract.json": "2e92a4ef5f5ed713cf9c887c0a3fd5356700678813fa3f477170cbe3fb263fac",
-    "implementation/design/M03/OM9-L3-03-16-039/dispatch_contract.md": "83e2149f072aed780ea6d301512590f97b15f706b8bab2837cc9ef37247d4f7e"
+    "implementation/design/M03/OM9-L3-03-16-039/dispatch_contract.json": "eab6c7b63c1678f628886909863a2b9bc23896792e0b415b976d0140d08a3e33",
+    "implementation/design/M03/OM9-L3-03-16-039/dispatch_contract.md": "c3e94444397afdfdc119f87a612f8e0950d6c38cc1cc4cd864362847d622e79c"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "DupEdge"
 }

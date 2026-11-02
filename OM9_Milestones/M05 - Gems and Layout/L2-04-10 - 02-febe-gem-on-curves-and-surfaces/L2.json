@@ -144,5 +144,76 @@
       "OM9-L3-04-10-010",
       "OM9-L3-04-10-011"
     ]
+  },
+  "runtime_implementation": {
+    "date": "2026-10-27",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+    "scope": "Typed gem placement owner: arc-length rows with start/end/spacing, taper, count fit, heterogeneous lists, atomic multi-curve runs, profile/girdle/guides, surface UV frames, follow/flow/splop and the persisted om9.gem.placement link",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-app"
+      ],
+      "tests": [
+        "crates/om9-core/tests/gem_placement.rs",
+        "crates/om9-app/tests/gem_placement.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/evidence/M05/OM9-L2-04-10/observed.json",
+      "implementation/evidence/M05/OM9-L2-04-10/README.md",
+      "implementation/evidence/M05/OM9-L2-04-10/core-gem-placement.log",
+      "implementation/evidence/M05/OM9-L2-04-10/app-gem-placement.log",
+      "implementation/evidence/M05/OM9-L2-04-10/workspace-check.log"
+    ],
+    "notes": "Placement trả dữ liệu thuần; apply là một transaction. Link om9.gem.placement lưu source/arc/station/uv/revision và có trạng thái ACTIVE/CONFLICT. Không copy asset Matrix. 11 L3 đều còn gate M05-UI.",
+    "l3_coverage": {
+      "OM9-L3-04-10-001": "automated_verified_manual_gate_open",
+      "OM9-L3-04-10-002": "automated_verified_manual_gate_open",
+      "OM9-L3-04-10-003": "automated_verified_manual_gate_open",
+      "OM9-L3-04-10-004": "automated_verified_manual_gate_open",
+      "OM9-L3-04-10-005": "automated_verified_manual_gate_open",
+      "OM9-L3-04-10-006": "automated_verified_manual_gate_open",
+      "OM9-L3-04-10-007": "automated_verified_manual_gate_open",
+      "OM9-L3-04-10-008": "automated_verified_manual_gate_open",
+      "OM9-L3-04-10-009": "automated_verified_manual_gate_open",
+      "OM9-L3-04-10-010": "automated_verified_manual_gate_open",
+      "OM9-L3-04-10-011": "automated_verified_manual_gate_open"
+    },
+    "l4": {
+      "planned": 33,
+      "artifacts": 33,
+      "receipts": [
+        "OM9-L4-10-001-03",
+        "OM9-L4-10-002-03",
+        "OM9-L4-10-003-03",
+        "OM9-L4-10-004-03",
+        "OM9-L4-10-005-03",
+        "OM9-L4-10-006-03",
+        "OM9-L4-10-007-03",
+        "OM9-L4-10-008-03",
+        "OM9-L4-10-009-03",
+        "OM9-L4-10-010-03",
+        "OM9-L4-10-011-03"
+      ]
+    },
+    "tests": [
+      "core gem_placement: exit 0",
+      "app gem_placement: exit 0",
+      "workspace check: exit 0",
+      "clippy: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M05-UI",
+    "remaining": [
+      "All eleven L3 keep the M05-UI manual gate open: no human has reviewed the placement commands on screen and no reviewer signature is claimed.",
+      "Only Windows x64 was exercised in this run.",
+      "The app test binaries link OCCT, so the run needs the OCCT bin and VC runtime directories on PATH; that environment requirement is recorded, not hidden.",
+      "CARGO_TARGET_DIR is H:/OpenMatrix9/cargo-target because this sandbox denies writes to the L:/om9-target directory named in AGENTS.md.",
+      "The clippy gate is scoped to the files this task owns: the shared checkout also contains concurrent in-flight work (for example the settings module and the head_commands tests), so its warnings are listed in clippy_foreign_warnings and left to that owner instead of failing this batch.",
+      "The crate-wide `cargo test -p om9-app --lib` reports 188 passed and 4 `ui::layer_dialog_audit` failures in this non-interactive session: those tests create fixtures under build/standalone-validation with a restricted token and fail with `os error 5` before reaching any placement code. The failures are environmental and recorded in app-lib-os-restriction.log, not hidden.",
+      "The placement preview is session data; painting it as a shaded viewport proxy remains a separate UI task."
+    ]
   }
 }

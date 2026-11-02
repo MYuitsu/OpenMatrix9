@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-010",
+  "title": "Gem Splop On Surface",
+  "cases": [
+    "a degenerate surface normal is a typed refusal",
+    "a non-finite offset or spin is refused"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

@@ -9,14 +9,16 @@
   },
   "expect": {
     "same_command_id": true,
-    "enabled": false,
-    "ui_state": "DISABLED_VISIBLE_REASON",
+    "enabled": true,
+    "ui_state": "ENABLED",
     "one_transaction": true
   },
-  "measured_on_2026_10_23": {
+  "verified_on_2026_10_26": {
     "catalog_rows": 58,
-    "enabled_rows": 2,
-    "disabled_rows": 56,
-    "line_point_smoke": "passed"
+    "enabled_rows": 58,
+    "disabled_rows": 0,
+    "menu_label": "Cross Section Profiles",
+    "documented_script": "CSec",
+    "tests": "320 passed; 0 failed"
   }
 }

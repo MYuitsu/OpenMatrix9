@@ -11,7 +11,7 @@
       "sequence": ["dispatch LINE", "point 0,0,0", "point 10,0,0"],
       "expect": {
         "phases": ["AwaitPoint", "AwaitEnd", "Idle"],
-        "prompts": ["Start of line (BothSides=No): ", "End of line (BothSides=No): ", "Command: "],
+        "prompts": ["Start of line (BothSides=No Length=): ", "End of line (BothSides=No Length=): ", "Command: "],
         "entities": 1,
         "undo_entries": 1
       }
@@ -35,7 +35,7 @@
     {
       "id": "M4-bothsides-is-an-option-of-the-running-command",
       "sequence": ["dispatch LINE", "BothSides=Yes"],
-      "expect": { "phase": "AwaitPoint", "prompt": "Start of line (BothSides=Yes): " }
+      "expect": { "phase": "AwaitPoint", "prompt": "Start of line (BothSides=Yes Length=): " }
     }
   ]
 }

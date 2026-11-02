@@ -1,0 +1,62 @@
+{
+  "schema": "om9.source_crosswalk.v1",
+  "l3": "OM9-L3-04-16-001",
+  "title": "Gem Cutter Azure For Single Stone",
+  "recorded_at": "2026-10-28",
+  "manual": {
+    "filename": "reference/text/m8book2__p274-279__gem-cutter.md",
+    "pdf_pages_1based": [
+      274,
+      279
+    ],
+    "printed_pages": [
+      500,
+      505
+    ]
+  },
+  "feature": "BuilderGemCutter",
+  "commands": [
+    "BuilderGemCutter",
+    "gvAzureCutter",
+    "AzureCutter",
+    "GemCutter"
+  ],
+  "rust_owner": [
+    "crates/om9-core/src/cutters/gem.rs",
+    "crates/om9-app/src/session/gem_cutters.rs"
+  ],
+  "symbols": [
+    "cutters::gem::CutterMode",
+    "cutters::gem::GemCutterParams",
+    "cutters::gem::build",
+    "session::gem_cutters::GemCutterSession",
+    "Controller::dispatch_gem_cutter"
+  ],
+  "reuse_decision": {
+    "decision": "ADD",
+    "reason": "Audit: the Cutters chapter had no cutter command at all. The M06 scallop builder (settings::bezel::build_scallop) sweeps one edge profile and the gem_pave azure curves are placement curves, so neither is a cutter body service. The M07 owner adds the cutter kernel once and the app dispatches to it; no second gem/settings store is created.",
+    "reuses": [
+      "OM9-L2-04-09 (gem::GemSpec, gem::profile_points, gem::girdle_outline)",
+      "OM9-L2-01-10 (geometry::Transform, closed-mesh admission)",
+      "OM9-L2-04-14 (settings::head::GemGirdle, settings::bezel::ScallopParams for the shared gvBezelCutter)",
+      "mesh_csg::mesh_boolean (the one mesh CSG service)"
+    ]
+  },
+  "previous_code_audit": [
+    "crates/om9-app/src/menu_catalog.rs CUTTERS already lists BuilderGemCutter and BuilderGemCutterLibrary, but session.rs did not resolve, dispatch or prompt for either id.",
+    "crates/om9-app/src/display.rs CutterRecord { kind, seat } and CUTTER_EXTENSION_SLOT already existed, so the display filter expected a payload nobody wrote.",
+    "crates/om9-app/src/icons.rs already maps cutters-minimal/BuilderGemCutter(.Library).svg.",
+    "crates/om9-core/src/settings/bezel.rs owned BuilderBezelCutter (Scallop Bezel) with a swept edge profile; the Cutters chapter's dimensional controls were absent."
+  ],
+  "tests": [
+    "cargo test -p om9-core --test cutters the_three_builder_modes_build_closed_cutters_that_clear_the_stone",
+    "cargo test -p om9-core --test cutters a_cutter_that_would_cut_into_the_stone_is_refused",
+    "cargo test -p om9-app --test gem_cutters the_gem_cutter_icon_stages_a_preview_and_enter_commits_cutter_bodies",
+    "cargo test -p om9-app --test gem_cutters the_builder_needs_a_selected_gem"
+  ],
+  "limitations": [
+    "The percentage controls are relative to the measured gem: radius percentages to the girdle half-extent, depth percentages to the pavilion depth, height percentages to the crown height, ZOffset to the pavilion depth.",
+    "The cutter is a lofted ring stack (48 segments by default); it is a cutter body, not a B-Rep solid.",
+    "Edge profiles only shape the azure hole ring; the seat rings stay round so the bearing always clears the stone."
+  ]
+}

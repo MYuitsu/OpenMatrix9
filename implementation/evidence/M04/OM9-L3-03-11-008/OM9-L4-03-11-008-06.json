@@ -1,0 +1,74 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-11-008",
+  "title": "Builder Accept Cancel Reset And Undo",
+  "generated_at_utc": "2026-10-27T02:20:24Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "7203b7acbcacf3f40356deb456e8b23d2d262ae4660f986ada9c4d596e509e66",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "Cancel leaves no change; Apply is exactly one Undo step; Undo/Redo restores",
+    "negative": "the second Enter is a no-op; Reset creates no journal entry"
+  },
+  "l4_id": "OM9-L4-03-11-008-06",
+  "role": "ACCEPTANCE",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/tests/builder_controls.rs",
+    "crates/om9-app/tests/builder_panel.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "double_enter_applies_once_and_reset_creates_no_journal_entry"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "82e6abc20f1e5a0a13660d0f3719cd4ef001249c7d44de62d2fb806ebc379e05",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "double_enter_applies_once_and_reset_creates_no_journal_entry",
+      "package": "om9-app",
+      "binary": "builder_controls"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "a_parameter_edit_and_its_recompute_are_two_undoable_steps"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "d6229d3a2d3dddedb5d48ef290077fb979482013d5f67b005c832f59059f417f",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.02s"
+      ],
+      "test": "a_parameter_edit_and_its_recompute_are_two_undoable_steps",
+      "package": "om9-app",
+      "binary": "builder_panel"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

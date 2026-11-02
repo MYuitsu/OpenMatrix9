@@ -1,0 +1,57 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-13-001",
+  "title": "Matrix History Record Toggle",
+  "generated_at_utc": "2026-10-27T03:41:04Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/icon/window review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "c37da789ba9372849cc52d658e8abab770036c8d6581563cd7cf90e7e7bac9d6",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "record off inserts the rail geometry without a recipe; record on stores the typed recipe; a toggle is refused while the builder transaction is open",
+    "negative": "toggle while an edit transaction is open -> Invalid(history record during edit transaction), policy unchanged"
+  },
+  "l4_id": "OM9-L4-03-13-001-06",
+  "role": "ACCEPT",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/history_ops.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/session/history.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/sidebar_palettes.rs",
+    "crates/om9-app/tests/history_updates.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "history_updates",
+        "-j",
+        "2",
+        "record_off_commits_geometry_without_a_recipe_and_toggles_stamp_new_records"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "6892c739dca510158831b4575ef96dc621e34fe00c1e5e1aa2787aa61505532a",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "record_off_commits_geometry_without_a_recipe_and_toggles_stamp_new_records",
+      "package": "om9-app",
+      "binary": "history_updates"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

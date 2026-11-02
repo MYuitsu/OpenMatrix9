@@ -1,0 +1,17 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-006",
+  "kind": "positive",
+  "input": "merge compatible profile sections and close a profile for a valid cap",
+  "expected": "two half-sections of one circle merge into a closed polycurve; a closed rectangular profile produces a planar cap surface; a closed profile path is checked before the cap",
+  "verified_by": [
+    "profile_sections_merge_when_they_are_connected_and_consistently_wound",
+    "the_profile_merge_icon_joins_compatible_sections_and_refuses_one_section",
+    "the_profile_end_cap_icon_builds_a_planar_cap_from_closed_sections",
+    "the_profile_end_cap_refuses_an_open_curve_without_changing_the_document"
+  ],
+  "notes": [
+    "Winding is measured in the first section's fixed plane frame; a per-section basis would flip twice for a reversed loop and hide the change.",
+    "A curve selection gets a planar cap surface. An open B-Rep selection uses the kernel planar cap under the occt-brep feature and otherwise reports Unsupported."
+  ]
+}

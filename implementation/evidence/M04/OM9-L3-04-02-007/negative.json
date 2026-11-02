@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-007",
+  "kind": "negative",
+  "input": "target diameter at or below twice the band thickness",
+  "expected": "Invalid(ring resizer target below thickness); no entity written",
+  "verified_by": [
+    "a_ring_resizer_creates_an_independent_ring_and_refuses_a_shrink_below_thickness",
+    "outside_rail_and_resizer_apply_independent_outputs"
+  ],
+  "document_unchanged": true
+}

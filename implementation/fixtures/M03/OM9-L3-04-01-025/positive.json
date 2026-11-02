@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-025",
+  "case": "10 x 10 reference plane, path (0,0,0)->(10,0,0), box 0..2, count 3, switch 0",
+  "expected": "10 x 10 reference plane, path (0,0,0)->(10,0,0), box 0..2, count 3, switch 0 -> three objects with centres (1,1,1), (6,1,1) and (11,1,1), one Undo entry",
+  "test": "m03_04_01_025_array_curve_on_surface_projects_the_stations_onto_the_surface"
+}

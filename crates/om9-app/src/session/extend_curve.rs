@@ -60,7 +60,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Length=") {
-            let Some(length) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(length) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.extend_curve_pending = Some(pending);
                 return Some(Err(Error::Invalid("length must be positive")));
             };
@@ -86,11 +90,21 @@ impl Controller {
         let (anchor, direction) = if pending.at_start {
             let start = samples[0];
             let after = samples[1];
-            (start, [start[0] - after[0], start[1] - after[1], start[2] - after[2]])
+            (
+                start,
+                [
+                    start[0] - after[0],
+                    start[1] - after[1],
+                    start[2] - after[2],
+                ],
+            )
         } else {
             let end = samples[samples.len() - 1];
             let before = samples[samples.len() - 2];
-            (end, [end[0] - before[0], end[1] - before[1], end[2] - before[2]])
+            (
+                end,
+                [end[0] - before[0], end[1] - before[1], end[2] - before[2]],
+            )
         };
         let norm = (direction[0].powi(2) + direction[1].powi(2) + direction[2].powi(2)).sqrt();
         if norm <= 1e-12 {

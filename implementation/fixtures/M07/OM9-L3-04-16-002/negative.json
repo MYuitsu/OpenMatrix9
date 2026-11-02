@@ -1,0 +1,17 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-16-002",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "empty stone group",
+      "input": "build_for_stones(&[])",
+      "expect": "Missing(\"cutter gems\")"
+    },
+    {
+      "case": "a stone without a gem record",
+      "input": "a mesh entity in the selection",
+      "expect": "it is not a stone; it becomes the Boolean surface candidate instead"
+    }
+  ]
+}

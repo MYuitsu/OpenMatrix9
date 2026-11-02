@@ -1,0 +1,41 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-19-001",
+  "title": "Metal Volume From Closed B-Rep",
+  "owner": "om9-core metal_weight over the om9-app Metal Weights command",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/metal_weight.rs",
+      "symbols": [
+        "SolidMeasure",
+        "closed_solid_volume_mm3",
+        "volume_mm3_from_project"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/metal.rs",
+      "symbols": [
+        "Controller::measure_metal_entity"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-kernel/src/creation.rs",
+      "symbols": [
+        "measure",
+        "Measures::closed",
+        "Measures::solids"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; behavior is established by the receipts.",
+    "The kernel measures canonical source, never the display mesh or a bounding box.",
+    "Volume conversion is cubic: a volume in cm^3 is multiplied by 1000, not passed through a length conversion."
+  ]
+}

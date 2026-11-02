@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-009",
+  "title": "Gem Flow Placement",
+  "cases": [
+    "a missing target curve or base station is refused",
+    "a row that mixes curve and surface targets is refused rather than guessed",
+    "a target too short for the station produces conflicts, never a silent drop"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

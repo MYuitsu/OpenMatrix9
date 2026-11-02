@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-11-006",
+  "title": "Orient To Gem",
+  "cases": [
+    "the object placement reuses the gem X/Y/Z basis and origin exactly",
+    "offset along the gem axes moves the object origin in the gem frame",
+    "Undo restores the previous object placement"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

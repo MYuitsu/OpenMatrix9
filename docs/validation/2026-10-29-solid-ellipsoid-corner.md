@@ -1,0 +1,7 @@
+# Ellipsoid Corner — 2026-10-29
+
+The normalized Ellipsoid manual specifies two opposite corners of a rectangle enclosing the base ellipse, followed by the third axis. The recovered menu export establishes the primary `_Ellipsoid` command but does not establish this option's native numerical solver. OM9 now exposes Corner through its command option, shortcut and `Ellipsoid Corner` / `_Ellipsoid _Corner`.
+
+OM9 captures the CPlane at the first corner and projects the second corner into it. The two half-extents along the captured plane axes form the base radii; the midpoint is the center and the third radius is measured along the plane normal. This is an OM9 interpretation of the enclosure and projection, not verified original Matrix behavior. Degenerate box dimensions and zero height are rejected without losing valid points. Input Undo steps back and the completed BRep is committed once.
+
+Windows `CARGO_TARGET_DIR=L:/om9-target`, `-j 2`: eight focused Ellipsoid controller tests passed, one pre-existing desktop fixture ignored. The Corner fixture checks both corner orders on a tilted CPlane, invalid input retry, input Undo, numeric third radius, analytic volume, placement and document Undo. Four simulated viewport workflows passed, including Corner base picks and side-view height. A shared-option fixture passed keyboard shortcut, pointer and typed routes. Desktop/GPU behavior, original solver semantics, extreme coordinates and live preview remain unverified; AroundCurve and a separate From Foci icon remain open.

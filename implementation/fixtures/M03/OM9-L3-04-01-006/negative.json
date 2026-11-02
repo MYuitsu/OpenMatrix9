@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-006",
+  "case": "reference direction equal to the base point",
+  "expected": "`Error::Invalid` from the align solve; the selection keeps its placement",
+  "test": "m03_04_01_006_orient_three_points_turns_the_selection"
+}

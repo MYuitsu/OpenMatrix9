@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-046-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-046",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-046",
   "source_command": "Sketch on Surface",
   "menu_icon": "CurveFreeFormSketchonSurface",
   "owner_candidate": "OM9-L3-02-04-003",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Sketch on Surface command session is not wired; owner candidate OM9-L3-02-04-003 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-046/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-046/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-046/dispatch_contract.json": "e40be42452ab06330bffae707fc8011317d98359ca05522933f941df72641e0a",
-    "implementation/design/M03/OM9-L3-03-16-046/dispatch_contract.md": "bb15c27c7e8723f4436dad7ea5a161f7484f4b4453656975acaab6ce23b74199"
+    "implementation/design/M03/OM9-L3-03-16-046/dispatch_contract.json": "78257f57f1bccd4819229ad565c9a9c064153141e4c5988f09083356c1109dc5",
+    "implementation/design/M03/OM9-L3-03-16-046/dispatch_contract.md": "d47ad8238426b1a6ad20830fa8ef715ceb73e55a929d00c6a91df3f6c44c64af"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "SketchOnSurface"
 }

@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-030-01",
+  "l3_id": "OM9-L3-04-01-030",
+  "kind": "Automated Runtime",
+  "date": "2026-10-26",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Set Points: golden case 'box 1x1x1 at the world origin, position 5,6,7' -> the object origin lands on (5,6,7)",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_030_set_points_moves_the_selection_to_the_typed_point"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

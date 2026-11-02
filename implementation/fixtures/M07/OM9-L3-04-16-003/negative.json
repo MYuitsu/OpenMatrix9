@@ -1,0 +1,27 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-16-003",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "unknown preset",
+      "input": "Preset=Titan",
+      "expect": "Invalid(\"cutter preset\")"
+    },
+    {
+      "case": "an empty preset name",
+      "input": "Preset=",
+      "expect": "Missing(\"cutter preset\")"
+    },
+    {
+      "case": "2D scale outside 10..400%",
+      "input": "ScaleX=5",
+      "expect": "Invalid(\"cutter library 2d scale\")"
+    },
+    {
+      "case": "a preset that would cut the stone",
+      "input": "a scaled-down heart azure",
+      "expect": "Invalid(\"cutter library clearance\")"
+    }
+  ]
+}

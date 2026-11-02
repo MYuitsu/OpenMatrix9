@@ -1,0 +1,77 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-12-005",
+  "title": "Builder Style Mode And Shape Filter",
+  "generated_at_utc": "2026-10-27T02:48:43Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the Builder Styles window at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "3cade1ae72f5e19ac02eadc40091d1634c96f3c259ea93cadb861322065c86f1",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "the ring mode enables the two ring styles and disables the gem one",
+    "negative": "a gem style and a foreign-parameter style are refused by the ring builder"
+  },
+  "l4_id": "OM9-L4-03-12-005-06",
+  "role": "ACCEPTANCE",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/builder_style.rs",
+    "crates/om9-app/tests/builder_styles.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_style",
+        "-j",
+        "2",
+        "a_gem_style_cannot_be_applied_to_a_ring_builder"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "930fef04065634a955c6e337855a7be1d769ba29225d838cf4b521dbbd7f3df5",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s"
+      ],
+      "test": "a_gem_style_cannot_be_applied_to_a_ring_builder",
+      "package": "om9-core",
+      "binary": "builder_style"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_styles",
+        "-j",
+        "2",
+        "a_style_for_another_mode_is_listed_disabled_and_refused"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "64954ca5ab79c98d6236489651c7c010aa4fb7e9ffeb7b8fce80f63eb04347c7",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s"
+      ],
+      "test": "a_style_for_another_mode_is_listed_disabled_and_refused",
+      "package": "om9-app",
+      "binary": "builder_styles"
+    }
+  ],
+  "manual_gate_note": "Acceptance And Evidence: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

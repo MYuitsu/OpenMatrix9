@@ -731,13 +731,47 @@ pub fn path_frames(path: &Curve, count: usize, limits: &Limits) -> Result<Vec<Pa
         .map_err(|_| Error::Budget("path frames"))?;
     for index in 0..count {
         let fraction = index as f64 / (count - 1) as f64;
-        let evaluated = crate::evaluation::evaluate_curve(
+        let evaluated = match crate::evaluation::evaluate_curve(
             path,
             crate::evaluation::Parameter::Fraction(fraction),
             1,
             crate::geometry::Transform::identity(),
             limits,
-        )?;
+        ) {
+            Ok(evaluated) => evaluated,
+            // A clamped NURBS seam can refuse D1 while the geometric tangent still exists.
+            Err(Error::Unsupported(_)) => {
+                let step = 1.0e-6;
+                let low = (fraction - step).max(0.0);
+                let high = (fraction + step).min(1.0);
+                if high <= low {
+                    return Err(Error::Invalid("path frame tangent"));
+                }
+                let start = crate::evaluation::evaluate_curve(
+                    path,
+                    crate::evaluation::Parameter::Fraction(low),
+                    0,
+                    crate::geometry::Transform::identity(),
+                    limits,
+                )?;
+                let end = crate::evaluation::evaluate_curve(
+                    path,
+                    crate::evaluation::Parameter::Fraction(high),
+                    0,
+                    crate::geometry::Transform::identity(),
+                    limits,
+                )?;
+                vec![
+                    start[0],
+                    [
+                        end[0][0] - start[0][0],
+                        end[0][1] - start[0][1],
+                        end[0][2] - start[0][2],
+                    ],
+                ]
+            }
+            Err(error) => return Err(error),
+        };
         if evaluated.len() < 2 {
             return Err(Error::Invalid("path frame tangent"));
         }

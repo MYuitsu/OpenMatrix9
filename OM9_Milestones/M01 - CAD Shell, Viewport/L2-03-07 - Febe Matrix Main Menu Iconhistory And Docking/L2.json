@@ -77,6 +77,17 @@
     }
   ],
   "runtime_implementation": {
+    "command_toolbar_icons_2026_10_28": {
+      "scope": "Partial toolbar icon work: Standard and Visibility reference order, 75% sizing, SubD flyouts, authored plugin and standard assets, shared feature availability dispatch.",
+      "status": "IN_PROGRESS",
+      "evidence": "docs/validation/2026-10-28-toolbar-icons-partial.md",
+      "limitations": "Latest Rust build and real-window checks pending; several tabs remain incomplete, unsupported buttons are disabled and screenshot-exact appearance remains unverified."
+    },
+    "top11_sidebar_2026_10_28": {
+      "scope": "Eleven Top 11 icons above DISPLAY in the expanded Main Menu; shared toolbar dispatch and egui layout/click tests.",
+      "status": "AUTOMATED_PARTIAL_MANUAL_UI_PENDING",
+      "evidence": "docs/validation/2026-10-28-top11-sidebar-ui.md"
+    },
     "date": "2026-10-20",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

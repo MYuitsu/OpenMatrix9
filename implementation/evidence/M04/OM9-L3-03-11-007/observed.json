@@ -1,0 +1,20 @@
+{
+  "schema": "om9.m04.l3_builder_evidence.v1",
+  "l3_id": "OM9-L3-03-11-007",
+  "title": "Builder Profile Selector Window",
+  "scope": "Profile library window lists rectangle, rounded rectangle and circle; choosing changes only the preview, Apply commits it, a removed preset is refused.",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "tests": [
+    "the_profile_library_changes_the_preview_and_the_applied_shape",
+    "the_preset_can_be_chosen_from_the_command_line",
+    "the_profile_library_switches_shape_and_refuses_a_removed_preset"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the panel and handle gestures; no reviewer signature is claimed.",
+  "logs": [
+    "app-builder.log",
+    "core-builder.log",
+    "workspace-check.log"
+  ]
+}

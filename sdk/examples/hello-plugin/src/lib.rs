@@ -169,10 +169,33 @@ impl Plugin for HelloPlugin {
                     id: "PickableDemo".into(),
                     title: "Test if an object is pickable".into(),
                 },
+                CommandDescriptor {
+                    id: "HistoryDemo".into(),
+                    title: "Read associative history and its rebuild plan".into(),
+                },
             ],
         }
     }
     fn execute(&mut self, host: &mut Host<'_>, command: &str, arguments: Value) -> Result<Value> {
+        if command == "HistoryDemo" {
+            let features = host.history_list()?;
+            let dependencies = host.history_dependencies()?;
+            let rebuild_plan = host.history_rebuild_plan()?;
+            // Provenance is optional: a legacy record without a unit-safe payload is
+            // reported by the host as an error, so the demo only asks for the first typed
+            // feature.
+            let provenance = match features.first() {
+                Some(feature) => Some(host.history_provenance(feature.id.clone())?),
+                None => None,
+            };
+            return Ok(serde_json::json!({
+                "features": features.len(),
+                "commands": features.iter().map(|feature| feature.command.clone()).collect::<Vec<_>>(),
+                "dependencies": dependencies.len(),
+                "rebuild_plan": rebuild_plan,
+                "provenance_command": provenance.map(|provenance| provenance.command),
+            }));
+        }
         if command == "CurveShapeDemo" {
             let ellipse = host.add_ellipse(
                 "SDK ellipse",

@@ -4,12 +4,14 @@
   "menu_icon": "CurveCurveFromObjectsIntersectTwoSets",
   "command_id": "OM9-CURVE-058",
   "menu_and_commandline_same_id": true,
-  "enabled": false,
-  "disabled_reason": "no verified backend owner for Intersect Two Sets; menu stays disabled",
-  "visible_disabled_reason": true,
-  "ui_state": "DISABLED_VISIBLE_REASON",
+  "enabled": true,
+  "disabled_reason": "",
+  "visible_disabled_reason": false,
+  "ui_state": "ENABLED",
   "owner_service_reused": null,
   "transaction": "one session; one Undo entry",
   "smoke_receipt": "implementation/evidence/M03/OM9-L3-03-16-058/OM9-L4-03-16-058-02.wire.json",
-  "status": "VERIFIED_DISABLED_PLACEHOLDER"
+  "status": "VERIFIED_ENABLED_SESSION",
+  "menu_label": "Intersect Two Sets",
+  "documented_script": "IntersectTwoSets"
 }

@@ -251,10 +251,12 @@ impl Controller {
     }
 
     fn apply_plugin_selection(&mut self, selection: std::collections::BTreeSet<ObjectId>) {
-        if selection != self.selection {
+        let order: Vec<_> = selection.iter().copied().collect();
+        if selection != self.selection || order != self.selection_order {
             self.selection_revision = self.selection_revision.saturating_add(1);
         }
         self.selection = selection;
+        self.selection_order = order;
         self.clear_subselection();
     }
 

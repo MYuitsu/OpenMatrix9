@@ -2,9 +2,12 @@
 //! Matrix Curve menu binding catalog (`OM9-L2-03-16`).
 //!
 //! One row per documented Curve Tools command. Each row names the existing authored icon,
-//! its stable command ID, the verified backend owner candidate and the explicit disabled
-//! reason when no interactive command session exists. The menu must never fabricate
-//! success: Line and Point are the only enabled entries until their owner sessions land.
+//! its stable command ID, the verified backend owner and the explicit disabled reason when
+//! no interactive command session exists. Every row currently resolves to a wired session,
+//! so the menu and the command line reach the same command ID. `by_label` makes the visible
+//! menu label a command-line name too, so a row can never be reachable from only one entry
+//! point. The menu must never fabricate success: a row whose session is missing stays
+//! disabled and reports why.
 
 /// Why a menu row is not enabled.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -172,10 +175,10 @@ pub const BINDINGS: &[CurveMenuBinding; 58] = &[
         label: "Curve 2 Views with History",
         source_command: "Curve 2 Views with History",
         icon: "BuilderCrv2ViewHistory",
-        feature: "OM9-CURVE-114",
-        owner: "OM9-L3-02-04-001",
-        state: BindingState::SessionMissing,
-        disabled_reason: "interactive Curve 2 Views with History command session is not wired; owner candidate OM9-L3-02-04-001",
+        feature: "OM9-CURVE-014",
+        owner: "OM9-L3-02-04-003",
+        state: BindingState::Implemented,
+        disabled_reason: "",
     },
     CurveMenuBinding {
         l3_id: "OM9-L3-03-16-015",
@@ -442,10 +445,10 @@ pub const BINDINGS: &[CurveMenuBinding; 58] = &[
         label: "Curve",
         source_command: "Curve",
         icon: "CurveFreeFormControlPoints",
-        feature: "OM9-CURVE-141",
-        owner: "",
-        state: BindingState::OwnerMissing,
-        disabled_reason: "no verified backend owner for Curve",
+        feature: "OM9-CURVE-042",
+        owner: "OM9-L3-02-04-001",
+        state: BindingState::Implemented,
+        disabled_reason: "",
     },
     CurveMenuBinding {
         l3_id: "OM9-L3-03-16-042",
@@ -502,10 +505,10 @@ pub const BINDINGS: &[CurveMenuBinding; 58] = &[
         label: "Sketch on Mesh",
         source_command: "Sketch on Mesh",
         icon: "CurveFreeFormSketchonPolygonMesh",
-        feature: "OM9-CURVE-147",
+        feature: "OM9-CURVE-049",
         owner: "OM9-L3-02-04-003",
-        state: BindingState::SessionMissing,
-        disabled_reason: "interactive Sketch on Mesh command session is not wired; owner candidate OM9-L3-02-04-003",
+        state: BindingState::Implemented,
+        disabled_reason: "",
     },
     CurveMenuBinding {
         l3_id: "OM9-L3-03-16-048",
@@ -632,6 +635,17 @@ pub fn by_feature(feature: &str) -> Option<&'static CurveMenuBinding> {
 /// Resolve a row by the authored icon name used by the menu palette.
 pub fn by_icon(icon: &str) -> Option<&'static CurveMenuBinding> {
     BINDINGS.iter().find(|binding| binding.icon == icon)
+}
+
+/// Resolve a row by the label the Curve menu shows. Typing that visible name is the
+/// same command as clicking the row, including the two builder rows whose documented
+/// script is the shared `_Crv2View` (OM9-L3-03-16-014) or `_Sketch _OnMesh`
+/// (OM9-L3-03-16-047) sequence.
+pub fn by_label(label: &str) -> Option<&'static CurveMenuBinding> {
+    let wanted = label.trim();
+    BINDINGS
+        .iter()
+        .find(|binding| binding.label.eq_ignore_ascii_case(wanted))
 }
 
 /// Whether the row is enabled by its verified interactive session.

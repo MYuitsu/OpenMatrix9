@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-005",
+  "case": "positive",
+  "input": "independent features X,Y and chain A->B; edit the source of A",
+  "expected": "only A and B recalculate; X and Y cache entries (revision and sha256) are unchanged",
+  "tests": [
+    "only_the_affected_chain_recomputes_and_independent_cache_entries_are_untouched",
+    "a_cache_entry_with_an_outdated_input_stamp_is_a_miss_even_when_the_graph_is_clean"
+  ]
+}

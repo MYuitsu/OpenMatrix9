@@ -4,6 +4,33 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-02-04",
   "title": "Join Explode Close And Split Curves",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "MISSING",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [
+      "domain inputs: type/default/range/unit/prompt"
+    ],
+    "implementation_l4": "OM9-L4-02-04-005-07"
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E05",
@@ -153,6 +180,20 @@
       "depends_on_task_ids": [
         "OM9-L4-02-04-005-05"
       ]
+    },
+    {
+      "id": "OM9-L4-02-04-005-07",
+      "title": "Parameter Implementation — Join Explode Close And Split Curves",
+      "file": "M03 - Geometry 3DM/L2-02-04 - 04/L3-005 - Join Explode Close And Split Curves/L4-07 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-02-04-005-01",
+        "OM9-L4-02-04-005-02",
+        "OM9-L4-02-04-005-03",
+        "OM9-L4-02-04-005-04",
+        "OM9-L4-02-04-005-05",
+        "OM9-L4-02-04-005-06"
+      ]
     }
   ],
   "l4_status": "PLANNED_EXECUTION_NOT_STARTED",
@@ -162,7 +203,8 @@
     "OM9-L4-02-04-005-03",
     "OM9-L4-02-04-005-04",
     "OM9-L4-02-04-005-05",
-    "OM9-L4-02-04-005-06"
+    "OM9-L4-02-04-005-06",
+    "OM9-L4-02-04-005-07"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",

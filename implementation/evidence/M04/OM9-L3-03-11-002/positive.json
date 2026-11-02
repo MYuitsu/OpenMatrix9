@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-002",
+  "kind": "positive",
+  "input": "Rail Profile tab with Width=3; switch to Ring Rail, Diameter=20; switch back",
+  "expected": "profile Width=3 and rail Diameter=20 persist per mode; exactly one active tab of five",
+  "verified_by": [
+    "tabs_keep_each_mode_parameters_and_switch_safely",
+    "a_failed_tab_switch_restores_the_previous_tab"
+  ],
+  "receipts": [
+    {
+      "test": "tabs_keep_each_mode_parameters_and_switch_safely",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "tabs_keep_each_mode_parameters_and_switch_safely"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "196b4c76d5e22dd444f7fd3a115b6b68f1f38fdeae23573b8448c7aa3dd4388a"
+    },
+    {
+      "test": "a_failed_tab_switch_restores_the_previous_tab",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "a_failed_tab_switch_restores_the_previous_tab"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "ce71a3dae0e01925a21589bfa061d4bbb2a4f53fe12d375132504eadc67ad8ce"
+    }
+  ]
+}

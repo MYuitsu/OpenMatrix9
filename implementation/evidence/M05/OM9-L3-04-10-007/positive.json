@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-10-007",
+  "title": "Gem On Surface",
+  "cases": [
+    "a stone on a 100x100 plane at z=5 sits at z=5 with its table axis on +Z",
+    "a 2x2 UV grid places four stones, each with its own UV and frame",
+    "the surface link keeps the UV, so the station can be rebuilt later"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-16-004",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderBezelCutter",
+  "cases": [
+    {
+      "case": "twelve dimensional blocks",
+      "input": "BezelCutterDims::default() on a 6.5 mm girdle",
+      "expect": "12 closed blocks, positive volume each"
+    },
+    {
+      "case": "the shared command carries the block contract",
+      "input": "gvBezelCutter with Dims=on Length=5.5 CutterLength=1.4 XOutside=1.8 Count=8",
+      "expect": "8 Scallop Cutter bodies whose om9.settings.scallop payload records the dims"
+    },
+    {
+      "case": "2D scale",
+      "input": "Scale2D=150",
+      "expect": "the block volume grows by more than 1.5x"
+    }
+  ]
+}

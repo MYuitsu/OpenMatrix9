@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-09-001",
+  "title": "Gem Shape Cut Dimension Schema",
+  "cases": [
+    "NaN / infinite dimension -> Invalid(\"gem dimension is not finite\")",
+    "negative or zero dimension -> Invalid(\"gem dimension range\")",
+    "unknown cut tag -> Invalid(\"gem cut\")",
+    "shape not offered by the cut -> Invalid(\"gem shape for cut\")",
+    "width > length -> Invalid(\"gem width exceeds length\")",
+    "pavilion depth == 0 on a faceted cut -> Invalid(\"gem pavilion depth is zero\")",
+    "corner > half the short axis -> Invalid(\"gem corner exceeds the girdle\")",
+    "wrong payload version/schema -> Invalid(\"gem spec version\"/\"gem spec schema\")"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

@@ -1,0 +1,24 @@
+{
+  "cases": [
+    {
+      "expect": "Invalid(\"style exists\")",
+      "name": "classic 2.5"
+    },
+    {
+      "expect": "Invalid(\"style exists\") (built-in name)",
+      "name": "Classic 2.2"
+    },
+    {
+      "expect": "Invalid(\"style name\")",
+      "name": "../escape"
+    },
+    {
+      "expect": "Permission(\"style library\")",
+      "write": "a directory as the style file"
+    },
+    {
+      "expect": "Invalid(\"style schema\")",
+      "file": "{ not json"
+    }
+  ]
+}

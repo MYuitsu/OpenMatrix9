@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-017",
+  "case": "path (0,0,0)->(10,0,0), box 0..2, point (5,2,0)",
+  "expected": "path (0,0,0)->(10,0,0), box 0..2, point (5,2,0) -> the reference point snaps to (5,0,0) and the local X axis is (1,0,0), one Undo entry",
+  "test": "m03_04_01_017_orient_on_curve_follows_the_tangent"
+}

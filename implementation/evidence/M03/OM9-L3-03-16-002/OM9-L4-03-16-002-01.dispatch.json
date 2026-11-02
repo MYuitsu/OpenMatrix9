@@ -3,8 +3,8 @@
   "task_id": "OM9-L4-03-16-002-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-002",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-002",
   "source_command": "Line",
   "menu_icon": "CurveLineSingleLine",
@@ -16,8 +16,9 @@
     "implementation/design/M03/OM9-L3-03-16-002/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-002/dispatch_contract.json": "b17bc442c15e2330db47ce332a5f46f2b6bd61fffd0a4156f1bdb69fcc87051e",
-    "implementation/design/M03/OM9-L3-03-16-002/dispatch_contract.md": "a39ec97c7437fbd2779a5cc272dd774d258cbdb358adef0f6699a6bfed897757"
+    "implementation/design/M03/OM9-L3-03-16-002/dispatch_contract.json": "f9ff3235f5fea9dea9454597194bd8a2770e3cb549486f7fea48e5a63b6f5d21",
+    "implementation/design/M03/OM9-L3-03-16-002/dispatch_contract.md": "06991ca39b54b2d95d57c543acdc68c18a62220c55fb10ad547f9f1893eb577a"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Line"
 }

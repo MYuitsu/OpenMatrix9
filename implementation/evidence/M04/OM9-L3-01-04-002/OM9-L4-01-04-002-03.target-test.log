@@ -1,0 +1,27 @@
+$ cargo test -p om9-core --test associative_rebuild -- --exact provenance_reopens_the_exact_command_parameters_inputs_and_unit
+# exit code: 0
+# captured: 2026-10-26T16:03:35Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test provenance_reopens_the_exact_command_parameters_inputs_and_unit ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\associative_rebuild.rs (L:\om9-target\debug\deps\associative_rebuild-f31669dfce2cd9f3.exe)
+
+$ cargo test -p om9-core --test associative_rebuild -- --exact provenance_refuses_a_bare_number_a_missing_input_id_and_a_duplicate_role
+# exit code: 0
+# captured: 2026-10-26T16:03:36Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test provenance_refuses_a_bare_number_a_missing_input_id_and_a_duplicate_role ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.09s
+     Running tests\associative_rebuild.rs (L:\om9-target\debug\deps\associative_rebuild-f31669dfce2cd9f3.exe)

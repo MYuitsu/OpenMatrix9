@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-003",
+  "case": "negative",
+  "input": "cycle C->A",
+  "expected": "Invalid('History cycle') from execution_order, plan_recompute and typed_edges",
+  "tests": [
+    "editing_the_source_dirties_b_and_d_then_c_in_topological_order",
+    "a_cycle_is_refused_instead_of_being_ordered_or_planned"
+  ]
+}

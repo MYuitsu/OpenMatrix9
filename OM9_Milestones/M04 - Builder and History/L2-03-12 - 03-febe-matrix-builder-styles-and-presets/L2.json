@@ -112,5 +112,53 @@
       "OM9-L3-03-12-005",
       "OM9-L3-03-12-006"
     ]
+  },
+  "runtime_implementation": {
+    "date": "2026-10-27",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+    "scope": "builder style snapshot, browser, preview apply, user save, mode filter, attribute match",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-app"
+      ],
+      "tests": [
+        "crates/om9-core/tests/builder_style.rs",
+        "crates/om9-app/tests/builder_styles.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/evidence/M04/OM9-L2-03-12/observed.json",
+      "implementation/evidence/M04/OM9-L2-03-12/README.md",
+      "implementation/evidence/M04/OM9-L2-03-12/core-builder-style.log",
+      "implementation/evidence/M04/OM9-L2-03-12/app-builder-styles.log",
+      "implementation/evidence/M04/OM9-L2-03-12/workspace-check.log"
+    ],
+    "l3_coverage": {
+      "OM9-L3-03-12-001": "automated_verified_manual_gate_open",
+      "OM9-L3-03-12-002": "automated_verified_manual_gate_open",
+      "OM9-L3-03-12-003": "automated_verified_manual_gate_open",
+      "OM9-L3-03-12-004": "automated_verified_manual_gate_open",
+      "OM9-L3-03-12-005": "automated_verified_manual_gate_open",
+      "OM9-L3-03-12-006": "automated_verified_manual_gate_open"
+    },
+    "tests": [
+      "core-builder-style.log: exit 0",
+      "core-builder-regression.log: exit 0",
+      "app-builder-styles.log: exit 0",
+      "occt-chain.log: exit 0",
+      "clippy-core-lib.log: exit 0",
+      "workspace-check.log: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M04-UI",
+    "remaining": [
+      "The user style file location comes from OM9_STYLE_LIBRARY; without it the user list lives for the session only — no default user directory was chosen.",
+      "Thumbnails are authored icon keys with a placeholder fallback; no raster thumbnail cache is implemented.",
+      "Only the five ring builders exist, so a gem-family style is always listed disabled; the gem builder belongs to another owner.",
+      "The Builder Styles window is painted by egui, but no screenshot/pointer frame records it.",
+      "macOS runtime is unverified; the evidence is Windows x64 only."
+    ]
   }
 }

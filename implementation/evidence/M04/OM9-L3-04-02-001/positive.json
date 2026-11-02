@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-001",
+  "kind": "positive",
+  "input": "an explicit millimetre diameter or a US ring size drives the same rail builder",
+  "expected": "US size 8 resolves through the frozen table to 18.13 mm inside diameter (radius 9.065); US size 9 resolves to 18.95 mm; an explicit 18 mm rail keeps radius 9.0 and circumference 56.55 mm",
+  "verified_by": [
+    "a_us_ring_size_resolves_through_the_frozen_table_and_an_unknown_locale_is_refused",
+    "the_ring_size_command_switches_the_builder_to_the_us_table"
+  ],
+  "notes": [
+    "The table is frozen in om9-core with provenance text; the producer reads the standard choice and the size count instead of a hidden locale lookup.",
+    "The panel sends Value::Quantity with the field's Dimension so a count or ratio is not mis-typed as a length."
+  ]
+}

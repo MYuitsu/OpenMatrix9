@@ -1,0 +1,12 @@
+[rtk] /!\ No hook installed — run `rtk init -g` for automatic token savings
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.90s
+     Running tests\annotation_ui.rs (L:/om9-target\debug\deps\annotation_ui-5540a0fb407ff88e.exe)
+
+running 3 tests
+test object_summary_is_reached_by_the_analyze_menu ... ok
+test hovering_distance_draws_a_value_before_commit_and_keeps_the_document_unchanged ... ok
+test the_measure_palette_horizontal_icon_creates_a_visible_dimension_label ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.52s
+

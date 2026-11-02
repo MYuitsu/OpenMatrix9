@@ -1,0 +1,6 @@
+$ cargo check -p om9-app -j 2
+
+--- stdout ---
+
+--- stderr ---
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.30s

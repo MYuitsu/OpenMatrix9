@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-009",
+  "case": "text at (4,4) reading \"OM9\"",
+  "expected": "text at (4,4) reading \"OM9\" -> one annotation with no witness points",
+  "test": "crates/om9-app/tests/annotation.rs::text_and_leader_edit_text_without_flattening_semantics"
+}

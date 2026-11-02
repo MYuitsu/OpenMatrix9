@@ -3,10 +3,9 @@
   "l3_id": "OM9-L3-03-16-007",
   "fixture_id": "OM9-L3-03-16-007-NEGATIVE",
   "cases": [
-    "disabled row reports the catalog reason and does not mutate the document",
-    "unknown/missing owner never produces a successful no-op",
-    "cancel/refusal writes no Undo entry"
+    "invalid or missing selection reports an explicit error and mutates nothing",
+    "cancel (Cancel/Esc) ends the session with no Undo entry",
+    "a refused commit keeps the document and the Undo stack unchanged"
   ],
-  "disabled_reason": "interactive Arc command session is not wired; owner candidate OM9-L3-02-04-002 is unverified",
-  "measured_on_2026_10_23": "cargo test -p om9-app --test curve_menu: 4 passed"
+  "verified_on_2026_10_26": "cargo test -p om9-app --test curve_menu: 5 passed; curve command regressions: 320 passed"
 }

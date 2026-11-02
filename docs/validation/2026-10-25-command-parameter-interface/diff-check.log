@@ -1,0 +1,16 @@
+warning: in the working copy of 'OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L2.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-10 - Febe Matrix Commandline Feedback Adapter/L3-003 - Command Options Clickable Tokens/l3.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'OM9_Milestones/M03 - Geometry 3DM/L2-02-04 - 04/L2.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'OM9_Milestones/M03 - Geometry 3DM/L2-02-04 - 04/L3-001 - Line Polyline Point Creation/l3.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'OM9_Milestones/M03 - Geometry 3DM/L2-03-16 - 08/L3-001 - Curve · PolyLine - menu binding/l3.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'README.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'crates/om9-app/src/lib.rs', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'crates/om9-app/src/session.rs', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'crates/om9-app/src/session/solid.rs', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'crates/om9-app/src/transcript.rs', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'crates/om9-app/src/ui.rs', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'crates/om9-app/tests/polyline_command.rs', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/openmatrix9-progress.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'implementation/design/M03/OM9-L3-03-16-001/api.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'implementation/design/M03/OM9-L3-03-16-001/dispatch_contract.json', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'implementation/design/M03/OM9-L3-03-16-001/wire_ui.json', CRLF will be replaced by LF the next time Git touches it

@@ -1,0 +1,39 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-15-001",
+  "cases": [
+    {
+      "input": "4 stones, 2.0 mm, 0.1 mm gap, default Gem Flow",
+      "expect": "at least one prong per stone plus the shared junctions; every body closed; volume equals the sum of the bodies",
+      "oracle": "om9-core tests/settings_family.rs::one_row_drives_every_setting_part"
+    },
+    {
+      "input": "2 stones, 2.0 mm, 3.0 mm gap, Mode=4 Prongs Close",
+      "expect": "four prongs per stone; the two prongs of one side are closer together than 4 Prongs 0 Degrees and stay distinct prongs",
+      "oracle": "om9-core tests/settings_family.rs::the_close_cluster_keeps_two_prongs_per_side_closer_than_4_prongs_0"
+    },
+    {
+      "input": "2 stones, 0.1 mm gap, Mode=6 Prongs 0 Degrees",
+      "expect": "six prongs per stone; a facing pair that lands on one point merges into one shared prong instead of failing",
+      "oracle": "om9-core tests/settings_family.rs::six_prongs_0_builds_on_a_tight_row_and_merges_only_a_shared_point"
+    },
+    {
+      "input": "2 stones, 2.0 mm, 3.0 mm gap, Mode=4 Prongs 0 Degrees",
+      "expect": "count grows against the default style and every committed body carries om9.settings.prong",
+      "oracle": "om9-app tests/settings_commands.rs::an_option_changes_the_preview_before_the_commit"
+    }
+  ],
+  "automated_tests": [
+    "the_icon_stages_a_prong_set_and_enter_commits_one_body_per_prong",
+    "an_option_changes_the_preview_before_the_commit",
+    "a_refused_option_keeps_the_command_and_its_last_preview",
+    "the_prong_builder_stages_the_documented_option_row",
+    "a_command_without_a_gem_selection_is_refused",
+    "every_icon_alias_resolves_to_its_own_feature",
+    "settings::prong::tests",
+    "tests/settings_family.rs::one_row_drives_every_setting_part",
+    "tests/settings_family.rs::every_documented_prong_preset_builds_or_refuses_by_name",
+    "tests/settings_family.rs::the_close_cluster_keeps_two_prongs_per_side_closer_than_4_prongs_0",
+    "tests/settings_family.rs::six_prongs_0_builds_on_a_tight_row_and_merges_only_a_shared_point"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-12-002",
+  "title": "Manual Pave Builder",
+  "cases": [
+    "an explicit count is honoured exactly",
+    "hexagonal spacing and Angle are typed and recompute the preview",
+    "the manual builder shares the Auto Pavé parameters and the same Apply path"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

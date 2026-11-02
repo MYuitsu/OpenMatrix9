@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-003",
+  "case": "a zero-length ray is refused as an invalid witness instead of reporting a made-up angle",
+  "expected": "a zero-length ray is refused as an invalid witness instead of reporting a made-up angle",
+  "test": "crates/om9-app/tests/annotation.rs::preview_cancel_invalid_witness_and_native_archive_roundtrip"
+}

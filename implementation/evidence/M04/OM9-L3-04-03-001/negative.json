@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "expect": "Invalid(\"ring stone count\")",
+      "stone_count": 0
+    },
+    {
+      "expect": "Invalid(\"ring stone spacing\")",
+      "stone_count": 40
+    }
+  ]
+}

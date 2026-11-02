@@ -1,0 +1,14 @@
+{
+  "l4_id": "OM9-L3-04-01-040-01",
+  "l3_id": "OM9-L3-04-01-040",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Soft Move: golden case '2 mm mesh cube at the origin, base (0,0,0), displacement point (0,0,5), radius 1.5 -> the corner at the base moves to (0,0,5) while every corner outside the radius keeps its coordinates, one Undo entry'",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_040_soft_move_moves_only_inside_the_falloff",
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_deform_rows_refuse_a_solid",
+    "crates/om9-core/src/deform.rs"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

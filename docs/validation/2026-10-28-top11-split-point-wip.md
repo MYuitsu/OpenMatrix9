@@ -1,0 +1,7 @@
+# Top 11 Split Point — work in progress
+
+The normalized M03 reference specifies splitting curves at picked points, including two or more points on a closed curve. The bounded `modTopMenu` recovered listing associates the Split button with `! _Split` and its alternate with `! _Split _P`; it is invocation evidence, not a solver. The existing closest-curve service uses an exact line projection but a sampled search for general curves.
+
+This work in progress adds the `Point` prompt option and a `Split Point`/`Split P` typed route for a preselected straight line. It computes the exact fraction in world space, requires the picked point to lie inside the line within the document's explicit absolute tolerance, then uses the existing curve splitter and one transaction. Non-line curves are refused rather than claiming general curve support. Tests are authored for placement, typed world points, invalid input and retry, Undo/Redo, alias/Cancel, and non-line refusal.
+
+No post-change compile or test result exists yet. The targeted Top 11 test batch is queued behind another full app build's `L:\om9-target` lock. Scoped rustfmt and public source audit checks do not establish execution. Once the lock releases, inspect the batch output, fix errors, verify both menu and CMD paths, and record actual geometry. Closed curves, general curves, more than one split point, selection after invoking the alternate, and the original alternate pointer gesture remain open. The broader Top 11 request is incomplete.

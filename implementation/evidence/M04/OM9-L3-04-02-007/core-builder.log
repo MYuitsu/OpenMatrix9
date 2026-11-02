@@ -1,0 +1,31 @@
+$ cargo test -p om9-core --test builder_session --test history_mutation -j 2
+# exit code: 0
+# captured: 2026-10-26T22:04:51Z
+# target dir: L:\om9-target
+
+
+running 8 tests
+test the_field_list_is_typed_and_the_panel_never_sees_a_bare_number ... ok
+test a_ring_resizer_creates_an_independent_ring_and_refuses_a_shrink_below_thickness ... ok
+test a_rail_profile_builder_reads_the_selected_rail_and_exposes_two_handles ... ok
+test a_ring_rail_builder_previews_its_field_and_exposes_a_diameter_handle ... ok
+test an_outside_rail_offsets_a_closed_circular_rail_only ... ok
+test the_profile_library_switches_shape_and_refuses_a_removed_preset ... ok
+test a_committed_builder_plan_inserts_entity_recipe_and_result_in_one_undoable_step ... ok
+test a_rail_sweep_builder_previews_a_surface_and_keeps_the_selection_roles ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 3 tests
+test a_history_update_is_refused_for_a_missing_recipe_or_a_foreign_result ... ok
+test history_recipe_inserts_and_undoes_with_its_output_in_one_transaction ... ok
+test a_recompute_is_one_transaction_with_geometry_recipe_and_result_and_undoes_together ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Blocking waiting for file lock on build directory
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10m 30s
+     Running tests\builder_session.rs (L:\om9-target\debug\deps\builder_session-348c808c86c05bee.exe)
+     Running tests\history_mutation.rs (L:\om9-target\debug\deps\history_mutation-b69033dd76b7002b.exe)

@@ -50,7 +50,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Size=") {
-            let Some(size) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(size) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.heightfield_pending = Some(pending);
                 return Some(Err(Error::Invalid("size")));
             };
@@ -60,7 +64,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.heightfield_pending = Some(pending);
-            return Some(Err(Error::Invalid("Heightfield accepts File=, Height=, Size= or Enter")));
+            return Some(Err(Error::Invalid(
+                "Heightfield accepts File=, Height=, Size= or Enter",
+            )));
         }
         let Some(file) = pending.file else {
             self.heightfield_pending = Some(pending);

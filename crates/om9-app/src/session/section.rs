@@ -36,23 +36,15 @@ impl Controller {
             for (j, cell) in row.iter_mut().enumerate() {
                 let u = u0 + (u1 - u0) * i as f64 / steps as f64;
                 let v = v0 + (v1 - v0) * j as f64 / steps as f64;
-                *cell = om9_core::surface_kernel::evaluate(
-                    &surface,
-                    u,
-                    v,
-                    self.coordinator.limits(),
-                )?;
+                *cell =
+                    om9_core::surface_kernel::evaluate(&surface, u, v, self.coordinator.limits())?;
             }
         }
         let signed = |point: Point3| {
             let value = (point[0] - plane.origin[0]) * normal[0]
                 + (point[1] - plane.origin[1]) * normal[1]
                 + (point[2] - plane.origin[2]) * normal[2];
-            if value.abs() < 1e-9 {
-                1e-9
-            } else {
-                value
-            }
+            if value.abs() < 1e-9 { 1e-9 } else { value }
         };
         let mut segments: Vec<[Point3; 2]> = Vec::new();
         for i in 0..steps {

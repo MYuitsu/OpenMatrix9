@@ -1,0 +1,64 @@
+{
+  "schema": "om9.evidence.domain.v1",
+  "l4": "OM9-L4-04-17-002-02",
+  "l3": "OM9-L3-04-17-002",
+  "recorded_at": "2026-10-28",
+  "status": "DOMAIN_INTEGRATION_RECORDED",
+  "implementation": [
+    "cutters::microprong::MicroProngParams",
+    "cutters::microprong::build_row",
+    "cutters::microprong::MicroProngCutter"
+  ],
+  "design": [
+    "implementation/design/M07/OM9-L3-04-17-002/source_crosswalk.json",
+    "implementation/design/M07/OM9-L3-04-17-002/api.md"
+  ],
+  "fixtures": [
+    "implementation/fixtures/M07/OM9-L3-04-17-002/positive.json",
+    "implementation/fixtures/M07/OM9-L3-04-17-002/negative.json"
+  ],
+  "positive_cases": [
+    {
+      "case": "three stones",
+      "input": "Count=0",
+      "expect": "one closed scallop in each of the two gaps"
+    },
+    {
+      "case": "an explicit count",
+      "input": "Count=4",
+      "expect": "four scallops evenly spaced along the row"
+    },
+    {
+      "case": "a leaning scallop",
+      "input": "Angle=25",
+      "expect": "the scallop is sheared along the row tangent and stays closed"
+    }
+  ],
+  "negative_cases": [
+    {
+      "case": "no gem selected",
+      "input": "a metal mesh only",
+      "expect": "Missing(\"cutter gems\")"
+    },
+    {
+      "case": "a zero radius",
+      "input": "Radius=0",
+      "expect": "Invalid(\"microprong radius\")"
+    },
+    {
+      "case": "an impossible angle",
+      "input": "Angle=70",
+      "expect": "Invalid(\"microprong angle\")"
+    },
+    {
+      "case": "an empty row",
+      "input": "build_row(&[])",
+      "expect": "Missing(\"microprong gems\")"
+    }
+  ],
+  "limitations": [
+    "A scallop is a rounded cap (5 rings, 16 segments by default) lofted into one closed body.",
+    "Count=0 follows the gaps; a positive Count distributes the scallops along the row, so the spacing stops following the stones.",
+    "Micro prongs are cutter bodies only: the bead itself belongs to the M06 prong/channel owner."
+  ]
+}

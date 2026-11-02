@@ -1,0 +1,18 @@
+{
+  "git_head": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "dirty_worktree": true,
+  "scope": "working tree; pre-existing user edits retained",
+  "source_sha256": {
+    "crates/om9-app/src/session.rs": "cfe4fb2ec7c73115c61fa948dfb802c0c47e9c48e39e0a1fd708ffe8e3617f85",
+    "crates/om9-app/src/session/polyline.rs": "b09de1aac189ebcabe6f21327864b6d0b46227d7aa1ac2b40b3c0d4f260fa43a",
+    "crates/om9-app/src/ui.rs": "134fbe3043b60fc5e251abed68a4f1808842218c666a7a08665d234e678a865d",
+    "crates/om9-app/src/ui/command.rs": "9785db71ad892c21505e0944d2a1cdbd4bcc87c09965949104b216f24394638f",
+    "crates/om9-scene/src/scene.rs": "5449b63b8aadbe9a8e4ba3b8676ace20ba9226d79cf4629aac7b8fb9983dfa32",
+    "crates/om9-scene/src/scene/admission.rs": "e78d40e4567b3b912a8ac967fb77f0aa5ec8c35f7a43c0e31ebcc624cf66a2a5",
+    "crates/om9-app/src/transcript.rs": "8890516a60a5f1ea306a03dfec5bd3b8c2e7390a15a4011be45c849f2a22fc39",
+    "crates/om9-app/tests/polyline_command.rs": "360b5458c36db254b68ebe7e31b13989ddee01be776dd1fb5a2ac33aff8744ab",
+    "crates/om9-app/tests/polyline_shortcuts.rs": "20fc054bc4d89ab01d6b016e17f4bdcaa927f3e4358549f19d12e5d571b7cb50",
+    "crates/om9-app/tests/polyline_mode_regression.rs": "b0bf9af75e227e041a8496c1a850823513a33478ccc080653f960c2fc95a3e9e",
+    "crates/om9-scene/tests/polyline_arcs.rs": "63a422ce167fe921372c20826af2447f785d7b72ddd581f3cfb3cc4187e373b0"
+  }
+}

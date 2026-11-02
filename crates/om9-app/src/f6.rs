@@ -15,7 +15,10 @@ use std::collections::BTreeSet;
 pub struct Providers {
     pub m03_curve_surface: bool,
     pub m04_builder: bool,
+    /// Gem properties and the gem tools of `OM9-L2-04-09`.
     pub m05_gem: bool,
+    /// The gemstone report owner (`OM9-L2-04-13`), which is not implemented yet.
+    pub m05_gem_report: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -215,7 +218,7 @@ fn context_for_kind(kind: ContextKind, providers: Providers) -> Context {
                     "M05 gem provider is not available",
                 )
             });
-            actions.push(if providers.m05_gem {
+            actions.push(if providers.m05_gem_report {
                 Action::enabled("GemReport", "Gem Report")
             } else {
                 Action::registered_disabled(
@@ -233,11 +236,15 @@ fn context_for_kind(kind: ContextKind, providers: Providers) -> Context {
             ));
         }
         ContextKind::Builder => {
-            actions.push(Action::registered_disabled(
-                "BuilderPrefill",
-                "Builder",
-                "M04 builder provider is not available",
-            ));
+            actions.push(if providers.m04_builder {
+                Action::enabled("BuilderPrefill", "Builder")
+            } else {
+                Action::registered_disabled(
+                    "BuilderPrefill",
+                    "Builder",
+                    "M04 builder provider is not available",
+                )
+            });
         }
         ContextKind::Custom => {}
     }

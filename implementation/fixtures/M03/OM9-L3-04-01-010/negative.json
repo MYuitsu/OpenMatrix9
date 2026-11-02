@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-010",
+  "case": "no selection",
+  "expected": "`Error::Missing(\"transform selection\")`; the command is refused before any edit",
+  "test": "m03_04_01_010_project_to_cplane_drops_each_object_onto_the_plane"
+}

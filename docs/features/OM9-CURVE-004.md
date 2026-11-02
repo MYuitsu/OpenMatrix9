@@ -3,6 +3,16 @@
 
 # OM9-CURVE-004 — Rectangle
 
+## Standalone correction — 2026-10-26
+
+Corners now keeps signed CPlane direction in a shared Rust preview/commit frame;
+typed first/subsequent corner coordinates use the shared local/world/relative
+parser and page units. 42 focused tests passed (5 new regressions, including 24
+quadrant cases); real Windows GPU icon/mouse and typed CMD creation were observed
+on the newly built binary. [Evidence](../validation/2026-10-26-rectangle-fix/README.md).
+Continuous GPU/present timing, full option acceptance and the human M03-UI gate
+remain open. The remainder of this record retains its legacy scope.
+
 <!-- rhino-core-extended-input:start -->
 ## Extended numeric input — validated slice
 

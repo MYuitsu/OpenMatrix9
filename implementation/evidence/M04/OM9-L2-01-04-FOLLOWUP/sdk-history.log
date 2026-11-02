@@ -1,0 +1,15 @@
+$ cargo test -p om9-plugin-host --lib -j 2 history
+# exit code: 0
+# captured: 2026-10-26T19:21:09Z
+# target dir: L:\om9-target
+
+
+running 3 tests
+test staged::tests::a_malformed_history_id_is_refused ... ok
+test staged::tests::history_queries_report_typed_ports_states_provenance_and_plan ... ok
+test staged::tests::history_is_read_only_for_a_plugin ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 52 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_plugin_host-bc2d19be1aeea2cb.exe)

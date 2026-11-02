@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-045-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-045",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-045",
   "source_command": "Sketch",
   "menu_icon": "CurveFreeFormSketch",
   "owner_candidate": "OM9-L3-02-04-003",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Sketch command session is not wired; owner candidate OM9-L3-02-04-003 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-045/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-045/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-045/dispatch_contract.json": "91b6fdf60942f63ad3a7e713d35fabf5d54c0dab04a040e3ca0868785842f86b",
-    "implementation/design/M03/OM9-L3-03-16-045/dispatch_contract.md": "75c138f673636bbf7b106d80746aa535c925b2c9df861ad578ef75d99ba21a4b"
+    "implementation/design/M03/OM9-L3-03-16-045/dispatch_contract.json": "687787064706e253e7da80ba8fbb6b33c1cdc73d1eb02dbdfe10fd89f958ee2b",
+    "implementation/design/M03/OM9-L3-03-16-045/dispatch_contract.md": "dac0abec80ac5ae2f8e0c2f40bf94a84068d276f98944c8c7ce38e5fa2c051dd"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Sketch"
 }

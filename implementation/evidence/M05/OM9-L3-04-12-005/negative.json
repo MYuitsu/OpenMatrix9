@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-12-005",
+  "title": "Pave Sphere Layout",
+  "cases": [
+    "a radius smaller than the stone is refused",
+    "a zero count and zero X/T are refused",
+    "more than MAX_PAVE_GEMS stones is a typed Budget error"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

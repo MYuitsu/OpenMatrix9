@@ -1,0 +1,81 @@
+{
+  "batch": "host-measure-annotation-transform-20261027",
+  "fixture_groups": 11,
+  "test_functions": 7,
+  "native_occt_fixture_groups": 4,
+  "opennurbs_fixture_groups": 0,
+  "counting": "One fixture group is the named document or geometry operand set below; repeated edge UUID assertions and retries are not new fixture groups.",
+  "fixtures": [
+    {
+      "id": "distance-ortho-continuous",
+      "test": "dynamic_ortho_and_continuous_distance_are_read_only",
+      "native_occt": false,
+      "result": "PASS"
+    },
+    {
+      "id": "ellipse-4x2",
+      "test": "radius_on_an_ellipse_is_pointwise_and_a_line_has_no_finite_curvature",
+      "native_occt": false,
+      "result": "PASS"
+    },
+    {
+      "id": "straight-line-no-radius",
+      "test": "radius_on_an_ellipse_is_pointwise_and_a_line_has_no_finite_curvature",
+      "native_occt": false,
+      "result": "PASS"
+    },
+    {
+      "id": "opposite-knot-curvatures",
+      "test": "radius_on_an_ellipse_is_pointwise_and_a_line_has_no_finite_curvature",
+      "native_occt": false,
+      "result": "PASS"
+    },
+    {
+      "id": "placed-surface-10x20",
+      "test": "isocurve_and_surface_area_use_world_placement",
+      "native_occt": false,
+      "result": "PASS"
+    },
+    {
+      "id": "placed-gem-instance-summary",
+      "test": "summary_groups_instances_and_counts_only_placed_explicit_carats",
+      "native_occt": false,
+      "result": "PASS"
+    },
+    {
+      "id": "box-2x3x4-and-point",
+      "test": "canonical_brep_edges_area_volume_and_object_distance_have_numeric_oracles",
+      "native_occt": true,
+      "result": "PASS"
+    },
+    {
+      "id": "affine-box-4x9x16",
+      "test": "canonical_brep_edges_area_volume_and_object_distance_have_numeric_oracles",
+      "native_occt": true,
+      "result": "PASS"
+    },
+    {
+      "id": "affine-quarter-arc",
+      "test": "placed_arc_keeps_its_trim_under_nonuniform_scale",
+      "native_occt": false,
+      "result": "PASS"
+    },
+    {
+      "id": "finite-surface-and-point",
+      "test": "object_distance_uses_trimmed_curves_and_finite_surface_domains",
+      "native_occt": true,
+      "result": "PASS"
+    },
+    {
+      "id": "trimmed-arc-and-point",
+      "test": "object_distance_uses_trimmed_curves_and_finite_surface_domains",
+      "native_occt": true,
+      "result": "PASS"
+    }
+  ],
+  "evidence": [
+    "final-focused.log",
+    "final-numeric.log",
+    "final-guards.log"
+  ]
+}

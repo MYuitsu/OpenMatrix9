@@ -129,7 +129,23 @@ pub fn derivative_at(curve: &Curve, fraction: f64, limits: &Limits) -> Result<Po
 
 /// Unit tangent at a global fraction.
 pub fn tangent_at(curve: &Curve, fraction: f64, limits: &Limits) -> Result<Point3> {
-    unit(derivative_at(curve, fraction, limits)?)
+    match derivative_at(curve, fraction, limits) {
+        Ok(tangent) => unit(tangent),
+        // A periodic/clamped NURBS seam can refuse a derivative while the geometric tangent
+        // is still well defined. Use a symmetric secant there instead of failing the frame.
+        Err(Error::Unsupported(_)) => {
+            let step = 1.0e-6;
+            let low = (fraction - step).max(0.0);
+            let high = (fraction + step).min(1.0);
+            if high <= low {
+                return Err(Error::Invalid("tangent interval"));
+            }
+            let start = point_at(curve, low, limits)?;
+            let end = point_at(curve, high, limits)?;
+            unit([end[0] - start[0], end[1] - start[1], end[2] - start[2]])
+        }
+        Err(error) => Err(error),
+    }
 }
 
 /// The two geometric ends in forward order. A reversed curve reports the reversed ends.
@@ -460,6 +476,272 @@ pub fn is_closed(curve: &Curve, tolerance: f64, limits: &Limits) -> Result<bool>
     }
     let [start, end] = curve_endpoints(curve, limits)?;
     Ok(distance(start, end) <= tolerance)
+}
+
+/// Validate a user-authored ring rail (`OM9-L3-04-02-004`).
+///
+/// A custom ring rail must be a closed, planar, non-self-intersecting curve with a usable
+/// tangent at every station. The sweep frame transport is only defined for such a rail; an
+/// open or self-intersecting rail is refused by name instead of producing a twisted or
+/// non-periodic band.
+pub fn validate_ring_rail(curve: &Curve, tolerance: f64, limits: &Limits) -> Result<()> {
+    if !tolerance.is_finite() || tolerance <= 0.0 {
+        return Err(Error::Invalid("ring rail tolerance"));
+    }
+    curve.validate(limits)?;
+    if !is_closed(curve, tolerance, limits)? {
+        return Err(Error::Invalid("ring rail not closed"));
+    }
+    let points = sample_curve(curve, 65, limits)?;
+    if points.len() < 4 {
+        return Err(Error::Invalid("ring rail stations"));
+    }
+    // Deterministic plane: the first non-collinear triple. A rail that has no such triple is
+    // degenerate and cannot define a profile plane.
+    let mut plane = None;
+    'search: for i in 1..points.len() {
+        for j in (i + 1)..points.len() {
+            let first = [
+                points[i][0] - points[0][0],
+                points[i][1] - points[0][1],
+                points[i][2] - points[0][2],
+            ];
+            let second = [
+                points[j][0] - points[0][0],
+                points[j][1] - points[0][1],
+                points[j][2] - points[0][2],
+            ];
+            let normal = [
+                first[1] * second[2] - first[2] * second[1],
+                first[2] * second[0] - first[0] * second[2],
+                first[0] * second[1] - first[1] * second[0],
+            ];
+            let length = normal[0].hypot(normal[1]).hypot(normal[2]);
+            if length > 1.0e-9 {
+                plane = Some([
+                    normal[0] / length,
+                    normal[1] / length,
+                    normal[2] / length,
+                ]);
+                break 'search;
+            }
+        }
+    }
+    let normal = plane.ok_or(Error::Invalid("ring rail plane"))?;
+    let origin = points[0];
+    for point in &points {
+        let distance = (point[0] - origin[0]) * normal[0]
+            + (point[1] - origin[1]) * normal[1]
+            + (point[2] - origin[2]) * normal[2];
+        if distance.abs() > tolerance.max(1.0e-6) {
+            return Err(Error::Invalid("ring rail not planar"));
+        }
+    }
+    // Project once into the plane and refuse any crossing between non-adjacent edges. The
+    // closed rail's last station repeats the first, so the last segment closes the loop.
+    let u = unit([
+        points[1][0] - origin[0],
+        points[1][1] - origin[1],
+        points[1][2] - origin[2],
+    ])?;
+    let v = unit([
+        normal[1] * u[2] - normal[2] * u[1],
+        normal[2] * u[0] - normal[0] * u[2],
+        normal[0] * u[1] - normal[1] * u[0],
+    ])?;
+    let flat: Vec<[f64; 2]> = points
+        .iter()
+        .map(|point| {
+            let offset = [
+                point[0] - origin[0],
+                point[1] - origin[1],
+                point[2] - origin[2],
+            ];
+            [
+                offset[0] * u[0] + offset[1] * u[1] + offset[2] * u[2],
+                offset[0] * v[0] + offset[1] * v[1] + offset[2] * v[2],
+            ]
+        })
+        .collect();
+    let edges = flat.len() - 1;
+    for first in 0..edges {
+        let a = flat[first];
+        let b = flat[first + 1];
+        if distance_2d(a, b) <= tolerance * 0.5 {
+            return Err(Error::Invalid("ring rail zero-length segment"));
+        }
+        for second in (first + 1)..edges {
+            if second == first + 1 || (first == 0 && second == edges - 1) {
+                continue;
+            }
+            let c = flat[second];
+            let d = flat[second + 1];
+            if segments_cross(a, b, c, d, tolerance) {
+                return Err(Error::Invalid("ring rail self-intersection"));
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Merge compatible profile sections into one curve (`OM9-L3-04-02-006`).
+///
+/// Sections must be coplanar, consistently wound and connected end to end. The join is the
+/// same `join_curves` transport used elsewhere, so continuity/tolerance rules stay in one
+/// place. A section with the opposite winding is refused by name rather than silently
+/// reversed, because reversing a profile changes the sweep's inside/outside.
+pub fn merge_profile_sections(curves: &[Curve], tolerance: f64, limits: &Limits) -> Result<Curve> {
+    if curves.len() < 2 {
+        return Err(Error::Invalid("profile merge needs two sections"));
+    }
+    if !tolerance.is_finite() || tolerance <= 0.0 {
+        return Err(Error::Invalid("profile merge tolerance"));
+    }
+    let mut reference: Option<(Point3, Point3, Point3, Point3, f64)> = None;
+    for curve in curves {
+        curve.validate(limits)?;
+        let points = sample_curve(curve, 33, limits)?;
+        let (origin, normal) = profile_plane(&points)?;
+        let plane_tolerance = tolerance.max(1.0e-3);
+        for point in &points {
+            let distance = (point[0] - origin[0]) * normal[0]
+                + (point[1] - origin[1]) * normal[1]
+                + (point[2] - origin[2]) * normal[2];
+            if distance.abs() > plane_tolerance {
+                return Err(Error::Invalid("profile section not planar"));
+            }
+        }
+        match &reference {
+            None => {
+                let u = plane_axis(normal)?;
+                let v = unit(cross(normal, u))?;
+                let area = signed_area(&points, origin, u, v);
+                if !area.is_finite() || area.abs() <= 1.0e-9 {
+                    return Err(Error::Invalid("profile section area"));
+                }
+                reference = Some((origin, u, v, normal, area.signum()));
+            }
+            Some((first_origin, first_u, first_v, first_normal, first_sign)) => {
+                let alignment = normal[0] * first_normal[0]
+                    + normal[1] * first_normal[1]
+                    + normal[2] * first_normal[2];
+                if alignment.abs() < 0.99 {
+                    return Err(Error::Invalid("profile section planes"));
+                }
+                // Measure both sections in the first section's frame. A per-section basis
+                // would flip twice for a reversed loop and hide the winding change.
+                let area = signed_area(&points, *first_origin, *first_u, *first_v);
+                if area.signum() != *first_sign {
+                    return Err(Error::Invalid("profile section winding"));
+                }
+            }
+        }
+    }
+    join_curves(curves, tolerance, limits)
+}
+
+/// A deterministic in-plane axis for the winding frame.
+fn plane_axis(normal: Point3) -> Result<Point3> {
+    for candidate in [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]] {
+        let projection = [
+            candidate[0] - normal[0] * dot(candidate, normal),
+            candidate[1] - normal[1] * dot(candidate, normal),
+            candidate[2] - normal[2] * dot(candidate, normal),
+        ];
+        let length = projection[0].hypot(projection[1]).hypot(projection[2]);
+        if length > 1.0e-9 {
+            return Ok([projection[0] / length, projection[1] / length, projection[2] / length]);
+        }
+    }
+    Err(Error::Invalid("profile section plane"))
+}
+
+/// The plane of a sampled loop: origin plus unit normal. Deterministic first non-collinear
+/// triple, matching the ring-rail validator.
+fn profile_plane(points: &[Point3]) -> Result<(Point3, Point3)> {
+    for i in 1..points.len() {
+        for j in (i + 1)..points.len() {
+            let first = [
+                points[i][0] - points[0][0],
+                points[i][1] - points[0][1],
+                points[i][2] - points[0][2],
+            ];
+            let second = [
+                points[j][0] - points[0][0],
+                points[j][1] - points[0][1],
+                points[j][2] - points[0][2],
+            ];
+            let normal = cross(first, second);
+            let length = normal[0].hypot(normal[1]).hypot(normal[2]);
+            if length > 1.0e-9 {
+                return Ok((
+                    points[0],
+                    [normal[0] / length, normal[1] / length, normal[2] / length],
+                ));
+            }
+        }
+    }
+    Err(Error::Invalid("profile section plane"))
+}
+
+/// Signed area of the sampled polygon in the section plane.
+fn signed_area(points: &[Point3], origin: Point3, u: Point3, v: Point3) -> f64 {
+    let mut area = 0.0;
+    for pair in points.windows(2) {
+        let a = pair[0];
+        let b = pair[1];
+        let ax = (a[0] - origin[0]) * u[0] + (a[1] - origin[1]) * u[1] + (a[2] - origin[2]) * u[2];
+        let ay = (a[0] - origin[0]) * v[0] + (a[1] - origin[1]) * v[1] + (a[2] - origin[2]) * v[2];
+        let bx = (b[0] - origin[0]) * u[0] + (b[1] - origin[1]) * u[1] + (b[2] - origin[2]) * u[2];
+        let by = (b[0] - origin[0]) * v[0] + (b[1] - origin[1]) * v[1] + (b[2] - origin[2]) * v[2];
+        area += ax * by - bx * ay;
+    }
+    area * 0.5
+}
+
+fn distance_2d(a: [f64; 2], b: [f64; 2]) -> f64 {
+    (a[0] - b[0]).hypot(a[1] - b[1])
+}
+
+fn cross(a: Point3, b: Point3) -> Point3 {
+    [
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    ]
+}
+
+fn orientation_2d(a: [f64; 2], b: [f64; 2], c: [f64; 2]) -> f64 {
+    (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+}
+
+fn segments_cross(a: [f64; 2], b: [f64; 2], c: [f64; 2], d: [f64; 2], tolerance: f64) -> bool {
+    let o1 = orientation_2d(a, b, c);
+    let o2 = orientation_2d(a, b, d);
+    let o3 = orientation_2d(c, d, a);
+    let o4 = orientation_2d(c, d, b);
+    let scale = tolerance.max(1.0e-9);
+    if o1 * o2 < -scale && o3 * o4 < -scale {
+        return true;
+    }
+    // A crossing exactly at a sample (the bow-tie case) gives one orientation of zero. The
+    // strict sign test misses it, so accept a point that lies on the other segment too.
+    (o1.abs() <= scale && point_on_segment(c, a, b, tolerance))
+        || (o2.abs() <= scale && point_on_segment(d, a, b, tolerance))
+        || (o3.abs() <= scale && point_on_segment(a, c, d, tolerance))
+        || (o4.abs() <= scale && point_on_segment(b, c, d, tolerance))
+}
+
+fn point_on_segment(point: [f64; 2], a: [f64; 2], b: [f64; 2], tolerance: f64) -> bool {
+    let cross = (b[0] - a[0]) * (point[1] - a[1]) - (b[1] - a[1]) * (point[0] - a[0]);
+    let scale = tolerance.max(1.0e-9);
+    if cross.abs() > scale {
+        return false;
+    }
+    point[0] >= a[0].min(b[0]) - tolerance
+        && point[0] <= a[0].max(b[0]) + tolerance
+        && point[1] >= a[1].min(b[1]) - tolerance
+        && point[1] <= a[1].max(b[1]) + tolerance
 }
 
 /// Rotate the start of a closed curve to a new seam fraction.

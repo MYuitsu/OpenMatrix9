@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-13-006",
+  "title": "Gem Update And Regenerate",
+  "cases": [
+    "a stale 4 mm body whose record says 6 mm is rebuilt to the 6 mm mesh",
+    "the stored record and its `GemId` are unchanged by the regeneration",
+    "the update is one transaction and Undo restores the stale body"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

@@ -18,10 +18,13 @@ fn the_running_command_exposes_its_canonical_feature_and_prompt() {
         "the alias resolves to the stable feature id the command line echoes"
     );
     assert_eq!(controller.phase(), CmdPhase::AwaitPoint);
-    assert_eq!(controller.prompt(), "Start of line (BothSides=No): ");
+    assert_eq!(
+        controller.prompt(),
+        "Start of line (BothSides=No Length=): "
+    );
     controller.submit("0,0,0").expect("start point");
     assert_eq!(controller.phase(), CmdPhase::AwaitEnd);
-    assert_eq!(controller.prompt(), "End of line (BothSides=No): ");
+    assert_eq!(controller.prompt(), "End of line (BothSides=No Length=): ");
     controller.submit("10,0,0").expect("end point");
     assert!(!controller.is_running());
     assert_eq!(

@@ -131,5 +131,57 @@
       "OM9-L3-03-11-008",
       "OM9-L3-03-11-009"
     ]
+  },
+  "runtime_implementation": {
+    "date": "2026-10-27",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "standalone Rust OM9, Windows x64",
+    "scope": "builder panel, mode tabs, live preview, viewport handles, profile selector",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-app"
+      ],
+      "tests": [
+        "crates/om9-core/tests/builder_session.rs",
+        "crates/om9-core/tests/builder_controls.rs",
+        "crates/om9-app/tests/builder_panel.rs",
+        "crates/om9-app/tests/builder_controls.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/evidence/M04/OM9-L2-03-11-COMPLETION/observed.json",
+      "implementation/evidence/M04/OM9-L2-03-11-COMPLETION/README.md",
+      "implementation/evidence/M04/OM9-L2-03-11-COMPLETION/core-builder-controls.log",
+      "implementation/evidence/M04/OM9-L2-03-11-COMPLETION/app-builder-controls.log",
+      "implementation/evidence/M04/OM9-L2-03-11-COMPLETION/occt-chain.log",
+      "implementation/evidence/M04/OM9-L2-03-11-COMPLETION/clippy-core.log",
+      "implementation/evidence/M04/OM9-L2-03-11-COMPLETION/workspace-check.log"
+    ],
+    "l3_coverage": {
+      "OM9-L3-03-11-001": "automated_verified_manual_gate_open",
+      "OM9-L3-03-11-002": "automated_verified_manual_gate_open",
+      "OM9-L3-03-11-003": "automated_verified_manual_gate_open",
+      "OM9-L3-03-11-004": "automated_verified_manual_gate_open",
+      "OM9-L3-03-11-005": "automated_verified_pointer_frame_open",
+      "OM9-L3-03-11-006": "automated_verified_manual_gate_open",
+      "OM9-L3-03-11-007": "automated_verified_manual_gate_open",
+      "OM9-L3-03-11-008": "automated_verified_manual_gate_open",
+      "OM9-L3-03-11-009": "automated_verified_manual_gate_open"
+    },
+    "tests": [
+      "core-builder-controls.log: exit 0",
+      "app-builder-controls.log: exit 0",
+      "occt-chain.log: exit 0",
+      "clippy-core.log: exit 0",
+      "workspace-check.log: exit 0"
+    ],
+    "human_approval": null,
+    "manual_gate": "M04-UI",
+    "remaining": [
+      "Manual M04-UI interactive acceptance (panel painting, real pointer gesture on a handle) is not performed by the implementer.",
+      "The live preview recomputes synchronously per accepted edit; no time-based throttle is implemented.",
+      "macOS runtime is unverified."
+    ]
   }
 }

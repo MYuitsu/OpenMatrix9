@@ -3,7 +3,7 @@
   "id": "OM9-L2-04-16",
   "milestone": "M07",
   "title": "01-febe-single-gem-seat-cutter-workflows",
-  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "planning_state": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
   "scope": "Gem Seat/Gem Cutters cho 1 viên đá",
   "source_original_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/module.json",
   "definition": {
@@ -40,12 +40,13 @@
     ],
     "early_slices": [],
     "source_code_audit": "QymCAD implementation not verified; REUSE/ADAPT/ADD must be decided after source checkout",
-    "l3_l4_status": "L3_DEFINED_L4_PLANNED_NOT_IMPLEMENTED",
-    "status": "SPEC_ONLY_NOT_IMPLEMENTED",
+    "l3_l4_status": "L3_IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
     "manual_test_required": true,
     "acceptance_gate": "M07-UI",
     "l3_count": 7,
-    "l3_catalog_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/l3-index.json"
+    "l3_catalog_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/l3-index.json",
+    "reuse_decision": "ADD_NEW_CUTTER_OWNER"
   },
   "children_l3": [
     {
@@ -84,7 +85,7 @@
       "target_implementation_milestone": "M07"
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED",
+  "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
   "planned_l4_count_m07": 24,
   "sdk_integration_plan": {
     "recorded_at": "2026-10-21",
@@ -119,5 +120,131 @@
       "OM9-L3-04-16-006",
       "OM9-L3-04-16-007"
     ]
+  },
+  "planning_state_before": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "implementation": {
+    "schema": "om9.l2_implementation.v1",
+    "recorded_at": "2026-10-28",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
+    "scope": "7 L3 over one cutter domain: Gem/Azure/Advanced gem cutters for one stone and for a stone group, the ten-profile library, the dimensional Bezel Cutter Builder, the pavilion clearance/depth controls, the Interactive Boolean cut of the metal body and the cutter-body Preserve/Remove answer.",
+    "shared_input": "the gem owner's om9.gem record (GemSpec + document placement) becomes the measured cutter reference; a selected closed mesh body becomes the Boolean target",
+    "shared_output": "closed cutter meshes with the om9.cutter payload and, for a cut, the replaced metal body with om9.cutter.cut",
+    "features": [
+      {
+        "l3": "OM9-L3-04-16-001",
+        "feature": "BuilderGemCutter",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-16-001/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-16-001/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-16-001/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-16-001/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-16-001/OM9-L4-04-16-001-03.json",
+          "implementation/evidence/M07/OM9-L3-04-16-001/OM9-L4-04-16-001-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-16-002",
+        "feature": "BuilderGemCutter",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-16-002/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-16-002/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-16-002/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-16-002/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-16-002/OM9-L4-04-16-002-03.json",
+          "implementation/evidence/M07/OM9-L3-04-16-002/OM9-L4-04-16-002-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-16-003",
+        "feature": "BuilderGemCutterLibrary",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-16-003/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-16-003/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-16-003/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-16-003/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-16-003/OM9-L4-04-16-003-03.json",
+          "implementation/evidence/M07/OM9-L3-04-16-003/OM9-L4-04-16-003-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-16-004",
+        "feature": "BuilderBezelCutter",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-16-004/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-16-004/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-16-004/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-16-004/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-16-004/OM9-L4-04-16-004-03.json",
+          "implementation/evidence/M07/OM9-L3-04-16-004/OM9-L4-04-16-004-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-16-005",
+        "feature": "BuilderGemCutter",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-16-005/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-16-005/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-16-005/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-16-005/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-16-005/OM9-L4-04-16-005-03.json",
+          "implementation/evidence/M07/OM9-L3-04-16-005/OM9-L4-04-16-005-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-16-006",
+        "feature": "BuilderGemCutter",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-16-006/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-16-006/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-16-006/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-16-006/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-16-006/OM9-L4-04-16-006-03.json",
+          "implementation/evidence/M07/OM9-L3-04-16-006/OM9-L4-04-16-006-04.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-16-007",
+        "feature": "BuilderGemCutter",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-16-007/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-16-007/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-16-007/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-16-007/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-16-007/OM9-L4-04-16-007-03.json",
+          "implementation/evidence/M07/OM9-L3-04-16-007/OM9-L4-04-16-007-04.json"
+        ]
+      }
+    ],
+    "automated_evidence": {
+      "cargo check -p om9-core -j 2": 0,
+      "cargo check -p om9-app -j 2": 0,
+      "cargo test -p om9-core -j 2": "901 passed / 74 targets",
+      "cargo test -p om9-core --lib cutters -j 2": "26 passed",
+      "cargo test -p om9-core --test cutters -j 2": "15 passed",
+      "cargo test -p om9-app --test gem_cutters -j 2": "7 passed",
+      "cargo test -p om9-app --test head_commands -j 2": "9 passed",
+      "cargo test -p om9-app --lib -j 2": "197 passed",
+      "cargo test -p om9-app -j 2": "all targets pass except command_snapshot::positional_top11_owner_is_visible_without_a_fake_option_row, a pre-existing Top11 work-in-progress assertion outside M07",
+      "summary": "implementation/evidence/M07/OM9-L3-04-16-001/summary.json"
+    },
+    "manual_gate": {
+      "required": true,
+      "gate": "M07-UI",
+      "signed": false,
+      "note": "no human UI review is claimed; the dashboard keeps the 7 L3 at WIP until a reviewer signs"
+    },
+    "limitations": [
+      "The percentage controls are relative to the measured gem (girdle radius, pavilion depth, crown height); the manual never names its reference lengths, so the mapping is documented here rather than guessed per control.",
+      "Cutter bodies are lofted ring stacks (48 segments by default), not B-Rep solids; the B-Rep swap is the kernel adapter's own gate.",
+      "The Interactive Boolean reuses the one mesh CSG service and requires a closed mesh target; a B-Rep surface body is refused instead of silently meshed.",
+      "BuilderBezelCutter stays the M06 gvBezelCutter command: M07 publishes the dimensional block contract and the shared scallop owner dispatches to it, so no second command kernel exists.",
+      "Preserve/Remove applies to the committed cut only; a cutter committed with the Boolean off always stays as its own body.",
+      "The manual gate M07-UI is not signed: the dashboard keeps the seven L3 at WIP until a human reviews the window preview/commit/cancel."
+    ],
+    "unrelated_open_failures": [
+      "crates/om9-app/tests/command_snapshot.rs::positional_top11_owner_is_visible_without_a_fake_option_row (untracked Top11 work in the working tree) asserts the Move command has no option row while the modified session/top11.rs now publishes one; it is not touched by this owner."
+    ],
+    "completion_note": "implementation/evidence/M07/OM9-L2-04-16-COMPLETION/README.md",
+    "evidence_logs": "implementation/evidence/M07/OM9-L3-04-16-001/logs/"
   }
 }

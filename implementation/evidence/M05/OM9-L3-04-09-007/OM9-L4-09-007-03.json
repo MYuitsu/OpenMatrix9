@@ -1,0 +1,89 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-09-007",
+  "l4_id": "OM9-L4-09-007-03",
+  "title": "Gem Asset Properties And Layer Defaults",
+  "generated_at_utc": "2026-10-27T09:23:50Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the gem window at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "29acd3d377146da6133d562808d7d34c45482625d13dada500846368da1f2f12",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "one property transaction, Gem layer routing, no scene-wide recolour",
+    "negative": "shared definitions and locked layers refuse edits"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/transaction.rs",
+    "crates/om9-core/tests/gem_assets.rs",
+    "crates/om9-kernel/src/brep.rs",
+    "crates/om9-kernel/src/gem.rs",
+    "crates/om9-kernel/src/lib.rs",
+    "crates/om9-kernel/src/brep_bridge.cpp",
+    "crates/om9-kernel/Cargo.toml",
+    "crates/om9-kernel/tests/gem_brep.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/f6.rs",
+    "crates/om9-app/src/icons.rs",
+    "crates/om9-app/tests/gem_panel.rs",
+    "tools/record_m05_l2_04_09_gem_assets.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_panel",
+        "-j",
+        "2",
+        "the_property_editor_is_one_transaction_and_undo_restores_every_field"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "30a398b7a5a89c9659ebc082bd782551840b20bb8bb142990714acdb2fc0397d",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.65s"
+      ],
+      "test": "the_property_editor_is_one_transaction_and_undo_restores_every_field",
+      "package": "om9-app",
+      "binary": "gem_panel"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_panel",
+        "-j",
+        "2",
+        "the_property_editor_refuses_a_shared_instance"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "8f73abfc16c991c5bc4e66376dd32b176a432266db7910c38abdc2d40f259ebe",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.60s"
+      ],
+      "test": "the_property_editor_refuses_a_shared_instance",
+      "package": "om9-app",
+      "binary": "gem_panel"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

@@ -1,0 +1,42 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-19-003",
+  "title": "Metal Estimated Mass Calculation",
+  "owner": "om9-core metal_weight over the om9-app Metal Weights command",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/metal_weight.rs",
+      "symbols": [
+        "MetalEstimate",
+        "grams_to_dwt",
+        "MM3_PER_CM3",
+        "GRAMS_PER_DWT"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/metal.rs",
+      "symbols": [
+        "Controller::calculate_metal_weights",
+        "parse_command"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/measure.rs",
+      "symbols": [
+        "MeasureUnit::Gram",
+        "MeasureUnit::Pennyweight"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; behavior is established by the receipts.",
+    "DWT uses 1 dwt = 1.55517384 g; both grams and dwt are carried in the report and command line.",
+    "The material option is parsed by the same command path as the menu icon; an unknown option is a typed refusal."
+  ]
+}

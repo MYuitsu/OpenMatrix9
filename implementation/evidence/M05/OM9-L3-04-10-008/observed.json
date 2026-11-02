@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_placement_evidence.v1",
+  "l3_id": "OM9-L3-04-10-008",
+  "title": "Gem Follow Underlying Curve",
+  "command": "BuilderGemFollow / gvGemFollow",
+  "scope": "`gem_placement::station_at_arc`; `PlacementLink::refresh(revision, arc, station)`; `PlacementLink::mark_conflict`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "arc-length follow reuses the link and keeps gem identity",
+  "negative": "lost sources become visible conflicts; stale writes are refused",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-10-008-03"
+    ],
+    "fixture_manifest_sha256": "d758cc7368e68786eb97a7d9b7b2b206e842a8ad493af3f27caff57f602b278e"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/tests/gem_placement.rs"
+  ],
+  "test": "follow_marks_gems_whose_source_is_gone_as_conflicts_instead_of_moving_them"
+}

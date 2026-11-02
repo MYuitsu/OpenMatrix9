@@ -11,6 +11,26 @@
   "mini_gate_id": "G03-C",
   "risk": "HIGH",
   "purpose": "Wire both menu and commandline to owned command",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 6,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M03 - Geometry 3DM/L2-03-17 - 09-febe/L3-005 - Surface · Profile Sweep - menu binding/l3.json#/parameter_contract",
+    "catalog_command": {
+      "menu": "Surface",
+      "command": "Sweep"
+    },
+    "option_count": 6,
+    "missing_option_count": 0,
+    "domain_input_count": 1,
+    "implementation_l4": "OM9-L4-03-17-005-04"
+  },
   "parent_l3_file": "M03 - Geometry 3DM/L2-03-17 - 09-febe/L3-005 - Surface · Profile Sweep - menu binding/l3.json",
   "preconditions": {
     "milestone": "M00,M01,M02 approved and passing actual tests; previous M03 mini-gates approved",
@@ -478,4 +498,5 @@
     "reference_note": "compose owners; re-check each owner's contract at its own revision",
     "sketch": "// Wire Ui — Surface · Profile Sweep — menu binding\n// ROLE: INTEGRATE - wire owners together; do not reimplement their logic.\n//\n// Purpose: Wire both menu and commandline to owned command\n// Boundary: this task may only orchestrate; each step below must already be owned\n//           and tested by the module named in the record's external_owner_interfaces.\n//\n// Order: None\n//\n// Integration checklist:\n//   1. resolve owners through the parent service contract, not through UI handles\n//   2. keep one transaction boundary: either the whole sequence commits or nothing does\n//   3. on any step error, roll back what this sequence already changed and report the failing step\n//   4. assert identity survives: same stable IDs before and after, no stale scene reference\n//\n// Contract under test: (see owner contracts)\n// Oracle: measured positive oracle\n// Negative oracle: typed error with unchanged state"
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `INTEGRATE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `INTEGRATE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

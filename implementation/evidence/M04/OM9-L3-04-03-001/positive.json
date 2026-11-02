@@ -1,0 +1,9 @@
+{
+  "expect": {
+    "closed": true,
+    "frames": 12,
+    "gem_solids": 0,
+    "volume_mm3": "> 0"
+  },
+  "input": "diameter 18 mm, width 6 mm, wall 2 mm, 12 stones of 2 mm"
+}

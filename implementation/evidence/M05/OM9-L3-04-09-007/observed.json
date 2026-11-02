@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-09-007",
+  "title": "Gem Asset Properties And Layer Defaults",
+  "scope": "F6 `GemProperties` action; `GemPropertiesEditor`; `gem_properties_apply`; `Controller::gem_layer`; `ensure_layer_writable`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "one property transaction, Gem layer routing, no scene-wide recolour",
+  "negative": "shared definitions and locked layers refuse edits",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-09-007-03"
+    ],
+    "fixture_manifest_sha256": "29acd3d377146da6133d562808d7d34c45482625d13dada500846368da1f2f12"
+  },
+  "tests": [
+    "the_property_editor_is_one_transaction_and_undo_restores_every_field",
+    "the_property_editor_refuses_a_shared_instance",
+    "a_property_edit_never_recolours_the_rest_of_the_scene",
+    "gems_route_to_the_gem_layer_default_even_from_another_current_layer"
+  ]
+}

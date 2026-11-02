@@ -1,0 +1,7 @@
+# Cylinder Tangent + Point — 2026-10-29
+
+The normalized Cylinder section describes Tangent and a Point option, but the source pages interleave adjacent Torus/Tube content and do not identify the original solver. OM9 now supports a bounded Tangent + Point path: select one curve, pick or enter its contact parameter, choose Point, pick a non-tangent constraint, then choose signed height. The selected curve and the resulting base circle must satisfy the existing shared planar tangent constraints. This is an OM9 interpretation, not a claim of complete Matrix Tangent behavior.
+
+The curve is preserved and stamped. A deleted or changed source prevents commit; invalid constraints retain the session. The selected OCCT cylinder is committed in one transaction. The separate multi-curve Tangent solver, other tangent options and full topology equivalence are not implemented or verified by this slice.
+
+Windows `CARGO_TARGET_DIR=L:/om9-target`, `-j 2`: eight Cylinder controller tests passed, including both tangent sides, analytic volume, source preservation, invalid input, deleted-source refusal and Undo. One simulated viewport fixture exercised curve/contact/point picks, and one shared-option fixture covered keyboard, pointer and typed Tangent activation. Two existing Truncated Cone Tangent + Point regressions passed. Changed-source fixture, general curves, actual desktop and original Matrix solver remain unverified.

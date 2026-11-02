@@ -1,0 +1,31 @@
+{
+  "schema": "om9.m04.l3_builder_style_evidence.v1",
+  "l3_id": "OM9-L3-03-12-001",
+  "title": "Builder Style Param Snapshot Schema",
+  "scope": "om9_core::builder_style::StyleValue/StyleFile/BuilderStyle STYLE_SCHEMA = om9.builder_style.v1 BuilderStyle::snapshot/defaults_of/validate profile_choice: profile_ref design names -> builder preset choices",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "tests": [
+    "a_style_roundtrip_keeps_the_values_their_unit_and_the_schema",
+    "an_unknown_schema_version_or_an_invalid_numeric_is_refused",
+    "a_profile_reference_name_is_translated_to_the_builder_preset"
+  ],
+  "fixture": "typed style v1: mode=band,width_mm=2.2,profile_ref=basic_round",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the Builder Styles browser and its gestures; no reviewer signature is claimed.",
+  "logs": [
+    "core-builder-style.log",
+    "app-builder-styles.log",
+    "workspace-check.log"
+  ],
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-03-12-001-03",
+      "OM9-L4-03-12-001-04",
+      "OM9-L4-03-12-001-05",
+      "OM9-L4-03-12-001-06",
+      "OM9-L4-03-12-001-07"
+    ],
+    "fixture_manifest_sha256": "fee758f6c24aab406f3737f52ba6fd39e24906729071cccf12d490529b960688"
+  }
+}

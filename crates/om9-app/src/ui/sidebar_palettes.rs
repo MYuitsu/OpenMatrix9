@@ -108,7 +108,14 @@ impl MatrixApp {
             let toggle = snap_kind.is_some()
                 || matches!(
                     key,
-                    "OrthoSnapON" | "PlanarSnapON" | "ProjectSnapON" | "RhinoSmartTrackON"
+                    "OrthoSnapON"
+                        | "PlanarSnapON"
+                        | "ProjectSnapON"
+                        | "RhinoSmartTrackON"
+                        | "RhinoHistoryON"
+                        | "GVHistoryRecordON"
+                        | "GVHistoryUpdateON"
+                        | "InfoSettingsGVClearHistory"
                 );
             let active = snap_kind.map_or_else(
                 || match key {
@@ -116,6 +123,10 @@ impl MatrixApp {
                     "PlanarSnapON" => app.controller.planar(),
                     "ProjectSnapON" => app.controller.project(),
                     "RhinoSmartTrackON" => app.smarttrack_enabled(),
+                    "RhinoHistoryON" | "GVHistoryRecordON" => {
+                        app.controller.history_record_enabled()
+                    }
+                    "GVHistoryUpdateON" => app.controller.history_update_enabled(),
                     _ => false,
                 },
                 |kind| app.snap_enabled(kind),
@@ -160,6 +171,35 @@ impl MatrixApp {
                             } else {
                                 "SmartTrack off"
                             });
+                        }
+                        // Matrix History switches and the per-object clear (`-001`, `-002`, `-004`).
+                        "RhinoHistoryON" | "GVHistoryRecordON" => {
+                            match app.controller.toggle_history_record() {
+                                Ok(message) => {
+                                    app.status.info(&message);
+                                }
+                                Err(error) => {
+                                    app.status.error(&format!("{error}"));
+                                }
+                            }
+                        }
+                        "GVHistoryUpdateON" => match app.controller.toggle_history_update() {
+                            Ok(message) => {
+                                app.status.info(&message);
+                            }
+                            Err(error) => {
+                                app.status.error(&format!("{error}"));
+                            }
+                        },
+                        "InfoSettingsGVClearHistory" => {
+                            match app.controller.clear_selected_history() {
+                                Ok(message) => {
+                                    app.status.info(&message);
+                                }
+                                Err(error) => {
+                                    app.status.error(&format!("{error}"));
+                                }
+                            }
                         }
                         _ => {}
                     }

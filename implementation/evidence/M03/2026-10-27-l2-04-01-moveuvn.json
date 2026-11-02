@@ -1,0 +1,45 @@
+{
+  "schema": "om9.evidence.batch.v1",
+  "date": "2026-10-27",
+  "l2_id": "OM9-L2-04-01",
+  "title": "Transform surface edit row: MoveUVN",
+  "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "manual_gate": "M03_UI_PENDING",
+  "kernel": {
+    "module": "crates/om9-core/src/deform.rs",
+    "public_api": [
+      "deform::move_uvn"
+    ],
+    "reused": [
+      "surface_kernel::greville_parameter",
+      "surface_kernel::derivatives"
+    ]
+  },
+  "rows": [
+    {
+      "l3_id": "OM9-L3-04-01-039",
+      "feature": "OM9-TRANSFORM-039",
+      "command": "MoveUVN",
+      "owner_services": [
+        "crates/om9-core/src/deform.rs",
+        "crates/om9-core/src/surface_kernel.rs"
+      ],
+      "test": "crates/om9-app/tests/transform_menu.rs::m03_04_01_039_move_uvn_offsets_the_control_net_along_u_v_and_the_normal",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-039/OM9-L3-04-01-039-01.json"
+    }
+  ],
+  "totals": {
+    "catalogued_rows": 41,
+    "implemented_rows": 33,
+    "disabled_rows": 8,
+    "tests": {
+      "app_transform_menu": "42 passed; 0 failed",
+      "core_deform": "9 passed; 0 failed"
+    }
+  },
+  "notes": [
+    "the frame is solved per pole from the surface before the edit, so the three offsets are independent",
+    "the row edits surfaces only: a solid or a curve in the selection is refused, not skipped",
+    "the cage and Smart Flow families stay M08-deferred because they need new owners (a cage entity with weights and the history-backed flow)"
+  ]
+}

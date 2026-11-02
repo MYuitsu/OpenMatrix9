@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-003",
+  "kind": "positive",
+  "input": "width_mm 2.0, slider moved 0.46 (step 0.1)",
+  "expected": "stored value 2.5 mm; display, model and preview agree",
+  "verified_by": [
+    "a_slider_move_lands_exactly_on_the_field_step",
+    "a_slider_edit_from_the_panel_quantises_and_previews_the_same_value"
+  ],
+  "receipts": [
+    {
+      "test": "a_slider_move_lands_exactly_on_the_field_step",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "a_slider_move_lands_exactly_on_the_field_step"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "bb83df642edf224f057357149ac61d387fd4d3afbabc7a1272a533700ab3d0ef"
+    },
+    {
+      "test": "a_slider_edit_from_the_panel_quantises_and_previews_the_same_value",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "a_slider_edit_from_the_panel_quantises_and_previews_the_same_value"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "81a8e4ec210795db1a273928884626c7b4791ad9dd5912d0f16e597156604178"
+    }
+  ]
+}

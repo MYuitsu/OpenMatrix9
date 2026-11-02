@@ -1,0 +1,516 @@
+{
+  "cases": [
+    {
+      "commit_ok": true,
+      "committed_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "document_objects": 1,
+      "first": [
+        3.0,
+        7.0,
+        0.0
+      ],
+      "preview_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "preview_ok": true,
+      "route": "CMD invocation / world picks",
+      "scene_epoch_matches_document": true,
+      "scene_objects": 1,
+      "scene_visible": true,
+      "second": [
+        13.0,
+        27.0,
+        0.0
+      ]
+    },
+    {
+      "commit_ok": false,
+      "committed_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "document_objects": 1,
+      "first": [
+        3.0,
+        7.0,
+        0.0
+      ],
+      "preview_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "preview_ok": false,
+      "route": "CMD invocation / world picks",
+      "scene_epoch_matches_document": true,
+      "scene_objects": 1,
+      "scene_visible": true,
+      "second": [
+        -7.0,
+        27.0,
+        0.0
+      ]
+    },
+    {
+      "commit_ok": false,
+      "committed_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "document_objects": 1,
+      "first": [
+        3.0,
+        7.0,
+        0.0
+      ],
+      "preview_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "preview_ok": false,
+      "route": "CMD invocation / world picks",
+      "scene_epoch_matches_document": true,
+      "scene_objects": 1,
+      "scene_visible": true,
+      "second": [
+        13.0,
+        -13.0,
+        0.0
+      ]
+    },
+    {
+      "commit_ok": false,
+      "committed_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "document_objects": 1,
+      "first": [
+        3.0,
+        7.0,
+        0.0
+      ],
+      "preview_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "preview_ok": false,
+      "route": "CMD invocation / world picks",
+      "scene_epoch_matches_document": true,
+      "scene_objects": 1,
+      "scene_visible": true,
+      "second": [
+        -7.0,
+        -13.0,
+        0.0
+      ]
+    },
+    {
+      "commit_ok": true,
+      "committed_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "document_objects": 1,
+      "first": [
+        3.0,
+        7.0,
+        0.0
+      ],
+      "preview_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "preview_ok": true,
+      "route": "menu dispatcher / world picks",
+      "scene_epoch_matches_document": true,
+      "scene_objects": 1,
+      "scene_visible": true,
+      "second": [
+        13.0,
+        27.0,
+        0.0
+      ]
+    },
+    {
+      "commit_ok": false,
+      "committed_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "document_objects": 1,
+      "first": [
+        3.0,
+        7.0,
+        0.0
+      ],
+      "preview_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "preview_ok": false,
+      "route": "menu dispatcher / world picks",
+      "scene_epoch_matches_document": true,
+      "scene_objects": 1,
+      "scene_visible": true,
+      "second": [
+        -7.0,
+        27.0,
+        0.0
+      ]
+    },
+    {
+      "commit_ok": false,
+      "committed_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "document_objects": 1,
+      "first": [
+        3.0,
+        7.0,
+        0.0
+      ],
+      "preview_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "preview_ok": false,
+      "route": "menu dispatcher / world picks",
+      "scene_epoch_matches_document": true,
+      "scene_objects": 1,
+      "scene_visible": true,
+      "second": [
+        13.0,
+        -13.0,
+        0.0
+      ]
+    },
+    {
+      "commit_ok": false,
+      "committed_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "document_objects": 1,
+      "first": [
+        3.0,
+        7.0,
+        0.0
+      ],
+      "preview_corners": [
+        [
+          3.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          7.0,
+          0.0
+        ],
+        [
+          13.0,
+          27.0,
+          0.0
+        ],
+        [
+          3.0,
+          27.0,
+          0.0
+        ]
+      ],
+      "preview_ok": false,
+      "route": "menu dispatcher / world picks",
+      "scene_epoch_matches_document": true,
+      "scene_objects": 1,
+      "scene_visible": true,
+      "second": [
+        -7.0,
+        -13.0,
+        0.0
+      ]
+    }
+  ],
+  "failed_cases": 6,
+  "total_cases": 8,
+  "typed_point": {
+    "accepted": false,
+    "actual": "Err(Invalid(\"rectangle needs a first corner\"))",
+    "document_objects": 0,
+    "input": "3,7,0"
+  }
+}

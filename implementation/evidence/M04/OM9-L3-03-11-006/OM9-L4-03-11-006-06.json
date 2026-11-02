@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-11-006",
+  "title": "Builder Handle And Panel Bidirectional Sync",
+  "generated_at_utc": "2026-10-27T02:20:24Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "7672ab84f32a91497de0a405e5441ee2210f5900c020b95057e5a87439d34723",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "both read 4.0; no feedback loop",
+    "negative": "stale event is refused; the newer value survives"
+  },
+  "l4_id": "OM9-L4-03-11-006-06",
+  "role": "ACCEPTANCE",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/tests/builder_controls.rs",
+    "crates/om9-app/tests/builder_panel.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "a_stale_panel_event_cannot_overwrite_a_newer_handle_drag"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "dbb90247e65663a221a0e5ce047ff73139f4b25b8c0d485aef21d8c65c83dbfc",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "a_stale_panel_event_cannot_overwrite_a_newer_handle_drag",
+      "package": "om9-app",
+      "binary": "builder_controls"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "a_handle_drag_and_a_typed_value_share_the_one_field"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "08daa6510c21a8352ee841db75465f8c1c759ee8dc16446e0cebf0987ace8add",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "a_handle_drag_and_a_typed_value_share_the_one_field",
+      "package": "om9-app",
+      "binary": "builder_panel"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

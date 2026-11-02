@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L4-03-20-004-04",
+  "l3_id": "OM9-L3-03-20-004",
+  "kind": "Regression",
+  "date": "2026-10-26",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "regression: `cargo test -p om9-app --test measure m03_03_20_004`",
+  "tests": [
+    "cargo test -p om9-app --test measure m03_03_20_004"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

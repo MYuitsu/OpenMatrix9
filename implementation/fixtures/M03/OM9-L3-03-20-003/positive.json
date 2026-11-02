@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-20-003",
+  "case": "box solid with corner (3,4,5) and size 10 x 20 x 30, selected; `BoundingBox`",
+  "input": "box solid with corner (3,4,5) and size 10 x 20 x 30, selected; `BoundingBox`",
+  "expected": "label `Bounding Box = 10 x 20 x 30 mm, center (8, 14, 20)`, no Undo entry"
+}

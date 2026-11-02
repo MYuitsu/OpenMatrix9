@@ -891,5 +891,27 @@
     "additional_bounded_inspect_children": 2,
     "full_feature_acceptance": false,
     "new_sdk_geometry_jobs": 0
+  },
+  "standalone_host_measure_annotation_20261027": {
+    "batch": "measure_annotation_transform_corrections_2026_10_27",
+    "scope": "OCCT host measurement/Rust annotation/Transform; NOT openNURBS or Rhino5 acceptance",
+    "test_counts": {
+      "core-regressions": 88,
+      "scene-regressions": 12,
+      "final-focused": 69,
+      "build": 0,
+      "annotation-ui-subset": 3
+    },
+    "receipt": "docs/validation/2026-10-26-measure-completion/receipt.json",
+    "fixture_rule": "13 annotation command families, 7 measurement regression scenarios, 6 Transform scenarios are not counts of future openNURBS batches.",
+    "remaining_total_test_batches": null,
+    "prepared_pending_batches_changed": false,
+    "packages_closed": [],
+    "next_action": "Independent native Rhino5 annotation/style/layout roundtrip remains in package 5; host annotation creation does not close it.",
+    "measurement_fixture_groups": 11,
+    "native_occt_fixture_groups": 4,
+    "opennurbs_fixture_groups": 0,
+    "distinct_tests": 169,
+    "fixture_manifest": "docs/validation/2026-10-26-measure-completion/measurement-fixtures.json"
   }
 }

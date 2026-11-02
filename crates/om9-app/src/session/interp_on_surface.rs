@@ -43,10 +43,6 @@ impl Controller {
             &parameters,
             self.coordinator.limits(),
         )?;
-        self.commit_geometry(
-            INTERP_ON_SURFACE,
-            "InterpCrvOnSrf",
-            Geometry::Curve(curve),
-        )
+        self.commit_geometry(INTERP_ON_SURFACE, "InterpCrvOnSrf", Geometry::Curve(curve))
     }
 }

@@ -1,0 +1,60 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-10-004",
+  "l4_id": "OM9-L4-10-004-03",
+  "title": "Gem List On Curve",
+  "generated_at_utc": "2026-10-27T13:45:02Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "M05-UI",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the placement command at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "bd7c91a9cdb9c49c524c5994142ba9a280a53ef8f6dccde3397f1b716446691f",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "heterogeneous diameters placed in order with per-stone specs",
+    "negative": "empty or invalid stone lists are typed refusals"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem_placement.rs",
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/src/session/gem_placement.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/tests/gem_placement.rs",
+    "tools/record_m05_l2_04_10_gem_placement.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_placement",
+        "-j",
+        "2",
+        "the_list_tool_places_heterogeneous_stones_in_order"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "77ae83cab8dfe1a31442c503021d1684a6bd21c237cce0e43e4aaec6a98b73d1",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s"
+      ],
+      "test": "the_list_tool_places_heterogeneous_stones_in_order",
+      "package": "om9-app",
+      "binary": "gem_placement"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

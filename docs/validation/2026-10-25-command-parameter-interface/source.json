@@ -1,0 +1,29 @@
+{
+  "head": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "dirty": true,
+  "files": {
+    "crates/om9-app/src/command_options.rs": "c903a1ad326fbb78be82be10e1292685053e3647ee6d6eb30a17d28f2a40fd21",
+    "crates/om9-app/src/session/command_options.rs": "68998f5df027a4add1ec721836277cdbf37696b6703135168728a8bd98f19033",
+    "crates/om9-app/src/session/command_options_tests.rs": "b1b6b71659b166ff1e9069697fac0f4c317c3c02da67fa0519d1c776b9c076c9",
+    "crates/om9-app/src/session.rs": "f89af1a70ae7aa2ef52361cfd3f9805085a5106005f2671b4dfe425995729aad",
+    "crates/om9-app/src/session/solid.rs": "af509f5c329ea2689a20a7acd7a4009d0736f2699089ff8066cd0002e436deed",
+    "crates/om9-app/src/ui.rs": "8731cb578fbfe87689df71f4dc7cb1a6260ffe186df3cf14173d4f13b1d3f8d1",
+    "crates/om9-app/src/ui/command.rs": "152c1018cbcde68a7874a765e9219ad03ea249de3b1b511ed2694d14d51d1c8d",
+    "crates/om9-app/src/lib.rs": "fb699ce21de5fec9c0004b39782c3aa284696e09ff250c40eb0871424fa8ab97",
+    "crates/om9-app/tests/command_options_interface.rs": "2453e5a8f1328239cd84b2d3f7433a4d43b6a49cb9621408f69801de588eab03"
+  },
+  "binary": {
+    "pid": 49140,
+    "binary": "L:\\om9-target\\debug\\om9.exe",
+    "sha256": "28915c56c1b2ab659624360939356c8a10dfcf8fafb0e96765ee5779cae76494",
+    "profile": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\command-parameter-interface-debug-20261025"
+  },
+  "environment": {
+    "target": "Windows x64 standalone safe Rust OM9, default features",
+    "cargo_target_dir": "L:/om9-target",
+    "jobs": 2,
+    "native_changes": false,
+    "new_release_build": false,
+    "release_note": "User release remains running; new verification uses debug only."
+  }
+}

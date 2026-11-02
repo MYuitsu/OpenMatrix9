@@ -1,0 +1,26 @@
+{
+  "status": "PASSED_OWN_APP_DEBUG_UI_REPLAY",
+  "manual_gate_signed": false,
+  "launch": {
+    "pid": 64572,
+    "binary": "L:\\om9-target\\debug\\om9.exe",
+    "sha256": "7823525d43d4778927b4fcaa059608ac0b7447bbcf404c2fd90cc23af8799be2",
+    "profile": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\command-polyline-shortcuts-debug-20261025"
+  },
+  "observed": [
+    "Curve menu starts PolyLine",
+    "Two viewport points then M changes Mode=Arc with empty draft",
+    "Accepted arc is visibly curved in Looking Down and Perspective",
+    "M returns to Line after three points without panic",
+    "Clicking Close commits the complete mixed curve",
+    "Typed Undo + Enter removes the whole curve",
+    "Typed Redo + Enter restores the whole curve"
+  ],
+  "screenshots": [
+    "implementation/evidence/M03/command-polyline-shortcuts-20261025/native-debug-closed.png",
+    "implementation/evidence/M03/command-polyline-shortcuts-20261025/native-debug-line-after-arc.png",
+    "implementation/evidence/M03/command-polyline-shortcuts-20261025/native-debug-redo.png",
+    "implementation/evidence/M03/command-polyline-shortcuts-20261025/native-debug-undo.png"
+  ],
+  "stderr": ""
+}

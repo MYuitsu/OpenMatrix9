@@ -49,7 +49,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Height=") {
-            let Some(height) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value != 0.0) else {
+            let Some(height) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value != 0.0)
+            else {
                 self.extrude_surface_pending = Some(pending);
                 return Some(Err(Error::Invalid("height must be non-zero")));
             };
@@ -70,8 +74,7 @@ impl Controller {
             Err(error) => return Some(Err(error)),
         };
         for surface in surfaces {
-            if let Err(error) =
-                self.commit_geometry(EXTRUDE, "Extrude", Geometry::Surface(surface))
+            if let Err(error) = self.commit_geometry(EXTRUDE, "Extrude", Geometry::Surface(surface))
             {
                 return Some(Err(error));
             }

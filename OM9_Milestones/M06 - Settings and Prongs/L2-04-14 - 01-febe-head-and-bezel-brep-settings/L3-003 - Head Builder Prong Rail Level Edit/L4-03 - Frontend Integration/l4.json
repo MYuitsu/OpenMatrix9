@@ -40,6 +40,23 @@
   "manual_interpretation_note": "Sách 2 trang in 470–474, phần Levels và Editing Dimensions. Nếu L3 chỉ có parent_l2_range: đây là chỉ mục tra cứu bổ sung, không khẳng định manual có heading độc lập.",
   "source_claim_level": "SOURCE_MANUAL_AND_L3_ONLY__NO_APP_CODE_CONFIRMED",
   "purpose": "Prong/rail level edits: tích hợp lệnh, preview, giao diện. chuyển 4 levels, chọn P/R, sửa prong x/y và rail drop, kiểm preview",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M06 - Settings and Prongs/L2-04-14 - 01-febe-head-and-bezel-brep-settings/L3-003 - Head Builder Prong Rail Level Edit/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 3,
+    "implementation_l4": null
+  },
   "inputs": [
     "basket head đã tạo; selection prong/rail; level index",
     "L3 canonical: specs/06-ms06-settings-and-prongs/01-febe-head-and-bezel-brep-settings/003-febe-head-builder-prong-rail-level-edit/l3.json",
@@ -389,14 +406,20 @@
       "stage": "6/7. Đặt chấu - bộ đặt chấu dùng đường tròn Apollonius",
       "why_for_this_task": "Sửa mức rail chấu: mỗi cặp đá liền kề dựng hai đường tròn biên rồi giải đường tròn tiếp xúc, nên đổi mức rail là đổi đường kính chấu chứ không phải dịch chấu.",
       "om9_backend": "pure Rust cho hình học đường tròn tiếp xúc và bố trí; OCCT cho khối chấu (pipe/profile revolve)",
-      "steps_cited": [3, 4, 5],
+      "steps_cited": [
+        3,
+        4,
+        5
+      ],
       "algorithm_steps": [
         "R3. Với mỗi cặp đá liền kề (và vòng qua đầu-cuối nếu kênh kín): dựng đường tròn biên phía trái.",
         "R4. Dựng đường tròn cho hai viên đá của cặp (bán kính bằng nửa chiều rộng trung bình).",
         "R5. Giải đường tròn tiếp xúc bộ ba đá-trước / đá-hiện-tại / biên, lấy nhánh căn âm."
       ],
       "source_file": "CS/CSBlocks/CSProngPlacerGC.cs",
-      "source_methods": ["Update"],
+      "source_methods": [
+        "Update"
+      ],
       "boundaries_carried": [
         "Việc SẮP XẾP chuỗi đá nằm ở block khác, không ở đây - block này không kiểm tra khoảng cách đá.",
         "Ý nghĩa hình học chính xác của NudgeEdge/NudgeGem (siết chặt hay lỏng ra) chỉ là INFERRED; phần dựng tới milimét thì đọc được.",
@@ -410,4 +433,5 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `INTEGRATE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `INTEGRATE` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

@@ -1,0 +1,13 @@
+{
+  "l4_id": "OM9-L3-03-21-009-01",
+  "l3_id": "OM9-L3-03-21-009",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Text Block: text at (4,4) reading \"OM9\" -> one annotation with no witness points",
+  "tests": [
+    "crates/om9-app/tests/annotation.rs::text_and_leader_edit_text_without_flattening_semantics",
+    "crates/om9-app/tests/annotation.rs::m03_04_01_all_thirteen_catalog_ids_have_distinct_icons_and_one_dispatcher"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

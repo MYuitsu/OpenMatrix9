@@ -1,0 +1,23 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\cutters.rs (L:\om9-target\debug\deps\cutters-14bd9331f7d33cd9.exe)
+
+running 15 tests
+test the_cutter_reference_is_measured_from_the_stone_profile ... ok
+test a_cutter_that_would_cut_into_the_stone_is_refused ... ok
+test the_bottom_direction_mirrors_the_cutter_above_the_girdle ... ok
+test the_loft_refuses_ring_orders_it_cannot_close ... ok
+test a_negative_cutter_length_is_refused ... ok
+test the_lower_seat_depth_is_bounded_by_the_cutter_bottom ... ok
+test the_bezier_profile_still_wins_when_no_dimensional_block_is_asked_for ... ok
+test the_dimensional_bezel_builder_makes_a_closed_block_per_cutter ... ok
+test the_library_builds_one_cutter_per_stone_and_refuses_an_empty_group ... ok
+test the_library_2d_scale_is_a_typed_control ... ok
+test multiple_stones_get_one_cutter_each ... ok
+test the_three_builder_modes_build_closed_cutters_that_clear_the_stone ... ok
+test every_edge_profile_stays_a_closed_cutter_and_changes_the_hole ... ok
+test every_library_preset_builds_a_closed_cutter ... ok
+test the_interactive_boolean_keeps_or_removes_the_cutter_bodies ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+

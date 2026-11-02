@@ -1,0 +1,19 @@
+{
+  "schema": "om9.m04.l3_builder_evidence.v1",
+  "l3_id": "OM9-L3-04-02-007",
+  "title": "Ring Resizer Builder",
+  "scope": "Independent ring at target_diameter_mm; source ring intact; shrink at or below twice thickness refused.",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "tests": [
+    "a_ring_resizer_creates_an_independent_ring_and_refuses_a_shrink_below_thickness",
+    "outside_rail_and_resizer_apply_independent_outputs"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the panel and handle gestures; no reviewer signature is claimed.",
+  "logs": [
+    "core-builder.log",
+    "app-builder.log",
+    "workspace-check.log"
+  ]
+}

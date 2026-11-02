@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-010",
+  "case": "a horizontal dimension edited to a new text keeps its two witness points, its text position and its object id, and the edit is one Undo entry",
+  "expected": "a horizontal dimension edited to a new text keeps its two witness points, its text position and its object id, and the edit is one Undo entry",
+  "test": "crates/om9-app/tests/annotation.rs::edits_options_and_recenter_preserve_identity_and_are_atomic"
+}

@@ -1,0 +1,76 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-02-007",
+  "title": "Ring Resizer Builder",
+  "generated_at_utc": "2026-10-27T02:20:24Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "9ba2aba81b9be4f4a2f3a9ae1d247b46ed74066666c31bbefa7041754a2713d8",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "new output ring radius 9.5 mm (inside diameter 19), original ring still radius 9 mm; undo removes only the output",
+    "negative": "Invalid(ring resizer target below thickness); no entity written"
+  },
+  "l4_id": "OM9-L4-04-02-007-05",
+  "role": "REGRESSION",
+  "kind": "regression",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-core/tests/builder_session.rs",
+    "crates/om9-app/tests/builder_panel.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "-j",
+        "2",
+        "a_ring_resizer_creates_an_independent_ring_and_refuses_a_shrink_below_thickness"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "ffda1bf447f2783b481699f330ee3f84f321b757ed86b34be17f85dfaee105ff",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s"
+      ],
+      "test": "a_ring_resizer_creates_an_independent_ring_and_refuses_a_shrink_below_thickness",
+      "package": "om9-core",
+      "binary": "builder_session"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "outside_rail_and_resizer_apply_independent_outputs"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "05743d0000ee3ac8319cedc8f03c24965da89dbd4a85a131322607ec050dad0a",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.01s"
+      ],
+      "test": "outside_rail_and_resizer_apply_independent_outputs",
+      "package": "om9-app",
+      "binary": "builder_panel"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

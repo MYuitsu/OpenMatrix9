@@ -1,0 +1,28 @@
+{
+  "schema": "om9.evidence.preflight.v1",
+  "l4": "OM9-L4-04-17-002-01",
+  "l3": "OM9-L3-04-17-002",
+  "recorded_at": "2026-10-28",
+  "status": "SOURCE_PREFLIGHT_RECORDED",
+  "manual": {
+    "filename": "OM9_Milestones/M07 - Cutters/L2-04-17 - 02-febe-channel-microprong-brightcut-cutters/reference/text/m8book2__p272-274__creating-cutters.md",
+    "pdf_pages_1based": [
+      272,
+      274
+    ],
+    "printed_pages": [
+      498,
+      500
+    ]
+  },
+  "source_audit": "The four commands existed only as menu catalog ids plus icon bindings; no session, kernel or UI code handled them. The shared kernels were reused instead of copied: cutters::{sweep, solid, loft, volume_mm3} for the bodies and cutters::boolean::apply for the Interactive Boolean.",
+  "inputs": [
+    "the selected gems (om9.gem record + placement), in selection order",
+    "every selected closed mesh body that is not a gem and not an om9.cutter"
+  ],
+  "decision": "ADD_OWNER_REUSE_SHARED_SERVICE",
+  "owner": [
+    "crates/om9-core/src/cutters/microprong.rs",
+    "crates/om9-app/src/session/channel_cutters.rs"
+  ]
+}

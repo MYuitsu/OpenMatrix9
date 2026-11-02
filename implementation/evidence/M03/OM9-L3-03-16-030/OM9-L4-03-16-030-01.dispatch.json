@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-030-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-030",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-030",
   "source_command": "Helix",
   "menu_icon": "CurveHelix",
   "owner_candidate": "",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "no verified backend owner for Helix; menu stays disabled",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-030/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-030/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-030/dispatch_contract.json": "1b19a4ebc55b0404a42d47e62362b451d5f72211b65bd8b6525b9d25c03f05ac",
-    "implementation/design/M03/OM9-L3-03-16-030/dispatch_contract.md": "877e5cac74f76b3435282e0fe030e957508c01213b59746ac4f043bf3187593e"
+    "implementation/design/M03/OM9-L3-03-16-030/dispatch_contract.json": "87256d5a9092e0c678651132d07cb08cef49fae00326df0ecf5e38af1fd44e4b",
+    "implementation/design/M03/OM9-L3-03-16-030/dispatch_contract.md": "638883cce562a01a7a99edcbe5f026b794687fe9adb163ad3748dee7792a8dde"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Helix"
 }

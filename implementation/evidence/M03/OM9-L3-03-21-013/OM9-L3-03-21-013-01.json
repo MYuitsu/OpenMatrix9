@@ -1,0 +1,13 @@
+{
+  "l4_id": "OM9-L3-03-21-013-01",
+  "l3_id": "OM9-L3-03-21-013",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Recenter Dimension Text: a dimension whose text point was dragged away -> the text point returns to the layout centre, the object id is unchanged and the commit is one Undo entry",
+  "tests": [
+    "crates/om9-app/tests/annotation.rs::edits_options_and_recenter_preserve_identity_and_are_atomic",
+    "crates/om9-app/tests/annotation.rs::m03_04_01_all_thirteen_catalog_ids_have_distinct_icons_and_one_dispatcher"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

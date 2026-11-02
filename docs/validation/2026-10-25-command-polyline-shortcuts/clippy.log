@@ -1,0 +1,21 @@
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+   Compiling om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Checking om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+    Checking om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+    Checking om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Checking om9-sdk v0.1.0 (H:\OpenMatrix9\crates\om9-sdk)
+    Checking om9-render v0.1.0 (H:\OpenMatrix9\crates\om9-render)
+    Checking om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+    Checking om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+error: this expression creates a reference which is immediately dereferenced by the compiler
+    --> crates\om9-app\src\ui.rs:1279:44
+     |
+1279 |             self.transcript.append_history(&prompt);
+     |                                            ^^^^^^^ help: change this to: `prompt`
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_borrow
+     = note: `-D clippy::needless-borrow` implied by `-D warnings`
+     = help: to override `-D warnings` add `#[allow(clippy::needless_borrow)]`
+
+error: could not compile `om9-app` (lib) due to 1 previous error

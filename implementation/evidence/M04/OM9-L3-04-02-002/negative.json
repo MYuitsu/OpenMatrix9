@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-002",
+  "kind": "negative",
+  "input": "negative offset, or a non-circular rail",
+  "expected": "typed rejection (field domain / Unsupported(non-circular rail)); committed document unchanged",
+  "verified_by": [
+    "an_outside_rail_offsets_a_closed_circular_rail_only",
+    "outside_rail_and_resizer_apply_independent_outputs"
+  ],
+  "document_unchanged": true
+}

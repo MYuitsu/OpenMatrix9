@@ -18,6 +18,23 @@
   "estimated_scope": null,
   "source_code_implementation_verified": false,
   "purpose": "retain ID/links when adjusting gemstone attributes",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M05 - Gems and Layout/L2-04-13 - 05-febe-gem-instance-edits-and-reports/L3-009 - Gem Attribute History And ID Preservation/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 2,
+    "implementation_l4": null
+  },
   "parent_goal": "retain ID/links when adjusting gemstone attributes",
   "inputs": [
     "specs/05-ms05-gems-and-layout/05-febe-gem-instance-edits-and-reports/009-febe-gem-attribute-history-and-id-preservation/l3.json",
@@ -409,14 +426,21 @@
       "stage": "Mô hình dữ liệu đá và khối lượng kim loại",
       "why_for_this_task": "Giữ ID và thuộc tính qua history: định danh đá nằm trong tên instance và khoá dữ liệu đối tượng, nên đổi tên là mất định danh.",
       "om9_backend": "pure Rust cho model và tính khối lượng; openNURBS cho user data trên đối tượng",
-      "steps_cited": [1, 3, 4],
+      "steps_cited": [
+        1,
+        3,
+        4
+      ],
       "algorithm_steps": [
         "M1. Đọc mô tả đá: lấy dữ liệu đối tượng dưới khoá MATRIXICGEM, dựng sáu điểm min/max, biến đổi bằng xform instance, suy độ lớn X/Y/Z và làm tròn.",
         "M3. Suy tên: cắt tên instance theo gạch dưới, chuẩn hoá hai trường hợp đặc biệt Custom và Baguette.",
         "M4. Suy các đại lượng dẫn xuất: chuỗi mô tả theo họ hình dạng, độ dài góc từ trung điểm hai đoạn, pháp tuyến từ TableCenter trừ Culet, cờ gương từ dấu định thức."
       ],
       "source_file": "PIM/GemBlock.cs",
-      "source_methods": ["GemBlock", "Strs2Pts"],
+      "source_methods": [
+        "GemBlock",
+        "Strs2Pts"
+      ],
       "boundaries_carried": [
         "KHÔNG có bảng tỉ trọng trong mã Matrix - OM9 phải tự chọn nguồn (ISO/tiêu chuẩn hợp kim) và ghi rõ nguồn.",
         "Công thức trọng lượng carat cho hình dạng KHÔNG tròn chưa đọc (chỉ biết nó dùng hệ số F).",
@@ -427,4 +451,5 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `SOURCE_AUDIT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `SOURCE_AUDIT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

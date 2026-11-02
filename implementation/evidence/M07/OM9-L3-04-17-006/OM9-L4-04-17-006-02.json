@@ -1,0 +1,70 @@
+{
+  "schema": "om9.evidence.domain.v1",
+  "l4": "OM9-L4-04-17-006-02",
+  "l3": "OM9-L3-04-17-006",
+  "recorded_at": "2026-10-28",
+  "status": "DOMAIN_INTEGRATION_RECORDED",
+  "implementation": [
+    "cutters::boolean::apply",
+    "session::channel_cutters::RowCutterSession::recompute",
+    "session::Controller::row_cutter_commit",
+    "model::CUTTER_CUT_EXTENSION_SLOT"
+  ],
+  "design": [
+    "implementation/design/M07/OM9-L3-04-17-006/source_crosswalk.json",
+    "implementation/design/M07/OM9-L3-04-17-006/api.md"
+  ],
+  "fixtures": [
+    "implementation/fixtures/M07/OM9-L3-04-17-006/positive.json",
+    "implementation/fixtures/M07/OM9-L3-04-17-006/negative.json"
+  ],
+  "positive_cases": [
+    {
+      "case": "one row of cutters on one metal body",
+      "input": "Boolean=On",
+      "expect": "one cut preview per selected metal body with removed_mm3 > 0"
+    },
+    {
+      "case": "every selected metal body",
+      "input": "a row plus one metal body",
+      "expect": "one CutterCut per target; Enter replaces each body in the same transaction"
+    },
+    {
+      "case": "the row provenance",
+      "input": "Enter with Preserve=Remove",
+      "expect": "om9.cutter.cut records kind, row and preserve; no cutter body is inserted"
+    },
+    {
+      "case": "one transaction",
+      "input": "Undo after the commit",
+      "expect": "the metal bodies and the cutter bodies return to the pre-command state"
+    }
+  ],
+  "negative_cases": [
+    {
+      "case": "Boolean without a metal body",
+      "input": "Boolean=On with gems only",
+      "expect": "Missing(\"cutter boolean surface\")"
+    },
+    {
+      "case": "Preserve=Remove with the Boolean off",
+      "input": "Preserve=Remove",
+      "expect": "Invalid(\"cutter preserve needs a boolean\")"
+    },
+    {
+      "case": "an unknown boolean mode",
+      "input": "Boolean=sometimes",
+      "expect": "Invalid(\"cutter boolean\")"
+    },
+    {
+      "case": "a cutter that misses the target",
+      "input": "a block far from the metal",
+      "expect": "Invalid(\"cutter boolean removed nothing\")"
+    }
+  ],
+  "limitations": [
+    "The Boolean reuses the one mesh CSG service (mesh_csg::mesh_boolean); it never runs OCCT inside the adapter.",
+    "Every target must be a closed mesh body; a surface body is refused instead of silently meshed.",
+    "The cut is applied in world space, so a row cut through several bodies is one transaction but not one CSG union."
+  ]
+}

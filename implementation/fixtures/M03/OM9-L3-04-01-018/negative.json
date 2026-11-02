@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-018",
+  "case": "a switch other than 0 or 1",
+  "expected": "a switch other than 0 or 1 -> Error::Invalid(\"0 or 1 switch\") at its prompt; a degenerate plane (both points equal) -> Error::Invalid(\"mirror plane normal\")",
+  "test": "m03_04_01_018_symmetry_mirrors_across_the_picked_plane"
+}

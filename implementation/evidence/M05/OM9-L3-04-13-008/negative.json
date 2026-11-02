@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-13-008",
+  "title": "Gem Reporter Count And Weight",
+  "cases": [
+    "a zero, negative, NaN or absurd density is `Invalid(\"gem density\")`",
+    "a refusal keeps the reporter open instead of printing a wrong weight",
+    "an unknown material without an override is flagged as an assumption, not hidden"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

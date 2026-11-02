@@ -1,0 +1,16 @@
+[rtk] /!\ No hook installed — run `rtk init -g` for automatic token savings
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.78s
+     Running tests\measure_extended.rs (L:/om9-target\debug\deps\measure_extended-95f953457a857744.exe)
+
+running 7 tests
+test placed_arc_keeps_its_trim_under_nonuniform_scale ... ok
+test summary_groups_instances_and_counts_only_placed_explicit_carats ... ok
+test object_distance_uses_trimmed_curves_and_finite_surface_domains ... ok
+test isocurve_and_surface_area_use_world_placement ... ok
+test dynamic_ortho_and_continuous_distance_are_read_only ... ok
+test radius_on_an_ellipse_is_pointwise_and_a_line_has_no_finite_curvature ... ok
+test canonical_brep_edges_area_volume_and_object_distance_have_numeric_oracles ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

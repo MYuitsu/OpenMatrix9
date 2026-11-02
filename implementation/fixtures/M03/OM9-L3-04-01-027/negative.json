@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-027",
+  "case": "fewer than two curves, or no object besides the two frames",
+  "expected": "fewer than two curves, or no object besides the two frames -> Error::Missing before the single prompt; a solid object -> Error::Unsupported(\"deformation of a solid\") with the document and the Undo journal untouched",
+  "test": "m03_04_01_flow_rows_need_two_frames_and_one_object"
+}

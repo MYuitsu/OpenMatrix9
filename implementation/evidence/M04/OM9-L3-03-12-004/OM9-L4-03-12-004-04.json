@@ -1,0 +1,77 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-12-004",
+  "title": "Builder Style Save New Name",
+  "generated_at_utc": "2026-10-27T02:48:37Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the Builder Styles window at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "73988bdb2f4ab38ae4f11874090ad3b7b59a62f86d2723f632a1d477b84b1c39",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "one new named user style; the three built-ins are unchanged",
+    "negative": "duplicate/built-in names, traversal text, a refused write and a corrupt file are typed errors"
+  },
+  "l4_id": "OM9-L4-03-12-004-04",
+  "role": "INTEGRATION",
+  "kind": "integration",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/builder_style.rs",
+    "crates/om9-app/tests/builder_styles.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_styles",
+        "-j",
+        "2",
+        "saving_a_style_adds_a_user_row_without_rewriting_the_defaults"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "2a7a111f14288156f9c1eb63e78eecf16bb63838fe67c66ecb8ee2ad021aaae8",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s"
+      ],
+      "test": "saving_a_style_adds_a_user_row_without_rewriting_the_defaults",
+      "package": "om9-app",
+      "binary": "builder_styles"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_styles",
+        "-j",
+        "2",
+        "user_styles_roundtrip_through_the_configured_file"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "d3738a62a8206960b3f64aeec17ff1d4c57846b109512944374f1115f6454377",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s"
+      ],
+      "test": "user_styles_roundtrip_through_the_configured_file",
+      "package": "om9-app",
+      "binary": "builder_styles"
+    }
+  ],
+  "manual_gate_note": "Integration: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

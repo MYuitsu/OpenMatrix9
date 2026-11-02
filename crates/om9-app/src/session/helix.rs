@@ -63,7 +63,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Radius=") {
-            let Some(radius) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(radius) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.helix_pending = Some(pending);
                 return Some(Err(Error::Invalid("radius must be positive")));
             };
@@ -90,7 +94,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Height=") {
-            let Some(height) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(height) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.helix_pending = Some(pending);
                 return Some(Err(Error::Invalid("height must be positive")));
             };
@@ -99,7 +107,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Turns=") {
-            let Some(turns) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(turns) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.helix_pending = Some(pending);
                 return Some(Err(Error::Invalid("turns must be positive")));
             };
@@ -112,7 +124,9 @@ impl Controller {
             return Some(self.commit_helix());
         }
         self.helix_pending = Some(pending);
-        Some(Err(Error::Invalid("Helix needs axis start, radius, or Enter")))
+        Some(Err(Error::Invalid(
+            "Helix needs axis start, radius, or Enter",
+        )))
     }
 
     pub fn accept_helix_point(&mut self, point: Point3) -> Result<(), Error> {
@@ -156,14 +170,27 @@ impl Controller {
                 plane.x[2] * plane.y[0] - plane.x[0] * plane.y[2],
                 plane.x[0] * plane.y[1] - plane.x[1] * plane.y[0],
             ]);
-            let helper = if normal[0].abs() < 0.9 { [1.0, 0.0, 0.0] } else { [0.0, 1.0, 0.0] };
+            let helper = if normal[0].abs() < 0.9 {
+                [1.0, 0.0, 0.0]
+            } else {
+                [0.0, 1.0, 0.0]
+            };
             let u = unit(cross(helper, normal)).unwrap_or(plane.x);
             let v = unit(cross(normal, u)).unwrap_or(plane.y);
             let (sin, cos) = angle.sin_cos();
             points.push([
-                center[0] + u[0] * radius * cos + v[0] * radius * sin + normal[0] * pending.height * fraction,
-                center[1] + u[1] * radius * cos + v[1] * radius * sin + normal[1] * pending.height * fraction,
-                center[2] + u[2] * radius * cos + v[2] * radius * sin + normal[2] * pending.height * fraction,
+                center[0]
+                    + u[0] * radius * cos
+                    + v[0] * radius * sin
+                    + normal[0] * pending.height * fraction,
+                center[1]
+                    + u[1] * radius * cos
+                    + v[1] * radius * sin
+                    + normal[1] * pending.height * fraction,
+                center[2]
+                    + u[2] * radius * cos
+                    + v[2] * radius * sin
+                    + normal[2] * pending.height * fraction,
             ]);
         }
         let curve = om9_core::curve_build::interpolate(
@@ -174,7 +201,6 @@ impl Controller {
         )?;
         self.commit_geometry(HELIX, "Helix", Geometry::Curve(Curve::Nurbs(curve)))
     }
-
 
     pub fn helix_preview(&self, point: Point3) -> Vec<[Point3; 2]> {
         let Some(pending) = self.helix_pending.as_ref() else {
@@ -194,16 +220,29 @@ impl Controller {
             plane.x[2] * plane.y[0] - plane.x[0] * plane.y[2],
             plane.x[0] * plane.y[1] - plane.x[1] * plane.y[0],
         ]);
-        let helper = if normal[0].abs() < 0.9 { [1.0, 0.0, 0.0] } else { [0.0, 1.0, 0.0] };
+        let helper = if normal[0].abs() < 0.9 {
+            [1.0, 0.0, 0.0]
+        } else {
+            [0.0, 1.0, 0.0]
+        };
         let u = unit(cross(helper, normal)).unwrap_or(plane.x);
         let v = unit(cross(normal, u)).unwrap_or(plane.y);
         let point_at = |fraction: f64| {
             let angle = std::f64::consts::TAU * pending.turns * fraction;
             let (sin, cos) = angle.sin_cos();
             [
-                center[0] + u[0] * radius * cos + v[0] * radius * sin + normal[0] * pending.height * fraction,
-                center[1] + u[1] * radius * cos + v[1] * radius * sin + normal[1] * pending.height * fraction,
-                center[2] + u[2] * radius * cos + v[2] * radius * sin + normal[2] * pending.height * fraction,
+                center[0]
+                    + u[0] * radius * cos
+                    + v[0] * radius * sin
+                    + normal[0] * pending.height * fraction,
+                center[1]
+                    + u[1] * radius * cos
+                    + v[1] * radius * sin
+                    + normal[1] * pending.height * fraction,
+                center[2]
+                    + u[2] * radius * cos
+                    + v[2] * radius * sin
+                    + normal[2] * pending.height * fraction,
             ]
         };
         (0..samples)

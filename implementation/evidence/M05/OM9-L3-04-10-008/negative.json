@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-008",
+  "title": "Gem Follow Underlying Curve",
+  "cases": [
+    "a deleted source curve produces conflicts, not a silent no-op",
+    "an older source revision cannot overwrite a newer link (`Error::Stale`)"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_placement_evidence.v1",
+  "l3_id": "OM9-L3-04-10-011",
+  "title": "Gem To Curve Surface History Links",
+  "command": "GemPlacementLinks / gvGemPlacementLinks",
+  "scope": "`gem_placement::PlacementLink`; `PlacementLink::{to_extension,from_extension,to_json,from_json}`; `PlacementLink::{refresh,mark_broken,mark_conflict}`; `Controller::gem_placement_links_report`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "persisted `om9.gem.placement` link with a lifecycle and a report",
+  "negative": "unreadable links are reported and stale writes/records are refused",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-10-011-03"
+    ],
+    "fixture_manifest_sha256": "1f85be1ee35baa31fa095cb1eecf70280b5791c87deb3a5bf4110ed0701f7135"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/tests/gem_placement.rs"
+  ],
+  "test": "the_links_report_and_the_typed_command_reach_the_same_service"
+}

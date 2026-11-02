@@ -415,4 +415,22 @@
     "reference_note": "read the pinned file and record symbol + line range; no runtime claim",
     "sketch": "// Source Map — Signet Ring Builder\n// ROLE: SOURCE_AUDIT - this task produces an inventory, not code.\n\n//\n// Capability: implement the capability\n// Proposed contract on record: (none frozen yet)\n//\n// Inventory to fill from the pinned checkout (record file, symbol, line range, verdict):\n    // - None\n//\n// Decision skeleton to complete with real evidence:\n//   reuse_decision: REUSE | ADAPT | ADD | BLOCKED_SOURCE\n//   evidence: <path>:<line-range> at pinned SHA\n//   license: <reviewed scope from M00>\n//\n// Do not claim \"implemented\", \"works\" or a PASS from this file."
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `SOURCE_AUDIT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `SOURCE_AUDIT` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M04 - Builder and History/L2-04-03 - 06-febe-jewelry-ring-builder-family/L3-002 - Signet Ring Builder/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 2,
+    "implementation_l4": null
+  }
+}

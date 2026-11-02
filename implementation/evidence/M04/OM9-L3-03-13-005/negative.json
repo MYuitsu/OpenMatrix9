@@ -1,0 +1,9 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-005",
+  "kind": "negative",
+  "expected": "missing builder kind/schema mismatch or an object without a recipe -> typed refusal, no partial edit",
+  "verified_by": [
+    "edit_from_history_reopens_the_builder_at_the_recorded_parameters"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "om9.m04.l3_ring_family_evidence.v1",
+  "l3_id": "OM9-L3-04-03-004",
+  "title": "Award Ring Builder",
+  "scope": "`ring_builder::build(Award)` `BuilderKind::AwardRing` Handles",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "the award body is larger than the signet and stays closed",
+  "negative": "an oversized top or a zero shoulder is refused",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the ring builder panel and gestures; no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-04-03-004-03",
+      "OM9-L4-04-03-004-04",
+      "OM9-L4-04-03-004-05",
+      "OM9-L4-04-03-004-07",
+      "OM9-L4-04-03-004-06"
+    ],
+    "fixture_manifest_sha256": "8861323bbed09b5dac7f1f387a56ffa5e961e4f768a2a90436953c0d25b9777e"
+  }
+}

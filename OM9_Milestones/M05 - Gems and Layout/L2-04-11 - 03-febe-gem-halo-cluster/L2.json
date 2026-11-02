@@ -115,5 +115,52 @@
       "OM9-L3-04-11-006",
       "OM9-L3-04-11-007"
     ]
+  },
+  "runtime_implementation": {
+    "date": "2026-10-27",
+    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+    "scope": "Halo, Cluster, Baguette Channel, Tapered Baguette between two curves, Gems between two curves, Orient to Gem and the persisted halo/cluster edit feature: typed layout plans in om9-core::gem_cluster, six builder commands in om9-app plus the live viewport preview and one-transaction Apply/Undo.",
+    "owner": {
+      "crates": [
+        "om9-core",
+        "om9-app"
+      ],
+      "tests": [
+        "crates/om9-core/tests/gem_cluster.rs",
+        "crates/om9-app/tests/gem_cluster_panel.rs"
+      ]
+    },
+    "evidence": [
+      "implementation/evidence/M05/OM9-L2-04-11/observed.json",
+      "implementation/evidence/M05/OM9-L2-04-11/README.md",
+      "implementation/evidence/M05/OM9-L2-04-11/core-gem-cluster.log",
+      "implementation/evidence/M05/OM9-L2-04-11/app-gem-cluster-panel.log",
+      "implementation/evidence/M05/OM9-L2-04-11/workspace-check.log",
+      "implementation/evidence/M05/OM9-L2-04-11/clippy-gem-cluster.log"
+    ],
+    "notes": "Halo/cluster/channel plans are typed and reuse om9_core::gem_placement curve measurement (không duplicate placement primitive). Channel/prong metal geometry thuộc M06/M07; owner này ghi đủ tham số channel/prong để metal builder dùng lại feature. Halo style presets (Load) chưa có catalogue nên chỉ có default + Reset. Gate M05-UI của 7 L3 còn mở, không có chữ ký reviewer.",
+    "l3_coverage": {
+      "OM9-L3-04-11-001": "automated_verified_manual_gate_open",
+      "OM9-L3-04-11-002": "automated_verified_manual_gate_open",
+      "OM9-L3-04-11-003": "automated_verified_manual_gate_open",
+      "OM9-L3-04-11-004": "automated_verified_manual_gate_open",
+      "OM9-L3-04-11-005": "automated_verified_manual_gate_open",
+      "OM9-L3-04-11-006": "automated_verified_manual_gate_open",
+      "OM9-L3-04-11-007": "automated_verified_manual_gate_open"
+    },
+    "l4": {
+      "planned": 21,
+      "artifacts": 21,
+      "receipts": [
+        "OM9-L4-11-001-03",
+        "OM9-L4-11-002-03",
+        "OM9-L4-11-003-03",
+        "OM9-L4-11-004-03",
+        "OM9-L4-11-005-03",
+        "OM9-L4-11-006-03",
+        "OM9-L4-11-007-03"
+      ]
+    }
   }
 }

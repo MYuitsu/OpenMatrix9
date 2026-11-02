@@ -1,0 +1,49 @@
+$ cargo test -p om9-core --test builder_style -j 2
+# exit code: 0
+# captured: 2026-10-27T02:48:33Z
+# target dir: L:\om9-target
+
+
+running 15 tests
+test a_style_name_cannot_be_a_path_or_control_text ... ok
+test a_missing_or_corrupt_thumbnail_falls_back_without_dropping_the_style ... ok
+test a_source_without_a_declared_slot_or_with_a_wrong_type_is_refused ... ok
+test a_style_missing_the_mandatory_profile_input_is_refused ... ok
+test a_profile_reference_name_is_translated_to_the_builder_preset ... ok
+test a_gem_style_cannot_be_applied_to_a_ring_builder ... ok
+test a_style_ignores_parameters_of_another_mode_and_reports_them ... ok
+test matching_attributes_copies_only_the_declared_attributes_and_keeps_the_identity ... ok
+test saving_a_user_style_leaves_the_defaults_untouched_and_refuses_a_duplicate_name ... ok
+test the_builder_tags_filter_a_style_to_one_mode ... ok
+test an_unknown_schema_version_or_an_invalid_numeric_is_refused ... ok
+test a_style_roundtrip_keeps_the_values_their_unit_and_the_schema ... ok
+test the_browser_lists_every_style_for_the_mode_and_disables_the_incompatible ... ok
+test applying_a_style_changes_the_preview_only_and_cancel_keeps_the_baseline ... ok
+test the_user_library_roundtrips_through_a_file_and_reports_a_refused_write ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\builder_style.rs (L:\om9-target\debug\deps\builder_style-6f58e599577ca6fd.exe)
+
+$ cargo test -p om9-app --test builder_styles -j 2
+# exit code: 0
+# captured: 2026-10-27T02:48:34Z
+# target dir: L:\om9-target
+
+
+running 9 tests
+test a_style_for_another_mode_is_listed_disabled_and_refused ... ok
+test the_browser_lists_the_styles_of_the_open_mode ... ok
+test the_command_line_routes_style_apply_and_save_to_the_same_service ... ok
+test saving_a_style_adds_a_user_row_without_rewriting_the_defaults ... ok
+test matching_attributes_copies_from_the_selection_and_keeps_the_ids ... ok
+test applying_a_style_changes_the_preview_only ... ok
+test a_locked_input_keeps_the_browser_read_only ... ok
+test cancel_and_apply_clear_the_applied_style_marker ... ok
+test user_styles_roundtrip_through_the_configured_file ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s
+     Running tests\builder_styles.rs (L:\om9-target\debug\deps\builder_styles-c54c9038cd98df6e.exe)

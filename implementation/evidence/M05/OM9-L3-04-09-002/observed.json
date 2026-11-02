@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-09-002",
+  "title": "Gem Reference Mesh And B-Rep Assets",
+  "scope": "`GemLibrary::canonical`; `GemLibrary::{asset,assets,asset_for_cut,nearest_size}`; `build_mesh(&GemSpec)`; `GemMesh`; `om9_kernel::brep::{from_triangles,from_mesh}`; `om9_kernel::gem::gem_brep`; `GemSession::brep` / `BRep=Yes|No`; `GemSession::preview` / `Controller::gem_world_preview`; `ui::gem::gem_preview_segments`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "the canonical library is authored/procedural and every asset is a closed solid; every cut family converts to one valid B-Rep with the same volume, the committed body is that B-Rep, and the open tool shows a world-space preview before Apply",
+  "negative": "no Matrix asset is copied; zero-area profiles and open meshes are refused; kernel sewing refuses open/multi-shell input; `BRep=Yes` never falls back to a mesh body silently",
+  "manual_gate": "AUTO_ONLY",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "statement": "AUTO_ONLY backend capability; acceptance rests on the automated checks.",
+  "l4": {
+    "l4_receipts": [],
+    "fixture_manifest_sha256": "88c51f9918137379c691059069a11a33df83b5e55a8112666a7363581b415859"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_assets.rs",
+    "crates/om9-kernel/tests/gem_brep.rs",
+    "crates/om9-app/tests/gem_panel.rs",
+    "crates/om9-app/src/ui/gem.rs (preview_tests)"
+  ]
+}

@@ -389,6 +389,20 @@ pub enum HostRequest {
         from_b: [f64; 3],
         to_b: [f64; 3],
     },
+    /// Every recorded feature, in execution order.
+    HistoryList,
+    /// One recorded feature by its recipe id.
+    HistoryFeature {
+        id: String,
+    },
+    /// Every typed dependency edge, producer first.
+    HistoryDependencies,
+    /// The command, parameters and inputs needed to reopen one feature.
+    HistoryProvenance {
+        id: String,
+    },
+    /// The features a recompute would run, in topological order.
+    HistoryRebuildPlan,
 }
 
 /// How a plugin report reaches the command feedback surface.
@@ -705,6 +719,60 @@ pub struct ObjectSummary {
     pub total: u64,
     pub by_kind: std::collections::BTreeMap<String, u64>,
 }
+
+/// One recorded input edge of a feature. `kind` is the declared port type: a geometry port
+/// names its accepted kinds (`"geometry:Curve|Brep"`), a scalar port names its dimension,
+/// and a recipe recorded before typed ports reports `"untyped"`.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct FeatureInputInfo {
+    pub role: String,
+    pub kind: String,
+    /// The source object id the edge reads.
+    pub object: String,
+}
+
+/// One recorded node of the associative history.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct FeatureRecordInfo {
+    pub id: String,
+    pub command: String,
+    /// `"clean"`, `"dirty"`, `"pending"`, `"unresolved"`, `"failed"` or `"detached"`.
+    pub state: String,
+    /// The recorded reason for `dirty`, `unresolved` or `failed`; absent otherwise.
+    pub state_reason: Option<String>,
+    pub revision: u64,
+    pub parameters: BTreeMap<String, ParameterValue>,
+    pub inputs: Vec<FeatureInputInfo>,
+    /// Output object ids, in the order the recipe records them.
+    pub outputs: Vec<String>,
+}
+
+/// One typed dependency edge: the consumer reads `role` of `source`, produced by `producer`
+/// when the source is itself a feature output.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct FeatureDependencyInfo {
+    pub producer: Option<String>,
+    pub consumer: String,
+    pub role: String,
+    pub kind: String,
+    pub source: String,
+}
+
+/// The command, parameters and inputs needed to reopen one feature exactly.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct FeatureProvenanceInfo {
+    pub recipe: String,
+    pub command: String,
+    pub command_version: u32,
+    pub schema_version: u32,
+    pub solver: String,
+    pub solver_version: String,
+    /// The canonical unit the recorded parameters are expressed in (`"mm"`).
+    pub unit: String,
+    pub parameters: BTreeMap<String, ParameterValue>,
+    pub inputs: Vec<FeatureInputInfo>,
+    pub outputs: Vec<String>,
+}
 /// Object-local bounding box and its derived size/center, in millimetres.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct ObjectBounds {
@@ -801,10 +869,12 @@ pub enum ParameterDomain {
 }
 
 /// A typed parameter value. The `kind` tag carries the unit, so a length can never be
-/// read back as an angle and a bare number is never an implicit millimetre.
+/// read back as an angle and a bare number is never an implicit millimetre. `Number`
+/// exists only so a history reader can report a legacy record; `ApplyParameters` refuses it.
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum ParameterValue {
+    Number { value: f64 },
     Length { millimeters: f64 },
     Angle { degrees: f64 },
     Ratio { value: f64 },
@@ -1458,6 +1528,33 @@ impl<'a> Host<'a> {
     /// `Surface`, `Cloud`, `Instance`, `Hatch`, `Light`).
     pub fn object_summary(&mut self) -> Result<ObjectSummary> {
         self.request(HostRequest::ObjectSummary)
+    }
+    /// Every recorded feature, in execution order.
+    ///
+    /// Read-only: a plugin cannot edit history state through this call. Typed ports,
+    /// parameters and state reasons are reported exactly as recorded; a legacy recipe
+    /// without typed ports reports `"untyped"` rather than a guessed type.
+    pub fn history_list(&mut self) -> Result<Vec<FeatureRecordInfo>> {
+        self.request(HostRequest::HistoryList)
+    }
+    /// One recorded feature by its recipe id.
+    pub fn history_feature(&mut self, id: impl Into<String>) -> Result<FeatureRecordInfo> {
+        self.request(HostRequest::HistoryFeature { id: id.into() })
+    }
+    /// Every typed dependency edge, producer first.
+    pub fn history_dependencies(&mut self) -> Result<Vec<FeatureDependencyInfo>> {
+        self.request(HostRequest::HistoryDependencies)
+    }
+    /// The command, parameters and inputs needed to reopen one feature exactly.
+    pub fn history_provenance(&mut self, id: impl Into<String>) -> Result<FeatureProvenanceInfo> {
+        self.request(HostRequest::HistoryProvenance { id: id.into() })
+    }
+    /// The features a recompute would run, in topological order.
+    ///
+    /// This is a plan only: recomputing is a document change, which stays with the host's
+    /// transaction/Undo owner and the kernel producer.
+    pub fn history_rebuild_plan(&mut self) -> Result<Vec<String>> {
+        self.request(HostRequest::HistoryRebuildPlan)
     }
     /// Measure a circle curve's radius in object-local millimetres.
     ///

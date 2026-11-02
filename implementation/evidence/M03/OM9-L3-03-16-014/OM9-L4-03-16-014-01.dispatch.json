@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-014-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-014",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
-  "command_id": "OM9-CURVE-114",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
+  "command_id": "OM9-CURVE-014",
   "source_command": "Curve 2 Views with History",
   "menu_icon": "BuilderCrv2ViewHistory",
   "owner_candidate": "",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "no verified backend owner for Curve 2 Views with History; menu stays disabled",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-014/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-014/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-014/dispatch_contract.json": "c2aa4c7d7d2160c5b145da2fd70318218d08ac0fdbc50d80285add2d310be3c5",
-    "implementation/design/M03/OM9-L3-03-16-014/dispatch_contract.md": "9a4a45b8ca83733d8db8f69d65d6df4d2ce6179b9d017acb70a63809a61076b9"
+    "implementation/design/M03/OM9-L3-03-16-014/dispatch_contract.json": "870faee1781fe67381aa00bc8a510d8ed92762d878470e93f8a08a22c56951ce",
+    "implementation/design/M03/OM9-L3-03-16-014/dispatch_contract.md": "5ea4fb3919812328d1af8ca9abf4363f929bdd79b25ac0485124589a5b62d73a"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Crv2View"
 }

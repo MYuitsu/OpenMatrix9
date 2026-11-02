@@ -1,0 +1,37 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-02-002",
+  "title": "Outside Ring Rail Generator",
+  "owner": "om9-core OutsideRailProducer",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/producers.rs",
+      "symbols": [
+        "OutsideRailProducer",
+        "OUTSIDE_RAIL_COMMAND"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/builder.rs",
+      "symbols": [
+        "BuilderKind::OutsideRail fields/handles"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "symbols": [
+        "switch_builder",
+        "builder_text Offset="
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3 skill/plan record is planning input; runtime behavior is established by the receipts."
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-09-004",
+  "title": "Gem Custom Shape From Profile",
+  "cases": [
+    "an open line -> Invalid(\"custom gem profile is not closed\")",
+    "a tilted circle -> Invalid(\"custom gem profile must be planar\")",
+    "self-intersecting / zero-area profiles -> typed profile refusals"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

@@ -1,0 +1,83 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-03-006",
+  "title": "Ring Builder History Updates",
+  "generated_at_utc": "2026-10-27T09:35:58Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the ring builder panel at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "a8a29a4b0743c49a13785804251ba3e6814f7fc2481a2354475c0d37d7350660",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "resize 18 -> 19 mm updates the same owner id; undo/redo restores the volumes",
+    "negative": "a parameter set the family refuses never reaches the document"
+  },
+  "l4_id": "OM9-L4-04-03-006-06",
+  "role": "ACCEPTANCE",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/ring_builder.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/ring_family.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/tests/ring_family_panel.rs",
+    "crates/om9-kernel/src/associative.rs",
+    "crates/om9-kernel/src/creation.rs",
+    "crates/om9-kernel/src/creation_bridge.cpp",
+    "crates/om9-kernel/tests/ring_family_brep.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "ring_family",
+        "-j",
+        "2",
+        "a_signet_ring_resize_updates_the_same_feature_through_the_recorded_recipe"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "0e70161ef1a5505e927acd303596e55056ba1506d2fe8eef5546f69f010902cd",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.04s"
+      ],
+      "test": "a_signet_ring_resize_updates_the_same_feature_through_the_recorded_recipe",
+      "package": "om9-core",
+      "binary": "ring_family"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_family_panel",
+        "-j",
+        "2",
+        "an_eternity_band_applies_a_closed_solid_in_one_undoable_step"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "7f4017549f209d422a95df42fde11f2d25be69f839d61585514e845247c6796f",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 2.97s"
+      ],
+      "test": "an_eternity_band_applies_a_closed_solid_in_one_undoable_step",
+      "package": "om9-app",
+      "binary": "ring_family_panel"
+    }
+  ],
+  "manual_gate_note": "Acceptance And Evidence: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

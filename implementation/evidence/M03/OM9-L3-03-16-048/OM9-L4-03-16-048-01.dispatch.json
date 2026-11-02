@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-048-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-048",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-048",
   "source_command": "Polyline on Surface",
   "menu_icon": "BuilderPolylineOnSurface",
   "owner_candidate": "OM9-L3-02-04-001",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Polyline on Surface command session is not wired; owner candidate OM9-L3-02-04-001 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-048/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-048/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-048/dispatch_contract.json": "a70b856e9588be0b61070498d378f6c08eed4fb547afb2e8d9f699f60e6b3587",
-    "implementation/design/M03/OM9-L3-03-16-048/dispatch_contract.md": "4128ba37ff6c85dcf924478353c263d151ce6938ee3440269040c53406ccd3eb"
+    "implementation/design/M03/OM9-L3-03-16-048/dispatch_contract.json": "e62dd8381cb38aaa14987ce696aa43a462fe1b0d07c794e6bd3f349602cf84a8",
+    "implementation/design/M03/OM9-L3-03-16-048/dispatch_contract.md": "643cdc3e16fafa2117471c1d4e9aa9c7271a21574304a68d575fd7f4232463e6"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "PolylineOnSurface"
 }

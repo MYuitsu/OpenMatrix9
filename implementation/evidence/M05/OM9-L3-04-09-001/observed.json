@@ -1,0 +1,21 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-09-001",
+  "title": "Gem Shape Cut Dimension Schema",
+  "scope": "`om9_core::gem::GemSpec`; `GemSpec::validate`; `GemSpec::{to_json,from_json}`; `GemSize` / `from_outer_dimensions`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "every cut x shape validates and JSON round-trips; dimensions are exact",
+  "negative": "every malformed spec is a typed refusal, never a clamp",
+  "manual_gate": "AUTO_ONLY",
+  "reviewer": {
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "statement": "AUTO_ONLY backend capability; acceptance rests on the automated checks.",
+  "l4": {
+    "l4_receipts": [],
+    "fixture_manifest_sha256": "904724c8fcaff59d4f748073af672d561ea543ed3e47dea8b4521ce973dbbdca"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_assets.rs"
+  ]
+}

@@ -1,0 +1,18 @@
+=== cargo test -p om9-core --test channel_cutters -j 2 ===
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running tests\channel_cutters.rs (L:\om9-target\debug\deps\channel_cutters-621b69dd977a6b8d.exe)
+
+running 10 tests
+test the_sweep_helper_refuses_a_degenerate_section ... ok
+test the_channel_refuses_a_narrow_row_or_a_deep_trench ... ok
+test the_channel_builder_sweeps_one_closed_trench_through_the_row ... ok
+test the_bright_channel_mirrors_both_sides_of_the_row ... ok
+test the_channel_end_profiles_shape_the_caps ... ok
+test the_channel_middle_profile_adds_a_station ... ok
+test the_channel_mirror_and_flip_swap_the_ends ... ok
+test the_bright_2d_scale_and_angle_are_typed_controls ... ok
+test the_bright_cutter_builds_one_closed_facet_per_count ... ok
+test microprongs_land_in_every_gap_and_stay_closed ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,18 @@
+{
+  "schema": "om9.m04.l3_builder_evidence.v1",
+  "l3_id": "OM9-L3-03-11-002",
+  "title": "Builder Mode Tabs And Context",
+  "scope": "Five builder tabs with independent typed parameters; a return refreshes the tab and a failed switch restores the previous one.",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "tests": [
+    "tabs_keep_each_mode_parameters_and_switch_safely",
+    "a_failed_tab_switch_restores_the_previous_tab"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the panel and handle gestures; no reviewer signature is claimed.",
+  "logs": [
+    "app-builder.log",
+    "workspace-check.log"
+  ]
+}

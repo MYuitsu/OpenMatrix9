@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-035",
+  "case": "path (0,1,0)->(10,1,0), base (0,0,0), axis (1,0,0), 90 degrees",
+  "expected": "path (0,1,0)->(10,1,0), base (0,0,0), axis (1,0,0), 90 degrees -> the 1 mm offset turns onto +Z, so the far end sits at (10,0,1), one Undo entry",
+  "test": "m03_04_01_035_twist_turns_the_section_over_the_span"
+}

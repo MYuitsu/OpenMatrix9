@@ -1,0 +1,63 @@
+{
+  "schema": "om9.evidence.domain.v1",
+  "l4": "OM9-L4-04-17-004-02",
+  "l3": "OM9-L3-04-17-004",
+  "recorded_at": "2026-10-28",
+  "status": "DOMAIN_INTEGRATION_RECORDED",
+  "implementation": [
+    "cutters::brightcut::BrightParams::for_gem",
+    "cutters::brightcut::build_single",
+    "cutters::brightcut::BrightMode::Single"
+  ],
+  "design": [
+    "implementation/design/M07/OM9-L3-04-17-004/source_crosswalk.json",
+    "implementation/design/M07/OM9-L3-04-17-004/api.md"
+  ],
+  "fixtures": [
+    "implementation/fixtures/M07/OM9-L3-04-17-004/positive.json",
+    "implementation/fixtures/M07/OM9-L3-04-17-004/negative.json"
+  ],
+  "positive_cases": [
+    {
+      "case": "six facets around a round brilliant",
+      "input": "BrightParams::for_gem",
+      "expect": "six closed facets, positive total volume, summary names the stone"
+    },
+    {
+      "case": "Height, Length and 2D Scale",
+      "input": "Scale2D=140",
+      "expect": "the facet reaches further and the volume grows"
+    },
+    {
+      "case": "the committed record",
+      "input": "Enter",
+      "expect": "six Bright Cutter bodies carrying om9.cutter kind=bright_cutter"
+    }
+  ],
+  "negative_cases": [
+    {
+      "case": "no gem selected",
+      "input": "a metal mesh only",
+      "expect": "Missing(\"cutter gems\")"
+    },
+    {
+      "case": "2D scale outside 10..400%",
+      "input": "Scale2D=5",
+      "expect": "Invalid(\"bright cutter 2d scale\")"
+    },
+    {
+      "case": "fewer than three facets",
+      "input": "Count=2",
+      "expect": "Invalid(\"bright cutter count\")"
+    },
+    {
+      "case": "a degenerate stone",
+      "input": "a 0 mm stone",
+      "expect": "Invalid(\"bright cutter gem\")"
+    }
+  ],
+  "limitations": [
+    "The facet is a block whose inner edge sits on the girdle and whose outer edge is Length away; the top face carries the bright angle.",
+    "A facet that would sink below its own bottom is deepened instead of refused: the cutter has to contain its facet."
+  ]
+}

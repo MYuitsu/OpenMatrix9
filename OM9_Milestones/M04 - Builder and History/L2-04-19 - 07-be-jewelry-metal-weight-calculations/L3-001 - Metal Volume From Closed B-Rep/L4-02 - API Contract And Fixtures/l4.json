@@ -398,12 +398,17 @@
       "stage": "Mô hình dữ liệu đá và khối lượng kim loại",
       "why_for_this_task": "Thể tích chỉ tính được trên brep solid, manifold, hợp lệ và thể tích dương; nếu không thì báo lỗi riêng chứ không im lặng trả 0.",
       "om9_backend": "pure Rust cho model và tính khối lượng; openNURBS cho user data trên đối tượng",
-      "steps_cited": [5],
+      "steps_cited": [
+        5
+      ],
       "algorithm_steps": [
         "M5. Khối lượng kim loại: lấy thể tích theo loại đối tượng (brep solid, mesh kín, surface kín), bỏ qua khối instance, rồi nhân 0.001 và tỉ trọng; chia thêm 1.55517 cho pennyweight; làm tròn 2 chữ số."
       ],
       "source_file": "PIM/GemBlock.cs",
-      "source_methods": ["GemBlock", "Strs2Pts"],
+      "source_methods": [
+        "GemBlock",
+        "Strs2Pts"
+      ],
       "boundaries_carried": [
         "KHÔNG có bảng tỉ trọng trong mã Matrix - OM9 phải tự chọn nguồn (ISO/tiêu chuẩn hợp kim) và ghi rõ nguồn.",
         "Công thức trọng lượng carat cho hình dạng KHÔNG tròn chưa đọc (chỉ biết nó dùng hệ số F).",
@@ -414,4 +419,22 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L3-001 - Metal Volume From Closed B-Rep/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 2,
+    "implementation_l4": null
+  }
+}

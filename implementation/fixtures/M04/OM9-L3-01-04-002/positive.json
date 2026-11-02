@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-002",
+  "case": "positive",
+  "input": "builder RingRail diameter_mm=18.0 with its originating command parameters",
+  "expected": "re-open the exact command, typed inputs and unit preserved",
+  "tests": [
+    "provenance_reopens_the_exact_command_parameters_inputs_and_unit",
+    "provenance_refuses_a_bare_number_a_missing_input_id_and_a_duplicate_role"
+  ]
+}

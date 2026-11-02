@@ -1,0 +1,11 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Non-blocking: a maximized start on a real 1366x768 screen at 125%/150% DPI is unproven; the DPI cases are SIMULATED (OM9_UI_AUDIT_MONITOR/ZOOM) and the item stays on the human checklist.",
+    "Non-blocking: the usable area is estimated with SHELL_RESERVE_PT = [16, 80], not the Win32 work area; documented, one constant switches to a taskbar-only reserve.",
+    "Non-blocking: the git index now holds unrelated staged OM9_Milestones renames and four tools/*.py edits from the separate path-shortening task; verification.md's 'nothing staged' holds only for this task's files.",
+    "Non-blocking: lap125/lap150 screenshots show 'Error: unsupported unknown/unavailable command' from concatenated audit script text; it is not a Layout error (regions.error is null); fix the audit script text separately.",
+    "Verified: window-level minimum is sent from MatrixApp::enforce_min_window (real run shows source=viewport, sent=[1280,720]) and covered by pure effective_min_size unit tests and window_minimum.rs frame tests; high-DPI conflict resolved by min(1280x720, monitor-[16,80]) with floor 800x400; right-dock threshold 1200 has computed-layout table and sweep; assertions were updated with stated reasons, not weakened; skill and installed copy have equal SHA-256 (B1D2305A...); private trees untouched by this change; no human, M00 or legal gate claimed."
+  ],
+  "reviewDoc": "h:\\OpenMatrix9\\.agents\\tasks\\m01-l3-002-docking\\min-window-review.md"
+}

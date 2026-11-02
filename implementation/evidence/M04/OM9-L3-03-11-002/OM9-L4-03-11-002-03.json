@@ -1,0 +1,75 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-11-002",
+  "title": "Builder Mode Tabs And Context",
+  "generated_at_utc": "2026-10-27T02:20:24Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "706207df91da9317e968b7360beee2df2b30d7d893150d672958fe26df6cd33a",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "profile Width=3 and rail Diameter=20 persist per mode; exactly one active tab of five",
+    "negative": "switch is refused with Missing(profile preset); the previous tab stays active"
+  },
+  "l4_id": "OM9-L4-03-11-002-03",
+  "role": "IMPLEMENT",
+  "kind": "implementation",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/tests/builder_panel.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "tabs_keep_each_mode_parameters_and_switch_safely"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "196b4c76d5e22dd444f7fd3a115b6b68f1f38fdeae23573b8448c7aa3dd4388a",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "tabs_keep_each_mode_parameters_and_switch_safely",
+      "package": "om9-app",
+      "binary": "builder_panel"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "a_failed_tab_switch_restores_the_previous_tab"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "ce71a3dae0e01925a21589bfa061d4bbb2a4f53fe12d375132504eadc67ad8ce",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "a_failed_tab_switch_restores_the_previous_tab",
+      "package": "om9-app",
+      "binary": "builder_panel"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

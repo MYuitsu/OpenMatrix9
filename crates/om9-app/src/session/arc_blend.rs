@@ -47,11 +47,9 @@ impl Controller {
                     }
                 })
         };
-        let gap = |a: &Curve, b: &Curve| {
-            match (endpoint(a, true), endpoint(b, false)) {
-                (Some(a), Some(b)) => distance(a, b),
-                _ => f64::INFINITY,
-            }
+        let gap = |a: &Curve, b: &Curve| match (endpoint(a, true), endpoint(b, false)) {
+            (Some(a), Some(b)) => distance(a, b),
+            _ => f64::INFINITY,
         };
         let (first, second) = if gap(&curves[0], &curves[1]) <= gap(&curves[1], &curves[0]) {
             (curves[0].clone(), curves[1].clone())
@@ -94,7 +92,8 @@ impl Controller {
         let a = first[first.len() - 1];
         let before = first[first.len() - 2];
         let b = second[0];
-        let tangent = unit([a[0] - before[0], a[1] - before[1], a[2] - before[2]]).unwrap_or([1.0, 0.0, 0.0]);
+        let tangent =
+            unit([a[0] - before[0], a[1] - before[1], a[2] - before[2]]).unwrap_or([1.0, 0.0, 0.0]);
         let plane = self.input_plane();
         let plane_normal = [
             plane.x[1] * plane.y[2] - plane.x[2] * plane.y[1],
@@ -113,7 +112,8 @@ impl Controller {
             normal = [normal[0] / norm, normal[1] / norm, normal[2] / norm];
         }
         let delta = [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-        let denominator = 2.0 * (normal[0] * delta[0] + normal[1] * delta[1] + normal[2] * delta[2]);
+        let denominator =
+            2.0 * (normal[0] * delta[0] + normal[1] * delta[1] + normal[2] * delta[2]);
         if denominator.abs() <= 1e-12 {
             return Some(Err(Error::Invalid("arc blend direction is collinear")));
         }
@@ -134,18 +134,16 @@ impl Controller {
             Err(error) => return Some(Err(error)),
         };
         let end_angle = signed_angle(x, y, b, center);
-        let sweep = if end_angle <= 0.0 { end_angle + std::f64::consts::TAU } else { end_angle };
-        let curve = match om9_core::curve_build::arc_by_center(
-            center, x, y, radius, 0.0, sweep,
-        ) {
+        let sweep = if end_angle <= 0.0 {
+            end_angle + std::f64::consts::TAU
+        } else {
+            end_angle
+        };
+        let curve = match om9_core::curve_build::arc_by_center(center, x, y, radius, 0.0, sweep) {
             Ok(curve) => curve,
             Err(error) => return Some(Err(error)),
         };
-        Some(self.commit_geometry(
-            ARC_BLEND,
-            "ArcBlend",
-            Geometry::Curve(curve),
-        ))
+        Some(self.commit_geometry(ARC_BLEND, "ArcBlend", Geometry::Curve(curve)))
     }
 
     pub fn arc_blend_option_tokens(&self) -> Vec<(&'static str, &'static str)> {

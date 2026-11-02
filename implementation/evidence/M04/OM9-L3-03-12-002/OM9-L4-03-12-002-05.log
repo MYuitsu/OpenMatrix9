@@ -1,0 +1,21 @@
+$ cargo test -p om9-app --test builder_styles -j 2
+# exit code: 0
+# captured: 2026-10-27T02:48:31Z
+# target dir: L:\om9-target
+
+
+running 9 tests
+test the_browser_lists_the_styles_of_the_open_mode ... ok
+test a_style_for_another_mode_is_listed_disabled_and_refused ... ok
+test the_command_line_routes_style_apply_and_save_to_the_same_service ... ok
+test applying_a_style_changes_the_preview_only ... ok
+test saving_a_style_adds_a_user_row_without_rewriting_the_defaults ... ok
+test matching_attributes_copies_from_the_selection_and_keeps_the_ids ... ok
+test a_locked_input_keeps_the_browser_read_only ... ok
+test cancel_and_apply_clear_the_applied_style_marker ... ok
+test user_styles_roundtrip_through_the_configured_file ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s
+     Running tests\builder_styles.rs (L:\om9-target\debug\deps\builder_styles-c54c9038cd98df6e.exe)

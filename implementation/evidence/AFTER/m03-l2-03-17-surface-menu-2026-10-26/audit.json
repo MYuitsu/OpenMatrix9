@@ -1,0 +1,41 @@
+{
+  "schema": "om9.m03.l2-03-17.audit.v1",
+  "date": "2026-10-26",
+  "module": "OM9-L2-03-17",
+  "rows": 38,
+  "implemented": 38,
+  "icons_authored": 38,
+  "surface_menu_icons": 40,
+  "menu_icons_wired": 40,
+  "menu_only_rows": {
+    "SurfaceRevolve": "OM9-SURFACE-018",
+    "SurfaceHeightfieldfromImage": "OM9-SURFACE-031",
+    "SurfaceSmash": "OM9-SURFACE-141",
+    "SurfaceSurfaceEditToolsRefittoTolerance": "OM9-SURFACE-142"
+  },
+  "scripts_quoted_in_sheet": 37,
+  "label_only_rows": [
+    "ExtrudeCrv"
+  ],
+  "l3_records": 38,
+  "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "manual_gate": "M03-UI",
+  "human_approval": null,
+  "problems": [],
+  "artifacts": {
+    "crates/om9-app/src/surface_menu.rs": "d5e3793c57c87efc1043ea5d3760b4cd2209e7494b4e2cba030feb594fab79b4",
+    "crates/om9-app/src/menu_catalog.rs": "d183c9f2b479be7b2f48dcaf8d326609c0029dfb41ea9f998ef1d8ccbe0acc23",
+    "crates/om9-app/src/icons.rs": "2c50d208b241a67d5332884323e158cefefe4263f80351e345e9dd0542837535",
+    "crates/om9-app/src/session.rs": "cb00b8dc4a66e39baed6d6da0ac01238d0f6ca8bbbefa35c408fda8e6e9005d0",
+    "crates/om9-app/src/session/surface_edit.rs": "f90740dec6d65b0ad4d4652ea57390c98054c758ed295f8a18c26b39101f1161",
+    "crates/om9-app/src/session/refit_srf.rs": "87dfbf69ec9d050ee546e7a7668fef8060a6bc269fc5574bc2bda28b0ddcc039",
+    "crates/om9-app/src/session/command_options.rs": "8a7b86c4dfa66af241d4b7bfb7f94933bc4392f10be46467fc16023a0617e554",
+    "crates/om9-app/assets/features.json": "a40422fda683dffd4439e1518970b1a08b2906521fd094a76c25f9f39df190bb",
+    "crates/om9-app/tests/surface_menu.rs": "afd51d87b8a9a1126a66f5b39e5d11d5d886fdfbd6270b3ba478f1ddece9925b",
+    "crates/om9-app/tests/smash.rs": "3e310f9cf994b8b984e0e5d790436d93d7fecf78793072fb66b069b497548370",
+    "crates/om9-app/tests/refit_srf.rs": "c85884cdddf2bad7b81e02d28c717a42330cf55219aac099d58d2735a2150ed9",
+    "implementation/design/M03/OM9-L2-03-17/README.md": "12259f52d25f4b36cee969179d866760e95f6020022fe2e71527cd3addf93d62",
+    "implementation/evidence/M03/2026-10-26-l2-03-17-checks.json": "12ce677748f615803646a20b010dcfe8076c61d8ee0ac063dd2027b7eb1c0f7e",
+    "OM9_Milestones/M03 - Geometry 3DM/L2-03-17 - 09-febe/L2.json": "4ba7e76f624f66ae09a01210cfed0f8784ae1028edfdee7e01c3f453f289c394"
+  }
+}

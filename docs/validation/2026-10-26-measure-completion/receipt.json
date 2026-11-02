@@ -1,0 +1,125 @@
+{
+  "date": "2026-10-27",
+  "state": "AUTOMATED_SCOPE_VERIFIED_MANUAL_UI_GATE_OPEN",
+  "evidence": "docs/validation/2026-10-26-measure-completion/README.md",
+  "checks": [
+    {
+      "target_dir": "L:/om9-target",
+      "exit_code": 0,
+      "parallelism": 2,
+      "check": "core-regressions"
+    },
+    {
+      "target_dir": "L:/om9-target",
+      "exit_code": 0,
+      "parallelism": 2,
+      "check": "scene-regressions"
+    },
+    {
+      "target_dir": "L:/om9-target",
+      "exit_code": 0,
+      "parallelism": 2,
+      "check": "final-focused"
+    },
+    {
+      "target_dir": "L:/om9-target",
+      "exit_code": 0,
+      "parallelism": 2,
+      "check": "build"
+    }
+  ],
+  "test_counts_by_batch": {
+    "core-regressions": 88,
+    "scene-regressions": 12,
+    "final-focused": 69,
+    "build": 0,
+    "annotation-ui-subset": 3
+  },
+  "manual_gate": "M03-UI",
+  "manual_gate_promoted": false,
+  "schema_version": 1,
+  "target": "Standalone OM9 Rust Windows x64 default OCCT features",
+  "native_sdk": "Existing configured OCCT 8.0.1; host-internal read-only adapter",
+  "source_sha256": {
+    "crates/om9-app/src/session/annotation.rs": "1de0f62544271a78d648012137daab12a4b38156cc38934a2e288178947cedd8",
+    "crates/om9-app/src/session/measure.rs": "f3b556c7473627f87777dc987fcd2a813cd746eb5626c4452f0c4a9c1a703c55",
+    "crates/om9-app/src/session/measure/extended.rs": "319e49d5c1be215b22566c25ca416167a4709dd3d49004d520acbb628aa5124d",
+    "crates/om9-app/src/session/transform.rs": "62e4265cc3b632366e7d8d7fb960ace52638993003e6be64d3c88d09cc7eab6b",
+    "crates/om9-app/src/session/transform/advanced.rs": "e20cff8baf1ebd6e1aa71668a77d8d8e3fd47a9b049dcc7b5fe59455d8029bd8",
+    "crates/om9-core/src/annotation.rs": "978e54c6eb80c4d4d74d60c270fd7e197d885e922e8eaf866241d1444c35f379",
+    "crates/om9-core/src/measure_geometry.rs": "26bc7f28e77255a707ff11ba394146efb9153554e1cf9fdc549fe55512c8463a",
+    "crates/om9-core/src/point_alignment.rs": "d510a1dd736267e99859ced47ae43f36d18bb3ab8d4eed72e59f9fce977708f8",
+    "crates/om9-core/src/evaluation.rs": "c83895711280d0e0181620b9b7971f6381fc55a6ac72c8003e727aeda56cd0f1",
+    "crates/om9-core/src/top11.rs": "b6745fe0969a5bb49b5793e9e710f17f797c64cfc14ffd8ddfda4a4891fc71e1",
+    "crates/om9-core/src/transaction.rs": "588bcfa42f93ecbc51d2a1ff9d071d17c106a0e617a03314eb3c668590351408",
+    "crates/om9-scene/src/scene.rs": "727eed560d121130a2eb2be5878840ca401c685e378f62f23166030f647ff724",
+    "crates/om9-scene/src/scene/admission.rs": "4f608a84ae479e66f3184ce288c6d7d9d0654ee84c513f634e6dc8fb0940f967",
+    "crates/om9-kernel/src/measurement.rs": "ea753b50b2bba2012980a4ffd0366397b41f49362d3af3eef1a83b4822102c6a",
+    "crates/om9-kernel/src/measurement_bridge.cpp": "34a4f22af6aa1c6a9a899e96c35816522194781f035a5b50cafaf62e7cb28f62",
+    "crates/om9-app/tests/annotation.rs": "10183d97b515ce8b7736f5a408953c3afc61d4f8e288a0e8c9c49216df0b8d55",
+    "crates/om9-app/tests/measure_extended.rs": "fdd6a1fe0f9992b178612f3a7368414616f3ccf7dc60c8d72fdcb3fd9c3ce244",
+    "crates/om9-app/tests/transform_corrections.rs": "ef2e6a1d08d3a5b7d4305b39d0f16337fd4c1966fde221ddcb2d74bf484d86dc",
+    "crates/om9-app/tests/annotation_ui.rs": "a7b79b9778724c728517771bfe412c970b738145bd75b8fdcd244f9a5f42829e",
+    "crates/om9-app/src/session.rs": "b6ab16819e5fe7c29c7b3a2fdf0917fb071981e7d5ddafcc8cff1a679e4a4794",
+    "crates/om9-app/src/session/command_options.rs": "05c59ec57e432820b33ae7a92ec9b68a16dbdb05fa6666ebfd68a51ef628fbda",
+    "crates/om9-app/src/ui.rs": "adfe78be2eeb9c05edd8ce89fe03090d3569b1de90638136db15c8fa28230352",
+    "crates/om9-app/src/ui/chrome.rs": "11b0dd40d983489ce1e48b843ae85a32ddb94330bf62fb75e9f66157dd6fa294",
+    "crates/om9-app/src/icons.rs": "dd7883faba0c80d69000a7c0cdde3d94451a0d2eb313c561b6d05848e2ef0c97",
+    "crates/om9-core/src/model.rs": "95125872da47ecc046f552133d2fd0ebaca22ce653f83ad9465f9b99bd7a43db",
+    "crates/om9-core/src/lib.rs": "0c8cac9084dab67163e68ab0c6411ee719d35bb69bb04a88e8ee434a6f6bc979",
+    "crates/om9-kernel/build.rs": "8cf18c5f259ab937d1696f79865ebc3fabd72e69e6b876a61eb855c25f67d538",
+    "crates/om9-kernel/src/lib.rs": "e13d57b77c14860e35cb19d3ed694c5acde443b2d3cdc3440452f63ee61d8471"
+  },
+  "distinct_tests": 169,
+  "annotation_catalog_ids": 13,
+  "annotation_test_functions": 8,
+  "measurement_extension_test_functions": 7,
+  "measurement_fixture_groups": 11,
+  "native_occt_fixture_groups": 4,
+  "transform_correction_test_functions": 7,
+  "red_findings": [
+    "Initial annotation 1 pass/6 fail: extension storage reservation and disconnected strokes",
+    "Ellipse quarter-knot curvature refused until exact one-sided comparison"
+  ],
+  "open": [
+    "Solid Points ON service",
+    "Array Curve on Surface adapter",
+    "Make Down Facing contract",
+    "M03-UI human acceptance",
+    "Rhino5 annotation/styles/layout roundtrip"
+  ],
+  "new_business_skill_rules_written": false,
+  "verification": {
+    "public_source_audit": "PASS; see public-source-audit.log",
+    "scoped_diff_check": "PASS",
+    "new_file_rustfmt": "Formatting applied to new standalone modules; no full workspace rustfmt gate claimed for concurrent shared files",
+    "prune": "PASS; 0 removed; cited older runs protected",
+    "workflow_new_owner_route": "OM9-L2-03-21 resolves through reference_index.py",
+    "followup_guards": "18 existing regression tests rerun successfully after finite/trim refusal guards; no dedicated trimmed-surface refusal fixture in this batch",
+    "desktop": "User reported unlocked; helper still GetCursorPos Access denied; recovery yielded black screenshot/window chrome only. No actual desktop replay claimed."
+  },
+  "runtime_verified": {
+    "ui_status": "Final verified executable launched; native input/capture helper remains inaccessible",
+    "real_desktop_replay_verified": false,
+    "pid": 4104,
+    "path": "H:/OpenMatrix9/build/standalone-validation/ui-artifacts/measure-transform-20261027/om9-verified.exe",
+    "dependency_path": "L:/om9-target/debug",
+    "manual_gate_closed": false,
+    "sha256": "4a69c74c4da464a40eab9b580e691f0fdf2e3cc304535bb93d9893adfbaa1f8c",
+    "matches_target": true
+  },
+  "evidence_files": [
+    "final-focused.log",
+    "core-regressions.log",
+    "scene-regressions.log",
+    "annotation-ui.log",
+    "final-numeric.log",
+    "final-followup.log",
+    "final-guards.log",
+    "build.log",
+    "public-source-audit.log",
+    "prune.log",
+    "measurement-fixtures.json",
+    "runtime-verified-launch.json"
+  ]
+}

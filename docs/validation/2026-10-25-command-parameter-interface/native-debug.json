@@ -1,0 +1,26 @@
+{
+  "launch": {
+    "pid": 49140,
+    "binary": "L:\\om9-target\\debug\\om9.exe",
+    "sha256": "28915c56c1b2ab659624360939356c8a10dfcf8fafb0e96765ee5779cae76494",
+    "profile": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\command-parameter-interface-debug-20261025"
+  },
+  "window_id": 21171156,
+  "observed": [
+    "Typed Circle starts with current mode and flags shown; all tokens remain inside the Command area.",
+    "Click Deformable changes it and its Approx alias to Yes and exposes Degree=3 / PointCount=32.",
+    "D changes Deformable and Approx back to No without a draft.",
+    "Typed Helix; T stages Turns=; 2 + Enter updates the token to Turns=2.",
+    "Curve menu > Rectangle starts the same option adapter; S changes Square=No to Yes.",
+    "Click Square changes it back to No; one fresh capture was needed for the next rendered frame.",
+    "Escape after each scratch command cancels without creating geometry; debug window left idle.",
+    "Existing release window was not controlled, closed or replaced."
+  ],
+  "stderr": "",
+  "scope": "Windows native smoke; automated agent observation, no human milestone sign-off",
+  "screenshots": [
+    "implementation/evidence/M01/command-parameter-interface-20261025/circle-deformable.png",
+    "implementation/evidence/M01/command-parameter-interface-20261025/helix-turns.png",
+    "implementation/evidence/M01/command-parameter-interface-20261025/rectangle-square.png"
+  ]
+}

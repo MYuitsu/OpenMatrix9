@@ -1,0 +1,38 @@
+$ cargo test -p om9-app --test gem_panel -j 2
+# exit code: 0
+# captured: 2026-10-28T04:06:06Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 25 tests
+test the_positioner_refuses_a_non_gem ... ok
+test the_custom_builder_refuses_an_open_or_non_planar_curve ... ok
+test a_bad_loader_option_is_refused_and_the_session_stays_open ... ok
+test a_locked_gem_layer_refuses_creation_and_property_edit ... ok
+test the_loader_previews_without_creating_an_object_and_cancel_leaves_no_phantom ... ok
+test the_typed_command_names_start_the_same_services ... ok
+test the_brep_option_keeps_the_portable_mesh_body ... ok
+test the_baguette_builder_refuses_a_degenerate_girdle_and_an_oversized_corner ... ok
+test the_emerald_builder_commits_the_requested_dimensions ... ok
+test gems_route_to_the_gem_layer_default_even_from_another_current_layer ... ok
+test the_f6_gem_context_enables_properties_but_not_the_unimplemented_report ... ok
+test the_loader_preview_is_world_space_and_never_committed ... ok
+test applying_the_loader_inserts_one_gem_in_one_transaction_and_undo_restores ... ok
+test a_gem_mutation_is_the_only_way_the_tools_touch_the_document ... ok
+test keep_original_size_keeps_the_replaced_gems_dimensions ... ok
+test the_loader_commits_an_editable_brep_with_the_mesh_volume ... ok
+test the_positioner_moves_and_rotates_the_instance_in_place ... ok
+test the_property_editor_refuses_a_shared_instance ... ok
+test the_positioner_preview_mirrors_move_rotate_and_scale ... ok
+test replacing_a_selected_gem_keeps_the_object_and_gem_identity ... ok
+test the_property_editor_is_one_transaction_and_undo_restores_every_field ... ok
+test the_positioner_duplicates_with_one_shared_definition ... ok
+test loader_options_change_the_cut_shape_size_and_depth ... ok
+test the_custom_builder_uses_a_closed_planar_profile ... ok
+test a_property_edit_never_recolours_the_rest_of_the_scene ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.65s
+
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.62s
+     Running tests\gem_panel.rs (cargo-target\debug\deps\gem_panel-2401e69851f3ef48.exe)

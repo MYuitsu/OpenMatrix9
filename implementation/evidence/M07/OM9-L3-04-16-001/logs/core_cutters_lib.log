@@ -1,0 +1,34 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.13s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)
+
+running 26 tests
+test cutters::bezel::tests::odd_and_even_positions_start_at_different_fractions ... ok
+test cutters::boolean::tests::the_edge_profile_helpers_are_available_to_the_policy ... ok
+test cutters::bezel::tests::an_impossible_block_is_refused ... ok
+test cutters::library::tests::an_unknown_preset_name_is_a_typed_refusal ... ok
+test cutters::gem::tests::an_unknown_mode_is_a_typed_refusal ... ok
+test cutters::gem::tests::a_cutter_that_would_cut_into_the_stone_is_refused ... ok
+test cutters::gem::tests::the_lower_seat_cannot_sit_below_the_cutter_bottom ... ok
+test cutters::library::tests::a_preset_that_would_cut_the_stone_is_refused ... ok
+test cutters::boolean::tests::an_empty_cutter_list_is_refused_instead_of_silently_doing_nothing ... ok
+test cutters::tests::a_non_monotonic_ring_list_is_refused ... ok
+test cutters::tests::an_unknown_edge_profile_is_a_typed_refusal ... ok
+test cutters::tests::every_edge_profile_stays_inside_the_unit_circle ... ok
+test cutters::boolean::tests::switching_the_boolean_off_is_a_typed_refusal ... ok
+test cutters::tests::a_cone_gets_a_pole_and_stays_closed ... ok
+test cutters::bezel::tests::the_dimensional_builder_makes_one_closed_block_per_cutter ... ok
+test cutters::library::tests::the_scale_controls_change_the_built_size ... ok
+test cutters::tests::a_cylinder_lofts_to_the_expected_volume ... ok
+test cutters::bezel::tests::the_2d_scale_grows_the_block ... ok
+test cutters::tests::a_frustum_matches_the_analytic_volume ... ok
+test cutters::gem::tests::multiple_stones_get_one_cutter_each_and_an_empty_group_is_refused ... ok
+test cutters::gem::tests::the_edge_profile_only_changes_the_modes_that_publish_it ... ok
+test cutters::gem::tests::the_three_modes_build_closed_cutters_with_different_heights ... ok
+test cutters::library::tests::every_library_preset_builds_a_closed_cutter ... ok
+test cutters::boolean::tests::a_cutter_that_misses_the_target_is_refused ... ok
+test cutters::boolean::tests::the_boolean_removes_the_cutter_volume_from_the_target ... ok
+test cutters::boolean::tests::one_mode_applies_only_the_first_cutter ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 171 filtered out; finished in 0.22s
+
+

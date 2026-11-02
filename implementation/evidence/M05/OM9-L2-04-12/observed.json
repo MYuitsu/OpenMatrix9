@@ -1,0 +1,180 @@
+{
+  "schema": "om9.m05.l2_gem_evidence.v1",
+  "l2_id": "OM9-L2-04-12",
+  "title": "Gem Pavé Layout And Azure",
+  "date": "2026-10-28",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "code": [
+    "crates/om9-core/src/gem_pave.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/tests/gem_pave.rs",
+    "crates/om9-app/src/session/gem_pave.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem_pave.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/gem_pave_panel.rs"
+  ],
+  "checks": [
+    {
+      "artifact": "core-gem-pave.log",
+      "command": "cargo test -p om9-core --test gem_pave -j 2",
+      "exit_code": 0,
+      "sha256": "8919ef80e425eae9a421a8f25e1bcd367c464a90557bbed7ca914a7792eeb779"
+    },
+    {
+      "artifact": "app-gem-pave-panel.log",
+      "command": "cargo test -p om9-app --test gem_pave_panel -j 2",
+      "exit_code": 0,
+      "sha256": "51c733e083063cc2099387a8a63d7bddec5fa4de7beb81977ddfaa4f9daafab6"
+    },
+    {
+      "artifact": "workspace-check.log",
+      "command": "cargo check -p om9-core -p om9-app -p om9-kernel --lib -j 2",
+      "exit_code": 0,
+      "sha256": "7d18716230d8d7c1ae6b8cdd9586f7b1c0441826c68f6e96075b41f330056b21"
+    },
+    {
+      "artifact": "clippy-gem-pave-lib.log",
+      "command": "cargo clippy -p om9-core -p om9-app -p om9-kernel --lib -j 2 -- -D warnings -A clippy::type_complexity -A clippy::field_reassign_with_default -A clippy::collapsible_if -A clippy::manual_inspect -A clippy::useless_vec",
+      "exit_code": 0,
+      "sha256": "d72eddd6bb24b9b5c176b525c21e68b2747fdf390ee2f7d63199d987142c3ad3"
+    },
+    {
+      "artifact": "clippy-core-test.log",
+      "command": "cargo clippy -p om9-core --test gem_pave -j 2 -- -D warnings -A clippy::type_complexity -A clippy::field_reassign_with_default -A clippy::collapsible_if -A clippy::manual_inspect -A clippy::useless_vec",
+      "exit_code": 0,
+      "sha256": "6f552a3733114cfd1ae08d6b39716fa607c331e8730f077df5d1e341f0fad80d"
+    },
+    {
+      "artifact": "clippy-app-test.log",
+      "command": "cargo clippy -p om9-app --test gem_pave_panel -j 2 -- -D warnings -A clippy::type_complexity -A clippy::field_reassign_with_default -A clippy::collapsible_if -A clippy::manual_inspect -A clippy::useless_vec",
+      "exit_code": 0,
+      "sha256": "8f8f7c5de03dc31bf9352e0abb17906a8d3b3ca52887a82dd9dca25e99510892"
+    }
+  ],
+  "workspace_all_targets_blocked": {
+    "artifact": "workspace-all-targets-blocked.log",
+    "command": "cargo check --workspace --all-targets -j 2",
+    "exit_code": 1,
+    "scope": "concurrent untracked crates/om9-core/tests/cutters.rs (unresolved om9_core::settings::GemGirdle); no pavé file is cited",
+    "resolution": "rerun after the cutters owner settles; scoped lib check above is clean"
+  },
+  "strict_clippy_blocked": {
+    "artifact": "clippy-strict-blocked.log",
+    "command": "cargo clippy -p om9-core -p om9-app -p om9-kernel --lib -j 2 -- -D warnings",
+    "exit_code": 1,
+    "scope": "concurrent untracked crates/om9-core/src/cutters/* and crates/om9-app/src/session/gem_cutters.rs; no pavé file is cited",
+    "resolution": "rerun after those modules settle; scoped pavé clippy above is clean"
+  },
+  "l3": {
+    "OM9-L3-04-12-001": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-12-001-03"
+      ],
+      "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c",
+      "tests": [
+        "crates/om9-core/tests/gem_pave.rs",
+        "crates/om9-app/tests/gem_pave_panel.rs"
+      ]
+    },
+    "OM9-L3-04-12-002": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-12-002-03"
+      ],
+      "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c",
+      "tests": [
+        "crates/om9-core/tests/gem_pave.rs",
+        "crates/om9-app/tests/gem_pave_panel.rs"
+      ]
+    },
+    "OM9-L3-04-12-003": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-12-003-03"
+      ],
+      "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c",
+      "tests": [
+        "crates/om9-core/tests/gem_pave.rs",
+        "crates/om9-app/tests/gem_pave_panel.rs"
+      ]
+    },
+    "OM9-L3-04-12-004": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-12-004-03"
+      ],
+      "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c",
+      "tests": [
+        "crates/om9-core/tests/gem_pave.rs",
+        "crates/om9-app/tests/gem_pave_panel.rs"
+      ]
+    },
+    "OM9-L3-04-12-005": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-12-005-03"
+      ],
+      "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c",
+      "tests": [
+        "crates/om9-core/tests/gem_pave.rs",
+        "crates/om9-app/tests/gem_pave_panel.rs"
+      ]
+    },
+    "OM9-L3-04-12-006": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-12-006-03"
+      ],
+      "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c",
+      "tests": [
+        "crates/om9-core/tests/gem_pave.rs",
+        "crates/om9-app/tests/gem_pave_panel.rs"
+      ]
+    },
+    "OM9-L3-04-12-007": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-12-007-03"
+      ],
+      "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c",
+      "tests": [
+        "crates/om9-core/tests/gem_pave.rs",
+        "crates/om9-app/tests/gem_pave_panel.rs"
+      ]
+    },
+    "OM9-L3-04-12-008": {
+      "manual_gate": "OPEN",
+      "l4_receipts": [
+        "OM9-L4-12-008-03"
+      ],
+      "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c",
+      "tests": [
+        "crates/om9-core/tests/gem_pave.rs",
+        "crates/om9-app/tests/gem_pave_panel.rs"
+      ]
+    }
+  },
+  "manual_ui_checklist": "implementation/evidence/M05/OM9-L2-04-12/MANUAL_UI_CHECKLIST.md",
+  "public_source_audit": {
+    "command": "python tools/public_source_audit.py",
+    "source_files": 14484,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "uncertainties": [
+    "All eight capabilities are interactive; the M05-UI manual gate stays OPEN and no human window/ preview review is claimed.",
+    "Azure profiles and prong curves are document curves; metal cutting, setting and prong solids belong to M06/M07.",
+    "The sphere builder exposes Radius and Count viewport handles; the manual gate still judges their usability.",
+    "User pavé styles persist only when OM9_PAVE_STYLE_LIBRARY names a file; otherwise they are session-local.",
+    "Attractor stones are sampled by a bounded 128-point projection of the selected curve; the exact falloff remains a documented approximation.",
+    "Closed edge curves clip the lattice to their union; holes and multiple disjoint regions are not distinguished.",
+    "The scoped clippy commands allow five lints that currently fire in concurrent untracked cutters/gem_cutters modules; the pavé files themselves were fixed and the strict whole-crate command is recorded as blocked, not reported as a false PASS."
+  ]
+}

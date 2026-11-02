@@ -1314,6 +1314,18 @@
     "module": "Surface Tools"
   },
   {
+    "id": "OM9-SURFACE-141",
+    "name": "Smash",
+    "command": "Smash",
+    "module": "Surface Tools"
+  },
+  {
+    "id": "OM9-SURFACE-142",
+    "name": "Refit to Tolerance",
+    "command": "RefitSrf",
+    "module": "Surface Tools"
+  },
+  {
     "id": "OM9-SURFACE-032",
     "name": "Sweep Multi",
     "command": "gvfourSweep",
@@ -1444,7 +1456,8 @@
     "id": "OM9-SOLID-013",
     "name": "Ellipsoid",
     "command": "Ellipsoid",
-    "module": "Solid Tools"
+    "module": "Solid Tools",
+    "right_click": "EllipsoidDiameter"
   },
   {
     "id": "OM9-SOLID-014",
@@ -1457,37 +1470,43 @@
     "id": "OM9-SOLID-015",
     "name": "Torus",
     "command": "Torus",
-    "module": "Solid Tools"
+    "module": "Solid Tools",
+    "right_click": "Torus2Point"
   },
   {
     "id": "OM9-SOLID-016",
     "name": "Cylinder",
     "command": "Cylinder",
-    "module": "Solid Tools"
+    "module": "Solid Tools",
+    "right_click": "Cylinder2Point"
   },
   {
     "id": "OM9-SOLID-017",
     "name": "Tube",
     "command": "Tube",
-    "module": "Solid Tools"
+    "module": "Solid Tools",
+    "right_click": "Tube2Point"
   },
   {
     "id": "OM9-SOLID-018",
     "name": "Pyramid",
     "command": "Pyramid",
-    "module": "Solid Tools"
+    "module": "Solid Tools",
+    "right_click": "PyramidStar"
   },
   {
     "id": "OM9-SOLID-019",
     "name": "Cone",
     "command": "Cone",
-    "module": "Solid Tools"
+    "module": "Solid Tools",
+    "right_click": "Cone2Point"
   },
   {
     "id": "OM9-SOLID-020",
     "name": "Truncated Cone",
     "command": "TCone",
-    "module": "Solid Tools"
+    "module": "Solid Tools",
+    "right_click": "TruncatedCone2Point"
   },
   {
     "id": "OM9-SOLID-021",

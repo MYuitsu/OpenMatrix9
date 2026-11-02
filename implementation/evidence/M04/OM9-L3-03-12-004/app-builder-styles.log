@@ -1,0 +1,91 @@
+$ cargo test -p om9-app --test builder_styles --test builder_panel --test builder_controls --test builder_slot --test top11 -j 2
+# exit code: 0
+# captured: 2026-10-27T02:48:23Z
+# target dir: L:\om9-target
+
+
+running 8 tests
+test a_tab_with_an_invalid_preview_is_never_silently_applied_or_silently_dropped ... ok
+test a_slider_edit_from_the_panel_quantises_and_previews_the_same_value ... ok
+test a_stale_panel_event_cannot_overwrite_a_newer_handle_drag ... ok
+test escape_after_preview_edits_leaves_the_document_bytewise_unchanged ... ok
+test a_locked_input_makes_the_builder_read_only_and_hides_its_handles ... ok
+test a_mode_tab_switch_keeps_each_modes_own_parameters ... ok
+test the_f6_prefill_and_the_command_line_reach_the_same_builder_service ... ok
+test double_enter_applies_once_and_reset_creates_no_journal_entry ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 10 tests
+test cancel_and_reset_leave_the_document_untouched ... ok
+test a_failed_tab_switch_restores_the_previous_tab ... ok
+test tabs_keep_each_mode_parameters_and_switch_safely ... ok
+test a_handle_drag_and_a_typed_value_share_the_one_field ... ok
+test the_profile_library_changes_the_preview_and_the_applied_shape ... ok
+test the_preset_can_be_chosen_from_the_command_line ... ok
+test the_ring_rail_command_line_opens_edits_and_applies_one_undoable_feature ... ok
+test outside_rail_and_resizer_apply_independent_outputs ... ok
+test a_parameter_edit_and_its_recompute_are_two_undoable_steps ... ok
+test profile_and_sweep_modes_read_the_selection_and_commit_their_own_command ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.60s
+
+
+running 9 tests
+test b1_the_slot_is_reserved_directly_below_projects ... ok
+test fixture_design_pair_is_present ... ok
+test b6_to_y4_a_layout_file_cannot_break_the_reservation ... ok
+test b2_every_placement_is_refused_and_changes_nothing ... ok
+test b5_the_placeholder_became_the_live_builder_panel_in_m04 ... ok
+test y2_y3_y5_the_slot_is_a_placeholder_and_never_a_menu ... ok
+test b3_the_slot_owns_no_model ... ok
+test b4_the_bar_carries_no_close_box_and_starts_no_drag ... ok
+test y1_a_click_on_the_bar_is_refused ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+
+running 9 tests
+test the_browser_lists_the_styles_of_the_open_mode ... ok
+test a_style_for_another_mode_is_listed_disabled_and_refused ... ok
+test applying_a_style_changes_the_preview_only ... ok
+test the_command_line_routes_style_apply_and_save_to_the_same_service ... ok
+test saving_a_style_adds_a_user_row_without_rewriting_the_defaults ... ok
+test matching_attributes_copies_from_the_selection_and_keeps_the_ids ... ok
+test a_locked_input_keeps_the_browser_read_only ... ok
+test cancel_and_apply_clear_the_applied_style_marker ... ok
+test user_styles_roundtrip_through_the_configured_file ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+
+running 19 tests
+test move_prompt_names_the_next_point ... ok
+test m03_03_08_006_toolbar_has_eleven_actions_and_ring_rail_opens_the_builder ... ok
+test m03_03_08_002_control_point_toggle_uses_f10_and_selection_only ... ok
+test m03_03_08_003_mirror_delete_input_reflects_the_original_in_place ... ok
+test m03_03_08_003_mirror_collects_a_plane_and_creates_a_copy ... ok
+test m03_03_08_002_grip_drag_moves_a_control_point_and_undo_restores_it ... ok
+test m03_03_08_003_move_and_rotate_collect_points_and_commit_placements ... ok
+test m03_03_08_002_circle_and_surface_control_grips_reach_the_toolbar_adapter ... ok
+test m03_03_08_001_duplicate_is_in_place_one_undo_and_selects_the_copy ... ok
+test m03_03_08_001_duplicate_base_point_places_multiple_copies_until_enter ... ok
+test m03_03_08_003_three_point_plane_and_non_rigid_mirror ... ok
+test m03_03_08_002_surface_edit_grips_keep_periodic_and_reversed_records ... ok
+test command_names_and_top11_prefix_share_the_toolbar_path ... ok
+test m03_03_08_004_multiple_cutters_split_and_trim_one_target ... ok
+test m03_03_08_001_duplicate_options_project_and_reuse_the_last_move ... ok
+test m03_03_08_004_join_explode_split_and_trim_run_from_the_toolbar ... ok
+test m03_03_08_002_surface_edit_grid_is_fast_through_the_adapter ... ok
+test m03_03_08_004_a_surface_can_be_the_cutting_object ... ok
+test m03_03_08_004_stress_join_explode_split_trim_cycles ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s
+     Running tests\builder_controls.rs (L:\om9-target\debug\deps\builder_controls-633cee14c06e5cc4.exe)
+     Running tests\builder_panel.rs (L:\om9-target\debug\deps\builder_panel-59c8ebc246fb5c22.exe)
+     Running tests\builder_slot.rs (L:\om9-target\debug\deps\builder_slot-9ec03b25ef03a0e6.exe)
+     Running tests\builder_styles.rs (L:\om9-target\debug\deps\builder_styles-c54c9038cd98df6e.exe)
+     Running tests\top11.rs (L:\om9-target\debug\deps\top11-e9fcc28ac2d7965b.exe)

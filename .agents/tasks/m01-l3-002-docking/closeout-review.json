@@ -1,0 +1,11 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Advisory: tools\\validate_m01_l3_002_ui_matrix.py (lines 104, 125) checks only status_text_overlap == false, and ui.rs reports false when a rect is missing. Also require status_message_px and status_summary_px to be non-null. The frame tests in status_bar_overlap.rs already expect both rects, so the overlap fix itself is proven.",
+    "Advisory: the status-bar fix in chrome.rs::status_bar_ui is about 60 lines of three scoped sub-layouts. It stays local to that function, and workbench_regions.rs and dock_layout.rs are unchanged, so region-plan behaviour is unchanged. Accepted.",
+    "Known defects recorded in the final report but not fixed, outside this item: saving a document with a Line fails 'archive encoding verification' in om9-archive, and the command panel leaves a 28 px gap below about 311 px height.",
+    "Human-only and still open, honestly labelled: M01-UI sign-off (reviewer.status NOT_SIGNED, gate OPEN), real OS DPI, second monitor, live drag, M00/legal approval (PENDING_HUMAN_M00_APPROVAL), and the audit-scoping decision. The full public_source_audit.py exits 1 (11721 errors, all in private trees) and is not claimed as passed.",
+    "Hygiene: none of this task's files is staged. The index holds only the user's OM9_Milestones renames plus four unrelated tools/*.py. No commit was made. Private trees and OM9_Milestones are untouched by this task."
+  ],
+  "reviewDoc": "h:\\OpenMatrix9\\.agents\\tasks\\m01-l3-002-docking\\closeout-review.md"
+}

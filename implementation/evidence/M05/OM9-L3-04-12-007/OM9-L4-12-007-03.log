@@ -1,0 +1,5 @@
+$ cargo test -p om9-core --test gem_pave -j 2
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+$ cargo test -p om9-app --test gem_pave_panel -j 2
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out

@@ -4,6 +4,60 @@
   "milestone": "M07",
   "parent_l2_id": "OM9-L2-04-18",
   "title": "Cutting Plane Mirror History",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "planning/E12.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M07 - Cutters/L2-04-18 - 03-febe-ring-finger-plane-quad-cutters/L3-005 - Cutting Plane Mirror History/L4-01 - Contract And Source Preflight/l4.json#l4.inputs"
+      },
+      {
+        "raw": "planning/M00/SOURCE_AUDIT_V012.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M07 - Cutters/L2-04-18 - 03-febe-ring-finger-plane-quad-cutters/L3-005 - Cutting Plane Mirror History/L4-01 - Contract And Source Preflight/l4.json#l4.inputs"
+      },
+      {
+        "raw": "FeatureId dependency graph, stable EntityId, mirror/plane parameters, source geometry provenance.",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M07 - Cutters/L2-04-18 - 03-febe-ring-finger-plane-quad-cutters/L3-005 - Cutting Plane Mirror History/L4-01 - Contract And Source Preflight/l4.json#l4.inputs"
+      }
+    ],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [
+      "input:planning/E12.md: type/default/range",
+      "input:planning/M00/SOURCE_AUDIT_V012.md: type/default/range",
+      "input:FeatureId dependency graph, stable EntityId, mirror/plane parameters, source geometry provenance.: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M07",
   "execution_stage": "E12",
@@ -124,5 +178,11 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED"
+  "l4_status": "PLANNED_NOT_EXECUTED",
+  "task_ids": [
+    "OM9-L4-04-18-005-01",
+    "OM9-L4-04-18-005-02",
+    "OM9-L4-04-18-005-03",
+    "OM9-L4-04-18-005-04"
+  ]
 }

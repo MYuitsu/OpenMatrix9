@@ -11,6 +11,8 @@ Theo [validation-playbook](references/validation-playbook.md), resolve target/cr
 
 Kiểm tra phù hợp change: semantic Rust tests → native bridge/error/ownership/tolerance → actual app lifecycle/document/Undo/.om9/3DM → UI Matrix9 thật/screenshot/pointer → performance fixture nếu liên quan. Compile/load hay mẫu planner không đóng các gate khác.
 
+Khi kiểm lệnh nhận điểm, frame hoặc preview, dùng [oracle hướng kéo và tọa độ CMD](../openmatrix9-feature-port/references/interactive-geometry-regressions.md): kiểm vị trí canonical, đủ dấu liên quan và preview/commit; phân biệt CMD invocation với nhập tọa độ, dispatcher với click UI, scene publication với GPU present. Lưu regression đỏ → xanh khi sửa; skill-only không đóng lỗi sản phẩm.
+
 FreeCAD `OpenMatrix9Gui`/FCMacro chỉ cho task legacy được chỉ định: dùng shared `H:/FreeCAD-src/build/relWithDebInfo`, `build/build-om9-plugin.ps1`, `build/run-om9-plugin.ps1`, không clone runtime hoặc root rebuild vì thay OM9. Báo scope legacy rõ.
 
 Lưu command/environment/source fingerprint/result và các phần chưa chạy ở `docs/validation/`; [sync progress](../openmatrix9-workflow/references/progress.md). Không tạo API/build target giả, không nâng trạng thái v2 từ native passes cũ, không publish ngoài yêu cầu.

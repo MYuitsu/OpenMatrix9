@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-09-002",
+  "title": "Gem Reference Mesh And B-Rep Assets",
+  "cases": [
+    "24 cut/shape assets, unique `asset_key`s, monotone size ladders",
+    "every asset builds a closed mesh at its min/mid/max ladder size with bbox == spec",
+    "round diamond 6.5 mm -> bbox 6.5 x 6.5 x 3.95 within 1e-6",
+    "cabochon dome is closed with a flat bottom",
+    "round, oval, emerald, baguette, heart, trillion, cabochon and a custom profile each convert to one valid closed B-Rep whose source volume equals the mesh volume within 1e-6 relative",
+    "the loader's committed body is `Geometry::Brep` with the mesh volume, and a property edit keeps it a B-Rep",
+    "the open gem tool exposes a world-space preview mesh and placement while the document has no gem object yet",
+    "the positioner preview mirrors Move, Rotate and Scale and equals the committed placement"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

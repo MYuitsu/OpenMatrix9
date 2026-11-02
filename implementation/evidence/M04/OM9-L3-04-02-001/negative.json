@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-001",
+  "kind": "negative",
+  "expected": "an unverified locale such as UK is refused by the choice domain; a size outside 1..15 is refused by the count domain",
+  "verified_by": [
+    "a_us_ring_size_resolves_through_the_frozen_table_and_an_unknown_locale_is_refused",
+    "the_ring_size_command_switches_the_builder_to_the_us_table"
+  ]
+}

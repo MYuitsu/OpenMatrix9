@@ -1,0 +1,153 @@
+{
+  "schema": "om9.m04.builder_ui.v1",
+  "recorded_at_utc": "2026-10-26T22:06:38Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "scope": [
+    "BuilderSession: typed fields, live preview through ProducerRegistry, viewport handles",
+    "command frame: RingRail / RailProfile / RailSweep / OutsideRail / RingResizer from the command line and Top 11",
+    "builder panel in the reserved BUILDERS slot: tabs, fields, sliders, Apply, Reset, Cancel, handle read-outs",
+    "builder mode tabs keep independent parameters per mode and survive a failed switch",
+    "profile selector window: rectangle / rounded rectangle / circle presets, preview only, removed preset refused",
+    "outside rail offsets a closed circular rail; a non-circular rail or non-positive offset is refused",
+    "ring resizer creates an independent ring at the target diameter and refuses a shrink below thickness",
+    "viewport handle drag edits the same field as the panel, with a stale panel event refused",
+    "Mutation::History carries published results; Mutation::HistoryUpdate journals a recompute",
+    "Controller::recompute_history applies a registry rebuild as one undoable transaction",
+    "F6 Builder prefill opens the mode the selection fits"
+  ],
+  "code": [
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/transaction.rs",
+    "crates/om9-core/src/history.rs",
+    "crates/om9-core/src/associative.rs",
+    "crates/om9-core/tests/builder_session.rs",
+    "crates/om9-core/tests/history_mutation.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/session/top11.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-app/src/f6.rs",
+    "crates/om9-app/tests/builder_panel.rs",
+    "crates/om9-app/tests/top11.rs",
+    "crates/om9-kernel/src/measurement.rs"
+  ],
+  "checks": [
+    {
+      "artifact": "core-builder.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "--test",
+        "history_mutation",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "artifact": "occt-chain.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-kernel",
+        "--features",
+        "3dm-brep",
+        "--test",
+        "associative_history",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.90s"
+      ]
+    },
+    {
+      "artifact": "app-builder.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "--test",
+        "top11",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.75s",
+        "test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s"
+      ]
+    },
+    {
+      "artifact": "plugin-host-history.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-plugin-host",
+        "--lib",
+        "-j",
+        "2",
+        "history"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 52 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "artifact": "kernel-clippy.log",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-kernel",
+        "--all-targets",
+        "--no-deps",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "summary": []
+    },
+    {
+      "artifact": "workspace-check.log",
+      "command": [
+        "cargo",
+        "check",
+        "--workspace",
+        "--all-targets",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": []
+    }
+  ],
+  "manual_gates": [
+    "OM9-L3-03-11-* and OM9-L3-04-02-* keep their plan status: the mode tabs, profile selector, outside rail and resizer are implemented and automatically tested, but a human still has to review the panel and handle gestures for those L3.",
+    "No screenshot/pointer-frame evidence is recorded for the panel or handles; the controller and core tests prove the model, command frame and transaction behavior."
+  ],
+  "notes": [
+    "clippy for om9-core/om9-app is currently blocked by unrelated untracked modules another process is adding (annotation.rs, measure/extended.rs, transform advanced); the changed builder and transaction code is rustfmt-clean."
+  ]
+}

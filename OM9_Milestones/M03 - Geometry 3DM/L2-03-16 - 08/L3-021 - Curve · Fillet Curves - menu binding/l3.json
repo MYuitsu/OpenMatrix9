@@ -4,6 +4,181 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-16",
   "title": "Curve · Fillet Curves — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Fillet Curves",
+        "Fillet Corners",
+        "Chamfer Curves",
+        "Connect Curves"
+      ],
+      "option_count": 4
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Curve",
+      "command": "Cleanup Tools",
+      "option": "Fillet Curves",
+      "root_group": false,
+      "path": [
+        "Curve",
+        "Cleanup Tools"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "selected BRep edge(s) or two curve ends, radius 1mm",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-16 - 08/L3-021 - Curve · Fillet Curves - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Fillet Curves",
+        "command_id": "CurveFilletCurves",
+        "script": "! _Fillet",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-021",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Fillet Curves",
+          "typed_forms": [
+            "Fillet Curves"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Fillet Corners",
+        "command_id": "CurveFilletCorners",
+        "script": "! _FilletCorners",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-022",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Fillet Corners",
+          "typed_forms": [
+            "Fillet Corners"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Chamfer Curves",
+        "command_id": "CurveChamferCurves",
+        "script": "! _Chamfer",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-023",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Chamfer Curves",
+          "typed_forms": [
+            "Chamfer Curves"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Connect Curves",
+        "command_id": "CurveConnectCurves",
+        "script": "! _Connect",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Connect Curves",
+          "typed_forms": [
+            "Connect Curves"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [
+      "Connect Curves"
+    ],
+    "missing": [
+      "option:Connect Curves: type/default/range/unit/prompt",
+      "input:selected BRep edge(s) or two curve ends, radius 1mm: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-03-16-021-04"
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E05",
@@ -121,13 +296,25 @@
       "depends_on_task_ids": [
         "OM9-L4-03-16-021-02"
       ]
+    },
+    {
+      "id": "OM9-L4-03-16-021-04",
+      "title": "Parameter Implementation — Curve · Fillet Curves — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-16 - 08/L3-021 - Curve · Fillet Curves - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-03-16-021-01",
+        "OM9-L4-03-16-021-02",
+        "OM9-L4-03-16-021-03"
+      ]
     }
   ],
   "l4_status": "L4_ACCEPTED_ON_AUTOMATED_EVIDENCE_MANUAL_UI_PENDING",
   "task_ids": [
     "OM9-L4-03-16-021-01",
     "OM9-L4-03-16-021-02",
-    "OM9-L4-03-16-021-03"
+    "OM9-L4-03-16-021-03",
+    "OM9-L4-03-16-021-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -278,10 +465,10 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
-    "date": "2026-10-23",
+    "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
-    "scope": "cataloged command id with verified visible disabled reason; no interactive session yet",
+    "scope": "one cataloged command id shared by the Matrix Curve menu row and the command line, with an interactive Rust session and verified geometry",
     "owner": {
       "crate": "om9-app",
       "files": [
@@ -299,12 +486,12 @@
       "implementation/fixtures/M03/OM9-L3-03-16-021/positive.json",
       "implementation/fixtures/M03/OM9-L3-03-16-021/negative.json",
       "implementation/evidence/M03/OM9-L3-03-16-021/",
-      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json"
+      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json",
+      "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/receipt.json"
     ],
     "tests": [
-      "cargo test -p om9-app --test curve_menu: 4 passed",
-      "Line/Point geometry smoke: passed",
-      "disabled reason catalog: 56 rows verified"
+      "cargo test -p om9-app --test curve_menu: 5 passed (58-row id/icon/label/script/menu-dispatch parity)",
+      "cargo test -p om9-app (curve command regressions): 320 passed, 0 failed"
     ],
     "l4_evidence": {
       "OM9-L4-03-16-021-01": "1/1",
@@ -314,8 +501,16 @@
     "human_approval": null,
     "manual_gate": "M03-UI",
     "remaining": [
-      "No interactive command session yet; the menu is disabled with a visible reason.",
-      "Human M03-UI review is unsigned."
-    ]
+      "Human M03-UI click/preview review is unsigned."
+    ],
+    "menu_binding": {
+      "date": "2026-10-26",
+      "feature": "OM9-CURVE-021",
+      "menu_label": "Fillet Curves",
+      "menu_icon": "CurveFilletCurves",
+      "documented_script": "Fillet",
+      "binding_state": "Implemented",
+      "same_id_menu_and_commandline": true
+    }
   }
 }

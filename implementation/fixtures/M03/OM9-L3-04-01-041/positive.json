@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-041",
+  "case": "10 x 10 x 10 mesh",
+  "expected": "10 x 10 x 10 mesh -> one cage entity with eight vertices spanning 0..10 on every axis, the object carries the om9.cage back pointer naming that cage, one Undo entry",
+  "test": "m03_04_01_041_create_cage_wraps_the_selection_in_a_box"
+}

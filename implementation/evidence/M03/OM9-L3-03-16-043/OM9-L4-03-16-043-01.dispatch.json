@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-043-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-043",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-044",
   "source_command": "Extract Angle Isocurve",
   "menu_icon": "CurveGVExtractIsocurve",
   "owner_candidate": "OM9-L3-02-04-010",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Extract Angle Isocurve command session is not wired; owner candidate OM9-L3-02-04-010 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-043/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-043/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-043/dispatch_contract.json": "77ccd9226b2c3a893b57c679d3c1ff198fdd31db856db0f5f28c030726a6c1ee",
-    "implementation/design/M03/OM9-L3-03-16-043/dispatch_contract.md": "fee35ab27fa5f71600be9516b440bd67cef9257e6c1570c578d3745b090bdc06"
+    "implementation/design/M03/OM9-L3-03-16-043/dispatch_contract.json": "38c2d1d6e145b032ce0e3b17786433ab3b7dcd663549a3581922ee4b5859cd64",
+    "implementation/design/M03/OM9-L3-03-16-043/dispatch_contract.md": "e476b107fa1db7650211f9fed835f0b2edd0ac48fb50b2a0926aff0c9850dd3e"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "gvExtractIsocurve"
 }

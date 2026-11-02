@@ -30,8 +30,19 @@ fn crv_start_and_end_create_points() {
         })
         .collect();
     assert_eq!(points.len(), 2);
-    let start = points.iter().find(|(label, _)| *label == "CrvStart").unwrap().1;
-    let end = points.iter().find(|(label, _)| *label == "CrvEnd").unwrap().1;
+    let start = points
+        .iter()
+        .find(|(label, _)| *label == "CrvStart")
+        .unwrap()
+        .1;
+    let end = points
+        .iter()
+        .find(|(label, _)| *label == "CrvEnd")
+        .unwrap()
+        .1;
     assert!(start[0].abs() < 1e-9);
     assert!((end[0] - 10.0).abs() < 1e-9);
+    // The committed command id follows the authored catalog: Start is 033, End is 032.
+    let recent: Vec<_> = c.recent().iter().map(String::as_str).collect();
+    assert_eq!(recent, vec!["OM9-CURVE-033", "OM9-CURVE-032"]);
 }

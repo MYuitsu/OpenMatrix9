@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-004",
+  "case": "negative",
+  "input": "two subshapes with the same name, a changed kind, a move beyond tolerance, a stale revision, a detached owner",
+  "expected": "Invalid('ambiguous semantic reference'), Invalid('semantic subshape kind'), Stale('semantic reference moved'), Stale('semantic reference revision'), Invalid('semantic reference detached feature')",
+  "tests": [
+    "a_semantic_reference_survives_an_allowed_edit_and_refuses_ambiguity",
+    "a_detached_feature_cannot_keep_a_semantic_reference"
+  ]
+}

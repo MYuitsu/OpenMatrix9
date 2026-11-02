@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-020",
+  "case": "no cage in the selection and no object attached to one",
+  "expected": "no cage in the selection and no object attached to one -> Error::Missing before the first question; two cages, or a selection spanning two cages -> Error::Invalid; a corner outside 1..8 -> Error::Invalid on the typed number",
+  "test": "m03_04_01_cage_rows_refuse_without_a_cage"
+}

@@ -39,7 +39,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Degree=") {
-            let Some(degree) = value.parse::<usize>().ok().filter(|value| (1..=11).contains(value)) else {
+            let Some(degree) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|value| (1..=11).contains(value))
+            else {
                 self.control_curve_pending = Some(pending);
                 return Some(Err(Error::Invalid("degree must be 1..11")));
             };
@@ -73,11 +77,7 @@ impl Controller {
             reversed: false,
             seam: None,
         };
-        Some(self.commit_geometry(
-            CONTROL_CURVE,
-            "Curve",
-            Geometry::Curve(Curve::Nurbs(curve)),
-        ))
+        Some(self.commit_geometry(CONTROL_CURVE, "Curve", Geometry::Curve(Curve::Nurbs(curve))))
     }
 
     pub fn accept_control_curve_point(&mut self, point: Point3) -> Result<(), Error> {

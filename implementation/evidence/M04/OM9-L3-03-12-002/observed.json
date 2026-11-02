@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m04.l3_builder_style_evidence.v1",
+  "l3_id": "OM9-L3-03-12-002",
+  "title": "Builder Style Browser And Thumbnail",
+  "scope": "StyleLibrary::styles_for + StyleEntry StyleThumbnail::for_style (authored icon or placeholder) Controller::builder_styles + the Builder Styles window",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "tests": [
+    "the_browser_lists_every_style_for_the_mode_and_disables_the_incompatible",
+    "a_missing_or_corrupt_thumbnail_falls_back_without_dropping_the_style",
+    "the_browser_lists_the_styles_of_the_open_mode"
+  ],
+  "fixture": "style library 3 styles, filter ring mode",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the Builder Styles browser and its gestures; no reviewer signature is claimed.",
+  "logs": [
+    "core-builder-style.log",
+    "app-builder-styles.log",
+    "workspace-check.log"
+  ],
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-03-12-002-03",
+      "OM9-L4-03-12-002-04",
+      "OM9-L4-03-12-002-05",
+      "OM9-L4-03-12-002-06"
+    ],
+    "fixture_manifest_sha256": "ec0d792345f8e3586284215d9f038505cff4a44be6a95a1080b01b481eef51d7"
+  }
+}

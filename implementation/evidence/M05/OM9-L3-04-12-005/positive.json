@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-12-005",
+  "title": "Pave Sphere Layout",
+  "cases": [
+    "Count or X/T produce a Fibonacci sphere layout on the typed radius",
+    "Removal None/A/B are typed and change the realized count",
+    "Gem Size and Minimum Size stay within the plan",
+    "Radius and Count have viewport handles through the shared builder-handle route",
+    "Apply inserts the sphere stones without needing a surface selection"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

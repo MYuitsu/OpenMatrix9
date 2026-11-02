@@ -66,7 +66,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.project_pending = Some(pending);
-            return Some(Err(Error::Invalid("Project accepts Direction=, Enter or Cancel")));
+            return Some(Err(Error::Invalid(
+                "Project accepts Direction=, Enter or Cancel",
+            )));
         }
         let samples = match om9_core::surface_kernel::sample_curve(
             &pending.source,
@@ -85,9 +87,8 @@ impl Controller {
         let mut projected = Vec::with_capacity(samples.len());
         for point in samples {
             let point = if let Some(direction) = pending.direction {
-                let denominator = direction[0] * normal[0]
-                    + direction[1] * normal[1]
-                    + direction[2] * normal[2];
+                let denominator =
+                    direction[0] * normal[0] + direction[1] * normal[1] + direction[2] * normal[2];
                 if denominator.abs() <= 1e-12 {
                     return Some(Err(Error::Invalid(
                         "projection direction is parallel to the plane",
@@ -98,9 +99,7 @@ impl Controller {
                     plane.origin[1] - point[1],
                     plane.origin[2] - point[2],
                 ];
-                let t = (offset[0] * normal[0]
-                    + offset[1] * normal[1]
-                    + offset[2] * normal[2])
+                let t = (offset[0] * normal[0] + offset[1] * normal[1] + offset[2] * normal[2])
                     / denominator;
                 [
                     point[0] + direction[0] * t,

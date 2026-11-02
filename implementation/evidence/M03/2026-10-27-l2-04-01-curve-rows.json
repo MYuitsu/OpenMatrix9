@@ -1,0 +1,44 @@
+{
+  "l2_id": "OM9-L2-04-01",
+  "title": "13-febe-matrix-transform-toolbar-bridges — curve rows and the per-object commit fix",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "extends": "implementation/evidence/M03/2026-10-26-l2-04-01-transform.json",
+  "scope": {
+    "catalogued_rows": 41,
+    "rows_with_a_verified_body": 16,
+    "rows_visible_and_disabled_with_a_reason": 25,
+    "rows_without_an_owner_service": 3,
+    "rows_deferred_to_m08": 22,
+    "l4_receipts": 17
+  },
+  "what_changed": [
+    "OM9-L3-04-01-016 Orient Perpendicular to Curve now runs: the picked point snaps to the nearest station and each object's construction-plane normal is aligned with the curve tangent.",
+    "OM9-L3-04-01-022 Array Along Curve now runs: copies land on equal arc-length stations measured with the owner length service.",
+    "Controller::commit_transform_mutations applies one step per object when a row hands in one step per target, which fixes Project To C-Plane for objects at different heights.",
+    "The owner services these two rows needed already existed (curve_ops::point_at/tangent_at/arc_length/length_between); the earlier 'no owner service' reason was wrong for them and is corrected in the records."
+  ],
+  "checks": {
+    "app_transform_menu": "22 passed; 0 failed",
+    "app_lib": "190 passed; 0 failed (includes 9 transform unit tests)",
+    "app_measure": "5 passed; 0 failed",
+    "app_measure_ui": "3 passed; 0 failed",
+    "app_gumball_placement": "4 passed; 0 failed",
+    "core_gumball": "15 passed; 0 failed",
+    "public_source_audit": "0 errors"
+  },
+  "evidence": [
+    "implementation/evidence/M03/OM9-L3-04-01-016/OM9-L3-04-01-016-01.json",
+    "implementation/evidence/M03/OM9-L3-04-01-022/OM9-L3-04-01-022-01.json"
+  ],
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_016_orient_perpendicular_to_curve_stands_the_object_on_the_path",
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_022_array_along_curve_spaces_copies_by_arc_length",
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_curve_rows_refuse_a_selection_without_exactly_one_path",
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_010_project_to_cplane_lands_objects_from_different_heights",
+    "crates/om9-app/src/session/transform.rs::tests::a_station_snaps_to_the_nearest_point_on_the_path",
+    "crates/om9-app/src/session/transform.rs::tests::a_station_is_measured_along_the_curve_length_not_along_the_axis"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

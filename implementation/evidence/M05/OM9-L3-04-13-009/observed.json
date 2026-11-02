@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_edits_evidence.v1",
+  "l3_id": "OM9-L3-04-13-009",
+  "title": "Gem Attribute History And ID Preservation",
+  "command": "GemAttributeHistory / gvGemHistory",
+  "scope": "`GemEdit::record` identity contract; `Controller::gem_edits_apply` extension merge; `GemAttributeHistory` report",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "ids and the placement link survive an edit and the history names them",
+  "negative": "a missing link is reported honestly, never fabricated",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-13-009-03"
+    ],
+    "fixture_manifest_sha256": "d5235739f3e9f21e7954d2a666518b106a674de590bdac6e53fb09fc6159822d"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_edits.rs",
+    "crates/om9-app/tests/gem_edits.rs"
+  ],
+  "test": "an_edit_keeps_the_placement_link_and_the_attribute_history_shows_it"
+}

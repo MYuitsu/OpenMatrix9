@@ -1,0 +1,20 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+     Running tests\gem_pave.rs (L:\om9-target\debug\deps\gem_pave-8e66180e7692351b.exe)
+
+running 13 tests
+test azure_round_and_hex_profiles_are_closed_and_ordered ... ok
+test prongs_cover_shared_center_and_unshared_cases ... ok
+test framework_preview_is_bounded_and_polygons_close ... ok
+test seeds_and_start_options_are_recorded ... ok
+test sphere_layout_uses_count_removal_and_radius ... ok
+test feature_roundtrip_and_refresh_preserve_ids ... ok
+test angle_rotates_the_lattice_and_bad_parameters_are_refused ... ok
+test styles_roundtrip_and_reject_duplicate_names ... ok
+test auto_pave_fills_a_plane_and_respects_the_region ... ok
+test springs_relax_overlaps_and_refuse_empty_input ... ok
+test every_pattern_is_distinct_and_never_empty ... ok
+test budget_caps_are_explicit ... ok
+test attractor_and_closed_edges_constrain_the_lattice ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+

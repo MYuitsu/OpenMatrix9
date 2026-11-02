@@ -1,0 +1,13 @@
+{
+  "expect": {
+    "cancel_baseline": 2.0,
+    "document_unchanged": true,
+    "session_width": 3.0,
+    "undo_len": 0
+  },
+  "steps": [
+    "style A width 2.2",
+    "style B width 3.0",
+    "Cancel"
+  ]
+}

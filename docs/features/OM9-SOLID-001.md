@@ -1,5 +1,11 @@
 # OM9-SOLID-001 — BooleanDifference
 
+Standalone checkpoint 2026-10-28: the BRep grouped-selection and `DeleteInput`
+slice and its limits are recorded in [the Solid audit](../validation/2026-10-28-solid-audit.md).
+The user approved saving its OM9 behavior in
+[`solid-prompt-contract.md`](../../skills/openmatrix9-feature-port/references/solid-prompt-contract.md).
+This does not promote the M03-UI gate or establish every source command mode.
+
 <!-- rhino-core-edit-result-20261011:start -->
 Rust admission và native CAD Edit GeometryResult đã triển khai trên solver sẵn có.
 Runtime14/15 đã đạt các hồi quy CAD/lệnh/guard và cold reload; callback abort còn thất bại 2/5 kiểm tra Redo.

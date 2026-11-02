@@ -1,0 +1,39 @@
+{
+  "schema": "om9.evidence.adversarial.v1",
+  "l4": "OM9-L4-04-17-001-04",
+  "l3": "OM9-L3-04-17-001",
+  "recorded_at": "2026-10-28",
+  "status": "ADVERSARIAL_CHECKS_RECORDED",
+  "cases": [
+    {
+      "case": "no gem selected",
+      "input": "a metal mesh only",
+      "expect": "Missing(\"cutter gems\")"
+    },
+    {
+      "case": "a channel narrower than its stone",
+      "input": "Width=2.0 with a 6.5 mm stone",
+      "expect": "Invalid(\"channel width\")"
+    },
+    {
+      "case": "a trench deeper than the stone allows",
+      "input": "Depth=9.0",
+      "expect": "Invalid(\"channel depth\")"
+    },
+    {
+      "case": "coincident stones",
+      "input": "two centres 0.001 mm apart",
+      "expect": "Invalid(\"channel row\")"
+    },
+    {
+      "case": "an unknown option",
+      "input": "Width=wide",
+      "expect": "Invalid(\"channel width\")"
+    }
+  ],
+  "notes": [
+    "Every refusal is a typed om9_core::Error naming the offending control; nothing is silently clamped.",
+    "A refused option restores the previous preview, so the staged builder keeps running.",
+    "Cancel and Esc drop the preview without touching the document; Undo restores a committed command in one step."
+  ]
+}

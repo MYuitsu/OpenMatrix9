@@ -34,11 +34,7 @@ impl Controller {
         let Geometry::Curve(curve) = &entity.geometry else {
             return Err(Error::Invalid("curve selection"));
         };
-        let samples = om9_core::surface_kernel::sample_curve(
-            curve,
-            2,
-            self.coordinator.limits(),
-        )?;
+        let samples = om9_core::surface_kernel::sample_curve(curve, 2, self.coordinator.limits())?;
         let start = *samples.last().ok_or(Error::Invalid("curve samples"))?;
         self.continue_interp_pending = Some(ContinueInterpPending {
             points: vec![start],
@@ -61,7 +57,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Degree=") {
-            let Some(degree) = value.parse::<usize>().ok().filter(|value| (1..=11).contains(value)) else {
+            let Some(degree) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|value| (1..=11).contains(value))
+            else {
                 self.continue_interp_pending = Some(pending);
                 return Some(Err(Error::Invalid("degree must be 1..11")));
             };
@@ -71,7 +71,9 @@ impl Controller {
         }
         if !text.trim().is_empty() {
             self.continue_interp_pending = Some(pending);
-            return Some(Err(Error::Invalid("ContinueinterpCrv accepts points, Undo or Enter")));
+            return Some(Err(Error::Invalid(
+                "ContinueinterpCrv accepts points, Undo or Enter",
+            )));
         }
         if pending.points.len() < 4 {
             self.continue_interp_pending = Some(pending);

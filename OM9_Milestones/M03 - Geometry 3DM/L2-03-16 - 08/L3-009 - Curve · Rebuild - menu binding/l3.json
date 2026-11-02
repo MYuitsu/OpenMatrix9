@@ -4,6 +4,1253 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-16",
   "title": "Curve · Rebuild — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "ROOT_GROUP",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE_ROOT_GROUP",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "ROOT_MENU_COMMAND",
+      "option_order": [],
+      "option_count": 40
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Others",
+      "command": "(root)",
+      "option": "Rebuild",
+      "root_group": true,
+      "path": [
+        "Others",
+        "(root)"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "explicit typed selection and deterministic numerical inputs for Rebuild",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-16 - 08/L3-009 - Curve · Rebuild - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Synchronize Views",
+        "command_id": "OthersViewSynchronizeViews",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Synchronize Views",
+          "typed_forms": [
+            "Synchronize Views"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Shade",
+        "command_id": "OthersRenderShade",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Shade",
+          "typed_forms": [
+            "Shade"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Shade All Viewports",
+        "command_id": "OthersRenderShadeAllViewports",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Shade All Viewports",
+          "typed_forms": [
+            "Shade All Viewports"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Horizontal Dimension",
+        "command_id": "OthersMeasureDimHorizontal",
+        "script": "! _Dim _Pause _Pause _Horizontal",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Horizontal Dimension",
+          "typed_forms": [
+            "Horizontal Dimension"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Vertical Dimension",
+        "command_id": "OthersMeasureDimVertical",
+        "script": "! _Dim _Pause _Pause _Vertical",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Vertical Dimension",
+          "typed_forms": [
+            "Vertical Dimension"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Edit Text",
+        "command_id": "OthersMeasureEditText",
+        "script": "! _gvEditText",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Edit Text",
+          "typed_forms": [
+            "Edit Text"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Edit Dimension",
+        "command_id": "OthersMeasureEditDim",
+        "script": "! -_DocumentProperties _Dimension _Pause _Cancel",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Edit Dimension",
+          "typed_forms": [
+            "Edit Dimension"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Dimension Options",
+        "command_id": "OthersMeasureDimOptions",
+        "script": "! -_DocumentPropertiesPage _Dimensions",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Dimension Options",
+          "typed_forms": [
+            "Dimension Options"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Rebuild",
+        "command_id": "OthersCurveRebuild",
+        "script": "! _Rebuild",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-009",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Rebuild",
+          "typed_forms": [
+            "Rebuild"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Divide Curve",
+        "command_id": "OthersCurveDivideCurve",
+        "script": "! _Divide",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Divide Curve",
+          "typed_forms": [
+            "Divide Curve"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Rebuild",
+        "command_id": "OthersSurfaceRebuild",
+        "script": "! _Rebuild",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-03-16-009",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Rebuild",
+          "typed_forms": [
+            "Rebuild"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Cut to Finger Rail",
+        "command_id": "OthersCuttoFingerRail",
+        "script": "! _gvCutRingRail",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Cut to Finger Rail",
+          "typed_forms": [
+            "Cut to Finger Rail"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Set Crosshairs",
+        "command_id": "OthersSetCrosshairs",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Set Crosshairs",
+          "typed_forms": [
+            "Set Crosshairs"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Extract Bad Surface",
+        "command_id": "OthersExtractBadSurface",
+        "script": "! _ExtractBadSrf",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Extract Bad Surface",
+          "typed_forms": [
+            "Extract Bad Surface"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "System 6 HD 3 View",
+        "command_id": "OthersSystem6HD3View",
+        "script": "! _System6HD3View",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "System 6 HD 3 View",
+          "typed_forms": [
+            "System 6 HD 3 View"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Match Attributes",
+        "command_id": "OthersMatchAttributes",
+        "script": "! _gvMatchAttributes",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Match Attributes",
+          "typed_forms": [
+            "Match Attributes"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Save Styles",
+        "command_id": "OthersSaveStyle",
+        "script": "! _gvStylesSave",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Save Styles",
+          "typed_forms": [
+            "Save Styles"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Load Styles",
+        "command_id": "OthersLoadStyle",
+        "script": "! _gvStylesLoad",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Load Styles",
+          "typed_forms": [
+            "Load Styles"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Surface Extrude All",
+        "command_id": "SurfaceGVDExtrudeAll",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Surface Extrude All",
+          "typed_forms": [
+            "Surface Extrude All"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Solid Extrude All",
+        "command_id": "SolidGVDAllExtrude",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Solid Extrude All",
+          "typed_forms": [
+            "Solid Extrude All"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Gem Flow",
+        "command_id": "BuilderGVDGemFlow",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Gem Flow",
+          "typed_forms": [
+            "Gem Flow"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Gem Splop",
+        "command_id": "BuilderGVDGemSplop",
+        "script": "! _Splop",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Gem Splop",
+          "typed_forms": [
+            "Gem Splop"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Object Info",
+        "command_id": "GVObjectInfo",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Object Info",
+          "typed_forms": [
+            "Object Info"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "All Object Info",
+        "command_id": "AllObjectInfo",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "All Object Info",
+          "typed_forms": [
+            "All Object Info"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Command History",
+        "command_id": "CommandHistory",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Command History",
+          "typed_forms": [
+            "Command History"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Project Notes",
+        "command_id": "ProjectNotes",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Project Notes",
+          "typed_forms": [
+            "Project Notes"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Super Select",
+        "command_id": "SuperSelect",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Super Select",
+          "typed_forms": [
+            "Super Select"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Email Support",
+        "command_id": "MatrixSupportModule",
+        "script": "",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Email Support",
+          "typed_forms": [
+            "Email Support"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Center Objects",
+        "command_id": "GVCenterObjects",
+        "script": "! _gvCenterObjects",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Center Objects",
+          "typed_forms": [
+            "Center Objects"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Rhino Options",
+        "command_id": "RhinoOptions",
+        "script": "! _Options",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Rhino Options",
+          "typed_forms": [
+            "Rhino Options"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Object Properties",
+        "command_id": "ObjectProperties",
+        "script": "! _Properties",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Object Properties",
+          "typed_forms": [
+            "Object Properties"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Matrix Clear Object History",
+        "command_id": "InfoSettingsGVClearHistory",
+        "script": "! _gvClearHistory",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Matrix Clear Object History",
+          "typed_forms": [
+            "Matrix Clear Object History"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Viewport Tabs Toggle",
+        "command_id": "InfoSettingsViewportTabsToggle",
+        "script": "! _ViewportTabs _Toggle",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Viewport Tabs Toggle",
+          "typed_forms": [
+            "Viewport Tabs Toggle"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Display Menu",
+        "command_id": "InfoSettingsDisplayProperties",
+        "script": "! _DisplayProperties",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Display Menu",
+          "typed_forms": [
+            "Display Menu"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Box Edit Menu",
+        "command_id": "InfoSettingsBoxEdit",
+        "script": "! _BoxEdit",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Box Edit Menu",
+          "typed_forms": [
+            "Box Edit Menu"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Library Menu",
+        "command_id": "InfoSettingsLibraries",
+        "script": "! _Libraries",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Library Menu",
+          "typed_forms": [
+            "Library Menu"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Selection Filter Menu",
+        "command_id": "InfoSettingsSelectionFilter",
+        "script": "! _SelectionFilter",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Selection Filter Menu",
+          "typed_forms": [
+            "Selection Filter Menu"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Gumball Alignment",
+        "command_id": "InfoSettingsGumballAlignment",
+        "script": "! _GumballAlignment",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Gumball Alignment",
+          "typed_forms": [
+            "Gumball Alignment"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Relocate Gumball",
+        "command_id": "InfoSettingsRelocateGumball",
+        "script": "! _RelocateGumball",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Relocate Gumball",
+          "typed_forms": [
+            "Relocate Gumball"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Design Report",
+        "command_id": "InfoSettingsDesignReport",
+        "script": "! _gvDesignReport",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Design Report",
+          "typed_forms": [
+            "Design Report"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [],
+    "missing": [
+      "input:explicit typed selection and deterministic numerical inputs for Rebuild: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E05",
@@ -278,10 +1525,10 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
-    "date": "2026-10-23",
+    "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
-    "scope": "cataloged command id with verified visible disabled reason; no interactive session yet",
+    "scope": "one cataloged command id shared by the Matrix Curve menu row and the command line, with an interactive Rust session and verified geometry",
     "owner": {
       "crate": "om9-app",
       "files": [
@@ -299,12 +1546,12 @@
       "implementation/fixtures/M03/OM9-L3-03-16-009/positive.json",
       "implementation/fixtures/M03/OM9-L3-03-16-009/negative.json",
       "implementation/evidence/M03/OM9-L3-03-16-009/",
-      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json"
+      "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json",
+      "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/receipt.json"
     ],
     "tests": [
-      "cargo test -p om9-app --test curve_menu: 4 passed",
-      "Line/Point geometry smoke: passed",
-      "disabled reason catalog: 56 rows verified"
+      "cargo test -p om9-app --test curve_menu: 5 passed (58-row id/icon/label/script/menu-dispatch parity)",
+      "cargo test -p om9-app (curve command regressions): 320 passed, 0 failed"
     ],
     "l4_evidence": {
       "OM9-L4-03-16-009-01": "1/1",
@@ -314,8 +1561,16 @@
     "human_approval": null,
     "manual_gate": "M03-UI",
     "remaining": [
-      "No interactive command session yet; the menu is disabled with a visible reason.",
-      "Human M03-UI review is unsigned."
-    ]
+      "Human M03-UI click/preview review is unsigned."
+    ],
+    "menu_binding": {
+      "date": "2026-10-26",
+      "feature": "OM9-CURVE-009",
+      "menu_label": "Rebuild",
+      "menu_icon": "OthersCurveRebuild",
+      "documented_script": "Rebuild",
+      "binding_state": "Implemented",
+      "same_id_menu_and_commandline": true
+    }
   }
 }

@@ -1,0 +1,9 @@
+{
+  "pid": 2952,
+  "executable": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\rectangle-fix-20261026\\om9.exe",
+  "sha256": "5ea01881bb3528343be972731ea4f0e20597f02cf9700d70d67b72ef5d0137ce",
+  "launched_at_utc": "2026-10-26T13:32:17.914950+00:00",
+  "isolated_layout": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\rectangle-fix-20261026\\ui-layout.json",
+  "runtime_dll_directory": "L:/om9-target/debug",
+  "initial_staged_launch": "Loader exit 0xC0000135 with only SDK bin on PATH; reused existing debug runtime DLL directory, no native code change."
+}

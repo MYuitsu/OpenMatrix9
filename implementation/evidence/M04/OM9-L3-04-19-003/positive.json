@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-19-003",
+  "kind": "positive",
+  "input": "estimate grams and pennyweights from volume and density",
+  "expected": "100 mm^3 at 10.0 g/cm^3 gives 1.0 g (100/1000*10) and 0.643 dwt; a 10,000 kg/m^3 material is converted to 10 g/cm^3 before the same calculation",
+  "verified_by": [
+    "a_kg_m3_density_is_converted_before_it_is_used",
+    "mass_is_volume_over_one_thousand_times_density_in_grams_and_dwt",
+    "the_command_line_matches_the_icon_and_accepts_a_material"
+  ],
+  "notes": [
+    "DWT uses 1 dwt = 1.55517384 g; both grams and dwt are carried in the report and command line.",
+    "The material option is parsed by the same command path as the menu icon; an unknown option is a typed refusal."
+  ]
+}

@@ -1,0 +1,299 @@
+[
+  {
+    "label": "app-regression",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "om9-app",
+      "--lib",
+      "--test",
+      "polyline_mode_regression",
+      "--test",
+      "polyline_shortcuts",
+      "--test",
+      "polyline_command",
+      "--test",
+      "polyline",
+      "--test",
+      "command_tokens",
+      "--test",
+      "command_transcript",
+      "--test",
+      "command_shortcuts",
+      "--test",
+      "pinned_command",
+      "--test",
+      "command_options_and_repeat",
+      "-j",
+      "2"
+    ],
+    "exit_code": 0,
+    "passed": 210,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "scene-regression",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "om9-scene",
+      "-j",
+      "2"
+    ],
+    "exit_code": 0,
+    "passed": 106,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "public-source-audit",
+    "command": [
+      "python",
+      "tools/public_source_audit.py"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "clippy",
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "om9-app",
+      "-p",
+      "om9-scene",
+      "--lib",
+      "-j",
+      "2",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 101,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "release-build",
+    "command": [
+      "cargo",
+      "build",
+      "--release",
+      "-p",
+      "om9-app",
+      "-j",
+      "2"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "app-final",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "om9-app",
+      "--lib",
+      "--test",
+      "polyline_mode_regression",
+      "--test",
+      "polyline_shortcuts",
+      "--test",
+      "polyline_command",
+      "--test",
+      "polyline",
+      "--test",
+      "command_tokens",
+      "--test",
+      "command_transcript",
+      "--test",
+      "command_shortcuts",
+      "--test",
+      "pinned_command",
+      "--test",
+      "command_options_and_repeat",
+      "--test",
+      "curve_menu",
+      "-j",
+      "2"
+    ],
+    "exit_code": 0,
+    "passed": 216,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "clippy-final",
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "om9-app",
+      "-p",
+      "om9-scene",
+      "--lib",
+      "-j",
+      "2",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "fmt-scoped",
+    "command": [
+      "rustfmt",
+      "--check",
+      "--edition",
+      "2024",
+      "--config",
+      "skip_children=true",
+      "crates/om9-app/src/session/polyline.rs",
+      "crates/om9-app/src/ui.rs",
+      "crates/om9-app/src/ui/command.rs",
+      "crates/om9-app/tests/polyline_mode_regression.rs",
+      "crates/om9-app/tests/polyline_shortcuts.rs",
+      "crates/om9-scene/src/scene.rs",
+      "crates/om9-scene/src/scene/admission.rs",
+      "crates/om9-scene/tests/polyline_arcs.rs"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "native-crash-regression",
+    "command": [
+      "cargo",
+      "test",
+      "-p",
+      "om9-app",
+      "--test",
+      "polyline_mode_regression",
+      "--test",
+      "polyline_shortcuts",
+      "--test",
+      "pinned_command",
+      "--test",
+      "command_tokens",
+      "-j",
+      "2"
+    ],
+    "exit_code": 0,
+    "passed": 19,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "debug-build",
+    "command": [
+      "cargo",
+      "build",
+      "-p",
+      "om9-app",
+      "-j",
+      "2"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "clippy-after-native-fix",
+    "command": [
+      "cargo",
+      "clippy",
+      "-p",
+      "om9-app",
+      "-p",
+      "om9-scene",
+      "--lib",
+      "-j",
+      "2",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "release-build-final",
+    "command": [
+      "cargo",
+      "build",
+      "--release",
+      "-p",
+      "om9-app",
+      "-j",
+      "2"
+    ],
+    "exit_code": 0,
+    "passed": 0,
+    "failed": 0,
+    "ignored": 0
+  },
+  {
+    "label": "fmt-after-native-fix",
+    "command": [
+      "rustfmt",
+      "--check",
+      "--edition",
+      "2024",
+      "--config",
+      "skip_children=true",
+      "crates/om9-app/src/session/polyline.rs",
+      "crates/om9-app/src/ui.rs",
+      "crates/om9-app/src/ui/command.rs",
+      "crates/om9-app/tests/polyline_mode_regression.rs",
+      "crates/om9-app/tests/polyline_shortcuts.rs",
+      "crates/om9-scene/src/scene.rs",
+      "crates/om9-scene/src/scene/admission.rs",
+      "crates/om9-scene/tests/polyline_arcs.rs"
+    ],
+    "exit_code": 0
+  },
+  {
+    "label": "public-source-final",
+    "command": [
+      "python",
+      "tools/public_source_audit.py"
+    ],
+    "exit_code": 1
+  },
+  {
+    "label": "public-source-after-evidence-move",
+    "command": [
+      "python",
+      "tools/public_source_audit.py"
+    ],
+    "exit_code": 0
+  },
+  {
+    "label": "prune-final",
+    "command": [
+      "python",
+      "tools/prune_build_artifacts.py",
+      "--apply"
+    ],
+    "exit_code": 0
+  }
+]

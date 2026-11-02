@@ -1,0 +1,23 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-16-005",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderGemCutter",
+  "cases": [
+    {
+      "case": "clearance is reported per cutter",
+      "input": "GemCutterParams::for_gem on a round brilliant",
+      "expect": "min_clearance_mm is the smallest air gap between any ring and the measured stone profile; it is >= 0"
+    },
+    {
+      "case": "the reference is the stone, not a nominal cone",
+      "input": "GemCutterReference::from_spec + gem::profile_points",
+      "expect": "radius_at(girdle) equals the girdle half-extent"
+    },
+    {
+      "case": "the default Clearance is 0.05 mm",
+      "input": "GemCutterParams::default()",
+      "expect": "clearance_mm == 0.05 and the defaults of for_gem pass the gate"
+    }
+  ]
+}

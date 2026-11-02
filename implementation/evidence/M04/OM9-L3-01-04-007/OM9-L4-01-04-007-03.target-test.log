@@ -1,0 +1,41 @@
+$ cargo test -p om9-core --test associative_rebuild -- --exact a_successful_rebuild_updates_geometry_published_result_and_cache
+# exit code: 0
+# captured: 2026-10-26T16:03:37Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_successful_rebuild_updates_geometry_published_result_and_cache ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\associative_rebuild.rs (L:\om9-target\debug\deps\associative_rebuild-f31669dfce2cd9f3.exe)
+
+$ cargo test -p om9-core --test associative_rebuild -- --exact a_failed_rebuild_keeps_the_last_good_geometry_result_and_cache_entry
+# exit code: 0
+# captured: 2026-10-26T16:03:37Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_failed_rebuild_keeps_the_last_good_geometry_result_and_cache_entry ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\associative_rebuild.rs (L:\om9-target\debug\deps\associative_rebuild-f31669dfce2cd9f3.exe)
+
+$ cargo test -p om9-core --test associative_rebuild -- --exact a_producer_that_breaks_the_recorded_output_set_creates_no_corrupt_node
+# exit code: 0
+# captured: 2026-10-26T16:03:37Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_producer_that_breaks_the_recorded_output_set_creates_no_corrupt_node ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 23 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running tests\associative_rebuild.rs (L:\om9-target\debug\deps\associative_rebuild-f31669dfce2cd9f3.exe)

@@ -1,0 +1,105 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-03-007",
+  "title": "Ring Builder Final B-Rep Validation",
+  "generated_at_utc": "2026-10-27T09:36:01Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the ring builder panel at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "360f74e9afa8078e8d61ed3fbc83344ba5bd1e9124a8ddce149d3d2b3aa16b48",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "closed ring accepted with positive volume in both representations (mesh and sewn B-Rep)",
+    "negative": "an open mesh and a too-thin section are rejected by the same gate"
+  },
+  "l4_id": "OM9-L4-04-03-007-03",
+  "role": "IMPLEMENT",
+  "kind": "implementation",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/ring_builder.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/ring_family.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/tests/ring_family_panel.rs",
+    "crates/om9-kernel/src/associative.rs",
+    "crates/om9-kernel/src/creation.rs",
+    "crates/om9-kernel/src/creation_bridge.cpp",
+    "crates/om9-kernel/tests/ring_family_brep.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--lib",
+        "-j",
+        "2",
+        "ring_builder::tests::the_final_gate_rejects_an_open_mesh_and_an_inverted_body"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "562f8ece93750eecd7ba2dbe3130cad47ea1843910fbd2dfa02deaae3a360a3b",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 130 filtered out; finished in 0.00s"
+      ],
+      "test": "ring_builder::tests::the_final_gate_rejects_an_open_mesh_and_an_inverted_body",
+      "package": "om9-core",
+      "binary": "om9-core"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "ring_family",
+        "-j",
+        "2",
+        "the_final_validation_gate_rejects_an_open_or_too_thin_ring"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "456cd5e3e744b091538755a0edcc47e14630500ff9447df6e4dbb2b36bb3541e",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s"
+      ],
+      "test": "the_final_validation_gate_rejects_an_open_or_too_thin_ring",
+      "package": "om9-core",
+      "binary": "ring_family"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-kernel",
+        "--features",
+        "3dm-brep",
+        "--test",
+        "ring_family_brep",
+        "-j",
+        "2",
+        "every_ring_kind_sews_into_one_closed_brep_matching_the_mesh_volume"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "84be5d189cee4a76818db0056ac8ad338e06ac5143e76a042f6a93b3e43f14ba",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.52s"
+      ],
+      "test": "every_ring_kind_sews_into_one_closed_brep_matching_the_mesh_volume",
+      "package": "om9-kernel",
+      "binary": "ring_family_brep"
+    }
+  ],
+  "manual_gate_note": "Implementation: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

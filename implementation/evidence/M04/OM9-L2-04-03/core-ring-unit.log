@@ -1,0 +1,20 @@
+$ cargo test -p om9-core --lib -j 2 ring_builder::tests
+# exit code: 0
+# captured: 2026-10-27T09:34:15Z
+# target dir: L:\om9-target
+
+
+running 8 tests
+test ring_builder::tests::a_signet_ring_refuses_a_negative_wall_and_a_self_intersecting_top ... ok
+test ring_builder::tests::an_eternity_band_refuses_zero_stones_and_impossible_spacing ... ok
+test ring_builder::tests::a_raised_band_keeps_a_positive_section_thickness ... ok
+test ring_builder::tests::an_eternity_band_builds_a_closed_solid_with_twelve_frames_and_no_gem_solids ... ok
+test ring_builder::tests::an_award_ring_has_a_wider_top_than_the_signet ... ok
+test ring_builder::tests::a_signet_ring_is_closed_with_a_visible_top_and_two_shoulders ... ok
+test ring_builder::tests::every_kind_builds_and_reports_the_same_segment_count ... ok
+test ring_builder::tests::the_final_gate_rejects_an_open_mesh_and_an_inverted_body ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 123 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)

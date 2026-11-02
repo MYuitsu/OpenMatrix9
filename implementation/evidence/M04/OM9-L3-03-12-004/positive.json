@@ -1,0 +1,11 @@
+{
+  "expect": {
+    "builtin_rows": 3,
+    "file": "om9.builder_style.v1 with the user style only",
+    "user_rows": 1
+  },
+  "save": {
+    "name": "Classic 2.5",
+    "width_mm": 2.4
+  }
+}

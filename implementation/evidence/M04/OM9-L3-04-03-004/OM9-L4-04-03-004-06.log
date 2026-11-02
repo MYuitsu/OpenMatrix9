@@ -1,0 +1,41 @@
+$ cargo test -p om9-core --lib -j 2 ring_builder::tests::an_award_ring_has_a_wider_top_than_the_signet
+# exit code: 0
+# captured: 2026-10-27T09:35:33Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test ring_builder::tests::an_award_ring_has_a_wider_top_than_the_signet ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 130 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src\lib.rs (L:\om9-target\debug\deps\om9_core-a7379f21b0eb74aa.exe)
+
+$ cargo test -p om9-app --test ring_family_panel -j 2 the_ring_family_opens_from_the_command_line_and_lists_its_parameters
+# exit code: 0
+# captured: 2026-10-27T09:35:35Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_ring_family_opens_from_the_command_line_and_lists_its_parameters ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 1.57s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests\ring_family_panel.rs (L:\om9-target\debug\deps\ring_family_panel-7d33ae66eb23707a.exe)
+
+$ cargo test -p om9-kernel --features 3dm-brep --test ring_family_brep -j 2 every_ring_kind_sews_into_one_closed_brep_matching_the_mesh_volume
+# exit code: 0
+# captured: 2026-10-27T09:35:37Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test every_ring_kind_sews_into_one_closed_brep_matching_the_mesh_volume ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 1.56s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\ring_family_brep.rs (L:\om9-target\debug\deps\ring_family_brep-978ce2d9e95264df.exe)

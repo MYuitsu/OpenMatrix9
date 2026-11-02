@@ -414,6 +414,23 @@
         "OM9-L3-02-04-011": "5/5",
         "OM9-L3-02-04-012": "5/5"
       }
+    },
+    "command_options_2026_10_25": {
+      "date": "2026-10-25",
+      "status": "SCOPED_RUST_AND_WINDOWS_UI_VERIFIED_MANUAL_GATE_PENDING",
+      "scope": "Polyline M/Mode toggles Line/Arc through one parser; P/H flags, protected input, analytic mixed segments, Direction/Center, bounded scene display, Close, Undo/Redo and retry/cancel.",
+      "evidence": [
+        "docs/validation/2026-10-25-command-polyline-shortcuts/README.md",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/commands.json",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/native-debug-replay.json",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/native-release-replay.json"
+      ],
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Helpers tracking and continuously closed PersistentClose preview remain unfinished.",
+        "Center minor arcs only; antipodal/major Center selection is not certified.",
+        "Full M01/M03 human review, macOS and exact mixed-Polycurve 3DM re-export remain open."
+      ]
     }
   }
 }

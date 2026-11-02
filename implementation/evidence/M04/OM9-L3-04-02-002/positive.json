@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-002",
+  "kind": "positive",
+  "input": "closed inner circular rail radius 9 mm; offset 2 mm outward",
+  "expected": "outer circle radius 11 mm, same centre/frame, closed domain, source rail untouched",
+  "verified_by": [
+    "an_outside_rail_offsets_a_closed_circular_rail_only",
+    "outside_rail_and_resizer_apply_independent_outputs"
+  ],
+  "receipts": [
+    {
+      "test": "an_outside_rail_offsets_a_closed_circular_rail_only",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_session",
+        "-j",
+        "2",
+        "an_outside_rail_offsets_a_closed_circular_rail_only"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "911a7a0ef4558de97536056f1d6eab2a0433339c65de80c9fb3714c4cb86d0da"
+    },
+    {
+      "test": "outside_rail_and_resizer_apply_independent_outputs",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "outside_rail_and_resizer_apply_independent_outputs"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "095499530a326b80c3a84629de93101fb43235523da3016d5e9844d8140e8834"
+    }
+  ]
+}

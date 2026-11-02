@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-007-01",
+  "l3_id": "OM9-L3-04-01-007",
+  "kind": "Automated Runtime",
+  "date": "2026-10-26",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "Rotate3D: golden case 'box 10x0x0 at the world origin, center 0,0,0, angle 90' -> the body point (10,0,0) moves onto (0,10,0)",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_007_rotate_3d_turns_ninety_degrees_about_the_cplane_normal"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

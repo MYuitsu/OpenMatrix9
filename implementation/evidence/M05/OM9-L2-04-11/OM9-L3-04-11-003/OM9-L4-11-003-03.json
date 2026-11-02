@@ -1,0 +1,78 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-11-003",
+  "l4_id": "OM9-L4-11-003-03",
+  "title": "Baguette Channel Layout",
+  "generated_at_utc": "2026-10-27T13:52:14Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the builder window at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "a34ec89332363f8e3ff56444c4f72733c5c440a59e3aac1f937d6e452a0981b7",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "a straight channel spans the wall gap and lays stones at the requested pitch",
+    "negative": "a zero or negative wall gap is refused"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem_cluster.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/tests/gem_cluster.rs",
+    "crates/om9-app/src/session/gem_cluster.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem_cluster.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/tests/gem_cluster_panel.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "gem_cluster",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "b71f80be1c3fb83373fce4ce90a5b08196a84f6cf624f2b5956a74c8647c277d",
+      "summary": [
+        "test result: ok. 12 passed; 0 failed"
+      ],
+      "test": "crates/om9-core/tests/gem_cluster.rs",
+      "package": "om9-core",
+      "binary": "gem_cluster"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_cluster_panel",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "2e3aa9735608f0207685eee0427ec7dbb8e7ecbf4afb0acaf0a0e7347c108fdd",
+      "summary": [
+        "test result: ok. 11 passed; 0 failed"
+      ],
+      "test": "crates/om9-app/tests/gem_cluster_panel.rs",
+      "package": "om9-app",
+      "binary": "gem_cluster_panel"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

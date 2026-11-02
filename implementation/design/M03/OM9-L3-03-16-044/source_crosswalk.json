@@ -6,7 +6,7 @@
   "command_id": "OM9-CURVE-043",
   "menu_icon": "CurveCrossSectionProfiles",
   "owner_candidate": "",
-  "decision": "BLOCKED_OWNER",
+  "decision": "IMPLEMENTED",
   "reviewed_upstream": [
     {
       "path": "crates/qymcad/src/command_catalog.rs",
@@ -39,5 +39,7 @@
       "Controller::availability"
     ]
   },
-  "rationale": "no verified backend owner for Cross Section Profiles; menu stays disabled"
+  "rationale": "the local Curve menu binding dispatches the Rust command session; the documented Matrix command spelling is accepted as an alias",
+  "menu_label": "Cross Section Profiles",
+  "documented_script": "CSec"
 }

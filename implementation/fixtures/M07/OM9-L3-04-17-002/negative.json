@@ -1,0 +1,27 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-17-002",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "no gem selected",
+      "input": "a metal mesh only",
+      "expect": "Missing(\"cutter gems\")"
+    },
+    {
+      "case": "a zero radius",
+      "input": "Radius=0",
+      "expect": "Invalid(\"microprong radius\")"
+    },
+    {
+      "case": "an impossible angle",
+      "input": "Angle=70",
+      "expect": "Invalid(\"microprong angle\")"
+    },
+    {
+      "case": "an empty row",
+      "input": "build_row(&[])",
+      "expect": "Missing(\"microprong gems\")"
+    }
+  ]
+}

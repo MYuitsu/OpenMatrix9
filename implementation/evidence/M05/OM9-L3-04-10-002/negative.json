@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-002",
+  "title": "Gem On Curve Advanced",
+  "cases": [
+    "a non-positive or non-finite end size is a typed refusal",
+    "a spec list whose length does not match the stations is refused, not truncated"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

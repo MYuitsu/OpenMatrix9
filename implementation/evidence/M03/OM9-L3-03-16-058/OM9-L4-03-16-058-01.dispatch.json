@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-058-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-058",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-058",
   "source_command": "Intersect Two Sets",
   "menu_icon": "CurveCurveFromObjectsIntersectTwoSets",
   "owner_candidate": "",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "no verified backend owner for Intersect Two Sets; menu stays disabled",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-058/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-058/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-058/dispatch_contract.json": "1ef08a4c2c162a4506cabaae526cf431f1ea1490e231bfde369b9e367557e567",
-    "implementation/design/M03/OM9-L3-03-16-058/dispatch_contract.md": "e4ea6797eb6d3a12d0c53d415f13ac32663a6ea4413b53bf6ce7ec0ee2ef1c2d"
+    "implementation/design/M03/OM9-L3-03-16-058/dispatch_contract.json": "3a49030eb78122df32b77c2a190e9c5c4d44167c0f2678dd9a1d0956054aa8be",
+    "implementation/design/M03/OM9-L3-03-16-058/dispatch_contract.md": "147ff23030409fd3a806f86f6354bda51e0e5df8188260358e6e2200ec9a7cd4"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "IntersectTwoSets"
 }

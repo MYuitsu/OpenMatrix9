@@ -87,6 +87,9 @@ macro_rules! identifier {
         pub struct $name(pub Uuid);
         impl $name {
             pub fn new() -> Self { Self(Uuid::new_v4()) }
+            /// The nil identity is only valid as a *recorded marker* (an absent input, a
+            /// legacy sentinel) and is refused wherever a live identity is required.
+            pub fn nil() -> Self { Self(Uuid::nil()) }
             pub fn is_nil(self) -> bool { self.0.is_nil() }
         }
         impl Default for $name { fn default() -> Self { Self::new() } }
@@ -107,6 +110,7 @@ identifier!(
     SourceId,
     ImportNamespaceId,
     HistoryId,
+    ReferenceId,
     TransactionId,
     JobId,
     FeatureId,

@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-002",
+  "case": "factor -1",
+  "expected": "`Error::Invalid(\"scale factor\")`; a negative factor is refused instead of flipping the object",
+  "test": "m03_04_01_002_scale2d_leaves_the_normal_axis_alone"
+}

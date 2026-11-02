@@ -1,0 +1,38 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-11-005",
+  "title": "Builder Viewport Control Handles",
+  "owner": "om9-core handle list + om9-app viewport drag",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/builder.rs",
+      "symbols": [
+        "BuilderSession::handles",
+        "BuilderHandle",
+        "adjust_handle"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "symbols": [
+        "builder_handles_ui",
+        "builder_handle_drag"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/tests/builder_controls.rs",
+      "symbols": [
+        "a_locked_input_makes_the_builder_read_only_and_hides_its_handles"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3 skill/plan record is planning input; runtime behavior is established by the receipts."
+  ]
+}

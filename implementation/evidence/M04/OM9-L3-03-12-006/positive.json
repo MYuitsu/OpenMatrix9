@@ -1,0 +1,17 @@
+{
+  "expect": {
+    "copied": [
+      "width_mm",
+      "height_mm",
+      "material"
+    ],
+    "identity": "unchanged"
+  },
+  "source": {
+    "om9.rail": {
+      "height_mm": 2.0,
+      "material": "synthetic",
+      "width_mm": 3.0
+    }
+  }
+}

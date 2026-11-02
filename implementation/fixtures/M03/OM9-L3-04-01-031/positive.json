@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-031",
+  "case": "box 10x10x10 at the world origin, base point 0,0,0, factor 2",
+  "expected": "the far corner moves from (10,10,10) to (10,10,20): only the normal axis scales",
+  "test": "m03_04_01_031_scale_by_plane_scales_along_the_plane_normal"
+}

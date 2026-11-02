@@ -1,0 +1,22 @@
+{
+  "schema": "om9.m04.l3_ring_family_evidence.v1",
+  "l3_id": "OM9-L3-04-03-006",
+  "title": "Ring Builder History Updates",
+  "scope": "`BuilderSession::adopt_history` `BuilderSession::plan` `Mutation::HistoryUpdate` Undo/Redo",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "resize 18 -> 19 mm updates the same owner id; undo/redo restores the volumes",
+  "negative": "a parameter set the family refuses never reaches the document",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the ring builder panel and gestures; no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-04-03-006-03",
+      "OM9-L4-04-03-006-04",
+      "OM9-L4-04-03-006-05",
+      "OM9-L4-04-03-006-07",
+      "OM9-L4-04-03-006-06"
+    ],
+    "fixture_manifest_sha256": "a8a29a4b0743c49a13785804251ba3e6814f7fc2481a2354475c0d37d7350660"
+  }
+}

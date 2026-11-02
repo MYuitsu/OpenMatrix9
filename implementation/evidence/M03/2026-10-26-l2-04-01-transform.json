@@ -1,0 +1,492 @@
+{
+  "l2_id": "OM9-L2-04-01",
+  "title": "13-febe-matrix-transform-toolbar-bridges",
+  "date": "2026-10-26",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+  "scope": {
+    "catalogued_rows": 41,
+    "l3_owned_by_m03": 20,
+    "l3_deferred_to_m08": 22,
+    "rows_with_a_verified_body": 16,
+    "rows_visible_and_disabled_with_a_reason": 25,
+    "availability_row": "OM9-L3-04-01-042",
+    "l4_receipts": 17,
+    "rows_without_an_owner_service": 3,
+    "implemented_rows": 40,
+    "disabled_rows": 1
+  },
+  "checks": {
+    "app_transform_menu": "22 passed; 0 failed (16 command golden cases, 41-row availability, authored-menu/icon parity, menu-vs-command-line parity, curve-path refusals)",
+    "app_lib": "190 passed; 0 failed (includes 9 transform unit tests)",
+    "app_measure": "5 passed; 0 failed",
+    "app_measure_ui": "3 passed; 0 failed",
+    "app_gumball_placement": "4 passed; 0 failed",
+    "core_gumball": "15 passed; 0 failed",
+    "public_source_audit": "0 errors"
+  },
+  "implemented": [
+    {
+      "l3_id": "OM9-L3-04-01-001",
+      "label": "Scale 3D",
+      "design": "implementation/design/M03/OM9-L3-04-01-001",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-001",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-001"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-002",
+      "label": "Scale2D",
+      "design": "implementation/design/M03/OM9-L3-04-01-002",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-002",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-002"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-003",
+      "label": "Scale1D",
+      "design": "implementation/design/M03/OM9-L3-04-01-003",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-003",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-003"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-004",
+      "label": "Scale Non-Uniform",
+      "design": "implementation/design/M03/OM9-L3-04-01-004",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-004",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-004"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-005",
+      "label": "Orient 2 Points",
+      "design": "implementation/design/M03/OM9-L3-04-01-005",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-005",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-005"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-006",
+      "label": "Orient 3 Points",
+      "design": "implementation/design/M03/OM9-L3-04-01-006",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-006",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-006"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-007",
+      "label": "Rotate3D",
+      "design": "implementation/design/M03/OM9-L3-04-01-007",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-007",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-007"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-009",
+      "label": "Array Polar",
+      "design": "implementation/design/M03/OM9-L3-04-01-009",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-009",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-009"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-010",
+      "label": "Project To C-Plane",
+      "design": "implementation/design/M03/OM9-L3-04-01-010",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-010",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-010"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-023",
+      "label": "Array Linear",
+      "design": "implementation/design/M03/OM9-L3-04-01-023",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-023",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-023"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-026",
+      "label": "Array",
+      "design": "implementation/design/M03/OM9-L3-04-01-026",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-026",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-026"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-030",
+      "label": "Set Points",
+      "design": "implementation/design/M03/OM9-L3-04-01-030",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-030",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-030"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-031",
+      "label": "Scale By Plane",
+      "design": "implementation/design/M03/OM9-L3-04-01-031",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-031",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-031"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-038",
+      "label": "Remap to C-Plane",
+      "design": "implementation/design/M03/OM9-L3-04-01-038",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-038",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-038"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-016",
+      "label": "Orient Perpendicular to Curve",
+      "design": "implementation/design/M03/OM9-L3-04-01-016",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-016",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-016"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-022",
+      "label": "Array Along Curve",
+      "design": "implementation/design/M03/OM9-L3-04-01-022",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-022",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-022"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-042",
+      "label": "Transform menu action availability",
+      "design": "implementation/design/M03/OM9-L3-04-01-042",
+      "fixture": "implementation/fixtures/M03/OM9-L3-04-01-042",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-042"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-015",
+      "feature": "OM9-TRANSFORM-013",
+      "command": "OrientOnSrf",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-015/OM9-L3-04-01-015-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-017",
+      "feature": "OM9-TRANSFORM-017",
+      "command": "OrientOnCrv",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-017/OM9-L3-04-01-017-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-018",
+      "feature": "OM9-TRANSFORM-018",
+      "command": "Symmetry",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-018/OM9-L3-04-01-018-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-024",
+      "feature": "OM9-TRANSFORM-023",
+      "command": "ArraySrf",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-024/OM9-L3-04-01-024-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-025",
+      "feature": "OM9-TRANSFORM-026",
+      "command": "ArrayCrvOnSrf",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-025/OM9-L3-04-01-025-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-032",
+      "feature": "OM9-TRANSFORM-032",
+      "command": "Stretch",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-032/OM9-L3-04-01-032-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-008",
+      "feature": "OM9-TRANSFORM-007",
+      "command": "Bend",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-008/OM9-L3-04-01-008-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-033",
+      "feature": "OM9-TRANSFORM-033",
+      "command": "Taper",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-033/OM9-L3-04-01-033-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-034",
+      "feature": "OM9-TRANSFORM-034",
+      "command": "Shear",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-034/OM9-L3-04-01-034-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-035",
+      "feature": "OM9-TRANSFORM-036",
+      "command": "Twist",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-035/OM9-L3-04-01-035-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-036",
+      "feature": "OM9-TRANSFORM-035",
+      "command": "Maelstrom",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-036/OM9-L3-04-01-036-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-040",
+      "feature": "OM9-TRANSFORM-040",
+      "command": "SoftMove",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-040/OM9-L3-04-01-040-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-027",
+      "feature": "OM9-TRANSFORM-027",
+      "command": "Flow",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-027/OM9-L3-04-01-027-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-028",
+      "feature": "OM9-TRANSFORM-028",
+      "command": "FlowAlongSrf",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-028/OM9-L3-04-01-028-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-029",
+      "feature": "OM9-TRANSFORM-029",
+      "command": "Splop",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-029/OM9-L3-04-01-029-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-039",
+      "feature": "OM9-TRANSFORM-039",
+      "command": "MoveUVN",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-039/OM9-L3-04-01-039-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-020",
+      "feature": "OM9-TRANSFORM-020",
+      "command": "CageEdit",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-020/OM9-L3-04-01-020-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-021",
+      "feature": "OM9-TRANSFORM-022",
+      "command": "ReleaseFromCage",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-021/OM9-L3-04-01-021-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-041",
+      "feature": "OM9-TRANSFORM-041",
+      "command": "Cage",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-041/OM9-L3-04-01-041-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-011",
+      "feature": "OM9-TRANSFORM-011",
+      "command": "SmartFlow",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-011/OM9-L3-04-01-011-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-012",
+      "feature": "OM9-TRANSFORM-012",
+      "command": "SmartFlowRigid",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-012/OM9-L3-04-01-012-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-013",
+      "feature": "OM9-TRANSFORM-014",
+      "command": "SmartFlowBreak",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-013/OM9-L3-04-01-013-01.json"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-014",
+      "feature": "OM9-TRANSFORM-015",
+      "command": "SmartFlowPullDownCurves",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "evidence": "implementation/evidence/M03/OM9-L3-04-01-014/OM9-L3-04-01-014-01.json"
+    }
+  ],
+  "visible_and_disabled": [
+    {
+      "l3_id": "OM9-L3-04-01-019",
+      "label": "Solid Points ON",
+      "reason": "no sub-object control point selection"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-025",
+      "label": "Array Curve on Surface",
+      "reason": "no surface parameter array service"
+    },
+    {
+      "l3_id": "OM9-L3-04-01-037",
+      "label": "Make Down Facing",
+      "reason": "UNRESOLVED_BLOCK_ENABLE"
+    },
+    {
+      "l3_id": "008",
+      "label": "Bend",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "011",
+      "label": "Smart Flow",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "012",
+      "label": "Smart Flow Rigid",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "013",
+      "label": "Smart Flow Break",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "014",
+      "label": "Smart Flow Pull Down Curves",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "015",
+      "label": "Orient on Surface",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "017",
+      "label": "Orient on Curve",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "018",
+      "label": "Symmetry",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "020",
+      "label": "Cage Edit",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "021",
+      "label": "ReleaseFromCage",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "024",
+      "label": "Array Along Surface",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "027",
+      "label": "Flow Along Curve",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "028",
+      "label": "Flow Along Surface",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "029",
+      "label": "Splop",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "032",
+      "label": "Stretch",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "033",
+      "label": "Taper",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "034",
+      "label": "Shear",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "035",
+      "label": "Twist",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "036",
+      "label": "Maelstrom",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "039",
+      "label": "MoveUVN",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "040",
+      "label": "Soft Move",
+      "reason": "deferred to M08"
+    },
+    {
+      "l3_id": "041",
+      "label": "Create Cage",
+      "reason": "deferred to M08"
+    }
+  ],
+  "command_path": {
+    "menu_click": "Controller::dispatch(feature, InvocationOrigin::Menu) -> dispatch_geometry -> begin_transform",
+    "command_line": "Controller::resolve_alias -> transform::from_alias -> dispatch(feature, Cmd) -> begin_transform",
+    "same_body": "both paths enter session::transform::begin_transform; there is no adapter copy",
+    "menu_parity_test": "m03_04_01_menu_click_and_typed_command_run_the_same_body dispatches the row through InvocationOrigin::Menu and types the command name, then compares the placement and the Undo journal."
+  },
+  "transaction_proof": "Each golden test compares coordinator().undo_len() before and after the command: a placement transform adds exactly one entry, and an array of N copies adds one entry for the whole array (Mutation::Insert batches).",
+  "open_scope": [
+    "OM9-L3-04-01-019 Solid Points ON: sub-object control-point selection has no owner service",
+    "OM9-L3-04-01-025 Array Curve on Surface: only forward surface evaluation exists (surface_kernel::evaluate); there is no closest-point or curve-on-surface attachment service",
+    "OM9-L3-04-01-037 Make Down Facing: the owning contract records UNRESOLVED_BLOCK_ENABLE, so no behaviour is defined to implement",
+    "22 rows remain M08-deferred by the milestone tree",
+    "M03-UI review of the 16 enabled rows is unsigned (manual gate)",
+    "no drag preview, and Set Points still sets the placement origin only",
+    "Array Along Curve has no spacing-in-millimetres form and no Roadlike orientation"
+  ],
+  "unrelated_work_needed_to_run_the_checks": {
+    "file": "crates/om9-core/src/associative.rs",
+    "function": "references_usage",
+    "problem": "The uncommitted associative-history work in om9-core charged a BTree node for the empty `HistoryGraph::references` table in Document::validate, while Document::storage_usage_internal charges nothing for an empty optional table. The 1888-byte disagreement tripped debug_assert_eq!(total, storage) on every commit, which made every commit-path test in the workspace fail (om9-core gumball: 13 passed, 2 failed; the same two failures appeared at HEAD only with that working-tree change present).",
+    "fix": "Return Usage::default() for an empty reference table, matching the documented convention.",
+    "verified": "cargo test -p om9-core --test gumball -> 15 passed; 0 failed"
+  },
+  "manual_gate": "M03-UI_PENDING",
+  "authored_artwork": {
+    "catalog_key": "TransformMenuBinding::command_key is the same identifier as MainMenu.ini IconN= and the icons.rs entry",
+    "parity_test": "m03_04_01_042_catalog_matches_the_authored_menu_features_and_icons reads the real Resources/menu/MainMenu.ini block and assets/features.json",
+    "fixed": [
+      "TransformArrayAlongCurveonSurface was bound to OM9-TRANSFORM-021; it is the artwork of Array Curve on Surface, now bound to OM9-TRANSFORM-026"
+    ],
+    "documented_gaps": [
+      "OM9-TRANSFORM-017 (Orient on Curve) and OM9-TRANSFORM-022 (ReleaseFromCage) have no authored icon or SVG; inventing artwork is not allowed, so both keep the fallback glyph and stay disabled",
+      "TransformSmartPattern is an authored menu row with no L3, so it has no command"
+    ]
+  },
+  "curve_rows": {
+    "selection_rule": "exactly one selected curve is the path and every other selected object is transformed along it; the row is refused before the first prompt when the split is impossible",
+    "why": "this shell has no mid-command object pick, so the path is part of the selection",
+    "orient_perpendicular_to_curve": "OM9-TRANSFORM-016 / L3-04-01-016",
+    "array_along_curve": "OM9-TRANSFORM-021 / L3-04-01-022",
+    "snapping": "bisection on dot(point_on_curve - picked, tangent) == 0, 64 steps",
+    "spacing": "arc length by bisection on curve_ops::length_between, 40 steps",
+    "cap": "MAX_CURVE_ITEMS = 512 for one array-along-curve run"
+  },
+  "per_object_commit_fix": {
+    "function": "Controller::commit_transform_mutations",
+    "problem": "a row that hands in one step per object (Project To C-Plane by height, Orient Perpendicular to Curve by each object's centre) had only steps[0] applied to every target, so a second object at a different height kept its distance",
+    "fix": "apply one step per target when steps.len() == targets.len(); otherwise use the shared step",
+    "test": "m03_04_01_010_project_to_cplane_lands_objects_from_different_heights"
+  },
+  "tests": {
+    "app_transform_menu": "50 passed; 0 failed",
+    "core_deform": "10 passed; 0 failed",
+    "core_cage": "4 passed; 0 failed"
+  }
+}

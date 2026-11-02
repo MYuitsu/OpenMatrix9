@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-005",
+  "kind": "positive",
+  "input": "tag two cross-sections from four consistent rails and sweep them",
+  "expected": "four rails with consistent start/direction/span tag both profiles with om9.four-rail-profile metadata, and Sweep4 consumes them as one four-boundary surface",
+  "verified_by": [
+    "the_four_profile_icon_reaches_the_existing_four_rail_metadata_command",
+    "the_four_profile_icon_refuses_an_inconsistent_selection",
+    "four_rail_profile_command_tags_profiles_then_sweep4_uses_them"
+  ],
+  "notes": [
+    "OM9-TOOLS-032 is an alias of the existing OM9-TOOLS-004 metadata command; both record the same stable command and label, so a recipe is not split by the icon used.",
+    "Five or more selected curves on OM9-TOOLS-004 take the four-rail path; a smaller selection is treated as a custom rail."
+  ]
+}

@@ -131,6 +131,21 @@ unsafe extern "C" {
         message: *mut c_char,
         capacity: c_int,
     ) -> c_int;
+    fn om9_occt_sew_solid(
+        points: *const f64,
+        point_count: usize,
+        quads: *const i32,
+        quad_count: usize,
+        tolerance: f64,
+        deflection: f64,
+        max_points: usize,
+        max_nodes: usize,
+        max_bytes: usize,
+        sink: NativeSink,
+        context: *mut c_void,
+        message: *mut c_char,
+        capacity: c_int,
+    ) -> c_int;
     fn om9_occt_planar(
         points: *const f64,
         count: usize,
@@ -213,6 +228,32 @@ unsafe extern "C" {
         message: *mut c_char,
         capacity: c_int,
     ) -> c_int;
+    fn om9_occt_tube_radii(
+        stations: *const f64,
+        radii: *const f64,
+        station_count: usize,
+        solid: c_int,
+        ruled: c_int,
+        deflection: f64,
+        max_points: usize,
+        max_nodes: usize,
+        max_bytes: usize,
+        sink: NativeSink,
+        context: *mut c_void,
+        message: *mut c_char,
+        capacity: c_int,
+    ) -> c_int;
+    fn om9_occt_round_pipe(
+        endpoints: *const f64, start_radius: f64, end_radius: f64, deflection: f64,
+        max_points: usize, max_nodes: usize, max_bytes: usize, sink: NativeSink,
+        context: *mut c_void, message: *mut c_char, capacity: c_int,
+    ) -> c_int;
+    fn om9_occt_hemisphere(frame: *const f64, radius: f64, forward: c_int, deflection: f64,
+        max_points: usize, max_nodes: usize, max_bytes: usize, sink: NativeSink,
+        context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_pipe_miter(path: *const f64, count: usize, radius: f64, solid: c_int,
+        deflection: f64, max_points: usize, max_nodes: usize, max_bytes: usize,
+        sink: NativeSink, context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_surface(
         points: *const f64,
         count: usize,
@@ -511,6 +552,45 @@ pub fn primitive(
     .map_err(CreationError::from)
 }
 
+/// Build a pyramid over a planar, alternating-radius star profile in the XY plane.
+/// Rust owns point generation, validation and bounded allocation; OCCT builds the topology.
+pub fn star_pyramid(
+    sides: u32, first_radius: f64, second_radius: f64, height: f64,
+    deflection_mm: f64, limits: &Limits,
+) -> Result<Brep, CreationError> {
+    if sides < 3 {
+        return Err(CreationError::Invalid("star needs at least three points".into()));
+    }
+    positive(first_radius, "star first radius")?;
+    positive(second_radius, "star second radius")?;
+    positive(height, "star height")?;
+    let count = (sides as usize).checked_mul(2)
+        .ok_or_else(|| CreationError::Budget("star vertex count".into()))?;
+    if count > MAX_PROFILE_POINTS || count as u64 > limits.max_points
+        || (count as u64).saturating_mul(512) > limits.max_bytes {
+        return Err(CreationError::Budget("star vertex budget".into()));
+    }
+    let mut points = Vec::new();
+    points.try_reserve_exact(count).map_err(|_| CreationError::Budget("star vertices".into()))?;
+    for i in 0..count {
+        let angle = std::f64::consts::TAU * i as f64 / count as f64;
+        let r = if i % 2 == 0 { first_radius } else { second_radius };
+        points.push([r * angle.cos(), r * angle.sin(), 0.]);
+    }
+    let profile = Profile::new(points)?;
+    let deflection = checked_deflection(deflection_mm)?;
+    let mut params = Vec::new();
+    params.try_reserve_exact(1 + 3 * count).map_err(|_| CreationError::Budget("star parameters".into()))?;
+    params.push(height);
+    for p in profile.points() { params.extend_from_slice(p); }
+    let budget = snapshot_budget(limits);
+    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: validated parameter storage and callback context live through this synchronous call.
+        unsafe { om9_occt_primitive(7, params.as_ptr(), params.len(), deflection, budget.points,
+            budget.nodes, budget.bytes, sink, context, message, capacity) }
+    }).map_err(CreationError::from)
+}
+
 /// Tensor product of four rational quarter circles around Z and two along the meridian.
 /// Each quadratic arc has endpoint weights 1 and middle weight sqrt(1/2); its middle
 /// pole is the tangent intersection, not a point on the circle. Products of arc weights
@@ -766,7 +846,7 @@ pub fn extrude(
                 points.as_ptr(),
                 profile.points.len(),
                 direction_mm.as_ptr(),
-                i32::from(capped),
+                if capped { 1 } else { 2 },
                 deflection,
                 budget.points,
                 budget.nodes,
@@ -914,6 +994,70 @@ pub fn revolve(
                 profile.points.len(),
                 axis_table.as_ptr(),
                 angle_radians,
+                deflection,
+                budget.points,
+                budget.nodes,
+                budget.bytes,
+                sink,
+                context,
+                message,
+                capacity,
+            )
+        }
+    })
+    .map_err(CreationError::from)
+}
+
+/// Sew planar quads into one closed solid (`OM9-L2-04-03`, `OM9-L3-04-03-007`).
+///
+/// Rust owns the geometry: the caller passes validated section quads whose corners are shared
+/// by construction. The adapter builds one planar face per quad, sews them at `tolerance_mm`,
+/// and refuses anything that is not exactly one closed shell with a positive volume, so a ring
+/// body can never arrive half open. The result is one owned B-Rep like every other creation.
+pub fn sewed_solid(
+    points: &[Point3],
+    quads: &[[u32; 4]],
+    tolerance_mm: f64,
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<Brep, CreationError> {
+    if points.len() < 4 || quads.len() < 4 {
+        return Err(CreationError::Invalid(
+            "sew solid needs four points and four faces".into(),
+        ));
+    }
+    if points.len() > MAX_PROFILE_POINTS {
+        return Err(CreationError::Budget("sew solid point count".into()));
+    }
+    for point in points {
+        finite(*point, "sew solid point")?;
+    }
+    if !tolerance_mm.is_finite() || tolerance_mm <= 0.0 {
+        return Err(CreationError::Invalid(
+            "sew tolerance must be finite and positive".into(),
+        ));
+    }
+    let mut index: Vec<i32> = Vec::with_capacity(quads.len() * 4);
+    for quad in quads {
+        for vertex in quad {
+            if *vertex as usize >= points.len() {
+                return Err(CreationError::Invalid("sew solid face index".into()));
+            }
+            index.push(*vertex as i32);
+        }
+    }
+    let table = flatten(points);
+    let deflection = checked_deflection(deflection_mm)?;
+    let budget = snapshot_budget(limits);
+    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: both buffers and the callback context live through this synchronous call.
+        unsafe {
+            om9_occt_sew_solid(
+                table.as_ptr(),
+                points.len(),
+                index.as_ptr(),
+                quads.len(),
+                tolerance_mm,
                 deflection,
                 budget.points,
                 budget.nodes,
@@ -1307,6 +1451,160 @@ pub fn pipe(
         }
     })
     .map_err(CreationError::from)
+}
+
+/// Loft exact circular sections with radii linearly interpolated by polyline
+/// length. For a straight rail this is an exact conical frustum. A curved
+/// rail is represented by the caller's polyline and the loft is approximate.
+pub fn pipe_linear(
+    path: &[Point3], start_radius_mm: f64, end_radius_mm: f64, capped: bool,
+    deflection_mm: f64, limits: &Limits,
+) -> Result<Brep, CreationError> {
+    positive(start_radius_mm, "pipe start radius")?;
+    positive(end_radius_mm, "pipe end radius")?;
+    let path = validate_rail(path, "pipe path")?;
+    let frames = polyline_frames(&path)?;
+    let total: f64 = path.windows(2).map(|p| distance(p[0], p[1])).sum();
+    if !total.is_finite() || total <= GEOMETRIC_TOLERANCE_MM {
+        return Err(CreationError::Invalid("pipe path length".into()));
+    }
+    let mut stations = Vec::with_capacity(frames.len() * 9);
+    let mut radii = Vec::with_capacity(frames.len());
+    let mut travelled = 0.0;
+    for (index, frame) in frames.iter().enumerate() {
+        if index > 0 { travelled += distance(path[index - 1], path[index]); }
+        stations.extend_from_slice(&frame.origin);
+        stations.extend_from_slice(&frame.tangent);
+        stations.extend_from_slice(&frame.x);
+        radii.push(start_radius_mm + (end_radius_mm - start_radius_mm) * (travelled / total));
+    }
+    let deflection = checked_deflection(deflection_mm)?;
+    let budget = snapshot_budget(limits);
+    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: the two buffers contain one frame and radius per station,
+        // and remain alive for the synchronous native call.
+        unsafe { om9_occt_tube_radii(stations.as_ptr(), radii.as_ptr(), frames.len(),
+            i32::from(capped), 0, deflection, budget.points, budget.nodes, budget.bytes,
+            sink, context, message, capacity) }
+    }).map_err(CreationError::from)
+}
+
+/// Loft a radius at each point of an already sampled path, using ruled sections.
+pub fn pipe_sampled_sections(
+    path: &[Point3], radii_mm: &[f64], capped: bool,
+    deflection_mm: f64, limits: &Limits,
+) -> Result<Brep, CreationError> {
+    if path.len()!=radii_mm.len() || path.len() as u64>limits.max_points {
+        return Err(CreationError::Invalid("pipe section count".into()));
+    }
+    for &radius in radii_mm {positive(radius,"pipe section radius")?;}
+    let path=validate_rail(path,"pipe section path")?;
+    let frames=polyline_frames(&path)?;
+    let capacity=frames.len().checked_mul(9).ok_or_else(||CreationError::Invalid("pipe section count overflow".into()))?;
+    let mut flat=Vec::new(); flat.try_reserve_exact(capacity).map_err(|_|CreationError::Invalid("pipe section allocation".into()))?;
+    for frame in &frames {flat.extend_from_slice(&frame.origin); flat.extend_from_slice(&frame.tangent); flat.extend_from_slice(&frame.x);}
+    let deflection=checked_deflection(deflection_mm)?; let budget=snapshot_budget(limits);
+    snapshot_via(deflection,limits,|sink,context,message,capacity| {
+        // SAFETY: frame and radius buffers remain alive throughout the synchronous bridge call.
+        unsafe {om9_occt_tube_radii(flat.as_ptr(),radii_mm.as_ptr(),frames.len(),i32::from(capped),1,
+            deflection,budget.points,budget.nodes,budget.bytes,sink,context,message,capacity)}
+    }).map_err(CreationError::from)
+}
+
+/// Straight rail with explicit ordered `(fraction, radius)` stations and
+/// piecewise linear interpolation. Fractions include both endpoints.
+pub fn pipe_stations_straight(
+    endpoints: [Point3; 2], stations: &[(f64, f64)], capped: bool,
+    deflection_mm: f64, limits: &Limits,
+) -> Result<Brep, CreationError> {
+    validate_rail(&endpoints, "pipe path")?;
+    if stations.len() < 2 || stations.len() > MAX_PROFILE_POINTS || stations[0].0 != 0.0
+        || stations[stations.len()-1].0 != 1.0 {
+        return Err(CreationError::Invalid("pipe stations require ordered endpoints".into()));
+    }
+    for (index, &(fraction, radius)) in stations.iter().enumerate() {
+        positive(radius, "pipe station radius")?;
+        if !fraction.is_finite() || !(0.0..=1.0).contains(&fraction)
+            || (index > 0 && fraction <= stations[index-1].0) {
+            return Err(CreationError::Invalid("pipe stations must be strictly ordered".into()));
+        }
+    }
+    let points: Vec<Point3> = stations.iter().map(|(t, _)| std::array::from_fn(|axis|
+        endpoints[0][axis] + t * (endpoints[1][axis] - endpoints[0][axis]))).collect();
+    validate_rail(&points, "pipe station path")?;
+    let frames = polyline_frames(&points)?;
+    let mut flat = Vec::with_capacity(frames.len() * 9);
+    let mut radii = Vec::with_capacity(frames.len());
+    for (frame, (_, radius)) in frames.iter().zip(stations) {
+        flat.extend_from_slice(&frame.origin);
+        flat.extend_from_slice(&frame.tangent);
+        flat.extend_from_slice(&frame.x);
+        radii.push(*radius);
+    }
+    let deflection = checked_deflection(deflection_mm)?;
+    let budget = snapshot_budget(limits);
+    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: the frame and radius arrays stay alive for the synchronous call.
+        unsafe { om9_occt_tube_radii(flat.as_ptr(), radii.as_ptr(), frames.len(),
+            i32::from(capped), 1, deflection, budget.points, budget.nodes, budget.bytes,
+            sink, context, message, capacity) }
+    }).map_err(CreationError::from)
+}
+
+/// Sweep a circular profile along an open polyline with mitered corners.
+pub fn pipe_miter_polyline(path: &[Point3], radius_mm: f64, capped: bool,
+    deflection_mm: f64, limits: &Limits) -> Result<Brep, CreationError> {
+    positive(radius_mm, "pipe radius")?;
+    let path = validate_rail(path, "pipe path")?;
+    if distance(path[0], path[path.len() - 1]) <= GEOMETRIC_TOLERANCE_MM {
+        return Err(CreationError::Invalid("closed pipe path is not supported".into()));
+    }
+    for points in path.windows(3) {
+        let a = unit(sub(points[1], points[0]), "pipe segment")?;
+        let b = unit(sub(points[2], points[1]), "pipe segment")?;
+        if dot(a, b) <= -1.0 + 1.0e-9 { return Err(CreationError::Invalid("pipe path reverses direction".into())); }
+    }
+    let flat = flatten(&path);
+    let deflection = checked_deflection(deflection_mm)?;
+    let budget = snapshot_budget(limits);
+    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: the validated path and callback context live through the synchronous call.
+        unsafe { om9_occt_pipe_miter(flat.as_ptr(), path.len(), radius_mm, i32::from(capped),
+            deflection, budget.points, budget.nodes, budget.bytes, sink, context, message, capacity) }
+    }).map_err(CreationError::from)
+}
+
+/// An oriented exact hemisphere with its flat face through `center`.
+pub fn hemisphere(center: Point3, direction: Point3, radius_mm: f64, forward: bool,
+    deflection_mm: f64, limits: &Limits) -> Result<Brep, CreationError> {
+    positive(radius_mm, "hemisphere radius")?;
+    finite(center,"hemisphere center")?;
+    let direction=unit(direction,"hemisphere direction")?;
+    let frame=[center[0],center[1],center[2],direction[0],direction[1],direction[2]];
+    let deflection=checked_deflection(deflection_mm)?; let budget=snapshot_budget(limits);
+    snapshot_via(deflection,limits,|sink,context,message,capacity| {
+        // SAFETY: frame and callback context outlive the synchronous native call.
+        unsafe {om9_occt_hemisphere(frame.as_ptr(),radius_mm,i32::from(forward),deflection,
+            budget.points,budget.nodes,budget.bytes,sink,context,message,capacity)}
+    }).map_err(CreationError::from)
+}
+
+/// Exact straight conical pipe with a hemispherical cap at each end.
+pub fn pipe_round_straight(
+    endpoints: [Point3; 2], start_radius_mm: f64, end_radius_mm: f64,
+    deflection_mm: f64, limits: &Limits,
+) -> Result<Brep, CreationError> {
+    positive(start_radius_mm, "pipe start radius")?;
+    positive(end_radius_mm, "pipe end radius")?;
+    validate_rail(&endpoints, "pipe path")?;
+    let flat = flatten(&endpoints);
+    let deflection = checked_deflection(deflection_mm)?;
+    let budget = snapshot_budget(limits);
+    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: the endpoint buffer and callback context outlive the synchronous call.
+        unsafe { om9_occt_round_pipe(flat.as_ptr(), start_radius_mm, end_radius_mm,
+            deflection, budget.points, budget.nodes, budget.bytes, sink, context, message, capacity) }
+    }).map_err(CreationError::from)
 }
 
 fn profile_local(profile: &Profile, frame: &PathFrame) -> Vec<[f64; 3]> {

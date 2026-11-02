@@ -15,6 +15,22 @@ Trước khi thay đổi hoặc tuyên bố thêm capability, đối chiếu cod
 
 ## Box: luồng mặc định, các option và frame
 
+Các ID phục hồi `SolidBoxDiagonal`, `SolidBox3PointsHeight`, `SolidBoxVerticalBase`, `SolidBoxCenterofBaseCornerHeight` có icon riêng và cùng owner Box với các macro `_Box _Diagonal`, `_Box _3Point`/`_Box _P`, `_Box _Vertical`, `_Box _Center`. Kiểm thử world XY và Undo đã qua; các quy tắc CPlane và hướng dưới đây vẫn cần bằng chứng standalone cho từng biến thể, không suy hoàn tất từ binding. Xem `docs/validation/2026-10-29-solid-box-menu-variants.md`.
+
+Trong OM9 world XY, Box mặc định/Diagonal và Center giữ dấu chiều cao khi pick; preview và commit dùng cùng đáy đã chọn, chiều âm xuống dưới đáy. Center nhập Length/Width cũng nhận Height âm; giá trị 0 bị từ chối và giữ phiên. Đã kiểm hình học, preview hai dấu và viewport mô phỏng; Vertical và 3Point còn phải xác minh riêng. Xem `docs/validation/2026-10-29-solid-box-signed-pick.md`.
+
+Box mặc định/Diagonal và Center hiện chụp CPlane tại điểm đầu; preview đáy/chiều cao và commit dùng frame đó, giữ dấu chiều cao. CMD nhận `0` tại gốc CPlane và tọa độ cục bộ qua parser chung. Kiểm thử standalone đã đo hình học, preview hai dấu, tọa độ CMD và phép chiếu ray trên một CPlane xoay; chưa nghiệm thu viewport/GPU thật, đổi view giữa phiên hay các CPlane tổng quát. Xem `docs/validation/2026-10-29-solid-box-cplane.md`.
+
+3Point và Vertical nhận điểm hoặc số Width có dấu sau hai đầu cạnh; 3Point dùng hướng trong CPlane vuông góc cạnh, Vertical dùng pháp tuyến CPlane. Height lấy theo pháp tuyến đáy tương ứng, preview và commit giữ cả hai dấu. Đã đo bốn tổ hợp dấu trên một CPlane xoay và kiểm viewport Vertical trên world XY; các góc nhìn edge-on, đơn vị và desktop thật còn mở. Xem `docs/validation/2026-10-29-solid-box-edge-width.md`.
+
+Ở 3Point/Vertical, preview cạnh đầu chiếu theo CPlane đã chụp. Cube preview dùng cùng frame và phép quay với commit, kể cả đường chéo đối hướng; góc thứ hai hợp lệ commit ngay, điểm trùng bị từ chối và giữ phiên. Tại bước kích thước, `3` là số thay vì phím đổi mode. Đã kiểm controller, tọa độ CMD và menu mô phỏng; chọn điểm 3D qua viewport và desktop thật còn mở. Xem `docs/validation/2026-10-29-solid-box-cube-preview.md`.
+
+Khi chọn góc Cube thứ hai bằng viewport, OM9 chiếu tia vào CPlane của viewport đang trỏ tới, trong khi giữ frame đã chụp ở góc đầu để định hướng khối. Đã kiểm mô phỏng góc đầu ở Looking Down, góc hai ở Through Finger và Side View, có đo vị trí/Undo; snap, CPlane tùy chỉnh và desktop thật còn mở. Xem `docs/validation/2026-10-29-solid-box-cube-viewport.md`.
+
+Box chuyển Length/Width/Height nhập số từ đơn vị tài liệu sang mm đúng một lần; Enter dùng lại kích thước đã chuyển. Đường Box ba số trực tiếp cũng đổi đơn vị. Với Box mặc định/Diagonal/3Point/Vertical/Cube, không nhận một số thay điểm thứ hai; Center giữ nhánh nhập Length riêng. Lỗi hình học khi nhập Height giữ phiên để Undo và sửa. Đã kiểm cm, preview Center, kích thước có dấu và Undo; UI thật và các luồng còn lại cần kiểm riêng. Xem `docs/validation/2026-10-29-solid-box-units.md`.
+
+Đã đo ba đường nhập inline, 3Point và Center trên cả sáu đơn vị tài liệu; tùy chọn Width trong tài liệu inch đã kiểm qua keyboard, chuột và nhập CMD mô phỏng. Phạm vi này chưa chứng minh mọi option, preview hoặc UI thật. Xem `docs/validation/2026-10-29-solid-box-unit-routes.md`.
+
 Người dùng làm rõ video ngày 2026-10-12: **video là Box mặc định, không phải một trong bốn option**. Box mở ngay ở `First corner of base ( Diagonal 3Point Vertical Center ):`; **không bắt buộc chọn phương pháp trước điểm đầu**. Điều này thay thế quy tắc chọn phương pháp bắt buộc đã lưu trước đó. Áp dụng correction này cho quy tắc Box đã được người dùng đồng ý cập nhật skill.
 
 | Luồng | Quy tắc |
@@ -37,6 +53,14 @@ Frame chụp tại điểm định nghĩa đầu tiên; đổi viewport không �
 Enter tại Width dùng Length, Enter tại Height dùng Width. Typed Length dương chỉ dùng ở bước góc-hoặc-Length của Center; signed Width/Height và picked extent âm dịch origin để dimensions dương, giữ frame thuận tay phải. Chuột Width của Vertical chiếu lên mặt phẳng đáy đứng. Bằng chứng hiện hành trong checkout: `docs/validation/2026-10-12-box-default-video.md`, `rust/tests/box_default_video.rs`, `box_wire_ffi.rs`, `tests/box_default_video_smoke.FCMacro`. Native evidence ở báo cáo chọn phương pháp bắt buộc trước đó là historical.
 
 ## Sphere: các nhánh dựng
+
+Sáu ID menu phục hồi Sphere 2/3/4 Points, AroundCurve, Tangent và FitPoints có icon riêng và các macro `_Sphere` tương ứng dùng chung phiên Sphere. Sau khi chọn tâm, số `2`, `3`, `4` được xử lý là bán kính thay vì đổi mode. Đã kiểm menu mô phỏng, macro và các fixture Sphere hiện có; chưa coi mọi solver Tangent/FitPoints, đơn vị hay desktop thật là hoàn tất. Xem `docs/validation/2026-10-29-solid-sphere-menu-variants.md`.
+
+Sphere Center nhận tọa độ CMD theo CPlane/đơn vị tài liệu và đổi Radius/Diameter nhập số sang mm; Sphere 2Point đổi Diameter và dùng trục X của CPlane chụp ở điểm đầu. Đường Sphere một số cũng đổi đơn vị; điểm world không đổi lại. Đã đo sáu đơn vị, CPlane xoay và tùy chọn Radius inch qua ba đường UI mô phỏng; các solver khác và desktop thật còn mở. Xem `docs/validation/2026-10-29-solid-sphere-units.md`.
+
+Sphere 3Point sau hai điểm nhận `Radius=value` hoặc `Radius` rồi số theo đơn vị tài liệu; bán kính nhỏ hơn nửa chord bị từ chối. Sau đó chọn hướng ngoài chord để xác định tâm, preview và commit dùng cùng phép dựng; Undo bỏ Radius trước khi bỏ điểm. Đã kiểm hai phía, một CPlane xoay, cm và ba đường tùy chọn/viewport mô phỏng; tương tác Matrix gốc và desktop thật còn mở. Xem `docs/validation/2026-10-29-solid-sphere-3point-radius.md`.
+
+Các nhánh Tangent đang hỗ trợ nhập Radius số cho một, hai hoặc ba curve, một curve cộng một điểm, và hai điểm đổi số theo đơn vị tài liệu trước khi gọi solver. Đã kiểm cm bằng thể tích và khoảng cách ràng buộc, cùng ba đường tùy chọn mô phỏng cho một curve; đây chỉ là các fixture đường thẳng/điểm, không chứng minh solver tổng quát hoặc desktop thật. Xem `docs/validation/2026-10-29-solid-sphere-tangent-units.md`.
 
 - Center dùng tâm và Radius dương hoặc khoảng cách world tới điểm radius. `Diameter=value` chia đôi giá trị. 2Point dùng trung điểm của hai đầu diameter; Diameter nhập số ở bước hai chạy theo X của CPlane đã chụp. Right-click icon Sphere bắt đầu 2Point.
 - 3Point dùng circumcircle qua ba world points không thẳng hàng. Sau hai điểm, `Radius=value` hoặc `Radius` rồi giá trị và một hướng ngoài chord chọn mặt phẳng/phía của circle; radius ít nhất bằng nửa chord.
@@ -65,3 +89,53 @@ Rust giữ input state/pure construction math; typed OM9 geometry/selected OCCT 
 Đơn vị mm, dimension suffix mm/cm/in, coordinates/final extents trong +/-1e9 mm; dimensions không zero, từ 1e-7 đến 1e9 mm, Sphere radius dương. Preview là OM9 scene node không pick được, không tạo document object. FitPoints preview fit cùng điểm hover; Tangent giải sau constraint cuối, không có live preview mọi nhánh.
 
 Revalidate BRep và global placement của references trước commit; source đổi/xóa hoặc lỗi không để output dở dang. Giữ nguồn; kết quả là snapshot độc lập, không regenerate theo nguồn sau commit. Cancel/Esc, đổi/đóng document hoặc đóng/deactivate workspace dọn input/preview. Input Undo tách khỏi OM9 document Undo/Redo; save/reload giữ geometry và metadata. Associative History, active-layer/Builder/Styles và toàn bộ foundation compatibility vẫn chưa được chứng minh.
+
+
+### Sphere placed curve sources (verified OM9 subset, 2026-10-29)
+
+AroundCurve and existing curve-based Tangent sessions sample source curves in world coordinates by applying each entity placement. Captured sources must still match their source stamps when completing; a changed or deleted source rejects completion without a commit, while Undo/Cancel remain available. This is an OM9 implementation rule, not verified Matrix original behavior. The tested cases are translated lines, a rotated line and a deleted source; curve sampling is approximate, and general tangent geometry, arbitrary transforms, typed path-pick projection and desktop interaction remain open. See `docs/validation/2026-10-29-solid-sphere-placed-curve.md`.
+
+
+### Sphere AroundCurve picked center (OM9 subset, 2026-10-29)
+
+The center is projected onto the source curve in world space for both controller point input and `Path`/`Curve` coordinates. The bounded search evaluates points on the curve and accounts for placement. Translated line, endpoint and circle fixtures pass; coarse search plus local refinement does not prove a global nearest point for arbitrary curves. Desktop picking and original Matrix behavior remain unverified. See `docs/validation/2026-10-29-solid-sphere-aroundcurve-pick.md`.
+
+
+### Sphere AroundCurve fraction and preview (OM9 subset, 2026-10-29)
+
+`OnCurve` evaluates the curve at the requested parameter fraction in world placement. Once the center is set, the radius preview and point commit share that center and radius. A translated circle fixture checks exact center, preview, volume and Undo; real viewport/GPU, BRep-edge input, arbitrary curves and Matrix-original behavior remain open. See `docs/validation/2026-10-29-solid-sphere-aroundcurve-fraction-preview.md`.
+
+
+### Sphere AroundCurve straight BRep edge (OM9 subset, 2026-10-29)
+
+`Path=Object.EdgeN` accepts a straight BRep edge through its native oriented endpoints. Fraction and point selection, preview and stale-source rejection share the curve session. A whole BRep requires one edge; non-circular curved edges are rejected. An identity-placement box controller fixture verifies input, invalid index, preview and Undo; BRep placement variants, other curved edges, direct viewport selection and Matrix-original behavior remain open. See `docs/validation/2026-10-29-solid-sphere-straight-brep-edge.md`.
+
+
+### Sphere AroundCurve circular BRep edge (OM9 subset, 2026-10-29)
+
+Named BRep paths also accept circular edges, with OCCT providing the bounded oriented circle and Rust owning the resulting curve/session. A closed Cylinder edge fixture checks fraction, point, preview, source deletion and Undo. Trimmed arcs, periodic seam, other curved edge types, placed BReps, direct viewport and Matrix-original behavior remain open. See `docs/validation/2026-10-29-solid-sphere-circular-brep-edge.md`.
+
+
+### Sphere AroundCurve viewport source selection (OM9 subset, 2026-10-29)
+
+In the simulated viewport, select a standalone curve or BRep edge, then choose the center; for BRep the second hit must be on the same edge and uses its world hit. Undo clears the center or, at source selection, the source. Ambiguous hits and instance edges are rejected. A line and a box edge are tested with simulated pointer events; overlapping-edge handling, real desktop/GPU, other BRep geometry and original Matrix behavior remain open. See `docs/validation/2026-10-29-solid-sphere-viewport-edge.md`.
+
+
+### Sphere AroundCurve overlapping center hits (OM9 subset, 2026-10-29)
+
+After a BRep source edge is captured, filter center hits by the captured source and edge before checking ambiguity. A simulated viewport fixture with two coincident boxes verifies the selected source wins; initial source selection with overlapping edges is still ambiguous. Desktop/GPU, instances and Matrix-original behavior remain open. See `docs/validation/2026-10-29-solid-sphere-overlapping-edge.md`.
+
+
+### Sphere AroundCurve ambiguous source selection (OM9 subset, 2026-10-29)
+
+Overlapping BRep source-edge hits use the selection popup with object and EdgeN for each candidate. Chosen hits are revalidated against command run, scene, source and viewport; cancel/restart invalidates the old choice. Simulated coincident boxes verify a selected candidate and stale-session rejection; same-object overlapping edges, popup row click, desktop/GPU, instances and Matrix-original behavior remain open. See `docs/validation/2026-10-29-solid-sphere-ambiguous-source.md`.
+
+
+### Sphere AroundCurve standalone curve world hit (OM9 subset, 2026-10-29)
+
+Viewport center selection uses the revalidated world hit of the captured standalone curve, rather than intersecting the CPlane first, and then projects to that curve. An elevated straight line in a simulated Perspective viewport verifies the center; general curves, snap, instances, desktop/GPU and Matrix-original behavior remain open. See `docs/validation/2026-10-29-solid-sphere-curve-world-hit.md`.
+
+
+### Sphere AroundCurve trimmed circular edge evidence (2026-10-29)
+
+One open circular edge produced by a cylinder/box intersection was checked against native oriented vertices and an independent circle midpoint. Fractions 0, 0.5 and 1 and an off-arc path pick produce the expected center under a rotation and translation, with Undo. Seam-crossing arcs, both orientations, nonuniform placement, desktop and Matrix-original behavior remain open. See `docs/validation/2026-10-29-solid-sphere-trimmed-arc.md`.

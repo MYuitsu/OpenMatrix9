@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-050-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-050",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-050",
   "source_command": "Curve to Lines",
   "menu_icon": "CurveConvertCurveToLines",
   "owner_candidate": "OM9-L3-02-04-001",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Curve to Lines command session is not wired; owner candidate OM9-L3-02-04-001 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-050/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-050/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-050/dispatch_contract.json": "af389e93bda66e25755565174b4dccfacdbeb88e4b2ea64142bfd2e769cc00dc",
-    "implementation/design/M03/OM9-L3-03-16-050/dispatch_contract.md": "830ecb27ac690d2de43693866600e9dc2379e6a5afa4be2fd12a0da1ab2cc605"
+    "implementation/design/M03/OM9-L3-03-16-050/dispatch_contract.json": "aec47a29132fe24bbe28aa925994dd5f12e59423367b8410857e0700ebdafb64",
+    "implementation/design/M03/OM9-L3-03-16-050/dispatch_contract.md": "df02da1b82e490a4a2f2a363500e2c6eea706119e52e46f14ac71872927c3050"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Convert"
 }

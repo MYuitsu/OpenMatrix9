@@ -1,0 +1,38 @@
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Checking om9-3dm v0.1.0 (H:\OpenMatrix9\crates\om9-3dm)
+warning: unused variable: `gem`
+  --> crates\om9-app\tests\head_commands.rs:82:26
+   |
+82 |     let (mut controller, gem) = gem_controller(6.0);
+   |                          ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `gem`
+   --> crates\om9-app\tests\head_commands.rs:102:26
+    |
+102 |     let (mut controller, gem) = gem_controller(6.0);
+    |                          ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+
+warning: unused variable: `gem`
+   --> crates\om9-app\tests\head_commands.rs:129:30
+    |
+129 |         let (mut controller, gem) = gem_controller(6.0);
+    |                              ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+
+warning: unused variable: `gem`
+   --> crates\om9-app\tests\head_commands.rs:155:26
+    |
+155 |     let (mut controller, gem) = gem_controller(6.0);
+    |                          ^^^ help: if this is intentional, prefix it with an underscore: `_gem`
+
+warning: `om9-app` (test "head_commands") generated 4 warnings (run `cargo fix --test "head_commands" -p om9-app` to apply 4 suggestions)
+    Checking om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+    Checking om9-render v0.1.0 (H:\OpenMatrix9\crates\om9-render)
+    Checking om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+    Checking om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Checking om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+    Checking om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+    Checking om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 28.14s

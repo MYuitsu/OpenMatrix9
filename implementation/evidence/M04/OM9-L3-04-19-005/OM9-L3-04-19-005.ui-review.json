@@ -1,0 +1,66 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-04-19-005",
+  "reviewer": {
+    "name": "OM9 automated evidence gate",
+    "role": "automated acceptance; no human signature",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "ACCEPTED_BY_AUTOMATED_EVIDENCE",
+  "approved_at_utc": "2026-10-27T07:12:44Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "open shell, invalid B-Rep and missing density are typed errors; the document, Undo journal and previous report stay unchanged Negative: NaN/infinite/zero volume, zero instances, duplicate bodies and a malformed material option are refused",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-005/api.md",
+      "sha256": "091d6681a22dd6c3d024090bfc9c6b2c17c4d5fa13010f78a5bd55c74987c8aa",
+      "bytes": 851
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-005/negative.json",
+      "sha256": "8b2006cd491802b63863747014394be73f396523b28477a92006c6d24582e2ac",
+      "bytes": 545
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-005/OM9-L4-04-19-005-03.json",
+      "sha256": "bd07578d2c2ec9a73230823db7a35f6a8426cc11d53a8acc307f313b0e4e3a54",
+      "bytes": 4626
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-005/OM9-L4-04-19-005-04.json",
+      "sha256": "a0b6faf477eea4f74daae11d2aea00fb3e46423d883ad13a68d76f040372e5c7",
+      "bytes": 4623
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-005/OM9-L4-04-19-005-05.json",
+      "sha256": "e1c243bf7da992dc062431345c5b627e4b123adc09e6a127e0858ae20e826901",
+      "bytes": 4623
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-005/OM9-L4-04-19-005-06.json",
+      "sha256": "f3578c6c60d81ee834a77746cb38456af1b50deb4bc9e2e4db164d513471acba",
+      "bytes": 4619
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-005/OM9-L4-04-19-005-07.json",
+      "sha256": "cbff61621369da328cfc48b35ebafd35af92a1f0d413a0d376171a42802bfa42",
+      "bytes": 4625
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-005/positive.json",
+      "sha256": "c50cdd705913342c81bc73c64441208dc1e7558b80fba671e5e47727b88a0dbe",
+      "bytes": 910
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-005/README.md",
+      "sha256": "88fe4aaf3aeaaa85e762c3a793dcabdb9c56e7a43a645229317f50675cc72ed0",
+      "bytes": 1492
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-005/source_crosswalk.json",
+      "sha256": "119cde138185cbe017b84b60fd800693dd7803e803d5dfaee8a1b19dcac935a5",
+      "bytes": 1182
+    }
+  ],
+  "note": "Generated from the passing receipts. The L3 plan sets manual_test_gate AUTO_ONLY; this record is not a human signature and does not approve a manual builder-panel review."
+}

@@ -1,0 +1,45 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-006",
+  "kind": "positive",
+  "input": "panel width 2.0 -> 3.0, then handle drag 3.0 -> 4.0",
+  "expected": "both read 4.0; no feedback loop",
+  "verified_by": [
+    "a_stale_panel_event_cannot_overwrite_a_newer_handle_drag",
+    "a_handle_drag_and_a_typed_value_share_the_one_field"
+  ],
+  "receipts": [
+    {
+      "test": "a_stale_panel_event_cannot_overwrite_a_newer_handle_drag",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_controls",
+        "-j",
+        "2",
+        "a_stale_panel_event_cannot_overwrite_a_newer_handle_drag"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "dbb90247e65663a221a0e5ce047ff73139f4b25b8c0d485aef21d8c65c83dbfc"
+    },
+    {
+      "test": "a_handle_drag_and_a_typed_value_share_the_one_field",
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_panel",
+        "-j",
+        "2",
+        "a_handle_drag_and_a_typed_value_share_the_one_field"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "08daa6510c21a8352ee841db75465f8c1c759ee8dc16446e0cebf0987ace8add"
+    }
+  ]
+}

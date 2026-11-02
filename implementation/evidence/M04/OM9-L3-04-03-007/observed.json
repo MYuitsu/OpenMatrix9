@@ -1,0 +1,22 @@
+{
+  "schema": "om9.m04.l3_ring_family_evidence.v1",
+  "l3_id": "OM9-L3-04-03-007",
+  "title": "Ring Builder Final B-Rep Validation",
+  "scope": "`ring_builder::inspect_measures` `ring_builder::inspect_geometry` `om9_kernel::creation::sewed_solid` Open model Thin model `BuilderKind` wiring",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "closed ring accepted with positive volume in both representations (mesh and sewn B-Rep)",
+  "negative": "an open mesh and a too-thin section are rejected by the same gate",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the ring builder panel and gestures; no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-04-03-007-03",
+      "OM9-L4-04-03-007-04",
+      "OM9-L4-04-03-007-05",
+      "OM9-L4-04-03-007-07",
+      "OM9-L4-04-03-007-06"
+    ],
+    "fixture_manifest_sha256": "360f74e9afa8078e8d61ed3fbc83344ba5bd1e9124a8ddce149d3d2b3aa16b48"
+  }
+}

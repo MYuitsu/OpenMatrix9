@@ -3,8 +3,8 @@
   "id": "OM9-M06",
   "milestone": "M06",
   "title": "Settings và Prongs",
-  "planning_state": "L1_L4_SPECIFIED_NOT_IMPLEMENTED",
-  "planning_only": true,
+  "planning_state": "M06_L2_04_14_AND_04_15_IMPLEMENTED_AUTOMATED_UI_REVIEW_OPEN",
+  "planning_only": false,
   "module_count": 2,
   "l3_count": 19,
   "l4_count": 76,
@@ -22,7 +22,7 @@
     "M06": 19
   },
   "execution_readiness": {
-    "target": "Planning-only L4 records; no binary, runtime receipts or changelog",
+    "target": "L2-04-14 and L2-04-15 both have automated Rust evidence; the M06-UI manual gate is open",
     "blocked_until": [
       "G00_PASS",
       "E01..E10_PASS",
@@ -31,7 +31,9 @@
     ],
     "l4_planned": 76,
     "l3_covered": 19,
-    "manual_basis": "Matrix 8 Book 2 PDF pp.242-271 (Chapter 28); see per-task origin refs"
+    "manual_basis": "Matrix 8 Book 2 PDF pp.242-271 (Chapter 28); see per-task origin refs",
+    "automated_evidence_recorded": true,
+    "manual_gate_open": "M06-UI"
   },
   "depends_on_milestones": [
     "M03",
@@ -52,5 +54,76 @@
     "not_yet_implemented_rule": "Deliver shared Rust service and SDK adapter/proof together inside the same canonical L3/L2 milestone owner; do not defer SDK to a separate delivery track.",
     "host_internal_rule": "Keep ownership and private runtime resources in the host; document the reason and expose only a bounded service/DTO when needed.",
     "completion_rule": "SDK-eligible feature delivery includes public DTO/wrapper, host dispatch/capability, shared service, atomicity/limits and external plugin evidence for each advertised target, alongside the existing owner acceptance contract."
+  },
+  "runtime_implementation": {
+    "settings_parts_2026_10_27": {
+      "date": "2026-10-27",
+      "status": "implemented_automated_evidence_recorded_ui_review_open",
+      "module": "OM9-L2-04-15",
+      "l3_recorded": 10,
+      "manual_gate_promoted": false,
+      "manual_gate": "M06-UI",
+      "evidence": [
+        "implementation/evidence/M06/OM9-L3-04-15-001/summary.json",
+        "implementation/evidence/M06/OM9-L3-04-15-001/logs/",
+        "implementation/design/M06/",
+        "implementation/fixtures/M06/"
+      ],
+      "next_action": "Open the OpenMatrix9 window and run each Builder icon: preview, change one option, Enter to commit and Cancel, then sign the M06-UI review for each L3.",
+      "limitations": [
+        "4 Prongs Close builds the sheet's closer pair: both North-side prongs sit inside the 4 Prongs 0 spacing and stay two distinct prongs.",
+        "A selection without gem objects is refused: the builder consumes the shared gem row instead of guessing.",
+        "A tight row can put the facing prongs of two stones on one point; the builder merges that pair into one shared prong and reports merged_prongs rather than refusing the style.",
+        "Border=On consumes the last committed channel border; the app never re-derives a border from the row.",
+        "Corner smoothing is the documented 0..1 angle; the exact Matrix corner radius law is not verified.",
+        "Count and Spacing are alternatives: setting one clears the other, and the last bead sits on the end fraction.",
+        "Curve mode needs a curve: it follows the picked curve, or the committed channel border with Border=On; with neither it is a typed Missing('metal piece curve'), never a row-offset body.",
+        "Cutter features are committed as bodies but never weighed; the report counts them under excluded_cutters.",
+        "Drop is negative-up per the sheet wording; the UI still has to confirm the sign on the preview.",
+        "F4 direction falls back to world +Z at the world centre.",
+        "Only a selected circle rail is accepted; an arc or line rail returns a typed refusal.",
+        "SettingsMass is a text command without a toolbar slot; mass covers settings features committed in this session.",
+        "The base bead diameter is 1.0 mm (OM9 engineering default); the sheet only gives the scale.",
+        "The editor rebuilds from the om9.settings.prong payload; a body without it is refused rather than re-derived.",
+        "These are command options, not a toolbar icon; the record says so instead of inventing an icon id."
+      ]
+    },
+    "head_bezel_2026_10_27": {
+      "date": "2026-10-27",
+      "status": "implemented_automated_evidence_recorded_ui_review_open",
+      "module": "OM9-L2-04-14",
+      "l3_recorded": 9,
+      "manual_gate_promoted": false,
+      "manual_gate": "M06-UI",
+      "evidence": [
+        "implementation/evidence/M06/OM9-L3-04-14-001/summary.json",
+        "implementation/evidence/M06/OM9-L3-04-14-001/logs/",
+        "implementation/evidence/M06/OM9-L2-04-14-COMPLETION/README.md",
+        "implementation/design/M06/",
+        "implementation/fixtures/M06/"
+      ],
+      "next_action": "Open the OpenMatrix9 window and run Head Builder (basket and half bezel), the four edit levels, the three Bezel Builder modes and the Scallop Bezel: preview, change one option, Enter to commit, Cancel, then sign the M06-UI review for each L3.",
+      "limitations": [
+        "A field outside the level's scope is refused as invalid head edit level field instead of being silently widened.",
+        "A payload without the om9.settings.head slot is refused rather than re-derived.",
+        "A scallop cutter is the edge profile extruded along the outline tangent; the cut itself is not performed here (the scallop is a separate cutter body).",
+        "A selection without a gem object is refused: the builder consumes the gem owner's om9.gem record.",
+        "Boolean=On is evaluated in the section frame: the finger rail is a ring on the same girdle, so the groove is the rail section swept along the outline. A non-ring target would need the 3-D CSG owner.",
+        "Cutter bodies never weigh in the metal mass; the report adds their cutter volume and the net metal (a bound on the removed metal) so the numbers are not silently ignored.",
+        "Half-bezel mode ignores the prong profile (the manual states there are no prong profile options in half-bezel mode) and reports it as prong_profile_ignored.",
+        "Level 1/2/3 edit the whole prong or rail set; only Level 4 with Prong=/Rail= edits a single element.",
+        "Profile=Bezier:x,y;x,y;... samples a closed cubic Bezier into a typed section; Profiles never insert a scene object, they only shape a builder section.",
+        "Prong clearance is measured against the inscribed girdle radius; a faceted outline is inscribed in its profile circle.",
+        "The band follows the girdle arc between Position and Position+Span; the white rotation handle is UI scope.",
+        "The committed Finger Rail body is an Insert alongside the notched ring; it carries the same om9.settings.bezel payload so a rebuild can find it.",
+        "The default head drop follows the stone (35% of the pavilion depth, capped at 0.9 mm) so the base stays above the culet.",
+        "The edge profile drives the corner shape only; the section parameters (height/top/base/dome/angle/chamfer) are explicit typed values.",
+        "The library is read-only built-ins plus the session's user list; ProfileSave= keeps a user section and Profile=<name> resolves it. The Bezier control-point editing UI is not part of this owner.",
+        "The seat cutter is a trapezoid wedge under the girdle; the cut is a mesh CSG difference and refuses a non-closed result.",
+        "The seat frames are published here; Enter applies the seat cut to the gem body through Mutation::Geometry on the gem owner's entity, so Undo restores both the stone and the head.",
+        "Under Bezel shifts the section below the girdle band; Gallery Rail is one ring below it. Both share the closed-ring and Boolean gates.",
+        "Validity is measured per body (closed, positive volume, unique ids) on the generated mesh; the OCCT B-Rep swap is the kernel adapter's own gate."
+      ]
+    }
   }
 }

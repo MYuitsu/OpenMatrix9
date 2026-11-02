@@ -4,6 +4,174 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-04-01",
   "title": "Transform · ReleaseFromCage — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Create Cage",
+        "Cage Edit",
+        "Release from Cage"
+      ],
+      "option_count": 3
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Transform",
+      "command": "Cage Editing",
+      "option": "Release from Cage",
+      "root_group": false,
+      "path": [
+        "Transform",
+        "Cage Editing"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "Selection context + typed command arguments for Transform · ReleaseFromCage — menu binding; dispatch to owner OM9-L2-04-08 (feature 005), not a duplicate math engine.",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-021 - Transform · ReleaseFromCage - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.expected_domain_inputs"
+      },
+      {
+        "raw": "planning/E13.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-021 - Transform · ReleaseFromCage - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.inputs"
+      },
+      {
+        "raw": "planning/M00/SOURCE_AUDIT_V012.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-021 - Transform · ReleaseFromCage - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.inputs"
+      },
+      {
+        "raw": "planning/M08/LUNA_START_HERE.md",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-021 - Transform · ReleaseFromCage - menu binding/L4-01 - Source And Interface Contract/l4.json#l4.inputs"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Create Cage",
+        "command_id": "TransformCageEditingCreateCage",
+        "script": "! _Cage",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-041",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Create Cage",
+          "typed_forms": [
+            "Create Cage"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Cage Edit",
+        "command_id": "TransformCageEditingCageEdit",
+        "script": "! _CageEdit",
+        "alt_script": "! _CageEdit _Pause _B _W",
+        "alt_label": "Cage Edit Bounding Box",
+        "covered_by_l3": "OM9-L3-04-01-020",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Cage Edit",
+          "typed_forms": [
+            "Cage Edit"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Release from Cage",
+        "command_id": "TransformCageEditingReleaseFromCage",
+        "script": "! _ReleaseFromCage",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": "OM9-L3-04-01-021",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Release from Cage",
+          "typed_forms": [
+            "Release from Cage"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [],
+    "missing": [
+      "input:Selection context + typed command arguments for Transform · ReleaseFromCage — menu binding; dispatch to owner OM9-L2-04-08 (feature 005), not a duplicate math engine.: type/default/range",
+      "input:planning/E13.md: type/default/range",
+      "input:planning/M00/SOURCE_AUDIT_V012.md: type/default/range",
+      "input:planning/M08/LUNA_START_HERE.md: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-04-01-021-03"
+  },
   "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M08",
   "execution_stage": "E13",
@@ -113,6 +281,16 @@
         "OM9-L4-04-01-021-01",
         "OM9-L4-04-08-005-03"
       ]
+    },
+    {
+      "id": "OM9-L4-04-01-021-03",
+      "title": "Parameter Implementation — Transform · ReleaseFromCage — menu binding",
+      "file": "M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-021 - Transform · ReleaseFromCage - menu binding/L4-03 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-04-01-021-01",
+        "OM9-L4-04-01-021-02"
+      ]
     }
   ],
   "l4_status": "PLANNED_NOT_EXECUTED",
@@ -120,5 +298,36 @@
     "implementation_owner_milestone": "M08",
     "reason": "Original implementation schedule is authoritative; do not implement twice in M03",
     "scope": "No M03 L4 assigned"
+  },
+  "task_ids": [
+    "OM9-L4-04-01-021-01",
+    "OM9-L4-04-01-021-02",
+    "OM9-L4-04-01-021-03"
+  ],
+  "runtime_implementation": {
+    "OM9-L3-04-01-021_2026_10_27": {
+      "date": "2026-10-27",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "drops the cage back pointer from the selected objects, or from every object attached to a selected cage, and leaves the geometry exactly where the cage put it.",
+      "owner_services": [
+        "crates/om9-core/src/cage.rs",
+        "crates/om9-app/src/session/transform/cage.rs"
+      ],
+      "l4_verified": [
+        "OM9-L3-04-01-021-01"
+      ],
+      "tests": {
+        "app_transform_menu": "46 passed; 0 failed",
+        "core_cage": "4 passed; 0 failed",
+        "core_deform": "9 passed; 0 failed"
+      },
+      "evidence": [
+        "implementation/design/M03/OM9-L3-04-01-021/README.md",
+        "implementation/fixtures/M03/OM9-L3-04-01-021/positive.json",
+        "implementation/evidence/M03/OM9-L3-04-01-021/OM9-L3-04-01-021-01.json"
+      ],
+      "manual_gate": "M03-UI",
+      "milestone_note": "early implementation inside the M03 bridge of the M08 owner OM9-L3-04-08-005: the cage kernel and the om9.cage slot carry the behaviour, and M08 still owns acceptance"
+    }
   }
 }

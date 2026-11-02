@@ -1,0 +1,27 @@
+{
+  "schema": "om9.fixture.negative.v1",
+  "l3": "OM9-L3-04-17-004",
+  "recorded_at": "2026-10-28",
+  "cases": [
+    {
+      "case": "no gem selected",
+      "input": "a metal mesh only",
+      "expect": "Missing(\"cutter gems\")"
+    },
+    {
+      "case": "2D scale outside 10..400%",
+      "input": "Scale2D=5",
+      "expect": "Invalid(\"bright cutter 2d scale\")"
+    },
+    {
+      "case": "fewer than three facets",
+      "input": "Count=2",
+      "expect": "Invalid(\"bright cutter count\")"
+    },
+    {
+      "case": "a degenerate stone",
+      "input": "a 0 mm stone",
+      "expect": "Invalid(\"bright cutter gem\")"
+    }
+  ]
+}

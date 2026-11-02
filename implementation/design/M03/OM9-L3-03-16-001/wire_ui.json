@@ -4,12 +4,16 @@
   "menu_icon": "CurvePolylinePolyline",
   "command_id": "OM9-CURVE-001",
   "menu_and_commandline_same_id": true,
-  "enabled": false,
-  "disabled_reason": "interactive PolyLine command session is not wired; owner candidate OM9-L3-02-04-001 is unverified",
-  "visible_disabled_reason": true,
-  "ui_state": "DISABLED_VISIBLE_REASON",
+  "enabled": true,
+  "disabled_reason": "",
+  "visible_disabled_reason": false,
+  "ui_state": "ENABLED",
   "owner_service_reused": "OM9-L3-02-04-001",
   "transaction": "one session; one Undo entry",
-  "smoke_receipt": "implementation/evidence/M03/OM9-L3-03-16-001/OM9-L4-03-16-001-02.wire.json",
-  "status": "VERIFIED_DISABLED_PLACEHOLDER"
+  "smoke_receipt": "docs/validation/2026-10-25-command-polyline-shortcuts/native-debug-replay.json",
+  "status": "VERIFIED_ENABLED_SESSION",
+  "verified_on": "2026-10-25",
+  "evidence": "docs/validation/2026-10-25-command-polyline-shortcuts/README.md",
+  "menu_label": "PolyLine",
+  "documented_script": "Polyline"
 }

@@ -1,0 +1,5 @@
+{
+  "l3_id": "OM9-L3-03-20-003",
+  "case": "no selection",
+  "expected": "Error::Missing, no label, no geometry created"
+}

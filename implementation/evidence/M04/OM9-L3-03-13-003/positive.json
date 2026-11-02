@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-003",
+  "kind": "positive",
+  "input": "show missing/changed history inputs and warnings",
+  "expected": "the History window lists each recorded feature, its recipe id, state and a detail naming the missing source id; a missing rail input is reported with its role, with no silent repair and an explicit Edit/Clear remediation",
+  "verified_by": [
+    "the_report_names_a_missing_input_and_survives_a_reopen"
+  ],
+  "notes": [
+    "broken_links reports the recipe id, command, state, missing input roles, changed input roles and the matching source object ids; a Clean recipe with intact bindings never appears.",
+    "The History window shows the recipe id, the detail (`missing input <role> (source <id>)` or `stale: <reason>`) and the Edit/Clear remediation; nothing is repaired silently.",
+    "Dirty/Unresolved/Failed rows are warnings too, so a parameter edit with update off (or a source revision change) is visible without being called missing.",
+    "The row is derived from the graph, not cached UI state, so a reopen re-reports the phantom reference."
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-11-004",
+  "title": "Tapered Baguettes Between Two Curves",
+  "scope": "opens the tapered builder",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": [
+    "one stone is measured between Point A and Point B on the first wall",
+    "the two widths are the local wall gaps, so the stone is tapered and bent",
+    "the tapered profile keeps Baguette/Gem identity and is a closed mesh"
+  ],
+  "negative": [
+    "a zero-length span is refused",
+    "a one-curve selection is refused with an explicit error",
+    "an unknown option is a typed error and the session stays open"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-11-004-03"
+    ],
+    "fixture_manifest_sha256": "b1a0bd7bbc2f2e9fd7cf4cf5e6b8f10092b8af06c3c0c6c68dbb55e30bccdf10"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_cluster.rs",
+    "crates/om9-app/tests/gem_cluster_panel.rs"
+  ]
+}

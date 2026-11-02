@@ -1,0 +1,42 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-02-005",
+  "title": "Four Rail Profile Tool",
+  "owner": "om9-app Controller ring/profile tools over om9-core producer chain",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-app/src/session/surface_edit.rs",
+      "symbols": [
+        "FOUR_RAIL_PROFILE",
+        "FOUR_RAIL_PROFILE_ICON",
+        "handles_four_rail_profile",
+        "label"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/ring_tools.rs",
+      "symbols": [
+        "FOUR_RAIL_PROFILE",
+        "dispatch_ring_tool"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/rhino_semantics.rs",
+      "symbols": [
+        "FourRailProfile",
+        "set_four_rail_profile"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "OM9-TOOLS-032 is an alias of the existing OM9-TOOLS-004 metadata command; both record the same stable command and label, so a recipe is not split by the icon used.",
+    "Five or more selected curves on OM9-TOOLS-004 take the four-rail path; a smaller selection is treated as a custom rail."
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "scope": "documentation-only; user explicitly approved storing anti-regression rules on 2026-10-26",
+  "quick_validate": [
+    {
+      "path": "H:\\OpenMatrix9\\skills\\openmatrix9-feature-port",
+      "exit": 0,
+      "output": "Skill is valid!\n"
+    },
+    {
+      "path": "H:\\OpenMatrix9\\skills\\openmatrix9-build-validation",
+      "exit": 0,
+      "output": "Skill is valid!\n"
+    },
+    {
+      "path": "H:\\OpenMatrix9\\skills\\openmatrix9-ui",
+      "exit": 0,
+      "output": "Skill is valid!\n"
+    },
+    {
+      "path": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-feature-port",
+      "exit": 0,
+      "output": "Skill is valid!\n"
+    },
+    {
+      "path": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-build-validation",
+      "exit": 0,
+      "output": "Skill is valid!\n"
+    },
+    {
+      "path": "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-ui",
+      "exit": 0,
+      "output": "Skill is valid!\n"
+    }
+  ],
+  "local_links_checked": 53,
+  "missing_links": [],
+  "sync": {
+    "openmatrix9-build-validation/SKILL.md": true,
+    "openmatrix9-ui/SKILL.md": true,
+    "openmatrix9-feature-port/references/command-integration-contract.md": true,
+    "openmatrix9-feature-port/references/interactive-geometry-regressions.md": true,
+    "feature_port_added_rule_equal": true
+  },
+  "preserved_existing_difference": "Repo feature-port also links document-scene-contract; installed copy does not. This unrelated difference was preserved.",
+  "sha256": {
+    "H:\\OpenMatrix9\\skills\\openmatrix9-feature-port\\SKILL.md": "8eea870f8d9c34dd6f9392298feb704f686c5b0f0f993f37853a44ddc52fa785",
+    "H:\\OpenMatrix9\\skills\\openmatrix9-build-validation\\SKILL.md": "7dc1237268e2588602d18f47a36d86364617cfc2327f37a07ffab4103a6835db",
+    "H:\\OpenMatrix9\\skills\\openmatrix9-ui\\SKILL.md": "9f123924681f83e5aa02912614492dae26eb0a37047b99a697fd20d6d2c70a81",
+    "H:\\OpenMatrix9\\skills\\openmatrix9-feature-port\\references\\command-integration-contract.md": "071e167e034734b9ed130501e4b506aa066df40cb4c589008b44bf8260142aeb",
+    "H:\\OpenMatrix9\\skills\\openmatrix9-feature-port\\references\\interactive-geometry-regressions.md": "2dfbb5ca033b04c50d2de7345e4436e276031f9bbded9ea61dcf3261f2929f26",
+    "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-feature-port\\SKILL.md": "01d5b3a349b05ad1670975c93444875632fa7ccb2a6e71e2564d65bf44ad9ee0",
+    "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-build-validation\\SKILL.md": "7dc1237268e2588602d18f47a36d86364617cfc2327f37a07ffab4103a6835db",
+    "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-ui\\SKILL.md": "9f123924681f83e5aa02912614492dae26eb0a37047b99a697fd20d6d2c70a81",
+    "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-feature-port\\references\\command-integration-contract.md": "071e167e034734b9ed130501e4b506aa066df40cb4c589008b44bf8260142aeb",
+    "C:\\Users\\nguye\\.codex\\skills\\openmatrix9-feature-port\\references\\interactive-geometry-regressions.md": "2dfbb5ca033b04c50d2de7345e4436e276031f9bbded9ea61dcf3261f2929f26"
+  },
+  "public_source_audit": {
+    "source_files": 12579,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "public_source_audit_exit": 0,
+  "scoped_diff_check_exit": 0,
+  "production_code_changed": false,
+  "rectangle_defects_fixed": false
+}

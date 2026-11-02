@@ -3,7 +3,7 @@
   "id": "OM9-L2-04-17",
   "milestone": "M07",
   "title": "02-febe-channel-microprong-brightcut-cutters",
-  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "planning_state": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
   "scope": "Channel/MicroProng/Bright Cut cutters",
   "source_original_path": "specs/07-ms07-cutters-manufacturing-check/02-febe-channel-microprong-brightcut-cutters/module.json",
   "definition": {
@@ -76,7 +76,7 @@
       "target_implementation_milestone": "M07"
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED",
+  "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
   "planned_l4_count_m07": 19,
   "sdk_integration_plan": {
     "recorded_at": "2026-10-21",
@@ -110,5 +110,130 @@
       "OM9-L3-04-17-005",
       "OM9-L3-04-17-006"
     ]
+  },
+  "implementation": {
+    "schema": "om9.l2_implementation.v1",
+    "recorded_at": "2026-10-28",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
+    "scope": "6 L3 over one row-cutter domain: the Channel Builder trench through a stone row, the Micro Prong scallop row, the Bright Cut Channel along the row, the Bright Cutter around one gem, the channel profile/end controls and the multi-stone Interactive Boolean.",
+    "shared_input": "the gem owner's om9.gem record and placement of every selected stone, in selection order; every selected closed mesh body that is not a gem and not an om9.cutter",
+    "shared_output": "closed cutter meshes carrying om9.cutter (kind + row provenance) and, for a cut, each replaced metal body with om9.cutter.cut",
+    "features": [
+      {
+        "l3": "OM9-L3-04-17-001",
+        "feature": "BuilderChannelBuilder",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-17-001/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-17-001/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-17-001/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-17-001/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-17-001/OM9-L4-04-17-001-01.json",
+          "implementation/evidence/M07/OM9-L3-04-17-001/OM9-L4-04-17-001-02.json",
+          "implementation/evidence/M07/OM9-L3-04-17-001/OM9-L4-04-17-001-03.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-17-002",
+        "feature": "BuilderMicroProngCutter",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-17-002/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-17-002/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-17-002/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-17-002/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-17-002/OM9-L4-04-17-002-01.json",
+          "implementation/evidence/M07/OM9-L3-04-17-002/OM9-L4-04-17-002-02.json",
+          "implementation/evidence/M07/OM9-L3-04-17-002/OM9-L4-04-17-002-03.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-17-003",
+        "feature": "BuilderBrightCutChannel",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-17-003/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-17-003/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-17-003/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-17-003/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-17-003/OM9-L4-04-17-003-01.json",
+          "implementation/evidence/M07/OM9-L3-04-17-003/OM9-L4-04-17-003-02.json",
+          "implementation/evidence/M07/OM9-L3-04-17-003/OM9-L4-04-17-003-03.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-17-004",
+        "feature": "BuilderBrightCutter",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-17-004/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-17-004/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-17-004/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-17-004/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-17-004/OM9-L4-04-17-004-01.json",
+          "implementation/evidence/M07/OM9-L3-04-17-004/OM9-L4-04-17-004-02.json",
+          "implementation/evidence/M07/OM9-L3-04-17-004/OM9-L4-04-17-004-03.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-17-005",
+        "feature": "BuilderChannelBuilder",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-17-005/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-17-005/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-17-005/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-17-005/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-17-005/OM9-L4-04-17-005-01.json",
+          "implementation/evidence/M07/OM9-L3-04-17-005/OM9-L4-04-17-005-02.json",
+          "implementation/evidence/M07/OM9-L3-04-17-005/OM9-L4-04-17-005-03.json"
+        ]
+      },
+      {
+        "l3": "OM9-L3-04-17-006",
+        "feature": "BuilderChannelBuilder",
+        "evidence": [
+          "implementation/design/M07/OM9-L3-04-17-006/source_crosswalk.json",
+          "implementation/design/M07/OM9-L3-04-17-006/api.md",
+          "implementation/fixtures/M07/OM9-L3-04-17-006/positive.json",
+          "implementation/fixtures/M07/OM9-L3-04-17-006/negative.json",
+          "implementation/evidence/M07/OM9-L3-04-17-006/OM9-L4-04-17-006-01.json",
+          "implementation/evidence/M07/OM9-L3-04-17-006/OM9-L4-04-17-006-02.json",
+          "implementation/evidence/M07/OM9-L3-04-17-006/OM9-L4-04-17-006-03.json"
+        ]
+      }
+    ],
+    "automated_evidence": {
+      "cargo check -p om9-core -j 2": 0,
+      "cargo check -p om9-app -j 2": 0,
+      "cargo test -p om9-core --test channel_cutters -j 2": "10 passed",
+      "cargo test -p om9-app --test channel_cutters -j 2": "7 passed",
+      "cargo test -p om9-core -j 2": "911 passed, 0 failed",
+      "cargo test -p om9-app --lib -j 2": "207 passed, 2 failed (ui::icon_size_audit, unmodified by this owner)",
+      "cargo test -p om9-app --test gem_cutters -j 2": "7 passed (M07-04-16 intact)",
+      "cargo test -p om9-app --test head_commands -j 2": "9 passed",
+      "summary": "implementation/evidence/M07/OM9-L3-04-17-001/summary.json",
+      "cargo test -p om9-app -j 2 --no-fail-fast": "8 targets fail and they are all outside the cutter family: om9-app --lib (2 x ui::icon_size_audit), command_snapshot, file_widgets (7), global_status_surface, mesh_fill, shell_docking (3), transform_corrections, ui_events",
+      "log": "implementation/evidence/M07/OM9-L3-04-17-001/logs/test-app-full.log"
+    },
+    "manual_gate": {
+      "required": true,
+      "gate": "M07-UI",
+      "signed": false,
+      "note": "no human UI review is claimed; the dashboard keeps the 6 L3 at WIP until a reviewer signs"
+    },
+    "limitations": [
+      "Cutter bodies are closed mesh bodies built from rings and 4-corner sections, not B-Rep solids; the B-Rep swap is the kernel adapter's own gate.",
+      "The Interactive Boolean reuses the one mesh CSG service and requires a closed mesh target; a surface body is refused instead of silently meshed.",
+      "The manual text for the channel/bright pages is not in the repository, so the option names come from the L3 domain inputs and the manual's named controls (Height, Length, 2D Scale, Mirror, end profiles); each mapping is documented in the L3 api.md.",
+      "The manual gate M07-UI is not signed: the dashboard keeps the six L3 at WIP until a human reviews the window preview/commit/cancel."
+    ],
+    "unrelated_open_failures": [
+      "crates/om9-app/src/ui/icon_size_audit.rs (unmodified by this owner): both cases fail at 1280x720 for the Curve page and after a live sidebar resize (31 vs 20 palette slots).",
+      "crates/om9-app/tests/command_snapshot.rs::positional_top11_owner_is_visible_without_a_fake_option_row: the modified working-tree session/top11.rs publishes a Move option row while the test expects none.",
+      "crates/om9-app/tests/file_widgets.rs (7 cases): file operation document/context turns Stale in the modified working tree; no cutter code is involved.",
+      "crates/om9-app/tests/global_status_surface.rs::x1_escape_still_cancels_a_running_command_under_a_failure: the status line reports Info instead of the expected failure.",
+      "crates/om9-app/tests/mesh_fill.rs::a_mesh_object_fills_its_faces_after_the_grid: 24 vs 24 fills in an empty document.",
+      "crates/om9-app/tests/shell_docking.rs (3 cases): the left column/status-surface layout assertions of the in-flight dock work.",
+      "crates/om9-app/tests/transform_corrections.rs::blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing: availability is Ok where the test expects an error.",
+      "crates/om9-app/tests/ui_events.rs::construction_grid_colors_only_positive_axes_like_the_reference: a construction-grid colour lookup returns None."
+    ],
+    "completion_note": "implementation/evidence/M07/OM9-L2-04-17-COMPLETION/README.md",
+    "evidence_logs": "implementation/evidence/M07/OM9-L3-04-17-001/logs/"
   }
 }

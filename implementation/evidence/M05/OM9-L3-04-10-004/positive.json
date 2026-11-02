@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-10-004",
+  "title": "Gem List On Curve",
+  "cases": [
+    "a 3-stone list [6, 5, 4] on a 30 mm curve places all three in the requested order",
+    "each station carries its own `GemSpec`, so the meshes differ",
+    "the row is still one transaction and one Undo"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

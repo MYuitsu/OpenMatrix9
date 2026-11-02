@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.l3_fixture.v1",
+  "l3_id": "OM9-L3-01-04-008",
+  "case": "positive",
+  "input": "parent curve deleted; a child uses its semantic rail reference",
+  "expected": "child marked broken; the report offers KeepBroken/DetachDependents/RemoveDependents and the chosen policy leaves no dangling reference",
+  "tests": [
+    "deleting_the_parent_marks_the_child_broken_and_reports_the_policy_choices",
+    "detach_and_remove_policies_leave_no_dangling_reference",
+    "a_delete_during_an_async_rebuild_is_refused_not_raced"
+  ]
+}

@@ -60,9 +60,11 @@ impl Controller {
             return Some(self.commit_interp());
         }
         if let Some(value) = text.trim().strip_prefix("Degree=") {
-            let Some(degree) = value.parse::<usize>().ok().filter(|degree| {
-                *degree >= 1 && *degree <= 11 && degree % 2 == 1
-            }) else {
+            let Some(degree) = value
+                .parse::<usize>()
+                .ok()
+                .filter(|degree| *degree >= 1 && *degree <= 11 && degree % 2 == 1)
+            else {
                 self.interp_pending = Some(pending);
                 return Some(Err(Error::Invalid("degree must be odd 1..11")));
             };
@@ -75,7 +77,9 @@ impl Controller {
             return Some(self.commit_interp());
         }
         self.interp_pending = Some(pending);
-        Some(Err(Error::Invalid("InterpCrv accepts points, Degree=, Close, Undo or Cancel")))
+        Some(Err(Error::Invalid(
+            "InterpCrv accepts points, Degree=, Close, Undo or Cancel",
+        )))
     }
 
     pub fn accept_interp_point(&mut self, point: Point3) -> Result<(), Error> {
@@ -151,10 +155,7 @@ impl Controller {
                 self.coordinator.limits(),
             )
         {
-            return samples
-                .windows(2)
-                .map(|pair| [pair[0], pair[1]])
-                .collect();
+            return samples.windows(2).map(|pair| [pair[0], pair[1]]).collect();
         }
         points.windows(2).map(|pair| [pair[0], pair[1]]).collect()
     }

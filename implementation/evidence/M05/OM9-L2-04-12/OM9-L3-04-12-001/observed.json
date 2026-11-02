@@ -1,0 +1,33 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-12-001",
+  "title": "Auto Pave Builder",
+  "scope": "opens Auto Pavé on one selected surface",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": [
+    "the lattice fills the selected surface region and every stone lies inside it",
+    "spacing, margin, border, angle and sizing stay within the typed range",
+    "Average/Pattern/Start=Base Direction/Curve/Edges/Seeds all produce a plan",
+    "a selected open curve becomes the attractor; selected closed curves clip the region",
+    "a saved style restores pattern, spacing, corrections and the manual count",
+    "Apply inserts every stone in one Undo step and Cancel leaves no phantom"
+  ],
+  "negative": [
+    "a spacing that cannot fit the region is refused (no squeeze)",
+    "a start point outside the margin is a typed error",
+    "more than MAX_PAVE_GEMS candidates is a typed Budget error"
+  ],
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-12-001-03"
+    ],
+    "fixture_manifest_sha256": "bca89f682deb8ead87d1057b4f6edf76768284573ebfa0596c70dbcdac32fe1c"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_pave.rs",
+    "crates/om9-app/tests/gem_pave_panel.rs"
+  ]
+}

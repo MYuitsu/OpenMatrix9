@@ -15,6 +15,12 @@ description: "Implement or review the Matrix9 interface described by OpenMatrix9
 
 [Command/grid theme](references/command-grid-theme.md) và workspace references giữ Command xanh, canvas đen, finite world grid, titles/dropdowns, pinned copyable CMD và Line/Polyline interaction đã duyệt. Defaults/unknowns không lấy từ upstream. UI giống hình không chứng minh solver đã hoạt động.
 
+## Command: icon, mặc định và tham số
+
+Khi triển khai command hoặc binding/hành vi gọi command, đọc [hợp đồng icon/default/options](../openmatrix9-feature-port/references/command-integration-contract.md). Icon/menu/CMD cho cùng biến thể phải tới cùng owner; thao tác mặc định và các tham số gạch chân accelerator phải hoạt động thật theo mẫu Polyline. Không nghiệm thu command chỉ từ icon hiển thị hoặc handler mở được.
+
+Khi sửa input điểm, preview hoặc chuyển preview → scene, đọc [hướng kéo/CMD/redraw](../openmatrix9-feature-port/references/interactive-geometry-regressions.md). Chuyển điểm qua parser/owner chung; kiểm preview bám đúng phía con trỏ trong CPlane và hình sau commit. Đối chiếu model/scene rồi kiểm UI thật khi có triệu chứng chớp/mất hình; không suy ra GPU đã hiển thị từ semantic test.
+
 ## Viewport GPU đã duyệt
 
 Người dùng duyệt ngày 2026-10-19: viewport desktop chỉ dùng GPU, không giữ nhánh render CPU/software dự phòng. Thiếu GPU phù hợp phải báo lỗi renderer. Model, picking và chuẩn bị dữ liệu vẫn do Rust xử lý; các lớp UI/Gumball qua egui không phải một renderer viewport CPU riêng. Bản mặc định phải dùng GPU mà không cần cờ bật; native OCCT là capability độc lập.

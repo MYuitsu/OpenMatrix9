@@ -4,6 +4,42 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-02-05",
   "title": "Surface Offset Fillet Chamfer",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "planar 10×20 mm face offset +2 along normal",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-02-05 - 05/L3-008 - Surface Offset Fillet Chamfer/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [
+      "input:planar 10×20 mm face offset +2 along normal: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E06",

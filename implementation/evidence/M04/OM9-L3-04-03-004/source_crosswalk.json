@@ -1,0 +1,84 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-03-004",
+  "title": "Award Ring Builder",
+  "owner": "om9-core ring_builder + builder session/panel",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/ring_builder.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/builder.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/producers.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/builder_style.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/lib.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/tests/ring_family.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/tests/ring_family_panel.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-kernel/src/associative.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-kernel/src/creation.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-kernel/src/creation_bridge.cpp",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-kernel/tests/ring_family_brep.rs",
+      "symbols": [],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "source_audit": {
+    "path": "QymCAD/",
+    "result": "NO_RING_BUILDER_MODULE",
+    "detail": "No eternity/signet/raised/award ring builder exists under QymCAD/crates; the builder dialogue samples are UI only. Decision: ADD the parametric family in Rust, reusing the OM9 builder session, producers, style library and history."
+  },
+  "planning_inputs": [
+    "OM9_Milestones/M04 - Builder and History/L2-04-03 - 06-febe-jewelry-ring-builder-family/L2.json",
+    "reference/text/m8book2__p114-115__128-builders.md (Matrix 8 Book 2, pages 114-115)"
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The manual pages describe the builders as interactive menus; the runtime behavior here is established by the receipts.",
+    "Geometry is a portable Rust surface of revolution; the OCCT swap shares the same feasibility gate."
+  ]
+}

@@ -37,27 +37,15 @@ impl Controller {
             for (j, cell) in row.iter_mut().enumerate() {
                 let u = u0 + (u1 - u0) * i as f64 / steps as f64;
                 let v = v0 + (v1 - v0) * j as f64 / steps as f64;
-                *cell = om9_core::surface_kernel::evaluate(
-                    &surface,
-                    u,
-                    v,
-                    self.coordinator.limits(),
-                )?;
-                normals[i][j] = om9_core::surface_kernel::normal(
-                    &surface,
-                    u,
-                    v,
-                    self.coordinator.limits(),
-                )?;
+                *cell =
+                    om9_core::surface_kernel::evaluate(&surface, u, v, self.coordinator.limits())?;
+                normals[i][j] =
+                    om9_core::surface_kernel::normal(&surface, u, v, self.coordinator.limits())?;
             }
         }
         let signed = |normal: Point3| {
             let value = normal[0] * view[0] + normal[1] * view[1] + normal[2] * view[2];
-            if value.abs() < 1e-9 {
-                1e-9
-            } else {
-                value
-            }
+            if value.abs() < 1e-9 { 1e-9 } else { value }
         };
         let mut segments: Vec<[Point3; 2]> = Vec::new();
         for i in 0..steps {
@@ -86,10 +74,7 @@ impl Controller {
                 if crossings.len() == 2 {
                     segments.push([crossings[0], crossings[1]]);
                 } else if crossings.len() == 4 {
-                    let signed_center = corners
-                        .iter()
-                        .map(|(_, value)| *value)
-                        .sum::<f64>();
+                    let signed_center = corners.iter().map(|(_, value)| *value).sum::<f64>();
                     if signed_center < 0.0 {
                         segments.push([crossings[0], crossings[1]]);
                         segments.push([crossings[2], crossings[3]]);

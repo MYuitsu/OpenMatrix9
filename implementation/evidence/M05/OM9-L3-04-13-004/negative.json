@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-13-004",
+  "title": "Gem Style Save",
+  "cases": [
+    "a name the shared store rejects (`bad/name`) is a typed refusal and the tool stays open",
+    "a non-gem selection cannot be saved as a style"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

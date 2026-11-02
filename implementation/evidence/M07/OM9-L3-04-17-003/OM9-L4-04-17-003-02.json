@@ -1,0 +1,63 @@
+{
+  "schema": "om9.evidence.domain.v1",
+  "l4": "OM9-L4-04-17-003-02",
+  "l3": "OM9-L3-04-17-003",
+  "recorded_at": "2026-10-28",
+  "status": "DOMAIN_INTEGRATION_RECORDED",
+  "implementation": [
+    "cutters::brightcut::BrightParams",
+    "cutters::brightcut::build_channel",
+    "cutters::brightcut::BrightMode::Channel"
+  ],
+  "design": [
+    "implementation/design/M07/OM9-L3-04-17-003/source_crosswalk.json",
+    "implementation/design/M07/OM9-L3-04-17-003/api.md"
+  ],
+  "fixtures": [
+    "implementation/fixtures/M07/OM9-L3-04-17-003/positive.json",
+    "implementation/fixtures/M07/OM9-L3-04-17-003/negative.json"
+  ],
+  "positive_cases": [
+    {
+      "case": "two stones, mirror on",
+      "input": "BrightParams::for_gem on a baguette row",
+      "expect": "one facet per stone per side (4 bodies), each closed"
+    },
+    {
+      "case": "Mirror=off",
+      "input": "Mirror=off",
+      "expect": "one facet per stone on one side of the channel"
+    },
+    {
+      "case": "the committed record",
+      "input": "Enter",
+      "expect": "om9.cutter kind=bright_cut_channel with the row provenance"
+    }
+  ],
+  "negative_cases": [
+    {
+      "case": "no gem selected",
+      "input": "a metal mesh only",
+      "expect": "Missing(\"cutter gems\")"
+    },
+    {
+      "case": "2D scale outside 10..400%",
+      "input": "Scale2D=5",
+      "expect": "Invalid(\"bright cutter 2d scale\")"
+    },
+    {
+      "case": "an impossible bright angle",
+      "input": "Angle=88",
+      "expect": "Invalid(\"bright cutter angle\")"
+    },
+    {
+      "case": "an empty row",
+      "input": "build_channel(&[])",
+      "expect": "Missing(\"bright cutter gems\")"
+    }
+  ],
+  "limitations": [
+    "Each facet is one closed 8-corner block with a sloped top face; the channel variant places the same block along the row.",
+    "Mirror=on builds the far side by mirroring the same frame; it does not re-derive a second profile."
+  ]
+}

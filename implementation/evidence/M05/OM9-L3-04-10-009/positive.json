@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-10-009",
+  "title": "Gem Flow Placement",
+  "cases": [
+    "the stones land on the target curve at the recorded arc ratio",
+    "surface stones also land on a parallel target surface and keep a usable UV link",
+    "the link is retargeted to the target object with its revision",
+    "the stone size is unchanged, so a flow is rigid"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

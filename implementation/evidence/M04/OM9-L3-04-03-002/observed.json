@@ -1,0 +1,22 @@
+{
+  "schema": "om9.m04.l3_ring_family_evidence.v1",
+  "l3_id": "OM9-L3-04-03-002",
+  "title": "Signet Ring Builder",
+  "scope": "`ring_builder::build(Signet)` `BuilderKind::SignetRing` `RingParams::validate` Top contour rule Handles `shoulder`/`top_width`/`top_length`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "closed signet body with a visible top and two shoulders",
+  "negative": "negative wall, folded top contour and zero shoulder are refused",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only. The L3 requires a human review of the ring builder panel and gestures; no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-04-03-002-03",
+      "OM9-L4-04-03-002-04",
+      "OM9-L4-04-03-002-05",
+      "OM9-L4-04-03-002-07",
+      "OM9-L4-04-03-002-06"
+    ],
+    "fixture_manifest_sha256": "3335a39ef7c1cd61dc7ca2da8a8f4209cfe39b82bd7d1d51c4ee780bd08c7076"
+  }
+}

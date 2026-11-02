@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-009",
+  "kind": "negative",
+  "expected": "Cancel after a drag inserts nothing; an invalid or locked drag is refused before the model changes",
+  "verified_by": [
+    "the_rail_profile_handles_edit_width_and_commit_exactly_once",
+    "a_rail_profile_builder_reads_the_selected_rail_and_exposes_two_handles"
+  ]
+}

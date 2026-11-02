@@ -1,0 +1,47 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-13-004",
+  "title": "Matrix Clear Single Object History",
+  "owner": "om9-app Controller history API over om9-core HistoryGraph",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/history_ops.rs",
+      "symbols": [
+        "detach_object",
+        "has_pending"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/history.rs",
+      "symbols": [
+        "Controller::clear_object_history",
+        "Controller::clear_selected_history"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/files.rs",
+      "symbols": [
+        "begin_file_intent"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "symbols": [
+        "MatrixApp::history_window_ui"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "Detach is one HistoryUpdate transaction (state Detached), so Undo restores the association.",
+    "The published result is intentionally kept as a plain snapshot; there is no result-removal mutation in the transaction model.",
+    "A frozen (lock) recipe is refused so Clear never bypasses the lock."
+  ]
+}

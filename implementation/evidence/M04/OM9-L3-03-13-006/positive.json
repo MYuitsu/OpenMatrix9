@@ -1,0 +1,16 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-006",
+  "kind": "positive",
+  "input": "informative status when rebuild happens",
+  "expected": "HistoryRecord/HistoryUpdate/HistoryReport/ClearHistory/EditHistory drive the same controller switches; recompute reports complete with the rebuilt feature count or failed with the node id and reason",
+  "verified_by": [
+    "the_command_line_drives_the_switches_report_and_clear",
+    "closing_the_window_is_refused_while_a_recipe_is_pending"
+  ],
+  "notes": [
+    "The command line and the sidebar/menu IDs dispatch to the same Controller methods; the status line consumes one history notice per command.",
+    "The rebuild is synchronous, so an interactive 'updating' frame is not observable; the terminal status distinguishes complete (with count) from failed (with node id and reason).",
+    "A recipe in Pending state is the queued rebuild the lifecycle guard refuses to close over."
+  ]
+}

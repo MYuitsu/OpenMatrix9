@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-008",
+  "case": "an empty text is refused instead of storing an invisible label",
+  "expected": "an empty text is refused instead of storing an invisible label",
+  "test": "crates/om9-app/tests/annotation.rs::preview_cancel_invalid_witness_and_native_archive_roundtrip"
+}

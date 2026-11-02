@@ -1,0 +1,27 @@
+$ cargo test -p om9-core --test ring_family -j 2 a_signet_ring_resize_updates_the_same_feature_through_the_recorded_recipe
+# exit code: 0
+# captured: 2026-10-27T09:35:55Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test a_signet_ring_resize_updates_the_same_feature_through_the_recorded_recipe ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.04s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests\ring_family.rs (L:\om9-target\debug\deps\ring_family-96685c27dfebd318.exe)
+
+$ cargo test -p om9-app --test ring_family_panel -j 2 an_eternity_band_applies_a_closed_solid_in_one_undoable_step
+# exit code: 0
+# captured: 2026-10-27T09:35:58Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test an_eternity_band_applies_a_closed_solid_in_one_undoable_step ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 2.97s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running tests\ring_family_panel.rs (L:\om9-target\debug\deps\ring_family_panel-7d33ae66eb23707a.exe)

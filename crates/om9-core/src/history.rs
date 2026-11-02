@@ -119,6 +119,14 @@ pub struct Recipe {
     pub policy: HistoryPolicy,
     pub state: EvaluationState,
     pub revision: u64,
+    /// Declared type of every input role (`OM9-L3-01-04-001`). A recipe recorded
+    /// before typed ports existed carries none and is reported as `Untyped`; a type
+    /// is never inferred from the geometry it happens to be bound to today.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub input_ports: Vec<crate::associative::FeaturePort>,
+    /// Declared geometry kind of every output, aligned with `outputs`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub output_ports: Vec<crate::associative::FeaturePort>,
 }
 impl Recipe {
     pub fn new(
@@ -145,9 +153,35 @@ impl Recipe {
             },
             state: EvaluationState::Clean,
             revision: 1,
+            input_ports: vec![],
+            output_ports: vec![],
         }
     }
+    /// Attach typed ports to this recipe. The two lists must line up with `inputs`
+    /// and `outputs`; `validate` refuses a mismatch, so a caller can never end up
+    /// with a type that silences an unrelated edge.
+    pub fn with_ports(
+        mut self,
+        input_ports: Vec<crate::associative::FeaturePort>,
+        output_ports: Vec<crate::associative::FeaturePort>,
+    ) -> Self {
+        self.input_ports = input_ports;
+        self.output_ports = output_ports;
+        self
+    }
     pub fn validate(&self, d: &Document, l: &Limits) -> Result<Usage> {
+        self.validate_with_pending(d, l, &BTreeSet::new())
+    }
+    /// Validate a recipe whose outputs may be inserted by the same transaction. A Clean
+    /// recipe normally requires its outputs to exist; a builder that computes the geometry
+    /// before the transaction records a Clean recipe whose output entity arrives with it, so
+    /// the transaction passes the ids it is about to insert.
+    pub fn validate_with_pending(
+        &self,
+        d: &Document,
+        l: &Limits,
+        pending: &BTreeSet<ObjectId>,
+    ) -> Result<Usage> {
         if self.id.is_nil()
             || self.document != d.id
             || self.command.is_empty()
@@ -183,7 +217,11 @@ impl Recipe {
             for input in &self.inputs {
                 d.resolve(&input.source)?;
             }
-            if self.outputs.iter().any(|id| !d.entities.contains_key(id)) {
+            if self
+                .outputs
+                .iter()
+                .any(|id| !pending.contains(id) && !d.entities.contains_key(id))
+            {
                 return Err(Error::Missing("clean recipe output"));
             }
         }
@@ -214,6 +252,10 @@ impl Recipe {
                 l,
             )?;
         }
+        u.add(
+            crate::associative::validate_typed_ports_with_pending(self, d, l, pending)?,
+            l,
+        )?;
         Ok(u)
     }
 }
@@ -222,6 +264,15 @@ impl Recipe {
 pub struct HistoryGraph {
     #[serde(deserialize_with = "crate::identity::unique_uuid_map")]
     pub recipes: BTreeMap<HistoryId, Recipe>,
+    /// Semantic subshape references that survive a rebuild (`OM9-L3-01-04-004`).
+    /// Kept on the graph, not on the entity, so a reference is owned by the feature
+    /// that produced the subshape and is dropped with it.
+    #[serde(
+        default,
+        skip_serializing_if = "BTreeMap::is_empty",
+        deserialize_with = "crate::identity::unique_uuid_map"
+    )]
+    pub references: BTreeMap<ReferenceId, crate::associative::SemanticReference>,
 }
 impl HistoryGraph {
     pub fn locked(&self, id: ObjectId) -> bool {
@@ -360,6 +411,10 @@ impl HistoryGraph {
             }
             u.add(r.validate(d, l)?, l)?;
         }
+        u.add(
+            crate::associative::references_usage(&self.references, l)?,
+            l,
+        )?;
         Ok(u)
     }
     pub(crate) fn invalidate(

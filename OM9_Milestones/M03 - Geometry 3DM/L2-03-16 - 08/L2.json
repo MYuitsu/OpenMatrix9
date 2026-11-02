@@ -428,40 +428,41 @@
     ]
   },
   "runtime_implementation": {
-    "date": "2026-10-23",
+    "completion_input_2026_10_28": "Curve sessions route an unmodified viewport right-click through the same draft submission as Enter; right-drag remains navigation. All 58 menu commands were dispatched on suitable fixtures: 42 pending and 16 immediate. Right-click and empty Enter gave equivalent initial-stage state and geometry for the 42 pending commands; Polyline and Curve also have completion geometry tests. Other stages and the interactive executable remain unverified.",
+    "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
-    "scope": "58 documented Curve Tools menu rows: one stable command id/icon per L3; Line and Point functional; the other 56 are disabled placeholders with a visible missing-session/owner reason.",
+    "scope": "58 documented Curve Tools menu rows: one stable command id/icon per L3, each row dispatching the same interactive Rust session as its documented Matrix command; no disabled placeholder remains.",
     "evidence": [
       "implementation/design/M03/OM9-L2-03-16/README.md",
       "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json",
       "implementation/evidence/M03/2026-10-23-l2-03-16-curve-menu.log",
       "crates/om9-app/src/curve_menu.rs",
       "crates/om9-app/src/ui/chrome.rs",
-      "crates/om9-app/tests/curve_menu.rs"
+      "crates/om9-app/tests/curve_menu.rs",
+      "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/receipt.json",
+      "crates/om9-app/src/icons.rs",
+      "crates/om9-app/tests/crv2view.rs"
     ],
     "human_approval": null,
     "remaining": [
-      "56 commands have no interactive command session yet; each is disabled with its owner candidate and reason.",
       "Human M03-UI click/preview review is unsigned.",
-      "A source-present owner service is not enabled merely because code exists."
+      "M03-UI approval does not promote a row to full L3 acceptance by itself."
     ],
-    "l3_with_verified_supported_scope": 2,
-    "l3_with_verified_disabled_fallback": 56,
+    "l3_with_verified_supported_scope": 58,
+    "l3_with_verified_disabled_fallback": 0,
     "full_l3_acceptance_promoted": 0,
     "full_l2_complete": false,
     "manual_gate": "M03-UI",
     "technical_scope_complete": true,
     "latest_verification": {
-      "date": "2026-10-23",
+      "date": "2026-10-26",
       "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
-      "checks": "implementation/evidence/M03/2026-10-23-l2-03-16-checks.json",
+      "checks": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/receipt.json",
       "tests": {
-        "curve_menu": "4 passed; 0 failed",
-        "app_check": "exit 0",
-        "clippy": "exit 0",
-        "fmt": "exit 0",
-        "public_source_audit": "exit 0; 0 errors"
+        "curve_menu": "5 passed; 0 failed",
+        "curve_command_regressions": "320 passed; 0 failed",
+        "app_check": "exit 0"
       },
       "l4_evidence": {
         "OM9-L3-03-16-001": "3/3",
@@ -535,8 +536,24 @@
         "cargo test -p om9-app --test curve_menu"
       ],
       "manual_gate": "M03-UI"
+    },
+    "curve_menu_audit_2026_10_26": {
+      "date": "2026-10-26",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "l3_with_verified_supported_scope": 58,
+      "l3_with_verified_disabled_fallback": 0,
+      "menu_rows": 58,
+      "rows_with_wrong_placeholder_command_id_fixed": 3,
+      "icon_feature_mappings_fixed": 11,
+      "curve_side_identity_swaps_fixed": 1,
+      "tests": [
+        "cargo test -p om9-app --test curve_menu",
+        "cargo test -p om9-app --test crv2view",
+        "cargo test -p om9-app --test crv_ends"
+      ],
+      "manual_gate": "M03-UI"
     }
   },
-  "l3_with_verified_supported_scope": 55,
-  "l3_with_verified_disabled_fallback": 3
+  "l3_with_verified_supported_scope": 58,
+  "l3_with_verified_disabled_fallback": 0
 }

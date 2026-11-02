@@ -1,0 +1,39 @@
+{
+  "schema": "om9.evidence.adversarial.v1",
+  "l4": "OM9-L4-04-16-006-04",
+  "l3": "OM9-L3-04-16-006",
+  "recorded_at": "2026-10-28",
+  "status": "ADVERSARIAL_CHECKS_RECORDED",
+  "cases": [
+    {
+      "case": "Boolean set without a metal body",
+      "input": "Boolean=On with gems only",
+      "expect": "Missing(\"cutter boolean surface\")"
+    },
+    {
+      "case": "the boolean is off",
+      "input": "apply(..., BooleanMode::Off, ...)",
+      "expect": "Invalid(\"cutter boolean mode\")"
+    },
+    {
+      "case": "no cutter bodies",
+      "input": "apply(target, &[], ...)",
+      "expect": "Missing(\"cutter bodies\")"
+    },
+    {
+      "case": "a cutter that misses the target",
+      "input": "a block 50 mm away",
+      "expect": "Invalid(\"cutter boolean removed nothing\")"
+    },
+    {
+      "case": "an open target mesh",
+      "input": "a single triangle",
+      "expect": "the CSG owner refuses it (\"CSG requires closed consistently oriented mesh\")"
+    }
+  ],
+  "notes": [
+    "Every refusal is a typed om9_core::Error naming the offending control; nothing is silently clamped.",
+    "A refused option restores the previous preview, so the staged builder keeps running.",
+    "Cancel and Esc drop the preview without touching the document; Undo restores a committed command in one step."
+  ]
+}

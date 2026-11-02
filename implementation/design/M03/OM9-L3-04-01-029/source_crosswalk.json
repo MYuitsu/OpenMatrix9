@@ -1,0 +1,17 @@
+{
+  "l3_id": "OM9-L3-04-01-029",
+  "title": "Transform · Splop — menu binding",
+  "owner": "OM9-L2-04-01",
+  "date": "2026-10-27",
+  "sources": [
+    "OM9_Milestones/M03 - Geometry 3DM/L2-04-01 - 13-febe/L3-029 - Transform · Splop - menu binding/l3.json",
+    "crates/om9-app/src/session/transform/rows.rs",
+    "crates/om9-app/src/session/transform.rs",
+    "crates/om9-app/src/transform_menu.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-core/src/deform.rs",
+    "crates/om9-core/src/curve_surface_ops.rs",
+    "crates/om9-app/tests/transform_menu.rs"
+  ],
+  "qymcad_source_paths_verified": []
+}

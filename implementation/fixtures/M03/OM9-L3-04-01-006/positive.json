@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-006",
+  "case": "box 1x1x1 at the world origin, base 0,0,0, target 0,0,0, reference 1,0,0, target direction 0,1,0",
+  "expected": "the body point (1,0,0) moves onto (0,1,0): a quarter turn about the CPlane normal",
+  "test": "m03_04_01_006_orient_three_points_turns_the_selection"
+}

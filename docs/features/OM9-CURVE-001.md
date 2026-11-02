@@ -1,5 +1,18 @@
-> **Current target: specs v2 (2026-10-13).** [OM9-CURVE-001](../../OpenMatrix9_Codex_Spec_v2/specs/02-curve/om9-curve-001-polyline.md)
-> Use standalone OM9 and Matrix9 UI contract for new work. The record below is legacy FreeCAD/source evidence; its v1 links, native passes and host limitations do not certify the new runtime.
+> **Current target:** standalone Rust OM9; [M03 geometry owner](<../../OM9_Milestones/M03 - Geometry 3DM/L2-02-04 - 04/L3-001 - Line Polyline Point Creation/l3.json>) and [menu adapter](<../../OM9_Milestones/M03 - Geometry 3DM/L2-03-16 - 08/L3-001 - Curve · PolyLine - menu binding/l3.json>). Legacy FreeCAD evidence below remains historical.
+
+## Standalone update — 2026-10-25
+
+`M`/`Mode` toggles Line/Arc; `M=L` and `M=A` select explicitly. Keyboard initials and inline option clicks use the same `Controller::submit` handler. Polyline Mode takes precedence over the global Mid snap shortcut. Supported option initials are underlined by the UI without inserting combining characters in the transcript. P/PersistentClose and H/Helpers toggle their existing flags, with the live prompt and history refreshed immediately. These actions preserve nonempty drafts, paste, IME and unrelated editor focus.
+
+Successive Line and Arc segments form one canonical analytic `Curve::Polycurve`; tessellation is display-only. Arc defaults to the preceding segment's end tangent. When no preceding segment supplies a tangent, the session asks for Direction. An explicitly picked Direction persists until replaced; Center selects the next arc's center. Degenerate/collinear arcs and inconsistent Center radii fail without losing accepted points. Center currently constructs the minor arc and rejects antipodal endpoints; major/semicircle Center selection is not certified. Numeric Length applies to the next Line segment only. Coordinates use the existing unit/CPlane parser.
+
+Enter commits the complete chain in one transaction. U/Undo removes a pending segment, document Undo/Redo restores the entire committed curve, and Cancel/Esc leaves no document object. Menu dispatch and CMD are checked against the same geometry oracle. Mixed line/arc display and its allocation admission use matching sample counts; gaps are rejected rather than connected by an invented edge.
+
+The pre-existing PersistentClose flag still restarts a session after commit; continuously closed preview is unfinished. Helpers currently changes the flag/prompt; dynamic tracking is unfinished. Exact mixed-Polycurve 3DM export, complete M03-UI acceptance and macOS are outside this fix. [Detailed evidence](../validation/2026-10-25-command-polyline-shortcuts/README.md).
+
+Standalone parameter-interface follow-up (2026-10-25): `PolylineOptionInterface` now supplies every existing Polyline parameter to the prompt, keyboard, pointer and typed-name paths from one current-value snapshot. Availability, C ambiguity, Length input, Direction/Center values and invalid/stale-stage activation are tested in [the interface report](../validation/2026-10-25-polyline-parameter-interface/README.md). Geometry and existing flag lifecycle semantics are preserved.
+
+## Historical FreeCAD implementation
 
 # OM9-CURVE-001 — Polyline
 

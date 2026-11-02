@@ -1,0 +1,47 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-04-002-01",
+  "l3_id": "OM9-L3-01-04-002",
+  "l3_title": "Feature Provenance From Command",
+  "owner_module_id": "OM9-L2-01-04",
+  "milestone": "M04",
+  "gate": "AUTO_ONLY",
+  "goal": "record the generating command and the user parameters for each result",
+  "positive_oracle": "builder RingRail diameter_mm=18.0 with its originating command parameters -> re-open the exact command, typed inputs and unit preserved",
+  "negative_oracle": "command payload with a bare Number parameter, a nil required input id, a duplicate role or an empty selection -> Invalid('feature parameter unit/type'), Invalid('feature input identity'), Invalid('feature input role'), Invalid('feature input selection')",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "source_dirty": true,
+  "checkout": "QymCAD/ (vendored subtree of the main repository; no independent .git)",
+  "method": "bounded file reads with line numbers; decisions are OM9-owned and no upstream code is copied",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-core/src/doc_file.rs",
+      "line": 79,
+      "observed_symbols": [
+        "pub timeline: Vec<crate::feature::FeatureNode> is what the saved document carries"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the timeline records the node, not the request that produced a result; reopening is the node editor, with no recorded command version or unit",
+      "om9_owner": "om9-core/src/associative.rs (FeatureProvenance/ReopenFeature)"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/records/frame.rs",
+      "line": 442,
+      "observed_symbols": [
+        "pub struct Rebuilding keeps the last rebuild's reference rebindings until the next rebuild, and they never reach the file"
+      ],
+      "decision": "ADD",
+      "what_is_missing": "provenance is deliberately transient here; OM9 makes the command/parameters/unit durable on the recipe",
+      "om9_owner": "om9-core/src/history.rs (ReplayEnvironment, Recipe.parameters)"
+    }
+  ],
+  "implemented_api": [
+    "crates/om9-core/src/associative.rs: FeatureProvenance, RecordedInput, ReopenFeature, feature_provenance, reopen_feature, replay_environment"
+  ],
+  "reuse_decision": "ADAPT the rebuild/dirty/persistent-id ideas; ADD the typed durable ports, the persisted semantic reference and the content baselines.",
+  "evidence": [
+    "crates/om9-core/tests/associative_rebuild.rs (provenance_reopens_the_exact_command_parameters_inputs_and_unit, provenance_refuses_a_bare_number_a_missing_input_id_and_a_duplicate_role)",
+    "implementation/fixtures/M04/OM9-L3-01-04-002/positive.json",
+    "implementation/fixtures/M04/OM9-L3-01-04-002/negative.json"
+  ]
+}

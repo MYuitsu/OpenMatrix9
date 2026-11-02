@@ -1,0 +1,48 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "task_id": "OM9-L4-01-04-006-01",
+  "l3_id": "OM9-L3-01-04-006",
+  "l3_title": "Builder Preview Vs Committed Features",
+  "owner_module_id": "OM9-L2-01-04",
+  "milestone": "M04",
+  "gate": "AUTO_ONLY",
+  "goal": "discard preview graph state without affecting the saved design",
+  "positive_oracle": "preview rail diameter 18->19->20 without Apply -> committed document id/geometry/hash unchanged; one Apply yields only the final value",
+  "negative_oracle": "Escape midway; Apply after the committed document moved -> transient nodes disappear; Stale('preview base document')",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "source_dirty": true,
+  "checkout": "QymCAD/ (vendored subtree of the main repository; no independent .git)",
+  "method": "bounded file reads with line numbers; decisions are OM9-owned and no upstream code is copied",
+  "planned_anchors": [
+    {
+      "path": "crates/qymcad-ui-state/src/edits.rs",
+      "line": 112,
+      "observed_symbols": [
+        "pub fn commit_edit(rc): the edit is pushed onto the undo stack only when the document changed, then one rebuild runs"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "the preview and the document are the same object in QymCAD (the edit is committed or rolled back); OM9 gives the builder a private draft so a preview cannot touch the saved design",
+      "om9_owner": "om9-core/src/associative.rs (PreviewSession)"
+    },
+    {
+      "path": "crates/qymcad-ui-state/src/edits.rs",
+      "line": 6,
+      "observed_symbols": [
+        "pub fn abort_edit(rc): the operation is rolled back and nothing is rebuilt"
+      ],
+      "decision": "ADAPT",
+      "what_is_missing": "rollback of a mutation; OM9's discard drops a copy that was never committed",
+      "om9_owner": "om9-core/src/associative.rs (PreviewSession::discard)"
+    }
+  ],
+  "implemented_api": [
+    "crates/om9-core/src/associative.rs: PreviewSession::{begin, draft, draft_mut, set_parameter, stage_recipe, plan, commit, discard}",
+    "crates/om9-core/src/associative.rs: PreviewSession staged maps (delta preview)"
+  ],
+  "reuse_decision": "ADAPT the rebuild/dirty/persistent-id ideas; ADD the typed durable ports, the persisted semantic reference and the content baselines.",
+  "evidence": [
+    "crates/om9-core/tests/associative_rebuild.rs (preview_edits_never_touch_the_committed_document_until_one_apply, escape_discards_transient_nodes_and_a_moved_base_is_refused)",
+    "implementation/fixtures/M04/OM9-L3-01-04-006/positive.json",
+    "implementation/fixtures/M04/OM9-L3-01-04-006/negative.json"
+  ]
+}

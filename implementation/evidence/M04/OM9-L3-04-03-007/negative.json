@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "expect": "Invalid(\"ring solid open\")",
+      "mesh": "one face removed"
+    },
+    {
+      "expect": "Invalid(\"ring wall\")",
+      "thickness_mm": 0.15
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "om9.m05.l3_gem_evidence.v1",
+  "l3_id": "OM9-L3-04-09-004",
+  "title": "Gem Custom Shape From Profile",
+  "scope": "`Controller::dispatch(BuilderCustomGem)` / `gvCustomGem`; `GemSession::selected_profile`; `GemSpec::from_profile(profile, cut, params)`; `CustomGemParams`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "positive": "closed planar profile -> centred custom gem with the profile stored",
+  "negative": "open, non-planar, self-intersecting and zero-area profiles are refused",
+  "manual_gate": "OPEN",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-09-004-03"
+    ],
+    "fixture_manifest_sha256": "c68bb43813faa1e9637b6349ff9872bcc171c76dc3588566e6670b911568a186"
+  },
+  "tests": [
+    "the_custom_builder_uses_a_closed_planar_profile",
+    "the_custom_builder_refuses_an_open_or_non_planar_curve"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-16-006",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderGemCutter",
+  "cases": [
+    {
+      "case": "the preview is the target minus the cutters",
+      "input": "Boolean=On with a selected metal body",
+      "expect": "session.cut holds a closed result; the document is unchanged until Enter"
+    },
+    {
+      "case": "the cut is committed with its record",
+      "input": "Boolean=On Preserve=Remove Enter",
+      "expect": "the metal body geometry is replaced, om9.cutter.cut records removed_mm3/applied/preserve, no Gem Cutter body is inserted"
+    },
+    {
+      "case": "Boolean=One cuts the first cutter only",
+      "input": "Boolean=One on a two-cutter list",
+      "expect": "applied == 1 and the removed volume is not larger than the full cut"
+    },
+    {
+      "case": "the cut is one transaction",
+      "input": "Undo after the commit",
+      "expect": "the metal body and the cutter bodies return to the pre-command state"
+    }
+  ]
+}

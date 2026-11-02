@@ -1,0 +1,51 @@
+{
+  "batch": "RECTANGLE-QUADRANT-DIAG-20261026",
+  "recorded_at_utc": "2026-10-26T07:00:47.329361+00:00",
+  "source_head": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "target": "Windows x64 standalone OM9; default features",
+  "build_target_dir": "L:/om9-target",
+  "jobs": 2,
+  "production_code_changed": false,
+  "source_sha256": {
+    "crates/om9-app/src/session/rect.rs": "b8fa321d49b026a2c236dd00a1b781a13d8d4c389cdcbf763db40dcfc0a17b38",
+    "crates/om9-app/src/session.rs": "8f6bf7e4fc2f585085818d84c22eeeff060ce3d88c9d4d8a6d789bf812916831",
+    "crates/om9-app/tests/rect.rs": "05588e7a0f0a360f40bec2a5576a481e78206a9c4236365bd8d04e41f0992938",
+    "crates/om9-app/src/ui.rs": "94ec147b32a3a802f559a4a90a0986fcb98950798686bd3042dab92c2cdb7426"
+  },
+  "artifact_sha256": {
+    "cargo-test-initial-harness.log": "4dddb9e1eef2c654b0bf05434d7e34a7b2e13d4f2efc09244be25ca65f9f7e82",
+    "cargo-test-no-default-features.log": "6a6c779b917964565afa830ed85eb715cd8b55f17e45f5a19513f397305f27ff",
+    "cargo-test.log": "23c970d168957c5217648b06d61e894589c24321c9371df10a97b9f0889cf346",
+    "prune.log": "63dd634046e142a6051bf1377e0ae3c1af4f39c05b2a6afe3858524f1623f9a2",
+    "public-source-audit.json": "827f2b7b375a8222223d42ff85c0931abb86986a7acc1a78af3df5e5dffc6f3b",
+    "README.md": "07c53035643920d7d8d164ae0f0c3b5ac516b98aec395641840425faf594d6dc",
+    "rectangle_quadrants_diagnostic.rs": "a36afd7c917e71dcd3afa5ae3c360c808e10d7041263423a54a65079fe87f331",
+    "results.json": "0071214fc9b599684f39e384f09339c7973881ee99615d5ceb1541635ba90f92"
+  },
+  "expected_test_exit_code": 101,
+  "diagnostic_tests": {
+    "failed": 2,
+    "passed": 0
+  },
+  "quadrant_cases": {
+    "total": 8,
+    "failed": 6,
+    "passed": 2
+  },
+  "typed_point_cases": {
+    "total": 1,
+    "rejected": 1
+  },
+  "live_ui_replay": false,
+  "native_measurement": false,
+  "public_source_audit": {
+    "source_files": 12576,
+    "icon_bindings": 511,
+    "svg_files": 510,
+    "errors": []
+  },
+  "scoped_git_diff_check": "PASS",
+  "temporary_integration_test_removed": true,
+  "prune": "PASS; 0 removed; cited runs retained"
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-19-001",
+  "kind": "positive",
+  "input": "compute a solid's volume in mm^3 and refuse an open shell",
+  "expected": "a closed 10 x 5 x 2 mm box measures 100 mm^3; 100 cm^3 converts to 100,000 mm^3 before aggregation",
+  "verified_by": [
+    "a_closed_box_volume_is_admitted_and_project_units_convert_to_mm",
+    "an_open_shell_or_an_empty_solid_never_gets_a_volume",
+    "non_finite_and_zero_volumes_are_refused",
+    "the_icon_reports_a_closed_box_in_grams_and_pennyweights_without_editing"
+  ],
+  "notes": [
+    "The kernel measures canonical source, never the display mesh or a bounding box.",
+    "Volume conversion is cubic: a volume in cm^3 is multiplied by 1000, not passed through a length conversion."
+  ]
+}

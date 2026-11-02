@@ -1,0 +1,142 @@
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 36.29s
+     Running tests\angle_isocurve.rs (L:\om9-target\debug\deps\angle_isocurve-e0366bdf1f3f4108.exe)
+
+running 2 tests
+test angle_isocurve_options_use_the_shared_snapshot ... ok
+test angle_isocurve_extracts_at_the_requested_angle ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\apply_crv.rs (L:\om9-target\debug\deps\apply_crv-e9596e98bade272c.exe)
+
+running 1 test
+test apply_crv_maps_a_curve_onto_the_surface ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\arc.rs (L:\om9-target\debug\deps\arc-d29a8f67515c6e62.exe)
+
+running 13 tests
+test arc_start_point_preview_follows_the_active_cplane ... ok
+test arc_mode_tokens_and_mode_lock ... ok
+test arc_center_preview_follows_the_active_cplane ... ok
+test arc_preview_has_thirty_two_segments ... ok
+test arc_radius_preview_uses_the_preset ... ok
+test arc_start_direction_uses_the_start_tangent ... ok
+test arc_mode_change_clears_the_radius_option ... ok
+test arc_accepts_diameter_option ... ok
+test arc_center_uses_the_shared_choice_option ... ok
+test arc_three_points_match_the_circumcircle ... ok
+test arc_radius_option_sets_the_radius ... ok
+test arc_center_mode_uses_start_and_end_angles ... ok
+test arc_center_follows_the_active_cplane ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\arc_blend.rs (L:\om9-target\debug\deps\arc_blend-0efecb8592bda7db.exe)
+
+running 2 tests
+test arc_blend_follows_the_active_cplane ... ok
+test arc_blend_connects_two_curve_ends ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\blend.rs (L:\om9-target\debug\deps\blend-bf2dd82b06e343f2.exe)
+
+running 5 tests
+test blend_exposes_scale_tokens ... ok
+test blend_curve_bridges_two_curve_ends ... ok
+test blend_accepts_tangent_scale_options ... ok
+test adjustable_blend_crv_dispatches_to_the_same_builder ... ok
+test match_uses_the_blend_builder_with_the_match_label ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\circle.rs (L:\om9-target\debug\deps\circle-ddb82b5a84b7520a.exe)
+
+running 29 tests
+test circle_fit_points_preview_is_a_ring ... ok
+test circle_center_preview_follows_the_active_cplane ... ok
+test circle_preview_and_tokens_follow_the_pending_points ... ok
+test circle_deformable_preview_uses_the_rebuilt_curve ... ok
+test circle_deformable_rejects_point_count_not_above_degree ... ok
+test circle_tangent_preview_is_a_ring ... ok
+test circle_tangent_point_preview_is_a_ring ... ok
+test circle_around_curve_preview_uses_the_path_normal ... ok
+test circle_two_point_preview_follows_the_active_cplane ... ok
+test circle_center_follows_the_active_cplane ... ok
+test circle_three_point_uses_the_circumcircle ... ok
+test circle_deformable_token_toggles_off ... ok
+test circle_center_and_radius_match ... ok
+test circle_accepts_circumference_size_and_exposes_size_tokens ... ok
+test circle_tangent_accepts_a_bare_radius ... ok
+test circle_around_curve_uses_the_path ... ok
+test circle_tangent_to_a_line_and_point ... ok
+test circle_fit_points_fits_a_circle ... ok
+test circle_area_size_uses_the_shared_choice_option ... ok
+test circle_vertical_preview_is_a_closed_ring ... ok
+test circle_tangent_to_two_lines ... ok
+test circle_vertical_mode_pick_sets_the_plane_from_the_point ... ok
+test circle_two_point_uses_the_diameter ... ok
+test circle_vertical_mode_uses_a_vertical_plane ... ok
+test circle_accepts_diameter_and_area_sizes ... ok
+test circle_accepts_approx_alias ... ok
+test circle_accepts_diameter_and_area_prefixes ... ok
+test circle_accepts_bare_deformable_option ... ok
+test circle_deformable_rebuilds_to_point_count ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\command_sessions.rs (L:\om9-target\debug\deps\command_sessions-42703811ec818c73.exe)
+
+running 6 tests
+test unavailable_command_and_unknown_options_cannot_publish_or_replace_active_session ... ok
+test numeric_cmd_points_use_page_units_and_captured_cplane_exactly_once ... ok
+test both_sides_uses_start_as_midpoint_and_empty_enter_never_repeats_active_session ... ok
+test cancel_and_invalid_second_point_preserve_world_and_executable_redo ... ok
+test menu_cmd_and_f6_dispatch_the_same_line_phases_and_atomic_commit ... ok
+test scene_is_derived_from_published_document_and_recent_icons_hold_nine_completed_commands ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests\command_shortcuts.rs (L:\om9-target\debug\deps\command_shortcuts-4f0d0c635134895d.exe)
+
+running 3 tests
+test space_while_editing_the_command_line_does_not_repeat ... ok
+test space_repeats_the_allowlisted_command_when_the_editor_is_idle ... ok
+test escape_aborts_the_running_command_and_keeps_the_document ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s
+
+     Running tests\command_tokens.rs (L:\om9-target\debug\deps\command_tokens-af9e3befc9344a2c.exe)
+
+running 1 test
+test clicking_the_both_sides_token_toggles_through_the_typed_option_path ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.49s
+
+     Running tests\command_transactions.rs (L:\om9-target\debug\deps\command_transactions-f0064ba042adbc0b.exe)
+
+running 5 tests
+test fixture_design_pairs_are_present ... ok
+test u1_to_u4_a_failure_writes_nothing ... ok
+test x1_to_x3_and_y1_to_y4_a_cancel_leaves_no_orphan ... ok
+test t1_to_t3_one_action_is_one_journal_entry ... ok
+test v1_to_v2_and_w1_to_w4_the_journal_walks_back_and_forward ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests\command_values.rs (L:\om9-target\debug\deps\command_values-682dbf160fbc3510.exe)
+
+running 7 tests
+test interp_snapshot_carries_degree_and_close ... ok
+test top11_duplicate_flags_are_typed_values ... ok
+test rebuild_and_polygon_snapshots_carry_typed_values ... ok
+test helix_and_spiral_snapshots_carry_typed_owner_values ... ok
+test snapshots_expose_typed_values_not_only_labels ... ok
+test primitive_snapshots_carry_typed_owner_values ... ok
+test angle_and_divide_snapshots_carry_typed_values ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

@@ -1,0 +1,24 @@
+{
+  "schema": "om9.m05.l3_gem_placement_evidence.v1",
+  "l3_id": "OM9-L3-04-10-007",
+  "title": "Gem On Surface",
+  "command": "BuilderGemOnSurface / gvGemOnSurface",
+  "scope": "`gem_placement::place_on_surface`; `SurfaceParams`; `GemPlacementTool::OnSurface`",
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",
+  "positive": "surface normal frame, UV grid placement and a UV-bearing link",
+  "negative": "out-of-domain UVs and degenerate normals are typed refusals",
+  "manual_gate": "M05-UI",
+  "reviewer": null,
+  "statement": "Automated evidence only; the M05-UI manual review remains open and no reviewer signature is claimed.",
+  "l4": {
+    "l4_receipts": [
+      "OM9-L4-10-007-03"
+    ],
+    "fixture_manifest_sha256": "124c936339f96a3e2633be47bb4204f3d18a4e1813e768d4b5e879dd35d7a00c"
+  },
+  "tests": [
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/tests/gem_placement.rs"
+  ],
+  "test": "the_surface_tool_stands_the_gem_on_the_surface_normal"
+}

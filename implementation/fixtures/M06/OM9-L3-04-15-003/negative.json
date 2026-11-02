@@ -1,0 +1,19 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-15-003",
+  "cases": [
+    {
+      "input": "no surface selected",
+      "error": "missing prong surface selection"
+    },
+    {
+      "input": "UV=1",
+      "error": "invalid settings uv option"
+    },
+    {
+      "input": "Diameter=0",
+      "error": "invalid prong diameter"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

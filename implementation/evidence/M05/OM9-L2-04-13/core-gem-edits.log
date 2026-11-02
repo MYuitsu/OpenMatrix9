@@ -1,0 +1,26 @@
+$ cargo test -p om9-core --test gem_edits -j 2
+# exit code: 0
+# captured: 2026-10-28T04:05:57Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 14 tests
+test a_size_edit_keeps_the_crown_to_pavilion_proportion ... ok
+test a_round_stone_collapses_two_diameters_and_refuses_a_cut_shape_mismatch ... ok
+test a_cut_edit_keeps_a_compatible_shape_and_rebuilds_the_record ... ok
+test a_missing_style_file_reads_as_the_empty_store_but_a_bad_name_is_refused ... ok
+test match_attributes_copies_only_the_masked_groups ... ok
+test a_style_roundtrips_the_attributes_but_not_the_gem_identity ... ok
+test match_attributes_refuses_an_empty_mask ... ok
+test the_map_numbers_the_scene_in_order_and_refuses_a_bad_point ... ok
+test an_empty_edit_is_a_valid_no_op_that_keeps_the_identity ... ok
+test the_reporter_refuses_an_impossible_density ... ok
+test a_density_override_scales_the_mass_but_not_the_formula_delta ... ok
+test the_reporter_groups_by_shape_cut_and_size_and_totals_the_mass ... ok
+test the_reporter_uses_the_material_density_and_cross_checks_the_trade_formula ... ok
+test a_style_store_replaces_by_name_and_saves_atomically ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.11s
+     Running tests\gem_edits.rs (cargo-target\debug\deps\gem_edits-cc11b2bd381a0526.exe)

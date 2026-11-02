@@ -50,6 +50,9 @@ impl Top11Result {
 /// The in-flight point/object-driven Top 11 command.
 #[derive(Debug, Clone, PartialEq)]
 pub enum Top11Pending {
+    SelectObjects {
+        action: Top11Action,
+    },
     Duplicate {
         ids: BTreeSet<ObjectId>,
         base: Option<Point3>,
@@ -65,6 +68,13 @@ pub enum Top11Pending {
         target: ObjectId,
         cutters: Vec<ObjectId>,
     },
+    SplitMany {
+        targets: Vec<ObjectId>,
+        cutters: Vec<ObjectId>,
+    },
+    SplitPoint {
+        target: ObjectId,
+    },
     Trim {
         target: ObjectId,
         cutters: Vec<ObjectId>,
@@ -73,11 +83,13 @@ pub enum Top11Pending {
     Move {
         ids: BTreeSet<ObjectId>,
         base: Option<Point3>,
+        vertical: bool,
     },
     Rotate {
         ids: BTreeSet<ObjectId>,
         center: Option<Point3>,
         reference: Option<Point3>,
+        copy: bool,
     },
     Mirror {
         ids: BTreeSet<ObjectId>,
@@ -90,8 +102,11 @@ pub enum Top11Pending {
 impl Top11Pending {
     pub fn action(&self) -> Top11Action {
         match self {
+            Self::SelectObjects { action } => *action,
             Self::Duplicate { .. } => Top11Action::Duplicate,
             Self::Split { .. } => Top11Action::Split,
+            Self::SplitMany { .. } => Top11Action::Split,
+            Self::SplitPoint { .. } => Top11Action::Split,
             Self::Trim { .. } => Top11Action::Trim,
             Self::Move { .. } => Top11Action::Move,
             Self::Rotate { .. } => Top11Action::Rotate,
@@ -101,9 +116,12 @@ impl Top11Pending {
 
     pub fn prompt(&self) -> &'static str {
         match self {
+            Self::SelectObjects { .. } => "select objects (Enter to continue)",
             Self::Duplicate { base: None, .. } => "pick the base point",
             Self::Duplicate { .. } => "pick a destination point (Enter to finish)",
             Self::Split { .. } => "pick cutting curves (Enter to execute)",
+            Self::SplitMany { .. } => "pick cutting curves (Enter to execute)",
+            Self::SplitPoint { .. } => "pick a point on the line",
             Self::Trim {
                 fractions: None, ..
             } => "pick cutting curves (Enter to continue)",
@@ -128,12 +146,95 @@ impl Top11Pending {
     pub fn needs_object(&self) -> bool {
         matches!(
             self,
-            Self::Split { .. }
+            Self::SelectObjects { .. }
+                | Self::Split { .. }
+                | Self::SplitMany { .. }
                 | Self::Trim {
                     fractions: None,
                     ..
                 }
         )
+    }
+    /// Current Duplicate flags as command-line options. Other Top11 actions
+    /// remain positional object/point input and therefore expose no fake row.
+    pub fn option_tokens(&self) -> Vec<(&'static str, &'static str)> {
+        if let Self::Split { cutters, .. } = self {
+            return if cutters.is_empty() {
+                vec![("Point", "Point")]
+            } else {
+                Vec::new()
+            };
+        }
+        if let Self::Move { vertical, .. } = self {
+            return vec![(
+                "Vertical",
+                if *vertical {
+                    "Vertical=No"
+                } else {
+                    "Vertical=Yes"
+                },
+            )];
+        }
+        if let Self::Mirror { copy, .. } = self {
+            return vec![
+                ("Copy", if *copy { "Copy=No" } else { "Copy=Yes" }),
+                ("3Point", "3Point"),
+                ("XAxis", "XAxis"),
+                ("YAxis", "YAxis"),
+            ];
+        }
+        if let Self::Rotate { copy, .. } = self {
+            return vec![("Copy", if *copy { "Copy=No" } else { "Copy=Yes" })];
+        }
+        let Self::Duplicate {
+            base,
+            vertical,
+            from_last,
+            use_last_distance,
+            use_last_direction,
+            ..
+        } = self
+        else {
+            return Vec::new();
+        };
+        let mut options = vec![
+            (
+                "Vertical",
+                if *vertical {
+                    "Vertical=No"
+                } else {
+                    "Vertical=Yes"
+                },
+            ),
+            (
+                "FromLastPoint",
+                if *from_last {
+                    "FromLastPoint=No"
+                } else {
+                    "FromLastPoint=Yes"
+                },
+            ),
+            (
+                "UseLastDistance",
+                if *use_last_distance {
+                    "UseLastDistance=No"
+                } else {
+                    "UseLastDistance=Yes"
+                },
+            ),
+            (
+                "UseLastDirection",
+                if *use_last_direction {
+                    "UseLastDirection=No"
+                } else {
+                    "UseLastDirection=Yes"
+                },
+            ),
+        ];
+        if base.is_none() {
+            options.insert(0, ("InPlace", "InPlace"));
+        }
+        options
     }
 }
 
@@ -225,7 +326,68 @@ impl Controller {
     }
 
     pub fn top11_availability(&self) -> [Top11Availability; 11] {
-        top11::toolbar(&self.top11_context())
+        let mut items = top11::toolbar(&self.top11_context());
+        // M04 owns the Ring Rail builder now: the core model keeps it conservatively
+        // disabled, and the application enables it when the builder provider is compiled in.
+        for item in &mut items {
+            if !self.is_running()
+                && self.selection.is_empty()
+                && item.action != Top11Action::RingRail
+            {
+                *item = Top11Availability {
+                    action: item.action,
+                    enabled: true,
+                    reason: "",
+                };
+            }
+            if item.action == Top11Action::Split {
+                let context = self.top11_context();
+                if !context.running && context.selected > 1 && context.curves == context.selected {
+                    *item = Top11Availability {
+                        action: Top11Action::Split,
+                        enabled: true,
+                        reason: "",
+                    };
+                }
+            }
+            if item.action == Top11Action::RingRail {
+                *item = Top11Availability {
+                    action: Top11Action::RingRail,
+                    enabled: !self.is_running(),
+                    reason: if self.is_running() {
+                        "a command is already running"
+                    } else {
+                        ""
+                    },
+                };
+            }
+            #[cfg(feature = "occt-brep")]
+            if item.action == Top11Action::Explode {
+                let context = self.top11_context();
+                if !context.running
+                    && context.breps > 0
+                    && context.curves + context.breps == context.selected
+                {
+                    *item = Top11Availability {
+                        action: Top11Action::Explode,
+                        enabled: true,
+                        reason: "",
+                    };
+                }
+            }
+            #[cfg(feature = "occt-brep")]
+            if item.action == Top11Action::Join {
+                let context = self.top11_context();
+                if !context.running && context.selected >= 2 && context.breps == context.selected {
+                    *item = Top11Availability {
+                        action: Top11Action::Join,
+                        enabled: true,
+                        reason: "",
+                    };
+                }
+            }
+        }
+        items
     }
 
     pub fn top11_pending(&self) -> Option<&Top11Pending> {
@@ -299,8 +461,12 @@ impl Controller {
         if self.is_running() {
             return Err(Error::Busy);
         }
+        self.duplicate_in_place_ids(&self.selection.clone())
+    }
+
+    fn duplicate_in_place_ids(&mut self, sources: &BTreeSet<ObjectId>) -> Result<Top11Result> {
         let copies =
-            top11::duplicate_entities(self.document(), &self.selection, self.coordinator.limits())?;
+            top11::duplicate_entities(self.document(), sources, self.coordinator.limits())?;
         let ids: Vec<ObjectId> = copies.iter().map(|entity| entity.id).collect();
         let mutations = copies
             .into_iter()
@@ -363,6 +529,14 @@ impl Controller {
         })
     }
 
+    /// Set the Mirror copy/delete-input flag without re-entering the command.
+    pub fn top11_set_mirror_copy(&mut self, copy: bool) -> bool {
+        let Some(Top11Pending::Mirror { copy: current, .. }) = self.top11_pending.as_mut() else {
+            return false;
+        };
+        *current = copy;
+        true
+    }
     /// Set one Duplicate option while the base-point prompt is active.
     pub fn top11_set_duplicate_option(&mut self, key: &str, value: Option<bool>) -> Result<bool> {
         let Some(Top11Pending::Duplicate {
@@ -391,6 +565,17 @@ impl Controller {
     pub fn top11_finish(&mut self) -> Option<Result<Top11Result>> {
         let pending = self.top11_pending.clone()?;
         match pending {
+            Top11Pending::SelectObjects { action } => {
+                if self.selection.is_empty() {
+                    return Some(Err(Error::Missing("selected objects")));
+                }
+                self.top11_pending = None;
+                let result = self.top11_invoke(action);
+                if result.is_err() {
+                    self.top11_pending = Some(Top11Pending::SelectObjects { action });
+                }
+                Some(result)
+            }
             Top11Pending::Duplicate { copies, .. } => {
                 self.top11_pending = None;
                 Some(Ok(Top11Result::Completed {
@@ -399,6 +584,9 @@ impl Controller {
                 }))
             }
             Top11Pending::Split { target, cutters } => Some(self.finish_split(target, cutters)),
+            Top11Pending::SplitMany { targets, cutters } => {
+                Some(self.finish_split_many(targets, cutters))
+            }
             Top11Pending::Trim {
                 target,
                 cutters,
@@ -427,6 +615,90 @@ impl Controller {
         })
     }
 
+    fn finish_split_many(
+        &mut self,
+        targets: Vec<ObjectId>,
+        cutters: Vec<ObjectId>,
+    ) -> Result<Top11Result> {
+        if cutters.is_empty() {
+            return Err(Error::Missing("cutting curve"));
+        }
+        let mut mutations = Vec::new();
+        let mut selected = Vec::new();
+        let mut changed = false;
+        for target in targets {
+            let entity = self
+                .document()
+                .entities
+                .get(&target)
+                .ok_or(Error::Missing("split curve"))?;
+            let Geometry::Curve(curve) = &entity.geometry else {
+                return Err(Error::Invalid("split target must be a curve"));
+            };
+            let mut fractions = Vec::new();
+            for cutter in &cutters {
+                match self.cutter_fractions(target, *cutter) {
+                    Ok(hit) => fractions.extend(hit),
+                    Err(Error::Invalid("cutting object has no intersection")) => {}
+                    Err(error) => return Err(error),
+                }
+            }
+            if fractions.is_empty() {
+                selected.push(target);
+                continue;
+            }
+            let pieces = top11::split_at_fractions(curve, &fractions, self.coordinator.limits())?;
+            if pieces.len() < 2 {
+                return Err(Error::Invalid("split produced no pieces"));
+            }
+            mutations.push(Mutation::Delete {
+                source: self.document().stamp(target)?,
+            });
+            for piece in pieces {
+                let child = child_entity(entity, Geometry::Curve(piece));
+                selected.push(child.id);
+                mutations.push(Mutation::Insert {
+                    document: self.document,
+                    entity: child,
+                });
+            }
+            changed = true;
+        }
+        if !changed {
+            return Err(Error::Invalid("cutting objects have no intersection"));
+        }
+        let count = selected.len();
+        self.commit_top11(Top11Action::Split, mutations, Some(selected))?;
+        self.top11_pending = None;
+        Ok(Top11Result::Completed {
+            label: Top11Action::Split.label(),
+            objects: count,
+        })
+    }
+
+    fn top11_split_point_mode(&mut self) -> Result<Top11Result> {
+        let Some(Top11Pending::Split { target, cutters }) = self.top11_pending.as_ref() else {
+            return Err(Error::Invalid("split point option"));
+        };
+        if !cutters.is_empty() {
+            return Err(Error::Invalid("remove cutting objects before Point"));
+        }
+        let target = *target;
+        let entity = self
+            .document()
+            .entities
+            .get(&target)
+            .ok_or(Error::Missing("split curve"))?;
+        if !matches!(entity.geometry, Geometry::Curve(Curve::Line { .. })) {
+            return Err(Error::Unsupported("split by point currently needs a line"));
+        }
+        self.top11_pending = Some(Top11Pending::SplitPoint { target });
+        Ok(Top11Result::Awaiting {
+            label: Top11Action::Split.label(),
+            prompt: "pick a point on the line",
+        })
+    }
+
     fn finish_trim_cutters(
         &mut self,
         target: ObjectId,
@@ -449,8 +721,25 @@ impl Controller {
 
     /// Run an immediate Top 11 action or start its point prompt.
     pub fn top11_invoke(&mut self, action: Top11Action) -> Result<Top11Result> {
+        if !self.is_running() && self.selection.is_empty() && action != Top11Action::RingRail {
+            self.top11_pending = Some(Top11Pending::SelectObjects { action });
+            return Ok(Top11Result::Awaiting {
+                label: action.label(),
+                prompt: "select objects (Enter to continue)",
+            });
+        }
         let context = self.top11_context();
-        let availability = top11::availability(action, &context);
+        let availability = if matches!(
+            action,
+            Top11Action::RingRail | Top11Action::Explode | Top11Action::Join | Top11Action::Split
+        ) {
+            self.top11_availability()
+                .into_iter()
+                .find(|item| item.action == action)
+                .ok_or(Error::Missing("top11 ring rail"))?
+        } else {
+            top11::availability(action, &context)
+        };
         if !availability.enabled {
             return Err(Error::Unsupported(availability.reason));
         }
@@ -481,11 +770,54 @@ impl Controller {
             }
             Top11Action::Explode => {
                 let originals: Vec<ObjectId> = self.selection.iter().copied().collect();
-                let pieces = top11::explode_entities(
-                    self.document(),
-                    &self.selection,
-                    self.coordinator.limits(),
-                )?;
+                let mut pieces = Vec::new();
+                for id in &self.selection {
+                    let entity = self
+                        .document()
+                        .entities
+                        .get(id)
+                        .ok_or(Error::Missing("object"))?;
+                    match &entity.geometry {
+                        Geometry::Curve(_) => pieces.extend(top11::explode_entities(
+                            self.document(),
+                            &BTreeSet::from([*id]),
+                            self.coordinator.limits(),
+                        )?),
+                        Geometry::Brep(brep) => {
+                            #[cfg(feature = "occt-brep")]
+                            {
+                                let limits = self.coordinator.limits();
+                                let count = om9_kernel::creation::measure(brep, limits)
+                                    .map_err(|error| Error::Io(format!("BRep explode: {error}")))?
+                                    .faces;
+                                if count < 2 {
+                                    return Err(Error::Unsupported("explode needs a polysurface"));
+                                }
+                                pieces
+                                    .try_reserve(count)
+                                    .map_err(|_| Error::Budget("exploded faces"))?;
+                                for index in 0..count {
+                                    let face = om9_kernel::editing::extract_face(
+                                        brep,
+                                        index,
+                                        brep.display.deflection_mm,
+                                        limits,
+                                    )
+                                    .map_err(|error| Error::Io(format!("BRep explode: {error}")))?;
+                                    pieces.push(child_entity(entity, Geometry::Brep(face)));
+                                }
+                            }
+                            #[cfg(not(feature = "occt-brep"))]
+                            {
+                                let _ = brep;
+                                return Err(Error::Unsupported(
+                                    "BRep explode needs the OCCT kernel feature",
+                                ));
+                            }
+                        }
+                        _ => return Err(Error::Unsupported("explode needs curves or BReps")),
+                    }
+                }
                 let ids: Vec<ObjectId> = pieces.iter().map(|entity| entity.id).collect();
                 let mut mutations: Vec<Mutation> = originals
                     .iter()
@@ -507,12 +839,100 @@ impl Controller {
             }
             Top11Action::Join => {
                 let originals: Vec<ObjectId> = self.selection.iter().copied().collect();
-                let joined = top11::join_entities(
-                    self.document(),
-                    &self.selection,
-                    1e-7,
-                    self.coordinator.limits(),
-                )?;
+                let joined = if context.breps > 2 && context.breps == context.selected {
+                    #[cfg(feature = "occt-brep")]
+                    {
+                        self.join_many_breps(&originals)?
+                    }
+                    #[cfg(not(feature = "occt-brep"))]
+                    {
+                        return Err(Error::Unsupported(
+                            "BRep join needs the OCCT kernel feature",
+                        ));
+                    }
+                } else if context.breps == 2 && context.selected == 2 {
+                    #[cfg(feature = "occt-brep")]
+                    {
+                        let first = &self.document().entities[&originals[0]];
+                        let second = &self.document().entities[&originals[1]];
+                        let (Geometry::Brep(a), Geometry::Brep(b)) =
+                            (&first.geometry, &second.geometry)
+                        else {
+                            return Err(Error::Invalid("BRep join selection"));
+                        };
+                        let limits = self.coordinator.limits();
+                        let tolerance = self.document().effective_tolerance()?.absolute_mm;
+                        let world_a = if first.placement == Transform::identity() {
+                            a.clone()
+                        } else {
+                            om9_kernel::transform_ops::transform_brep(
+                                a,
+                                &first.placement,
+                                a.display.deflection_mm,
+                                limits,
+                            )
+                            .map_err(|e| Error::Io(format!("BRep join: {e}")))?
+                        };
+                        let world_b = if second.placement == Transform::identity() {
+                            b.clone()
+                        } else {
+                            om9_kernel::transform_ops::transform_brep(
+                                b,
+                                &second.placement,
+                                b.display.deflection_mm,
+                                limits,
+                            )
+                            .map_err(|e| Error::Io(format!("BRep join: {e}")))?
+                        };
+                        let before_a = om9_kernel::creation::measure(&world_a, limits)
+                            .map_err(|e| Error::Io(format!("BRep join: {e}")))?;
+                        let before_b = om9_kernel::creation::measure(&world_b, limits)
+                            .map_err(|e| Error::Io(format!("BRep join: {e}")))?;
+                        let result = om9_kernel::editing::sew(
+                            &world_a,
+                            &world_b,
+                            tolerance,
+                            a.display.deflection_mm.min(b.display.deflection_mm),
+                            limits,
+                        )
+                        .map_err(|e| Error::Io(format!("BRep join: {e}")))?;
+                        let after = om9_kernel::creation::measure(&result, limits)
+                            .map_err(|e| Error::Io(format!("BRep join: {e}")))?;
+                        if after.faces != before_a.faces + before_b.faces
+                            || after.shells != 1
+                            || after.naked_edges >= before_a.naked_edges + before_b.naked_edges
+                        {
+                            return Err(Error::Invalid("BRep faces do not share a joinable edge"));
+                        }
+                        let local = if first.placement == Transform::identity() {
+                            result
+                        } else {
+                            let inverse = om9_kernel::transform_ops::inverse(&first.placement)
+                                .map_err(|e| Error::Io(format!("BRep join: {e}")))?;
+                            om9_kernel::transform_ops::transform_brep(
+                                &result,
+                                &inverse,
+                                result.display.deflection_mm,
+                                limits,
+                            )
+                            .map_err(|e| Error::Io(format!("BRep join: {e}")))?
+                        };
+                        child_entity(first, Geometry::Brep(local))
+                    }
+                    #[cfg(not(feature = "occt-brep"))]
+                    {
+                        return Err(Error::Unsupported(
+                            "BRep join needs the OCCT kernel feature",
+                        ));
+                    }
+                } else {
+                    top11::join_entities(
+                        self.document(),
+                        &self.selection,
+                        1e-7,
+                        self.coordinator.limits(),
+                    )?
+                };
                 let id = joined.id;
                 let mut mutations: Vec<Mutation> = originals
                     .iter()
@@ -533,6 +953,16 @@ impl Controller {
                 })
             }
             Top11Action::Split => {
+                if self.selection.len() > 1 {
+                    self.top11_pending = Some(Top11Pending::SplitMany {
+                        targets: self.selection.iter().copied().collect(),
+                        cutters: Vec::new(),
+                    });
+                    return Ok(Top11Result::Awaiting {
+                        label: action.label(),
+                        prompt: "pick cutting curves (Enter to execute)",
+                    });
+                }
                 let target = self
                     .selection
                     .iter()
@@ -585,11 +1015,16 @@ impl Controller {
             Top11Action::Move | Top11Action::Rotate | Top11Action::Mirror => {
                 let ids = self.selection.clone();
                 self.top11_pending = Some(match action {
-                    Top11Action::Move => Top11Pending::Move { ids, base: None },
+                    Top11Action::Move => Top11Pending::Move {
+                        ids,
+                        base: None,
+                        vertical: false,
+                    },
                     Top11Action::Rotate => Top11Pending::Rotate {
                         ids,
                         center: None,
                         reference: None,
+                        copy: false,
                     },
                     Top11Action::Mirror => Top11Pending::Mirror {
                         ids,
@@ -610,7 +1045,13 @@ impl Controller {
                     prompt: self.top11_prompt().unwrap_or("pick a point"),
                 })
             }
-            Top11Action::RingRail => Err(Error::Unsupported("Ring Rail builder belongs to M04")),
+            Top11Action::RingRail => {
+                self.begin_builder(om9_core::builder::BuilderKind::RingRail)?;
+                Ok(Top11Result::Awaiting {
+                    label: "Ring Rail",
+                    prompt: "builder panel",
+                })
+            }
         }
     }
 
@@ -622,6 +1063,54 @@ impl Controller {
             .take()
             .ok_or(Error::Missing("top 11 point command"))?;
         match pending {
+            Top11Pending::SelectObjects { action } => {
+                self.top11_pending = Some(Top11Pending::SelectObjects { action });
+                Err(Error::Invalid("select an object"))
+            }
+            Top11Pending::SplitPoint { target } => {
+                let result = (|| {
+                    let entity = self
+                        .document()
+                        .entities
+                        .get(&target)
+                        .ok_or(Error::Missing("split curve"))?;
+                    let Geometry::Curve(Curve::Line { start, end, .. }) = &entity.geometry else {
+                        return Err(Error::Unsupported("split by point currently needs a line"));
+                    };
+                    let start = entity.placement.point(*start)?;
+                    let end = entity.placement.point(*end)?;
+                    let direction = vector(start, end);
+                    let squared = dot(direction, direction);
+                    if squared <= 1e-24 {
+                        return Err(Error::Invalid("degenerate split line"));
+                    }
+                    let fraction = dot(vector(start, point), direction) / squared;
+                    let closest = add(start, scale(direction, fraction));
+                    let tolerance = self.document().effective_tolerance()?.absolute_mm;
+                    if !(0.0 < fraction && fraction < 1.0)
+                        || norm(vector(closest, point)) > tolerance
+                    {
+                        return Err(Error::Invalid(
+                            "point must lie inside the line within document tolerance",
+                        ));
+                    }
+                    let Geometry::Curve(curve) = &entity.geometry else {
+                        unreachable!()
+                    };
+                    let pieces =
+                        top11::split_at_fractions(curve, &[fraction], self.coordinator.limits())?;
+                    let count = pieces.len();
+                    self.commit_cut(Top11Action::Split, target, pieces)?;
+                    Ok(Top11Result::Completed {
+                        label: Top11Action::Split.label(),
+                        objects: count,
+                    })
+                })();
+                if result.is_err() {
+                    self.top11_pending = Some(Top11Pending::SplitPoint { target });
+                }
+                result
+            }
             Top11Pending::Duplicate {
                 ids,
                 base: None,
@@ -735,6 +1224,10 @@ impl Controller {
                 self.top11_pending = Some(Top11Pending::Split { target, cutters });
                 Err(Error::Invalid("split expects Enter to execute"))
             }
+            Top11Pending::SplitMany { targets, cutters } => {
+                self.top11_pending = Some(Top11Pending::SplitMany { targets, cutters });
+                Err(Error::Invalid("select a cutting object"))
+            }
             Top11Pending::Trim {
                 target,
                 cutters,
@@ -778,10 +1271,15 @@ impl Controller {
                     objects: self.selection.len(),
                 })
             }
-            Top11Pending::Move { ids, base: None } => {
+            Top11Pending::Move {
+                ids,
+                base: None,
+                vertical,
+            } => {
                 self.top11_pending = Some(Top11Pending::Move {
                     ids,
                     base: Some(point),
+                    vertical,
                 });
                 Ok(Top11Result::Awaiting {
                     label: Top11Action::Move.label(),
@@ -791,8 +1289,14 @@ impl Controller {
             Top11Pending::Move {
                 ids,
                 base: Some(base),
+                vertical,
             } => {
-                let delta = vector(base, point);
+                let mut delta = vector(base, point);
+                if vertical {
+                    let plane = self.input_plane();
+                    let normal = unit(cross(plane.x, plane.y))?;
+                    delta = scale(normal, dot(delta, normal));
+                }
                 let moves = top11::translate_placements(self.document(), &ids, delta)?;
                 let mutations = self.placement_mutations(moves)?;
                 self.commit_top11(Top11Action::Move, mutations, None)?;
@@ -805,11 +1309,13 @@ impl Controller {
                 ids,
                 center: None,
                 reference,
+                copy,
             } => {
                 self.top11_pending = Some(Top11Pending::Rotate {
                     ids,
                     center: Some(point),
                     reference,
+                    copy,
                 });
                 Ok(Top11Result::Awaiting {
                     label: Top11Action::Rotate.label(),
@@ -820,11 +1326,13 @@ impl Controller {
                 ids,
                 center: Some(center),
                 reference: None,
+                copy,
             } => {
                 self.top11_pending = Some(Top11Pending::Rotate {
                     ids,
                     center: Some(center),
                     reference: Some(point),
+                    copy,
                 });
                 Ok(Top11Result::Awaiting {
                     label: Top11Action::Rotate.label(),
@@ -835,6 +1343,7 @@ impl Controller {
                 ids,
                 center: Some(center),
                 reference: Some(reference),
+                copy,
             } => {
                 let axis = {
                     let plane = self.input_plane();
@@ -842,9 +1351,7 @@ impl Controller {
                 };
                 let degrees =
                     signed_degrees(axis, vector(center, reference), vector(center, point))?;
-                let moves = top11::rotate_placements(self.document(), &ids, center, axis, degrees)?;
-                let mutations = self.placement_mutations(moves)?;
-                self.commit_top11(Top11Action::Rotate, mutations, None)?;
+                self.commit_top11_rotation(&ids, center, axis, degrees, copy)?;
                 Ok(Top11Result::Completed {
                     label: Top11Action::Rotate.label(),
                     objects: ids.len(),
@@ -917,6 +1424,19 @@ impl Controller {
             .take()
             .ok_or(Error::Missing("top 11 object command"))?;
         match pending {
+            Top11Pending::SelectObjects { action } => {
+                let mut ids: Vec<ObjectId> = self.selection.iter().copied().collect();
+                if !ids.contains(&object) {
+                    ids.push(object);
+                }
+                let result = self.select_objects(&ids);
+                self.top11_pending = Some(Top11Pending::SelectObjects { action });
+                result?;
+                Ok(Top11Result::Awaiting {
+                    label: action.label(),
+                    prompt: "select objects (Enter to continue)",
+                })
+            }
             Top11Pending::Split {
                 target,
                 mut cutters,
@@ -935,6 +1455,40 @@ impl Controller {
                 }
                 cutters.push(object);
                 self.top11_pending = Some(Top11Pending::Split { target, cutters });
+                Ok(Top11Result::Awaiting {
+                    label: Top11Action::Split.label(),
+                    prompt: "pick more cutting curves (Enter to execute)",
+                })
+            }
+            Top11Pending::SplitMany {
+                targets,
+                mut cutters,
+            } => {
+                let validation = (|| {
+                    if targets.contains(&object) {
+                        return Err(Error::Invalid("cutting curve is a target"));
+                    }
+                    if cutters.contains(&object) {
+                        return Err(Error::Invalid("cutting curve already picked"));
+                    }
+                    let mut intersects = false;
+                    for target in &targets {
+                        match self.cutter_fractions(*target, object) {
+                            Ok(_) => intersects = true,
+                            Err(Error::Invalid("cutting object has no intersection")) => {}
+                            Err(error) => return Err(error),
+                        }
+                    }
+                    if !intersects {
+                        return Err(Error::Invalid("cutting object has no intersection"));
+                    }
+                    Ok(())
+                })();
+                if validation.is_ok() {
+                    cutters.push(object);
+                }
+                self.top11_pending = Some(Top11Pending::SplitMany { targets, cutters });
+                validation?;
                 Ok(Top11Result::Awaiting {
                     label: Top11Action::Split.label(),
                     prompt: "pick more cutting curves (Enter to execute)",
@@ -985,6 +1539,69 @@ impl Controller {
                 Err(Error::Invalid("top 11 command does not take an object"))
             }
         }
+    }
+
+    /// Remove a previously picked object from a selection or cutting-object stage.
+    pub fn top11_remove_object(&mut self, object: ObjectId) -> Result<Top11Result> {
+        let pending = self
+            .top11_pending
+            .clone()
+            .ok_or(Error::Missing("top 11 object command"))?;
+        let action = pending.action();
+        match pending {
+            Top11Pending::SelectObjects { .. } => {
+                if !self.selection.contains(&object) {
+                    return Err(Error::Missing("selected object"));
+                }
+                let ids: Vec<_> = self
+                    .selection
+                    .iter()
+                    .copied()
+                    .filter(|id| *id != object)
+                    .collect();
+                self.select_objects(&ids)?;
+            }
+            Top11Pending::Split {
+                target,
+                mut cutters,
+            } => {
+                let Some(index) = cutters.iter().position(|id| *id == object) else {
+                    return Err(Error::Missing("cutting object"));
+                };
+                cutters.remove(index);
+                self.top11_pending = Some(Top11Pending::Split { target, cutters });
+            }
+            Top11Pending::SplitMany {
+                targets,
+                mut cutters,
+            } => {
+                let Some(index) = cutters.iter().position(|id| *id == object) else {
+                    return Err(Error::Missing("cutting object"));
+                };
+                cutters.remove(index);
+                self.top11_pending = Some(Top11Pending::SplitMany { targets, cutters });
+            }
+            Top11Pending::Trim {
+                target,
+                mut cutters,
+                fractions: None,
+            } => {
+                let Some(index) = cutters.iter().position(|id| *id == object) else {
+                    return Err(Error::Missing("cutting object"));
+                };
+                cutters.remove(index);
+                self.top11_pending = Some(Top11Pending::Trim {
+                    target,
+                    cutters,
+                    fractions: None,
+                });
+            }
+            _ => return Err(Error::Invalid("top 11 command does not select objects")),
+        }
+        Ok(Top11Result::Awaiting {
+            label: action.label(),
+            prompt: self.top11_prompt().unwrap_or("select objects"),
+        })
     }
 
     /// Interior fractions produced by one cutting object: a curve, a NURBS surface or a
@@ -1210,6 +1827,103 @@ impl Controller {
         Ok((copies, replacements))
     }
 
+    #[cfg(feature = "occt-brep")]
+    fn join_many_breps(&self, ids: &[ObjectId]) -> Result<Entity> {
+        let limits = self.coordinator.limits();
+        let tolerance = self.document().effective_tolerance()?.absolute_mm;
+        let first = self
+            .document()
+            .entities
+            .get(&ids[0])
+            .ok_or(Error::Missing("BRep"))?;
+        let mut parts = Vec::new();
+        parts
+            .try_reserve_exact(ids.len())
+            .map_err(|_| Error::Budget("BRep join inputs"))?;
+        for id in ids {
+            let entity = self
+                .document()
+                .entities
+                .get(id)
+                .ok_or(Error::Missing("BRep"))?;
+            let Geometry::Brep(brep) = &entity.geometry else {
+                return Err(Error::Invalid("BRep join selection"));
+            };
+            let world = if entity.placement == Transform::identity() {
+                brep.clone()
+            } else {
+                om9_kernel::transform_ops::transform_brep(
+                    brep,
+                    &entity.placement,
+                    brep.display.deflection_mm,
+                    limits,
+                )
+                .map_err(|e| Error::Io(format!("BRep join: {e}")))?
+            };
+            let measure = om9_kernel::creation::measure(&world, limits)
+                .map_err(|e| Error::Io(format!("BRep join: {e}")))?;
+            parts.push((world, measure));
+        }
+        let (mut current, mut current_measure) = parts.remove(0);
+        let mut attempts = 0u64;
+        while !parts.is_empty() {
+            let mut joined = None;
+            for (index, (part, measure)) in parts.iter().enumerate() {
+                attempts = attempts
+                    .checked_add(1)
+                    .ok_or(Error::Overflow("BRep join attempts"))?;
+                if attempts > limits.max_outputs {
+                    return Err(Error::Budget("BRep join attempts"));
+                }
+                let candidate = om9_kernel::editing::sew(
+                    &current,
+                    part,
+                    tolerance,
+                    current
+                        .display
+                        .deflection_mm
+                        .min(part.display.deflection_mm),
+                    limits,
+                )
+                .map_err(|e| Error::Io(format!("BRep join: {e}")))?;
+                let after = om9_kernel::creation::measure(&candidate, limits)
+                    .map_err(|e| Error::Io(format!("BRep join: {e}")))?;
+                let faces = current_measure
+                    .faces
+                    .checked_add(measure.faces)
+                    .ok_or(Error::Overflow("BRep join faces"))?;
+                let naked = current_measure
+                    .naked_edges
+                    .checked_add(measure.naked_edges)
+                    .ok_or(Error::Overflow("BRep join edges"))?;
+                if after.faces == faces && after.shells == 1 && after.naked_edges < naked {
+                    joined = Some((index, candidate, after));
+                    break;
+                }
+            }
+            let Some((index, candidate, measure)) = joined else {
+                return Err(Error::Invalid("BRep faces do not form one connected shell"));
+            };
+            parts.remove(index);
+            current = candidate;
+            current_measure = measure;
+        }
+        let local = if first.placement == Transform::identity() {
+            current
+        } else {
+            let inverse = om9_kernel::transform_ops::inverse(&first.placement)
+                .map_err(|e| Error::Io(format!("BRep join: {e}")))?;
+            om9_kernel::transform_ops::transform_brep(
+                &current,
+                &inverse,
+                current.display.deflection_mm,
+                limits,
+            )
+            .map_err(|e| Error::Io(format!("BRep join: {e}")))?
+        };
+        Ok(child_entity(first, Geometry::Brep(local)))
+    }
+
     fn placement_mutations(&self, placements: Vec<(ObjectId, Transform)>) -> Result<Vec<Mutation>> {
         placements
             .into_iter()
@@ -1220,6 +1934,66 @@ impl Controller {
                 })
             })
             .collect()
+    }
+
+    fn commit_top11_rotation(
+        &mut self,
+        ids: &BTreeSet<ObjectId>,
+        center: Point3,
+        axis: Point3,
+        degrees: f64,
+        copy: bool,
+    ) -> Result<()> {
+        let placements = top11::rotate_placements(self.document(), ids, center, axis, degrees)?;
+        if !copy {
+            let mutations = self.placement_mutations(placements)?;
+            return self.commit_top11(Top11Action::Rotate, mutations, None);
+        }
+        let mut mutations = Vec::with_capacity(placements.len());
+        let mut selected = Vec::with_capacity(placements.len());
+        for (id, placement) in placements {
+            let source = self
+                .document()
+                .entities
+                .get(&id)
+                .ok_or(Error::Missing("object"))?;
+            let mut entity = child_entity(source, source.geometry.clone());
+            entity.placement = placement;
+            selected.push(entity.id);
+            mutations.push(Mutation::Insert {
+                document: self.document,
+                entity,
+            });
+        }
+        self.commit_top11(Top11Action::Rotate, mutations, Some(selected))
+    }
+
+    fn commit_top11_mirror_axis(
+        &mut self,
+        ids: &BTreeSet<ObjectId>,
+        origin: Point3,
+        normal: Point3,
+        copy: bool,
+    ) -> Result<()> {
+        let (copies, replacements) = self.mirror_entities(ids, origin, normal, copy)?;
+        let mut mutations = Vec::with_capacity(replacements.len() + copies.len());
+        for (id, geometry) in replacements {
+            mutations.push(Mutation::Geometry {
+                source: self.document().stamp(id)?,
+                geometry,
+            });
+        }
+        let new_ids: Vec<ObjectId> = copies.iter().map(|entity| entity.id).collect();
+        mutations.extend(copies.into_iter().map(|entity| Mutation::Insert {
+            document: self.document,
+            entity,
+        }));
+        let selection = if copy {
+            new_ids
+        } else {
+            ids.iter().copied().collect()
+        };
+        self.commit_top11(Top11Action::Mirror, mutations, Some(selection))
     }
 
     fn commit_top11(
@@ -1255,6 +2029,77 @@ impl Controller {
         if text.is_empty() {
             return None;
         }
+        if matches!(text.to_ascii_lowercase().as_str(), "point" | "p")
+            && matches!(self.top11_pending, Some(Top11Pending::Split { .. }))
+        {
+            return Some(self.top11_split_point_mode());
+        }
+        if matches!(
+            text.to_ascii_lowercase().as_str(),
+            "inplace" | "in place" | "in-place"
+        ) && let Some(Top11Pending::Duplicate {
+            ids, base: None, ..
+        }) = self.top11_pending.clone()
+        {
+            let pending = self.top11_pending.take();
+            let result = self.duplicate_in_place_ids(&ids);
+            if result.is_err() {
+                self.top11_pending = pending;
+            }
+            return Some(result);
+        }
+        if let Some(Top11Pending::Rotate { copy, .. }) = self.top11_pending.as_mut() {
+            let lower = text.to_ascii_lowercase();
+            if lower == "copy" || lower.starts_with("copy=") {
+                let next = match lower.strip_prefix("copy=") {
+                    None => !*copy,
+                    Some("yes" | "y" | "on" | "1" | "true") => true,
+                    Some("no" | "n" | "off" | "0" | "false") => false,
+                    Some(_) => return Some(Err(Error::Invalid("rotate copy option"))),
+                };
+                *copy = next;
+                return Some(Ok(Top11Result::Awaiting {
+                    label: Top11Action::Rotate.label(),
+                    prompt: "pick a point or enter an angle",
+                }));
+            }
+        }
+        if let Some(Top11Pending::Rotate {
+            ids,
+            center: Some(center),
+            reference: None,
+            copy,
+        }) = self.top11_pending.clone()
+            && let Ok(degrees) = text.parse::<f64>()
+        {
+            if !degrees.is_finite() {
+                return Some(Err(Error::Invalid("rotation angle")));
+            }
+            let plane = self.input_plane();
+            let axis = match unit(cross(plane.x, plane.y)) {
+                Ok(axis) => axis,
+                Err(error) => return Some(Err(error)),
+            };
+            let pending = self.top11_pending.take();
+            let result = self.commit_top11_rotation(&ids, center, axis, degrees, copy);
+            if result.is_err() {
+                self.top11_pending = pending;
+            }
+            return Some(result.map(|_| Top11Result::Completed {
+                label: Top11Action::Rotate.label(),
+                objects: ids.len(),
+            }));
+        }
+        if let Some(Top11Pending::Move { vertical, .. }) = self.top11_pending.as_mut()
+            && let Some((key, value)) = duplicate_option(text)
+            && key.eq_ignore_ascii_case("vertical")
+        {
+            *vertical = value.unwrap_or(!*vertical);
+            return Some(Ok(Top11Result::Awaiting {
+                label: Top11Action::Move.label(),
+                prompt: "pick a point",
+            }));
+        }
         if matches!(self.top11_pending, Some(Top11Pending::Duplicate { .. }))
             && let Some((key, value)) = duplicate_option(text)
         {
@@ -1266,6 +2111,44 @@ impl Controller {
             }));
         }
         if matches!(self.top11_pending, Some(Top11Pending::Mirror { .. })) {
+            let axis = match text.to_ascii_lowercase().as_str() {
+                "xaxis" | "x axis" => Some(true),
+                "yaxis" | "y axis" => Some(false),
+                _ => None,
+            };
+            if let Some(x_axis) = axis {
+                let Some(Top11Pending::Mirror { ids, copy, .. }) = self.top11_pending.clone()
+                else {
+                    unreachable!()
+                };
+                let plane = self.input_plane();
+                let normal = if x_axis { plane.y } else { plane.x };
+                let pending = self.top11_pending.take();
+                let result = self.commit_top11_mirror_axis(&ids, plane.origin, normal, copy);
+                if result.is_err() {
+                    self.top11_pending = pending;
+                }
+                return Some(result.map(|_| Top11Result::Completed {
+                    label: Top11Action::Mirror.label(),
+                    objects: ids.len(),
+                }));
+            }
+            if let Some(value) = text
+                .strip_prefix("Copy=")
+                .or_else(|| text.strip_prefix("copy="))
+            {
+                let copy = match value.to_ascii_lowercase().as_str() {
+                    "yes" | "y" | "on" | "1" | "true" => true,
+                    "no" | "n" | "off" | "0" | "false" => false,
+                    _ => return Some(Err(Error::Invalid("mirror copy option"))),
+                };
+                return Some(self.top11_set_mirror_copy(copy).then_some(()).ok_or(
+                    Error::Invalid("mirror copy option"),
+                ).map(|_| Top11Result::Awaiting {
+                    label: Top11Action::Mirror.label(),
+                    prompt: "pick two points on the mirror plane (type 3Point for any plane)",
+                }));
+            }
             let three = matches!(
                 text.to_ascii_lowercase().as_str(),
                 "3point" | "3-point" | "plane3" | "three"
@@ -1322,6 +2205,10 @@ impl Controller {
         if !top11_prefix
             && matches!(action, Top11Action::Move | Top11Action::Rotate)
             && !rest.is_empty()
+            && !(action == Top11Action::Rotate
+                && rest
+                    .iter()
+                    .all(|word| word.to_ascii_lowercase().starts_with("copy=")))
         {
             // `Move 1,2,3` / `Rotate 90` belong to the gumball numeric grammar, not to the
             // bare top11 action. Defer so a malformed numeric form is refused instead of
@@ -1361,6 +2248,9 @@ impl Controller {
             }
             Top11Action::Duplicate => self.top11_duplicate_in_place(),
             Top11Action::Mirror => {
+                if self.selection.is_empty() && option_words.is_empty() {
+                    return Some(self.top11_invoke(action));
+                }
                 let copy = !option_words
                     .iter()
                     .any(|word| word == "delete" || word == "deleteinput" || word == "nocopy");
@@ -1369,7 +2259,36 @@ impl Controller {
                 });
                 self.top11_mirror_mode(copy, three_point)
             }
+            Top11Action::Rotate if !option_words.is_empty() => {
+                if option_words.len() != 1 {
+                    return Some(Err(Error::Invalid("rotate options")));
+                }
+                let value = match option_words[0].strip_prefix("copy=") {
+                    Some("yes" | "y" | "on" | "1" | "true") => true,
+                    Some("no" | "n" | "off" | "0" | "false") => false,
+                    _ => return Some(Err(Error::Invalid("rotate copy option"))),
+                };
+                let result = match self.top11_invoke(action) {
+                    Ok(result) => result,
+                    Err(error) => return Some(Err(error)),
+                };
+                if let Some(Top11Pending::Rotate { copy, .. }) = self.top11_pending.as_mut() {
+                    *copy = value;
+                }
+                Ok(result)
+            }
             Top11Action::Split if !values.is_empty() => self.top11_split(values[0]),
+            Top11Action::Split
+                if option_words.len() == 1 && matches!(option_words[0].as_str(), "point" | "p") =>
+            {
+                if self.selection.is_empty() {
+                    return Some(Err(Error::Missing("select a line before Split Point")));
+                }
+                if let Err(error) = self.top11_invoke(action) {
+                    return Some(Err(error));
+                }
+                self.top11_split_point_mode()
+            }
             Top11Action::Trim if values.len() >= 2 => self.top11_trim(values[0], values[1]),
             _ => self.top11_invoke(action),
         })

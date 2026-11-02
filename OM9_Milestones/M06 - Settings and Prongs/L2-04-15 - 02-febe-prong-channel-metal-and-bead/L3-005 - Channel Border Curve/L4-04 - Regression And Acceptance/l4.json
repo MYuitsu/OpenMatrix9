@@ -44,6 +44,23 @@
   "manual_interpretation_note": "Sách 2 trang in 496–497, Channel Border Curve. Nếu L3 chỉ có parent_l2_range: đây là chỉ mục tra cứu bổ sung, không khẳng định manual có heading độc lập.",
   "source_claim_level": "SOURCE_MANUAL_AND_L3_ONLY__NO_APP_CODE_CONFIRMED",
   "purpose": "Channel Border Curve: hồi quy, liên kết, nghiệm thu e11. golden curves for straight/curved/closed rows; corners no pinch, stable orientations",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M06 - Settings and Prongs/L2-04-15 - 02-febe-prong-channel-metal-and-bead/L3-005 - Channel Border Curve/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 3,
+    "implementation_l4": null
+  },
   "inputs": [
     "ordered gem line; offset and end parameters",
     "L3 canonical: specs/06-ms06-settings-and-prongs/02-febe-prong-channel-metal-and-bead-settings/005-febe-channel-border-curve/l3.json",
@@ -399,14 +416,22 @@
       "stage": "3. Đặt đá theo curve - offset curve theo hình dạng đá",
       "why_for_this_task": "Đường biên kênh suy từ đường bao đá qua offset, và offset phụ thuộc hình dạng đá chứ không chỉ khoảng cách.",
       "om9_backend": "OCCT (offset curve) + pure Rust cho bảng hình dạng và kiểm tra hợp lệ",
-      "steps_cited": [1, 2, 3],
+      "steps_cited": [
+        1,
+        2,
+        3
+      ],
       "algorithm_steps": [
         "O1. Kiểm tra hình dạng đá có nằm trong tập hợp lệ không; nếu không, từ chối.",
         "O2. Từ hình dạng + cỡ đá, suy bán kính/đường bao tham chiếu.",
         "O3. Offset đường bao theo khoảng cách đã cho, ra một hoặc nhiều đường."
       ],
       "source_file": "CS/CSGemOffsetCurves/GemOffsetCurve.cs",
-      "source_methods": ["GemOffset", "GemOffsetCurves", "validGemShape"],
+      "source_methods": [
+        "GemOffset",
+        "GemOffsetCurves",
+        "validGemShape"
+      ],
       "boundaries_carried": [
         "KHÔNG đọc được bảng hình dạng hợp lệ gồm những giá trị nào (chỉ biết có hàm kiểm tra).",
         "KHÔNG chứng minh offset của họ tương đương offset của OCCT ở chỗ tự giao."
@@ -414,4 +439,5 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `REGRESSION_STRESS` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `REGRESSION_STRESS` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

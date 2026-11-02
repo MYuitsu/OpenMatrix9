@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 use crate::{PluginRun, core_error, error};
 use om9_core::{
+    associative::{PortKind, feature_provenance, typed_edges},
     budget::{Limits, Usage},
     geometry::{Curve, Geometry as CoreGeometry, Transform},
-    identity::{GroupId, LayerId, ObjectId},
+    history::{EvaluationState, Recipe},
+    identity::{GroupId, HistoryId, LayerId, ObjectId},
     layers::{LayerAction, LayerPlan},
     model::{Attributes, Document, Entity, Extension, Layer, Permissions},
     transaction::{Mutation, TransactionCoordinator, TransactionRequest},
@@ -11,10 +13,11 @@ use om9_core::{
 use om9_sdk::{
     AngleValue, AttributesPatch, BlockDefinitionInfo, Coordinates, CurveDefinition, CurveInfo,
     CurveSample, CurveSegment, CurveSemantics, Dimension, DocumentInfo, DocumentTolerance,
-    DocumentUnits, Geometry, GroupInfo, HostRequest, KnotMode, LayerInfo, LayerUpdate, LengthValue,
-    MeasuredAngle, MeasuredArea, MeasuredDistance, ObjectAttributes, ObjectBounds, ObjectExtension,
-    ObjectInfo, ObjectPage, ObjectProvenance, ObjectQuery, ObjectSummary, ParameterDomain,
-    ParameterValue, PluginMessage, ProjectChange, ProjectInfo, Result, SdkError,
+    DocumentUnits, FeatureDependencyInfo, FeatureInputInfo, FeatureProvenanceInfo,
+    FeatureRecordInfo, Geometry, GroupInfo, HostRequest, KnotMode, LayerInfo, LayerUpdate,
+    LengthValue, MeasuredAngle, MeasuredArea, MeasuredDistance, ObjectAttributes, ObjectBounds,
+    ObjectExtension, ObjectInfo, ObjectPage, ObjectProvenance, ObjectQuery, ObjectSummary,
+    ParameterDomain, ParameterValue, PluginMessage, ProjectChange, ProjectInfo, Result, SdkError,
     abi::{self, ReplyFn},
 };
 use serde_json::Value;
@@ -1000,6 +1003,28 @@ impl<'a> Staged<'a> {
         }
         Ok(())
     }
+    fn history_id(&self, text: &str) -> Result<HistoryId> {
+        let id = HistoryId(uuid::Uuid::parse_str(text).map_err(|e| error("id", e))?);
+        if id.to_string() != text || id.is_nil() {
+            return Err(error("id", "expected canonical nonnil history UUID"));
+        }
+        Ok(id)
+    }
+    fn history_record(&self, id: HistoryId) -> Result<FeatureRecordInfo> {
+        self.base
+            .history
+            .recipes
+            .get(&id)
+            .ok_or_else(|| error("missing", "history feature"))
+            .and_then(history_record_info)
+    }
+    fn history_records(&self) -> Result<Vec<FeatureRecordInfo>> {
+        let order = self.base.history.execution_order().map_err(core_error)?;
+        order
+            .into_iter()
+            .map(|id| self.history_record(id))
+            .collect()
+    }
     fn handle(&mut self, request: HostRequest) -> Result<Value> {
         self.calls += 1;
         if self.calls > 4096 {
@@ -1074,6 +1099,11 @@ impl<'a> Staged<'a> {
                 "curve_evaluate_segment",
                 "curve_definition",
                 "curve_semantics",
+                "history_list",
+                "history_feature",
+                "history_dependencies",
+                "history_provenance",
+                "history_rebuild_plan",
             ]),
             HostRequest::DocumentInfo => json(&DocumentInfo {
                 id: self.base.id.to_string(),
@@ -1796,6 +1826,41 @@ impl<'a> Staged<'a> {
                 self.placements.remove(&id);
                 json(&())
             }
+            HostRequest::HistoryList => json(&self.history_records()?),
+            HostRequest::HistoryFeature { id } => {
+                let id = self.history_id(&id)?;
+                json(&self.history_record(id)?)
+            }
+            HostRequest::HistoryDependencies => {
+                let edges =
+                    typed_edges(self.base, &self.base.history, self.limits).map_err(core_error)?;
+                let dependencies: Vec<FeatureDependencyInfo> = edges
+                    .iter()
+                    .map(|edge| FeatureDependencyInfo {
+                        producer: edge.producer.map(|id| id.to_string()),
+                        consumer: edge.consumer.to_string(),
+                        role: edge.role.clone(),
+                        kind: port_label(&edge.kind),
+                        source: edge.source.to_string(),
+                    })
+                    .collect();
+                json(&dependencies)
+            }
+            HostRequest::HistoryProvenance { id } => {
+                let id = self.history_id(&id)?;
+                let recipe = self
+                    .base
+                    .history
+                    .recipes
+                    .get(&id)
+                    .ok_or_else(|| error("missing", "history feature"))?;
+                json(&provenance_info(recipe)?)
+            }
+            HostRequest::HistoryRebuildPlan => {
+                let plan = om9_core::history_ops::plan_recompute(&self.base.history)
+                    .map_err(core_error)?;
+                json(&plan.iter().map(ToString::to_string).collect::<Vec<_>>())
+            }
             HostRequest::ObjectTransform { id, matrix } => {
                 let id = self.id(&id)?;
                 self.editable(id)?;
@@ -2037,6 +2102,9 @@ fn core_parameter(value: ParameterValue) -> om9_core::request::Value {
         ParameterValue::Choice { value } => CoreValue::Choice(value),
         ParameterValue::Boolean { value } => CoreValue::Boolean(value),
         ParameterValue::Text { value } => CoreValue::Text(value),
+        // A record may carry a bare number from legacy data; applying it is refused by the
+        // option domain (missing unit), never silently treated as millimetres.
+        ParameterValue::Number { value } => CoreValue::Number(value),
     }
 }
 fn sdk_parameter(value: &om9_core::request::Value) -> Result<ParameterValue> {
@@ -2059,12 +2127,7 @@ fn sdk_parameter(value: &om9_core::request::Value) -> Result<ParameterValue> {
         CoreValue::Text(value) => ParameterValue::Text {
             value: value.clone(),
         },
-        CoreValue::Number(_) => {
-            return Err(error(
-                "parameter",
-                "a quantity needs an explicit unit; a bare number is refused",
-            ));
-        }
+        CoreValue::Number(value) => ParameterValue::Number { value: *value },
     })
 }
 fn count_value(value: f64) -> Result<u64> {
@@ -2072,6 +2135,99 @@ fn count_value(value: f64) -> Result<u64> {
         return Err(error("parameter", "count must be a non-negative integer"));
     }
     Ok(value as u64)
+}
+
+/// The state label a history reader sees; the reason travels beside it, never inside it.
+fn state_label(state: &EvaluationState) -> (String, Option<String>) {
+    match state {
+        EvaluationState::Clean => ("clean".into(), None),
+        EvaluationState::Dirty(reason) => ("dirty".into(), Some(reason.clone())),
+        EvaluationState::Pending => ("pending".into(), None),
+        EvaluationState::Unresolved(reason) => ("unresolved".into(), Some(reason.clone())),
+        EvaluationState::Failed(reason) => ("failed".into(), Some(reason.clone())),
+        EvaluationState::Detached => ("detached".into(), None),
+    }
+}
+
+/// The public label of a recorded port. Keeping it in one function means the record, the
+/// dependency edge and the provenance always describe a type the same way.
+fn port_label(kind: &PortKind) -> String {
+    match kind {
+        PortKind::Geometry { kinds } => {
+            let names: Vec<&str> = kinds.iter().map(|kind| kind.tag()).collect();
+            format!("geometry:{}", names.join("|"))
+        }
+        PortKind::Length => "length".into(),
+        PortKind::Angle => "angle".into(),
+        PortKind::Ratio => "ratio".into(),
+        PortKind::Count => "count".into(),
+        PortKind::Text => "text".into(),
+        PortKind::Untyped => "untyped".into(),
+    }
+}
+
+fn feature_inputs(recipe: &Recipe) -> Vec<FeatureInputInfo> {
+    recipe
+        .inputs
+        .iter()
+        .enumerate()
+        .map(|(index, input)| FeatureInputInfo {
+            role: input.role.clone(),
+            kind: recipe
+                .input_ports
+                .get(index)
+                .map(|port| port_label(&port.kind))
+                .unwrap_or_else(|| "untyped".into()),
+            object: input.source.object.to_string(),
+        })
+        .collect()
+}
+
+fn feature_parameters(
+    parameters: &om9_core::request::Options,
+) -> Result<BTreeMap<String, ParameterValue>> {
+    parameters
+        .iter()
+        .map(|(name, value)| Ok((name.clone(), sdk_parameter(value)?)))
+        .collect()
+}
+
+fn history_record_info(recipe: &Recipe) -> Result<FeatureRecordInfo> {
+    let (state, state_reason) = state_label(&recipe.state);
+    Ok(FeatureRecordInfo {
+        id: recipe.id.to_string(),
+        command: recipe.command.clone(),
+        state,
+        state_reason,
+        revision: recipe.revision,
+        parameters: feature_parameters(&recipe.parameters)?,
+        inputs: feature_inputs(recipe),
+        outputs: recipe.outputs.iter().map(ToString::to_string).collect(),
+    })
+}
+
+fn provenance_info(recipe: &Recipe) -> Result<FeatureProvenanceInfo> {
+    let provenance = feature_provenance(recipe).map_err(core_error)?;
+    Ok(FeatureProvenanceInfo {
+        recipe: provenance.recipe.to_string(),
+        command: provenance.command,
+        command_version: provenance.command_version,
+        schema_version: provenance.schema_version,
+        solver: provenance.solver,
+        solver_version: provenance.solver_version,
+        unit: provenance.unit.symbol().into(),
+        parameters: feature_parameters(&provenance.parameters)?,
+        inputs: provenance
+            .inputs
+            .iter()
+            .map(|input| FeatureInputInfo {
+                role: input.role.clone(),
+                kind: port_label(&input.kind),
+                object: input.stamp.object.to_string(),
+            })
+            .collect(),
+        outputs: provenance.outputs.iter().map(ToString::to_string).collect(),
+    })
 }
 /// A bounds refusal is the analysis/sampling owner's decision.
 fn bounds_error(refusal: om9_core::Error) -> SdkError {
@@ -5353,5 +5509,175 @@ mod tests {
             }),
             "budget"
         );
+    }
+
+    /// Build a three-node typed history: rail -> profile -> sweep.
+    fn history_document() -> Document {
+        use om9_core::{
+            associative::FeaturePort,
+            geometry::{Curve as CoreCurve, Geometry as CoreHistoryGeometry},
+            history::{HistoryGraph, Recipe, ReplayEnvironment, Tolerance},
+            request::{Selection, SourceBinding},
+        };
+        let mut document = Document::new("history");
+        let mut add = |label: &str, geometry: CoreHistoryGeometry| {
+            let entity = Entity::new(label, geometry, None);
+            let id = entity.id;
+            document.entities.insert(id, entity);
+            id
+        };
+        let rail_curve = CoreHistoryGeometry::Curve(CoreCurve::Line {
+            start: [0., 0., 0.],
+            end: [10., 0., 0.],
+            domain: [0., 1.],
+        });
+        let profile_curve = CoreHistoryGeometry::Curve(CoreCurve::Line {
+            start: [0., 0., 0.],
+            end: [0., 1., 0.],
+            domain: [0., 1.],
+        });
+        let sweep_curve = CoreHistoryGeometry::Curve(CoreCurve::Line {
+            start: [0., 0., 0.],
+            end: [0., 0., 1.],
+            domain: [0., 1.],
+        });
+        let out_rail = add("Rail", rail_curve);
+        let out_profile = add("Profile", profile_curve);
+        let out_sweep = add("Sweep", sweep_curve);
+        let environment = ReplayEnvironment {
+            command_version: 1,
+            solver: "om9".into(),
+            solver_version: "1".into(),
+            schema_version: 1,
+            length_unit: Unit::Millimeter,
+            frame: om9_core::geometry::Transform::identity(),
+            tolerance: Tolerance::try_new(0.001, 1.0e-4, 1.0e-9).unwrap(),
+        };
+        let binding = |id, role: &str| SourceBinding {
+            role: role.into(),
+            source: document.stamp(id).unwrap(),
+            selection: Selection::Whole,
+        };
+        let port =
+            |role: &str| FeaturePort::geometry(role, &[om9_core::geometry::GeometryKind::Curve]);
+        let mut rail = Recipe::new(
+            document.id,
+            "RingRail",
+            vec![],
+            vec![out_rail],
+            environment.clone(),
+        )
+        .with_ports(vec![], vec![port("result")]);
+        rail.parameters.insert(
+            "diameter_mm".into(),
+            om9_core::request::Value::length(om9_core::units::LengthMm::try_new(18.0).unwrap()),
+        );
+        let profile = Recipe::new(
+            document.id,
+            "RailProfile",
+            vec![binding(out_rail, "rail")],
+            vec![out_profile],
+            environment.clone(),
+        )
+        .with_ports(vec![port("rail")], vec![port("result")]);
+        let mut sweep = Recipe::new(
+            document.id,
+            "RailSweep",
+            vec![binding(out_rail, "rail"), binding(out_profile, "profile")],
+            vec![out_sweep],
+            environment,
+        )
+        .with_ports(vec![port("rail"), port("profile")], vec![port("result")]);
+        sweep.state = om9_core::history::EvaluationState::Dirty("source changed".into());
+        let mut graph = HistoryGraph::default();
+        for recipe in [rail, profile, sweep] {
+            graph.recipes.insert(recipe.id, recipe);
+        }
+        document.history = graph;
+        document
+    }
+
+    #[test]
+    fn history_queries_report_typed_ports_states_provenance_and_plan() {
+        let limits = Limits::default();
+        let document = history_document();
+        let (coordinator, doc_id) = coordinator_with(document.clone(), limits);
+        let base = &coordinator.world().documents[&doc_id];
+        let mut staged = Staged::new(&coordinator, base, &[], &limits).unwrap();
+        with_host(&mut staged, |host| {
+            let list = host.history_list().unwrap();
+            assert_eq!(list.len(), 3);
+            assert_eq!(list[0].command, "RingRail");
+            assert_eq!(list[0].state, "clean");
+            assert_eq!(
+                list[0].parameters["diameter_mm"],
+                ParameterValue::Length { millimeters: 18.0 }
+            );
+            assert_eq!(list[1].inputs[0].role, "rail");
+            assert_eq!(list[1].inputs[0].kind, "geometry:Curve");
+            assert_eq!(list[2].state, "dirty");
+            assert_eq!(list[2].state_reason.as_deref(), Some("source changed"));
+
+            let dependencies = host.history_dependencies().unwrap();
+            assert_eq!(dependencies.len(), 3);
+            assert_eq!(
+                dependencies[0].producer.as_deref(),
+                Some(list[0].id.as_str())
+            );
+            assert_eq!(dependencies[0].role, "rail");
+
+            let provenance = host.history_provenance(list[0].id.clone()).unwrap();
+            assert_eq!(provenance.command, "RingRail");
+            assert_eq!(provenance.command_version, 1);
+            assert_eq!(provenance.unit, "mm");
+
+            let plan = host.history_rebuild_plan().unwrap();
+            assert_eq!(plan, vec![list[2].id.clone()]);
+
+            let missing = host
+                .history_feature(uuid::Uuid::new_v4().to_string())
+                .unwrap_err();
+            assert_eq!(missing.code, "missing");
+        });
+    }
+
+    #[test]
+    fn a_malformed_history_id_is_refused() {
+        // The first rejected host call is sticky for the rest of the command, so this refusal
+        // gets its own host.
+        let limits = Limits::default();
+        let document = history_document();
+        let (coordinator, doc_id) = coordinator_with(document, limits);
+        let base = &coordinator.world().documents[&doc_id];
+        let mut staged = Staged::new(&coordinator, base, &[], &limits).unwrap();
+        with_host(&mut staged, |host| {
+            let bad = host.history_feature("not-a-uuid").unwrap_err();
+            assert_eq!(bad.code, "id");
+        });
+    }
+
+    #[test]
+    fn history_is_read_only_for_a_plugin() {
+        // Every history request is a query: a plugin cannot forge a feature or change a
+        // state through this surface, so the committed document is unchanged after a run.
+        let limits = Limits::default();
+        let document = history_document();
+        let before = serde_json::to_vec(&document).unwrap();
+        let (coordinator, doc_id) = coordinator_with(document.clone(), limits);
+        let base = &coordinator.world().documents[&doc_id];
+        let mut staged = Staged::new(&coordinator, base, &[], &limits).unwrap();
+        with_host(&mut staged, |host| {
+            let _ = host.history_list().unwrap();
+            let _ = host.history_dependencies().unwrap();
+            let _ = host.history_rebuild_plan().unwrap();
+        });
+        let run = staged.finish("HistoryQuery".into(), Value::Null).unwrap();
+        // Read-only calls stage no object mutation.
+        assert!(
+            run.request
+                .as_ref()
+                .is_none_or(|request| request.mutations.is_empty())
+        );
+        assert_eq!(serde_json::to_vec(&document).unwrap(), before);
     }
 }

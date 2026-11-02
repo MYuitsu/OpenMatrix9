@@ -3,7 +3,153 @@
   "id": "OM9-L3-03-18-007",
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-03-18",
-  "title": "Solid \u00b7 Fillet Edge \u2014 menu binding",
+  "title": "Solid · Fillet Edge — menu binding",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "CATALOG_PLUS_DOMAIN",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "CATALOG_COMMAND",
+      "option_order": [
+        "Fillet Edge",
+        "Blend Edge",
+        "Chamfer Edge"
+      ],
+      "option_count": 3
+    },
+    "catalog": {
+      "source": "docs/analysis/matrix-command-layers.json",
+      "menu": "Solid",
+      "command": "Fillet Edge",
+      "option": "Fillet Edge",
+      "root_group": false,
+      "path": [
+        "Solid",
+        "Fillet Edge"
+      ]
+    },
+    "domain_inputs": [
+      {
+        "raw": "selected BRep edge(s) or two curve ends, radius 1mm",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-007 - Solid · Fillet Edge - menu binding/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [
+      {
+        "label": "Fillet Edge",
+        "command_id": "SolidFilletEdgeFilletEdge",
+        "script": "! _FilletEdge",
+        "alt_script": "! _FilletEdge P",
+        "alt_label": "Fillet Edge Prev. Edge",
+        "covered_by_l3": "OM9-L3-03-18-007",
+        "status": "COVERED",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Fillet Edge",
+          "typed_forms": [
+            "Fillet Edge"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Blend Edge",
+        "command_id": "SolidFilletEdgeBlendEdge",
+        "script": "! _BlendEdge",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Blend Edge",
+          "typed_forms": [
+            "Blend Edge"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      },
+      {
+        "label": "Chamfer Edge",
+        "command_id": "SolidFilletEdgeChamferEdge",
+        "script": "! _ChamferEdge",
+        "alt_script": "",
+        "alt_label": "",
+        "covered_by_l3": null,
+        "status": "MISSING",
+        "type": null,
+        "default": null,
+        "range": null,
+        "unit": null,
+        "inline": {
+          "mode": "COMMAND_INLINE",
+          "token": "Chamfer Edge",
+          "typed_forms": [
+            "Chamfer Edge"
+          ],
+          "shortcut": null,
+          "shortcut_status": "UNRESOLVED",
+          "underlined_index": null,
+          "clickable": true,
+          "activation": "UNRESOLVED",
+          "availability": "UNRESOLVED",
+          "value_owner": "UNRESOLVED",
+          "value_type": "UNRESOLVED",
+          "prompt_fragment": "UNRESOLVED",
+          "route": "Controller::submit"
+        }
+      }
+    ],
+    "missing_options": [
+      "Blend Edge",
+      "Chamfer Edge"
+    ],
+    "missing": [
+      "option:Blend Edge: type/default/range/unit/prompt",
+      "option:Chamfer Edge: type/default/range/unit/prompt",
+      "input:selected BRep edge(s) or two curve ends, radius 1mm: type/default/range"
+    ],
+    "implementation_l4": "OM9-L4-03-18-007-04"
+  },
   "planning_state": "IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E07",
@@ -13,7 +159,7 @@
     "l3_id": "OM9-L3-03-18-007",
     "capability_id": "cap.03-18.solid-command-fillet-edge",
     "stable_owner_key": "OM9-L2-03-18/solid-command-fillet-edge",
-    "title": "Solid \u00b7 Fillet Edge \u2014 menu binding",
+    "title": "Solid · Fillet Edge — menu binding",
     "slug": "solid-command-fillet-edge",
     "module_id": "OM9-L2-03-18",
     "module_path": "specs/03-ms03-curve-surface-solid-3dm/10-febe-matrix-solid-menu-workflows/",
@@ -25,10 +171,10 @@
     "delivery": "mainline",
     "status": "L3_SPEC_WITH_L4_PLANNED_NOT_EXECUTED",
     "origin_source_taxonomy": "03-matrix8-book1",
-    "goal": "Bind menu/commandline for documented Solid Tools command \u201cFillet Edge\u201d; reuse owning geometry service rather than reimplement its algorithm",
+    "goal": "Bind menu/commandline for documented Solid Tools command “Fillet Edge”; reuse owning geometry service rather than reimplement its algorithm",
     "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
-    "parent_scope": "Solid menu ph\u00f9 h\u1ee3p trang s\u1ee9c: primitives, bool, extrusion, shell, text geometry",
-    "parent_exclusions": "Kh\u00f4ng th\u00eam c\u01a1 kh\u00ed thu\u1ea7n t\u00fay Boss/Rib/Slab d\u1ea1ng feature chuy\u00ean bi\u1ec7t.",
+    "parent_scope": "Solid menu phù hợp trang sức: primitives, bool, extrusion, shell, text geometry",
+    "parent_exclusions": "Không thêm cơ khí thuần túy Boss/Rib/Slab dạng feature chuyên biệt.",
     "depends_on_module_ids": [
       "OM9-L2-01-09",
       "OM9-L2-01-10",
@@ -70,18 +216,18 @@
       "integration": "Register one capability owner; adapters dispatch to owning kernel/domain service."
     },
     "acceptance_tests_auto": [
-      "Automated: valid input exercises \u201cSolid \u00b7 Fillet Edge \u2014 menu binding\u201d without panic, leaked handle or stale scene reference.",
+      "Automated: valid input exercises “Solid · Fillet Edge — menu binding” without panic, leaked handle or stale scene reference.",
       "Automated: invalid, empty, or degenerate input yields an explicit error and leaves document state consistent.",
       "Automated: geometry fixture checks BRep validity/tolerance/closedness or documented intentional open output."
     ],
     "acceptance_tests_manual": [
-      "Manual gate M03: run OpenMatrix9 UI; perform \u201cSolid \u00b7 Fillet Edge \u2014 menu binding\u201d; observe preview/feedback and commit/cancel behavior.",
+      "Manual gate M03: run OpenMatrix9 UI; perform “Solid · Fillet Edge — menu binding”; observe preview/feedback and commit/cancel behavior.",
       "A visible failure/warning must be shown for unsupported input; the command must never silently do nothing."
     ],
     "requires_manual_test": true,
     "manual_test_gate": "M03-UI",
     "invariants": [
-      "No `90-after` dependency for any M01\u2013M09 deliverable.",
+      "No `90-after` dependency for any M01–M09 deliverable.",
       "No implementation may be assumed from QymCAD until source paths are checked.",
       "Existing document IDs/layer flags/units/history remain consistent after operation.",
       "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
@@ -99,15 +245,15 @@
   "children_l4": [
     {
       "id": "OM9-L4-03-18-007-01",
-      "title": "Dispatch Contract \u2014 Solid \u00b7 Fillet Edge \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-007 - Solid \u00b7 Fillet Edge - menu binding/L4-01 - Command Dispatch Contract/l4.json",
+      "title": "Dispatch Contract — Solid · Fillet Edge — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-007 - Solid · Fillet Edge - menu binding/L4-01 - Command Dispatch Contract/l4.json",
       "role": "DISPATCH_CONTRACT",
       "depends_on_task_ids": []
     },
     {
       "id": "OM9-L4-03-18-007-02",
-      "title": "Wire Ui \u2014 Solid \u00b7 Fillet Edge \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-007 - Solid \u00b7 Fillet Edge - menu binding/L4-02 - Menu and Command UI Integration/l4.json",
+      "title": "Wire Ui — Solid · Fillet Edge — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-007 - Solid · Fillet Edge - menu binding/L4-02 - Menu and Command UI Integration/l4.json",
       "role": "WIRE_UI",
       "depends_on_task_ids": [
         "OM9-L4-03-18-007-01",
@@ -116,11 +262,22 @@
     },
     {
       "id": "OM9-L4-03-18-007-03",
-      "title": "Acceptance \u2014 Solid \u00b7 Fillet Edge \u2014 menu binding",
-      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-007 - Solid \u00b7 Fillet Edge - menu binding/L4-03 - Acceptance and Evidence/l4.json",
+      "title": "Acceptance — Solid · Fillet Edge — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-007 - Solid · Fillet Edge - menu binding/L4-03 - Acceptance and Evidence/l4.json",
       "role": "ACCEPTANCE",
       "depends_on_task_ids": [
         "OM9-L4-03-18-007-02"
+      ]
+    },
+    {
+      "id": "OM9-L4-03-18-007-04",
+      "title": "Parameter Implementation — Solid · Fillet Edge — menu binding",
+      "file": "M03 - Geometry 3DM/L2-03-18 - 10-febe/L3-007 - Solid · Fillet Edge - menu binding/L4-04 - Parameter Implementation/l4.json",
+      "role": "PARAMETER_IMPLEMENTATION",
+      "depends_on_task_ids": [
+        "OM9-L4-03-18-007-01",
+        "OM9-L4-03-18-007-02",
+        "OM9-L4-03-18-007-03"
       ]
     }
   ],
@@ -128,7 +285,8 @@
   "task_ids": [
     "OM9-L4-03-18-007-01",
     "OM9-L4-03-18-007-02",
-    "OM9-L4-03-18-007-03"
+    "OM9-L4-03-18-007-03",
+    "OM9-L4-03-18-007-04"
   ],
   "m03_luna_execution_contract": {
     "target_implementation_milestone": "M03",
@@ -162,17 +320,17 @@
     ],
     "api_owner_resolution_status": "CANDIDATE_REQUIRES_LOCAL_TEST",
     "technical_decisions": [
-      "Matrix menu item ch\u1ec9 dispatch qua qymcad/src/command_catalog.rs / command bus; kh\u00f4ng t\u1ea1o m\u1ed9t kernel thao t\u00e1c song song.",
-      "D\u00f9ng c\u00f9ng command descriptor, typed options v\u00e0 selection gi\u1eefa menu, command line v\u00e0 toolbar; ki\u1ec3m tra disable state khi backend v\u1eafng m\u1eb7t.",
-      "N\u1ebfu kh\u00f4ng c\u00f3 owner L3 x\u00e1c minh \u0111\u01b0\u1ee3c, tr\u1ea1ng th\u00e1i BLOCKED_OWNER, kh\u00f4ng coi m\u1ed9t menu item render th\u00e0nh PASS.",
-      "\u1ee8ng vi\u00ean owner L3: OM9-L3-01-10-006; ph\u1ea3i ki\u1ec3m ch\u1ee9ng API v\u00e0 test tr\u01b0\u1edbc khi b\u1eadt menu."
+      "Matrix menu item chỉ dispatch qua qymcad/src/command_catalog.rs / command bus; không tạo một kernel thao tác song song.",
+      "Dùng cùng command descriptor, typed options và selection giữa menu, command line và toolbar; kiểm tra disable state khi backend vắng mặt.",
+      "Nếu không có owner L3 xác minh được, trạng thái BLOCKED_OWNER, không coi một menu item render thành PASS.",
+      "Ứng viên owner L3: OM9-L3-01-10-006; phải kiểm chứng API và test trước khi bật menu."
     ],
     "fixture_design": {
       "case_id": "OM9-L3-03-18-007-GOLDEN",
       "status": "DESIGN_ONLY_NOT_EXECUTED",
       "input": {
-        "command": "Solid \u00b7 Fillet Edge \u2014 menu binding",
-        "purpose": "Bind menu/commandline for documented Solid Tools command \u201cFillet Edge\u201d; reuse owning geometry service rather than reimplement its algorithm",
+        "command": "Solid · Fillet Edge — menu binding",
+        "purpose": "Bind menu/commandline for documented Solid Tools command “Fillet Edge”; reuse owning geometry service rather than reimplement its algorithm",
         "units": "mm",
         "document": "empty_or_specific_fixture",
         "command_id_to_define": "M03.fillet-edge",
@@ -201,7 +359,7 @@
       "input": "selected BRep edge(s) or two curve ends, radius 1mm",
       "positive_assertions": "fillet geometry valid; radius recorded; errors if self-intersects",
       "negative_fixture_id": "OM9-L3-03-18-007-NEGATIVE",
-      "negative_assertions": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
+      "negative_assertions": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
       "status": "DESIGN_ONLY_NOT_EXECUTED",
       "rust_test_name_to_create": "m03_03_18_007"
     },
@@ -247,7 +405,7 @@
       "expected_negative_fixture_ref": "OM9-L3-03-18-007-NEGATIVE",
       "source_golden_input_from_parent": "selected BRep edge(s) or two curve ends, radius 1mm",
       "parent_golden_positive_oracle": "fillet geometry valid; radius recorded; errors if self-intersects",
-      "parent_golden_negative_oracle": "no typed selection, invalid numerical option, locked layer, missing backend owner \u2192 visible refusal, no document change, no fake success",
+      "parent_golden_negative_oracle": "no typed selection, invalid numerical option, locked layer, missing backend owner → visible refusal, no document change, no fake success",
       "independent_domain_example_proposed_not_always_applicable": "command invoked with valid selection and chosen options, and with no selection/locked layer/unavailable backend",
       "domain_specific_assertions_to_select_when_applicable": [
         "command ID resolves to one backend handler or explicit disabled fallback",
@@ -279,6 +437,12 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "stack_regression_2026_10_29": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-29-solid-wide-regression.md",
+      "tests": "Solid 130 passed/1 ignored; options 68 passed; simulated viewport 100 passed; internal input regressions 56 passed; targeted stack regressions passed.",
+      "desktop_and_original_behavior_verified": false
+    },
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "feature": "OM9-SOLID-007",
@@ -300,6 +464,288 @@
       "solid 64 passed, 1 ignored"
     ],
     "remaining": [],
-    "manual_gate": "M03-UI"
+    "manual_gate": "M03-UI",
+    "standalone_fillet_audit_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "NUMERIC_SINGLE_EDGE_ONLY_FULL_COMMAND_OPEN",
+      "scope": "Existing numeric single-edge constant-radius closed-solid path; registration and normalized reference comparison.",
+      "evidence": [
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "Viewport edge selection, multiple edges, open polysurfaces, handle preview/edit, previous-edge alternate and chain options remain unimplemented or unverified.",
+        "Actual desktop and M03 human UI acceptance pending."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_staged_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_STAGED_CONSTANT_RADIUS_FILLET_AUTOMATED_CHECKS_PASSED",
+      "scope": "Select multiple edges of one closed root BRep with explicit uniform NextRadius, preview and commit.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "Editable handles, per-edge radii, previous-edge/chain options, open joined shells, instance paths and ambiguity choice remain open.",
+        "No original default radius established; native peak allocations, actual desktop/human UI, GPU presentation and F6/SDK/History are unverified.",
+        "The legacy numeric two-argument path still commits immediately."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_radii_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_INDEPENDENT_EDGE_RADII_AUTOMATED_CHECKS_PASSED",
+      "scope": "Capture NextRadius at each edge pick and preview/commit independent edge radii.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "Different radii within one tangent contour are rejected and need a dedicated fixture; editable handles, chain/previous-edge, open shells, instances and ambiguous picks remain open.",
+        "Native peak allocation, actual desktop/human UI, GPU presentation and F6/SDK/History are unverified.",
+        "Original default radius is unknown and the numeric two-argument path commits immediately."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_open_shell_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_JOINED_OPEN_SHELL_FILLET_AUTOMATED_CHECKS_PASSED",
+      "scope": "Support a tested shared edge of a joined open BRep shell in app staged and numeric fillet; reject naked boundaries.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "General open-shell and non-manifold topology, tangent-contour variable radii, handle editing, chain/previous-edge, instances and ambiguous picks remain open.",
+        "The legacy kernel uniform-radius API still rejects shells; native peak allocation, actual desktop/human UI, GPU and F6/SDK/History remain unverified.",
+        "Original default radius is unknown and numeric two-argument path commits immediately."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_handle_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_SAMPLED_FILLET_HANDLE_AUTOMATED_CHECKS_PASSED",
+      "scope": "Select one sampled handle per edge in preview and recompute constant CurrentRadius atomically.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "Handle dragging, additional handles and variable radius along a contour remain unimplemented.",
+        "Sampled handle placement on arbitrary curves, large-BRep performance, general shell topology, F6/SDK/History and actual desktop/human UI remain unverified.",
+        "Original default radius is unknown and numeric two-argument path commits immediately."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_endpoint_radii_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_ENDPOINT_VARIABLE_FILLET_AUTOMATED_CHECKS_PASSED",
+      "scope": "Edit independent oriented endpoint radii, interpolate linearly and preview/commit one-edge contours.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "Variable radius across multi-edge tangent contours, handle dragging and interior handles are not implemented.",
+        "General curved/closed edges, large-BRep performance, native peak allocation, actual desktop/human UI, F6/SDK/History remain unverified.",
+        "Original default radius is unknown and numeric two-argument path commits immediately."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_closed_edge_classification_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_CLOSED_EDGE_CLASSIFICATION_AUTOMATED_CHECKS_PASSED",
+      "scope": "Distinguish closed edge from endpoint lookup failures before selecting Fillet edges.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md"
+      ],
+      "remaining": [
+        "Moving the closed handle, arbitrary closed curves, multi-edge tangent contours, interior handles and actual desktop UI remain unverified."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_show_radius_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_SHOW_RADIUS_AUTOMATED_CHECKS_PASSED",
+      "scope": "Toggle radius labels on existing preview handles through shared command options.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md"
+      ],
+      "remaining": [
+        "OM9 starts with Yes to preserve existing display; original default is unknown.",
+        "Actual desktop label rendering and full Fillet handle/chain/options behavior remain unverified."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_setall_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_SETALL_AUTOMATED_CHECKS_PASSED",
+      "scope": "Set all currently implemented preview handle radii with rollback on failed rebuild.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md"
+      ],
+      "remaining": [
+        "SetAll pointer and keyboard entry and real desktop rendering are not directly tested.",
+        "Additional/interior handles, variable multi-edge tangent contours, link/drag and remaining Fillet options are unimplemented."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_link_handles_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_LINK_HANDLES_AUTOMATED_CHECKS_PASSED",
+      "scope": "Link or unlink currently implemented preview handles and validate SetAll input routes.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md"
+      ],
+      "remaining": [
+        "OM9 starts LinkHandles=No to preserve prior behavior; original default unknown.",
+        "Actual desktop rendering/input, additional handles, dragging, multi-edge tangent contours and remaining Fillet options are unverified or unimplemented."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_select_edges_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_SELECT_EDGES_AUTOMATED_CHECKS_PASSED",
+      "scope": "Return from Fillet preview to select additional edges while retaining prior endpoint radii.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md"
+      ],
+      "remaining": [
+        "Only independent edges of one root BRep tested; instances, arbitrary topology and actual desktop UI remain unverified.",
+        "Additional handles, dragging, multi-edge tangent laws and other Fillet options remain unimplemented."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_tangent_contour_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_VARIABLE_TANGENT_CONTOUR_AUTOMATED_CHECKS_PASSED",
+      "scope": "Nonuniform fillet radius on fully selected open tangent contours with consistent vertex radii.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "App cannot yet edit coincident shared handles together individually; selection of every edge is required for nonuniform open contours.",
+        "Curved and closed contours, large-model native memory and actual desktop UI remain unverified.",
+        "Added handles, dragging and other Fillet options remain unimplemented."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_shared_handle_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_SHARED_TANGENT_HANDLE_AUTOMATED_CHECKS_PASSED",
+      "scope": "Synchronize CurrentRadius at the same topological vertex within a selected tangent contour.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "Coincident handle drawing and actual desktop picking remain unverified; curved/closed contours and arbitrary topology are not covered.",
+        "Native per-edge query rereads BRep; large-model latency and peak allocation not measured.",
+        "Additional handles, dragging and remaining Fillet options remain unimplemented."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_shared_batch_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_BATCH_QUERY_AUTOMATED_CHECKS_PASSED",
+      "scope": "Batch shared tangent endpoint classification in one OCCT topology query without changing command behavior.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md"
+      ],
+      "remaining": [
+        "Large-BRep latency and native peak allocation are not measured.",
+        "Desktop UI, curved/closed contours and remaining Fillet handle/chain options are unverified or unimplemented."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_shared_handle_pick_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_SHARED_HANDLE_PICK_AUTOMATED_CHECKS_PASSED",
+      "scope": "Resolve overlapping Fillet handle hits only when they share a topological vertex and tangent contour.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md"
+      ],
+      "remaining": [
+        "Actual desktop picking, curved/closed contours and large-model performance remain unverified.",
+        "Additional handles, dragging and other Fillet options remain unimplemented."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_interior_controls_kernel_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_INTERIOR_RADIUS_CONTROL_KERNEL_AUTOMATED_CHECKS_PASSED",
+      "scope": "Pass bounded interior edge-fraction radius constraints to OCCT on fully selected open fillet contours.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "AddHandle/CopyHandle/RemoveHandle and viewport projection are not wired to the application.",
+        "Curved and closed contours, native peak memory and actual desktop UI remain unverified."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_add_handle_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_ADD_HANDLE_AUTOMATED_CHECKS_PASSED",
+      "scope": "Add interior radius handles from selected open-edge viewport picks, edit and preview atomically.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "Original AddHandle default radius is unknown; OM9 uses selected handle or last NextRadius.",
+        "Closed/general curved edges, nonuniform placement, dragging, CopyHandle/RemoveHandle, large-model performance and actual desktop UI remain unverified or unimplemented."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_remove_handle_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_REMOVE_HANDLE_AUTOMATED_CHECKS_PASSED",
+      "scope": "Remove added Fillet preview controls while protecting default endpoint handles.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "Native rebuild-failure rollback is implemented but not directly induced in a test.",
+        "CopyHandle, dragging, closed/general curved edges, actual desktop and performance remain unverified or unimplemented."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    },
+    "standalone_fillet_copy_handle_2026_10_28": {
+      "date": "2026-10-28",
+      "status": "PARTIAL_COPY_HANDLE_AUTOMATED_CHECKS_PASSED",
+      "scope": "Copy a selected Fillet radius to repeated new-edge or existing-handle preview destinations.",
+      "evidence": [
+        "docs/features/OM9-SOLID-007.md",
+        "docs/validation/2026-10-28-solid-audit.md",
+        "docs/validation/2026-10-28-solid-fillet-source-map.md"
+      ],
+      "remaining": [
+        "Closed/general curved edges, nonuniform placement, dragging, large-model performance and actual desktop UI remain unverified.",
+        "Native preview rebuild failure for copy/remove not directly induced."
+      ],
+      "manual_gate": "M03-UI_PENDING"
+    }
   }
 }

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-12-006",
+  "title": "Gem Springs And Relaxation",
+  "cases": [
+    "a spring run without a surface or any gem is refused",
+    "an empty gem set is a typed error",
+    "a non-finite or negative strength is refused"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

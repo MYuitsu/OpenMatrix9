@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-003",
+  "kind": "negative",
+  "input": "slider ratio -3.0 or 3.0 (outside 0..1)",
+  "expected": "stored value clamps to the field min/max (0.1 / 20 mm); no value outside the domain is stored",
+  "verified_by": [
+    "a_slider_move_lands_exactly_on_the_field_step",
+    "a_slider_edit_from_the_panel_quantises_and_previews_the_same_value"
+  ],
+  "document_unchanged": true
+}

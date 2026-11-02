@@ -45,7 +45,6 @@ fn offset_curve_moves_a_circle_outward() {
     assert!((radius - 12.0).abs() < 0.2, "{radius}");
 }
 
-
 #[test]
 fn offset_curve_follows_the_active_cplane() {
     let mut doc = Document::new("offset cplane");
@@ -74,9 +73,13 @@ fn offset_curve_follows_the_active_cplane() {
         panic!("nurbs");
     };
     assert!(curve.poles.iter().all(|point| point[1].abs() < 1e-6));
-    assert!(curve.poles.iter().all(|point| (point[2].abs() - 2.0).abs() < 0.2));
+    assert!(
+        curve
+            .poles
+            .iter()
+            .all(|point| (point[2].abs() - 2.0).abs() < 0.2)
+    );
 }
-
 
 #[test]
 fn offset_exposes_distance_token() {
@@ -92,8 +95,34 @@ fn offset_exposes_distance_token() {
     let mut c = Controller::new(doc, Limits::default()).unwrap();
     c.select_objects(&[id]).unwrap();
     c.submit("Offset").unwrap();
-    assert!(c
-        .offset_curve_option_tokens()
-        .iter()
-        .any(|(_, command)| *command == "Distance="));
+    assert!(
+        c.offset_curve_option_tokens()
+            .iter()
+            .any(|(_, command)| *command == "Distance=")
+    );
+}
+
+#[test]
+fn offset_distance_uses_the_shared_option_entry() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    let (mut c, id) = controller_with_circle();
+    c.select_objects(&[id]).unwrap();
+    c.submit("Offset").unwrap();
+    let distance = c
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Distance")
+        .expect("Distance option");
+    assert_eq!(
+        c.activate_command_option(distance.id).unwrap(),
+        CommandOptionEffect::Draft("Distance=".into())
+    );
+    c.submit("Distance=2").unwrap();
+    c.submit("").unwrap();
+    assert!(
+        c.document()
+            .entities
+            .values()
+            .any(|entity| entity.label == "Offset")
+    );
 }

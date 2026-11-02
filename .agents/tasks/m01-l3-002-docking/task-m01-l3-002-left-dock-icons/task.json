@@ -1,0 +1,7 @@
+{
+  "task_id": "task-m01-l3-002-left-dock-icons",
+  "task_description": "OM9-L3-01-01-002 heavy fix: Layers stays in the LEFT column below Info & Settings and above Projects in every audit/test/screenshot; right dock hidden by default (neutral Snaps fixture, two audit modes, minimal drop zone); mode-aware validator and richer ui-receipt; left rail outer width 300 vs inner, rail max 460, SVG icon edge follows rail width; fix spurious CMD error text in audit screenshots; docs/ledger/evidence corrected; skill change only as a proposal file. Full plan: h:/OpenMatrix9/.agents/tasks/m01-l3-002-docking/plan.md",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

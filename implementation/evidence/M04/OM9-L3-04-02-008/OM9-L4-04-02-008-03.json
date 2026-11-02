@@ -1,0 +1,79 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-02-008",
+  "title": "Rail Profile Sweep Associative Output",
+  "generated_at_utc": "2026-10-27T04:25:55Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "f648cbd9d0f4cecf97fc705abaf7a618d3272b8094dde9160776e6dcda9059bc",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "a RingRail -> RailProfile -> RailSweep chain rebuilds once when the ring diameter changes from 18 to 19 mm; the dependent sweep gets a new geometry revision and the plan is clean",
+    "negative": "an invalid profile width makes the downstream rebuild fail explicitly and leaves the committed sweep geometry revision unchanged"
+  },
+  "l4_id": "OM9-L4-04-02-008-03",
+  "role": "IMPLEMENT",
+  "kind": "implementation",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/surface_kernel.rs",
+    "crates/om9-core/src/history_ops.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-core/tests/ring_tools.rs",
+    "crates/om9-app/tests/ring_tools.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "a_ring_size_edit_rebuilds_the_profile_and_one_dirty_sweep"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "1345c0a2fa467e13f71d6ae9a0df6543ddd227275b8a017c90eacee290d3d8e8",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 52.25s"
+      ],
+      "test": "a_ring_size_edit_rebuilds_the_profile_and_one_dirty_sweep",
+      "package": "om9-app",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "a_builder_ring_sweep_refuses_an_open_rail_and_accepts_a_custom_closed_one"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "616f886513a898ed91692a2832b00356aee43740103d69263f6b75d6f3157402",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.01s"
+      ],
+      "test": "a_builder_ring_sweep_refuses_an_open_rail_and_accepts_a_custom_closed_one",
+      "package": "om9-core",
+      "binary": "ring_tools"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

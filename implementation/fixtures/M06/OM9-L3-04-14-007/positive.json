@@ -1,0 +1,28 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-14-007",
+  "cases": [
+    {
+      "input": "list the built-in Prong/Rail/Edge libraries",
+      "expect": "5 prong, 4 rail and 4 edge profiles, each a closed unit section with positive width and height",
+      "oracle": "om9-core src/settings/head.rs::an_unknown_profile_is_a_typed_error"
+    },
+    {
+      "input": "Profile=Round on the head and Profile=Chamfer on the bezel",
+      "expect": "the built profile uses the library section; profiles never insert a scene object",
+      "oracle": "om9-app tests/head_commands.rs::the_head_icon_stages_a_basket_and_enter_commits_prongs_and_rails"
+    },
+    {
+      "input": "Profile=Bezier:0,0;0.5,0.1;0.55,0.8;0,1 then ProfileSave=Leaf then Profile=Leaf",
+      "expect": "the Bezier section drives the prongs; saving keeps it in the session library and the name resolves it again",
+      "oracle": "om9-app tests/head_commands.rs::the_bezier_profile_is_saved_and_resolved_by_name"
+    }
+  ],
+  "automated_tests": [
+    "the_head_icon_stages_a_basket_and_enter_commits_prongs_and_rails",
+    "the_bezier_profile_is_saved_and_resolved_by_name",
+    "an_unknown_profile_is_a_typed_error",
+    "the_edge_profile_is_read_from_the_library",
+    "a_user_bezier_section_drives_the_prongs"
+  ]
+}

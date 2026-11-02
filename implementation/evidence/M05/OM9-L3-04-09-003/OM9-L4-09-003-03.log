@@ -1,0 +1,28 @@
+$ cargo test -p om9-app --test gem_panel -j 2 the_loader_previews_without_creating_an_object_and_cancel_leaves_no_phantom
+# exit code: 0
+# captured: 2026-10-27T09:23:19Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test the_loader_previews_without_creating_an_object_and_cancel_leaves_no_phantom ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+    Blocking waiting for file lock on build directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.60s
+     Running tests\gem_panel.rs (L:\om9-target\debug\deps\gem_panel-2401e69851f3ef48.exe)
+
+$ cargo test -p om9-app --test gem_panel -j 2 applying_the_loader_inserts_one_gem_in_one_transaction_and_undo_restores
+# exit code: 0
+# captured: 2026-10-27T09:23:20Z
+# target dir: L:\om9-target
+
+
+running 1 test
+test applying_the_loader_inserts_one_gem_in_one_transaction_and_undo_restores ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.32s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running tests\gem_panel.rs (L:\om9-target\debug\deps\gem_panel-2401e69851f3ef48.exe)

@@ -1,0 +1,60 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-10-007",
+  "l4_id": "OM9-L4-10-007-03",
+  "title": "Gem On Surface",
+  "generated_at_utc": "2026-10-27T13:45:05Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "M05-UI",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the placement command at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "124c936339f96a3e2633be47bb4204f3d18a4e1813e768d4b5e879dd35d7a00c",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "surface normal frame, UV grid placement and a UV-bearing link",
+    "negative": "out-of-domain UVs and degenerate normals are typed refusals"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem_placement.rs",
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/src/session/gem_placement.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/tests/gem_placement.rs",
+    "tools/record_m05_l2_04_10_gem_placement.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_placement",
+        "-j",
+        "2",
+        "the_surface_tool_stands_the_gem_on_the_surface_normal"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "3ba6d797af2e5a0404636e5870c1e6fcc07b39a905b3c6ca055547b2a644bbb1",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s"
+      ],
+      "test": "the_surface_tool_stands_the_gem_on_the_surface_normal",
+      "package": "om9-app",
+      "binary": "gem_placement"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

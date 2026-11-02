@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-005",
+  "kind": "positive",
+  "input": "reopen builder with parameters from selected object",
+  "expected": "the ring builder reopens at the recorded 22 mm diameter; Apply at 24 mm updates the same object and recipe in one transaction",
+  "verified_by": [
+    "edit_from_history_reopens_the_builder_at_the_recorded_parameters"
+  ],
+  "notes": [
+    "The plan adopts the selected object's ObjectId and recipe id, so Apply writes Geometry + HistoryUpdate instead of Insert + History.",
+    "Only the five builder commands are re-openable from history; another command or a schema_version other than 1 is a typed refusal.",
+    "The published geometry_revision is advanced to the revision the Geometry mutation will produce before the transaction is prepared."
+  ]
+}

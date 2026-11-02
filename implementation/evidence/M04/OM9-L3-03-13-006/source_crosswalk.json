@@ -1,0 +1,48 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-03-13-006",
+  "title": "History Commandline And Preview Status",
+  "owner": "om9-app Controller history API over om9-core HistoryGraph",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-app/src/session/history.rs",
+      "symbols": [
+        "Controller::submit_history_text",
+        "Controller::dispatch_history_feature",
+        "Controller::take_history_notice"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session.rs",
+      "symbols": [
+        "Controller::submit_effect",
+        "Controller::dispatch_effect"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/files.rs",
+      "symbols": [
+        "begin_file_intent"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "symbols": [
+        "MatrixApp::feedback"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "The command line and the sidebar/menu IDs dispatch to the same Controller methods; the status line consumes one history notice per command.",
+    "The rebuild is synchronous, so an interactive 'updating' frame is not observable; the terminal status distinguishes complete (with count) from failed (with node id and reason).",
+    "A recipe in Pending state is the queued rebuild the lifecycle guard refuses to close over."
+  ]
+}

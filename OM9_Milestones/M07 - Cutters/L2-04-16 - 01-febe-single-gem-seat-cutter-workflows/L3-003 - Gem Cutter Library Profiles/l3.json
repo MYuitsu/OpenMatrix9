@@ -4,7 +4,112 @@
   "milestone": "M07",
   "parent_l2_id": "OM9-L2-04-16",
   "title": "Gem Cutter Library Profiles",
-  "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "IMPLEMENTED",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "RESOLVED_FULL_NAME",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "preset",
+        "type": "enum of the ten library profiles",
+        "unit": null,
+        "default": "SettingAzure",
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-003/api.md"
+      },
+      {
+        "raw": "scale x",
+        "type": "percent",
+        "unit": "%",
+        "default": 100,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-003/api.md"
+      },
+      {
+        "raw": "scale y",
+        "type": "percent",
+        "unit": "%",
+        "default": 100,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-003/api.md"
+      },
+      {
+        "raw": "z scale",
+        "type": "percent",
+        "unit": "%",
+        "default": 100,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-003/api.md"
+      },
+      {
+        "raw": "z offset",
+        "type": "mm",
+        "unit": "mm",
+        "default": 0,
+        "required": true,
+        "source": "implementation/design/M07/OM9-L3-04-16-003/api.md"
+      }
+    ],
+    "command_options": [
+      "Preset=",
+      "ScaleX=",
+      "ScaleY=",
+      "ZScale=",
+      "ZOffset=",
+      "Boolean=",
+      "Preserve=",
+      "Reset",
+      "Enter",
+      "Cancel"
+    ],
+    "missing_options": [],
+    "missing": [],
+    "implementation_l4": {
+      "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+      "feature": "BuilderGemCutterLibrary",
+      "owner": [
+        "crates/om9-core/src/cutters/library.rs",
+        "crates/om9-app/src/session/gem_cutters.rs"
+      ],
+      "evidence": [
+        "implementation/design/M07/OM9-L3-04-16-003/source_crosswalk.json",
+        "implementation/design/M07/OM9-L3-04-16-003/api.md",
+        "implementation/fixtures/M07/OM9-L3-04-16-003/positive.json",
+        "implementation/fixtures/M07/OM9-L3-04-16-003/negative.json",
+        "implementation/evidence/M07/OM9-L3-04-16-003/OM9-L4-04-16-003-03.json",
+        "implementation/evidence/M07/OM9-L3-04-16-003/OM9-L4-04-16-003-04.json"
+      ]
+    },
+    "option_order": [
+      "Preset=",
+      "ScaleX=",
+      "ScaleY=",
+      "ZScale=",
+      "ZOffset=",
+      "Boolean=",
+      "Preserve=",
+      "Reset",
+      "Enter",
+      "Cancel"
+    ],
+    "option_count": 10
+  },
+  "planning_state": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
   "target_implementation_milestone": "M07",
   "execution_stage": "E12",
   "source_original_path": "specs/07-ms07-cutters-manufacturing-check/01-febe-single-gem-seat-cutter-workflows/003-febe-gem-cutter-library-profiles/l3.json",
@@ -23,7 +128,7 @@
     "milestone_id": "M07",
     "target_milestone": "M07",
     "delivery": "mainline",
-    "status": "L3_SPECIFIED_L4_PLANNED_NOT_EXECUTED",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_OPEN",
     "origin_source_taxonomy": "04-matrix8-book2",
     "goal": "pick and resize preset cutting profiles",
     "owner_rule": "The named command is a GUI/command-line action only. Call the designated implementation owner; do not create a second geometry kernel or duplicate data stores.",
@@ -89,13 +194,14 @@
       "No separate OCCT operation should be coded inside a Matrix toolbar/menu adapter."
     ],
     "qymcad_source_paths_verified": [],
-    "reuse_decision": "UNDETERMINED_PENDING_SOURCE_AUDIT",
-    "l4_status": "L4_CREATED_PLANNING_ONLY",
+    "reuse_decision": "ADD_NEW_CUTTER_OWNER",
+    "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
     "execution_stage": "E12",
     "planning_release": "CORE_MVP",
     "planning_risk": "HIGH",
     "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
-    "execution_status": "L4_PLANNED_NOT_EXECUTED"
+    "execution_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
+    "implementation_role_note": "ui_command_adapter: the command dispatches to the om9_core::cutters service; it never creates a second geometry kernel, gem store or settings store."
   },
   "children_l4": [
     {
@@ -125,5 +231,59 @@
       ]
     }
   ],
-  "l4_status": "PLANNED_NOT_EXECUTED"
+  "l4_status": "AUTOMATED_EVIDENCE_RECORDED_UI_REVIEW_PENDING",
+  "task_ids": [
+    "OM9-L4-04-16-003-01",
+    "OM9-L4-04-16-003-02",
+    "OM9-L4-04-16-003-03"
+  ],
+  "planning_state_before": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
+  "implementation": {
+    "schema": "om9.l3_implementation.v1",
+    "recorded_at": "2026-10-28",
+    "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+    "feature": "BuilderGemCutterLibrary",
+    "command_options": [
+      "Preset=",
+      "ScaleX=",
+      "ScaleY=",
+      "ZScale=",
+      "ZOffset=",
+      "Boolean=",
+      "Preserve=",
+      "Reset",
+      "Enter",
+      "Cancel"
+    ],
+    "owner": [
+      "crates/om9-core/src/cutters/library.rs",
+      "crates/om9-app/src/session/gem_cutters.rs"
+    ],
+    "evidence": [
+      "implementation/design/M07/OM9-L3-04-16-003/source_crosswalk.json",
+      "implementation/design/M07/OM9-L3-04-16-003/api.md",
+      "implementation/fixtures/M07/OM9-L3-04-16-003/positive.json",
+      "implementation/fixtures/M07/OM9-L3-04-16-003/negative.json",
+      "implementation/evidence/M07/OM9-L3-04-16-003/OM9-L4-04-16-003-03.json",
+      "implementation/evidence/M07/OM9-L3-04-16-003/OM9-L4-04-16-003-04.json"
+    ],
+    "automated_tests": {
+      "core": [
+        "cargo test -p om9-core --test cutters every_library_preset_builds_a_closed_cutter"
+      ],
+      "app": [
+        "cargo test -p om9-app --test gem_cutters"
+      ]
+    },
+    "manual_gate": {
+      "required": true,
+      "gate": "M07-UI",
+      "signed": false,
+      "open": "preview/commit/cancel of Gem Cutter Library Profiles in the OpenMatrix9 window"
+    },
+    "limitations": [
+      "The ten presets are the manual's own table (Z in pavilion-depth units, radius in girdle-radius units); a user preset library is not part of this owner.",
+      "The library writes the same om9.cutter slot as the Gem Cutter with kind=gem_cutter_library, so the display filter and the jewelry report read one record shape."
+    ]
+  }
 }

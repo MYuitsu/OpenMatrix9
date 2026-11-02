@@ -1,0 +1,28 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-17-006",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderChannelBuilder",
+  "cases": [
+    {
+      "case": "one row of cutters on one metal body",
+      "input": "Boolean=On",
+      "expect": "one cut preview per selected metal body with removed_mm3 > 0"
+    },
+    {
+      "case": "every selected metal body",
+      "input": "a row plus one metal body",
+      "expect": "one CutterCut per target; Enter replaces each body in the same transaction"
+    },
+    {
+      "case": "the row provenance",
+      "input": "Enter with Preserve=Remove",
+      "expect": "om9.cutter.cut records kind, row and preserve; no cutter body is inserted"
+    },
+    {
+      "case": "one transaction",
+      "input": "Undo after the commit",
+      "expect": "the metal bodies and the cutter bodies return to the pre-command state"
+    }
+  ]
+}

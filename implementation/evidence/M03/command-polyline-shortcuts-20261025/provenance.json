@@ -1,0 +1,13 @@
+{
+  "origin": "Screenshots of the authored standalone OM9 test window captured with Windows Computer Use; no user reference image or commercial image copied.",
+  "sha256": {
+    "native-debug-closed.png": "bbaf38ce0a9c8bbb796227c346b78aac782eb3003d3834a62c4e37b954e10596",
+    "native-debug-line-after-arc.png": "048e4478692ad04162feb1f35206b05ae5f6cf45d5f9be092d9acf3e7581d5ff",
+    "native-debug-redo.png": "60fb19c25c93bf82be1c2a360d993f5860b305f4244a6c1f682d1de5f7f3deef",
+    "native-debug-undo.png": "7db94c9d345d61e43dacaea622a0379a60cef59f7119ea34354806e98e5060b4",
+    "native-mode-arc.png": "9925330e2f3371ae1042977d1ecf7040469f938fb619f68446adc916ec2a20ea",
+    "native-release-closed.png": "15a2df1b4b28e26102b618b08ad12ea72a9adb1aa0ba7666122d8ca7e48919f0",
+    "native-release-line-after-arc.png": "77f885f6851ef1e0e907d8db4bcd093aa76bcc11fd1e3031d25bb122afa6ba54",
+    "native-release-mode-arc.png": "621254e2fc255ec687a980693632705ef50086279cd018446c80c2ecdaa444c2"
+  }
+}

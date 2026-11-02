@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-022",
+  "case": "box at the origin on a path from (0,0,0) to (10,0,0), count 3",
+  "expected": "box at the origin on a path from (0,0,0) to (10,0,0), count 3 → three boxes at the measured stations 0, 5 and 10 mm, one Undo entry",
+  "test": "m03_04_01_022_array_along_curve_spaces_copies_by_arc_length"
+}

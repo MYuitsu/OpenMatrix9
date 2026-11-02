@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-034-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-034",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-031",
   "source_command": "Adjust Closed Curve Seam",
   "menu_icon": "CurveCurveEditToolsAdjustClosedCurveSeam",
   "owner_candidate": "OM9-L3-02-04-005",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Adjust Closed Curve Seam command session is not wired; owner candidate OM9-L3-02-04-005 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-034/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-034/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-034/dispatch_contract.json": "5d418c5d5a4b2ccdb0de22629bf95878bfcbcfb0f56b0d1bfdba9c9d0e50f2ee",
-    "implementation/design/M03/OM9-L3-03-16-034/dispatch_contract.md": "0e51a0068fb3b2d18242be1b8948b54302f5dac0a35f4187eb498adc4b59c47a"
+    "implementation/design/M03/OM9-L3-03-16-034/dispatch_contract.json": "3874ae7492f43b6566234f63d2f6e7e03fefc47110359665ed6aad567c7722e7",
+    "implementation/design/M03/OM9-L3-03-16-034/dispatch_contract.md": "9dcfa98f7f6d6ca82254bcfa684b51eed8519ee59f246c0fa151d81f6c90f137"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "CrvSeam"
 }

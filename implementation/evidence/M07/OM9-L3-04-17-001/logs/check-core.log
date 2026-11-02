@@ -1,0 +1,4 @@
+=== cargo check -p om9-core -j 2 ===
+    Blocking waiting for file lock on build directory
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 18.05s

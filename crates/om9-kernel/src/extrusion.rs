@@ -32,6 +32,7 @@ unsafe extern "C" {
         edges: *const EdgeInput,
         edge_count: usize,
         direction: *const f64,
+        capped: c_int,
         deflection: f64,
         max_points: usize,
         max_nodes: usize,
@@ -133,6 +134,31 @@ pub fn solid(
     deflection: f64,
     limits: &Limits,
 ) -> Result<Brep, CreationError> {
+    build(curve, direction, 1, deflection, limits)
+}
+
+/// Extrude an exact closed curve as its side shell without planar end caps.
+pub fn shell(
+    curve: &Curve,
+    direction: Point3,
+    deflection: f64,
+    limits: &Limits,
+) -> Result<Brep, CreationError> {
+    build(curve, direction, 0, deflection, limits)
+}
+
+/// Build an exact bounded planar face from one closed analytic or rational curve.
+pub fn planar_face(curve: &Curve, deflection: f64, limits: &Limits) -> Result<Brep, CreationError> {
+    build(curve, [0.0, 0.0, 1.0], 2, deflection, limits)
+}
+
+fn build(
+    curve: &Curve,
+    direction: Point3,
+    mode: c_int,
+    deflection: f64,
+    limits: &Limits,
+) -> Result<Brep, CreationError> {
     let mut held = curve.validate(limits).map_err(invalid)?;
     let magnitude = direction.iter().fold(0.0_f64, |length, v| length.hypot(*v));
     if !deflection.is_finite()
@@ -166,6 +192,7 @@ pub fn solid(
                     edges.as_ptr(),
                     edges.len(),
                     direction.as_ptr(),
+                    mode,
                     deflection,
                     budget.points,
                     budget.nodes,

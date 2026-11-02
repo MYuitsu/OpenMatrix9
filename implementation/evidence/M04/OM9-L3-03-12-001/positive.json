@@ -1,0 +1,21 @@
+{
+  "expect": {
+    "preset": "circle",
+    "roundtrip": "parameters and unit preserved"
+  },
+  "schema": "om9.builder_style.v1",
+  "style": {
+    "family": [
+      "band"
+    ],
+    "name": "typed v1",
+    "parameters": {
+      "profile_ref": {
+        "choice": "basic_round"
+      },
+      "width_mm": {
+        "length_mm": 2.2
+      }
+    }
+  }
+}

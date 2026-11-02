@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-10-005",
+  "title": "Gem On Curve Multi",
+  "cases": [
+    "two selected curves produce one run each with the same spacing rule",
+    "every gem link points at its own source curve",
+    "the whole multi run is atomic: one Undo removes both runs"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

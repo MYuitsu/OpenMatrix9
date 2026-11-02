@@ -1,0 +1,13 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-10-001",
+  "title": "Gem On Curve Basic",
+  "cases": [
+    "a 100 mm line at 8 mm spacing yields 13 stations from 0 to 96 mm",
+    "`Count=5` on the same line yields exactly 5 stations at 0/25/50/75/100 mm",
+    "every station frame is right-handed and the table axis is world +Z upright",
+    "Apply inserts one gem per station in ONE transaction; a single Undo removes the row",
+    "each gem keeps its spec in `om9.gem` and its `om9.gem.placement` curve link"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-004-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-004",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-004",
   "source_command": "Rectangle",
   "menu_icon": "CurveRectangleCornertoCorner",
   "owner_candidate": "OM9-L3-02-04-001",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Rectangle command session is not wired; owner candidate OM9-L3-02-04-001 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-004/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-004/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-004/dispatch_contract.json": "a265d11717ccc18c3809e12c01db98e0a19816d58ef92521c55cd4098a6607c4",
-    "implementation/design/M03/OM9-L3-03-16-004/dispatch_contract.md": "3a6ede52af11e3363d72e1d9248902fdc9dc339531547397173b9c8d47c80826"
+    "implementation/design/M03/OM9-L3-03-16-004/dispatch_contract.json": "d3c9799dde21771766d1a52adbae493f4661d28b5112968140c2d8d4b3134e38",
+    "implementation/design/M03/OM9-L3-03-16-004/dispatch_contract.md": "3bdfbbd63caed818fc6a60e6cfe83ba0c16feb61f4470e41b7a96bc1c61e9ecf"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Rectangle"
 }

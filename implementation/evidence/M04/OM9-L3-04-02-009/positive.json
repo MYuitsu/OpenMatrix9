@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-04-02-009",
+  "kind": "positive",
+  "input": "drag the profile width handle and commit exactly one profile",
+  "expected": "the RailProfile builder exposes width, height and position handles; adjusting width by +1 mm reports 3.00 x 1.50 in the panel and one Apply inserts one entity and one recipe",
+  "verified_by": [
+    "the_rail_profile_handles_edit_width_and_commit_exactly_once",
+    "a_rail_profile_builder_reads_the_selected_rail_and_exposes_two_handles"
+  ],
+  "notes": [
+    "Handle drag deltas are projected millimetres times the handle scale; the position handle scales by 0.01 so one projected millimetre is 0.01 of the rail.",
+    "Apply is the only insert path: Cancel clears the session without a mutation."
+  ]
+}

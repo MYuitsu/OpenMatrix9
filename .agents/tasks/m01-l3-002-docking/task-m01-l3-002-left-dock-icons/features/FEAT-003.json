@@ -1,0 +1,37 @@
+{
+  "id": "FEAT-003",
+  "type": "chore",
+  "description": "Plan items 7-12: mode-aware validator with --self-test (RED then GREEN), real om9.exe matrix in a new dated folder (default mode for every supported size + rail240/rail460 + user-docked-right threshold cases), viewing the PNGs, full cargo/audit checks, evidence JSON + ledger + verification/final-report/validation doc corrections, M01-UI checklist items 6-8, and the skill proposal file (no skill edits). Depends on FEAT-001 and FEAT-002.",
+  "status": "pending",
+  "steps": [
+    "Edit tools/validate_m01_l3_002_ui_matrix.py per plan item 7: --mode, --self-test, per-case mode env OM9_UI_AUDIT_LAYOUT_MODE, new default output name <date>-m01-l3-002-left-dock/matrix with default/ and user-docked-right/ subfolders, cases (all supported sizes in default; rail240-1280x720, rail460-1280x720; udr-1280x720, udr-lap125-1366x680, udr-lap150-1366x700; unsupported-1000x600 stays), and every new FAIL condition (left order, layers in left, layers never in right/floating, default mode no right dock, title-bar order and inside sidebar, scroll offset 0, mode label, outer width, icon edge, icon rects inside, four checks + no 'unsupported' in cmd, keep status_message_px/status_summary_px non-null). Update the module docstring and FRAME_TEST_ONLY and honest_limits.",
+    "Run python tools\\validate_m01_l3_002_ui_matrix.py --self-test (exit 0) and prove the self-test fails when the Layers check is disabled (restore after).",
+    "cargo build --workspace in standalone, then run the full matrix into build\\standalone-validation\\ui-artifacts\\2026-10-16-m01-l3-002-left-dock\\matrix; all cases must pass.",
+    "Real RED/GREEN: back up ui.rs to build\\ui.rs.bak, temporarily dock SectionId::Layers in the user-docked-right hook, rebuild, run --only udr-1280x720 and save the non-zero result to implementation/evidence/M01/OM9-L3-01-01-002/left-dock-validator.red.log; restore ui.rs byte-for-byte (compare SHA-256 with the backup), rebuild, rerun GREEN to left-dock-validator.green.log; delete the backup.",
+    "View with the read tool: default/min-1280x720, default/lap125-1366x680, default/lap150-1366x700 (CMD error text must be gone), default/tall-1280x900, default/rail240-1280x720, default/rail460-1280x720, user-docked-right/udr-1280x720; write what was seen (and that it is agent viewing, not a human sign-off) into verification.md.",
+    "Run the full checks of plan item 9 (fmt, check, clippy -D warnings, test --workspace -j 1, full public_source_audit.py reported truthfully, refreshed scoped mirror audit with control case) and confirm nothing under ref/ manuals/ OM9_Milestones/ QymCAD/ vendor-research/ changed and the staged file list equals the baseline.",
+    "Update evidence + ledger per plan item 10: OM9-L4-01-01-002-05.ui-review.json (corrections list, superseding command/env note, checklist items 6-8 with null decisions, NOT_SIGNED/OPEN/PENDING_HUMAN_M00_APPROVAL unchanged) and docs/openmatrix9-progress.json (new dated entry, correction note on old 'right Layers dock' evidence, ownership split, no status/gate/planning_state change); validate JSON parses.",
+    "Update docs per plan item 11: verification.md (correction notes + new section), final-report-vi.md (Vietnamese update section), docs/validation/2026-10-16-m01-l3-002-workbench-docking-regions.md (layout modes, outer/inner width, rail max 460 table, icon rule, assertions changed table, drop target, ownership).",
+    "Write .agents/tasks/m01-l3-002-docking/skill-proposal-left-dock.md per plan item 12 and confirm git diff -- skills/ is empty and the installed copy was not touched.",
+    "Delete temporary files (ui.rs.bak, temp measuring test if not kept as a real test, scratch dirs); keep generated artifact folders under build/."
+  ],
+  "acceptance_criteria": [
+    "python tools\\validate_m01_l3_002_ui_matrix.py --self-test exits 0 and each doctored receipt (Layers right, Layers missing from left, Layers before Info & Settings, Layers title bar outside sidebar, default mode with visible right dock, wrong icon edge) is rejected",
+    "The real matrix passes (all_passed true) in default mode for every supported size and for the udr threshold cases; the real RED run exits non-zero with a 'layers in right_sections' problem and the restored run is GREEN",
+    "No default-mode receipt has a right dock or right_sections; every receipt has layers between info-settings and projects inside the sidebar rect; lap125/lap150 cmd has no 'unsupported'",
+    "Viewed screenshots confirm Layers in the left column below Info & Settings, no right dock in default captures, larger icons at rail 460, and the udr capture is labelled user-initiated",
+    "verification.md, final-report-vi.md, the validation doc, the ui-review evidence JSON and the ledger no longer describe 'the right Layers dock' without a correction note; M01-UI stays NOT_SIGNED/OPEN, legal PENDING_HUMAN_M00_APPROVAL, L2-01-02/03 BLOCKED_DEPENDENCY, planning_state unchanged; the checklist has the three new items",
+    "skill-proposal-left-dock.md exists; skills/ and the installed skill copy are unchanged",
+    "cargo fmt/check/clippy/test --workspace -j 1 all exit 0 with higher pass count than 596 and 0 failures; the full public_source_audit result is reported as it is (known exit 1 from private trees), never as a pass"
+  ],
+  "verification": [
+    "cd h:\\OpenMatrix9; python tools\\validate_m01_l3_002_ui_matrix.py --self-test",
+    "cd h:\\OpenMatrix9\\standalone; cargo build --workspace",
+    "cd h:\\OpenMatrix9; python tools\\validate_m01_l3_002_ui_matrix.py --output build\\standalone-validation\\ui-artifacts\\2026-10-16-m01-l3-002-left-dock\\matrix",
+    "cd h:\\OpenMatrix9\\standalone; cargo fmt --all -- --check; cargo check --workspace --all-targets; cargo clippy --workspace --all-targets -- -D warnings; cargo test --workspace -j 1",
+    "cd h:\\OpenMatrix9; python -c \"import json;json.load(open('docs/openmatrix9-progress.json',encoding='utf-8'));json.load(open('implementation/evidence/M01/OM9-L3-01-01-002/OM9-L4-01-01-002-05.ui-review.json',encoding='utf-8'))\"",
+    "cd h:\\OpenMatrix9; git diff --stat -- skills ref manuals OM9_Milestones QymCAD vendor-research (must show nothing from this work); git diff --cached --name-only (equal to baseline)"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

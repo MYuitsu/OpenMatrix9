@@ -14,8 +14,8 @@ use om9_core::{
     surface_ops::{
         BlendTangents, SurfaceContinuity, SurfaceEdge, blend_surface, boundary_curve,
         match_surface, network, normal_extrude, offset_surface, rail_revolve, rebuild_surface,
-        reverse_surface, seam_surface, shrink_surface, softedit, split_surface, trim_surface,
-        unroll, untrim_surface,
+        refit_to_tolerance, reverse_surface, seam_surface, shrink_surface, smash, softedit,
+        split_surface, trim_surface, unroll, untrim_surface,
     },
 };
 
@@ -829,4 +829,128 @@ fn m03_02_05_receipt() {
         "unroll_v": evaluate(&unrolled, 0.0, 1.0, &limits()).unwrap()[1],
     });
     println!("{receipt}");
+}
+
+/* ------------------------------ L3-006 smash / refit to tolerance ------------------------------ */
+
+fn saddle_surface() -> NurbsSurface {
+    let mut poles = Vec::new();
+    for i in 0..3 {
+        let x = i as f64 - 1.0;
+        for j in 0..3 {
+            let y = j as f64 - 1.0;
+            poles.push([2.0 * x, 2.0 * y, 1.5 * x * y]);
+        }
+    }
+    NurbsSurface {
+        degree: [2, 2],
+        size: [3, 3],
+        poles,
+        weights: vec![1.0; 9],
+        knots: [
+            vec![0.0, 0.0, 0.0, 1.0, 1.0, 1.0],
+            vec![0.0, 0.0, 0.0, 1.0, 1.0, 1.0],
+        ],
+        domain: [[0.0, 1.0], [0.0, 1.0]],
+        periodic: [false, false],
+        reversed: false,
+    }
+}
+
+#[test]
+fn m03_02_05_smash_flattens_onto_the_plane_and_reports_the_stretch() {
+    let plane_surface = plane(
+        point(0.0, 0.0, 0.0),
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        4.0,
+        2.0,
+        &limits(),
+    )
+    .unwrap();
+    let flat = smash(&plane_surface, [8, 8], &limits()).unwrap();
+    assert_eq!(flat.surface.degree, [1, 1]);
+    assert!(flat.stretch < 1e-9, "plane stretch {}", flat.stretch);
+    for pole in &flat.surface.poles {
+        assert!(pole[2].abs() < 1e-9, "smash is planar: {pole:?}");
+    }
+
+    let cylinder_surface = cylinder(
+        point(0.0, 0.0, 0.0),
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        4.0,
+        6.0,
+        &limits(),
+    )
+    .unwrap();
+    let unrolled = smash(&cylinder_surface, [16, 8], &limits()).unwrap();
+    assert!(
+        unrolled.stretch < 1e-9,
+        "a developable cylinder must not stretch: {}",
+        unrolled.stretch
+    );
+
+    let saddle = smash(&saddle_surface(), [12, 12], &limits()).unwrap();
+    assert!(
+        saddle.stretch > 0.05,
+        "a doubly curved surface must report its distortion: {}",
+        saddle.stretch
+    );
+    for pole in &saddle.surface.poles {
+        assert!(pole[2].abs() < 1e-9, "smash is planar: {pole:?}");
+    }
+}
+
+#[test]
+fn m03_02_05_refit_to_tolerance_picks_a_grid_that_meets_the_bound() {
+    let dense = cylinder(
+        point(0.0, 0.0, 0.0),
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        6.0,
+        12.0,
+        &limits(),
+    )
+    .unwrap();
+    let refit = refit_to_tolerance(&dense, 0.05, &limits()).unwrap();
+    assert!(
+        refit.deviation <= 0.05,
+        "reported deviation {}",
+        refit.deviation
+    );
+    assert!(refit.degree.iter().all(|degree| *degree <= 3));
+    assert!(refit.size.iter().all(|size| *size <= 24));
+    // The search stops at the first grid that meets the tolerance instead of always
+    // spending the 24-pole budget.
+    assert!(refit.size[0] < 24, "refit grid {:?}", refit.size);
+    // Sample parameters the search did not use: the bound is a sampling bound, so allow
+    // twice the requested tolerance outside the measured grid.
+    let mut sampled: f64 = 0.0;
+    for i in 0..=16 {
+        for j in 0..=16 {
+            let u = i as f64 / 16.0;
+            let v = j as f64 / 16.0;
+            let target = evaluate(&dense, u, v, &limits()).unwrap();
+            let fitted = evaluate(&refit.surface, u, v, &limits()).unwrap();
+            sampled = sampled.max(
+                ((fitted[0] - target[0]).powi(2)
+                    + (fitted[1] - target[1]).powi(2)
+                    + (fitted[2] - target[2]).powi(2))
+                .sqrt(),
+            );
+        }
+    }
+    assert!(
+        sampled <= 0.1,
+        "independent sampling {sampled} exceeds twice the tolerance"
+    );
+    assert_eq!(
+        refit_to_tolerance(&dense, 0.0, &limits()).err(),
+        Some(Error::Invalid("refit tolerance"))
+    );
+    assert_eq!(
+        refit_to_tolerance(&dense, 1.0e-9, &limits()).err(),
+        Some(Error::Invalid("refit cannot meet the tolerance"))
+    );
 }

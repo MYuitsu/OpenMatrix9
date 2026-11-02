@@ -1,0 +1,63 @@
+{
+  "schema": "om9.m05.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-12-004",
+  "title": "Pave Prong Layout",
+  "owner": "om9-core gem_pave owner + om9-app gem pave session/window",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/gem_pave.rs",
+      "state": "IMPLEMENTED_AND_TESTED"
+    },
+    {
+      "path": "crates/om9-core/src/gem.rs",
+      "state": "REUSED_GEM_OWNER"
+    },
+    {
+      "path": "crates/om9-core/src/surface_kernel.rs",
+      "state": "REUSED_SURFACE_EVALUATION"
+    },
+    {
+      "path": "crates/om9-core/src/curve_ops.rs",
+      "state": "REUSED_CURVE_EVALUATION"
+    },
+    {
+      "path": "crates/om9-core/src/curve_surface_ops.rs",
+      "state": "REUSED_PROJECTION"
+    },
+    {
+      "path": "crates/om9-core/tests/gem_pave.rs",
+      "state": "REGISTERED_TESTS"
+    },
+    {
+      "path": "crates/om9-app/src/session/gem_pave.rs",
+      "state": "IMPLEMENTED_AND_TESTED"
+    },
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "state": "REUSED_HANDLE_ROUTE"
+    },
+    {
+      "path": "crates/om9-app/src/ui/gem_pave.rs",
+      "state": "IMPLEMENTED_WINDOW"
+    },
+    {
+      "path": "crates/om9-app/tests/gem_pave_panel.rs",
+      "state": "REGISTERED_TESTS"
+    }
+  ],
+  "source_audit": {
+    "matrix_assets": "NOT_COPIED",
+    "result": "PROCEDURAL_ASSETS_ONLY",
+    "detail": "Stones are the existing procedural GemSpec/mesh owner; no Matrix gem, azure or metal binary is read."
+  },
+  "planning_inputs": [
+    "OM9_Milestones/M05 - Gems and Layout/L2-04-12 - 04-febe-gem-pave-layout-and-azure/L3-004 - Pave Prong Layout/l3.json"
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "Azure profiles are closed curves; prong curves are markers. Metal cutting/setting geometry belongs to M06/M07.",
+    "The Matrix command names are kept."
+  ]
+}

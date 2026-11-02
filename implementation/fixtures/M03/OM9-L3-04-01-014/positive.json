@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-014",
+  "case": "curve (1,1,1)->(3,1,3) on the tilted plane, base plane picked",
+  "expected": "curve (1,1,1)->(3,1,3) on the tilted plane, base plane picked -> the ends land on (1,1,0) and (3,1,0)",
+  "test": "m03_04_01_015_smart_flow_pulldown_brings_curves_to_the_base"
+}

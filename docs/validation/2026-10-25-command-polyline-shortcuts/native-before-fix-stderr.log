@@ -1,0 +1,4 @@
+
+thread 'main' (16944) panicked at crates\om9-app\src\ui\command.rs:264:26:
+byte range starts at 77 but ends at 57
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace

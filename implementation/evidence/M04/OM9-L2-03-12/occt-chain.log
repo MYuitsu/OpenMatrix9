@@ -1,0 +1,14 @@
+$ cargo test -p om9-kernel --features 3dm-brep --test associative_history -j 2
+# exit code: 0
+# captured: 2026-10-27T02:48:24Z
+# target dir: L:\om9-target
+
+
+running 2 tests
+test the_occt_registry_sweeps_a_real_brep_and_publishes_its_topology ... ok
+test an_occt_sweep_reference_resolves_after_a_profile_edit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.87s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running tests\associative_history.rs (L:\om9-target\debug\deps\associative_history-87cd16c00aba0a00.exe)

@@ -4,6 +4,51 @@
   "milestone": "M04",
   "parent_l2_id": "OM9-L2-04-19",
   "title": "Metal Volume From Closed B-Rep",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "closed box BRep 10x5x2 mm",
+        "type": "UNRESOLVED",
+        "unit": "mm",
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L3-001 - Metal Volume From Closed B-Rep/l3.json#l3.m04_execution_handoff.positive_fixture.input"
+      },
+      {
+        "raw": "open shell supplied in place of solid",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/L3-001 - Metal Volume From Closed B-Rep/l3.json#l3.m04_execution_handoff.positive_fixture.negative_input"
+      }
+    ],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [
+      "input:closed box BRep 10x5x2 mm: type/default/range",
+      "input:open shell supplied in place of solid: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPECIFIED_L4_PLANNED_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M04",
   "execution_stage": "E09",
@@ -170,5 +215,14 @@
     "requires_human_review": true,
     "source_pin": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
     "special_manual_flags": []
-  }
+  },
+  "task_ids": [
+    "OM9-L4-04-19-001-01",
+    "OM9-L4-04-19-001-02",
+    "OM9-L4-04-19-001-03",
+    "OM9-L4-04-19-001-04",
+    "OM9-L4-04-19-001-05",
+    "OM9-L4-04-19-001-07",
+    "OM9-L4-04-19-001-06"
+  ]
 }

@@ -4,6 +4,42 @@
   "milestone": "M03",
   "parent_l2_id": "OM9-L2-02-04",
   "title": "Line Polyline Point Creation",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "schema": "om9.command_inline.v1",
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "prompt_source": "owner_current_value_snapshot",
+      "renderer": "shared_command_option_formatter",
+      "keyboard_and_click_share_handler": true,
+      "preserve_draft_ime_focus": true,
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION",
+      "shortcut_policy": "full_name_or_unique_stage_accelerator",
+      "shortcut_resolution": "UNRESOLVED",
+      "option_scope": "DOMAIN_COMMAND",
+      "option_order": [],
+      "option_count": 0
+    },
+    "catalog": null,
+    "domain_inputs": [
+      {
+        "raw": "line (0,0,0)→(3,4,0), polyline with three vertices",
+        "type": "UNRESOLVED",
+        "unit": null,
+        "default": null,
+        "required": true,
+        "source": "OM9_Milestones/M03 - Geometry 3DM/L2-02-04 - 04/L3-001 - Line Polyline Point Creation/l3.json#l3.m03_luna_execution_contract.golden_test_design.input"
+      }
+    ],
+    "command_options": [],
+    "missing_options": [],
+    "missing": [
+      "input:line (0,0,0)→(3,4,0), polyline with three vertices: type/default/range"
+    ],
+    "implementation_l4": null
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "M03",
   "execution_stage": "E04",
@@ -361,10 +397,10 @@
     "human_approval": null,
     "manual_gate": "M03-UI",
     "remaining": [
-      "The menu/viewport command tier for Point/Polyline is not rewired in this slice; the records and service are delivered.",
-      "Arc mode and PersistentClose prompts remain a command-tier concern.",
-      "Manual M03-UI interactive acceptance is not performed by the implementer.",
-      "macOS runtime is unverified."
+      "Polyline menu/CMD Line/Arc tier verified in the 2026-10-25 follow-up; original core-only receipts remain historical.",
+      "Helpers tracking and continuously closed PersistentClose preview remain unfinished.",
+      "Center minor arcs only; antipodal/major Center selection is not certified.",
+      "Full M01/M03 human review, macOS and exact mixed-Polycurve 3DM re-export remain open."
     ],
     "standalone_verification_2026_10_22": {
       "date": "2026-10-22",
@@ -386,6 +422,50 @@
       "OM9-L4-02-04-001-03": "1/1",
       "OM9-L4-02-04-001-04": "1/1",
       "OM9-L4-02-04-001-05": "1/1"
+    },
+    "command_options_2026_10_25": {
+      "date": "2026-10-25",
+      "status": "SCOPED_RUST_AND_WINDOWS_UI_VERIFIED_MANUAL_GATE_PENDING",
+      "scope": "Polyline M/Mode toggles Line/Arc through one parser; P/H flags, protected input, analytic mixed segments, Direction/Center, bounded scene display, Close, Undo/Redo and retry/cancel.",
+      "evidence": [
+        "docs/validation/2026-10-25-command-polyline-shortcuts/README.md",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/commands.json",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/native-debug-replay.json",
+        "docs/validation/2026-10-25-command-polyline-shortcuts/native-release-replay.json"
+      ],
+      "manual_gate_promoted": false,
+      "remaining": [
+        "Helpers tracking and continuously closed PersistentClose preview remain unfinished.",
+        "Center minor arcs only; antipodal/major Center selection is not certified.",
+        "Full M01/M03 human review, macOS and exact mixed-Polycurve 3DM re-export remain open."
+      ]
+    },
+    "polyline_parameter_interface_2026_10_25": {
+      "date": "2026-10-25",
+      "status": "SCOPED_AUTOMATED_AND_WINDOWS_UI_VERIFIED_MANUAL_GATE_PENDING",
+      "scope": "All eight Polyline parameters share typed IDs, names, shortcuts, kinds, current values and activation; keyboard, pointer and typed names reuse one parser. Other command families unchanged.",
+      "evidence": [
+        "docs/validation/2026-10-25-polyline-parameter-interface/README.md",
+        "docs/validation/2026-10-25-polyline-parameter-interface/commands.json",
+        "docs/validation/2026-10-25-polyline-parameter-interface/native-debug.json",
+        "docs/validation/2026-10-25-polyline-parameter-interface/native-release.json"
+      ],
+      "tests": {
+        "app_passed": 216,
+        "failed": 0,
+        "new_rust_tests": 3,
+        "parameter_route_scenarios": 24,
+        "scenario_note": "24 scenarios inside one of the three new Rust tests, not 24 extra test functions",
+        "clippy": "passed",
+        "fmt": "passed",
+        "release": "passed"
+      },
+      "manual_gate_promoted": false,
+      "existing_geometry_and_flag_lifecycle_semantics_changed": false,
+      "remaining": [
+        "Helpers tracking and continuously closed PersistentClose preview remain unfinished.",
+        "Existing Center arc restrictions, exact mixed-Polycurve 3DM re-export, macOS and human gates remain open."
+      ]
     }
   }
 }

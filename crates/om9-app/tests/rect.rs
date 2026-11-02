@@ -63,7 +63,6 @@ fn rectangle_preview_has_four_edges() {
     assert_eq!(c.rect_preview([10.0, 20.0, 0.0]).len(), 4);
 }
 
-
 #[test]
 fn rectangle_square_option_uses_the_longer_side() {
     let mut c = controller();
@@ -75,7 +74,6 @@ fn rectangle_square_option_uses_the_longer_side() {
     assert!((max[0] - 20.0).abs() < 1e-9);
     assert!((max[1] - 20.0).abs() < 1e-9);
 }
-
 
 #[test]
 fn rectangle_follows_the_active_cplane() {
@@ -90,7 +88,6 @@ fn rectangle_follows_the_active_cplane() {
     assert!((max[2] - 20.0).abs() < 1e-9);
     assert!(min[1].abs() < 1e-9 && max[1].abs() < 1e-9);
 }
-
 
 #[test]
 fn rectangle_preview_follows_the_active_cplane() {
@@ -107,12 +104,12 @@ fn rectangle_preview_follows_the_active_cplane() {
         .map(|point| point[2])
         .fold(f64::MIN, f64::max);
     assert!((max_z - 20.0).abs() < 1e-9, "{max_z}");
-    assert!(wire
-        .iter()
-        .flat_map(|segment| segment.iter())
-        .all(|point| point[1].abs() < 1e-9));
+    assert!(
+        wire.iter()
+            .flat_map(|segment| segment.iter())
+            .all(|point| point[1].abs() < 1e-9)
+    );
 }
-
 
 #[test]
 fn rectangle_center_mode_uses_the_center_and_doubles_the_extent() {
@@ -150,7 +147,6 @@ fn rectangle_center_preview_is_centered() {
     assert!((min_x + 5.0).abs() < 1e-9, "min_x={min_x}");
 }
 
-
 #[test]
 fn rectangle_three_point_mode_uses_edge_then_width() {
     let mut c = controller();
@@ -164,7 +160,6 @@ fn rectangle_three_point_mode_uses_edge_then_width() {
     assert!((max[0] - 10.0).abs() < 1e-9);
     assert!((max[1] - 5.0).abs() < 1e-9);
 }
-
 
 #[test]
 fn rectangle_three_point_preview_uses_the_edge_frame() {
@@ -183,7 +178,6 @@ fn rectangle_three_point_preview_uses_the_edge_frame() {
     assert!((max_y - 5.0).abs() < 1e-9, "{max_y}");
 }
 
-
 #[test]
 fn rectangle_vertical_mode_uses_a_vertical_edge() {
     let mut c = controller();
@@ -197,7 +191,6 @@ fn rectangle_vertical_mode_uses_a_vertical_edge() {
     assert!((max[0] - 10.0).abs() < 1e-9);
     assert!((max[2] - 5.0).abs() < 1e-9);
 }
-
 
 #[test]
 fn rectangle_vertical_preview_uses_the_vertical_edge() {
@@ -222,7 +215,6 @@ fn rectangle_vertical_preview_uses_the_vertical_edge() {
     assert!((max_z - 5.0).abs() < 1e-9);
 }
 
-
 #[test]
 fn rectangle_accepts_length_option() {
     let mut c = controller();
@@ -235,7 +227,6 @@ fn rectangle_accepts_length_option() {
     assert!((max[0] - 10.0).abs() < 1e-9);
     assert!((max[1] - 5.0).abs() < 1e-9);
 }
-
 
 #[test]
 fn rectangle_three_point_accepts_numeric_width() {
@@ -250,7 +241,6 @@ fn rectangle_three_point_accepts_numeric_width() {
     assert!((max[1] - 5.0).abs() < 1e-9);
 }
 
-
 #[test]
 fn rectangle_three_point_accepts_numeric_height() {
     let mut c = controller();
@@ -262,4 +252,25 @@ fn rectangle_three_point_accepts_numeric_height() {
     let (_, max) = bounds(&c);
     assert!((max[0] - 10.0).abs() < 1e-9);
     assert!((max[1] - 5.0).abs() < 1e-9);
+}
+
+#[test]
+fn rectangle_square_uses_the_shared_option_snapshot() {
+    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+    let mut c = controller();
+    c.submit("Rectangle").unwrap();
+    let square = c
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Square")
+        .expect("Square option");
+    assert_eq!(
+        c.activate_command_option(square.id).unwrap(),
+        CommandOptionEffect::Applied
+    );
+    c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
+    c.accept_world_point([10.0, 20.0, 0.0]).unwrap();
+    let (_, max) = bounds(&c);
+    assert!((max[0] - 20.0).abs() < 1e-9);
+    assert!((max[1] - 20.0).abs() < 1e-9);
 }

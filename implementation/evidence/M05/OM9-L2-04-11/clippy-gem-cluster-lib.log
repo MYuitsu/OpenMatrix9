@@ -1,0 +1,9 @@
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Checking om9-native-owner v0.1.0 (H:\OpenMatrix9\crates\om9-native-owner)
+    Checking om9-scene v0.1.0 (H:\OpenMatrix9\crates\om9-scene)
+    Checking om9-archive v0.1.0 (H:\OpenMatrix9\crates\om9-archive)
+    Checking om9-kernel v0.1.0 (H:\OpenMatrix9\crates\om9-kernel)
+    Checking om9-exchange v0.1.0 (H:\OpenMatrix9\crates\om9-exchange)
+    Checking om9-plugin-host v0.1.0 (H:\OpenMatrix9\crates\om9-plugin-host)
+    Checking om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.02s

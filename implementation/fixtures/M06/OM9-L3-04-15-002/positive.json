@@ -1,0 +1,17 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-15-002",
+  "cases": [
+    {
+      "input": "one committed prong body selected, Diameter=1.6",
+      "expect": "same object id, new geometry, payload diameter 1.6, prong count unchanged",
+      "oracle": "om9-app tests/settings_commands.rs::the_editor_edits_a_committed_prong_in_place"
+    }
+  ],
+  "automated_tests": [
+    "the_editor_edits_a_committed_prong_in_place",
+    "the_editor_refuses_a_non_prong_selection",
+    "settings::prong::tests::editing_one_prong_keeps_the_others",
+    "tests/settings_family.rs::the_editor_changes_one_prong_and_leaves_its_neighbours_alone"
+  ]
+}

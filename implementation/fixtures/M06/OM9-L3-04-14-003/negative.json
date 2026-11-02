@@ -1,0 +1,15 @@
+{
+  "schema": "om9.negative_fixtures.v1",
+  "task_id": "OM9-L3-04-14-003",
+  "cases": [
+    {
+      "input": "Grouped level with an overall field",
+      "error": "invalid head edit level field"
+    },
+    {
+      "input": "Prong index 0",
+      "error": "invalid head prong index"
+    }
+  ],
+  "rule": "a refused value keeps the staged command and its last valid preview; the document never changes"
+}

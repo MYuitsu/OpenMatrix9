@@ -1,0 +1,76 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-12-006",
+  "title": "Builder Style Match Attributes",
+  "generated_at_utc": "2026-10-27T02:48:46Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the Builder Styles window at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "8c2a025c59b99035d5d2c825deea3eb3d91a68cdbff593464d9d4c20ab14a43b",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "width 3, height 2 and material synthetic are copied; the source entity id and slots are unchanged",
+    "negative": "a source without a declared slot and a wrong-typed member are refused"
+  },
+  "l4_id": "OM9-L4-03-12-006-06",
+  "role": "ACCEPTANCE",
+  "kind": "acceptance",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/builder_style.rs",
+    "crates/om9-app/tests/builder_styles.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "builder_style",
+        "-j",
+        "2",
+        "matching_attributes_copies_only_the_declared_attributes_and_keeps_the_identity"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "da3e4fa788b629864e06433845fd0e00948cd6ebd47f99afc8d78e75e5704e0a",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s"
+      ],
+      "test": "matching_attributes_copies_only_the_declared_attributes_and_keeps_the_identity",
+      "package": "om9-core",
+      "binary": "builder_style"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_styles",
+        "-j",
+        "2",
+        "matching_attributes_copies_from_the_selection_and_keeps_the_ids"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "d9089be6e57088a036bfc8472f8c6234af8e3750e5efacada90f56633bb5321b",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s"
+      ],
+      "test": "matching_attributes_copies_from_the_selection_and_keeps_the_ids",
+      "package": "om9-app",
+      "binary": "builder_styles"
+    }
+  ],
+  "manual_gate_note": "Acceptance And Evidence: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

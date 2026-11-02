@@ -1,0 +1,158 @@
+{
+  "schema": "om9.m04.followup.v1",
+  "l2": "OM9-L2-01-04",
+  "recorded_at_utc": "2026-10-26T19:21:18Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",
+  "scope": [
+    "real ring rail/profile/sweep producer chain",
+    "OCCT sweep backend and topology provider for PublishedSubshapes",
+    "SDK history read contract and host dispatch",
+    "external example plugin command HistoryDemo",
+    "delta-based PreviewSession"
+  ],
+  "code": [
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/associative.rs",
+    "crates/om9-kernel/src/associative.rs",
+    "crates/om9-kernel/tests/associative_history.rs",
+    "crates/om9-sdk/src/lib.rs",
+    "crates/om9-plugin-host/src/staged.rs",
+    "sdk/examples/hello-plugin/src/lib.rs",
+    "sdk/examples/hello-plugin/descriptor.json"
+  ],
+  "checks": [
+    {
+      "artifact": "producers-core.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "producers",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s"
+      ]
+    },
+    {
+      "artifact": "producers-occt.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-kernel",
+        "--features",
+        "3dm-brep",
+        "--test",
+        "associative_history",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.88s"
+      ]
+    },
+    {
+      "artifact": "associative-regression.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "associative_rebuild",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "artifact": "sdk-history.log",
+      "command": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-plugin-host",
+        "--lib",
+        "-j",
+        "2",
+        "history"
+      ],
+      "exit_code": 0,
+      "summary": [
+        "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 52 filtered out; finished in 0.00s"
+      ]
+    },
+    {
+      "artifact": "external-plugin.log",
+      "command": [
+        "cargo",
+        "check",
+        "-p",
+        "om9-hello-plugin",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": []
+    },
+    {
+      "artifact": "clippy.log",
+      "command": [
+        "cargo",
+        "clippy",
+        "-p",
+        "om9-core",
+        "-p",
+        "om9-sdk",
+        "-p",
+        "om9-plugin-host",
+        "-p",
+        "om9-hello-plugin",
+        "--all-targets",
+        "-j",
+        "2",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "summary": []
+    },
+    {
+      "artifact": "workspace-check.log",
+      "command": [
+        "cargo",
+        "check",
+        "--workspace",
+        "--all-targets",
+        "-j",
+        "2"
+      ],
+      "exit_code": 0,
+      "summary": []
+    }
+  ],
+  "notes": [
+    "The OCCT run uses the pinned 8.0.1 bridge; the test executable needs the target DLL directory on PATH.",
+    "The SDK export is read-only by design: recompute needs the native producer and the host transaction/Undo owner."
+  ],
+  "external_plugin_runtime": {
+    "artifact": "external-plugin-runtime.log",
+    "package": "hello.om9p",
+    "command": "om9.exe --plugin-run-on hello.om9p HistoryDemo",
+    "exit_code": 0,
+    "document_projection_unchanged": true,
+    "note": "The packaged hello-plugin ran HistoryDemo through the app host; the project had no recorded feature, so non-empty data is covered by the host unit tests."
+  }
+}

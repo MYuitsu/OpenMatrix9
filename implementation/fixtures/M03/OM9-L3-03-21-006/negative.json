@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-03-21-006",
+  "case": "no selection, more than one object, or a selected curve that is not a circle/arc",
+  "expected": "no selection, more than one object, or a selected curve that is not a circle/arc -> Error::Invalid (\"select one circle or arc\", \"radial dimension needs a circle/arc\")",
+  "test": "crates/om9-app/tests/annotation.rs::preview_cancel_invalid_witness_and_native_archive_roundtrip"
+}

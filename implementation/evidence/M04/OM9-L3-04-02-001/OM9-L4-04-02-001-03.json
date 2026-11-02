@@ -1,0 +1,81 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-02-001",
+  "title": "Ring Rail Jewelry Size Standard",
+  "generated_at_utc": "2026-10-27T04:25:55Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual panel/handle review at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "4383857713f1795044d3c028757abe1fd7cbe876fab412cec389816fb6dc6ea4",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "US size 8 resolves through the frozen table to 18.13 mm inside diameter (radius 9.065); US size 9 resolves to 18.95 mm; an explicit 18 mm rail keeps radius 9.0 and circumference 56.55 mm",
+    "negative": "an unverified locale such as UK is refused by the choice domain; a size outside 1..15 is refused by the count domain"
+  },
+  "l4_id": "OM9-L4-04-02-001-03",
+  "role": "IMPLEMENT",
+  "kind": "implementation",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/ring_size.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/producers.rs",
+    "crates/om9-core/src/builder.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/ring_tools.rs",
+    "crates/om9-app/tests/ring_tools.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-core",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "a_us_ring_size_resolves_through_the_frozen_table_and_an_unknown_locale_is_refused"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "4ade01f64696bc755ef692144d14d69f119101bc621bcc3d408086dc8d259e44",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s"
+      ],
+      "test": "a_us_ring_size_resolves_through_the_frozen_table_and_an_unknown_locale_is_refused",
+      "package": "om9-core",
+      "binary": "ring_tools"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "ring_tools",
+        "-j",
+        "2",
+        "the_ring_size_command_switches_the_builder_to_the_us_table"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "d17afc3c40d680278efb27b5c1ac480c482467fb16596d17fe0cf913c068376b",
+      "summary": [
+        "running 1 test",
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s"
+      ],
+      "test": "the_ring_size_command_switches_the_builder_to_the_us_table",
+      "package": "om9-app",
+      "binary": "ring_tools"
+    }
+  ],
+  "manual_gate_note": "M04-UI manual review remains open; no signature is included."
+}

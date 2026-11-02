@@ -1,0 +1,12 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-11-006",
+  "kind": "negative",
+  "input": "a panel event captured before the latest handle drag",
+  "expected": "stale event is refused; the newer value survives",
+  "verified_by": [
+    "a_stale_panel_event_cannot_overwrite_a_newer_handle_drag",
+    "a_handle_drag_and_a_typed_value_share_the_one_field"
+  ],
+  "document_unchanged": true
+}

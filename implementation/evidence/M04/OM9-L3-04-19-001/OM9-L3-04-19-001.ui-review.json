@@ -1,0 +1,66 @@
+{
+  "schema": "om9.ui-review.v1",
+  "l3_id": "OM9-L3-04-19-001",
+  "reviewer": {
+    "name": "OM9 automated evidence gate",
+    "role": "automated acceptance; no human signature",
+    "status": "AUTOMATED_EVIDENCE_ONLY"
+  },
+  "decision": "ACCEPTED_BY_AUTOMATED_EVIDENCE",
+  "approved_at_utc": "2026-10-27T07:12:44Z",
+  "manual_test_gate": "AUTO_ONLY",
+  "statement": "a closed 10 x 5 x 2 mm box measures 100 mm^3; 100 cm^3 converts to 100,000 mm^3 before aggregation Negative: an open shell, zero solids, NaN, infinite and zero/negative volumes are typed refusals; no mass is ever reported",
+  "evidence": [
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-001/api.md",
+      "sha256": "e3420d7f911f57084b134368ea4d711f7ff611e661921246428903dabe196275",
+      "bytes": 774
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-001/negative.json",
+      "sha256": "3e7295138b54cbcf2446cb2c427d47b6db3875237b4df78c1ce60e30f1476ef8",
+      "bytes": 511
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-001/OM9-L4-04-19-001-03.json",
+      "sha256": "e5687b8f5475a11624601c86da3f7242c78c08e84d7830120fe288e195c6bd55",
+      "bytes": 3993
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-001/OM9-L4-04-19-001-04.json",
+      "sha256": "ff135ed8579e16c2a5d54ae9fd3b191128b351307f7e4055363c212c0f61f555",
+      "bytes": 3990
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-001/OM9-L4-04-19-001-05.json",
+      "sha256": "584bab2a0b492dc77b5c57290c8c5a42e9c3160618ca8ddcdf841562056a4585",
+      "bytes": 3990
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-001/OM9-L4-04-19-001-06.json",
+      "sha256": "ce853902b9996998c64d80904dabc7615b47773a1ecfb622209bdde1b78ff3a5",
+      "bytes": 3986
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-001/OM9-L4-04-19-001-07.json",
+      "sha256": "9e78c725214c9c30672643ce50e3e9d88c9817f03ef6645e2ea632323fb69f15",
+      "bytes": 3992
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-001/positive.json",
+      "sha256": "7bef9f52d67b5abb2f06e8cddd10f01a0b94e32808292cdaab5667fc6654be31",
+      "bytes": 793
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-001/README.md",
+      "sha256": "09c913232c2fe1946eeb38b66601d569880ebc9ea299614a914903fe43f6370f",
+      "bytes": 1406
+    },
+    {
+      "path": "implementation/evidence/M04/OM9-L3-04-19-001/source_crosswalk.json",
+      "sha256": "1ba5ff46c44199c87fa58ce06c9ff0fff5f8d928d4d0cb544dba12e5c7961530",
+      "bytes": 1299
+    }
+  ],
+  "note": "Generated from the passing receipts. The L3 plan sets manual_test_gate AUTO_ONLY; this record is not a human signature and does not approve a manual builder-panel review."
+}

@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-008",
+  "case": "path (0,0,0)->(10,0,0), base (0,0,0), axis (1,0,0), bend direction (0,1,0), 90 degrees",
+  "expected": "path (0,0,0)->(10,0,0), base (0,0,0), axis (1,0,0), bend direction (0,1,0), 90 degrees -> the far end lands on (10/(pi/2), 10/(pi/2), 0) = (6.3662, 6.3662, 0) as a polycurve of the mapped samples, one Undo entry",
+  "test": "m03_04_01_008_bend_turns_the_curve_into_an_arc"
+}

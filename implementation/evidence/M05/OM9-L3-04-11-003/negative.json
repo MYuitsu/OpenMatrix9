@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-11-003",
+  "title": "Baguette Channel Layout",
+  "cases": [
+    "a zero or negative wall gap is refused",
+    "an unknown channel option is a typed error and the session stays open",
+    "a stone outside the wall span is refused"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

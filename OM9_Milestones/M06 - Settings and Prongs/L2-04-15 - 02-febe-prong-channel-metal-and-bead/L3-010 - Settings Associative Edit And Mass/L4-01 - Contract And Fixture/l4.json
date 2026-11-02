@@ -38,6 +38,23 @@
   "manual_interpretation_note": "E11 exit & metal weights concepts; no independent Chapter 28 heading for associative mass. Nếu L3 chỉ có parent_l2_range: đây là chỉ mục tra cứu bổ sung, không khẳng định manual có heading độc lập.",
   "source_claim_level": "SOURCE_MANUAL_AND_L3_ONLY__NO_APP_CODE_CONFIRMED",
   "purpose": "Associative settings & metal mass: chốt dữ liệu/api và fixture. settings and gem feature graph; exact solid BRep; material density from validated source",
+  "parameter_contract": {
+    "schema": "om9.parameter_contract.ref.v1",
+    "status": "DOMAIN_ONLY",
+    "interaction": {
+      "mode": "DOMAIN_COMMAND_INLINE",
+      "handler": "Controller::submit",
+      "option_count": 0,
+      "shortcut_resolution": "UNRESOLVED",
+      "legacy_button_row": "REMOVE_AFTER_MIGRATION"
+    },
+    "l3_contract": "M06 - Settings and Prongs/L2-04-15 - 02-febe-prong-channel-metal-and-bead/L3-010 - Settings Associative Edit And Mass/l3.json#/parameter_contract",
+    "catalog_command": null,
+    "option_count": 0,
+    "missing_option_count": 0,
+    "domain_input_count": 3,
+    "implementation_l4": null
+  },
   "inputs": [
     "settings and gem feature graph; exact solid BRep; material density from validated source",
     "L3 canonical: specs/06-ms06-settings-and-prongs/02-febe-prong-channel-metal-and-bead-settings/010-febe-settings-associative-edit-and-mass/l3.json",
@@ -408,12 +425,17 @@
       "stage": "Mô hình dữ liệu đá và khối lượng kim loại",
       "why_for_this_task": "Khối lượng của setting dùng cùng công thức: thể tích nhân 0.001 nhân tỉ trọng, làm tròn hai chữ số; brep hở bị từ chối chứ không trả 0.",
       "om9_backend": "pure Rust cho model và tính khối lượng; openNURBS cho user data trên đối tượng",
-      "steps_cited": [5],
+      "steps_cited": [
+        5
+      ],
       "algorithm_steps": [
         "M5. Khối lượng kim loại: lấy thể tích theo loại đối tượng (brep solid, mesh kín, surface kín), bỏ qua khối instance, rồi nhân 0.001 và tỉ trọng; chia thêm 1.55517 cho pennyweight; làm tròn 2 chữ số."
       ],
       "source_file": "PIM/GemBlock.cs",
-      "source_methods": ["GemBlock", "Strs2Pts"],
+      "source_methods": [
+        "GemBlock",
+        "Strs2Pts"
+      ],
       "boundaries_carried": [
         "KHÔNG có bảng tỉ trọng trong mã Matrix - OM9 phải tự chọn nguồn (ISO/tiêu chuẩn hợp kim) và ghi rõ nguồn.",
         "Công thức trọng lượng carat cho hình dạng KHÔNG tròn chưa đọc (chỉ biết nó dùng hệ số F).",
@@ -424,4 +446,5 @@
       "note_status": "authored description derived from reading the private Matrix9 source; not runtime evidence, and every constant must be re-measured"
     }
   },
-  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"}
+  "implementation_sample_guide": "## Code mẫu / thuật toán mẫu (sketch, không phải bằng chứng)\n\n**Trạng thái:** `author_skeleton_untrusted` — code mẫu để bắt đầu, KHÔNG phải bằng chứng và không được báo cáo là đã triển khai.\n\n**Vai trò được sinh mẫu:** `CONTRACT_TEST` x1.\n\n### Quy tắc dùng code mẫu\n\n- Mẫu chỉ nêu tên những thứ đã có trong chính bản ghi này (API đề xuất / `implementation_algorithm` / `source_paths`) hoặc thư viện chuẩn Rust — không có symbol bịa.\n- `unimplemented!()` là cố ý: mẫu là khung, không chạy được và không chứng minh hành vi nào.\n- Code tham chiếu từ QymCAD (revision đã khóa) và từ Matrix9 phải **đọc rồi ADAPT**, không copy nguyên văn; phạm vi license lấy từ M00.\n- Oracle dương/âm trong mẫu lấy từ bản ghi; điều kiện PASS vẫn là command receipt exit 0 cộng oracle đo được từ lần chạy thật.\n\n> Không thay placeholder bằng số liệu suy đoán. Không xóa cảnh báo này để biến mẫu thành bằng chứng.\n"
+}

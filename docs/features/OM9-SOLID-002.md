@@ -28,3 +28,14 @@ are in [implementation ledger](../openmatrix9-progress.json).
 Status: `partially_implemented`, `validated_supported_slice`. Source edits do
 not recompute snapshot results. Live Matrix History, annotation/block/cage
 adapters, document-tolerance compatibility and exhaustive topology remain open.
+
+## Standalone checkpoint — 2026-10-28
+
+The current Rust/OCCT standalone slice selects two ordered BRep sets, fuses each
+set and intersects them atomically. `DeleteInput=No` keeps both sets; `Yes`
+deletes both. An empty common result is rejected without document mutation.
+The No default is an OM9 host decision; the recovered native registration does
+not prove the Matrix default. See the [audit](../validation/2026-10-28-solid-audit.md)
+and [bounded source mapping](../validation/2026-10-28-solid-intersection-source-map.md).
+The older FreeCAD evidence above is historical, not standalone proof of mesh or
+surface support; real desktop and human UI acceptance remain open.

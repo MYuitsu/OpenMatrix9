@@ -3,10 +3,10 @@
   "l3_id": "OM9-L3-03-16-047",
   "owner_l2_id": "OM9-L2-03-16",
   "date": "2026-10-23",
-  "command_id": "OM9-CURVE-147",
+  "command_id": "OM9-CURVE-049",
   "menu_icon": "CurveFreeFormSketchonPolygonMesh",
   "owner_candidate": "OM9-L3-02-04-003",
-  "decision": "BLOCKED_OWNER",
+  "decision": "IMPLEMENTED",
   "reviewed_upstream": [
     {
       "path": "crates/qymcad/src/command_catalog.rs",
@@ -39,5 +39,7 @@
       "Controller::availability"
     ]
   },
-  "rationale": "interactive Sketch on Mesh command session is not wired; owner candidate OM9-L3-02-04-003 is unverified"
+  "rationale": "the local Curve menu binding dispatches the Rust command session; the documented Matrix command spelling is accepted as an alias",
+  "menu_label": "Sketch on Mesh",
+  "documented_script": "SketchOnMesh"
 }

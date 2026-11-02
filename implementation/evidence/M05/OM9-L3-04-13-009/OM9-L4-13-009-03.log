@@ -1,0 +1,13 @@
+$ cargo test -p om9-app --test gem_edits -j 2 an_edit_keeps_the_placement_link_and_the_attribute_history_shows_it
+# exit code: 0
+# captured: 2026-10-28T04:07:39Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 1 test
+test an_edit_keeps_the_placement_link_and_the_attribute_history_shows_it ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.04s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+     Running tests\gem_edits.rs (cargo-target\debug\deps\gem_edits-bb31322b60f9f8c2.exe)

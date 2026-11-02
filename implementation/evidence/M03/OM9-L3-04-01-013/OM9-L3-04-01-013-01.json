@@ -1,0 +1,12 @@
+{
+  "l4_id": "OM9-L3-04-01-013-01",
+  "l3_id": "OM9-L3-04-01-013",
+  "kind": "Automated Runtime",
+  "date": "2026-10-27",
+  "status": "IMPLEMENTED_READY_FOR_REVIEW",
+  "detail": "SmartFlowBreak: golden case 'curve flowed, then broken -> state BROKEN at revision 2 and the ends are unchanged'",
+  "tests": [
+    "crates/om9-app/tests/transform_menu.rs::m03_04_01_014_smart_flow_break_marks_the_link_broken"
+  ],
+  "manual_gate": "M03-UI_PENDING"
+}

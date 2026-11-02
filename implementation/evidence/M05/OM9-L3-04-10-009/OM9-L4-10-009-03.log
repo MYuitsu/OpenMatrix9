@@ -1,0 +1,26 @@
+$ cargo test -p om9-app --test gem_placement -j 2 flow_carries_the_same_stones_onto_a_target_curve
+# exit code: 0
+# captured: 2026-10-27T13:45:07Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 1 test
+test flow_carries_the_same_stones_onto_a_target_curve ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.05s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running tests\gem_placement.rs (cargo-target\debug\deps\gem_placement-6deb83edeedfcaef.exe)
+$ cargo test -p om9-app --test gem_placement -j 2 flow_carries_surface_stones_onto_another_surface
+# exit code: 0
+# captured: 2026-10-27T13:45:07Z
+# target dir: H:\OpenMatrix9\cargo-target
+
+
+running 1 test
+test flow_carries_surface_stones_onto_another_surface ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.04s
+
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running tests\gem_placement.rs (cargo-target\debug\deps\gem_placement-6deb83edeedfcaef.exe)

@@ -1,0 +1,21 @@
+{
+  "schema": "om9.positive_fixtures.v1",
+  "task_id": "OM9-L3-04-14-006",
+  "cases": [
+    {
+      "input": "12 cutters, Round edge profile, 0.05 mm offset",
+      "expect": "12 closed cutter bodies, positive cutter volume, summary reports the count",
+      "oracle": "om9-core src/settings/bezel.rs::scallop_builds_one_closed_cutter_per_position"
+    },
+    {
+      "input": "Scallop Bezel icon after a head commit",
+      "expect": "12 Scallop Cutter bodies with the om9.settings.scallop payload; SettingsMass counts one excluded cutter and reports the cutter volume and the net metal",
+      "oracle": "om9-app tests/head_commands.rs::scallop_cutters_commit_and_stay_out_of_the_settings_mass"
+    }
+  ],
+  "automated_tests": [
+    "scallop_cutters_commit_and_stay_out_of_the_settings_mass",
+    "scallop_builds_one_closed_cutter_per_position",
+    "the_scallop_takes_an_explicit_section"
+  ]
+}

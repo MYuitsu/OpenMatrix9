@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-016-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-016",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
-  "command_id": "OM9-CURVE-116",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
+  "command_id": "OM9-CURVE-016",
   "source_command": "Project",
   "menu_icon": "CurveCurveFromObjectsProject",
   "owner_candidate": "OM9-L3-02-04-009",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Project command session is not wired; owner candidate OM9-L3-02-04-009 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-016/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-016/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-016/dispatch_contract.json": "a982692e86757b546e9b5de34acf64ef855ce88e65d21dc78890722c4261062f",
-    "implementation/design/M03/OM9-L3-03-16-016/dispatch_contract.md": "5565f342a18f669f78def018484d4420352844d214b57fec6b5ab3145df026d9"
+    "implementation/design/M03/OM9-L3-03-16-016/dispatch_contract.json": "d34aed9cd0a58dc5bfa8d277551423a8b05df9dfd87a6100245febf19acd126d",
+    "implementation/design/M03/OM9-L3-03-16-016/dispatch_contract.md": "afd0372ed06b19851ad5a2a28f03ffd458d8221b591fed1314d3ab2ee8a72076"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "Project"
 }

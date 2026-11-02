@@ -1,0 +1,60 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-10-003",
+  "l4_id": "OM9-L4-10-003-03",
+  "title": "Gem Count On Curve",
+  "generated_at_utc": "2026-10-27T13:45:02Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "M05-UI",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the placement command at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "5e534ef47a4c18dad83da4d10733c5e6ee16e84a01639109522140d5369bc1d5",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "fit count derives from arc length, stone diameter and the requested gap",
+    "negative": "a non-fitting row is refused instead of placing a partial row"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem_placement.rs",
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/model.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/tests/gem_placement.rs",
+    "crates/om9-app/src/session/gem_placement.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/tests/gem_placement.rs",
+    "tools/record_m05_l2_04_10_gem_placement.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_placement",
+        "-j",
+        "2",
+        "the_count_tool_fits_the_row_between_the_curve_ends"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "4064e4f43335771b6de8e328e416c4e2ea6c603eea37fa134f95a41b8020a36b",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.05s"
+      ],
+      "test": "the_count_tool_fits_the_row_between_the_curve_ends",
+      "package": "om9-app",
+      "binary": "gem_placement"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

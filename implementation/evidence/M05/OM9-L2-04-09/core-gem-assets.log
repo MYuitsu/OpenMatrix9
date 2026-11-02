@@ -1,0 +1,35 @@
+$ cargo test -p om9-core --test gem_assets -j 2
+# exit code: 0
+# captured: 2026-10-27T09:21:19Z
+# target dir: L:\om9-target
+
+
+running 21 tests
+test a_corner_or_angle_outside_the_geometry_is_refused ... ok
+test a_non_finite_or_negative_dimension_is_refused ... ok
+test a_zero_depth_is_refused_and_a_new_depth_keeps_the_crown_pavilion_split ... ok
+test an_open_self_intersecting_or_zero_area_profile_is_refused ... ok
+test a_shape_outside_the_cut_family_is_refused ... ok
+test a_round_stone_needs_one_diameter_and_width_never_exceeds_length ... ok
+test an_unknown_cut_or_shape_tag_is_refused ... ok
+test the_custom_profile_refuses_self_intersection_and_open_outlines ... ok
+test the_reference_api_returns_geometry_and_stable_normals ... ok
+test the_library_nearest_size_matches_by_short_axis ... ok
+test a_custom_profile_is_centred_and_keeps_the_requested_parameters ... ok
+test a_spec_from_the_wrong_schema_is_refused ... ok
+test the_emerald_and_baguette_builders_match_their_dimensions ... ok
+test a_payload_from_the_previous_shape_is_refused_instead_of_silently_dropped ... ok
+test a_reference_is_bound_to_the_gem_identity ... ok
+test a_gem_entity_round_trips_through_the_document_record ... ok
+test the_library_has_one_asset_for_every_cut_and_shape_combination ... ok
+test an_instance_transform_keeps_a_normalised_basis_and_moves_without_duplicating_geometry ... ok
+test every_cut_and_shape_round_trips_through_the_versioned_schema ... ok
+test a_cabochon_has_a_dome_and_no_pavilion_depth ... ok
+test every_shape_builds_a_closed_solid_whose_bounds_match_the_spec ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+    Blocking waiting for file lock on build directory
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.21s
+     Running tests\gem_assets.rs (L:\om9-target\debug\deps\gem_assets-e6c63b27984df89c.exe)

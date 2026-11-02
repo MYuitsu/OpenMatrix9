@@ -1,0 +1,23 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-16-007",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderGemCutter",
+  "cases": [
+    {
+      "case": "Preserve keeps the bodies",
+      "input": "Boolean=On Preserve=Preserve Enter",
+      "expect": "the cut metal body AND the Gem Cutter bodies exist after the commit"
+    },
+    {
+      "case": "Remove deletes the bodies",
+      "input": "Boolean=On Preserve=Remove Enter",
+      "expect": "only the cut metal body remains; the entity count is unchanged"
+    },
+    {
+      "case": "the answer is recorded",
+      "input": "either answer",
+      "expect": "om9.cutter carries preserve=Preserve|Remove"
+    }
+  ]
+}

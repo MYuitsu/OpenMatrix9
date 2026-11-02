@@ -1,0 +1,76 @@
+{
+  "schema": "om9.m04.l4.receipt.v1",
+  "l3_id": "OM9-L3-03-12-003",
+  "title": "Builder Style Apply And Preview",
+  "generated_at_utc": "2026-10-27T02:48:33Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the Builder Styles window at the M04-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "58c6f4c02a3616bb5a69b2884af7a4c8d6d5c1972d4caa2cf288ff3c1f24c259",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "two previews and a Cancel: the document stays byte-identical and a new session starts at the baseline",
+    "negative": "a style without the mandatory profile is refused before it can touch the preview"
+  },
+  "l4_id": "OM9-L4-03-12-003-04",
+  "role": "INTEGRATION",
+  "kind": "integration",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/builder_style.rs",
+    "crates/om9-app/src/session/builder.rs",
+    "crates/om9-app/src/ui/chrome.rs",
+    "crates/om9-core/tests/builder_style.rs",
+    "crates/om9-app/tests/builder_styles.rs"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_styles",
+        "-j",
+        "2",
+        "applying_a_style_changes_the_preview_only"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "bf0421e27af462dc538a4041340c5fbc413860a3f4dc6d2ee15cda2d7a167dee",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s"
+      ],
+      "test": "applying_a_style_changes_the_preview_only",
+      "package": "om9-app",
+      "binary": "builder_styles"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "builder_styles",
+        "-j",
+        "2",
+        "cancel_and_apply_clear_the_applied_style_marker"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "f0f73562a59f243868b7171d02d3f585f4be39e81b8804e36750ea0b605985e6",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s"
+      ],
+      "test": "cancel_and_apply_clear_the_applied_style_marker",
+      "package": "om9-app",
+      "binary": "builder_styles"
+    }
+  ],
+  "manual_gate_note": "Integration: automated evidence only; the M04-UI manual review remains open and no signature is included."
+}

@@ -1,0 +1,7 @@
+$ cargo clippy -p om9-core --lib --no-deps -j 2 -- -D warnings -A clippy::type_complexity
+# exit code: 0
+# captured: 2026-10-27T09:34:37Z
+# target dir: L:\om9-target
+
+    Checking om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.62s

@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-13-001",
+  "title": "Gem Positioner",
+  "cases": [
+    "a non-gem selection is a typed refusal and opens no session",
+    "a shared definition member is refused instead of rewriting the definition"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "om9.m04.fixture.v1",
+  "l3_id": "OM9-L3-03-13-002",
+  "kind": "positive",
+  "input": "enable/disable associative recompute display",
+  "expected": "with update off a parameter edit leaves the rail geometry and marks the recipe Dirty; re-enabling update rebuilds the edited feature and its downstream profile once",
+  "verified_by": [
+    "update_off_marks_dirty_and_rebuilds_only_after_update_is_reenabled",
+    "reenabling_update_refuses_a_broken_dependency"
+  ],
+  "notes": [
+    "recompute_history walks plan_recompute in execution order after the edited recipe; refresh_inputs re-stamps a Dirty consumer against the source as it is now, because the old stamp names the previous geometry revision.",
+    "Re-enabling update validates execution_order (cycles) and broken_links (missing input/output) before the flag flips."
+  ]
+}

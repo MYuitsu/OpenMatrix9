@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-021",
+  "case": "a selection with no cage relation",
+  "expected": "a selection with no cage relation -> Error::Invalid(\"selection is not attached to a cage\") and no question is asked",
+  "test": "m03_04_01_cage_rows_refuse_without_a_cage"
+}

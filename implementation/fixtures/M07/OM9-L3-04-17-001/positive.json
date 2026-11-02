@@ -1,0 +1,23 @@
+{
+  "schema": "om9.fixture.positive.v1",
+  "l3": "OM9-L3-04-17-001",
+  "recorded_at": "2026-10-28",
+  "feature": "BuilderChannelBuilder",
+  "cases": [
+    {
+      "case": "three stones on a 7 mm row",
+      "input": "ChannelParams::for_row + build_row",
+      "expect": "one closed trench of 5 stations, positive volume, gem_ids in row order"
+    },
+    {
+      "case": "the preview owns nothing",
+      "input": "dispatch BuilderChannelBuilder on a 3-stone row",
+      "expect": "document entity count unchanged until Enter; Undo restores it"
+    },
+    {
+      "case": "the committed record",
+      "input": "Enter",
+      "expect": "one Channel Builder body with om9.cutter kind=channel_cutter and row=[Gem 0, Gem 1, Gem 2]"
+    }
+  ]
+}

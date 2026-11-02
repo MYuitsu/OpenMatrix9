@@ -1,0 +1,10 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-10-007",
+  "title": "Gem On Surface",
+  "cases": [
+    "a UV outside the surface domain is a typed refusal",
+    "a degenerate surface (no normal) is refused instead of orienting to NaN"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

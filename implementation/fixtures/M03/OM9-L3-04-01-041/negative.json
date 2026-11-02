@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-041",
+  "case": "an object already attached to a cage",
+  "expected": "an object already attached to a cage -> Error::Invalid(\"object is already attached to a cage\"); a selection whose bounds have no volume -> Error::Invalid(\"cage needs a box with volume\")",
+  "test": "m03_04_01_cage_rows_refuse_without_a_cage"
+}

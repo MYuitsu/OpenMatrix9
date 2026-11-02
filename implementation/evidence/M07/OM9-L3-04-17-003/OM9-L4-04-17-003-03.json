@@ -1,0 +1,49 @@
+{
+  "schema": "om9.evidence.implement.v1",
+  "l4": "OM9-L4-04-17-003-03",
+  "l3": "OM9-L3-04-17-003",
+  "recorded_at": "2026-10-28",
+  "status": "IMPLEMENTED_AUTOMATED_EVIDENCE_RECORDED",
+  "changed_files": [
+    "crates/om9-core/src/cutters/brightcut.rs",
+    "crates/om9-app/src/session/channel_cutters.rs"
+  ],
+  "implementation": [
+    "cutters::brightcut::BrightParams",
+    "cutters::brightcut::build_channel",
+    "cutters::brightcut::BrightMode::Channel"
+  ],
+  "command_options": [
+    "Height=<mm>",
+    "Length=<mm>",
+    "Scale2D=<percent>",
+    "Angle=<degrees>",
+    "Depth=<mm>",
+    "Mirror=on|off",
+    "Boolean=off|on|one",
+    "Preserve=preserve|remove",
+    "Reset",
+    "Enter",
+    "Cancel"
+  ],
+  "verification": {
+    "commands": [
+      "cargo test -p om9-core --test channel_cutters the_bright_channel_mirrors_both_sides_of_the_row",
+      "cargo test -p om9-app --test channel_cutters the_bright_cutter_rings_one_stone_and_the_channel_mirrors_the_row"
+    ],
+    "results": {
+      "cargo check -p om9-core -j 2": 0,
+      "cargo check -p om9-app -j 2": 0,
+      "cargo test -p om9-core --test channel_cutters -j 2": "10 passed",
+      "cargo test -p om9-app --test channel_cutters -j 2": "7 passed",
+      "cargo test -p om9-core -j 2": "911 passed, 0 failed",
+      "cargo test -p om9-app --lib -j 2": "202 passed, 2 failed (ui::icon_size_audit, pre-existing)",
+      "cargo test -p om9-app --test gem_cutters -j 2": "7 passed, 0 failed",
+      "cargo test -p om9-app --test head_commands -j 2": "9 passed, 0 failed"
+    }
+  },
+  "limitations": [
+    "Each facet is one closed 8-corner block with a sloped top face; the channel variant places the same block along the row.",
+    "Mirror=on builds the far side by mirroring the same frame; it does not re-derive a second profile."
+  ]
+}

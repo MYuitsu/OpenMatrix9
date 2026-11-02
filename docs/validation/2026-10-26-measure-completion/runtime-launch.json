@@ -1,0 +1,10 @@
+{
+  "date": "2026-10-27",
+  "pid": 27736,
+  "path": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\measure-transform-20261027\\om9.exe",
+  "sha256": "83fa5ef969789ea0ebfe45bdadd805b70fdd78bff60dd3c361b95326cb13d5cc",
+  "dependency_path": "L:/om9-target/debug",
+  "ui_status": "process running; desktop replay blocked: GetCursorPos Access denied 0x80070005; one fresh-state recovery returned black screenshots and no accessibility tree",
+  "manual_gate_closed": false,
+  "real_desktop_replay_verified": false
+}

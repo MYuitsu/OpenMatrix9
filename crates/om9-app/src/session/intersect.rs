@@ -52,7 +52,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Tolerance=") {
-            let Some(tolerance) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(tolerance) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.intersect_pending = Some(pending);
                 return Some(Err(Error::Invalid("tolerance must be positive")));
             };
@@ -88,11 +92,9 @@ impl Controller {
             return Some(Err(Error::Invalid("curves do not intersect")));
         }
         for point in points {
-            if let Err(error) = self.commit_geometry(
-                INTERSECT,
-                "Intersection",
-                Geometry::Point(point),
-            ) {
+            if let Err(error) =
+                self.commit_geometry(INTERSECT, "Intersection", Geometry::Point(point))
+            {
                 return Some(Err(error));
             }
         }

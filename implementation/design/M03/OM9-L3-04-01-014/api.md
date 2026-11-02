@@ -1,0 +1,11 @@
+# OM9-L3-04-01-014 API
+
+- `om9_app::session::transform::SMART_FLOW_PULLDOWN` — the row constant (`OM9-TRANSFORM-015`)
+- `om9_app::session::transform::fields("OM9-TRANSFORM-015") -> &'static [Field]`
+- `om9_core::deform::pulldown_from_target`
+- `om9_core::model::FLOW_EXTENSION_SLOT` (`om9.flow`), registered in
+  `model::extension_slot_known`
+- `om9_core::transaction::Mutation::{Geometry, Placement, Extensions}`
+
+The commit is one `TransactionRequest`, so the command is one Undo entry. Errors are typed
+(`Missing`/`Invalid`). Owner L3: `OM9-L3-04-05-006`.

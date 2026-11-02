@@ -1,0 +1,12 @@
+{
+  "cases": [
+    {
+      "expect": "row kept, fallback=true",
+      "thumbnail": "not-an-icon.png"
+    },
+    {
+      "expect": "row kept, fallback=true",
+      "thumbnail": null
+    }
+  ]
+}

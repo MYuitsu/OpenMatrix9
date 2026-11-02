@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-011",
+  "case": "fewer than two surfaces, or no object besides them",
+  "expected": "fewer than two surfaces, or no object besides them -> Error::Missing before the single prompt",
+  "test": "m03_04_01_011_smart_flow_maps_from_the_base_surface"
+}

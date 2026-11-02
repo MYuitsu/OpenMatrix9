@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-019-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-019",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-020",
   "source_command": "Offset Curve on Surface",
   "menu_icon": "CurveOffsetOffsetCrvOnSrf",
   "owner_candidate": "OM9-L3-02-04-006",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Offset Curve on Surface command session is not wired; owner candidate OM9-L3-02-04-006 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-019/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-019/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-019/dispatch_contract.json": "f33f05793305034d936d003e53c500c0232dda3a25a63111b7d80ad6d5128483",
-    "implementation/design/M03/OM9-L3-03-16-019/dispatch_contract.md": "fb24381f7210abf837845812f5315b34af3a8c7049bb697782f0b508289d974e"
+    "implementation/design/M03/OM9-L3-03-16-019/dispatch_contract.json": "2e829539a291c98a173af0d2d65f19d79ab8686f20e8a9e13f164d862f013776",
+    "implementation/design/M03/OM9-L3-03-16-019/dispatch_contract.md": "6b05eb4fb679c5335bc94329732710da5b7c60ea90b2a3a7392aa8fc27ce71a9"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "OffsetCrvOnSrf"
 }

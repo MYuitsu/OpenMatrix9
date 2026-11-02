@@ -1,0 +1,49 @@
+{
+  "schema": "om9.m04.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-02-004",
+  "title": "Custom Rail And Advanced Rail",
+  "owner": "om9-app Controller ring/profile tools over om9-core producer chain",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/curve_ops.rs",
+      "symbols": [
+        "validate_ring_rail",
+        "segments_cross",
+        "point_on_segment"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/producers.rs",
+      "symbols": [
+        "RailSweepProducer",
+        "closed_rail"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-core/src/surface_kernel.rs",
+      "symbols": [
+        "path_frames"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    },
+    {
+      "path": "crates/om9-app/src/session/ring_tools.rs",
+      "symbols": [
+        "CUSTOM_RAIL",
+        "CUSTOM_RAIL_ADVANCED",
+        "dispatch_custom_rail"
+      ],
+      "state": "INSPECTED_IN_CHECKOUT"
+    }
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The L3/L4 plan records are planning input; runtime behavior is established by the receipts.",
+    "The self-intersection test includes endpoint-touching crossings: a strict orientation-only test misses a bow-tie whose crossing lands exactly on a sample.",
+    "A clamped NURBS seam can refuse D1; path_frames and tangent_at fall back to a symmetric secant so the frame stays defined without changing the curve."
+  ]
+}

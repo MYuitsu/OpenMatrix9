@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_negative.v1",
+  "l3_id": "OM9-L3-04-12-001",
+  "title": "Auto Pave Builder",
+  "cases": [
+    "a spacing that cannot fit the region is refused (no squeeze)",
+    "a start point outside the margin is a typed error",
+    "more than MAX_PAVE_GEMS candidates is a typed Budget error"
+  ],
+  "oracle": "typed refusals asserted by the registered tests"
+}

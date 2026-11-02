@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-036",
+  "case": "path (0,1,0)->(10,1,0), base (0,0,0), axis (1,0,0), 90 degrees, pull 0.5",
+  "expected": "path (0,1,0)->(10,1,0), base (0,0,0), axis (1,0,0), 90 degrees, pull 0.5 -> the far end lands at (10,0,0.5), half the turned offset, one Undo entry",
+  "test": "m03_04_01_036_maelstrom_twists_and_pulls_the_section_in"
+}

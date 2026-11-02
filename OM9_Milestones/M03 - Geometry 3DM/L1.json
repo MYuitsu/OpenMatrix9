@@ -2,12 +2,12 @@
   "level": "L1",
   "id": "OM9-M03",
   "milestone": "M03",
-  "title": "Curve, Surface, Solid v\u00e0 trao \u0111\u1ed5i 3DM",
+  "title": "Curve, Surface, Solid và trao đổi 3DM",
   "planning_state": "NOT_STARTED",
   "planning_only": true,
-  "module_count": 14,
-  "l3_count": 243,
-  "l4_count": 854,
+  "module_count": 15,
+  "l3_count": 256,
+  "l4_count": 1005,
   "modules": [
     {
       "id": "OM9-L2-01-09",
@@ -64,6 +64,10 @@
     {
       "id": "OM9-L2-04-01",
       "file": "M03 - Geometry 3DM/L2-04-01 - 13-febe/L2.json"
+    },
+    {
+      "id": "OM9-L2-03-21",
+      "file": "M03 - Geometry 3DM/L2-03-21 - Model-space annotations/L2.json"
     }
   ],
   "implementation_targets_by_milestone": {
@@ -71,14 +75,14 @@
     "M04": 1,
     "M08": 22
   },
-  "note": " M\u1ed9t s\u1ed1 L3 c\u00f3 owner n\u1eb1m t\u1ea1i milestone n\u00e0y nh\u01b0ng \u0111\u01b0\u1ee3c l\u00ean l\u1ecbch th\u1ef1c hi\u1ec7n \u1edf milestone kh\u00e1c; gi\u1eef ID v\u00e0 owner g\u1ed1c.",
+  "note": " Một số L3 có owner nằm tại milestone này nhưng được lên lịch thực hiện ở milestone khác; giữ ID và owner gốc.",
   "m03_l4_scope": {
     "l3_total_in_folder": 243,
     "l3_owned_by_m03": 220,
     "l3_deferred_to_m04_m08": 23,
-    "l4_planned_owned_by_m03": 854,
+    "l4_planned_owned_by_m03": 966,
     "stage_gate_counts_l4": {
-      "G03-A": 61,
+      "G03-A": 173,
       "G03-B": 223,
       "G03-C": 211,
       "G03-D": 293,
@@ -239,7 +243,7 @@
     "status_effect": "NO_RUNTIME_OR_GATE_PROMOTION",
     "plan": "OM9_Milestones/SDK-INTEGRATION-PLAN.md",
     "integration_mode": "SDK_TASKS_INSIDE_EXISTING_MILESTONE_AND_OWNERS",
-    "responsibility": "M\u1ed7i operator Curve/Surface/Solid/Transform/Measure v\u00e0 3DM ph\u1ea3i n\u1ed1i public SDK trong c\u00f9ng l\u00e1t c\u1eaft c\u1ee7a owner. T\u1eadn d\u1ee5ng service n\u1ed9i b\u1ed9 tr\u01b0\u1edbc; operator thi\u1ebfu \u0111\u01b0\u1ee3c l\u00e0m c\u00f9ng adapter v\u00e0 plugin proof.",
+    "responsibility": "Mỗi operator Curve/Surface/Solid/Transform/Measure và 3DM phải nối public SDK trong cùng lát cắt của owner. Tận dụng service nội bộ trước; operator thiếu được làm cùng adapter và plugin proof.",
     "owner_ids": [
       "OM9-L2-01-09",
       "OM9-L2-01-10",
@@ -375,7 +379,8 @@
       "manual_gate": "M03-UI",
       "manual_gate_promoted": false,
       "planning_state_modified": false,
-      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED.",
+      "superseded_by": "l2_03_16_curve_menu_2026_10_26"
     },
     "l2_03_17_surface_menu_2026_10_23": {
       "date": "2026-10-23",
@@ -492,6 +497,57 @@
       "remaining": [
         "Human M03-UI review/signoff using the 21-row worksheet."
       ]
+    },
+    "l2_03_16_curve_menu_2026_10_26": {
+      "date": "2026-10-26",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "owner": "OM9-L2-03-16",
+      "title": "08-febe-matrix-curve-menu-workflows",
+      "evidence": "implementation/evidence/AFTER/m03-l2-03-16-curve-menu-2026-10-26/ + implementation/evidence/M03/OM9-L3-03-16-* + implementation/design/M03/OM9-L3-03-16-*",
+      "l3_delivered": 58,
+      "l4_evidence": 174,
+      "functional": 58,
+      "disabled_visible_reason": 0,
+      "tests": "320 passed; 0 failed",
+      "manual_gate": "M03-UI",
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_03_20_measure_2026_10_26": {
+      "date": "2026-10-26",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "owner": "OM9-L2-03-20",
+      "title": "12-febe-matrix-measure-and-model-statistics",
+      "evidence": "implementation/evidence/M03 + implementation/design/M03 + implementation/fixtures/M03",
+      "l3_delivered": 5,
+      "l4_evidence": 25,
+      "tests": {
+        "app_measure": "5 passed; 0 failed",
+        "app_measure_ui": "3 passed; 0 failed",
+        "public_source_audit": "0 errors"
+      },
+      "manual_gate_promoted": false,
+      "planning_state_modified": false,
+      "note": "Evidence-based runtime record; the planning tree stays SPEC_ONLY_NOT_IMPLEMENTED."
+    },
+    "l2_04_01_transform_2026_10_26": {
+      "date": "2026-10-26",
+      "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "title": "13-febe-matrix-transform-toolbar-bridges",
+      "transform_rows_with_a_body": 14,
+      "transform_rows_visible_and_disabled": 27,
+      "tests": {
+        "app_transform_menu": "50 passed; 0 failed",
+        "core_deform": "10 passed; 0 failed",
+        "core_cage": "4 passed; 0 failed"
+      },
+      "evidence": "implementation/evidence/M03/2026-10-26-l2-04-01-transform.json",
+      "manual_gate": "M03-UI",
+      "commands": "28 verified command bodies: Scale 3D, Scale 2D, Scale 1D, Scale Non-Uniform, Scale By Plane, Orient 2 Points, Orient 3 Points, Orient on Surface, Orient on Curve, Orient Perpendicular to Curve, Symmetry, Bend, Taper, Twist, Shear, Maelstrom, Soft Move, Rotate 3D, Array Polar, Array Linear, Array, Array Along Curve, Array Along Surface, Array Curve on Surface, Stretch, Set Points, Project To C-Plane, Remap to C-Plane",
+      "l3_with_verified_supported_scope": 39,
+      "l3_with_verified_disabled_fallback": 2,
+      "l4_implemented": 40
     }
   }
 }

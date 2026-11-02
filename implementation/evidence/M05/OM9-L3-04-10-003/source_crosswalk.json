@@ -1,0 +1,53 @@
+{
+  "schema": "om9.m05.source_crosswalk.v1",
+  "l3_id": "OM9-L3-04-10-003",
+  "title": "Gem Count On Curve",
+  "owner": "om9-core gem_placement owner + om9-app placement session",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "sources": [
+    {
+      "path": "crates/om9-core/src/gem_placement.rs",
+      "state": "IMPLEMENTED_AND_TESTED"
+    },
+    {
+      "path": "crates/om9-core/src/gem.rs",
+      "state": "REUSED_GEM_OWNER"
+    },
+    {
+      "path": "crates/om9-core/src/model.rs",
+      "state": "EXTENSION_SLOT_REGISTERED"
+    },
+    {
+      "path": "crates/om9-core/tests/gem_placement.rs",
+      "state": "REGISTERED_TESTS"
+    },
+    {
+      "path": "crates/om9-app/src/session/gem_placement.rs",
+      "state": "IMPLEMENTED_AND_TESTED"
+    },
+    {
+      "path": "crates/om9-app/src/session.rs",
+      "state": "COMMAND_WIRING"
+    },
+    {
+      "path": "crates/om9-app/tests/gem_placement.rs",
+      "state": "REGISTERED_TESTS"
+    }
+  ],
+  "source_audit": {
+    "matrix_assets": "NOT_COPIED",
+    "result": "PROCEDURAL_ASSETS_ONLY",
+    "detail": "No Matrix asset, catalogue bitmap or decompiled resource is read or shipped. Stations are computed from the shared curve/surface evaluators and every gem mesh comes from the typed spec in crates/om9-core/src/gem.rs."
+  },
+  "planning_inputs": [
+    "OM9_Milestones/M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L3-003 - Gem Count On Curve/l3.json",
+    "OM9_Milestones/M05 - Gems and Layout/L2-04-10 - 02-febe-gem-on-curves-and-surfaces/L2.json"
+  ],
+  "planning_tree_touched": false,
+  "notes": [
+    "The gem body remains the mesh/record owner of OM9-L2-04-09; this module only computes placement stations and the link.",
+    "The Matrix command names of the family are preserved and dispatch to one session.",
+    "Placement is pure data: no function mutates the document, the caller commits one transaction."
+  ]
+}

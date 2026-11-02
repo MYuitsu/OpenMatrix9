@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-09-005",
+  "title": "Gem Emerald And Baguette Builders",
+  "cases": [
+    "emerald 9x7x4.5, corner 1.5, girdle 0.2 keeps every typed value",
+    "baguette 7x3.5x2.8 with corner 0.4",
+    "bbox agrees with length/width and the mesh is closed"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

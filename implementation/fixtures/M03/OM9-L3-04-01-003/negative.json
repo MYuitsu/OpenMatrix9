@@ -1,0 +1,6 @@
+{
+  "l3_id": "OM9-L3-04-01-003",
+  "case": "no selection",
+  "expected": "`Error::Missing(\"transform selection\")`; the command never asks for a base point",
+  "test": "m03_04_01_003_scale1d_grows_only_along_the_cplane_x"
+}

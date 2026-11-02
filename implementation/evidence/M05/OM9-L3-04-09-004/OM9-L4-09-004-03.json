@@ -1,0 +1,89 @@
+{
+  "schema": "om9.m05.l4.receipt.v1",
+  "l3_id": "OM9-L3-04-09-004",
+  "l4_id": "OM9-L4-09-004-03",
+  "title": "Gem Custom Shape From Profile",
+  "generated_at_utc": "2026-10-27T09:23:22Z",
+  "source_revision": "71852257e59f4117c3b3bfca73f047ac546f76c2",
+  "checkout_dirty": true,
+  "manual_gate": "OPEN",
+  "signature": null,
+  "not_claimed": [
+    "manual review of the gem window at the M05-UI gate",
+    "a reviewer signature"
+  ],
+  "fixture_manifest_sha256": "c68bb43813faa1e9637b6349ff9872bcc171c76dc3588566e6670b911568a186",
+  "document_snapshot": {
+    "source": "asserted by the registered tests",
+    "positive": "closed planar profile -> centred custom gem with the profile stored",
+    "negative": "open, non-planar, self-intersecting and zero-area profiles are refused"
+  },
+  "role": "WIRE_UI",
+  "kind": "ui",
+  "status": "READY_FOR_REVIEW",
+  "changed_files": [
+    "crates/om9-core/src/gem.rs",
+    "crates/om9-core/src/lib.rs",
+    "crates/om9-core/src/transaction.rs",
+    "crates/om9-core/tests/gem_assets.rs",
+    "crates/om9-kernel/src/brep.rs",
+    "crates/om9-kernel/src/gem.rs",
+    "crates/om9-kernel/src/lib.rs",
+    "crates/om9-kernel/src/brep_bridge.cpp",
+    "crates/om9-kernel/Cargo.toml",
+    "crates/om9-kernel/tests/gem_brep.rs",
+    "crates/om9-app/src/session/gem.rs",
+    "crates/om9-app/src/session.rs",
+    "crates/om9-app/src/ui/gem.rs",
+    "crates/om9-app/src/ui.rs",
+    "crates/om9-app/src/f6.rs",
+    "crates/om9-app/src/icons.rs",
+    "crates/om9-app/tests/gem_panel.rs",
+    "tools/record_m05_l2_04_09_gem_assets.py"
+  ],
+  "commands": [
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_panel",
+        "-j",
+        "2",
+        "the_custom_builder_uses_a_closed_planar_profile"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "ee797b43fe8263c37555889b98ea85b4f1ab2dd98218e0434e58685c11f39b4d",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.95s"
+      ],
+      "test": "the_custom_builder_uses_a_closed_planar_profile",
+      "package": "om9-app",
+      "binary": "gem_panel"
+    },
+    {
+      "command_argv": [
+        "cargo",
+        "test",
+        "-p",
+        "om9-app",
+        "--test",
+        "gem_panel",
+        "-j",
+        "2",
+        "the_custom_builder_refuses_an_open_or_non_planar_curve"
+      ],
+      "exit_code": 0,
+      "stdout_stderr_sha256": "8aa31f367d08a8e6363b9cbad45204840a40eb21868a76bc86b69b286309cc84",
+      "summary": [
+        "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s"
+      ],
+      "test": "the_custom_builder_refuses_an_open_or_non_planar_curve",
+      "package": "om9-app",
+      "binary": "gem_panel"
+    }
+  ],
+  "manual_gate_note": "Automated evidence only; the M05-UI manual gate remains open."
+}

@@ -1,0 +1,11 @@
+{
+  "schema": "om9.m05.l3_positive.v1",
+  "l3_id": "OM9-L3-04-13-002",
+  "title": "Gem Control And Size Edits",
+  "cases": [
+    "`Size=8` edits two selected stones from 6/4 mm to 8 mm in one transaction",
+    "each edited stone keeps its object id and its `GemId`",
+    "Undo restores both original sizes and Redo re-applies the edit"
+  ],
+  "oracle": "asserted by the registered tests; see observed.json"
+}

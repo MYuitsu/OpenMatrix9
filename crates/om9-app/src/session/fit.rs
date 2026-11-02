@@ -48,7 +48,11 @@ impl Controller {
             return Some(Ok(()));
         }
         if let Some(value) = text.trim().strip_prefix("Tolerance=") {
-            let Some(tolerance) = value.parse::<f64>().ok().filter(|value| value.is_finite() && *value > 0.0) else {
+            let Some(tolerance) = value
+                .parse::<f64>()
+                .ok()
+                .filter(|value| value.is_finite() && *value > 0.0)
+            else {
                 self.fit_pending = Some(pending);
                 return Some(Err(Error::Invalid("tolerance must be positive")));
             };
@@ -81,11 +85,9 @@ impl Controller {
                 Err(_) => continue,
             };
             let curve = Curve::Nurbs(curve);
-            let Ok(fitted_samples) = om9_core::surface_kernel::sample_curve(
-                &curve,
-                512,
-                self.coordinator.limits(),
-            ) else {
+            let Ok(fitted_samples) =
+                om9_core::surface_kernel::sample_curve(&curve, 512, self.coordinator.limits())
+            else {
                 continue;
             };
             let mut error = 0.0_f64;

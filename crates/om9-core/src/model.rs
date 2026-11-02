@@ -83,7 +83,8 @@ impl Entity {
         layer: impl Into<Option<LayerId>>,
     ) -> Self {
         let layer = layer.into();
-        let color = if layer.is_none() && matches!(geometry, Geometry::Curve(_)) {
+        // Matrix9 geometry colour: unlayered authored geometry draws in the branded green.
+        let color = if layer.is_none() {
             Some([0, 130, 85, 255])
         } else {
             None
@@ -136,10 +137,35 @@ impl Entity {
 /// Extension slots are namespaced names; the name is the persistence key and
 /// the identity of the slot. Known slots keep their documented meaning, unknown
 /// slots are preserved verbatim instead of being dropped on load.
+/// A cage box created by `Transform > Create Cage` (the corners it was created with) and, on a
+/// caged object, the back pointer to that cage.
+pub const CAGE_EXTENSION_SLOT: &str = "om9.cage";
+/// A Smart Flow link on a flowed object: the base and target surfaces, whether the transport is
+/// rigid, the revision and the ACTIVE/BROKEN state.
+pub const FLOW_EXTENSION_SLOT: &str = "om9.flow";
 pub const GEM_EXTENSION_SLOT: &str = "om9.gem";
+/// The curve/surface a placed gem follows (`OM9-L3-04-10-011`): the source object, the
+/// station, the source revision and the `ACTIVE`/`BROKEN`/`CONFLICT` state.
+pub const GEM_PLACEMENT_EXTENSION_SLOT: &str = "om9.gem.placement";
+/// The halo/cluster/baguette feature that owns a group of accent gems (`OM9-L3-04-11-007`):
+/// the typed layout parameters, the center stone or wall curves and the ordered child ids.
+pub const GEM_CLUSTER_EXTENSION_SLOT: &str = "om9.gem.cluster";
+/// The persisted pavé surface layout of `OM9-L2-04-12` (`PaveFeature`).
+pub const GEM_PAVE_EXTENSION_SLOT: &str = "om9.gem.pave";
 pub const RAIL_EXTENSION_SLOT: &str = "om9.rail";
+/// A setting part (prong, bead, metal piece) and the row/parameters it was built from.
+pub const SETTINGS_PRONG_SLOT: &str = "om9.settings.prong";
+/// The head/bezel settings bodies of `OM9-L2-04-14`; their payload is the typed builder state.
+pub const SETTINGS_HEAD_SLOT: &str = "om9.settings.head";
+pub const SETTINGS_BEZEL_SLOT: &str = "om9.settings.bezel";
+pub const SETTINGS_SCALLOP_SLOT: &str = "om9.settings.scallop";
+/// The girdle seat cut a head committed on a gem body.
+pub const SETTINGS_HEAD_SEAT_SLOT: &str = "om9.settings.head.seat";
 pub const HEAD_EXTENSION_SLOT: &str = "om9.head";
 pub const CUTTER_EXTENSION_SLOT: &str = "om9.cutter";
+/// The Interactive Boolean a cutter command committed on a metal body (`OM9-L2-04-16`):
+/// which cutter cut it, how many bodies were applied and how much metal was removed.
+pub const CUTTER_CUT_EXTENSION_SLOT: &str = "om9.cutter.cut";
 /// Trimming loops over the entity's surface (OM9-L2-02-01 L3-005). The surface itself
 /// stays the entity geometry; the slot constrains the visible face.
 pub const TRIM_SURFACE_EXTENSION_SLOT: &str = "om9.trim.surface";
@@ -155,13 +181,25 @@ pub fn extension_slot_known(slot: &str) -> bool {
     matches!(
         slot,
         GEM_EXTENSION_SLOT
+            | GEM_PLACEMENT_EXTENSION_SLOT
+            | GEM_CLUSTER_EXTENSION_SLOT
+            | GEM_PAVE_EXTENSION_SLOT
+            | crate::annotation::SLOT
             | RAIL_EXTENSION_SLOT
             | HEAD_EXTENSION_SLOT
             | CUTTER_EXTENSION_SLOT
+            | CUTTER_CUT_EXTENSION_SLOT
             | TRIM_SURFACE_EXTENSION_SLOT
             | FOUR_RAIL_PROFILE_EXTENSION_SLOT
             | MESH_UV_EXTENSION_SLOT
             | EXTRUSION_EXTENSION_SLOT
+            | CAGE_EXTENSION_SLOT
+            | FLOW_EXTENSION_SLOT
+            | SETTINGS_PRONG_SLOT
+    | SETTINGS_HEAD_SLOT
+    | SETTINGS_BEZEL_SLOT
+    | SETTINGS_SCALLOP_SLOT
+    | SETTINGS_HEAD_SEAT_SLOT
     )
 }
 /// A slot name is a lowercase namespace plus a name, separated by a dot. A bare
@@ -812,6 +850,9 @@ impl Document {
             )?;
             total.add(extension.validate(l)?, l)?;
             crate::rhino_semantics::validate_extension(slot, &extension.payload, l)?;
+            if slot==crate::annotation::SLOT&&extension.version==1 {
+                crate::annotation::Annotation::read(e)?.layout(l)?;
+            }
         }
         name(&e.label, l)?;
         e.placement.validate()?;
@@ -1011,6 +1052,10 @@ impl Document {
         for recipe in self.history.recipes.values() {
             total.add(Self::recipe_storage_usage(recipe, l)?, l)?;
         }
+        total.add(
+            crate::associative::references_usage(&self.history.references, l)?,
+            l,
+        )?;
         total.add(self.retained_owned_usage(l)?, l)?;
         for (id, result) in &self.results {
             total.add(result.validate(*id, self, l)?, l)?;
@@ -1063,6 +1108,7 @@ impl Document {
                 l,
             )?;
         }
+        total.add(crate::associative::ports_usage(recipe, l)?, l)?;
 
         Ok(total)
     }

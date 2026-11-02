@@ -3,21 +3,22 @@
   "task_id": "OM9-L4-03-16-040-01",
   "role": "DISPATCH_CONTRACT",
   "l3": "OM9-L3-03-16-040",
-  "date": "2026-10-23",
-  "status": "DOCUMENT_READY",
+  "date": "2026-10-26",
+  "status": "DISPATCH_CONTRACT_READY",
   "command_id": "OM9-CURVE-039",
   "source_command": "Duplicate Border",
   "menu_icon": "CurveCurveFromObjectsDuplicateBorder",
   "owner_candidate": "OM9-L3-02-04-010",
-  "binding_state": "BLOCKED_OWNER",
-  "disabled_reason": "interactive Duplicate Border command session is not wired; owner candidate OM9-L3-02-04-010 is unverified",
+  "binding_state": "IMPLEMENTED",
+  "disabled_reason": "",
   "artifact_paths": [
     "implementation/design/M03/OM9-L3-03-16-040/dispatch_contract.json",
     "implementation/design/M03/OM9-L3-03-16-040/dispatch_contract.md"
   ],
   "artifact_sha256": {
-    "implementation/design/M03/OM9-L3-03-16-040/dispatch_contract.json": "ec695157715dd229b76f553f5a3e61f13e5d5473205ba04689c31f89fd1d5789",
-    "implementation/design/M03/OM9-L3-03-16-040/dispatch_contract.md": "be26fa1b297e92e63262980c2b0f3d23d1806a65a6d100cd4d0cf2dd4c01171c"
+    "implementation/design/M03/OM9-L3-03-16-040/dispatch_contract.json": "391c42b046b5b5f027d7cd47e2700b1ada7b9b1b755977f1c06fd120aa9b5173",
+    "implementation/design/M03/OM9-L3-03-16-040/dispatch_contract.md": "d3f635cdc8ad9f6f06fc1c20a798b7e2ae68482d603ac44e3d05c61b3754b0a3"
   },
-  "reviewer": "document review only; not a runtime feature claim"
+  "reviewer": "document review only; not a runtime feature claim",
+  "documented_script": "DupBorder"
 }

@@ -1,0 +1,21 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+     Running tests\gem_pave_panel.rs (L:\om9-target\debug\deps\gem_pave_panel-7cb7ed0d9f1ca140.exe)
+
+running 14 tests
+test cancel_and_bad_selection_leave_the_document_untouched ... ok
+test typed_commands_and_reset_share_the_same_handler ... ok
+test pave_style_save_and_apply_restore_the_stone_parameters ... ok
+test sphere_handles_drag_radius_and_count_through_the_shared_builder_route ... ok
+test azure_builder_commits_four_profiles_per_stone ... ok
+test prong_builder_commits_markers_and_refuses_no_gem ... ok
+test gem_springs_move_stones_and_undo_restores_them ... ok
+test manual_pave_honours_the_exact_quantity ... ok
+test sphere_builder_previews_and_commits_without_a_surface ... ok
+test selected_curves_supply_the_attractor_and_closed_edges ... ok
+test auto_pave_previews_and_commits_one_feature ... ok
+test editing_the_builder_reuses_existing_child_ids ... ok
+test undo_redo_restore_the_whole_pave_layout ... ok
+test refreshing_a_feature_preserves_the_child_ids ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 38.30s
+
