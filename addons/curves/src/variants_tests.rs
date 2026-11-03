@@ -777,7 +777,7 @@ fn helix_around_a_curve() {
     let r = go(text("2"), std::slice::from_ref(&rail), None);
     assert!(r.done);
     for p in g::nurbs::samples(&r.create[0], 400) {
-        assert!(((p[1] * p[1] + p[2] * p[2]).sqrt() - 2.0).abs() < 5e-3, "{p:?}");
+        assert!(((p[1] * p[1] + p[2] * p[2]).sqrt() - 2.0).abs() < 1e-3, "{p:?}");
     }
 }
 
@@ -835,5 +835,223 @@ fn line_curves_are_picked_where_clicked() {
     let r = go2(pt(5.0, 0.0), std::slice::from_ref(&a), None);
     let Geo::Line { start, end } = r.create[0] else { panic!() };
     assert!(dist(start, [1.0, 0.0, 0.0]) < 1e-6 && dist(end, [5.0, 0.0, 0.0]) < 1e-6, "{start:?} {end:?}");
+}
+
+
+// ---- shape audit: every creation command and variant, checked against its geometry ----------
+
+/// Steps with a selection and a click location each; records the finished shape.
+fn picks(command: &str, steps: Vec<(Input, Vec<Selected>, Option<Vec3>)>) -> Reply {
+    let mut st = Value::Null;
+    let mut last = Reply::default();
+    let mut sel_last = Vec::new();
+    for (i, (input, sel, pick)) in std::iter::once((Input::Start, Vec::new(), None)).chain(steps).enumerate() {
+        let mut e = ev(command, input, &st, &sel);
+        e.pick = pick;
+        let r = Curves::step(&e).unwrap();
+        assert!(r.error.is_none(), "{command} step {i}: {:?} ({})", r.error, r.prompt);
+        st = r.state.clone();
+        sel_last = sel;
+        last = r;
+    }
+    assert!(last.done, "{command}: {}", last.prompt);
+    let inputs: Vec<Geo> = sel_last.iter().filter_map(|s| s.exact.clone()).collect();
+    let test = std::thread::current().name().unwrap_or("").to_owned();
+    om9_addon_geom::audit::record("curves", &test, command, &inputs, &last.create);
+    last
+}
+fn ends(g: &Geo) -> (Vec3, Vec3) {
+    (at(g, 0.0), at(g, 1.0))
+}
+fn lin(id: &str, a: Vec3, b: Vec3) -> Selected {
+    crv(id, Geo::Line { start: a, end: b })
+}
+fn close(a: Vec3, b: Vec3) -> bool {
+    dist(a, b) < 1e-6
+}
+fn radius_of(g: &Geo) -> (Vec3, f64, Vec3) {
+    match g {
+        Geo::Circle { center, radius, x, y } => (*center, *radius, unit(cross(*x, *y))),
+        other => panic!("not a circle: {other:?}"),
+    }
+}
+
+#[test]
+fn audit_line_variants() {
+    // Plain: exactly the two clicks.
+    let g = created(&run(LINE, vec![pt(1.0, 2.0), pt(7.0, 5.0)]));
+    assert_eq!(ends(&g), ([1.0, 2.0, 0.0], [7.0, 5.0, 0.0]));
+    // A typed length then a direction click.
+    let g = created(&run(LINE, vec![pt(0.0, 0.0), text("4"), pt(10.0, 0.0)]));
+    assert!(close(ends(&g).1, [4.0, 0.0, 0.0]), "{g:?}");
+    // BothSides: the first click is the middle (Rhino 5: twice the distance).
+    let g = created(&run(LINE, vec![opt("BothSides"), pt(0.0, 0.0), pt(3.0, 0.0)]));
+    let (a, b) = ends(&g);
+    assert!(close(a, [-3.0, 0.0, 0.0]) && close(b, [3.0, 0.0, 0.0]) || close(b, [-3.0, 0.0, 0.0]) && close(a, [3.0, 0.0, 0.0]), "{a:?} {b:?}");
+    // Vertical: along the CPlane normal; a typed length is a distance constraint (Rhino),
+    // the click then picks the side.
+    let g = created(&run(LINE, vec![opt("Vertical"), pt(2.0, 2.0), text("5"), Input::Point { point: [2.0, 2.0, 1.0] }]));
+    let (a, b) = ends(&g);
+    assert!(close(a, [2.0, 2.0, 0.0]) && close(b, [2.0, 2.0, 5.0]), "{a:?} {b:?}");
+    // Angled: base line along x, pivot 30°, end click at distance 4 → the line at 30°.
+    let g = created(&run(LINE, vec![opt("Angled"), pt(0.0, 0.0), pt(10.0, 0.0), text("30"), pt(4.0, 4.0)]));
+    let (a, b) = ends(&g);
+    let d = unit(sub(b, a));
+    assert!((d[1].atan2(d[0]).to_degrees() - 30.0).abs() < 1e-6, "angle {:?}", d);
+    // FourPoint: direction from the reference line, start and end from the last two.
+    let g = created(&run(LINE, vec![opt("FourPoint"), pt(0.0, 0.0), pt(0.0, 1.0), pt(5.0, 0.0), pt(7.0, 3.0)]));
+    let (a, b) = ends(&g);
+    assert!(close(a, [5.0, 0.0, 0.0]) && (b[0] - 5.0).abs() < 1e-6, "parallel to y: {a:?} {b:?}");
+    // Bisector: vertex (0,0), sides along x and y → along the 45° diagonal, typed length 2.
+    let g = created(&run(LINE, vec![opt("Bisector"), pt(0.0, 0.0), pt(5.0, 0.0), pt(0.0, 5.0), text("2"), pt(3.0, 3.0)]));
+    let (a, b) = ends(&g);
+    assert!(close(a, [0.0; 3]) && close(b, [2f64.sqrt(), 2f64.sqrt(), 0.0]), "{a:?} {b:?}");
+    // Tangent from a circle at its top: horizontal through (0, 2).
+    let c = circle_sel("c", 0.0, 0.0, 2.0);
+    let r = picks(LINE, vec![
+        (opt("Tangent"), vec![], None),
+        (Input::Selection, vec![c.clone()], Some([0.0, 2.0, 0.0])),
+        (pt(5.0, 2.0), vec![c.clone()], None),
+    ]);
+    let (a, b) = ends(&r.create[0]);
+    assert!((a[1] - 2.0).abs() < 1e-6 && (b[1] - 2.0).abs() < 1e-6, "{a:?} {b:?}");
+    // Tangent from a point outside a circle: the line touches the circle.
+    let r = picks(LINE, vec![
+        (opt("Tangent"), vec![], None),
+        (opt("Point"), vec![], None),
+        (Input::Selection, vec![c.clone()], Some([0.5, 2.0, 0.0])),
+        (pt(10.0, 0.0), vec![c.clone()], None),
+        (pt(0.5, 2.0), vec![c.clone()], None),
+    ]);
+    let (a, b) = ends(&r.create[0]);
+    let foot = if close(a, [10.0, 0.0, 0.0]) { b } else { a };
+    assert!((norm(foot) - 2.0).abs() < 1e-4, "ends on the circle: {foot:?}");
+    assert!(dot(foot, sub([10.0, 0.0, 0.0], foot)).abs() < 1e-3, "tangent: radius ⟂ line");
+    // Perpendicular from a point to a line: the foot is the projection.
+    let l = lin("l", [0.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    let r = picks(LINE, vec![
+        (opt("Perpendicular"), vec![], None),
+        (opt("Point"), vec![], None),
+        (Input::Selection, vec![l.clone()], Some([3.0, 0.0, 0.0])),
+        (pt(3.0, 5.0), vec![l.clone()], None),
+        (pt(3.2, 0.0), vec![l.clone()], None),
+    ]);
+    let (a, b) = ends(&r.create[0]);
+    assert!(close(a, [3.0, 5.0, 0.0]) && close(b, [3.0, 0.0, 0.0]) || close(b, [3.0, 5.0, 0.0]) && close(a, [3.0, 0.0, 0.0]), "{a:?} {b:?}");
+    // Perpendicular 2Curves between two parallel lines: a common normal of length 4.
+    let m = lin("m", [0.0, 4.0, 0.0], [10.0, 4.0, 0.0]);
+    let r = picks(LINE, vec![
+        (opt("Perpendicular"), vec![], None),
+        (opt("2Curves"), vec![], None),
+        (Input::Selection, vec![l.clone()], Some([2.0, 0.0, 0.0])),
+        (Input::Selection, vec![l.clone(), m.clone()], Some([2.5, 4.0, 0.0])),
+    ]);
+    let (a, b) = ends(&r.create[0]);
+    assert!((dist(a, b) - 4.0).abs() < 1e-6 && (a[0] - b[0]).abs() < 1e-6, "{a:?} {b:?}");
+    // Extension: continues the line's end along it.
+    let r = picks(LINE, vec![
+        (opt("Extension"), vec![], None),
+        (Input::Selection, vec![l.clone()], Some([9.0, 0.0, 0.0])),
+        (pt(14.0, 1.0), vec![l.clone()], None),
+    ]);
+    let (a, b) = ends(&r.create[0]);
+    assert!(close(a, [10.0, 0.0, 0.0]) && b[1].abs() < 1e-9 && b[0] > 10.0, "{a:?} {b:?}");
+    // Extension with a typed distance (Rhino 5): exactly that much longer.
+    let r = picks(LINE, vec![
+        (opt("Extension"), vec![], None),
+        (Input::Selection, vec![l.clone()], Some([9.0, 0.0, 0.0])),
+        (text("3"), vec![l.clone()], None),
+        (pt(20.0, 0.0), vec![l.clone()], None),
+    ]);
+    assert_eq!(ends(&r.create[0]), ([10.0, 0.0, 0.0], [13.0, 0.0, 0.0]));
+}
+
+#[test]
+fn audit_point_polyline_rectangle() {
+    let r = run(POINT, vec![pt(3.0, 4.0)]);
+    assert_eq!(ok(&r).create[0], Geo::Point { point: [3.0, 4.0, 0.0] });
+    // Polyline: corners exactly at the clicks.
+    let g = created(&run(POLYLINE, vec![pt(0.0, 0.0), pt(10.0, 0.0), pt(10.0, 5.0), pt(0.0, 5.0), Input::Enter]));
+    let pts: Vec<Vec3> = (0..=3).map(|i| at(&g, i as f64 / 3.0)).collect();
+    assert_eq!(pts, [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0], [10.0, 5.0, 0.0], [0.0, 5.0, 0.0]]);
+    // PersistentClose: closed after Enter.
+    let g = created(&run(POLYLINE, vec![opt("PersistentClose"), pt(0.0, 0.0), pt(10.0, 0.0), pt(5.0, 5.0), Input::Enter]));
+    assert!(close(at(&g, 0.0), at(&g, 1.0)), "closed");
+    // Rectangle corner to corner: 10 × 6 with corners at the clicks.
+    let corners = |g: &Geo| match g {
+        Geo::Polyline { points, closed: true } => points.clone(),
+        other => panic!("{other:?}"),
+    };
+    let p = corners(&created(&run(RECTANGLE, vec![pt(0.0, 0.0), pt(10.0, 6.0)])));
+    assert_eq!(p, [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0], [10.0, 6.0, 0.0], [0.0, 6.0, 0.0]]);
+    // Center: center (0,0), corner (5,3) → 10 × 6 around the center.
+    let p = corners(&created(&run(RECTANGLE, vec![opt("Center"), pt(0.0, 0.0), pt(5.0, 3.0)])));
+    let (xs, ys): (Vec<f64>, Vec<f64>) = p.iter().map(|q| (q[0], q[1])).unzip();
+    assert!(xs.iter().all(|x| (x.abs() - 5.0).abs() < 1e-9) && ys.iter().all(|y| (y.abs() - 3.0).abs() < 1e-9), "{p:?}");
+    // 3Point: an edge along a 45° line, width 2 → a rotated rectangle with right angles.
+    let p = corners(&created(&run(RECTANGLE, vec![opt("3Point"), pt(0.0, 0.0), pt(4.0, 4.0), pt(0.0, 3.0)])));
+    for k in 0..4 {
+        let (a, b, c) = (p[k], p[(k + 1) % 4], p[(k + 2) % 4]);
+        assert!(dot(sub(b, a), sub(c, b)).abs() < 1e-9, "right angle at {b:?}");
+    }
+    assert!((dist(p[0], p[1]) - 32f64.sqrt()).abs() < 1e-9);
+    // Vertical: stands on the CPlane, height from the third click.
+    let p = corners(&created(&run(RECTANGLE, vec![opt("Vertical"), pt(0.0, 0.0), pt(4.0, 0.0), text("3")])));
+    assert!(p.iter().all(|q| q[1].abs() < 1e-9) && p.iter().any(|q| (q[2] - 3.0).abs() < 1e-9), "{p:?}");
+}
+
+#[test]
+fn audit_circle_and_ellipse_variants() {
+    // Center + radius, Diameter.
+    let (c, r, n) = radius_of(&created(&run(CIRCLE, vec![pt(1.0, 1.0), text("3")])));
+    assert!(close(c, [1.0, 1.0, 0.0]) && (r - 3.0).abs() < 1e-12 && (n[2].abs() - 1.0).abs() < 1e-12);
+    let (_, r, _) = radius_of(&created(&run(CIRCLE, vec![pt(0.0, 0.0), opt("Diameter"), text("10")])));
+    assert!((r - 5.0).abs() < 1e-12);
+    // 2Point: the diameter ends.
+    let (c, r, _) = radius_of(&created(&run(CIRCLE, vec![opt("2Point"), pt(-2.0, 0.0), pt(2.0, 0.0)])));
+    assert!(close(c, [0.0; 3]) && (r - 2.0).abs() < 1e-9);
+    // 3Point: through three points of the circle radius 5 at the origin.
+    let (c, r, _) = radius_of(&created(&run(CIRCLE, vec![opt("3Point"), pt(5.0, 0.0), pt(0.0, 5.0), pt(-3.0, -4.0)])));
+    assert!(close(c, [0.0; 3]) && (r - 5.0).abs() < 1e-9, "{c:?} {r}");
+    // Vertical: the circle stands on the CPlane (normal in the plane).
+    let (_, _, n) = radius_of(&created(&run(CIRCLE, vec![opt("Vertical"), pt(0.0, 0.0), pt(3.0, 0.0)])));
+    assert!(n[2].abs() < 1e-9, "{n:?}");
+    // Ellipse from center: axes 5 and 3.
+    let g = created(&run(ELLIPSE, vec![pt(0.0, 0.0), pt(5.0, 0.0), pt(0.0, 3.0)]));
+    for i in 0..64 {
+        let p = at(&g, i as f64 / 64.0);
+        assert!(((p[0] / 5.0).powi(2) + (p[1] / 3.0).powi(2) - 1.0).abs() < 1e-6, "{p:?}");
+    }
+}
+
+#[test]
+fn audit_polygon_spiral_helix() {
+    // Inscribed polygon: every vertex at the radius, equal sides, sharp corners.
+    for n in 3..=8 {
+        let r = run(POLYGON, vec![set("NumSides", &n.to_string()), pt(0.0, 0.0), text("5")]);
+        let p = poly_pts(&ok(&r).create[0]);
+        assert_eq!(p.len(), n);
+        let side = dist(p[0], p[1]);
+        for k in 0..n {
+            assert!((norm(p[k]) - 5.0).abs() < 1e-9);
+            assert!((dist(p[k], p[(k + 1) % n]) - side).abs() < 1e-9);
+        }
+        om9_addon_geom::audit::record("curves", &format!("polygon_{n}"), POLYGON, &[], &ok(&r).create);
+    }
+    // Spiral along an axis: 3D, radius 2 → 5 over the axis 0 → 10, ends on the radii.
+    let g = created(&run(SPIRAL, vec![pt(0.0, 0.0), Input::Point { point: [0.0, 0.0, 10.0] }, text("2"), text("5")]));
+    let (a, b) = ends(&g);
+    assert!(((a[0] * a[0] + a[1] * a[1]).sqrt() - 2.0).abs() < 1e-6 && a[2].abs() < 1e-6, "{a:?}");
+    assert!(((b[0] * b[0] + b[1] * b[1]).sqrt() - 5.0).abs() < 1e-6 && (b[2] - 10.0).abs() < 1e-6, "{b:?}");
+    // The radius grows steadily with height (no wobble).
+    for p in g::nurbs::samples(&g, 400) {
+        let want = 2.0 + 3.0 * p[2] / 10.0;
+        assert!(((p[0] * p[0] + p[1] * p[1]).sqrt() - want).abs() < 1e-3, "{p:?}");
+    }
+    // Helix vertical: 10 turns by default along the height, radius exact.
+    let g = created(&run(HELIX, vec![opt("Vertical"), pt(0.0, 0.0), pt(0.0, 5.0), text("2")]));
+    for p in g::nurbs::samples(&g, 2000) {
+        assert!(((p[0] * p[0] + p[1] * p[1]).sqrt() - 2.0).abs() < 1e-3, "{p:?}");
+    }
 }
 

@@ -134,20 +134,22 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
             return None;
         }
         let tn = turns(st, r0, r1);
-        let count = ((tn * PER_TURN as f64).ceil() as usize).max(8);
-        let fr = frames(c, count, sub(first, q0));
-        let pts: Vec<Vec3> = fr
-            .iter()
-            .enumerate()
-            .map(|(i, (x, t, nrm))| {
-                let f = i as f64 / count as f64;
-                let ang = twist * f * tn * TAU;
-                let b = cross(*t, *nrm);
-                let r = r0 + (r1 - r0) * f;
-                add(*x, add(scale(*nrm, r * ang.cos()), scale(b, r * ang.sin())))
-            })
-            .collect();
-        return g::interpolate(&pts, 3, false);
+        // Points at `2·count` steps (frames at half steps too): the even ones are fitted,
+        // the odd ones measure the fit.
+        let dense = |count: usize| -> Vec<Vec3> {
+            let fr = frames(c, 2 * count, sub(first, q0));
+            fr.iter()
+                .enumerate()
+                .map(|(i, (x, t, nrm))| {
+                    let f = i as f64 / (2 * count) as f64;
+                    let ang = twist * f * tn * TAU;
+                    let b = cross(*t, *nrm);
+                    let r = r0 + (r1 - r0) * f;
+                    add(*x, add(scale(*nrm, r * ang.cos()), scale(b, r * ang.sin())))
+                })
+                .collect()
+        };
+        return within_tolerance(tn, &dense);
     }
     let a = *st.points.first()?;
     let flat = st.mode == "flat";
@@ -170,19 +172,49 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
     }
     let x = unit(x);
     let y = scale(cross(n, x), twist);
-    let count = ((tn * PER_TURN as f64).ceil() as usize).max(8);
-    let pts: Vec<Vec3> = (0..=count)
-        .map(|i| {
-            let f = i as f64 / count as f64;
-            let ang = f * tn * TAU;
-            let r = r0 + (r1 - r0) * f;
-            add(
-                add(a, scale(sub(b, a), f)),
-                add(scale(x, r * ang.cos()), scale(y, r * ang.sin())),
-            )
-        })
-        .collect();
-    g::interpolate(&pts, 3, false)
+    let dense = |count: usize| -> Vec<Vec3> {
+        (0..=2 * count)
+            .map(|i| {
+                let f = i as f64 / (2 * count) as f64;
+                let ang = f * tn * TAU;
+                let r = r0 + (r1 - r0) * f;
+                add(
+                    add(a, scale(sub(b, a), f)),
+                    add(scale(x, r * ang.cos()), scale(y, r * ang.sin())),
+                )
+            })
+            .collect()
+    };
+    within_tolerance(tn, &dense)
+}
+
+/// Interpolate the exact helix/spiral points, adding points per turn until the curve is
+/// within 0.0005 of the exact shape everywhere (Rhino's default absolute tolerance is
+/// 0.001). `dense(count)` gives the exact points at `2·count` equal steps.
+fn within_tolerance(tn: f64, dense: &dyn Fn(usize) -> Vec<Vec3>) -> Option<Geo> {
+    let mut count = ((tn * PER_TURN as f64).ceil() as usize).max(8);
+    let cap = ((tn * 128.0).ceil() as usize).max(64);
+    loop {
+        let all = dense(count);
+        let pts: Vec<Vec3> = all.iter().step_by(2).copied().collect();
+        let geo = g::interpolate(&pts, 3, false)?;
+        let fit = CurveRef {
+            id: String::new(),
+            pts: g::nurbs::samples(&geo, (count * 8).min(2048)),
+            closed: false,
+            exact: Some(geo.clone()),
+        };
+        let worst = all
+            .iter()
+            .skip(1)
+            .step_by(2)
+            .map(|p| dist(fit.closest(*p).1, *p))
+            .fold(0.0, f64::max);
+        if worst <= 5e-4 || count >= cap {
+            return Some(geo);
+        }
+        count = (count * 3 / 2).max(count + 1);
+    }
 }
 
 /// Points still needed for the axis.
