@@ -1055,3 +1055,24 @@ fn audit_polygon_spiral_helix() {
     }
 }
 
+
+#[test]
+fn click_then_type_numbers_makes_the_shape() {
+    // The usual Matrix habit: click the point, type the numbers.
+    let (_, r, _) = radius_of(&created(&run(CIRCLE, vec![pt(0.0, 0.0), text("5")])));
+    assert!((r - 5.0).abs() < 1e-12);
+    let p = poly_pts(&created(&run(POLYGON, vec![pt(0.0, 0.0), text("5")])));
+    assert!(p.iter().all(|q| (norm(*q) - 5.0).abs() < 1e-9));
+    let (_, r, a) = arc_of(&created(&run(ARC, vec![pt(0.0, 0.0), text("5"), text("90")])));
+    assert!((r - 5.0).abs() < 1e-12 && (a - FRAC_PI_2).abs() < 1e-12);
+    let g = created(&run(ELLIPSE, vec![pt(0.0, 0.0), text("5"), text("3")]));
+    for i in 0..32 {
+        let q = at(&g, i as f64 / 32.0);
+        assert!(((q[0] / 5.0).powi(2) + (q[1] / 3.0).powi(2) - 1.0).abs() < 1e-6, "{q:?}");
+    }
+    let Geo::Polyline { points, .. } = created(&run(RECTANGLE, vec![pt(0.0, 0.0), text("10"), text("6")])) else { panic!() };
+    assert_eq!(points[2], [10.0, 6.0, 0.0]);
+    // Line: a typed length then Enter goes along the CPlane x axis.
+    let g = created(&run(LINE, vec![pt(1.0, 1.0), text("5"), Input::Enter]));
+    assert_eq!(ends(&g), ([1.0, 1.0, 0.0], [6.0, 1.0, 0.0]));
+}

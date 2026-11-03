@@ -488,7 +488,17 @@ pub fn step(e: &Event) -> Reply {
             }
             st.reply(e, None)
         }
-        Input::Enter => Reply::finish(vec![]),
+        Input::Enter => {
+            // A start and a typed length, then Enter: the line goes along its fixed direction,
+            // else along the CPlane x axis (click then type a number, as in Matrix).
+            if let (Some(st_pt), Some(_)) = (st.start, st.length) {
+                let d = st.axis.unwrap_or(e.plane.x);
+                if let Some((a, b)) = st.segment(e, add(st_pt, d)) {
+                    return st.done(a, b);
+                }
+            }
+            Reply::finish(vec![])
+        }
     }
 }
 
