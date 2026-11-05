@@ -1,9 +1,41 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-29",
+  "updated_at": "2026-11-05",
   "implementation_target": "Standalone Rust OM9 owns model/session/UI/scene; selected native adapters only. Older FreeCAD entries are historical scoped evidence.",
-  "active_item": "m07-channel-cutters-2026-10-28",
+  "active_item": "viewport-export-anti-loop-plan-2026-11-05",
   "items": [
+    {
+      "id": "viewport-export-anti-loop-plan-2026-11-05",
+      "date": "2026-11-05",
+      "stage": "standalone-foundation",
+      "status": "documentation_validated",
+      "scope": "User-authorized documentation only while implementation goal remains paused: remove verified FileState/Open work from the remaining checklist; add anti-loop rules, functional delivery gates and grouped test policy. No source/skill edits or new application builds/tests.",
+      "feature_ids": [
+        "OM9-L2-01-03",
+        "OM9-L2-01-12",
+        "OM9-L2-03-15"
+      ],
+      "outputs": [
+        "implementation/design/M01/viewport-export-separation-20261102/PLAN.md",
+        "implementation/design/M01/viewport-export-separation-20261102/PLAN-REVISED.md",
+        "docs/validation/2026-11-05-live-file-state-memory.md",
+        "README.md"
+      ],
+      "evidence": [
+        "docs/validation/2026-11-05-live-file-state-memory.md",
+        "build/standalone-validation/ui-artifacts/file-memory-20261105-073852/file-memory.log",
+        "build/standalone-validation/ui-artifacts/file-memory-20261105-074055",
+        "build/standalone-validation/ui-artifacts/file-memory-20261105-075042"
+      ],
+      "tests": [
+        "Existing terminal logs reconciled without rerunning: 285 distinct passed, 7 ignored, 0 failed across the final FileState groups. Presentation 13 and native STL 60 resolve the prior pending status; skipped large-memory/overlay cases remain unproved.",
+        "Documentation checks passed: 47 local links, ledger JSON/unique current ID, plan invariants, whitespace/scoped diff and existing source fingerprint. Public source audit exit 0: 15195 files, 594 bindings, 593 SVG, no errors. No new Rust/GPU/native/release/desktop or exchange measurement batch."
+      ],
+      "source_fingerprint_sha256": "6f45eb650b37fa05eaaddce178fb8cbcbac27a31c9abd97739118fc5b1ff84a2",
+      "uncertainties": "Only the documented FileState slice has runtime evidence; wider R1a/R1b/R2, UI background export, display/v5, GPU batching, STL/3DM accuracy, checkpoint and release/desktop remain open. Historical next_action fields are evidence, not the current queue.",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN.md",
+      "next_action": "Implementation remains paused. When the user resumes, deliver functional milestone A: export-path auxiliary/native admission together with UI STL worker; reuse valid results and run focused tests until one combined milestone batch. Do not reopen verified FileState or create a broad test cycle per allocation."
+    },
     {
       "id": "solid-rib-development-session-2026-10-29",
       "date": "2026-10-29",
