@@ -75,3 +75,26 @@ library 381 passed / 5 failing as on main without these changes (LOCALAPPDATA, n
 Linux, typed-command catalog). om9-scene all, om9-addons all (new
 `command_settings_match_the_full_table`), om9-native-owner, om9-addon-curves 41,
 om9-addon-matrix, `tools/public_source_audit.py` 0 errors.
+
+## Follow-up: per-command settings index and picked-object lookup
+
+- The host keeps, per installed add-on, the positions of the settings that apply to each
+  command (made once when the manifest is read). Looking up one command's settings no longer
+  depends on how many settings the package has; `matrix_command_settings_match_the_full_table`
+  checks every Matrix command against the full-table filter (same values, same order).
+- Add-on steps look up the picked objects through a table "object → scene positions" made
+  once per published scene (rebuilt when the scene changes; a stale entry is never trusted),
+  instead of walking every scene object on each click and pointer move. Test:
+  `addon_steps_see_the_current_selection_after_scene_changes`.
+
+Offset (`CurveOffsetCurve`) on one picked line, release, medians of 20, one at a time:
+
+| Document | Pointer move before | Pointer move after | Whole command after |
+|---|---|---|---|
+| 1 object | 0.041 ms | 0.051 ms | 1.25 ms |
+| 5,000 objects | 0.066 ms | 0.056 ms | 54.9 ms |
+| 20,000 objects | 0.228 ms | 0.060 ms | 301 ms |
+
+(The container ran ~30 % slower during the "after" runs; built-in Line went 0.093 → 0.124 ms.)
+The whole Offset command in a large file is almost all the core commit (start 0.5 ms, typed
+distance 0.3–0.5 ms, click + commit 200–300 ms at 20,000 objects).
