@@ -55,6 +55,25 @@ impl Default for State {
 }
 
 const PER_TURN: usize = 16;
+// Interpolation uses a dense matrix, so its memory grows quadratically.
+const MAX_INTERVALS: usize = 512;
+
+#[derive(Debug, PartialEq, Eq)]
+enum BuildError {
+    InvalidGeometry,
+    TooComplex,
+    Tolerance,
+}
+
+impl BuildError {
+    fn message(&self) -> &'static str {
+        match self {
+            Self::InvalidGeometry => "Cannot create the curve with these inputs",
+            Self::TooComplex => "Too many turns for this curve; increase Pitch or reduce its length",
+            Self::Tolerance => "Cannot create this curve within tolerance at the maximum complexity",
+        }
+    }
+}
 
 /// The axis length the turns run along (the curve length around a curve; flat: the radius
 /// change).
@@ -114,7 +133,7 @@ fn frames(c: &CurveRef, n: usize, up: Vec3) -> Vec<(Vec3, Vec3, Vec3)> {
     out
 }
 
-fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
+fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Result<Geo, BuildError> {
     let twist = if st.reverse { -1.0 } else { 1.0 };
     let radius_of = |p: Vec3, n: Vec3, base: Vec3| {
         let d = sub(p, base);
@@ -131,7 +150,7 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
             dist(r1_point, c.closest(r1_point).1)
         };
         if r0 < g::EPS {
-            return None;
+            return Err(BuildError::InvalidGeometry);
         }
         let tn = turns(st, r0, r1);
         // Points at `2·count` steps (frames at half steps too): the even ones are fitted,
@@ -151,9 +170,9 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
         };
         return within_tolerance(tn, &dense);
     }
-    let a = *st.points.first()?;
+    let a = *st.points.first().ok_or(BuildError::InvalidGeometry)?;
     let flat = st.mode == "flat";
-    let b = if flat { a } else { *st.points.get(1)? };
+    let b = if flat { a } else { *st.points.get(1).ok_or(BuildError::InvalidGeometry)? };
     let n = if flat || norm(sub(b, a)) < g::EPS {
         e.plane.normal()
     } else {
@@ -163,7 +182,7 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
     let r0 = st.r0.unwrap_or_else(|| radius_of(first, n, a));
     let r1 = if helix { r0 } else { radius_of(r1_point, n, a) };
     if r0 < g::EPS && r1 < g::EPS {
-        return None;
+        return Err(BuildError::InvalidGeometry);
     }
     let tn = turns(st, r0, r1);
     let mut x = sub(sub(first, a), scale(n, dot(sub(first, a), n)));
@@ -191,13 +210,16 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
 /// Interpolate the exact helix/spiral points, adding points per turn until the curve is
 /// within 0.0005 of the exact shape everywhere (Rhino's default absolute tolerance is
 /// 0.001). `dense(count)` gives the exact points at `2·count` equal steps.
-fn within_tolerance(tn: f64, dense: &dyn Fn(usize) -> Vec<Vec3>) -> Option<Geo> {
+fn within_tolerance(tn: f64, dense: &dyn Fn(usize) -> Vec<Vec3>) -> Result<Geo, BuildError> {
+    if !tn.is_finite() || tn <= 0.0 || tn * PER_TURN as f64 > MAX_INTERVALS as f64 {
+        return Err(BuildError::TooComplex);
+    }
     let mut count = ((tn * PER_TURN as f64).ceil() as usize).max(8);
-    let cap = ((tn * 128.0).ceil() as usize).max(64);
+    let cap = (((tn * 128.0).ceil() as usize).max(64)).min(MAX_INTERVALS);
     loop {
         let all = dense(count);
         let pts: Vec<Vec3> = all.iter().step_by(2).copied().collect();
-        let geo = g::interpolate(&pts, 3, false)?;
+        let geo = g::interpolate(&pts, 3, false).ok_or(BuildError::InvalidGeometry)?;
         let fit = CurveRef {
             id: String::new(),
             pts: g::nurbs::samples(&geo, (count * 8).min(2048)),
@@ -210,10 +232,13 @@ fn within_tolerance(tn: f64, dense: &dyn Fn(usize) -> Vec<Vec3>) -> Option<Geo> 
             .step_by(2)
             .map(|p| dist(fit.closest(*p).1, *p))
             .fold(0.0, f64::max);
-        if worst <= 5e-4 || count >= cap {
-            return Some(geo);
+        if worst <= 5e-4 {
+            return Ok(geo);
         }
-        count = (count * 3 / 2).max(count + 1);
+        if count >= cap {
+            return Err(BuildError::Tolerance);
+        }
+        count = (count * 3 / 2).max(count + 1).min(cap);
     }
 }
 
@@ -282,7 +307,7 @@ fn ask(e: &Event, st: &State, helix: bool, hover: Option<Vec3>) -> Reply {
         opts.push(OptionToken::action("Undo"));
     }
     let preview: Vec<Geo> = match hover {
-        Some(h) if radius_stage => build(e, st, helix, h).into_iter().collect(),
+        Some(h) if radius_stage => build(e, st, helix, h).ok().into_iter().collect(),
         Some(h) if n == 1 && st.mode != "flat" => vec![Geo::Line {
             start: st.points[0],
             end: vertical_end(e, st, h),
@@ -362,10 +387,10 @@ pub fn step(e: &Event, helix: bool) -> Reply {
             st.start = Some(p);
         }
         match build(e, st, helix, p) {
-            Some(gm) => {
+            Ok(gm) => {
                 Reply::finish(vec![gm]).say(format!("{label}: {} turns", fmt(turns(st, 1.0, 1.0))))
             }
-            None => ask(e, st, helix, None).refuse("The radius must not be 0"),
+            Err(error) => ask(e, st, helix, None).refuse(error.message()),
         }
     };
     match &e.input {
@@ -484,5 +509,30 @@ pub fn step(e: &Event, helix: bool) -> Reply {
             ask(e, &st, helix, None)
         }
         _ => ask(e, &st, helix, None),
+    }
+}
+
+#[cfg(test)]
+mod budget_tests {
+    use super::*;
+
+    #[test]
+    fn rejects_excessive_and_nonfinite_turns_before_sampling() {
+        for turns in [f64::INFINITY, f64::NAN, 10_000_000.0] {
+            assert!(matches!(
+                within_tolerance(turns, &|_| panic!("must not allocate samples")),
+                Err(BuildError::TooComplex)
+            ));
+        }
+    }
+
+    #[test]
+    fn refuses_when_sample_budget_cannot_meet_tolerance() {
+        let result = within_tolerance(0.01, &|count| {
+            (0..=2 * count)
+                .map(|i| [i as f64, if i % 2 == 0 { 0.0 } else { 100.0 }, 0.0])
+                .collect()
+        });
+        assert!(matches!(result, Err(BuildError::Tolerance)));
     }
 }
