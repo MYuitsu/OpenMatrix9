@@ -1308,7 +1308,7 @@ impl MatrixApp {
     /// fields, the preview summary, Apply/Reset/Cancel, the profile library button and the
     /// handle read-outs.
     fn builder_slot_ui(&mut self, ui: &mut egui::Ui) {
-        self.builder_slot_rect = Some(ui.max_rect());
+        self.builder_slot_rect = Some(ui.available_rect_before_wrap());
         ui.horizontal_wrapped(|ui| {
             ui.label(egui::RichText::new("BUILDERS").strong());
             for (kind, active) in self.controller.builder_tabs() {

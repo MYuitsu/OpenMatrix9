@@ -35,6 +35,18 @@ impl super::Controller {
         if bytes.len() > 1024 * 1024 {
             return Err(Error::Budget("display state bytes"));
         }
+        let mut existing = self
+            .document()
+            .resources
+            .values()
+            .filter(|r| r.name == DISPLAY_STATE_RESOURCE);
+        if let Some(old) = existing.next()
+            && existing.next().is_none()
+            && matches!(old.kind, ResourceKind::OpaqueBinary)
+            && old.payload()? == bytes
+        {
+            return Ok(());
+        }
         let limits = *self.coordinator.limits();
         let resource = Resource::from_bytes(
             DISPLAY_STATE_RESOURCE,
@@ -59,11 +71,6 @@ impl super::Controller {
         });
         let mut request = TransactionRequest::new("Display State", mutations);
         request.recording = false;
-        let prepared = self.coordinator.prepare(request)?;
-        let receipt = self.coordinator.commit(prepared)?;
-        if receipt.published {
-            self.sync_published(om9_core::changes::ChangeCause::Edit);
-        }
-        Ok(())
+        self.commit_ui_metadata(request)
     }
 }

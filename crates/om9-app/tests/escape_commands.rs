@@ -6,7 +6,7 @@ use om9_app::session::{
 use om9_app::ui::MatrixApp;
 use om9_core::{
     gem::{GemSpec, gem_entity},
-    geometry::{Curve, Geometry},
+    geometry::{Curve, Geometry, Transform},
     model::{Document, Entity},
 };
 
@@ -25,7 +25,8 @@ fn escape(app: &mut MatrixApp, context: &egui::Context) {
         }],
         ..Default::default()
     };
-    let _ = context.run_ui(input, |ui| app.show(ui));
+    let mut output = context.run_ui(input, |ui| app.show(ui));
+    output.textures_delta.clear();
     let release = egui::RawInput {
         screen_rect: Some(Rect::from_min_size(
             egui::Pos2::ZERO,
@@ -40,7 +41,8 @@ fn escape(app: &mut MatrixApp, context: &egui::Context) {
         }],
         ..Default::default()
     };
-    let _ = context.run_ui(release, |ui| app.show(ui));
+    let mut output = context.run_ui(release, |ui| app.show(ui));
+    output.textures_delta.clear();
 }
 
 #[test]
@@ -63,6 +65,16 @@ fn escape_discards_builder_and_setting_previews_without_document_changes() {
     let gem = gem_entity("gem", &GemSpec::round(6., 3.72).unwrap(), None).unwrap();
     let gem_id = gem.id;
     doc.entities.insert(gem_id, gem);
+    // Prong Adder needs a row of at least two stones to define its direction.
+    let mut second = gem_entity("second gem", &GemSpec::round(6., 3.72).unwrap(), None).unwrap();
+    second.placement = Transform([
+        [1., 0., 0., 7.],
+        [0., 1., 0., 0.],
+        [0., 0., 1., 0.],
+        [0., 0., 0., 1.],
+    ]);
+    let second_id = second.id;
+    doc.entities.insert(second_id, second);
     let mut app = MatrixApp::new(doc).unwrap();
     let ctx = egui::Context::default();
     app.controller.select_objects(&[rail_id]).unwrap();
@@ -72,7 +84,12 @@ fn escape_discards_builder_and_setting_previews_without_document_changes() {
     assert!(app.controller.builder().is_none());
     assert!(!app.controller.is_running());
     for feature in [HEAD_BUILDER, PRONG_BUILDER] {
-        app.controller.select_objects(&[gem_id]).unwrap();
+        let gems = if feature == PRONG_BUILDER {
+            vec![gem_id, second_id]
+        } else {
+            vec![gem_id]
+        };
+        app.controller.select_objects(&gems).unwrap();
         app.controller
             .dispatch(feature, InvocationOrigin::Menu)
             .unwrap();
@@ -82,6 +99,6 @@ fn escape_discards_builder_and_setting_previews_without_document_changes() {
         assert!(app.controller.head_pending().is_none());
         assert!(app.controller.settings_pending().is_none());
     }
-    assert_eq!(app.controller.document().entities.len(), 2);
+    assert_eq!(app.controller.document().entities.len(), 3);
     assert_eq!(app.controller.coordinator().undo_len(), 0);
 }

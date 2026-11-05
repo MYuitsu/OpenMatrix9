@@ -32,6 +32,18 @@ impl super::Controller {
         if bytes.len() > 256 * 1024 * 1024 {
             return Err(Error::Budget("picture frame state bytes"));
         }
+        let mut existing = self
+            .document()
+            .resources
+            .values()
+            .filter(|r| r.name == PICTUREFRAME_STATE_RESOURCE);
+        if let Some(old) = existing.next()
+            && existing.next().is_none()
+            && matches!(old.kind, ResourceKind::OpaqueBinary)
+            && old.payload()? == bytes
+        {
+            return Ok(());
+        }
         let limits = *self.coordinator.limits();
         let resource = Resource::from_bytes(
             PICTUREFRAME_STATE_RESOURCE,
@@ -56,11 +68,6 @@ impl super::Controller {
         });
         let mut request = TransactionRequest::new("Picture Frames", mutations);
         request.recording = false;
-        let prepared = self.coordinator.prepare(request)?;
-        let receipt = self.coordinator.commit(prepared)?;
-        if receipt.published {
-            self.sync_published(om9_core::changes::ChangeCause::Edit);
-        }
-        Ok(())
+        self.commit_ui_metadata(request)
     }
 }

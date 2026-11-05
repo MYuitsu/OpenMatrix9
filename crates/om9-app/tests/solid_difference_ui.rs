@@ -1208,7 +1208,8 @@ fn viewport_pipe_chain_sweeps_brep_edges_at_right_angle() {
 
 #[test]
 fn viewport_pipe_mixed_chain_accepts_endpoint_and_station_points() {
-    let mut doc = Document::new("Pipe chain points");
+    // Exact B-rep snap refinement needs the same explicit tolerance as New.
+    let mut doc = Document::with_template_tolerance("Pipe chain points");
     let line = Entity::new("line", Geometry::Curve(Curve::Line {
         start: [0.0, 0.0, 0.0], end: [5.0, 0.0, 0.0], domain: [0.0, 1.0],
     }), None);
@@ -1228,7 +1229,9 @@ fn viewport_pipe_mixed_chain_accepts_endpoint_and_station_points() {
     app.controller.submit("").unwrap();
     app.controller.submit("ShapeBlending=Global").unwrap();
     click(&mut app, &ctx, [0.0, 1.0, 0.0]);
+    assert!(app.controller.prompt().starts_with("End radius"), "{}", app.status_line());
     click(&mut app, &ctx, [10.0, 3.0, 0.0]);
+    assert!(!app.controller.prompt().starts_with("End radius"), "{}", app.status_line());
     app.controller.submit("5,0,0").unwrap();
     let preview=app.controller.solid_preview([5.,2.,0.]); assert_eq!(preview.len(),64); assert!((preview[0][0][0]-5.).abs()<1e-6 && (preview[0][0][1]-2.).abs()<1e-6);
     app.controller.submit("2").unwrap();

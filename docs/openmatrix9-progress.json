@@ -2,8 +2,38 @@
   "schema_version": 1,
   "updated_at": "2026-11-05",
   "implementation_target": "Standalone Rust OM9 owns model/session/UI/scene; selected native adapters only. Older FreeCAD entries are historical scoped evidence.",
-  "active_item": "workspace-build-test-commit-2026-11-05",
+  "active_item": "fix21-rust-regressions-2026-11-05",
   "items": [
+    {
+      "id": "fix21-rust-regressions-2026-11-05",
+      "date": "2026-11-05",
+      "stage": "build-validation",
+      "status": "TARGETED_REGRESSIONS_PASSED_DESKTOP_PENDING",
+      "scope": "Fix all 21 recorded Rust failures; preserve approved UI/GPU/tolerance contracts. No viewport/export plan expansion.",
+      "feature_ids": [
+        "OM9-M01",
+        "OM9-L2-03-15",
+        "OM9-L2-01-01",
+        "OM9-L2-01-06"
+      ],
+      "outputs": [
+        "docs/validation/2026-11-05-fix21-regressions.md",
+        "docs/validation/2026-11-05-fix21-regressions.json"
+      ],
+      "evidence": [
+        "docs/validation/2026-11-05-fix21-regressions.md",
+        "docs/validation/2026-11-05-fix21-regressions.json"
+      ],
+      "tests": [
+        "21/21 original failures resolved; 669 passed/0 failed/1 ignored across the selected affected targets.",
+        "One combined app gate found one new metadata regression; only five affected integration targets rerun after fixing it. No full-workspace rerun. GPU pixel checks executed without skip.",
+        "Release app build exit 0; source/publication checks recorded in report."
+      ],
+      "source_fingerprint_sha256": "18ac19936e75167500c99ed30b082d6c11feea8c9a655dfec6580ce32c5daec3",
+      "uncertainties": "Desktop/WPR and whole-workspace green status not claimed. Earlier native inventory and missing-PDF failures remain outside these 21 Rust cases; ignored tests remain unproved.",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN.md",
+      "next_action": "Use the existing anti-loop milestone queue when plan work is authorized; do not reopen these failures or rerun broad suites without a related change."
+    },
     {
       "id": "workspace-build-test-commit-2026-11-05",
       "date": "2026-11-05",

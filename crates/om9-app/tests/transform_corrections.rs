@@ -154,11 +154,13 @@ fn setpt_cplane_axes_and_cancel_are_read_only_until_commit() {
 fn blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing() {
     for id in [
         "OM9-TRANSFORM-019",
-        "OM9-TRANSFORM-026",
         "OM9-TRANSFORM-037",
     ] {
         assert!(Controller::availability(id).is_err());
     }
+    // ArrayCrvOnSrf has its own implemented owner; solid grips and
+    // MakeDownFacing remain blocked independently of that service.
+    assert!(Controller::availability("OM9-TRANSFORM-026").is_ok());
     let mut c = controller(vec![]);
     assert!(
         c.dispatch(

@@ -36,6 +36,18 @@ impl super::Controller {
         if bytes.len() > 16 * 1024 * 1024 {
             return Err(Error::Budget("project state bytes"));
         }
+        let mut existing = self
+            .document()
+            .resources
+            .values()
+            .filter(|r| r.name == PROJECT_STATE_RESOURCE);
+        if let Some(old) = existing.next()
+            && existing.next().is_none()
+            && matches!(old.kind, ResourceKind::OpaqueBinary)
+            && old.payload()? == bytes
+        {
+            return Ok(());
+        }
         let limits = *self.coordinator.limits();
         let resource = Resource::from_bytes(
             PROJECT_STATE_RESOURCE,
@@ -60,8 +72,21 @@ impl super::Controller {
         });
         let mut request = TransactionRequest::new("Project State", mutations);
         request.recording = false;
-        let prepared = self.coordinator.prepare(request)?;
-        let receipt = self.coordinator.commit(prepared)?;
+        self.commit_ui_metadata(request)
+    }
+
+    /// Publish resource-only edits with the document's matching scene metadata.
+    /// Geometry buffers stay shared; a failed admission keeps both old versions.
+    pub(super) fn commit_ui_metadata(&mut self, request: TransactionRequest) -> Result<()> {
+        let old_scene = self.scene.as_ref().ok_or(Error::Missing("UI metadata scene"))?;
+        if old_scene.epoch != self.coordinator.epoch() {
+            return Err(Error::Stale("UI metadata scene"));
+        }
+        let mut held = self.scene_cache_usage()?;
+        let increment = old_scene.update_held_usage(None)?;
+        held.add(increment, self.coordinator.limits())?;
+        let prepared = self.coordinator.prepare_with_held_usage(request, held)?;
+        let receipt = self.commit_incremental_scene(prepared, held, increment, None, false)?;
         if receipt.published {
             self.sync_published(om9_core::changes::ChangeCause::Edit);
         }

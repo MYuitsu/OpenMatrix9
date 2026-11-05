@@ -28,6 +28,88 @@ fn add_point(app: &mut MatrixApp, x: f64) {
 }
 
 #[test]
+fn staging_default_ui_state_preserves_document_and_redo() {
+    let mut app = MatrixApp::new(Document::new("no implicit metadata")).unwrap();
+    add_point(&mut app, 1.);
+    app.controller.undo().unwrap();
+    let before = app.controller.coordinator().snapshot();
+    app.stage_project_state().unwrap();
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+}
+
+#[test]
+fn unchanged_embedded_ui_records_preserve_document_and_redo() {
+    let mut app = MatrixApp::new(Document::new("stable embedded metadata")).unwrap();
+    add_point(&mut app, 0.);
+    let buffers = app.controller.scene().unwrap().objects[0].buffers.clone();
+    app.project_manager
+        .set_notes("Keep all four metadata resources")
+        .unwrap();
+    app.display_preferences.wireframe = false;
+    app.controller
+        .store_f6_state(app.f6_custom.to_json().unwrap().as_bytes())
+        .unwrap();
+    let pictures = om9_app::pictureframe::PictureFrameStore {
+        version: 1,
+        frames: vec![],
+    };
+    app.controller
+        .store_pictureframes(pictures.to_json().unwrap().as_bytes())
+        .unwrap();
+    app.stage_project_state().unwrap();
+    let state = app.controller.document_scene_state();
+    assert_eq!(state.scene_epoch, Some(state.publication_epoch));
+    assert!(std::sync::Arc::ptr_eq(
+        &buffers,
+        &app.controller.scene().unwrap().objects[0].buffers
+    ));
+    add_point(&mut app, 1.);
+    app.controller.undo().unwrap();
+    let before = app.controller.coordinator().snapshot();
+    app.stage_project_state().unwrap();
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+}
+
+#[test]
+fn metadata_admission_failure_preserves_document_scene_and_redo() {
+    let mut app = MatrixApp::new(Document::new("metadata pressure")).unwrap();
+    add_point(&mut app, 0.);
+    add_point(&mut app, 1.);
+    app.controller.undo().unwrap();
+    let before = app.controller.coordinator().snapshot();
+    let state = app.controller.document_scene_state();
+    let buffers = app.controller.scene().unwrap().objects[0].buffers.clone();
+    let pressure = app
+        .controller
+        .coordinator()
+        .reserve_remaining_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel,
+            None,
+            app.controller.scene_cache_usage().unwrap(),
+        )
+        .unwrap();
+    let bytes = serde_json::to_vec(&app.display_preferences).unwrap();
+    assert!(matches!(
+        app.controller.store_display_state(&bytes),
+        Err(om9_core::Error::Budget(_))
+    ));
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.document_scene_state(), state);
+    assert!(std::sync::Arc::ptr_eq(
+        &buffers,
+        &app.controller.scene().unwrap().objects[0].buffers
+    ));
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+    drop(pressure);
+    app.controller.store_display_state(&bytes).unwrap();
+    let state = app.controller.document_scene_state();
+    assert_eq!(state.scene_epoch, Some(state.publication_epoch));
+    add_point(&mut app, 2.);
+}
+
+#[test]
 fn jobbag_state_survives_save_and_reopen_inside_the_om9_file() {
     let fixture = Fixture::new();
     let mut app = MatrixApp::new(Document::new("Persisted jobbag")).expect("app");
@@ -53,6 +135,10 @@ fn jobbag_state_survives_save_and_reopen_inside_the_om9_file() {
         .set_notes("Khách hàng: Nguyễn Văn A")
         .expect("notes");
     app.stage_project_state().expect("embed project state");
+    let staged = app.controller.coordinator().snapshot();
+    app.stage_project_state()
+        .expect("unchanged state is a no-op");
+    assert_eq!(app.controller.coordinator().snapshot(), staged);
 
     app.controller
         .begin_file_operation(FileKind::SaveAs)

@@ -1027,21 +1027,37 @@ impl MatrixApp {
             let bytes = self.project_manager.to_json()?;
             self.controller.store_project_state(&bytes)?;
         }
-        let display = serde_json::to_vec(&self.display_preferences)
-            .map_err(|_| Error::Invalid("display state"))?;
-        self.controller.store_display_state(&display)?;
-        let store = crate::pictureframe::PictureFrameStore {
-            version: 1,
-            frames: self
-                .pictureframes
-                .iter()
-                .map(|frame| frame.to_record(true))
-                .collect(),
+        let has_resource = |name: &str| {
+            self.controller.document().resources.values().any(|r| r.name == name)
         };
-        self.controller
-            .store_pictureframes(store.to_json()?.as_bytes())?;
-        self.controller
-            .store_f6_state(self.f6_custom.to_json()?.as_bytes())
+        let store_display = self.display_preferences != crate::display::DisplayPreferences::default()
+            || has_resource(crate::session::display_state::DISPLAY_STATE_RESOURCE);
+        let store_pictures = !self.pictureframes.is_empty()
+            || has_resource(crate::session::pictureframe_state::PICTUREFRAME_STATE_RESOURCE);
+        let store_f6 = self.f6_custom != crate::f6::CustomMenu::default()
+            || has_resource(crate::session::f6_state::F6_STATE_RESOURCE);
+        if store_display {
+            let display = serde_json::to_vec(&self.display_preferences)
+                .map_err(|_| Error::Invalid("display state"))?;
+            self.controller.store_display_state(&display)?;
+        }
+        if store_pictures {
+            let store = crate::pictureframe::PictureFrameStore {
+                version: 1,
+                frames: self
+                    .pictureframes
+                    .iter()
+                    .map(|frame| frame.to_record(true))
+                    .collect(),
+            };
+            self.controller
+                .store_pictureframes(store.to_json()?.as_bytes())?;
+        }
+        if store_f6 {
+            self.controller
+                .store_f6_state(self.f6_custom.to_json()?.as_bytes())?;
+        }
+        Ok(())
     }
     /// Reload Project Manager and display state after New/Open/Master replacement.
     pub fn reload_project_state(&mut self) -> Result<()> {

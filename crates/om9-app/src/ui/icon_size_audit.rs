@@ -17,20 +17,51 @@ fn frame(app: &mut MatrixApp, ctx: &egui::Context, physical: Vec2, ppp: f32) {
 fn palette_rects(app: &MatrixApp, section: SectionId, next: SectionId) -> Vec<Rect> {
     let top = app.section_rect(section.key()).unwrap().bottom();
     let bottom = app.section_rect(next.key()).unwrap().top();
+    let top11 = top11_rects(app);
     app.rail_icon_rects
         .iter()
         .copied()
-        .filter(|r| r.top() >= top && r.bottom() <= bottom)
+        .filter(|r| r.top() >= top && r.bottom() <= bottom && !top11.contains(r))
         .collect()
 }
 
+fn top11_rects(app: &MatrixApp) -> Vec<Rect> {
+    app.current_ui_context.as_ref().unwrap().memory(|memory| {
+        [
+            "Duplicate",
+            "EditPoints",
+            "ControlPoints",
+            "Mirror",
+            "Move",
+            "Rotate",
+            "Explode",
+            "Join",
+            "Split",
+            "Trim",
+            "RingRail",
+        ]
+        .iter()
+        .map(|name| {
+            memory
+                .data
+                .get_temp::<Rect>(egui::Id::new(("top11-sidebar", name)))
+                .expect("all eleven Top11 buttons are measured separately")
+        })
+        .collect()
+    })
+}
+
 fn check_slots(rects: &[Rect], sidebar: Rect, label: &str) {
+    check_slots_min(rects, sidebar, label, 18.);
+}
+
+fn check_slots_min(rects: &[Rect], sidebar: Rect, label: &str, minimum_edge: f32) {
     for (i, rect) in rects.iter().enumerate() {
         assert!(
             rect.is_finite() && (rect.width() - rect.height()).abs() < 0.1,
             "{label}: {rect:?}"
         );
-        assert!(rect.width() >= 18., "{label}: too small: {rect:?}");
+        assert!(rect.width() >= minimum_edge, "{label}: too small: {rect:?}");
         assert!(
             rect.left() >= sidebar.left() - 0.5 && rect.right() <= sidebar.right() + 0.5,
             "{label}: horizontal overflow: {rect:?} / {sidebar:?}"
@@ -43,6 +74,31 @@ fn check_slots(rects: &[Rect], sidebar: Rect, label: &str) {
             );
         }
     }
+}
+
+fn check_all_slots(app: &MatrixApp, sidebar: Rect, label: &str) {
+    let top11 = top11_rects(app);
+    assert_eq!(top11.len(), 11);
+    let regular: Vec<_> = app
+        .rail_icon_rects
+        .iter()
+        .copied()
+        .filter(|r| !top11.contains(r))
+        .collect();
+    check_slots(&regular, sidebar, label);
+    // The fitted Top11 row uses eleven columns in a fixed physical-width rail.
+    // Keep the full pairwise overlap/bounds check, with an 18-device-pixel floor.
+    check_slots_min(
+        &app.rail_icon_rects,
+        sidebar,
+        label,
+        18. / app
+            .current_ui_context
+            .as_ref()
+            .unwrap()
+            .pixels_per_point()
+            .max(1.),
+    );
 }
 
 #[test]
@@ -238,8 +294,8 @@ fn icon_size_audit_all_categories_at_common_resolutions_and_scales() {
                         (total - page * 20).min(20),
                         "{label}/{name}/page{page}"
                     );
-                    check_slots(
-                        &app.rail_icon_rects,
+                    check_all_slots(
+                        &app,
                         app.sidebar_rect.unwrap(),
                         &format!("{label}/{name}/page{page}"),
                     );

@@ -1,0 +1,701 @@
+{
+  "date": "2026-11-05",
+  "branch": "hieu-nang",
+  "base": "592757c25",
+  "scope": "21 recorded Rust failures and directly affected app/persistence regressions; no full-workspace rerun",
+  "resolved_original_failures": [
+    {
+      "original_test": "ui::icon_size_audit::icon_size_audit_all_categories_at_common_resolutions_and_scales",
+      "current_test": "ui::icon_size_audit::icon_size_audit_all_categories_at_common_resolutions_and_scales",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "ui::icon_size_audit::icons_resize_in_the_same_window_and_restore_without_changing_slots",
+      "current_test": "ui::icon_size_audit::icons_resize_in_the_same_window_and_restore_without_changing_slots",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "escape_discards_builder_and_setting_previews_without_document_changes",
+      "current_test": "escape_discards_builder_and_setting_previews_without_document_changes",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "close_save_failure_at_active_path_keeps_prompt_draft_and_path",
+      "current_test": "close_save_failure_at_active_path_keeps_prompt_draft_and_path",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/metadata-regressions.log"
+    },
+    {
+      "original_test": "failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo",
+      "current_test": "failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/metadata-regressions.log"
+    },
+    {
+      "original_test": "held_opening_enter_cannot_accept_save_on_the_new_prompt",
+      "current_test": "held_opening_enter_cannot_accept_save_on_the_new_prompt",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/metadata-regressions.log"
+    },
+    {
+      "original_test": "overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_replace",
+      "current_test": "overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_replace",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/metadata-regressions.log"
+    },
+    {
+      "original_test": "owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner",
+      "current_test": "owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/metadata-regressions.log"
+    },
+    {
+      "original_test": "real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_once",
+      "current_test": "real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_once",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/metadata-regressions.log"
+    },
+    {
+      "original_test": "shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save",
+      "current_test": "shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/metadata-regressions.log"
+    },
+    {
+      "original_test": "x1_escape_still_cancels_a_running_command_under_a_failure",
+      "current_test": "x1_escape_still_cancels_a_running_command_under_a_failure",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "empty_show_confirmation_needs_no_mutation_buffers_in_a_tight_budget",
+      "current_test": "empty_show_confirmation_needs_no_mutation_buffers_in_a_tight_budget",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "a_mesh_object_fills_its_faces_after_the_grid",
+      "current_test": "a_mesh_object_fills_its_faces_after_the_grid",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "builder_area_stays_reserved_and_non_interactive",
+      "current_test": "builder_area_stays_reserved_and_non_interactive",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "invalid_command_stays_visible_in_the_status_surface_and_the_transcript",
+      "current_test": "invalid_command_stays_visible_in_the_status_surface_and_the_transcript",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "left_column_renders_the_documented_sections_with_builders_below_projects",
+      "current_test": "left_column_renders_the_documented_sections_with_builders_below_projects",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "viewport_pipe_mixed_chain_accepts_endpoint_and_station_points",
+      "current_test": "viewport_pipe_mixed_chain_accepts_endpoint_and_station_points",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/pipe.log"
+    },
+    {
+      "original_test": "blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing",
+      "current_test": "blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "construction_grid_colors_only_positive_axes_like_the_reference",
+      "current_test": "construction_grid_renders_finite_axes_without_document_geometry",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "jewelry_grid_axes_follow_each_view_cplane",
+      "current_test": "jewelry_grid_axes_follow_each_view_cplane",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    },
+    {
+      "original_test": "staged::tests::attribute_and_label_edits_are_staged_and_readable_before_commit",
+      "current_test": "staged::tests::attribute_and_label_edits_are_staged_and_readable_before_commit",
+      "result": "passed",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/plugin.log"
+    }
+  ],
+  "raw_attempt_test_counts": {
+    "final-app": {
+      "passed": 611,
+      "failed": 1,
+      "ignored": 1
+    },
+    "metadata-regressions": {
+      "passed": 33,
+      "failed": 0,
+      "ignored": 0
+    },
+    "pipe": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "plugin": {
+      "passed": 55,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "totals_distinct_latest_cases": {
+    "passed": 669,
+    "failed": 0,
+    "ignored": 1
+  },
+  "latest_target_counts": {
+    "om9-app::display_persistence": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::escape_commands": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::f6_context": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::file_lifecycle": {
+      "passed": 20,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::file_widgets": {
+      "passed": 21,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::global_status_surface": {
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::layer_dialogs": {
+      "passed": 11,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::lib": {
+      "passed": 509,
+      "failed": 0,
+      "ignored": 1
+    },
+    "om9-app::mesh_fill": {
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::pictureframe_persistence": {
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::project_manager_persistence": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::shell_docking": {
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::solid_difference_ui": {
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::transform_corrections": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::ui_events": {
+      "passed": 7,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-app::viewport_layout": {
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    "om9-plugin-host::lib": {
+      "passed": 55,
+      "failed": 0,
+      "ignored": 0
+    }
+  },
+  "retained_ignored_cases": [
+    {
+      "target": "om9-app::lib",
+      "test": "ui::tests::surface_ui_grouped_release_probe",
+      "result": "ignored",
+      "log": "build/standalone-validation/ui-artifacts/fix21-20261105/final-app.log"
+    }
+  ],
+  "checks": {
+    "final-app": {
+      "name": "final-app",
+      "exit_code": 101,
+      "seconds": 289.4965125,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--no-fail-fast",
+        "--lib",
+        "--test",
+        "file_widgets",
+        "--test",
+        "escape_commands",
+        "--test",
+        "global_status_surface",
+        "--test",
+        "layer_dialogs",
+        "--test",
+        "shell_docking",
+        "--test",
+        "mesh_fill",
+        "--test",
+        "ui_events",
+        "--test",
+        "viewport_layout",
+        "--test",
+        "transform_corrections",
+        "--test",
+        "project_manager_persistence",
+        "--test",
+        "display_persistence",
+        "--test",
+        "f6_context",
+        "--test",
+        "pictureframe_persistence",
+        "--test",
+        "file_lifecycle",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    "metadata-regressions": {
+      "name": "metadata-regressions",
+      "exit_code": 0,
+      "seconds": 53.9908798,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--no-fail-fast",
+        "--test",
+        "file_widgets",
+        "--test",
+        "project_manager_persistence",
+        "--test",
+        "display_persistence",
+        "--test",
+        "f6_context",
+        "--test",
+        "pictureframe_persistence",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    "pipe": {
+      "name": "pipe",
+      "exit_code": 0,
+      "seconds": 5.7317736,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--test",
+        "solid_difference_ui",
+        "viewport_pipe_mixed_chain_accepts_endpoint_and_station_points",
+        "--",
+        "--exact",
+        "--nocapture"
+      ]
+    },
+    "plugin": {
+      "name": "plugin",
+      "exit_code": 0,
+      "seconds": 21.2937039,
+      "args": [
+        "test",
+        "-p",
+        "om9-plugin-host",
+        "--locked",
+        "-j",
+        "2",
+        "--lib",
+        "staged::tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    "release-build-final": {
+      "name": "release-build-final",
+      "exit_code": 0,
+      "seconds": 411.6382901,
+      "args": [
+        "build",
+        "--release",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2"
+      ]
+    }
+  },
+  "attempts": [
+    {
+      "name": "integrations",
+      "exit_code": 101,
+      "seconds": 55.6719148,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--no-fail-fast",
+        "--test",
+        "file_widgets",
+        "--test",
+        "escape_commands",
+        "--test",
+        "global_status_surface",
+        "--test",
+        "layer_dialogs",
+        "--test",
+        "shell_docking",
+        "--test",
+        "mesh_fill",
+        "--test",
+        "ui_events",
+        "--test",
+        "viewport_layout",
+        "--test",
+        "transform_corrections",
+        "--test",
+        "project_manager_persistence",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    {
+      "name": "pipe",
+      "exit_code": 0,
+      "seconds": 5.7317736,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--test",
+        "solid_difference_ui",
+        "viewport_pipe_mixed_chain_accepts_endpoint_and_station_points",
+        "--",
+        "--exact",
+        "--nocapture"
+      ]
+    },
+    {
+      "name": "icons",
+      "exit_code": 101,
+      "seconds": 11.6791502,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--lib",
+        "icon_size_audit",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    {
+      "name": "status",
+      "exit_code": 101,
+      "seconds": 11.4391249,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--lib",
+        "status_surface::tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    {
+      "name": "plugin",
+      "exit_code": 0,
+      "seconds": 21.2937039,
+      "args": [
+        "test",
+        "-p",
+        "om9-plugin-host",
+        "--locked",
+        "-j",
+        "2",
+        "--lib",
+        "staged::tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    {
+      "name": "icons-fixed",
+      "exit_code": 0,
+      "seconds": 64.7508397,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--lib",
+        "icon_size_audit",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    {
+      "name": "status-fixed",
+      "exit_code": 101,
+      "seconds": 0.8751188,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--lib",
+        "status_surface::tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    {
+      "name": "escape-fixed",
+      "exit_code": 0,
+      "seconds": 4.6907157,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--test",
+        "escape_commands",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    {
+      "name": "final-app",
+      "exit_code": 101,
+      "seconds": 289.4965125,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--no-fail-fast",
+        "--lib",
+        "--test",
+        "file_widgets",
+        "--test",
+        "escape_commands",
+        "--test",
+        "global_status_surface",
+        "--test",
+        "layer_dialogs",
+        "--test",
+        "shell_docking",
+        "--test",
+        "mesh_fill",
+        "--test",
+        "ui_events",
+        "--test",
+        "viewport_layout",
+        "--test",
+        "transform_corrections",
+        "--test",
+        "project_manager_persistence",
+        "--test",
+        "display_persistence",
+        "--test",
+        "f6_context",
+        "--test",
+        "pictureframe_persistence",
+        "--test",
+        "file_lifecycle",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    {
+      "name": "metadata-regressions",
+      "exit_code": 0,
+      "seconds": 53.9908798,
+      "args": [
+        "test",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2",
+        "--no-fail-fast",
+        "--test",
+        "file_widgets",
+        "--test",
+        "project_manager_persistence",
+        "--test",
+        "display_persistence",
+        "--test",
+        "f6_context",
+        "--test",
+        "pictureframe_persistence",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ]
+    },
+    {
+      "name": "release-build-final",
+      "exit_code": 0,
+      "seconds": 411.6382901,
+      "args": [
+        "build",
+        "--release",
+        "-p",
+        "om9-app",
+        "--locked",
+        "-j",
+        "2"
+      ]
+    }
+  ],
+  "interrupted_release_attempt": {
+    "log": "build/standalone-validation/ui-artifacts/fix21-20261105/release-build.log",
+    "result": "Stopped after the combined gate exposed stale scene metadata; not counted as a completed build"
+  },
+  "release_smoke": {
+    "checks": [
+      {
+        "mode": "--create-fixture",
+        "exit_code": 0,
+        "stdout": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\fix21-20261105\\release-create.stdout.log",
+        "stderr": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\fix21-20261105\\release-create.stderr.log"
+      },
+      {
+        "mode": "--inspect",
+        "exit_code": 0,
+        "stdout": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\fix21-20261105\\release-inspect.stdout.log",
+        "stderr": "H:\\OpenMatrix9\\build\\standalone-validation\\ui-artifacts\\fix21-20261105\\release-inspect.stderr.log"
+      }
+    ],
+    "objects": 4,
+    "restoration": "ready",
+    "persistent_hash_matches": true
+  },
+  "source_manifest_sha256": "18ac19936e75167500c99ed30b082d6c11feea8c9a655dfec6580ce32c5daec3",
+  "source_files_sha256": {
+    "crates/om9-app/src/session.rs": "c3587256ac5b5d5aaa0806cbb3f984cf57c80feff2a3e6614badbb8d19f28e40",
+    "crates/om9-app/src/session/display_state.rs": "2eae7a3e7b76ea9bcd8b7afedf3d05c9a46b4909554edcbbd9f875b3c4c07ee4",
+    "crates/om9-app/src/session/f6_state.rs": "803fa5ca6d930b91fb9f6cb24d809ca9b519e0925c00385654b5e31dfdd25701",
+    "crates/om9-app/src/session/pictureframe_state.rs": "5d0010b78cd3a661487d0b6bc15c4dff58aec3722672772198f6aac07eac3454",
+    "crates/om9-app/src/session/project_state.rs": "639cf4be315b639d31399d3eaff74d64fa2330ea23a7e04ad6f6336d2619804d",
+    "crates/om9-app/src/status_surface.rs": "6866bb5686d7ba4503d9c030a18c76effcc6e61188cee70ac740320e2a524587",
+    "crates/om9-app/src/ui.rs": "a4b153e33e1dc73a1ad62a16bbd571374f4cba4a7e2c3deff2689ed815bbc625",
+    "crates/om9-app/src/ui/chrome.rs": "159646f035781dbc0929edbca31c3315482f56c6e7105f1f39ae6303412e0282",
+    "crates/om9-app/src/ui/files.rs": "931da714fe8cc660c4334df32a1092d5d8903ce80c311d3dd9433f1144263f23",
+    "crates/om9-app/src/ui/icon_size_audit.rs": "b9dfb030a942564f6cc9488261727f454e801710b089414e0d135728ddc25da5",
+    "crates/om9-app/tests/common/gpu_frames.rs": "2ffe1c09eca0c57a096c0aba0af50493c08feb6bef9fdd185dbc1ead823acf97",
+    "crates/om9-app/tests/escape_commands.rs": "734c402dffcaffa720c61a5db7d1901aee428dbece251ae3cd42bc9180ac4c56",
+    "crates/om9-app/tests/layer_dialogs.rs": "1e1df05134a7c0be162a0e496fb622019789968b23a2fe68e897c7dec772c4f1",
+    "crates/om9-app/tests/mesh_fill.rs": "872a1bd22c8dc3d7ececc4d6a5fde4dd58873192a98a283fa1c235a739ddeed9",
+    "crates/om9-app/tests/project_manager_persistence.rs": "8a2f67bc3578d18a12d7acdb0570fd6b2c7a3a59ad1e8547d54b2664a1ba257d",
+    "crates/om9-app/tests/solid_difference_ui.rs": "9fd3f21155055175249261bcf89616a48ae0731dd33c566396a7773ffa352c92",
+    "crates/om9-app/tests/transform_corrections.rs": "5ccfe48b1dd2a149dc3efcbfbf0172a0a2abc7d900f7d0748aa541e192b82d07",
+    "crates/om9-app/tests/ui_events.rs": "f36ed46413721989e0c27a2e6e5a52d48a22ed2cf0693ba4ba82a3618ff32db9",
+    "crates/om9-app/tests/viewport_layout.rs": "827bbd478c685cc84bf618d8d7fd9456847983b7f671c3f9a87bba1c96a5fa30",
+    "crates/om9-plugin-host/src/staged.rs": "65ac232cdc9daf937e0780e1f41e3ffb0ce0d7377dca3f7f95a49b22ec728e9e"
+  },
+  "release_executable_sha256": "7e548b5ea77cf3646d343e40a35d19e2b8c03ca97bd25a048a79b145b6254e2e",
+  "logs": "build/standalone-validation/ui-artifacts/fix21-20261105",
+  "limits": [
+    "Headless/GPU offscreen do not prove desktop presentation or latency.",
+    "No native/STL/3DM geometry algorithm changed; inventory packet and missing-PDF failures remain outside this task.",
+    "The prior 183 ignored workspace cases are not promoted by this targeted gate."
+  ],
+  "public_source_audit": {
+    "source_files": 15200,
+    "icon_bindings": 594,
+    "svg_files": 593,
+    "errors": []
+  },
+  "record_checks": "Ledger JSON/unique IDs, 21 original-to-passed mappings, report local links and milestone JSON passed",
+  "hygiene": {
+    "diff_whitespace": "passed",
+    "untracked_whitespace": "passed",
+    "source_manifest_recheck": "passed",
+    "prune": "exit 0; 0 removed; keep newest 10 plus cited runs; no external target deletion"
+  }
+}

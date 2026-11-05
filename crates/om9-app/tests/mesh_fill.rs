@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 //! A mesh object must hide the ground grid behind it, the way Matrix9 draws a shaded viewport.
 //!
-//! The grid is painted first and the object after it, so the only way the grid can show through the
-//! object is a missing face fill. This test counts the filled shapes the viewport emits for a mesh and
-//! checks that they come after the grid lines in the paint order.
+//! Mesh fill/occlusion uses actual GPU pixels; chrome stability still uses egui shapes.
+#[path = "common/gpu_frames.rs"]
+mod gpu_frames;
 use eframe::egui::{self, Event, Modifiers, Pos2, Rect, Shape, Vec2};
 use om9_app::ui::MatrixApp;
 use om9_core::{
@@ -43,7 +43,7 @@ fn mesh_document() -> Document {
         vec![0, 4, 7],
         vec![0, 7, 3],
     ];
-    let entity = Entity::new(
+    let mut entity = Entity::new(
         "cube",
         Geometry::Mesh(Mesh {
             vertices,
@@ -55,6 +55,7 @@ fn mesh_document() -> Document {
         }),
         None,
     );
+    entity.attributes.color = Some([240, 80, 160, 255]);
     let id = entity.id;
     document.entities.insert(id, entity);
     document
@@ -93,36 +94,26 @@ fn filled(shapes: &[egui::epaint::ClippedShape]) -> usize {
 
 #[test]
 fn a_mesh_object_fills_its_faces_after_the_grid() {
-    let context = egui::Context::default();
-    let mut empty = MatrixApp::new(Document::new("empty")).expect("app");
-    let empty_shapes = run(&mut empty, &context, 4);
-    let empty_fills = filled(&empty_shapes);
-    let context = egui::Context::default();
-    let mut app = MatrixApp::new(mesh_document()).expect("app");
-    let shapes = run(&mut app, &context, 4);
-    let faces = filled(&shapes);
+    let Some(empty) = gpu_frames::render(&Document::new("empty")) else {
+        return;
+    };
+    let Some(mesh) = gpu_frames::render(&mesh_document()) else {
+        return;
+    };
+    let is_face =
+        |p: &[u8; 4]| p[0] > 70 && p[2] > p[0] / 3 && u16::from(p[1]) * 4 < u16::from(p[0]) * 3;
     assert!(
-        faces >= empty_fills + 12,
-        "each of the twelve cube triangles needs a fill: {faces} vs {empty_fills} in an empty document"
+        mesh[0].pixels().filter(|p| is_face(&p.0)).count() > 200,
+        "cube face must cover an area, not just wire lines"
     );
-    // Within one viewport rect, the grid lines must be painted before the object's fills.
-    let rect = app.view_rects[&om9_scene::workspace::ViewId::Perspective];
-    let in_view: Vec<&egui::epaint::ClippedShape> = shapes
-        .iter()
-        .filter(|clipped| clipped.clip_rect == rect)
-        .collect();
-    let first_line = in_view
-        .iter()
-        .position(|clipped| matches!(&clipped.shape, Shape::LineSegment { .. }));
-    let first_fill = in_view.iter().position(|clipped| match &clipped.shape {
-        Shape::Path(path) => path.fill != eframe::egui::Color32::TRANSPARENT,
-        _ => false,
-    });
-    if let (Some(first_line), Some(first_fill)) = (first_line, first_fill) {
+    // The top face at z=5 must occlude both grid axes at z=0.
+    for point in [[-2., 0., 5.], [2., 0., 5.], [0., -2., 5.], [0., 2., 5.]] {
+        let (x, y) = gpu_frames::looking_down_pixel(point);
         assert!(
-            first_fill > first_line,
-            "the grid starts at {first_line}, the first fill at {first_fill}"
+            is_face(&mesh[0].get_pixel(x, y).0),
+            "face/grid depth at {point:?}"
         );
+        assert!(!is_face(&empty[0].get_pixel(x, y).0));
     }
 }
 

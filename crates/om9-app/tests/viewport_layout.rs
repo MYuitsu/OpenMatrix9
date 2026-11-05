@@ -55,16 +55,22 @@ fn jewelry_grid_axes_follow_each_view_cplane() {
     for id in ViewId::ALL {
         let grid = Grid::new(workspace.views[&id].cplane).expect("grid");
         assert_eq!(grid.lines.len(), 82);
+        let horizontal_colour = if id == ViewId::SideView { [0, 200, 220, 255] } else { [210, 35, 35, 255] };
+        let vertical_colour = if id == ViewId::SideView { [235, 180, 50, 255] } else { [0, 200, 220, 255] };
         let red = grid
             .lines
             .iter()
-            .find(|line| line.axis && line.color == [210, 35, 35, 255])
-            .expect("red X axis");
+            .find(|line| line.axis && line.color == horizontal_colour)
+            .expect("horizontal axis colour");
         let cyan = grid
             .lines
             .iter()
-            .find(|line| line.axis && line.color == [0, 200, 220, 255])
-            .expect("cyan Y axis");
+            .find(|line| line.axis && line.color == vertical_colour)
+            .expect("vertical axis colour");
+        if id == ViewId::SideView {
+            assert_eq!((red.start, red.end), ([0., -20., 0.], [0., 20., 0.]));
+            assert_eq!((cyan.start, cyan.end), ([0., 0., -20.], [0., 0., 20.]));
+        }
         if matches!(id, ViewId::LookingDown | ViewId::Perspective) {
             assert_eq!(red.start, [-20., 0., 0.]);
             assert_eq!(red.end, [20., 0., 0.]);

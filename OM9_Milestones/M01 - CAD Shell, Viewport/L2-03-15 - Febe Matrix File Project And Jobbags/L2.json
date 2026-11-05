@@ -131,6 +131,16 @@
     ]
   },
   "runtime_implementation": {
+    "regression_fixes_20261105": {
+      "date": "2026-11-05",
+      "status": "TARGETED_REGRESSIONS_PASSED_DESKTOP_PENDING",
+      "evidence": [
+        "docs/validation/2026-11-05-fix21-regressions.md",
+        "docs/validation/2026-11-05-fix21-regressions.json"
+      ],
+      "results": "21/21 original failures resolved; 669 passed/0 failed/1 ignored; release build exit 0",
+      "scope": "Regression evidence only; existing planning and manual acceptance gates unchanged."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

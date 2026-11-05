@@ -339,19 +339,8 @@ impl MatrixApp {
             ctx.request_repaint();
             return Ok(());
         };
-        if self
-            .controller
-            .file_operation()
-            .and_then(|operation| operation.kind())
-            .is_some_and(|kind| {
-                matches!(
-                    kind,
-                    crate::file_lifecycle::FileKind::Save | crate::file_lifecycle::FileKind::SaveAs
-                )
-            })
-        {
-            self.stage_project_state()?;
-        }
+        // Save invocation stages UI metadata before capturing this token.
+        // A picker response must not mutate the captured document/context.
         let result = self.controller.accept_file_path(token, &path);
         self.file_feedback(ctx, result)
     }

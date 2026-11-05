@@ -2,6 +2,8 @@
 use eframe::egui::{self, Event, Key, Modifiers, Rect, Vec2};
 use om9_app::ui::MatrixApp;
 use om9_core::model::Document;
+#[path = "common/gpu_frames.rs"]
+mod gpu_frames;
 fn frame(app: &mut MatrixApp, ctx: &egui::Context, events: Vec<Event>) -> egui::FullOutput {
     let input = egui::RawInput {
         screen_rect: Some(Rect::from_min_size(
@@ -155,30 +157,27 @@ fn reference_workspace_places_sidebar_left_and_through_finger_below_looking_down
 }
 
 #[test]
-fn construction_grid_colors_only_positive_axes_like_the_reference() {
+fn construction_grid_renders_finite_axes_without_document_geometry() {
     use om9_scene::workspace::ViewId;
     let mut app = MatrixApp::new(Document::new("grid reference")).unwrap();
     let ctx = egui::Context::default();
-    let output = frame(&mut app, &ctx, vec![]);
-    let view = app.view_rects[&ViewId::LookingDown];
-    let red = egui::Color32::from_rgb(210, 35, 35);
-    let axis = output
-        .shapes
-        .iter()
-        .find_map(|s| match &s.shape {
-            egui::Shape::LineSegment { points, stroke }
-                if stroke.color == red && points.iter().all(|p| view.contains(*p)) =>
-            {
-                Some(points)
-            }
-            _ => None,
-        })
-        .unwrap();
-    assert!(
-        (axis[0].x - view.center().x).abs() < 1.,
-        "colored axis starts at origin"
-    );
-    assert!(axis[1].x > view.center().x);
+    frame(&mut app, &ctx, vec![]);
+    let Some(images) = gpu_frames::render(app.controller.document()) else { return };
+    let red = |p: [u8; 4]| p[0] > 30 && u16::from(p[0]) > 2 * u16::from(p[1]) && u16::from(p[0]) > 2 * u16::from(p[2]);
+    let cyan = |p: [u8; 4]| p[1] > 40 && p[2] > 40 && 2 * u16::from(p[0]) < u16::from(p[1].min(p[2]));
+    for (point, predicate) in [
+        ([-5., 0., 0.], red as fn([u8; 4]) -> bool),
+        ([5., 0., 0.], red as fn([u8; 4]) -> bool),
+        ([0., -5., 0.], cyan as fn([u8; 4]) -> bool),
+        ([0., 5., 0.], cyan as fn([u8; 4]) -> bool),
+    ] {
+        let (x, y) = gpu_frames::looking_down_pixel(point);
+        assert!((-1..=1).any(|dy| (-1..=1).any(|dx| {
+            predicate(images[0].get_pixel((x as i32 + dx) as u32, (y as i32 + dy) as u32).0)
+        })), "GPU axis colour at {point:?}");
+    }
+    let grid = om9_scene::grid::Grid::new(app.controller.workspace.views[&ViewId::LookingDown].cplane).unwrap();
+    assert!(grid.lines.iter().flat_map(|line| [line.start, line.end]).flatten().all(|v| v.abs() <= 20.));
     assert!(app.controller.document().entities.is_empty());
     assert_eq!(app.controller.coordinator().undo_len(), 0);
 }

@@ -2827,7 +2827,7 @@ mod tests {
         with_host(&mut staged, |host| {
             let before = host.object_attributes(first_id.to_string()).unwrap();
             assert_eq!(before.label, "first");
-            assert_eq!(before.color, None);
+            assert_eq!(before.color, document.entities[&first_id].attributes.color);
             assert!(before.effective_visible && before.effective_editable);
             let after = host
                 .set_object_attributes(

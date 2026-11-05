@@ -91,10 +91,16 @@ impl StatusSurface {
     }
 
     pub fn info(&mut self, message: &str) -> bool {
+        if self.kind.is_failure() {
+            return false;
+        }
         self.report(StatusKind::Info, message)
     }
 
     pub fn warning(&mut self, message: &str) -> bool {
+        if self.kind.is_failure() {
+            return false;
+        }
         self.report(StatusKind::Warning, message)
     }
 
@@ -163,6 +169,9 @@ mod tests {
         assert_eq!(status.message(), "Unknown command: Foo");
         assert!(!status.complete_success());
         assert_eq!(status.kind(), StatusKind::Error);
+        assert!(!status.info("Command canceled"));
+        assert!(!status.warning("Layout note"));
+        assert_eq!(status.message(), "Unknown command: Foo");
         assert!(status.acknowledge());
         assert_eq!(status.kind(), StatusKind::Ready);
         assert!(!status.complete_success());
@@ -189,6 +198,7 @@ mod tests {
         status.error(&"ẩ".repeat(1000));
         assert!(status.message().len() <= StatusSurface::MAX_MESSAGE_BYTES);
         assert!(status.message().chars().all(|ch| ch == 'ẩ'));
+        assert!(status.acknowledge());
         status.info("line one\nline two\r\nline three\ttab");
         assert_eq!(status.message(), "line one line two  line three tab");
         status.info("   ");

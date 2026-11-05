@@ -299,20 +299,12 @@ fn hidden_snapshot_count_is_admitted_before_allocation() {
 #[test]
 fn empty_show_confirmation_needs_no_mutation_buffers_in_a_tight_budget() {
     let d = Document::new("tight no-op dialog");
-    let probe = Controller::new(d.clone(), Limits::default()).unwrap();
-    let base = probe
-        .coordinator()
-        .retained_usage_with_held_usage(probe.scene_cache_usage().unwrap())
-        .unwrap()
-        .bytes;
-    let mut c = Controller::new(
-        d,
-        Limits {
-            max_bytes: base + 8192,
-            ..Limits::default()
-        },
-    )
-    .unwrap();
+    let mut c = Controller::new(d, Limits::default()).unwrap();
+    // Limit post-startup headroom, not constructor peak to steady-state usage.
+    let mut pressure = c.coordinator().reserve_remaining_external_memory_with_held(
+        om9_core::budget::memory::MemoryClass::Kernel, None, c.scene_cache_usage().unwrap(),
+    ).unwrap();
+    pressure.shrink_to(pressure.bytes().checked_sub(8192).unwrap()).unwrap();
     let token = c.begin_layer_dialog(LayerDialogKind::Show, None).unwrap();
     let epoch = c.coordinator().epoch();
     c.confirm_layer_dialog(token).unwrap();
