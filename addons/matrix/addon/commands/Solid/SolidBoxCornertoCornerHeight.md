@@ -3,7 +3,7 @@
 Tạo hộp theo hai góc đáy và chiều cao.
 
 - **Mã lệnh:** `SolidBoxCornertoCornerHeight`
-- **Vị trí:** menu Solid, ô số 15
+- **Vị trí:** menu Solid, ô số 12
 - **Icon:** `Resources/icons/solid-minimal/SolidBoxCornertoCornerHeight.svg`
 - **Gọi bằng dòng lệnh:** `SolidBoxCornertoCornerHeight`, `Box`
 - **Cách chạy:** từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ
