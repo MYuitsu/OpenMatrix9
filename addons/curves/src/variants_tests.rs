@@ -719,6 +719,23 @@ fn polygon_modes() {
 }
 
 #[test]
+fn helix_and_spiral_reject_tiny_pitch_without_preview_or_commit() {
+    for (command, mut inputs) in [
+        (HELIX, vec![pt(0.0, 0.0), pt(10.0, 0.0), set("Pitch", "0.000001")]),
+        (SPIRAL, vec![pt(0.0, 0.0), pt(10.0, 0.0), set("Pitch", "0.000001"), text("1")]),
+    ] {
+        inputs.push(Input::Hover { point: [0.0, 2.0, 0.0] });
+        inputs.push(text("2"));
+        let replies = run(command, inputs);
+        let preview = &replies[replies.len() - 2];
+        assert!(preview.preview.is_empty());
+        let last = replies.last().unwrap();
+        assert!(!last.done && last.create.is_empty());
+        assert!(last.error.as_deref().unwrap_or("").contains("Too many turns"));
+    }
+}
+
+#[test]
 fn helix_and_spiral_options() {
     let r = run(HELIX, vec![]);
     assert_eq!(r[0].prompt, "Start of axis");
@@ -1096,10 +1113,10 @@ fn helix_pitch_far_too_small_is_refused_without_hanging() {
     let last = r.last().unwrap();
     assert!(!last.done);
     let why = last.error.clone().unwrap_or_default();
-    assert!(why.contains("at most 1000"), "{why}");
+    assert!(why.contains("Too many turns") && why.contains("at most 1000"), "{why}");
     // Spiral the same.
     let r = run(SPIRAL, vec![pt(0.0, 0.0), pt(10.0, 0.0), set("Pitch", "0.0001"), text("1"), text("2")]);
-    assert!(r.last().unwrap().error.as_deref().is_some_and(|w| w.contains("at most 1000")));
+    assert!(r.last().unwrap().error.as_deref().is_some_and(|w| w.contains("Too many turns")));
     assert!(t0.elapsed().as_secs_f64() < 5.0, "took {:?}", t0.elapsed());
 }
 

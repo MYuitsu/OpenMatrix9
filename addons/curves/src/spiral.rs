@@ -91,7 +91,7 @@ fn turns(st: &State, r0: f64, r1: f64) -> Result<f64, String> {
     }
     if t > MAX_TURNS {
         return Err(format!(
-            "{} turns: at most {} (the pitch is too small for this axis)",
+            "Too many turns for this curve ({}, at most {}); increase Pitch or reduce its length",
             fmt(t.round()),
             fmt(MAX_TURNS)
         ));
@@ -220,7 +220,7 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3, preview: bool) -> R
 /// never passes [`MAX_POINTS`]; if the tolerance is not met by then, the shape is refused.
 fn within_tolerance(tn: f64, dense: &dyn Fn(usize) -> Vec<Vec3>, tol: f64) -> Result<Geo, String> {
     let wanted = tn * PER_TURN as f64;
-    if !wanted.is_finite() || wanted > MAX_POINTS as f64 {
+    if !wanted.is_finite() || wanted <= 0.0 || wanted > MAX_POINTS as f64 {
         return Err(format!("Too many points for this shape (at most {})", MAX_POINTS));
     }
     let mut count = (wanted.ceil() as usize).max(8);
@@ -553,5 +553,32 @@ pub fn step(e: &Event, helix: bool) -> Reply {
             ask(e, &st, helix, None)
         }
         _ => ask(e, &st, helix, None),
+    }
+}
+
+#[cfg(test)]
+mod budget_tests {
+    use super::*;
+
+    #[test]
+    fn rejects_excessive_and_nonfinite_turns_before_sampling() {
+        for turns in [f64::INFINITY, f64::NAN, 0.0, -1.0, 10_000_000.0] {
+            let result = within_tolerance(turns, &|_| panic!("must not allocate samples"), FIT_TOL);
+            assert!(result.is_err(), "{turns}");
+        }
+    }
+
+    #[test]
+    fn refuses_when_sample_budget_cannot_meet_tolerance() {
+        let result = within_tolerance(
+            0.01,
+            &|count| {
+                (0..=2 * count)
+                    .map(|i| [i as f64, if i % 2 == 0 { 0.0 } else { 100.0 }, 0.0])
+                    .collect()
+            },
+            FIT_TOL,
+        );
+        assert!(result.is_err_and(|why| why.starts_with("Cannot keep the shape within 0.0005 mm")));
     }
 }
