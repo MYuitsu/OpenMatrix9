@@ -11,7 +11,7 @@ use crate::settings::{self, SettingSpec, SettingValue};
 use crate::sha256;
 use crate::toml::{self, Table, Value};
 use crate::zip::ZipArchive;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -113,10 +113,60 @@ impl HostConfig {
 #[derive(Debug, Clone)]
 struct Installed {
     manifest: Option<Manifest>,
+    /// Which settings apply to which command, made once from the manifest: looking up one
+    /// command's settings (at every step of an interactive command) does not depend on how
+    /// many settings the whole package has.
+    specs: SpecIndex,
     errors: Vec<String>,
     repo: RepoKind,
     dir: PathBuf,
     shadows: Vec<(RepoKind, PathBuf)>,
+}
+
+/// Positions in `Manifest::settings`, in manifest order.
+#[derive(Debug, Default, Clone)]
+struct SpecIndex {
+    /// Settings with no command list: they apply to every command.
+    general: Vec<usize>,
+    by_command: HashMap<String, Vec<usize>>,
+}
+
+impl SpecIndex {
+    fn new(manifest: Option<&Manifest>) -> Self {
+        let mut index = Self::default();
+        for (at, spec) in manifest.map_or(&[][..], |m| &m.settings[..]).iter().enumerate() {
+            if spec.addon_wide {
+                continue;
+            }
+            if spec.commands.is_empty() {
+                index.general.push(at);
+            }
+            for command in &spec.commands {
+                let list = index.by_command.entry(command.clone()).or_default();
+                if list.last() != Some(&at) {
+                    list.push(at);
+                }
+            }
+        }
+        index
+    }
+
+    /// The settings that apply to `command` ([`SettingSpec::applies_to`]), in manifest order.
+    fn of(&self, command: &str) -> Vec<usize> {
+        let own = self.by_command.get(command).map_or(&[][..], |v| &v[..]);
+        let (mut out, mut a, mut b) = (Vec::with_capacity(self.general.len() + own.len()), 0, 0);
+        while a < self.general.len() || b < own.len() {
+            let take_general = b >= own.len() || (a < self.general.len() && self.general[a] < own[b]);
+            if take_general {
+                out.push(self.general[a]);
+                a += 1;
+            } else {
+                out.push(own[b]);
+                b += 1;
+            }
+        }
+        out
+    }
 }
 
 struct Active {
@@ -488,8 +538,10 @@ impl Host {
                         Err(e) => (None, e),
                     },
                 };
+                let specs = SpecIndex::new(manifest.as_ref());
                 let mut inst = Installed {
                     manifest,
+                    specs,
                     errors,
                     repo: kind,
                     dir: dir.clone(),
@@ -1074,13 +1126,18 @@ impl Host {
     /// for these at every step, so only the specs that apply to `command` are looked at and
     /// nothing else is copied (a package can carry hundreds of settings).
     pub fn command_settings(&self, id: &str, command: &str) -> Vec<(String, SettingValue)> {
-        let Some(m) = self.installed.get(id).and_then(|i| i.manifest.as_ref()) else {
+        let Some((inst, m)) = self
+            .installed
+            .get(id)
+            .and_then(|i| Some((i, i.manifest.as_ref()?)))
+        else {
             return Vec::new();
         };
         let stored = self.prefs.addons.get(id).map(|a| &a.settings);
-        m.settings
-            .iter()
-            .filter(|spec| spec.applies_to(command))
+        inst.specs
+            .of(command)
+            .into_iter()
+            .map(|at| &m.settings[at])
             .map(|spec| {
                 let value = stored
                     .and_then(|st| st.get(&spec.key))
@@ -1287,14 +1344,16 @@ impl Host {
     /// for the builder (command-line options and builder panel).
     pub fn command_info(&self, code: &str) -> Option<CommandInfo> {
         let owner = self.bindings.get(code)?;
-        let manifest = self.installed.get(owner)?.manifest.as_ref()?;
+        let inst = self.installed.get(owner)?;
+        let manifest = inst.manifest.as_ref()?;
         let command = manifest.commands.iter().find(|c| c.id == code)?.clone();
         // Only this command's specs are resolved and copied (not the whole package's).
         let stored = self.prefs.addons.get(owner).map(|a| &a.settings);
-        let settings = manifest
-            .settings
-            .iter()
-            .filter(|spec| spec.applies_to(code))
+        let settings = inst
+            .specs
+            .of(code)
+            .into_iter()
+            .map(|at| &manifest.settings[at])
             .map(|spec| {
                 let value = stored
                     .and_then(|st| st.get(&spec.key))

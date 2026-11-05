@@ -945,6 +945,8 @@ pub struct Controller {
     preview_revision: u64,
     document: DocumentId,
     scene: Option<Scene>,
+    /// Scene positions of each object, for add-on steps (see `addon_session::SceneRoots`).
+    scene_roots: std::sync::Mutex<addon_session::SceneRoots>,
     // Declared after scene so its last lease is released after scene buffers.
     scene_buffer_owner: std::sync::Mutex<Option<SceneBufferOwner>>,
     session: Option<CommandSession>,
@@ -1136,6 +1138,7 @@ impl Controller {
             om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes))
         })?;
         Ok(Self {
+            scene_roots: Default::default(),
             coordinator,
             command_run: 0,
             invoked_feature: None,

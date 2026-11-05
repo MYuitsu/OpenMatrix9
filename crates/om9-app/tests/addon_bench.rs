@@ -273,3 +273,84 @@ fn addon_single_object_is_published_and_undone() {
     assert_eq!(c.coordinator().undo_len(), undo + 1);
     assert_eq!(roots(&c).len(), 202);
 }
+
+/// Benchmark (ignored): an editing add-on command (Offset) on a picked curve in an empty and a
+/// large document: per pointer move while choosing the side, and the whole command.
+#[test]
+#[ignore]
+fn bench_edit_command_with_selection() {
+    let tmp = std::env::temp_dir().join(format!("om9-bench-edit-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let samples: usize = std::env::var("BENCH_N").ok().and_then(|v| v.parse().ok()).unwrap_or(40);
+    let shared = host(&tmp);
+    for n in [1usize, 5000, 20000] {
+        let mut c = controller(n, Some(&shared));
+        let first = *c.document().entities.keys().next().unwrap();
+        let (mut whole, mut moves) = (Vec::new(), Vec::new());
+        for _ in 0..samples {
+            c.select_objects(&[first]).unwrap();
+            let before = c.document().entities.len();
+            let t0 = std::time::Instant::now();
+            c.run_addon_command("CurveOffsetCurve").unwrap();
+            c.submit("1").unwrap();
+            let h0 = std::time::Instant::now();
+            for i in 0..20 {
+                c.session_hover([1.5, 1.0 + i as f64 * 0.01, 0.0]);
+            }
+            moves.push(h0.elapsed().as_secs_f64() * 1e3 / 20.0);
+            c.session_point([1.5, 1.0, 0.0]).unwrap();
+            whole.push(t0.elapsed().as_secs_f64() * 1e3);
+            assert_eq!(c.document().entities.len(), before + 1, "one offset curve");
+            c.undo().unwrap();
+        }
+        eprintln!("BENCH-EDIT doc={n:>5} Offset: whole {:>8.3} ms, pointer move {:>7.4} ms", median(whole), median(moves));
+    }
+}
+
+/// The picked objects an add-on step receives follow the selection across scene changes
+/// (new objects, Undo): Offset always offsets the curve picked at that moment.
+#[test]
+fn addon_steps_see_the_current_selection_after_scene_changes() {
+    let tmp = std::env::temp_dir().join(format!("om9-selidx-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let shared = host(&tmp);
+    let mut c = controller(50, Some(&shared));
+    let line_at = |c: &Controller, y: f64| {
+        *c.document()
+            .entities
+            .iter()
+            .find(|(_, e)| matches!(&e.geometry, Geometry::Curve(Curve::Line { start, .. }) if (start[1] - y).abs() < 1e-9))
+            .unwrap()
+            .0
+    };
+    let offset_of = |c: &mut Controller, id, side: [f64; 3]| -> f64 {
+        c.select_objects(&[id]).unwrap();
+        let before: std::collections::BTreeSet<_> = c.document().entities.keys().copied().collect();
+        c.run_addon_command("CurveOffsetCurve").unwrap();
+        c.submit("0.004").unwrap();
+        c.session_point(side).unwrap();
+        let new = c.document().entities.keys().find(|k| !before.contains(k)).copied().expect("offset made");
+        let e = &c.document().entities[&new];
+        let bbox_y = match &e.geometry {
+            Geometry::Curve(Curve::Line { start, .. }) => start[1],
+            Geometry::Curve(Curve::Nurbs(n)) => n.poles[0][1],
+            other => panic!("{other:?}"),
+        };
+        bbox_y
+    };
+    // Line at y = 0.10, offset 0.004 to the upper side.
+    let a = line_at(&c, 0.10);
+    assert!((offset_of(&mut c, a, [1.5, 0.2, 0.0]) - 0.104).abs() < 1e-6);
+    // The scene changes (one more object), then another curve is picked.
+    c.submit(om9_app::session::LINE).unwrap();
+    c.submit("0,-5,0").unwrap();
+    c.submit("3,-5,0").unwrap();
+    let b = line_at(&c, 0.30);
+    assert!((offset_of(&mut c, b, [1.5, 0.2, 0.0]) - 0.296).abs() < 1e-6);
+    // Undo twice (scene goes back), then pick the new line from before.
+    c.undo().unwrap();
+    let d = line_at(&c, -5.0);
+    assert!((offset_of(&mut c, d, [1.5, -6.0, 0.0]) + 5.004).abs() < 1e-6);
+}

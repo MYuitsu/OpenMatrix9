@@ -618,7 +618,52 @@ fn record_in_local(mut g: Value, placement: &Transform, k: f64) -> Result<Value>
     Ok(g)
 }
 
+/// Where each object's pieces sit in the published scene (`Scene::objects`), made once per
+/// scene: an add-on step looks up only the picked objects instead of walking the whole
+/// document's scene on every click and pointer move.
+#[derive(Default)]
+pub(super) struct SceneRoots {
+    key: Option<(u64, usize, usize)>,
+    map: std::collections::HashMap<om9_core::identity::ObjectId, Vec<usize>>,
+}
+
 impl Controller {
+    /// The scene objects of the selection, in scene order (as a walk over the scene gives them).
+    fn selected_scene_objects<'a>(
+        &self,
+        scene: &'a om9_scene::scene::Scene,
+    ) -> Vec<&'a om9_scene::scene::SceneObject> {
+        let key = (scene.epoch, scene.objects.as_ptr() as usize, scene.objects.len());
+        let mut roots = self.scene_roots.lock().unwrap_or_else(|e| e.into_inner());
+        let lookup = |roots: &SceneRoots| -> Option<Vec<usize>> {
+            let mut at = Vec::new();
+            for id in &self.selection {
+                for &i in roots.map.get(id).map_or(&[][..], |v| &v[..]) {
+                    // A stale table (same key, other objects) is never trusted.
+                    if scene.objects.get(i).is_none_or(|o| o.root != *id) {
+                        return None;
+                    }
+                    at.push(i);
+                }
+            }
+            Some(at)
+        };
+        let found = if roots.key == Some(key) { lookup(&roots) } else { None };
+        let mut at = match found {
+            Some(at) => at,
+            None => {
+                roots.map.clear();
+                for (i, object) in scene.objects.iter().enumerate() {
+                    roots.map.entry(object.root).or_default().push(i);
+                }
+                roots.key = Some(key);
+                lookup(&roots).unwrap_or_default()
+            }
+        };
+        at.sort_unstable();
+        at.into_iter().map(|i| &scene.objects[i]).collect()
+    }
+
     pub fn addon_session(&self) -> Option<&AddonSession> {
         self.addon_session.as_ref()
     }
@@ -643,8 +688,8 @@ impl Controller {
             return out;
         };
         let mut index = std::collections::BTreeMap::new();
-        for object in &scene.objects {
-            if !self.selection.contains(&object.root) || out.len() >= MAX_SELECTION {
+        for object in self.selected_scene_objects(scene) {
+            if out.len() >= MAX_SELECTION {
                 continue;
             }
             let Some(entity) = self.document().entities.get(&object.root) else {
@@ -742,8 +787,8 @@ impl Controller {
             .iter()
             .filter_map(|m| to_transform(m, k).ok())
             .collect();
-        for object in &scene.objects {
-            if !self.selection.contains(&object.root) || lines.len() > 200_000 {
+        for object in self.selected_scene_objects(scene) {
+            if lines.len() > 200_000 {
                 continue;
             }
             let Ok(display) = object.display_transform() else {
