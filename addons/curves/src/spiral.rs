@@ -55,6 +55,13 @@ impl Default for State {
 }
 
 const PER_TURN: usize = 16;
+/// The most turns a helix or spiral may have (typed or from Axis length / Pitch).
+const MAX_TURNS: f64 = 1000.0;
+/// The most points one helix or spiral is interpolated through, for the preview and the
+/// result alike: past it the command refuses instead of working without end.
+const MAX_POINTS: usize = 20_000;
+/// How close to the exact shape the curve must be (half Rhino's default 0.001).
+const FIT_TOL: f64 = 5e-4;
 
 /// The axis length the turns run along (the curve length around a curve; flat: the radius
 /// change).
@@ -68,12 +75,28 @@ fn axis_length(st: &State, r0: f64, r1: f64) -> f64 {
     }
 }
 
-fn turns(st: &State, r0: f64, r1: f64) -> f64 {
-    if st.by_pitch && st.pitch > 0.0 {
+/// The turn count: typed, or the axis length over the pitch. Refused when it is not a
+/// finite number or more than [`MAX_TURNS`] (a pitch far too small for the axis).
+fn turns(st: &State, r0: f64, r1: f64) -> Result<f64, String> {
+    let t = if st.by_pitch {
+        if !(st.pitch.is_finite() && st.pitch > 0.0) {
+            return Err("Pitch must be a positive number".into());
+        }
         (axis_length(st, r0, r1) / st.pitch).max(0.01)
     } else {
         st.turns
+    };
+    if !t.is_finite() || t <= 0.0 {
+        return Err("The number of turns is not a valid number".into());
     }
+    if t > MAX_TURNS {
+        return Err(format!(
+            "{} turns: at most {} (the pitch is too small for this axis)",
+            fmt(t.round()),
+            fmt(MAX_TURNS)
+        ));
+    }
+    Ok(t)
 }
 
 /// Rotation-minimising frames along a curve: (point, tangent, normal) at `n + 1` stations.
@@ -114,7 +137,10 @@ fn frames(c: &CurveRef, n: usize, up: Vec3) -> Vec<(Vec3, Vec3, Vec3)> {
     out
 }
 
-fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
+/// The helix/spiral for the radius point. `preview`: fitted to 0.01 mm only (what the
+/// screen shows), so moving the pointer stays quick; the result is fitted to [`FIT_TOL`].
+fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3, preview: bool) -> Result<Geo, String> {
+    let tol = if preview { 0.01 } else { FIT_TOL };
     let twist = if st.reverse { -1.0 } else { 1.0 };
     let radius_of = |p: Vec3, n: Vec3, base: Vec3| {
         let d = sub(p, base);
@@ -130,10 +156,10 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
         } else {
             dist(r1_point, c.closest(r1_point).1)
         };
-        if r0 < g::EPS {
-            return None;
+        if !(r0.is_finite() && r1.is_finite()) || r0 < g::EPS {
+            return Err("The radius must not be 0".into());
         }
-        let tn = turns(st, r0, r1);
+        let tn = turns(st, r0, r1)?;
         // Points at `2·count` steps (frames at half steps too): the even ones are fitted,
         // the odd ones measure the fit.
         let dense = |count: usize| -> Vec<Vec3> {
@@ -149,11 +175,11 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
                 })
                 .collect()
         };
-        return within_tolerance(tn, &dense);
+        return within_tolerance(tn, &dense, tol);
     }
-    let a = *st.points.first()?;
+    let a = *st.points.first().ok_or("Start of axis")?;
     let flat = st.mode == "flat";
-    let b = if flat { a } else { *st.points.get(1)? };
+    let b = if flat { a } else { *st.points.get(1).ok_or("End of axis")? };
     let n = if flat || norm(sub(b, a)) < g::EPS {
         e.plane.normal()
     } else {
@@ -162,10 +188,10 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
     let first = st.start.unwrap_or(r1_point);
     let r0 = st.r0.unwrap_or_else(|| radius_of(first, n, a));
     let r1 = if helix { r0 } else { radius_of(r1_point, n, a) };
-    if r0 < g::EPS && r1 < g::EPS {
-        return None;
+    if !(r0.is_finite() && r1.is_finite()) || (r0 < g::EPS && r1 < g::EPS) {
+        return Err("The radius must not be 0".into());
     }
-    let tn = turns(st, r0, r1);
+    let tn = turns(st, r0, r1)?;
     let mut x = sub(sub(first, a), scale(n, dot(sub(first, a), n)));
     if norm(x) < g::EPS {
         x = e.plane.x;
@@ -185,36 +211,74 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3) -> Option<Geo> {
             })
             .collect()
     };
-    within_tolerance(tn, &dense)
+    within_tolerance(tn, &dense, tol)
 }
 
 /// Interpolate the exact helix/spiral points, adding points per turn until the curve is
-/// within 0.0005 of the exact shape everywhere (Rhino's default absolute tolerance is
-/// 0.001). `dense(count)` gives the exact points at `2·count` equal steps.
-fn within_tolerance(tn: f64, dense: &dyn Fn(usize) -> Vec<Vec3>) -> Option<Geo> {
-    let mut count = ((tn * PER_TURN as f64).ceil() as usize).max(8);
-    let cap = ((tn * 128.0).ceil() as usize).max(64);
+/// within [`FIT_TOL`] of the exact shape everywhere. `dense(count)` gives the exact points at
+/// `2·count` equal steps: the even ones are fitted, the odd ones measure the fit. The count
+/// never passes [`MAX_POINTS`]; if the tolerance is not met by then, the shape is refused.
+fn within_tolerance(tn: f64, dense: &dyn Fn(usize) -> Vec<Vec3>, tol: f64) -> Result<Geo, String> {
+    let wanted = tn * PER_TURN as f64;
+    if !wanted.is_finite() || wanted > MAX_POINTS as f64 {
+        return Err(format!("Too many points for this shape (at most {})", MAX_POINTS));
+    }
+    let mut count = (wanted.ceil() as usize).max(8);
     loop {
         let all = dense(count);
-        let pts: Vec<Vec3> = all.iter().step_by(2).copied().collect();
-        let geo = g::interpolate(&pts, 3, false)?;
-        let fit = CurveRef {
-            id: String::new(),
-            pts: g::nurbs::samples(&geo, (count * 8).min(2048)),
-            closed: false,
-            exact: Some(geo.clone()),
-        };
-        let worst = all
-            .iter()
-            .skip(1)
-            .step_by(2)
-            .map(|p| dist(fit.closest(*p).1, *p))
-            .fold(0.0, f64::max);
-        if worst <= 5e-4 || count >= cap {
-            return Some(geo);
+        if all.iter().any(|p| !p.iter().all(|v| v.is_finite())) {
+            return Err("The shape has no valid points".into());
         }
-        count = (count * 3 / 2).max(count + 1);
+        let pts: Vec<Vec3> = all.iter().step_by(2).copied().collect();
+        let geo = g::interpolate(&pts, 3, false).ok_or("No curve through the points")?;
+        if deviation(&geo, &all) <= tol {
+            return Ok(geo);
+        }
+        if count >= MAX_POINTS {
+            return Err(format!(
+                "Cannot keep the shape within {} mm with at most {} points",
+                fmt(tol),
+                MAX_POINTS
+            ));
+        }
+        count = (count * 3 / 2).max(count + 1).min(MAX_POINTS);
     }
+}
+
+/// The largest distance from the odd (measuring) points of `all` to the curve, found near
+/// each one: the curve's parameter is chord length over the even points, so each odd point
+/// is checked against a short stretch of the curve around its neighbours' parameters.
+fn deviation(geo: &Geo, all: &[Vec3]) -> f64 {
+    let pts: Vec<Vec3> = all.iter().step_by(2).copied().collect();
+    let total: f64 = pts.windows(2).map(|w| dist(w[0], w[1])).sum();
+    if total <= 0.0 {
+        return 0.0;
+    }
+    let mut u = vec![0.0; pts.len()];
+    for i in 1..pts.len() {
+        u[i] = u[i - 1] + dist(pts[i - 1], pts[i]) / total;
+    }
+    let mut worst: f64 = 0.0;
+    for (k, p) in all.iter().enumerate().skip(1).step_by(2) {
+        let (i0, i1) = (k / 2, (k / 2 + 1).min(pts.len() - 1));
+        let (a, b) = (u[i0], u[i1]);
+        // 16 samples of the curve between the two neighbours, nearest segment distance.
+        let s: Vec<Vec3> = (0..=16)
+            .filter_map(|j| g::eval_geo(geo, a + (b - a) * j as f64 / 16.0))
+            .collect();
+        let d = s
+            .windows(2)
+            .map(|w| {
+                let (x, y) = (w[0], w[1]);
+                let v = sub(y, x);
+                let l = dot(v, v);
+                let t = if l > 0.0 { (dot(sub(*p, x), v) / l).clamp(0.0, 1.0) } else { 0.0 };
+                dist(*p, add(x, scale(v, t)))
+            })
+            .fold(f64::INFINITY, f64::min);
+        worst = worst.max(d);
+    }
+    worst
 }
 
 /// Points still needed for the axis.
@@ -282,7 +346,8 @@ fn ask(e: &Event, st: &State, helix: bool, hover: Option<Vec3>) -> Reply {
         opts.push(OptionToken::action("Undo"));
     }
     let preview: Vec<Geo> = match hover {
-        Some(h) if radius_stage => build(e, st, helix, h).into_iter().collect(),
+        // A shape refused (too many turns …) shows no preview; the click says why.
+        Some(h) if radius_stage => build(e, st, helix, h, true).into_iter().collect(),
         Some(h) if n == 1 && st.mode != "flat" => vec![Geo::Line {
             start: st.points[0],
             end: vertical_end(e, st, h),
@@ -361,11 +426,12 @@ pub fn step(e: &Event, helix: bool) -> Reply {
         if helix {
             st.start = Some(p);
         }
-        match build(e, st, helix, p) {
-            Some(gm) => {
-                Reply::finish(vec![gm]).say(format!("{label}: {} turns", fmt(turns(st, 1.0, 1.0))))
+        match build(e, st, helix, p, false) {
+            Ok(gm) => {
+                let n = turns(st, 1.0, 1.0).map(fmt).unwrap_or_default();
+                Reply::finish(vec![gm]).say(format!("{label}: {n} turns"))
             }
-            None => ask(e, st, helix, None).refuse("The radius must not be 0"),
+            Err(why) => ask(e, st, helix, None).refuse(why),
         }
     };
     match &e.input {
@@ -394,11 +460,14 @@ pub fn step(e: &Event, helix: bool) -> Reply {
                     }
                 }
                 "Turns" => match number_of(value) {
-                    Some(t) if t > 0.0 && t <= 1000.0 => {
+                    Some(t) if t > 0.0 && t <= MAX_TURNS => {
                         st.turns = t;
                         st.by_pitch = false;
                     }
-                    _ => return ask(e, &st, helix, None).refuse("Turns must be positive"),
+                    _ => {
+                        return ask(e, &st, helix, None)
+                            .refuse(format!("Turns must be more than 0 and at most {}", fmt(MAX_TURNS)));
+                    }
                 },
                 "Pitch" => match number_of(value) {
                     Some(p) if p > 0.0 => {
