@@ -1,0 +1,131 @@
+{
+  "profile": "dev debug=0; default OCCT features",
+  "commands": "cargo build -j 2 -p om9-app --bin om9 --offline",
+  "samples": [
+    {
+      "variant": "before",
+      "scenario": "parser",
+      "iteration": 1,
+      "seconds": 9.997
+    },
+    {
+      "variant": "after",
+      "scenario": "parser",
+      "iteration": 1,
+      "seconds": 8.742
+    },
+    {
+      "variant": "after",
+      "scenario": "parser",
+      "iteration": 2,
+      "seconds": 9.736
+    },
+    {
+      "variant": "before",
+      "scenario": "parser",
+      "iteration": 2,
+      "seconds": 8.434
+    },
+    {
+      "variant": "before",
+      "scenario": "parser",
+      "iteration": 3,
+      "seconds": 9.466
+    },
+    {
+      "variant": "after",
+      "scenario": "parser",
+      "iteration": 3,
+      "seconds": 11.798
+    },
+    {
+      "variant": "after",
+      "scenario": "parser",
+      "iteration": 4,
+      "seconds": 8.781
+    },
+    {
+      "variant": "before",
+      "scenario": "parser",
+      "iteration": 4,
+      "seconds": 7.889
+    },
+    {
+      "variant": "before",
+      "scenario": "parser",
+      "iteration": 5,
+      "seconds": 7.702
+    },
+    {
+      "variant": "after",
+      "scenario": "parser",
+      "iteration": 5,
+      "seconds": 8.51
+    },
+    {
+      "variant": "before",
+      "scenario": "app",
+      "iteration": 1,
+      "seconds": 8.093
+    },
+    {
+      "variant": "after",
+      "scenario": "app",
+      "iteration": 1,
+      "seconds": 8.203
+    },
+    {
+      "variant": "after",
+      "scenario": "app",
+      "iteration": 2,
+      "seconds": 7.784
+    },
+    {
+      "variant": "before",
+      "scenario": "app",
+      "iteration": 2,
+      "seconds": 7.918
+    },
+    {
+      "variant": "before",
+      "scenario": "app",
+      "iteration": 3,
+      "seconds": 7.8
+    },
+    {
+      "variant": "after",
+      "scenario": "app",
+      "iteration": 3,
+      "seconds": 8.163
+    },
+    {
+      "variant": "after",
+      "scenario": "app",
+      "iteration": 4,
+      "seconds": 8.614
+    },
+    {
+      "variant": "before",
+      "scenario": "app",
+      "iteration": 4,
+      "seconds": 8.109
+    },
+    {
+      "variant": "before",
+      "scenario": "app",
+      "iteration": 5,
+      "seconds": 8.233
+    },
+    {
+      "variant": "after",
+      "scenario": "app",
+      "iteration": 5,
+      "seconds": 8.01
+    }
+  ],
+  "cold_seconds": {
+    "before": 217.54,
+    "after": 201.05
+  },
+  "notes": "Two snapshots; default features; debug=0; separate target directories; sequential alternating runs; no external cargo/rustc observed; first app sample also follows parser source restoration."
+}

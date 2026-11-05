@@ -1239,3 +1239,897 @@ fn m03_01_13_012() {
     assert_eq!(imported_definition.label, "Golden Block");
     assert_eq!(imported_definition.members.len(), 1);
 }
+#[test]
+#[ignore = "requires an admitted om9-exchange-native.exe"]
+fn mirrored_nested_block_survives_real_3dm_export_import() {
+    use om9_core::top11::Top11Action;
+    let limits=Limits::default();let host=host();
+    let leaf=Entity::new("authored line",Geometry::Curve(Curve::Line{start:[1.,2.,0.],end:[3.,2.,0.],domain:[0.,1.]}),None);
+    let inner=Definition::new("Mirror Inner",vec![leaf]);let inner_id=inner.id;
+    let mut nested=Entity::new("nested",Geometry::Instance(inner_id),None);nested.placement=Transform::translation([2.,0.,0.]);
+    let outer=Definition::new("Mirror Outer",vec![nested]);let outer_id=outer.id;
+    let mut root=Entity::new("mirrored block",Geometry::Instance(outer_id),None);root.placement=Transform::translation([4.,0.,0.]);let id=root.id;
+    let mut doc=Document::with_template_tolerance("mirror 3dm");doc.definitions.insert(inner_id,inner);doc.definitions.insert(outer_id,outer);doc.entities.insert(id,root);
+    let mut controller=Controller::new(doc,limits).unwrap();controller.select_objects(&[id]).unwrap();controller.top11_invoke(Top11Action::Mirror).unwrap();controller.submit("Copy=No").unwrap();controller.submit("YAxis").unwrap();
+    let path=std::env::temp_dir().join(format!("om9-mirror-block-{}.3dm",uuid::Uuid::new_v4()));
+    host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+    let (imported,doc_id,_)=import_fixture(&host,&path);std::fs::remove_file(path).unwrap();let result=document_of(&imported,doc_id);
+    let root=result.entities.values().find(|e|e.label=="mirrored block").expect("root instance");
+    let Geometry::Instance(outer)=root.geometry else {panic!("root not instance")};let outer=&result.definitions[&outer];assert_eq!(outer.label,"Mirror Outer");
+    let nested=outer.members.iter().find(|e|matches!(e.geometry,Geometry::Instance(_))).expect("nested instance");
+    let Geometry::Instance(inner)=nested.geometry else {unreachable!()};let inner=&result.definitions[&inner];assert_eq!(inner.label,"Mirror Inner");
+    let member=inner.members.iter().find(|e|matches!(e.geometry,Geometry::Curve(Curve::Line{..}))).expect("line");
+    let Geometry::Curve(Curve::Line{start,end,..})=member.geometry else {unreachable!()};
+    let world=result.member_transform(root.id,&[nested.id,member.id]).unwrap();
+    for (p,expected) in [(start,[-7.,2.,0.]),(end,[-9.,2.,0.])] {let actual=world.point(p).unwrap();assert!(actual.iter().zip(expected).all(|(a,b)|(a-b).abs()<1e-9),"{actual:?} {expected:?}");}
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer and authored fixture builder"]
+fn mirrored_retained_brep_survives_real_3dm_export_import() {
+    use om9_core::top11::Top11Action;
+    let limits=Limits::default();let host=host();let nonce=uuid::Uuid::new_v4();
+    let source=std::env::temp_dir().join(format!("om9-retained-source-{nonce}.3dm"));
+    let output=std::env::temp_dir().join(format!("om9-retained-mirrored-{nonce}.3dm"));
+    let unchanged=std::env::temp_dir().join(format!("om9-retained-identity-{nonce}.3dm"));
+    let multi=std::env::temp_dir().join(format!("om9-retained-multi-{nonce}.3dm"));
+    struct TempFiles(Vec<PathBuf>);impl Drop for TempFiles {fn drop(&mut self){for path in &self.0 {let _=std::fs::remove_file(path);}}}
+    let _cleanup=TempFiles(vec![source.clone(),output.clone(),unchanged.clone(),multi.clone()]);
+    let authored=Command::new(fixture_binary()).arg("mm").arg(&source).output().unwrap();assert!(authored.status.success(),"{}",String::from_utf8_lossy(&authored.stderr));
+    let options=ImportOptions{mode:ImportMode::Geometry,brep:BrepMode::RetainOpaque,..ImportOptions::default()};
+    let (mut first,doc_id)=fresh_coordinator("retain source");host.import_with_options(&mut first,doc_id,&source,&options,&Cancellation::default()).unwrap();
+    let retained=document_of(&first,doc_id).entities.values().find(|e|matches!(e.geometry,Geometry::NativeBrep(_))).expect("native box");
+    let mut isolated=Entity::new("authored box",retained.geometry.clone(),None);isolated.placement=retained.placement;let target=isolated.id;
+    let mut doc=Document::with_template_tolerance("source brep");doc.entities.insert(target,isolated);
+    let mut controller=Controller::new(doc,limits).unwrap();controller.select_objects(&[target]).unwrap();let original=controller.document().entities[&target].geometry.clone();
+    host.export(controller.coordinator(),controller.document().id,&unchanged,&Cancellation::default()).expect("identity retained export");std::fs::remove_file(unchanged).unwrap();
+    controller.top11_invoke(Top11Action::Mirror).unwrap();controller.submit("Copy=No").unwrap();controller.submit("YAxis").unwrap();assert_eq!(controller.document().entities[&target].geometry,original);
+    let receipt=host.export(controller.coordinator(),controller.document().id,&output,&Cancellation::default()).unwrap();
+    assert!(receipt.brep_fingerprints.as_ref().is_some_and(|p|p.exited && p.active_processes==0));
+    let (mut second,second_id)=fresh_coordinator("retain mirrored");host.import_with_options(&mut second,second_id,&output,&options,&Cancellation::default()).unwrap();
+    let result=document_of(&second,second_id).entities.values().find(|e|matches!(e.geometry,Geometry::NativeBrep(_))).expect("mirrored native box");
+    let Geometry::NativeBrep(native)=&result.geometry else {unreachable!()};assert!(!native.payload.is_empty());assert!(!native.display.vertices.is_empty());
+    let x:Vec<_>=native.display.vertices.iter().map(|p|result.placement.point(*p).unwrap()[0]).collect();let min=x.iter().copied().fold(f64::INFINITY,f64::min);let max=x.iter().copied().fold(f64::NEG_INFINITY,f64::max);
+    assert!((min+1.).abs()<1e-6 && max.abs()<1e-6,"{min} {max}");
+    let good=std::fs::read(&output).unwrap();let mut bad=controller.document().clone();
+    let Geometry::NativeBrep(ref mut altered)=bad.entities.get_mut(&target).unwrap().geometry else {unreachable!()};altered.crc^=1;
+    let invalid=Controller::new(bad,limits).unwrap();assert!(host.export(invalid.coordinator(),invalid.document().id,&output,&Cancellation::default()).is_err());
+    assert_eq!(std::fs::read(&output).unwrap(),good,"failed validation must not replace existing 3DM");
+    let mut many=controller.document().clone();let mut another=Entity::new("translated native",original.clone(),None);another.placement=Transform::translation([4.,0.,0.]);many.entities.insert(another.id,another);
+    let mut member=Entity::new("native member",original,None);member.placement=Transform::translation([2.,0.,0.]);
+    let definition=Definition::new("native definition",vec![member]);let definition_id=definition.id;many.definitions.insert(definition_id,definition);
+    let mut instance=Entity::new("native instance",Geometry::Instance(definition_id),None);instance.placement=Transform::translation([0.,4.,0.]);many.entities.insert(instance.id,instance);
+    let many=Controller::new(many,limits).unwrap();let receipt=host.export(many.coordinator(),many.document().id,&multi,&Cancellation::default()).unwrap();
+    assert_eq!(receipt.root_objects,3);assert_eq!(receipt.definition_members,1);assert!(receipt.brep_fingerprints.is_some());
+    let (mut third,third_id)=fresh_coordinator("reimport multiple");host.import_with_options(&mut third,third_id,&multi,&options,&Cancellation::default()).unwrap();
+    let imported=document_of(&third,third_id);assert_eq!(imported.entities.len(),3);assert_eq!(imported.definitions.len(),1);
+    assert_eq!(imported.entities.values().filter(|e|matches!(e.geometry,Geometry::NativeBrep(_))).count(),2);
+    assert!(imported.definitions.values().any(|d|d.members.iter().any(|e|matches!(e.geometry,Geometry::NativeBrep(_)))));
+    std::fs::remove_file(source).unwrap();std::fs::remove_file(output).unwrap();
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer and authored fixture builder"]
+fn explode_retained_3dm_brep_exports_exact_faces() {
+    use om9_core::top11::Top11Action;
+    let temp = Temp::new(); let host = host(); let limits = Limits::default();
+    let source = fixture(&temp, "mm");
+    let options = ImportOptions { mode: ImportMode::Geometry, brep: BrepMode::RetainOpaque, ..ImportOptions::default() };
+    let (mut first, doc_id) = fresh_coordinator("retained source");
+    host.import_with_options(&mut first, doc_id, &source, &options, &Cancellation::default()).unwrap();
+    let retained = document_of(&first, doc_id).entities.values().find(|e| matches!(e.geometry, Geometry::NativeBrep(_))).unwrap();
+    let mut entity = Entity::new("retained box", retained.geometry.clone(), None); entity.placement = retained.placement;
+    let id = entity.id; let mut doc = Document::with_template_tolerance("explode 3dm"); doc.entities.insert(id, entity);
+    let mut c = Controller::new(doc, limits).unwrap(); c.select_objects(&[id]).unwrap(); let before = c.document().clone();
+    c.top11_invoke(Top11Action::Explode).unwrap();
+    assert_eq!(c.document().entities.len(), 6);
+    let original = c.document().clone();
+    let path = temp.join("exploded.3dm"); host.export(c.coordinator(), c.document().id, &path, &Cancellation::default()).unwrap();
+    let (mut second, second_id) = fresh_coordinator("reimport faces");
+    host.import_with_options(&mut second, second_id, &path, &options, &Cancellation::default()).unwrap();
+    let result = document_of(&second, second_id);
+    assert_eq!(result.entities.len(), 6);
+    for entity in result.entities.values() {
+        let Geometry::NativeBrep(native) = &entity.geometry else { panic!("native face") };
+        let exact = om9_kernel::brep::from_3dm(&native.payload, 0.001, 0.01, &limits).unwrap();
+        assert_eq!(om9_kernel::creation::measure(&exact, &limits).unwrap().faces, 1);
+    }
+    c.undo().unwrap(); assert_eq!(c.document(), &before); c.redo().unwrap(); assert_eq!(c.document(), &original);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn short_line_roundtrips_as_line_with_disclosed_native_representation() {
+    let host=host();let limits=Limits::default();let mut doc=Document::with_template_tolerance("short line");
+    doc.tolerance.as_mut().unwrap().absolute_mm=1e-13;
+    let line=Entity::new("tiny line",Geometry::Curve(Curve::Line{start:[0.,0.,0.],end:[2e-10,0.,0.],domain:[2.,5.]}),None);
+    let expected=line.geometry.clone();doc.entities.insert(line.id,line);let c=Controller::new(doc,limits).unwrap();
+    let temp=Temp::new();let path=temp.join("short-line.3dm");
+    let receipt=host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();
+    assert!(receipt.diagnostics.iter().any(|d|d.contains("short line") && d.contains("NURBS")),"{:?}",receipt.diagnostics);
+    let (imported,id,_)=import_fixture(&host,&path);let doc=document_of(&imported,id);
+    assert_eq!(doc.entities.values().find(|e|e.label=="tiny line").unwrap().geometry,expected);
+    let (mut preserve,preserve_id)=fresh_coordinator("short line Preserve");
+    let preserved=host.import_with_options(&mut preserve,preserve_id,&path,&ImportOptions::default(),&Cancellation::default()).unwrap();
+    assert!(preserved.retained_records>0);assert!(document_of(&preserve,preserve_id).entities.values().any(|e|e.label=="tiny line"));
+    let resolution=temp.join("short-resolution.json");std::fs::write(&resolution,serde_json::to_vec(&serde_json::json!({"schema_version":1,"model_mm_per_unit":null,"page_mm_per_unit":null,"definition_mm_per_unit":{}})).unwrap()).unwrap();
+    for (mode,expected_kind) in [("--short-line-bad",None),("--short-line-no-metadata",Some("Nurbs")),("--short-line-extra",Some("Line"))] {
+        let changed=temp.join(&format!("{mode}.3dm"));let output=Command::new(fixture_binary()).arg(mode).arg(&path).arg(&changed).output().unwrap();assert!(output.status.success(),"{}",String::from_utf8_lossy(&output.stderr));
+        let output=Command::new(native()).arg("--inspect").arg(&changed).output().unwrap();assert!(output.status.success());let json:serde_json::Value=serde_json::from_slice(&output.stdout).unwrap();let object=json["objects"].as_array().unwrap().iter().find(|o|o["label"]=="tiny line").unwrap();
+        assert_eq!(object["native_kind"],"ON_NurbsCurve");
+        if let Some(kind)=expected_kind {assert!(object["geometry"]["Curve"].get(kind).is_some());}else {assert!(object["geometry"].is_null());assert!(object["diagnostics"].as_array().unwrap().iter().any(|v|v.as_str().unwrap_or("").contains("invalid short line metadata")));}
+        let projected=Command::new(native()).arg("--project-source").arg(&changed).arg(&resolution).output().unwrap();assert!(projected.status.success());let projected:serde_json::Value=serde_json::from_slice(&projected.stdout).unwrap();let object=projected["objects"].as_array().unwrap().iter().find(|o|o["label"]=="tiny line").unwrap();assert_eq!(object["owned_short_line_userdata_only"],false);
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn typed_copy_and_mirror_coordinates_survive_real_3dm() {
+    use om9_core::top11::Top11Action;let host=host();let limits=Limits::default();
+    for action in [Top11Action::Duplicate,Top11Action::Mirror] {
+        let source=Entity::new("source",Geometry::Curve(Curve::Line{start:[2.,0.,0.],end:[3.,0.,0.],domain:[0.,1.]}),None);let id=source.id;let mut doc=Document::with_template_tolerance("typed 3dm");doc.entities.insert(id,source);let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[id]).unwrap();c.submit(action.command()).unwrap();
+        if action==Top11Action::Mirror{c.submit("Copy=No").unwrap();}c.submit("W1,2,0").unwrap();c.submit("@0,3,0").unwrap();if action==Top11Action::Duplicate{c.submit("").unwrap();}
+        let temp=Temp::new();let path=temp.join("typed.3dm");host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();let (imported,doc_id,_)=import_fixture(&host,&path);let d=document_of(&imported,doc_id);
+        let mut starts:Vec<_>=d.entities.values().filter(|e|e.label=="source").map(|e|{let Geometry::Curve(Curve::Line{start,..})=&e.geometry else{panic!("line")};e.placement.point(*start).unwrap()}).collect();starts.sort_by(|a,b|a[1].total_cmp(&b[1]));
+        if action==Top11Action::Duplicate{assert_eq!(starts,vec![[2.,0.,0.],[2.,3.,0.]]);}else{assert_eq!(starts.len(),1);assert!(starts[0][0].abs()<1e-9&&starts[0][1].abs()<1e-9,"{:?}",starts);}
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_near_cutter_endpoint_within_tolerance_roundtrips_3dm() {
+    use om9_core::top11::Top11Action;let host=host();let limits=Limits::default();let mut doc=Document::with_template_tolerance("near endpoint");doc.tolerance.as_mut().unwrap().absolute_mm=0.001;
+    let make=|name,start,end|Entity::new(name,Geometry::Curve(Curve::Line{start,end,domain:[0.,1.]}),None);
+    let target=make("target",[0.,0.,0.],[10.,0.,0.]);let cutter=make("cutter",[5.,0.0005,0.],[5.,2.,0.]);let ids=[target.id,cutter.id];doc.entities.insert(ids[0],target);doc.entities.insert(ids[1],cutter);
+    let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[ids[0]]).unwrap();c.top11_invoke(Top11Action::Split).unwrap();c.top11_accept_object(ids[1]).unwrap();c.submit("").unwrap();
+    let temp=Temp::new();let output=temp.join("near-endpoint.3dm");host.export(c.coordinator(),c.document().id,&output,&Cancellation::default()).unwrap();
+    let (imported,id,_)=import_fixture(&host,&output);let doc=document_of(&imported,id);let pieces:Vec<_>=doc.entities.values().filter(|e|e.label=="target").collect();assert_eq!(pieces.len(),2);
+    for e in pieces{let Geometry::Curve(curve)=&e.geometry else{panic!("curve")};let ends=om9_core::curve_ops::curve_endpoints(curve,&limits).unwrap();assert!(ends.iter().any(|p|(p[0]-5.).abs()<1e-10 && p[1].abs()<1e-10),"{ends:?}");}
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn preserve_short_line_grip_edit_roundtrips_native_source() {
+    use om9_core::{budget::Usage,top11::Top11Action};
+    use om9_exchange::{ExportCapture,NativeExchange};use om9_native_owner::{NativeProgram,ProcessLimits};
+    let host=host();let limits=Limits::default();let exchange=NativeExchange::new(NativeProgram::admit(&native(),sha256(&native())).unwrap(),ProcessLimits::default()).unwrap();
+    let temp=Temp::new();let source=temp.join("short-source.3dm");let mut doc=Document::with_template_tolerance("short source");doc.tolerance.as_mut().unwrap().absolute_mm=1e-13;
+    let line=Entity::new("tiny line",Geometry::Curve(Curve::Line{start:[0.;3],end:[2e-10,0.,0.],domain:[2.,5.]}),None);doc.entities.insert(line.id,line);
+    let author=Controller::new(doc,limits).unwrap();host.export(author.coordinator(),author.document().id,&source,&Cancellation::default()).unwrap();
+    let (mut original,doc_id)=fresh_coordinator("preserve short");let receipt=host.import_with_options(&mut original,doc_id,&source,&ImportOptions::default(),&Cancellation::default()).unwrap();
+    let doc=document_of(&original,doc_id).clone();let id=doc.entities.values().find(|e|e.label=="tiny line").unwrap().id;let mut c=Controller::new(doc,limits).unwrap();
+    c.select_objects(&[id]).unwrap();c.top11_invoke(Top11Action::ControlPoints).unwrap();let h=c.top11_grip_handles().unwrap().into_iter().find(|h|h.index==1).unwrap();
+    let original_geometry=c.document().entities[&id].geometry.clone();c.top11_move_grip(h,[4e-10,0.,0.]).unwrap();let expected=c.document().entities[&id].geometry.clone();
+    c.undo().unwrap();assert_eq!(c.document().entities[&id].geometry,original_geometry);c.redo().unwrap();assert_eq!(c.document().entities[&id].geometry,expected);
+    let before=c.document().clone();let token=Cancellation::default();let project=temp.join("short-source.om9");om9_archive::Archive::save(&project,&before,&limits,&token).unwrap();assert_eq!(om9_archive::Archive::open(&project,&limits).unwrap(),before);
+    let capture=ExportCapture::all(c.coordinator(),doc_id).unwrap();let inputs=exchange.prepare_merge_inputs(c.coordinator(),&capture,Some(receipt.namespace),&temp.path,&token,Usage::default()).unwrap();
+    let wire=inputs.output_wire_plan(c.coordinator(),&token,Usage::default()).unwrap();let stage=wire.stage_retained_request(c.coordinator(),&temp.path,&token,Usage::default()).unwrap();
+    let written=exchange.write_retained_private(c.coordinator(),&stage,&token,Usage::default()).unwrap();let validated=exchange.inspect_retained_private(c.coordinator(),written,&token,Usage::default()).unwrap();
+    let losses=validated.losses().unwrap();let output=temp.join("short-retained.3dm");validated.publish(c.coordinator(),&output,&token,Some(losses),Usage::default()).unwrap();
+    let (again,id,_)=import_fixture(&host,&output);assert_eq!(document_of(&again,id).entities.values().find(|e|e.label=="tiny line").unwrap().geometry,expected);assert_eq!(c.document(),&before);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn preserve_short_line_with_foreign_userdata_stays_retained_when_other_line_changes() {
+    use om9_core::{budget::Usage,top11::Top11Action};use om9_exchange::{ExportCapture,NativeExchange};use om9_native_owner::{NativeProgram,ProcessLimits};
+    let host=host();let limits=Limits::default();let exchange=NativeExchange::new(NativeProgram::admit(&native(),sha256(&native())).unwrap(),ProcessLimits::default()).unwrap();
+    let temp=Temp::new();let raw=temp.join("source.3dm");let source=temp.join("foreign.3dm");let mut doc=Document::with_template_tolerance("short foreign");doc.tolerance.as_mut().unwrap().absolute_mm=1e-13;
+    for (label,end) in [("tiny line",[2e-10,0.,0.]),("independent line",[1.,0.,0.])] {let e=Entity::new(label,Geometry::Curve(Curve::Line{start:[0.;3],end,domain:[0.,1.]}),None);doc.entities.insert(e.id,e);}
+    let author=Controller::new(doc,limits).unwrap();host.export(author.coordinator(),author.document().id,&raw,&Cancellation::default()).unwrap();
+    let mutated=Command::new(fixture_binary()).arg("--short-line-extra").arg(&raw).arg(&source).output().unwrap();assert!(mutated.status.success(),"{}",String::from_utf8_lossy(&mutated.stderr));
+    let (mut original,doc_id)=fresh_coordinator("foreign short");let receipt=host.import_with_options(&mut original,doc_id,&source,&ImportOptions::default(),&Cancellation::default()).unwrap();
+    let doc=document_of(&original,doc_id).clone();assert!(doc.entities.values().all(|e|e.label!="tiny line"));let id=doc.entities.values().find(|e|e.label=="independent line").unwrap().id;
+    let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[id]).unwrap();c.top11_invoke(Top11Action::ControlPoints).unwrap();let h=c.top11_grip_handles().unwrap().into_iter().find(|h|h.index==1).unwrap();c.top11_move_grip(h,[2.,0.,0.]).unwrap();
+    let before=c.document().clone();let token=Cancellation::default();let capture=ExportCapture::all(c.coordinator(),doc_id).unwrap();let inputs=exchange.prepare_merge_inputs(c.coordinator(),&capture,Some(receipt.namespace),&temp.path,&token,Usage::default()).unwrap();
+    let wire=inputs.output_wire_plan(c.coordinator(),&token,Usage::default()).unwrap();let stage=wire.stage_retained_request(c.coordinator(),&temp.path,&token,Usage::default()).unwrap();let written=exchange.write_retained_private(c.coordinator(),&stage,&token,Usage::default()).unwrap();let validated=exchange.inspect_retained_private(c.coordinator(),written,&token,Usage::default()).unwrap();
+    let losses=validated.losses().unwrap();let output=temp.join("foreign-out.3dm");validated.publish(c.coordinator(),&output,&token,Some(losses),Usage::default()).unwrap();
+    let oracle=|p:&Path|{let r=Command::new(fixture_binary()).arg("--oracle-short-line-userdata").arg(p).output().unwrap();assert!(r.status.success(),"{}",String::from_utf8_lossy(&r.stderr));serde_json::from_slice::<serde_json::Value>(&r.stdout).unwrap()};
+    assert_eq!(oracle(&source),oracle(&output));assert_eq!(oracle(&output),serde_json::json!({"own":true,"other":true}));assert_eq!(c.document(),&before);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn transformed_and_nested_short_lines_roundtrip_real_3dm() {
+    let host=host();let limits=Limits::default();let mut doc=Document::with_template_tolerance("placed short lines");
+    doc.tolerance.as_mut().unwrap().absolute_mm=1e-13;
+    let line=|start,end|Curve::Line{start,end,domain:[0.,1.]};
+    let mut scaled=Entity::new("scaled line",Geometry::Curve(line([0.;3],[1.,0.,0.])),None);
+    scaled.placement=Transform::scale([2e-10,1.,1.]).unwrap();
+    let poly=Entity::new("tiny segment",Geometry::Curve(Curve::Polycurve{segments:vec![line([0.;3],[2e-10,0.,0.]),line([2e-10,0.,0.],[1.,0.,0.])],reversed:false}),None);
+    doc.entities.insert(scaled.id,scaled);doc.entities.insert(poly.id,poly.clone());let c=Controller::new(doc,limits).unwrap();
+    let temp=Temp::new();let output=temp.join("short-placed.3dm");let receipt=host.export(c.coordinator(),c.document().id,&output,&Cancellation::default()).unwrap();
+    assert!(receipt.diagnostics.iter().any(|d|d.contains("short line")&&d.contains("NURBS")));
+    let (imported,id,_)=import_fixture(&host,&output);let d=document_of(&imported,id);
+    assert_eq!(d.entities.values().find(|e|e.label=="tiny segment").unwrap().geometry,poly.geometry);
+    assert_eq!(d.entities.values().find(|e|e.label=="scaled line").unwrap().geometry,Geometry::Curve(line([0.;3],[2e-10,0.,0.])));
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_tiny_open_nurbs_and_short_line_cutters_survive_3dm() {
+    use om9_core::{geometry::NurbsCurve,top11::Top11Action};let host=host();let limits=Limits::default();
+    let curve=Curve::Nurbs(NurbsCurve{degree:1,poles:vec![[0.,0.,0.],[1e-10,0.,0.]],weights:vec![1.;2],knots:vec![0.,0.,1.,1.],domain:[0.,1.],periodic:false,reversed:false,seam:None});
+    let target=Entity::new("target",Geometry::Curve(curve),None);let cutter=|name,x|Entity::new(name,Geometry::Curve(Curve::Line{start:[x,-1e-10,0.],end:[x,1e-10,0.],domain:[0.,1.]}),None);let a=cutter("a",2.5e-11);let b=cutter("b",7.5e-11);let ids=[target.id,a.id,b.id];
+    let mut doc=Document::with_template_tolerance("tiny NURBS 3dm");doc.tolerance.as_mut().unwrap().absolute_mm=1e-13;for e in [target,a,b]{doc.entities.insert(e.id,e);}let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[ids[0]]).unwrap();c.top11_invoke(Top11Action::Split).unwrap();c.top11_accept_object(ids[1]).unwrap();c.top11_accept_object(ids[2]).unwrap();c.submit("").unwrap();
+    let path=std::env::temp_dir().join(format!("om9-tiny-nurbs-{}.3dm",uuid::Uuid::new_v4()));struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    let receipt=host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();assert_eq!(receipt.diagnostics.iter().filter(|d|d.contains("short line")&&d.contains("NURBS")).count(),2);
+    let (imported,doc_id,_)=import_fixture(&host,&path);let d=document_of(&imported,doc_id);for id in [ids[1],ids[2]] {let original=&c.document().entities[&id];assert_eq!(d.entities.values().find(|e|e.label==original.label).unwrap().geometry,original.geometry);}
+    let mut only_line=Document::with_template_tolerance("tiny cutter 3dm");only_line.tolerance=c.document().tolerance.clone();let line=c.document().entities[&ids[1]].clone();only_line.entities.insert(line.id,line);let line_controller=Controller::new(only_line,limits).unwrap();
+    host.export(line_controller.coordinator(),line_controller.document().id,&path,&Cancellation::default()).unwrap();
+    let mut only_pieces=Document::with_template_tolerance("tiny results 3dm");only_pieces.tolerance=c.document().tolerance.clone();for e in c.document().entities.values().filter(|e|e.label=="target"){only_pieces.entities.insert(e.id,e.clone());}let result_controller=Controller::new(only_pieces,limits).unwrap();
+    host.export(result_controller.coordinator(),result_controller.document().id,&path,&Cancellation::default()).unwrap();let(imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);let pieces:Vec<_>=doc.entities.values().filter(|e|e.label=="target").collect();assert_eq!(pieces.len(),3);
+    let mut ends=Vec::new();for e in pieces{let Geometry::Curve(curve)=&e.geometry else{panic!("curve")};ends.extend(om9_core::curve_ops::curve_endpoints(curve,&limits).unwrap());}for x in [0.,2.5e-11,7.5e-11,1e-10]{assert!(ends.iter().any(|p|(p[0]-x).abs()<1e-20),"{ends:?}");}
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn trimmed_reseamed_nurbs_brep_cutter_survives_real_3dm() {
+    use om9_core::{curve_ops,top11::Top11Action};use om9_kernel::creation::{self,Primitive};let host=host();let limits=Limits::default();
+    let curve=Curve::Nurbs(om9_core::curve_build::ellipse([0.;3],[1.,0.,0.],[0.,1.,0.],5.,5.,&limits).unwrap());let(f,_,distance)=om9_core::curve_surface_ops::closest_point_on_curve(&curve,[-1.,24_f64.sqrt(),0.],&limits).unwrap();assert!(distance<1e-7);let curve=curve_ops::set_seam(&curve,f,1e-9,&limits).unwrap();
+    let target=Entity::new("target",Geometry::Curve(curve),None);let body=creation::primitive(Primitive::Box{x_mm:6.,y_mm:20.,z_mm:2.},creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();let mut cutter=Entity::new("cutter",Geometry::Brep(body),None);cutter.placement=Transform::translation([-1.,-10.,-1.]);
+    let ids=[target.id,cutter.id];let mut doc=Document::with_template_tolerance("reseamed brep trim 3dm");doc.entities.insert(ids[0],target);doc.entities.insert(ids[1],cutter);let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&ids).unwrap();c.top11_invoke(Top11Action::Trim).unwrap();
+    let d=5./2_f64.sqrt();c.top11_trim_many_accept_pick(ids[0],[d,d,0.]).unwrap();c.submit("").unwrap();let path=std::env::temp_dir().join(format!("om9-reseamed-brep-trim-{}.3dm",uuid::Uuid::new_v4()));struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();let(imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);let pieces:Vec<_>=doc.entities.values().filter(|e|e.label=="target").collect();assert_eq!(pieces.len(),1);
+    assert!(doc.entities.values().any(|e|e.label=="cutter"&&matches!(e.geometry,Geometry::Brep(_)|Geometry::NativeBrep(_))));
+    let Geometry::Curve(curve)=&pieces[0].geometry else{panic!("curve")};let ends=curve_ops::curve_endpoints(curve,&limits).unwrap();for p in [[5.,0.],[-1.,24_f64.sqrt()]]{assert!(ends.iter().any(|q|(q[0]-p[0]).hypot(q[1]-p[1])<1e-6),"{ends:?}");}let expected=5.*(std::f64::consts::TAU-(-0.2_f64).acos());assert!((curve_ops::arc_length(curve,&limits).unwrap()-expected).abs()<1e-5);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn trim_closed_circle_with_seam_cutter_survives_real_3dm() {
+    use om9_core::top11::Top11Action;let host=host();let limits=Limits::default();
+    let target=Entity::new("target",Geometry::Curve(Curve::Circle{center:[0.;3],x:[1.,0.,0.],y:[0.,1.,0.],radius:5.,domain:[0.,std::f64::consts::TAU],angle_domain:None}),None);
+    let diameter=Entity::new("diameter",Geometry::Curve(Curve::Line{start:[-6.,0.,0.],end:[6.,0.,0.],domain:[0.,1.]}),None);
+    let ray=Entity::new("ray",Geometry::Curve(Curve::Line{start:[0.,0.,0.],end:[0.,6.,0.],domain:[0.,1.]}),None);let ids=[target.id,diameter.id,ray.id];
+    let mut doc=Document::with_template_tolerance("trim seam 3dm");for e in [target,diameter,ray]{doc.entities.insert(e.id,e);}let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&ids).unwrap();c.top11_invoke(Top11Action::Trim).unwrap();
+    let d=5./2_f64.sqrt();c.top11_trim_many_accept_pick(ids[0],[d,d,0.]).unwrap();c.submit("").unwrap();
+    let path=std::env::temp_dir().join(format!("om9-trim-seam-{}.3dm",uuid::Uuid::new_v4()));struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();let(imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);let pieces:Vec<_>=doc.entities.values().filter(|e|e.label=="target").collect();assert_eq!(pieces.len(),1);
+    let Geometry::Curve(curve)=&pieces[0].geometry else{panic!("curve")};let ends=om9_core::curve_ops::curve_endpoints(curve,&limits).unwrap();for p in [[5.,0.],[0.,5.]] {assert!(ends.iter().any(|q|(q[0]-p[0]).hypot(q[1]-p[1])<1e-8),"{ends:?}");}
+    assert!((om9_core::curve_ops::arc_length(curve,&limits).unwrap()-7.5*std::f64::consts::PI).abs()<1e-7);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_periodic_quadratic_tangencies_survive_real_3dm() {
+    use om9_core::{curve_ops,geometry::NurbsCurve,top11::Top11Action};let host=host();let limits=Limits::default();
+    let curve=Curve::Nurbs(NurbsCurve{degree:2,poles:vec![[0.,0.,0.],[2.,0.,0.],[0.,2.,0.],[-2.,0.,0.],[0.,0.,0.],[2.,0.,0.]],weights:vec![1.;6],knots:vec![-2.,-1.,0.,1.,2.,3.,4.,5.,6.],domain:[0.,4.],periodic:true,reversed:false,seam:None});
+    let curve=curve_ops::set_seam(&curve,0.31,1e-9,&limits).unwrap();let target=Entity::new("target",Geometry::Curve(curve),None);
+    let cutter=|name,x|Entity::new(name,Geometry::Curve(Curve::Line{start:[x,-1.,0.],end:[x,2.,0.],domain:[0.,1.]}),None);let a=cutter("right",1.5);let b=cutter("left",-1.5);
+    let ids=[target.id,a.id,b.id];let mut doc=Document::with_template_tolerance("periodic tangents 3dm");for e in [target,a,b]{doc.entities.insert(e.id,e);}
+    let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[ids[0]]).unwrap();c.top11_invoke(Top11Action::Split).unwrap();c.top11_accept_object(ids[1]).unwrap();c.top11_accept_object(ids[2]).unwrap();c.submit("").unwrap();
+    let path=std::env::temp_dir().join(format!("om9-periodic-tangent-{}.3dm",uuid::Uuid::new_v4()));struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();let(imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);let pieces:Vec<_>=doc.entities.values().filter(|e|e.label=="target").collect();assert_eq!(pieces.len(),2);
+    for e in pieces {let Geometry::Curve(curve)=&e.geometry else{panic!("curve")};let ends=curve_ops::curve_endpoints(curve,&limits).unwrap();for x in [-1.5,1.5]{assert!(ends.iter().any(|p|(p[0]-x).abs()<1e-8&&(p[1]-0.25).abs()<1e-8),"{ends:?}");}}
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_multispan_quadratic_tangent_survives_real_3dm() {
+    use om9_core::{geometry::NurbsCurve, top11::Top11Action};
+    let host=host();let limits=Limits::default();
+    let target=Entity::new("target",Geometry::Curve(Curve::Nurbs(NurbsCurve{degree:2,poles:vec![[0.,100.,0.],[0.5,-100.,0.],[1.,100.,0.],[1.5,200.,0.],[2.,300.,0.]],weights:vec![1.;5],knots:vec![0.,0.,0.,0.5,0.5,1.,1.,1.],domain:[0.,1.],periodic:false,reversed:false,seam:None})),None);
+    let cutter=Entity::new("cutter",Geometry::Curve(Curve::Line{start:[0.,0.,0.],end:[2.,0.,0.],domain:[0.,1.]}),None);
+    let ids=[target.id,cutter.id];let mut doc=Document::with_template_tolerance("multispan tangent 3dm");doc.entities.insert(ids[0],target);doc.entities.insert(ids[1],cutter);
+    let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[ids[0]]).unwrap();c.top11_invoke(Top11Action::Split).unwrap();c.top11_accept_object(ids[1]).unwrap();c.submit("").unwrap();
+    let path=std::env::temp_dir().join(format!("om9-multispan-tangent-{}.3dm",uuid::Uuid::new_v4()));struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();let (imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);
+    let pieces:Vec<_>=doc.entities.values().filter(|e|e.label=="target").collect();assert_eq!(pieces.len(),2);
+    for e in pieces {let Geometry::Curve(curve)=&e.geometry else {panic!("curve")};let ends=om9_core::curve_ops::curve_endpoints(curve,&limits).unwrap();assert!(ends.iter().any(|p|(p[0]-0.5).abs()<1e-8&&p[1].abs()<1e-8));}
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_quadratic_nurbs_tangent_survives_real_3dm() {
+    use om9_core::{geometry::NurbsCurve, top11::Top11Action};
+    let host = host(); let limits = Limits::default();
+    let target = Entity::new("target", Geometry::Curve(Curve::Nurbs(NurbsCurve {
+        degree: 2, poles: vec![[0., 250., 0.], [0.5, -250., 0.], [1., 250., 0.]], weights: vec![1.; 3],
+        knots: vec![0., 0., 0., 1., 1., 1.], domain: [0., 1.], periodic: false, reversed: false, seam: None,
+    })), None);
+    let cutter = Entity::new("cutter", Geometry::Curve(Curve::Line { start: [0., 0., 0.], end: [1., 0., 0.], domain: [0., 1.] }), None);
+    let ids = [target.id, cutter.id]; let mut doc = Document::with_template_tolerance("quadratic tangent 3dm");
+    doc.entities.insert(ids[0], target); doc.entities.insert(ids[1], cutter);
+    let mut c = Controller::new(doc, limits).unwrap(); c.select_objects(&[ids[0]]).unwrap();
+    c.top11_invoke(Top11Action::Split).unwrap(); c.top11_accept_object(ids[1]).unwrap(); c.submit("").unwrap();
+    let path = std::env::temp_dir().join(format!("om9-quadratic-tangent-{}.3dm", uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf); impl Drop for Cleanup { fn drop(&mut self) { let _ = std::fs::remove_file(&self.0); } } let _cleanup = Cleanup(path.clone());
+    host.export(c.coordinator(), c.document().id, &path, &Cancellation::default()).unwrap();
+    let (imported, doc_id, _) = import_fixture(&host, &path); let doc = document_of(&imported, doc_id);
+    let pieces: Vec<_> = doc.entities.values().filter(|e| e.label == "target").collect(); assert_eq!(pieces.len(), 2);
+    for entity in pieces { let Geometry::Curve(curve) = &entity.geometry else { panic!("curve") };
+        let ends = om9_core::curve_ops::curve_endpoints(curve, &limits).unwrap(); assert!(ends.iter().any(|p| (p[0] - 0.5).abs() < 1e-8 && p[1].abs() < 1e-8)); }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_narrow_nurbs_intersections_survive_real_3dm() {
+    use om9_core::{geometry::NurbsCurve, top11::Top11Action};
+    let host = host(); let limits = Limits::default();
+    let target = Entity::new("target", Geometry::Curve(Curve::Nurbs(NurbsCurve {
+        degree: 1, poles: vec![[0., 0., 0.], [1., 0., 0.], [500., 0., 0.], [0., -100., 0.], [502., 0., 0.], [503., 0., 0.]],
+        weights: vec![1.; 6], knots: vec![0., 0., 0.4, 0.9, 0.90001, 0.90002, 1., 1.], domain: [0., 1.], periodic: false, reversed: false, seam: None,
+    })), None);
+    let cutter = Entity::new("cutter", Geometry::Curve(Curve::Line { start: [0., -50., 0.], end: [502., -50., 0.], domain: [0., 1.] }), None);
+    let ids = [target.id, cutter.id]; let mut doc = Document::with_template_tolerance("narrow NURBS 3dm");
+    doc.entities.insert(ids[0], target); doc.entities.insert(ids[1], cutter);
+    let mut c = Controller::new(doc, limits).unwrap(); c.select_objects(&[ids[0]]).unwrap();
+    c.top11_invoke(Top11Action::Split).unwrap(); c.top11_accept_object(ids[1]).unwrap(); c.submit("").unwrap();
+    let path = std::env::temp_dir().join(format!("om9-narrow-nurbs-{}.3dm", uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf); impl Drop for Cleanup { fn drop(&mut self) { let _ = std::fs::remove_file(&self.0); } } let _cleanup = Cleanup(path.clone());
+    host.export(c.coordinator(), c.document().id, &path, &Cancellation::default()).unwrap();
+    let (imported, doc_id, _) = import_fixture(&host, &path); let doc = document_of(&imported, doc_id);
+    let mut ends = Vec::new(); let mut count = 0;
+    for entity in doc.entities.values().filter(|e| e.label == "target") {
+        let Geometry::Curve(curve) = &entity.geometry else { panic!("curve") };
+        ends.extend(om9_core::curve_ops::curve_endpoints(curve, &limits).unwrap()); count += 1;
+    }
+    assert_eq!(count, 3);
+    for x in [250., 251.] { assert!(ends.iter().any(|p| (p[0] - x).abs() < 1e-4 && (p[1] + 50.).abs() < 1e-4), "{ends:?}"); }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn preserve_periodic_foreign_userdata_remains_untouched_when_another_object_is_edited() {
+    use om9_core::{budget::Usage,top11::Top11Action};use om9_exchange::{ExportCapture,NativeExchange};use om9_native_owner::{NativeProgram,ProcessLimits};
+    let host=host();let limits=Limits::default();let exchange=NativeExchange::new(NativeProgram::admit(&native(),sha256(&native())).unwrap(),ProcessLimits::default()).unwrap();
+    let temp=Temp::new();let source=fixture(&temp,"--periodic-extra");let (mut original,doc_id)=fresh_coordinator("preserve foreign");let receipt=host.import_with_options(&mut original,doc_id,&source,&ImportOptions::default(),&Cancellation::default()).unwrap();
+    let doc=document_of(&original,doc_id).clone();assert!(doc.entities.values().all(|e|e.label!="periodic metadata"));let id=doc.entities.values().find(|e|e.label=="independent line").unwrap().id;
+    let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[id]).unwrap();c.top11_invoke(Top11Action::ControlPoints).unwrap();let h=c.top11_grip_handles().unwrap().into_iter().find(|h|h.index==1).unwrap();c.top11_move_grip(h,[2.,0.,0.]).unwrap();
+    let before=c.document().clone();let token=Cancellation::default();let capture=ExportCapture::all(c.coordinator(),doc_id).unwrap();let inputs=exchange.prepare_merge_inputs(c.coordinator(),&capture,Some(receipt.namespace),&temp.path,&token,Usage::default()).unwrap();
+    let wire=inputs.output_wire_plan(c.coordinator(),&token,Usage::default()).unwrap();let stage=wire.stage_retained_request(c.coordinator(),&temp.path,&token,Usage::default()).unwrap();let written=exchange.write_retained_private(c.coordinator(),&stage,&token,Usage::default()).unwrap();let validated=exchange.inspect_retained_private(c.coordinator(),written,&token,Usage::default()).unwrap();
+    let losses=validated.losses().unwrap();let output=temp.join("foreign-preserved.3dm");validated.publish(c.coordinator(),&output,&token,Some(losses),Usage::default()).unwrap();
+    let oracle=|path:&std::path::Path|{let r=Command::new(fixture_binary()).arg("--oracle-periodic-userdata").arg(path).output().unwrap();assert!(r.status.success());serde_json::from_slice::<serde_json::Value>(&r.stdout).unwrap()};
+    assert_eq!(oracle(&source),oracle(&output));assert_eq!(oracle(&output)["other"],true);assert_eq!(c.document(),&before);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn preserve_periodic_owned_metadata_allows_edit_and_retained_roundtrip() {
+    use om9_core::{budget::Usage,top11::Top11Action};
+    use om9_exchange::{ExportCapture,NativeExchange};use om9_native_owner::{NativeProgram,ProcessLimits};
+    let host=host();let limits=Limits::default();let exchange=NativeExchange::new(NativeProgram::admit(&native(),sha256(&native())).unwrap(),ProcessLimits::default()).unwrap();
+    let temp=Temp::new();let source=fixture(&temp,"--periodic-good");let (mut original,doc_id)=fresh_coordinator("preserve periodic");
+    let receipt=host.import_with_options(&mut original,doc_id,&source,&ImportOptions::default(),&Cancellation::default()).unwrap();
+    let doc=document_of(&original,doc_id).clone();let id=doc.entities.values().find(|e|e.label=="periodic metadata").unwrap().id;
+    let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[id]).unwrap();c.top11_invoke(Top11Action::ControlPoints).unwrap();
+    let h=c.top11_grip_handles().unwrap().into_iter().find(|h|h.index==0).unwrap();let target=[h.point[0]+0.25,h.point[1],h.point[2]];c.top11_move_grip(h,target).unwrap();
+    let before=c.document().clone();let token=Cancellation::default();let capture=ExportCapture::all(c.coordinator(),doc_id).unwrap();
+    let inputs=exchange.prepare_merge_inputs(c.coordinator(),&capture,Some(receipt.namespace),&temp.path,&token,Usage::default()).unwrap();
+    let wire=inputs.output_wire_plan(c.coordinator(),&token,Usage::default()).unwrap();let stage=wire.stage_retained_request(c.coordinator(),&temp.path,&token,Usage::default()).unwrap();
+    let written=exchange.write_retained_private(c.coordinator(),&stage,&token,Usage::default()).unwrap();
+    let inspect=Command::new(native()).arg("--inspect").arg(written.output_path()).output().unwrap();assert!(inspect.status.success());
+    let inspected:serde_json::Value=serde_json::from_slice(&inspect.stdout).unwrap();let actual=inspected["objects"].as_array().unwrap().iter().find(|o|o["label"]=="periodic metadata").unwrap();
+    let expected=serde_json::to_value(&c.document().entities[&id].geometry).unwrap();assert_eq!(actual["geometry"],expected,"native geometry mismatch");
+    let validated=exchange.inspect_retained_private(c.coordinator(),written,&token,Usage::default()).unwrap();
+    let losses=validated.losses().unwrap();let output=temp.join("retained-edited.3dm");validated.publish(c.coordinator(),&output,&token,Some(losses),Usage::default()).unwrap();
+    let (imported,id,_)=import_fixture(&host,&output);let doc=document_of(&imported,id);let e=doc.entities.values().find(|e|e.label=="periodic metadata").unwrap();
+    let Geometry::Curve(Curve::Nurbs(n))=&e.geometry else{panic!("NURBS")};n.certify_repeated_periodic(&limits).unwrap();assert_eq!(n.poles[0],target);assert_eq!(c.document(),&before);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn preserve_import_admits_plain_layer_but_retains_nondefault_layer() {
+    let host=host();
+    for (mode,expected) in [("--periodic-no-metadata",true),("--periodic-layer-extra",false)] {
+        let temp=Temp::new();let source=fixture(&temp,mode);let (mut c,id)=fresh_coordinator("preserve layer");
+        let receipt=host.import_with_options(&mut c,id,&source,&ImportOptions::default(),&Cancellation::default()).unwrap();let doc=document_of(&c,id);
+        assert_eq!(doc.entities.values().any(|e|e.label=="independent line"),expected,"mode={mode} diagnostics={:?}",receipt.diagnostics);
+        if !expected {assert!(receipt.retained_records>0);}
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn periodic_grip_geometry_export_discloses_omitted_retained_data() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    for (mode,extra) in [("--periodic-good",false),("--periodic-extra",true)] {
+        let temp=Temp::new();let source=fixture(&temp,mode);let source_hash=sha256(&source);let (original,doc_id,receipt)=import_fixture(&host,&source);
+        let (mut preserve,preserve_id)=fresh_coordinator("preserve mode");
+        let preserve_receipt=host.import_with_options(&mut preserve,preserve_id,&source,&ImportOptions::default(),&Cancellation::default()).unwrap();
+        assert_eq!(document_of(&preserve,preserve_id).entities.values().any(|e|e.label=="periodic metadata"),!extra);
+        if extra {assert!(preserve_receipt.retained_records>0);}
+        assert!(receipt.diagnostics.iter().any(|d|d.contains("userdata")));
+        let doc=document_of(&original,doc_id).clone();let id=doc.entities.values().find(|e|e.label=="periodic metadata").unwrap().id;
+        let retained_sources=doc.retained_sources.clone();assert!(!retained_sources.is_empty());
+        let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[id]).unwrap();c.top11_invoke(Top11Action::ControlPoints).unwrap();
+        let handle=c.top11_grip_handles().unwrap().into_iter().find(|h|h.index==0).unwrap();let target=[handle.point[0]+0.25,handle.point[1],handle.point[2]];c.top11_move_grip(handle,target).unwrap();
+        let before=c.document().clone();assert_eq!(before.retained_sources,retained_sources);
+        let output=temp.join("geometry-edited.3dm");let export=host.export(c.coordinator(),doc_id,&output,&Cancellation::default()).unwrap();
+        assert!(export.dropped_native_records>0 && export.dropped_retained_sources>0);
+        assert_eq!(export.diagnostics.iter().filter(|d|d.contains("EXPORT_RETAINED_OMITTED")).count(),1);
+        let ui_output=temp.join("geometry-edited-ui.3dm");let ui_diagnostics=c.export_3dm(&ui_output).unwrap();
+        assert_eq!(ui_diagnostics.iter().filter(|d|d.contains("EXPORT_RETAINED_OMITTED")).count(),1);
+        let oracle=|path:&std::path::Path|{let r=Command::new(fixture_binary()).arg("--oracle-periodic-userdata").arg(path).output().unwrap();assert!(r.status.success(),"{}",String::from_utf8_lossy(&r.stderr));serde_json::from_slice::<serde_json::Value>(&r.stdout).unwrap()};
+        assert_eq!(oracle(&source)["other"],extra);assert_eq!(oracle(&output)["other"],false);assert_eq!(oracle(&output)["own"],true);
+        let (imported,imported_id,_)=import_fixture(&host,&output);let d=document_of(&imported,imported_id);let e=d.entities.values().find(|e|e.label=="periodic metadata").unwrap();
+        let Geometry::Curve(Curve::Nurbs(n))=&e.geometry else{panic!("periodic NURBS")};n.certify_repeated_periodic(&limits).unwrap();assert_eq!(n.poles[0],target);
+        let project=temp.join("source-retained.om9");om9_archive::Archive::save(&project,&before,&limits,&Cancellation::default()).unwrap();assert_eq!(om9_archive::Archive::open(&project,&limits).unwrap(),before);
+        assert_eq!(sha256(&source),source_hash);assert_eq!(c.document(),&before);
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn periodic_outer_metadata_rejects_malformed_and_stale_payloads_per_object() {
+    for (mode,error) in [("--periodic-good",None),("--periodic-extra",None),("--periodic-no-metadata",None),("--periodic-bad-json",Some("invalid periodic outer knot metadata")),("--periodic-stale",Some("stale periodic outer knot metadata"))] {
+        let temp=Temp::new();let path=fixture(&temp,mode);
+        let resolution=temp.join("resolution.json");std::fs::write(&resolution,serde_json::to_vec(&serde_json::json!({"schema_version":1,"model_mm_per_unit":null,"page_mm_per_unit":null,"definition_mm_per_unit":{}})).unwrap()).unwrap();
+        for operation in ["--inspect","--inventory-source","--project-source"] {
+            let mut command=Command::new(native());command.arg(operation).arg(&path);if operation=="--project-source"{command.arg(&resolution);}let output=command.output().unwrap();
+            assert!(output.status.success(),"{}",String::from_utf8_lossy(&output.stderr));
+            let result:serde_json::Value=serde_json::from_slice(&output.stdout).unwrap();let objects=result["objects"].as_array().unwrap();
+            let target=objects.iter().find(|o|o["label"]=="periodic metadata").unwrap();let line=objects.iter().find(|o|o["label"]=="independent line").unwrap();
+            if operation=="--project-source" {assert_eq!(target["owned_periodic_userdata_only"],mode=="--periodic-good");}
+            assert!(!line["geometry"].is_null(),"{line}");
+            if let Some(error)=error {assert!(target["geometry"].is_null());assert!(target["diagnostics"].as_array().unwrap().iter().any(|d|d.as_str().unwrap_or("").contains(error)),"{target}");}
+            else {assert!(!target["geometry"].is_null(),"{target}");let expected=if mode=="--periodic-no-metadata" {[-1.,5.]}else{[-2.,6.]};assert_eq!(target["geometry"]["Curve"]["Nurbs"]["knots"][0],expected[0]);assert_eq!(target["geometry"]["Curve"]["Nurbs"]["knots"][8],expected[1]);}
+        }
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn periodic_nurbs_top11_grips_survive_real_3dm() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    for edit in [false,true] {for toolbar in [false,true] {
+        let n=NurbsCurve{degree:2,poles:vec![[0.,0.,0.],[2.,0.,0.],[0.,2.,0.],[-2.,0.,0.],[0.,0.,0.],[2.,0.,0.]],weights:vec![1.,0.7,1.2,0.9,1.,0.7],knots:vec![-2.,-1.,0.,1.,2.,3.,4.,5.,6.],domain:[0.,4.],periodic:true,reversed:false,seam:None};
+        let entity=Entity::new("periodic grips",Geometry::Curve(Curve::Nurbs(n)),None);let id=entity.id;let mut doc=Document::with_template_tolerance("periodic grips");doc.entities.insert(id,entity);let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[id]).unwrap();
+        if toolbar {c.top11_invoke(if edit {Top11Action::EditPoints}else{Top11Action::ControlPoints}).unwrap();}else{c.submit(if edit {"EditPtOn"}else{"PointsOn"}).unwrap();}
+        let h=c.top11_grip_handles().unwrap().into_iter().find(|h|h.index==if edit{1}else{0}).unwrap();let target=[h.point[0]+0.2,h.point[1]-0.3,h.point[2]+0.4];c.top11_move_grip(h,target).unwrap();
+        let Geometry::Curve(expected)=&c.document().entities[&id].geometry else{panic!("curve")};let expected=expected.clone();
+        let temp=Temp::new();let path=temp.join("grips.3dm");let receipt=host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();
+        assert!(receipt.diagnostics.iter().any(|d|d.contains("external edits may remove or invalidate")),"{:?}",receipt.diagnostics);
+        let (imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);
+        let e=doc.entities.values().find(|e|e.label=="periodic grips").unwrap();let Geometry::Curve(actual)=&e.geometry else{panic!("curve")};
+        let Curve::Nurbs(n)=actual else{panic!("NURBS")};n.certify_repeated_periodic(&limits).unwrap();
+        let Curve::Nurbs(expected_n)=&expected else{panic!("NURBS")};assert_eq!(n.knots,expected_n.knots);
+        for f in [0.,0.1,0.25,0.5,0.75,0.9,1.] {let a=om9_core::curve_ops::point_at(actual,f,&limits).unwrap();let b=om9_core::curve_ops::point_at(&expected,f,&limits).unwrap();assert!((0..3).all(|i|(a[i]-b[i]).abs()<1e-8),"{a:?} {b:?}");}
+    }}
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn nested_periodic_outer_knots_roundtrip_real_3dm() {
+    let host=host();let limits=Limits::default();
+    let n=NurbsCurve{degree:2,poles:vec![[0.,0.,0.],[2.,0.,0.],[0.,2.,0.],[-2.,0.,0.],[0.,0.,0.],[2.,0.,0.]],weights:vec![1.;6],knots:vec![-2.,-1.,0.,1.,2.,3.,4.,5.,6.],domain:[0.,4.],periodic:true,reversed:false,seam:None};
+    let curve=Curve::Polycurve{segments:vec![Curve::Nurbs(n.clone())],reversed:false};let e=Entity::new("nested periodic",Geometry::Curve(curve.clone()),None);let id=e.id;
+    let mut doc=Document::with_template_tolerance("nested periodic");doc.entities.insert(id,e);let c=Controller::new(doc,limits).unwrap();let temp=Temp::new();let path=temp.join("nested-periodic.3dm");
+    let receipt=host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();assert!(receipt.diagnostics.iter().any(|d|d.contains("external edits may remove or invalidate")),"{:?}",receipt.diagnostics);
+    let (imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);let e=doc.entities.values().find(|e|e.label=="nested periodic").unwrap();let Geometry::Curve(actual)=&e.geometry else{panic!("curve")};
+    let Curve::Polycurve{segments,..}=actual else{panic!("polycurve")};let Curve::Nurbs(actual_n)=&segments[0] else{panic!("NURBS")};assert_eq!(actual_n.knots,n.knots);
+    for f in [0.,0.1,0.25,0.5,0.75,0.9,1.] {let a=om9_core::curve_ops::point_at(actual,f,&limits).unwrap();let b=om9_core::curve_ops::point_at(&curve,f,&limits).unwrap();assert!((0..3).all(|i|(a[i]-b[i]).abs()<1e-8));}
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn trim_nested_reseamed_nurbs_roundtrips_real_3dm() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    for toolbar in [false,true] {
+        let base=Curve::Nurbs(NurbsCurve{degree:2,poles:vec![[0.,0.,0.],[2.,0.,0.],[0.,2.,0.],[-2.,0.,0.],[0.,0.,0.],[2.,0.,0.]],weights:vec![1.,0.7,1.2,0.9,1.,0.7],knots:vec![-2.,-1.,0.,1.,2.,3.,4.,5.,6.],domain:[0.,4.],periodic:true,reversed:false,seam:None});
+        let shifted=om9_core::curve_ops::set_seam(&base,0.31,1e-9,&limits).unwrap();
+        let curve=Curve::Polycurve{segments:vec![Curve::Polycurve{segments:vec![shifted],reversed:false}],reversed:false};
+        let pick=om9_core::curve_ops::point_at(&curve,0.25,&limits).unwrap();let target=Entity::new("target",Geometry::Curve(curve),None);
+        let cutter=|name,x|Entity::new(name,Geometry::Curve(Curve::Line{start:[x,-2.,0.],end:[x,3.,0.],domain:[0.,1.]}),None);
+        let a=cutter("right",0.5);let b=cutter("left",-0.5);let ids=[target.id,a.id,b.id];let mut doc=Document::with_template_tolerance("nested reseam trim");for e in [target,a,b]{doc.entities.insert(e.id,e);}
+        let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[ids[0]]).unwrap();if toolbar {c.top11_invoke(Top11Action::Trim).unwrap();}else{c.submit("Trim").unwrap();}
+        c.top11_accept_object(ids[1]).unwrap();c.top11_accept_object(ids[2]).unwrap();c.submit("").unwrap();c.accept_world_point(pick).unwrap();c.submit("").unwrap();
+        let expected:Vec<_>=c.document().entities.values().filter(|e|e.label=="target").map(|e|{let Geometry::Curve(curve)=&e.geometry else{panic!("curve")};curve.clone()}).collect();assert_eq!(expected.len(),1);
+        let temp=Temp::new();let path=temp.join("trim.3dm");host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();
+        let (imported,id,_)=import_fixture(&host,&path);let doc=document_of(&imported,id);let actual:Vec<_>=doc.entities.values().filter(|e|e.label=="target").map(|e|{let Geometry::Curve(curve)=&e.geometry else{panic!("curve")};curve}).collect();
+        assert_eq!(actual.len(),1);for f in [0.,0.1,0.25,0.5,0.75,0.9,1.] {let a=om9_core::curve_ops::point_at(actual[0],f,&limits).unwrap();let b=om9_core::curve_ops::point_at(&expected[0],f,&limits).unwrap();assert!((0..3).all(|axis|(a[axis]-b[axis]).abs()<1e-8),"f={f} {a:?} {b:?}");}
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_nested_closed_curves_roundtrip_real_3dm() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    for circle in [false,true] { for shifted in [false,true] {
+        if circle && shifted {continue;}
+        let base=if circle {Curve::Circle{center:[0.;3],x:[1.,0.,0.],y:[0.,1.,0.],radius:2.,domain:[0.,std::f64::consts::TAU],angle_domain:None}}else{
+            Curve::Nurbs(NurbsCurve{degree:2,poles:vec![[0.,0.,0.],[2.,0.,0.],[0.,2.,0.],[-2.,0.,0.],[0.,0.,0.],[2.,0.,0.]],weights:vec![1.;6],knots:vec![-2.,-1.,0.,1.,2.,3.,4.,5.,6.],domain:[0.,4.],periodic:true,reversed:false,seam:None})
+        };
+        let base=if shifted {om9_core::curve_ops::set_seam(&base,0.31,1e-9,&limits).unwrap()}else{base};
+        let target=Entity::new("target",Geometry::Curve(Curve::Polycurve{segments:vec![Curve::Polycurve{segments:vec![base],reversed:false}],reversed:false}),None);
+        let x=if circle {2.}else{1.5};let cutter=|name,x|Entity::new(name,Geometry::Curve(Curve::Line{start:[x,-1.,0.],end:[x,3.,0.],domain:[0.,1.]}),None);
+        let a=cutter("right",x);let b=cutter("left",-x);let ids=[target.id,a.id,b.id];let mut doc=Document::with_template_tolerance("nested closed 3dm");for e in [target,a,b]{doc.entities.insert(e.id,e);}
+        let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[ids[0]]).unwrap();c.top11_invoke(Top11Action::Split).unwrap();c.top11_accept_object(ids[1]).unwrap();c.top11_accept_object(ids[2]).unwrap();c.submit("").unwrap();
+        let temp=Temp::new();let path=temp.join("closed.3dm");host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();
+        let (imported,id,_)=import_fixture(&host,&path);let doc=document_of(&imported,id);let mut count=0;
+        for e in doc.entities.values().filter(|e|e.label=="target"){let Geometry::Curve(curve)=&e.geometry else{panic!("curve")};let ends=om9_core::curve_ops::curve_endpoints(curve,&limits).unwrap();for expected_x in [-x,x]{assert!(ends.iter().any(|p|(p[0]-expected_x).abs()<1e-7&&(p[1]-if circle {0.}else{0.25}).abs()<1e-7),"{ends:?}");}count+=1;}
+        assert_eq!(count,2);
+    }}
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_nested_arc_and_nurbs_roundtrip_real_3dm() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    for arc in [false,true] {
+        let (first,join,end,cut)=if arc {
+            (curve_build::arc_by_center([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],2.,0.,std::f64::consts::FRAC_PI_2).unwrap(),[0.,2.,0.],[-2.,2.,0.],[1.,3f64.sqrt(),0.])
+        } else {
+            (Curve::Nurbs(NurbsCurve{degree:2,poles:vec![[0.,0.,0.],[2.,2.,0.],[4.,0.,0.]],weights:vec![1.;3],knots:vec![0.,0.,0.,1.,1.,1.],domain:[0.,1.],periodic:false,reversed:false,seam:None}),[4.,0.,0.],[6.,0.,0.],[2.,1.,0.])
+        };
+        let inner=Curve::Polycurve{segments:vec![first,Curve::Line{start:join,end,domain:[0.,1.]}],reversed:false};
+        let target=Entity::new("target",Geometry::Curve(Curve::Polycurve{segments:vec![inner],reversed:false}),None);
+        let cutter=Entity::new("cutter",Geometry::Curve(Curve::Line{start:[cut[0],-2.,0.],end:[cut[0],4.,0.],domain:[0.,1.]}),None);
+        let ids=[target.id,cutter.id];let mut doc=Document::with_template_tolerance("nested curve 3dm");doc.entities.insert(ids[0],target);doc.entities.insert(ids[1],cutter);
+        let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[ids[0]]).unwrap();c.top11_invoke(Top11Action::Split).unwrap();c.top11_accept_object(ids[1]).unwrap();c.submit("").unwrap();
+        let temp=Temp::new();let path=temp.join("nested.3dm");host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();
+        let (imported,id,_)=import_fixture(&host,&path);let doc=document_of(&imported,id);let mut count=0;let mut cut_ends=0;
+        for entity in doc.entities.values().filter(|e|e.label=="target") { let Geometry::Curve(curve)=&entity.geometry else{panic!("curve")};count+=1;for p in om9_core::curve_ops::curve_endpoints(curve,&limits).unwrap(){if (0..3).all(|i|(p[i]-cut[i]).abs()<1e-6){cut_ends+=1;}}}
+        assert_eq!(count,2);assert_eq!(cut_ends,2);
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_short_polycurve_segments_survives_real_3dm() {
+    use om9_core::top11::Top11Action;
+    let host = host(); let limits = Limits::default();
+    let segments: Vec<_> = (0..600).map(|i| {
+        let height = |n| if n == 301 { 3.0 } else { 0.0 };
+        Curve::Line { start: [i as f64, height(i), 0.], end: [(i + 1) as f64, height(i + 1), 0.], domain: [0., 1.] }
+    }).collect();
+    let target = Entity::new("target", Geometry::Curve(Curve::Polycurve { segments, reversed: false }), None);
+    let cutter = Entity::new("cutter", Geometry::Curve(Curve::Line { start: [300., 1., 0.], end: [302., 1., 0.], domain: [0., 1.] }), None);
+    let ids = [target.id, cutter.id]; let mut doc = Document::with_template_tolerance("polycurve crossings 3dm");
+    doc.entities.insert(ids[0], target); doc.entities.insert(ids[1], cutter);
+    let mut c = Controller::new(doc, limits).unwrap(); c.select_objects(&[ids[0]]).unwrap();
+    c.top11_invoke(Top11Action::Split).unwrap(); c.top11_accept_object(ids[1]).unwrap(); c.submit("").unwrap();
+    let path = std::env::temp_dir().join(format!("om9-polycurve-crossings-{}.3dm", uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf); impl Drop for Cleanup { fn drop(&mut self) { let _ = std::fs::remove_file(&self.0); } } let _cleanup = Cleanup(path.clone());
+    host.export(c.coordinator(), c.document().id, &path, &Cancellation::default()).unwrap();
+    let (imported, doc_id, _) = import_fixture(&host, &path); let doc = document_of(&imported, doc_id);
+    let mut ends = Vec::new(); let mut count = 0;
+    for entity in doc.entities.values().filter(|e| e.label == "target") {
+        let Geometry::Curve(curve) = &entity.geometry else { panic!("curve") };
+        ends.extend(om9_core::curve_ops::curve_endpoints(curve, &limits).unwrap()); count += 1;
+    }
+    assert_eq!(count, 3);
+    for x in [300. + 1. / 3., 302. - 1. / 3.] { assert!(ends.iter().any(|p| (p[0] - x).abs() < 1e-8 && (p[1] - 1.).abs() < 1e-8)); }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_close_line_circle_crossings_survive_real_3dm() {
+    use om9_core::top11::Top11Action;
+    let host = host(); let limits = Limits::default(); let y = 0.999998_f64;
+    let crossing = (1.0 - y * y).sqrt();
+    let target = Entity::new("target", Geometry::Curve(Curve::Line { start: [-2., y, 0.], end: [2., y, 0.], domain: [0., 1.] }), None);
+    let cutter = Entity::new("cutter", Geometry::Curve(Curve::Circle { center: [0., 0., 0.], x: [1., 0., 0.], y: [0., 1., 0.], radius: 1., domain: [0., std::f64::consts::TAU], angle_domain: None }), None);
+    let ids = [target.id, cutter.id]; let mut doc = Document::with_template_tolerance("close crossings 3dm");
+    doc.entities.insert(ids[0], target); doc.entities.insert(ids[1], cutter);
+    let mut c = Controller::new(doc, limits).unwrap(); c.select_objects(&[ids[0]]).unwrap();
+    c.top11_invoke(Top11Action::Split).unwrap(); c.top11_accept_object(ids[1]).unwrap(); c.submit("").unwrap();
+    let path = std::env::temp_dir().join(format!("om9-line-circle-split-{}.3dm", uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf); impl Drop for Cleanup { fn drop(&mut self) { let _ = std::fs::remove_file(&self.0); } } let _cleanup = Cleanup(path.clone());
+    host.export(c.coordinator(), c.document().id, &path, &Cancellation::default()).unwrap();
+    let (imported, doc_id, _) = import_fixture(&host, &path); let doc = document_of(&imported, doc_id);
+    let mut ends: Vec<_> = doc.entities.values().filter(|e| e.label == "target").map(|e| { let Geometry::Curve(curve) = &e.geometry else { panic!("curve") }; om9_core::curve_ops::curve_endpoints(curve, &limits).unwrap() }).collect();
+    ends.sort_by(|a, b| a[0][0].total_cmp(&b[0][0])); assert_eq!(ends.len(), 3);
+    assert!((ends[0][1][0] + crossing).abs() < 1e-8); assert!((ends[2][0][0] - crossing).abs() < 1e-8);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_intersecting_arcs_survives_real_3dm_roundtrip() {
+    use om9_core::top11::Top11Action;let host=host();let limits=Limits::default();let pi=std::f64::consts::PI;
+    let arc=|name,center|Entity::new(name,Geometry::Curve(Curve::Circle{center,x:[1.,0.,0.],y:[0.,1.,0.],radius:1.,domain:[7.,12.],angle_domain:Some([0.,pi])}),None);
+    let target=arc("target",[0.,0.,0.]);let id=target.id;let cutter=arc("cutter",[1.,0.,0.]);let cutter_id=cutter.id;
+    let mut doc=Document::with_template_tolerance("arc split 3dm");doc.entities.insert(id,target);doc.entities.insert(cutter_id,cutter);
+    let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[id]).unwrap();c.top11_invoke(Top11Action::Split).unwrap();c.top11_accept_object(cutter_id).unwrap();c.submit("").unwrap();
+    let path=std::env::temp_dir().join(format!("om9-arc-split-{}.3dm",uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(c.coordinator(),c.document().id,&path,&Cancellation::default()).unwrap();
+    let (imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);let target_pieces:Vec<_>=doc.entities.values().filter(|e|e.label=="target").collect();assert_eq!(target_pieces.len(),2);
+    let boundary=[0.5,3_f64.sqrt()/2.,0.];for e in target_pieces {let Geometry::Curve(curve)=&e.geometry else {panic!("curve")};let ends=om9_core::curve_ops::curve_endpoints(curve,&limits).unwrap();assert!(ends.iter().any(|p|(p[0]-boundary[0]).hypot(p[1]-boundary[1])<1e-9));}
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_nearly_parallel_lines_survives_real_3dm_roundtrip() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    let line=|name,start,end|Entity::new(name,Geometry::Curve(Curve::Line{start,end,domain:[0.,1.]}),None);
+    let target=line("target",[0.,0.,0.],[1e10,0.,0.]);let id=target.id;let cutter=line("cutter",[0.,-0.74,0.],[1e10,1.26,0.]);let cutter_id=cutter.id;
+    let mut doc=Document::with_template_tolerance("near parallel 3dm");doc.entities.insert(id,target);doc.entities.insert(cutter_id,cutter);
+    let mut controller=Controller::new(doc,limits).unwrap();controller.select_objects(&[id]).unwrap();controller.top11_invoke(Top11Action::Split).unwrap();controller.top11_accept_object(cutter_id).unwrap();controller.submit("").unwrap();
+    let path=std::env::temp_dir().join(format!("om9-near-parallel-{}.3dm",uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+    let (imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);
+    let mut segments:Vec<_>=doc.entities.values().filter_map(|e|match &e.geometry {Geometry::Curve(Curve::Line{start,end,..}) if start[1]==0.&&end[1]==0.=>Some([start[0],end[0]]),_=>None}).collect();
+    segments.sort_by(|a,b|a[0].total_cmp(&b[0]));assert_eq!(segments.len(),2);assert!((segments[0][1]-3.7e9).abs()<0.001);assert!((segments[1][0]-3.7e9).abs()<0.001);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_with_near_endpoint_cutters_survives_real_3dm_roundtrip() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    for toolbar in [false,true] {
+        let line=|name,start,end|Entity::new(name,Geometry::Curve(Curve::Line{start,end,domain:[0.,1.]}),None);
+        let target=line("target",[0.,0.,0.],[1_000_000.,0.,0.]);let id=target.id;
+        let a=line("cutter a",[0.05,-1.,0.],[0.05,1.,0.]);let a_id=a.id;let b=line("cutter b",[0.10,-1.,0.],[0.10,1.,0.]);let b_id=b.id;
+        let mut doc=Document::with_template_tolerance("cutter 3dm");for e in [target,a,b] {doc.entities.insert(e.id,e);}
+        let mut controller=Controller::new(doc,limits).unwrap();controller.select_objects(&[id]).unwrap();
+        if toolbar {controller.top11_invoke(Top11Action::Split).unwrap();}else{controller.submit("Split").unwrap();}controller.top11_accept_object(a_id).unwrap();controller.top11_accept_object(b_id).unwrap();controller.submit("").unwrap();
+        let path=std::env::temp_dir().join(format!("om9-cutter-precision-{}.3dm",uuid::Uuid::new_v4()));
+        struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+        host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+        let (imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);
+        let mut lengths:Vec<_>=doc.entities.values().filter_map(|e|match &e.geometry {Geometry::Curve(Curve::Line{start,end,..}) if start[1]==0.&&end[1]==0.=>Some((end[0]-start[0]).abs()),_=>None}).collect();
+        lengths.sort_by(f64::total_cmp);assert_eq!(lengths.len(),3);assert!((lengths[0]-0.05).abs()<1e-8);assert!((lengths[1]-0.05).abs()<1e-8);assert!((lengths[2]-999_999.9).abs()<1e-6);
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn split_point_near_long_line_endpoint_survives_real_3dm_roundtrip() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    for toolbar in [false,true] {
+        let entity=Entity::new("line",Geometry::Curve(Curve::Line{start:[0.,0.,0.],end:[1_000_000.,0.,0.],domain:[2.,5.]}),None);let id=entity.id;
+        let mut doc=Document::with_template_tolerance("long split 3dm");doc.entities.insert(id,entity);let mut controller=Controller::new(doc,limits).unwrap();controller.select_objects(&[id]).unwrap();
+        if toolbar {controller.top11_invoke(Top11Action::Split).unwrap();controller.submit("Point").unwrap();}else{controller.submit("Split Point").unwrap();}
+        controller.submit("W0.05,0,0").unwrap();assert_eq!(controller.document().entities.len(),2);
+        let path=std::env::temp_dir().join(format!("om9-long-split-{}.3dm",uuid::Uuid::new_v4()));
+        struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+        host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+        let (imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);assert_eq!(doc.entities.len(),2);
+        let mut ends:Vec<_>=doc.entities.values().map(|e|match &e.geometry {Geometry::Curve(curve)=>om9_core::curve_ops::curve_endpoints(curve,&limits).unwrap(),_=>panic!("curve")}).collect();
+        ends.sort_by(|a,b|a[0][0].total_cmp(&b[0][0]));assert!((ends[0][1][0]-0.05).abs()<1e-9);assert!((ends[1][0][0]-0.05).abs()<1e-9);
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn top11_ringrail_toolbar_and_command_export_real_3dm_geometry() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    for toolbar in [false,true] {
+        let doc=Document::with_template_tolerance("top11 ring rail");let mut controller=Controller::new(doc,limits).unwrap();
+        if toolbar {controller.top11_invoke(Top11Action::RingRail).unwrap();}else{controller.submit("gvRingRail").unwrap();}
+        controller.submit("Diameter=20").unwrap();controller.submit("").unwrap();
+        let path=std::env::temp_dir().join(format!("om9-top11-ringrail-{}.3dm",uuid::Uuid::new_v4()));
+        struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+        let receipt=host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+        assert_eq!(receipt.root_objects,1);assert_eq!(receipt.dropped_history_recipes,1);
+        let (imported,doc_id,_)=import_fixture(&host,&path);let doc=document_of(&imported,doc_id);assert_eq!(doc.entities.len(),1);
+        let Geometry::Curve(Curve::Circle{center,radius,..})=&doc.entities.values().next().unwrap().geometry else {panic!("circle")};
+        assert_eq!(*center,[0.,0.,0.]);assert!((*radius-10.).abs()<1e-10);
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer and authored fixture oracle"]
+fn nonuniform_native_polycurve_parent_mapping_is_not_silently_projected() {
+    let path=std::env::temp_dir().join(format!("om9-unequal-parent-{}.3dm",uuid::Uuid::new_v4()));
+    let packet=path.with_extension("json");
+    struct Cleanup(Vec<PathBuf>);impl Drop for Cleanup{fn drop(&mut self){for path in &self.0 {let _=std::fs::remove_file(path);}}}let _cleanup=Cleanup(vec![path.clone(),packet.clone()]);
+    let authored=Command::new(fixture_binary()).arg("--unequal-polycurve").arg(&path).output().unwrap();
+    assert!(authored.status.success(),"{}",String::from_utf8_lossy(&authored.stderr));
+    let witness=Command::new(fixture_binary()).arg("--oracle-polycurve").arg(&path).output().unwrap();assert!(witness.status.success());
+    let witness:serde_json::Value=serde_json::from_slice(&witness.stdout).unwrap();
+    assert_eq!(witness["segments"][0]["parent"][1].as_f64(),Some(1.));assert_eq!(witness["segments"][1]["parent"][1].as_f64(),Some(3.));
+    let inspected=Command::new(native()).arg("--inspect").arg(&path).output().unwrap();
+    assert!(inspected.status.success());let report:serde_json::Value=serde_json::from_slice(&inspected.stdout).unwrap();
+    assert!(report["objects"][0]["geometry"].is_null());
+    assert!(report["objects"][0]["diagnostics"].as_array().unwrap().iter().any(|v|v.as_str()==Some("polycurve parent parameter correspondence")));
+    std::fs::write(&packet,br#"{"schema_version":1,"model_mm_per_unit":null,"page_mm_per_unit":null,"definition_mm_per_unit":{}}"#).unwrap();
+    let projected=Command::new(native()).arg("--project-source").arg(&path).arg(&packet).output().unwrap();
+    assert!(projected.status.success(),"{}",String::from_utf8_lossy(&projected.stderr));
+    let report:serde_json::Value=serde_json::from_slice(&projected.stdout).unwrap();
+    assert_eq!(report["objects"][0]["capability"],"retained_only");assert!(report["objects"][0]["geometry"].is_null());
+    assert!(report["objects"][0]["diagnostics"].as_array().unwrap().iter().any(|v|v.as_str()==Some("polycurve parent parameter intervals are not uniform")));
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer and authored fixture oracle"]
+fn many_polycurve_segments_keep_domains_and_uniform_native_parent_mapping() {
+    let host=host();let limits=Limits::default();let domains=[[2.,5.],[-7.,-6.99],[10.,10010.],[0.2,0.3],[500.,501.]];
+    let expected=Curve::Polycurve{segments:domains.iter().enumerate().map(|(i,domain)|Curve::Line{start:[i as f64,0.,0.],end:[(i+1) as f64,0.,0.],domain:*domain}).collect(),reversed:false};
+    let entity=Entity::new("many",Geometry::Curve(expected.clone()),None);let mut doc=Document::with_template_tolerance("many domains");doc.entities.insert(entity.id,entity);
+    let controller=Controller::new(doc,limits).unwrap();let path=std::env::temp_dir().join(format!("om9-many-domains-{}.3dm",uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+    let oracle=Command::new(fixture_binary()).arg("--oracle-polycurve").arg(&path).output().unwrap();assert!(oracle.status.success());
+    let witness:serde_json::Value=serde_json::from_slice(&oracle.stdout).unwrap();let segments=witness["segments"].as_array().unwrap();assert_eq!(segments.len(),domains.len());
+    for (i,(segment,domain)) in segments.iter().zip(domains).enumerate() {
+        let child=segment["child"].as_array().unwrap();for j in 0..2 {assert_eq!(child[j].as_f64(),Some(domain[j]));}
+        let parent=segment["parent"].as_array().unwrap();for j in 0..2 {assert!((parent[j].as_f64().unwrap()-(i+j) as f64).abs()<1e-12);}
+    }
+    for (i,sample) in witness["samples"].as_array().unwrap().iter().enumerate() {let p=om9_core::curve_ops::point_at(&expected,i as f64/8.,&limits).unwrap();for (a,b) in sample.as_array().unwrap().iter().zip(p) {assert!((a.as_f64().unwrap()-b).abs()<1e-9);}}
+    let (imported,doc_id,_)=import_fixture(&host,&path);let imported=document_of(&imported,doc_id);
+    assert_eq!(imported.entities.len(),1);let Geometry::Curve(actual)=&imported.entities.values().next().unwrap().geometry else {panic!("curve")};assert_eq!(*actual,expected);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer and authored fixture oracle"]
+fn mixed_polycurve_with_independent_domains_has_native_fraction_correspondence() {
+    let host=host();let limits=Limits::default();
+    let expected=Curve::Polycurve{segments:vec![
+        Curve::Line{start:[0.,0.,0.],end:[1.,0.,0.],domain:[2.,5.]},
+        Curve::Circle{center:[0.,0.,0.],x:[1.,0.,0.],y:[0.,1.,0.],radius:1.,domain:[7.,12.],angle_domain:Some([0.,std::f64::consts::FRAC_PI_2])},
+    ],reversed:false};
+    let entity=Entity::new("mixed",Geometry::Curve(expected.clone()),None);let mut doc=Document::with_template_tolerance("mixed domains");doc.entities.insert(entity.id,entity);
+    let controller=Controller::new(doc,limits).unwrap();let path=std::env::temp_dir().join(format!("om9-mixed-domains-{}.3dm",uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+    let oracle=Command::new(fixture_binary()).arg("--oracle-polycurve").arg(&path).output().unwrap();assert!(oracle.status.success(),"{}",String::from_utf8_lossy(&oracle.stderr));
+    let witness:serde_json::Value=serde_json::from_slice(&oracle.stdout).unwrap();
+    for (index,sample) in witness["samples"].as_array().unwrap().iter().enumerate() {
+        let expected_point=om9_core::curve_ops::point_at(&expected,index as f64/8.,&limits).unwrap();
+        for (actual,expected) in sample.as_array().unwrap().iter().zip(expected_point) {assert!((actual.as_f64().unwrap()-expected).abs()<1e-9);}
+    }
+    let (imported,doc_id,_)=import_fixture(&host,&path);let imported=document_of(&imported,doc_id);
+    assert_eq!(imported.entities.len(),1);let Geometry::Curve(actual)=&imported.entities.values().next().unwrap().geometry else {panic!("curve")};
+    assert_eq!(*actual,expected);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer and authored fixture oracle"]
+fn joined_reversed_noncontiguous_domains_survive_real_3dm_roundtrip() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    let a=Entity::new("a",Geometry::Curve(Curve::Line{start:[0.,0.,0.],end:[1.,0.,0.],domain:[2.,5.]}),None);
+    let b=Entity::new("b",Geometry::Curve(Curve::Line{start:[2.,0.,0.],end:[1.,0.,0.],domain:[7.,12.]}),None);
+    let ids=[a.id,b.id];let mut doc=Document::with_template_tolerance("join independent domains");doc.entities.insert(a.id,a);doc.entities.insert(b.id,b);
+    let mut controller=Controller::new(doc,limits).unwrap();controller.select_objects(&ids).unwrap();controller.top11_invoke(Top11Action::Join).unwrap();
+    let Geometry::Curve(expected)=&controller.document().entities.values().next().unwrap().geometry else {panic!("curve")};let expected=expected.clone();
+    let path=std::env::temp_dir().join(format!("om9-joined-domains-{}.3dm",uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+    let oracle=Command::new(fixture_binary()).arg("--oracle-polycurve").arg(&path).output().unwrap();
+    assert!(oracle.status.success(),"{}",String::from_utf8_lossy(&oracle.stderr));
+    let witness:serde_json::Value=serde_json::from_slice(&oracle.stdout).unwrap();assert_eq!(witness["status"],"native_polycurve_oracle");
+    let segments=witness["segments"].as_array().unwrap();assert_eq!(segments.len(),2);
+    let interval=|v:&serde_json::Value| {let a=v.as_array().unwrap();[a[0].as_f64().unwrap(),a[1].as_f64().unwrap()]};
+    assert_eq!(interval(&segments[0]["parent"]),[0.,1.]);assert_eq!(interval(&segments[1]["parent"]),[1.,2.]);
+    let Curve::Polycurve{segments:original,..}=&expected else {panic!("polycurve")};
+    for (native,segment) in segments.iter().zip(original) {let Curve::Line{domain,..}=segment else {panic!("line")};assert_eq!(interval(&native["child"]),*domain);}
+    for (index,sample) in witness["samples"].as_array().unwrap().iter().enumerate() {
+        let expected_point=om9_core::curve_ops::point_at(&expected,index as f64/8.,&limits).unwrap();
+        for (actual,expected) in sample.as_array().unwrap().iter().zip(expected_point) {assert!((actual.as_f64().unwrap()-expected).abs()<1e-10);}
+    }
+    let (imported,doc_id,_)=import_fixture(&host,&path);let imported=document_of(&imported,doc_id);
+    assert_eq!(imported.entities.len(),1);let Geometry::Curve(actual)=&imported.entities.values().next().unwrap().geometry else {panic!("curve")};
+    assert_eq!(*actual,expected);
+    for fraction in [0.,0.125,0.25,0.5,0.625,0.875,1.] {
+        let a=om9_core::curve_ops::point_at(actual,fraction,&limits).unwrap();let b=om9_core::curve_ops::point_at(&expected,fraction,&limits).unwrap();
+        assert!(a.iter().zip(b).all(|(a,b)|(a-b).abs()<1e-10));
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn mirrored_uniformly_scaled_arc_survives_real_3dm_export_import() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    let arc=Curve::Circle{center:[1.,2.,0.],x:[1.,0.,0.],y:[0.,1.,0.],radius:2.,domain:[7.,12.],angle_domain:Some([-0.8,2.])};
+    let mut entity=Entity::new("arc",Geometry::Curve(arc.clone()),None);entity.placement=Transform::scale([2.,2.,2.]).unwrap();let id=entity.id;
+    let mut doc=Document::with_template_tolerance("mirror arc 3dm");doc.entities.insert(id,entity);
+    let mut controller=Controller::new(doc,limits).unwrap();controller.select_objects(&[id]).unwrap();controller.top11_invoke(Top11Action::Mirror).unwrap();controller.submit("Copy=Yes").unwrap();controller.submit("YAxis").unwrap();
+    let reflected=*controller.selected().iter().next().unwrap();let expected=controller.document().entities[&reflected].geometry.clone();
+    let mut isolated=controller.document().clone();isolated.entities.retain(|id,_|*id==reflected);let output=Controller::new(isolated,limits).unwrap();
+    let path=std::env::temp_dir().join(format!("om9-mirror-arc-{}.3dm",uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(output.coordinator(),output.document().id,&path,&Cancellation::default()).unwrap();
+    let (imported,doc_id,_)=import_fixture(&host,&path);let imported=document_of(&imported,doc_id);
+    assert_eq!(imported.entities.len(),1);
+    let Geometry::Curve(actual)=&imported.entities.values().next().unwrap().geometry else {panic!("curve")};
+    let Geometry::Curve(expected)=&expected else {panic!("curve")};
+    for fraction in [0.,0.1,0.37,0.9,1.] {
+        let a=om9_core::curve_ops::point_at(actual,fraction,&limits).unwrap();let b=om9_core::curve_ops::point_at(expected,fraction,&limits).unwrap();
+        assert!(a.iter().zip(b).all(|(a,b)|(a-b).abs()<1e-9),"{fraction}: {a:?} vs {b:?}");
+    }
+    let Curve::Circle{domain,angle_domain,..}=actual else {panic!("arc changed type")};
+    assert_eq!(*domain,[7.,12.]);assert_eq!(*angle_domain,Some([-0.8,2.]));
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn mirrored_parameterized_lines_survive_real_3dm_export_import() {
+    use om9_core::top11::Top11Action;
+    let host=host();let limits=Limits::default();
+    for geometry in [
+        Geometry::Curve(Curve::Line{start:[0.,0.,0.],end:[2.,0.,0.],domain:[2.,5.]}),
+        Geometry::Curve(Curve::Polycurve{segments:vec![Curve::Line{start:[0.,0.,0.],end:[2.,0.,0.],domain:[2.,5.]},Curve::Line{start:[2.,0.,0.],end:[2.,1.,0.],domain:[5.,9.]}],reversed:false}),
+    ] {
+        let mut entity=Entity::new("parameterized",geometry,None);entity.placement=Transform::translation([4.,1.,0.]);let id=entity.id;
+        let mut doc=Document::with_template_tolerance("mirror parameter 3dm");doc.entities.insert(id,entity);
+        let mut controller=Controller::new(doc,limits).unwrap();controller.select_objects(&[id]).unwrap();controller.top11_invoke(Top11Action::Mirror).unwrap();controller.submit("Copy=Yes").unwrap();controller.submit("YAxis").unwrap();
+        let reflected=*controller.selected().iter().next().unwrap();let expected=controller.document().entities[&reflected].geometry.clone();
+        let mut isolated=controller.document().clone();isolated.entities.retain(|id,_|*id==reflected);
+        let output=Controller::new(isolated,limits).unwrap();let path=std::env::temp_dir().join(format!("om9-mirror-domain-{}.3dm",uuid::Uuid::new_v4()));
+        struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+        host.export(output.coordinator(),output.document().id,&path,&Cancellation::default()).unwrap();
+        let (imported,doc_id,_)=import_fixture(&host,&path);let imported=document_of(&imported,doc_id);
+        assert_eq!(imported.entities.len(),1);assert_eq!(imported.entities.values().next().unwrap().geometry,expected);
+    }
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn mirrored_mesh_survives_real_3dm_export_import() {
+    use om9_core::{geometry::Mesh,top11::Top11Action};
+    let limits=Limits::default(); let host=host();
+    let mesh=Mesh{vertices:vec![[0.,0.,0.],[2.,0.,0.],[0.,2.,0.],[2.,2.,0.]],faces:vec![vec![0,1,2],vec![0,1,3,2]],normals:vec![[0.,0.,1.];4],colors:vec![[10,20,30,255];4],corner_uvs:vec![]};
+    for toolbar in [false,true] { for copy in [false,true] {
+        let mut entity=Entity::new("mirror mesh",Geometry::Mesh(mesh.clone()),None); entity.placement=Transform::translation([4.,1.,0.]); let id=entity.id;
+        let mut doc=Document::with_template_tolerance("mirror mesh 3dm"); doc.entities.insert(id,entity);
+        let mut controller=Controller::new(doc,limits).unwrap(); controller.select_objects(&[id]).unwrap();
+        if toolbar {controller.top11_invoke(Top11Action::Mirror).unwrap();}else{controller.submit("Mirror").unwrap();}
+        if !copy {controller.submit("Copy=No").unwrap();} controller.submit("YAxis").unwrap();
+        let reflected=*controller.selected().iter().next().unwrap();
+        let result=&controller.document().entities[&reflected];
+        let Geometry::Mesh(expected)=&result.geometry else {panic!("expected mesh")};
+        let expected_positions:Vec<_>=expected.vertices.iter().map(|p|result.placement.point(*p).unwrap()).collect();
+        let path=std::env::temp_dir().join(format!("om9-mirror-mesh-{}.3dm",uuid::Uuid::new_v4()));
+        struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+        host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+        let (imported,doc_id,_)=import_fixture(&host,&path);let imported=document_of(&imported,doc_id);
+        let found=imported.entities.values().filter_map(|e|match &e.geometry {Geometry::Mesh(m) if m.faces==expected.faces=>Some((e,m)),_=>None}).collect::<Vec<_>>();
+        assert_eq!(found.len(),1);let (actual_entity,actual)=found[0];
+        let actual_positions:Vec<_>=actual.vertices.iter().map(|p|actual_entity.placement.point(*p).unwrap()).collect();
+        assert_eq!(actual_positions,expected_positions);assert_eq!(actual.colors,expected.colors);assert_eq!(actual.normals,expected.normals);
+        assert_eq!(actual.faces,vec![vec![0,2,1],vec![0,2,3,1]]);
+    }}
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn mirrored_exploded_mesh_pieces_survive_real_3dm_export_import() {
+    use om9_core::{geometry::Mesh,top11::Top11Action};
+    let host=host(); let limits=Limits::default();
+    let mesh=Mesh{vertices:vec![[0.,0.,0.],[1.,0.,0.],[0.,1.,0.],[3.,0.,0.],[4.,0.,0.],[3.,1.,0.]],faces:vec![vec![0,1,2],vec![3,4,5]],normals:vec![[0.,0.,1.];6],colors:vec![[10,20,30,255];3].into_iter().chain(vec![[40,50,60,255];3]).collect(),corner_uvs:vec![]};
+    let mut entity=Entity::new("mesh",Geometry::Mesh(mesh),None);entity.placement=Transform::translation([2.,0.,0.]);let id=entity.id;
+    let mut doc=Document::with_template_tolerance("mirror explode 3dm");doc.entities.insert(id,entity);
+    let mut controller=Controller::new(doc,limits).unwrap();controller.select_objects(&[id]).unwrap();
+    controller.submit("Mirror").unwrap();controller.submit("Copy=No").unwrap();controller.submit("YAxis").unwrap();
+    controller.top11_invoke(Top11Action::Explode).unwrap();
+    assert_eq!(controller.document().entities.len(),2);
+    let snapshot=|document:&Document| {
+        let mut records:Vec<_>=document.entities.values().map(|entity| {
+            let Geometry::Mesh(mesh)=&entity.geometry else {panic!("mesh piece")};
+            let vertices:Vec<_>=mesh.vertices.iter().map(|p|entity.placement.point(*p).unwrap()).collect();
+            (vertices,mesh.faces.clone(),mesh.normals.clone(),mesh.colors.clone())
+        }).collect();
+        records.sort_by(|a,b|a.0[0][0].total_cmp(&b.0[0][0]));records
+    };
+    let expected=snapshot(controller.document());
+    let path=std::env::temp_dir().join(format!("om9-mirror-explode-{}.3dm",uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf);impl Drop for Cleanup{fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+    let (imported,doc_id,_)=import_fixture(&host,&path);let imported=document_of(&imported,doc_id);
+    assert_eq!(snapshot(&imported),expected);
+}
+
+#[test]
+#[ignore = "requires an admitted native reader/writer"]
+fn placed_editable_brep_roundtrips_through_3dm() {
+    use om9_kernel::creation::{self,Primitive};
+    let limits=Limits::default();let host=host();
+    let brep=creation::primitive(Primitive::Box{x_mm:2.,y_mm:3.,z_mm:4.},creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();
+    let mut entity=Entity::new("placed box",Geometry::Brep(brep),None);entity.placement=Transform::translation([4.,0.,0.]);
+    let mut doc=Document::with_template_tolerance("placed editable brep");doc.entities.insert(entity.id,entity);
+    let controller=Controller::new(doc,limits).unwrap();let path=std::env::temp_dir().join(format!("om9-placed-brep-{}.3dm",uuid::Uuid::new_v4()));
+    struct Cleanup(PathBuf);impl Drop for Cleanup {fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}let _cleanup=Cleanup(path.clone());
+    let receipt=host.export(controller.coordinator(),controller.document().id,&path,&Cancellation::default()).unwrap();
+    assert!(receipt.brep_fingerprints.as_ref().is_some_and(|p|p.exited && p.active_processes==0));
+    let options=ImportOptions{mode:ImportMode::Geometry,brep:BrepMode::RetainOpaque,..ImportOptions::default()};
+    let (mut c,id)=fresh_coordinator("reimport placed");host.import_with_options(&mut c,id,&path,&options,&Cancellation::default()).unwrap();std::fs::remove_file(path).unwrap();
+    let e=document_of(&c,id).entities.values().find(|e|matches!(e.geometry,Geometry::NativeBrep(_))).expect("retained box");
+    let Geometry::NativeBrep(native)=&e.geometry else{unreachable!()};let xs:Vec<_>=native.display.vertices.iter().map(|p|e.placement.point(*p).unwrap()[0]).collect();
+    let min=xs.iter().copied().fold(f64::INFINITY,f64::min);let max=xs.iter().copied().fold(f64::NEG_INFINITY,f64::max);
+    assert!((min-4.).abs()<1e-6 && (max-6.).abs()<1e-6,"{min} {max}");
+}

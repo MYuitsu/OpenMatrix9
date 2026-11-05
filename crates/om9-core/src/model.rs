@@ -870,7 +870,24 @@ impl Document {
             },
             l,
         )?;
-        total.add(e.geometry.validate(l)?, l)?;
+        let mut geometry = e.geometry.validate(l)?;
+        if let Geometry::Brep(brep) = &e.geometry {
+            if self.brep_source_seen_before(e, brep.source_allocation_key()) {
+                geometry.bytes = geometry.bytes.checked_sub(brep.source_allocation_bytes()?)
+                    .ok_or(Error::Overflow("shared BRep source accounting"))?;
+            }
+            if self.brep_display_seen_before(e, brep.display_allocation_key()) {
+                geometry.bytes = geometry.bytes.checked_sub(brep.display_allocation_bytes()?)
+                    .ok_or(Error::Overflow("shared BRep display accounting"))?;
+            }
+        }
+        if let Geometry::NativeBrep(brep) = &e.geometry {
+            if self.native_brep_payload_seen_before(e, brep.payload_allocation_key()) {
+                geometry.bytes = geometry.bytes.checked_sub(brep.payload_allocation_bytes()?)
+                    .ok_or(Error::Overflow("shared native BRep payload accounting"))?;
+            }
+        }
+        total.add(geometry, l)?;
         if let Geometry::Instance(id) = e.geometry
             && !self.definitions.contains_key(&id)
         {
@@ -914,15 +931,65 @@ impl Document {
     pub fn validate(&self, l: &Limits) -> Result<Usage> {
         self.validate_internal(l, true)
     }
+    /// Conservative owned bytes for cloning this document while the source
+    /// remains alive. Resource payloads, B-rep sources and native B-rep
+    /// payloads are Arc-backed and remain shared by Document::clone.
+    pub fn clone_owned_bytes_estimate(&self, l: &Limits) -> Result<u64> {
+        let mut bytes = self.validate(l)?.bytes;
+        for resource in self.resources.values() {
+            bytes = bytes.checked_sub(resource.payload()?.len() as u64)
+                .ok_or(Error::Overflow("clone shared resource accounting"))?;
+        }
+        for entity in self.entities.values().chain(self.definitions.values().flat_map(|d| &d.members)) {
+            let shared = match &entity.geometry {
+                Geometry::Brep(brep) if !self.brep_source_seen_before(entity, brep.source_allocation_key()) =>
+                    brep.source_allocation_bytes()?,
+                Geometry::NativeBrep(brep) if !self.native_brep_payload_seen_before(entity, brep.payload_allocation_key()) =>
+                    brep.payload_allocation_bytes()?,
+                _ => 0,
+            };
+            bytes = bytes.checked_sub(shared).ok_or(Error::Overflow("clone shared geometry accounting"))?;
+            if let Geometry::Brep(brep) = &entity.geometry
+                && !self.brep_display_seen_before(entity, brep.display_allocation_key()) {
+                bytes = bytes.checked_sub(brep.display_allocation_bytes()?)
+                    .ok_or(Error::Overflow("clone shared BRep display accounting"))?;
+            }
+        }
+        Ok(bytes)
+    }
     /// Archive preflight only: validate typed metadata and charge prospective
     /// embedded payload storage before hydration. Runtime owners use validate.
     pub fn validate_manifest(&self, l: &Limits) -> Result<Usage> {
         self.validate_internal(l, false)
     }
+    /// Estimate owned storage and the validation scratch admitted by this
+    /// document. This does not establish that the document is valid.
+    pub fn validation_peak_estimate(&self, l: &Limits, require_resource_payloads: bool) -> Result<Usage> {
+        let mut peak = self.storage_usage_internal(l, require_resource_payloads)?;
+        peak.add(self.validation_scratch_usage(l)?, l)?;
+        Ok(peak)
+    }
     /// Nonallocating inventory of immutable owned storage. Cross-document
     /// callers reserve every peer before any identity/graph validation scratch.
     pub(crate) fn storage_usage(&self, l: &Limits) -> Result<Usage> {
         self.storage_usage_internal(l, true)
+    }
+    fn brep_source_seen_before(&self, entity: &Entity, key: usize) -> bool {
+        // ponytail: allocation-free scan is quadratic in BRep count; use an
+        // admitted pointer index if large-document profiling justifies it.
+        self.entities.values().chain(self.definitions.values().flat_map(|d| &d.members))
+            .take_while(|prior| !std::ptr::eq(*prior, entity))
+            .any(|prior| matches!(&prior.geometry, Geometry::Brep(brep) if brep.source_allocation_key() == key))
+    }
+    fn brep_display_seen_before(&self, entity: &Entity, key: usize) -> bool {
+        self.entities.values().chain(self.definitions.values().flat_map(|d| &d.members))
+            .take_while(|prior| !std::ptr::eq(*prior, entity))
+            .any(|prior| matches!(&prior.geometry, Geometry::Brep(brep) if brep.display_allocation_key() == key))
+    }
+    fn native_brep_payload_seen_before(&self, entity: &Entity, key: usize) -> bool {
+        self.entities.values().chain(self.definitions.values().flat_map(|d| &d.members))
+            .take_while(|prior| !std::ptr::eq(*prior, entity))
+            .any(|prior| matches!(&prior.geometry, Geometry::NativeBrep(brep) if brep.payload_allocation_key() == key))
     }
     fn storage_usage_internal(&self, l: &Limits, payloads: bool) -> Result<Usage> {
         let mut total = Usage::array::<Self>(1)?;
@@ -1022,7 +1089,31 @@ impl Document {
                 },
                 l,
             )?;
-            total.add(entity.geometry.validate(l)?, l)?;
+            let mut geometry_usage = match &entity.geometry {
+                Geometry::Brep(brep) => {
+                    let mut usage = Usage::array::<Geometry>(1)?;
+                    usage.add(brep.storage_usage(l)?, l)?;
+                    usage
+                }
+                geometry => geometry.validate(l)?,
+            };
+            if let Geometry::Brep(brep) = &entity.geometry {
+                if self.brep_source_seen_before(entity, brep.source_allocation_key()) {
+                    geometry_usage.bytes = geometry_usage.bytes.checked_sub(brep.source_allocation_bytes()?)
+                        .ok_or(Error::Overflow("shared BRep source accounting"))?;
+                }
+                if self.brep_display_seen_before(entity, brep.display_allocation_key()) {
+                    geometry_usage.bytes = geometry_usage.bytes.checked_sub(brep.display_allocation_bytes()?)
+                        .ok_or(Error::Overflow("shared BRep display accounting"))?;
+                }
+            }
+            if let Geometry::NativeBrep(brep) = &entity.geometry {
+                if self.native_brep_payload_seen_before(entity, brep.payload_allocation_key()) {
+                    geometry_usage.bytes = geometry_usage.bytes.checked_sub(brep.payload_allocation_bytes()?)
+                        .ok_or(Error::Overflow("shared native BRep payload accounting"))?;
+                }
+            }
+            total.add(geometry_usage, l)?;
             if !entity.extensions.is_empty() {
                 total.add(
                     Usage::btree::<String, Extension>(entity.extensions.len())?,
@@ -1149,7 +1240,9 @@ impl Document {
         }
         Ok(())
     }
-    fn validation_scratch_usage(&self, l: &Limits) -> Result<Usage> {
+    /// Conservative temporary storage estimate for document validation. Owned
+    /// document storage is separate; allocator and native overhead are excluded.
+    pub fn validation_scratch_usage(&self, l: &Limits) -> Result<Usage> {
         let objects = self
             .definitions
             .values()

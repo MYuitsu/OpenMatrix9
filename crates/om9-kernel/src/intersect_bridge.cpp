@@ -41,12 +41,11 @@ int emit(IntCurvesFace_ShapeIntersector& inter, double u0, double u1, double* fr
     const double w = inter.WParameter(index);
     if (!std::isfinite(w)) continue;
     const double fraction = (w - u0) / (u1 - u0);
-    if (fraction > 1e-7 && fraction < 1.0 - 1e-7) hits.push_back(fraction);
+    if (fraction >= 0.0 && fraction <= 1.0) hits.push_back(fraction);
   }
   std::sort(hits.begin(), hits.end());
-  hits.erase(std::unique(hits.begin(), hits.end(),
-                         [](double a, double b) { return std::fabs(a - b) <= 1e-7; }),
-             hits.end());
+  // Rust merges near-duplicates using the actual world-space curve tolerance.
+  hits.erase(std::unique(hits.begin(), hits.end()), hits.end());
   if (hits.size() > capacity) {
     if (message && message_capacity > 0)
       std::snprintf(message, message_capacity, "curve/B-Rep intersection budget");

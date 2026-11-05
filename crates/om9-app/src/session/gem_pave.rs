@@ -966,7 +966,7 @@ impl Controller {
                     continue;
                 }
                 if lower == "reset" {
-                    session = reset_session(&session)?;
+                    session = reset_session(&session, self.coordinator.limits())?;
                     options = true;
                     continue;
                 }
@@ -1151,7 +1151,7 @@ fn correction(value: &str) -> Result<PaveCorrection> {
 }
 
 /// Reset every parameter of an open builder while keeping its host selection.
-pub fn reset_session(session: &GemPaveSession) -> Result<GemPaveSession> {
+pub fn reset_session(session: &GemPaveSession, limits: &Limits) -> Result<GemPaveSession> {
     let mut session = session.clone();
     session.quantity = None;
     session.kind = match &session.kind {
@@ -1161,6 +1161,6 @@ pub fn reset_session(session: &GemPaveSession) -> Result<GemPaveSession> {
         PaveKind::Sphere(params) => PaveKind::Sphere(SphereParams::new(params.spec.clone())?),
         PaveKind::Spring(_) => PaveKind::Spring(SpringParams::new()?),
     };
-    session.recompute(&Limits::default())?;
+    session.recompute(limits)?;
     Ok(session)
 }

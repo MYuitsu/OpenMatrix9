@@ -30,6 +30,24 @@ fn text(app: &mut MatrixApp, ctx: &egui::Context, value: &str) {
     frame(app, ctx, vec![Event::Text(value.into())]);
     frame(app, ctx, vec![key(Key::Enter, Modifiers::NONE)]);
 }
+
+#[test]
+fn ctrl_z_undoes_document_with_idle_command_focus_but_not_while_editing() {
+    let mut app = MatrixApp::new(Document::new("ctrl-z")).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]);
+    text(&mut app, &ctx, "Point");
+    text(&mut app, &ctx, "1,2,3");
+    assert_eq!(app.controller.document().entities.len(), 1);
+    let ctrl = Modifiers { ctrl: true, command: true, ..Modifiers::NONE };
+    frame(&mut app, &ctx, vec![Event::Text("draft".into())]);
+    frame(&mut app, &ctx, vec![key(Key::Z, ctrl)]);
+    assert_eq!(app.controller.document().entities.len(), 1, "text editing must not undo the document");
+    app.transcript.set_draft("");
+    frame(&mut app, &ctx, vec![key(Key::Z, ctrl)]);
+    assert!(app.controller.document().entities.is_empty());
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+}
 #[test]
 fn rendered_cmd_events_build_line_undo_redo_and_cancel_without_direct_model_writes() {
     let mut app = MatrixApp::new(Document::new("egui")).unwrap();

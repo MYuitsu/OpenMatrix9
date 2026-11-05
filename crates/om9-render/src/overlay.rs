@@ -37,6 +37,7 @@ pub struct OverlayBatch {
     buffers: Vec<wgpu::Buffer>,
     counts: Vec<u32>,
     model: [[f32; 4]; 4],
+    on_top: bool,
 }
 
 impl OverlayBatch {
@@ -47,6 +48,15 @@ impl OverlayBatch {
     /// A line pass whose pipeline matches a multisampled colour/depth pair: the grid is one pixel wide, so
     /// multisampling is what turns its diagonal edges into partial coverage instead of a staircase.
     pub fn with_samples(device: wgpu::Device, queue: wgpu::Queue, samples: u32) -> Self {
+        Self::with_depth_mode(device, queue, samples, false)
+    }
+
+    /// A selection-only pass that remains visible through the selected solid.
+    pub fn on_top(device: wgpu::Device, queue: wgpu::Queue, samples: u32) -> Self {
+        Self::with_depth_mode(device, queue, samples, true)
+    }
+
+    fn with_depth_mode(device: wgpu::Device, queue: wgpu::Queue, samples: u32, on_top: bool) -> Self {
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("overlay lines"),
             source: wgpu::ShaderSource::Wgsl(
@@ -129,7 +139,7 @@ impl OverlayBatch {
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: wgpu::TextureFormat::Depth32Float,
                 depth_write_enabled: Some(false),
-                depth_compare: Some(wgpu::CompareFunction::LessEqual),
+                depth_compare: Some(if on_top { wgpu::CompareFunction::Always } else { wgpu::CompareFunction::LessEqual }),
                 stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState::default(),
             }),
@@ -160,6 +170,7 @@ impl OverlayBatch {
             batch: LineBatch::default(),
             buffers: Vec::new(),
             counts: Vec::new(),
+            on_top,
             model: [
                 [1., 0., 0., 0.],
                 [0., 1., 0., 0.],
@@ -209,8 +220,9 @@ impl OverlayBatch {
         let buffers = self.buffers.clone();
         let counts = self.counts.clone();
         let model = self.model;
+        let on_top = self.on_top;
         Box::new(move || {
-            let mut fork = Self::with_samples(device, queue, samples);
+            let mut fork = Self::with_depth_mode(device, queue, samples, on_top);
             fork.buffers = buffers;
             fork.counts = counts;
             fork.model = model;
@@ -249,6 +261,12 @@ impl OverlayBatch {
     pub fn pending_upload_bytes(&self) -> usize {
         std::mem::size_of_val(self.batch.vertices.as_slice()).saturating_sub(self.upload_cursor)
     }
+    /// Allocated sizes of the currently held GPU vertex buffers.
+    pub fn gpu_buffer_capacity_bytes(&self) -> u64 {
+        self.buffers.iter().fold(0u64, |total, buffer| total.saturating_add(buffer.size()))
+    }
+    /// Actual vertex-buffer handles held by this batch, for opt-in GPU diagnostics.
+    pub fn gpu_buffer_handles(&self) -> &[wgpu::Buffer] { &self.buffers }
     pub fn flush_uploads_budget(
         &mut self,
         max_bytes: usize,
@@ -330,7 +348,7 @@ impl OverlayBatch {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("overlay wrapper"),
             });
-        self.encode_pass(
+        let _ = self.encode_pass(
             &mut encoder,
             colour_view,
             resolve_view,
@@ -351,13 +369,13 @@ impl OverlayBatch {
         camera: Camera,
         width: u32,
         height: u32,
-    ) {
+    ) -> Option<wgpu::Buffer> {
         self.flush_uploads_budget(
             usize::MAX,
             std::time::Instant::now() + std::time::Duration::from_secs(3600),
         );
         if self.buffers.is_empty() {
-            return;
+            return None;
         }
         let uniforms = Uniforms {
             view_projection: matrix_to_columns(
@@ -412,6 +430,7 @@ impl OverlayBatch {
                 pass.draw(0..*count, 0..1);
             }
         }
+        Some(buffer)
     }
 }
 

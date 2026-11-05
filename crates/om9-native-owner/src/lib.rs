@@ -17,6 +17,8 @@ use std::{
 pub mod dialog_probe;
 #[cfg(windows)]
 pub mod file_dialog;
+#[cfg(windows)]
+pub mod clipboard;
 mod verified_file;
 #[cfg(windows)]
 mod windows;
@@ -29,6 +31,10 @@ pub fn report_startup_failure(_title: &str, _message: &str) -> bool {
     false
 }
 pub use verified_file::VerifiedFile;
+mod system_memory;
+pub use system_memory::{CommitMemory, PhysicalMemory, ProcessMemory, commit_memory, physical_memory, physical_memory_bytes, process_memory};
+#[cfg(windows)]
+pub mod gpu_memory;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum FailureKind {
     Invalid(&'static str),

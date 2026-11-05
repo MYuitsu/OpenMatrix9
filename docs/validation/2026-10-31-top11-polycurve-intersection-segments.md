@@ -1,0 +1,11 @@
+# Top11 Split/Trim: polycurve segment intersections
+
+The sampled whole-curve intersection search missed both crossings in a connected, 600-segment polycurve with a short triangular peak. Rust now intersects each polycurve segment using its corresponding solver and maps each result back to the segment-uniform parent fraction, including a reversed parent. It merges duplicate results at shared joints while retaining separate visits to the same point at different fractions, and enforces the output budget. The core fixtures cover both argument orders, two polycurves, reversed parents, repeated visits and budget refusal. Nested polycurve segment evaluation remains unsupported.
+
+The regression initially returned zero instead of two crossings. CMD and toolbar tests for both Split and Trim now check the actual two boundaries, output counts, `.om9` roundtrip and Undo/Redo. With segment intersections enabled, the initial 600-segment application test was interrupted after more than three minutes: mutual Trim was repeatedly sampling disjoint collinear segment pairs. An instrumented rerun localized the delay to the trim pick. Parallel finite lines now use direct interval and distance checks; a substantial overlap is explicitly refused instead of manufacturing isolated intersections. The same four-route application test passed in 0.81 seconds after the fix, including `.om9` roundtrips. The timing is a local debug-test observation, not a general performance guarantee.
+
+The Split result also survived export to and import from real 3DM, preserving all three pieces and the two cut locations. The admitted native adapter SHA-256 was `bddca46577747333f9377b379351a077b710158f47ce6e279d7b6e21e6439615`. This interoperability check is not an openNURBS measurement batch.
+
+Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: 204 core library, 34 core Top11, 20 core curve/surface, 121 app Top11 and 83 app Top11 BRep tests passed; 121 no-default app Top11 tests passed with existing warnings. The `.om9` addition and the native 3DM case were also rerun individually after the main suite.
+
+General NURBS and other nonanalytic segment pairs still use sampled intersection; nested polycurves, overlap operations, worst-case segment-pair scaling, extreme precision and physical desktop acceptance remain open. The checks do not establish completion of Top11.

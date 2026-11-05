@@ -219,6 +219,24 @@
     "next": "surface/swapchain integration through eframe, then the wireframe and highlight passes"
   },
   "runtime_implementation": {
+    "gpu_serial_followup_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-published-scene-picking.md#gpu-suite-resource-follow-up-2026-11-04",
+      "scope": "26 GPU publication tests pass serially after resource-heavy parallel run was stopped",
+      "limitations": "Parallel noncompletion cause, physical presentation and desktop interaction remain unverified"
+    },
+    "vulkan_selected_device_memory_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-vulkan-selected-device-memory.md",
+      "scope": "Selected wgpu Vulkan device per-heap budget sampling for optional diagnostics",
+      "limitations": "No UMA classification, budget refresh, actual allocation enforcement or desktop evidence"
+    },
+    "dx12_selected_adapter_memory_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-dx12-selected-adapter-memory.md",
+      "scope": "Selected wgpu DX12 adapter DXGI memory sample for optional diagnostics",
+      "limitations": "Node 0 only; Vulkan/UMA classification and actual GPU budget enforcement remain open"
+    },
     "desktop_viewport_backend": "GPU_ONLY",
     "gpu_only_evidence": [
       "implementation/evidence/M02/2026-10-19-gpu-only.md",

@@ -14,9 +14,17 @@ impl Controller {
         if matches!(
             self.top11_pending,
             Some(
-                super::top11::Top11Pending::Move { .. }
+                super::top11::Top11Pending::Duplicate { .. }
+                    | super::top11::Top11Pending::Mirror { .. }
+                    | super::top11::Top11Pending::Move { .. }
                     | super::top11::Top11Pending::Rotate { .. }
                     | super::top11::Top11Pending::SplitPoint { .. }
+                    | super::top11::Top11Pending::SplitIso { .. }
+                    | super::top11::Top11Pending::TrimMany {
+                        fractions: Some(_),
+                        ..
+                    }
+                    | super::top11::Top11Pending::TrimMutual { .. }
             )
         ) {
             let plane = self.input_plane();
@@ -101,6 +109,37 @@ impl Controller {
         }
         if self.surface_pending.is_some() {
             return self.submit_surface_text(text);
+        }
+        if let Some(snappy) = super::gumball::parse_snappy(text) {
+            self.set_gumball_snappy(snappy);
+            self.events.emit(
+                crate::command_events::EventKind::Finished,
+                "Gumball",
+                if snappy { "snappy" } else { "smooth" },
+                None,
+            );
+            return Ok(());
+        }
+        if let Some(strength) = super::gumball::parse_drag_strength(text) {
+            let strength = strength?;
+            self.set_gumball_drag_strength(strength)?;
+            self.events.emit(
+                crate::command_events::EventKind::Finished,
+                "Gumball",
+                &format!("drag strength {}%", (strength * 100.0).round()),
+                None,
+            );
+            return Ok(());
+        }
+        if super::gumball::parse_restore_defaults(text) {
+            self.restore_gumball_defaults();
+            self.events.emit(
+                crate::command_events::EventKind::Finished,
+                "Gumball",
+                "defaults restored",
+                None,
+            );
+            return Ok(());
         }
         if let Some(command) = parse_gumball_placement(text) {
             match command {
@@ -404,6 +443,17 @@ impl Controller {
                 }
             }
             return Ok(());
+        }
+        // Matrix Line: at the end prompt a bare positive number is the length; the
+        // next direction pick then chooses where the endpoint goes.
+        if s.feature == LINE && s.start.is_some() {
+            if let Ok(value) = text.trim().parse::<f64>() {
+                if value.is_finite() && value > 0.0 {
+                    self.session.as_mut().expect("session").length_mm =
+                        Some(value * s.unit.factor());
+                    return Ok(());
+                }
+            }
         }
         // Typed world/local/relative input: the grammar, prompts and error labels are
         // unchanged, but a local point only becomes world through the captured frame.

@@ -1,0 +1,11 @@
+# STL weld distance and key range
+
+Follow-up: [authored mesh and generated-degenerate handling](2026-11-03-stl-weld-authored-mesh.md) narrows welding to generated geometry. The checks below describe the earlier batch.
+
+P3a partial implementation. Weld now groups candidates only within the same selected source, searches adjacent spatial cells and compares Euclidean distance before reusing an existing vertex. The radius is `min(1e-6 mm, document_absolute_tolerance / 10)`. The first matching previously retained vertex is selected deterministically by index. Source-count mismatches, invalid radius and cell coordinates outside the exactly representable integer grid are explicitly refused rather than using saturating integer casts. A refused export does not reach the destination replacement.
+
+Windows default features, including OCCT, `CARGO_TARGET_DIR=L:/om9-target`, Cargo `-j 2`: `cargo test -p om9-app -j 2 --lib weld_tests` passed 1 test; `cargo test -p om9-app -j 2 --test stl_export` passed 16 tests. The direct fixture checks adjacent-cell matching, a same-cell diagonal farther than the radius, source separation, a smaller document tolerance, very large coordinates and a mismatched source list. The integration suite includes B-rep sphere/native B-rep, display-profile independence, one sampled nonuniform sphere and STL destination checks.
+
+This limits the distance moved by an individual weld but does not identify topologically intended seams: unrelated close points in the same object may still be merged. Existing treatment of triangles collapsed by welding, full surface deviation, native error, boundary/coverage proofs, memory reservations and measured release performance remain open. The weld grid deliberately rejects coordinates whose scaled cell index reaches 2^52; it does not yet offer an alternative for those extreme coordinates. It uses extra per-cell vectors and up to 27 neighbor lookups per input point; the batch did not measure its CPU or peak-memory cost. No desktop session was touched.
+
+Next: distinguish native pole degenerates from valid authored features, use topology-aware seam ownership, and implement the explicit export profile and bounded geometry/error validation from `implementation/design/M01/viewport-export-separation-20261102/PLAN.md`.

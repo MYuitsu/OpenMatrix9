@@ -1,0 +1,7 @@
+# STL capture at invocation
+
+P3b partial: menu and typed command capture the immutable document and selected IDs when the STL export is invoked, before the quality dialog and native picker. The picker uses that capture; later ordinary edits or selection changes do not replace its source. Cancel, Escape, New/Open requests and window-close requests discard a pending capture. A different active document is also detected on the next UI frame. A second request while a capture is pending reports busy.
+
+Windows, default OCCT/openNURBS features, `CARGO_TARGET_DIR=L:/om9-target`, Cargo `-j 2`: five headless egui STL tests and 22 STL integration tests passed. The menu test captures a 10 mm box, adds another box, changes selection and deletes the original, then checks the captured export still spans 10 mm; it also checks New cancels. A separate headless close-request test checks capture cleanup, and existing tests cover menu/CMD entry and Escape. Open cancellation and actual native picker/desktop interactions have not been independently exercised.
+
+This remains synchronous: the native picker and tessellation still block the UI, the captured document remains held through them, and no worker or in-flight cancellation exists. The capture holds the entire shared document and is not registered in the managed-memory budget. New/Open/close cancellation here applies to the pending UI stage, not a background job. Export accuracy, memory/GPU budgeting, checkpoints and the remaining plan gates are incomplete; the live OM9 session was untouched.

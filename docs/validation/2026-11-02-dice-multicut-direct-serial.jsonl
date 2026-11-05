@@ -1,0 +1,25 @@
+{"event": "cavity_prepared", "elapsed_s": 0.558, "face": 1, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 0.808, "face": 6, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 1.152, "face": 6, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 1.596, "face": 6, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 2.118, "face": 6, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 2.761, "face": 6, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 3.567, "face": 6, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 4.406, "face": 2, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 5.313, "face": 2, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 6.312, "face": 5, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 7.376, "face": 5, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 8.514, "face": 5, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 9.75, "face": 5, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 11.074, "face": 5, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 12.525, "face": 3, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 14.039, "face": 3, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 15.651, "face": 3, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 17.36, "face": 4, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 19.13, "face": 4, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 21.027, "face": 4, "index": null}
+{"event": "cavity_prepared", "elapsed_s": 23.026, "face": 4, "index": null}
+{"event": "saved", "elapsed_s": 24.78, "undo": 43}
+{"event": "geometry", "elapsed_s": 25.182, "sha256": "22ce14cab9bf89e8e5b5a45b806ce1196f8d44b2b16bec5645a0ba4f3783a23f", "faces": 31, "mesh_volume": 7852.342791869271, "ideal_volume": 7851.559747117883}
+{"event": "undo_verified", "elapsed_s": 25.419, "objects": 2, "undo": 42}
+{"event": "redo_verified", "elapsed_s": 26.04, "objects": 1, "sha256": "22ce14cab9bf89e8e5b5a45b806ce1196f8d44b2b16bec5645a0ba4f3783a23f"}

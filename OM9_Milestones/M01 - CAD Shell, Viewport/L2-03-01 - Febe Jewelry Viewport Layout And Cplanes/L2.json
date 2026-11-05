@@ -83,6 +83,12 @@
     }
   ],
   "runtime_implementation": {
+    "side_grid_axis_colours_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Colour the default Side View world Y grid axis blue and horizontal and world Z yellow and vertical.",
+      "evidence": "docs/validation/2026-11-03-side-view-grid-axis-colours.md",
+      "limitations": "Exact Right CPlane orientation; arbitrary CPlanes and desktop appearance remain unverified."
+    },
     "date": "2026-10-19",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

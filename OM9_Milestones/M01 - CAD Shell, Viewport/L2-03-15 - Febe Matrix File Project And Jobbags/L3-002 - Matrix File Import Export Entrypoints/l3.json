@@ -213,6 +213,12 @@
     }
   ],
   "runtime_implementation": {
+    "stl_entrypoint_2026_11_01": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-01-command-checklist-audit.md",
+      "scope": "FileExportSelected (OM9-FILE-001) is enabled and reaches the same Controller export through the File menu, the typed ExportSTL alias and the MCP om9_export_stl tool; the native .stl dialog filter and owned-Window accept probe are tested.",
+      "limitations": "The real Windows .stl Save dialog passed an owned-HWND accept probe; M01-UI manual review remains pending."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

@@ -311,6 +311,35 @@ fn double_enter_applies_once_and_reset_creates_no_journal_entry() {
 }
 
 #[test]
+fn builder_memory_refusal_keeps_preview_document_and_retry() {
+    use om9_core::budget::memory::MemoryClass;
+    let (document, rail, _, _) = document();
+    let limits = Limits { max_bytes: 2 * 1024 * 1024, ..Limits::default() };
+    let mut controller = Controller::new(document, limits).unwrap();
+    controller.select_objects(&[rail]).unwrap();
+    controller.submit("RailProfile").unwrap();
+    controller.submit("Width=3").unwrap();
+    let held = controller.scene_cache_usage().unwrap();
+    let (mut low, mut high) = (0u64, limits.max_bytes);
+    while low < high {
+        let mid = low + (high - low + 1) / 2;
+        let trial = controller.coordinator().reserve_external_memory_with_held(MemoryClass::Export, mid, None, held);
+        if trial.is_ok() { low = mid; } else { high = mid - 1; }
+    }
+    let reservation = controller.coordinator().reserve_external_memory_with_held(MemoryClass::Export, low, None, held).unwrap();
+    let before = controller.coordinator().snapshot();
+    let epoch = controller.scene().unwrap().epoch;
+    assert!(controller.submit("").is_err());
+    assert_eq!(controller.coordinator().snapshot(), before);
+    assert_eq!(controller.scene().unwrap().epoch, epoch);
+    assert_eq!(controller.builder().unwrap().field("width_mm").unwrap().numeric(), Some(3.0));
+    drop(reservation);
+    controller.submit("").unwrap();
+    assert!(controller.builder().is_none());
+    assert_eq!(controller.coordinator().undo_len(), 1);
+}
+
+#[test]
 fn escape_after_preview_edits_leaves_the_document_bytewise_unchanged() {
     let (mut controller, _rail) = controller_with_rail();
     let before = controller.document().clone();

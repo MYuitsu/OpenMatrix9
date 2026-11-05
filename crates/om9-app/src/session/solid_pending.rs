@@ -1347,23 +1347,27 @@ impl SolidPending {
             };
         }
         if self.box_mode {
+            // One punctuation rule for every Box prompt: no space before the final colon.
             return match (self.points.len(), self.box_kind) {
-                (0, "Center") => "Center of base",
-                (0, "ThreePoint" | "Vertical") => "Start of edge",
-                (0, _) => "First corner of base ( Diagonal 3Point Vertical Center ) :",
-                (1, "Diagonal") => "Other corner of base or length ( 3Point ) :",
-                (1, "Cube") => "Other corner of box",
-                (1, "ThreePoint" | "Vertical") => "End of first edge or Length",
+                (0, "Center") => "Center of base:",
+                (0, "ThreePoint" | "Vertical") => "Start of edge:",
+                (0, _) => "First corner of base ( Diagonal 3Point Vertical Center ):",
+                (1, "Diagonal") => "Other corner of base or length ( 3Point ):",
+                (1, "Cube") => "Other corner of box:",
+                (1, "ThreePoint" | "Vertical") => "End of first edge or Length:",
                 (1, "Center") if self.box_length > 0.0 && self.box_width.is_none() => {
-                    "Width. Press Enter to use length"
+                    "Width. Press Enter to use length:"
                 }
-                (1, "Center") if self.box_length > 0.0 => "Height. Press Enter to use width",
-                (1, "Center") => "Other corner of base or length",
-                (1, _) => "Other corner of base or length ( 3Point ) :",
-                (_, "ThreePoint" | "Vertical") if self.box_width.is_none() => {
-                    "Width. Press Enter to use length"
+                (1, "Center") if self.box_length > 0.0 => "Height. Press Enter to use width:",
+                (1, "Center") => "Other corner of base or length:",
+                (1, _) => "Other corner of base or length ( 3Point ):",
+                (_, "ThreePoint") if self.box_width.is_none() => {
+                    "Width. Press Enter to use length ( 3Point ):"
                 }
-                (_, "Cube") => "Press Enter to create the cube",
+                (_, "Vertical") if self.box_width.is_none() => {
+                    "Width. Press Enter to use length ( Vertical ):"
+                }
+                (_, "Cube") => "Press Enter to create the cube:",
                 _ => "Height. Press Enter to use width:",
             };
         }

@@ -182,6 +182,24 @@ fn scaling_is_independent_of_the_number_of_pointer_samples() {
     }
 }
 #[test]
+fn picking_index_follows_gumball_preview_and_its_cancellation() {
+    use om9_scene::{camera::Camera, scene::{PickIntent, PickKind}};
+    let (mut app, _, id) = app();
+    let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
+    let camera = |x| Camera::orthographic([x, 0., 100.], [x, 0., 0.], [0., 1., 0.], 40.).unwrap();
+    let pick = |app: &MatrixApp, x| {
+        app.controller.scene().unwrap().pick_kind(
+            [300., 300.], &camera(x), viewport, 5., PickIntent::Select, PickKind::Object,
+        ).unwrap().map(|hit| hit.root)
+    };
+    assert_eq!(pick(&app, 0.), Some(id), "warm the original spatial index");
+    app.controller.preview_gumball(Transform::translation([1000., 0., 0.])).unwrap();
+    assert_eq!(pick(&app, 1000.), Some(id), "the index must include the displayed preview");
+    app.controller.clear_gumball_preview();
+    assert_eq!(pick(&app, 0.), Some(id), "cancel must restore the original picking bounds");
+}
+
+#[test]
 fn losing_selection_cancels_the_preview_and_preserves_old_redo() {
     let (mut app, ctx, id) = app();
     app.controller.numeric_move([1., 0., 0.]).unwrap();
@@ -285,33 +303,131 @@ fn tapping_alt_during_a_drag_copies_and_tapping_twice_restores_move() {
 
 #[test]
 fn losing_window_focus_discards_the_gesture_without_publication() {
+    for view in [ViewId::LookingDown, ViewId::Perspective] {
+        let (mut app, ctx, id) = app();
+        app.controller.workspace.active = view;
+        let p = move_start(&app, view, 0);
+        let start = screen(&app, view, p);
+        let end = screen(&app, view, [p[0] + 3., 0., 0.]);
+        button(&mut app, &ctx, start, true);
+        events(&mut app, &ctx, vec![Event::PointerMoved(end)]);
+        assert_ne!(
+            app.controller.scene().unwrap().objects[0].display_transform().unwrap(),
+            Transform::identity(),
+            "the drag must have started in {view:?}"
+        );
+        let mut output = ctx.run_ui(
+            egui::RawInput {
+                focused: false,
+                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 720.))),
+                events: vec![Event::WindowFocused(false)],
+                ..Default::default()
+            },
+            |ui| app.show(ui),
+        );
+        output.textures_delta.clear();
+        button(&mut app, &ctx, end, false);
+        near(
+            app.controller.document().entities[&id].placement,
+            Transform::identity(),
+        );
+        near(
+            app.controller.scene().unwrap().objects[0]
+                .display_transform()
+                .unwrap(),
+            Transform::identity(),
+        );
+        assert_eq!(app.controller.coordinator().undo_len(), 0);
+    }
+}
+
+#[test]
+fn perspective_drag_continues_outside_viewport_and_commits_release_position() {
     let (mut app, ctx, id) = app();
-    let view = ViewId::LookingDown;
+    let view = ViewId::Perspective;
+    app.controller.workspace.active = view;
+    let p = move_start(&app, view, 0);
+    let start = screen(&app, view, p);
+    let end = screen(&app, view, [p[0] + 80., 0., 0.]);
+    assert!(!app.view_rects[&view].contains(end), "fixture must leave the viewport");
+    button(&mut app, &ctx, start, true);
+    events(&mut app, &ctx, vec![Event::PointerMoved(end)]);
+    button(&mut app, &ctx, end, false);
+    near(app.controller.document().entities[&id].placement, Transform::translation([80., 0., 0.]));
+    assert_eq!(app.controller.coordinator().undo_len(), 1);
+}
+
+#[test]
+fn perspective_escape_during_drag_discards_preview_and_preserves_selection() {
+    let (mut app, ctx, id) = app();
+    let view = ViewId::Perspective;
+    app.controller.workspace.active = view;
     let p = move_start(&app, view, 0);
     let start = screen(&app, view, p);
     let end = screen(&app, view, [p[0] + 3., 0., 0.]);
     button(&mut app, &ctx, start, true);
     events(&mut app, &ctx, vec![Event::PointerMoved(end)]);
-    let mut output = ctx.run_ui(
-        egui::RawInput {
-            focused: false,
-            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 720.))),
-            events: vec![Event::WindowFocused(false)],
-            ..Default::default()
-        },
-        |ui| app.show(ui),
-    );
-    output.textures_delta.clear();
+    assert_ne!(app.controller.scene().unwrap().objects[0].display_transform().unwrap(), Transform::identity());
+    events(&mut app, &ctx, vec![Event::Key { key: egui::Key::Escape, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::NONE }]);
     button(&mut app, &ctx, end, false);
-    near(
-        app.controller.document().entities[&id].placement,
-        Transform::identity(),
-    );
-    near(
-        app.controller.scene().unwrap().objects[0]
-            .display_transform()
-            .unwrap(),
-        Transform::identity(),
-    );
+    near(app.controller.document().entities[&id].placement, Transform::identity());
+    near(app.controller.scene().unwrap().objects[0].display_transform().unwrap(), Transform::identity());
+    assert!(app.controller.selected().contains(&id));
     assert_eq!(app.controller.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn changing_active_view_during_drag_immediately_discards_preview() {
+    let (mut app, ctx, id) = app();
+    let view = ViewId::Perspective;
+    app.controller.workspace.active = view;
+    let p = move_start(&app, view, 0);
+    let start = screen(&app, view, p);
+    let end = screen(&app, view, [p[0] + 3., 0., 0.]);
+    button(&mut app, &ctx, start, true);
+    events(&mut app, &ctx, vec![Event::PointerMoved(end)]);
+    assert_ne!(app.controller.scene().unwrap().objects[0].display_transform().unwrap(), Transform::identity());
+    app.controller.workspace.active = ViewId::LookingDown;
+    events(&mut app, &ctx, vec![]);
+    near(app.controller.scene().unwrap().objects[0].display_transform().unwrap(), Transform::identity());
+    button(&mut app, &ctx, end, false);
+    near(app.controller.document().entities[&id].placement, Transform::identity());
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
+    app.controller.workspace.active = view;
+    events(&mut app, &ctx, vec![]);
+    let start = screen(&app, view, p);
+    let end = screen(&app, view, [p[0] + 2., 0., 0.]);
+    button(&mut app, &ctx, start, true);
+    events(&mut app, &ctx, vec![Event::PointerMoved(end)]);
+    button(&mut app, &ctx, end, false);
+    near(app.controller.document().entities[&id].placement, Transform::translation([2., 0., 0.]));
+    assert_eq!(app.controller.coordinator().undo_len(), 1);
+}
+
+#[test]
+fn changing_perspective_camera_during_drag_immediately_discards_preview() {
+    let (mut app, ctx, id) = app();
+    let view = ViewId::Perspective;
+    app.controller.workspace.active = view;
+    let p = move_start(&app, view, 0);
+    let start = screen(&app, view, p);
+    let end = screen(&app, view, [p[0] + 3., 0., 0.]);
+    button(&mut app, &ctx, start, true);
+    events(&mut app, &ctx, vec![Event::PointerMoved(end)]);
+    assert_ne!(app.controller.scene().unwrap().objects[0].display_transform().unwrap(), Transform::identity());
+    app.controller.workspace.views.get_mut(&view).unwrap().camera.eye[0] += 5.;
+    events(&mut app, &ctx, vec![]);
+    near(app.controller.scene().unwrap().objects[0].display_transform().unwrap(), Transform::identity());
+    button(&mut app, &ctx, end, false);
+    near(app.controller.document().entities[&id].placement, Transform::identity());
+    assert_eq!(app.controller.coordinator().undo_len(), 0);
+    events(&mut app, &ctx, vec![]);
+    let p = move_start(&app, view, 0);
+    let start = screen(&app, view, p);
+    let end = screen(&app, view, [p[0] + 2., 0., 0.]);
+    button(&mut app, &ctx, start, true);
+    events(&mut app, &ctx, vec![Event::PointerMoved(end)]);
+    button(&mut app, &ctx, end, false);
+    near(app.controller.document().entities[&id].placement, Transform::translation([2., 0., 0.]));
+    assert_eq!(app.controller.coordinator().undo_len(), 1);
 }

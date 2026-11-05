@@ -6,7 +6,6 @@
 //! through the overlay line pass, meshes through the scene batch; the result is the viewport image
 //! a reader can open, never an OS screenshot.
 use crate::session::Controller;
-use om9_archive::Archive;
 use om9_core::{Error, Result, budget::Limits};
 use om9_render::{Frame, LayerLine, LayerMesh, LayerPoint, MeshData, Renderer};
 use om9_scene::scene::{RenderBuffers, Scene};
@@ -65,9 +64,7 @@ fn render_frames(project: &Path, width: u32, height: u32) -> Result<Vec<(&'stati
     if width == 0 || height == 0 {
         return Err(Error::Invalid("render size"));
     }
-    let limits = Limits::default();
-    let restored = Archive::open_restored(project, &limits, &std::collections::BTreeSet::new())?;
-    let controller = Controller::new(restored.document, limits)?;
+    let controller = open_render_project(project, crate::document_limits())?;
     let scene = controller.scene().ok_or(Error::Missing("render scene"))?;
     let (meshes, lines, points) = layers(scene)?;
     let mut renderer = Renderer::new().ok_or(Error::Unsupported("headless GPU adapter"))?;
@@ -104,6 +101,13 @@ fn render_frames(project: &Path, width: u32, height: u32) -> Result<Vec<(&'stati
         frames.push((title, frame));
     }
     Ok(frames)
+}
+
+// Use the same bounded, reserved Open lifecycle as the interactive application.
+// Loading directly before constructing the Controller bypasses that shared
+// admission path and used to impose the unrelated 256 MiB default on renders.
+fn open_render_project(project: &Path, limits: Limits) -> Result<Controller> {
+    Controller::open_archive_for_batch(project, limits)
 }
 
 /// Parses the optional `WIDTHxHEIGHT` argument.
@@ -213,4 +217,35 @@ fn slug(title: &str) -> String {
         .collect::<String>()
         .trim_matches('-')
         .to_owned()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use om9_core::{model::Document, resource::{Resource, ResourceKind}, transaction::Cancellation};
+
+    #[test]
+    fn render_open_uses_caller_budget_and_preserves_input() {
+        const MIB: u64 = 1024 * 1024;
+        struct Cleanup(PathBuf);
+        impl Drop for Cleanup { fn drop(&mut self) { let _ = std::fs::remove_file(&self.0); } }
+        // Headless rendering historically accepts valid archives without a
+        // specific extension; the file-picker's extension rule must not leak in.
+        let path = Cleanup(std::env::temp_dir().join(format!("om9-headless-budget-{}.fixture", uuid::Uuid::new_v4())));
+        let limits = Limits { max_bytes: 32 * MIB, ..Limits::default() };
+        let resource = Resource::from_bytes("fixture", ResourceKind::OpaqueBinary, &vec![0x5a; 2 * MIB as usize], &limits).unwrap();
+        let id = resource.id;
+        let digest = resource.sha256();
+        let mut document = Document::with_template_tolerance("render budget");
+        document.resources.insert(id, resource);
+        om9_archive::Archive::save(&path.0, &document, &limits, &Cancellation::default()).unwrap();
+        let before = std::fs::read(&path.0).unwrap();
+        let small = Limits { max_bytes: MIB, ..limits };
+        assert!(open_render_project(&path.0, small).is_err());
+        assert_eq!(std::fs::read(&path.0).unwrap(), before);
+        let opened = open_render_project(&path.0, limits).unwrap();
+        assert_eq!(opened.document().name, "render budget");
+        assert_eq!(opened.document().resources[&id].sha256(), digest);
+        assert_eq!(std::fs::read(&path.0).unwrap(), before);
+    }
 }

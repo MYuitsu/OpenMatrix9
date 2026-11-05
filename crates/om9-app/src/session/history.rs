@@ -162,7 +162,8 @@ impl Controller {
             .get(&id)
             .cloned()
             .ok_or(Error::Missing("history recipe"))?;
-        let prepared = self.coordinator.prepare(TransactionRequest::new(
+        let held = self.scene_cache_usage()?;
+        let prepared = self.coordinator.prepare_with_held_usage(TransactionRequest::new(
             "Clear History",
             vec![Mutation::HistoryUpdate {
                 document: self.document,
@@ -170,11 +171,10 @@ impl Controller {
                 recipes: vec![Box::new(recipe)],
                 published: vec![],
             }],
-        ))?;
-        let before = self.document().clone();
-        let receipt = self.coordinator.commit(prepared)?;
+        ), held)?;
+        let before = self.coordinator.capture_retained_document(self.document)?;
+        let receipt = self.commit_with_candidate_scene(prepared, held)?;
         if receipt.published {
-            self.refresh_scene()?;
             self.record_history_change(&before, ChangeCause::Edit);
             self.sync_published(ChangeCause::Edit);
         }

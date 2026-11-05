@@ -216,6 +216,30 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
+    "same_layer_overlay_press_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-perspective-gumball-early-gate.md#same-layer-overlay-press",
+      "scope": "Reject a batched Gumball press covered by a registered same-layer interactive widget",
+      "limitations": "One offscreen axis and sequence; dynamic controls, other handles, cost and desktop remain unverified"
+    },
+    "published_camera_press_race_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Keep the published camera for a primary-button gesture through release while allowing GPU preview preparation; resume the current camera afterward.",
+      "evidence": "docs/validation/2026-11-03-perspective-gumball-early-gate.md",
+      "limitations": "Combined synthetic egui/offscreen GPU regression reproduced the race. An isolated release desktop trial with synthetic Windows pointer input moved a box in Perspective, verified Undo visually, and repeated the drag after zoom. It does not establish physical-pointer behavior, the precise race on desktop, or full resolution of the user's reported failure."
+    },
+    "pivot_cache_2026_11_02": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Reuse the exact selected-geometry centre while document, scene epoch and selection are unchanged; retain alignment and relocated-origin semantics.",
+      "evidence": "docs/validation/2026-11-02-gumball-reference-pivot-cache.md",
+      "limitations": "Visible debug zoom still below 30 FPS; physical pointer and release performance remain open."
+    },
+    "snappy_drag_2026_11_01": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-01-command-checklist-audit.md and docs/validation/2026-11-01-gumball-os-gpu.json",
+      "scope": "Gumball Snappy follows the active object-snap candidate during a drag; selected objects are excluded and Move handles use the exact 3D world point while axis/plane handles keep their constraints. Drag strength 1-200%, Gumball Snappy/Smooth, a settings window (axes, reset pivot, defaults), application-scoped persistence of Snappy/strength/alignment, and an OS-mouse/GPU acceptance harness are implemented.",
+      "limitations": "The OS-mouse/GPU acceptance uses synthetic Win32 input and an audit-only focus bypass, not a physical mouse; human review remains open."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

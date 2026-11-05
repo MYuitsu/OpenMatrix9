@@ -1,0 +1,32 @@
+{"event": "start", "elapsed_s": 0.851, "binary": "L:\\om9-target\\debug\\om9.exe"}
+{"event": "box", "elapsed_s": 0.862}
+{"event": "cavity", "elapsed_s": 1.274, "face": 1, "index": 1, "seconds": 0.412}
+{"event": "face", "elapsed_s": 1.274, "face": 1, "seconds": 0.412}
+{"event": "cavity", "elapsed_s": 1.951, "face": 6, "index": 2, "seconds": 0.677}
+{"event": "cavity", "elapsed_s": 3.07, "face": 6, "index": 3, "seconds": 1.119}
+{"event": "cavity", "elapsed_s": 4.862, "face": 6, "index": 4, "seconds": 1.792}
+{"event": "cavity", "elapsed_s": 7.144, "face": 6, "index": 5, "seconds": 2.282}
+{"event": "cavity", "elapsed_s": 10.391, "face": 6, "index": 6, "seconds": 3.246}
+{"event": "cavity", "elapsed_s": 14.752, "face": 6, "index": 7, "seconds": 4.362}
+{"event": "face", "elapsed_s": 14.753, "face": 6, "seconds": 13.478}
+{"event": "cavity", "elapsed_s": 19.935, "face": 2, "index": 8, "seconds": 5.182}
+{"event": "cavity", "elapsed_s": 26.36, "face": 2, "index": 9, "seconds": 6.426}
+{"event": "face", "elapsed_s": 26.36, "face": 2, "seconds": 11.608}
+{"event": "cavity", "elapsed_s": 34.052, "face": 5, "index": 10, "seconds": 7.692}
+{"event": "cavity", "elapsed_s": 43.896, "face": 5, "index": 11, "seconds": 9.844}
+{"event": "cavity", "elapsed_s": 55.156, "face": 5, "index": 12, "seconds": 11.26}
+{"event": "cavity", "elapsed_s": 68.716, "face": 5, "index": 13, "seconds": 13.56}
+{"event": "cavity", "elapsed_s": 84.322, "face": 5, "index": 14, "seconds": 15.606}
+{"event": "face", "elapsed_s": 84.322, "face": 5, "seconds": 57.962}
+{"event": "cavity", "elapsed_s": 104.68, "face": 3, "index": 15, "seconds": 20.357}
+{"event": "cavity", "elapsed_s": 122.848, "face": 3, "index": 16, "seconds": 18.168}
+{"event": "cavity", "elapsed_s": 142.172, "face": 3, "index": 17, "seconds": 19.324}
+{"event": "face", "elapsed_s": 142.172, "face": 3, "seconds": 57.85}
+{"event": "cavity", "elapsed_s": 162.856, "face": 4, "index": 18, "seconds": 20.684}
+{"event": "cavity", "elapsed_s": 185.601, "face": 4, "index": 19, "seconds": 22.746}
+{"event": "cavity", "elapsed_s": 210.626, "face": 4, "index": 20, "seconds": 25.025}
+{"event": "cavity", "elapsed_s": 238.094, "face": 4, "index": 21, "seconds": 27.468}
+{"event": "face", "elapsed_s": 238.094, "face": 4, "seconds": 95.922}
+{"event": "saved", "elapsed_s": 239.924, "seconds": 1.83, "cavities": 21, "result": {"bytes": 2666159, "saved": "H:\\OpenMatrix9\\build\\dice-21-undo-optimized-2026-11-02\\dice.om9", "state": {"benchmark_no_undo": false, "command": {"feature": null, "options": [], "phase": "Idle", "prompt": "Command: ", "repeat": "OM9-SOLID-014", "running": false}, "document": {"current_layer": null, "id": "ab85eb71-697d-4cb8-8436-f1069968c2ff", "layers": 0, "name": "Dice 20mm - 21 recessed pips", "objects": 1, "path": "H:\\OpenMatrix9\\build\\dice-21-undo-optimized-2026-11-02\\dice.om9", "revision": 44}, "last_change": {"cause": "Edit", "changes": ["EntityRemoved(ObjectId(97c46170-8bc3-411b-8808-6e667c944811))", "EntityRemoved(ObjectId(dd8d5809-58cd-48f9-8580-d5adfea3cefd))", "EntityAdded(ObjectId(5dc22831-3757-4363-86c8-c0d4b20f9cd7))"], "from_revision": 43, "to_revision": 44}, "layers": [], "objects": [], "objects_total": 1, "objects_truncated": true, "redo": 0, "selection": [{"id": "5dc22831-3757-4363-86c8-c0d4b20f9cd7", "label": "Boolean Two Objects"}], "undo": 43}}}
+{"event": "report_written", "elapsed_s": 240.268}
+{"event": "undo_redo_verified", "elapsed_s": 251.556}

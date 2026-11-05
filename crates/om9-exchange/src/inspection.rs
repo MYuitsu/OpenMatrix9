@@ -9,10 +9,59 @@ use om9_core::{
     model::{Document, Entity},
 };
 use serde_json::Value;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
+pub(crate) type ExpectedBreps = BTreeMap<ObjectId, (u32, usize)>;
 const DEFAULT_LAYER: &str = "ffffffff-ffff-4fff-8fff-ffffffffffff";
+pub(crate) fn expected_breps(document: &Document, bytes: &[u8], limits: &Limits) -> Result<ExpectedBreps> {
+    let mut usage = om9_archive::admit_json_usage(bytes, limits)?;
+    let entities = || document.entities.values().chain(document.definitions.values().flat_map(|d| &d.members));
+    let count = entities().filter(|e| matches!(e.geometry, Geometry::NativeBrep(_))).count();
+    usage.add(Usage::btree::<ObjectId, u32>(count)?, limits)?;
+    usage.add(Usage::btree::<ObjectId, (u32, usize)>(count)?, limits)?;
+    let root: Value = serde_json::from_slice(bytes).map_err(|_| invalid())?;
+    fields(&root, &["schema_version", "status", "objects"])?;
+    if root["schema_version"] != 1 || root["status"] != "expected_brep_fingerprints" {
+        return Err(invalid());
+    }
+    let ids: BTreeMap<_, _> = entities().filter_map(|e| match &e.geometry {
+        Geometry::NativeBrep(b) => Some((e.id, b.crc)),
+        _ => None,
+    }).collect();
+    let objects = array(&root["objects"])?;
+    if objects.len() != ids.len() { return Err(invalid()); }
+    let mut result = ExpectedBreps::new();
+    for value in objects {
+        fields(value, &["id", "source_crc", "crc", "payload_bytes"])?;
+        let id = ObjectId(id(&value["id"])?);
+        let crc = value["crc"].as_u64().and_then(|x| u32::try_from(x).ok()).ok_or_else(invalid)?;
+        let size = value["payload_bytes"].as_u64().filter(|n| *n > 0 && *n <= limits.max_bytes)
+            .and_then(|n| usize::try_from(n).ok()).ok_or_else(invalid)?;
+        if !ids.contains_key(&id) || value["source_crc"].as_u64() != ids.get(&id).map(|n| u64::from(*n))
+            || result.insert(id, (crc, size)).is_some() {
+            return Err(invalid());
+        }
+    }
+    Ok(result)
+}
 fn invalid() -> Error {
     Error::Invalid("native geometry correspondence")
+}
+fn verify_model_tolerance(document: &Document, root: &Value) -> Result<()> {
+    if let Some(actual) = root.get("model_tolerance") {
+        fields(actual, &["absolute_mm", "relative", "angular_rad"])?;
+        let absolute = actual["absolute_mm"].as_f64().filter(|v| v.is_finite() && *v > 0.).ok_or_else(invalid)?;
+        let relative = actual["relative"].as_f64().filter(|v| v.is_finite() && *v > 0. && *v < 1.).ok_or_else(invalid)?;
+        let angular = actual["angular_rad"].as_f64().filter(|v| v.is_finite() && *v > 0. && *v <= std::f64::consts::PI).ok_or_else(invalid)?;
+        let _ = (absolute, relative, angular);
+    }
+    if let Some(tolerance) = document.tolerance() {
+        let actual = root.get("model_tolerance").ok_or_else(invalid)?;
+        fields(actual, &["absolute_mm", "relative", "angular_rad"])?;
+        for (name, expected) in [("absolute_mm", tolerance.absolute_mm), ("relative", tolerance.relative), ("angular_rad", tolerance.angular_rad)] {
+            if actual[name].as_f64() != Some(expected) { return Err(invalid()); }
+        }
+    }
+    Ok(())
 }
 fn array(v: &Value) -> Result<&[Value]> {
     v.as_array().map(Vec::as_slice).ok_or_else(invalid)
@@ -72,6 +121,29 @@ fn points(v: &Value, want: &[Point3], t: Transform, normal: bool) -> Result<()> 
             },
             if normal { 2e-6 } else { 1e-10 },
         )?;
+    }
+    Ok(())
+}
+// A fixed absolute tolerance can exceed an entire small curve. Scale the
+// geometric allowance by its extent and separately admit transform roundoff.
+fn curve_extent(points: &[Point3], t: Transform) -> Result<Point3> {
+    let first = t.point(*points.first().ok_or_else(invalid)?)?;
+    let (mut lo, mut hi) = (first, first);
+    for p in &points[1..] {
+        let p = t.point(*p)?;
+        for i in 0..3 { lo[i] = lo[i].min(p[i]); hi[i] = hi[i].max(p[i]); }
+    }
+    Ok(std::array::from_fn(|i| hi[i] - lo[i]))
+}
+fn curve_point(v: &Value, p: Point3, t: Transform, extent: Point3) -> Result<()> {
+    let actual = array(v)?;
+    if actual.len() != 3 { return Err(invalid()); }
+    let expected = t.point(p)?;
+    for i in 0..3 {
+        let value = actual[i].as_f64().filter(|n| n.is_finite()).ok_or_else(invalid)?;
+        let roundoff = t.0[i][3].abs() + (0..3).map(|j| (t.0[i][j] * p[j]).abs()).sum::<f64>();
+        let tolerance = 1e-10 * extent[i] + 32. * f64::EPSILON * roundoff;
+        if !tolerance.is_finite() || (value - expected[i]).abs() > tolerance { return Err(invalid()); }
     }
     Ok(())
 }
@@ -139,7 +211,10 @@ fn nurbs(v: &Value, n: &NurbsCurve, t: Transform) -> Result<()> {
             }
         }
     }
-    points(&v["poles"], &n.poles, t, false)?;
+    let poles = array(&v["poles"])?;
+    if poles.len() != n.poles.len() { return Err(invalid()); }
+    let extent = curve_extent(&n.poles, t)?;
+    for (actual, expected) in poles.iter().zip(&n.poles) { curve_point(actual, *expected, t, extent)?; }
     numbers(&v["weights"], &n.weights)?;
     numbers(&v["knots"], &n.knots)?;
     numbers(&v["domain"], &n.domain)
@@ -150,8 +225,9 @@ fn curve(v: &Value, c: &Curve, t: Transform) -> Result<()> {
             fields(v, &["Line"])?;
             let v = &v["Line"];
             fields(v, &["start", "end", "domain"])?;
-            point(&v["start"], t.point(*start)?, 1e-10)?;
-            point(&v["end"], t.point(*end)?, 1e-10)?;
+            let extent = curve_extent(&[*start, *end], t)?;
+            curve_point(&v["start"], *start, t, extent)?;
+            curve_point(&v["end"], *end, t, extent)?;
             numbers(&v["domain"], domain)
         }
         Curve::Circle {
@@ -232,6 +308,9 @@ fn color(v: &Value, want: [u8; 4]) -> Result<()> {
     Ok(())
 }
 pub(crate) fn geometry(v: &Value, g: &Geometry, t: Transform) -> Result<()> {
+    geometry_with_brep(v,g,t,None)
+}
+fn geometry_with_brep(v:&Value,g:&Geometry,t:Transform,expected:Option<(u32,usize)>)->Result<()> {
     match g {
         Geometry::Point(p) => {
             fields(v, &["Point"])?;
@@ -280,21 +359,25 @@ pub(crate) fn geometry(v: &Value, g: &Geometry, t: Transform) -> Result<()> {
             fields(v, &["NativeBrep"])?;
             let v = &v["NativeBrep"];
             fields(v, &["display", "payload", "crc"])?;
-            if v["crc"].as_u64() != Some(brep.crc as u64) {
+            let (crc,payload_bytes)=expected.unwrap_or((brep.crc,brep.payload.len()));
+            if expected.is_none() && t != Transform::identity() {return Err(invalid());}
+            if v["crc"].as_u64() != Some(crc as u64) {
                 return Err(invalid());
             }
             let chunks = array(&v["payload"])?;
-            let mut bytes = Vec::new();
+            let mut byte_count = 0usize;
             for chunk in chunks {
                 for byte in array(chunk)? {
-                    bytes.push(byte.as_u64().ok_or_else(invalid)? as u8);
+                    byte.as_u64().and_then(|b| u8::try_from(b).ok()).ok_or_else(invalid)?;
+                    byte_count = byte_count.checked_add(1).ok_or_else(invalid)?;
+                    if byte_count > payload_bytes { return Err(invalid()); }
                 }
             }
             // Native re-serialization can change archive framing bytes while the
             // BRep topology/geometry stays exact. The native kind check above
             // (ON_Brep) plus a non-empty payload establishes correspondence; the
             // BRep geometry oracle re-imports and inspects it independently.
-            if bytes.is_empty() || bytes.len() != brep.payload.len() {
+            if byte_count == 0 || byte_count != payload_bytes {
                 return Err(invalid());
             }
             Ok(())
@@ -396,7 +479,7 @@ fn native_kind(g: &Geometry) -> &'static str {
         Geometry::Light(_) => "ON_Light",
     }
 }
-fn entity(v: &Value, e: &Entity, member: bool) -> Result<()> {
+fn entity(v: &Value, e: &Entity, member: bool,expected:&ExpectedBreps) -> Result<()> {
     fields(
         v,
         &[
@@ -413,10 +496,14 @@ fn entity(v: &Value, e: &Entity, member: bool) -> Result<()> {
     for diagnostic in array(&v["diagnostics"])? {
         text(diagnostic)?;
     }
+    let native = text(&v["native_kind"])?;
+    let short_line = matches!(&e.geometry, Geometry::Curve(Curve::Line { .. }))
+        && native == "ON_NurbsCurve"
+        && array(&v["diagnostics"])?.iter().any(|d| d.as_str() == Some("short line uses degree-one NURBS and OM9 user data; external edits may remove or invalidate the metadata"));
     if id(&v["id"])? != e.id.0
         || text(&v["label"])? != e.label
         || v["is_definition_member"] != member
-        || text(&v["native_kind"])? != native_kind(&e.geometry)
+        || (native != native_kind(&e.geometry) && !short_line)
     {
         return Err(invalid());
     }
@@ -428,7 +515,7 @@ fn entity(v: &Value, e: &Entity, member: bool) -> Result<()> {
             Transform::identity()
         },
     )?;
-    geometry(&v["geometry"], &e.geometry, e.placement)?;
+    geometry_with_brep(&v["geometry"], &e.geometry, e.placement,expected.get(&e.id).copied())?;
     let a = &v["attributes"];
     fields(a, &["layer", "visible", "locked", "color", "color_source"])?;
     let expected = e
@@ -457,12 +544,14 @@ fn entity(v: &Value, e: &Entity, member: bool) -> Result<()> {
     }
     Ok(())
 }
-pub(crate) fn verify(document: &Document, bytes: &[u8], limits: &Limits) -> Result<Vec<String>> {
+#[cfg(test)]
+fn verify(document:&Document,bytes:&[u8],limits:&Limits)->Result<Vec<String>> {
+    verify_with_brep(document,bytes,limits,&ExpectedBreps::new())
+}
+pub(crate) fn verify_with_brep(document: &Document, bytes: &[u8], limits: &Limits,expected_brep:&ExpectedBreps) -> Result<Vec<String>> {
     let json_usage = om9_archive::admit_json_usage(bytes, limits)?;
     let root: Value = serde_json::from_slice(bytes).map_err(|_| invalid())?;
-    fields(
-        &root,
-        &[
+    let mut expected_fields = vec![
             "schema_version",
             "status",
             "archive_version",
@@ -473,8 +562,9 @@ pub(crate) fn verify(document: &Document, bytes: &[u8], limits: &Limits) -> Resu
             "layers",
             "definitions",
             "diagnostics",
-        ],
-    )?;
+        ];
+    if root.get("model_tolerance").is_some() { expected_fields.push("model_tolerance"); }
+    fields(&root, &expected_fields)?;
     if root["schema_version"] != 1
         || root["status"] != "inspected"
         || root["archive_version"] != 50
@@ -483,6 +573,7 @@ pub(crate) fn verify(document: &Document, bytes: &[u8], limits: &Limits) -> Resu
     {
         return Err(invalid());
     }
+    verify_model_tolerance(document, &root)?;
     let expected = document.entities.len()
         + document
             .definitions
@@ -500,7 +591,7 @@ pub(crate) fn verify(document: &Document, bytes: &[u8], limits: &Limits) -> Resu
             return Err(invalid());
         }
         if let Some(e) = document.entities.get(&oid) {
-            entity(v, e, false)?;
+            entity(v, e, false,expected_brep)?;
         } else {
             let e = document
                 .definitions
@@ -508,7 +599,7 @@ pub(crate) fn verify(document: &Document, bytes: &[u8], limits: &Limits) -> Resu
                 .flat_map(|d| &d.members)
                 .find(|e| e.id == oid)
                 .ok_or_else(invalid)?;
-            entity(v, e, true)?;
+            entity(v, e, true,expected_brep)?;
         }
     }
     let defs = array(&root["definitions"])?;
@@ -631,6 +722,9 @@ fn visit_diagnostics(
         for v in array(&object["diagnostics"])? {
             visit(None, text(v)?)?;
         }
+    }
+    if document.tolerance().is_none() {
+        visit(None, "Document tolerance is unspecified; 3DM model settings use openNURBS defaults, not an OM9 accuracy claim.")?;
     }
     if generated {
         visit(
@@ -756,6 +850,48 @@ fn collect_diagnostics(
 mod tests {
     use super::*;
     #[test]
+    fn tiny_curve_correspondence_rejects_collapsed_poles_and_endpoints() {
+        let n = NurbsCurve { degree: 1, poles: vec![[0.; 3], [2.5e-11, 0., 0.]], weights: vec![1.; 2], knots: vec![0., 0., 1., 1.], domain: [0., 1.], periodic: false, reversed: false, seam: None };
+        let c = Curve::Nurbs(n);
+        let mut actual = serde_json::to_value(&c).unwrap();
+        curve(&actual, &c, Transform::identity()).unwrap();
+        actual["Nurbs"]["poles"][1][0] = 0.into();
+        assert!(curve(&actual, &c, Transform::identity()).is_err());
+        let c = Curve::Line { start: [0.; 3], end: [2.5e-11, 0., 0.], domain: [0., 1.] };
+        let mut actual = serde_json::to_value(&c).unwrap();
+        actual["Line"]["end"][0] = 0.into();
+        assert!(curve(&actual, &c, Transform::identity()).is_err());
+        let c = Curve::Line { start: [0.; 3], end: [0.001, 0., 0.], domain: [0., 1.] };
+        let placement = Transform::translation([1e9, 0., 0.]);
+        let actual = serde_json::json!({"Line":{"start":[1e9,0.,0.],"end":[1e9+0.001,0.,0.],"domain":[0.,1.]}});
+        curve(&actual, &c, placement).unwrap();
+        let mut collapsed = actual;
+        collapsed["Line"]["end"][0] = serde_json::json!(1e9);
+        assert!(curve(&collapsed, &c, placement).is_err());
+    }
+    #[test]
+    fn transformed_native_brep_requires_bound_expected_fingerprint() {
+        use om9_core::geometry::{Mesh,NativeBrep};
+        let native=NativeBrep{display:Mesh{vertices:vec![],faces:vec![],normals:vec![],colors:vec![],corner_uvs:vec![]},payload:vec![1,2,3].into(),crc:10};
+        let geometry=Geometry::NativeBrep(native);let entity=Entity::new("source",geometry.clone(),None);let id=entity.id;
+        let mut document=Document::new("source");document.entities.insert(id,entity);let limits=Limits::default();
+        let response=serde_json::json!({"schema_version":1,"status":"expected_brep_fingerprints","objects":[{"id":id.0.to_string(),"source_crc":10,"crc":20,"payload_bytes":4}]});
+        let parse=|v:&Value|expected_breps(&document,&serde_json::to_vec(v).unwrap(),&limits);
+        let expected=parse(&response).unwrap();assert_eq!(expected.get(&id),Some(&(20,4)));
+        let mut bad=response.clone();bad["objects"][0]["source_crc"]=11.into();assert!(parse(&bad).is_err());
+        let mut bad=response.clone();bad["objects"][0]["id"]=uuid::Uuid::new_v4().to_string().into();assert!(parse(&bad).is_err());
+        let mut bad=response.clone();bad["objects"]=serde_json::json!([]);assert!(parse(&bad).is_err());
+        let mut bad=response.clone();bad["objects"].as_array_mut().unwrap().push(response["objects"][0].clone());assert!(parse(&bad).is_err());
+        let mut inspected=serde_json::json!({"NativeBrep":{"display":{},"payload":[[1,2,3,4]],"crc":20}});
+        let t=Transform::scale([-1.,1.,1.]).unwrap();assert!(geometry_with_brep(&inspected,&geometry,t,expected.get(&id).copied()).is_ok());
+        assert!(geometry_with_brep(&inspected,&geometry,t,None).is_err());
+        inspected["NativeBrep"]["crc"]=21.into();assert!(geometry_with_brep(&inspected,&geometry,t,expected.get(&id).copied()).is_err());
+        inspected["NativeBrep"]["crc"]=20.into();inspected["NativeBrep"]["payload"]=serde_json::json!([[1,2,3]]);
+        assert!(geometry_with_brep(&inspected,&geometry,t,expected.get(&id).copied()).is_err());
+        inspected["NativeBrep"]["payload"]=serde_json::json!([[1,2,3,300]]);
+        assert!(geometry_with_brep(&inspected,&geometry,t,expected.get(&id).copied()).is_err());
+    }
+    #[test]
     fn diagnostics_reserve_native_strings_and_om9_loss_messages_with_live_json() {
         let mut d = Document::new("diagnostic budget");
         let layer = om9_core::model::Layer::preset(om9_core::layers::PresetSlot::new(17).unwrap());
@@ -766,6 +902,7 @@ mod tests {
         let root = serde_json::json!({"diagnostics":["native warning"]});
         let limits = Limits::default();
         let result = collect_diagnostics(&d, &root, &[], false, Usage::default(), &limits).unwrap();
+        assert!(result.iter().any(|message| message.contains("tolerance is unspecified")));
         assert!(result.iter().any(|message| message.contains("OM9 Hidden")));
         assert!(result.iter().any(|message| message.contains("preset slot")));
         assert!(result.iter().any(|message| message == "native warning"));
@@ -824,6 +961,18 @@ mod tests {
         });
         let value = serde_json::to_value(&light).unwrap();
         geometry(&value, &light, Transform::identity()).unwrap();
+    }
+
+    #[test]
+    fn tolerance_inspection_rejects_missing_or_changed_values() {
+        let mut document = Document::new("tolerance");
+        document.tolerance = Some(om9_core::history::Tolerance::try_new(0.02, 0.005, 0.1).unwrap());
+        let mut root = serde_json::json!({"model_tolerance":{"absolute_mm":0.02,"relative":0.005,"angular_rad":0.1}});
+        verify_model_tolerance(&document, &root).unwrap();
+        root["model_tolerance"]["absolute_mm"] = serde_json::json!(0.001);
+        assert!(verify_model_tolerance(&document, &root).is_err());
+        root.as_object_mut().unwrap().remove("model_tolerance");
+        assert!(verify_model_tolerance(&document, &root).is_err());
     }
 
     #[test]

@@ -1,0 +1,7 @@
+# Streamed STL writer
+
+P3b partial: STL encoding now writes incrementally through a buffered writer to a newly created temporary file in the destination directory. On successful geometry validation and writing, it flushes and syncs the file before the existing atomic rename; on a reported encoding or I/O failure the temporary file is removed and the destination is left untouched. The previous `Vec<u8>` API remains a wrapper around the same encoder for other callers. The controller receipt computes the binary length from the checked triangle count.
+
+On Windows with OCCT/openNURBS, `CARGO_TARGET_DIR=L:/om9-target`, Cargo `-j 2`: eight exchange STL unit tests passed, including a writer that fails after a partial output. All 22 app STL integration tests passed. A quantization failure test uses a dedicated directory and verifies both unchanged destination bytes and removal of the partial temporary file. Successful replacement of an existing STL was also tested. The I/O failure is simulated at the writer boundary, not a disk-full or process-crash test.
+
+This removes the full encoded STL byte vector from the app export path; it does not stream tessellation or welding. Triangle soup, weld maps, topology maps, native snapshots and buffered writes still consume memory, with no global reservation or peak-memory measurement. Export remains synchronous and cannot be cancelled in flight. Atomicity/durability under power loss, desktop responsiveness, and the remaining plan gates are not established. The active OM9 session was not changed.

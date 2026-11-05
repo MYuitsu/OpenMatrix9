@@ -1,0 +1,7 @@
+# STL mesh output allocation and cancellation
+
+Authored mesh append now validates face lengths/indices and computes its output triangle count before modifying the output. It checks addition overflow, the configured point limit and the `u32` index range before reserving output capacity. Vertex and triangle buffers use fallible `try_reserve`; cancellation is checked before work and at intervals during validation and copy. Generated B-rep output now requests vertex/triangle capacity fallibly, and the generated-triangle flags request capacity before resizing. A failed request returns a budget error before atomic file publication.
+
+The E: default-feature build with `-j 2` passed eight STL worker/cancellation unit tests and all 41 STL integration tests. Unit fixtures check index-range overflow without allocating billions of points, the configured point ceiling, and cancellation/invalid indices before modifying output buffers. The no-default-features check passed with 17 existing warnings. The tests do not inject an allocation failure or cancellation in the middle of a running large mesh copy.
+
+These checks do not account for all allocated capacities, reserve the worker's full scratch, enforce 60% physical RAM, or bound the native mesher. Other allocation paths, peak coexistence, native cancellation, actual memory-pressure behavior and release performance remain open. The interactive export is still synchronous. The active OM9 window was not operated.

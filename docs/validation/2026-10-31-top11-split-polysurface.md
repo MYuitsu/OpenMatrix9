@@ -1,0 +1,16 @@
+# Top11 Split: connected polysurface regions — 2026-10-31
+
+Top11 Split previously rejected multi-face BRep targets. It now partitions a connected BRep boundary using the existing geometry-tool splitter, retains connections through original edges and their OCCT-modified descendants, and emits one open BRep per resulting connected region. A closed solid is treated as its boundary; this is an OM9 interpretation of the normalized Split reference, not proof of Matrix's capping behavior. The target is replaced in one host transaction, retaining source attributes and placement. Cutters and uncut targets remain unchanged. Disconnected or non-manifold input is rejected; invalid or unproductive cuts do not commit.
+
+Native exception: edge identity, splitter history, connected shell construction and OCCT validity checks require live OCCT topology within the synchronous adapter. The operation-local connectivity table is native because its keys are those ephemeral native shape identities. Rust owns operand validation, snapshot/result budgets, document state and transaction. No OCCT handle escapes; native code is not certified memory-safe by its Rust caller.
+
+Windows x64, OCCT 8.0.1, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`:
+
+- Two joined planar faces cut across their shared edge produce two connected two-face regions of 100 mm² each, retaining the authored seam; Undo/Redo restore exact documents. A one-output budget refuses the two-region result.
+- A translated box cut by a translated planar BRep produces two five-face open regions of 26 mm² each; placement, `.om9` save/open and Undo/Redo pass. A sphere cut at its equator produces two open hemispheres of 50π mm², with Undo. A missed cutter leaves the session and document unchanged.
+- `cargo test -j 2 -p om9-app --test top11 --test top11_options --test top11_brep --test command_snapshot`: 111 passed before final snapshot-budget accounting; the eight Split-related BRep tests passed again after that change. Simulated egui viewport selection of a cutter for a joined polysurface passed after the final change. `--no-default-features` Top11/options/snapshot: 68 passed.
+- `cargo test -j 2 -p om9-kernel --features 3dm-brep --test l2_01_10`: 69 passed. Running that suite without its required `3dm-brep` linkage first failed on unresolved 3DM symbols; no source failure was inferred from that configuration.
+
+Limits: preservation of original edges relies on OCCT splitter history and has only the named fixtures; general curved, periodic, tangent, coincident, affine, multiple-cutter and complex/non-manifold cases, aggregate performance, 3DM interchange, external SDK plugin parity, physical desktop input and human M03-UI acceptance remain unverified. Isocurve/Direction/Shrink are still missing. Outputs are boundary shells, not capped solids; whether this matches original Matrix in all closed-polysurface cases remains to be established.
+
+SHA-256: `session/top11.rs` 31a293df149feafa512a8bb1c67d82e30e46d07326e59a1836f665e82a841ef3; `ui/chrome.rs` 02153905569e320ad3ebe32f0846f785c7f816f511b17e7da863b3a870146694; `tests/top11_brep.rs` 1238277c5127a71a8ecdaeb6b37abc2df88edbcaa090792b681764ab7ee39894; `measurement.rs` 8f5789348d3bed80513c617df6199c9302c3908790becc1b6c1cfe1eb2205945; `measurement_bridge.cpp` af4d9caa4afbca00c51c8f0aa72a36310d88556932b0337d4c0140b985dfa6b4.

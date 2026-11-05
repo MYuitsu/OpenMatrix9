@@ -9,15 +9,16 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Brep {
-    source: String,
+    source: Arc<String>,
     source_sha256: [u8; 32],
     display_sha256: [u8; 32],
-    pub display: BrepDisplay,
+    pub display: Arc<BrepDisplay>,
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -45,16 +46,60 @@ impl Brep {
         display.source_sha256 = digest;
         let display_sha256 = crate::retained::fingerprint(&display)?;
         let shape = Self {
-            source,
+            source: Arc::new(source),
             source_sha256: digest,
             display_sha256,
-            display,
+            display: Arc::new(display),
         };
         shape.validate(limits)?;
         Ok(shape)
     }
     pub fn source(&self) -> &str {
         &self.source
+    }
+    pub(crate) fn source_allocation_key(&self) -> usize {
+        Arc::as_ptr(&self.source) as usize
+    }
+    pub(crate) fn source_allocation_bytes(&self) -> Result<u64> {
+        Usage::array::<u8>(self.source.capacity())?.bytes
+            .checked_add(Usage::array::<usize>(2)?.bytes)
+            .and_then(|bytes| bytes.checked_add(std::mem::size_of::<String>() as u64))
+            .ok_or(Error::Overflow("BRep source allocation"))
+    }
+    pub(crate) fn display_allocation_key(&self) -> usize {
+        Arc::as_ptr(&self.display) as usize
+    }
+    pub(crate) fn display_allocation_bytes(&self) -> Result<u64> {
+        let d = &self.display;
+        let sizes = [
+            Usage::array::<BrepDisplay>(1)?.bytes,
+            Usage::array::<usize>(2)?.bytes,
+            Usage::array::<Point3>(d.points.capacity())?.bytes,
+            Usage::array::<[u32; 4]>(d.triangles.capacity())?.bytes,
+            Usage::array::<[u32; 3]>(d.segments.capacity())?.bytes,
+            Usage::array::<u32>(d.vertices.capacity())?.bytes,
+            Usage::array::<[u32; 2]>(d.face_edges.capacity())?.bytes,
+            Usage::array::<Uuid>(d.faces.capacity())?.bytes,
+            Usage::array::<Uuid>(d.edges.capacity())?.bytes,
+            Usage::array::<Uuid>(d.vertex_ids.capacity())?.bytes,
+        ];
+        sizes.into_iter().try_fold(0u64, |sum, bytes| sum.checked_add(bytes).ok_or(Error::Overflow("BRep display allocation")))
+    }
+    /// Inventory owned buffers without hashing, topology checks, or scratch allocation.
+    /// Callers must still validate untrusted data before publication.
+    pub fn storage_usage(&self, limits: &Limits) -> Result<Usage> {
+        let d = &self.display;
+        let mut usage = Usage { bytes: self.source_allocation_bytes()?, ..Usage::default() };
+        usage.add(Usage { bytes: self.display_allocation_bytes()?, ..Usage::default() }, limits)?;
+        usage.points = d.points.len() as u64;
+        usage.nodes = d
+            .faces
+            .len()
+            .checked_add(d.edges.len())
+            .and_then(|n| n.checked_add(d.vertices.len()))
+            .ok_or(Error::Overflow("BRep topology count"))? as u64;
+        usage.check(limits)?;
+        Ok(usage)
     }
     pub fn validate(&self, limits: &Limits) -> Result<Usage> {
         let d = &self.display;
@@ -75,18 +120,7 @@ impl Brep {
         {
             return Err(Error::Invalid("BRep display topology"));
         }
-        let mut usage = Usage::array::<u8>(self.source.capacity())?;
-        usage.add(Usage::array::<Point3>(d.points.capacity())?, limits)?;
-        usage.add(Usage::array::<[u32; 4]>(d.triangles.capacity())?, limits)?;
-        usage.add(Usage::array::<[u32; 3]>(d.segments.capacity())?, limits)?;
-        usage.add(Usage::array::<u32>(d.vertices.capacity())?, limits)?;
-        usage.add(Usage::array::<[u32; 2]>(d.face_edges.capacity())?, limits)?;
-        for keys in [&d.faces, &d.edges, &d.vertex_ids] {
-            usage.add(Usage::array::<Uuid>(keys.capacity())?, limits)?;
-        }
-        usage.points = d.points.len() as u64;
-        usage.nodes = (d.faces.len() + d.edges.len() + d.vertices.len()) as u64;
-        usage.check(limits)?;
+        let mut usage = self.storage_usage(limits)?;
         for p in &d.points {
             finite(*p)?;
         }
@@ -126,5 +160,55 @@ impl Brep {
         }
         usage.bytes -= Usage::array::<Uuid>(count)?.bytes;
         Ok(usage)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn inventory_matches_validation_and_does_not_waive_scratch_budget() {
+        let limits = Limits::default();
+        let shape = Brep::from_native(
+            "CASCADE Topology fixture".into(),
+            BrepDisplay {
+                source_sha256: [0; 32],
+                deflection_mm: 0.01,
+                points: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+                triangles: vec![[0, 1, 2, 0]],
+                segments: vec![],
+                vertices: vec![],
+                faces: vec![Uuid::from_u128(1)],
+                edges: vec![],
+                vertex_ids: vec![],
+                face_edges: vec![],
+            },
+            &limits,
+        )
+        .unwrap();
+        let cloned = shape.clone();
+        assert_eq!(shape.source().as_ptr(), cloned.source().as_ptr(), "immutable source should be shared across clones");
+        assert!(Arc::ptr_eq(&shape.display, &cloned.display));
+        let serialized = serde_json::to_vec(&shape).unwrap();
+        let packet: serde_json::Value = serde_json::from_slice(&serialized).unwrap();
+        assert_eq!(packet["source"].as_str(), Some(shape.source()));
+        assert_eq!(packet["display"], serde_json::to_value(shape.display.as_ref()).unwrap());
+        let restored: Brep = serde_json::from_slice(&serialized).unwrap();
+        assert_eq!(restored, shape);
+        restored.validate(&limits).unwrap();
+        let mut changed = cloned;
+        Arc::make_mut(&mut changed.display).points[0][0] = 42.;
+        assert!(!Arc::ptr_eq(&shape.display, &changed.display));
+        assert!(changed.validate(&limits).is_err(), "modified snapshot must fail source binding");
+        assert_eq!(shape.display.points[0][0], 0.);
+        let usage = shape.storage_usage(&limits).unwrap();
+        assert_eq!(usage, shape.validate(&limits).unwrap());
+        let tight = Limits {
+            max_bytes: usage.bytes,
+            ..limits
+        };
+        assert!(shape.storage_usage(&tight).is_ok());
+        assert!(matches!(shape.validate(&tight), Err(Error::Budget(_))));
     }
 }

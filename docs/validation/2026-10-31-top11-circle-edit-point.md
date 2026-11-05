@@ -1,0 +1,9 @@
+# Top11 Edit Points: circle and arc endpoint drag — 2026-10-31
+
+Status: PARTIAL_CHECKS_PASSED. Previously moving a circle or arc edit grip changed only the angular span around the original center and radius. A drag off that circle, including out of its plane, could report success without reaching the requested point.
+
+A nonzero drag now converts the original circle/arc exactly to an existing rational quadratic NURBS representation, then uses the rational edit-point solver. A full circle keeps its two coincident seam endpoints together; an arc retains its opposite endpoint. No-op returns the original analytic entity. The edit may change the representation from an analytic circle to NURBS. This is an OM9 implementation choice, not proof of original Matrix internal representation or curve fairness; seam derivative continuity and general creation-point semantics remain open.
+
+Core fixtures check both endpoints of a circle and arc, nonzero angles and three-dimensional targets, opposite endpoints, closure and no-op. Controller fixtures exercise toolbar and `EditPtOn` invocation, the committed geometry and Undo/Redo. Windows x64, external `L:\om9-target`, `-j 2`: 35 core curve_ops/top11 tests and 138 app Top11/options/BRep/snapshot tests passed; 70 app no-default tests passed. The expanded toolbar/CMD fixture was rerun after the wider batches and passed. Physical mouse drag, .om9/3DM round trips, arbitrary placements, periodic NURBS and M03-UI human acceptance remain open. These tests do not establish all Top11 commands.
+
+Source SHA-256: `crates/om9-core/src/curve_ops.rs` 1c9a9bbb4f74edd857d610e6d2c16fb16bbc7f96ee816431f4a1f26f9dd2a7e9; `crates/om9-core/src/top11.rs` 657c8275bc6de6676f99c4103e395721613b1c0cdf1f73a39f77907e275840eb; `crates/om9-core/tests/curve_ops.rs` 6cb9686bc5e75e57416ffa2d362fe14bae1ded292ea1f92367d4abff286bda7b; `crates/om9-app/tests/top11.rs` 354c0d17afbae6ce80bfae14a7b7fc6bfbd5848194120a99b1c7dcf77067d599.

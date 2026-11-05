@@ -541,14 +541,20 @@ impl Controller {
         };
         let mut tokens = Vec::new();
         if pending.points.is_empty() && pending.center.is_none() {
-            tokens.extend([
+            // Construction modes only before the first input; the current mode is the
+            // prompt word, so it is not repeated as an option (Rhino p22 convention).
+            for (label, mode) in [
                 ("Center", "Center"),
                 ("Corner", "Corner"),
                 ("Diameter", "Diameter"),
                 ("Vertical", "Vertical"),
                 ("FromFoci", "FromFoci"),
                 ("AroundCurve", "AroundCurve"),
-            ]);
+            ] {
+                if pending.mode != mode {
+                    tokens.push((label, label));
+                }
+            }
         }
         if pending.mode == "AroundCurve" && pending.center.is_none() {
             tokens.push(("OnCurve=", "OnCurve="));
@@ -557,7 +563,6 @@ impl Controller {
             tokens.push(("MarkFoci", "MarkFoci"));
         }
         tokens.push(("Deformable", "Deformable"));
-        tokens.push(("Approx", "Approx"));
         if pending.deformable {
             tokens.push(("Degree=", "Degree="));
             tokens.push(("PointCount=", "PointCount="));

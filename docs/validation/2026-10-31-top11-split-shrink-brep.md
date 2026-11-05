@@ -1,0 +1,15 @@
+# Top11 Split Isocurve Shrink for BRep faces — 2026-10-31
+
+Top11 Isocurve Shrink was unavailable on BReps because an earlier OCCT face-divide experiment did not change the underlying surface bounds. The new adapter instead replaces a single face's surface with the same UV parameterization restricted to the face's trimming bounds, carrying its edge pcurves into the replacement. Nonperiodic B-spline surfaces are segmented exactly; analytic surfaces use a rectangular bounded surface. The output must preserve one face, wire count, BRep validity and area. Rust owns selection, capability state, transactions and Undo. OCCT retains no document state or native handles after the synchronous operation.
+
+Shrink=Yes is now offered on eligible single-face, nonperiodic BReps in the Isocurve point stage. Eligibility is checked once when the option stage starts; periodic BReps do not advertise Shrink. The results retain the target's placement and attributes and are committed in one transaction. This is a capability-scoped native exception for BRep geometry and pcurve reassociation; OCCT is not certified memory-safe by its Rust caller.
+
+Windows x64, OCCT 8.0.1, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`:
+
+- A four-region planar fixture confirms the actual underlying UV bounds shrink, rather than merely checking unchanged area, and checks option activation and Undo/Redo. The earlier face-divide prototype did not satisfy this bounds check.
+- A face with a circular trim hole preserves the hole (distance from its center remains 2 mm), area, `.om9` save/open and Undo/Redo. A nonuniformly placed face preserves placement, expected region areas and sampled geometry. A rational B-spline BRep fixture confirms reduced underlying bounds, preserved area and evaluated surface position. A periodic cylinder does not advertise Shrink.
+- Three simulated egui Isocurve viewport tests pass, including BRep Shrink=Yes. Top11/options/BRep/snapshot suites passed 130 tests before the final added point-distance assertions; the strengthened nonuniform-placement fixture then passed separately. No-default Top11/options/snapshot: 68 passed; kernel `--features 3dm-brep --test l2_01_10`: 69 passed.
+
+Limits: periodic and seam-bearing surfaces, complex pcurves, degenerate geometry, general affine/trim topology, object-cutter Split Shrink, aggregate transient budget and performance remain unverified. Analytic faces use an exact bounded-surface wrapper rather than changing an analytic primitive's mathematical support; B-spline faces are segmented. No 3DM interchange, external SDK plugin parity, physical desktop input or human M03-UI acceptance is claimed. The OCCT distance checks above are not openNURBS measurement attempts.
+
+SHA-256: `session/top11.rs` 5912f2d5460254f1f5ea6dbb350d409bbb78c8f3e427985aeaae2a971635eb67; `ui/chrome.rs` a2c95a3eea13e50f09173cc96f3df511c73c0120e5ff91e010b0d0abf2c7e5db; `tests/top11_brep.rs` c861253e2b130e9d7d8b0bc198483b3de8120b85f09e7ac191106fcbb15fd27a; `measurement.rs` c797ab47e60b8381be88993b8bd0e49ce1580457e4dbda8f8129c9c047abd03a; `measurement_bridge.cpp` 0e9e71b44db6bd5680cc8c303c80cbd42416354d5507ea6ace41c33ab0b500a2.

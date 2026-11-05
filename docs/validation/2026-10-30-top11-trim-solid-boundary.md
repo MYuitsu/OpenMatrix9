@@ -1,0 +1,11 @@
+# Top11 Trim: solid boundary targets
+
+OCCT splitting now takes the exact boundary faces of a solid BRep as the target; removing a picked region produces an open BRep and preserves original edges through the existing per-target protection. Rust still owns session, selection and atomic mutation. The native bridge only builds an OCCT compound of the original boundary faces, performs the existing split and emits a bounded snapshot; no native document or handle is retained.
+
+Kernel fixture: a 10 mm cube cut by a plane produces ten boundary regions with total area 600 mm²; removing a 50 mm² region produces an open, non-solid BRep with six faces, positive naked-edge count and area 550 mm². Controller tests cover a plane cutter, a straight-line cutter, and two overlapping cubes (one translated); the latter removes a 25 mm² region from each, checks 575 mm² per result and restores the original solids with two Undos. A simulated egui viewport fixture removes a cube's top-face region and undoes it. CMD selection and toolbar adapter routes are exercised by controller tests, not physical desktop input.
+
+Windows MSVC, pinned OCCT 8.0.1 SDK/runtime and `CARGO_TARGET_DIR=L:\om9-target`: kernel editing/transform suites passed 80 tests; app Top11/options/BRep passed 100 tests; no-default Top11/options passed 65 tests; the simulated solid viewport fixture passed; public source audit reported zero errors.
+
+SHA-256: `session/top11.rs` b40efe8ae185bd01ed1830b28a6bf35aa1e7302f42dc3e7d0871236a9de5a080; `ui/chrome.rs` 329de8aa1c5aca015a8466e69f56cedff454e427257f4d1680961a4ebcb7bb7b; `tests/top11_brep.rs` 676e4989f765c91c9aa60ab1f9a9056ed4159e829c789a48ce1cc5ac52c3a704; `measurement.rs` 83223b58ff34a27c4e4b2f5dabe364cc2313355def7a1fd15d29eda15f65f7cf; `measurement_bridge.cpp` d63d0637ab628feeed2e67c95e863dfbd16025c756eff85dc7d5bac462a68d61; `l2_01_10.rs` 38db568c8da5d7ad7a7c860fb6bbbb08c24b00ea7a006d2ecc2354f42ae5b83e.
+
+These fixtures do not prove solid trimming for arbitrary curved, periodic, non-manifold or nested boundary topology, nonuniform affine placement, stable connectivity in every compound, general edge matching, .om9/3DM round trips, performance or physical desktop acceptance. Mixed selected shapes can still fail safely when OCCT does not support the requested topology.

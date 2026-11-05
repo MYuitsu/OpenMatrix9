@@ -15,6 +15,7 @@ occt-brep = ["dep:om9-kernel", "om9-kernel/3dm-brep"]
 
 [dependencies]
 om9-core = { path = "../om9-core" }
+om9-command-options = { path = "../om9-command-options" }
 om9-sdk = { path = "../om9-sdk" }
 om9-plugin-host = { path = "../om9-plugin-host" }
 om9-archive = { path = "../om9-archive" }

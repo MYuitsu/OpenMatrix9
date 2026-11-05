@@ -52,9 +52,8 @@ impl super::Controller {
         let prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new("Jobbag Restore", mutations), held)?;
-        let receipt = self.coordinator.commit(prepared)?;
+        let receipt = self.commit_with_candidate_scene(prepared, held)?;
         if receipt.published {
-            self.refresh_scene()?;
             self.sync_published(ChangeCause::Edit);
         }
         Ok(ids)

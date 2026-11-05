@@ -44,20 +44,6 @@ impl PreviewQuality {
             Self::Q3 => 3,
         }
     }
-    fn worse(self) -> Self {
-        match self {
-            Self::Q0 => Self::Q1,
-            Self::Q1 => Self::Q2,
-            _ => Self::Q3,
-        }
-    }
-    fn better(self) -> Self {
-        match self {
-            Self::Q3 => Self::Q2,
-            Self::Q2 => Self::Q1,
-            _ => Self::Q0,
-        }
-    }
 }
 pub struct WindowFrameScheduler {
     hz: u32,
@@ -66,8 +52,6 @@ pub struct WindowFrameScheduler {
     next: Option<Instant>,
     last: Option<Instant>,
     pub interval: Option<Duration>,
-    over: u32,
-    under: u32,
     history: VecDeque<(Instant, f64, bool)>,
     switched: Instant,
     recovery: Option<Instant>,
@@ -81,16 +65,14 @@ impl WindowFrameScheduler {
         Self::new(hz, Instant::now())
     }
     pub fn new(fixed: Option<f64>, now: Instant) -> Self {
-        let fixed = fixed.filter(|v| *v == 30. || *v == 60.);
+        let fixed = fixed.filter(|v| *v == 24. || *v == 30.);
         Self {
-            hz: fixed.map_or(60, |v| v as u32),
+            hz: fixed.map_or(30, |v| v as u32),
             fixed: fixed.is_some(),
             quality: PreviewQuality::Q0,
             next: None,
             last: None,
             interval: None,
-            over: 0,
-            under: 0,
             history: VecDeque::new(),
             switched: now,
             recovery: None,
@@ -127,14 +109,10 @@ impl WindowFrameScheduler {
         self.interval = None;
         self.recovery = None;
         self.history.clear();
-        self.over = 0;
-        self.under = 0;
     }
     pub fn reset_quality_feedback(&mut self) {
         self.recovery = None;
         self.history.clear();
-        self.over = 0;
-        self.under = 0;
     }
     pub fn wait(&self, now: Instant) -> Duration {
         self.next.map_or(Duration::ZERO, |n| {
@@ -152,21 +130,6 @@ impl WindowFrameScheduler {
         let ms = work.as_secs_f64() * 1000.;
         let budget = self.target().as_secs_f64() * 1000.;
         let late = missed || ms > budget;
-        self.over = if late { self.over + 1 } else { 0 };
-        self.under = if ms <= budget * 0.75 {
-            self.under + 1
-        } else {
-            0
-        };
-        if self.over >= 3 {
-            self.quality = self.quality.worse();
-            self.over = 0;
-            self.under = 0;
-        }
-        if self.under >= 60 {
-            self.quality = self.quality.better();
-            self.under = 0;
-        }
         self.history.push_back((now, ms, late));
         while self
             .history
@@ -182,27 +145,26 @@ impl WindowFrameScheduler {
         let full_window = self.history.front().is_some_and(|(t, _, _)| {
             now.saturating_duration_since(*t) >= Duration::from_millis(900)
         });
-        if self.hz == 60
-            && self.quality == PreviewQuality::Q3
+        if self.hz == 30
             && full_window
             && self.history.iter().filter(|r| r.2).count() * 5 > self.history.len()
             && can_switch
         {
-            self.hz = 30;
+            self.hz = 24;
             self.switched = now;
             self.recovery = None;
         }
-        if self.hz == 30 {
+        if self.hz == 24 {
             let mut work: Vec<_> = self.history.iter().map(|r| r.1).collect();
             work.sort_by(f64::total_cmp);
             let fast =
-                !work.is_empty() && work[((work.len() - 1) as f64 * 0.95).ceil() as usize] <= 12.;
+                !work.is_empty() && work[((work.len() - 1) as f64 * 0.95).ceil() as usize] <= 25.;
             if !fast {
                 self.recovery = None;
             } else {
                 let start = *self.recovery.get_or_insert(now);
                 if now.saturating_duration_since(start) >= Duration::from_secs(3) && can_switch {
-                    self.hz = 60;
+                    self.hz = 30;
                     self.switched = now;
                     self.recovery = None;
                 }
@@ -227,27 +189,27 @@ mod tests {
         assert!(s.interval.is_none());
     }
     #[test]
-    fn profiles_degrade_and_recover_with_hysteresis() {
+    fn sustained_load_preserves_full_resolution_and_antialiasing() {
         let now = Instant::now();
-        let mut s = WindowFrameScheduler::new(Some(60.), now);
-        for i in 0..3 {
-            s.observe(now + Duration::from_millis(i), Duration::from_millis(20));
-        }
-        assert_eq!(s.quality, PreviewQuality::Q1);
-        for i in 0..59 {
+        let mut s = WindowFrameScheduler::new(None, now);
+        for i in 0..200 {
             s.observe(
-                now + Duration::from_millis(10 + i),
-                Duration::from_millis(2),
+                now + Duration::from_millis(i * 40),
+                Duration::from_millis(50),
             );
+            assert_eq!(s.quality.scale(), 1.0);
+            assert_eq!(s.quality.samples(), 4);
         }
-        assert_eq!(s.quality, PreviewQuality::Q1);
-        s.observe(now + Duration::from_millis(70), Duration::from_millis(2));
-        assert_eq!(s.quality, PreviewQuality::Q0);
+        assert_eq!(s.hz(), 24);
     }
     #[test]
     fn invalid_hz_never_panics() {
         let s = WindowFrameScheduler::new(Some(f64::NAN), Instant::now());
-        assert_eq!(s.hz(), 60);
+        assert_eq!(s.hz(), 30);
+        assert_eq!(
+            WindowFrameScheduler::new(Some(60.), Instant::now()).hz(),
+            30
+        );
     }
     #[test]
     fn auto_fallback_and_recovery_require_sustained_windows() {
@@ -255,20 +217,20 @@ mod tests {
         let mut s = WindowFrameScheduler::new(None, now);
         for i in 0..=360 {
             s.observe_load(
-                now + Duration::from_millis(i * 17),
-                Duration::from_millis(25),
+                now + Duration::from_millis(i * 34),
+                Duration::from_millis(40),
                 true,
             );
         }
-        assert_eq!(s.hz(), 30);
+        assert_eq!(s.hz(), 24);
         for i in 1..=180 {
             s.observe_load(
-                now + Duration::from_millis(6120 + i * 34),
+                now + Duration::from_millis(12240 + i * 42),
                 Duration::from_millis(5),
                 false,
             );
         }
-        assert_eq!(s.hz(), 60);
+        assert_eq!(s.hz(), 30);
         s.idle();
         assert!(s.recovery.is_none());
         assert!(s.history.is_empty());

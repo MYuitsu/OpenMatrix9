@@ -90,6 +90,30 @@ pub fn pick_3dm(
     Err(Error::Unsupported("native 3DM chooser on this platform"))
 }
 
+/// Binary STL save picker for File ▸ Export Selected. The path is still validated by
+/// the export owner, which owns the extension and the atomic write.
+#[cfg(windows)]
+pub fn pick_stl(parent: &eframe::Frame, current: Option<&Path>) -> Result<Option<PathBuf>> {
+    use om9_native_owner::file_dialog::{Mode, choose_stl};
+    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+    let RawWindowHandle::Win32(handle) = parent
+        .window_handle()
+        .map_err(|e| Error::Io(e.to_string()))?
+        .as_raw()
+    else {
+        return Err(Error::Unsupported("Win32 STL picker parent"));
+    };
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        choose_stl(handle.hwnd.get() as usize, Mode::Save, current)
+    }))
+    .map_err(|_| Error::Io("native STL picker panicked".into()))?
+    .map_err(|error| Error::Io(format!("Windows STL dialog: {error}")))
+}
+#[cfg(not(windows))]
+pub fn pick_stl(_parent: &eframe::Frame, _current: Option<&Path>) -> Result<Option<PathBuf>> {
+    Err(Error::Unsupported("native STL chooser on this platform"))
+}
+
 #[cfg(windows)]
 pub fn pick_fixture_for_audit(
     parent: &eframe::Frame,

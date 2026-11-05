@@ -86,6 +86,24 @@
     }
   ],
   "runtime_implementation": {
+    "live_subselection_memory_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "R1a subselection: live CPU ownership of slots and nested paths, allocated-only transfer between same-account/class guards, phased old/new slots and input-path materialization, removal/drop without stale capture double charge",
+      "evidence": [
+        "docs/validation/2026-11-05-live-subselection-memory.md"
+      ],
+      "verification": "601 distinct passed/7 ignored/0 failed: core 325 includes allocated-transfer 2; subselection 3; app/native/GPU groups documented. GPU 29/no SKIP, native STL 60; no new release/desktop/RSS measurements.",
+      "remaining": "Workspace/path/recent/pending/high-water R1a and caller/query/peer/retired R1b remain. Native peak, UI export, P1-P5, GPU batching and STL/3DM accuracy gates remain open; allocation ownership does not certify process RSS or native safety."
+    },
+    "live_root_selection_memory_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "R1a root selection: pre-admitted live CPU owner for tree/order and staged plugin selection; detach capture observes growth/removal/drop via shared account without capture-time double charge",
+      "evidence": [
+        "docs/validation/2026-11-05-live-root-selection-memory.md"
+      ],
+      "verification": "Final scoped groups: 322 distinct passed/7 ignored/0 failed; GPU 29/no SKIP, native STL 60. Original overlay baseline oracle failure retained; exact live selection bill added, timeout/stale assertions unchanged.",
+      "remaining": "Root selection only. BTree bill is a pinned-profile allowance; other auxiliary/high-water, scratch/peer/retired/native/RSS, UI export, P1-P5 and release/desktop remain open. No FPS or global geometric certification claim."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

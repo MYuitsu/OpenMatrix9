@@ -100,7 +100,7 @@ fn i1_to_i5_the_info_is_sourced_from_the_model() {
             colors: Vec::new(),
             corner_uvs: Vec::new(),
         },
-        payload: Vec::new(),
+        payload: Vec::new().into(),
         crc: 0,
     });
     let (doc, id) = document_with(native);

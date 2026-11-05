@@ -14,7 +14,8 @@ fn active_input_snapshot_is_owner_run_and_phase_aware() {
     let started = c.active_command_input_snapshot();
     assert_eq!(started.owner, Some("line"));
     assert_eq!(started.phase, CmdPhase::AwaitPoint);
-    assert_eq!(started.options.len(), 2);
+    // Matrix Line: BothSides is the only option, and only before the first point.
+    assert_eq!(started.options.len(), 1);
     assert!(started.run > idle.run);
     assert_eq!(started.options[0].id.name(), "BothSides");
 
@@ -23,6 +24,7 @@ fn active_input_snapshot_is_owner_run_and_phase_aware() {
     assert_eq!(end.owner, Some("line"));
     assert_eq!(end.phase, CmdPhase::AwaitEnd);
     assert_eq!(end.run, started.run);
+    assert!(end.options.is_empty());
     c.accept_world_point([10.0, 0.0, 0.0]).unwrap();
     let done = c.active_command_input_snapshot();
     assert_eq!(done.owner, None);
@@ -31,7 +33,7 @@ fn active_input_snapshot_is_owner_run_and_phase_aware() {
 }
 
 #[test]
-fn positional_top11_owner_is_visible_without_a_fake_option_row() {
+fn move_snapshot_exposes_the_vertical_option() {
     use om9_core::geometry::{Curve, Geometry};
     use om9_core::model::Entity;
     let mut doc = Document::new("positional snapshot");
@@ -49,7 +51,8 @@ fn positional_top11_owner_is_visible_without_a_fake_option_row() {
     let snapshot = c.active_command_input_snapshot();
     assert_eq!(snapshot.owner, Some("top11"));
     assert_eq!(snapshot.phase, CmdPhase::AwaitPoint);
-    assert!(snapshot.options.is_empty());
+    assert_eq!(snapshot.options.len(), 1);
+    assert_eq!(snapshot.options[0].id.name(), "Vertical");
 }
 
 #[test]

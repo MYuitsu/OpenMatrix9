@@ -8,7 +8,7 @@
 
 use om9_core::{
     Error, Result,
-    identity::DocumentId,
+    identity::{DocumentId, ObjectId},
     transaction::{Cancellation, TransactionCoordinator},
 };
 use om9_exchange::{
@@ -147,6 +147,34 @@ impl ThreeDmHost {
         options: &ImportOptions,
         cancel: &Cancellation,
     ) -> Result<ImportReceipt> {
+        self.import_with_metadata(coordinator, document, source, options, None, cancel)
+    }
+
+    pub fn import_with_metadata(
+        &self,
+        coordinator: &mut TransactionCoordinator,
+        document: DocumentId,
+        source: &Path,
+        options: &ImportOptions,
+        metadata: Option<&om9_exchange::three_dm::ThreeDmLayerSnapshot>,
+        cancel: &Cancellation,
+    ) -> Result<ImportReceipt> {
+        let (transaction, receipt) = self.prepare_import_with_metadata(coordinator, document, source, options, metadata, cancel)?;
+        coordinator.commit(transaction)?;
+        Ok(receipt)
+    }
+
+    /// Prepare the native import without publishing it, so an interactive
+    /// controller can build its dependent scene before committing.
+    pub fn prepare_import_with_metadata(
+        &self,
+        coordinator: &TransactionCoordinator,
+        document: DocumentId,
+        source: &Path,
+        options: &ImportOptions,
+        metadata: Option<&om9_exchange::three_dm::ThreeDmLayerSnapshot>,
+        cancel: &Cancellation,
+    ) -> Result<(om9_core::transaction::PreparedTransaction, ImportReceipt)> {
         let capture = ImportCapture::target(coordinator, document)?;
         let staging = std::env::temp_dir();
         #[cfg(feature = "occt-brep")]
@@ -171,9 +199,10 @@ impl ThreeDmHost {
             options,
             cancel,
         )?;
-        let (transaction, receipt) = prepared.prepare(coordinator, cancel)?;
-        coordinator.commit(transaction)?;
-        Ok(receipt)
+        if let Some(metadata) = metadata {
+            prepared.verify_equivalent_clipboard_metadata(metadata, coordinator)?;
+        }
+        prepared.prepare(coordinator, cancel)
     }
 
     /// Export the document's current state to `target`. The native writer publishes to a private
@@ -186,6 +215,29 @@ impl ThreeDmHost {
         cancel: &Cancellation,
     ) -> Result<ExportReceipt> {
         let capture = ExportCapture::all(coordinator, document)?;
+        self.export_capture(coordinator, capture, target, cancel)
+    }
+
+    /// Export only selected objects, preserving their current geometry and block dependencies.
+    pub fn export_selected(
+        &self,
+        coordinator: &TransactionCoordinator,
+        document: DocumentId,
+        selected: &[ObjectId],
+        target: &Path,
+        cancel: &Cancellation,
+    ) -> Result<ExportReceipt> {
+        let capture = ExportCapture::selected(coordinator, document, selected)?;
+        self.export_capture(coordinator, capture, target, cancel)
+    }
+
+    fn export_capture(
+        &self,
+        coordinator: &TransactionCoordinator,
+        capture: ExportCapture,
+        target: &Path,
+        cancel: &Cancellation,
+    ) -> Result<ExportReceipt> {
         #[cfg(feature = "occt-brep")]
         let validated = {
             let bridge = crate::brep_bridge::OcctBrepBridge;

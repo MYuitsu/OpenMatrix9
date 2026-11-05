@@ -4,6 +4,20 @@
   "milestone": "M01",
   "parent_l2_id": "OM9-L2-03-14",
   "title": "Matrix Object Info Overlay",
+  "runtime_implementation": {
+    "async_brep_selection_2026_11_02": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Measure exact BRep Object Info on a bounded worker; publish only for the matching document, session, geometry, placement, unit and limits.",
+      "evidence": "docs/validation/2026-11-02-selection-highlight-latency.md",
+      "limitations": "One automated native-window click comparison; physical mouse, release and broader workloads remain open."
+    },
+    "brep_bounds_2026_11_01": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-01-object-info-brep-bounds.md",
+      "scope": "Selected root BRep: kernel bounds and validity, placement, document units and cached label/receipt",
+      "limitations": "Desktop, broad BRep corpus and performance not verified; label rounds to three decimals."
+    }
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "specification": {
     "l3_id": "OM9-L3-03-14-005",

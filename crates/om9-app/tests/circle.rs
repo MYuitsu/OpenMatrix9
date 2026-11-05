@@ -535,8 +535,9 @@ fn circle_deformable_rejects_point_count_not_above_degree() {
 fn circle_accepts_approx_alias() {
     let mut c = controller();
     c.submit("Circle").unwrap();
+    // The prompt advertises `Deformable`; `Approx` remains a typed alias only.
     assert!(
-        c.circle_option_tokens()
+        !c.circle_option_tokens()
             .iter()
             .any(|(_, command)| *command == "Approx")
     );
@@ -620,12 +621,99 @@ fn circle_area_size_uses_the_shared_choice_option() {
     let area = c
         .command_options()
         .into_iter()
-        .find(|option| option.id.name() == "Size=Area")
-        .expect("Size=Area option");
+        .find(|option| option.id.name() == "Area")
+        .expect("Area measure option");
     assert_eq!(
         c.activate_command_option(area.id).unwrap(),
         CommandOptionEffect::Applied
     );
+    c.submit(&(std::f64::consts::PI * 25.0).to_string())
+        .unwrap();
+    assert!((radius_of(&c) - 5.0).abs() < 1e-9);
+}
+
+#[test]
+fn circle_prompt_and_options_match_the_reference_stages() {
+    let mut c = controller();
+    c.submit("Circle").unwrap();
+    // First prompt: the current mode is the prompt word, the other modes are options.
+    assert_eq!(c.prompt(), "Center of circle");
+    assert_eq!(
+        c.prompt_with_options(),
+        "Center of circle ( Deformable Vertical 2Point 3Point Tangent AroundCurve FitPoints ): "
+    );
+    c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
+    // Size stage: the current measure is the prompt, the other measures + Orientation
+    // are the options; there is no 18-option row.
+    assert_eq!(c.prompt(), "Radius");
+    assert_eq!(
+        c.prompt_with_options(),
+        "Radius ( Orientation Diameter Circumference Area ): "
+    );
+    c.submit("Diameter").unwrap();
+    assert_eq!(c.prompt(), "Diameter");
+    assert_eq!(
+        c.prompt_with_options(),
+        "Diameter ( Radius Orientation Circumference Area ): "
+    );
+    assert_eq!(c.circle_option_tokens().len(), 4);
+}
+
+#[test]
+fn circle_orientation_takes_a_normal_then_a_radius() {
+    use om9_app::command_options::CommandOptionInterface;
+    let mut c = controller();
+    c.submit("Circle").unwrap();
+    c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
+    let orientation = c
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Orientation")
+        .expect("Orientation option");
+    c.activate_command_option(orientation.id).unwrap();
+    assert_eq!(c.prompt(), "Normal direction point");
+    // No size options until the normal exists.
+    assert!(
+        !c.circle_option_tokens()
+            .iter()
+            .any(|(label, _)| matches!(*label, "Radius" | "Diameter" | "Area"))
+    );
+    c.accept_world_point([0.0, 10.0, 0.0]).unwrap();
+    assert_eq!(c.prompt(), "Radius");
+    c.accept_world_point([5.0, 0.0, 0.0]).unwrap();
+    let id = *c.document().entities.keys().next().unwrap();
+    let Geometry::Curve(om9_core::geometry::Curve::Circle {
+        center,
+        x,
+        y,
+        radius,
+        ..
+    }) = &c.document().entities[&id].geometry
+    else {
+        panic!("circle curve");
+    };
+    assert!((radius - 5.0).abs() < 1e-9);
+    assert_eq!(center, &[0.0, 0.0, 0.0]);
+    let normal = [
+        x[1] * y[2] - x[2] * y[1],
+        x[2] * y[0] - x[0] * y[2],
+        x[0] * y[1] - x[1] * y[0],
+    ];
+    assert!(
+        normal[0].abs() < 1e-9 && (normal[1] - 1.0).abs() < 1e-9 && normal[2].abs() < 1e-9,
+        "orientation normal must be +Y: {normal:?}"
+    );
+}
+
+#[test]
+fn circle_orientation_accepts_a_measure_word_then_a_value() {
+    let mut c = controller();
+    c.submit("Circle").unwrap();
+    c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
+    c.submit("Orientation").unwrap();
+    c.accept_world_point([0.0, 0.0, 1.0]).unwrap();
+    c.submit("Area").unwrap();
+    assert_eq!(c.prompt(), "Area");
     c.submit(&(std::f64::consts::PI * 25.0).to_string())
         .unwrap();
     assert!((radius_of(&c) - 5.0).abs() < 1e-9);

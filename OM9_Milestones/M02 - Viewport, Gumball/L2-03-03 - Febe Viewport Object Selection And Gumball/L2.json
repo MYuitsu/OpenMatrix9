@@ -109,6 +109,192 @@
     ]
   },
   "runtime_implementation": {
+    "gumball_fast_exit_viewport_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Preserve an eligible original viewport press when its initial movement exits the viewport before the next UI frame.",
+      "evidence": "docs/validation/2026-11-03-perspective-gumball-early-gate.md#fast-initial-movement-outside-the-viewport",
+      "limitations": "Perspective Z fixture remains inside the application window; other handles, overlapping UI and post-fix desktop remain unverified."
+    },
+    "one_frame_gumball_drag_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Retain the still-valid published input basis for a primary gesture awaiting capture, including a tested one-frame Perspective drag after zoom.",
+      "evidence": "docs/validation/2026-11-03-perspective-gumball-early-gate.md#entire-gumball-drag-batched-in-one-ui-frame",
+      "limitations": "Synthetic in-viewport input only; fast viewport exit, all modes, physical presentation and post-fix desktop remain unverified."
+    },
+    "batched_gumball_press_after_zoom_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Commit a tested two-frame in-viewport Gumball drag when press and initial movement were batched after zoom and the published press basis remains valid.",
+      "evidence": "docs/validation/2026-11-03-perspective-gumball-early-gate.md#batched-press-and-movement-after-zoom",
+      "limitations": "All events in one frame, fast initial viewport exit, other handles and post-fix desktop remain unverified."
+    },
+    "release_gumball_desktop_followup_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Observe Perspective box Gumball, Undo and zoom in an isolated release window with synthetic Windows input.",
+      "evidence": "docs/validation/2026-11-03-perspective-gumball-early-gate.md#release-desktop-follow-up-after-surface-clipping-correction",
+      "limitations": "First post-zoom drag showed no visible displacement and is inconclusive; no physical mouse, numeric placement, timing or real user model."
+    },
+    "surface_exact_far_clip_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Omit exact Surface hits outside the camera slab without discarding other valid candidates.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#exact-surface-hits-beyond-the-far-clipping-plane",
+      "limitations": "Real NURBS display fixture covers one orthographic and one Perspective ray; general boundaries, visibility, worker integration and desktop remain open."
+    },
+    "nurbs_ray_miss_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Skip an exact NURBS ray miss while retaining other source-validated Surface candidates and existing occlusion checks.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#nurbs-exact-miss-and-a-valid-b-rep-candidate",
+      "limitations": "Fixture uses an altered candidate; actual tessellation coverage, general visibility and desktop remain open."
+    },
+    "surface_fixed_group_results_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Keep bounded Surface face-ray points and temporary candidate slots inline rather than allocating group-result vectors.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#fixed-storage-grouped-results",
+      "limitations": "Other allocations and native peak remain unbudgeted; no new release peak or desktop measurement."
+    },
+    "surface_group_copy_reduction_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Use borrowed bounded groups and iterator selection to avoid two temporary candidate-copy arrays in UI/worker Surface paths.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#reducing-temporary-group-copies",
+      "limitations": "Remaining group/result/index allocations and native peak are not covered by production budget or release memory measurement."
+    },
+    "surface_interleaved_face_groups_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Synchronous UI groups interleaved B-rep candidates by root/member path and restores original order before depth choice.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#interleaved-same-source-face-groups",
+      "limitations": "Temporary grouping allocations lack production admission; performance after this change and desktop presentation remain unmeasured."
+    },
+    "surface_ui_release_resolver_probe_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Compare individual and grouped uncached synchronous UI face refinement in one release process on a generated 16-hole B-rep.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#release-measurement-of-the-synchronous-ui-resolver",
+      "limitations": "One fixture and baseline-first ordering; excludes candidate generation, shaded occlusion, full frame and desktop presentation."
+    },
+    "surface_ui_grouped_face_refinement_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Line and Snappy Gumball use bounded grouped refinement for contiguous uncached same-source face candidates with source/view validation.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#synchronous-ui-path-uses-bounded-face-groups",
+      "limitations": "Still synchronous; release UI/desktop timing, background scheduler integration, native peak admission and full picking coverage are open."
+    },
+    "surface_grouped_face_refinement_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Experimental worker groups at most eight matching B-rep face candidates into one call-local OCCT source reconstruction; cancellation checked between calls.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#bounded-grouped-face-refinement",
+      "limitations": "Not wired to UI; native peak and extra group allocations lack production admission, broad geometry and desktop validation remain open."
+    },
+    "surface_trimmed_memory_probe_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Three isolated release Surface worker probes on a generated 16-hole, 22-face B-rep with independently checked front intersection.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#trimmed-multi-face-fixture",
+      "limitations": "Process high-water deltas are not a native upper bound; fixture preparation, candidate generation and desktop latency are outside the measured worker interval."
+    },
+    "surface_worker_memory_probe_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Two isolated release process memory probes for experimental Surface worker, one and 50 overlapping sphere candidates.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#isolated-release-surface-memory-probes",
+      "limitations": "One run per synthetic fixture; process high-water difference is not a native upper bound or a production reservation policy."
+    },
+    "surface_stl_concurrent_fixture_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Exercise an experimental Surface worker and STL export from the same immutable sphere source, with analytic snap and encoded-vertex checks.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#surface-refinement-alongside-stl-export",
+      "limitations": "Actual native-call overlap is not instrumented; one fixture cannot prove OCCT thread safety, global STL error, native peak or desktop behavior."
+    },
+    "surface_worker_storage_floor_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Include retained candidate and instance-path capacity in the experimental Surface worker's minimum reservation check.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#surface-worker-candidate-storage-floor",
+      "limitations": "Not a native peak, allocator or overall managed RAM bound; worker is not integrated into UI."
+    },
+    "surface_worker_busy_retry_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Experimental scheduler keeps the latest request while its shared Surface slot is busy and retries on polling; cancellation and stale selection release the reservation.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#retrying-a-busy-surface-slot",
+      "limitations": "No UI integration, fairness guarantee, native peak or desktop validation."
+    },
+    "surface_worker_slot_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Serialize experimental Surface workers within one shared coordinator account and preserve the slot across account adoption.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#surface-worker-slot-per-shared-account",
+      "limitations": "Independent accounts and other native operations remain concurrent; UI integration, native peak and desktop are open."
+    },
+    "surface_worker_snapshot_identity_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Bind experimental Surface worker receipts and scheduler requests to the captured document snapshot, including same-ID replacement rejection.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#surface-worker-and-replacement-snapshots",
+      "limitations": "Worker is not wired to UI; native memory sizing, concurrency and desktop remain unverified."
+    },
+    "surface_cache_context_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Revalidate cached Surface candidates and distinguish captured document allocations; focused stale-camera and replacement tests pass.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#cached-surface-candidate-context",
+      "limitations": "Desktop behavior, asynchronous refinement and full candidate coverage remain open."
+    },
+    "preview_two_view_pixels_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Check Gumball preview pixel publication and unchanged document/Undo in two synthetic viewports.",
+      "evidence": "docs/validation/2026-11-03-published-scene-picking.md#preview-pixel-publication-in-two-viewports",
+      "limitations": "Two sampled pixels per view with distinct synthetic cameras; physical input and desktop presentation remain open."
+    },
+    "moving_selection_preview_receipts_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Reject stale moving frame IDs after selection or preview changes without a document epoch change.",
+      "evidence": "docs/validation/2026-11-03-published-scene-picking.md#moving-frame-publication-after-queue-completion",
+      "limitations": "Pixel-level preview and physical input/presentation are not established by these synthetic GPU tests."
+    },
+    "published_colour_isolation_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Keep published viewport pixels stable during tested stationary mode updates, resizing and superseding camera changes.",
+      "evidence": "docs/validation/2026-11-03-published-scene-picking.md#published-colour-texture-isolation",
+      "limitations": "Physical input, displayed presentation, moving-frame synchronization and broader picking correctness remain open."
+    },
+    "off_axis_surface_clipping_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Headless off-axis sphere Surface snap with near/far clipping in Perspective and orthographic views",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#off-axis-camera-clipping",
+      "limitations": "One analytic fixture; general boundary, silhouette and desktop verification remain open."
+    },
+    "surface_triangle_scale_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Scale-relative ray/triangle intersection for Surface candidates and visible mesh occlusion.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md",
+      "limitations": "Headless display-geometry fixtures only; numerical corner cases, kernel refinement at tiny scales and desktop remain open."
+    },
+    "surface_triangle_seam_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Avoid a reproduced missed Surface snap at a shared display-triangle edge and refine the tested point against the NURBS source.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md",
+      "limitations": "Empirical floating-point margin; general topology and desktop interaction remain unverified."
+    },
+    "surface_candidate_broad_phase_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Use the scene spatial index for tested Surface snap candidate enumeration and avoid dropping near-parallel rays.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md",
+      "limitations": "Warmed-index synthetic timing only; index rebuild, complex geometry, allocation admission and desktop behavior remain open."
+    },
+    "surface_snap_camera_clipping_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Surface snap skips intersections before camera near plane in tested B-rep and NURBS cases.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md",
+      "limitations": "Clipping boundaries, complex geometry, general selection and desktop verification remain open."
+    },
+    "nurbs_surface_snap_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Source-bound NURBS Surface snap refinement for Line and Snappy Gumball on tested fixtures.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md",
+      "limitations": "Display-dependent candidate generation, complex surfaces, synchronous cost and desktop verification remain open."
+    },
+    "hatch_surface_occlusion_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Shaded Hatch display triangles block Line and Snappy Gumball Surface snaps behind them.",
+      "evidence": "docs/validation/2026-11-03-published-scene-picking.md",
+      "limitations": "Headless fixture; Hatch GPU pixels, general occlusion and desktop interaction remain unverified."
+    },
+    "selection_latency_2026_11_02": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Reuse revalidated pick candidates and current-document validation proof; defer exact BRep info measurement from the click path.",
+      "evidence": "docs/validation/2026-11-02-selection-highlight-latency.md",
+      "limitations": "Single automated native-window click per build; GPU selection resources still rebuild and broader performance remains open."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

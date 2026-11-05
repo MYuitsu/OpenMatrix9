@@ -78,7 +78,7 @@ fn box_solid(origin: Point3, size: Point3) -> Geometry {
             colors: Vec::new(),
             corner_uvs: Vec::new(),
         },
-        payload: vec![1, 2, 3, 4],
+        payload: vec![1, 2, 3, 4].into(),
         crc: 0,
     })
 }

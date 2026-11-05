@@ -1,0 +1,9 @@
+# STL duplicate indexed faces
+
+STL topology inspection now counts repeated indexed triangles regardless of winding. After source-scoped welding, two coincident faces within one selected source no longer pass the topology checks merely because each edge has two oppositely directed uses. Strict codec export returns `InvalidTopology`; the application preserves its existing lenient output policy for defective meshes but marks the receipt as not watertight and reports the duplicate count. MCP output now includes separate boundary, non-manifold, winding, disconnected-vertex and duplicate-face counts, and states that self-intersections are not checked.
+
+On Windows, default features, `CARGO_TARGET_DIR=L:/om9-target`, Cargo `-j 2`: `cargo test -p om9-exchange -j 2 --test stl_export_policy` passed 6 tests and `cargo test -p om9-app -j 2 --test stl_export` passed 13. The new codec test uses two coincident, opposite-winding triangles whose edge and vertex-fan counts pass, then verifies duplicate detection and strict refusal. The application test exports the same authored geometry and verifies the receipt's count and not-watertight result. MCP fields compiled as part of the application but were not independently exercised over stdio in this batch.
+
+Duplicate detection compares welded index triples, not geometric triangle intersections or partially overlapping triangles. Self-intersection, cavity containment, robust weld tolerance, f64-to-writer, export tolerance and resource budgeting remain open. The legacy `watertight` Boolean only reflects implemented topology checks; it does not certify self-intersection freedom or printability. No desktop or release performance claim.
+
+Next: implement f64 through the STL writer and quantization checks with source/placement-aware error budgets, then independent export-profile and captured background export work in `implementation/design/M01/viewport-export-separation-20261102/PLAN.md`.

@@ -411,6 +411,14 @@
   "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
   "acceptance_category": "THREEDM",
   "runtime_implementation": {
+    "short_line_preserve_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-short-line-preserve.md", "scope": "Preserve import and retained-current output roundtrip an edited Line with exactly owned short-line metadata; foreign userdata remains retained.", "limitations": "Normal GUI uses Geometry import/export; compound-curve editing and independent editor interoperability remain open."},
+    "periodic_retained_export_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-periodic-retained-export.md", "scope": "Shared 3DM export receipt discloses retained-data omissions; two imported periodic grip fixtures verify geometry export and .om9 retention.", "limitations": "Unrelated user data is omitted from new geometry-only 3DM; tested Preserve-mode objects remain retained-only; physical desktop acceptance remains open."},
+    "periodic_grips_3dm_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-periodic-grips-3dm.md", "scope": "Tested periodic grip edits and nested periodic curves roundtrip expanded outer knots with disclosed OM9 user data.", "limitations": "External edits may remove metadata; broad native and retained-source coverage, short lines and physical desktop acceptance remain open."},
+    "periodic_curve_grips_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-periodic-curve-grips.md", "scope": "Certified repeated-basis periodic curve control/edit grips via CMD and toolbar; .om9 and Undo/Redo.", "limitations": "3DM export refuses the tested outer-knot representation; other periodic families and physical desktop acceptance remain open."},
+    "reseamed_affine_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-reseamed-affine-parameter.md", "scope": "Compatible NURBS pieces preserve tested affine trim fractions; nested rational Trim tested via both entrypoints and native 3DM.", "limitations": "Fallback and general composite parameterization, seam derivatives and physical desktop acceptance remain open."},
+    "nested_reseamed_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-nested-reseamed-nurbs.md", "scope": "Knot-aware nested reseamed NURBS display and parameter trim; CMD/toolbar Split/Trim and native Split 3DM fixture.", "limitations": "Composite affine parameterization, Trim 3DM, general geometry and desktop acceptance remain open."},
+    "nested_closed_curves_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-nested-closed-curves.md", "scope": "Full circles and unseamed periodic NURBS in nested display; seam cutter accepted for closed Split; two native Split roundtrip fixtures.", "limitations": "Reseamed leaves, Trim 3DM, arbitrary geometry and physical desktop acceptance remain open."},
+    "nested_mixed_curves_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-nested-mixed-curves.md", "scope": "Connected nested arc and supported NURBS scene; CMD/toolbar Split and Trim, .om9, Undo/Redo and two native Split 3DM fixtures.", "limitations": "Periodic/seamed nested display, Trim 3DM, broad geometry and desktop acceptance remain open."},
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED",
     "target": "standalone Rust OM9, Windows x64",
@@ -461,6 +469,12 @@
     "manual_gate": "AUTO_ONLY",
     "remaining": [
       "The clean fixture removes retained Breps, so editable B-Rep golden coverage is L3-006; a host `Curve::Polycurve` is not exported back exactly."
-    ]
+    ],
+    "small_line_interoperability_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-small-nurbs-polycurve-closure.md",
+      "scope": "Isolated small Split NURBS pieces roundtrip through real 3DM.",
+      "limitations": "A 2e-10 mm line cutter and its full source document are refused by native geometry validity; no successful full-document roundtrip is claimed."
+    }
   }
 }

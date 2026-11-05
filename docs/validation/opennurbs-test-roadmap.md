@@ -1,3 +1,6 @@
+<!-- native-source-inventory-attempt-20261105 -->
+Native source inventory attempt 2026-11-05: adapter build passed; first canonical JSON packet rejected (`missing/unknown record fields`). **1 packet fixture/1 native call, 0 completed 3DM fixtures, 0 source inventory views.** This repeats the existing matrix, not a new planned batch. Prepared queues unchanged (legacy Rhino5 batch4 fixtures/7 objects; standalone prepared list empty); packages2–8 stay open and total future batches remain unknown. Next: compare packet/schema before targeted retry. [Evidence](2026-11-05-workspace-build-test-commit.md).
+
 <!-- host-measure-annotation-20261027 -->
 Host batch 2026-10-27: 88 core +12 scene +69 focused app tests (3 UI-frame tests included); 13 annotation command families, 11 measurement fixture groups across 7 tests and 7 Transform test scenarios are distinct categories, not future batch counts. OCCT canonical measurement/Rust annotation proof only; no openNURBS/Rhino5 acceptance. Prepared pending batches unchanged; packages2–8 remain open; remaining total batch count unknown. [Evidence](2026-10-26-measure-completion/README.md). Next: independent Rhino annotation/style/layout roundtrip remains package5.
 

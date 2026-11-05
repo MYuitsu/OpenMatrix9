@@ -1159,7 +1159,7 @@ mod tests {
                 colors: Vec::new(),
                 corner_uvs: Vec::new(),
             },
-            payload: vec![0],
+            payload: vec![0].into(),
             crc: 0,
         });
         let error = apply(&deform, &geometry, &limits).expect_err("a solid is refused");

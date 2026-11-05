@@ -828,13 +828,7 @@ impl Controller {
         let prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new(name, mutations), held)?;
-        let receipt = self.coordinator.commit(prepared)?;
-        if receipt.published {
-            // Gems change geometry, placement and definitions, which the incremental
-            // `update_owned` path does not cover; a full capture keeps the display exactly the
-            // committed world.
-            self.refresh_scene()?;
-        }
+        self.commit_with_candidate_scene(prepared, held)?;
         Ok(())
     }
 

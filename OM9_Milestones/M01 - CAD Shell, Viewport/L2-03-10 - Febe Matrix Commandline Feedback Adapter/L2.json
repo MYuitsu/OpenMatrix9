@@ -76,6 +76,12 @@
     }
   ],
   "runtime_implementation": {
+    "ctrl_z_2026_11_01": {
+      "status": "SCOPED_EGUI_TEST_PASSED_DESKTOP_PENDING",
+      "scope": "Ctrl+Z invokes document Undo with idle empty command input; text editing retains its shortcut.",
+      "evidence": "docs/validation/2026-11-01-ctrl-shortcuts.md",
+      "limitations": "Native desktop shortcut and geometry clipboard remain unverified."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

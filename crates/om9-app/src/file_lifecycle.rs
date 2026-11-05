@@ -132,6 +132,8 @@ pub(crate) struct FileState {
     pub operation: Option<FileOperation>,
     pub serial: u64,
     pub accepted_save: Option<FileSaveReceipt>,
+    // Heap fields above must be dropped before their shared-account lease.
+    pub memory: Option<om9_core::transaction::ExternalMemoryReservation>,
 }
 impl Default for FileState {
     fn default() -> Self {
@@ -143,6 +145,7 @@ impl Default for FileState {
             operation: None,
             serial: 0,
             accepted_save: None,
+            memory: None,
         }
     }
 }
@@ -173,7 +176,16 @@ impl FileState {
         &self,
         limits: &om9_core::budget::Limits,
     ) -> om9_core::Result<om9_core::budget::Usage> {
+        let mut usage = self.storage_usage()?;
+        usage.bytes = usage.bytes.saturating_sub(self.memory.as_ref().map_or(0, |m| m.bytes()));
+        usage.check(limits)?;
+        Ok(usage)
+    }
+    /// Actual retained heap payload; inline operation/token/hash state is
+    /// already part of Controller storage, not a separate 1 KiB allocation.
+    pub fn storage_usage(&self) -> om9_core::Result<om9_core::budget::Usage> {
         use om9_core::budget::Usage;
+        let limits = om9_core::budget::Limits { max_bytes: u64::MAX, ..Default::default() };
         let mut usage = Usage::array::<String>(self.diagnostics.capacity())?;
         for diagnostic in &self.diagnostics {
             usage.add(
@@ -181,7 +193,7 @@ impl FileState {
                     bytes: diagnostic.capacity() as u64,
                     ..Usage::default()
                 },
-                limits,
+                &limits,
             )?;
         }
         if let Some(path) = &self.path {
@@ -190,25 +202,17 @@ impl FileState {
                     bytes: path.capacity() as u64,
                     ..Usage::default()
                 },
-                limits,
+                &limits,
             )?;
         }
         if let Some(operation) = &self.operation {
-            usage.add(Usage::array::<FileOperation>(1)?, limits)?;
-            usage.add(
-                Usage {
-                    bytes: 1024,
-                    ..Usage::default()
-                },
-                limits,
-            )?;
             if let Some(path) = &operation.destination {
                 usage.add(
                     Usage {
                         bytes: path.capacity() as u64,
                         ..Usage::default()
                     },
-                    limits,
+                    &limits,
                 )?;
             }
         }

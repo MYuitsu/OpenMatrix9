@@ -1,0 +1,382 @@
+{
+  "date": "2026-11-05T09:01:00+07:00",
+  "branch": "hieu-nang",
+  "status": "BUILD_PASSED_TESTS_FAILED",
+  "base_commit": "d20a03029",
+  "staged_tree_before_validation": "d14402dc6da4764b3d29f363703e1045fda9a67b",
+  "cargo_target_dir": "E:/om9-surface-snap-validation",
+  "cargo_jobs": 2,
+  "features": "workspace defaults including occt-brep; no --all-features or --ignored",
+  "full_workspace_test_invocations": 1,
+  "commands": [
+    {
+      "args": [
+        "build",
+        "--release",
+        "--workspace",
+        "--locked",
+        "-j",
+        "2"
+      ],
+      "elapsed_seconds": 425.9584587,
+      "exit_code": 0,
+      "name": "release-build"
+    },
+    {
+      "args": [
+        "test",
+        "--workspace",
+        "--locked",
+        "--no-fail-fast",
+        "-j",
+        "2",
+        "--",
+        "--test-threads=1"
+      ],
+      "elapsed_seconds": 2050.081928,
+      "exit_code": 101,
+      "name": "workspace-tests"
+    }
+  ],
+  "workspace": {
+    "passed": 4497,
+    "failed": 21,
+    "ignored": 183,
+    "target_summaries": 427,
+    "failed_tests": [
+      "ui::icon_size_audit::icon_size_audit_all_categories_at_common_resolutions_and_scales",
+      "ui::icon_size_audit::icons_resize_in_the_same_window_and_restore_without_changing_slots",
+      "escape_discards_builder_and_setting_previews_without_document_changes",
+      "close_save_failure_at_active_path_keeps_prompt_draft_and_path",
+      "failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo",
+      "held_opening_enter_cannot_accept_save_on_the_new_prompt",
+      "overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_replace",
+      "owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner",
+      "real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_once",
+      "shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save",
+      "x1_escape_still_cancels_a_running_command_under_a_failure",
+      "empty_show_confirmation_needs_no_mutation_buffers_in_a_tight_budget",
+      "a_mesh_object_fills_its_faces_after_the_grid",
+      "builder_area_stays_reserved_and_non_interactive",
+      "invalid_command_stays_visible_in_the_status_surface_and_the_transcript",
+      "left_column_renders_the_documented_sections_with_builders_below_projects",
+      "viewport_pipe_mixed_chain_accepts_endpoint_and_station_points",
+      "blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing",
+      "construction_grid_colors_only_positive_axes_like_the_reference",
+      "jewelry_grid_axes_follow_each_view_cplane",
+      "staged::tests::attribute_and_label_edits_are_staged_and_readable_before_commit"
+    ],
+    "failed_targets": [
+      "    `-p om9-app --lib`",
+      "    `-p om9-app --test escape_commands`",
+      "    `-p om9-app --test file_widgets`",
+      "    `-p om9-app --test global_status_surface`",
+      "    `-p om9-app --test layer_dialogs`",
+      "    `-p om9-app --test mesh_fill`",
+      "    `-p om9-app --test shell_docking`",
+      "    `-p om9-app --test solid_difference_ui`",
+      "    `-p om9-app --test transform_corrections`",
+      "    `-p om9-app --test ui_events`",
+      "    `-p om9-app --test viewport_layout`",
+      "    `-p om9-plugin-host --lib`"
+    ]
+  },
+  "failure_details": [
+    {
+      "test": "ui::icon_size_audit::icon_size_audit_all_categories_at_common_resolutions_and_scales",
+      "output_tail": "OM9_ICON_SIZE {\"client_points\":[1280.0,720.0],\"dock_art_pt\":21.0,\"dock_slot_device_px\":24.0,\"dock_slot_pt\":24.0,\"fixed_art_pt\":17.21875,\"fixed_slot_device_px\":20.21875,\"fixed_slot_pt\":20.21875,\"history_slot_pt\":24.0,\"main_art_pt\":20.0,\"main_slot_device_px\":23.0,\"main_slot_pt\":23.0,\"resolution\":[1280.0,720.0],\"scale\":1.0,\"toolbar_art_pt\":15.0,\"toolbar_slot_device_px\":17.25,\"toolbar_slot_pt\":17.25}\n\nthread 'ui::icon_size_audit::icon_size_audit_all_categories_at_common_resolutions_and_scales' (44340) panicked at crates\\om9-app\\src\\ui\\icon_size_audit.rs:236:21:\nassertion `left == right` failed: 1280x720@1/Curve/page0\n  left: 31\n right: 20"
+    },
+    {
+      "test": "ui::icon_size_audit::icons_resize_in_the_same_window_and_restore_without_changing_slots",
+      "output_tail": "thread 'ui::icon_size_audit::icons_resize_in_the_same_window_and_restore_without_changing_slots' (5040) panicked at crates\\om9-app\\src\\ui\\icon_size_audit.rs:71:17:\nassertion `left == right` failed\n  left: 31\n right: 20"
+    },
+    {
+      "test": "escape_discards_builder_and_setting_previews_without_document_changes",
+      "output_tail": "thread 'escape_discards_builder_and_setting_previews_without_document_changes' (57124) panicked at C:\\Users\\nguye\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\epaint-0.36.2\\src\\textures.rs:337:9:\nDropped TexturesDelta with 112 unapplied deltas. Deltas need to be handled. If you want to drop this intentionally call `clear` before dropping.\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    },
+    {
+      "test": "close_save_failure_at_active_path_keeps_prompt_draft_and_path",
+      "output_tail": "thread 'close_save_failure_at_active_path_keeps_prompt_draft_and_path' (16484) panicked at crates\\om9-app\\tests\\file_widgets.rs:244:10:\ncalled `Result::unwrap()` on an `Err` value: Stale(\"file operation document/context\")\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    },
+    {
+      "test": "failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo",
+      "output_tail": "thread 'failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo' (20916) panicked at crates\\om9-app\\tests\\file_widgets.rs:531:58:\ncalled `Option::unwrap()` on a `None` value"
+    },
+    {
+      "test": "held_opening_enter_cannot_accept_save_on_the_new_prompt",
+      "output_tail": "thread 'held_opening_enter_cannot_accept_save_on_the_new_prompt' (48948) panicked at crates\\om9-app\\tests\\file_widgets.rs:705:10:\ncalled `Result::unwrap()` on an `Err` value: Stale(\"file operation document/context\")"
+    },
+    {
+      "test": "overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_replace",
+      "output_tail": "thread 'overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_replace' (50204) panicked at crates\\om9-app\\tests\\file_widgets.rs:554:10:\ncalled `Result::unwrap()` on an `Err` value: Stale(\"file operation document/context\")"
+    },
+    {
+      "test": "owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner",
+      "output_tail": "thread 'owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner' (23044) panicked at crates\\om9-app\\tests\\file_widgets.rs:390:10:\ncalled `Result::unwrap()` on an `Err` value: Stale(\"file operation document/context\")"
+    },
+    {
+      "test": "real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_once",
+      "output_tail": "l: \"Point\", generation: 1, geometry_revision: 1, attributes_revision: 1, geometry: Point([1.0, 2.0, 3.0]), placement: Transform([[1.0, 0.0, 0.0, 0.0], [0.0, 1.0, 0.0, 0.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]), attributes: Attributes { layer: None, visible: true, hidden: false, selectable: true, locked: false, color: Some([0, 130, 85, 255]), line_pattern: None, line_pattern_source: 0, material: None, material_source: 0, plot_color: None, plot_weight_mm: None, plot_color_source: None, plot_weight_source: None, display_order: 0, space: 1, viewport_id: None }, extensions: {} }}, definitions: {}, history: HistoryGraph { recipes: {}, references: {} }, results: {}, resources: {}, retained_sources: {}, import_namespaces: {}, groups: {}, features: {}, exchange: ExchangeMetadata { line_patterns: {}, text_styles: {}, materials: {}, dim_styles: {}, hatch_patterns: {}, lights: {} } }}, validation_cache: RetainedValidationCache(Mutex { data: [Some(RetainedValidationProof { address: 1581548815984, limits: Limits { max_bytes: 20590589995, max_objects: 49999, max_nodes: 1999999, max_points: 1000000, max_history: 4999, max_outputs: 50000, max_depth: 32, max_degree: 32, max_name_bytes: 16384 } }), Some(RetainedValidationProof { address: 1581548816592, limits: Limits { max_bytes: 20590590176, max_objects: 50000, max_nodes: 1999999, max_points: 1000000, max_history: 4999, max_outputs: 50000, max_depth: 32, max_degree: 32, max_name_bytes: 16384 } })], poisoned: false, .. }) }], redo: [], scope: None, identities: IdentityLedger([Object(ObjectId(93d51938-38d6-4cf4-8916-528ecd41c332))]) }"
+    },
+    {
+      "test": "shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save",
+      "output_tail": "thread 'shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save' (26892) panicked at crates\\om9-app\\tests\\file_widgets.rs:484:10:\ncalled `Result::unwrap()` on an `Err` value: Stale(\"file operation document/context\")"
+    },
+    {
+      "test": "x1_escape_still_cancels_a_running_command_under_a_failure",
+      "output_tail": "thread 'x1_escape_still_cancels_a_running_command_under_a_failure' (59204) panicked at crates\\om9-app\\tests\\global_status_surface.rs:358:5:\nassertion `left == right` failed: and the failure stays on the line\n  left: Info\n right: Error\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    },
+    {
+      "test": "empty_show_confirmation_needs_no_mutation_buffers_in_a_tight_budget",
+      "output_tail": "thread 'empty_show_confirmation_needs_no_mutation_buffers_in_a_tight_budget' (54356) panicked at crates\\om9-app\\tests\\layer_dialogs.rs:315:6:\ncalled `Result::unwrap()` on an `Err` value: Budget(\"bytes\")\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    },
+    {
+      "test": "a_mesh_object_fills_its_faces_after_the_grid",
+      "output_tail": "thread 'a_mesh_object_fills_its_faces_after_the_grid' (50204) panicked at crates\\om9-app\\tests\\mesh_fill.rs:104:5:\neach of the twelve cube triangles needs a fill: 24 vs 24 in an empty document\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    },
+    {
+      "test": "builder_area_stays_reserved_and_non_interactive",
+      "output_tail": "thread 'builder_area_stays_reserved_and_non_interactive' (35640) panicked at crates\\om9-app\\tests\\shell_docking.rs:317:5:\nassertion `left == right` failed\n  left: 1\n right: 0\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    },
+    {
+      "test": "invalid_command_stays_visible_in_the_status_surface_and_the_transcript",
+      "output_tail": "thread 'invalid_command_stays_visible_in_the_status_surface_and_the_transcript' (44536) panicked at crates\\om9-app\\tests\\shell_docking.rs:340:5:\nassertion `left == right` failed: unknown command: NotACommand\n  left: Ready\n right: Error"
+    },
+    {
+      "test": "left_column_renders_the_documented_sections_with_builders_below_projects",
+      "output_tail": "thread 'left_column_renders_the_documented_sections_with_builders_below_projects' (30924) panicked at crates\\om9-app\\tests\\shell_docking.rs:147:5:\nbuilders open in the space below the Project Manager"
+    },
+    {
+      "test": "viewport_pipe_mixed_chain_accepts_endpoint_and_station_points",
+      "output_tail": "thread 'viewport_pipe_mixed_chain_accepts_endpoint_and_station_points' (48720) panicked at crates\\om9-app\\tests\\solid_difference_ui.rs:1232:36:\ncalled `Result::unwrap()` on an `Err` value: Invalid(\"Pipe point must be away from the rail axis\")\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    },
+    {
+      "test": "blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing",
+      "output_tail": "thread 'blockers_refuse_instead_of_reusing_unrelated_grips_or_inventing_facing' (25164) panicked at crates\\om9-app\\tests\\transform_corrections.rs:160:9:\nassertion failed: Controller::availability(id).is_err()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    },
+    {
+      "test": "construction_grid_colors_only_positive_axes_like_the_reference",
+      "output_tail": "thread 'construction_grid_colors_only_positive_axes_like_the_reference' (52812) panicked at crates\\om9-app\\tests\\ui_events.rs:176:10:\ncalled `Option::unwrap()` on a `None` value\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    },
+    {
+      "test": "jewelry_grid_axes_follow_each_view_cplane",
+      "output_tail": "thread 'jewelry_grid_axes_follow_each_view_cplane' (55392) panicked at crates\\om9-app\\tests\\viewport_layout.rs:62:14:\nred X axis\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    },
+    {
+      "test": "staged::tests::attribute_and_label_edits_are_staged_and_readable_before_commit",
+      "output_tail": "thread 'staged::tests::attribute_and_label_edits_are_staged_and_readable_before_commit' (10104) panicked at crates\\om9-plugin-host\\src\\staged.rs:2830:13:\nassertion `left == right` failed\n  left: Some([0, 130, 85, 255])\n right: None\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+    }
+  ],
+  "release_smoke": {
+    "create_exit": 0,
+    "inspect_exit": 0,
+    "objects": 4,
+    "exe_sha256": "96c9658b47e88c21e8663c5189a2b74491457aab8fcd4863c10d1075813c4f88"
+  },
+  "native_adapter": {
+    "build_exit": 0,
+    "build_elapsed_seconds": 14.08,
+    "sha256": "41509fd16acaef8f45fd32a8ee925c51c408ed6cdd59d0ae6d4ec686a4768d93",
+    "validation_status": "FIRST_FIXTURE_PROTOCOL_REJECTED",
+    "fixture_packets_attempted": 1,
+    "native_calls_attempted": 1,
+    "source_inventory_views_completed": 0,
+    "completed_3dm_fixtures": 0,
+    "failure": {
+      "reason": "NativeExit(1)",
+      "stats": {
+        "active_processes": 0,
+        "elapsed_ms": 581,
+        "exited": true,
+        "peak_committed_bytes": 34275328,
+        "pid": 60636
+      },
+      "status": "native_owner_rejected",
+      "stderr": "OM9 native exchange (packet preflight): missing/unknown record fields\r\n",
+      "program_sha256": "41509fd16acaef8f45fd32a8ee925c51c408ed6cdd59d0ae6d4ec686a4768d93",
+      "arguments": [
+        "--write",
+        "canonical.json",
+        "canonical.3dm"
+      ]
+    }
+  },
+  "tool_tests": {
+    "tests_run": 12,
+    "error_records": 7,
+    "reason": "missing ref/rhino5/windows_pdf_user_s_guide.pdf; not a successful tool suite"
+  },
+  "syntax": {
+    "staged_python_files": 16,
+    "staged_powershell_files": 4,
+    "status": "passed"
+  },
+  "post_validation_whitespace_only": [
+    {
+      "path": "crates/om9-app/Cargo.toml",
+      "before_sha256": "c0b41f10cab5eeae0f1c876ef465087dd11b7101f495f5b549516be1713cf858",
+      "after_sha256": "07751fd294a2c42cae2634be7c52a800d6e9f6799f7622bf3c5d3299a3a74adc",
+      "verification": "identical parsed TOML"
+    },
+    {
+      "path": "crates/om9-app/src/ui/gem_pave.rs",
+      "before_sha256": "a16126684c5d64ef9bcc5132b693d3cecbb5a3a16d00b5071f3960db89a6c58e",
+      "after_sha256": "8ca585a3b888f16a1ec405d43e7cc135d24036384bf1fd2127b1f525644447f8",
+      "verification": "only blank lines after final Rust token removed"
+    },
+    {
+      "path": "crates/om9-app/tests/three_dm_native_roundtrip.rs",
+      "before_sha256": "b29655fce276085d345539133f725f181e850c69617993c2f7da54cb09559076",
+      "after_sha256": "c9116fa96a02515cdf47d639440f877c986d420faef1eb7ec4366b8fb2603aec",
+      "verification": "only blank lines after final Rust token removed"
+    },
+    {
+      "path": "docs/validation/2026-11-01-user-viewport-present-trace.md",
+      "before_sha256": "168d48ec43692e5306d78d3d8f9f69d8324defbee1c6d39353da69ed95fb6d03",
+      "after_sha256": "f3ef9243a7db9dbcee2a128d974d3a2654d6037c8a0818cdcbbf271ffd4f1389",
+      "verification": "line endings and EOF blank lines only; rule text preserved"
+    },
+    {
+      "path": "docs/validation/2026-11-01-viewport-navigation-performance.jsonl",
+      "before_sha256": "95c0a5a602461d991b0a0ba09fd2bfaa30a6365c024a5b80cff9e6f8fe99ae93",
+      "after_sha256": "d67d527509184863703ea5099baf7f743dbc7ec11954af0a3e4e13fc1032d0f8",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-boolean-options-obb.jsonl",
+      "before_sha256": "c1b44c482b575f48ab1046e6e6ad21db85144af3a565c2ddaed9f3d0e0ac39db",
+      "after_sha256": "4c03393a14d62a22b10b1dd1db5e4c073147a76b96c0271d0d1166318eb49fc9",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-boolean-options-obb2.jsonl",
+      "before_sha256": "30a9de6f9a4f10b86fb83544b79d98174c5d746c825f203c151da054ac94cedd",
+      "after_sha256": "9b5f6cc4108d3251ef0993f2d98b29ef77bc77520eed566b5b7eb259a679b0f3",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-boolean-options-parallel.jsonl",
+      "before_sha256": "1c417f2d33c52a951bb591d7123dc128fa9513dbe8ed777884f354f437517526",
+      "after_sha256": "cf5f777c1950488b883674e0a4a0e7635bc1191702b10de884705a8ea63248dd",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-boolean-options-serial.jsonl",
+      "before_sha256": "0874da7a8422ab699ab7191f73d18f30c6876f9c0bf87e93a3354acf9b46529e",
+      "after_sha256": "d2d91c027e08ad049e133f96d4f6c7fd15381b5203e1b31e41b8cadaa5e1cdd7",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-boolean-options-serial2.jsonl",
+      "before_sha256": "6793fd584840e53e6ab469435f80acf995b8fae8d80e3eb64ad556c6e5b1ecc8",
+      "after_sha256": "6a2483a8d61bb788e6ba00b416f12a51302a93592e03be4c6bf179033e8076f4",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-dice-21-cavities-timing.jsonl",
+      "before_sha256": "f20f3b98fea9cf2fd086387f151208096dd09ed5820230540f59f6a5c5eee74c",
+      "after_sha256": "86ca6980893106cb0f4156c9ef5a5abd7deb6dde91a0ba9c2267c2a5eb4d8781",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-dice-boolean-baseline-timing.jsonl",
+      "before_sha256": "e5639c1445382a4415237b76f1d3e70be57c54833b738fdad2872b3feb81621f",
+      "after_sha256": "8abcf3d4f22bfa927d0ca90f7294b64d188084348f0931137229978d3655dc9d",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-dice-boolean-topology-timing.jsonl",
+      "before_sha256": "5be5923985f9df35c0225d6ad4fc30590301e1f00aa22d5862c456320dc1e0b5",
+      "after_sha256": "c076480a340bec7f2e43511172e920d097461f5c325c5b125353aa4ce031050d",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-dice-multicut-direct-serial.jsonl",
+      "before_sha256": "b5f2b53ba178c1aea52c253c4959f28f31aa89ac7090711d6660695039c65e0d",
+      "after_sha256": "5986d2d97ee36a578554072d1421c4afb43dd369733aa812c9ba1c218937e04c",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-dice-multicut-direct.jsonl",
+      "before_sha256": "cc5bac1aa1ba2305e7c8ad6e6afea20511c83db8acb508e77ba9a314c85c0ea3",
+      "after_sha256": "bd059fafff69734687b6a54a962c0930aee21d28972809e909f3969fc78bcc3d",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-dice-no-undo-timing.jsonl",
+      "before_sha256": "c0579585c58f6537ab8cb6d754a1faf1b77450ae4dbe8a30b100c8426b031cdc",
+      "after_sha256": "a8b87a23fadbecdcc44c7f4183d5fe48cd3dd5e8cf3337837c020f925a858e23",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-dice-undo-optimized-timing.jsonl",
+      "before_sha256": "e46d51c74921183ef9a118b0bddf1f05ebac77f3124c2e0a54ddbb6c6c4aeff5",
+      "after_sha256": "547d32e95c861f5fec04feef302627fd21fb99738342f8036f9a4a42bda13798",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-dice-validation-cache-prior-timing.jsonl",
+      "before_sha256": "c07953eebb2516d67cd3ac49db202cd0b39ef4abf446541e2c7c02831c501fdc",
+      "after_sha256": "47fe5e26751f1a465b8e22165bcea5791898d3956aafe22df7ca3cb00aa76161",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-02-dice-validation-cache-timing.jsonl",
+      "before_sha256": "53476efc0a3389289a2cc5be37264f50eb830c861b5c4b458d3ad98de79470aa",
+      "after_sha256": "03651d79098a613425e922e78dedcbfd4034e4f58d9563934a9e95e543d9d27f",
+      "verification": "identical parsed JSONL records; line endings only"
+    },
+    {
+      "path": "docs/validation/2026-11-03-stl-worker-sampled-reservation.md",
+      "before_sha256": "d14670a68a717e95c1913ffaa6d504ea2bfca7c57858f0e10943fb727e0dfdb0",
+      "after_sha256": "ac6ff2ecbfb3fabb855eaec555a3f86789c91a8542145d41b368b6c7e4245244",
+      "verification": "line endings and EOF blank lines only; rule text preserved"
+    },
+    {
+      "path": "docs/validation/2026-11-04-interactive-ram-transition.md",
+      "before_sha256": "2d7a7768434376852c5e7e4dc86b10cba63f7779ae44afd8a363be5b72e84fda",
+      "after_sha256": "6550905709f467e5308bd53ee9fcec88af3232e6b971003a08db6fc38033a9c9",
+      "verification": "line endings and EOF blank lines only; rule text preserved"
+    },
+    {
+      "path": "implementation/design/M01/viewport-export-separation-20261102/EVIDENCE-HISTORY-20261105.md",
+      "before_sha256": "587282b29cbdf11b4a5a196d8ae861bfeb28fc380956faaae449489720bdf979",
+      "after_sha256": "df377dbd2c8069ade1fa4109d47184694cd9e222e867235bec3ba28e73a09a53",
+      "verification": "line endings and EOF blank lines only; rule text preserved"
+    },
+    {
+      "path": "skills/openmatrix9-feature-port/references/solid-prompt-contract.md",
+      "before_sha256": "a73aeb359d854c0bc2f0550888bdb26f4d1bb39fa8aa6bd52c39c5eba54d638a",
+      "after_sha256": "3fcf3c88ec3c6522813d13ef29b79f7ab31dadffec8b4f3b667dc3aa01cd8ca5",
+      "verification": "line endings and EOF blank lines only; rule text preserved"
+    },
+    {
+      "path": "skills/openmatrix9-ui/references/command-options-by-menu.md",
+      "before_sha256": "e8924f833172759490243d600370fd48ba998c0b9ef319368029407dded2cc43",
+      "after_sha256": "3be912115ca6ee017c2c7a4d4f71750af9b11e1e9ebae8078e5c16032e219b28",
+      "verification": "line endings and EOF blank lines only; rule text preserved"
+    }
+  ],
+  "limitations": [
+    "21 Rust failures across 12 targets; all 183 ignored cases remain unproved.",
+    "Native inventory stopped at the first canonical Circle JSON packet; later matrices did not execute.",
+    "No desktop/WPR or before/after performance measurement, and no global STL/3DM accuracy certification.",
+    "No new implementation of the remaining viewport/export plan; source after validation only received verified whitespace normalization."
+  ],
+  "logs": "build/standalone-validation/ui-artifacts/workspace-final-20261105-081437",
+  "final_checks": {
+    "public_source_audit": {
+      "exit": 0,
+      "source_files": 15197,
+      "icon_bindings": 594,
+      "svg_files": 593,
+      "errors": []
+    },
+    "staged_whitespace_check": 0,
+    "report_links": 7,
+    "json_records_checked": 4,
+    "failure_details_checked": 21,
+    "prune_removed_uncited_runs": 1,
+    "external_targets_deleted": 0
+  }
+}

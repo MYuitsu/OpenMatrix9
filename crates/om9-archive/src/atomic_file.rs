@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-use crate::Archive;
 use om9_core::{Error, Result, budget::Limits, model::Document, transaction::Cancellation};
 use std::{
     fs::{self, File, OpenOptions},
@@ -24,11 +23,18 @@ impl Drop for Staging {
     }
 }
 pub fn read_bounded(path: &Path, limits: &Limits) -> Result<Vec<u8>> {
+    read_bounded_reserved(path, limits, |_| Ok(())).map(|(bytes, ())| bytes)
+}
+
+/// Reserve the bytes from the same opened file before allocating the input.
+/// Reject growth beyond that reservation even if the caller's limit is higher.
+pub fn read_bounded_reserved<T>(path: &Path, limits: &Limits, reserve: impl FnOnce(u64) -> Result<T>) -> Result<(Vec<u8>, T)> {
     let mut file = File::open(path).map_err(io)?;
     let size = file.metadata().map_err(io)?.len();
     if size > limits.max_bytes {
         return Err(Error::Budget("archive file bytes"));
     }
+    let reservation = reserve(size)?;
     let mut bytes = Vec::new();
     bytes
         .try_reserve_exact(
@@ -45,21 +51,25 @@ pub fn read_bounded(path: &Path, limits: &Limits) -> Result<Vec<u8>> {
             .len()
             .checked_add(count)
             .ok_or(Error::Overflow("file read bytes"))?;
-        if next as u64 > limits.max_bytes {
+        if next as u64 > size {
             return Err(Error::Budget("growing archive file"));
         }
-        bytes
-            .try_reserve_exact(count)
-            .map_err(|_| Error::Budget("file read allocation"))?;
         bytes.extend_from_slice(&buffer[..count]);
     }
-    Ok(bytes)
+    Ok((bytes, reservation))
 }
 pub fn save(path: &Path, document: &Document, limits: &Limits, token: &Cancellation) -> Result<()> {
+    save_with_admission(path, document, limits, token, &mut |_, _| Ok(()))
+}
+pub(crate) fn save_with_admission(path: &Path, document: &Document, limits: &Limits,
+    token: &Cancellation, admit: &mut dyn FnMut(u64, u64) -> Result<()>) -> Result<()> {
     cancel(token)?;
-    let bytes = Archive::encode(document, limits)?;
+    let bytes = crate::container::encode_with_admission(document, limits, admit)?;
+    let encoded = bytes.capacity() as u64;
     cancel(token)?;
+    admit(encoded, document.validation_scratch_usage(limits)?.bytes)?;
     let held = document.validate(limits)?;
+    admit(encoded, 0)?;
     let mut retained = held;
     retained.add(
         om9_core::budget::Usage {
@@ -68,12 +78,23 @@ pub fn save(path: &Path, document: &Document, limits: &Limits, token: &Cancellat
         },
         limits,
     )?;
-    let validation = limits.remaining_after(retained)?;
+    // The verification copy coexists in memory with the live document, but
+    // structural limits describe one document, not the sum of two versions.
+    let validation = limits.remaining_after(om9_core::budget::Usage {
+        bytes: retained.bytes,
+        ..Default::default()
+    })?;
     // Prove the private decoder/model copy fits alongside the live document and
     // encoded buffer before creating any staging file.
-    if Archive::decode(&bytes, &validation)? != *document {
+    let decoded = crate::container::decode_with_admission(&bytes, &validation, &mut |estimated| {
+        admit(encoded, estimated.checked_sub(bytes.len() as u64)
+            .ok_or(Error::Invalid("archive decoder input accounting"))?)
+    })?;
+    if decoded != *document {
         return Err(Error::Invalid("archive encoding verification"));
     }
+    drop(decoded);
+    admit(encoded, 0)?;
     let parent = path
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -104,10 +125,20 @@ pub fn save(path: &Path, document: &Document, limits: &Limits, token: &Cancellat
     file.sync_all().map_err(io)?;
     drop(file);
     cancel(token)?;
-    let reread = read_bounded(&staging.0, &validation)?;
-    if reread != bytes || Archive::decode(&reread, &validation)? != *document {
+    let (reread, ()) = read_bounded_reserved(&staging.0, &validation, |size| admit(encoded, size))?;
+    let live = encoded.checked_add(reread.capacity() as u64).ok_or(Error::Overflow("archive readback capacity"))?;
+    admit(live, 0)?;
+    if reread != bytes {
         return Err(Error::Invalid("staged archive verification"));
     }
+    let decoded = crate::container::decode_with_admission(&reread, &validation, &mut |estimated| {
+        admit(live, estimated.checked_sub(reread.len() as u64)
+            .ok_or(Error::Invalid("archive decoder input accounting"))?)
+    })?;
+    if decoded != *document { return Err(Error::Invalid("staged archive verification")); }
+    drop(decoded);
+    drop(reread);
+    admit(encoded, 0)?;
     cancel(token)?;
     #[cfg(windows)]
     {

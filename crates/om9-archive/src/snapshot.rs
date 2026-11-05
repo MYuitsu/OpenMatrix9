@@ -116,6 +116,12 @@ impl DocumentSnapshot {
     /// Restore in one atomic step: version tag, payload integrity, document
     /// identity, then typed validation. No partial document is ever returned.
     pub fn restore(&self, limits: &Limits) -> Result<Document> {
+        self.restore_with_admission(limits, &mut |_| Ok(()))
+    }
+    /// Reserve the decoder's reported peak before its corresponding allocations.
+    /// Estimates include the encoded input; callers already owning that input
+    /// can subtract `encoded_len` from their external scratch reservation.
+    pub fn restore_with_admission(&self, limits: &Limits, admit: &mut impl FnMut(u64) -> Result<()>) -> Result<Document> {
         if self.version != VERSION {
             return Err(Error::Unsupported(VERSION_REFUSAL));
         }
@@ -125,7 +131,7 @@ impl DocumentSnapshot {
         if self.digest()? != self.sha256 {
             return Err(Error::Invalid("snapshot checksum"));
         }
-        let document = container::decode(&self.payload, limits)?;
+        let document = container::decode_with_admission(&self.payload, limits, admit)?;
         if document.id != self.document_id {
             return Err(Error::Invalid("snapshot document"));
         }
@@ -135,6 +141,13 @@ impl DocumentSnapshot {
         };
         usage.add(document.validate(limits)?, limits)?;
         Ok(document)
+    }
+    pub fn encoded_len(&self) -> u64 { self.payload.len() as u64 }
+    pub fn storage_usage(&self) -> Result<Usage> {
+        let bytes = (std::mem::size_of::<Self>() as u64).checked_add(self.payload.capacity() as u64)
+            .and_then(|bytes| bytes.checked_add(self.sha256.capacity() as u64))
+            .ok_or(Error::Overflow("snapshot storage"))?;
+        Ok(Usage { bytes, ..Usage::default() })
     }
     pub fn to_json(&self) -> Result<String> {
         serde_json::to_string(&Envelope {

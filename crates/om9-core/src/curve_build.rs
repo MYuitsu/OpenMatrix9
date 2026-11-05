@@ -593,10 +593,24 @@ pub fn insert_knot(
     times: usize,
     limits: &Limits,
 ) -> Result<NurbsCurve> {
+    insert_knot_impl(source, t, times, limits, false)
+}
+
+/// Insert a support boundary knot for subsequent exact endpoint clamping.
+pub(crate) fn insert_support_knot(
+    source: &NurbsCurve, t: f64, times: usize, limits: &Limits,
+) -> Result<NurbsCurve> {
+    insert_knot_impl(source, t, times, limits, true)
+}
+
+fn insert_knot_impl(
+    source: &NurbsCurve, t: f64, times: usize, limits: &Limits, boundary: bool,
+) -> Result<NurbsCurve> {
     if times == 0 {
         return Ok(source.clone());
     }
-    if !t.is_finite() || t <= source.domain[0] || t >= source.domain[1] {
+    if !t.is_finite() || t < source.domain[0] || t > source.domain[1]
+        || (!boundary && (t == source.domain[0] || t == source.domain[1])) {
         return Err(Error::Invalid("knot insertion parameter"));
     }
     let degree = source.degree;
@@ -604,7 +618,11 @@ pub fn insert_knot(
     let mut knots = source.knots.clone();
     let mut inserted = 0;
     while inserted < times {
-        let span = knot_span(&knots, degree, t)?;
+        let span = if boundary && t == source.domain[1] {
+            knots.partition_point(|k| *k < t).checked_sub(1).ok_or(Error::Invalid("knot span"))?
+        } else {
+            knot_span(&knots, degree, t)?
+        };
         // Boehm works on the *new* pole sequence: one extra pole, so index runs to
         // old_len(). Poles after the span take the previous old pole (`P[i-1]`); the
         // blended range is `(span-degree, span]`.

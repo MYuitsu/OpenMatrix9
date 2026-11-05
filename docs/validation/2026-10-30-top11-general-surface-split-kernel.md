@@ -1,0 +1,11 @@
+# Top11 Trim: geometry-tool surface splitter groundwork
+
+The OCCT adapter now accepts an open surface or BRep target and independently placed curve, surface and BRep tools. Rust validates and flattens operands, retains their buffers for the synchronous call, applies resource budgets, and owns the returned snapshot. The native exception is limited to converting the typed inputs, performing OCCT splitting, checking topology and area, and returning a bounded snapshot; it holds no document, session or handles across the ABI. Reversed typed surface targets are explicitly rejected until their orientation is preserved.
+
+Exact fixtures cover two crossing lines creating four 50 mm² pieces of a 200 mm² face; a closed radius-2 circle creating a 4π mm² region, both at the origin and translated; a quadratic NURBS cutter; a translated BRep box cutter; and one degree-1 NURBS surface cutting another into two 100 mm² pieces. A missed BRep cutter is rejected. The area guard exposed an error for translated circles: generic OCCT affine conversion changed the circle and area. Identity and similarity transforms now use the exact OCCT transformation path, while general affine transforms keep the existing general transform path.
+
+Windows MSVC, pinned OCCT 8.0.1 SDK and runtime, `CARGO_TARGET_DIR=L:\om9-target`: `cargo test -j 2 -p om9-kernel --features 3dm-brep --test l2_01_10 --test l2_01_11` passed 77 tests. `cargo test -j 2 -p om9-app --test measure_extended --test top11_brep` passed 24 tests. `tools/public_source_audit.py` reported zero errors.
+
+SHA-256: `measurement.rs` 6322825a54b40450da7f48d0911cb5fb3697e0e7e81ce6e28394a69a66def128; `measurement_bridge.cpp` 1d8a0ac4f48fe89c48e8b3b4a51ff32de16d96c86ecdcfb1184ad381743d9519; `l2_01_10.rs` 71728dda98eb2ebbd5d7f4611fd427e563b71360484b52cdb8d5a6a09d3716fd.
+
+At the time of this kernel record the splitter was not connected to Top11; later curve-cutter integration is recorded in `2026-10-30-top11-trim-surface-regions.md`. These fixtures do not prove arbitrary curved/periodic or reversed surfaces, nonuniform affine transformations, multiple intersecting shells, or general robustness. The area check is a conservative error guard, not a proof of general topology or UV correctness.

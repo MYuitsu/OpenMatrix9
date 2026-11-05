@@ -1,0 +1,7 @@
+# STL encoded-position collision
+
+Two separate parallel triangles at z=1 and z=1.00000002 mm have nonzero area before and after binary STL encoding, and each vertex meets a 0.0001 mm quantization allowance. Before this change both planes nevertheless encoded to identical `f32` positions and export succeeded. The exchange unit test reproduced this failure.
+
+The streaming writer now indexes encoded positions and refuses distinct scaled input positions that become equal as binary STL coordinates. Signed zero is normalized for comparison, and positions already numerically identical are not reported as new quantization collisions. A fallible allocation failure reports a budget error. The app's atomic publication test verifies that this error preserves existing destination bytes and removes the temporary output.
+
+Ten exchange STL unit tests and the new atomic-file test passed after the change; 29 application STL integration tests passed before the subsequent fallible-allocation-only adjustment. This is a conservative collision guard: it does not establish manifoldness after encoding, test face intersections, detect pre-existing coincident objects, or prove global geometric tolerance. The index adds memory proportional to unique encoded positions and is not yet included in a production export reservation or measured on large fixtures. The existing application export is synchronous; desktop behavior is unverified.

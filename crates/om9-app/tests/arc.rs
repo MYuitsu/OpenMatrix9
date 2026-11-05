@@ -131,11 +131,18 @@ fn arc_mode_tokens_and_mode_lock() {
     let mut c = controller();
     c.submit("Arc").unwrap();
     let tokens = c.arc_option_tokens();
-    for expected in ["3Point", "Center", "StartPoint"] {
+    // The current mode is the prompt word, so the other modes are the options.
+    for expected in ["Center", "StartPoint"] {
         assert!(tokens.iter().any(|(_, command)| *command == expected));
     }
+    assert!(!tokens.iter().any(|(_, command)| *command == "3Point"));
     c.submit("Center").unwrap();
+    let tokens = c.arc_option_tokens();
+    assert!(tokens.iter().any(|(_, command)| *command == "3Point"));
+    assert!(tokens.iter().any(|(_, command)| *command == "Radius="));
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
+    let tokens = c.arc_option_tokens();
+    assert!(!tokens.iter().any(|(_, command)| *command == "Center"));
     assert!(c.submit("3point").is_err());
 }
 

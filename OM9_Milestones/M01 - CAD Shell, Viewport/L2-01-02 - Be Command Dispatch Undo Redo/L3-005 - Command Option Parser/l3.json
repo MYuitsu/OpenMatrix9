@@ -1,6 +1,13 @@
 {
   "level": "L3",
   "id": "OM9-L3-01-02-005",
+  "runtime_implementation": {
+    "command_options_crate_2026_11_02": {
+      "status": "REFACTOR_PARTIAL_VALIDATION",
+      "scope": "Existing parser extracted to om9-command-options; om9-app retains the original re-export. No completion status promoted.",
+      "evidence": "docs/validation/2026-11-02-command-options-crate.md"
+    }
+  },
   "milestone": "M01",
   "parent_l2_id": "OM9-L2-01-02",
   "title": "Command Option Parser",

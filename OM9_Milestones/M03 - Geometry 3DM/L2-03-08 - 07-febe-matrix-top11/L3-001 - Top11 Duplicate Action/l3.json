@@ -316,6 +316,30 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "copy_direction_scale_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-copy-rotate-direction-scale.md", "scope": "Nonzero small offsets and scale-safe last direction/distance tested through preview and commit.", "limitations": "Additional geometry and physical desktop input remain open."},
+    "inactive_view_input_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-inactive-view-cplane.md", "scope": "Copy pointer, preview and click use the pointed viewport CPlane; tested four directions.", "limitations": "Other CPlanes, input devices, GPU and desktop acceptance remain open."},
+    "projected_preview_input_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-projected-snap-preview.md", "scope": "Transform preview and click share the constrained, snapped and projected viewport input; egui fixture covers Move.", "limitations": "Copy-specific projected snap and inactive viewport cases remain unverified."},
+    "copy_preview_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-copy-move-preview.md", "scope": "Copy preview shares the committed translation candidate, including repeat options and nested scene instances.", "limitations": "Physical input, GPU display and additional geometry and CPlanes remain open."},
+    "typed_points_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-copy-mirror-typed-points.md", "scope": "Copy accepts typed absolute and relative points through the shared point owner; rotated CPlane, CMD widget and 3DM cases passed.", "limitations": "Other options, physical input and desktop acceptance remain open."},
+    "desktop_observation_2026_10_31": {"status": "PARTIAL_DESKTOP_OBSERVATION", "evidence": "docs/validation/2026-10-31-top11-desktop-and-short-line-investigation.md", "scope": "One real desktop Duplicate/Move sequence, Control Points toggle, and toolbar Undo/Redo visually observed.", "limitations": "No saved document or measured coordinates; human acceptance and broader cases remain open."},
+    "empty_finish_feedback_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-empty-finish-feedback.md",
+      "scope": "Report no-change finishes distinctly for tested Duplicate and Trim sessions and propagate command feedback to status/history.",
+      "limitations": "Physical UI and external MCP transport were not exercised; wider Top11 acceptance remains open."
+    },
+    "scene_atomic_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-scene-atomic.md",
+      "scope": "Prepare Top11 candidate scene before transaction publication; reject tested Duplicate scene budget failure atomically.",
+      "limitations": "Other scene failures, performance, GPU and physical UI remain open."
+    },
+    "duplicate_retry_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-duplicate-retry.md",
+      "scope": "Preserve Duplicate prompt after tested invalid point and pre-publication budget failure, including synthetic viewport retry.",
+      "limitations": "General failures, post-publication errors, native UI and human acceptance remain open."
+    },
     "inplace_option_2026_10_28": {
       "scope": "InPlace at the initial Duplicate prompt reuses one transaction; point geometry, Undo and Redo have a focused test.",
       "evidence": "docs/validation/2026-10-28-top11-split-join-followup.md",

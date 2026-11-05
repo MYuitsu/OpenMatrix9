@@ -255,6 +255,7 @@ impl Controller {
 
     /// Read-only candidate of the same plan the click/Enter commits.
     pub fn transform_preview(&self, point: Point3, draft: &str) -> Result<Vec<[Point3; 2]>> {
+        if self.top11_pending.is_some() { return self.top11_transform_preview(point, draft); }
         let Some(p) = &self.transform_pending else {
             return Ok(Vec::new());
         };

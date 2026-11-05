@@ -276,3 +276,117 @@ All 19 remain `AUDIT_REQUIRED` until their exact parser, stage and transaction b
 - No release/install update; no human M01-UI/M03-UI gate is signed.
 - Worktree contains unrelated parallel changes; no commit was made by this checkpoint.
 
+## Checkpoint 2026-11-01 — one inline presentation for every command
+
+The user reported that commands still showed a row of option buttons above the command
+row and asked for the Polyline presentation in every command.
+
+- `crates/om9-app/src/ui/command.rs` now adopts `Controller::prompt_with_options()` every
+  frame, so typed, menu, toolbar (including `ui/top11::top11_action`) and
+  `DispatchOutcome::Top11` starts all render the same inline signature. The stale prompt
+  that produced the floating row cannot survive a frame.
+- The floating `option-tokens` `Area` and its `shortcut_button` helper are deleted; the
+  only option presentation is the underlined span inside the prompt. `cmd_token_rects`
+  keeps the same `id.name()` lookup keys that tests and hit reports already used.
+- Idle prompts wrap inside the command panel so every inline option stays visible and
+  clickable (Circle publishes 18 options; its rect used to end past the row edge). The
+  history area is sized from the measured prompt height. While a draft is typed the pinned
+  row keeps its single-line horizontal-scroll contract (`pinned_command`).
+- A prompt change re-anchors the editor caret to the draft end (`Transcript::prompt()` is
+  new), so paste/typing after a stage change is no longer dropped by a stale protected
+  boundary.
+- Box keeps its documented plain-word mode prompt, so the shared-routes test now expects
+  `Center` for Box only; the prompt text shows the active mode (`Center of base ...`).
+
+Evidence filed in `docs/validation/2026-11-01-command-options-inline.md`:
+`command_inline_options` (9, including a catalog sweep that starts 67 commands headlessly
+and checks all 41 that publish options), `command_options_interface` (74),
+`pinned_command` (7), `chrome_actions` (30), plus the passing Polyline/token/snapshot suites.
+The full `om9-app` suite still reports failures outside this work (icon-size audit, shell
+docking status surface, transform availability, grid colours); the icon-size and grid
+failures reproduce on build artifacts made before this change, and the rest belong to
+parallel work in this worktree.
+
+## Checkpoint 2026-11-02 — stage-scoped options, Circle as the reference
+
+The user's Matrix screenshots show two Circle prompts: `Center of circle ( Deformable
+Vertical 2Point 3Point Tangent AroundCurve FitPoints ):` and `Diameter <17.559> ( Radius
+Orientation Circumference Area ):`; OM9 published 18 options after the center.
+
+- `circle_option_tokens` now publishes the *other* modes only before the first point
+  (seven entries, current mode omitted) and, after the center, the three other measures
+  plus `Orientation`. `Undo`, `Cancel`, `Approx` and the `Size=`/measure-entry tokens are
+  gone; Esc cancels and `Approx` stays a typed alias.
+- `CirclePending::prompt` returns the current measure (`Radius`, `Diameter`, ...), so the
+  measure is the prompt word and the options are the alternatives, exactly the Matrix
+  pattern.
+- `Orientation` is implemented (parsed, staged, previewed and committed through
+  `commit_circle_normal`); the feature record had claimed it while the parser never
+  accepted it.
+- Bare measure words and `Radius=`/`Diameter=`/`Circumference=`/`Area=` assignments are
+  case-insensitive at the size stage.
+- The generated inline signature keeps Matrix spacing (` ( Deformable ... )`).
+
+Evidence: `docs/validation/2026-11-02-circle-prompt-stages.md`; `circle` 32 tests
+(two stage/prompt fixtures and two Orientation fixtures), `command_options_interface` 74,
+`command_values` 7, `command_inline_options` 9, plus the solid/curve suites.
+Open gap: the live value (`Diameter <17.559>`) is not rendered because the prompt has no
+hover point; only the measure word appears.
+
+## Checkpoint 2026-11-02 — option visibility taken from the contracts
+
+The user asked to re-read the documents for what is shown, hidden, or revealed by an
+action. Sources and rules: `docs/validation/2026-11-02-command-option-visibility.md`.
+
+- Line: BothSides is offered before the first point only; the end stage offers Length.
+  Prompt is stage-aware (`Start of line (BothSides=No): ` → `End of line (Length=): `).
+- Rectangle: Length/Width hidden until the first corner (the parser rejects them earlier).
+- Arc: current mode omitted and mode words plain; choosing Center reveals
+  Radius/Diameter; both disappear after the first point.
+- Ellipse: current construction mode omitted (modes only at the pre-point stage).
+- Sphere: current mode omitted; other modes plain words (Box already followed this).
+- Circle/Box: unchanged from the previous checkpoints.
+
+Evidence: `command_options_interface` 78 (four new stage fixtures), `command_feedback_adapter`
+5, `command_sessions` 5, `command_snapshot` 3, `command_values` 7,
+`command_options_and_repeat` 6 (fixture `OM9-L3-01-02-005` updated), `arc` 7, `ellipse` 22,
+`rect` 16, `rectangle_regressions` 5, plus solid/UI suites unchanged.
+Known divergence: SPEC §8 asks for an unwrapped live row with horizontal scrolling; an
+idle prompt whose option signature exceeds the panel still wraps (previous checkpoint).
+
+## Checkpoint 2026-11-02 — Matrix references for every command family
+
+The user pointed out that the Matrix book 1/book 2/addendum text already lives in the
+per-L3 `reference/text` folders, so the audit must cover every command family, not only
+curve/solid.
+
+- Built the reference-locator index `docs/validation/matrix-ref-command-options-2026-11-02.md`
+  from 1130 per-L3 reference files: 371 command sections with their option words and the
+  owning L3 reference path/page. `docs/validation/matrix-ref-option-diff-2026-11-02.md`
+  compares the option words that could be aligned with the running command bar; the
+  automated extraction can pick sub-options out of prose, so each row needs a per-command
+  read before a provider change.
+- Top11 Duplicate now follows the Matrix Copy contract: `InPlace`/`Vertical` before the
+  first copy, `FromLastPoint`/`UseLastDistance`/`UseLastDirection` only after it
+  (`top11_option_tokens`). Typed assignments for the last group still work at any stage.
+- Ellipse stopped advertising the `Approx` alias (Matrix documents `Deformable` only).
+
+Evidence: `top11` 152, `top11_options` 10, `command_inline_options` 9, `ellipse` 22 pass.
+
+## Checkpoint 2026-11-02 — Matrix direction for Line and Rectangle
+
+The user chose the Matrix behaviour for the two conflicts recorded in the owner cards.
+
+- Line: no `Length` option at any stage. The end prompt is `End of line: ` and a bare
+  positive number sets the length (converted through the session unit); `Length=` remains a
+  typed alias. The M01 `OM9-L3-01-02-005` fixture declares `BothSides` only and
+  `OM9-L3-01-02-004` expects `End of line: `.
+- Rectangle: no `Square` option. Holding Shift while picking the corner sets the owner flag
+  through `Controller::set_rect_square` (the viewport pick wires it); the typed `Square`/`s`
+  word stays a hidden alias. Matrix `Rounded` (Arc/Conic) is still open.
+- Evidence: `command_options_interface` 78, `command_values` 7, `command_snapshot` 3,
+  `command_feedback_adapter` 5, `command_sessions` 5, `command_options_and_repeat` 6,
+  `command_state_machine` 3, `rect` 16, `rectangle_regressions` 5,
+  `command_inline_options` 9, `command_tokens` 1, `pinned_command` 7, `preview_drag` 5
+  (new Shift-square pointer test).
+

@@ -1,0 +1,9 @@
+# STL background job foundation
+
+Follow-up: the job now requires a reservation from the capture's coordinator account; see [transaction reservation evidence](2026-11-03-transaction-external-reservations.md). The earlier isolated-budget details below are historical.
+
+P3b partial: `StlExportJob` launches one captured export on a named Rust thread, receives its result without blocking and keeps the supplied export-class reservation until the worker finishes. Dropping the job requests cooperative cancellation. The temporary-file guard also removes the temporary on normal error or unwinding. A zero-byte or non-export reservation is refused; the caller remains responsible for obtaining a sufficient reservation from the correct shared budget.
+
+Windows with default OCCT/openNURBS, `CARGO_TARGET_DIR=L:/om9-target`, Cargo `-j 2`: 24 STL integration tests, three cancellation tests and three memory-budget tests passed. Two background-job tests were then run, covering a captured box exported while the live controller deletes it, result delivery and release of a simulated reservation, plus refusal of zero-byte/wrong-class reservations. Existing cancellation tests check concurrent temporary-file cleanup. The simulated 64 MiB reservation is not a verified bound on export memory.
+
+This job is not connected to the UI or native picker, does not enforce one job globally, and has no production estimate or shared owner inventory; therefore it is not evidence of a runtime 60% RAM cap or safe peak admission. Cancellation on job drop, New/Open/close during an actual worker, panic handling, failure cleanup under real I/O faults, concurrent edit responsiveness and desktop presentation require further tests. OCCT calls cannot be interrupted mid-call. The 256 MiB aggregate limit and the other plan gates remain open. The active OM9 session was not changed.

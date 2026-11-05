@@ -10,12 +10,12 @@ use crate::{
     Error, Result,
     budget::Limits,
     curve_ops, curve_surface_ops,
-    geometry::{Curve, Geometry, GeometryKind, NurbsCurve, Point3, Transform, finite},
+    geometry::{Curve, Geometry, GeometryKind, Mesh, NurbsCurve, Point3, Transform, finite},
     identity::ObjectId,
     model::{Document, Entity},
     surface_kernel,
 };
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 /// The eleven Matrix Top 11 actions in toolbar order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -134,6 +134,14 @@ impl Top11Action {
             .into_iter()
             .find(|action| action.icon().eq_ignore_ascii_case(icon))
     }
+
+    /// Resolve the stable feature id a menu row or CMD alias publishes, so a
+    /// toolbar click and a feature dispatch reach the same action.
+    pub fn from_feature(feature: &str) -> Option<Self> {
+        Self::ALL
+            .into_iter()
+            .find(|action| action.feature_id().eq_ignore_ascii_case(feature))
+    }
 }
 
 /// Point display mode selected by the two `*PtOn` actions.
@@ -154,6 +162,7 @@ pub struct Top11Context {
     pub surfaces: usize,
     pub breps: usize,
     pub other: usize,
+    pub mirrorable_other: usize,
 }
 
 impl Top11Context {
@@ -167,6 +176,7 @@ impl Top11Context {
             surfaces: 0,
             breps: 0,
             other: 0,
+            mirrorable_other: 0,
         };
         for id in selection {
             match document
@@ -179,7 +189,10 @@ impl Top11Context {
                 Some(GeometryKind::Mesh) => context.meshes += 1,
                 Some(GeometryKind::Surface) => context.surfaces += 1,
                 Some(GeometryKind::Brep) => context.breps += 1,
-                Some(_) => context.other += 1,
+                Some(kind) => {
+                    context.other += 1;
+                    if matches!(kind,GeometryKind::Cloud | GeometryKind::Instance | GeometryKind::Hatch | GeometryKind::Light) {context.mirrorable_other += 1;}
+                },
                 None => context.selected = context.selected.saturating_sub(1),
             }
         }
@@ -227,14 +240,14 @@ pub fn availability(action: Top11Action, context: &Top11Context) -> Top11Availab
     match action {
         Top11Action::Duplicate => Top11Availability::enabled(action),
         Top11Action::Mirror => {
-            if context.curves + context.points + context.meshes + context.surfaces + context.breps
+            if context.curves + context.points + context.meshes + context.surfaces + context.breps + context.mirrorable_other
                 > 0
             {
                 Top11Availability::enabled(action)
             } else {
                 Top11Availability::disabled(
                     action,
-                    "mirror needs points, curves, surfaces, meshes or BReps",
+                    "mirror needs supported geometry or an instance",
                 )
             }
         }
@@ -254,14 +267,14 @@ pub fn availability(action: Top11Action, context: &Top11Context) -> Top11Availab
             }
         }
         Top11Action::Explode => {
-            if context.curves > 0 && context.other == 0 {
+            if context.curves + context.meshes > 0 && context.curves + context.meshes == context.selected {
                 Top11Availability::enabled(action)
             } else {
-                Top11Availability::disabled(action, "explode needs curves only")
+                Top11Availability::disabled(action, "explode needs curves or meshes")
             }
         }
         Top11Action::Join => {
-            if context.curves >= 2 && context.other == 0 {
+            if context.curves >= 2 && context.curves == context.selected {
                 Top11Availability::enabled(action)
             } else {
                 Top11Availability::disabled(action, "join needs two or more curves")
@@ -358,27 +371,103 @@ pub fn explode_entities(
     let mut pieces = Vec::new();
     for id in ids {
         let source = document.entities.get(id).ok_or(Error::Missing("object"))?;
-        let curve = curve_of(document, *id)?;
-        let members = curve_ops::explode_curve(curve, limits)?;
-        if members.len() < 2 {
-            return Err(Error::Unsupported("explode needs a polycurve"));
-        }
-        pieces
-            .try_reserve(members.len())
-            .map_err(|_| Error::Budget("exploded objects"))?;
-        for member in members {
-            member.validate(limits)?;
-            pieces.push(clone_entity(
-                source,
-                Geometry::Curve(member),
-                source.placement,
-            ));
+        match &source.geometry {
+            Geometry::Curve(curve) => {
+                let members = curve_ops::explode_curve(curve, limits)?;
+                if members.len() < 2 { return Err(Error::Unsupported("explode needs a polycurve")); }
+                for member in members {
+                    member.validate(limits)?;
+                    pieces.push(clone_entity(source, Geometry::Curve(member), source.placement));
+                }
+            }
+            Geometry::Mesh(mesh) => {
+                for member in explode_mesh(mesh, limits)? {
+                    pieces.push(clone_entity(source, Geometry::Mesh(member), source.placement));
+                }
+            }
+            _ => return Err(Error::Unsupported("explode needs curves or meshes")),
         }
     }
     if pieces.is_empty() {
         return Err(Error::Invalid("explode selection"));
     }
     Ok(pieces)
+}
+
+/// Separate face components connected by welded (shared-index) mesh edges.
+fn explode_mesh(mesh: &Mesh, limits: &Limits) -> Result<Vec<Mesh>> {
+    mesh.validate(limits)?;
+    let count=mesh.faces.len();
+    let corners=mesh.faces.iter().try_fold(0usize, |n,f| n.checked_add(f.len()).ok_or(Error::Overflow("mesh corners")))?;
+    let mut scratch=crate::budget::Usage::array::<usize>(count)?;
+    scratch.add(crate::budget::Usage::array::<u8>(count)?,limits)?;
+    scratch.add(crate::budget::Usage::array::<bool>(mesh.vertices.len())?,limits)?;
+    scratch.add(crate::budget::Usage::array::<(Point3,Point3,[u8;4])>(mesh.vertices.len())?,limits)?;
+    // Account conservatively for edge maps, remapping maps and transient output
+    // storage before populating them. Output meshes still receive normal validation.
+    scratch.add(crate::budget::Usage::array::<[u8;128]>(corners)?,limits)?;
+    let mut parent:Vec<usize>=(0..count).collect();
+    let mut rank=vec![0u8;count];
+    let mut used=vec![false;mesh.vertices.len()];
+    let mut edges=BTreeMap::<(u32,u32),usize>::new();
+    fn root(parent:&mut [usize],mut i:usize)->usize {
+        while parent[i]!=i { parent[i]=parent[parent[i]];i=parent[i]; } i
+    }
+    for (index,face) in mesh.faces.iter().enumerate() {
+        for i in 0..face.len() {
+            let a=face[i];let b=face[(i+1)%face.len()];let edge=(a.min(b),a.max(b));
+            used[a as usize]=true;
+            if let Some(other)=edges.insert(edge,index) {
+                let a=root(&mut parent,index);let b=root(&mut parent,other);
+                if a!=b {
+                    if rank[a]<rank[b] {parent[a]=b;} else {
+                        parent[b]=a;
+                        if rank[a]==rank[b] {rank[a]=rank[a].saturating_add(1);}
+                    }
+                }
+            }
+        }
+    }
+    let components:BTreeSet<usize>=(0..count).map(|i|root(&mut parent,i)).collect();
+    if components.len()<2 {return Err(Error::Unsupported("mesh has no unwelded components"));}
+    if u64::try_from(components.len()).map_err(|_| Error::Overflow("mesh outputs"))?>limits.max_outputs {
+        return Err(Error::Budget("outputs"));
+    }
+    let mut groups=BTreeMap::<usize,(Mesh,BTreeMap<u32,u32>)>::new();
+    let mut uv=0;
+    for (index,face) in mesh.faces.iter().enumerate() {
+        let key=root(&mut parent,index);
+        let (part,map)=groups.entry(key).or_insert_with(||(Mesh{vertices:Vec::new(),faces:Vec::new(),normals:Vec::new(),colors:Vec::new(),corner_uvs:Vec::new()},BTreeMap::new()));
+        let mut output=Vec::with_capacity(face.len());
+        for old in face {
+            let new=if let Some(new)=map.get(old) {*new} else {
+                let new=u32::try_from(part.vertices.len()).map_err(|_| Error::Overflow("mesh vertex index"))?;
+                let i=*old as usize;part.vertices.push(mesh.vertices[i]);
+                if !mesh.normals.is_empty(){part.normals.push(mesh.normals[i]);}
+                if !mesh.colors.is_empty(){part.colors.push(mesh.colors[i]);}
+                map.insert(*old,new);new
+            };
+            output.push(new);
+        }
+        part.faces.push(output);
+        if !mesh.corner_uvs.is_empty(){part.corner_uvs.extend_from_slice(&mesh.corner_uvs[uv..uv+face.len()]);}
+        uv+=face.len();
+    }
+    // Isolated vertices are not assigned to any face component. Keep them once,
+    // with their channels, on the deterministic first component.
+    if let Some((part,_))=groups.values_mut().next() {
+        for (i,referenced) in used.iter().enumerate() {
+            if !referenced {
+                part.vertices.push(mesh.vertices[i]);
+                if !mesh.normals.is_empty(){part.normals.push(mesh.normals[i]);}
+                if !mesh.colors.is_empty(){part.colors.push(mesh.colors[i]);}
+            }
+        }
+    }
+    let mut result=Vec::new();
+    result.try_reserve_exact(groups.len()).map_err(|_| Error::Budget("exploded meshes"))?;
+    for (_, (part,_)) in groups {part.validate(limits)?;result.push(part);}
+    Ok(result)
 }
 
 /// Join selected curves into one curve in the first object's layer/attributes.
@@ -392,96 +481,169 @@ pub fn join_entities(
         return Err(Error::Invalid("join selection"));
     }
     let mut source: Option<&Entity> = None;
-    let mut placement: Option<Transform> = None;
     let mut curves = Vec::new();
     for id in ids {
         let entity = document.entities.get(id).ok_or(Error::Missing("object"))?;
-        let curve = curve_of(document, *id)?.clone();
-        if let Some(existing) = placement {
-            if existing != entity.placement {
-                return Err(Error::Unsupported("join across different placements"));
-            }
+        let curve = curve_of(document, *id)?;
+        if source.is_none() { source = Some(entity); }
+        curves.push(if entity.placement == Transform::identity() {
+            curve.clone()
         } else {
-            placement = Some(entity.placement);
-            source = Some(entity);
-        }
-        curves.push(curve);
+            bake_curve(curve, entity.placement)?
+        });
     }
     let curves = chain_curves(curves, tolerance, limits)?;
     let joined = curve_ops::join_curves(&curves, tolerance, limits)?;
+    let joined = heal_joined_curve(joined, tolerance, limits)?;
     joined.validate(limits)?;
     let source = source.ok_or(Error::Missing("join source"))?;
-    Ok(clone_entity(
-        source,
-        Geometry::Curve(joined),
-        placement.unwrap_or_else(Transform::identity),
-    ))
+    Ok(clone_entity(source, Geometry::Curve(joined), Transform::identity()))
+}
+
+/// Replace a curve endpoint while retaining the other poles and parameters where possible.
+fn set_join_endpoint(curve: &Curve, start: bool, target: Point3, tolerance: f64, limits: &Limits) -> Result<Curve> {
+    let old = curve_ops::curve_endpoints(curve, limits)?[usize::from(!start)];
+    if old == target { return Ok(curve.clone()); }
+    let result = match curve {
+        Curve::Line { start: a, end: b, domain } => Curve::Line { start: if start { target } else { *a }, end: if start { *b } else { target }, domain: *domain },
+        Curve::Circle { center, x, y, radius, domain, angle_domain } => {
+            let n = affine_circle(*center,*x,*y,*radius,angle_domain.unwrap_or(*domain),Transform::identity())?;
+            return set_join_endpoint(&n,start,target,tolerance,limits);
+        }
+        Curve::Nurbs(n) => {
+            let mut changed=curve_ops::clamped_active_nurbs(n,start,limits)?;
+            let index=if start != changed.reversed {0} else {changed.poles.len()-1};
+            changed.poles[index]=target; Curve::Nurbs(changed)
+        }
+        Curve::Polycurve { .. } => {
+            let mut segments=curve_ops::explode_curve(curve,limits)?;
+            let index=if start {0} else {segments.len()-1};
+            segments[index]=set_join_endpoint(&segments[index],start,target,tolerance,limits)?;
+            Curve::Polycurve {segments,reversed:false}
+        }
+    };
+    result.validate(limits)?;
+    let actual=curve_ops::curve_endpoints(&result,limits)?[usize::from(!start)];
+    if distance(actual,target)>tolerance*0.01 { return Err(Error::Invalid("join endpoint adjustment")); }
+    Ok(result)
+}
+
+/// Replace each pair of tolerated endpoints by their common world-space midpoint.
+fn heal_joined_curve(curve: Curve, tolerance: f64, limits: &Limits) -> Result<Curve> {
+    let Curve::Polycurve { mut segments, reversed: false } = curve else { return Ok(curve) };
+    for i in 1..segments.len() {
+        let a=curve_ops::curve_endpoints(&segments[i-1],limits)?[1];
+        let b=curve_ops::curve_endpoints(&segments[i],limits)?[0];
+        if distance(a,b)>tolerance { return Err(Error::Invalid("join continuity")); }
+        if a != b {
+            let midpoint=std::array::from_fn(|axis| a[axis]*0.5+b[axis]*0.5);
+            segments[i-1]=set_join_endpoint(&segments[i-1],false,midpoint,tolerance,limits)?;
+            segments[i]=set_join_endpoint(&segments[i],true,midpoint,tolerance,limits)?;
+        }
+    }
+    if segments.len()>1 {
+        let first=curve_ops::curve_endpoints(&segments[0],limits)?[0];
+        let last=curve_ops::curve_endpoints(segments.last().unwrap(),limits)?[1];
+        if first != last && distance(first,last)<=tolerance {
+            let midpoint=std::array::from_fn(|axis| first[axis]*0.5+last[axis]*0.5);
+            segments[0]=set_join_endpoint(&segments[0],true,midpoint,tolerance,limits)?;
+            let end=segments.len()-1;
+            segments[end]=set_join_endpoint(&segments[end],false,midpoint,tolerance,limits)?;
+        }
+    }
+    Ok(Curve::Polycurve {segments,reversed:false})
 }
 
 fn distance(a: Point3, b: Point3) -> f64 {
     let delta = sub(a, b);
-    dot(delta, delta).sqrt()
+    delta[0].hypot(delta[1]).hypot(delta[2])
 }
 
-/// Order a selection into one continuous chain, regardless of selection order.
-fn chain_curves(mut curves: Vec<Curve>, tolerance: f64, limits: &Limits) -> Result<Vec<Curve>> {
-    if curves.len() < 2 {
-        return Err(Error::Invalid("join selection"));
+/// Order curves as a continuous trail, including loops encountered along the way.
+fn chain_curves(curves: Vec<Curve>, tolerance: f64, limits: &Limits) -> Result<Vec<Curve>> {
+    if curves.len() < 2 { return Err(Error::Invalid("join selection")); }
+    if !tolerance.is_finite() || tolerance < 0.0 { return Err(Error::Invalid("join tolerance")); }
+    let endpoint_count = curves.len().checked_mul(2).ok_or(Error::Overflow("join endpoints"))?;
+    let mut scratch = crate::budget::Usage::array::<Point3>(endpoint_count)?;
+    scratch.nodes = u64::try_from(endpoint_count).map_err(|_| Error::Overflow("join nodes"))?;
+    scratch.add(crate::budget::Usage::array::<usize>(endpoint_count)?, limits)?;
+    scratch.add(crate::budget::Usage::array::<usize>(endpoint_count)?, limits)?;
+    scratch.add(crate::budget::Usage::array::<Vec<(usize, usize, bool)>>(endpoint_count)?, limits)?;
+    scratch.add(crate::budget::Usage::array::<(usize, usize, bool)>(endpoint_count)?, limits)?;
+    let mut endpoints = Vec::new();
+    endpoints.try_reserve_exact(endpoint_count).map_err(|_| Error::Budget("join endpoints"))?;
+    for curve in &curves { endpoints.extend(curve_ops::curve_endpoints(curve, limits)?); }
+    let mut parent = Vec::new();
+    parent.try_reserve_exact(endpoint_count).map_err(|_| Error::Budget("join nodes"))?;
+    parent.extend(0..endpoint_count);
+    fn root(parent: &mut [usize], mut index: usize) -> usize {
+        while parent[index] != index { parent[index] = parent[parent[index]]; index = parent[index]; }
+        index
     }
-    let first = curves.remove(0);
-    let mut ordered = vec![first];
-    while !curves.is_empty() {
-        let end = curve_ops::curve_endpoints(ordered.last().expect("chain"), limits)?[1];
-        let mut found = None;
-        for (index, curve) in curves.iter().enumerate() {
-            let endpoints = curve_ops::curve_endpoints(curve, limits)?;
-            if distance(end, endpoints[0]) <= tolerance {
-                found = Some((index, false));
-                break;
-            }
-            if distance(end, endpoints[1]) <= tolerance {
-                found = Some((index, true));
-                break;
+    // Sweep along the widest axis; only candidates within tolerance on that axis
+    // need the exact 3D distance test. Dense coincident points remain quadratic.
+    let axis = (0..3).max_by(|&a, &b| {
+        let extent = |axis: usize| {
+            let (min, max) = endpoints.iter().fold((f64::INFINITY, f64::NEG_INFINITY), |(min, max), p| (min.min(p[axis]), max.max(p[axis])));
+            max - min
+        };
+        extent(a).total_cmp(&extent(b))
+    }).expect("three axes");
+    let mut order = Vec::new();
+    order.try_reserve_exact(endpoint_count).map_err(|_| Error::Budget("join sweep"))?;
+    order.extend(0..endpoint_count);
+    order.sort_unstable_by(|&a, &b| endpoints[a][axis].total_cmp(&endpoints[b][axis]).then(a.cmp(&b)));
+    for position in 0..endpoint_count {
+        let i = order[position];
+        for &j in order[..position].iter().rev() {
+            if endpoints[i][axis] - endpoints[j][axis] > tolerance { break; }
+            if distance(endpoints[i], endpoints[j]) <= tolerance {
+                let a = root(&mut parent, i); let b = root(&mut parent, j);
+                if a != b { let low = a.min(b); let high = a.max(b); parent[high] = low; }
             }
         }
-        let Some((index, reverse)) = found else {
-            break;
-        };
-        let curve = curves.remove(index);
-        ordered.push(if reverse {
-            curve_ops::reverse_curve(&curve, limits)?
-        } else {
-            curve
-        });
     }
-    // An open chain may have been entered in the middle: extend at the start too.
-    while !curves.is_empty() {
-        let start = curve_ops::curve_endpoints(ordered.first().expect("chain"), limits)?[0];
-        let mut found = None;
-        for (index, curve) in curves.iter().enumerate() {
-            let endpoints = curve_ops::curve_endpoints(curve, limits)?;
-            if distance(start, endpoints[1]) <= tolerance {
-                found = Some((index, false));
-                break;
-            }
-            if distance(start, endpoints[0]) <= tolerance {
-                found = Some((index, true));
-                break;
-            }
-        }
-        let Some((index, reverse)) = found else {
-            break;
-        };
-        let curve = curves.remove(index);
-        let curve = if reverse {
-            curve_ops::reverse_curve(&curve, limits)?
-        } else {
-            curve
-        };
-        ordered.insert(0, curve);
+    let mut adjacency: Vec<Vec<(usize, usize, bool)>> = Vec::new();
+    adjacency.try_reserve_exact(endpoint_count).map_err(|_| Error::Budget("join adjacency"))?;
+    adjacency.resize_with(endpoint_count, Vec::new);
+    for index in 0..curves.len() {
+        let a = root(&mut parent, index * 2); let b = root(&mut parent, index * 2 + 1);
+        adjacency[a].try_reserve(1).map_err(|_| Error::Budget("join adjacency"))?;
+        adjacency[a].push((index, b, false));
+        adjacency[b].try_reserve(1).map_err(|_| Error::Budget("join adjacency"))?;
+        adjacency[b].push((index, a, true));
     }
-    if !curves.is_empty() {
-        return Err(Error::Invalid("join continuity"));
+    let odd: Vec<_> = adjacency.iter().enumerate().filter_map(|(i, edges)| (edges.len() % 2 == 1).then_some(i)).collect();
+    if !matches!(odd.len(), 0 | 2) { return Err(Error::Invalid("join has no continuous trail")); }
+    let start = odd.first().copied().unwrap_or_else(|| adjacency.iter().position(|edges| !edges.is_empty()).expect("nonempty curves"));
+    let mut used = vec![false; curves.len()];
+    let mut stack = vec![(start, None)];
+    let mut trail = Vec::new();
+    while let Some(&(vertex, _)) = stack.last() {
+        let next = loop {
+            match adjacency[vertex].pop() {
+                Some((edge, other, reverse)) if !used[edge] => break Some((edge, other, reverse)),
+                Some(_) => continue,
+                None => break None,
+            }
+        };
+        if let Some((edge, other, reverse)) = next {
+            used[edge] = true; stack.push((other, Some((edge, reverse))));
+        } else if let Some((_, Some(edge))) = stack.pop() { trail.push(edge); }
+    }
+    if trail.len() != curves.len() { return Err(Error::Invalid("join continuity")); }
+    trail.reverse();
+    let mut ordered = Vec::new();
+    ordered.try_reserve_exact(curves.len()).map_err(|_| Error::Budget("join trail"))?;
+    for (edge, reverse) in trail {
+        ordered.push(if reverse { curve_ops::reverse_curve(&curves[edge], limits)? } else { curves[edge].clone() });
+    }
+    // Tolerance clusters can be non-transitive: reject any consecutive endpoints
+    // farther apart than the requested tolerance instead of inventing a connection.
+    for pair in ordered.windows(2) {
+        let end = curve_ops::curve_endpoints(&pair[0], limits)?[1];
+        let start = curve_ops::curve_endpoints(&pair[1], limits)?[0];
+        if distance(end, start) > tolerance { return Err(Error::Invalid("join ambiguous tolerance cluster")); }
     }
     Ok(ordered)
 }
@@ -622,23 +784,6 @@ pub fn rotate_placements(
     Ok(moved)
 }
 
-fn is_rigid(placement: Transform) -> bool {
-    let m = placement.0;
-    let columns = [
-        [m[0][0], m[1][0], m[2][0]],
-        [m[0][1], m[1][1], m[2][1]],
-        [m[0][2], m[1][2], m[2][2]],
-    ];
-    for column in columns {
-        if (dot(column, column) - 1.0).abs() > 1e-9 {
-            return false;
-        }
-    }
-    dot(columns[0], columns[1]).abs() <= 1e-9
-        && dot(columns[0], columns[2]).abs() <= 1e-9
-        && dot(columns[1], columns[2]).abs() <= 1e-9
-}
-
 /// Inverse of a rigid placement (orthonormal rotation/reflection plus translation).
 pub fn inverse_affine(placement: Transform) -> Result<Transform> {
     placement.validate()?;
@@ -671,7 +816,7 @@ pub fn inverse_affine(placement: Transform) -> Result<Transform> {
 
 /// Exact affine image of a circle: a rational quadratic NURBS ellipse. The weights and
 /// knots are unchanged by an affine map, so only the Cartesian poles are transformed.
-fn affine_circle(
+pub(crate) fn affine_circle(
     center: Point3,
     x: Point3,
     y: Point3,
@@ -748,17 +893,13 @@ pub fn bake_curve(curve: &Curve, placement: Transform) -> Result<Curve> {
         Ok(out)
     };
     Ok(match curve {
-        Curve::Line { start, end, .. } => {
+        Curve::Line { start, end, domain } => {
             let start = placement.point(*start)?;
             let end = placement.point(*end)?;
-            let length = (0..3)
-                .map(|axis| (end[axis] - start[axis]).powi(2))
-                .sum::<f64>()
-                .sqrt();
             Curve::Line {
                 start,
                 end,
-                domain: [0.0, length],
+                domain: *domain,
             }
         }
         Curve::Circle {
@@ -769,12 +910,24 @@ pub fn bake_curve(curve: &Curve, placement: Transform) -> Result<Curve> {
             domain,
             angle_domain,
         } => {
-            if is_rigid(placement) {
+            let transformed_x = vector(*x)?;
+            let transformed_y = vector(*y)?;
+            let x_scale = transformed_x[0].hypot(transformed_x[1]).hypot(transformed_x[2]);
+            let y_scale = transformed_y[0].hypot(transformed_y[1]).hypot(transformed_y[2]);
+            let same_scale = x_scale.is_finite() && y_scale.is_finite()
+                && x_scale > 1e-12 && y_scale > 1e-12
+                && (x_scale-y_scale).abs() <= 8.0*f64::EPSILON*x_scale.max(y_scale);
+            let axes = if same_scale {
+                let a = transformed_x.map(|v| v/x_scale);
+                let b = transformed_y.map(|v| v/y_scale);
+                (dot(a,b).abs() <= 8.0*f64::EPSILON).then_some((a,b))
+            } else { None };
+            if let Some((x,y)) = axes {
                 Curve::Circle {
                     center: placement.point(*center)?,
-                    x: unit(vector(*x)?)?,
-                    y: unit(vector(*y)?)?,
-                    radius: *radius,
+                    x,
+                    y,
+                    radius: radius*x_scale,
                     domain: *domain,
                     angle_domain: *angle_domain,
                 }
@@ -859,17 +1012,13 @@ fn reflect_geometry(geometry: Geometry, origin: Point3, normal: Point3) -> Resul
     Ok(match geometry {
         Geometry::Point(point) => Geometry::Point(reflect_point(point, origin, normal)),
         Geometry::Curve(curve) => Geometry::Curve(match curve {
-            Curve::Line { start, end, .. } => {
+            Curve::Line { start, end, domain } => {
                 let start = reflect_point(start, origin, normal);
                 let end = reflect_point(end, origin, normal);
-                let length = (0..3)
-                    .map(|axis| (end[axis] - start[axis]).powi(2))
-                    .sum::<f64>()
-                    .sqrt();
                 Curve::Line {
                     start,
                     end,
-                    domain: [0.0, length],
+                    domain,
                 }
             }
             Curve::Circle {
@@ -922,12 +1071,18 @@ fn reflect_geometry(geometry: Geometry, origin: Point3, normal: Point3) -> Resul
             for direction in &mut mesh.normals {
                 *direction = reflect_direction(*direction, normal);
             }
-            // A reflection reverses orientation; swapping two corners keeps the
-            // outward winding.
+            // Reverse each boundary and its corner attributes together. A quad
+            // needs the entire tail reversed to avoid crossing its edges.
+            let mut uv_offset = 0;
             for face in &mut mesh.faces {
+                let end = uv_offset + face.len();
                 if face.len() >= 3 {
-                    face.swap(1, 2);
+                    face[1..].reverse();
+                    if !mesh.corner_uvs.is_empty() {
+                        mesh.corner_uvs[uv_offset + 1..end].reverse();
+                    }
                 }
+                uv_offset = end;
             }
             Geometry::Mesh(mesh)
         }
@@ -950,6 +1105,7 @@ fn reflect_geometry(geometry: Geometry, origin: Point3, normal: Point3) -> Resul
 pub struct MirrorOutcome {
     pub copies: Vec<Entity>,
     pub replacements: Vec<(ObjectId, Geometry)>,
+    pub placements: Vec<(ObjectId, Transform)>,
 }
 
 /// Mirror selected objects about a world plane.
@@ -966,9 +1122,22 @@ pub fn mirror_entities(
     let mut outcome = MirrorOutcome {
         copies: Vec::new(),
         replacements: Vec::new(),
+        placements: Vec::new(),
     };
     for id in ids {
         let entity = document.entities.get(id).ok_or(Error::Missing("object"))?;
+        if matches!(entity.geometry, Geometry::Instance(_) | Geometry::NativeBrep(_) | Geometry::Hatch(_) | Geometry::Light(_)) {
+            let mut matrix=Transform::identity();
+            let distance=dot(origin,normal);
+            for i in 0..3 {
+                for j in 0..3 {matrix.0[i][j]-=2.*normal[i]*normal[j];}
+                matrix.0[i][3]=2.*distance*normal[i];
+            }
+            let placement=matrix.compose(entity.placement)?;
+            if copy {outcome.copies.push(clone_entity(entity,entity.geometry.clone(),placement));}
+            else {outcome.placements.push((*id,placement));}
+            continue;
+        }
         let baked = bake_geometry(&entity.geometry, entity.placement, limits)?;
         let reflected = reflect_geometry(baked, origin, normal)?;
         reflected.validate(limits)?;
@@ -1039,21 +1208,26 @@ pub fn grip_handles(
     limits: &Limits,
 ) -> Result<Vec<GripHandle>> {
     let mut handles = Vec::new();
+    let mut compatible = false;
     for id in ids {
         let entity = document.entities.get(id).ok_or(Error::Missing("object"))?;
         let source: Vec<Point3> = match &entity.geometry {
             Geometry::Curve(curve) => {
+                compatible = true;
                 let grips = curve_ops::curve_grips(curve, 1e-9, limits)?;
                 match mode {
                     GripMode::Edit => grips.edit_points,
                     GripMode::Control => grips.poles,
                 }
             }
-            Geometry::Surface(surface) => match mode {
-                GripMode::Edit => surface_edit_points(surface, limits)?,
-                GripMode::Control => surface.poles.clone(),
+            Geometry::Surface(surface) => {
+                compatible = true;
+                match mode {
+                    GripMode::Edit => surface_edit_points(surface, limits)?,
+                    GripMode::Control => surface.poles.clone(),
+                }
             },
-            _ => return Err(Error::Unsupported("grips need a curve or surface")),
+            _ => continue,
         };
         handles
             .try_reserve(source.len())
@@ -1067,6 +1241,7 @@ pub fn grip_handles(
             });
         }
     }
+    if !ids.is_empty() && !compatible { return Err(Error::Unsupported("grips need a curve or surface")); }
     Ok(handles)
 }
 
@@ -1081,6 +1256,14 @@ pub fn grip_points(
         .into_iter()
         .map(|handle| handle.point)
         .collect())
+}
+
+/// Return geometry after deleting a control grip; callers publish it atomically.
+pub fn delete_grip_geometry(document: &Document, handle: GripHandle, limits: &Limits) -> Result<Geometry> {
+    if handle.mode != GripMode::Control { return Err(Error::Invalid("control grip required")); }
+    let entity = document.entities.get(&handle.object).ok_or(Error::Missing("object"))?;
+    let Geometry::Curve(curve) = &entity.geometry else { return Err(Error::Unsupported("control point deletion needs a NURBS curve")); };
+    Ok(Geometry::Curve(curve_ops::delete_control_point(curve, handle.index, limits)?))
 }
 
 /// Move one grip to a world point and return the edited geometry.
@@ -1098,10 +1281,22 @@ pub fn move_grip_geometry(
     let local = inverse_affine(entity.placement)?.point(world)?;
     match &entity.geometry {
         Geometry::Curve(curve) => {
-            let edited = match handle.mode {
-                GripMode::Control => curve_ops::move_grip(curve, handle.index, local, limits)?,
-                GripMode::Edit => curve_ops::move_edit_point(curve, handle.index, local, limits)?,
+            let edited = if matches!(curve, Curve::Polycurve { .. }) {
+                let tolerance = document.effective_tolerance()?.absolute_mm;
+                match handle.mode {
+                    GripMode::Control => curve_ops::move_grip_with_joints(curve, handle.index, local, entity.placement, tolerance, limits)?,
+                    GripMode::Edit => curve_ops::move_edit_point_with_joints(curve, handle.index, local, entity.placement, tolerance, limits)?,
+                }
+            } else {
+                match handle.mode {
+                    GripMode::Control => curve_ops::move_grip(curve, handle.index, local, limits)?,
+                    GripMode::Edit => curve_ops::move_edit_point(curve, handle.index, local, limits)?,
+                }
             };
+            let edited = if handle.mode == GripMode::Control && matches!(curve, Curve::Polycurve { .. }) {
+                let tolerance = document.effective_tolerance()?;
+                curve_ops::fuse_smooth_control_polycurve(curve, &edited, entity.placement, tolerance.absolute_mm, tolerance.angular_rad, limits)?.unwrap_or(edited)
+            } else { edited };
             edited.validate(limits)?;
             Ok(Geometry::Curve(edited))
         }
@@ -1140,27 +1335,108 @@ pub fn move_grip_geometry(
 
 /* ------------------------- split / trim by cutter ------------------------- */
 
+/// Closure for cutting: a short line or a small open circular arc is not a loop.
+pub fn curve_closed_for_cut(curve: &Curve, limits: &Limits) -> Result<bool> {
+    curve.validate(limits)?;
+    match curve {
+        Curve::Line { .. } => Ok(false),
+        Curve::Circle { radius, domain, angle_domain, .. } => {
+            let angles = angle_domain.unwrap_or(*domain);
+            let span = angles[1] - angles[0];
+            let tau = std::f64::consts::TAU;
+            let tolerance = 1e-9_f64.min(1e-9 / radius);
+            if span < tau - tolerance { return Ok(false); }
+            let residual = span.rem_euclid(tau);
+            Ok(residual.min(tau-residual) <= tolerance)
+        }
+        Curve::Nurbs(n) if n.seam.is_some() => {
+            let mut base = n.clone(); base.seam = None;
+            curve_closed_for_cut(&Curve::Nurbs(base), limits)
+        }
+        _ => {
+            let start = curve_ops::point_at(curve, 0.0, limits)?;
+            let end = curve_ops::point_at(curve, 1.0, limits)?;
+            let separation = (start[0]-end[0]).hypot(start[1]-end[1]).hypot(start[2]-end[2]);
+            if separation == 0.0 { return Ok(true); }
+            if separation > 1e-9 { return Ok(false); }
+            // Do not let a fixed absolute threshold classify an entire small
+            // open curve as closed. Sampling gives a conservative size bound.
+            let mut extent = separation;
+            for fraction in [0.25, 0.5, 0.75] {
+                let p = curve_ops::point_at(curve, fraction, limits)?;
+                extent = extent.max((start[0]-p[0]).hypot(start[1]-p[1]).hypot(start[2]-p[2]));
+            }
+            Ok(separation <= 1e-9_f64.min(extent * 1e-9))
+        }
+    }
+}
+
 fn intersection_fractions(
     target: &Curve,
     cutter: &Curve,
     tolerance: f64,
+    include_endpoints: bool,
     limits: &Limits,
 ) -> Result<Vec<f64>> {
     if !tolerance.is_finite() || tolerance <= 0.0 {
         return Err(Error::Invalid("cutting tolerance"));
     }
     let hits = curve_surface_ops::curve_curve_intersections(target, cutter, tolerance, limits)?;
-    let mut fractions: Vec<f64> = hits
+    let fractions: Vec<f64> = hits
         .into_iter()
         .map(|hit| hit.first_fraction)
-        .filter(|fraction| *fraction > 1e-7 && *fraction < 1.0 - 1e-7)
         .collect();
-    fractions.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-    fractions.dedup_by(|a, b| (*a - *b).abs() <= 1e-7);
+    let fractions = normalize_cut_fractions(target, Transform::identity(), fractions, tolerance, include_endpoints, limits)?;
     if fractions.is_empty() {
         return Err(Error::Invalid("cutting curve has no intersection"));
     }
     Ok(fractions)
+}
+
+/// Sort intersection fractions and merge only cuts within tolerance along the placed curve.
+pub fn normalize_cut_fractions(
+    curve: &Curve,
+    placement: Transform,
+    mut fractions: Vec<f64>,
+    tolerance: f64,
+    include_endpoints: bool,
+    limits: &Limits,
+) -> Result<Vec<f64>> {
+    if !tolerance.is_finite() || tolerance <= 0.0 { return Err(Error::Invalid("cutting tolerance")); }
+    if fractions.iter().any(|f| !f.is_finite() || *f < 0.0 || *f > 1.0) { return Err(Error::Invalid("cutting fraction")); }
+    fractions.sort_by(f64::total_cmp);
+    let mut unique: Vec<f64> = Vec::new();
+    unique.try_reserve_exact(fractions.len()).map_err(|_| Error::Budget("cut fractions"))?;
+    let within_tolerance = |a: f64, b: f64| -> Result<bool> {
+        if a == b { return Ok(true); }
+        let pa=placement.point(curve_ops::point_at(curve,a,limits)?)?;
+        let pb=placement.point(curve_ops::point_at(curve,b,limits)?)?;
+        let distance=(pa[0]-pb[0]).hypot(pa[1]-pb[1]).hypot(pa[2]-pb[2]);
+        if distance > tolerance { return Ok(false); }
+        if matches!(curve, Curve::Line { .. }) { return Ok(true); }
+        if let Curve::Nurbs(n)=curve && let Some(seam)=n.seam {
+            let offset=if n.reversed {(n.domain[1]-seam)/(n.domain[1]-n.domain[0])} else {(seam-n.domain[0])/(n.domain[1]-n.domain[0])};
+            // The two fractions may round to exactly the same unwrapped native
+            // parameter; trimming that zero-representable interval is invalid.
+            if offset+a == offset+b { return Ok(true); }
+        }
+        let interval=curve_ops::trim_curve_by_parameter(curve,a,b,limits)?;
+        let world=bake_curve(&interval,placement)?;
+        Ok(curve_ops::arc_length(&world,limits)? <= tolerance)
+    };
+    for mut fraction in fractions {
+        let endpoint=if within_tolerance(0.0,fraction)? { Some(0.0) }
+            else if within_tolerance(fraction,1.0)? { Some(1.0) } else { None };
+        if let Some(end)=endpoint {
+            if !include_endpoints { continue; }
+            fraction=end;
+        }
+        if let Some(&previous) = unique.last() {
+            if within_tolerance(previous,fraction)? { continue; }
+        }
+        unique.push(fraction);
+    }
+    Ok(unique)
 }
 
 fn cut_pieces(target: &Curve, fractions: &[f64], limits: &Limits) -> Result<Vec<Curve>> {
@@ -1170,11 +1446,11 @@ fn cut_pieces(target: &Curve, fractions: &[f64], limits: &Limits) -> Result<Vec<
     boundaries.push(1.0);
     let mut pieces = Vec::new();
     for pair in boundaries.windows(2) {
-        if pair[1] - pair[0] <= 1e-9 {
+        if pair[1] <= pair[0] {
             continue;
         }
-        let piece = curve_ops::trim_curve(target, pair[0], pair[1], limits)?;
-        if curve_ops::arc_length(&piece, limits)? > 1e-9 {
+        let piece = curve_ops::trim_curve_by_parameter(target, pair[0], pair[1], limits)?;
+        if curve_ops::arc_length(&piece, limits)? > 0.0 {
             pieces.push(piece);
         }
     }
@@ -1194,14 +1470,46 @@ pub fn split_at_fractions(
     let mut clean: Vec<f64> = fractions
         .iter()
         .copied()
-        .filter(|fraction| fraction.is_finite() && *fraction > 1e-7 && *fraction < 1.0 - 1e-7)
+        .filter(|fraction| fraction.is_finite() && *fraction > 0.0 && *fraction < 1.0)
         .collect();
     clean.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-    clean.dedup_by(|a, b| (*a - *b).abs() <= 1e-7);
+    clean.dedup_by(|a, b| *a == *b);
     if clean.is_empty() {
         return Err(Error::Invalid("no cutting fraction"));
     }
     cut_pieces(target, &clean, limits)
+}
+
+/// Split a closed curve at distinct fractions, including the interval across its seam.
+pub fn split_closed_at_fractions(
+    target: &Curve,
+    fractions: &[f64],
+    limits: &Limits,
+) -> Result<Vec<Curve>> {
+    if !curve_closed_for_cut(target, limits)? {
+        return Err(Error::Invalid("closed split needs a closed curve"));
+    }
+    let mut cuts = fractions.to_vec();
+    if cuts.iter().any(|f| !f.is_finite() || *f < 0.0 || *f >= 1.0) {
+        return Err(Error::Invalid("closed split fraction"));
+    }
+    cuts.sort_by(f64::total_cmp);
+    cuts.dedup_by(|a, b| *a == *b);
+    if cuts.len() < 2 {
+        return Err(Error::Invalid("closed curve needs two distinct points"));
+    }
+    let mut pieces = Vec::with_capacity(cuts.len());
+    for pair in cuts.windows(2) {
+        pieces.push(curve_ops::trim_curve_by_parameter(target, pair[0], pair[1], limits)?);
+    }
+    let tail = curve_ops::trim_curve_by_parameter(target, *cuts.last().unwrap(), 1.0, limits)?;
+    if cuts[0] == 0.0 {
+        pieces.push(tail);
+    } else {
+        let head = curve_ops::trim_curve_by_parameter(target, 0.0, cuts[0], limits)?;
+        pieces.push(curve_ops::join_curves(&[tail, head], 1e-7, limits)?);
+    }
+    Ok(pieces)
 }
 
 /// Split a target curve at every intersection with a cutting curve.
@@ -1211,7 +1519,7 @@ pub fn split_by_cutter(
     tolerance: f64,
     limits: &Limits,
 ) -> Result<Vec<Curve>> {
-    let fractions = intersection_fractions(target, cutter, tolerance, limits)?;
+    let fractions = intersection_fractions(target, cutter, tolerance, false, limits)?;
     split_at_fractions(target, &fractions, limits)
 }
 
@@ -1222,15 +1530,28 @@ pub fn trim_by_fractions(
     pick: Point3,
     limits: &Limits,
 ) -> Result<Vec<Curve>> {
+    trim_by_fractions_in_world(target, fractions, pick, Transform::identity(), limits)
+}
+
+/// Choose the picked interval in world space while retaining each piece in its source frame.
+pub fn trim_by_fractions_in_world(
+    target: &Curve,
+    fractions: &[f64],
+    pick: Point3,
+    placement: Transform,
+    limits: &Limits,
+) -> Result<Vec<Curve>> {
     finite(pick)?;
     target.validate(limits)?;
+    let closed = curve_closed_for_cut(target, limits)?;
+    let seam_cut = closed && fractions.iter().any(|f| *f == 0.0 || *f == 1.0);
     let mut fractions: Vec<f64> = fractions
         .iter()
         .copied()
-        .filter(|fraction| fraction.is_finite() && *fraction > 1e-7 && *fraction < 1.0 - 1e-7)
+        .filter(|fraction| fraction.is_finite() && *fraction > 0.0 && *fraction < 1.0)
         .collect();
     fractions.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-    fractions.dedup_by(|a, b| (*a - *b).abs() <= 1e-7);
+    fractions.dedup_by(|a, b| *a == *b);
     if fractions.is_empty() {
         return Err(Error::Invalid("no cutting fraction"));
     }
@@ -1241,27 +1562,38 @@ pub fn trim_by_fractions(
     let mut remove = None;
     let mut best = f64::INFINITY;
     for (index, pair) in boundaries.windows(2).enumerate() {
-        let middle = 0.5 * (pair[0] + pair[1]);
-        let point = curve_ops::point_at(target, middle, limits)?;
-        let measured = distance(point, pick);
+        let piece = curve_ops::trim_curve_by_parameter(target, pair[0], pair[1], limits)?;
+        let world_piece = bake_curve(&piece, placement)?;
+        let (_, _, measured) = curve_surface_ops::closest_point_on_curve(&world_piece, pick, limits)?;
         if measured < best {
             best = measured;
             remove = Some(index);
         }
     }
     let remove = remove.ok_or(Error::Invalid("trim interval"))?;
+    // On a closed curve the first and last parameter intervals are the same
+    // cyclic interval, separated only by the representation seam.
+    if closed && !seam_cut && fractions.len() >= 2 && (remove == 0 || remove == boundaries.len() - 2) {
+        let piece = curve_ops::trim_curve_by_parameter(target, fractions[0], *fractions.last().unwrap(), limits)?;
+        if curve_ops::arc_length(&piece, limits)? <= 0.0 { return Err(Error::Invalid("trim removed the whole curve")); }
+        return Ok(vec![piece]);
+    }
     let mut pieces = Vec::new();
-    for (index, pair) in boundaries.windows(2).enumerate() {
-        if index == remove || pair[1] - pair[0] <= 1e-9 {
-            continue;
-        }
-        let piece = curve_ops::trim_curve(target, pair[0], pair[1], limits)?;
-        if curve_ops::arc_length(&piece, limits)? > 1e-9 {
-            pieces.push(piece);
+    for (from, to) in [(0.0, boundaries[remove]), (boundaries[remove + 1], 1.0)] {
+        if from < to {
+            let piece = curve_ops::trim_curve_by_parameter(target, from, to, limits)?;
+            if curve_ops::arc_length(&piece, limits)? > 0.0 {
+                pieces.push(piece);
+            }
         }
     }
     if pieces.is_empty() {
         return Err(Error::Invalid("trim removed the whole curve"));
+    }
+    if pieces.len() == 2 && closed {
+        let tail = pieces.pop().expect("two pieces");
+        let head = pieces.pop().expect("two pieces");
+        pieces.push(curve_ops::join_curves(&[tail, head], 1e-7, limits)?);
     }
     Ok(pieces)
 }
@@ -1274,7 +1606,8 @@ pub fn trim_by_cutter(
     tolerance: f64,
     limits: &Limits,
 ) -> Result<Vec<Curve>> {
-    let fractions = intersection_fractions(target, cutter, tolerance, limits)?;
+    let closed = curve_closed_for_cut(target, limits)?;
+    let fractions = intersection_fractions(target, cutter, tolerance, closed, limits)?;
     trim_by_fractions(target, &fractions, pick, limits)
 }
 

@@ -1,0 +1,11 @@
+# Top11 Split/Trim: line and quadratic NURBS intersections
+
+The sampled solver returned 16 nearby hits for one exact tangent between a line and a quadratic NURBS. A single rational quadratic Bezier span and a line now use a quadratic intersection equation, map reversed curve parameters, check the finite line and measured 3D distance, and enforce output limits. Distinct roots are retained; an exact double root yields one hit. Tested separated collinear segments return no hit, while overlap is explicitly unsupported. Non-finite coefficients are refused.
+
+The core regression covers a tangent, two close crossings in one knot span, swapped operands, a reversed rational tangent, a spatially offset line, disjoint collinear inputs and output budget refusal. A zero rounded discriminant is accepted as an exact double root only when the checked coefficient and product calculations do not discard bits. A decimal-derived example with roots near the floating-point resolution was checked using exact decimal arithmetic on the stored binary inputs; it is refused as needing higher precision rather than silently treated as one tangent. These checks do not certify all rounding errors in arbitrary frames or scales.
+
+Split and Trim through CMD and toolbar each exercise both the tangent and close-crossing examples, verify the piece boundaries and counts, `.om9` roundtrip and Undo/Redo. The tangent Split result was exported and imported through real 3DM, preserving the two pieces and tangent point. The admitted native adapter SHA-256 was `bddca46577747333f9377b379351a077b710158f47ce6e279d7b6e21e6439615`. This interoperability check is not an openNURBS measurement batch.
+
+Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: 204 core library, 34 core Top11, 23 core curve/surface, 123 app Top11 and 83 app Top11 BRep tests passed; 123 no-default app Top11 tests passed with existing warnings. The core curve/surface and app suites were rerun after adding non-finite checks, and one native 3DM tangent roundtrip passed.
+
+The analytic branch is limited to clamped, unseamed, single-span quadratic NURBS. General NURBS tangencies, near-degenerate precision, overlaps, general numerical intersection completeness and physical desktop acceptance remain open. This evidence does not establish completion of Top11.

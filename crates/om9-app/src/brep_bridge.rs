@@ -26,9 +26,25 @@ impl om9_exchange::BrepExport for OcctBrepBridge {
     fn export(
         &self,
         brep: &om9_core::brep::Brep,
+        tolerance_mm: f64,
         limits: &om9_core::budget::Limits,
     ) -> om9_core::Result<om9_core::geometry::NativeBrep> {
-        om9_kernel::brep::to_3dm(brep, 0.001, limits)
+        om9_kernel::brep::to_3dm(brep, tolerance_mm, limits)
             .map_err(|error| om9_core::Error::Io(format!("3DM BRep export: {error}")))
+    }
+}
+
+#[cfg(all(test, feature = "occt-brep"))]
+mod tests {
+    use super::OcctBrepBridge;
+    use om9_exchange::BrepExport;
+
+    #[test]
+    fn export_bridge_forwards_tolerance_to_kernel() {
+        let limits = om9_core::budget::Limits::default();
+        let sphere = om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap();
+        assert!(OcctBrepBridge.export(&sphere, 0.0, &limits).is_err());
+        let result = OcctBrepBridge.export(&sphere, 0.02, &limits).unwrap();
+        assert!(!result.payload.is_empty());
     }
 }

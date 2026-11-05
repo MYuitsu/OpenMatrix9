@@ -95,6 +95,167 @@
     }
   ],
   "runtime_implementation": {
+    "live_subselection_memory_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "R1a subselection: live CPU ownership of slots and nested paths, allocated-only transfer between same-account/class guards, phased old/new slots and input-path materialization, removal/drop without stale capture double charge",
+      "evidence": [
+        "docs/validation/2026-11-05-live-subselection-memory.md"
+      ],
+      "verification": "601 distinct passed/7 ignored/0 failed: core 325 includes allocated-transfer 2; subselection 3; app/native/GPU groups documented. GPU 29/no SKIP, native STL 60; no new release/desktop/RSS measurements.",
+      "remaining": "Workspace/path/recent/pending/high-water R1a and caller/query/peer/retired R1b remain. Native peak, UI export, P1-P5, GPU batching and STL/3DM accuracy gates remain open; allocation ownership does not certify process RSS or native safety."
+    },
+    "presentation_weak_allocation_lifetime_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Separate presentation Scene storage from its Weak-retained block and share one allocation allowance through cached Weak/strong reader lifetimes; prune expired predecessor before successor admission",
+      "evidence": [
+        "docs/validation/2026-11-05-presentation-weak-allocation-lifetime.md"
+      ],
+      "verification": "Reproduced expired Weak undercharge red to green. Final 176 distinct passes/1 opt-in measurement ignored; GPU 29/no SKIP. Three new empty-template fixtures plus exact lifecycle/metadata checks.",
+      "remaining": "Only presentation allocation ownership. Cache containers/pool, auxiliary/peer/retired/query owners, native/RSS, UI export, P1-P5 and release/desktop remain open. Incremental buffer-chain leakage was not reproduced and is not claimed fixed."
+    },
+    "external_memory_refusal_provenance_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "One historical final refusal for external reservations/grow, captured under admission lock with actual operands/headroom and coordinator origin; successful eviction retries do not publish a refusal",
+      "evidence": [
+        "docs/validation/2026-11-05-external-memory-refusal-provenance.md"
+      ],
+      "verification": "440 distinct passes, GPU 29/no SKIP; real external-admission failure operands and successful retry semantics tested. Dev MCP binary returns 9 replies with unchanged Point state and additive refusal/origin fields.",
+      "remaining": "Only external reservation/grow entrypoints. Other retained/publication/recheck/codec/native/job provenance, full owner attribution, bounded UI/logging, native/RSS, P1-P5 and release/desktop remain open. An allocation refusal is not a verdict that a CAD command failed."
+    },
+    "on_demand_memory_diagnostics_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Read-only storage/probe diagnostics via core and om9_memory MCP, including overage, unknown states, pending/materialized and independent physical/commit request observations",
+      "evidence": [
+        "docs/validation/2026-11-05-on-demand-memory-diagnostics.md"
+      ],
+      "verification": "452 distinct final tests passed, 29 GPU/no SKIP; dev binary --mcp returned 9 replies with unchanged Point fixture and measured Windows RAM/commit. Read-only/overage/error states covered.",
+      "remaining": "No full R1/native/RSS bound. Known storage inventory is synchronous on demand, so large-model/nonblocking UI remains unverified; actual failed-request/codec attribution, missing owners, exact Undo age, UI export, P1-P5 and release/desktop remain open. Running desktop/connector was not updated."
+    },
+    "account_root_weak_document_memory_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Admit active shared-account fixed roots at startup; count expired external Document Weak blocks once and retire expired validation proofs without retaining historical metadata peaks",
+      "evidence": [
+        "docs/validation/2026-11-05-account-root-and-weak-document-memory.md"
+      ],
+      "verification": "Three regressions red to green; final core 312 (retained 104 included), 641 distinct total passes/7 ignored across selected current-source checks. No GPU SKIP.",
+      "remaining": "Fixed roots of current shared account and known Weak/proof ownership only. Retired account handles, peer/journal/auxiliary/query owners, diagnostics, native envelope, UI export, P1-P5 and release/desktop remain open; no RSS or whole-process memory bound."
+    },
+    "picking_cache_recency_qos_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Shared picking cache admission reclaims unused quotas before warm arenas, tracks interactive read recency in the existing weak index, and gives render bounds a nonallocating passive read path",
+      "evidence": [
+        "docs/validation/2026-11-05-picking-cache-recency-qos.md"
+      ],
+      "verification": "Two policy regressions red to green; 15 managed tests/16 canonical 200-point fixtures; 263 distinct final passes and 1 ignored, including 29 GPU offscreen. No adapter SKIP.",
+      "remaining": "CPU cache policy and offscreen publication evidence only. Normal close culling stays disabled; no desktop FPS improvement inferred. Model-scale churn/latency, other R1 owners/diagnostics, native envelope, UI export worker, P1-P5 and full plan remain open."
+    },
+    "picking_cache_pressure_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Shared-account CPU picking cache/quota pressure reclamation and automatic readmission; owned read handles retain data and leases through preview, eviction and Scene drop",
+      "evidence": [
+        "docs/validation/2026-11-05-picking-cache-pressure-reclamation.md"
+      ],
+      "verification": "Final targeted 257 passed, 1 ignored including 28 GPU offscreen; 10 managed cache tests use 11 canonical 200-point fixtures. No desktop measurement.",
+      "remaining": "CPU picking only. Near-ceiling churn/QoS, other cache and registry/peer/journal/query/auxiliary owners, native allocation envelope, UI export worker, GPU batching and release/desktop remain open. No process RSS bound or whole-plan completion."
+    },
+    "scene_save_phase_reservations_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Scene-owned reusable allocation phase/recheck and per-stage Save reservation on shared account; concurrent peer and phase-refusal history preservation tested",
+      "evidence": "docs/validation/2026-11-05-scene-picking-save-phases.md",
+      "limitations": "R1 remains open for automatic pressure eviction/re-admission, optional pending arena quota retention, query/auxiliary/native owners and diagnostics. Save decoder scratch remains estimated pending within each phase; no current release/desktop or allocator/RSS bound. Captured/detached STL still reserve all remaining headroom; P1-P5 open."
+    },
+    "system_commit_admission_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "System-commit admission/recheck under shared reservation lock, adopted-peer coverage and retained physical ceiling on commit refusal",
+      "evidence": "docs/validation/2026-11-05-snapshot-metadata-system-commit.md",
+      "limitations": "Point-in-time Windows probe and managed estimates, not a process/native memory cap; full owner inventory and diagnostics remain open."
+    },
+    "transaction_clone_pending_transfer_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Clone reservation transfers both managed and pending phase totals into the registered candidate under shared locks, preserving both totals on refusal",
+      "evidence": "docs/validation/2026-11-05-pending-allocated-ram.md",
+      "limitations": "Not full process/native accounting, commit headroom, metadata ownership or desktop evidence."
+    },
+    "validation_independent_structural_limits_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Validate node and point quotas independently per document without subtracting retained versions; preserve shared byte accounting",
+      "evidence": "docs/validation/2026-11-04-stl-scene-high-water-and-structural-quotas.md",
+      "limitations": "Representative desktop and complete live owner accounting remain open."
+    },
+    "multiple_document_structural_quotas_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Apply point and node quotas independently per document while maintaining the shared byte budget",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#independent-node-and-point-quotas-for-multiple-documents",
+      "limitations": "Small two-document fixture only; release, real desktop and process-memory measurements remain open"
+    },
+    "per_document_history_node_limit_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Retained document versions use individual node limits while their memory bytes remain charged; large synthetic geometry edit and Undo/Redo tested",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#per-document-node-limits-across-retained-history",
+      "limitations": "No representative desktop or measured process peak; other structural counters and owner accounting remain open"
+    },
+    "interactive_ram_transition_startup_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Use the physical-RAM-derived interactive limit for startup and retained New/Open policy",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md",
+      "limitations": "Full P0, real large history and native memory accounting remain open"
+    },
+    "open_document_account_race_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Recheck coordinator open-document retained and candidate peak under shared account locks before publication; preserve Redo on refusal.",
+      "evidence": "docs/validation/2026-11-03-transaction-ram-commit-race.md#opening-a-document-while-another-owner-reserves-memory",
+      "limitations": "Application replacement path, preparation lifetime reservations, physical/native/GPU memory and 256 MiB default remain open."
+    },
+    "transaction_ram_publication_recheck_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Recheck shared memory admission after the commit guard and serialize reservation policy through publication.",
+      "evidence": "docs/validation/2026-11-03-transaction-ram-commit-race.md",
+      "limitations": "Tested commit path only; preparation/other-operation races, complete allocation ownership, 256 MiB limit and desktop/performance remain open."
+    },
+    "retained_sampled_ceiling_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Retain the tightest valid sampled RAM ceiling across shared external-account reservations and apply the constrained limit before relevant held transaction data.",
+      "evidence": "docs/validation/2026-11-03-sampled-reservation-60-percent.md",
+      "limitations": "Only learned after an explicit sample; cross-thread policy-tightening races, unaccounted owners, native peak, free-RAM freshness and interactive 256 MiB ceiling remain open."
+    },
+    "sampled_external_reservation_ceiling_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "When an external reservation provides a physical-memory sample, check retained owners and proposed reservations against at most 60% of total RAM as well as free headroom.",
+      "evidence": "docs/validation/2026-11-03-sampled-reservation-60-percent.md",
+      "limitations": "Only sampled external reservation calls; the interactive 256 MiB ceiling, other owners, actual native peaks and session-wide 60% enforcement remain open."
+    },
+    "shared_external_capture_resource_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Deduplicate immutable resource payloads shared between external captured documents and coordinator-retained document versions.",
+      "evidence": "docs/validation/2026-11-03-retained-shared-resource-admission.md",
+      "limitations": "Repeated per-document aliases, other shared owners, the 256 MiB ceiling and complete 60% policy remain open; performance unmeasured."
+    },
+    "shared_resource_admission_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Coordinator retained document and Undo versions deduplicate shared immutable resource payloads in aggregate admission.",
+      "evidence": "docs/validation/2026-11-03-retained-shared-resource-admission.md",
+      "limitations": "External capture overlap, repeated per-document aliases, other shared owners, the 256 MiB ceiling and complete RAM policy remain open."
+    },
+    "undo_ram_cap_inventory_2026_11_02": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-02-undo-ram-cap-and-inventory.md",
+      "scope": "50% physical RAM ceiling with Windows discovery, 100 MB conservative tracked-growth inventory and cached settings statistics",
+      "plan": "implementation/design/M01/viewport-export-separation-20261102/PLAN.md",
+      "limitations": "Existing 256 MB aggregate hard admission remains; GPU budget and 512 MB geometry checkpoints are planned only; desktop/release acceptance open"
+    },
+    "undo_memory_policy_2026_11_02": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-02-undo-memory-policy.md",
+      "scope": "Soft Undo RAM retention with minimum steps, shared-owner accounting and persisted Options UI",
+      "limitations": "Hard admission limits still apply; default-feature debug and headless tests do not close desktop or release acceptance"
+    },
+    "windows_mcp_sphere_stack_2026_11_02": "docs/validation/2026-11-02-mcp-sphere-stack-fix.md",
+    "live_mcp_window_validation_2026_11_02": "docs/validation/2026-11-02-mcp-live-window.md",
+    "command_options_crate_2026_11_02": {
+      "status": "REFACTOR_PARTIAL_VALIDATION",
+      "scope": "Extracted the existing command option parser into a Rust crate; application re-exports its existing path. No feature completion status promoted.",
+      "evidence": "docs/validation/2026-11-02-command-options-crate.md"
+    },
     "plugin_sdk_v1": {
       "date": "2026-10-21",
       "target": "standalone Rust OM9",

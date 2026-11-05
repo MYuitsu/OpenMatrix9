@@ -107,7 +107,11 @@ impl MatrixApp {
                                 .selected_text(start.label())
                                 .show_ui(ui, |ui| {
                                     for candidate in ChannelEnd::ALL {
-                                        ui.selectable_value(&mut start, candidate, candidate.label());
+                                        ui.selectable_value(
+                                            &mut start,
+                                            candidate,
+                                            candidate.label(),
+                                        );
                                     }
                                 });
                         });
@@ -132,12 +136,8 @@ impl MatrixApp {
                             &mut session.channel.start_depth_mm,
                             " mm",
                         );
-                        dirty |= number_row(
-                            ui,
-                            "End depth",
-                            &mut session.channel.end_depth_mm,
-                            " mm",
-                        );
+                        dirty |=
+                            number_row(ui, "End depth", &mut session.channel.end_depth_mm, " mm");
                         dirty |= toggle_row(ui, "Mirror", &mut session.channel.mirror);
                         dirty |= toggle_row(ui, "Flip A/B", &mut session.channel.flip);
                         let mut middle = session.channel.middle;
@@ -161,15 +161,18 @@ impl MatrixApp {
                         }
                     }
                     RowTool::MicroProng => {
-                        dirty |=
-                            number_row(ui, "Radius", &mut session.microprong.radius_mm, " mm");
+                        dirty |= number_row(ui, "Radius", &mut session.microprong.radius_mm, " mm");
                         dirty |= number_row(ui, "Depth", &mut session.microprong.depth_mm, " mm");
                         dirty |= number_row(ui, "Height", &mut session.microprong.height_mm, " mm");
                         let mut count = session.microprong.count as f64;
                         let before = count;
                         ui.horizontal(|ui| {
                             ui.label("Count (0 = one per gap)");
-                            ui.add(egui::DragValue::new(&mut count).speed(1.0).range(0.0..=256.0));
+                            ui.add(
+                                egui::DragValue::new(&mut count)
+                                    .speed(1.0)
+                                    .range(0.0..=256.0),
+                            );
                         });
                         if count != before {
                             session.microprong.count = count.round() as usize;
@@ -177,29 +180,27 @@ impl MatrixApp {
                         }
                         dirty |=
                             number_row(ui, "Spacing", &mut session.microprong.spacing_mm, " mm");
-                        dirty |=
-                            number_row(ui, "Angle", &mut session.microprong.angle_deg, " °");
+                        dirty |= number_row(ui, "Angle", &mut session.microprong.angle_deg, " °");
                     }
                     RowTool::BrightCutChannel | RowTool::BrightCutter => {
                         dirty |= number_row(ui, "Height", &mut session.bright.height_mm, " mm");
                         dirty |= number_row(ui, "Length", &mut session.bright.length_mm, " mm");
-                        dirty |= number_row(
-                            ui,
-                            "2D scale",
-                            &mut session.bright.scale_2d_percent,
-                            " %",
-                        );
+                        dirty |=
+                            number_row(ui, "2D scale", &mut session.bright.scale_2d_percent, " %");
                         dirty |= number_row(ui, "Angle", &mut session.bright.angle_deg, " °");
                         dirty |= number_row(ui, "Depth", &mut session.bright.depth_mm, " mm");
                         if session.tool == RowTool::BrightCutChannel {
-                            dirty |= toggle_row(ui, "Mirror both sides", &mut session.bright.mirror);
+                            dirty |=
+                                toggle_row(ui, "Mirror both sides", &mut session.bright.mirror);
                         } else {
                             let mut count = session.bright.count as f64;
                             let before = count;
                             ui.horizontal(|ui| {
                                 ui.label("Facets");
                                 ui.add(
-                                    egui::DragValue::new(&mut count).speed(1.0).range(3.0..=256.0),
+                                    egui::DragValue::new(&mut count)
+                                        .speed(1.0)
+                                        .range(3.0..=256.0),
                                 );
                             });
                             if count != before {
@@ -236,7 +237,11 @@ impl MatrixApp {
                         .selected_text(session.keep.label())
                         .show_ui(ui, |ui| {
                             for candidate in CutterKeep::ALL {
-                                ui.selectable_value(&mut session.keep, candidate, candidate.label());
+                                ui.selectable_value(
+                                    &mut session.keep,
+                                    candidate,
+                                    candidate.label(),
+                                );
                             }
                         });
                 });

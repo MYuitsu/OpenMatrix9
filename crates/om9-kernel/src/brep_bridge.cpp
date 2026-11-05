@@ -45,7 +45,7 @@ extern "C" int om9_occt_brep_volume(const char* source, size_t length, double* v
 }
 
 extern "C" int om9_occt_brep_snapshot(const char* source, size_t source_len, int kind,
-                                      const double* dimensions, double deflection,
+                                      const double* dimensions, double deflection, double angular_deflection,
                                       size_t max_points, size_t max_nodes, size_t max_bytes,
                                       Om9BrepSink sink, void* context, char* message,
                                       int capacity) {
@@ -69,7 +69,7 @@ extern "C" int om9_occt_brep_snapshot(const char* source, size_t source_len, int
    throw std::invalid_argument("unsupported BRep primitive");
   }
   return om9_emit_brep_snapshot(shape, deflection, max_points, max_nodes, max_bytes, sink, context,
-                                message, capacity);
+                                message, capacity, angular_deflection);
  } catch (const Standard_Failure& e) {
   if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
   return 2;
@@ -78,6 +78,37 @@ extern "C" int om9_occt_brep_snapshot(const char* source, size_t source_len, int
   return 1;
  } catch (...) {
   if (message && capacity > 0) std::snprintf(message, capacity, "Unknown BRep snapshot failure");
+  return 2;
+ }
+}
+
+// Export-only face ownership, emitted from the same parsed shape as the mesh snapshot.
+extern "C" int om9_occt_brep_snapshot_grouped(const char* source, size_t source_len,
+                                               double deflection, double angular_deflection,
+                                               size_t max_points, size_t max_nodes, size_t max_bytes,
+                                               Om9BrepSink sink, void* context,
+                                               Om9FaceShellSink shell_sink, void* shell_context,
+                                               int include_edge_bindings,
+                                               int optimize_export_sphere,
+                                               char* message, int capacity) {
+ try {
+  if (!source || !source_len || source_len > max_bytes || !sink || !shell_sink)
+   throw std::invalid_argument("invalid grouped BRep snapshot input");
+  std::istringstream input(std::string(source, source_len));
+  BRep_Builder builder;
+  TopoDS_Shape shape;
+  BRepTools::Read(shape, input, builder);
+  return om9_emit_brep_snapshot(shape, deflection, max_points, max_nodes, max_bytes, sink, context,
+                                message, capacity, angular_deflection, shell_sink, shell_context,
+                                include_edge_bindings != 0, optimize_export_sphere != 0);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown grouped BRep snapshot failure");
   return 2;
  }
 }

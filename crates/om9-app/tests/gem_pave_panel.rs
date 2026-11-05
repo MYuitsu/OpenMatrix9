@@ -349,8 +349,16 @@ fn typed_commands_and_reset_share_the_same_handler() {
     let mut session = controller.gem_pave_session().unwrap().clone();
     assert_eq!(session.kind.stone_pattern(), Some(PavePattern::Hex));
     session.quantity = Some(4);
-    let reset = reset_session(&session).unwrap();
+    let tight = Limits { max_points: 1, ..*controller.coordinator().limits() };
+    let before = session.summary();
+    assert!(reset_session(&session, &tight).is_err());
+    assert_eq!(session.quantity, Some(4));
+    assert_eq!(session.summary(), before);
+    let reset = reset_session(&session, controller.coordinator().limits()).unwrap();
     assert_eq!(reset.quantity, None);
+    controller.gem_pave_set(session).unwrap();
+    controller.gem_pave_text("reset").unwrap().unwrap();
+    assert_eq!(controller.gem_pave_session().unwrap().quantity, None);
 }
 
 #[test]

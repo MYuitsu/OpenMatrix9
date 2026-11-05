@@ -7,6 +7,61 @@ use super::{Controller, Error};
 
 pub const RECTANGLE: &str = "OM9-CURVE-004";
 
+#[cfg(test)]
+mod numeric_tests {
+    use super::*;
+    use om9_core::{budget::Limits, model::Document};
+
+    #[test]
+    fn cmd_lengths_create_rectangle_and_default_square() {
+        for (menu, width, y) in [(false, "5", 25.), (false, "", 30.), (true, "10", 30.)] {
+            let mut c =
+                Controller::new(Document::new("rectangle input"), Limits::default()).unwrap();
+            if menu {
+                c.dispatch(RECTANGLE, super::super::InvocationOrigin::Menu)
+                    .unwrap();
+            } else {
+                c.submit("Rectangle").unwrap();
+            }
+            for input in ["20,20", "10"] {
+                c.submit(input).unwrap();
+            }
+            assert!(c.document().entities.is_empty());
+            c.submit(width).unwrap();
+            let entity = c.document().entities.values().next().unwrap();
+            let Geometry::Curve(Curve::Polycurve { segments, .. }) = &entity.geometry else {
+                panic!("rectangle")
+            };
+            let points: Vec<_> = segments
+                .iter()
+                .flat_map(|s| match s {
+                    Curve::Line { start, end, .. } => vec![*start, *end],
+                    _ => panic!("edge"),
+                })
+                .collect();
+            assert!(points.contains(&[20., 20., 0.]));
+            assert!(points.contains(&[30., y, 0.]));
+            assert!(!c.is_running());
+        }
+    }
+
+    #[test]
+    fn invalid_numeric_width_keeps_length_and_allows_retry() {
+        let mut c = Controller::new(Document::new("rectangle retry"), Limits::default()).unwrap();
+        for input in ["Rectangle", "20,20", "10"] {
+            c.submit(input).unwrap();
+        }
+        for invalid in ["0", "-5", "NaN", "inf"] {
+            assert!(c.submit(invalid).is_err(), "{invalid}");
+            assert!(c.is_running());
+            assert!(c.document().entities.is_empty());
+        }
+        c.submit("5").unwrap();
+        assert!(!c.is_running());
+        assert_eq!(c.document().entities.len(), 1);
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct RectPending {
     pub mode: &'static str,
@@ -118,9 +173,9 @@ impl RectPending {
         } else if self.points.is_empty() {
             "First corner of rectangle"
         } else if self.width.is_none() {
-            "Other corner or Width"
+            "Other corner or length"
         } else if self.height.is_none() {
-            "Height"
+            "Width. Press Enter to use length"
         } else {
             "Press Enter to create the rectangle"
         }
@@ -198,6 +253,25 @@ impl Controller {
         if pending.points.is_empty() {
             self.rect_pending = Some(pending);
             return Some(Err(Error::Invalid("rectangle needs a first corner")));
+        }
+        if pending.mode == "Corners" {
+            if let Ok(value) = text.trim().parse::<f64>() {
+                if !value.is_finite() || value <= 0.0 {
+                    self.rect_pending = Some(pending);
+                    return Some(Err(Error::Invalid(
+                        "rectangle dimension must be positive and finite",
+                    )));
+                }
+                if pending.width.is_none() {
+                    pending.width = Some(value);
+                    self.rect_pending = Some(pending);
+                    return Some(Ok(()));
+                }
+                pending.height = Some(value);
+            } else if text.trim().is_empty() && pending.width.is_some() && pending.height.is_none()
+            {
+                pending.height = pending.width;
+            }
         }
         if let Some(value) = text
             .trim()
@@ -441,23 +515,38 @@ impl Controller {
         self.commit_geometry(RECTANGLE, "Rectangle", Geometry::Curve(curve))
     }
 
+    /// Matrix Rectangle: a square is made with Shift while picking the second corner,
+    /// not by a command option. The UI applies the transient flag through these.
+    pub fn rect_running(&self) -> bool {
+        self.rect_pending.is_some()
+    }
+
+    pub fn set_rect_square(&mut self, square: bool) -> Result<(), Error> {
+        let Some(mut pending) = self.rect_pending.take() else {
+            return Err(Error::Missing("rectangle command"));
+        };
+        pending.square = square;
+        self.rect_pending = Some(pending);
+        Ok(())
+    }
+
     pub fn rect_option_tokens(&self) -> Vec<(&'static str, &'static str)> {
         let Some(pending) = self.rect_pending.as_ref() else {
             return Vec::new();
         };
-        let mut tokens = vec![
-            ("Square", "Square"),
-            ("Length=", "Length="),
-            ("Cancel", "Cancel"),
-        ];
+        // Modes are chosen before the first corner; Length/Width only exist once the
+        // parser has that corner (it rejects them at the start stage). Square is a
+        // Shift gesture in Matrix, and the typed `Square` word stays a hidden alias.
+        let mut tokens = Vec::new();
         if pending.points.is_empty() {
-            tokens.insert(0, ("Center", "Center"));
-            tokens.insert(0, ("3Point", "3Point"));
-            tokens.insert(0, ("Vertical", "Vertical"));
+            tokens.push(("Vertical", "Vertical"));
+            tokens.push(("3Point", "3Point"));
+            tokens.push(("Center", "Center"));
+        } else {
+            tokens.push(("Undo", "Undo"));
+            tokens.push(("Length=", "Length="));
         }
-        if !pending.points.is_empty() {
-            tokens.insert(0, ("Undo", "Undo"));
-        }
+        tokens.push(("Cancel", "Cancel"));
         tokens
     }
 

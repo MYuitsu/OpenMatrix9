@@ -48,6 +48,25 @@ fn select(c: &mut Controller, ids: &[ObjectId]) {
 }
 
 #[test]
+fn cached_pivot_tracks_selection_edit_and_undo() {
+    let mut c = controller();
+    let ids = points(&mut c, 2);
+    select(&mut c, &[ids[0]]);
+    assert_eq!(c.gumball_pivot().unwrap().origin, [0.0, 0.0, 0.0]);
+    assert_eq!(c.gumball_pivot().unwrap().origin, [0.0, 0.0, 0.0]);
+    let mut session = Session::begin(c.gumball_pivot().unwrap(), c.gumball_targets(), false).unwrap();
+    session.drag(Handle::MoveFree, Drag::WorldDelta([4.0, 0.0, 0.0])).unwrap();
+    c.commit_gumball(&session, "Move").unwrap();
+    assert_eq!(c.gumball_pivot().unwrap().origin, [4.0, 0.0, 0.0]);
+    c.undo().unwrap();
+    assert_eq!(c.gumball_pivot().unwrap().origin, [0.0, 0.0, 0.0]);
+    select(&mut c, &[ids[1]]);
+    assert_eq!(c.gumball_pivot().unwrap().origin, [10.0, 0.0, 0.0]);
+    c.clear_selection();
+    assert!(c.gumball_pivot().is_none());
+}
+
+#[test]
 fn moving_two_selected_objects_is_one_journal_entry() {
     let mut c = controller();
     let ids = points(&mut c, 2);

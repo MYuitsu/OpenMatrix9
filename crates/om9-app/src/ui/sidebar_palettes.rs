@@ -134,8 +134,24 @@ impl MatrixApp {
             let response = if toggle {
                 app.icon_toggle(&mut child, key, active, key)
             } else {
-                app.icon_slot(&mut child, key, false, key, None)
+                let help = match key {
+                    "InfoSettingsGumballON" | "InfoSettingsSmartTargetsGumballON" => {
+                        "Gumball snapping: type Gumball Snappy at the command line"
+                    }
+                    "InfoSettingsGumballAlignment" => {
+                        "Gumball settings: axes, Smooth/Snappy, drag strength"
+                    }
+                    _ => key,
+                };
+                let enabled = matches!(key, "InfoSettingsGumballAlignment" | "RhinoOptions");
+                app.icon_slot(&mut child, key, enabled, help, None)
             };
+            if key == "InfoSettingsGumballAlignment" && response.clicked() {
+                app.gumball_settings_open = true;
+            }
+            if key == "RhinoOptions" && response.clicked() {
+                app.invoke(key, InvocationOrigin::Menu);
+            }
             if toggle && response.clicked() {
                 if let Some(kind) = snap_kind {
                     let on = !app.snap_enabled(kind);
@@ -389,6 +405,11 @@ mod tests {
         assert!(app.controller.planar());
         click(&mut app, SectionId::InfoSettings, 16);
         assert!(!app.smarttrack_enabled());
+        click(&mut app, SectionId::InfoSettings, 19);
+        assert!(
+            app.gumball_settings_open,
+            "alignment icon opens the settings menu"
+        );
     }
 
     #[test]

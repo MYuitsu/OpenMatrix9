@@ -216,6 +216,13 @@
     "next": "cluster shader multi-level errors selection; instance path; image-diff/zoom matrix"
   },
   "runtime_implementation": {
+    "picking_cache_recency_qos_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Passive GPU bounds cannot allocate/reclaim/promote picking caches; shared account reclaims unused quotas before arenas ordered by interactive read recency",
+      "evidence": "docs/validation/2026-11-05-picking-cache-recency-qos.md",
+      "verification": "Two policy regressions red to green; 15 managed tests/16 canonical 200-point fixtures and 29 GPU offscreen tests passed, no GPU SKIP. Cold/warm render retains four objects and geometry/instance uploads.",
+      "remaining": "Normal close culling stays disabled. No pixel-readback/desktop latency or full GPU budget/batching acceptance; other R1 owners/native/UI export and P1-P5 remain open."
+    },
     "performance": {
       "plan": "implementation/design/M01/VIEWPORT-INTERACTION-PERFORMANCE.md",
       "p1a": {

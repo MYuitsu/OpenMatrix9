@@ -1,0 +1,137 @@
+{
+  "schema": "om9-gumball-os-gpu-acceptance/v1",
+  "date": "2026-11-01",
+  "command": "powershell -NoProfile -ExecutionPolicy Bypass -File tools\\gumball-os-audit.ps1",
+  "environment": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "window": "real eframe/wgpu window (1600x1000 client)",
+    "input": "Win32 SetCursorPos + mouse_event after AttachThreadInput foreground handoff",
+    "binary_sha256": "af8eb9601bdec9561c752d86a3e9139fc2ccc5d18561e3add4e1281ac4f314f3"
+  },
+  "fixture": {
+    "line": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        10.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "snap_point": [
+      5.0,
+      5.0,
+      0.0
+    ],
+    "gumball": "Snappy, free Move handle"
+  },
+  "receipts": {
+    "ready": {
+      "client": [
+        1600.0,
+        1000.0
+      ],
+      "pivot_client": [
+        1315.2977383694931,
+        386.709192764853
+      ],
+      "pivot_world": [
+        5.0,
+        0.0,
+        0.0
+      ],
+      "pixels_per_point": 1.0,
+      "target_client": [
+        1351.276942132368,
+        363.75000000000006
+      ],
+      "target_world": [
+        5.0,
+        5.0,
+        0.0
+      ],
+      "title": "OpenMatrix9 \u2014 project.om9 *",
+      "view": "Perspective"
+    },
+    "input": {
+      "hwnd": 28053212,
+      "visible": true,
+      "foreground": 28053212,
+      "client_origin": [
+        320,
+        343
+      ],
+      "start": [
+        1635,
+        730
+      ],
+      "end": [
+        1671,
+        707
+      ]
+    },
+    "result": {
+      "after": [
+        [
+          0.0,
+          5.0,
+          0.0
+        ],
+        [
+          10.0,
+          5.0,
+          0.0
+        ]
+      ],
+      "before": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "drag_started": true,
+      "moved": true
+    },
+    "state": {
+      "dragging": true,
+      "focused": true,
+      "frames": 52,
+      "hover": [
+        5.007575927828469,
+        4.950440390912007,
+        0.0
+      ],
+      "result": true,
+      "session": false
+    },
+    "done": {
+      "detail": "drag committed and screenshot saved",
+      "elapsed_ms": 9394,
+      "status": "ok"
+    }
+  },
+  "screenshot": {
+    "path": "build/gumball-os-audit/gumball-os-audit.png",
+    "sha256": "91872306fbcb162bb25576440fcab29241e3a0b91bd83ca25f449d5ace4c2d3e",
+    "note": "App-side egui ViewportCommand::Screenshot, real GPU framebuffer; kept in build/ because docs raster assets require review."
+  },
+  "checks": {
+    "drag_started": true,
+    "line_moved": true,
+    "landed_on_snap_point": true,
+    "screenshot_saved": true,
+    "process_completed": true,
+    "app_focused": true,
+    "gumball_session_committed": true
+  },
+  "all_passed": true
+}

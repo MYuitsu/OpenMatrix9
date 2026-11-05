@@ -54,6 +54,9 @@ impl Transcript {
     pub fn draft(&self) -> &str {
         &self.draft
     }
+    pub fn prompt(&self) -> &str {
+        &self.prompt
+    }
     pub fn protected_chars(&self) -> usize {
         self.history.chars().count() + self.prompt.chars().count()
     }

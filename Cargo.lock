@@ -1649,6 +1649,7 @@ dependencies = [
  "epaint_default_fonts",
  "image",
  "om9-archive",
+ "om9-command-options",
  "om9-core",
  "om9-exchange",
  "om9-kernel",
@@ -1676,6 +1677,13 @@ dependencies = [
  "serde_json",
  "sha2",
  "uuid",
+]
+
+[[package]]
+name = "om9-command-options"
+version = "0.1.0"
+dependencies = [
+ "om9-core",
 ]
 
 [[package]]
@@ -1724,10 +1732,13 @@ dependencies = [
 name = "om9-native-owner"
 version = "0.1.0"
 dependencies = [
+ "ash",
+ "clipboard-win",
  "om9-core",
  "serde_json",
  "sha2",
  "uuid",
+ "wgpu",
  "windows",
  "windows-sys 0.61.2",
 ]

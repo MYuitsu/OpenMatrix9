@@ -1,0 +1,9 @@
+# Top11 Split/Trim: line intersection conditioning
+
+The line-line solver used `|d1|² |d2|² - (d1·d2)²` with an absolute `1e-20` cutoff. This rejected small perpendicular segments and can lose the determinant to cancellation for long, nearly parallel lines. The regression using 1e-8-mm segments first returned no hit. The old expression for the tested long near-parallel pair also evaluates to zero in double precision.
+
+The Rust solver now normalizes both directions and uses their cross product to compute closest parameters. Nonparallel results, including an empty result outside tolerance or the segments, return directly instead of falling into the sampled general-curve solver. It checks finite direction and parameter arithmetic, uses scaled vector lengths and midpoint construction, and retains the pre-existing fallback for parallel or overlap cases. This is not a general robust-exact predicate: near-underflow angles, extreme coordinates, collinear overlaps and general non-line intersection behavior remain open.
+
+The core regression checks the short crossing, a long near-parallel crossing at fraction 0.37, a skew pair both outside and inside tolerance, and swapped argument correspondence. An application regression runs Split and Trim through CMD and toolbar against the near-parallel lines, checks the world-space cut, `.om9` persistence and Undo/Redo. A real-native 3DM test exports/imports the Split result and checks the boundary at 3.7e9 mm. Native adapter SHA-256 `bddca46577747333f9377b379351a077b710158f47ce6e279d7b6e21e6439615`; this is an interoperability test, not an openNURBS measurement batch.
+
+Windows x64 with `CARGO_TARGET_DIR=L:\om9-target` and `-j 2`: 117 app Top11, 34 core Top11, 83 app Top11 BRep, 204 core library, 15 curve/surface operation and 117 no-default app Top11 tests passed. Existing no-default unused-code/import warnings remain. Actual desktop input, GPU presentation and the broader Top11 acceptance matrix remain open.

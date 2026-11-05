@@ -207,6 +207,37 @@
     ]
   },
   "runtime_implementation": {
+    "sphere_preview_grid_2026_11_01": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-01-sphere-preview-grid.md",
+      "scope": "Sphere preview six meridian arcs and three latitudes; completed full sphere four arcs and one equator",
+      "limitations": "Additional latitude spacing is an OM9 interpretation; desktop visual comparison and other sphere representations remain open."
+    },
+    "box_height_transition_2026_11_01": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-01-box-height-transition.md",
+      "scope": "Box height ray anchored at second base corner for Corners, Diagonal and Center",
+      "limitations": "Actual desktop pointer check remains open."
+    },
+    "typed_cancel_2026_11_01": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-01-command-checklist-audit.md",
+      "scope": "Typed Cancel/Esc ends any solid prompt before a feature handler parses it; Sphere/Box/Cylinder/Cone covered.",
+      "limitations": "Desktop keyboard acceptance and other command families remain open."
+    },
+    "solid_menu_icon_binding_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-solid-menu-icon-map.md",
+      "scope": "Restored the authored 30-icon Matrix order (Solid Extrude All ends row one, Pipe starts row two, Boss..Solid Points ON on page two), moved the 13 recovered variant icons to the tail, and fixed the five icons with no command binding (Union/Difference/Intersection/Extrude Curve/Solid Extrude All); Solid Points ON now names its Transform row",
+      "tests": "cargo test -p om9-app --lib -- menu_catalog solid_menu: 7 passed; cargo test -p om9-app --test chrome_actions: 28 passed",
+      "limitations": "Simulated egui frame clicks, not a desktop mouse session; Rib, Slab, holes, Move Face and Solid Points ON stay disabled with no owner; the 13 recovered variant icons remain after Solid Points ON rather than in the 30-icon Matrix menu."
+    },
+    "box_base_preview_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-box-base-preview.md",
+      "scope": "Four-edge base preview between first and second Box points; height stage retains 3D preview",
+      "limitations": "Standard GUI executable rebuilt and launched; desktop pointer preview and integration test not yet validated."
+    },
     "rib_development_session_2026_10_29": {
       "id": "solid-rib-development-session-2026-10-29",
       "status": "PARTIAL_CHECKS_PASSED",

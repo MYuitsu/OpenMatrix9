@@ -306,6 +306,51 @@ fn trimmed_plane() -> (NurbsSurface, om9_core::rhino_semantics::TrimmedSurface) 
 }
 
 #[test]
+fn exact_surface_restriction_preserves_rational_geometry() {
+    let l = limits();
+    let surface = NurbsSurface {
+        degree: [2, 2], size: [3, 3],
+        poles: (0..3).flat_map(|u| (0..3).map(move |v| [u as f64 * 5., v as f64 * 4., (u * v) as f64])).collect(),
+        weights: vec![1., 0.8, 1., 0.9, 0.6, 0.9, 1., 0.8, 1.],
+        knots: [vec![0., 0., 0., 1., 1., 1.], vec![0., 0., 0., 1., 1., 1.]],
+        domain: [[0., 1.], [0., 1.]], periodic: [false, false], reversed: false,
+    };
+    let restricted = om9_core::surface_ops::shrink_surface_domain_exact(&surface, [[0.2, 0.8], [0.1, 0.7]], &l).unwrap();
+    assert_eq!(restricted.domain, [[0.2, 0.8], [0.1, 0.7]]);
+    assert_eq!(restricted.knots[0][0], 0.2);
+    assert_eq!(*restricted.knots[0].last().unwrap(), 0.8);
+    assert_eq!(restricted.knots[1][0], 0.1);
+    assert_eq!(*restricted.knots[1].last().unwrap(), 0.7);
+    for u in [0.2, 0.37, 0.8] { for v in [0.1, 0.43, 0.7] {
+        let a = evaluate(&surface, u, v, &l).unwrap();
+        let b = evaluate(&restricted, u, v, &l).unwrap();
+        for i in 0..3 { assert!((a[i] - b[i]).abs() < 1e-9, "{u} {v}: {a:?} {b:?}"); }
+    }}
+    let constrained = Limits { max_points: 30, ..l };
+    assert!(om9_core::surface_ops::shrink_surface_domain_exact(&surface, [[0.2, 0.8], [0.1, 0.7]], &constrained).is_err());
+}
+
+#[test]
+fn exact_surface_restriction_crosses_existing_knots() {
+    let l = limits();
+    let surface = NurbsSurface {
+        degree: [2, 2], size: [4, 3],
+        poles: (0..4).flat_map(|u| (0..3).map(move |v| [u as f64 * 2., v as f64 * 3., ((u + 1) * v) as f64])).collect(),
+        weights: vec![1., 0.8, 1., 0.9, 0.6, 0.9, 1., 0.8, 1., 1., 0.7, 1.],
+        knots: [vec![0., 0., 0., 0.5, 1., 1., 1.], vec![0., 0., 0., 1., 1., 1.]],
+        domain: [[0., 1.], [0., 1.]], periodic: [false, false], reversed: false,
+    };
+    for u_bounds in [[0.1, 0.5], [0.5, 0.9], [0.2, 0.8]] {
+        let shrunk = om9_core::surface_ops::shrink_surface_domain_exact(&surface, [u_bounds, [0.2, 0.8]], &l).unwrap();
+        for fraction in [0., 0.3, 0.5, 1.] { for v in [0.2, 0.5, 0.8] {
+            let u = u_bounds[0] + fraction * (u_bounds[1] - u_bounds[0]);
+            let a = evaluate(&surface, u, v, &l).unwrap(); let b = evaluate(&shrunk, u, v, &l).unwrap();
+            for i in 0..3 { assert!((a[i] - b[i]).abs() < 1e-9, "{u} {v}: {a:?} {b:?}"); }
+        }}
+    }
+}
+
+#[test]
 fn m03_02_05_trimming_preserves_the_underlying_nurbs_and_untrim_returns_it() {
     let (surface, trimmed) = trimmed_plane();
     assert!(trimmed.is_trimmed());
@@ -953,4 +998,28 @@ fn m03_02_05_refit_to_tolerance_picks_a_grid_that_meets_the_bound() {
         refit_to_tolerance(&dense, 1.0e-9, &limits()).err(),
         Some(Error::Invalid("refit cannot meet the tolerance"))
     );
+}
+
+#[test]
+fn delete_complete_surface_rows_columns_preserves_rectangular_rational_net() {
+    use std::collections::BTreeSet;
+    let limits = Limits::default();
+    let surface = NurbsSurface { degree: [2,2], size: [4,4], poles: (0..4).flat_map(|u| (0..4).map(move |v| [u as f64,v as f64,(u*v) as f64])).collect(), weights: (0..16).map(|i| 1. + i as f64 * 0.05).collect(), knots: [vec![0.,0.,0.,0.5,1.,1.,1.],vec![0.,0.,0.,0.5,1.,1.,1.]], domain: [[0.,1.],[0.,1.]], periodic: [false,false], reversed: true };
+    for (rows,cols) in [(vec![1],vec![]),(vec![],vec![2]),(vec![1],vec![2])] {
+        let indices: BTreeSet<_> = (0..4).flat_map(|u| (0..4).map(move |v| (u,v))).filter(|(u,v)| rows.contains(u) || cols.contains(v)).map(|(u,v)| u*4+v).collect();
+        let edited = om9_core::surface_kernel::delete_control_points(&surface,&indices,&limits).unwrap();
+        let expected: Vec<_> = (0..4).flat_map(|u| (0..4).map(move |v| (u,v))).filter(|(u,v)| !rows.contains(u) && !cols.contains(v)).map(|(u,v)| u*4+v).collect();
+        assert_eq!(edited.size, [4-rows.len(),4-cols.len()]);
+        assert_eq!(edited.poles, expected.iter().map(|i| surface.poles[*i]).collect::<Vec<_>>());
+        assert_eq!(edited.weights, expected.iter().map(|i| surface.weights[*i]).collect::<Vec<_>>());
+        assert_eq!(edited.domain, surface.domain); assert!(edited.reversed);
+        edited.validate(&limits).unwrap();
+        let old_point = om9_core::surface_kernel::evaluate(&surface, 0.4, 0.6, &limits).unwrap();
+        let new_point = om9_core::surface_kernel::evaluate(&edited, 0.4, 0.6, &limits).unwrap();
+        assert!((0..3).any(|axis| (old_point[axis] - new_point[axis]).abs() > 1e-6));
+    }
+    assert!(om9_core::surface_kernel::delete_control_points(&surface,&BTreeSet::from([5]),&limits).is_err());
+    let mut periodic = surface.clone(); periodic.periodic[0] = true;
+    assert!(om9_core::surface_kernel::delete_control_points(&periodic,&BTreeSet::from([4,5,6,7]),&limits).is_err());
+    assert!(om9_core::surface_kernel::delete_control_points(&surface,&(0..8).collect(),&limits).is_err());
 }

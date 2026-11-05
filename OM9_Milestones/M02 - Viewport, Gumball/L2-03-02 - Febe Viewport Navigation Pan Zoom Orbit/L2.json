@@ -74,6 +74,18 @@
     }
   ],
   "runtime_implementation": {
+    "toolbar_index_2026_11_02": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Index icon lookups to eliminate repeated toolbar palette scans during navigation.",
+      "evidence": "docs/validation/2026-11-02-toolbar-icon-index-navigation.md",
+      "limitations": "Short visible wheel sample only; sustained 30 FPS, physical orbit and pan, and displayed-frame timing remain open."
+    },
+    "rhino_inspired_sensitivity_2026_11_01": {
+      "status": "AUTOMATED_CHECKS_PASSED_DESKTOP_PENDING",
+      "scope": "Orbit π/600 per logical point; wheel notch factor 0.81; projected pan verified",
+      "evidence": "docs/validation/2026-11-01-rhino-inspired-navigation.md",
+      "limitations": "Approximation from Rhino native analysis; physical mouse, DPI and actual Matrix9 parity remain unverified."
+    },
     "navigation_checkpoint_2026_10_21": {
       "date": "2026-10-21",
       "status": "implemented_automated_checks_passed_performance_acceptance_open",

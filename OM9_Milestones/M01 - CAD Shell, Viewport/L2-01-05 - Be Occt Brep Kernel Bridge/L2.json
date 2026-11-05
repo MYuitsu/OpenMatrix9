@@ -5,6 +5,127 @@
   "title": "Be Occt Brep Kernel Bridge",
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "scope": "Adapter OCCT, BRep, NURBS evaluation, tolerances, memory ownership/FFI safety.",
+  "runtime_implementation": {
+    "staged_stl_shared_admission_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Replace whole-headroom captured/Controller and detached STL leases with shared phase admission; add Rust native-source/snapshot copy hooks, preserve typed refusal and selection allocation phases",
+      "evidence": "docs/validation/2026-11-05-stl-staged-memory.md",
+      "limitations": "Native conversion/meshing allocations precede copy callbacks and are not bounded by this admission. Topology/hash scratch stays estimated pending; full allocator/path/worker/receipt ownership, automatic eviction, UI background integration, release/desktop and the rest of P1-P5 remain open."
+    },
+    "stl_export_no_display_edge_sampling_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Omit viewport-only sampled edge polylines from export snapshots with topology bindings",
+      "evidence": "docs/validation/2026-11-04-stl-export-no-display-edge-sampling.md",
+      "limitations": "No release A/B memory peak or comprehensive geometry equivalence; other native allocations remain unbounded"
+    },
+    "multiedge_curved_loft_memory_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Measure process high-water for 12-edge fillet and curved 32-section loft, with volume and closedness checks",
+      "evidence": "docs/validation/2026-11-04-kernel-operation-memory-probe.md#twelve-edge-fillet-and-curved-32-section-loft",
+      "limitations": "Synthetic process samples, not native allocation bounds; complex real models, native OOM and concurrent jobs remain open"
+    },
+    "stl_fan_adjacency_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Check known indexed fan adjacency and traversal capacities alongside retained fan lists",
+      "limitations": "Hash metadata, allocator, native and encoded-output allocations remain outside the lower bound",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#indexed-fan-adjacency-and-traversal-admission"
+    },
+    "stl_vertex_fan_list_admission_2026_11_04": {
+      "status": "partial_checks_passed",
+      "scope": "Known fan-table and per-vertex link capacities are checked during indexed STL topology analysis; adjacency and encoded-output scratch remain open.",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#indexed-vertex-fan-list-admission"
+    },
+    "stl_edge_stage_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#indexed-edge-stage-capacity-admission",
+      "scope": "Check known indexed face and edge table capacities at growth boundaries",
+      "limitations": "Hash metadata, allocator peaks, fan and encoded-output stages remain outside this lower bound"
+    },
+    "stl_indexed_topology_minimum_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#indexed-soup-topology-minimum",
+      "scope": "Admit retained STL soup and minimum topology union-find arrays together",
+      "limitations": "Hash maps, fan scratch and encoded-output analysis remain outside the lower bound"
+    },
+    "stl_brep_amortized_growth_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#amortized-b-rep-output-growth",
+      "scope": "Plan B-rep output growth with amortized capacity and combined exact fallback",
+      "limitations": "Allocator, topology and native transient peaks remain incomplete"
+    },
+    "stl_authored_mesh_growth_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#authored-mesh-output-growth",
+      "scope": "Preflight authored STL mesh buffer growth with amortized capacity and exact-size fallback",
+      "limitations": "Allocator, topology diagnostics and native transient peaks remain incomplete"
+    },
+    "stl_brep_output_growth_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#b-rep-output-buffer-growth",
+      "scope": "Preflight old and new STL B-rep output buffers with source and remap retained",
+      "limitations": "Authored-mesh growth, allocator and native transient peaks remain incomplete"
+    },
+    "stl_topology_lookup_estimate_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#topology-lookup-estimate",
+      "scope": "Include conservative remap lookup-tree estimates in STL admission",
+      "limitations": "Allocator, output growth and native transient peaks remain incomplete"
+    },
+    "stl_topology_remap_minimum_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#topology-remap-minimum",
+      "scope": "Admit snapshot and minimum remap arrays together in STL",
+      "limitations": "Lookup maps, output growth and native/allocator transients are not bounded"
+    },
+    "stl_soup_snapshot_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md",
+      "scope": "Deduct existing STL soup and temporary source capacities before native snapshot admission",
+      "limitations": "Native, remap and output-growth peaks remain outside complete admission"
+    },
+    "stl_worker_snapshot_reservation_cap_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-worker-sampled-reservation.md#native-adapter-ceiling-from-worker-reservation",
+      "scope": "Cap experimental STL worker snapshot admission at its reservation",
+      "limitations": "Does not bound native mesher transients or concurrent export scratch"
+    },
+    "grouped_topology_copy_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-occt-snapshot-copy-preflight.md#grouped-topology-accounting",
+      "scope": "Admit retained Rust snapshot and grouped topology arrays in one synchronous callback account",
+      "limitations": "Native, allocator and validation peaks remain outside this account"
+    },
+    "occt_snapshot_copy_preflight_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-occt-snapshot-copy-preflight.md",
+      "scope": "Check aggregate minimum Rust snapshot buffer size before copying native snapshot arrays",
+      "limitations": "Native buffers, grouped bindings, validation scratch and allocator peaks remain unaccounted"
+    },
+    "kernel_operation_memory_probe_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-kernel-operation-memory-probe.md",
+      "scope": "Measure isolated process high-water for simple Boolean, Fillet and Loft fixtures",
+      "limitations": "Synthetic process-wide high-water is not a native upper bound or admission envelope"
+    },
+    "nurbs_ray_miss_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Distinguish a completed NURBS ray miss from invalid inputs and native failure while preserving legacy error-on-miss callers.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#nurbs-exact-miss-and-a-valid-b-rep-candidate",
+      "limitations": "Synthetic candidate; general ambiguous intersections, native memory and desktop evidence remain open."
+    },
+    "fixed_face_ray_output_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Expose bounded inline face-ray results while retaining the existing vector wrapper; UI and experimental worker avoid point/group-result heap vectors.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#fixed-storage-grouped-results",
+      "limitations": "Other Rust allocations and OCCT native peak remain outside a complete admission bound; desktop remains unverified."
+    },
+    "bounded_face_ray_groups_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Bounded synchronous OCCT adapter reconstructs a call-local B-rep once for up to eight ordered face-ray intersections; Rust owns identities, output and worker lifecycle.",
+      "evidence": "docs/validation/2026-11-03-brep-picking-precision.md#bounded-grouped-face-refinement",
+      "limitations": "Worker and synchronous UI use; no global native allocation bound, desktop acceptance or complete topology coverage."
+    }
+  },
   "definition": {
     "module_id": "OM9-L2-01-05",
     "milestone_id": "M01",

@@ -1,0 +1,7 @@
+# Initialize the session managed-RAM ceiling
+
+Controller creation now passes the OS-reported physical RAM total to the shared coordinator account and sets a non-widening 60% ceiling before constructing the scene. At initialization the check includes known retained coordinator owners and the caller's held workspace/replacement usage. Coordinator replacement continues to share the previous account. An absent OS sample leaves this ceiling uninitialized rather than guessing.
+
+The deterministic core fixture checks held-byte refusal without changing the account or document, the 60% boundary, that a later larger total cannot widen it, and the same limit after replacement. This validates simulated counters, not actual allocation above 256 MiB. The independent `Limits::default()` 256 MiB cap still applies and is normally lower; thus this change does not enable large models. The held usage is checked at initialization, not registered as a permanent reservation. Current free physical RAM is not sampled here; workers with reservations do sample separately. Scene, preparation, native, GPU, allocator and other unregistered allocations remain incomplete. This is not a process RSS ceiling or a completed P0 gate.
+
+On E: with `-j 2`, 266 core unit, 23 atomic transaction, 3 memory-budget, 8 Undo memory, 3 app startup and 52 STL export tests passed. Public source audit passed. No physical desktop or release performance measurement was performed.

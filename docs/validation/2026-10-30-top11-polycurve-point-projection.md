@@ -1,0 +1,7 @@
+# Top 11 point projection across polycurve segments (2026-10-30)
+
+Standalone Rust OM9 on Windows, base `89ef2676b597ebc5ab38fa5c6acf0ad47a2f261b` plus working-tree changes. The old closest-point search sampled the whole polycurve at 64 stations. On a continuous 128-segment fixture, an unsampled vertex was exactly at the picked point but the search refined near the start; the regression failed with fraction approximately zero instead of 65/128.
+
+The shared projection now checks every segment in world space and maps the best segment fraction to the original segment-uniform polycurve parameter. Reversed polycurves map the fraction back to their original direction. Straight segments use analytic projection; nonlinear segment projection still uses bounded sampling. Nested polycurves remain explicitly unsupported by the existing evaluator. A scaled fixture verifies forward and reversed fractions and actual world coordinates; a CMD Split Point test verifies both output endpoints and Undo/Redo.
+
+With `CARGO_TARGET_DIR=L:\om9-target` and `-j 2`, four core curve/Top 11 suites passed 55 tests, app Top 11/options/OCCT BRep suites passed 64, and app Top 11/options without default features passed 49. Public-source audit passed. No OS pointer/GPU or human M03-UI acceptance was performed. Per-segment nonlinear global minima, pathological and nested curves, periodic NURBS, large nonlinear-segment performance, cutter tolerance and other Top 11 gaps remain open; this does not certify complete commands.

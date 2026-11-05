@@ -201,17 +201,20 @@
     }
   ],
   "runtime_implementation": {
-    "date": "2026-10-22",
+    "date": "2026-11-01",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "Typed command aliases submit through the same Controller; accepted feature id echoed.",
-    "owner": "transcript.rs + ui.rs",
+    "scope": "Typed command aliases submit through the same Controller; accepted feature id echoed. While typing a top-level name, a catalog-backed suggestion popup lists available commands (exact/prefix/contains, max 8), with arrow navigation, Tab/click fill and Enter completion or exact submit.",
+    "owner": "transcript.rs + ui.rs + ui/command.rs",
     "tests": [
-      "command_feedback_adapter 5 passed"
+      "command_feedback_adapter 5 passed",
+      "typed_command_offers_available_suggestions_and_enter_completes 1 passed",
+      "om9-app --lib 320 passed (3 pre-existing icon-size/Split failures)"
     ],
     "evidence": [
       "implementation/design/M01/OM9-L2-03-10/README.md",
-      "implementation/evidence/M01/2026-10-22-l2-03-10-commandline-feedback.json"
+      "implementation/evidence/M01/2026-10-22-l2-03-10-commandline-feedback.json",
+      "docs/validation/2026-11-01-command-suggestions.md"
     ],
     "human_approval": null,
     "remaining": [

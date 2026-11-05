@@ -1,0 +1,15 @@
+# Top11 Split Isocurve on single-face BReps — 2026-10-31
+
+The Isocurve option previously accepted only typed NURBS surfaces. It now also accepts one open single-face BRep; the option remains absent for multiple selected objects or multi-face/solid BReps. Eligibility is computed when Split starts, rather than measuring BReps on each UI frame.
+
+For a picked world point, the synchronous OCCT adapter finds a unique closest interior point on the trimmed face, obtains its UV parameters, constructs exact underlying-surface isocurves, and splits the face while checking result validity and total area. Rust extracts the resulting faces, restores the original placement, preserves source attributes and commits all replacements in one transaction. Typed points must satisfy document tolerance; viewport triangle hits use projection onto the face. The OCCT adapter is a native exception for face topology and geometric operations; it retains no document state and returns owned snapshots, not native handles.
+
+Windows x64, OCCT 8.0.1, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`:
+
+- The new BRep option regression failed before implementation and passes afterward for U, V and Both on a translated face, including invalid off-surface input, four independently checked region areas, `.om9` save/open and Undo/Redo. A nonuniformly scaled/translated face gives the expected local region areas and placement.
+- A trimmed face with a circular hole preserves total area; picking in the hole is refused. A cylindrical face split along a circumferential isocurve produces two exact-area halves. Multi-face and multiple target selections do not advertise Isocurve.
+- Two simulated egui viewport tests pass for typed and BRep faces. The Top11/options/BRep/snapshot suites passed 121 tests before the final extra placement/availability fixtures; seven Isocurve fixtures and the availability fixture subsequently passed. No-default Top11/options/snapshot: 68 passed. Kernel `--features 3dm-brep --test l2_01_10`: 69 passed.
+
+Limits: `Shrink=Yes`, native isocurve preview, general trimmed/periodic/degenerate faces, ambiguous projections, tangent/grazing viewport rays and 3DM interchange remain open. Viewport selection currently projects a tessellated hit instead of refining along its camera ray. Large or complex faces may exceed budgets; no performance measurement was performed. No external SDK plugin parity, physical desktop input or human M03-UI acceptance is claimed. OCCT remains native and not certified memory-safe by its Rust caller.
+
+SHA-256: `session/top11.rs` d8f771efccf71f7349c106a7228ee52cbefe98dfc6d9e9dc8240aa51e4e0d3ec; `session/surface_commands.rs` 0ed902967e8fecaaa4c34101595d1c89cc61fa002d6597662fd302f75dc19957; `ui/chrome.rs` 4c2689ba6051b51dd47eb116e5f269b886e6bce12e3b902bea7cdfa6ae6b4aad; `tests/top11_brep.rs` db9847f9ce6721f6145477ffd3545db0cfb9f3274b6d9af5a4b31a8b3437315d; `measurement.rs` 145bf7c7f11f49b07f5f8ae9143f45a319644a509b379d3672e3bf08dfa0a845; `measurement_bridge.cpp` c3b314530b2971c25ffa678b4969e1ca5ca7fb15fcccf5018859f1d1e05ddc5e.

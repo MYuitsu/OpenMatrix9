@@ -1,0 +1,7 @@
+# Top11 small-curve 3DM inspection
+
+The geometry-only 3DM export gate previously compared coordinates using `1e-10 * (1 + |coordinate|)`. A collapsed pole or endpoint on a `2.5e-11` mm curve therefore passed correspondence. A regression first failed on the old code. Line endpoints and NURBS poles now use per-axis transformed curve extent plus a bound for floating-point transform roundoff. The regression rejects a collapsed tiny line and NURBS, accepts an unchanged line translated to `1e9` mm, and rejects its collapse.
+
+Windows x64, `CARGO_TARGET_DIR=L:\om9-target-top11-nested`, `cargo test -j 2 -p om9-exchange --lib`: 31 passed. With native adapter `L:\om9-native-retained-final\om9-exchange-native.exe`, SHA-256 `351f0c9d86981def9c71a8de0a720230891aafe1499186650eaab102c6c1c12b`, all 50 explicitly ignored real-native `om9-app --test l2_01_13` cases passed, including tiny NURBS pieces, periodic curves, placed lines and nested curves. The tiny-line fixture still confirms the native SDK rejects the short ON_LineCurve; this change does not implement a replacement representation or resolve that interoperability limitation. Comparison tests do not prove every possible numerical transform or all geometry types.
+
+The GUI still needs an explicit loss-acknowledgement flow before retained-current output can be published. Remaining Top11 capability and physical desktop gates are open. This is not an openNURBS measurement batch.

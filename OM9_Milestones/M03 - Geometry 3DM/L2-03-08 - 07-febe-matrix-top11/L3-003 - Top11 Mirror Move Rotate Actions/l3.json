@@ -316,6 +316,74 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "rotate_direction_scale_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-copy-rotate-direction-scale.md", "scope": "Rotate reference direction is normalized before projection; signed extreme scales, preview and commit checked.", "limitations": "Near-axis conditioning and physical desktop input remain open."},
+    "mirror_plane_scale_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-mirror-plane-scale.md", "scope": "Two- and three-point mirror direction normalization handles tested small/large definitions; point and BRep preview/commit verified.", "limitations": "Near-collinear angles, wider geometry, physical input and desktop GPU acceptance remain open."},
+    "inactive_view_input_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-inactive-view-cplane.md", "scope": "Move, Mirror and Rotate preview and click use pointed viewport CPlane; tested Project snap and parallel-ray refusal.", "limitations": "Other CPlanes, input devices, GPU and desktop acceptance remain open."},
+    "projected_preview_input_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-projected-snap-preview.md", "scope": "Transform preview and click share viewport constraint, snap and projection; egui Move fixture covers four directions with Project on/off.", "limitations": "Mirror/Rotate projected snaps and inactive viewports with different CPlanes remain unverified."},
+    "mirror_rotate_preview_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-mirror-rotate-preview.md", "scope": "Mirror/Rotate point preview, three-point mirror, numeric angle and egui paint checked against committed world coordinates.", "limitations": "Further geometry, physical input, GPU presentation and desktop acceptance remain open."},
+    "move_preview_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-copy-move-preview.md", "scope": "Move preview shares its committed translation candidate and displays nested scene instances.", "limitations": "Mirror and Rotate previews, physical input, GPU display and additional geometry and CPlanes remain open."},
+    "typed_mirror_and_retry_base_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-copy-mirror-typed-points.md", "scope": "Mirror accepts typed absolute and relative points; rejected Top11 points no longer replace the relative base.", "limitations": "Other options, physical input and desktop acceptance remain open."},
+    "desktop_observation_2026_10_31": {"status": "PARTIAL_DESKTOP_OBSERVATION", "evidence": "docs/validation/2026-10-31-top11-desktop-and-short-line-investigation.md", "scope": "One real desktop Duplicate/Move sequence, Control Points toggle, and toolbar Undo/Redo visually observed.", "limitations": "No saved document or measured coordinates; human acceptance and broader cases remain open."},
+    "circle_plane_similarity_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-circle-plane-similarity.md",
+      "scope": "Keep circle type and angular parameterization under tested uniform in-plane affine transforms; distinguish small anisotropy.",
+      "limitations": "Eight-epsilon classification, general affine ellipse fractional parameter fidelity, reverse-curve domain behavior, UV seams, wider geometry and physical desktop remain open."
+    },
+    "mirror_line_domains_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-line-domains.md",
+      "scope": "Preserve line and polycurve segment domains through Mirror and placed Join; verify custom contiguous domains via real native 3DM.",
+      "limitations": "Circle-to-NURBS parameterization, noncontiguous polycurve 3DM domains, mesh UV 3DM seams, wider geometry and real desktop acceptance remain open."
+    },
+    "mirror_mesh_native_roundtrip_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-mesh-native-roundtrip.md",
+      "scope": "Verify reflected triangle and quad mesh 3DM roundtrip with normals, colors and world coordinates via both command paths and both Copy modes.",
+      "limitations": "UV-bearing meshes, broader geometry and actual desktop input and GPU presentation remain unverified."
+    },
+    "mirror_mesh_uv_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-mesh-uv-3dm.md",
+      "scope": "Preserve mesh face boundaries and corner UVs during Mirror; repair empty-UV mesh and tested polycurve domains in staged 3DM export.",
+      "limitations": "Populated corner UV 3DM export, arbitrary polycurve domains, real retained-file pipeline, wider geometry, Rhino and desktop UI remain open."
+    },
+    "transformed_brep_3dm_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-transformed-brep-3dm.md",
+      "scope": "Validate source-bound transformed native BRep fingerprints before publication and pass tested mirrored/placed 3DM roundtrips.",
+      "limitations": "CRC32 collision risk, wider BReps, cold-retained path, baseline exchange test failures, Rhino review and physical UI remain open."
+    },
+    "mirror_3dm_roundtrip_2026_10_31": {
+      "status": "PARTIAL_CHECKS_FAILED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-3dm-roundtrip.md",
+      "scope": "Nested mirrored block roundtrips through real 3DM; identify real retained-BRep Mirror export rejection.",
+      "limitations": "Nonidentity retained BRep fails prepublication correspondence verification; exact transformed verification and physical UI remain open."
+    },
+    "mirror_retained_objects_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-retained-objects.md",
+      "scope": "Mirror tested Hatch, Light and synthetic retained NativeBrep objects by reflecting placement without changing their data.",
+      "limitations": "Actual 3DM payload/export, lighting output, other transforms and physical UI remain open."
+    },
+    "mirror_block_render_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-block-render.md",
+      "scope": "Offscreen rendered tested mirrored nested mesh/BRep against explicit world-space reference and picked both occurrence paths.",
+      "limitations": "Copy=Yes GPU, other transforms/geometry, 3DM and physical desktop remain open."
+    },
+    "mirror_block_cloud_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-block-cloud.md",
+      "scope": "Mirror tested block instances by composing world reflection with placement and enable tested point clouds.",
+      "limitations": "Reflected nested mesh/BRep rendering, 3DM export, other entity kinds and physical UI remain open."
+    },
+    "transform_retry_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-transform-retry.md",
+      "scope": "Move/Mirror/Rotate pre-publication retry and Rotate CPlane reference projection, with tested controller and viewport cases.",
+      "limitations": "General failures, post-publication behavior, 3DM and physical UI remain open."
+    },
     "transforms_2026_10_28": {
       "scope": "Rotate Copy and typed angle/point; Mirror CPlane X/Y axes. Targeted tests cover specified geometry and undo/redo cases.",
       "evidence": "docs/validation/2026-10-28-top11-selection-transforms-join.md",

@@ -14,11 +14,14 @@ fn snapshots_expose_typed_values_not_only_labels() {
         .find(|option| option.id.name() == "BothSides")
         .expect("BothSides");
     assert_eq!(both.value, CommandValue::Flag(false));
-    let length = options
-        .iter()
-        .find(|option| option.id.name() == "Length")
-        .expect("Length");
-    assert_eq!(length.value, CommandValue::Number(None));
+    // Matrix Line has no Length option at any stage; a bare number is the length.
+    assert!(options.iter().all(|option| option.id.name() != "Length"));
+    line.accept_world_point([0.0, 0.0, 0.0]).unwrap();
+    assert!(
+        line.command_options()
+            .iter()
+            .all(|option| option.id.name() != "Length")
+    );
 
     let mut polyline = Controller::new(Document::new("polyline values"), limits).unwrap();
     polyline
@@ -177,40 +180,40 @@ fn primitive_snapshots_carry_typed_owner_values() {
 
     let mut rect = Controller::new(Document::new("rect values"), limits).unwrap();
     rect.submit("Rectangle").unwrap();
-    let square = rect
-        .command_options()
-        .into_iter()
-        .find(|option| option.id.name() == "Square")
-        .expect("Square");
-    assert_eq!(square.value, CommandValue::Flag(false));
+    // Matrix Rectangle: Square is a Shift gesture, not an option; the typed word stays
+    // an alias and the option list carries only the modes.
+    assert!(
+        rect.command_options()
+            .iter()
+            .all(|option| option.id.name() != "Square")
+    );
+    rect.submit("Square").unwrap();
 
     let mut circle = Controller::new(Document::new("circle values"), limits).unwrap();
     circle.submit("Circle").unwrap();
-    circle.accept_world_point([0.0; 3]).unwrap();
-    let area = circle
-        .command_options()
-        .into_iter()
-        .find(|option| option.id.name() == "Size=Area")
-        .expect("Size=Area");
-    circle.activate_command_option(area.id).unwrap();
-    let area = circle
-        .command_options()
-        .into_iter()
-        .find(|option| option.id.name() == "Size=Area")
-        .expect("Size=Area after");
-    assert_eq!(area.value, CommandValue::Flag(true));
-    let diameter = circle
-        .command_options()
-        .into_iter()
-        .find(|option| option.id.name() == "Size=Diameter")
-        .expect("Size=Diameter");
-    assert_eq!(diameter.value, CommandValue::Flag(false));
+    // Deformable belongs to the pre-center stage; the size measures follow the center.
     let deformable = circle
         .command_options()
         .into_iter()
         .find(|option| option.id.name() == "Deformable")
         .expect("Deformable");
     assert_eq!(deformable.value, CommandValue::Flag(false));
+    circle.accept_world_point([0.0; 3]).unwrap();
+    let area = circle
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Area")
+        .expect("Area");
+    assert_eq!(area.value, CommandValue::Flag(false));
+    circle.activate_command_option(area.id).unwrap();
+    assert_eq!(circle.prompt(), "Area");
+    // The chosen measure leaves the option list; the other measures stay.
+    let diameter = circle
+        .command_options()
+        .into_iter()
+        .find(|option| option.id.name() == "Diameter")
+        .expect("Diameter after Area");
+    assert_eq!(diameter.value, CommandValue::Flag(false));
 }
 
 #[test]

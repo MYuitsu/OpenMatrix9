@@ -40,35 +40,22 @@ impl Controller {
             return Err(Error::Stale("layer scene"));
         }
         let old_usage = self.scene_cache_usage()?;
-        let mut prepared = self
+        let prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new("Layers", mutations), old_usage)?;
         let same = Arc::ptr_eq(
             &prepared.candidate_world().documents[&self.document],
             &self.coordinator.world().documents[&self.document],
         );
-        let scene = if same {
-            None
+        let receipt = if same {
+            self.coordinator.commit(prepared)?
         } else {
             let mut held = old_usage;
-            held.add(old_scene.update_usage(None)?, self.coordinator.limits())?;
-            self.coordinator
-                .reserve_prepared_held_usage(&mut prepared, held)?;
-            Some(
-                old_scene.update_owned(
-                    prepared.candidate_world().documents[&self.document].clone(),
-                    self.coordinator
-                        .epoch()
-                        .checked_add(1)
-                        .ok_or(Error::Overflow("layer scene epoch"))?,
-                    None,
-                    self.coordinator.limits(),
-                )?,
-            )
+            let increment = old_scene.update_held_usage(None)?;
+            held.add(increment, self.coordinator.limits())?;
+            self.commit_incremental_scene(prepared, held, increment, None, false)?
         };
-        let receipt = self.coordinator.commit(prepared)?;
         if receipt.published {
-            self.scene = scene;
             let epoch = self.coordinator.epoch();
             let revision = self.document().context_revision;
             if let Some(s) = &mut self.session {
@@ -218,34 +205,25 @@ impl Controller {
         self.apply_layer_actions(vec![LayerAction::Hidden { sources, hidden }])
     }
     pub fn scene_cache_usage(&self) -> Result<om9_core::budget::Usage> {
-        let mut usage = self
+        let scene = self
             .scene
             .as_ref()
-            .ok_or(Error::Missing("scene"))?
-            .cache_usage()?;
+            .ok_or(Error::Missing("scene"))?;
+        let mut usage = scene.cache_held_usage()?;
+        usage.bytes = usage.bytes.checked_sub(self.registered_scene_buffer_bytes(scene))
+            .ok_or(Error::Invalid("scene buffer accounting"))?;
         usage.add(self.auxiliary_usage()?, self.coordinator.limits())?;
         Ok(usage)
     }
     pub(super) fn auxiliary_usage(&self) -> Result<om9_core::budget::Usage> {
-        let mut usage = om9_core::budget::Usage::btree::<ObjectId, ()>(self.selection.len())?;
-        usage.add(
-            om9_core::budget::Usage::array::<ObjectId>(self.selection_order.capacity())?,
-            self.coordinator.limits(),
-        )?;
+        let mut usage = if self.selection_reservation.is_some() {
+            om9_core::budget::Usage::default()
+        } else { self.root_selection_usage()? };
         if let Some(pending) = &self.solid_pending {
             usage.add(pending.usage()?, self.coordinator.limits())?;
         }
-        usage.add(
-            om9_core::budget::Usage::array::<super::SelectedSubobject>(
-                self.subselection.capacity(),
-            )?,
-            self.coordinator.limits(),
-        )?;
-        for picked in &self.subselection {
-            usage.add(
-                om9_core::budget::Usage::array::<ObjectId>(picked.path.capacity())?,
-                self.coordinator.limits(),
-            )?;
+        if self.subselection_reservation.is_none() {
+            usage.add(self.subselection_storage_usage()?, self.coordinator.limits())?;
         }
         usage.add(self.workspace.storage_usage()?, self.coordinator.limits())?;
         usage.add(
@@ -309,6 +287,7 @@ impl Controller {
         }
         self.selection.clear();
         self.selection_order.clear();
+        self.release_removed_root_selection();
     }
     /// Adds objects to the selection without dropping the ones already there (Shift + window).
     pub fn add_objects(&mut self, ids: &[ObjectId]) -> Result<()> {
@@ -324,6 +303,7 @@ impl Controller {
             self.selection.remove(id);
         }
         self.selection_order.retain(|id| self.selection.contains(id));
+        self.release_removed_root_selection();
         self.selection_revision = self.selection_revision.saturating_add(1);
         Ok(())
     }
@@ -349,23 +329,7 @@ impl Controller {
                 return Err(Error::Permission("selected root"));
             }
         }
-        let mut held = self.scene_cache_usage()?;
-        let added = ids
-            .iter()
-            .filter(|id| !self.selection.contains(*id))
-            .count();
-        held.add(
-            om9_core::budget::Usage::btree::<ObjectId, ()>(self.selection.len() + added)?,
-            self.coordinator.limits(),
-        )?;
-        held.add(om9_core::budget::Usage::array::<ObjectId>(added)?, self.coordinator.limits())?;
-        self.coordinator.retained_usage_with_held_usage(held)?;
-        self.selection_order.try_reserve_exact(added).map_err(|_| Error::Budget("selection order"))?;
-        for id in ids {
-            if self.selection.insert(*id) {
-                self.selection_order.push(*id);
-            }
-        }
+        self.append_root_selection(ids)?;
         self.selection_revision = self.selection_revision.saturating_add(1);
         Ok(())
     }
@@ -375,6 +339,7 @@ impl Controller {
         if self.selection.contains(&id) {
             self.selection.remove(&id);
             self.selection_order.retain(|selected| *selected != id);
+            self.release_removed_root_selection();
             self.selection_revision = self.selection_revision.saturating_add(1);
             return Ok(());
         }
@@ -392,16 +357,7 @@ impl Controller {
         {
             return Err(Error::Permission("selected root"));
         }
-        let mut held = self.scene_cache_usage()?;
-        held.add(
-            om9_core::budget::Usage::btree::<ObjectId, ()>(self.selection.len() + 1)?,
-            self.coordinator.limits(),
-        )?;
-        held.add(om9_core::budget::Usage::array::<ObjectId>(1)?, self.coordinator.limits())?;
-        self.coordinator.retained_usage_with_held_usage(held)?;
-        self.selection_order.try_reserve_exact(1).map_err(|_| Error::Budget("selection order"))?;
-        self.selection.insert(id);
-        self.selection_order.push(id);
+        self.append_root_selection(&[id])?;
         self.selection_revision = self.selection_revision.saturating_add(1);
         Ok(())
     }
@@ -421,36 +377,8 @@ impl Controller {
         if ids.len() as u64 > self.coordinator.limits().max_outputs {
             return Err(Error::Budget("root selection count"));
         }
-        let mut next = std::collections::BTreeSet::new();
-        for id in ids {
-            if id.is_nil()
-                || !scene.objects.iter().any(|object| {
-                    object.root == *id && object.selectable && object.has_pick_geometry()
-                })
-            {
-                return Err(Error::Permission("selected root"));
-            }
-            next.insert(*id);
-        }
-        let mut held = self.scene_cache_usage()?;
-        held.add(
-            om9_core::budget::Usage::btree::<ObjectId, ()>(next.len())?,
-            self.coordinator.limits(),
-        )?;
-        held.add(om9_core::budget::Usage::array::<ObjectId>(ids.len())?, self.coordinator.limits())?;
-        self.coordinator.retained_usage_with_held_usage(held)?;
-        let mut order = Vec::new();
-        order.try_reserve_exact(ids.len()).map_err(|_| Error::Budget("selection order"))?;
-        for id in ids {
-            if !order.contains(id) {
-                order.push(*id);
-            }
-        }
-        if next != self.selection || order != self.selection_order {
-            self.selection_revision = self.selection_revision.saturating_add(1);
-        }
-        self.selection_order = order;
-        self.selection = next;
+        let next = self.prepare_root_selection(scene, ids, false)?;
+        self.publish_root_selection(next);
         Ok(())
     }
 
@@ -479,52 +407,40 @@ impl Controller {
         if count as u64 > self.coordinator.limits().max_outputs {
             return Err(Error::Budget("root selection count"));
         }
-        let mut held = self.scene_cache_usage()?;
-        held.add(
-            om9_core::budget::Usage::btree::<ObjectId, ()>(count)?,
-            self.coordinator.limits(),
-        )?;
-        held.add(om9_core::budget::Usage::array::<ObjectId>(usize::from(root.is_some()))?, self.coordinator.limits())?;
-        self.coordinator.retained_usage_with_held_usage(held)?;
-        self.selection_order.try_reserve_exact(usize::from(root.is_some())).map_err(|_| Error::Budget("selection order"))?;
         if extend {
-            // Shift means ADD (Rhino p33: "Hold the Shift key while clicking the objects"), not toggle:
-            // clicking an already selected object again must leave it selected. Ctrl is the toggle gesture
-            // and lives in `toggle_selection`.
-            if let Some(id) = root {
-                if self.selection.insert(id) {
-                    self.selection_order.push(id);
-                }
-            }
+            if let Some(id) = root { self.append_root_selection(&[id])?; }
         } else {
-            let mut selection = std::collections::BTreeSet::new();
-            if let Some(id) = root {
-                selection.insert(id);
-            }
-            self.selection = selection;
-            self.selection_order.clear();
-            self.selection_order.extend(root);
+            let ids = root.as_slice();
+            let scene = self.scene.as_ref().ok_or(Error::Missing("selection scene"))?;
+            let next = self.prepare_root_selection(scene, ids, false)?;
+            let revision = self.selection_revision;
+            self.publish_root_selection(next);
+            self.selection_revision = revision;
         }
         self.selection_revision = self.selection_revision.saturating_add(1);
         Ok(())
     }
     pub fn select_layer(&mut self, slot: PresetSlot) -> Result<()> {
         let count = self.selectable_layer_member_count(slot)?;
-        let limits = self.coordinator.limits();
-        if count as u64 > limits.max_outputs {
+        if count as u64 > self.coordinator.limits().max_outputs {
             return Err(Error::Budget("layer selection count"));
         }
-        let mut held = self.scene_cache_usage()?;
-        held.add(om9_core::budget::Usage::array::<ObjectId>(count)?, limits)?;
-        held.add(
-            om9_core::budget::Usage::btree::<ObjectId, ()>(count)?,
-            limits,
-        )?;
-        self.coordinator.retained_usage_with_held_usage(held)?;
-        let ids = self.selectable_layer_members(slot)?;
-        self.selection = ids.iter().copied().collect();
-        self.selection_order = ids;
-        self.selection_revision = self.selection_revision.saturating_add(1);
+        let reservation = self.reserve_root_selection(count, count)?;
+        let mut ids = Vec::new();
+        ids.try_reserve_exact(count).map_err(|_| Error::Budget("layer selection allocation"))?;
+        if let Some(layer) = self.layer_id(slot) {
+            let scene = self.scene.as_ref().ok_or(Error::Missing("layer selection scene"))?;
+            for group in scene.objects.chunk_by(|a, b| a.root == b.root) {
+                if group.iter().any(|o| o.selectable && o.has_pick_geometry())
+                    && self.document().entities.get(&group[0].root).is_some_and(|e| e.attributes.layer == Some(layer)) {
+                    ids.push(group[0].root);
+                }
+            }
+        }
+        let next = self.prepare_root_selection_ordered(ids, reservation)?;
+        let revision = self.selection_revision;
+        self.publish_root_selection(next);
+        self.selection_revision = revision.saturating_add(1);
         Ok(())
     }
     pub fn selectable_layer_member_count(&self, slot: PresetSlot) -> Result<usize> {

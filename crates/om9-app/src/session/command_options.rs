@@ -131,26 +131,23 @@ impl CommandOptionInterface for Controller {
         if let Some(session) = &self.session
             && session.feature == super::LINE
         {
-            let mut options = vec![
-                descriptor(
-                    "line",
-                    "BothSides",
-                    if session.both_sides {
-                        "BothSides=No"
-                    } else {
-                        "BothSides=Yes"
-                    },
-                ),
-                descriptor("line", "Length=", "Length="),
-            ];
+            // Matrix Line: BothSides is the only command-line option. A length is
+            // typed as a bare number at the end prompt, not offered as an option.
+            if session.start.is_some() {
+                return Vec::new();
+            }
+            let mut options = vec![descriptor(
+                "line",
+                "BothSides",
+                if session.both_sides {
+                    "BothSides=No"
+                } else {
+                    "BothSides=Yes"
+                },
+            )];
             options[0].kind = Kind::Toggle;
             options[0].label = format!("BothSides={}", yes_no(session.both_sides));
             options[0].value = crate::command_options::CommandValue::Flag(session.both_sides);
-            options[1].value = crate::command_options::CommandValue::Number(session.length_mm);
-            options[1].label = numeric_label(
-                "Length",
-                session.length_mm.map(|value| value / session.unit.factor()),
-            );
             assign_shortcuts(&mut options);
             for option in &mut options {
                 option.id.run = self.command_run;
@@ -563,15 +560,16 @@ impl Controller {
                 _ => CommandValue::None,
             },
             "circle" => match &self.circle_pending {
-                Some(pending) if name == "Radius" => CommandValue::Number(pending.radius),
+                Some(pending)
+                    if matches!(name, "Radius" | "Diameter" | "Circumference" | "Area") =>
+                {
+                    CommandValue::Flag(pending.size == name)
+                }
                 Some(pending) if name == "Degree" => CommandValue::Integer(Some(pending.degree)),
                 Some(pending) if name == "PointCount" => {
                     CommandValue::Integer(Some(pending.point_count))
                 }
                 Some(pending) if name == "Deformable" => CommandValue::Flag(pending.deformable),
-                Some(pending) if name.starts_with("Size=") => {
-                    CommandValue::Flag(pending.size == &name[5..])
-                }
                 Some(pending) if name == "Solution=1" => CommandValue::Flag(pending.solution == 1),
                 Some(pending) if name == "Solution=2" => CommandValue::Flag(pending.solution == 2),
                 _ => CommandValue::None,
@@ -689,6 +687,15 @@ impl Controller {
                 _ => CommandValue::None,
             },
             "top11" => match &self.top11_pending {
+                Some(super::top11::Top11Pending::SplitMany { shrink: Some(value), .. }) if name == "Shrink" => CommandValue::Flag(*value),
+                Some(super::top11::Top11Pending::SplitIso { shrink, .. }) if name == "Shrink" => CommandValue::Flag(*shrink),
+                Some(super::top11::Top11Pending::SplitIso { direction, .. }) if name == "Direction" => {
+                    CommandValue::Choice(match direction {
+                        super::top11::SplitIsoDirection::U => "U",
+                        super::top11::SplitIsoDirection::V => "V",
+                        super::top11::SplitIsoDirection::Both => "Both",
+                    })
+                }
                 Some(super::top11::Top11Pending::Move { vertical, .. }) if name == "Vertical" => {
                     CommandValue::Flag(*vertical)
                 }
@@ -809,6 +816,23 @@ impl Controller {
             }};
         }
         match owner {
+            "top11" if name == "Shrink" => {
+                if let Some(super::top11::Top11Pending::SplitIso { shrink, .. }) = &self.top11_pending {
+                    flag!(*shrink);
+                } else if let Some(super::top11::Top11Pending::SplitMany { shrink: Some(value), .. }) = &self.top11_pending {
+                    flag!(*value);
+                }
+            }
+            "top11" if name == "Direction" => {
+                if let Some(super::top11::Top11Pending::SplitIso { direction, .. }) = &self.top11_pending {
+                    option.kind = Kind::Choice;
+                    option.label = format!("Direction={}", match direction {
+                        super::top11::SplitIsoDirection::U => "U",
+                        super::top11::SplitIsoDirection::V => "V",
+                        super::top11::SplitIsoDirection::Both => "Both",
+                    });
+                }
+            }
             "annotation" => {
                 if let Some(p) = &self.annotation_pending {
                     match name {
@@ -880,11 +904,10 @@ impl Controller {
             "arc" => {
                 optional_numbers!(arc_pending, "Radius" => radius);
                 if let Some(p) = &self.arc_pending {
+                    // Mode words stay plain and the current mode is the prompt word
+                    // (Rhino p22: `Center of circle ( Deformable Vertical ... )`).
                     if name == "Diameter" {
                         option.label = numeric_label(name, p.radius.map(|r| r * 2.));
-                    }
-                    if matches!(name, "3Point" | "Center" | "StartPoint") {
-                        mode!(p.mode);
                     }
                 }
             }
@@ -893,30 +916,14 @@ impl Controller {
             }
             "circle" => {
                 numbers!(circle_pending, "Degree" => degree, "PointCount" => point_count, "Solution" => solution);
-                optional_numbers!(circle_pending, "Radius" => radius);
                 if let Some(p) = &self.circle_pending {
+                    // The prompt carries the current mode and measure; the options stay
+                    // plain words, exactly like the Matrix `Center of circle (...)` line.
                     match name {
-                        "Deformable" => flag!(p.deformable),
-                        "Approx" => flag!(p.deformable),
-                        "Center" | "2Point" | "3Point" | "Vertical" | "FitPoints"
-                        | "AroundCurve" | "Tangent" => mode!(p.mode),
-                        "Diameter" => option.label = numeric_label(name, p.radius.map(|r| r * 2.)),
-                        "Circumference" => {
-                            option.label =
-                                numeric_label(name, p.radius.map(|r| r * std::f64::consts::TAU))
-                        }
-                        "Area" => {
-                            option.label =
-                                numeric_label(name, p.radius.map(|r| r * r * std::f64::consts::PI))
-                        }
                         "Point" => {
                             if let Some([x, y, z]) = p.tangent_point {
                                 option.label = format!("Point={x},{y},{z}");
                             }
-                        }
-                        _ if name.starts_with("Size=") => {
-                            let size = name.trim_start_matches("Size=");
-                            option.label = format!("{name} ({})", yes_no(p.size == size));
                         }
                         _ => {}
                     }
@@ -978,12 +985,12 @@ impl Controller {
                 numbers!(ellipse_pending, "Degree" => degree, "PointCount" => point_count);
                 optional_numbers!(ellipse_pending, "RadiusX" => radius_x, "RadiusY" => radius_y);
                 if let Some(p) = &self.ellipse_pending {
+                    // Toggles keep their value; construction modes stay plain words and
+                    // the current mode is the prompt (`Center of ellipse`, ...).
                     match name {
                         "MarkFoci" => flag!(p.mark_foci),
                         "Deformable" => flag!(p.deformable),
                         "Approx" => flag!(p.deformable),
-                        "Center" | "Corner" | "Diameter" | "Vertical" | "FromFoci"
-                        | "AroundCurve" => mode!(p.mode),
                         _ => {}
                     }
                 }
@@ -1094,11 +1101,10 @@ impl Controller {
                 if let Some(p) = &self.solid_pending {
                     if matches!(option.activation, Activation::Submit(command) if command.starts_with("Mode="))
                     {
-                        mode!(if p.box_mode {
-                            p.box_kind
-                        } else {
-                            p.sphere_kind
-                        });
+                        option.kind = Kind::Choice;
+                        // Box and Sphere name their modes as plain prompt words; the
+                        // current mode is the prompt, so only the others are options.
+                        option.label = name.to_owned();
                     }
                     match name {
                         "MarkFoci" if p.feature == "OM9-SOLID-013" => flag!(p.ellipsoid_mark_foci),

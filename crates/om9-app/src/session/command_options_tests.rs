@@ -307,7 +307,19 @@ fn every_declared_owner_has_unique_options_and_safe_value_entry() {
                 assert_eq!(c.coordinator().undo_len(), 0, "{owner}");
             }
         }
-        let cancel = c.resolve_command_option("Cancel").unwrap();
+        let cancel = match c.resolve_command_option("Cancel") {
+            Some(cancel) => cancel,
+            // The documented solid and Circle prompts name their mode/measure words
+            // only; Esc cancels those commands instead of an option token.
+            None if owner == "solid" || owner == "circle" => {
+                c.cancel();
+                assert!(c.command_options().is_empty(), "{owner}");
+                assert!(c.document().entities.is_empty(), "{owner}");
+                assert_eq!(c.coordinator().undo_len(), 0, "{owner}");
+                continue;
+            }
+            None => panic!("owner {owner} has no Cancel option"),
+        };
         c.activate_command_option(cancel).unwrap();
         assert!(c.command_options().is_empty(), "{owner}");
         assert!(c.document().entities.is_empty(), "{owner}");

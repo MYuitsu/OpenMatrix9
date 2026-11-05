@@ -70,3 +70,30 @@ fn a_wheel_burst_animates_and_zooms_toward_the_cursor() {
         "zoom-to-cursor must move the pivot"
     );
 }
+
+#[test]
+fn line_wheel_notch_scales_orthographic_span_by_rhino_default() {
+    use om9_scene::camera::Projection;
+    for (delta, factor) in [(1., 0.81), (-1., 1. / 0.81)] {
+        let mut app = MatrixApp::new(Document::new("notch")).unwrap();
+        let context = egui::Context::default();
+        let mut time = 0.;
+        let mut frame = |app: &mut MatrixApp, events: Vec<Event>| {
+            time += 0.05;
+            let input = egui::RawInput {
+                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 800.))),
+                events, time: Some(time), ..Default::default()
+            };
+            let mut output = context.run_ui(input, |ui| app.show(ui));
+            output.textures_delta.clear();
+        };
+        frame(&mut app, vec![]);
+        let cursor = app.view_rects[&ViewId::LookingDown].center();
+        let Projection::Orthographic { vertical_span_mm: before } = app.controller.workspace.views[&ViewId::LookingDown].camera.projection else { panic!("orthographic") };
+        frame(&mut app, vec![Event::PointerMoved(cursor)]);
+        frame(&mut app, vec![Event::MouseWheel { unit: egui::MouseWheelUnit::Line, delta: Vec2::new(0., delta), modifiers: Modifiers::NONE, phase: egui::TouchPhase::Move }]);
+        for _ in 0..8 { frame(&mut app, vec![]); }
+        let Projection::Orthographic { vertical_span_mm: after } = app.controller.workspace.views[&ViewId::LookingDown].camera.projection else { panic!("orthographic") };
+        assert!((after / before - factor).abs() < 1e-8, "delta={delta}, factor={}", after / before);
+    }
+}

@@ -1,0 +1,9 @@
+# DX12 selected-adapter GPU memory sample
+
+Follow-up: selected Vulkan devices with `VK_EXT_memory_budget` are now sampled too; see [Vulkan evidence](2026-11-03-vulkan-selected-device-memory.md). The limitations below describe the earlier DX12-only delivery.
+
+P2 partial: the Windows native owner queries DXGI directly through the HAL guard of the `wgpu::Adapter` supplied by the caller. It records adapter LUID, vendor/device IDs, dedicated and shared system memory, and DXGI local/nonlocal budget and usage for node 0. No adapter is selected by name. An unsupported backend or failed query returns no sample; it is not represented as a verified hardware limit. The app emits a `gpu_memory_sample` event at startup only when the existing interaction log is enabled. This is a raw point-in-time observation, not a budget policy.
+
+Windows, `CARGO_TARGET_DIR=L:/om9-target`, Cargo `-j 2`: two native-owner tests passed. The DX12 test queried two actual wgpu DX12 adapters with distinct LUIDs and compared DXGI vendor/device IDs with each corresponding wgpu adapter. One sample reported 12,701,401,088 dedicated bytes and local budget 11,896,094,720 bytes; the other reported zero dedicated bytes and local budget 50,650,140,672 bytes. These are individual test-process samples, not proof of which adapter the user's existing OM9 window uses. A Vulkan-adapter test confirmed the DX12 query returns no value for that backend. The GPU offscreen four-viewport reuse test passed, and the app library compiled after the diagnostic hookup.
+
+The query uses node 0 and does not establish UMA/discrete classification, a hardware ceiling, headroom, budget-change notifications or VRAM allocation accounting. Vulkan memory-budget support and fallback reporting policy remain open. No GPU limit, eviction, batching, present timing or performance improvement is implemented or proven here. The active OM9 session was not modified; release and desktop tests remain outstanding.

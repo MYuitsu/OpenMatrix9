@@ -1,0 +1,9 @@
+[package]
+name = "om9-command-options"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+om9-core = { path = "../om9-core" }

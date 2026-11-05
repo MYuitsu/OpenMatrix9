@@ -1,0 +1,11 @@
+# Top11 Edit Points: rational NURBS representation — 2026-10-31
+
+Status: PARTIAL_CHECKS_PASSED. The previous curve edit path reinterpolated sampled points with new chord-length knots and unit weights, silently replacing the original parameterization and dropping reversed, periodic and seam metadata. This could change the curve even for a zero-distance edit.
+
+For a nonperiodic NURBS curve with admissible Greville points, the Rust curve operation now solves the rational basis collocation system for pole displacements, retaining the original degree, knots, weights, domain, orientation and seam metadata. It verifies the computed edit points before returning, and refuses singular or inaccurate solutions. An unchanged target returns the original curve. When editing an endpoint of a closed curve, both coincident seam points follow. Matrix is bounded to 512 poles and checked against the configured byte limit. Periodic NURBS editing is explicitly rejected pending a seam-aware solver instead of silently converting it to an open curve. The document/controller remains responsible for atomic publication and Undo.
+
+Fixtures exercise a rational, nonuniform-knot NURBS with non-unit domain and both orientation flags; the moved point reaches its target and all other edit grips remain fixed. They also exercise no-op, a closed seam, resource rejection, periodic rejection, and CMD `EditPtOn` through the controller with Undo/Redo. After the final solution guard, core curve_ops/top11 tests: 34 passed; app top11/options/BRep/snapshot tests: 137 passed. Before that guard, the no-default app suite passed 69. Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`.
+
+The sampled Greville points are not proof that original creation clicks are preserved. General trimmed-domain, repeated-knot/singular and periodic cases, large-curve performance, real pointer interaction, 3DM and human M03-UI acceptance remain open. Other Top11 commands still require complete audit.
+
+SHA-256: `crates/om9-core/src/curve_ops.rs` fa49e44bd15d56e151fd934f5a5144de6199f2f37c154b1a367e0eb2f1862328; `crates/om9-core/tests/curve_ops.rs` 6a956cd11fa292c214d6d5bb1adb1a2ef3f947146890b797b2d3e25c0d5819d1; `crates/om9-app/tests/top11.rs` 95eaeb4e76c363de18b25650c31f813dc75b1543a1f14d44f6ef6b28fcf97820.

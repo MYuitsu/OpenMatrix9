@@ -131,24 +131,39 @@
     "scope": "No M03 L4 assigned"
   },
   "runtime_implementation": {
-    "date": "2026-10-23",
-    "status": "DEFERRED_TO_M04",
-    "target": "M04",
-    "scope": "Ring Rail entry point reaches the M04 builder; no M03 L4 is assigned.",
+    "date": "2026-10-31",
+    "status": "AUTOMATED_PARTIAL_MANUAL_UI_PENDING",
+    "target": "standalone M04 builder",
+    "scope": "Verify Top11 and CMD Ring Rail route through M04 builder to tested geometry and history, including simulated widget clicks and native 3DM.",
     "owner": {
       "crate": "om9-app",
-      "note": "the Top 11 button exists and stays disabled"
+      "note": "Top11 and CMD dispatch to the existing M04 Ring Rail builder."
     },
     "evidence": [
-      "implementation/evidence/M03/OM9-L3-03-08-006/OM9-L4-03-08-006-03.focused-test.log"
+      "docs/validation/2026-10-31-top11-ringrail-entrypoint.md"
     ],
     "human_approval": null,
     "manual_gate": "M04-UI",
     "remaining": [
-      "M04 builder and its M04 L4 plan are not created in this milestone."
+      "M04-UI human review, OS pointer input and GPU display remain unverified.",
+      "Other M04 builder parameters and geometry require their own owner evidence."
     ],
     "planning_state_modified": false,
-    "l4_evidence": {}
+    "l4_evidence": {},
+    "historical_m03_deferred_state": {
+      "status": "DEFERRED_TO_M04",
+      "scope": "Ring Rail entry point reaches the M04 builder; no M03 L4 is assigned.",
+      "owner": {
+        "crate": "om9-app",
+        "note": "the Top 11 button exists and stays disabled"
+      },
+      "remaining": [
+        "M04 builder and its M04 L4 plan are not created in this milestone."
+      ],
+      "evidence": [
+        "implementation/evidence/M03/OM9-L3-03-08-006/OM9-L4-03-08-006-03.focused-test.log"
+      ]
+    }
   },
   "task_ids": [
     "OM9-L4-03-08-005-01"

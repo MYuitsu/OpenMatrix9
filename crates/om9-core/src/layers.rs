@@ -164,6 +164,7 @@ impl LayerPlan {
         context: OperationContext,
         d: &Document,
         new_target: Option<&Layer>,
+        created_layers: &std::collections::BTreeMap<(DocumentId, LayerId), &Layer>,
         l: &Limits,
         peak: &mut Usage,
         cancel: &Cancellation,
@@ -199,7 +200,9 @@ impl LayerPlan {
                         }
                     }
                 }
-                let editable = editable_layer(d, layer.parent)?;
+                let editable = d.layer_permissions_with(layer.parent, false, |id| {
+                    created_layers.get(&(d.id, id)).copied().or_else(|| d.layers.get(&id))
+                })?.editable;
                 if *make_current && (!editable || layer.locked) {
                     return Err(Error::Permission("new current layer"));
                 }

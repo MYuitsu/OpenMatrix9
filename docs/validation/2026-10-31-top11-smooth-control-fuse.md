@@ -1,0 +1,11 @@
+# Top11 Control Points: exact fusion of supported smooth polycurves — 2026-10-31
+
+Status: PARTIAL_CHECKS_PASSED. Matrix's normalized reference says control editing smooth joined segments fuses them into one curve that cannot be exploded. Previously OM9 preserved a polycurve after all control edits.
+
+For a nonzero control edit, the document path now checks the original adjacent tangents in world coordinates against the document angular tolerance, including a closing seam where applicable. Supported edited line, circular-arc and clamped nonperiodic NURBS segments with exactly matching endpoints are converted and joined into a single rational NURBS; degrees are elevated and homogeneous weights rescaled as needed. The segment geometry is preserved by the rational construction. Unsupported bases or nonmatching endpoints retain the existing polycurve result. An unchanged edit does not convert. Tangent classification is an OM9 interpretation, not verified original Matrix internals.
+
+Controller fixtures cover two collinear line segments in both traversal directions with a moved joint, a line tangent to a circular arc with degree elevation and sampled circle radius, Undo/Redo, and an Explode refusal on the fused result without document mutation. Existing corner fixtures remain polycurves. Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: core curve_ops/top11 42 passed; app Top11/options/BRep/snapshot 143 passed; no-default app 75 passed. The Explode assertion was strengthened and rerun after the wider batches.
+
+Exact endpoint equality is currently required for fusion even if a gap is within document tolerance; trimmed or periodic NURBS, nested segments, general placement and multi-span degree-elevation fidelity, large-allocation budgets, seam tangent/fairness after editing, .om9/3DM, physical UI and human M03-UI acceptance remain unverified. Other Top11 requirements remain open.
+
+Source SHA-256: `crates/om9-core/src/curve_ops.rs` 05a7228486cac9cb8782751e2a590dbec496c2355f3dca09373f2c42f99a5bb9; `crates/om9-core/src/top11.rs` 3ecf2f8433203425658f0e2cd1e830e7d20749fe9363c773019620536bc964e5; `crates/om9-app/tests/top11.rs` 4227c7a33bb952a669fc1478249d508c86800a1be10cc2f64cdfaf9d8ef1726b.

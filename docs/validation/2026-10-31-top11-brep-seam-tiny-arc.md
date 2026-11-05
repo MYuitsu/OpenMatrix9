@@ -1,0 +1,11 @@
+# Top11 BRep seam cuts and small open arcs
+
+Trim was tested against an OCCT box whose boundary meets a closed target at its seam and at two other locations. Circle and rational NURBS targets, both NURBS directions and a seam moved to a BRep crossing were exercised through CMD and toolbar. The result keeps the intended complementary arc, its expected endpoints and length, the cutter, `.om9` state and Undo/Redo. The moved-seam fixture initially failed because two endpoint fractions rounded to the same unwrapped native NURBS parameter; normalization now recognizes that unrepresentable interval as one location before attempting to trim it. A core test also confirms distinct fractions over the rest of the curve are not merged.
+
+A separate core regression found that a `1e-10`-radius half-circle was classified as closed by the previous fixed absolute endpoint threshold, so Trim removed an extra interval. Top11 cutting now treats lines as open and classifies circular curves using their angular span with a scale-aware angular/absolute bound. Tests distinguish small partial arcs, complete and multi-turn circles, including an independent angle domain. CMD and toolbar Split/Trim tests use a `1e-13` mm document tolerance for the small arc and check piece counts, total length and Undo/Redo. Non-circular curves retain the existing closure rule.
+
+The moved-seam NURBS Trim result and BRep cutter survived real 3DM export/import with the two expected arc endpoints and length; the test checks the cutter remains a BRep object but does not remeasure its shape. The admitted native adapter SHA-256 was `bddca46577747333f9377b379351a077b710158f47ce6e279d7b6e21e6439615`. This interoperability check is not an openNURBS measurement batch.
+
+Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: 204 core library, 41 core Top11, 28 core curve/surface, 127 app Top11 and 84 app Top11 BRep tests passed; 127 no-default app Top11 tests passed with existing warnings. One native 3DM roundtrip passed. The BRep fixture initially reproduced an invalid empty join at the moved seam and passed after the normalization fix.
+
+Non-circular near-closure classification, general overlapping curves, extreme angle or coordinate precision, more BRep configurations and physical desktop acceptance remain open. These tests do not establish completion of Top11.

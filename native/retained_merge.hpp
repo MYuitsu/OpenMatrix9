@@ -360,7 +360,7 @@ inline size_t retained_geometry_shape(const J& j) {
   if(key=="Surface") {fields(c,{"degree","size","poles","weights","knots","domain","periodic","reversed"});array(c["degree"],2);array(c["size"],2);array(c["knots"],2);array(c["domain"],2);array(c["periodic"],2);for(const auto& b:c["periodic"])(void)flag(b);require(!flag(c["reversed"]),"Unsupported: reversed Surface metadata");
     const auto u=count(c["size"][0]),v=count(c["size"][1]);require(u>0&&v>0&&u<=max_array/v,"retained surface pole budget");poles(c["poles"],c["weights"]);require(c["poles"].size()==u*v,"retained Surface grid shape");axis(count(c["degree"][0],16),u,c["knots"][0],c["domain"][0]);axis(count(c["degree"][1],16),v,c["knots"][1],c["domain"][1]);return u*v;}
   require(key=="Mesh"||key=="Cloud","Unsupported: retained current Geometry variant");const bool mesh=key=="Mesh";
-  if(mesh)fields(c,{"vertices","faces","normals","colors"});else fields(c,{"points","normals","colors","hidden"});
+  if(mesh){fields(c,{"vertices","faces","normals","colors","corner_uvs"});require(c["corner_uvs"].is_array() && c["corner_uvs"].empty(),"retained mesh corner UV export unsupported");}else fields(c,{"points","normals","colors","hidden"});
   const auto& p=c[mesh?"vertices":"points"];require(p.is_array()&&!p.empty()&&p.size()<=max_array,"retained vertices/points budget");for(const auto& q:p)(void)point(q);
   for(const auto* k:{"normals","colors"}){require(c[k].is_array()&&(c[k].empty()||c[k].size()==p.size()),"retained channel count");for(const auto& q:c[k])if(k==std::string("normals"))(void)point(q);else (void)color(q);}
   if(mesh){require(c["faces"].is_array()&&c["faces"].size()<=max_array,"retained mesh face budget");for(const auto& f:c["faces"]){require(f.is_array()&&(f.size()==3||f.size()==4),"retained polygon shape");for(const auto& index:f)require(count(index)<p.size(),"retained face index range");}}
@@ -495,7 +495,7 @@ inline bool retained_same_geometry(const ON_Geometry& a,const ON_Geometry& b) {
   return native_class(a)==native_class(b)&&record_fingerprint(a,50,ON::Version())==record_fingerprint(b,50,ON::Version());
 }
 inline bool retained_curve_userdata(const ON_Curve& curve,size_t depth=0) {
-  require(depth<=max_depth,"retained child userdata depth budget");if(curve.FirstUserData())return true;
+  require(depth<=max_depth,"retained child userdata depth budget");if(curve.FirstUserData()&&!owned_replaceable_userdata_only(curve))return true;
   if(const auto* poly=ON_PolyCurve::Cast(&curve)){require(poly->Count()>=0&&static_cast<size_t>(poly->Count())<=max_records,"retained child userdata record budget");for(int i=0;i<poly->Count();++i){require(poly->SegmentCurve(i),"retained child userdata missing curve");if(retained_curve_userdata(*poly->SegmentCurve(i),depth+1))return true;}}return false;
 }
 inline void retained_build_current(RetainedRequest& request) {
@@ -505,7 +505,7 @@ inline void retained_build_current(RetainedRequest& request) {
     if(row.original){row.master=row.original->object.get();row.attributes=row.original->attributes.get();}
     if(row.action=="retain")continue;
     const bool fresh=row.action=="regenerate";const auto& c=row.current.begin().value();
-    if(fresh&&row.original)require(row.original->object->FirstUserData()==nullptr&&(!row.original->attributes||row.original->attributes->FirstUserData()==nullptr)&&row.original->unrepresented_record_chunks.empty(),"Unsupported: regeneration with opaque master/attribute/record userdata");
+    if(fresh&&row.original)require((row.original->object->FirstUserData()==nullptr||owned_replaceable_userdata_only(*row.original->object))&&(!row.original->attributes||row.original->attributes->FirstUserData()==nullptr)&&row.original->unrepresented_record_chunks.empty(),"Unsupported: regeneration with opaque master/attribute/record userdata");
     if(type==5) {
       if(fresh){row.generated=std::make_unique<ON_Layer>();row.master=row.generated.get();}
       require(row.master,"retained missing Layer master");auto* layer=ON_Layer::Cast(row.master);require(layer,"retained Layer master type");
@@ -519,7 +519,7 @@ inline void retained_build_current(RetainedRequest& request) {
     } else if(type==12) {
       const bool replace=fresh||flag(row.changed["geometry"])||flag(row.changed["placement"]);
       if(replace) {
-        require(!row.original||(row.original->object->FirstUserData()==nullptr&&row.original->unrepresented_record_chunks.empty()),"Unsupported: geometry/placement patch requires admitted opaque master codec");
+        require(!row.original||((row.original->object->FirstUserData()==nullptr||owned_replaceable_userdata_only(*row.original->object))&&row.original->unrepresented_record_chunks.empty()),"Unsupported: geometry/placement patch requires admitted opaque master codec");
         if(row.original)if(const auto* old_curve=ON_Curve::Cast(row.original->object.get()))require(!retained_curve_userdata(*old_curve),"Unsupported: replacement of compound curve with opaque child userdata");
         if(c["geometry"].contains("Instance")) {auto instance=std::make_unique<ON_InstanceRef>();instance->m_instance_definition_uuid=uuid(c["geometry"]["Instance"]);instance->m_xform=matrix(c["placement"]);row.generated=std::move(instance);}
         else row.generated=geometry(c["geometry"],matrix(c["placement"]),{});

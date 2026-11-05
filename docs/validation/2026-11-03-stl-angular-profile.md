@@ -1,0 +1,7 @@
+# STL angular profile
+
+P3a partial: the shared menu/CMD export dialog accepts an angular deflection in radians, initialized to the existing 0.3 rad. `StlExportProfile` and MCP accept finite values in `(0, pi]`; the export receipt and MCP report the requested value. The linear setting remains independent and defaults to the document tolerance. Canonical OCCT BReps, retained 3DM BReps and NURBS-converted faces pass the requested angle to their OCCT mesher. Authored meshes retain their triangles.
+
+On Windows with the default OCCT/openNURBS features, `CARGO_TARGET_DIR=L:/om9-target` and Cargo `-j 2`, 21 STL integration tests passed. The sphere fixture generated more triangles at 0.1 than 0.6 rad for both canonical and retained BReps; a curved NURBS fixture also responded to the angle. Invalid angles preserved the existing destination in the sphere test. Two headless egui quality-dialog tests passed, and the invalid-angle UI case was rerun successfully. One in-process MCP test verified schema and receipt. None of these exercise the native picker or a desktop session.
+
+This tests parameter propagation and selected examples; it does not certify a global geometric error, geometric coverage, or all trimmed/periodic surfaces. OCCT's deflection is a request. The export still runs synchronously and captures no immutable source at invocation; managed RAM/GPU budgets, checkpoint, background cancellation, performance and other plan gates remain open. The live OM9 session was not modified.

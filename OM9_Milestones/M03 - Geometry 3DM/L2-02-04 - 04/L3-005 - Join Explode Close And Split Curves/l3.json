@@ -357,6 +357,108 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "BOOLEAN_TRIM",
   "runtime_implementation": {
+    "reseamed_nurbs_split_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-reseamed-nurbs-split.md",
+      "scope": "Honor seam in NURBS fraction evaluation and tested projection, native intersections and Split Point without refitting.",
+      "limitations": "General periodic encodings, affine direct split, extreme precision, 3DM and physical UI remain open."
+    },
+    "split_periodic_points_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-periodic-points.md",
+      "scope": "Split tested certified repeated-basis periodic NURBS at points, preserving full and trimmed active intervals without refit.",
+      "limitations": "Other periodic encodings, reseamed NURBS, general knots, 3DM and physical UI remain open."
+    },
+    "explode_block_permissions_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-explode-block-permissions.md",
+      "scope": "Preserve tested hidden/locked block members and avoid post-commit selection refusal.",
+      "limitations": "Scene refresh failure, other attributes, complex blocks, other geometry, 3DM and physical UI remain open."
+    },
+    "explode_block_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-explode-block.md",
+      "scope": "Keep block instances in toolbar Explode; unpack tested instances from typed Explode.",
+      "limitations": "Inherited attributes, complex blocks, other geometry, 3DM and physical UI remain open."
+    },
+    "explode_mixed_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-explode-mixed.md",
+      "scope": "Preserve isolated mesh vertices and tested group membership in mixed curve/mesh/BRep Explode.",
+      "limitations": "Other geometry/group combinations, aggregate budgets, 3DM and physical UI remain open."
+    },
+    "explode_groups_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-explode-groups.md",
+      "scope": "Preserve tested group identity and membership when Explode replaces a polycurve.",
+      "limitations": "Other geometry/group combinations, broader grouping semantics, 3DM and physical UI remain open."
+    },
+    "explode_mesh_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-explode-mesh.md",
+      "scope": "Explode tested mesh components separated by unwelded edges, retaining attributes and channels.",
+      "limitations": "Unreferenced vertices, general topology, exact aggregate budget, remaining geometry and physical UI remain open."
+    },
+    "join_discontinuous_start_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-discontinuous-start.md",
+      "scope": "Heal tested NURBS whose active lower boundary begins at a discontinuous knot.",
+      "limitations": "Upper discontinuity, other periodic bases, wider geometry, 3DM and physical UI remain open."
+    },
+    "join_trimmed_periodic_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-trimmed-periodic.md",
+      "scope": "Evaluate, display and heal tested trimmed certified periodic rational NURBS.",
+      "limitations": "Other periodic bases, discontinuities, wider geometry, 3DM and physical UI remain open."
+    },
+    "join_periodic_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-periodic.md",
+      "scope": "Heal tested certified repeated-basis periodic curve seam after exact opening.",
+      "limitations": "Other periodic forms, discontinuities, wider geometry, 3DM and physical UI remain open."
+    },
+    "join_support_boundary_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-support-boundary.md",
+      "scope": "Heal tested nonperiodic rational NURBS support boundaries after exact clamping.",
+      "limitations": "Periodic curves, discontinuities, wider geometry, 3DM and physical UI remain open."
+    },
+    "join_unclamped_trim_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-unclamped-trim.md",
+      "scope": "Heal tested interior-trimmed rational NURBS backed by unclamped support; only edited endpoint needs clamping.",
+      "limitations": "Unclamped support boundary, periodic curves, discontinuities, wider geometry, 3DM and physical UI remain open."
+    },
+    "join_trimmed_nurbs_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-trimmed-nurbs.md",
+      "scope": "Heal tested trimmed rational NURBS with nonperiodic clamped backing at seam midpoint using exact restriction.",
+      "limitations": "Periodic and unclamped backing, discontinuous trim boundaries, broader geometry, 3DM and physical UI remain open."
+    },
+    "join_midpoint_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-midpoint.md",
+      "scope": "Heal supported tolerated curve endpoints at the world-space midpoint, including near-closed seams.",
+      "limitations": "Periodic/trimmed endpoint adjustment, general geometry, 3DM and physical UI remain open."
+    },
+    "join_sweep_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-sweep.md",
+      "scope": "Sweep world-space curve endpoints for tested Join trails with robust distance and scratch admission.",
+      "limitations": "Dense clusters, aggregate budget, seam healing, 3DM and physical UI remain open."
+    },
+    "join_trail_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-trail.md",
+      "scope": "Order tested continuous curve selections through loops with graph trail and invalid graph refusal.",
+      "limitations": "Tolerance clusters, seam healing, large selection performance, 3DM and physical UI remain open."
+    },
+    "join_world_curves_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-world-curves.md",
+      "scope": "Join tested differently placed curves with validated document tolerance in world coordinates.",
+      "limitations": "Seam healing, branching, general geometry, 3DM and physical UI remain open."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
@@ -387,6 +489,48 @@
     ],
     "human_approval": null,
     "manual_gate": "M03-UI",
+    "flagged_reversed_trim_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-cutter-world-tolerance.md",
+      "scope": "Normalize reversed polycurve flag before parameter/length trim, preserving traversal direction.",
+      "limitations": "Complex nonlinear and periodic representations remain unverified."
+    },
+    "trim_survivor_continuity_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-continuity-repeat.md",
+      "scope": "Retain continuous open-curve sides and join closed-circle complement over its seam.",
+      "limitations": "Complex closed/periodic representations and general topology remain open."
+    },
+    "nurbs_knot_projection_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-nurbs-knot-projection.md",
+      "scope": "Knot-aware candidate projection on a scaled forward/reversed NURBS fixture.",
+      "limitations": "Global minima, periodic curves and large knot runtime remain unverified."
+    },
+    "polycurve_point_projection_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-polycurve-point-projection.md",
+      "scope": "Segment-wise projection for forward and reversed polycurves under scale.",
+      "limitations": "Nonlinear segment global minima and nested curves remain unverified."
+    },
+    "world_point_projection_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-split-point-world-projection.md",
+      "scope": "World-space closest point on scaled line and circle retaining original curve fraction.",
+      "limitations": "Bounded nonlinear search and broader transformed NURBS remain unverified."
+    },
+    "closed_point_split_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-split-point-curves.md",
+      "scope": "Closed circle and rectangular polycurve point splitting, including seam-spanning output.",
+      "limitations": "Periodic/reseamed NURBS and broader geometry remain open."
+    },
+    "parameter_trim_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-polycurve-trim-parameter.md",
+      "scope": "Parameter-based polycurve trimming for Top 11 intersections; existing length-based trim remains available.",
+      "limitations": "Unequal line segments and an arc/line case tested; general NURBS and broader integration remain open."
+    },
     "remaining": [
       "A polycurve's split parameter is segment-uniform (the sampling contract); trim is measured by arc length.",
       "Nested polycurve members are flattened before joining.",

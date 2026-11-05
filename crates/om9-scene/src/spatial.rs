@@ -44,15 +44,14 @@ impl Aabb {
         let mut far = f64::INFINITY;
         for axis in 0..3 {
             let delta = direction[axis];
-            if delta.abs() < 1e-12 {
+            if delta == 0.0 {
                 if origin[axis] < self.min[axis] || origin[axis] > self.max[axis] {
                     return false;
                 }
                 continue;
             }
-            let inv = 1.0 / delta;
-            let mut t0 = (self.min[axis] - origin[axis]) * inv;
-            let mut t1 = (self.max[axis] - origin[axis]) * inv;
+            let mut t0 = (self.min[axis] - origin[axis]) / delta;
+            let mut t1 = (self.max[axis] - origin[axis]) / delta;
             if t0 > t1 {
                 std::mem::swap(&mut t0, &mut t1);
             }
@@ -78,17 +77,84 @@ struct Node {
 pub struct SpatialIndex {
     nodes: Vec<Node>,
     order: Vec<usize>,
+    sort_scratch: Vec<usize>,
 }
 
 impl SpatialIndex {
-    pub fn build(centres: &[[f64; 3]], radii: &[f64]) -> Self {
-        let n = centres.len();
-        let mut order: Vec<usize> = (0..n).collect();
-        let mut nodes = Vec::new();
-        if n > 0 {
-            build_node(&mut nodes, &mut order, centres, radii, 0, n);
+    fn node_capacity(objects: usize) -> om9_core::Result<usize> {
+        if objects == 0 { return Ok(0); }
+        objects.div_ceil(8).checked_next_power_of_two()
+            .and_then(|leaves| leaves.checked_mul(2)).and_then(|nodes| nodes.checked_sub(1))
+            .ok_or(om9_core::Error::Overflow("picking nodes"))
+    }
+    pub(crate) fn allocation_usage(objects: usize) -> om9_core::Result<om9_core::budget::Usage> {
+        use om9_core::budget::{Limits, Usage};
+        if objects > u32::MAX as usize { return Err(om9_core::Error::Overflow("picking object index")); }
+        let mut usage = Usage::array::<Node>(Self::node_capacity(objects)?)?;
+        usage.add(Usage::array::<usize>(objects)?, &Limits { max_bytes: u64::MAX, ..Default::default() })?;
+        usage.add(Usage::array::<usize>(objects)?, &Limits { max_bytes: u64::MAX, ..Default::default() })?;
+        Ok(usage)
+    }
+    pub(crate) fn try_with_capacity(objects: usize) -> om9_core::Result<Self> {
+        use om9_core::Error;
+        if objects > u32::MAX as usize { return Err(Error::Overflow("picking object index")); }
+        let mut index = Self { nodes: Vec::new(), order: Vec::new(), sort_scratch: Vec::new() };
+        index.nodes.try_reserve_exact(Self::node_capacity(objects)?).map_err(|_| Error::Budget("picking nodes allocation"))?;
+        index.order.try_reserve_exact(objects).map_err(|_| Error::Budget("picking order allocation"))?;
+        index.sort_scratch.try_reserve_exact(objects).map_err(|_| Error::Budget("picking sort allocation"))?;
+        index.sort_scratch.resize(objects, 0);
+        Ok(index)
+    }
+    pub(crate) fn rebuild_from_spheres(&mut self, spheres: &[([f64; 3], f64)]) -> om9_core::Result<()> {
+        self.rebuild_with(spheres.len(), |index| spheres[index])
+    }
+    fn rebuild_with(&mut self, n: usize, sphere: impl Fn(usize) -> ([f64; 3], f64)) -> om9_core::Result<()> {
+        if self.nodes.capacity() < Self::node_capacity(n)? || self.order.capacity() < n || self.sort_scratch.len() < n {
+            return Err(om9_core::Error::Budget("picking index capacity"));
         }
-        Self { nodes, order }
+        self.nodes.clear();
+        self.order.clear();
+        self.order.extend(0..n);
+        if n != 0 { build_node(&mut self.nodes, &mut self.order, &mut self.sort_scratch, &sphere, 0, n); }
+        Ok(())
+    }
+    /// Conservative logical estimate for BVH build and one ray query. This is
+    /// not an allocator-enforced bound or a bound on sort implementation scratch.
+    pub fn estimated_build_and_query_usage(objects: usize) -> om9_core::Result<om9_core::budget::Usage> {
+        use om9_core::{Error, budget::{Limits, Usage}};
+        let n = objects.max(1);
+        let four_n = n.checked_mul(4).ok_or(Error::Overflow("picking index estimate"))?;
+        let limits = Limits { max_bytes: u64::MAX, ..Default::default() };
+        let mut usage = Usage::array::<Node>(four_n)?;
+        // Ordering, ray candidates and conservative sorting/query workspace.
+        usage.add(Usage::array::<usize>(four_n)?, &limits)?;
+        usage.add(Usage::array::<u32>(four_n)?, &limits)?;
+        Ok(usage)
+    }
+    /// Managed heap capacity retained by the picking index, excluding allocator overhead.
+    pub fn storage_usage(&self) -> om9_core::Result<om9_core::budget::Usage> {
+        let mut usage = om9_core::budget::Usage::array::<Node>(self.nodes.capacity())?;
+        usage.add(
+            om9_core::budget::Usage::array::<usize>(self.order.capacity())?,
+            &om9_core::budget::Limits { max_bytes: u64::MAX, ..Default::default() },
+        )?;
+        usage.add(om9_core::budget::Usage::array::<usize>(self.sort_scratch.capacity())?,
+            &om9_core::budget::Limits { max_bytes: u64::MAX, ..Default::default() })?;
+        Ok(usage)
+    }
+    pub fn build(centres: &[[f64; 3]], radii: &[f64]) -> Self {
+        Self::build_with(centres.len(), |index| (centres[index], radii[index]))
+    }
+
+    /// Build directly from a scene's already retained occurrence spheres.
+    pub fn build_from_spheres(spheres: &[([f64; 3], f64)]) -> Self {
+        Self::build_with(spheres.len(), |index| spheres[index])
+    }
+
+    fn build_with(n: usize, sphere: impl Fn(usize) -> ([f64; 3], f64)) -> Self {
+        let mut index = Self::try_with_capacity(n).expect("picking index allocation");
+        index.rebuild_with(n, sphere).expect("preallocated picking index");
+        index
     }
 
     /// Object indices whose sphere may be hit by the ray, in arbitrary order.
@@ -157,18 +223,19 @@ impl SpatialIndex {
 }
 
 #[allow(clippy::needless_range_loop)]
-fn build_node(
+fn build_node<F: Fn(usize) -> ([f64; 3], f64)>(
     nodes: &mut Vec<Node>,
     order: &mut [usize],
-    centres: &[[f64; 3]],
-    radii: &[f64],
+    scratch: &mut [usize],
+    sphere: &F,
     start: usize,
     end: usize,
 ) -> u32 {
     let mut bounds = Aabb::empty();
     for index in start..end {
         let object = order[index];
-        bounds.add_sphere(centres[object], radii[object]);
+        let (centre, radius) = sphere(object);
+        bounds.add_sphere(centre, radius);
     }
     let slot = nodes.len() as u32;
     nodes.push(Node {
@@ -184,7 +251,7 @@ fn build_node(
     let mut lo = [f64::INFINITY; 3];
     let mut hi = [f64::NEG_INFINITY; 3];
     for index in start..end {
-        let c = centres[order[index]];
+        let c = sphere(order[index]).0;
         for axis in 0..3 {
             lo[axis] = lo[axis].min(c[axis]);
             hi[axis] = hi[axis].max(c[axis]);
@@ -196,19 +263,78 @@ fn build_node(
     if hi[axis] - lo[axis] < 1e-9 {
         return slot;
     }
-    order[start..end].sort_by(|a, b| centres[*a][axis].total_cmp(&centres[*b][axis]));
+    // Stable merge sorting preserves the previous tie order while using the
+    // admitted reusable workspace instead of std's hidden sort allocation.
+    stable_order_sort(&mut order[start..end], &mut scratch[start..end], sphere, axis);
     let mid = (start + end) / 2;
-    let left = build_node(nodes, order, centres, radii, start, mid);
-    let right = build_node(nodes, order, centres, radii, mid, end);
+    let left = build_node(nodes, order, scratch, sphere, start, mid);
+    let right = build_node(nodes, order, scratch, sphere, mid, end);
     nodes[slot as usize].left = left;
     nodes[slot as usize].right = right;
     nodes[slot as usize].count = 0;
     slot
 }
 
+fn stable_order_sort<F: Fn(usize) -> ([f64; 3], f64)>(order: &mut [usize], scratch: &mut [usize], sphere: &F, axis: usize) {
+    let n = order.len();
+    let mut width = 1usize;
+    while width < n {
+        for start in (0..n).step_by(width.saturating_mul(2)) {
+            let mid = start.saturating_add(width).min(n);
+            let end = mid.saturating_add(width).min(n);
+            let (mut left, mut right) = (start, mid);
+            for slot in &mut scratch[start..end] {
+                if left < mid && (right == end || !sphere(order[left]).0[axis].total_cmp(&sphere(order[right]).0[axis]).is_gt()) {
+                    *slot = order[left]; left += 1;
+                } else { *slot = order[right]; right += 1; }
+            }
+        }
+        order.copy_from_slice(&scratch[..n]);
+        width = width.saturating_mul(2);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{Aabb, SpatialIndex};
+
+    #[test]
+    fn reusable_stable_sort_matches_std_ties_and_node_capacity_bound() {
+        for n in 0usize..512 {
+            let sphere = |index: usize| ([(index % 11) as f64, (index % 7) as f64, 0.], 1.);
+            let mut expected: Vec<_> = (0..n).rev().collect();
+            let mut actual = expected.clone();
+            expected.sort_by(|a, b| sphere(*a).0[0].total_cmp(&sphere(*b).0[0]));
+            super::stable_order_sort(&mut actual, &mut vec![0; n], &sphere, 0);
+            assert_eq!(actual, expected, "stable ties at {n}");
+            let centres: Vec<_> = (0..n).map(|index| sphere(index).0).collect();
+            let index = SpatialIndex::build(&centres, &vec![1.; n]);
+            assert!(index.node_count() <= SpatialIndex::node_capacity(n).unwrap());
+        }
+    }
+
+    #[test]
+    fn picking_scratch_estimate_rejects_overflow() {
+        assert!(SpatialIndex::estimated_build_and_query_usage(usize::MAX).is_err());
+        assert!(SpatialIndex::estimated_build_and_query_usage(100).unwrap().bytes > 0);
+    }
+
+    #[test]
+    fn direct_sphere_input_matches_separate_arrays() {
+        let spheres: Vec<_> = (0..257).map(|i| {
+            ([f64::from(i % 17), f64::from(i / 17), f64::from(i % 3)], 0.1 + f64::from(i % 7) * 0.1)
+        }).collect();
+        let centres: Vec<_> = spheres.iter().map(|s| s.0).collect();
+        let radii: Vec<_> = spheres.iter().map(|s| s.1).collect();
+        let original = SpatialIndex::build(&centres, &radii);
+        let direct = SpatialIndex::build_from_spheres(&spheres);
+        assert_eq!(original.node_count(), direct.node_count());
+        for y in 0..17 {
+            let origin = [-5., f64::from(y) + 0.2, 1.];
+            assert_eq!(original.ray_candidates(origin, [1., 0., 0.]), direct.ray_candidates(origin, [1., 0., 0.]));
+            assert_eq!(original.ray_candidates_fat(origin, [1., 0., 0.], 0.2), direct.ray_candidates_fat(origin, [1., 0., 0.], 0.2));
+        }
+    }
 
     #[test]
     fn a_ray_only_returns_objects_near_its_path() {

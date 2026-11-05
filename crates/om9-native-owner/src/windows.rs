@@ -218,6 +218,25 @@ struct Capture {
     bytes: Vec<u8>,
     error: Option<FailureKind>,
 }
+impl Capture {
+    /// Fallible geometric growth avoids reallocating on every pipe read while
+    /// preserving the configured logical byte limit and old/new peak budget.
+    fn reserve_bounded(&mut self, additional: usize, limit: usize) -> Result<()> {
+        let needed = self.bytes.len().checked_add(additional)
+            .ok_or_else(|| Failure::new(FailureKind::OutputBudget))?;
+        if needed > limit {
+            return Err(Failure::new(FailureKind::OutputBudget));
+        }
+        if needed > self.bytes.capacity() {
+            let target = self.bytes.capacity().saturating_mul(2).max(needed).min(limit);
+            if self.bytes.try_reserve_exact(target - self.bytes.len()).is_err() {
+                self.bytes.try_reserve_exact(needed - self.bytes.len())
+                    .map_err(|_| Failure::new(FailureKind::OutputBudget))?;
+            }
+        }
+        Ok(())
+    }
+}
 struct PipeCapture {
     read: File,
     capture: Capture,
@@ -289,7 +308,7 @@ impl PipeCapture {
         };
         if self.capture.error.is_none() {
             let keep = n.min(self.limit - self.capture.bytes.len());
-            if self.capture.bytes.try_reserve_exact(keep).is_err() {
+            if self.capture.reserve_bounded(keep, self.limit).is_err() {
                 self.capture.error = Some(FailureKind::OutputBudget);
             } else {
                 self.capture.bytes.extend_from_slice(&buffer[..keep]);
@@ -661,6 +680,22 @@ pub(super) fn run(
 mod tests {
     use super::*;
     use std::{cell::Cell, collections::VecDeque, io::Write};
+
+    #[test]
+    fn bounded_pipe_capture_grows_amortized_without_changing_bytes_or_limit() {
+        let mut capture = Capture::default();
+        let mut growths = 0;
+        for i in 0..65536usize {
+            let previous = capture.bytes.capacity();
+            capture.reserve_bounded(1, 65536).unwrap();
+            growths += usize::from(capture.bytes.capacity() != previous);
+            capture.bytes.push((i % 251) as u8);
+        }
+        assert!(growths <= 17, "unexpected reallocations: {growths}");
+        assert!(capture.bytes.iter().enumerate().all(|(i, byte)| *byte == (i % 251) as u8));
+        assert!(capture.reserve_bounded(1, 65536).is_err());
+        assert_eq!(capture.bytes.len(), 65536);
+    }
 
     fn stats(active_processes: u32, elapsed: Duration) -> ProcessStats {
         ProcessStats {

@@ -262,6 +262,12 @@ pub(crate) fn pick(
     .next())
 }
 
+fn hit_order(left: &PickHit, right: &PickHit) -> std::cmp::Ordering {
+    left.depth.total_cmp(&right.depth)
+        .then(left.root.cmp(&right.root))
+        .then(left.path.cmp(&right.path))
+}
+
 /// Every object under the pointer, nearest first. One hit per object: the ambiguity popup offers objects,
 /// not individual faces of the same object.
 #[allow(clippy::too_many_arguments)]
@@ -292,9 +298,9 @@ pub(crate) fn pick_candidates(
         }
     };
     let padding = tolerance.max(0.0) * world_per_pixel;
-    let candidates = scene
-        .spatial_index()
-        .ray_candidates_fat(ray.origin, ray.direction, padding);
+    let spatial = scene.spatial_index()?;
+    let spheres = scene.object_spheres()?;
+    let candidates = spatial.ray_candidates_fat(ray.origin, ray.direction, padding);
     let mut hits: Vec<PickHit> = Vec::new();
     let mut best_depth = f64::INFINITY;
     for index in candidates {
@@ -309,7 +315,7 @@ pub(crate) fn pick_candidates(
         if !allowed {
             continue;
         }
-        let (centre, radius) = scene.object_spheres()[index];
+        let (centre, radius) = spheres[index];
         let mut sphere_depth = f64::INFINITY;
         if radius > 0.0
             && let Some(projected) = camera.project(centre, viewport)?
@@ -338,7 +344,31 @@ pub(crate) fn pick_candidates(
             continue;
         }
         let transform = object.display_transform()?;
-        let mut candidates = vec![];
+        let brep_display = match &scene.entity_for(object)?.geometry {
+            Geometry::Brep(shape) => Some(&shape.display),
+            _ => None,
+        };
+        let mut consider = |mut candidate: PickHit| {
+            if let Some(display) = brep_display {
+                let mapped = match candidate.subset {
+                    Subelement::MeshFace(face) => display.faces.get(face as usize).copied().map(Subelement::BrepFace),
+                    Subelement::MeshVertex(vertex) => display.vertices.iter().position(|offset| *offset == vertex)
+                        .and_then(|index| display.vertex_ids.get(index)).copied().map(Subelement::BrepVertex),
+                    Subelement::MeshEdge { a, b } => display.segments.iter()
+                        .find(|[x, y, _]| (*x == a && *y == b) || (*x == b && *y == a))
+                        .and_then(|[_, _, edge]| display.edges.get(*edge as usize)).copied().map(Subelement::BrepEdge),
+                    _ => None,
+                };
+                let Some(subset) = mapped else { return; };
+                candidate.subset = subset;
+            }
+            if best.as_ref().is_none_or(|old| {
+                candidate.screen_distance < old.screen_distance
+                    || candidate.screen_distance == old.screen_distance && candidate.depth < old.depth
+            }) {
+                best = Some(candidate);
+            }
+        };
         match object.buffers.as_ref() {
             RenderBuffers::Points {
                 points,
@@ -364,7 +394,7 @@ pub(crate) fn pick_candidates(
                         subset,
                         tolerance,
                     )? {
-                        candidates.push(h);
+                        consider(h);
                     }
                 }
             }
@@ -411,7 +441,7 @@ pub(crate) fn pick_candidates(
                             Subelement::Whole,
                             tolerance,
                         )? {
-                            candidates.push(candidate);
+                            consider(candidate);
                         }
                     }
                 } else {
@@ -430,7 +460,7 @@ pub(crate) fn pick_candidates(
                             Subelement::CurveParameter(parameter),
                             tolerance,
                         )? {
-                            candidates.push(h);
+                            consider(h);
                         }
                     }
                 }
@@ -452,7 +482,7 @@ pub(crate) fn pick_candidates(
                             Subelement::MeshVertex(index as u32),
                             tolerance,
                         )? {
-                            candidates.push(h);
+                            consider(h);
                         }
                     }
                 } else if kind == PickKind::Edge {
@@ -507,17 +537,28 @@ pub(crate) fn pick_candidates(
                             },
                             tolerance,
                         )? {
-                            candidates.push(h);
+                            consider(h);
                         }
                     }
                 }
                 // A vertex or edge pick never falls back to the whole face test.
                 if matches!(kind, PickKind::Object | PickKind::Face) {
+                    // Reuse shared vertices within this query and its fallback.
+                    let mut world_vertices = vec![None; vertices.len()];
+                    let mut world_vertex = |index: u32| -> Result<[f64; 3]> {
+                        let index = index as usize;
+                        if let Some(point) = world_vertices[index] {
+                            return Ok(point);
+                        }
+                        let point = transform.point(vertices[index])?;
+                        world_vertices[index] = Some(point);
+                        Ok(point)
+                    };
                     let mut face_hit = false;
                     for (indices, face) in triangles {
-                        let a = transform.point(vertices[indices[0] as usize])?;
-                        let b = transform.point(vertices[indices[1] as usize])?;
-                        let c = transform.point(vertices[indices[2] as usize])?;
+                        let a = world_vertex(indices[0])?;
+                        let b = world_vertex(indices[1])?;
+                        let c = world_vertex(indices[2])?;
                         if let Some(p) = triangle(ray, a, b, c)
                             && let Some(h) = hit(
                                 scene,
@@ -530,7 +571,7 @@ pub(crate) fn pick_candidates(
                                 tolerance,
                             )?
                         {
-                            candidates.push(h);
+                            consider(h);
                             face_hit = true;
                         }
                     }
@@ -538,9 +579,9 @@ pub(crate) fn pick_candidates(
                         // Screen-space fallback for a ray that threaded exactly through a shared edge.
                         let mut nearest: Option<(f64, PickHit)> = None;
                         for (indices, face) in triangles {
-                            let a = transform.point(vertices[indices[0] as usize])?;
-                            let b = transform.point(vertices[indices[1] as usize])?;
-                            let c = transform.point(vertices[indices[2] as usize])?;
+                            let a = world_vertex(indices[0])?;
+                            let b = world_vertex(indices[1])?;
+                            let c = world_vertex(indices[2])?;
                             let (Ok(Some(pa)), Ok(Some(pb)), Ok(Some(pc))) = (
                                 camera.project(a, viewport),
                                 camera.project(b, viewport),
@@ -585,65 +626,26 @@ pub(crate) fn pick_candidates(
                             }
                         }
                         if let Some((_, h)) = nearest {
-                            candidates.push(h);
+                            consider(h);
                         }
                     }
                 }
             }
         }
-        if let Geometry::Brep(shape) = &scene.entity_for(object)?.geometry {
-            let display = &shape.display;
-            candidates.retain_mut(|candidate| {
-                let mapped = match candidate.subset {
-                    Subelement::MeshFace(face) => display
-                        .faces
-                        .get(face as usize)
-                        .copied()
-                        .map(Subelement::BrepFace),
-                    Subelement::MeshVertex(vertex) => display
-                        .vertices
-                        .iter()
-                        .position(|offset| *offset == vertex)
-                        .and_then(|index| display.vertex_ids.get(index))
-                        .copied()
-                        .map(Subelement::BrepVertex),
-                    Subelement::MeshEdge { a, b } => display
-                        .segments
-                        .iter()
-                        .find(|[x, y, _]| (*x == a && *y == b) || (*x == b && *y == a))
-                        .and_then(|[_, _, edge]| display.edges.get(*edge as usize))
-                        .copied()
-                        .map(Subelement::BrepEdge),
-                    _ => None,
-                };
-                if let Some(subset) = mapped {
-                    candidate.subset = subset;
-                    true
-                } else {
-                    false
-                }
-            });
-        }
-        for candidate in candidates {
-            if best.as_ref().is_none_or(|old| {
-                candidate.screen_distance < old.screen_distance
-                    || candidate.screen_distance == old.screen_distance
-                        && candidate.depth < old.depth
-            }) {
-                best = Some(candidate);
-            }
-        }
         if let Some(best) = best {
             best_depth = best_depth.min(best.depth);
-            hits.push(best);
+            if nearest_only {
+                if hits.first().is_none_or(|current| hit_order(&best, current).is_lt()) {
+                    hits.clear();
+                    hits.push(best);
+                }
+            } else {
+                hits.push(best);
+            }
         }
     }
-    hits.sort_by(|left, right| {
-        left.depth
-            .total_cmp(&right.depth)
-            .then(left.root.cmp(&right.root))
-            .then(left.path.cmp(&right.path))
-    });
+    if nearest_only { return Ok(hits); }
+    hits.sort_by(hit_order);
     let mut roots = std::collections::BTreeSet::new();
     hits.retain(|hit| roots.insert(hit.root));
     Ok(hits)

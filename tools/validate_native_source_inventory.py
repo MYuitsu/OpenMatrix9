@@ -59,6 +59,10 @@ def build_fixture():
     assert actual == PIN, actual
     project = ROOT / "build/native-source-fixture-project"
     project.mkdir(parents=True, exist_ok=True)
+    native_roots = [ROOT / "build/native-brep/out/opennurbs", ROOT / "build/standalone-native/opennurbs"]
+    native_root = next((p for p in native_roots if (p / "Release/opennurbsStatic.lib").is_file() and (p / "zlib/Release/zlib.lib").is_file()), None)
+    if native_root is None:
+        raise FileNotFoundError("pinned openNURBS and zlib libraries are not built")
     code = f'''cmake_minimum_required(VERSION 3.25)
 project(OM9AuthoredSourceFixture LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
@@ -67,13 +71,13 @@ add_executable(om9-source-fixture "{ROOT.as_posix()}/native/source_inventory_fix
 target_include_directories(om9-source-fixture PRIVATE "{ROOT.as_posix()}/build/standalone-deps/opennurbs")
 target_compile_definitions(om9-source-fixture PRIVATE ON_CMAKE_BUILD NOMINMAX)
 target_compile_options(om9-source-fixture PRIVATE /W4 /WX /utf-8 /EHsc)
-target_link_libraries(om9-source-fixture PRIVATE "{ROOT.as_posix()}/build/standalone-native/opennurbs/Release/opennurbsStatic.lib" Shlwapi Usp10 "{ROOT.as_posix()}/build/standalone-native/opennurbs/zlib/Release/zlib.lib")
+target_link_libraries(om9-source-fixture PRIVATE "{(native_root / 'Release/opennurbsStatic.lib').as_posix()}" Shlwapi Usp10 "{(native_root / 'zlib/Release/zlib.lib').as_posix()}")
 target_link_options(om9-source-fixture PRIVATE /SUBSYSTEM:WINDOWS /ENTRY:wmainCRTStartup)
 '''
     (project / "CMakeLists.txt").write_text(code, encoding="utf-8")
     out = ROOT / "build/native-source-fixture"
     for args in [["-S", str(project), "-B", str(out), "-G", "Visual Studio 17 2022", "-A", "x64"],
-                 ["--build", str(out), "--config", "Release", "--target", "om9-source-fixture"]]:
+                 ["--build", str(out), "--config", "Release", "--target", "om9-source-fixture", "--parallel", "2"]]:
         subprocess.run(["rtk", "proxy", str(CMAKE), *args], check=True)
 
 

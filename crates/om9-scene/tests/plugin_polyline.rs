@@ -220,6 +220,28 @@ fn reversed_polycurve_is_published_with_reversed_display_order() {
 }
 
 #[test]
+fn nested_line_polycurve_display_respects_reversal_gaps_and_budget() {
+    let line = |a, b| Curve::Line { start: [a, 0., 0.], end: [b, 0., 0.], domain: [0., 1.] };
+    let inner = Curve::Polycurve { segments: vec![line(2., 1.), line(1., 0.)], reversed: true };
+    let curve = Curve::Polycurve { segments: vec![inner, line(2., 3.)], reversed: true };
+    let (document, _) = document_with_curve(curve, Transform::identity());
+    let source_points = document.validate(&Limits::default()).unwrap().points;
+    let limits = Limits { max_points: source_points + 4, ..Limits::default() };
+    let scene = Scene::capture(Arc::new(document.clone()), 1, &limits).unwrap();
+    let RenderBuffers::Curve { points, .. } = scene.objects[0].buffers.as_ref() else { panic!("curve") };
+    assert_eq!(points.as_slice(), &[[3.,0.,0.],[2.,0.,0.],[1.,0.,0.],[0.,0.,0.]]);
+    assert_eq!(scene.cache_usage().unwrap().points, 4);
+    let smaller = Limits { max_points: limits.max_points - 1, ..limits };
+    assert!(matches!(Scene::capture(Arc::new(document), 1, &smaller), Err(Error::Budget(_))));
+
+    let disconnected = Curve::Polycurve { segments: vec![Curve::Polycurve { segments: vec![line(0., 1.)], reversed: false }, line(2., 3.)], reversed: false };
+    let (document, _) = document_with_curve(disconnected, Transform::identity());
+    let scene = Scene::capture(Arc::new(document), 1, &Limits::default()).unwrap();
+    assert!(scene.objects.is_empty());
+    assert!(scene.diagnostics.iter().any(|message| message.contains("connected lines")));
+}
+
+#[test]
 fn disconnected_line_strokes_remain_disconnected() {
     let line = |start, end| Curve::Line { start, end, domain: [0.0,1.0] };
     let curve = Curve::Polycurve { segments: vec![line([0.0,0.0,0.0],[1.0,0.0,0.0]), line([2.0,0.0,0.0],[3.0,0.0,0.0])], reversed: false };
@@ -234,17 +256,14 @@ fn unsupported_polycurves_report_precise_diagnostics() {
     let cases = [
         (
             Curve::Polycurve {
-                segments: vec![Curve::Circle {
-                    center: [0.; 3],
-                    x: [1., 0., 0.],
-                    y: [0., 1., 0.],
-                    radius: 1.,
-                    domain: [0., std::f64::consts::TAU],
-                    angle_domain: None,
-                }],
+                segments: vec![Curve::Nurbs(om9_core::geometry::NurbsCurve {
+                    degree: 1, poles: vec![[0.,0.,0.],[1.,0.,0.]],
+                    weights: vec![1.;2], knots: vec![0.,0.,1.,1.],
+                    domain: [0.,1.], periodic: false, reversed: false, seam: Some(0.5),
+                })],
                 reversed: false,
             },
-            "direct line",
+            "requires closed NURBS",
         ),
     ];
     for (curve, reason) in cases {

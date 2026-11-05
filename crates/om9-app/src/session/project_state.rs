@@ -2,6 +2,7 @@
 //! Project-manager state embedded as an opaque `.om9` resource (OM9-L2-03-15).
 use om9_core::{
     Error, Result,
+    budget::Usage,
     resource::{Resource, ResourceKind},
     transaction::{Mutation, TransactionRequest},
 };
@@ -72,11 +73,14 @@ impl super::Controller {
     /// a failure leaves the current document untouched.
     pub fn restore_master_document(&mut self, document: om9_core::model::Document) -> Result<()> {
         let limits = *self.coordinator.limits();
-        let held = self.scene_cache_usage()?;
-        let mut candidate = Self::new_with_held(document, limits, held)?;
-        candidate.adopt_contract_state(self);
-        *self = candidate;
-        self.sync_published(om9_core::changes::ChangeCause::Replace);
-        Ok(())
+        let held = self.replacement_hold(Usage::default())?;
+        let auxiliary = self.scene_cache_usage()?;
+        let initial = document.validation_peak_estimate(&limits, true)?.bytes.max(1);
+        let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::CpuCache, initial, physical, auxiliary,
+        )?;
+        let (candidate, reservation) = self.build_reserved_document_replacement(document, held, auxiliary, reservation)?;
+        self.publish_reserved_replacement(reservation, candidate, om9_core::changes::ChangeCause::Replace, Usage::default())
     }
 }

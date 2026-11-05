@@ -1,0 +1,11 @@
+# Top11 Join: repeated-basis periodic NURBS surfaces — 2026-10-31
+
+Status: partial automated evidence; not full Top11 or M03-UI acceptance.
+
+OM9's repeated-pole/extended-knot periodic surface basis differs from OCCT's native periodic constructor. Rust now validates repeated pole/weight rows, knot periodicity and finite support span on each flagged axis. For this certified representation, the conversion adapter passes the same active basis as a nonperiodic extended B-spline to OCCT, avoiding refitting. The resulting BRep may not retain a periodic metadata flag; the tested geometry and closed seam are the evidence, not equivalence of metadata. Other periodic encodings are refused by this conversion. No C++ code changed in this batch.
+
+The OCCT kernel fixtures check one rational U-periodic and one V-periodic repeated basis against Rust surface evaluation at three samples each, and refuse a mismatched repeated row. The app fixture joins two stacked U-periodic surfaces via CMD and toolbar, checks two faces, one shell, five edges, two naked edges, total area, .om9 roundtrip and Undo/Redo. A separately run negative fixture rejects an uncertified periodic surface without a transaction. This does not establish two-axis periodicity, trimmed periodic domains, arbitrary knot encodings, external 3DM metadata, full seam continuity or general numerical behavior.
+
+Windows x64, CARGO_TARGET_DIR=L:\om9-target, -j 2: 81 OCCT kernel tests with the pinned 8.0.1 SDK and 3dm-brep, 80 core curve/surface/semantics/Top11 tests, 187 app Top11/options/BRep/snapshot tests and 107 no-default tests passed. The final topology assertion and invalid-basis fixture were rerun individually after the broader app batch. No-default reports existing unrelated warnings. Physical desktop and signed M03-UI acceptance remain open; a prior desktop launch returned access denied. No openNURBS measurement batch was performed.
+
+Source SHA-256: geometry.rs `6b5d061abedb05d6828e8c76f382c4c0f6c21d87bf40eb8092cdd8322487fa38`; measurement.rs `8328c96a7201b8f3bab30c91a2a4611a940046e6e4729d52e5dc06df33151674`; kernel tests/l2_02_05.rs `b861266029a29fbc4b4fe1bbe67a75ea172729aebcdbec46e811942297fb6ae7`; app tests/top11_brep.rs `165830766fc68657820414bec405eca52a549e9e8d8b7d24feae20474ede80eb`.

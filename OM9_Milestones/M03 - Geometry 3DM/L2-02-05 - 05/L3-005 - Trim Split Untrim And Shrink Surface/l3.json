@@ -363,6 +363,12 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "BOOLEAN_TRIM",
   "runtime_implementation": {
+    "periodic_brep_cutters_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-periodic-brep-cutters.md",
+      "scope": "Use certified repeated NURBS bases in tested OCCT BRep intersections and surface cuts; exercise Split and Trim through both routes.",
+      "limitations": "Other encodings, general topology, 3DM interoperability, native peak allocation and physical UI remain open."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
@@ -400,6 +406,168 @@
     },
     "human_approval": null,
     "manual_gate": "M03-UI",
+    "split_shrink_shell_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-shrink-shell.md",
+      "scope": "Shrink tested nonperiodic connected BRep boundary components after Split, preserving shared topology.",
+      "limitations": "Periodic surfaces, general topology and continuity, 3DM, SDK and physical UI remain open."
+    },
+    "split_cutter_shrink_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-cutter-shrink.md",
+      "scope": "Shrink eligible single-face object-cutter Split results, including mixed curve/surface selection and atomic failure.",
+      "limitations": "Periodic and multi-face Shrink, general topology, SDK and physical UI remain open."
+    },
+    "split_shrink_brep_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-shrink-brep.md",
+      "scope": "Shrink eligible nonperiodic single-face BRep Isocurve results while preserving tested pcurves, holes and Undo.",
+      "limitations": "Periodic and object-cutter Shrink, complex topology, SDK and physical UI remain open."
+    },
+    "isocurve_viewport_ray_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-isocurve-viewport-ray.md",
+      "scope": "Exact camera-ray face hits for Top11 Split Isocurve, including tested curved NURBS and BRep fixtures.",
+      "limitations": "Grazing rays, complex topology, BRep Shrink, SDK and physical UI remain open."
+    },
+    "split_shrink_nurbs_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-shrink-nurbs.md",
+      "scope": "Exact knot-based Shrink=Yes for nonperiodic typed NURBS Isocurve Split, with Undo and viewport fixture.",
+      "limitations": "BRep and periodic Shrink, object-cutter Shrink, general geometry and desktop acceptance remain open."
+    },
+    "split_brep_isocurve_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-brep-isocurve.md",
+      "scope": "Top11 Split Isocurve U/V/Both on one open BRep face, tested planar, trimmed, scaled and cylindrical fixtures.",
+      "limitations": "Shrink=Yes, complex topology, curved viewport ray accuracy, SDK and physical UI remain open."
+    },
+    "split_isocurve_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-isocurve.md",
+      "scope": "Top11 Split Isocurve U/V/Both on one typed NURBS surface, tested CMD/options/viewport and Undo.",
+      "limitations": "Single-face BRep, Shrink=Yes, projection, periodic surfaces, SDK and physical UI remain open."
+    },
+    "split_existing_seam_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-existing-seam.md",
+      "scope": "Cut a tested original shared edge with curve or BRep cutter while retaining crossed seams; single Undo.",
+      "limitations": "General topology, overlap, performance, isocurve options and desktop acceptance remain open."
+    },
+    "split_polysurface_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-polysurface.md",
+      "scope": "Connected BRep boundary regions retain original face seams; joined faces, translated box and sphere fixtures with Undo.",
+      "limitations": "General topology, capping parity, isocurve options, SDK and desktop acceptance remain open."
+    },
+    "split_surface_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-surface.md",
+      "scope": "Top11 Split of tested single-face surface targets with curve or BRep cutters; atomic Undo.",
+      "limitations": "Multiface polysurfaces, isocurve options, general geometry and desktop acceptance remain open."
+    },
+    "trim_curved_viewport_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-curved-viewport.md",
+      "scope": "Exact camera-ray picking on curved BRep Trim; sphere/cylinder and .om9 fixtures.",
+      "limitations": "General topology, 3DM and physical desktop acceptance remain open."
+    },
+    "trim_solid_boundary_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-solid-boundary.md",
+      "scope": "Trim exact solid boundary regions into an open BRep with per-pick Undo.",
+      "limitations": "General solid topology, interchange and desktop acceptance remain open."
+    },
+    "trim_multiple_multiface_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-multiple-multiface.md",
+      "scope": "Mutual Trim of multiple multi-face open BReps and curves with per-object boundary preservation.",
+      "limitations": "Solid targets, general topology and desktop acceptance remain open."
+    },
+    "trim_multiface_boundaries_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-multiface-boundaries.md",
+      "scope": "Single multi-face open BRep with curve cutters; preserve tested original edges and recompute after curve edits.",
+      "limitations": "Multiple multi-face targets, solid targets, general topology and desktop acceptance remain open."
+    },
+    "trim_multiple_surfaces_curves_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-multiple-surfaces-curves.md",
+      "scope": "Multiple single-face surfaces and curves share a Trim session with per-pick recomputation and Undo.",
+      "limitations": "Multi-face and solid targets, general geometry and desktop acceptance remain open."
+    },
+    "trim_mutual_surfaces_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-mutual-surfaces.md",
+      "scope": "Mutual Trim of multiple typed or single-face BRep surfaces with per-pick recomputation and Undo.",
+      "limitations": "Mixed multi-surface/curve selection, multi-face BReps and desktop acceptance remain open."
+    },
+    "trim_mixed_curve_surface_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-mixed-curve-surface.md",
+      "scope": "Mutual curve and single-face surface picks with repartition before commit and simulated viewport.",
+      "limitations": "Multiple surface targets, multi-face curve edits, general topology and desktop acceptance remain open."
+    },
+    "trim_unify_regions_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-unify-regions.md",
+      "scope": "Merge adjacent kept regions of a single original face when committing Trim, retaining session partitions.",
+      "limitations": "Cutter edits do not yet repartition the surface; mixed mutual targets and desktop acceptance remain open."
+    },
+    "trim_piercing_curves_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-piercing-curves.md",
+      "scope": "Trim a curve piercing a surface or solid BRep, with repeated endpoint handling and Undo.",
+      "limitations": "Divided surface and curve mutual edits, multiple surfaces and desktop acceptance remain open."
+    },
+    "trim_affine_area_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-affine-area.md",
+      "scope": "Adaptive OCCT area validation and nonuniformly placed circular face trim regression.",
+      "limitations": "Mixed mutual targets, general geometry and desktop acceptance remain open."
+    },
+    "trim_surface_regions_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-surface-regions.md",
+      "scope": "One surface/BRep with multiple curve cutters and repeated exact region picks, Undo/Redo and simulated viewport.",
+      "limitations": "Curve cutters not themselves targets; multiple surface targets, surface cutters, general geometry and desktop acceptance remain open."
+    },
+    "general_surface_split_kernel_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-general-surface-split-kernel.md",
+      "scope": "Kernel surface splitting by multiple placed curve, surface and BRep tools.",
+      "limitations": "General topology, reversed surfaces, application interaction and desktop UI remain open."
+    },
+    "trim_line_face_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-line-face.md",
+      "scope": "One exact BRep face and one straight-line cutter through CMD or toolbar, tested on a planar face with Undo/Redo.",
+      "limitations": "Multiple cutters, general surface/BRep geometry, repeated face picks and desktop acceptance remain open."
+    },
+    "trim_face_region_kernel_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-face-region-kernel.md",
+      "scope": "Exact unique-region pick and removal on a planar BRep face with a straight cutter, kernel only.",
+      "limitations": "Not connected to Top11; general geometry, placements, Undo and desktop UI remain open."
+    },
+    "trim_short_line_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-short-line.md",
+      "scope": "Recognize short lines as open for endpoint-only mutual Trim.",
+      "limitations": "Other near-tolerance curve types, surface/BRep targets and desktop acceptance remain open."
+    },
+    "trim_endpoint_residual_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-endpoint-residual.md",
+      "scope": "Delete endpoint-only open-curve residual in mutual Trim; guard closed seam-only curve.",
+      "limitations": "Surface/BRep targets and general topology remain open."
+    },
+    "mutual_curve_trim_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-mutual-curves.md",
+      "scope": "Selected curve objects cut one another with recalculation after each committed pick.",
+      "limitations": "Surface/BRep targets, endpoint-only residuals, complex numerical geometry and desktop UI remain open."
+    },
     "remaining": [
       "Trim loops are authored by the caller; curve-surface pullback into loops is a separate intersection task.",
       "The M03-UI workflow is not signed."

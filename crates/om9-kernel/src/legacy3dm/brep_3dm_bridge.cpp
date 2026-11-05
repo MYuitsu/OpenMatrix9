@@ -60,7 +60,7 @@ void require(bool condition, const char* text) {
   if (!condition) throw std::runtime_error(text);
 }
 
-int snapshot_shape(const TopoDS_Shape& shape, double deflection, size_t max_points,
+int snapshot_shape(const TopoDS_Shape& shape, double deflection, double angular_deflection, size_t max_points,
                    size_t max_nodes, size_t max_bytes, SnapshotSink sink, void* context) {
   require(!shape.IsNull() && BRepCheck_Analyzer(shape).IsValid(), "invalid OCCT BRep shape");
   std::ostringstream archive;
@@ -73,7 +73,7 @@ int snapshot_shape(const TopoDS_Shape& shape, double deflection, size_t max_poin
   TopExp::MapShapes(shape, TopAbs_VERTEX, verts);
   if (size_t(faces.Extent() + edges.Extent() + verts.Extent()) > max_nodes)
     throw std::length_error("BRep topology budget");
-  BRepMesh_IncrementalMesh mesh(shape, deflection, false, 0.3, false);
+  BRepMesh_IncrementalMesh mesh(shape, deflection, false, angular_deflection, false);
   if (!mesh.IsDone()) throw std::runtime_error("BRep tessellation failed");
   std::vector<std::array<double, 3>> points;
   std::vector<std::array<uint32_t, 4>> triangles;
@@ -163,6 +163,7 @@ extern "C" int om9_occt_brep_from_3dm_snapshot(
     size_t length,
     double tolerance,
     double deflection,
+    double angular_deflection,
     size_t max_points,
     size_t max_nodes,
     size_t max_bytes,
@@ -175,6 +176,7 @@ extern "C" int om9_occt_brep_from_3dm_snapshot(
     require(sink != nullptr, "3DM BRep snapshot sink");
     require(std::isfinite(tolerance) && tolerance > 0, "3DM BRep tolerance");
     require(std::isfinite(deflection) && deflection > 0, "3DM BRep deflection");
+    require(std::isfinite(angular_deflection) && angular_deflection > 0 && angular_deflection <= std::acos(-1.0), "3DM BRep angular deflection");
     ON_Read3dmBufferArchive archive(length, const_cast<unsigned char*>(payload), true, 50,
                                     ON::Version());
     ON_Object* object = nullptr;
@@ -183,7 +185,7 @@ extern "C" int om9_occt_brep_from_3dm_snapshot(
     const auto* brep = ON_Brep::Cast(object);
     require(brep && brep->IsValid(), "3DM BRep payload type/validity");
     TopoDS_Shape shape = OpenMatrix9Gui::ThreeDm::importBrep(*brep, tolerance);
-    if (snapshot_shape(shape, deflection, max_points, max_nodes, max_bytes, sink, context) != 0) {
+    if (snapshot_shape(shape, deflection, angular_deflection, max_points, max_nodes, max_bytes, sink, context) != 0) {
       message(error, capacity, "Rust refused converted OCCT BRep snapshot");
       return 1;
     }

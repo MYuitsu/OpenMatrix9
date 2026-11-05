@@ -49,6 +49,64 @@ impl MatrixApp {
         }))
     }
 
+    pub(super) fn select_control_grip_at(
+        &mut self,
+        view: &om9_scene::workspace::ViewState,
+        viewport: Viewport,
+        screen: [f64; 2],
+        additive: bool,
+    ) -> bool {
+        if self.controller.top11_grip_mode() != Some(om9_core::top11::GripMode::Control) {
+            return false;
+        }
+        let revision = self.controller.document().revision;
+        self.selected_grips.retain(|(_, r)| *r == revision);
+        let Some(handle) = self.grip_at(view, viewport, screen) else {
+            if !additive {
+                self.selected_grips.clear();
+            }
+            return false;
+        };
+        if !additive {
+            self.selected_grips.clear();
+        }
+        if let Some(index) = self
+            .selected_grips
+            .iter()
+            .position(|(selected, _)| same_grip(*selected, handle))
+        {
+            self.selected_grips.remove(index);
+        } else {
+            self.selected_grips.push((handle, revision));
+        }
+        true
+    }
+
+    /// Consume Delete while grips are active, so it cannot delete the whole object.
+    pub(super) fn delete_selected_control_grip(&mut self) -> bool {
+        if self.controller.top11_grip_mode().is_none() {
+            self.selected_grips.clear();
+            return false;
+        }
+        let revision = self.controller.document().revision;
+        self.selected_grips.retain(|(_, r)| *r == revision);
+        if self.selected_grips.is_empty() {
+            return true;
+        }
+        let handles: Vec<_> = self
+            .selected_grips
+            .iter()
+            .map(|(handle, _)| *handle)
+            .collect();
+        let result = self.controller.top11_delete_grips(&handles).map(|_| ());
+        if result.is_ok() {
+            self.selected_grips.clear();
+        }
+        *self.grip_cache.borrow_mut() = None;
+        self.feedback(result);
+        true
+    }
+
     /// Draw the active edit/control grips over one viewport, including a drag preview.
     pub(super) fn top11_grip_overlay(
         &self,
@@ -79,7 +137,10 @@ impl MatrixApp {
             };
             let centre = egui::pos2(projected.screen[0] as f32, projected.screen[1] as f32);
             let square = Rect::from_center_size(centre, egui::vec2(6.0, 6.0));
-            painter.rect_filled(square, 0.0, colour);
+            let selected = self.selected_grips.iter().any(|(selected, revision)| {
+                *revision == self.controller.document().revision && same_grip(*selected, *handle)
+            });
+            painter.rect_filled(square, 0.0, if selected { Color32::YELLOW } else { colour });
             painter.rect_stroke(
                 square,
                 0.0,
@@ -109,21 +170,62 @@ impl MatrixApp {
             else {
                 return;
             };
-            let plane = self.controller.input_plane();
+            // A drag can start in a viewport that was not previously active.
+            // Its camera rays must use that viewport's own construction plane.
+            let plane = view.cplane;
+            let plane = CPlane {
+                origin: handle.point,
+                x: plane.x,
+                y: plane.y,
+                revision: plane.revision,
+            };
+            let press_world = match view
+                .camera
+                .ray([press.x as f64, press.y as f64], viewport)
+                .and_then(|ray| ray.intersect_plane(plane))
+            {
+                Ok(Some(point)) => point,
+                _ => {
+                    let message =
+                        "Grip edit: cannot intersect the view ray with the construction plane";
+                    self.status.error(message);
+                    self.transcript.append_history(message);
+                    return;
+                }
+            };
+            self.selected_grips.clear();
+            self.controller.workspace.active = view.id;
+            let Ok(source) = self.controller.document().stamp(handle.object) else {
+                return;
+            };
             self.grip_drag = Some(GripDrag {
                 handle,
-                plane: CPlane {
-                    origin: handle.point,
-                    x: plane.x,
-                    y: plane.y,
-                    revision: plane.revision,
-                },
+                source,
+                epoch: self.controller.coordinator().epoch(),
+                selection: self.controller.selection_state().revision,
+                view: view.id,
+                camera: view.camera.clone(),
+                workspace_camera: self.controller.workspace.views[&view.id].camera.clone(),
+                maximized: self.controller.workspace.maximized,
+                viewport,
+                view_plane: view.cplane,
+                plane,
+                press_world,
                 current: handle.point,
             });
         }
         let Some(mut drag) = self.grip_drag.take() else {
             return;
         };
+        if drag.view != view.id {
+            self.grip_drag = Some(drag);
+            return;
+        }
+        if drag.camera != view.camera || drag.viewport != viewport || drag.view_plane != view.cplane
+        {
+            self.status.info("Grip edit cancelled: viewport changed");
+            return;
+        }
         if response.dragged_by(egui::PointerButton::Primary)
             && let Some(pointer) = response.interact_pointer_pos()
         {
@@ -132,17 +234,18 @@ impl MatrixApp {
                 .ray([pointer.x as f64, pointer.y as f64], viewport)
                 .and_then(|ray| ray.intersect_plane(drag.plane));
             if let Ok(Some(world)) = world {
-                drag.current = world;
+                drag.current = std::array::from_fn(|i| {
+                    drag.handle.point[i] + (world[i] - drag.press_world[i])
+                });
             }
         }
         if response.drag_stopped_by(egui::PointerButton::Primary) {
             let handle = drag.handle;
             let world = drag.current;
             self.grip_drag = None;
-            let moved = (0..3)
-                .map(|axis| (world[axis] - handle.point[axis]).abs())
-                .fold(0.0, f64::max);
-            if moved <= 1e-9 {
+            // egui has already applied its screen-space drag threshold. A
+            // fixed world-space epsilon discards visible edits at deep zoom.
+            if world == handle.point {
                 return;
             }
             *self.grip_cache.borrow_mut() = None;
@@ -231,5 +334,224 @@ mod tests {
             .unwrap();
         assert_eq!(hit.object, handle.object);
         assert_eq!(hit.index, handle.index);
+    }
+    #[test]
+    fn picked_control_grip_delete_is_undoable_and_never_deletes_object() {
+        use om9_core::geometry::{Curve, Geometry, NurbsCurve};
+        use om9_core::model::{Document, Entity};
+        let n = NurbsCurve {
+            degree: 2,
+            poles: vec![[0., 0., 0.], [1., 2., 0.], [3., 2., 0.], [4., 0., 0.]],
+            weights: vec![1.; 4],
+            knots: vec![0., 0., 0., 0.5, 1., 1., 1.],
+            domain: [0., 1.],
+            periodic: false,
+            reversed: false,
+            seam: None,
+        };
+        let entity = Entity::new("curve", Geometry::Curve(Curve::Nurbs(n)), None);
+        let id = entity.id;
+        let mut doc = Document::with_template_tolerance("grip delete");
+        doc.entities.insert(id, entity);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller
+            .top11_invoke(Top11Action::ControlPoints)
+            .unwrap();
+        let viewport = Viewport {
+            origin: [0., 0.],
+            size: [800., 600.],
+        };
+        let view = app
+            .controller
+            .workspace
+            .views
+            .get(&om9_scene::workspace::ViewId::LookingDown)
+            .unwrap()
+            .clone();
+        let handle = app.controller.top11_grip_handles().unwrap()[1];
+        let screen = view
+            .camera
+            .project(handle.point, viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        assert!(app.select_control_grip_at(&view, viewport, screen, false));
+        let before = app.controller.document().clone();
+        let context = egui::Context::default();
+        let key = || egui::RawInput {
+            events: vec![egui::Event::Key {
+                key: Key::Delete,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Modifiers::NONE,
+            }],
+            ..Default::default()
+        };
+        let mut raw = key();
+        app.delete_selection_from_input(&context, &mut raw);
+        assert!(raw.events.is_empty());
+        let Geometry::Curve(Curve::Nurbs(result)) =
+            &app.controller.document().entities[&id].geometry
+        else {
+            panic!("object lost")
+        };
+        assert_eq!(result.poles.len(), 3);
+        let after = app.controller.document().clone();
+        let mut raw = key();
+        app.delete_selection_from_input(&context, &mut raw);
+        assert_eq!(app.controller.document(), &after);
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
+        app.controller.redo().unwrap();
+        assert_eq!(app.controller.document(), &after);
+    }
+    #[test]
+    fn shift_selects_multiple_grips_for_one_delete_and_undo() {
+        use om9_core::geometry::{Curve, Geometry, NurbsCurve};
+        use om9_core::model::{Document, Entity};
+        let n = NurbsCurve {
+            degree: 2,
+            poles: vec![
+                [0., 0., 0.],
+                [1., 3., 0.],
+                [3., 2., 0.],
+                [5., 3., 0.],
+                [6., 0., 0.],
+            ],
+            weights: vec![1.; 5],
+            knots: vec![0., 0., 0., 0.3, 0.7, 1., 1., 1.],
+            domain: [0., 1.],
+            periodic: false,
+            reversed: false,
+            seam: None,
+        };
+        let entity = Entity::new("curve", Geometry::Curve(Curve::Nurbs(n)), None);
+        let id = entity.id;
+        let mut doc = Document::with_template_tolerance("multiple grip delete");
+        doc.entities.insert(id, entity);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller
+            .top11_invoke(Top11Action::ControlPoints)
+            .unwrap();
+        let viewport = Viewport {
+            origin: [0., 0.],
+            size: [800., 600.],
+        };
+        let view = app
+            .controller
+            .workspace
+            .views
+            .get(&om9_scene::workspace::ViewId::LookingDown)
+            .unwrap()
+            .clone();
+        let handles = app.controller.top11_grip_handles().unwrap();
+        let screen = |i: usize| {
+            view.camera
+                .project(handles[i].point, viewport)
+                .unwrap()
+                .unwrap()
+                .screen
+        };
+        assert!(app.select_control_grip_at(&view, viewport, screen(1), false));
+        assert!(app.select_control_grip_at(&view, viewport, screen(3), true));
+        assert_eq!(app.selected_grips.len(), 2);
+        let before = app.controller.document().clone();
+        let mut raw = egui::RawInput {
+            events: vec![egui::Event::Key {
+                key: Key::Delete,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Modifiers::NONE,
+            }],
+            ..Default::default()
+        };
+        app.delete_selection_from_input(&egui::Context::default(), &mut raw);
+        let Geometry::Curve(Curve::Nurbs(result)) =
+            &app.controller.document().entities[&id].geometry
+        else {
+            panic!("object lost")
+        };
+        assert_eq!(result.poles.len(), 3);
+        let after = app.controller.document().clone();
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
+        app.controller.redo().unwrap();
+        assert_eq!(app.controller.document(), &after);
+    }
+    #[test]
+    fn selected_surface_control_row_deletes_via_key_and_undo() {
+        use om9_core::geometry::{Geometry, NurbsSurface};
+        use om9_core::model::{Document, Entity};
+        let surface = NurbsSurface {
+            degree: [2, 2],
+            size: [4, 4],
+            poles: (0..4)
+                .flat_map(|u| (0..4).map(move |v| [u as f64 * 10., v as f64 * 10., 0.]))
+                .collect(),
+            weights: vec![1.; 16],
+            knots: [
+                vec![0., 0., 0., 0.5, 1., 1., 1.],
+                vec![0., 0., 0., 0.5, 1., 1., 1.],
+            ],
+            domain: [[0., 1.], [0., 1.]],
+            periodic: [false, false],
+            reversed: false,
+        };
+        let entity = Entity::new("surface", Geometry::Surface(surface), None);
+        let id = entity.id;
+        let mut doc = Document::with_template_tolerance("surface control delete");
+        doc.entities.insert(id, entity);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller
+            .top11_invoke(Top11Action::ControlPoints)
+            .unwrap();
+        let viewport = Viewport {
+            origin: [0., 0.],
+            size: [1200., 900.],
+        };
+        let view = app
+            .controller
+            .workspace
+            .views
+            .get(&om9_scene::workspace::ViewId::LookingDown)
+            .unwrap()
+            .clone();
+        let handles = app.controller.top11_grip_handles().unwrap();
+        for index in 4..8 {
+            let screen = view
+                .camera
+                .project(handles[index].point, viewport)
+                .unwrap()
+                .unwrap()
+                .screen;
+            assert!(app.select_control_grip_at(&view, viewport, screen, index != 4));
+        }
+        assert_eq!(app.selected_grips.len(), 4);
+        let before = app.controller.document().clone();
+        let mut raw = egui::RawInput {
+            events: vec![egui::Event::Key {
+                key: Key::Delete,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Modifiers::NONE,
+            }],
+            ..Default::default()
+        };
+        app.delete_selection_from_input(&egui::Context::default(), &mut raw);
+        let Geometry::Surface(result) = &app.controller.document().entities[&id].geometry else {
+            panic!("surface lost")
+        };
+        assert_eq!(result.size, [3, 4]);
+        let after = app.controller.document().clone();
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
+        app.controller.redo().unwrap();
+        assert_eq!(app.controller.document(), &after);
     }
 }

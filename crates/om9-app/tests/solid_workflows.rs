@@ -117,6 +117,37 @@ fn boolean_two_objects_menu_has_operation_prompt() {
 }
 
 #[test]
+fn difference_multiple_tools_commits_once_and_undo_restores_inputs() {
+    for overlap in [false, true] {
+        let limits = Limits::default();
+        let mut doc = Document::new("Boolean multi tool");
+        let mut ids = Vec::new();
+        for (side, position) in [(10.0, [0.0,0.0,0.0]), (2.0, [1.0,1.0,1.0]),
+            (2.0, [if overlap { 2.0 } else { 6.0 }, if overlap { 1.0 } else { 6.0 }, if overlap { 1.0 } else { 6.0 }])] {
+            let body = creation::primitive(creation::Primitive::Box { x_mm: side, y_mm: side, z_mm: side }, 0.01, &limits).unwrap();
+            let mut entity = Entity::new("body", Geometry::Brep(body), None);
+            entity.placement = Transform::translation(position);
+            ids.push(entity.id);
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut c = Controller::new(doc, limits).unwrap();
+        c.select_objects(&ids[..1]).unwrap();
+        c.submit("BooleanDifference").unwrap();
+        c.submit("DeleteInput=Yes").unwrap();
+        c.submit("").unwrap();
+        c.select_objects(&ids[1..]).unwrap();
+        c.submit("").unwrap();
+        assert_eq!(c.document().entities.len(), 1);
+        assert!((volume(&c) - if overlap { 988.0 } else { 984.0 }).abs() < 1e-6);
+        assert_eq!(c.coordinator().undo_len(), 1);
+        c.undo().unwrap();
+        assert!(ids.iter().all(|id| c.document().entities.contains_key(id)));
+        c.redo().unwrap();
+        assert_eq!(c.document().entities.len(), 1);
+    }
+}
+
+#[test]
 fn create_solid_rejects_missing_selection_without_mutation() {
     let mut c = controller();
     c.submit("Box 10 10 10").unwrap();

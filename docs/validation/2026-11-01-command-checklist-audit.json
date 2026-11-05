@@ -1,0 +1,527 @@
+{
+  "schema": "om9-command-checklist-audit/v1",
+  "date": "2026-11-01",
+  "scope": "Audit 26 checklist commands: menu/feature route, Command Line route and produced geometry",
+  "environment": {
+    "platform": "Windows x64",
+    "binary": "L:\\om9-target\\debug\\om9.exe",
+    "build": "cargo build -p om9-app -j 2, CARGO_TARGET_DIR=L:\\om9-target",
+    "harness": "om9 --mcp (same Controller as the Command Line)",
+    "measurement": "om9_report full projection; bounding boxes and B-Rep volume from display triangles"
+  },
+  "commands": [
+    {
+      "item": "solid -> box",
+      "group": "solid",
+      "feature": "OM9-SOLID-012",
+      "typed": "Box",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "curve -> rectangle",
+      "group": "curve",
+      "feature": "OM9-CURVE-004",
+      "typed": "Rectangle",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "solid -> sphere",
+      "group": "solid",
+      "feature": "OM9-SOLID-014",
+      "typed": "Sphere",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "top11 -> copy",
+      "group": "top11",
+      "feature": "OM9-TOP11-002",
+      "typed": "Copy",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "curve -> polyline",
+      "group": "curve",
+      "feature": "OM9-CURVE-001",
+      "typed": "Polyline",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "curve -> offset",
+      "group": "curve",
+      "feature": "OM9-CURVE-018",
+      "typed": "Offset",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "top11 -> mirror",
+      "group": "top11",
+      "feature": "OM9-TOP11-004",
+      "typed": "Mirror",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "top11 -> move",
+      "group": "top11",
+      "feature": "OM9-TOP11-006",
+      "typed": "Move",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "top11 -> rotate",
+      "group": "top11",
+      "feature": "OM9-TOP11-007",
+      "typed": "Rotate",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "transform -> rotate 3d",
+      "group": "transform",
+      "feature": "OM9-TRANSFORM-008",
+      "typed": "Rotate3D",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "surface -> plane from corner",
+      "group": "surface",
+      "feature": "OM9-SURFACE-015",
+      "typed": "Plane",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "solid -> extrude curve straight",
+      "group": "solid",
+      "feature": "OM9-SOLID-009",
+      "typed": "ExtrudeCrv",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "surface -> offset surface",
+      "group": "surface",
+      "feature": "OM9-SURFACE-025",
+      "typed": "OffsetSrf",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "solid -> shell",
+      "group": "solid",
+      "feature": "OM9-SOLID-029",
+      "typed": "Shell",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "curve -> dupEdge",
+      "group": "curve",
+      "feature": "OM9-CURVE-040",
+      "typed": "DupEdge",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "top11 -> join",
+      "group": "top11",
+      "feature": "OM9-TOP11-008",
+      "typed": "Join",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "top11 -> split",
+      "group": "top11",
+      "feature": "OM9-TOP11-009",
+      "typed": "Split",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "top11 -> trim",
+      "group": "top11",
+      "feature": "OM9-TOP11-010",
+      "typed": "Trim",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "solid -> different",
+      "group": "solid",
+      "feature": "OM9-SOLID-004",
+      "typed": "Boolean2Objects",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "file -> export stl",
+      "group": "file",
+      "feature": "OM9-FILE-001",
+      "typed": "ExportSTL",
+      "menu": "PASS",
+      "command_line": "PASS",
+      "geometry": "PASS",
+      "detail": ""
+    },
+    {
+      "item": "solid -> different (button)",
+      "group": "solid",
+      "feature": "OM9-SOLID-001",
+      "typed": null,
+      "menu": "PASS",
+      "command_line": "n/a",
+      "geometry": "PASS",
+      "detail": "menu starts and waits for the second set; exact 500 mm3 difference is measured by solid_workflows::immediate_boolean_menu_actions_have_measured_results"
+    }
+  ],
+  "checklist": [
+    {
+      "item": "solid -> box",
+      "status": "PASS",
+      "evidence": "MCP row; 10x20x5, V=1000"
+    },
+    {
+      "item": "curve -> rectangle",
+      "status": "PASS",
+      "evidence": "MCP row; 4 segments 0..10 x 0..20"
+    },
+    {
+      "item": "snap -> mid",
+      "status": "PASS",
+      "evidence": "om9-scene osnap: Mid (5,0,0)"
+    },
+    {
+      "item": "snap -> end",
+      "status": "PASS",
+      "evidence": "om9-scene osnap + osnap_ui click: End (10,0,0)"
+    },
+    {
+      "item": "snap -> on/off",
+      "status": "PARTIAL",
+      "evidence": "snap_panel_modes + sidebar toggles; GridSnap icon disabled"
+    },
+    {
+      "item": "solid -> sphere",
+      "status": "PASS",
+      "evidence": "MCP row; r=5, volume within 2%"
+    },
+    {
+      "item": "snaps -> gumball",
+      "status": "PASS",
+      "evidence": "Gumball Snappy follows the active osnap candidate (selected excluded); Move handles snap to the exact 3D world point; Drag strength 1-200% and a Gumball settings window (axes, Smooth/Snappy, strength, reset, defaults); 7 gumball_viewport tests"
+    },
+    {
+      "item": "top11 -> copy",
+      "status": "PASS",
+      "evidence": "MCP row; copy placement +10 Z"
+    },
+    {
+      "item": "curve -> polyline",
+      "status": "PASS",
+      "evidence": "MCP row; 2 segments 0..10"
+    },
+    {
+      "item": "curve -> offset",
+      "status": "PASS",
+      "evidence": "MCP row; Distance=2 gives y=+-2"
+    },
+    {
+      "item": "top11 -> mirror",
+      "status": "PASS",
+      "evidence": "MCP row; mirrored x -4..-1"
+    },
+    {
+      "item": "snap -> center",
+      "status": "PASS",
+      "evidence": "om9-scene osnap: Center on the circle"
+    },
+    {
+      "item": "top11 -> move",
+      "status": "PASS",
+      "evidence": "MCP row; (+5,-2)"
+    },
+    {
+      "item": "top11 -> rotate",
+      "status": "PASS",
+      "evidence": "MCP row; 90 deg about Z"
+    },
+    {
+      "item": "transform -> rotate 3d",
+      "status": "PASS",
+      "evidence": "MCP row; 90 deg about Z"
+    },
+    {
+      "item": "layer -> assign, show, hide",
+      "status": "PASS",
+      "evidence": "layer_controller, layer_current_and_assign, layer_widgets"
+    },
+    {
+      "item": "surface -> plane from corner",
+      "status": "PASS",
+      "evidence": "MCP row; 0..10 x 0..20 at z=0"
+    },
+    {
+      "item": "top11 -> split",
+      "status": "PASS",
+      "evidence": "MCP row; circle split into two half arcs"
+    },
+    {
+      "item": "surface -> offset surface",
+      "status": "PASS",
+      "evidence": "MCP row; second surface at z=+-5"
+    },
+    {
+      "item": "solid -> shell",
+      "status": "PASS",
+      "evidence": "MCP row; face 0 removed, V=424"
+    },
+    {
+      "item": "curve -> dupEdge",
+      "status": "PASS",
+      "evidence": "MCP row; 12 edge curves inside the box"
+    },
+    {
+      "item": "top11 -> join",
+      "status": "PASS",
+      "evidence": "MCP row; one 2-segment polycurve"
+    },
+    {
+      "item": "top11 -> trim",
+      "status": "PASS",
+      "evidence": "MCP row; horizontal kept x=0..10"
+    },
+    {
+      "item": "solid -> extrude curve straight",
+      "status": "PASS",
+      "evidence": "MCP row; 10x20x5, V=1000"
+    },
+    {
+      "item": "solid -> different",
+      "status": "PASS",
+      "evidence": "MCP row Boolean Two Objects V=500; OM9-SOLID-001 menu start + solid_workflows V=500"
+    },
+    {
+      "item": "file -> export stl",
+      "status": "PASS",
+      "evidence": "MCP row; File/CMD/native .stl dialog + om9_export_stl; meshes, editable/retained B-Reps and surfaces; 9 stl_export tests, independent trimesh record, real Win32 save-dialog test and GPU render"
+    }
+  ],
+  "supporting_tests": [
+    {
+      "binary": "om9-scene osnap",
+      "passed": 11,
+      "failed": 0,
+      "proves": "End (10,0,0), Mid (5,0,0), Center on the circle and Quadrant candidates are exact and ranked inside the screen radius."
+    },
+    {
+      "binary": "om9-app osnap_ui",
+      "passed": 3,
+      "failed": 0,
+      "proves": "A viewport click inside the snap radius creates a Line whose endpoints are the exact snap world points; disabling End removes the marker; Escape clears guides."
+    },
+    {
+      "binary": "om9-app snap_panel_modes",
+      "passed": 4,
+      "failed": 0,
+      "proves": "Persistent End on/off and the one-shot override change the snap state."
+    },
+    {
+      "binary": "om9-app layer_controller",
+      "passed": 9,
+      "failed": 0,
+      "proves": "Lazy layer assignment, current layer, group visibility toggle and locked-layer refusal with Undo."
+    },
+    {
+      "binary": "om9-app layer_widgets (actual_hide_show_and_lock_visibility_preserve_explicit_preferences)",
+      "passed": 1,
+      "failed": 0,
+      "proves": "The panel Hide and Show buttons change object visibility and keep explicit hidden/selectable preferences."
+    },
+    {
+      "binary": "om9-app layer_current_and_assign",
+      "passed": 3,
+      "failed": 0,
+      "proves": "The panel and the model agree on the current layer and assignment."
+    },
+    {
+      "binary": "om9-app gumball_viewport (a_click_selects_and_a_gumball_drag_moves_the_line)",
+      "passed": 1,
+      "failed": 0,
+      "proves": "A real widget drag on a gumball arrow moves the selected line and commits one transform."
+    },
+    {
+      "binary": "om9-app solid_workflows (immediate_boolean_menu_actions_have_measured_results)",
+      "passed": 1,
+      "failed": 0,
+      "proves": "OM9-SOLID-001 Difference through the menu and the object pick yields volume 500 mm3 and one Undo transaction."
+    },
+    {
+      "binary": "om9-exchange stl_export_policy",
+      "passed": 3,
+      "failed": 0,
+      "proves": "The STL writer itself is correct (closed cube layout, units, winding, refusals); it is not connected to the application."
+    },
+    {
+      "binary": "om9-app top11 (feature_dispatch_reaches_the_same_action_as_the_toolbar)",
+      "passed": 1,
+      "failed": 0,
+      "proves": "Dispatching OM9-TOP11-006 starts the same Move pending state and geometry as the toolbar icon."
+    },
+    {
+      "binary": "om9-app solid (typed_cancel_ends_a_solid_prompt_without_mutation)",
+      "passed": 1,
+      "failed": 0,
+      "proves": "Typed Cancel ends Sphere/Box/Cylinder/Cone prompts without a document mutation."
+    },
+    {
+      "binary": "om9-app top11 (full suite)",
+      "passed": 152,
+      "failed": 0,
+      "proves": "No Top11 regression after adding feature-id dispatch."
+    },
+    {
+      "binary": "om9-app solid (full suite)",
+      "passed": 195,
+      "failed": 0,
+      "ignored": 1,
+      "proves": "No solid regression after the shared Cancel branch."
+    },
+    {
+      "binary": "om9-core top11 (full suite)",
+      "passed": 44,
+      "failed": 0,
+      "proves": "Top11Action::from_feature is additive in the core crate."
+    },
+    {
+      "binary": "om9-app mcp_stdio",
+      "passed": 2,
+      "failed": 0,
+      "proves": "The MCP protocol surface and the om9_export_stl tool work after the dispatch change."
+    },
+    {
+      "binary": "om9-app stl_export",
+      "passed": 10,
+      "failed": 0,
+      "proves": "Menu/CMD routes, selection, mixed skip, sphere watertightness, retained native payload re-import, adaptive open surface, units, wrong extension and atomic replace."
+    },
+    {
+      "binary": "om9-app gumball_viewport",
+      "passed": 7,
+      "failed": 0,
+      "proves": "Select/drag/rotate/scale, typed Snappy/Smooth, exact 3D snap, drag strength 50% and bounded settings/defaults."
+    },
+    {
+      "binary": "om9-app lib gumball settings",
+      "passed": 2,
+      "failed": 0,
+      "proves": "The settings window renders and typed settings persist through the application-scope file and reload."
+    },
+    {
+      "binary": "tools/gumball-os-audit.ps1",
+      "passed": 1,
+      "failed": 0,
+      "proves": "A real Win32 pointer drag on the live wgpu window lands the line on the 3D snap point and saves the GPU framebuffer."
+    },
+    {
+      "binary": "om9-native-owner real_stl_save_dialog (ignored, run with --ignored)",
+      "passed": 1,
+      "failed": 0,
+      "proves": "The real Windows Save dialog with the .stl filter, owned HWND and IDOK probe returns the chosen audit.stl path."
+    },
+    {
+      "binary": "independent trimesh read-back",
+      "passed": 10,
+      "failed": 0,
+      "proves": "A third-party library (not the OM9 writer) confirms box/sphere triangle counts, mm bounds, volumes, watertightness, winding and no degenerate faces."
+    },
+    {
+      "binary": "headless GPU render",
+      "passed": 1,
+      "failed": 0,
+      "proves": "om9 --render-4 draws the box and sphere in all four viewports; PNG 1280x800, sha256 040ae890...a643da1."
+    }
+  ],
+  "findings": [
+    {
+      "status": "FIXED",
+      "item": "top11 feature dispatch",
+      "before": "om9_dispatch(OM9-TOP11-006) returned 'unsupported command has no accepted standalone operation'; only the toolbar and typed name reached the action.",
+      "after": "Top11Action::from_feature + dispatch_effect route the published id through top11_invoke, the same function the toolbar calls.",
+      "evidence": "tests/top11.rs::feature_dispatch_reaches_the_same_action_as_the_toolbar; MCP menu column PASS for all six Top11 rows."
+    },
+    {
+      "status": "FIXED",
+      "item": "typed Cancel on solid prompts",
+      "before": "Sphere/Box/Cylinder/Cone advertised Cancel but typing it returned errors such as 'sphere center needs three coordinates'.",
+      "after": "submit_solid_pending handles Cancel/Esc once before any feature handler.",
+      "evidence": "tests/solid.rs::typed_cancel_ends_a_solid_prompt_without_mutation; MCP probe shows running=false for all four."
+    },
+    {
+      "status": "IMPLEMENTED",
+      "item": "file -> export stl",
+      "evidence": "Controller::export_stl_selected handles selected meshes, editable OCCT B-Reps (shared re-tessellation), retained NativeBrep payloads (OCCT bridge, not display) and NurbsSurfaces (adaptive 8-128 chord grid); applies placement, welds nodes, drops pole degenerates, writes strict when closed and non-strict with open_edges for surfaces, atomically in mm. FileExportSelected, typed ExportSTL and MCP om9_export_stl share it; the real Win32 .stl dialog test passes. Independent trimesh read-back confirms box/sphere counts, bounds, volume, watertightness, winding and no degenerates."
+    },
+    {
+      "status": "IMPLEMENTED",
+      "item": "snaps -> gumball (Snappy)",
+      "evidence": "Snappy uses the active osnap candidates during a drag, excluding the moved objects; Move handles use the exact world candidate through Drag::WorldDelta while axis/plane handles keep their constraints. Drag strength (1-200%) scales smooth pointer motion, and a Gumball settings window covers World/Object/CPlane, Smooth/Snappy, strength, reset pivot and defaults. Snappy/strength/alignment persist in %APPDATA%/OpenMatrix9/gumball.json and reload at startup. A real OS-mouse drag on the wgpu window (tools/gumball-os-audit.ps1) lands a line on the 3D snap point and records the GPU screenshot."
+    },
+    {
+      "status": "PARTIAL",
+      "item": "snap -> on/off (Grid Snap)",
+      "evidence": "Per-kind object snaps (End/Mid/Center/...) and Ortho/Planar/Project toggles work. GridSnapON and the header GridSnap icon stay visible but disabled: no grid-snap model exists."
+    },
+    {
+      "status": "NOTE",
+      "item": "layer assign/show/hide",
+      "evidence": "Connected through the Layers panel (arrow assigns, visibility/lock controls, Hide/Show buttons); there is no typed Assign/Hide/Show command. The typed Layer command sets the current layer or creates its preset group."
+    }
+  ]
+}

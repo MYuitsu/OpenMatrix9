@@ -298,9 +298,200 @@ mod tests {
     }
 
     #[test]
-    fn recovered_unimplemented_commands_remain_in_solid_menu() {
+    fn recovered_commands_stay_after_the_documented_solid_rows() {
         let menu = crate::menu_catalog::SOLID;
-        let start = menu.iter().position(|key| *key == "SolidBooleanTwoObjects").unwrap();
-        assert_eq!(&menu[start + 1..start + 3], &["SolidBooleanSplit", "SolidCreateSolid"]);
+        let pt_on = menu.iter().position(|key| *key == "SolidPtOn").unwrap();
+        assert_eq!(pt_on, 29, "the documented menu has thirty icons");
+        assert_eq!(
+            &menu[pt_on + 1..pt_on + 3],
+            &["SolidBooleanSplit", "SolidCreateSolid"]
+        );
+    }
+
+    /// The documented Main Menu page one (Matrix manual "The Main Menu", Solid menu):
+    /// ten icons per row and Pipe starts the second row.
+    #[test]
+    fn documented_solid_page_one_starts_row_two_with_pipe() {
+        let page = &crate::menu_catalog::SOLID[..20];
+        assert_eq!(
+            &page[..10],
+            &[
+                "SolidUnion",
+                "SolidDifference",
+                "SolidIntersection",
+                "SolidBooleanTwoObjects",
+                "SolidCapPlanarHoles",
+                "SolidExtractSurface",
+                "SolidFilletEdgeFilletEdge",
+                "SolidText",
+                "SolidExtrudePlanarCurveStraight",
+                "SolidGVDAllExtrude",
+            ]
+        );
+        assert_eq!(
+            &page[10..],
+            &[
+                "SolidPipe",
+                "SolidBoxCornertoCornerHeight",
+                "SolidSphereCenterRadius",
+                "SolidEllipsoidFromCenter",
+                "SolidTorus",
+                "SolidCylinder",
+                "SolidTube",
+                "SolidPyramid",
+                "SolidCone",
+                "SolidTruncatedCone",
+            ]
+        );
+    }
+
+    /// The authored Solid palette in dispatch order: the icon, the command the palette
+    /// must hand to dispatch, and the feature the command resolves to at runtime (empty
+    /// when the documented row has no owner and must stay visible but disabled).
+    /// Variant icons keep their own mode command; `SolidPtOn` is the Transform row's
+    /// documented command and stays disabled with that row's reason.
+    const DOCUMENTED_ICONS: [(&str, &str, &str); 43] = [
+        ("SolidUnion", "OM9-SOLID-003", "OM9-SOLID-003"),
+        ("SolidDifference", "OM9-SOLID-001", "OM9-SOLID-001"),
+        ("SolidIntersection", "OM9-SOLID-002", "OM9-SOLID-002"),
+        ("SolidBooleanTwoObjects", "OM9-SOLID-004", "OM9-SOLID-004"),
+        ("SolidCapPlanarHoles", "OM9-SOLID-005", "OM9-SOLID-005"),
+        ("SolidExtractSurface", "OM9-SOLID-006", "OM9-SOLID-006"),
+        (
+            "SolidFilletEdgeFilletEdge",
+            "OM9-SOLID-007",
+            "OM9-SOLID-007",
+        ),
+        ("SolidText", "OM9-SOLID-008", "OM9-SOLID-008"),
+        (
+            "SolidExtrudePlanarCurveStraight",
+            "OM9-SOLID-009",
+            "OM9-SOLID-009",
+        ),
+        ("SolidGVDAllExtrude", "OM9-SOLID-010", "OM9-SOLID-010"),
+        ("SolidPipe", "OM9-SOLID-011", "OM9-SOLID-011"),
+        (
+            "SolidBoxCornertoCornerHeight",
+            "OM9-SOLID-012",
+            "OM9-SOLID-012",
+        ),
+        ("SolidSphereCenterRadius", "OM9-SOLID-014", "OM9-SOLID-014"),
+        ("SolidEllipsoidFromCenter", "OM9-SOLID-013", "OM9-SOLID-013"),
+        ("SolidTorus", "OM9-SOLID-015", "OM9-SOLID-015"),
+        ("SolidCylinder", "OM9-SOLID-016", "OM9-SOLID-016"),
+        ("SolidTube", "OM9-SOLID-017", "OM9-SOLID-017"),
+        ("SolidPyramid", "OM9-SOLID-018", "OM9-SOLID-018"),
+        ("SolidCone", "OM9-SOLID-019", "OM9-SOLID-019"),
+        ("SolidTruncatedCone", "OM9-SOLID-020", "OM9-SOLID-020"),
+        ("SolidBoss", "OM9-SOLID-021", "OM9-SOLID-021"),
+        ("SolidRib", "OM9-SOLID-022", ""),
+        ("SolidSlab", "OM9-SOLID-024", ""),
+        ("SolidSolidEditToolsHolesMakeHole", "OM9-SOLID-023", ""),
+        ("SolidSolidEditToolsHolesArrayHole", "OM9-SOLID-025", ""),
+        (
+            "SolidSolidEditToolsHolesArrayHolePolar",
+            "OM9-SOLID-026",
+            "",
+        ),
+        ("SolidSolidEditToolsHolesMoveHole", "OM9-SOLID-027", ""),
+        ("SolidSolidEditToolsFacesMoveFace", "OM9-SOLID-028", ""),
+        ("SolidShell", "OM9-SOLID-029", "OM9-SOLID-029"),
+        ("SolidPtOn", "OM9-TRANSFORM-019", ""),
+        (
+            "SolidBooleanSplit",
+            "SolidBooleanSplit",
+            "SolidBooleanSplit",
+        ),
+        ("SolidCreateSolid", "SolidCreateSolid", "SolidCreateSolid"),
+        ("SolidGVDMultiPipe", "SolidGVDMultiPipe", "OM9-SOLID-011"),
+        ("SolidBoxDiagonal", "SolidBoxDiagonal", "OM9-SOLID-012"),
+        (
+            "SolidBox3PointsHeight",
+            "SolidBox3PointsHeight",
+            "OM9-SOLID-012",
+        ),
+        (
+            "SolidBoxVerticalBase",
+            "SolidBoxVerticalBase",
+            "OM9-SOLID-012",
+        ),
+        (
+            "SolidBoxCenterofBaseCornerHeight",
+            "SolidBoxCenterofBaseCornerHeight",
+            "OM9-SOLID-012",
+        ),
+        ("SolidSphere2Points", "SolidSphere2Points", "OM9-SOLID-014"),
+        ("SolidSphere3Points", "SolidSphere3Points", "OM9-SOLID-014"),
+        ("SolidSphere4Points", "SolidSphere4Points", "OM9-SOLID-014"),
+        (
+            "SolidSphereAroundCurve",
+            "SolidSphereAroundCurve",
+            "OM9-SOLID-014",
+        ),
+        (
+            "SolidSphereTangenttoCurves",
+            "SolidSphereTangenttoCurves",
+            "OM9-SOLID-014",
+        ),
+        (
+            "SolidSphereFitSpheretoPoints",
+            "SolidSphereFitSpheretoPoints",
+            "OM9-SOLID-014",
+        ),
+    ];
+
+    #[test]
+    fn every_solid_icon_dispatches_its_documented_command() {
+        use crate::session::{Controller, InvocationOrigin};
+        use om9_core::{budget::Limits, model::Document};
+
+        let menu: Vec<&str> = crate::menu_catalog::SOLID.to_vec();
+        assert_eq!(
+            menu,
+            DOCUMENTED_ICONS.map(|(icon, _, _)| icon).to_vec(),
+            "Solid palette order"
+        );
+        for (icon, command, resolved) in DOCUMENTED_ICONS {
+            assert_eq!(
+                crate::icons::feature_for(icon),
+                Some(command),
+                "{icon} must dispatch {command}"
+            );
+            if resolved.is_empty() {
+                assert!(
+                    Controller::availability(command).is_err(),
+                    "{icon}: {command} has no owner and must stay disabled"
+                );
+                continue;
+            }
+            assert!(
+                Controller::availability(command).is_ok(),
+                "{icon}: {command}"
+            );
+            let mut controller =
+                Controller::new(Document::new("solid icon binding"), Limits::default()).unwrap();
+            controller
+                .dispatch(command, InvocationOrigin::Menu)
+                .unwrap_or_else(|error| panic!("{icon}: {command}: {error}"));
+            assert_eq!(
+                controller.active_feature(),
+                Some(resolved),
+                "{icon} ran the wrong command"
+            );
+            controller.cancel();
+        }
+        // The twenty-one documented L3 rows follow the authored palette order.
+        let positions: Vec<usize> = BINDINGS
+            .iter()
+            .map(|binding| {
+                menu.iter()
+                    .position(|icon| *icon == binding.icon)
+                    .unwrap_or_else(|| panic!("{} is not in the Solid palette", binding.icon))
+            })
+            .collect();
+        assert!(
+            positions.windows(2).all(|pair| pair[0] < pair[1]),
+            "{positions:?}"
+        );
     }
 }

@@ -205,6 +205,12 @@
     ],
     "human_approval": null,
     "remaining": [],
+    "fingerprint_streaming_2026_11_02": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Buffer unchanged JSON SHA-256 fingerprint input on the stack; compare against serialized bytes and retain validation.",
+      "evidence": ["docs/validation/2026-11-02-dice-fingerprint-performance.md"],
+      "limitations": ["Four-cavity debug timing only; full dice, release and desktop performance remain unmeasured."]
+    },
     "plugin_sdk_v1_object_provenance": {
       "date": "2026-10-22",
       "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",

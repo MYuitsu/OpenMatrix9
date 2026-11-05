@@ -316,6 +316,8 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "native_brep_availability_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-native-brep-availability.md", "scope": "Retained-native-BRep topology buttons show disabled with a reason; placement transforms stay enabled.", "limitations": "Native topology editing, actual 3DM input and desktop acceptance remain open."},
+    "mixed_join_availability_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-mixed-selection.md", "scope": "Curve Join is disabled for mixed selections containing incompatible objects, with atomic command refusal.", "limitations": "Original Matrix behavior and physical desktop acceptance remain open."},
     "remove_selection_2026_10_28": {
       "scope": "Controller removes selected targets or cutting objects and viewport routes Ctrl-click to it; controller Split and Undo test passes.",
       "evidence": "docs/validation/2026-10-28-top11-split-join-followup.md",

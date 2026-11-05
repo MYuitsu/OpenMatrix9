@@ -50,12 +50,14 @@ pub fn post_owned_root_close(root: usize) -> std::io::Result<()> {
 pub enum DialogKind {
     Open,
     Save,
+    SaveStl,
 }
 impl DialogKind {
     fn title(self) -> &'static str {
         match self {
             Self::Open => "Open OpenMatrix9 document",
             Self::Save => "Save OpenMatrix9 document",
+            Self::SaveStl => "Export STL",
         }
     }
 }

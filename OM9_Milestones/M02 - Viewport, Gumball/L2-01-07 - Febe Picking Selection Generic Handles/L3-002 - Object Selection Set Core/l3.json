@@ -218,6 +218,15 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
+    "live_root_selection_memory_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "R1a root selection: pre-admitted live CPU owner for tree/order and staged plugin selection; detach capture observes growth/removal/drop via shared account without capture-time double charge",
+      "evidence": [
+        "docs/validation/2026-11-05-live-root-selection-memory.md"
+      ],
+      "verification": "Final scoped groups: 322 distinct passed/7 ignored/0 failed; GPU 29/no SKIP, native STL 60. Original overlay baseline oracle failure retained; exact live selection bill added, timeout/stale assertions unchanged.",
+      "remaining": "Root selection only. BTree bill is a pinned-profile allowance; other auxiliary/high-water, scratch/peer/retired/native/RSS, UI export, P1-P5 and release/desktop remain open. No FPS or global geometric certification claim."
+    },
     "plugin_sdk_v1_selection": {
       "date": "2026-10-21",
       "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",

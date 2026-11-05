@@ -15,6 +15,12 @@ fn main() {
         Some("hold") => loop {
             thread::sleep(Duration::from_secs(1));
         },
+        Some("bounded-output") => {
+            let mut output = io::stdout().lock();
+            for index in 0..1024usize {
+                output.write_all(&[(index % 251) as u8; 8192]).unwrap();
+            }
+        }
         Some("stdout-flood" | "stderr-flood") => {
             let mut output: Box<dyn Write> = if args[0] == "stdout-flood" {
                 Box::new(io::stdout())

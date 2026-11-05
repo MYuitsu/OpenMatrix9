@@ -9,7 +9,7 @@ use om9_core::{
         DimStyle, ExchangeMetadata, HatchPattern, HatchPatternLine, LinePattern,
         LinePatternSegment, RenderLight, RenderMaterial, TextStyle,
     },
-    geometry::Geometry,
+    geometry::{Curve, Geometry},
     identity::*,
     model::{Definition, Entity, Group, Layer},
     resource::{Resource, ResourceKind},
@@ -66,7 +66,7 @@ pub trait BrepBridge {
 }
 /// Complete OCCT -> 3DM payload operation used only for an export copy.
 pub trait BrepExport {
-    fn export(&self, brep: &Brep, limits: &Limits) -> Result<om9_core::geometry::NativeBrep>;
+    fn export(&self, brep: &Brep, tolerance_mm: f64, limits: &Limits) -> Result<om9_core::geometry::NativeBrep>;
 }
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct UnitResolution {
@@ -164,10 +164,83 @@ pub struct PreparedNativeImport {
     bundle: ImportBundle,
     receipt: ImportReceipt,
     cancel: Cancellation,
+    // Carries known source/bundle allocations across the handoff to the
+    // transaction; it is released only after the candidate is registered.
+    _reservation: om9_core::transaction::ExternalMemoryReservation,
 }
 impl PreparedNativeImport {
     pub fn receipt(&self) -> &ImportReceipt {
         &self.receipt
+    }
+    /// Admit a clipboard sidecar only when all its state is already represented
+    /// by this exact inspected 3DM projection. Non-equivalent overlays need a
+    /// separate transactional layer merge and are refused rather than dropped.
+    pub fn verify_equivalent_clipboard_metadata(
+        &self,
+        snapshot: &crate::three_dm::ThreeDmLayerSnapshot,
+        coordinator: &TransactionCoordinator,
+    ) -> Result<()> {
+        use crate::three_dm::{ColorSource, validate_layer_snapshot};
+        use om9_core::retained::HostRef;
+        self.capture.revalidate(coordinator)?;
+        let mut held = Usage::btree::<uuid::Uuid, om9_core::identity::LayerId>(snapshot.layers.len())?;
+        held.add(Usage::btree::<uuid::Uuid, om9_core::identity::ObjectId>(snapshot.objects.len())?, coordinator.limits())?;
+        held.add(Usage::btree::<om9_core::identity::LayerId, &om9_core::model::Layer>(self.bundle.layers.len())?, coordinator.limits())?;
+        held.add(Usage::btree::<om9_core::identity::ObjectId, &om9_core::model::Entity>(self.bundle.entities.len())?, coordinator.limits())?;
+        coordinator.retained_usage_with_held_usage(held)?;
+        validate_layer_snapshot(snapshot).map_err(|_| Error::Invalid("clipboard layer metadata"))?;
+        if snapshot.active_layer.is_some()
+            || snapshot.layers.iter().any(|layer| layer.persistent_locked.is_some() || layer.persistent_visible.is_some())
+        {
+            return Err(Error::Unsupported("clipboard active or persistent layer state"));
+        }
+        let mut native_layers = BTreeMap::new();
+        let mut native_objects = BTreeMap::new();
+        for record in &self.bundle.namespace.records {
+            match record.host {
+                Some(HostRef::Layer(id)) => { native_layers.insert(record.key.id, id); }
+                Some(HostRef::Object(id)) => { native_objects.insert(record.key.id, id); }
+                _ => {}
+            }
+        }
+        if snapshot.layers.len() != self.bundle.layers.len() || snapshot.objects.len() != self.bundle.entities.len() {
+            return Err(Error::Unsupported("clipboard metadata has unrepresented layers or objects"));
+        }
+        let layer_by_id: BTreeMap<_, _> = self.bundle.layers.iter().map(|layer| (layer.id, layer)).collect();
+        let entity_by_id: BTreeMap<_, _> = self.bundle.entities.iter().map(|entity| (entity.id, entity)).collect();
+        let parse = |value: &str| uuid::Uuid::parse_str(value).map_err(|_| Error::Invalid("clipboard native identity"));
+        let mut seen_layers = BTreeSet::new();
+        for row in &snapshot.layers {
+            let native_id = parse(&row.source_id)?;
+            if !seen_layers.insert(native_id) { return Err(Error::Invalid("duplicate clipboard layer identity")); }
+            let id = native_layers.get(&native_id).ok_or(Error::Invalid("clipboard layer identity"))?;
+            let layer = layer_by_id.get(id).ok_or(Error::Missing("clipboard imported layer"))?;
+            let parent = row.parent_id.as_ref().map(|value| {
+                native_layers.get(&parse(value)?).copied().ok_or(Error::Invalid("clipboard parent identity"))
+            }).transpose()?;
+            if layer.name != row.name || layer.parent != parent || layer.color[..3] != row.rgb
+                || layer.visible != row.visible || layer.locked != row.locked {
+                return Err(Error::Unsupported("clipboard layer metadata requires merge"));
+            }
+        }
+        let mut seen_objects = BTreeSet::new();
+        for row in &snapshot.objects {
+            let native_id = parse(&row.id)?;
+            if !seen_objects.insert(native_id) { return Err(Error::Invalid("duplicate clipboard object identity")); }
+            let id = native_objects.get(&native_id).ok_or(Error::Invalid("clipboard object identity"))?;
+            let entity = entity_by_id.get(id).ok_or(Error::Missing("clipboard imported object"))?;
+            let layer_id = native_layers.get(&parse(&row.layer_id)?).ok_or(Error::Invalid("clipboard object layer identity"))?;
+            let layer = layer_by_id.get(layer_id).ok_or(Error::Missing("clipboard object layer"))?;
+            let color_matches = match row.color_source {
+                ColorSource::ByLayer => entity.attributes.color.is_none() && layer.color[..3] == row.rgb,
+                ColorSource::ByObject => entity.attributes.color.is_some_and(|color| color[..3] == row.rgb),
+            };
+            if entity.attributes.layer != Some(*layer_id) || entity.attributes.visible != row.visible
+                || entity.attributes.locked != row.locked || !color_matches {
+                return Err(Error::Unsupported("clipboard object metadata requires merge"));
+            }
+        }
+        Ok(())
     }
     pub fn prepare(
         mut self,
@@ -226,6 +299,9 @@ impl PreparedNativeImport {
         self.receipt.diagnostics.extend(scene_diagnostics);
         self.capture.revalidate(c)?;
         check(&combined)?;
+        // Register before `self` drops its shared reservation, so peer
+        // coordinators can see the candidate throughout the handoff.
+        drop(c.register_prepared_document(&p, target)?);
         Ok((p, self.receipt))
     }
 }
@@ -238,6 +314,20 @@ fn check(cancel: &Cancellation) -> Result<()> {
     } else {
         Ok(())
     }
+}
+fn reserve_json_increment(needed: u64, reserved: &mut u64, mut grow: impl FnMut(u64) -> Result<()>) -> Result<()> {
+    if needed <= *reserved { return Ok(()); }
+    let extra = needed - *reserved;
+    let rounded = extra.max(1024 * 1024);
+    match grow(rounded) {
+        Ok(()) => *reserved = reserved.checked_add(rounded).ok_or(Error::Overflow("JSON reservation"))?,
+        Err(Error::Budget(_)) if rounded != extra => {
+            grow(extra)?;
+            *reserved = needed;
+        }
+        Err(error) => return Err(error),
+    }
+    Ok(())
 }
 fn locked_read(path: &Path) -> Result<File> {
     let mut o = OpenOptions::new();
@@ -258,6 +348,48 @@ struct Snapshot {
     original: Option<File>,
     request: Option<File>,
 }
+
+#[cfg(test)]
+mod snapshot_reservation_tests {
+    use super::*;
+
+    #[test]
+    fn json_reservation_falls_back_to_exact_remaining_headroom() {
+        let mut reserved = 0;
+        let mut calls = Vec::new();
+        reserve_json_increment(100, &mut reserved, |bytes| {
+            calls.push(bytes);
+            if bytes > 100 { Err(Error::Budget("test headroom")) } else { Ok(()) }
+        }).unwrap();
+        assert_eq!(calls, vec![1024 * 1024, 100]);
+        assert_eq!(reserved, 100);
+        let refused = reserve_json_increment(200, &mut reserved, |_| Err(Error::Budget("test headroom")));
+        assert!(matches!(refused, Err(Error::Budget("test headroom"))));
+        assert_eq!(reserved, 100);
+        reserve_json_increment(90, &mut reserved, |_| panic!("existing reservation suffices")).unwrap();
+    }
+
+    #[test]
+    fn snapshot_reservation_refusal_precedes_read_and_staging() {
+        let dir = std::env::temp_dir().join(format!("om9-snapshot-admission-{}", Uuid::new_v4()));
+        fs::create_dir(&dir).unwrap();
+        let source = dir.join("source.3dm");
+        let bytes = vec![0x5a; 96 * 1024];
+        fs::write(&source, &bytes).unwrap();
+        let mut requested = 0;
+        let result = Snapshot::capture(&source, &dir, 1024 * 1024, Usage::default(), &Limits::default(),
+            &Cancellation::default(), |amount| {
+                requested = amount;
+                Err(Error::Budget("test snapshot admission"))
+            });
+        assert!(matches!(result, Err(Error::Budget("test snapshot admission"))));
+        assert_eq!(requested, (bytes.len() as u64) * 3 + 16384);
+        assert_eq!(fs::read(&source).unwrap(), bytes);
+        assert_eq!(fs::read_dir(&dir).unwrap().count(), 1, "no staging directory may be created");
+        fs::remove_file(source).unwrap();
+        fs::remove_dir(dir).unwrap();
+    }
+}
 impl Snapshot {
     fn capture(
         source: &Path,
@@ -266,6 +398,7 @@ impl Snapshot {
         held: Usage,
         l: &Limits,
         cancel: &Cancellation,
+        reserve_snapshot: impl FnOnce(u64) -> Result<()>,
     ) -> Result<Self> {
         check(cancel)?;
         if !fs::symlink_metadata(source).map_err(io)?.is_file() {
@@ -285,17 +418,13 @@ impl Snapshot {
             .ok_or(Error::Invalid("source filename"))?;
         name(source_name, l)?;
         let mut peak = held;
-        peak.add(
-            Usage {
-                bytes: meta
-                    .len()
-                    .checked_mul(3)
-                    .and_then(|n| n.checked_add(16384))
-                    .ok_or(Error::Overflow("source snapshot copies"))?,
-                ..Usage::default()
-            },
-            l,
-        )?;
+        let snapshot_bytes = meta.len().checked_mul(3)
+            .and_then(|n| n.checked_add(16384))
+            .ok_or(Error::Overflow("source snapshot copies"))?;
+        peak.add(Usage { bytes: snapshot_bytes, ..Usage::default() }, l)?;
+        // The source is locked and its size validated. Keep the shared
+        // reservation live before allocating or copying any of its bytes.
+        reserve_snapshot(snapshot_bytes)?;
         let source_name = source_name.to_owned();
         let capacity = usize::try_from(meta.len())
             .map_err(|_| Error::Overflow("source snapshot address space"))?;
@@ -425,13 +554,25 @@ impl NativeExchange {
         capture.revalidate(c)?;
         let options_usage = options.validate(c.limits())?;
         let base = c.retained_usage_with_held_usage(options_usage)?;
+        let native_bytes = self.limits.reservation_bytes().map_err(native)?;
         let mut running = base;
         running.add(
             Usage {
-                bytes: self.limits.reservation_bytes().map_err(native)?,
+                bytes: native_bytes,
                 ..Usage::default()
             },
             c.limits(),
+        ).map_err(|error| match error {
+            Error::Budget("bytes") => Error::Budget("3DM native process reservation"),
+            other => other,
+        })?;
+        // Keep the child-process cap and its parent pipe buffers visible to
+        // competing shared-account owners, not merely in a local estimate.
+        // The source snapshot is added to this guard below. Conversion
+        // allocations are separate owners and remain incomplete.
+        let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let mut native_reservation = c.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel, native_bytes, physical, options_usage,
         )?;
         let mut snapshot = Snapshot::capture(
             path,
@@ -440,6 +581,10 @@ impl NativeExchange {
             running,
             c.limits(),
             cancel,
+            |bytes| {
+                let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+                c.grow_external_memory_with_held(&mut native_reservation, bytes, physical, options_usage)
+            },
         )?;
         snapshot.write_resolution(&options.units)?;
         check(cancel)?;
@@ -474,7 +619,15 @@ impl NativeExchange {
             c.limits(),
         )?;
         let response_limits = c.limits().remaining_after(held)?;
-        let inventory = dto::Inventory::decode(&output.stdout, &response_limits)?;
+        let mut json_reserved = 0u64;
+        let inventory = dto::Inventory::decode_with_admission(&output.stdout, &response_limits, |needed| {
+            // Amortize account locking; retry exact headroom when a
+            // conservative extra chunk does not fit.
+            reserve_json_increment(needed, &mut json_reserved, |extra| {
+                let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+                c.grow_external_memory_with_held(&mut native_reservation, extra, physical, options_usage)
+            })
+        })?;
         if inventory.archive.file_bytes != snapshot.bytes.len() as u64
             || inventory.archive.source_sha256 != hex(snapshot.sha256)
         {
@@ -482,10 +635,14 @@ impl NativeExchange {
         }
         capture.revalidate(c)?;
         check(cancel)?;
-        held.add(
-            inventory.owned_usage(&c.limits().remaining_after(held)?)?,
-            c.limits(),
-        )?;
+        let inventory_usage = inventory.owned_usage(&c.limits().remaining_after(held)?)?;
+        held.add(inventory_usage, c.limits())?;
+        if inventory_usage.bytes > json_reserved {
+            let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+            c.grow_external_memory_with_held(&mut native_reservation, inventory_usage.bytes - json_reserved, physical, options_usage)?;
+        }
+        let conversion_base = held.bytes;
+        let mut conversion_reserved = 0u64;
         let (bundle, mut receipt) = convert(
             inventory,
             &snapshot,
@@ -494,11 +651,30 @@ impl NativeExchange {
             held,
             c.limits(),
             cancel,
+            &mut |peak| {
+                let needed = peak.checked_sub(conversion_base).ok_or(Error::Overflow("3DM conversion reservation"))?;
+                if needed > conversion_reserved {
+                    let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+                    c.grow_external_memory_with_held(&mut native_reservation, needed - conversion_reserved, physical, options_usage)?;
+                    conversion_reserved = needed;
+                }
+                Ok(())
+            },
         )?;
         receipt.native = output.stats;
+        let mut retained = bundle.storage_usage(c.limits())?;
+        retained.add(receipt.usage(c.limits())?, c.limits())?;
+        retained.add(Usage::array::<PreparedNativeImport>(1)?, c.limits())?;
+        if retained.bytes > conversion_reserved {
+            let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+            c.grow_external_memory_with_held(&mut native_reservation, retained.bytes - conversion_reserved, physical, options_usage)?;
+        }
         drop(output.stdout);
         drop(output.stderr);
         drop(snapshot);
+        // The child has exited and the snapshot has been dropped. Retain only
+        // the admitted bundle/receipt estimate while awaiting transaction prep.
+        native_reservation.shrink_to(retained.bytes.max(1))?;
         capture.revalidate(c)?;
         check(cancel)?;
         Ok(PreparedNativeImport {
@@ -506,6 +682,7 @@ impl NativeExchange {
             bundle,
             receipt,
             cancel: cancel.clone(),
+            _reservation: native_reservation,
         })
     }
 }
@@ -711,6 +888,16 @@ fn loss(
 }
 fn eligible_object(o: &dto::Object, mode: ImportMode, layers: &BTreeMap<Uuid, LayerId>) -> bool {
     let page_space = o.attributes.space == 2;
+    let owned_periodic = o.owned_periodic_userdata_only
+        && o.userdata.len() == 1
+        && o.unsupported_fields.len() == 1
+        && o.unsupported_fields[0] == "Geometry.userdata"
+        && matches!(&o.geometry, Some(Geometry::Curve(Curve::Nurbs(n))) if n.periodic && n.seam.is_none());
+    let owned_short_line = o.owned_short_line_userdata_only
+        && o.userdata.len() == 1
+        && o.unsupported_fields.len() == 1
+        && o.unsupported_fields[0] == "Geometry.userdata"
+        && matches!(&o.geometry, Some(Geometry::Curve(Curve::Line { .. })));
     o.admission_required
         && (o.preservation.admission_required || page_space)
         && o.native_component_type == 12
@@ -722,8 +909,7 @@ fn eligible_object(o: &dto::Object, mode: ImportMode, layers: &BTreeMap<Uuid, La
             .is_some_and(|id| layers.contains_key(&id))
         && (page_space
             || mode == ImportMode::Geometry
-            || (o.userdata.is_empty()
-                && o.unsupported_fields.is_empty()
+            || ((o.userdata.is_empty() && o.unsupported_fields.is_empty() || owned_periodic || owned_short_line)
                 && o.attributes.color_source <= 1
                 && default_preservation(&o.preservation, &["color_source", "native_color"])))
 }
@@ -900,6 +1086,7 @@ fn convert(
     mut held: Usage,
     l: &Limits,
     cancel: &Cancellation,
+    reserve_conversion: &mut impl FnMut(u64) -> Result<()>,
 ) -> Result<(ImportBundle, ImportReceipt)> {
     let count = d
         .components
@@ -1022,6 +1209,9 @@ fn convert(
             l,
         )?;
     }
+    // All maps and buffers estimated above must be visible to other jobs
+    // before creating the first owned conversion structures.
+    reserve_conversion(held.bytes)?;
     let mut source_units = d.source_units(
         options.units.model_mm_per_unit,
         options.units.page_mm_per_unit,
@@ -1163,6 +1353,7 @@ fn convert(
         },
         l,
     )?;
+    reserve_conversion(held.bytes)?;
     diagnostics
         .try_reserve_exact(diagnostic_count - diagnostics.len())
         .map_err(|_| Error::Budget("import diagnostics"))?;
@@ -1846,6 +2037,11 @@ fn convert(
             }
         }
         entities.push(e);
+    }
+    let empty_groups = groups.iter().filter(|group| group.members.is_empty()).count();
+    groups.retain(|group| !group.members.is_empty());
+    if empty_groups > 0 {
+        diagnostics.push(format!("{empty_groups} native groups without editable members remain retained-only."));
     }
     let retained_records = catalog.records.iter().filter(|r| r.host.is_none()).count();
     if retained_records > 0 {

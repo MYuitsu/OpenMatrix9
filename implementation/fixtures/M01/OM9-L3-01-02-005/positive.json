@@ -4,12 +4,12 @@
   "l4": "OM9-L4-01-02-005-02",
   "case": "command-option-parser-positive",
   "positive_oracle": "Option parser reads length=2.5mm angle=90deg from typed descriptors",
-  "declared_options": ["BothSides", "Length"],
+  "declared_options": ["BothSides"],
   "cases": [
     {
       "id": "O1-a-flag-is-read-without-case-or-padding",
       "typed": ["BothSides=Yes", "bothsides=no", " BothSides = No "],
-      "expect": { "prompts": ["Start of line (BothSides=Yes Length=): ", "Start of line (BothSides=No Length=): ", "Start of line (BothSides=No Length=): "] }
+      "expect": { "prompts": ["Start of line (BothSides=Yes): ", "Start of line (BothSides=No): ", "Start of line (BothSides=No): "] }
     },
     {
       "id": "O2-a-length-fixes-the-end-distance-and-the-click-chooses-the-direction",

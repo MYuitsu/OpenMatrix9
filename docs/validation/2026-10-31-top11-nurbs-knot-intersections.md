@@ -1,0 +1,11 @@
+# Top11 Split/Trim: intersections in narrow NURBS knot spans
+
+The whole-curve intersection sampler missed two crossings inside two consecutive `0.00001`-wide NURBS knot spans. The sampled solver now seeds both curves using uniform samples plus NURBS knots and span midpoints, including reversed and reseamed parameter mapping, then refines candidates from both directions. Cached sample points avoid reevaluating the second curve for every pair. The two-variable refinement had incorrect off-diagonal signs; those are corrected, with a full step and backtracking. At a knot where the first derivative is not continuous, a candidate can still be accepted by its measured distance instead of failing the entire operation. Scratch and output budgets are checked.
+
+The core regression first returned no crossings, and returned only one after knot seeding until the refinement signs were corrected. It now finds both actual points with either curve first and with the NURBS reversed, checks source fractions and verifies budget refusals. A separate C0-corner test checks the intersection at the knot without requiring a unique tangent. The initial application Trim run failed when recomputing intersections at an insufficient-continuity knot; it now passes.
+
+Split and Trim tests exercise CMD and toolbar, checking three or two pieces, respectively, the two boundary positions, `.om9` roundtrip and Undo/Redo. The three Split pieces and both boundaries also survived real 3DM export/import using admitted native adapter SHA-256 `bddca46577747333f9377b379351a077b710158f47ce6e279d7b6e21e6439615`. This 3DM interoperability check is not an openNURBS measurement batch.
+
+Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: 204 core library, 34 core Top11, 22 curve/surface, 122 app Top11 and 83 app Top11 BRep tests passed; 122 no-default app Top11 tests passed with existing warnings. The `.om9` addition and native 3DM case were rerun individually after the main suite.
+
+Sampling and local refinement do not prove all possible NURBS intersections, particularly multiple roots in one span, tangencies, overlaps, extreme coordinates, singular derivatives and very close repeated parameters. General curve intersections and physical desktop acceptance remain open; this evidence does not establish completion of Top11.

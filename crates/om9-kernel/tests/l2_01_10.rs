@@ -25,6 +25,138 @@ fn close(actual: f64, expected: f64, tolerance: f64) -> bool {
     (actual - expected).abs() <= tolerance
 }
 
+#[test]
+fn grouped_mesh_snapshot_binds_faces_to_their_source_solids() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let a = box_shape(1., 1., 1.);
+    let b = om9_kernel::transform_ops::transform_brep(&a, &Transform::translation([1.0000005, 0., 0.]), deflection(), &limits).unwrap();
+    let compound = editing::boolean(&a, &b, BooleanOp::Union, deflection(), &limits).unwrap().body().unwrap().clone();
+    assert_eq!(measured(&compound).solids, 2);
+    let topology = om9_kernel::brep::read_brep_with_shell_groups_and_edges(compound.source(), 0.1, 0.3, &limits).unwrap();
+    assert!(topology.max_source_tolerance().is_finite() && topology.max_source_tolerance() >= 1e-7,
+        "box topology must expose its OCCT tolerance");
+    let snapshot = topology.brep();
+    let owners = topology.shell_groups();
+    let binding_set = topology.bindings();
+    let bindings = binding_set.bindings();
+    assert!(!bindings.is_empty(), "closed boxes need edge-to-node bindings");
+    assert!(bindings.iter().all(|binding| binding.parameter().is_some()), "box edge nodes must carry curve parameters");
+    let mut parameters = std::collections::BTreeMap::<u32, Vec<f64>>::new();
+    for binding in bindings { parameters.entry(binding.edge).or_default().push(binding.parameter().unwrap()); }
+    assert!(parameters.values().any(|values| values.iter().any(|a| values.iter().any(|b| (a-b).abs() > 1e-6))),
+        "one edge must contain distinct curve positions; edge identity alone is insufficient");
+    assert!(bindings.iter().enumerate().any(|(i, a)| bindings.iter().enumerate().any(|(j, b)| a.edge != b.edge && a.vertex().is_some() && a.vertex() == b.vertex() && binding_set.same_source_site(i, j) == Some(true))),
+        "shared box vertices must match across their different incident edges");
+    assert!(bindings.iter().enumerate().any(|(i, a)| bindings.iter().enumerate().any(|(j, b)| a.edge == b.edge && a.parameter() != b.parameter() && a.vertex() != b.vertex() && binding_set.same_source_site(i, j) == Some(false))),
+        "different locations on one edge must not share a source site");
+    assert_eq!(binding_set.same_source_site(0, bindings.len()), None, "invalid indices must not be accepted");
+    assert!(topology.may_weld(0, bindings.len(), Transform::identity(), 0.001).is_err());
+    assert!(topology.may_weld(0, 0, Transform::identity(), f64::NAN).is_err());
+    assert!(topology.may_weld(0, 0, Transform::identity(), 0.0).unwrap());
+    let remap = topology.topology_remap(Transform::identity(), 1e-6).unwrap();
+    let mut incidence = std::collections::BTreeMap::<(u32, u32), usize>::new();
+    for [a, b, c, _] in &snapshot.display.triangles {
+        let tri = [remap[*a as usize], remap[*b as usize], remap[*c as usize]];
+        assert!(tri[0] != tri[1] && tri[1] != tri[2] && tri[0] != tri[2]);
+        for (a, b) in [(tri[0], tri[1]), (tri[1], tri[2]), (tri[2], tri[0])] {
+            *incidence.entry((a.min(b), a.max(b))).or_default() += 1;
+        }
+    }
+    assert!(incidence.values().all(|count| *count == 2), "box source edges must close after identity remap");
+    assert_eq!(owners.len(), snapshot.display.faces.len());
+    assert_eq!(owners.iter().copied().collect::<std::collections::BTreeSet<_>>(), [1, 2].into_iter().collect());
+    let mut point_faces = vec![std::collections::BTreeSet::new(); snapshot.display.points.len()];
+    for [a, b, c, face] in &snapshot.display.triangles {
+        for point in [a, b, c] { point_faces[*point as usize].insert(*face); }
+    }
+    let mut edge_faces = std::collections::BTreeMap::<u32, std::collections::BTreeSet<u32>>::new();
+    let mut vertex_faces = std::collections::BTreeMap::<u32, std::collections::BTreeSet<u32>>::new();
+    for binding in bindings {
+        edge_faces.entry(binding.edge).or_default().extend(&point_faces[binding.point as usize]);
+        if let Some(vertex) = binding.vertex() {
+            vertex_faces.entry(vertex).or_default().extend(&point_faces[binding.point as usize]);
+            let p = snapshot.display.points[binding.point as usize];
+            let v = snapshot.display.points[snapshot.display.vertices[vertex as usize] as usize];
+            assert!((0..3).map(|axis| (p[axis] - v[axis]).powi(2)).sum::<f64>().sqrt() < 1e-6);
+        }
+    }
+    assert_eq!(edge_faces.len(), 24, "all twelve edges of each box must be bound");
+    for faces in edge_faces.values() {
+        assert_eq!(faces.len(), 2, "each box edge must bind nodes from both neighboring faces");
+        assert_eq!(faces.iter().map(|face| owners[*face as usize]).collect::<std::collections::BTreeSet<_>>().len(), 1,
+            "a source edge must not connect separate shells");
+    }
+    assert_eq!(vertex_faces.len(), 16, "all corners of two boxes must bind canonical vertices");
+    assert!(vertex_faces.values().all(|faces| faces.len() == 3), "each box vertex must bind three adjacent faces");
+    let mut ranges = std::collections::BTreeMap::<u32, (f64, f64)>::new();
+    for [a, b, c, face] in &snapshot.display.triangles {
+        let range = ranges.entry(owners[*face as usize]).or_insert((f64::INFINITY, f64::NEG_INFINITY));
+        for point in [a, b, c] {
+            let x = snapshot.display.points[*point as usize][0];
+            range.0 = range.0.min(x);
+            range.1 = range.1.max(x);
+        }
+    }
+    let mut ranges = ranges.into_values().collect::<Vec<_>>();
+    ranges.sort_by(|a, b| a.0.total_cmp(&b.0));
+    assert!((ranges[0].1 - 1.).abs() < 1e-9);
+    assert!((ranges[1].0 - 1.0000005).abs() < 1e-9);
+}
+
+#[test]
+fn sphere_snapshot_reports_edge_bindings_at_periodic_seams() {
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 5. }, 0.1, &limits).unwrap();
+    let topology = om9_kernel::brep::read_brep_with_shell_groups_and_edges(sphere.source(), 0.1, 0.3, &limits).unwrap();
+    let snapshot = topology.brep();
+    let binding_set = topology.bindings();
+    let bindings = binding_set.bindings();
+    let (first, second) = bindings.iter().enumerate().find_map(|(i, a)| {
+        bindings.iter().enumerate().skip(i + 1).find_map(|(j, b)| {
+            (a.point != b.point && binding_set.same_source_site(i, j) == Some(true)
+                && snapshot.display.points[a.point as usize] == snapshot.display.points[b.point as usize]).then_some((i, j))
+        })
+    }).expect("sphere fixture must contain coincident nodes for one source site");
+    assert!(topology.may_weld(first, second, om9_core::geometry::Transform::identity(), 0.).unwrap());
+    let mut node_edges = vec![std::collections::BTreeSet::<u32>::new(); snapshot.display.points.len()];
+    let mut node_parameters = vec![Vec::<(u32, f64)>::new(); snapshot.display.points.len()];
+    let missing_parameters = bindings.iter().filter(|binding| binding.parameter().is_none()).count();
+    let vertex_bindings = bindings.iter().filter(|binding| binding.vertex().is_some()).count();
+    eprintln!("sphere edge bindings without parameters: {missing_parameters}/{}", bindings.len());
+    eprintln!("sphere edge bindings with verified endpoints: {vertex_bindings}");
+    for binding in bindings {
+        node_edges[binding.point as usize].insert(binding.edge);
+        if let Some(parameter) = binding.parameter() { node_parameters[binding.point as usize].push((binding.edge, parameter)); }
+    }
+    let mut used = std::collections::BTreeSet::new();
+    for [a, b, c, _] in &snapshot.display.triangles { used.extend([*a as usize, *b as usize, *c as usize]); }
+    let points = used.into_iter().collect::<Vec<_>>();
+    let remap = topology.topology_remap(om9_core::geometry::Transform::identity(), 1e-6).unwrap();
+    let remaining = points.iter().map(|point| remap[*point]).collect::<std::collections::BTreeSet<_>>().len();
+    assert!(remaining < points.len(), "periodic sphere must merge at least one verified seam site");
+    let mut bound = 0;
+    let mut unbound = 0;
+    let mut same_parameter = 0;
+    let mut no_same_parameter = 0;
+    for (i, &a) in points.iter().enumerate() {
+        for &b in &points[i + 1..] {
+            let p = snapshot.display.points[a]; let q = snapshot.display.points[b];
+            if (0..3).map(|axis| (p[axis]-q[axis]).powi(2)).sum::<f64>().sqrt() < 1e-9 {
+                if node_edges[a].is_disjoint(&node_edges[b]) { unbound += 1; } else {
+                    bound += 1;
+                    let matches = node_parameters[a].iter().any(|(edge, param)| node_parameters[b].iter()
+                        .any(|(other_edge, other_param)| edge == other_edge && (param - other_param).abs() < 1e-12));
+                    if matches { same_parameter += 1; } else { no_same_parameter += 1; }
+                }
+            }
+        }
+    }
+    eprintln!("sphere duplicate-node pairs with shared edge: {bound}, without shared edge: {unbound}");
+    eprintln!("sphere shared-edge pairs with matching parameter: {same_parameter}, without: {no_same_parameter}");
+    assert!(bound > 0, "the periodic fixture must exercise an edge-bound duplicate");
+}
+
 fn box_shape(dx: f64, dy: f64, dz: f64) -> Brep {
     creation::primitive(
         Primitive::Box {
@@ -1064,6 +1196,51 @@ fn m03_01_10_002() {
     ));
 }
 
+#[test]
+fn multi_cut_disjoint_tools_and_overlapping_fallback() {
+    let limits = limits();
+    let target = box_shape(10.0, 10.0, 10.0);
+    let tools = [box_at([1.0, 1.0, 1.0], 2.0, 2.0, 2.0),
+                 box_at([6.0, 6.0, 6.0], 2.0, 2.0, 2.0)];
+    let original = target.source().to_owned();
+    let outcome = editing::cut_disjoint_tools(&target, &tools, deflection(), &limits)
+        .expect("multi-cut").expect("disjoint boxes use multi-cut");
+    let body = outcome.body().expect("remaining solid");
+    let measures = measured(body);
+    assert!(close(measures.volume_mm3, 984.0, 1e-6));
+    assert_eq!(measures.solids, 1);
+    assert!(measures.closed);
+    assert_eq!(target.source(), original);
+    let overlapping = [tools[0].clone(), box_at([2.0, 1.0, 1.0], 2.0, 2.0, 2.0)];
+    assert!(editing::cut_disjoint_tools(&target, &overlapping, deflection(), &limits)
+        .expect("overlap screen").is_none());
+    let mut json = serde_json::to_value(&tools[0]).unwrap();
+    json["source"] = serde_json::Value::String("tampered".into());
+    let tampered: Brep = serde_json::from_value(json).unwrap();
+    assert!(editing::cut_disjoint_tools(&target, &[tampered, tools[1].clone()], deflection(), &limits).is_err());
+}
+
+#[test]
+fn dice_spheres_take_disjoint_multi_cut_path() {
+    let l = limits();
+    let target = box_shape(20.0, 20.0, 20.0);
+    let sphere = creation::primitive(creation::Primitive::Sphere { radius_mm: 1.5 }, deflection(), &l).unwrap();
+    let centers = [
+        [10.,10.,20.], [6.,5.,0.],[6.,10.,0.],[6.,15.,0.],[14.,5.,0.],[14.,10.,0.],[14.,15.,0.],
+        [6.,0.,6.],[14.,0.,14.], [6.,20.,6.],[6.,20.,14.],[10.,20.,10.],[14.,20.,6.],[14.,20.,14.],
+        [20.,6.,6.],[20.,10.,10.],[20.,14.,14.], [0.,6.,6.],[0.,6.,14.],[0.,14.,6.],[0.,14.,14.],
+    ];
+    let tools: Vec<_> = centers.into_iter().map(|p| om9_kernel::transform_ops::transform_brep(
+        &sphere, &om9_core::geometry::Transform::translation(p), deflection(), &l).unwrap()).collect();
+    let outcome = editing::cut_disjoint_tools(&target, &tools, deflection(), &l)
+        .expect("dice cut").expect("dice tools must use multi-cut path");
+    let m = measured(outcome.body().expect("dice body"));
+    assert_eq!(m.solids, 1);
+    assert!(m.closed);
+    let expected = 8000.0 - 21.0 * 2.0 * std::f64::consts::PI * 1.5_f64.powi(3) / 3.0;
+    assert!(close(m.volume_mm3, expected, 1e-4), "{} != {}", m.volume_mm3, expected);
+}
+
 /* ------------------------- 003 intersection ------------------------- */
 
 #[test]
@@ -1117,6 +1294,219 @@ fn m03_01_10_003() {
 }
 
 /* ------------------------- 004 split ------------------------- */
+
+#[test]
+fn exact_surface_split_accepts_multiple_placed_lines_and_a_closed_circle() {
+    use om9_core::geometry::{Curve, Geometry, Transform};
+    let face = Geometry::Brep(rect_face(10., 20.));
+    let vertical = Geometry::Curve(Curve::Line { start: [0., -1., 0.], end: [0., 21., 0.], domain: [0., 1.] });
+    let horizontal = Geometry::Curve(Curve::Line { start: [-1., 10., 0.], end: [11., 10., 0.], domain: [0., 1.] });
+    let split = om9_kernel::measurement::split_surface_by_geometry(
+        &face, Transform::identity(),
+        &[(&vertical, Transform::translation([5., 0., 0.])), (&horizontal, Transform::identity())],
+        deflection(), &limits(),
+    ).unwrap();
+    assert_eq!(split.pieces, 4);
+    assert!(close(measured(&split.brep).area_mm2, 200., 1e-6));
+    for index in 0..4 { assert!(close(face_area(&split.brep, index), 50., 1e-6)); }
+    let remainder = editing::remove_picked_face(&split.brep, [1., 1., 0.], 1e-4, deflection(), &limits()).unwrap().unwrap();
+    assert!(close(measured(&remainder).area_mm2, 150., 1e-6));
+    let merged = editing::unify_surface_regions(&remainder, deflection(), &limits()).unwrap();
+    assert_eq!(measured(&merged).faces, 1);
+    assert!(close(measured(&merged).area_mm2, 150., 1e-6));
+    let distance = |brep: &Brep, point| om9_kernel::measurement::distance(
+        &Geometry::Brep(brep.clone()), Transform::identity(), &Geometry::Point(point), Transform::identity(), &limits(),
+    ).unwrap().millimetres;
+    assert!((distance(&merged, [1., 1., 0.]) - 4.).abs() < 1e-6);
+    assert!(distance(&merged, [1., 19., 0.]) < 1e-7);
+    let updated_target = Geometry::Brep(merged);
+    let updated_split = om9_kernel::measurement::split_surface_by_geometry(
+        &updated_target, Transform::identity(), &[(&horizontal, Transform::identity())], deflection(), &limits(),
+    ).unwrap();
+    assert_eq!(updated_split.pieces, 2);
+    let mut updated_areas = [face_area(&updated_split.brep, 0), face_area(&updated_split.brep, 1)];
+    updated_areas.sort_by(f64::total_cmp);
+    assert!(close(updated_areas[0], 50., 1e-6) && close(updated_areas[1], 100., 1e-6));
+    let remainder = editing::remove_picked_face(&remainder, [9., 19., 0.], 1e-4, deflection(), &limits()).unwrap().unwrap();
+    assert!(close(measured(&remainder).area_mm2, 100., 1e-6));
+    let disjoint = editing::unify_surface_regions(&remainder, deflection(), &limits()).unwrap();
+    assert_eq!(measured(&disjoint).faces, 2);
+    assert!(close(measured(&disjoint).area_mm2, 100., 1e-6));
+    assert!(editing::remove_picked_face(&remainder, [5., 10., 0.], 1e-4, deflection(), &limits()).is_err());
+    let circle = Geometry::Curve(Curve::Circle {
+        center: [5., 10., 0.], x: [1., 0., 0.], y: [0., 1., 0.], radius: 2.,
+        domain: [0., std::f64::consts::TAU], angle_domain: None,
+    });
+    let split = om9_kernel::measurement::split_surface_by_geometry(
+        &face, Transform::identity(), &[(&circle, Transform::identity())], deflection(), &limits(),
+    ).unwrap();
+    assert_eq!(split.pieces, 2);
+    assert!(close(measured(&split.brep).area_mm2, 200., 1e-6));
+    let areas = [face_area(&split.brep, 0), face_area(&split.brep, 1)];
+    assert!(areas.iter().any(|area| close(*area, 4. * PI, 1e-6)));
+    let merged_circle = editing::unify_surface_regions(&split.brep, deflection(), &limits()).unwrap();
+    assert_eq!(measured(&merged_circle).faces, 1);
+    assert!(close(measured(&merged_circle).area_mm2, 200., 1e-6));
+    let moved = Transform::translation([30., -7., 4.]);
+    let split = om9_kernel::measurement::split_surface_by_geometry(
+        &face, moved, &[(&circle, moved)], deflection(), &limits(),
+    ).unwrap();
+    assert_eq!(split.pieces, 2);
+    assert!(close(measured(&split.brep).area_mm2, 200., 1e-6));
+}
+
+#[test]
+fn exact_nurbs_surface_can_be_split_by_another_surface() {
+    use om9_core::geometry::{Geometry, NurbsSurface, Transform};
+    let surface = |poles| Geometry::Surface(NurbsSurface {
+        degree: [1, 1], size: [2, 2], poles, weights: vec![1.; 4],
+        knots: [vec![0., 0., 1., 1.], vec![0., 0., 1., 1.]],
+        domain: [[0., 1.], [0., 1.]], periodic: [false, false], reversed: false,
+    });
+    let target = surface(vec![[0., 0., 0.], [0., 20., 0.], [10., 0., 0.], [10., 20., 0.]]);
+    let cutter = surface(vec![[5., -1., -1.], [5., -1., 1.], [5., 21., -1.], [5., 21., 1.]]);
+    let split = om9_kernel::measurement::split_surface_by_geometry(
+        &target, Transform::identity(), &[(&cutter, Transform::identity())], deflection(), &limits(),
+    ).unwrap();
+    assert_eq!(split.pieces, 2);
+    assert!(close(measured(&split.brep).area_mm2, 200., 1e-6));
+    for index in 0..2 { assert!(close(face_area(&split.brep, index), 100., 1e-6)); }
+}
+
+#[test]
+fn unify_regions_on_a_cylindrical_face_preserves_surface_area() {
+    use om9_core::geometry::{Curve, Geometry, Transform};
+    let cylinder = creation::primitive(Primitive::Cylinder { radius_mm: 5., height_mm: 10. }, deflection(), &limits()).unwrap();
+    let face = (0..measured(&cylinder).faces)
+        .map(|i| editing::extract_face(&cylinder, i, deflection(), &limits()).unwrap())
+        .find(|face| close(measured(face).area_mm2, 100. * PI, 1e-6)).unwrap();
+    let tools: Vec<_> = [[0., 5.], [-5., 0.], [0., -5.]].into_iter().map(|xy| Geometry::Curve(Curve::Line {
+        start: [xy[0], xy[1], -1.], end: [xy[0], xy[1], 11.], domain: [0., 1.],
+    })).collect();
+    let cutters: Vec<_> = tools.iter().map(|tool| (tool, Transform::identity())).collect();
+    let split = om9_kernel::measurement::split_surface_by_geometry(
+        &Geometry::Brep(face), Transform::identity(), &cutters, deflection(), &limits(),
+    ).unwrap();
+    assert!(split.pieces >= 3);
+    let merged = editing::unify_surface_regions(&split.brep, deflection(), &limits()).unwrap();
+    assert_eq!(measured(&merged).faces, 1);
+    assert!(close(measured(&merged).area_mm2, 100. * PI, 1e-5));
+    let diagonal = 5. / 2_f64.sqrt();
+    let removed = editing::remove_picked_face(&split.brep, [diagonal, diagonal, 5.], 1e-5, deflection(), &limits()).unwrap().unwrap();
+    let kept = editing::unify_surface_regions(&removed, deflection(), &limits()).unwrap();
+    assert_eq!(measured(&kept).faces, 1);
+    assert!(close(measured(&kept).area_mm2, 75. * PI, 1e-5));
+    let distance = om9_kernel::measurement::distance(
+        &Geometry::Brep(kept), Transform::identity(), &Geometry::Point([diagonal, diagonal, 5.]), Transform::identity(), &limits(),
+    ).unwrap().millimetres;
+    assert!(distance > 3.0, "removed quadrant distance {distance}");
+}
+
+#[test]
+fn unify_trim_regions_preserves_original_coplanar_face_boundary() {
+    use om9_core::geometry::{Curve, Geometry, Transform};
+    let left = rect_face(5., 20.);
+    let right_profile = Profile::new(vec![[5., 0., 0.], [10., 0., 0.], [10., 20., 0.], [5., 20., 0.]]).unwrap();
+    let right = creation::planar(&right_profile, deflection(), &limits()).unwrap();
+    let original = editing::sew(&left, &right, 1e-6, deflection(), &limits()).unwrap();
+    assert_eq!(measured(&original).faces, 2);
+    let line = Geometry::Curve(Curve::Line { start: [-1., 10., 0.], end: [11., 10., 0.], domain: [0., 1.] });
+    let partition = om9_kernel::measurement::split_surface_by_geometry(
+        &Geometry::Brep(original.clone()), Transform::identity(), &[( &line, Transform::identity())], deflection(), &limits(),
+    ).unwrap();
+    assert_eq!(partition.pieces, 4);
+    let merged = editing::unify_surface_regions_preserving_edges(&partition.brep, &original, deflection(), &limits()).unwrap();
+    assert_eq!(measured(&merged).faces, 2);
+    assert!(close(measured(&merged).area_mm2, 200., 1e-6));
+    let remaining = editing::remove_picked_face(&partition.brep, [1., 1., 0.], 1e-5, deflection(), &limits()).unwrap().unwrap();
+    let merged = editing::unify_surface_regions_preserving_edges(&remaining, &original, deflection(), &limits()).unwrap();
+    assert_eq!(measured(&merged).faces, 2);
+    assert!(close(measured(&merged).area_mm2, 150., 1e-6));
+    let mut areas = [face_area(&merged, 0), face_area(&merged, 1)];
+    areas.sort_by(f64::total_cmp);
+    assert!(close(areas[0], 50., 1e-6) && close(areas[1], 100., 1e-6));
+    let moved = Transform::translation([12., -3., 4.]);
+    let world_original = om9_kernel::transform_ops::transform_brep(&original, &moved, deflection(), &limits()).unwrap();
+    let partition = om9_kernel::measurement::split_surface_by_geometry(
+        &Geometry::Brep(original.clone()), moved, &[(&line, moved)], deflection(), &limits(),
+    ).unwrap();
+    let merged = editing::unify_surface_regions_preserving_edges(&partition.brep, &world_original, deflection(), &limits()).unwrap();
+    assert_eq!(measured(&merged).faces, 2);
+    assert!(close(measured(&merged).area_mm2, 200., 1e-6));
+}
+
+#[test]
+fn split_and_trim_solid_boundary_preserves_other_faces() {
+    use om9_core::geometry::{Geometry, Transform};
+    let solid = box_shape(10., 10., 10.);
+    let cutter_profile = Profile::new(vec![[5., -5., -5.], [5., 15., -5.], [5., 15., 15.], [5., -5., 15.]]).unwrap();
+    let cutter = creation::planar(&cutter_profile, deflection(), &limits()).unwrap();
+    let split = om9_kernel::measurement::split_surface_by_geometry(
+        &Geometry::Brep(solid.clone()), Transform::identity(),
+        &[(&Geometry::Brep(cutter), Transform::identity())], deflection(), &limits(),
+    ).unwrap();
+    let split_measure = measured(&split.brep);
+    assert_eq!(split.pieces, 10);
+    assert_eq!(split_measure.solids, 0);
+    assert!(close(split_measure.area_mm2, 600., 1e-6));
+    let remaining = editing::remove_picked_face(&split.brep, [2., 0., 2.], 1e-5, deflection(), &limits()).unwrap().unwrap();
+    let merged = editing::unify_surface_regions_preserving_edges(&remaining, &solid, deflection(), &limits()).unwrap();
+    let after = measured(&merged);
+    assert_eq!(after.solids, 0);
+    assert_eq!(after.faces, 6);
+    assert!(!after.closed && after.naked_edges > 0);
+    assert!(close(after.area_mm2, 550., 1e-6));
+}
+
+#[test]
+fn exact_face_split_handles_nurbs_curve_and_placed_brep_cutter() {
+    use om9_core::geometry::{Curve, Geometry, NurbsCurve, Transform};
+    let target = Geometry::Brep(rect_face(10., 20.));
+    let curve = Geometry::Curve(Curve::Nurbs(NurbsCurve {
+        degree: 2, poles: vec![[5., -1., 0.], [7., 10., 0.], [5., 21., 0.]],
+        weights: vec![1., 1., 1.], knots: vec![0., 0., 0., 1., 1., 1.],
+        domain: [0., 1.], periodic: false, reversed: false, seam: None,
+    }));
+    let box_cutter = Geometry::Brep(box_shape(2., 3., 4.));
+    for (tool, placement) in [(&curve, Transform::identity()), (&box_cutter, Transform::translation([3., 4., -2.]))] {
+        let split = om9_kernel::measurement::split_surface_by_geometry(
+            &target, Transform::identity(), &[(tool, placement)], deflection(), &limits(),
+        ).unwrap();
+        assert_eq!(split.pieces, 2);
+        assert!(close(measured(&split.brep).area_mm2, 200., 1e-5));
+    }
+    assert!(om9_kernel::measurement::split_surface_by_geometry(
+        &target, Transform::identity(), &[(&box_cutter, Transform::translation([30., 4., -2.]))], deflection(), &limits(),
+    ).is_err());
+}
+
+#[test]
+fn trim_face_by_polyline_removes_the_picked_region_and_rejects_ambiguous_picks() {
+    let face = rect_face(10., 20.);
+    let source = face.clone();
+    let line = [[3., -5., 0.], [3., 25., 0.]];
+    for (point, remaining) in [([1., 10., 0.], 140.), ([8., 10., 0.], 60.)] {
+        let result = editing::trim_face_by_polyline(
+            &face, &line, point, 1e-4, deflection(), &limits(),
+        ).unwrap();
+        assert_eq!(measured(&result).faces, 1);
+        assert!(close(measured(&result).area_mm2, remaining, 1e-6));
+    }
+    for point in [[3., 10., 0.], [50., 10., 0.], [1., 10., 1.]] {
+        assert!(editing::trim_face_by_polyline(
+            &face, &line, point, 1e-4, deflection(), &limits(),
+        ).is_err());
+    }
+    for tolerance in [0., -1., f64::NAN] {
+        assert!(editing::trim_face_by_polyline(
+            &face, &line, [1., 10., 0.], tolerance, deflection(), &limits(),
+        ).is_err());
+    }
+    assert!(editing::trim_face_by_polyline(
+        &face, &line, [f64::NAN, 10., 0.], 1e-4, deflection(), &limits(),
+    ).is_err());
+    assert_eq!(face, source);
+}
 
 #[test]
 fn m03_01_10_004() {
@@ -2039,4 +2429,18 @@ fn m03_01_10_receipt() {
     report.pop();
     report.push_str("}}");
     println!("{report}");
+}
+#[test]
+fn certified_periodic_nurbs_partitions_planar_face() {
+    use om9_core::geometry::{Curve,Geometry,NurbsCurve,Transform};
+    let limits=limits();
+    let face=Geometry::Surface(om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,20.,&limits).unwrap());
+    let mut n=NurbsCurve{degree:2,poles:vec![[3.,8.,0.],[7.,8.,0.],[7.,12.,0.],[3.,12.,0.],[3.,8.,0.],[7.,8.,0.]],
+        weights:vec![1.,0.7,1.2,0.9,1.,0.7],knots:vec![-2.,-1.,0.,1.,2.,3.,4.,5.,6.],domain:[0.,4.],periodic:true,reversed:false,seam:None};
+    let cutter=Geometry::Curve(Curve::Nurbs(n.clone()));
+    let split=om9_kernel::measurement::split_surface_by_geometry(&face,Transform::identity(),&[(&cutter,Transform::identity())],deflection(),&limits).unwrap();
+    assert_eq!(split.pieces,2);assert!(close(measured(&split.brep).area_mm2,200.,1e-6));
+    let areas=[face_area(&split.brep,0),face_area(&split.brep,1)];assert!(areas.iter().all(|a|*a>0.));
+    n.poles[5][0]+=0.1;let bad=Geometry::Curve(Curve::Nurbs(n));
+    assert!(om9_kernel::measurement::split_surface_by_geometry(&face,Transform::identity(),&[(&bad,Transform::identity())],deflection(),&limits).is_err());
 }

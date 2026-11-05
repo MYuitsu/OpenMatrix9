@@ -1,0 +1,13 @@
+# Top11 Join: bounded NURBS surfaces and BReps — 2026-10-31
+
+Status: partial automated evidence; not full Top11 or M03-UI acceptance.
+
+Join now admits selections of bounded NURBS surfaces and BReps through the same CMD/toolbar owner. A small synchronous OCCT adapter converts a validated surface to a single owned BRep face snapshot; Rust owns document data, selection, validation, ordering, transaction and Undo. Native code only constructs/validates the OCCT face and emits a bounded snapshot; input arrays are borrowed only for the synchronous call, exceptions are caught at the C ABI, and the Rust side owns the result. OCCT is not memory-safe merely because Rust calls it. Existing sewing logic uses world placement and document tolerance and verifies face count, one shell and reduced naked edges. Reversed surfaces are explicitly refused; no-default builds keep surface/BRep Join unavailable.
+
+App fixtures check two separately placed planar NURBS surfaces through CMD and toolbar (two faces, one shell, six naked edges and area 12), and a three-part mixed surface/BRep chain (three faces, one shell, eight naked edges, area 18); .om9 roundtrip and Undo/Redo are exercised, as are disconnected and reversed-input atomic refusal. Kernel tests check conversion and invalid inputs, plus a rational curved NURBS at three points against Rust surface evaluation via OCCT ray intersections. This does not establish general surface sewing, periodic surfaces, curved-surface Join, toleranced edge families, 3DM exchange or physical UI acceptance.
+
+Windows x64, CARGO_TARGET_DIR=L:\om9-target, -j 2: the OCCT 8.0.1 project SDK pin was used without include/lib overrides; 76 OCCT kernel tests passed with 3dm-brep, and the extra rational sample fixture passed separately. 48 core curve_ops/top11 tests, 182 app Top11/options/BRep/snapshot tests and 107 no-default app tests passed. No-default has existing unrelated warnings. Physical desktop and signed M03-UI acceptance remain open; a prior desktop launch returned access denied. No openNURBS measurement batch was performed.
+
+Source SHA-256: measurement.rs `ca9104cdf57edd9d4d389d73584e4e6ef42e3e54274470ae2319dd177eac7834`; measurement_bridge.cpp `e658b9631350363e639ca246dce8473f8bbd925b1726df7478a03ae6e698dd06`; kernel tests/l2_02_05.rs `55e2a54f49c911c2fc3b90d8f2c325bb6f1165f5f6572fecf60c18ebc2a66260`; app session/top11.rs `8061e19bf11325b76ae0e1966394906077957451906a58cbff5bc150e67368b6`; app tests/top11_brep.rs `78073e8e2aafbd91e00b1d24310ffec2e26d33dc35f84abffcea5fd515cf90d7`.
+
+Update: [reversed/curved evidence](2026-10-31-top11-join-reversed-curved.md) covers U/V reversed planes, a rational curved pair and a limited tolerance fixture; wider cases remain open.

@@ -1,0 +1,11 @@
+# Clipboard candidate-scene admission — 2026-11-04
+
+Previously OM9 clipboard paste constructed its candidate scene before its actual scene bytes were added to prepared held usage, so competing shared-account jobs could not see that scene construction. The paste path now includes projected selection memory in held usage before transaction preparation, then uses the existing candidate-scene commit path. That path registers the prepared document and reserves scratch and estimated scene construction before building, reconciles actual scene capacity and retains the reservation through commit/publication. Success still selects selectable pasted roots; the document and history remain unchanged on pre-commit failure.
+
+Default-feature tests with OCCT 8.0.1, E: debug target and `-j 2`:
+
+- A new `clipboard_paste_under_shared_pressure_preserves_redo_and_can_retry` test reserves the remaining shared headroom, checks budget refusal preserves the document, scene epoch, selection and prior Redo, then releases pressure and verifies successful paste, Undo and Redo. This pressure is present before transaction preparation; it does not independently inject a competing reservation exactly during scene construction.
+- `clipboard_om9`: 18 passed, three native tests ignored in the default run (25.87 s build, 0.12 s tests). A separate configured native run using `E:\om9-native-definition-release\om9-exchange-native.exe` SHA-256 `0e159f1571d15e853c924e3ba2140480a816c77f1ab95845cc9cc7373b8d25ef` passed those three in 7.82 s. Fixtures cover line and B-rep clipboard, Undo and sidecar conflict.
+- `interactive_memory_limits`: nine passed and six large-resource/geometry tests intentionally ignored (0.07 s tests); point-limit paste and over-limit failure remain covered.
+
+This follows the common candidate-scene mechanism whose separate injected tests cover reservation visibility, physical pressure and reconciliation; it is not a test of every concurrent interleaving. Actual capacity excess is known after allocation; the published scene and its lazy caches are not yet persistent registered owners. Clipboard payload/selection allocation details, native OCCT peaks, actual OS exhaustion and desktop behavior remain outside this result. No process-wide RAM ceiling or complete 3DM accuracy is established.

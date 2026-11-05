@@ -3,6 +3,123 @@
 //! already present in `assets/features.json`; every enabled row dispatches to the OCCT
 //! owner in `om9-kernel`, never to a second geometry implementation in the UI.
 use super::*;
+
+#[cfg(all(test, feature = "occt-brep"))]
+mod box_base_preview_tests {
+    use super::*;
+
+    #[test]
+    fn corners_show_only_the_base_until_the_height_stage() {
+        for input in [false, true] {
+            for end in [[13.,27.,0.],[-7.,27.,0.],[13.,-13.,0.],[-7.,-13.,0.]] {
+                let mut c = Controller::new(Document::new("box preview"), Limits::default()).unwrap();
+                let before = c.document().clone(); c.submit("Box").unwrap();
+                if input { c.submit("3,7,0").unwrap(); } else { c.accept_world_point([3.,7.,0.]).unwrap(); }
+                let wire = c.solid_preview(end);
+                assert_eq!(wire.len(),4);
+                assert!(wire.iter().all(|[a,b]| a != b && a[2] == 0. && b[2] == 0.));
+                assert!(wire.iter().flatten().any(|p| *p == [3.,7.,0.]));
+                assert!(wire.iter().flatten().any(|p| *p == end));
+                assert_eq!(c.document(),&before);
+                if input { c.submit(&format!("{},{},0",end[0],end[1])).unwrap(); } else { c.accept_world_point(end).unwrap(); }
+                assert_eq!(c.solid_preview([3.,7.,5.]).len(),12);
+                assert_eq!(c.coordinator().undo_len(),0);
+                if end == [13.,27.,0.] {
+                    c.accept_world_point([3.,7.,5.]).unwrap();
+                    assert_eq!(c.coordinator().undo_len(),1);assert_eq!(c.document().entities.len(),1);
+                    c.undo().unwrap();assert_eq!(c.document(),&before);
+                } else { c.cancel();assert_eq!(c.document(),&before); }
+            }
+        }
+    }
+
+    #[test]
+    fn base_rectangle_uses_the_captured_rotated_plane() {
+        let mut c = Controller::new(Document::new("rotated box"), Limits::default()).unwrap();
+        c.set_cplane_from_three_points([0.,0.,0.],[0.,1.,0.],[0.,0.,1.]).unwrap();
+        c.submit("Box").unwrap();c.accept_world_point([10.,20.,30.]).unwrap();
+        let end = [10.,16.,33.];let wire = c.solid_preview(end);
+        assert_eq!(wire.len(),4);assert!(wire.iter().flatten().all(|p| (p[0]-10.).abs()<1e-9));
+        assert!(wire.iter().flatten().any(|p| *p == end));
+        c.accept_world_point(end).unwrap();assert_eq!(c.solid_preview([15.,20.,30.]).len(),12);
+    }
+
+    #[test]
+    fn diagonal_and_center_preview_base_before_height() {
+        for mode in ["Diagonal", "Center"] {
+            let mut c = Controller::new(Document::new("box mode preview"), Limits::default()).unwrap();
+            c.submit("Box").unwrap();c.submit(mode).unwrap();c.accept_world_point([3.,7.,0.]).unwrap();
+            let wire=c.solid_preview([13.,27.,0.]);assert_eq!(wire.len(),4);
+            assert!(wire.iter().flatten().all(|p|p[2] == 0.));
+            c.accept_world_point([13.,27.,0.]).unwrap();assert_eq!(c.solid_preview([3.,7.,5.]).len(),12);
+        }
+    }
+
+    #[test]
+    fn height_ray_starts_at_the_second_corner_without_jumping() {
+        use om9_scene::camera::{Camera, Viewport};
+        let camera=Camera::perspective([30.,-40.,35.],[0.,0.,0.],[0.,0.,1.],0.8).unwrap();
+        let viewport=Viewport {origin:[0.,0.],size:[1280.,720.]};
+        for mode in ["Corners","Diagonal","Center"] {
+            for second in [[13.,27.,0.],[-7.,27.,0.],[13.,-13.,0.],[-7.,-13.,0.]] {
+                let mut c=Controller::new(Document::new("height anchor"),Limits::default()).unwrap();
+                c.submit("Box").unwrap();if mode!="Corners" {c.submit(mode).unwrap();}
+                c.accept_world_point([3.,7.,0.]).unwrap();c.accept_world_point(second).unwrap();
+                for height in [0.,5.,-5.] {
+                    let target=[second[0],second[1],height];
+                    let screen=camera.project(target,viewport).unwrap().unwrap().screen;
+                    let point=c.box_height_ray_point(&camera.ray(screen,viewport).unwrap()).unwrap();
+                    assert!((point[2]-height).abs()<1e-8,"mode={mode} target={target:?} got={point:?}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn height_ray_uses_the_second_corner_in_a_rotated_plane() {
+        use om9_scene::camera::{Camera, Viewport};
+        let mut c=Controller::new(Document::new("rotated height anchor"),Limits::default()).unwrap();
+        c.set_cplane_from_three_points([0.,0.,0.],[0.,1.,0.],[0.,0.,1.]).unwrap();
+        c.submit("Box").unwrap();c.accept_world_point([10.,20.,30.]).unwrap();
+        let corner=[10.,16.,33.];c.accept_world_point(corner).unwrap();
+        let camera=Camera::perspective([40.,-30.,60.],[10.,18.,31.],[0.,0.,1.],0.8).unwrap();
+        let viewport=Viewport {origin:[0.,0.],size:[1280.,720.]};
+        for height in [0.,5.,-5.] {
+            let target=[corner[0]+height,corner[1],corner[2]];
+            let screen=camera.project(target,viewport).unwrap().unwrap().screen;
+            let point=c.box_height_ray_point(&camera.ray(screen,viewport).unwrap()).unwrap();
+            assert!((point[0]-target[0]).abs()<1e-8,"target={target:?} got={point:?}");
+        }
+    }
+}
+
+#[cfg(all(test, feature = "occt-brep"))]
+mod sphere_preview_grid_tests {
+    use super::*;
+
+    #[test]
+    fn preview_has_six_meridian_arcs_and_three_horizontal_circles() {
+        let mut c=Controller::new(Document::new("sphere preview grid"),Limits::default()).unwrap();
+        let before=c.document().clone();c.submit("Sphere").unwrap();c.accept_world_point([1.,2.,3.]).unwrap();
+        let wire=c.solid_preview([5.,2.,3.]);assert_eq!(wire.len(),384);
+        for [a,b] in &wire {
+            for p in [a,b] {let r=((p[0]-1.).powi(2)+(p[1]-2.).powi(2)+(p[2]-3.).powi(2)).sqrt();assert!((r-4.).abs()<1e-9);}
+        }
+        for index in 0..3 {
+            let azimuth=std::f64::consts::PI*index as f64/3.;
+            assert!(wire[index*64..(index+1)*64].iter().flatten().all(|p|
+                ((p[0]-1.)*azimuth.sin()-(p[1]-2.)*azimuth.cos()).abs()<1e-9));
+            assert!(wire[index*64..(index+1)*64].iter().flatten().any(|p|(p[2]-7.).abs()<1e-9));
+            assert!(wire[index*64..(index+1)*64].iter().flatten().any(|p|(p[2]+1.).abs()<1e-9));
+        }
+        for (index,z) in [1.,3.,5.].into_iter().enumerate() {
+            assert!(wire[(3+index)*64..(4+index)*64].iter().flatten().all(|p|(p[2]-z).abs()<1e-9));
+        }
+        assert_eq!(c.document(),&before);assert_eq!(c.coordinator().undo_len(),0);
+        c.accept_world_point([5.,2.,3.]).unwrap();assert_eq!(c.document().entities.len(),1);
+        c.undo().unwrap();assert_eq!(c.document(),&before);
+    }
+}
 pub(super) use super::solid_pending::*;
 pub(super) use super::solid_geometry::*;
 
@@ -833,32 +950,34 @@ impl Controller {
         if radius <= 1e-9 {
             return Vec::new();
         }
-        let mut edges = Vec::with_capacity(192);
-        for axis in 0..3 {
+        // Three meridian circles produce six pole-to-pole arcs. Three latitude
+        // circles include the equator and the two half-height parallels.
+        let mut edges = Vec::with_capacity(384);
+        for meridian in 0..3 {
+            let azimuth = std::f64::consts::PI * meridian as f64 / 3.0;
+            let (azimuth_sin, azimuth_cos) = azimuth.sin_cos();
             for index in 0..64 {
                 let first = std::f64::consts::TAU * index as f64 / 64.0;
                 let second = std::f64::consts::TAU * (index + 1) as f64 / 64.0;
                 let point_at = |angle: f64| {
                     let (sin, cos) = angle.sin_cos();
-                    match axis {
-                        0 => [
-                            center[0],
-                            center[1] + radius * cos,
-                            center[2] + radius * sin,
-                        ],
-                        1 => [
-                            center[0] + radius * cos,
-                            center[1],
-                            center[2] + radius * sin,
-                        ],
-                        _ => [
-                            center[0] + radius * cos,
-                            center[1] + radius * sin,
-                            center[2],
-                        ],
-                    }
+                    [center[0] + radius * cos * azimuth_cos,
+                     center[1] + radius * cos * azimuth_sin,
+                     center[2] + radius * sin]
                 };
                 edges.push([point_at(first), point_at(second)]);
+            }
+        }
+        for fraction in [-0.5_f64, 0., 0.5] {
+            let ring_radius = radius * (1.0 - fraction * fraction).sqrt();
+            let point_at = |angle: f64| {
+                let (sin, cos) = angle.sin_cos();
+                [center[0] + ring_radius * cos, center[1] + ring_radius * sin, center[2] + radius * fraction]
+            };
+            for index in 0..64 {
+                let first = std::f64::consts::TAU * index as f64 / 64.0;
+                let second = std::f64::consts::TAU * (index + 1) as f64 / 64.0;
+                edges.push([point_at(first),point_at(second)]);
             }
         }
         edges
@@ -1036,6 +1155,13 @@ impl Controller {
         let to_world = |local: [f64; 3]| {
             std::array::from_fn(|i| first[i] + (0..3).map(|j| local[j] * axes[j][i]).sum::<f64>())
         };
+        let base_edges = |origin: [f64; 3], dx: f64, dy: f64| {
+            let corner = |u: f64, v: f64| {
+                std::array::from_fn(|i| origin[i] + u * axes[0][i] + v * axes[1][i])
+            };
+            let corners = [origin, corner(dx, 0.), corner(dx, dy), corner(0., dy)];
+            (0..4).map(|i| [corners[i], corners[(i + 1) % 4]]).collect()
+        };
         if pending.box_kind == "Center"
             && pending.points.len() == 1
             && pending.box_length > 0.0
@@ -1061,7 +1187,7 @@ impl Controller {
             let y = dot(delta, axes[1]);
             let dx = x.abs();
             let dy = y.abs();
-            if !height.is_finite() || height.abs() <= 1e-9 || dx <= 1e-9 || dy <= 1e-9 {
+            if !height.is_finite() || dx <= 1e-9 || dy <= 1e-9 {
                 return Vec::new();
             }
             let center = pending.box_kind == "Center";
@@ -1071,6 +1197,9 @@ impl Controller {
             } else {
                 to_world([x.min(0.0), y.min(0.0), height.min(0.0)])
             };
+            if height.abs() <= 1e-9 {
+                return base_edges(origin, factor * dx, factor * dy);
+            }
             return box_wire_edges([factor * dx, factor * dy, height.abs()], axes, origin);
         }
         if pending.points.len() == 1
@@ -1092,11 +1221,9 @@ impl Controller {
             } else {
                 to_world([x.min(0.), y.min(0.), 0.])
             };
-            return box_wire_edges(
-                [factor * x.abs(), factor * y.abs(), factor * y.abs()],
-                axes,
-                origin,
-            );
+            let dx = factor * x.abs();
+            let dy = factor * y.abs();
+            return base_edges(origin, dx, dy);
         }
         if pending.points.len() >= 2 && matches!(pending.box_kind, "ThreePoint" | "Vertical") {
             let Ok((length, box_axes)) = box_edge_axes(
@@ -2533,17 +2660,25 @@ impl Controller {
                 return vec![("Undo", "Undo"), ("Cancel", "Cancel")];
             }
             if pending.points.is_empty() && pending.sphere_center.is_none() {
-                return vec![
-                    ("Center", "Mode=Center"),
-                    ("2Point", "Mode=2Point"),
-                    ("3Point", "Mode=3Point"),
-                    ("4Point", "Mode=4Point"),
-                    ("Vertical", "Mode=Vertical"),
-                    ("AroundCurve", "Mode=AroundCurve"),
-                    ("FitPoints", "Mode=FitPoints"),
-                    ("Tangent", "Mode=Tangent"),
-                    ("Cancel", "Cancel"),
-                ];
+                // Construction modes only; the current mode is the prompt word
+                // (`Center of sphere`), not a repeated option.
+                let mut tokens = Vec::new();
+                for (label, kind, command) in [
+                    ("Center", "Center", "Mode=Center"),
+                    ("2Point", "TwoPoint", "Mode=2Point"),
+                    ("3Point", "ThreePoint", "Mode=3Point"),
+                    ("4Point", "FourPoint", "Mode=4Point"),
+                    ("Vertical", "Vertical", "Mode=Vertical"),
+                    ("AroundCurve", "AroundCurve", "Mode=AroundCurve"),
+                    ("FitPoints", "FitPoints", "Mode=FitPoints"),
+                    ("Tangent", "Tangent", "Mode=Tangent"),
+                ] {
+                    if pending.sphere_kind != kind {
+                        tokens.push((label, command));
+                    }
+                }
+                tokens.push(("Cancel", "Cancel"));
+                return tokens;
             }
             let mut tokens = Vec::new();
             if (pending.sphere_kind == "TangentPoint" && pending.points.len() >= 2)
@@ -2562,13 +2697,13 @@ impl Controller {
             return Vec::new();
         }
         if pending.points.is_empty() {
+            // The documented Box prompt names exactly these four modes; Cube appears only
+            // after a Diagonal first corner, and Cancel is the Esc key, not a prompt word.
             return vec![
                 ("Diagonal", "Mode=Diagonal"),
                 ("3Point", "Mode=3Point"),
                 ("Vertical", "Mode=Vertical"),
                 ("Center", "Mode=Center"),
-                ("Cube", "Mode=Cube"),
-                ("Cancel", "Cancel"),
             ];
         }
         let mut tokens = Vec::new();
@@ -2694,6 +2829,14 @@ impl Controller {
         let Some(mut pending) = self.solid_pending.take() else {
             return None;
         };
+        // Every solid prompt advertises Cancel. Handle the word once here so a
+        // feature handler cannot read it as a coordinate or an option value.
+        let input = text.trim();
+        if input.eq_ignore_ascii_case("cancel") || input.eq_ignore_ascii_case("esc") {
+            self.clear_subselection();
+            self.cancel();
+            return Some(Ok(()));
+        }
         #[cfg(feature = "occt-brep")]
         if pending.feature == "SolidRibDevelopment" {
             let input=text.trim();
@@ -3779,7 +3922,7 @@ impl Controller {
 
     /// The point under the pointer for a Box height step. The usual construction-plane
     /// intersection pins z to the plane, so clicking for a height would always report zero;
-    /// this intersects a vertical plane through the first base point instead.
+    /// this intersects a vertical plane through the last selected base corner instead.
     pub fn box_height_ray_point(
         &self,
         ray: &om9_scene::camera::Ray,
@@ -3926,6 +4069,13 @@ impl Controller {
         } else {
             plane.normal()
         };
+        let anchor = if matches!(pending.box_kind, "Corners" | "Diagonal" | "Center") {
+            let second = pending.points.get(1).copied().unwrap_or(first);
+            let offset = (0..3).map(|i| (second[i] - first[i]) * axis[i]).sum::<f64>();
+            std::array::from_fn(|i| second[i] - offset * axis[i])
+        } else {
+            first
+        };
         let along = (0..3).map(|i| ray.direction[i] * axis[i]).sum::<f64>();
         let mut normal = std::array::from_fn::<_, 3, _>(|i| ray.direction[i] - along * axis[i]);
         let length = (normal[0].powi(2) + normal[1].powi(2) + normal[2].powi(2)).sqrt();
@@ -3941,9 +4091,9 @@ impl Controller {
             return None;
         }
         let offset = [
-            first[0] - ray.origin[0],
-            first[1] - ray.origin[1],
-            first[2] - ray.origin[2],
+            anchor[0] - ray.origin[0],
+            anchor[1] - ray.origin[1],
+            anchor[2] - ray.origin[2],
         ];
         let t =
             (offset[0] * normal[0] + offset[1] * normal[1] + offset[2] * normal[2]) / denominator;
@@ -4626,16 +4776,15 @@ impl Controller {
         select: Option<Vec<om9_core::identity::ObjectId>>,
         extra: Option<om9_core::budget::Usage>,
     ) -> Result<()> {
-        let mut held = self.auxiliary_usage()?;
+        let mut held = self.scene_cache_usage()?;
         if let Some(extra) = extra {
             held.add(extra, self.coordinator.limits())?;
         }
         let prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new(name, mutations), held)?;
-        let receipt = self.coordinator.commit(prepared)?;
+        let receipt = self.commit_with_candidate_scene(prepared, held)?;
         if receipt.published {
-            self.refresh_scene()?;
             self.sync_published(om9_core::changes::ChangeCause::Edit);
             if let Some(ids) = select {
                 self.select_objects(&ids)?;
@@ -4849,33 +4998,35 @@ impl Controller {
                 }
             };
         }
-        let mut cutter_body = self.world_solid_brep(cutter_stamps[0].object)?;
-        for cutter in &cutter_stamps[1..] {
-            let operand = self.world_solid_brep(cutter.object)?;
-            cutter_body = match editing::boolean(
-                &cutter_body,
-                &operand,
-                BooleanOp::Union,
-                deflection,
-                self.coordinator.limits(),
-            )
-            .map_err(|error| Error::Io(format!("solid cutter union: {error}")))?
-            {
-                editing::BooleanOutcome::Body(body) => body,
-                editing::BooleanOutcome::Empty => {
-                    return Err(Error::Invalid("cutter union produced an empty body"));
-                }
-            };
-        }
-        let body = match editing::boolean(
-            &target_body,
-            &cutter_body,
-            op,
-            deflection,
-            self.coordinator.limits(),
-        )
-        .map_err(|error| Error::Io(format!("solid boolean: {error}")))?
-        {
+        let fast = if op == BooleanOp::Difference && cutter_stamps.len() > 1 {
+            let mut cutter_bodies = Vec::new();
+            cutter_bodies.try_reserve_exact(cutter_stamps.len())
+                .map_err(|_| Error::Budget("boolean cutters"))?;
+            let mut held = self.coordinator.retained_usage_with_held_usage(self.scene_cache_usage()?)?;
+            held.add(target_body.validate(self.coordinator.limits())?, self.coordinator.limits())?;
+            for cutter in &cutter_stamps {
+                let body = self.world_solid_brep(cutter.object)?;
+                held.add(body.validate(self.coordinator.limits())?, self.coordinator.limits())?;
+                cutter_bodies.push(body);
+            }
+            editing::cut_disjoint_tools(&target_body, &cutter_bodies, deflection, self.coordinator.limits())
+                .map_err(|error| Error::Io(format!("solid boolean: {error}")))?
+        } else { None };
+        let result = if let Some(outcome) = fast { outcome } else {
+            let mut cutter_body = self.world_solid_brep(cutter_stamps[0].object)?;
+            for cutter in &cutter_stamps[1..] {
+                let operand = self.world_solid_brep(cutter.object)?;
+                cutter_body = match editing::boolean(&cutter_body, &operand, BooleanOp::Union,
+                    deflection, self.coordinator.limits())
+                    .map_err(|error| Error::Io(format!("solid cutter union: {error}")))? {
+                    editing::BooleanOutcome::Body(body) => body,
+                    editing::BooleanOutcome::Empty => return Err(Error::Invalid("cutter union produced an empty body")),
+                };
+            }
+            editing::boolean(&target_body, &cutter_body, op, deflection, self.coordinator.limits())
+                .map_err(|error| Error::Io(format!("solid boolean: {error}")))?
+        };
+        let body = match result {
             editing::BooleanOutcome::Body(body) => body,
             editing::BooleanOutcome::Empty => {
                 return Err(Error::Invalid("boolean produced an empty body"));

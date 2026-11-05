@@ -221,6 +221,10 @@ struct Attributes {
     space: u32,
     display_order: i32,
     plot_weight_mm: f64,
+    #[serde(deserialize_with = "option")]
+    plot_color: Option<[u8; 4]>,
+    plot_color_source: u32,
+    plot_weight_source: u32,
     userdata: Vec<Value>,
 }
 #[derive(Deserialize)]
@@ -1152,6 +1156,13 @@ fn object(o: &Object, e: Expected<'_>, w: &WireOutputPlan<'_>) -> Result<()> {
     {
         return Err(invalid());
     }
+    if a.plot_color_source > 3
+        || !matches!(a.plot_weight_source, 0 | 1 | 3)
+        || a.plot_color.is_some() != (a.plot_color_source == 1)
+        || a.plot_color.is_some_and(|c| rgba(&o.preservation["plot_color"]) != Some(c))
+    {
+        return Err(invalid());
+    }
     if a.mode > 3
         || a.native_layer_index < 0
         || a.groups.iter().any(|n| *n < 0)
@@ -1175,6 +1186,8 @@ fn object(o: &Object, e: Expected<'_>, w: &WireOutputPlan<'_>) -> Result<()> {
         ("space", Value::from(a.space)),
         ("display_order", Value::from(a.display_order)),
         ("plot_weight_mm", Value::from(a.plot_weight_mm)),
+        ("plot_color_source", Value::from(a.plot_color_source)),
+        ("plot_weight_source", Value::from(a.plot_weight_source)),
     ] {
         if o.preservation[k] != v {
             return Err(invalid());

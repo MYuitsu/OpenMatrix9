@@ -97,6 +97,249 @@
     "execution_status": "SPEC_ONLY; NOT READY TO CODE UNTIL M00 AND TASK L4 AUDIT"
   },
   "runtime_implementation": {
+    "stl_shared_admission_peer_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "R1a peer portion: reuse the existing shared-account admission peer for STL capture, preserving cache quota at the tested managed ceiling and source authority without a temporary identity/account adoption",
+      "evidence": [
+        "docs/validation/2026-11-05-stl-shared-admission-peer.md"
+      ],
+      "verification": "Final stl-peer-20261105-061229: 169 distinct passed/6 large ignored/0 failed; STL unit 60 includes new peer 2, replacement 8, lifecycle 12+20+9, native STL integration 60. Initial zero-test filter run rejected, not evidence.",
+      "remaining": "R1a live auxiliary/high-water ownership, wider peer/journal/retired inventory, native pre-copy peak, UI worker and P1-P5 remain open. No new RSS/native peak, GPU, release or desktop measurement; no claimed material memory/FPS gain."
+    },
+    "staged_stl_shared_admission_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Replace whole-headroom captured/Controller and detached STL leases with shared phase admission; add Rust native-source/snapshot copy hooks, preserve typed refusal and selection allocation phases",
+      "evidence": "docs/validation/2026-11-05-stl-staged-memory.md",
+      "limitations": "Native conversion/meshing allocations precede copy callbacks and are not bounded by this admission. Topology/hash scratch stays estimated pending; full allocator/path/worker/receipt ownership, automatic eviction, UI background integration, release/desktop and the rest of P1-P5 remain open."
+    },
+    "snapshot_transfer_without_unreserved_clone_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-brep-shared-display.md#snapshot-handoff-follow-up",
+      "scope": "Move unique OCCT display buffers into STL export or refuse a shared snapshot without allocating a clone",
+      "limitations": "No native peak or complete export memory bound; shared-refusal branch only tested at kernel level; release and desktop remain open"
+    },
+    "native_brep_display_export_separation_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-native-brep-display-export-separation.md",
+      "scope": "Verify STL from one retained native B-rep is independent of its display cache",
+      "limitations": "One fixture only; not full P1 ownership, 3DM roundtrip or global error proof"
+    },
+    "concave_quad_display_export_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-concave-quad-display-export.md",
+      "scope": "Share valid authored quad triangulation with viewport and picking",
+      "limitations": "Invalid quad display fallback, arbitrary polygons and desktop remain open"
+    },
+    "scaled_sphere_source_probes_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-sphere-stl-mesher-memory.md#nonuniformly-scaled-sphere-source-probes-2026-11-04",
+      "scope": "Sample source-to-encoded-STL distance on a nonuniformly scaled analytic sphere",
+      "limitations": "One fixture and finite rays; no global error certificate"
+    },
+    "encoded_disconnected_fans_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-disconnected-vertex-fans.md",
+      "scope": "Verify encoded edge-closed singular vertex is flagged as disconnected fan",
+      "limitations": "One fixture; no intersection detection, repair or general manifold proof"
+    },
+    "intersecting_closed_components_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-intersecting-closed-components.md",
+      "scope": "Verify that the receipt distinguishes closed topology from unchecked geometric intersections",
+      "limitations": "Does not implement intersection detection, repair or a printability certificate"
+    },
+    "mirrored_cavity_orientation_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-mirrored-cavity-orientation.md",
+      "scope": "Check signed outer and cavity shell volumes for one reflected nonuniformly scaled B-rep STL",
+      "limitations": "Single analytic fixture; arbitrary shell containment and self-intersection remain open"
+    },
+    "sphere_poles_seam_probes_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-sphere-stl-mesher-memory.md#pole-and-periodic-seam-probes-2026-11-04",
+      "scope": "Sample encoded STL source coverage near poles and seam for a 12 mm radius analytic sphere",
+      "limitations": "Finite geometry-specific samples, not a global bidirectional error certificate"
+    },
+    "three_axis_quantization_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-f64-quantization.md#three-axis-quantization-at-large-coordinates-2026-11-04",
+      "scope": "Verify actual Euclidean f32 error and destination preservation for an authored mesh at large coordinates",
+      "limitations": "One authored fixture; source-meshing and global deviation remain unverified"
+    },
+    "small_triangle_normal_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-stl-small-triangle-normal.md",
+      "scope": "Avoid a fixed cross-product area floor for representable binary STL triangles",
+      "limitations": "One tiny authored-mesh document fixture also passes; B-rep/kernel small-feature limits, full accuracy gate and desktop remain open"
+    },
+    "stl_occt_source_tolerance_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-occt-source-tolerance.md",
+      "scope": "Read OCCT topology tolerance metadata from export snapshot and report a placement-scaled upper bound",
+      "limitations": "Metadata is not measured mesh error; controlled high-tolerance vertex, edge and face fixtures pass, but complete error bound, native memory admission and desktop proof remain open"
+    },
+    "stl_worker_reservation_lifetime_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-worker-reservation-lifetime.md",
+      "scope": "Controlled cancellation and panic tests for worker reservation lifetime",
+      "limitations": "Worker not integrated into UI; actual peak allocation, native crash recovery and desktop behavior unverified"
+    },
+    "transaction_external_reservations_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-transaction-external-reservations.md",
+      "scope": "Coordinator-admitted external scratch and same-account STL worker reservation",
+      "limitations": "Interactive export does not use it; actual peaks and other owners unbounded; 256 MiB cap and global 60% admission remain open"
+    },
+    "capture_across_replacement_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-capture-across-replacement.md",
+      "scope": "Transfer live external capture inventory across controller replacements with admission rollback",
+      "limitations": "Does not cover other memory classes or independent sessions; global RAM budget and background UI export remain incomplete"
+    },
+    "undo_point_limit_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-undo-point-limit.md",
+      "scope": "Avoid summing point counts across retained history and candidate copies in tested transaction paths",
+      "limitations": "Other structural paths and global RAM owner admission remain incomplete; aggregate 256 MiB byte ceiling remains"
+    },
+    "stl_capture_owner_accounting_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-capture-owner-accounting.md",
+      "scope": "Coordinator accounts for externally retained STL document captures",
+      "limitations": "No session-wide owner ledger, other memory groups, export scratch reservation or removal of 256 MiB aggregate ceiling"
+    },
+    "stl_concave_quad_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-concave-quad.md",
+      "scope": "Select interior diagonal for tested concave authored quad and refuse crossed example",
+      "limitations": "Nonplanar and numerically ill-conditioned quads lack comprehensive coverage; global intersection and accuracy not certified"
+    },
+    "stl_background_job_foundation_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-background-job-foundation.md",
+      "scope": "Captured STL worker with caller-provided reservation and nonblocking result",
+      "limitations": "UI still synchronous; no verified memory estimate or global ownership accounting; lifecycle cancellation and desktop responsiveness untested"
+    },
+    "stl_cancel_topology_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-cancel-topology.md",
+      "scope": "Cancellation checks in weld and topology; reuse topology results in STL writing",
+      "limitations": "No background UI worker, timed mid-weld proof, native interruption, memory admission or desktop evidence"
+    },
+    "memory_available_reservations_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-memory-available-reservations.md",
+      "scope": "Windows available memory sample and concurrent pending reservation accounting foundation",
+      "limitations": "Not integrated into app allocations or STL export; 256 MiB cap remains; no real peak-memory evidence"
+    },
+    "stl_cancellation_foundation_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-cancellation-foundation.md",
+      "scope": "Cooperative STL cancellation serialized with publication",
+      "limitations": "Not wired to UI/worker; individual native, weld and topology operations remain non-interruptible; no managed admission"
+    },
+    "stl_streamed_writer_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-streamed-writer.md",
+      "scope": "Incremental binary STL output to a temporary file with checked failure cleanup",
+      "limitations": "Geometry and weld maps remain in RAM; no concurrent worker, managed admission or desktop/performance evidence"
+    },
+    "stl_capture_invocation_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-capture-invocation.md",
+      "scope": "Capture selected STL source when menu/CMD invoked; cancel pending capture on lifecycle requests",
+      "limitations": "Synchronous picker and export; Open/desktop not separately exercised; no background worker, cancellation or managed-memory reservation"
+    },
+    "stl_source_capture_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-source-capture.md",
+      "scope": "Immutable shared STL source and selected IDs with session epoch receipt",
+      "limitations": "Synchronous only; capture after picker, entire document held without managed-memory admission; worker and cancellation absent"
+    },
+    "stl_angular_profile_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-angular-profile.md",
+      "scope": "Angular deflection profile for canonical, retained 3DM and NURBS STL meshing through UI and MCP",
+      "limitations": "Fixture-level parameter checks, not certified global accuracy; no desktop or immutable background export evidence"
+    },
+    "stl_nurbs_occt_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-nurbs-occt.md",
+      "scope": "STL NURBS conversion through OCCT face meshing with reversal and reflection orientation",
+      "limitations": "One sampled curved fixture; periodic/trimmed and nonuniformly scaled cases, angular profile and background export remain open"
+    },
+    "occt_angular_adapter_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-occt-angular-adapter.md",
+      "scope": "Explicit angular deflection on canonical-source OCCT snapshot; legacy default retained",
+      "limitations": "Not wired into STL export; retained 3DM BReps and NURBS export need compatible meshing; no global accuracy certification"
+    },
+    "stl_quality_dialog_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-quality-dialog.md",
+      "scope": "Shared menu and command dialog for a document-defaulted STL linear tolerance",
+      "limitations": "Headless only; angular control, immutable capture and background export are absent; geometric accuracy is not certified"
+    },
+    "stl_linear_profile_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-linear-profile.md",
+      "scope": "Optional per-export linear tolerance in Controller/MCP with document default and receipt",
+      "limitations": "UI and angular profile absent; total geometric error, asynchronous capture and native/desktop acceptance remain open"
+    },
+    "stl_weld_authored_mesh_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-weld-authored-mesh.md",
+      "scope": "Preserve authored vertex identities and explicitly handle generated triangles collapsed by welding",
+      "limitations": "Generated seam ownership remains distance-based; no general geometry-error certification or desktop/release gate"
+    },
+    "stl_weld_distance_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-weld-distance.md",
+      "scope": "Distance-check source-scoped weld candidates within a document-derived radius and reject grid-index overflow",
+      "limitations": "Seam topology, collapsed triangles, global geometric error, extreme coordinates, and memory scaling remain open"
+    },
+    "stl_document_deflection_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-document-deflection.md",
+      "scope": "Use document-derived OCCT deflection with placement scaling independently of display meshing",
+      "limitations": "One sampled nonuniform sphere fixture is not global certification; UI profile, robust surface path and combined error bounds remain open"
+    },
+    "stl_f64_quantization_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-f64-quantization.md",
+      "scope": "Keep f64 coordinates through weld and check binary STL quantization against a document-derived budget",
+      "limitations": "Only quantization component bounded; native meshing, weld error, geometric accuracy and desktop/release gates remain open"
+    },
+    "stl_duplicate_faces_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-duplicate-faces.md",
+      "scope": "Detect duplicate indexed faces and report separate topology defect counts",
+      "limitations": "Geometric overlaps, self-intersection and cavity containment unverified; MCP fields not independently tested over stdio"
+    },
+    "stl_edge_topology_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-edge-topology.md",
+      "scope": "Report boundary, non-manifold and winding edge defects and disconnected vertex fans",
+      "limitations": "No self-intersection, duplicate-face or cavity containment check; app defect receipt and memory scaling remain unverified"
+    },
+    "stl_source_welding_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-source-welding.md",
+      "scope": "Keep weld keys separate for each selected source",
+      "limitations": "Only coincident authored open triangles and existing STL fixtures verified; parity closedness and f32 weld remain"
+    },
+    "stl_reflection_winding_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-reflection-winding.md",
+      "scope": "Correct triangle winding for reflected object placement on the shared STL collection path",
+      "limitations": "Reflected authored mesh tested; reflected B-rep, surface and cavity orientation require further evidence; general STL accuracy and topology acceptance remain open"
+    },
+    "document_stl_export_2026_11_01": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-01-command-checklist-audit.md",
+      "scope": "File > Export Selected writes one binary STL in millimetres from selected meshes, editable B-Reps (shared OCCT re-tessellation), retained NativeBrep payloads (re-imported through the OCCT bridge, not the display mesh) and NurbsSurfaces (adaptive 8-128 chord grid). Inputs are placed, welded, pole-degenerates removed; closed sets are strict and open surfaces report open edges. The destination is replaced atomically.",
+      "limitations": "M09 G-MVP-013 still needs an identified independent GUI viewer and reviewer sign-off; surface refinement is a per-axis uniform grid rather than a T-junction quadtree, and native payload re-import depends on the OCCT bridge."
+    },
     "date": "2026-10-19",
     "status": "DEFERRED_TO_M07_NOT_IN_M01_SCOPE",
     "target": "standalone Rust OM9",

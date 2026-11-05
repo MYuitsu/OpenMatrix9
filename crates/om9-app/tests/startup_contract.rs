@@ -40,6 +40,7 @@ fn config_from(value: &Value) -> AppConfig {
         maximized: config["maximized"].as_bool().unwrap(),
         audit_dir: None,
         layout_path: None,
+        gumball_settings_path: None,
         startup_dialog: config["startup_dialog"].as_bool().unwrap(),
     }
 }

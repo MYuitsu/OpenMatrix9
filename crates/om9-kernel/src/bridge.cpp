@@ -253,7 +253,7 @@ int measure(const TopoDS_Shape& shape, double* volume, double* area) {
   }
   if (area != nullptr) {
     GProp_GProps area_properties;
-    BRepGProp::SurfaceProperties(shape, area_properties);
+    BRepGProp::SurfaceProperties(shape, area_properties, 1.0e-10);
     *area = area_properties.Mass();
   }
   return kOk;

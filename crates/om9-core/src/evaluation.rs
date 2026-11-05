@@ -77,14 +77,24 @@ fn evaluate_admitted(
             }
             let span = domain[1] - domain[0];
             let scale = if reversed { -span } else { span };
+            if let Curve::Nurbs(n) = c && let Some(seam) = n.seam {
+                let origin = (seam - domain[0]) / span;
+                let shifted = (origin + if reversed { -f } else { f }).rem_euclid(1.0);
+                (domain[0] + shifted * span, scale)
+            } else {
             (
-                if reversed {
+                if f == 0.0 {
+                    if reversed { domain[1] } else { domain[0] }
+                } else if f == 1.0 {
+                    if reversed { domain[0] } else { domain[1] }
+                } else if reversed {
                     domain[1] + f * scale
                 } else {
                     domain[0] + f * scale
                 },
                 scale,
             )
+            }
         }
     };
     if !u.is_finite() || u < domain[0] || u > domain[1] || !scale.is_finite() {
@@ -183,10 +193,10 @@ pub fn nurbs_one_sided_derivatives(n:&NurbsCurve,u:f64,order:usize,from_left:boo
 }
 fn nurbs_derivatives_side(n:&NurbsCurve,u:f64,order:usize,limits:&Limits,side:Option<bool>)->Result<Vec<Point3>>{
     if n.periodic {
-        n.certify_repeated_periodic(limits)?;
+        n.certify_repeated_periodic_basis(limits)?;
         // Knot multiplicity limits continuity at the periodic seam.
-        if side.is_none() && (u==n.domain[0] || u==n.domain[1]) {
-            let seam=n.domain[0];
+        if side.is_none() && (u==n.knots[n.degree] || u==n.knots[n.poles.len()]) {
+            let seam=n.knots[n.degree];
             let mult=n.knots.partition_point(|k|*k<=seam)-n.knots.partition_point(|k|*k<seam);
             if order>n.degree.saturating_sub(mult) {return Err(Error::Unsupported("periodic seam derivative continuity"));}
         }

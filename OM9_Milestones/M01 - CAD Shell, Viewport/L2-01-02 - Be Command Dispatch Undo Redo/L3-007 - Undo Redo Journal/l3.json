@@ -197,6 +197,103 @@
     }
   ],
   "hardening_notes": "# OM9-L3-01-02-007 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-01-02`.\n- Luồng/đối tượng: undo redo stable identity.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-core/src/feature.rs`.\n- API Rust dự kiến: `UndoJournal::undo(&mut Document) -> Result<(), UndoError>`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** create→undo→redo restores same EntityId, LayerId, BRep reference.\n- **Negative:** undo after reorder/deletion does not resurrect invalid references.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n",
+  "runtime_implementation": {
+    "planning_indexes_reservation_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#transaction-planning-index-reservation",
+      "scope": "Reserve estimated transaction planning indexes and preserve history on empty transactions",
+      "limitations": "Other scratch, native allocation, large-model release, concurrent scheduler and desktop checks remain open"
+    },
+    "clone_physical_headroom_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#sample-physical-headroom-before-transaction-document-clone",
+      "scope": "Controller samples physical headroom before transaction document-clone reservation",
+      "limitations": "Point-in-time sample, optional for independent core callers; other preparation/native allocations and release/desktop remain open"
+    },
+    "transaction_clone_reservation_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#transaction-document-clone-reservation",
+      "scope": "Reserve estimated participant document copies before transaction cloning and transfer to registered candidates under shared locks",
+      "limitations": "Other preparation/native owners and free-RAM sampling are incomplete; large release and desktop validation remain open"
+    },
+    "prepared_candidate_peer_accounting_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#prepared-transaction-candidate-peer-accounting",
+      "scope": "Register prepared transaction document versions with the shared account before returning to callers",
+      "limitations": "Candidate creation and planning still occur before shared registration; no complete pre-allocation reservation, desktop or large-scene performance proof"
+    },
+    "release_large_geometry_lifecycle_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#release-geometry-archive-larger-than-256-mib",
+      "scope": "Release Save As/New/Open of an archive over 256 MiB with preserved mesh and session limits",
+      "limitations": "Synthetic mesh only; large-fixture Undo pressure, desktop and complete transaction preparation reservation remain open"
+    },
+    "shared_brep_display_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-brep-shared-display.md",
+      "scope": "Share immutable B-rep display snapshots and deduplicate tracked document and Undo owners",
+      "limitations": "Display remains embedded in B-rep/v4; full owner accounting, native peaks, v5 migration and desktop verification remain open"
+    },
+    "scene_managed_ceiling_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-scene-managed-ceiling.md",
+      "scope": "Share one effective account snapshot between retained owner accounting and scene preflight",
+      "limitations": "Scene lifetime reservation, other owners, interactive 256 MiB limit and desktop remain open"
+    },
+    "session_managed_ram_ceiling_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-session-managed-ram-ceiling.md",
+      "scope": "Initialize the shared managed account ceiling from physical RAM on controller creation",
+      "limitations": "Independent 256 MiB limit, unregistered allocation owners, current free-RAM checking and desktop remain open"
+    },
+    "tracked_dual_registry_growth_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-tracked-external-captures.md#tracked-document-and-lease-registry-growth",
+      "scope": "Preflight both tracked capture registries and retain old allocations on refusal",
+      "limitations": "Allocator overhead, complete owner accounting, interactive cap and desktop remain open"
+    },
+    "legacy_capture_registry_growth_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-tracked-external-captures.md#legacy-document-registry-growth",
+      "scope": "Preflight untracked capture registry growth and preserve capacity on refusal",
+      "limitations": "Tracked registry growth, allocator overhead, complete owner accounting and desktop remain open"
+    },
+    "undo_tracked_capture_attribution_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-undo-tracked-capture-attribution.md",
+      "scope": "Attribute live tracked capture owners in Undo inventory and flag stale statistics when ownership changes",
+      "limitations": "Reconciliation is deferred; legacy owners, complete accounting, the interactive hard limit, contention measurements and desktop remain open"
+    },
+    "tracked_external_captures_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-tracked-external-captures.md",
+      "scope": "Track external document capture lease lifetime separately from document ownership",
+      "limitations": "Document and lease registration share both locks and lease metadata is included conservatively in admission; Undo attribution, legacy owners, allocator overhead and desktop remain open"
+    },
+    "undo_shared_brep_inventory_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-undo-shared-brep-inventory.md",
+      "scope": "Count shared B-rep source allocations once in full Undo inventory",
+      "limitations": "External-only owners, inventory scratch, large models, 256 MiB cap and desktop remain open"
+    },
+    "ram_ceiling_inventory_2026_11_02": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-02-undo-ram-cap-and-inventory.md",
+      "scope": "50% physical RAM configurable ceiling, conservative 100 MB inventory cadence and cached Options statistics",
+      "plan": "implementation/design/M01/viewport-export-separation-20261102/PLAN.md",
+      "limitations": "Independent 256 MB hard admission remains; checkpoint and GPU budgeting planned only; no real pressure or desktop/release acceptance"
+    },
+    "memory_policy_2026_11_02": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-02-undo-memory-policy.md",
+      "scope": "Oldest Undo retention by estimated bytes, preserving minimum steps, current geometry, failure atomicity and valid Redo",
+      "limitations": "Soft budget, independent hard admission; physical mouse and release verification open"
+    },
+    "status": "PARTIAL_CHECKS_PASSED",
+    "scope": "Ordinary Undo retained; isolated new MCP benchmark session may explicitly disable recording before its first edit.",
+    "evidence": ["docs/validation/2026-11-02-dice-undo-benchmark.md", "docs/validation/2026-11-02-undo-brep-inventory-optimization.md", "docs/validation/2026-11-02-undo-validated-owner-cache.md"],
+    "limitations": ["Single debug benchmark per mode; no claim of full journal acceptance or release performance."]
+  },
   "sdk_export_plan": {
     "decided": "2026-10-21",
     "status": "planned",

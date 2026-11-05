@@ -32,6 +32,7 @@ pub enum Mode {
 pub enum DialogFilter {
     Om9,
     ThreeDm,
+    Stl,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DialogError {
@@ -157,6 +158,14 @@ pub fn choose_3dm(
 ) -> Result<Option<PathBuf>, DialogError> {
     choose_impl(parent, mode, current, DialogFilter::ThreeDm, false)
 }
+/// The same owned dialog with the binary STL filter; used by File ▸ Export Selected.
+pub fn choose_stl(
+    parent: usize,
+    mode: Mode,
+    current: Option<&Path>,
+) -> Result<Option<PathBuf>, DialogError> {
+    choose_impl(parent, mode, current, DialogFilter::Stl, false)
+}
 /// Explicit own-app audit prefill. Show and GetResult remain the native
 /// selection boundary; this hint never becomes a returned selection itself.
 pub fn choose_fixture_for_audit(
@@ -228,6 +237,17 @@ fn choose_impl(
                 w!("3dm"),
                 "Untitled.3dm",
             ),
+            DialogFilter::Stl => (
+                if mode == Mode::Open {
+                    w!("Import STL")
+                } else {
+                    w!("Export STL")
+                },
+                w!("Binary STL"),
+                w!("*.stl"),
+                w!("stl"),
+                "Untitled.stl",
+            ),
         };
         dialog.SetTitle(title).map_err(|e| native("SetTitle", e))?;
         dialog
@@ -253,6 +273,8 @@ fn choose_impl(
         if mode == Mode::Save || audit_prefill {
             let extension_text = if matches!(filter, DialogFilter::ThreeDm) {
                 "3dm"
+            } else if matches!(filter, DialogFilter::Stl) {
+                "stl"
             } else {
                 "om9"
             };
@@ -333,8 +355,62 @@ mod tests {
         assert!(admit_fixture_reply(expected, Path::new("H:/owned/other.om9")).is_err());
     }
     #[test]
-    fn real_com_apartment_conflict_is_error_and_does_not_uninitialize_the_owner() {
-        std::thread::spawn(|| {
+    #[ignore = "requires an interactive Windows desktop; run with --ignored"]
+    fn real_stl_save_dialog_accepts_an_owned_fixture() {
+        use crate::dialog_probe::{DialogKind, ModalCancelProbe};
+        use windows::{
+            Win32::{
+                Foundation::HWND,
+                UI::WindowsAndMessaging::{
+                    CreateWindowExW, DestroyWindow, WINDOW_EX_STYLE, WS_OVERLAPPED,
+                },
+            },
+            core::w,
+        };
+        let directory = std::env::temp_dir().join(format!("om9-stl-dialog-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&directory);
+        std::fs::create_dir_all(&directory).expect("dialog directory");
+        let target = directory.join("audit.stl");
+        // SAFETY: A system STATIC window owned by this thread; the dialog API only
+        // receives its HWND and the window is destroyed before the test returns.
+        let owner: HWND = unsafe {
+            CreateWindowExW(
+                WINDOW_EX_STYLE(0),
+                w!("STATIC"),
+                w!("om9 stl dialog owner"),
+                WS_OVERLAPPED,
+                0,
+                0,
+                120,
+                80,
+                None,
+                None,
+                None,
+                None,
+            )
+        }
+        .expect("hidden owner window");
+        let probe = ModalCancelProbe::arm_accept(owner.0 as usize, DialogKind::SaveStl)
+            .expect("owned dialog probe");
+        let result = choose_stl(owner.0 as usize, Mode::Save, Some(&target));
+        let receipt = probe.finish().expect("probe receipt");
+        // SAFETY: the window was created above on this thread and is no longer used.
+        unsafe {
+            let _ = DestroyWindow(owner);
+        }
+        let path = result.expect("dialog call").expect("accepted save");
+        assert!(receipt.observed, "{receipt:?}");
+        assert!(receipt.accept_posted, "{receipt:?}");
+        assert_eq!(
+            path.file_name().and_then(|name| name.to_str()),
+            Some("audit.stl")
+        );
+        assert_eq!(path.parent(), Some(directory.as_path()));
+        let _ = std::fs::remove_dir_all(&directory);
+    }
+
+    #[test]
+    fn real_com_apartment_conflict_is_error_and_does_not_uninitialize_the_owner() {        std::thread::spawn(|| {
             // SAFETY: This test owns this fresh thread's COM initialization and
             // balances both successful calls, including S_FALSE.
             unsafe {

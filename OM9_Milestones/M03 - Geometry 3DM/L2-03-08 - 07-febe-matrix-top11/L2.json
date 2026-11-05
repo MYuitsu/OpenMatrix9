@@ -123,6 +123,276 @@
     ]
   },
   "runtime_implementation": {
+    "feature_id_dispatch_2026_11_01": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-01-command-checklist-audit.md",
+      "scope": "Published OM9-TOP11-* feature ids now dispatch through Top11Action::from_feature and top11_invoke, the same function the toolbar icon calls.",
+      "limitations": "Desktop mouse/GPU acceptance, the remaining checklist gaps (gumball Snappy, STL export) and real 3DM payloads remain open."
+    },
+    "transformed_brep_3dm_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-transformed-brep-3dm.md",
+      "scope": "Validate source-bound transformed native BRep fingerprints before publication and pass tested mirrored/placed 3DM roundtrips.",
+      "limitations": "CRC32 collision risk, wider BReps, cold-retained path, baseline exchange test failures, Rhino review and physical UI remain open."
+    },
+    "mirror_3dm_roundtrip_2026_10_31": {
+      "status": "PARTIAL_CHECKS_FAILED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-3dm-roundtrip.md",
+      "scope": "Nested mirrored block roundtrips through real 3DM; identify real retained-BRep Mirror export rejection.",
+      "limitations": "Nonidentity retained BRep fails prepublication correspondence verification; exact transformed verification and physical UI remain open."
+    },
+    "mirror_retained_objects_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-retained-objects.md",
+      "scope": "Mirror tested Hatch, Light and synthetic retained NativeBrep objects by reflecting placement without changing their data.",
+      "limitations": "Actual 3DM payload/export, lighting output, other transforms and physical UI remain open."
+    },
+    "mirror_block_render_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-block-render.md",
+      "scope": "Offscreen rendered tested mirrored nested mesh/BRep against explicit world-space reference and picked both occurrence paths.",
+      "limitations": "Copy=Yes GPU, other transforms/geometry, 3DM and physical desktop remain open."
+    },
+    "mirror_block_cloud_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-mirror-block-cloud.md",
+      "scope": "Mirror tested block instances by composing world reflection with placement and enable tested point clouds.",
+      "limitations": "Reflected nested mesh/BRep rendering, 3DM export, other entity kinds and physical UI remain open."
+    },
+    "periodic_brep_cutters_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-periodic-brep-cutters.md",
+      "scope": "Use certified repeated NURBS bases in tested OCCT BRep intersections and surface cuts; exercise Split and Trim through both routes.",
+      "limitations": "Other encodings, general topology, 3DM interoperability, native peak allocation and physical UI remain open."
+    },
+    "reseamed_nurbs_split_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-reseamed-nurbs-split.md",
+      "scope": "Honor seam in NURBS fraction evaluation and tested projection, native intersections and Split Point without refitting.",
+      "limitations": "General periodic encodings, affine direct split, extreme precision, 3DM and physical UI remain open."
+    },
+    "split_periodic_points_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-periodic-points.md",
+      "scope": "Split tested certified repeated-basis periodic NURBS at points, preserving full and trimmed active intervals without refit.",
+      "limitations": "Other periodic encodings, reseamed NURBS, general knots, 3DM and physical UI remain open."
+    },
+    "empty_finish_feedback_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-empty-finish-feedback.md",
+      "scope": "Report no-change finishes distinctly for tested Duplicate and Trim sessions and propagate command feedback to status/history.",
+      "limitations": "Physical UI and external MCP transport were not exercised; wider Top11 acceptance remains open."
+    },
+    "join_periodic_metadata_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-periodic-metadata.md",
+      "scope": "Preserve and directly inspect tested OCCT periodic surface axes; validate U-periodic joined faces across .om9, trimmed U and doubly periodic sampled conversion.",
+      "limitations": "Other encodings and topology, doubly periodic Join, 3DM interoperability, peak native memory and physical UI remain open."
+    },
+    "join_periodic_surfaces_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-periodic-surfaces.md",
+      "scope": "Validate repeated periodic surface bases and join tested U-periodic NURBS surfaces.",
+      "limitations": "Other periodic encodings, two-axis/trimmed periodic cases, 3DM metadata and physical UI remain open."
+    },
+    "join_cylinders_budget_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-cylinders-budget.md",
+      "scope": "Bound supporting-surface guard serialization and join tested closed cylinder surfaces.",
+      "limitations": "Mutation rejection unobserved; general periodic surfaces, trim behavior, 3DM and physical UI remain open."
+    },
+    "join_surface_guard_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-surface-guard.md",
+      "scope": "Guard supporting-surface representation during tested Top11 OCCT sewing.",
+      "limitations": "Rejection branch not exercised; trim behavior, custom surfaces, native allocation, 3DM and physical UI remain open."
+    },
+    "join_reversed_curved_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-reversed-curved.md",
+      "scope": "Join tested U/V-reversed planar and rational curved surfaces; measure toleranced seam behavior.",
+      "limitations": "Toleranced trim area changed in tested gap; underlying identity, wider topology, 3DM and physical UI remain open."
+    },
+    "join_surfaces_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-surfaces.md",
+      "scope": "Sew tested adjacent NURBS surfaces and mixed surface/BRep chains using bounded OCCT face snapshots.",
+      "limitations": "Reversed/periodic and general curved surfaces, wider topology, 3DM and physical UI remain open."
+    },
+    "scene_atomic_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-scene-atomic.md",
+      "scope": "Prepare Top11 candidate scene before transaction publication; reject tested Duplicate scene budget failure atomically.",
+      "limitations": "Other scene failures, performance, GPU and physical UI remain open."
+    },
+    "explode_block_permissions_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-explode-block-permissions.md",
+      "scope": "Preserve tested hidden/locked block members and avoid post-commit selection refusal.",
+      "limitations": "Scene refresh failure, other attributes, complex blocks, other geometry, 3DM and physical UI remain open."
+    },
+    "explode_block_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-explode-block.md",
+      "scope": "Keep block instances in toolbar Explode; unpack tested instances from typed Explode.",
+      "limitations": "Inherited attributes, complex blocks, other geometry, 3DM and physical UI remain open."
+    },
+    "explode_mixed_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-explode-mixed.md",
+      "scope": "Preserve isolated mesh vertices and tested group membership in mixed curve/mesh/BRep Explode.",
+      "limitations": "Other geometry/group combinations, aggregate budgets, 3DM and physical UI remain open."
+    },
+    "explode_groups_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-explode-groups.md",
+      "scope": "Preserve tested group identity and membership when Explode replaces a polycurve.",
+      "limitations": "Other geometry/group combinations, broader grouping semantics, 3DM and physical UI remain open."
+    },
+    "explode_mesh_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-explode-mesh.md",
+      "scope": "Explode tested mesh components separated by unwelded edges, retaining attributes and channels.",
+      "limitations": "Unreferenced vertices, general topology, exact aggregate budget, remaining geometry and physical UI remain open."
+    },
+    "join_discontinuous_start_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-discontinuous-start.md",
+      "scope": "Heal tested NURBS whose active lower boundary begins at a discontinuous knot.",
+      "limitations": "Upper discontinuity, other periodic bases, wider geometry, 3DM and physical UI remain open."
+    },
+    "join_trimmed_periodic_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-trimmed-periodic.md",
+      "scope": "Evaluate, display and heal tested trimmed certified periodic rational NURBS.",
+      "limitations": "Other periodic bases, discontinuities, wider geometry, 3DM and physical UI remain open."
+    },
+    "join_periodic_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-periodic.md",
+      "scope": "Heal tested certified repeated-basis periodic curve seam after exact opening.",
+      "limitations": "Other periodic forms, discontinuities, wider geometry, 3DM and physical UI remain open."
+    },
+    "join_support_boundary_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-support-boundary.md",
+      "scope": "Heal tested nonperiodic rational NURBS support boundaries after exact clamping.",
+      "limitations": "Periodic curves, discontinuities, wider geometry, 3DM and physical UI remain open."
+    },
+    "join_unclamped_trim_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-unclamped-trim.md",
+      "scope": "Heal tested interior-trimmed rational NURBS backed by unclamped support; only edited endpoint needs clamping.",
+      "limitations": "Unclamped support boundary, periodic curves, discontinuities, wider geometry, 3DM and physical UI remain open."
+    },
+    "join_trimmed_nurbs_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-trimmed-nurbs.md",
+      "scope": "Heal tested trimmed rational NURBS with nonperiodic clamped backing at seam midpoint using exact restriction.",
+      "limitations": "Periodic and unclamped backing, discontinuous trim boundaries, broader geometry, 3DM and physical UI remain open."
+    },
+    "join_midpoint_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-midpoint.md",
+      "scope": "Heal supported tolerated curve endpoints at the world-space midpoint, including near-closed seams.",
+      "limitations": "Periodic/trimmed endpoint adjustment, general geometry, 3DM and physical UI remain open."
+    },
+    "join_sweep_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-sweep.md",
+      "scope": "Sweep world-space curve endpoints for tested Join trails with robust distance and scratch admission.",
+      "limitations": "Dense clusters, aggregate budget, seam healing, 3DM and physical UI remain open."
+    },
+    "join_trail_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-trail.md",
+      "scope": "Order tested continuous curve selections through loops with graph trail and invalid graph refusal.",
+      "limitations": "Tolerance clusters, seam healing, large selection performance, 3DM and physical UI remain open."
+    },
+    "join_world_curves_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-world-curves.md",
+      "scope": "Join tested differently placed curves with validated document tolerance in world coordinates.",
+      "limitations": "Seam healing, branching, general geometry, 3DM and physical UI remain open."
+    },
+    "transform_retry_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-transform-retry.md",
+      "scope": "Move/Mirror/Rotate pre-publication retry and Rotate CPlane reference projection, with tested controller and viewport cases.",
+      "limitations": "General failures, post-publication behavior, 3DM and physical UI remain open."
+    },
+    "duplicate_retry_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-duplicate-retry.md",
+      "scope": "Preserve Duplicate prompt after tested invalid point and pre-publication budget failure, including synthetic viewport retry.",
+      "limitations": "General failures, post-publication errors, native UI and human acceptance remain open."
+    },
+    "control_grip_pointer_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-control-grip-pointer.md",
+      "scope": "Synthetic egui viewport Shift grip selection, raw Delete and drag with Undo on typed curves/surfaces.",
+      "limitations": "Physical UI, native focus, GPU presentation, full grip behavior and 3DM remain open."
+    },
+    "surface_control_delete_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-surface-control-delete.md",
+      "scope": "Delete complete typed NURBS surface control-net rows/columns with mixed curve transactions and Undo.",
+      "limitations": "General surface selections, periodic/trimmed directions, 3DM and physical UI remain open."
+    },
+    "multiple_control_delete_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-multiple-control-delete.md",
+      "scope": "Multiple selected supported NURBS control grips deleted atomically across curves with Undo.",
+      "limitations": "Surfaces, periodic/trimmed/polycurve deletion, 3DM and physical UI remain open."
+    },
+    "control_point_delete_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-control-point-delete.md",
+      "scope": "Single selected control grip deletion for clamped nonperiodic NURBS with protected object Delete and Undo.",
+      "limitations": "Multiple grips, surfaces, periodic/trimmed curves, 3DM and physical UI remain open."
+    },
+    "smooth_fusion_rational_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-smooth-fusion-rational.md",
+      "scope": "Output allocation admission and sampled rational multi-span/affine fusion, degree elevation and .om9 round trip.",
+      "limitations": "Aggregate budget, control point deletion, general curves, 3DM and physical UI remain open."
+    },
+    "smooth_control_fuse_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-smooth-control-fuse.md",
+      "scope": "Control edit fuses supported smooth line and arc polycurves to a single rational NURBS with Undo.",
+      "limitations": "Tolerance-sized gaps, periodic/trimmed curves, general placement, degree elevation, 3DM and physical UI remain open."
+    },
+    "grip_world_joint_tolerance_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-grip-world-joint-tolerance.md",
+      "scope": "Document grip edits compare polycurve joints using world-space absolute tolerance, including nonuniform placement and near-closed seam.",
+      "limitations": "Smooth curve fusion, general curves, 3DM and physical UI remain open."
+    },
+    "polycurve_control_joint_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-polycurve-control-joint.md",
+      "scope": "Control-grip edits preserve tested coincident polycurve joints and reversed traversal with atomic Undo.",
+      "limitations": "Smooth curve fusion, world-space tolerance, general curves, 3DM and physical UI remain open."
+    },
+    "polycurve_edit_joint_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-polycurve-edit-joint.md",
+      "scope": "Move tested coincident polycurve edit joints on both sides, with closure and reversed traversal.",
+      "limitations": "World-space join tolerance, control grips, general curves, 3DM and physical UI remain open."
+    },
+    "circle_edit_point_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-circle-edit-point.md",
+      "scope": "Circle and arc edit grips reach tested 3D targets via exact NURBS conversion, with closed seam and Undo.",
+      "limitations": "Seam fairness, general curves, periodic NURBS, placement, 3DM and physical UI remain open."
+    },
+    "nurbs_edit_points_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-nurbs-edit-points.md",
+      "scope": "Rational nonperiodic NURBS edit points preserve source representation and tested closed seam with Undo.",
+      "limitations": "Periodic, trimmed and singular NURBS, creation-point provenance, >512 poles, pointer UI and human acceptance remain open."
+    },
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
@@ -140,7 +410,7 @@
     "l3_deferred_to_m04": 1,
     "full_l3_acceptance_promoted": 0,
     "full_l2_complete": false,
-    "technical_scope_complete": true,
+    "technical_scope_complete": false,
     "human_approval": null,
     "manual_gate": "M03-UI",
     "remaining": [
@@ -173,6 +443,210 @@
         "OM9-L3-03-08-004": "6/6",
         "OM9-L3-03-08-006": "5/5"
       }
+    },
+    "split_shrink_shell_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-shrink-shell.md",
+      "scope": "Shrink tested nonperiodic connected BRep boundary components after Split, preserving shared topology.",
+      "limitations": "Periodic surfaces, general topology and continuity, 3DM, SDK and physical UI remain open."
+    },
+    "split_cutter_shrink_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-cutter-shrink.md",
+      "scope": "Shrink eligible single-face object-cutter Split results, including mixed curve/surface selection and atomic failure.",
+      "limitations": "Periodic and multi-face Shrink, general topology, SDK and physical UI remain open."
+    },
+    "split_shrink_brep_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-shrink-brep.md",
+      "scope": "Shrink eligible nonperiodic single-face BRep Isocurve results while preserving tested pcurves, holes and Undo.",
+      "limitations": "Periodic and object-cutter Shrink, complex topology, SDK and physical UI remain open."
+    },
+    "isocurve_viewport_ray_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-isocurve-viewport-ray.md",
+      "scope": "Exact camera-ray face hits for Top11 Split Isocurve, including tested curved NURBS and BRep fixtures.",
+      "limitations": "Grazing rays, complex topology, BRep Shrink, SDK and physical UI remain open."
+    },
+    "split_shrink_nurbs_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-shrink-nurbs.md",
+      "scope": "Exact knot-based Shrink=Yes for nonperiodic typed NURBS Isocurve Split, with Undo and viewport fixture.",
+      "limitations": "BRep and periodic Shrink, object-cutter Shrink, general geometry and desktop acceptance remain open."
+    },
+    "split_brep_isocurve_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-brep-isocurve.md",
+      "scope": "Top11 Split Isocurve U/V/Both on one open BRep face, tested planar, trimmed, scaled and cylindrical fixtures.",
+      "limitations": "Shrink=Yes, complex topology, curved viewport ray accuracy, SDK and physical UI remain open."
+    },
+    "split_isocurve_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-isocurve.md",
+      "scope": "Top11 Split Isocurve U/V/Both on one typed NURBS surface, tested CMD/options/viewport and Undo.",
+      "limitations": "Single-face BRep, Shrink=Yes, projection, periodic surfaces, SDK and physical UI remain open."
+    },
+    "split_existing_seam_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-existing-seam.md",
+      "scope": "Cut a tested original shared edge with curve or BRep cutter while retaining crossed seams; single Undo.",
+      "limitations": "General topology, overlap, performance, isocurve options and desktop acceptance remain open."
+    },
+    "split_polysurface_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-polysurface.md",
+      "scope": "Connected BRep boundary regions retain original face seams; joined faces, translated box and sphere fixtures with Undo.",
+      "limitations": "General topology, capping parity, isocurve options, SDK and desktop acceptance remain open."
+    },
+    "split_surface_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-split-surface.md",
+      "scope": "Single-face typed surface and BRep targets with curve/BRep cutters and mixed curve targets; atomic Undo.",
+      "limitations": "Multiface polysurfaces, isocurve options, general geometry and desktop acceptance remain open."
+    },
+    "trim_curved_viewport_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-curved-viewport.md",
+      "scope": "Exact camera-ray picking on curved BRep Trim; sphere/cylinder and .om9 fixtures.",
+      "limitations": "General topology, 3DM and physical desktop acceptance remain open."
+    },
+    "trim_solid_boundary_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-solid-boundary.md",
+      "scope": "Trim exact solid boundary regions into an open BRep with per-pick Undo.",
+      "limitations": "General solid topology, interchange and desktop acceptance remain open."
+    },
+    "trim_multiple_multiface_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-multiple-multiface.md",
+      "scope": "Mutual Trim of multiple multi-face open BReps and curves with per-object boundary preservation.",
+      "limitations": "Solid targets, general topology and desktop acceptance remain open."
+    },
+    "trim_multiface_boundaries_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-multiface-boundaries.md",
+      "scope": "Single multi-face open BRep with curve cutters; preserve tested original edges and recompute after curve edits.",
+      "limitations": "Multiple multi-face targets, solid targets, general topology and desktop acceptance remain open."
+    },
+    "trim_multiple_surfaces_curves_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-multiple-surfaces-curves.md",
+      "scope": "Multiple single-face surfaces and curves share a Trim session with per-pick recomputation and Undo.",
+      "limitations": "Multi-face and solid targets, general geometry and desktop acceptance remain open."
+    },
+    "trim_mutual_surfaces_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-mutual-surfaces.md",
+      "scope": "Mutual Trim of multiple typed or single-face BRep surfaces with per-pick recomputation and Undo.",
+      "limitations": "Mixed multi-surface/curve selection, multi-face BReps and desktop acceptance remain open."
+    },
+    "trim_mixed_curve_surface_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-mixed-curve-surface.md",
+      "scope": "Mutual curve and single-face surface picks with repartition before commit and simulated viewport.",
+      "limitations": "Multiple surface targets, multi-face curve edits, general topology and desktop acceptance remain open."
+    },
+    "trim_unify_regions_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-unify-regions.md",
+      "scope": "Merge adjacent kept regions of a single original face when committing Trim, retaining session partitions.",
+      "limitations": "Cutter edits do not yet repartition the surface; mixed mutual targets and desktop acceptance remain open."
+    },
+    "trim_piercing_curves_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-piercing-curves.md",
+      "scope": "Trim a curve piercing a surface or solid BRep, with repeated endpoint handling and Undo.",
+      "limitations": "Divided surface and curve mutual edits, multiple surfaces and desktop acceptance remain open."
+    },
+    "trim_affine_area_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-affine-area.md",
+      "scope": "Adaptive OCCT area validation and nonuniformly placed circular face trim regression.",
+      "limitations": "Mixed mutual targets, general geometry and desktop acceptance remain open."
+    },
+    "trim_surface_regions_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-surface-regions.md",
+      "scope": "Repeated region picks on one surface/BRep with curve cutters and Undo, including simulated viewport.",
+      "limitations": "Curve cutters not themselves targets; multiple surfaces and BRep cutters, general geometry and desktop acceptance remain open."
+    },
+    "trim_endpoint_residual_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-endpoint-residual.md",
+      "scope": "Mutual Trim removes an endpoint-only open residual; closed seam-only guard and Undo.",
+      "limitations": "Near-closed/tangent cases, surface/BRep targets and desktop UI remain open."
+    },
+    "trim_mutual_curves_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-mutual-curves.md",
+      "scope": "Selected curve objects cut one another; recompute intersections before each Undo transaction.",
+      "limitations": "Surface/BRep targets, endpoint residuals, general geometry, performance and desktop UI remain open."
+    },
+    "trim_continuity_repeat_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-continuity-repeat.md",
+      "scope": "Continuous Trim survivors and repeat picks on pieces with remaining interior intersections.",
+      "limitations": "Separate target/cutter interaction differs from documented mutual cutting; residual endpoint-only pieces and desktop remain open."
+    },
+    "trim_multiple_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-multiple.md",
+      "scope": "Multiple curve targets, cutter selection, explicit viewport hits and one Undo per picked portion.",
+      "limitations": "Only one portion per original target per session; surface/BRep targets and OS UI remain open."
+    },
+    "cutter_world_tolerance_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-cutter-world-tolerance.md",
+      "scope": "Document tolerance in world-space Split/Trim cutter intersection and mapped affine-curve parameters.",
+      "limitations": "General numerical intersections, complex BRep and desktop UI remain open."
+    },
+    "nurbs_knot_projection_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-nurbs-knot-projection.md",
+      "scope": "Knot-aware candidate sampling for a narrow-span NURBS and Split Point.",
+      "limitations": "Global minimum, periodic NURBS, large knot runtime and OS UI remain open."
+    },
+    "polycurve_point_projection_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-polycurve-point-projection.md",
+      "scope": "Per-segment point projection with forward/reversed 128-line fixtures and Split Point Undo/Redo.",
+      "limitations": "Nonlinear segment global minima, nested curves and OS UI remain open."
+    },
+    "split_point_world_projection_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-split-point-world-projection.md",
+      "scope": "World-distance projection under nonuniform scale for a line and circle.",
+      "limitations": "Nonlinear global minimum, other affine frames, NURBS seams and desktop UI remain open."
+    },
+    "split_point_selection_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-split-point-selection.md",
+      "scope": "Post-invocation selection for Split Point and Split P, controller and simulated CMD/viewport widgets.",
+      "limitations": "OS input and native focus unverified; full Top 11 remains open."
+    },
+    "split_point_curves_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-split-point-curves.md",
+      "scope": "Open arc and multiple closed circle/polycurve point cuts with Undo.",
+      "limitations": "Numerical projection, NURBS seams, multiple open points and OS UI remain open."
+    },
+    "polycurve_trim_parameter_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-polycurve-trim-parameter.md",
+      "scope": "Unequal-segment open polycurve cut boundaries, controller geometry and Undo/Redo.",
+      "limitations": "Closed and NURBS polycurves and OS-level UI remain unverified."
+    },
+    "placed_cutters_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-placed-cutters.md",
+      "scope": "Translated curve, surface and BRep cutters; world-space Trim pick.",
+      "limitations": "Fixed local tolerance, numerical intersection completeness, scaled target frames and manual UI remain open."
+    },
+    "trim_picked_interval_2026_10_30": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-30-top11-trim-picked-interval.md",
+      "scope": "Nearest cut piece selection; line core and CMD/Undo regression.",
+      "limitations": "Approximate nonlinear projection; viewport pointer, broader geometry and manual acceptance unverified."
     }
   }
 }

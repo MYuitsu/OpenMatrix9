@@ -270,6 +270,122 @@ pub fn untrim_surface(trimmed: &TrimmedSurface, limits: &Limits) -> Result<Nurbs
     Ok(trimmed.underlying.clone())
 }
 
+/// Restrict a nonperiodic NURBS surface to a rectangular domain exactly by knot insertion.
+/// Unlike a refit, this preserves the original rational geometry and parameterization.
+pub fn shrink_surface_domain_exact(
+    surface: &NurbsSurface,
+    domain: [[f64; 2]; 2],
+    limits: &Limits,
+) -> Result<NurbsSurface> {
+    let source_usage = surface.validate(limits)?;
+    if surface.periodic.iter().any(|periodic| *periodic) {
+        return Err(Error::Unsupported("exact shrink of periodic surface"));
+    }
+    for (axis, [low, high]) in domain.iter().copied().enumerate() {
+        if !low.is_finite()
+            || !high.is_finite()
+            || low >= high
+            || low < surface.domain[axis][0]
+            || high > surface.domain[axis][1]
+        {
+            return Err(Error::Invalid("exact surface shrink domain"));
+        }
+    }
+    let mut result = surface.clone();
+    for axis in 0..2 {
+        let mut held = source_usage;
+        held.add(result.validate(limits)?, limits)?;
+        let other = 1 - axis;
+        let count = result.size[axis];
+        let full = [
+            result.knots[axis][result.degree[axis]],
+            result.knots[axis][count],
+        ];
+        let mut rows = Vec::new();
+        for j in 0..result.size[other] {
+            let indices = (0..count).map(|i| {
+                if axis == 0 {
+                    i * result.size[1] + j
+                } else {
+                    j * result.size[1] + i
+                }
+            });
+            let mut poles = Vec::with_capacity(count);
+            let mut weights = Vec::with_capacity(count);
+            for index in indices {
+                poles.push(result.poles[index]);
+                weights.push(result.weights[index]);
+            }
+            let mut curve = Curve::Nurbs(crate::geometry::NurbsCurve {
+                degree: result.degree[axis],
+                poles,
+                weights,
+                knots: result.knots[axis].clone(),
+                domain: full,
+                periodic: false,
+                reversed: false,
+                seam: None,
+            });
+            if domain[axis][0] > full[0] {
+                let fraction = (domain[axis][0] - full[0]) / (full[1] - full[0]);
+                curve = crate::curve_ops::split_curve(&curve, fraction, limits)?.1;
+            }
+            if domain[axis][1] < full[1] {
+                let fraction = (domain[axis][1] - domain[axis][0]) / (full[1] - domain[axis][0]);
+                curve = crate::curve_ops::split_curve(&curve, fraction, limits)?.0;
+            }
+            let Curve::Nurbs(row) = curve else {
+                unreachable!()
+            };
+            held.add(row.validate(limits)?, limits)?;
+            rows.push(row);
+        }
+        let first = rows.first().ok_or(Error::Invalid("surface shrink rows"))?;
+        let new_count = first.poles.len();
+        let new_knots = first.knots.clone();
+        let mut new_size = result.size;
+        new_size[axis] = new_count;
+        let total = new_size[0]
+            .checked_mul(new_size[1])
+            .ok_or(Error::Overflow("surface shrink poles"))?;
+        if total as u64 > limits.max_points {
+            return Err(Error::Budget("surface shrink poles"));
+        }
+        held.add(crate::budget::Usage::array::<Point3>(total)?, limits)?;
+        held.add(crate::budget::Usage::array::<f64>(total)?, limits)?;
+        held.add(
+            crate::budget::Usage {
+                points: total as u64,
+                ..Default::default()
+            },
+            limits,
+        )?;
+        let mut poles = vec![[0.; 3]; total];
+        let mut weights = vec![0.; total];
+        for (j, row) in rows.into_iter().enumerate() {
+            if row.poles.len() != new_count || row.knots != new_knots {
+                return Err(Error::Invalid("inconsistent surface shrink"));
+            }
+            for i in 0..new_count {
+                let index = if axis == 0 {
+                    i * new_size[1] + j
+                } else {
+                    j * new_size[1] + i
+                };
+                poles[index] = row.poles[i];
+                weights[index] = row.weights[i];
+            }
+        }
+        result.size = new_size;
+        result.poles = poles;
+        result.weights = weights;
+        result.knots[axis] = new_knots;
+        result.domain[axis] = domain[axis];
+        result.validate(limits)?;
+    }
+    Ok(result)
+}
+
 /// Shrink a surface to a rectangular sub-domain by sampling and refitting.
 /// The domain values are in the surface's own UV domain; a range outside that
 /// domain or an empty range is refused.

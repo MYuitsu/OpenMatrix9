@@ -2037,6 +2037,32 @@ impl Controller {
             .filter(|value| value.is_finite())
             .collect();
         if pending.points.len() < 2 {
+            // A single positive number after the first corner is the box length, exactly
+            // like the documented "Other corner of base or length ( 3Point )" prompt:
+            // the second base edge runs along the construction-plane X axis and the
+            // command continues with Width and Height.
+            if pending.points.len() == 1
+                && numbers.len() == 1
+                && numbers[0] > 0.0
+                && !text.contains(',')
+                && matches!(pending.box_kind, "Corners" | "Diagonal")
+            {
+                let length = match self.document().page_unit.length_to_mm(numbers[0]) {
+                    Ok(value) => value,
+                    Err(error) => {
+                        self.solid_pending = Some(pending);
+                        return Some(Err(error));
+                    }
+                };
+                let plane = pending.box_plane.unwrap_or_else(|| self.input_plane());
+                let first = pending.points[0];
+                let second: [f64; 3] = std::array::from_fn(|i| first[i] + length * plane.x[i]);
+                pending.points.push(second);
+                pending.box_kind = "ThreePoint";
+                pending.box_width = None;
+                self.solid_pending = Some(pending);
+                return Some(Ok(()));
+            }
             if numbers.len() == 3
                 || text.contains(',')
                 || (pending.points.is_empty() && text.trim() == "0")

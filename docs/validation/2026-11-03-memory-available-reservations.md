@@ -1,0 +1,7 @@
+# Available physical memory and concurrent reservations
+
+P0 foundation: Windows native-owner now returns total and available physical RAM from one `GlobalMemoryStatusEx` sample. The old capacity-only function wraps the same call. The safe Rust memory-budget prototype now subtracts outstanding reservations made against free RAM while holding the shared budget lock, so simultaneous jobs cannot both spend the same sampled headroom. The configured managed ceiling and the `max(256 MiB, 10% total RAM)` reserve remain checked. Dropping a reservation returns both charges.
+
+Windows, `CARGO_TARGET_DIR=L:/om9-target`, Cargo `-j 2`: three `om9-core` memory-budget integration tests passed, including two threads competing for the same simulated 1000 MiB available sample, and two Windows native-owner tests passed for total/available sample invariants. The concurrency test uses simulated counters and is not a real allocation or peak-memory measurement.
+
+These pieces are not wired into the app's document, Undo, cache, kernel or export allocations. The existing 256 MiB aggregate limit remains, and neither the 60% total managed budget nor physical-headroom protection is enforced for interactive OM9. Reservations remain subtracted from free headroom until dropped even after allocation; this is conservative and may refuse work unnecessarily, but avoids trusting a possibly stale OS sample. Other processes can consume RAM after sampling, so the OS sample is not a reservation. Live OM9 was not touched.

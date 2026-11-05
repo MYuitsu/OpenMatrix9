@@ -52,11 +52,14 @@ fn fixture() -> Document {
     document
 }
 fn report(document: &Document, diagnostics: &[String]) -> Result<()> {
+    report_with_limits(document, diagnostics, &Limits::default())
+}
+fn report_with_limits(document: &Document, diagnostics: &[String], limits: &Limits) -> Result<()> {
     om9_app::report::write(
         std::io::stdout().lock(),
         document,
         diagnostics,
-        &Limits::default(),
+        limits,
     )
 }
 fn create_fixture(path: &Path) -> Result<()> {
@@ -74,38 +77,40 @@ fn import_3dm(source: &Path, target: &Path) -> Result<()> {
     let host = om9_app::three_dm_host::ThreeDmHost::configured()?;
     let document = Document::with_template_tolerance("3DM import");
     let id = document.id;
-    let limits = Limits::default();
+    let limits = om9_app::document_limits();
     let mut coordinator =
         TransactionCoordinator::new(World::new(vec![document], &limits)?, limits)?;
+    if let Some(total) = om9_native_owner::physical_memory_bytes() {
+        coordinator.constrain_managed_ram(total, om9_core::budget::Usage::default())?;
+    }
     let receipt = host.import(&mut coordinator, id, source, &Cancellation::default())?;
     let document = coordinator
         .world()
         .documents
         .get(&id)
         .ok_or(Error::Missing("imported document"))?;
-    Archive::save(target, document, &limits, &Cancellation::default())?;
-    report(document, &receipt.diagnostics)
+    // The serializer and verification copy share the same account as the
+    // imported document; lease only the remaining admitted headroom.
+    let document_usage = document.validate(&limits)?;
+    let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+    let reservation = coordinator.reserve_remaining_external_memory_with_held(
+        om9_core::budget::memory::MemoryClass::CpuCache, physical, om9_core::budget::Usage::default(),
+    )?;
+    let mut archive_limits = limits;
+    archive_limits.max_bytes = document_usage.bytes.checked_add(reservation.bytes())
+        .ok_or(Error::Overflow("save memory budget"))?;
+    Archive::save(target, document, &archive_limits, &Cancellation::default())?;
+    drop(reservation);
+    report_with_limits(document, &receipt.diagnostics, &limits)
 }
 
 /// Export the current OM9 project through the admitted native writer.
 fn export_3dm(source: &Path, target: &Path) -> Result<()> {
     let host = om9_app::three_dm_host::ThreeDmHost::configured()?;
-    let restored = Archive::open_restored(
-        source,
-        &Limits::default(),
-        &std::collections::BTreeSet::new(),
-    )?;
-    let document = restored.document;
-    let id = document.id;
-    let limits = Limits::default();
-    let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits)?, limits)?;
-    let receipt = host.export(&coordinator, id, target, &Cancellation::default())?;
-    let document = coordinator
-        .world()
-        .documents
-        .get(&id)
-        .ok_or(Error::Missing("exported document"))?;
-    report(document, &receipt.diagnostics)
+    let limits = om9_app::document_limits();
+    let controller = om9_app::session::Controller::open_archive_for_batch(source, limits)?;
+    let receipt = host.export(controller.coordinator(), controller.document().id, target, &Cancellation::default())?;
+    report_with_limits(controller.document(), &receipt.diagnostics, &limits)
 }
 
 /// Renders every workspace viewport into a PNG under `out`, without starting the application.
@@ -125,7 +130,18 @@ fn render_sheet(project: &Path, out: &Path, width: u32, height: u32) -> Result<(
 }
 
 fn migrate(path: &Path, version: u8) -> Result<()> {
-    let limits = Limits::default();
+    let mut limits = om9_app::document_limits();
+    let coordinator = TransactionCoordinator::new(
+        World::new(vec![Document::new("Migration budget")], &limits)?, limits,
+    )?;
+    let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+    // The legacy decoder, restored copy and verified save are bounded by this
+    // lease while the source and result coexist. Unknown native allocations
+    // are not covered by the managed reservation.
+    let reservation = coordinator.reserve_remaining_external_memory_with_held(
+        om9_core::budget::memory::MemoryClass::CpuCache, physical, om9_core::budget::Usage::default(),
+    )?;
+    limits.max_bytes = reservation.bytes();
     let cancellation = Cancellation::default();
     let empty = std::collections::BTreeSet::new();
     let restored = match version {
@@ -133,12 +149,42 @@ fn migrate(path: &Path, version: u8) -> Result<()> {
         2 => Archive::upgrade_v2_restored_in_place(path, &limits, &cancellation, &empty)?,
         _ => Archive::upgrade_v3_restored_in_place(path, &limits, &cancellation, &empty)?,
     };
-    report(&restored.document, &restored.diagnostics)
+    report_with_limits(&restored.document, &restored.diagnostics, &limits)
 }
 fn inspect(path: &Path, hold: bool) -> Result<()> {
-    let restored =
-        Archive::open_restored(path, &Limits::default(), &std::collections::BTreeSet::new())?;
-    report(&restored.document, &restored.diagnostics)?;
+    let limits = om9_app::document_limits();
+    let coordinator = TransactionCoordinator::new(
+        World::new(vec![Document::new("Inspection budget")], &limits)?, limits,
+    )?;
+    let sample = || om9_native_owner::physical_memory().map(|x| (x.total_bytes, x.available_bytes));
+    let class = om9_core::budget::memory::MemoryClass::CpuCache;
+    let (archive_memory, restored) = Archive::open_restored_retaining_reservation(
+        path, &limits, &std::collections::BTreeSet::new(),
+        |bytes| coordinator.reserve_external_memory(class, bytes.max(1), sample()),
+        |reservation, bytes| coordinator.grow_external_memory_with_held(
+            reservation, bytes, sample(), om9_core::budget::Usage::default(),
+        ),
+        |reservation, estimated| {
+            let additional = estimated.saturating_sub(reservation.bytes());
+            if additional == 0 { return Ok(()); }
+            let batch = additional.max(64 * 1024);
+            match coordinator.grow_external_memory_with_held(reservation, batch, sample(), om9_core::budget::Usage::default()) {
+                Err(Error::Budget(_)) if batch != additional => coordinator.grow_external_memory_with_held(
+                    reservation, additional, sample(), om9_core::budget::Usage::default(),
+                ),
+                result => result,
+            }
+        },
+    )?;
+    // Keep the conservative archive/restore lease, even after the input
+    // buffer is gone, until the report and audit lifetime end.
+    let report_memory = coordinator.reserve_remaining_external_memory_with_held(
+        class, sample(), om9_core::budget::Usage::default(),
+    )?;
+    let mut report_limits = limits;
+    report_limits.max_bytes = archive_memory.bytes().checked_add(report_memory.bytes())
+        .ok_or(Error::Overflow("inspection report memory"))?.min(limits.max_bytes);
+    report_with_limits(&restored.document, &restored.diagnostics, &report_limits)?;
     if hold {
         use std::io::Write;
         std::io::stdout()
@@ -161,7 +207,7 @@ fn run_plugin(
     source: Option<&Path>,
     target: &Path,
 ) -> Result<()> {
-    let limits = Limits::default();
+    let limits = om9_app::document_limits();
     let command = command
         .to_str()
         .ok_or(Error::Invalid("UTF-8 plugin command"))?;
@@ -179,22 +225,14 @@ fn run_plugin(
     if !arguments.is_object() {
         return Err(Error::Invalid("plugin arguments must be a JSON object"));
     }
-    let document = match source {
-        Some(path) => {
-            Archive::open_restored(path, &limits, &std::collections::BTreeSet::new())?.document
-        }
-        None => Document::with_template_tolerance("Plugin output"),
+    let mut controller = match source {
+        Some(path) => om9_app::session::Controller::open_archive_for_batch(path, limits)?,
+        None => om9_app::session::Controller::new(Document::with_template_tolerance("Plugin output"), limits)?,
     };
-    let mut controller = om9_app::session::Controller::new(document, limits)?;
     let descriptor = controller.load_plugin(package)?;
     controller.run_loaded_plugin(&descriptor.id, command, arguments)?;
-    Archive::save(
-        target,
-        controller.document(),
-        &limits,
-        &Cancellation::default(),
-    )?;
-    report(controller.document(), &[])
+    controller.save_archive_for_batch(target)?;
+    report_with_limits(controller.document(), &[], &limits)
 }
 /// Startup failures of the document/CLI path keep the document stage; the two
 /// UI entry points classify their own document restore and window creation.
@@ -237,6 +275,7 @@ fn run() -> std::result::Result<(), om9_app::startup::StartupFailure> {
         // Headless Model Context Protocol server: an agent client drives the same Controller as
         // CMD and reads typed state instead of screenshots.
         Some("--mcp") if args.len() == 1 => document_stage(om9_app::mcp::serve_stdio()),
+        Some("--mcp-live") if args.len() == 1 => document_stage(om9_app::mcp::live::serve_stdio()),
         // Headless viewport capture: one PNG per workspace camera, no window or egui.
         Some("--render") if args.len() == 3 || args.len() == 4 => {
             let size = if args.len() == 4 {

@@ -8,6 +8,106 @@
 
 use om9_exchange::stl::{StlError, StlOptions, TriangleSoup, open_edges, write_binary_stl};
 
+#[test]
+fn edge_checks_reject_even_non_manifold_incidence_and_same_direction() {
+    use om9_exchange::stl::edge_topology;
+    let mut mesh = cube();
+    mesh.triangles.extend([mesh.triangles[0], mesh.triangles[0]]);
+    let report = edge_topology(&mesh);
+    assert_eq!(report.boundary, 0);
+    assert_eq!(report.non_manifold, 3);
+    assert!(write_binary_stl(&mesh, StlOptions::default()).is_err());
+    let mut mesh = cube();
+    mesh.triangles[0].swap(1, 2);
+    let report = edge_topology(&mesh);
+    assert_eq!(report.boundary, 0);
+    assert_eq!(report.inconsistent_winding, 3);
+    assert!(write_binary_stl(&mesh, StlOptions::default()).is_err());
+}
+
+#[test]
+fn edge_closed_tetrahedra_touching_at_one_vertex_have_disconnected_fans() {
+    use om9_exchange::stl::edge_topology;
+    let soup = TriangleSoup::new(
+        vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.], [0.,0.,1.], [-1.,0.,0.], [0.,-1.,0.], [0.,0.,-1.]],
+        vec![[0,2,1], [0,1,3], [1,2,3], [2,0,3], [0,5,4], [0,4,6], [4,5,6], [5,0,6]],
+    );
+    let report = edge_topology(&soup);
+    assert_eq!((report.boundary, report.non_manifold, report.inconsistent_winding), (0, 0, 0));
+    assert_eq!(report.disconnected_vertices, 1);
+    assert_eq!(report.edge_connected_components, 2);
+    assert!(write_binary_stl(&soup, StlOptions::default()).is_err());
+}
+
+#[test]
+fn triangle_components_use_shared_edges_even_for_non_manifold_incidence() {
+    let soup = TriangleSoup::new(
+        vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.], [0.,-1.,0.], [0.,0.,1.], [2.,0.,0.], [2.,1.,0.]],
+        vec![[0,1,2], [1,0,3], [0,1,4], [2,5,6]],
+    );
+    let report = om9_exchange::stl::edge_topology(&soup);
+    assert_eq!(report.edge_connected_components, 2);
+    assert_eq!(report.non_manifold, 1);
+    assert_eq!(om9_exchange::stl::edge_topology(&TriangleSoup::new(vec![], vec![])).edge_connected_components, 0);
+    assert_eq!(om9_exchange::stl::edge_topology(&cube()).edge_connected_components, 1);
+}
+
+#[test]
+fn writer_reports_distinct_indices_at_same_encoded_position() {
+    use om9_exchange::stl::write_binary_stl_to_with_report;
+    let options = StlOptions { strict: false, ..StlOptions::default() };
+    let mut encoded = Vec::new();
+    let report = write_binary_stl_to_with_report(&mut encoded, &cube(), options, None, || Ok(())).unwrap();
+    assert!(!report.coincident_distinct_indices, "repeated use of the same indices is unambiguous");
+    let soup = TriangleSoup::new(
+        vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.], [0.,0.,-0.], [1.,0.,0.], [0.,1.,0.]],
+        vec![[0,1,2], [3,4,5]],
+    );
+    encoded.clear();
+    let report = write_binary_stl_to_with_report(&mut encoded, &soup, options, None, || Ok(())).unwrap();
+    assert!(report.coincident_distinct_indices);
+    assert_eq!(encoded.len(), 84 + 2 * 50);
+}
+
+#[test]
+fn topology_cancellation_is_checked_during_both_passes() {
+    let soup = TriangleSoup::new(vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], vec![[0,1,2]]);
+    // For one triangle: initial, edge construction, edge traversal, then fan construction.
+    for stop_at in [1, 2, 3, 4, 5] {
+        let mut calls = 0;
+        let result = om9_exchange::stl::try_edge_topology_with_check(&soup, || {
+            calls += 1;
+            if calls == stop_at { Err("canceled") } else { Ok(()) }
+        }, || "allocation");
+        assert_eq!(result, Err("canceled"));
+        assert_eq!(calls, stop_at);
+    }
+}
+
+#[test]
+fn coincident_opposite_triangles_are_duplicate_faces_not_a_closed_solid() {
+    let soup = TriangleSoup::new(
+        vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+        vec![[0, 1, 2], [0, 2, 1]],
+    );
+    let report = om9_exchange::stl::edge_topology(&soup);
+    assert_eq!((report.boundary, report.non_manifold, report.inconsistent_winding, report.disconnected_vertices), (0, 0, 0, 0));
+    assert_eq!(report.duplicate_faces, 1);
+    assert!(matches!(write_binary_stl(&soup, StlOptions::default()), Err(StlError::InvalidTopology { duplicate_faces: 1, .. })));
+}
+
+#[test]
+fn f64_input_checks_quantization_distance_and_triangle_collapse() {
+    use om9_exchange::stl::write_binary_stl_with_tolerance;
+    let open = StlOptions { strict: false, ..StlOptions::default() };
+    let accurate = TriangleSoup::new_f64(vec![[0.0000001, 0., 0.], [1., 0., 0.], [0., 1., 0.]], vec![[0, 1, 2]]);
+    assert!(write_binary_stl_with_tolerance(&accurate, open, Some(0.0001)).is_ok());
+    let far = TriangleSoup::new_f64(vec![[100000.003, 0., 0.], [100001.003, 0., 0.], [100000.003, 1., 0.]], vec![[0, 1, 2]]);
+    assert!(matches!(write_binary_stl_with_tolerance(&far, open, Some(0.0001)), Err(StlError::Quantization { .. })));
+    let collapsed = TriangleSoup::new_f64(vec![[100000., 0., 0.], [100000.001, 0., 0.], [100000., 1., 0.]], vec![[0, 1, 2]]);
+    assert!(matches!(write_binary_stl_with_tolerance(&collapsed, open, None), Err(StlError::QuantizedTriangle { .. })));
+}
+
 /// A closed 10 mm cube, wound counter-clockwise seen from outside.
 fn cube() -> TriangleSoup {
     let positions = vec![

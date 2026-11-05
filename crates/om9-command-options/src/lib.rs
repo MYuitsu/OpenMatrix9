@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
+#![forbid(unsafe_code)]
 //! The runtime option parser for interactive commands (OM9-L3-01-02-005).
 //!
 //! A command declares its option names in its descriptor (`Operation::options`,

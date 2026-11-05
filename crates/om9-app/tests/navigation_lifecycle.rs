@@ -41,6 +41,30 @@ impl Harness {
         ]);
     }
 }
+
+#[test]
+fn burst_motion_preserves_the_final_camera_and_button_release() {
+    let mut burst = Harness::new();
+    let mut separate = Harness::new();
+    let start = burst.app.view_rects[&ViewId::Perspective].center();
+    let mid = start + Vec2::new(20., 10.);
+    let end = start + Vec2::new(55., 25.);
+    burst.button(start, true);
+    separate.button(start, true);
+    burst.frame(vec![Event::PointerMoved(mid), Event::PointerMoved(end)]);
+    separate.frame(vec![Event::PointerMoved(mid)]);
+    separate.frame(vec![Event::PointerMoved(end)]);
+    burst.button(end, false);
+    separate.button(end, false);
+    let actual = &burst.app.controller.workspace.views[&ViewId::Perspective].camera;
+    let expected = &separate.app.controller.workspace.views[&ViewId::Perspective].camera;
+    for axis in 0..3 {
+        assert!((actual.eye[axis] - expected.eye[axis]).abs() < 1e-9, "{actual:?} != {expected:?}");
+    }
+    let stopped = actual.clone();
+    burst.frame(vec![Event::PointerMoved(end + Vec2::new(100., 50.))]);
+    assert_eq!(burst.app.controller.workspace.views[&ViewId::Perspective].camera, stopped);
+}
 #[test]
 fn capture_crosses_other_panes_and_release_has_no_inertia() {
     let mut h = Harness::new();

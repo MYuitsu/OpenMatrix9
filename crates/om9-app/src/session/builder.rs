@@ -499,7 +499,7 @@ impl Controller {
         }
         let mut held = self.scene_cache_usage()?;
         held.add(
-            old_scene.update_usage(Some(&plan.entity))?,
+            old_scene.update_held_usage(Some(&plan.entity))?,
             self.coordinator.limits(),
         )?;
         let expected_revision = self
@@ -540,13 +540,12 @@ impl Controller {
         let prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new(kind.title(), mutations), held)?;
-        let before = self.document().clone();
-        let receipt = self.coordinator.commit(prepared)?;
+        let before = self.coordinator.capture_retained_document(self.document)?;
+        let receipt = self.commit_with_candidate_scene(prepared, held)?;
         self.builder = None;
         self.builder_saved.clear();
         self.applied_style = None;
         if receipt.published || !record {
-            self.refresh_scene()?;
             self.record_history_change(&before, ChangeCause::Edit);
             if record || editing {
                 self.sync_published(ChangeCause::Edit);
@@ -707,7 +706,8 @@ impl Controller {
     /// Edit one recorded parameter through the transaction journal (the panel's "edit
     /// existing feature" path). The recipe becomes Dirty; the next recompute rebuilds it.
     pub fn set_history_parameter(&mut self, id: HistoryId, key: &str, value: Value) -> Result<()> {
-        let base = self.document().clone();
+        let base = self.document();
+        let revision = base.revision;
         let mut recipe = base
             .history
             .recipes
@@ -717,17 +717,17 @@ impl Controller {
         recipe.parameters.insert(key.into(), value);
         recipe.policy.update = self.history_update;
         recipe.state = om9_core::history::EvaluationState::Dirty("parameter edit".into());
-        let prepared = self.coordinator.prepare(TransactionRequest::new(
+        let held = self.scene_cache_usage()?;
+        let prepared = self.coordinator.prepare_with_held_usage(TransactionRequest::new(
             "History Parameter",
             vec![Mutation::HistoryUpdate {
                 document: self.document,
-                expected_revision: base.revision,
+                expected_revision: revision,
                 recipes: vec![Box::new(recipe)],
                 published: vec![],
             }],
-        ))?;
-        self.coordinator.commit(prepared)?;
-        self.refresh_scene()?;
+        ), held)?;
+        self.commit_with_candidate_scene(prepared, held)?;
         self.sync_published(ChangeCause::Edit);
         Ok(())
     }
@@ -892,12 +892,13 @@ impl Controller {
         }
         let old_scene = self.scene.as_ref().ok_or(Error::Missing("command scene"))?;
         let mut held = self.scene_cache_usage()?;
+        let mut scene_points = old_scene.cache_usage()?.points;
         for mutation in &mutations {
             if let Mutation::Geometry { source, .. } = mutation
                 && let Some(entity) = draft.entities.get(&source.object)
             {
                 held.add(
-                    old_scene.update_usage(Some(entity))?,
+                    old_scene.update_held_usage_counted(Some(entity), &mut scene_points)?,
                     self.coordinator.limits(),
                 )?;
             }
@@ -912,10 +913,9 @@ impl Controller {
             TransactionRequest::new("Recompute History", mutations),
             held,
         )?;
-        let before = self.document().clone();
-        let receipt = self.coordinator.commit(prepared)?;
+        let before = self.coordinator.capture_retained_document(self.document)?;
+        let receipt = self.commit_with_candidate_scene(prepared, held)?;
         if receipt.published {
-            self.refresh_scene()?;
             self.record_history_change(&before, ChangeCause::Edit);
             self.sync_published(ChangeCause::Edit);
         }

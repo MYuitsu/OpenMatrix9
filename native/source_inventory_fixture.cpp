@@ -219,11 +219,122 @@ void circle_oracle(const std::filesystem::path& path,unsigned object_id) {
   }
   std::cout<<"]}\n";
 }
+void polycurve_oracle(const std::filesystem::path& path) {
+  ONX_Model model;ON_wString text;ON_TextLog log(text);check(model.Read(path.c_str(),&log),"polycurve oracle read");
+  const ON_PolyCurve* poly=nullptr;ONX_ModelComponentIterator objects(model,ON_ModelComponent::Type::ModelGeometry);
+  for(const auto* c=objects.FirstComponent();c;c=objects.NextComponent()) {
+    const auto* item=ON_ModelGeometryComponent::Cast(c);check(item,"polycurve oracle object");
+    if(const auto* found=ON_PolyCurve::Cast(item->Geometry(nullptr))) {check(!poly,"polycurve oracle ambiguous");poly=found;}
+  }
+  check(poly&&poly->IsValid(),"polycurve oracle missing or invalid");const auto domain=poly->Domain();
+  std::cout<<std::setprecision(17)<<"{\"status\":\"native_polycurve_oracle\",\"segments\":[";
+  for(int i=0;i<poly->Count();++i) {if(i)std::cout<<',';const auto parent=poly->SegmentDomain(i),child=poly->SegmentCurve(i)->Domain();
+    std::cout<<"{\"parent\":["<<parent[0]<<','<<parent[1]<<"],\"child\":["<<child[0]<<','<<child[1]<<"]}";}
+  std::cout<<"],\"samples\":[";
+  for(int i=0;i<=8;++i) {if(i)std::cout<<',';const auto p=poly->PointAt(domain.ParameterAt(static_cast<double>(i)/8));std::cout<<'['<<p.x<<','<<p.y<<','<<p.z<<']';}
+  std::cout<<"]}\n";
+}
+void unequal_polycurve_fixture(const std::filesystem::path& path) {
+  check(!std::filesystem::exists(path),"unequal fixture destination exists");ONX_Model model;
+  model.m_settings.m_ModelUnitsAndTolerances.m_unit_system=ON_UnitSystem::Millimeters;
+  ON_Layer layer;layer.SetId(id(1));layer.SetName(L"Fixture");layer.SetIndex(0);check(!model.AddModelComponent(layer,false).IsEmpty(),"unequal fixture layer");
+  model.m_settings.SetCurrentLayerId(id(1));
+  auto poly=std::make_unique<ON_PolyCurve>();auto first=std::make_unique<ON_LineCurve>(ON_3dPoint(0,0,0),ON_3dPoint(1,0,0));
+  auto second=std::make_unique<ON_LineCurve>(ON_3dPoint(1,0,0),ON_3dPoint(1,1,0));
+  check(first->SetDomain(0,1)&&second->SetDomain(1,3),"unequal fixture domains");
+  check(poly->Append(first.get()),"unequal first");first.release();check(poly->Append(second.get()),"unequal second");second.release();
+  auto attrs=std::make_unique<ON_3dmObjectAttributes>();attrs->m_uuid=id(2);attrs->m_layer_index=0;attrs->m_name=L"unequal polycurve";
+  check(!model.AddManagedModelGeometryComponent(poly.get(),attrs.get(),false).IsEmpty(),"unequal fixture object");poly.release();attrs.release();
+  ON_wString text;ON_TextLog log(text);check(model.Write(path.c_str(),50,&log),"unequal fixture write");
+}
+void periodic_outer_fixture(const std::wstring& mode,const std::filesystem::path& path) {
+  check(!std::filesystem::exists(path),"periodic fixture destination exists"); ONX_Model model;
+  model.m_settings.m_ModelUnitsAndTolerances.m_unit_system=ON_UnitSystem::Millimeters;
+  ON_Layer layer;layer.SetId(id(1));layer.SetName(L"Fixture");layer.SetIndex(0);if(mode==L"--periodic-layer-extra")layer.m_plot_weight_mm=0.5;check(!model.AddModelComponent(layer,false).IsEmpty(),"periodic fixture layer");model.m_settings.SetCurrentLayerId(id(1));
+  auto curve=std::make_unique<ON_NurbsCurve>(3,false,3,6);
+  const ON_3dPoint poles[]={ON_3dPoint(0,0,0),ON_3dPoint(2,0,0),ON_3dPoint(0,2,0),ON_3dPoint(-2,0,0),ON_3dPoint(0,0,0),ON_3dPoint(2,0,0)};
+  const double knots[]={-1,0,1,2,3,4,5};
+  for(int i=0;i<6;++i)check(curve->SetCV(i,poles[i]),"periodic fixture pole");
+  for(int i=0;i<7;++i)check(curve->SetKnot(i,knots[i]),"periodic fixture knot");
+  check(curve->IsValid()&&curve->IsPeriodic(),"periodic fixture validity");
+  const wchar_t* value=mode==L"--periodic-bad-json"?L"{bad":mode==L"--periodic-stale"?L"[-3.0,6.0]":L"[-2.0,6.0]";
+  if(mode!=L"--periodic-no-metadata")check(curve->SetUserString(L"org.openmatrix9.periodic_outer_knots.v1",value),"periodic fixture metadata");
+  if(mode==L"--periodic-extra")check(curve->SetUserString(L"fixture.other",L"preserve opaque external string"),"periodic fixture unrelated metadata");
+  auto attr=std::make_unique<ON_3dmObjectAttributes>();attr->m_uuid=id(2);attr->m_layer_index=0;attr->m_name=L"periodic metadata";
+  check(!model.AddManagedModelGeometryComponent(curve.get(),attr.get(),false).IsEmpty(),"periodic fixture object");curve.release();attr.release();
+  auto line=std::make_unique<ON_LineCurve>(ON_3dPoint(0,0,0),ON_3dPoint(1,0,0));auto line_attr=std::make_unique<ON_3dmObjectAttributes>();line_attr->m_uuid=id(3);line_attr->m_layer_index=0;line_attr->m_name=L"independent line";
+  check(!model.AddManagedModelGeometryComponent(line.get(),line_attr.get(),false).IsEmpty(),"periodic fixture line");line.release();line_attr.release();
+  ON_wString text;ON_TextLog log(text);check(model.Write(path.c_str(),50,&log),"periodic fixture write");
+}
+void periodic_userdata_oracle(const std::filesystem::path& path) {
+  ONX_Model model;ON_wString text;ON_TextLog log(text);check(model.Read(path.c_str(),&log),"periodic userdata oracle read");
+  const ON_Curve* curve=nullptr;ONX_ModelComponentIterator objects(model,ON_ModelComponent::Type::ModelGeometry);
+  for(const auto* c=objects.FirstComponent();c;c=objects.NextComponent()) {
+    const auto* item=ON_ModelGeometryComponent::Cast(c);check(item,"periodic userdata oracle object");
+    const auto* attrs=item->Attributes(nullptr);check(attrs,"periodic userdata oracle attributes");
+    if(attrs->m_name==L"periodic metadata") {check(!curve,"periodic userdata oracle ambiguous");curve=ON_Curve::Cast(item->Geometry(nullptr));}
+  }
+  check(curve,"periodic userdata oracle missing");ON_wString own,other;
+  const bool has_own=curve->GetUserString(L"org.openmatrix9.periodic_outer_knots.v1",own);
+  const bool has_other=curve->GetUserString(L"fixture.other",other);
+  check(!has_other || other==L"preserve opaque external string","periodic userdata oracle unexpected value");
+  std::cout<<"{\"own\":"<<(has_own?"true":"false")<<",\"other\":"<<(has_other?"true":"false")<<"}\n";
+}
+void layer_normalization_oracle(const std::filesystem::path& path) {
+  ONX_Model model;ON_wString text;ON_TextLog log(text);check(model.Read(path.c_str(),&log),"layer oracle read");
+  ONX_ModelComponentIterator layers(model,ON_ModelComponent::Type::Layer);const auto* layer=ON_Layer::Cast(layers.FirstComponent());check(layer,"layer oracle missing");
+  const ON_Layer defaults;auto normalized=*layer;
+  normalized.SetId(defaults.Id());normalized.SetIndex(defaults.Index());normalized.SetName(defaults.Name());
+  normalized.SetParentLayerId(defaults.ParentLayerId());normalized.SetVisible(defaults.IsVisible());normalized.SetLocked(defaults.IsLocked());normalized.SetColor(defaults.Color());
+  normalized.SetRenderMaterialIndex(defaults.RenderMaterialIndex());normalized.SetLinetypeIndex(defaults.LinetypeIndex());
+  ON_Write3dmBufferArchive a(0,2*1024*1024,50,ON::Version()),b(0,2*1024*1024,50,ON::Version());
+  check(normalized.Write(a)&&defaults.Write(b),"layer oracle serialization");
+  const auto* x=static_cast<const unsigned char*>(a.Buffer());const auto* y=static_cast<const unsigned char*>(b.Buffer());
+  std::cout<<"{\"actual_bytes\":"<<a.SizeOfArchive()<<",\"default_bytes\":"<<b.SizeOfArchive()<<",\"different\":[";
+  bool first=true;const auto count=std::min(a.SizeOfArchive(),b.SizeOfArchive());
+  for(size_t i=0;i<count;++i)if(x[i]!=y[i]) {if(!first)std::cout<<',';first=false;std::cout<<'['<<i<<','<<static_cast<unsigned>(x[i])<<','<<static_cast<unsigned>(y[i])<<']';}
+  std::cout<<"]}\n";
+}
+void mutate_short_line_metadata(const std::wstring& mode,const std::filesystem::path& source,const std::filesystem::path& output) {
+  check(!std::filesystem::exists(output),"short line mutation destination exists");
+  ONX_Model model;ON_wString text;ON_TextLog log(text);check(model.Read(source.c_str(),&log),"short line mutation read");
+  ONX_ModelComponentIterator objects(model,ON_ModelComponent::Type::ModelGeometry);bool found=false;
+  for(const auto* c=objects.FirstComponent();c;c=objects.NextComponent()) {
+    const auto* item=ON_ModelGeometryComponent::Cast(c);check(item,"short line mutation object");
+    const auto* attrs=item->Attributes(nullptr);check(attrs,"short line mutation attributes");
+    if(attrs->m_name==L"tiny line") {
+      check(!found,"ambiguous short line");found=true;
+      auto* n=const_cast<ON_NurbsCurve*>(ON_NurbsCurve::Cast(item->Geometry(nullptr)));check(n,"short line mutation NURBS");
+      if(mode==L"--short-line-extra")check(n->SetUserString(L"fixture.other",L"preserve external string"),"short line extra string");
+      else check(n->SetUserString(L"org.openmatrix9.short_line.v1",mode==L"--short-line-bad"?L"invalid":nullptr),"short line mutation string");
+    }
+  }
+  check(found&&model.Write(output.c_str(),50,&log),"short line mutation write");
+}
+void short_line_userdata_oracle(const std::filesystem::path& path) {
+  ONX_Model model;ON_wString text;ON_TextLog log(text);check(model.Read(path.c_str(),&log),"short line userdata read");
+  ONX_ModelComponentIterator objects(model,ON_ModelComponent::Type::ModelGeometry);const ON_Geometry* g=nullptr;
+  for(const auto* c=objects.FirstComponent();c;c=objects.NextComponent()) {
+    const auto* item=ON_ModelGeometryComponent::Cast(c);check(item&&item->Attributes(nullptr),"short line userdata object");
+    if(item->Attributes(nullptr)->m_name==L"tiny line") {check(!g,"short line userdata ambiguous");g=item->Geometry(nullptr);}
+  }
+  check(g,"short line userdata missing");ON_wString own,other;
+  const bool has_own=g->GetUserString(L"org.openmatrix9.short_line.v1",own),has_other=g->GetUserString(L"fixture.other",other);
+  check(!has_own||own==L"1","short line own string changed");check(!has_other||other==L"preserve external string","short line foreign string changed");
+  std::cout<<"{\"own\":"<<(has_own?"true":"false")<<",\"other\":"<<(has_other?"true":"false")<<"}\n";
+}
 }
 int wmain(int argc,wchar_t** argv) {
   try {
     check(argc==3||argc==4,"fixture arguments: mode private.3dm | --oracle-circle authored.3dm object_number"); ON::Begin();
-    if(argc==4) { check(std::wstring(argv[1])==L"--oracle-circle","oracle arguments"); const auto n=std::stoul(argv[3]); check(n<=65535,"oracle object id"); circle_oracle(std::filesystem::path(argv[2]),static_cast<unsigned>(n)); }
+    if(argc==4 && (std::wstring(argv[1])==L"--short-line-bad"||std::wstring(argv[1])==L"--short-line-no-metadata"||std::wstring(argv[1])==L"--short-line-extra"))mutate_short_line_metadata(argv[1],std::filesystem::path(argv[2]),std::filesystem::path(argv[3]));
+    else if(argc==4) { check(std::wstring(argv[1])==L"--oracle-circle","oracle arguments"); const auto n=std::stoul(argv[3]); check(n<=65535,"oracle object id"); circle_oracle(std::filesystem::path(argv[2]),static_cast<unsigned>(n)); }
+    else if(std::wstring(argv[1])==L"--oracle-polycurve")polycurve_oracle(std::filesystem::path(argv[2]));
+    else if(std::wstring(argv[1])==L"--oracle-periodic-userdata")periodic_userdata_oracle(std::filesystem::path(argv[2]));
+    else if(std::wstring(argv[1])==L"--oracle-layer-normalization")layer_normalization_oracle(std::filesystem::path(argv[2]));
+    else if(std::wstring(argv[1])==L"--oracle-short-line-userdata")short_line_userdata_oracle(std::filesystem::path(argv[2]));
+    else if(std::wstring(argv[1])==L"--unequal-polycurve")unequal_polycurve_fixture(std::filesystem::path(argv[2]));
+    else if(std::wstring(argv[1])==L"--periodic-good"||std::wstring(argv[1])==L"--periodic-bad-json"||std::wstring(argv[1])==L"--periodic-stale"||std::wstring(argv[1])==L"--periodic-no-metadata"||std::wstring(argv[1])==L"--periodic-extra"||std::wstring(argv[1])==L"--periodic-layer-extra")periodic_outer_fixture(argv[1],std::filesystem::path(argv[2]));
     else { create(argv[1],std::filesystem::path(argv[2])); std::cout<<"{\"status\":\"authored_native_fixture\"}\n"; }
     ON::End(); return 0;
   }

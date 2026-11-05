@@ -113,7 +113,7 @@ fn immutable_worker_input_survives_close_and_reply_is_discarded() {
     assert!(c.world().documents.is_empty());
 }
 #[test]
-fn active_savepoints_share_aggregate_budget_with_next_private_clone() {
+fn active_savepoints_do_not_sum_per_document_point_limits() {
     let mut d = Document::new("budget");
     let e = Entity::new("point", Geometry::Point([0., 0., 0.]), d.current_layer);
     let id = e.id;
@@ -140,7 +140,6 @@ fn active_savepoints_share_aggregate_budget_with_next_private_clone() {
     let p = c.prepare(r).unwrap();
     c.commit(p).unwrap();
     c.savepoint(&owner).unwrap();
-    let before = c.snapshot();
     let source = c.editing_world(&owner).unwrap().documents[&did]
         .stamp(id)
         .unwrap();
@@ -152,6 +151,10 @@ fn active_savepoints_share_aggregate_budget_with_next_private_clone() {
         }],
     );
     r.owner = Some(owner.clone());
-    assert!(c.prepare(r).is_err());
-    assert_eq!(c.snapshot(), before);
+    // Each version has one point; historical snapshots must not exhaust the
+    // per-document point ceiling. Aggregate byte limits remain separate.
+    let prepared = c.prepare(r).unwrap();
+    c.commit(prepared).unwrap();
+    assert_eq!(c.editing_world(&owner).unwrap().documents[&did].entities[&id].placement.0[0][3], 2.);
+    assert_eq!(c.world().documents[&did].entities[&id].placement.0[0][3], 0.);
 }

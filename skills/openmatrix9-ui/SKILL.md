@@ -19,6 +19,14 @@ description: "Implement or review the Matrix9 interface described by OpenMatrix9
 
 Khi triển khai command hoặc binding/hành vi gọi command, đọc [hợp đồng icon/default/options](../openmatrix9-feature-port/references/command-integration-contract.md). Icon/menu/CMD cho cùng biến thể phải tới cùng owner; thao tác mặc định và các tham số gạch chân accelerator phải hoạt động thật theo mẫu Polyline. Không nghiệm thu command chỉ từ icon hiển thị hoặc handler mở được.
 
+## Option hiển thị theo stage (người dùng duyệt 2026-11-02)
+
+Option chỉ hiện **inline trong prompt**; mode/measure/giá trị hiện tại là chữ prompt (`Center of sphere`, `Diameter`), option chỉ là các lựa chọn thay thế còn lại của stage đó. Option của bước sau bị ẩn tới khi thao tác xảy ra (`Length` sau góc Rectangle, `Cube` sau góc chéo, `FromLastPoint`/`UseLast*` sau bản copy đầu); option mà parser từ chối ở stage hiện tại thì không quảng bá. Theo hướng Matrix đã chốt 2026-11-02: Line không có option `Length` (gõ số trần ở prompt cuối là length; `Length=` chỉ còn alias gõ tay), Rectangle không có option `Square` (giữ **Shift** khi pick góc để vuông; chữ `Square` chỉ còn alias). Mode construction giữ chữ trơn, flag/giá trị giữ `Name=Value` như chuẩn Polyline; Cancel là Esc trừ prompt mà contract đã có. Ẩn token không có nghĩa là bỏ đường gõ tay.
+
+Nguồn hành vi là các extract Matrix đã nằm trong `OM9_Milestones/**/L3-*/reference/text` (book 1/2/addendum), không đọc lại PDF. Trước khi sửa một lệnh: đọc `Steps` + `Command Line Options` của ref, lập bảng stage (prompt, input bắt buộc, option khả dụng, giá trị hiện tại, chuyển bước, finish/cancel/undo), so với provider/`describe_command_option`/parser rồi mới sửa. Nếu Matrix khác contract cục bộ đã duyệt (M01 fixture, OWNER-CARDS), ghi cả hai và hỏi — không tự đổi. Sau khi sửa: cập nhật fixture stage, kiểm ba đường kích hoạt, geometry/Undo và ghi evidence.
+
+Đọc [command-option-visibility](references/command-option-visibility.md) cho luật đầy đủ, workflow và các gap còn mở; [command-options-by-menu](references/command-options-by-menu.md) là file tra theo đúng 12 menu (Curve, Surface, Solid, Transform, SubD, Art, Builder, Tools, Gems, Setting, Cutters, Render): mỗi lệnh có option Matrix, trạng thái verified/auto/pending, ref trang và token OM9 hiện tại. Index thô từ 1130 ref L3: `docs/validation/matrix-ref-command-options-2026-11-02.md`; diff option với app: `docs/validation/matrix-ref-option-diff-2026-11-02.md`; ghi chú theo trang: `docs/validation/2026-11-02-matrix-command-prompts.md`.
+
 Khi sửa input điểm, preview hoặc chuyển preview → scene, đọc [hướng kéo/CMD/redraw](../openmatrix9-feature-port/references/interactive-geometry-regressions.md). Chuyển điểm qua parser/owner chung; kiểm preview bám đúng phía con trỏ trong CPlane và hình sau commit. Đối chiếu model/scene rồi kiểm UI thật khi có triệu chứng chớp/mất hình; không suy ra GPU đã hiển thị từ semantic test.
 
 ## Viewport GPU đã duyệt
@@ -26,6 +34,10 @@ Khi sửa input điểm, preview hoặc chuyển preview → scene, đọc [hư�
 Người dùng duyệt ngày 2026-10-19: viewport desktop chỉ dùng GPU, không giữ nhánh render CPU/software dự phòng. Thiếu GPU phù hợp phải báo lỗi renderer. Model, picking và chuẩn bị dữ liệu vẫn do Rust xử lý; các lớp UI/Gumball qua egui không phải một renderer viewport CPU riêng. Bản mặc định phải dùng GPU mà không cần cờ bật; native OCCT là capability độc lập.
 
 Khi sửa backend hoặc startup, xem bằng chứng trong checkout `implementation/evidence/M02/2026-10-19-gpu-only.md`; kiểm cả bốn viewport và trường hợp thiếu adapter, không dùng kết quả của renderer CPU cũ để nghiệm thu.
+
+## Tốc độ điều hướng viewport
+
+Người dùng đồng ý ghi quy tắc ngày 2026-11-01: orbit Perspective mặc định dùng π/600 radian mỗi điểm logic; một nấc bánh xe làm span nhân 0,81, nấc ngược nhân 1/0,81; pan theo span hiển thị tại độ sâu target. Giữ zoom neo con trỏ và input phân đoạn tỉ lệ. Đây là lựa chọn OM9 suy ra từ native Rhino 5, không phải chứng nhận giống Matrix9; chuột thật, DPI và cảm giác desktop còn cần kiểm tra. Xem `docs/validation/2026-11-01-rhino-inspired-navigation.md`.
 
 ## Selection BRep đã duyệt
 

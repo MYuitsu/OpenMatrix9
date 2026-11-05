@@ -139,7 +139,7 @@ impl Document {
             ),
             Geometry::Brep(brep) => (
                 "B-rep",
-                Measurement::Unavailable("B-rep bounds come from the kernel and are not loaded"),
+                Measurement::Unavailable("B-rep dimensions unavailable"),
                 brep.source().to_owned(),
             ),
             Geometry::NativeBrep(_) => (

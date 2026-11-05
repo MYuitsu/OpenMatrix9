@@ -1,0 +1,11 @@
+# Top11 Trim: multiple surfaces and curves in one session
+
+The mutual surface session now admits selected curves alongside multiple typed surfaces or single-face open BReps. Both curve portions and divided surface regions are targets. Before each commit, the controller computes prospective geometry, recalculates curve intersections and affected surface partitions, and publishes only when every computation succeeds. Typed picks close to multiple targets are rejected; viewport picks use the existing explicit object hit. Each pick has its own Undo/Redo transaction.
+
+Controller fixtures use two perpendicular planar surfaces and one curve on a face, both as typed degree-1 NURBS surfaces and as BReps. They exercise curve-first and face-first edits, including a removed surface region followed by a changed cutter, and assert exact remaining areas, ambiguity rollback and three Undo/Redo steps. Translated versions of both representations also pass. A simulated egui viewport test clicks the curve and two surface regions in different views and undoes all three. These fixtures do not constitute physical desktop or GPU acceptance.
+
+Windows MSVC, pinned OCCT 8.0.1 runtime and `CARGO_TARGET_DIR=L:\om9-target`: Top11/options/BRep suites passed 95 tests; the later expanded translation fixture passed separately; no-default Top11/options passed 65 tests and the final no-default check passed; five simulated Trim viewport tests passed (the `--lib trim_` filter also ran one unrelated formatting test); public source audit reported zero errors.
+
+SHA-256: `session/top11.rs` a9ef508c5049f6fa0407fcbd24d451a0f2c6165e9505174dc6e6b1cf32e4765a; `ui/chrome.rs` bc64297216e129c5841fcff57f4bf3865a5f59d9591dde59e8c89a32e00c690b; `tests/top11_brep.rs` 66a91a0c992dcf930fe60676c44ed58a4cf0757ee45994d7e149675b6d9bd1c5.
+
+Multi-face and solid BRep targets are still refused in this branch; reversed typed surfaces, arbitrary curved/periodic topology, nonuniform placements in this mixed case, robust overlap/tangency classification, .om9/3DM persistence, performance and physical desktop acceptance remain open. The curve-edit planning logic is duplicated between the single- and multi-surface session owners and should be consolidated when the state model is unified.

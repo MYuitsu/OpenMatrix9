@@ -110,6 +110,19 @@ fn output_and_stderr_overflow_reject_success_and_stop_the_native_writer() {
     }
 }
 #[test]
+fn large_bounded_pipe_output_preserves_bytes_and_rejects_overflow() {
+    const SIZE: usize = 8 * 1024 * 1024;
+    let mut limits = ProcessLimits { stdout_bytes: SIZE, ..ProcessLimits::default() };
+    let output = program().run(&args(&["bounded-output"]), &limits, &Cancellation::default()).unwrap();
+    assert_eq!(output.stdout.len(), SIZE);
+    assert!(output.stdout.chunks_exact(8192).enumerate().all(|(i, chunk)| chunk.iter().all(|byte| *byte == (i % 251) as u8)));
+    assert_eq!(output.stats.active_processes, 0);
+    limits.stdout_bytes = SIZE - 1;
+    let error = program().run(&args(&["bounded-output"]), &limits, &Cancellation::default()).unwrap_err();
+    assert_eq!(error.kind, FailureKind::OutputBudget);
+    assert_eq!(error.stats.unwrap().active_processes, 0);
+}
+#[test]
 fn process_committed_memory_is_limited_before_native_entry_and_failure_is_not_success() {
     let limits = ProcessLimits {
         native_committed_bytes: 32 * 1024 * 1024,

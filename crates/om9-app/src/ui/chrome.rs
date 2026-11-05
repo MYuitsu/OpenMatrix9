@@ -222,8 +222,32 @@ impl MatrixApp {
                                 ui.close();
                             }
                         }
+                        let stl = ui
+                            .add_enabled(
+                                !self.controller.is_running(),
+                                egui::Button::new("Export Selected STL…"),
+                            )
+                            .on_hover_text(
+                                "Selected meshes and editable B-Rep solids, binary STL in millimetres",
+                            );
+                        if stl.clicked() {
+                            self.invoke("OM9-FILE-001", InvocationOrigin::Menu);
+                            ui.close();
+                        }
                     }
                     "Edit" => {
+                        let can_copy = !self.controller.is_running() && !self.controller.selected().is_empty();
+                        for (label, action, enabled) in [
+                            ("Copy\tCtrl+C", super::clipboard::ClipboardAction::Copy, can_copy),
+                            ("Copy as 3DM\tCtrl+Shift+C", super::clipboard::ClipboardAction::Copy3dm, can_copy),
+                            ("Paste\tCtrl+V", super::clipboard::ClipboardAction::Paste, !self.controller.is_running()),
+                        ] {
+                            if ui.add_enabled(enabled, egui::Button::new(label)).clicked() {
+                                self.clipboard_action(action);
+                                ui.close();
+                            }
+                        }
+                        ui.separator();
                         if ui
                             .add_enabled(
                                 self.controller.coordinator().undo_len() > 0
@@ -671,9 +695,19 @@ impl MatrixApp {
         response
     }
     fn feature_icon(&mut self, ui: &mut egui::Ui, id: &str, name: &str) {
+        if name == "RhinoOptions" {
+            if self.icon(ui, name, true, "Options: General / Undo").clicked() {
+                self.invoke(name, InvocationOrigin::Menu);
+            }
+            return;
+        }
         if matches!(name, "SolidBooleanSplit" | "SolidCreateSolid") {
             let enabled = Controller::availability(name).is_ok();
-            let label = if name == "SolidBooleanSplit" { "Boolean Split" } else { "Create Solid" };
+            let label = if name == "SolidBooleanSplit" {
+                "Boolean Split"
+            } else {
+                "Create Solid"
+            };
             if self.icon(ui, name, enabled, label).clicked() {
                 self.invoke(name, InvocationOrigin::Menu);
             }
@@ -705,10 +739,21 @@ impl MatrixApp {
         if let Some(actual) = actual {
             let enabled = Controller::availability(&actual).is_ok() && catalog_enabled;
             let help = if enabled {
-                feature
-                    .as_ref()
-                    .map_or(if name == "SolidGVDMultiPipe" { "Solid Multi Pipe" } else { name }, |f| f.name.as_str())
-                    .to_owned()
+                if actual == "OM9-FILE-001" {
+                    "Export Selected STL…".to_owned()
+                } else {
+                    feature
+                        .as_ref()
+                        .map_or(
+                            if name == "SolidGVDMultiPipe" {
+                                "Solid Multi Pipe"
+                            } else {
+                                name
+                            },
+                            |f| f.name.as_str(),
+                        )
+                        .to_owned()
+                }
             } else {
                 catalog_reason
                     .filter(|reason| !reason.is_empty())
@@ -719,10 +764,12 @@ impl MatrixApp {
                 Some("SolidExtractSurfaceCopy")
             } else if name == "SolidPipe" {
                 Some("SolidPipeChain")
-            } else { feature
-                .as_ref()
-                .and_then(|f| f.right_click.as_deref())
-                .filter(|command| Controller::availability(command).is_ok()) };
+            } else {
+                feature
+                    .as_ref()
+                    .and_then(|f| f.right_click.as_deref())
+                    .filter(|command| Controller::availability(command).is_ok())
+            };
             if self.icon_slot(ui, name, enabled, &help, right).clicked() {
                 self.invoke(&actual, InvocationOrigin::Menu);
             }
@@ -1400,10 +1447,14 @@ impl MatrixApp {
             }
         }
         ui.horizontal_wrapped(|ui| {
-            if ui
-                .add_enabled(editable, egui::Button::new("Apply"))
-                .clicked()
-            {
+            let apply = ui.add_enabled(editable, egui::Button::new("Apply"));
+            #[cfg(test)]
+            ui.ctx().memory_mut(|memory| {
+                memory
+                    .data
+                    .insert_temp(egui::Id::new("builder-apply-test"), apply.rect)
+            });
+            if apply.clicked() {
                 let result = self.controller.builder_apply();
                 self.feedback(result);
             }
@@ -1506,7 +1557,10 @@ impl MatrixApp {
             self.feedback(result);
         }
         if let Some(object) = edit {
-            let result = self.controller.begin_builder_from_history(object).map(|_| ());
+            let result = self
+                .controller
+                .begin_builder_from_history(object)
+                .map(|_| ());
             self.feedback(result);
         }
         if let Some(object) = clear {
@@ -1773,6 +1827,14 @@ impl MatrixApp {
                             });
                         }
                         match *name {
+                            "Standard Copy" | "Standard Paste" if tab == "Standard" => {
+                                let copying = *name == "Standard Copy";
+                                let enabled = !self.controller.is_running()
+                                    && (!copying || !self.controller.selected().is_empty());
+                                if self.icon(ui, name, enabled, if copying { "Copy OM9 objects" } else { "Paste objects" }).clicked() {
+                                    self.clipboard_action(if copying { super::clipboard::ClipboardAction::Copy } else { super::clipboard::ClipboardAction::Paste });
+                                }
+                            }
                             "New" | "Open" | "Save" => {
                                 let kind = crate::file_lifecycle::FileKind::from_command(name)
                                     .expect("File control");
@@ -1816,9 +1878,12 @@ impl MatrixApp {
                                     } else {
                                         DisplayPreset::Shaded
                                     });
-                                    let result = self.controller
+                                    let result = self
+                                        .controller
                                         .capture_view_menu(self.controller.workspace.active)
-                                        .and_then(|capture| self.controller.apply_view_menu(&capture, action));
+                                        .and_then(|capture| {
+                                            self.controller.apply_view_menu(&capture, action)
+                                        });
                                     self.feedback(result);
                                 }
                             }
@@ -2159,30 +2224,70 @@ fn category_palette(category: &str) -> &'static [&'static str] {
 fn subd_flyout_items(name: &str) -> impl Iterator<Item = &'static &'static str> {
     let items: &'static [&'static str] = match name {
         "SubD Primitives" => &[
-            "ClayooPrimitivesPlane", "ClayooPrimitivesBox", "ClayooPrimitivesTorus",
-            "ClayooPrimitivesSphere", "ClayooPrimitivesCylinder", "ClayooPrimitivesCone",
+            "ClayooPrimitivesPlane",
+            "ClayooPrimitivesBox",
+            "ClayooPrimitivesTorus",
+            "ClayooPrimitivesSphere",
+            "ClayooPrimitivesCylinder",
+            "ClayooPrimitivesCone",
         ],
         "SubD Creation" => &[
-            "ClayooCreationAppendFace", "ClayooCreationFromCurve", "ClayooCreationFrom2Curves",
-            "ClayooCreationLoft", "ClayooCreationSweep1Rail", "ClayooCreationSweep2Rails",
-            "ClayooCreationPipe", "ClayooCreationRevolve", "ClayooCreateIsocurves",
-            "ClayooCreationRing", "ClayooCreationSignetRing", "ClayooCreationClayooBezel",
-            "ClayooCreationFromSurface", "ClayooCreationFromMesh", "ClayooCreationFromTSplines",
-            "ClayooCreationToNurbs", "ClayooCreationClayooLibrary",
+            "ClayooCreationAppendFace",
+            "ClayooCreationFromCurve",
+            "ClayooCreationFrom2Curves",
+            "ClayooCreationLoft",
+            "ClayooCreationSweep1Rail",
+            "ClayooCreationSweep2Rails",
+            "ClayooCreationPipe",
+            "ClayooCreationRevolve",
+            "ClayooCreateIsocurves",
+            "ClayooCreationRing",
+            "ClayooCreationSignetRing",
+            "ClayooCreationClayooBezel",
+            "ClayooCreationFromSurface",
+            "ClayooCreationFromMesh",
+            "ClayooCreationFromTSplines",
+            "ClayooCreationToNurbs",
+            "ClayooCreationClayooLibrary",
         ],
         "SubD Edition" => &[
-            "ClayooEditDivide", "ClayooEditSplitSides", "ClayooEditMatch", "ClayooEditExtract",
-            "ClayooEditOffset", "ClayooEditInset", "ClayooEditExtrude", "ClayooEditWeld",
-            "ClayooEditCollapse", "ClayooEditBridge", "ClayooEditFill", "ClayooEditShell",
-            "ClayooEditKnife", "ClayooEditWrap", "ClayooEditSymmetry", "ClayooEditFlipNormals",
-            "ClayooEditCrease", "ClayooEditProjectToPlane", "ClayooEditSubdivisionLevel", "ClayooEditItem",
+            "ClayooEditDivide",
+            "ClayooEditSplitSides",
+            "ClayooEditMatch",
+            "ClayooEditExtract",
+            "ClayooEditOffset",
+            "ClayooEditInset",
+            "ClayooEditExtrude",
+            "ClayooEditWeld",
+            "ClayooEditCollapse",
+            "ClayooEditBridge",
+            "ClayooEditFill",
+            "ClayooEditShell",
+            "ClayooEditKnife",
+            "ClayooEditWrap",
+            "ClayooEditSymmetry",
+            "ClayooEditFlipNormals",
+            "ClayooEditCrease",
+            "ClayooEditProjectToPlane",
+            "ClayooEditSubdivisionLevel",
+            "ClayooEditItem",
         ],
         "SubD Selection" => &[
-            "ClayooSelectionSelectAll", "ClayooSelectionSelectNone", "ClayooSelectionInvertSelection",
-            "ClayooSelectionSelectCreased", "ClayooSelectionSelectNaked", "ClayooSelectionSelectCoplanar",
-            "ClayooSelectionPaintSelection", "ClayooSelectionGrowSelection", "ClayooSelectionShrink",
-            "ClayooSelectUV", "ClayooSelectionSelectRing", "ClayooSelectionSelectLoop",
-            "ClayooSelectionSetPlane", "ClayooSelectionResetPlane", "ClayooSelectionSelectionSets",
+            "ClayooSelectionSelectAll",
+            "ClayooSelectionSelectNone",
+            "ClayooSelectionInvertSelection",
+            "ClayooSelectionSelectCreased",
+            "ClayooSelectionSelectNaked",
+            "ClayooSelectionSelectCoplanar",
+            "ClayooSelectionPaintSelection",
+            "ClayooSelectionGrowSelection",
+            "ClayooSelectionShrink",
+            "ClayooSelectUV",
+            "ClayooSelectionSelectRing",
+            "ClayooSelectionSelectLoop",
+            "ClayooSelectionSetPlane",
+            "ClayooSelectionResetPlane",
+            "ClayooSelectionSelectionSets",
         ],
         _ => &[],
     };
@@ -2255,11 +2360,23 @@ fn toolbar_palette(tab: &str) -> &'static [&'static str] {
             "ViewManager",
         ],
         "Display" => &[
-            "Wireframe", "Shaded", "Standard Shade", "Display Rendered Viewport",
-            "Dial_Ghosted", "Display X-Ray Viewport", "Dial_Tech Shade",
-            "Display Pen Viewport", "Display Artistic Viewport", "Display Render Mesh Settings",
-            "Display Flat Shade", "ShadeSelectedOnlyON", "Display Object Shading", "ViewCaptureToFile",
-            "Visibility Add Clipping Plane", "Visibility Disable Clipping Plane", "Display Panel",
+            "Wireframe",
+            "Shaded",
+            "Standard Shade",
+            "Display Rendered Viewport",
+            "Dial_Ghosted",
+            "Display X-Ray Viewport",
+            "Dial_Tech Shade",
+            "Display Pen Viewport",
+            "Display Artistic Viewport",
+            "Display Render Mesh Settings",
+            "Display Flat Shade",
+            "ShadeSelectedOnlyON",
+            "Display Object Shading",
+            "ViewCaptureToFile",
+            "Visibility Add Clipping Plane",
+            "Visibility Disable Clipping Plane",
+            "Display Panel",
         ],
         "Visibility" => &[
             "Visibility Hide Objects",
@@ -2561,6 +2678,477 @@ mod chrome_tests {
         output.textures_delta.clear();
     }
 
+    #[test]
+    fn native_brep_top11_buttons_are_visible_but_not_clickable() {
+        use om9_core::{
+            geometry::{Geometry, Mesh, NativeBrep},
+            model::Entity,
+        };
+        let entity = Entity::new(
+            "native",
+            Geometry::NativeBrep(NativeBrep {
+                display: Mesh {
+                    vertices: vec![[0., 0., 0.], [2., 0., 0.], [0., 2., 0.]],
+                    faces: vec![vec![0, 1, 2]],
+                    normals: vec![],
+                    colors: vec![],
+                    corner_uvs: vec![],
+                },
+                payload: vec![1, 2, 3].into(),
+                crc: 0,
+            }),
+            None,
+        );
+        let id = entity.id;
+        let mut doc = Document::new("native toolbar");
+        doc.entities.insert(id, entity);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        let context = egui::Context::default();
+        let mut output = context.run_ui(
+            egui::RawInput {
+                screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, Vec2::new(600., 400.))),
+                ..Default::default()
+            },
+            |ui| {
+                let split = app.top11_icon(ui, "Split");
+                assert!(split.rect.is_positive());
+                assert_eq!(split.sense, egui::Sense::hover());
+                let explode = app.top11_icon(ui, "Explode");
+                assert!(explode.rect.is_positive());
+                assert_eq!(
+                    explode.sense,
+                    if cfg!(feature = "occt-brep") {
+                        egui::Sense::click()
+                    } else {
+                        egui::Sense::hover()
+                    }
+                );
+                let mirror = app.top11_icon(ui, "Mirror");
+                assert_eq!(mirror.sense, egui::Sense::click());
+            },
+        );
+        output.textures_delta.clear();
+    }
+
+    #[test]
+    fn top11_transform_preview_is_painted_by_egui() {
+        use om9_core::{geometry::Geometry, model::Entity, top11::Top11Action};
+        for action in [Top11Action::Mirror, Top11Action::Rotate] {
+            let source = Entity::new("point", Geometry::Point([2., 1., 0.]), None);
+            let id = source.id;
+            let mut doc = Document::new("preview paint");
+            doc.entities.insert(id, source);
+            let mut app = MatrixApp::new(doc).unwrap();
+            let context = egui::Context::default();
+            window_frame(&mut app, &context, Vec2::new(1400., 900.), vec![]);
+            app.controller.select_objects(&[id]).unwrap();
+            app.controller.top11_invoke(action).unwrap();
+            app.controller.accept_world_point([0.; 3]).unwrap();
+            if action == Top11Action::Rotate {
+                app.controller.accept_world_point([1., 0., 0.]).unwrap();
+            }
+            app.hover = Some([0., 3., 0.]);
+            let mut output = context.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        Vec2::new(1400., 900.),
+                    )),
+                    ..Default::default()
+                },
+                |ui| app.show(ui),
+            );
+            let painted = output.shapes.iter().any(|shape| {
+                matches!(&shape.shape,
+                egui::Shape::Circle(circle) if circle.fill == egui::Color32::from_rgb(0, 200, 130))
+            });
+            output.textures_delta.clear();
+            assert!(painted, "missing {action:?} preview paint");
+        }
+    }
+
+    #[test]
+    fn top11_move_preview_uses_projected_snap_point() {
+        use om9_core::{geometry::Geometry, model::Entity, top11::Top11Action};
+        use om9_scene::{camera::Viewport, workspace::ViewId};
+        for project in [false, true] {
+            for [x, y] in [[3., 2.], [-3., 2.], [3., -2.], [-3., -2.]] {
+                let entity = Entity::new("source", Geometry::Point([-4., -4., 0.]), None);
+                let id = entity.id;
+                let target = Entity::new("snap", Geometry::Point([x, y, 5.]), None);
+                let target_id = target.id;
+                let mut doc = Document::new("projected preview");
+                doc.entities.insert(id, entity);
+                doc.entities.insert(target_id, target);
+                let mut app = MatrixApp::new(doc).unwrap();
+                app.controller.select_objects(&[id]).unwrap();
+                app.controller.workspace.active = ViewId::LookingDown;
+                app.controller.set_project(project);
+                app.controller.top11_invoke(Top11Action::Move).unwrap();
+                app.controller.accept_world_point([0.; 3]).unwrap();
+                let context = egui::Context::default();
+                let size = Vec2::new(1400., 900.);
+                for _ in 0..3 {
+                    window_frame(&mut app, &context, size, vec![]);
+                }
+                let top_rect = app.view_rects[&ViewId::LookingDown];
+                let top_viewport = Viewport {
+                    origin: [top_rect.min.x as f64, top_rect.min.y as f64],
+                    size: [top_rect.width() as f64, top_rect.height() as f64],
+                };
+                let top_camera = app
+                    .controller
+                    .view_cameras()
+                    .into_iter()
+                    .find(|(title, _, _)| *title == "Looking Down")
+                    .unwrap()
+                    .1;
+                let cursor = top_camera
+                    .project([x, y, 5.], top_viewport)
+                    .unwrap()
+                    .unwrap()
+                    .screen;
+                let cursor = egui::pos2(cursor[0] as f32, cursor[1] as f32);
+                window_frame(
+                    &mut app,
+                    &context,
+                    size,
+                    vec![egui::Event::PointerMoved(cursor)],
+                );
+                assert_eq!(app.snap.as_ref().and_then(|s| s.root), Some(target_id));
+                let rect = app.view_rects[&ViewId::ThroughFinger];
+                let viewport = Viewport {
+                    origin: [rect.min.x as f64, rect.min.y as f64],
+                    size: [rect.width() as f64, rect.height() as f64],
+                };
+                let camera = app
+                    .controller
+                    .view_cameras()
+                    .into_iter()
+                    .find(|(title, _, _)| *title == "Through Finger")
+                    .unwrap()
+                    .1;
+                let expected = camera
+                    .project([x - 4., y - 4., if project { 0. } else { 5. }], viewport)
+                    .unwrap()
+                    .unwrap()
+                    .screen;
+                let mut output = context.run_ui(
+                    egui::RawInput {
+                        screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, size)),
+                        ..Default::default()
+                    },
+                    |ui| app.show(ui),
+                );
+                let painted = output.shapes.iter().any(|shape| {
+                    matches!(&shape.shape, egui::Shape::Circle(circle)
+                if circle.fill == egui::Color32::from_rgb(0, 200, 130)
+                    && (circle.center.x as f64 - expected[0]).abs() < 0.1
+                    && (circle.center.y as f64 - expected[1]).abs() < 0.1)
+                });
+                output.textures_delta.clear();
+                assert!(
+                    painted,
+                    "preview is not at projected snap point, Project={project}"
+                );
+                window_frame(&mut app, &context, size, pointer(cursor, true));
+                window_frame(&mut app, &context, size, pointer(cursor, false));
+                let entity = &app.controller.document().entities[&id];
+                let Geometry::Point(point) = entity.geometry else {
+                    panic!("point")
+                };
+                let actual = entity.placement.point(point).unwrap();
+                let wanted = [x - 4., y - 4., if project { 0. } else { 5. }];
+                assert!(
+                    (0..3).all(|i| (actual[i] - wanted[i]).abs() < 1e-8),
+                    "Project={project}: {actual:?}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn top11_move_uses_hovered_view_cplane_before_and_after_click() {
+        use om9_core::{geometry::Geometry, model::Entity, top11::Top11Action};
+        use om9_scene::{camera::Viewport, workspace::ViewId};
+        for action in [Top11Action::Move, Top11Action::Duplicate] {
+            for [x, z] in [[3., 2.], [-3., 2.], [3., -2.], [-3., -2.]] {
+                let entity = Entity::new("source", Geometry::Point([0.; 3]), None);
+                let id = entity.id;
+                let mut doc = Document::new("inactive viewport move");
+                doc.entities.insert(id, entity);
+                let mut app = MatrixApp::new(doc).unwrap();
+                app.controller.workspace.active = ViewId::LookingDown;
+                app.controller.select_objects(&[id]).unwrap();
+                app.controller.top11_invoke(action).unwrap();
+                app.controller.accept_world_point([0.; 3]).unwrap();
+                app.snap_state.settings.enabled = 0;
+                let context = egui::Context::default();
+                let size = Vec2::new(1400., 900.);
+                for _ in 0..3 {
+                    window_frame(&mut app, &context, size, vec![]);
+                }
+                let rect = app.view_rects[&ViewId::ThroughFinger];
+                let viewport = Viewport {
+                    origin: [rect.min.x as f64, rect.min.y as f64],
+                    size: [rect.width() as f64, rect.height() as f64],
+                };
+                let camera = app
+                    .controller
+                    .view_cameras()
+                    .into_iter()
+                    .find(|(title, _, _)| *title == "Through Finger")
+                    .unwrap()
+                    .1;
+                let target = [x, 0., z];
+                let p = camera.project(target, viewport).unwrap().unwrap().screen;
+                let cursor = egui::pos2(p[0] as f32, p[1] as f32);
+                window_frame(
+                    &mut app,
+                    &context,
+                    size,
+                    vec![egui::Event::PointerMoved(cursor)],
+                );
+                let hover = app
+                    .hover
+                    .expect("hover point on the pointed viewport CPlane");
+                assert!(
+                    (0..3).all(|i| (hover[i] - target[i]).abs() < 1e-4),
+                    "hover={hover:?}, target={target:?}"
+                );
+                assert_eq!(app.controller.workspace.active, ViewId::LookingDown);
+                let mut output = context.run_ui(
+                    egui::RawInput {
+                        screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, size)),
+                        ..Default::default()
+                    },
+                    |ui| app.show(ui),
+                );
+                let painted = output.shapes.iter().any(|shape| matches!(&shape.shape, egui::Shape::Circle(circle)
+                if circle.fill == egui::Color32::from_rgb(0, 200, 130) && circle.center.distance(cursor) < 0.1));
+                output.textures_delta.clear();
+                assert!(painted, "preview must be under the pointer: {target:?}");
+                window_frame(&mut app, &context, size, pointer(cursor, true));
+                window_frame(&mut app, &context, size, pointer(cursor, false));
+                if action == Top11Action::Duplicate {
+                    app.controller.submit("").unwrap();
+                }
+                let result = if action == Top11Action::Duplicate {
+                    app.controller
+                        .document()
+                        .entities
+                        .values()
+                        .find(|entity| entity.id != id)
+                        .unwrap()
+                } else {
+                    &app.controller.document().entities[&id]
+                };
+                let actual = result.placement.point([0.; 3]).unwrap();
+                assert!(
+                    (0..3).all(|i| (actual[i] - target[i]).abs() < 1e-4),
+                    "actual={actual:?}, target={target:?}"
+                );
+                assert_eq!(app.controller.workspace.active, ViewId::ThroughFinger);
+            }
+        }
+    }
+
+    #[test]
+    fn top11_rotation_and_mirror_preview_use_hovered_view_plane() {
+        use om9_core::{geometry::Geometry, model::Entity, top11::Top11Action};
+        use om9_scene::{camera::Viewport, workspace::ViewId};
+        for action in [Top11Action::Mirror, Top11Action::Rotate] {
+            let entity = Entity::new("source", Geometry::Point([1., 0., 0.]), None);
+            let id = entity.id;
+            let mut doc = Document::new("inactive view transform");
+            doc.entities.insert(id, entity);
+            let mut app = MatrixApp::new(doc).unwrap();
+            app.controller.workspace.active = ViewId::LookingDown;
+            app.controller.select_objects(&[id]).unwrap();
+            app.controller.top11_invoke(action).unwrap();
+            app.controller.submit("Copy=No").unwrap();
+            app.controller.accept_world_point([0.; 3]).unwrap();
+            if action == Top11Action::Rotate {
+                app.controller.accept_world_point([1., 0., 0.]).unwrap();
+            }
+            app.snap_state.settings.enabled = 0;
+            let context = egui::Context::default();
+            let size = Vec2::new(1400., 900.);
+            for _ in 0..3 {
+                window_frame(&mut app, &context, size, vec![]);
+            }
+            let rect = app.view_rects[&ViewId::ThroughFinger];
+            let viewport = Viewport {
+                origin: [rect.min.x as f64, rect.min.y as f64],
+                size: [rect.width() as f64, rect.height() as f64],
+            };
+            let camera = app
+                .controller
+                .view_cameras()
+                .into_iter()
+                .find(|(title, _, _)| *title == "Through Finger")
+                .unwrap()
+                .1;
+            let screen = |p| {
+                let q = camera.project(p, viewport).unwrap().unwrap().screen;
+                egui::pos2(q[0] as f32, q[1] as f32)
+            };
+            let cursor = screen([0., 0., 3.]);
+            let expected = if action == Top11Action::Mirror {
+                [-1., 0., 0.]
+            } else {
+                [0., 0., 1.]
+            };
+            window_frame(
+                &mut app,
+                &context,
+                size,
+                vec![egui::Event::PointerMoved(cursor)],
+            );
+            let mut output = context.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, size)),
+                    ..Default::default()
+                },
+                |ui| app.show(ui),
+            );
+            let painted = output.shapes.iter().any(|shape| matches!(&shape.shape, egui::Shape::Circle(circle)
+                if circle.fill == egui::Color32::from_rgb(0, 200, 130) && circle.center.distance(screen(expected)) < 0.1));
+            output.textures_delta.clear();
+            assert!(painted, "{action:?} preview");
+            window_frame(&mut app, &context, size, pointer(cursor, true));
+            window_frame(&mut app, &context, size, pointer(cursor, false));
+            let entity = &app.controller.document().entities[&id];
+            let Geometry::Point(point) = entity.geometry else {
+                panic!("point")
+            };
+            let actual = entity.placement.point(point).unwrap();
+            assert!(
+                (0..3).all(|i| (actual[i] - expected[i]).abs() < 1e-4),
+                "{action:?} {actual:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn top11_parallel_view_ray_cannot_reuse_stale_hover() {
+        use om9_core::{geometry::Geometry, model::Entity, top11::Top11Action};
+        use om9_scene::{
+            camera::{CPlane, CPlanePreset},
+            workspace::ViewId,
+        };
+        let entity = Entity::new("source", Geometry::Point([0.; 3]), None);
+        let id = entity.id;
+        let mut doc = Document::new("parallel view");
+        doc.entities.insert(id, entity);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller.workspace.active = ViewId::LookingDown;
+        app.controller
+            .workspace
+            .views
+            .get_mut(&ViewId::ThroughFinger)
+            .unwrap()
+            .cplane = CPlane::preset(CPlanePreset::Top);
+        app.controller.top11_invoke(Top11Action::Move).unwrap();
+        app.controller.accept_world_point([0.; 3]).unwrap();
+        let before = app.controller.document().clone();
+        let context = egui::Context::default();
+        let size = Vec2::new(1400., 900.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        app.hover = Some([5., 5., 0.]);
+        app.hover_view = Some(ViewId::LookingDown);
+        let cursor = app.view_rects[&ViewId::ThroughFinger].center();
+        window_frame(
+            &mut app,
+            &context,
+            size,
+            vec![egui::Event::PointerMoved(cursor)],
+        );
+        assert!(app.hover.is_none());
+        window_frame(&mut app, &context, size, pointer(cursor, true));
+        window_frame(&mut app, &context, size, pointer(cursor, false));
+        assert_eq!(app.controller.document(), &before);
+        assert!(app.controller.is_running());
+    }
+
+    #[test]
+    fn top11_inactive_view_projected_snap_matches_preview_and_commit() {
+        use om9_core::{geometry::Geometry, model::Entity, top11::Top11Action};
+        use om9_scene::{camera::Viewport, workspace::ViewId};
+        for project in [false, true] {
+            let source = Entity::new("source", Geometry::Point([-4., 0., -4.]), None);
+            let id = source.id;
+            let snap = Entity::new("snap", Geometry::Point([3., 2., 5.]), None);
+            let snap_id = snap.id;
+            let mut doc = Document::new("inactive view project snap");
+            doc.entities.insert(id, source);
+            doc.entities.insert(snap_id, snap);
+            let mut app = MatrixApp::new(doc).unwrap();
+            app.controller.workspace.active = ViewId::LookingDown;
+            app.controller.set_project(project);
+            app.controller.select_objects(&[id]).unwrap();
+            app.controller.top11_invoke(Top11Action::Move).unwrap();
+            app.controller.accept_world_point([0.; 3]).unwrap();
+            let context = egui::Context::default();
+            let size = Vec2::new(1400., 900.);
+            for _ in 0..3 {
+                window_frame(&mut app, &context, size, vec![]);
+            }
+            let screen = |app: &MatrixApp, view: ViewId, p| {
+                let rect = app.view_rects[&view];
+                let viewport = Viewport {
+                    origin: [rect.min.x as f64, rect.min.y as f64],
+                    size: [rect.width() as f64, rect.height() as f64],
+                };
+                let camera = app
+                    .controller
+                    .view_cameras()
+                    .into_iter()
+                    .find(|(title, _, _)| *title == view.title())
+                    .unwrap()
+                    .1;
+                let q = camera.project(p, viewport).unwrap().unwrap().screen;
+                egui::pos2(q[0] as f32, q[1] as f32)
+            };
+            let cursor = screen(&app, ViewId::ThroughFinger, [3., 2., 5.]);
+            window_frame(
+                &mut app,
+                &context,
+                size,
+                vec![egui::Event::PointerMoved(cursor)],
+            );
+            assert_eq!(app.snap.as_ref().and_then(|s| s.root), Some(snap_id));
+            let expected = [-1., if project { 0. } else { 2. }, 1.];
+            let expected_screen = screen(&app, ViewId::SideView, expected);
+            let mut output = context.run_ui(
+                egui::RawInput {
+                    screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, size)),
+                    ..Default::default()
+                },
+                |ui| app.show(ui),
+            );
+            let painted = output.shapes.iter().any(|shape| matches!(&shape.shape, egui::Shape::Circle(circle)
+                if circle.fill == egui::Color32::from_rgb(0, 200, 130) && circle.center.distance(expected_screen) < 0.1));
+            output.textures_delta.clear();
+            assert!(painted, "Project={project} preview");
+            window_frame(&mut app, &context, size, pointer(cursor, true));
+            window_frame(&mut app, &context, size, pointer(cursor, false));
+            let entity = &app.controller.document().entities[&id];
+            let Geometry::Point(point) = entity.geometry else {
+                panic!("point")
+            };
+            let actual = entity.placement.point(point).unwrap();
+            assert!(
+                (0..3).all(|i| (actual[i] - expected[i]).abs() < 1e-8),
+                "Project={project}: {actual:?}"
+            );
+        }
+    }
+
     fn pointer(pos: egui::Pos2, pressed: bool) -> Vec<egui::Event> {
         vec![
             egui::Event::PointerMoved(pos),
@@ -2773,17 +3361,48 @@ mod chrome_tests {
 
     #[test]
     fn standard_toolbar_new_unavailable_icons_render_without_dispatch() {
-        assert_eq!(&toolbar_palette("Standard")[..32], &[
-            "New", "Open", "Save", "FilePrint", "Standard Document Properties",
-            "Standard Cut", "Standard Copy", "Standard Paste", "Undo", "Standard Pan",
-            "Standard Rotate View", "ViewZoomZoomDynamic", "ViewZoomZoomWindow", "Fit",
-            "ViewZoomZoomSelected", "Standard Undo View", "Standard Four Views", "Standard Right View",
-            "Standard CPlane Origin", "Standard Object Snaps", "Standard Select All", "Standard Hide Objects",
-            "Standard Lock Objects", "Layers", "ObjectProperties", "Standard Shade", "Shaded",
-            "Standard Render", "Standard Spotlight", "RhinoOptions", "Standard Linear Dimension", "Standard Help",
-        ]);
+        assert_eq!(
+            &toolbar_palette("Standard")[..32],
+            &[
+                "New",
+                "Open",
+                "Save",
+                "FilePrint",
+                "Standard Document Properties",
+                "Standard Cut",
+                "Standard Copy",
+                "Standard Paste",
+                "Undo",
+                "Standard Pan",
+                "Standard Rotate View",
+                "ViewZoomZoomDynamic",
+                "ViewZoomZoomWindow",
+                "Fit",
+                "ViewZoomZoomSelected",
+                "Standard Undo View",
+                "Standard Four Views",
+                "Standard Right View",
+                "Standard CPlane Origin",
+                "Standard Object Snaps",
+                "Standard Select All",
+                "Standard Hide Objects",
+                "Standard Lock Objects",
+                "Layers",
+                "ObjectProperties",
+                "Standard Shade",
+                "Shaded",
+                "Standard Render",
+                "Standard Spotlight",
+                "RhinoOptions",
+                "Standard Linear Dimension",
+                "Standard Help",
+            ]
+        );
         for name in &toolbar_palette("Standard")[..32] {
-            assert!(crate::icons::icon_name(name).is_some(), "missing icon for {name}");
+            assert!(
+                crate::icons::icon_name(name).is_some(),
+                "missing icon for {name}"
+            );
         }
         let mut app = MatrixApp::new(Document::new("standard toolbar")).unwrap();
         let context = egui::Context::default();
@@ -2830,24 +3449,44 @@ mod chrome_tests {
     #[test]
     fn visibility_toolbar_keeps_reference_order_and_unavailable_commands_inert() {
         let names = toolbar_palette("Visibility");
-        assert_eq!(names, &[
-            "Visibility Hide Objects", "Visibility Show Objects", "Visibility Show Selected Objects",
-            "Visibility Invert Selection and Hide", "Visibility Swap Hidden Objects",
-            "Visibility Lock Objects", "Visibility Unlock Objects", "Visibility Unlock Selected Objects",
-            "Visibility Invert Selection and Lock", "Visibility Swap Locked Objects",
-            "Visibility Invert and Hide Control Points", "Visibility Hide Control Points",
-            "Visibility Add Clipping Plane", "Visibility Disable Clipping Plane",
-            "Visibility Hide A", "Visibility Hide B", "Visibility Hide C", "Visibility Hide Custom",
-        ]);
+        assert_eq!(
+            names,
+            &[
+                "Visibility Hide Objects",
+                "Visibility Show Objects",
+                "Visibility Show Selected Objects",
+                "Visibility Invert Selection and Hide",
+                "Visibility Swap Hidden Objects",
+                "Visibility Lock Objects",
+                "Visibility Unlock Objects",
+                "Visibility Unlock Selected Objects",
+                "Visibility Invert Selection and Lock",
+                "Visibility Swap Locked Objects",
+                "Visibility Invert and Hide Control Points",
+                "Visibility Hide Control Points",
+                "Visibility Add Clipping Plane",
+                "Visibility Disable Clipping Plane",
+                "Visibility Hide A",
+                "Visibility Hide B",
+                "Visibility Hide C",
+                "Visibility Hide Custom",
+            ]
+        );
         let mut app = MatrixApp::new(Document::new("visibility toolbar")).unwrap();
         let context = egui::Context::default();
         let size = Vec2::new(1280., 720.);
         app.toolbar_tab = TABS.iter().position(|tab| *tab == "Visibility").unwrap();
-        for _ in 0..3 { window_frame(&mut app, &context, size, vec![]); }
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
         for name in names {
             assert!(crate::icons::icon_name(name).is_some(), "{name}");
             assert!(crate::icons::feature_for(name).is_none(), "{name}");
-            let rect: Rect = context.memory(|m| m.data.get_temp(egui::Id::new(("toolbar-test", "Visibility", name))).unwrap());
+            let rect: Rect = context.memory(|m| {
+                m.data
+                    .get_temp(egui::Id::new(("toolbar-test", "Visibility", name)))
+                    .unwrap()
+            });
             window_frame(&mut app, &context, size, pointer(rect.center(), true));
             window_frame(&mut app, &context, size, pointer(rect.center(), false));
             assert!(!app.controller.is_running(), "{name}");
@@ -2858,27 +3497,53 @@ mod chrome_tests {
     #[test]
     fn display_toolbar_switches_only_active_view_with_existing_view_owner() {
         use om9_scene::workspace::DisplayMode;
-        assert_eq!(toolbar_palette("Display"), &[
-            "Wireframe", "Shaded", "Standard Shade", "Display Rendered Viewport",
-            "Dial_Ghosted", "Display X-Ray Viewport", "Dial_Tech Shade",
-            "Display Pen Viewport", "Display Artistic Viewport", "Display Render Mesh Settings",
-            "Display Flat Shade", "ShadeSelectedOnlyON", "Display Object Shading", "ViewCaptureToFile",
-            "Visibility Add Clipping Plane", "Visibility Disable Clipping Plane", "Display Panel",
-        ]);
+        assert_eq!(
+            toolbar_palette("Display"),
+            &[
+                "Wireframe",
+                "Shaded",
+                "Standard Shade",
+                "Display Rendered Viewport",
+                "Dial_Ghosted",
+                "Display X-Ray Viewport",
+                "Dial_Tech Shade",
+                "Display Pen Viewport",
+                "Display Artistic Viewport",
+                "Display Render Mesh Settings",
+                "Display Flat Shade",
+                "ShadeSelectedOnlyON",
+                "Display Object Shading",
+                "ViewCaptureToFile",
+                "Visibility Add Clipping Plane",
+                "Visibility Disable Clipping Plane",
+                "Display Panel",
+            ]
+        );
         let mut app = MatrixApp::new(Document::new("display toolbar")).unwrap();
         let context = egui::Context::default();
         let size = Vec2::new(1280., 720.);
         app.toolbar_tab = TABS.iter().position(|tab| *tab == "Display").unwrap();
-        for _ in 0..3 { window_frame(&mut app, &context, size, vec![]); }
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
         let target = app.controller.workspace.active;
         let original = app.controller.workspace.views.clone();
-        for (name, mode) in [("Shaded", DisplayMode::Shaded), ("Wireframe", DisplayMode::Wireframe)] {
-            let rect: Rect = context.memory(|m| m.data.get_temp(egui::Id::new(("toolbar-test", "Display", &name))).unwrap());
+        for (name, mode) in [
+            ("Shaded", DisplayMode::Shaded),
+            ("Wireframe", DisplayMode::Wireframe),
+        ] {
+            let rect: Rect = context.memory(|m| {
+                m.data
+                    .get_temp(egui::Id::new(("toolbar-test", "Display", &name)))
+                    .unwrap()
+            });
             window_frame(&mut app, &context, size, pointer(rect.center(), true));
             window_frame(&mut app, &context, size, pointer(rect.center(), false));
             assert_eq!(app.controller.workspace.views[&target].mode, mode, "{name}");
             for (id, view) in &original {
-                if *id != target { assert_eq!(app.controller.workspace.views[id], *view); }
+                if *id != target {
+                    assert_eq!(app.controller.workspace.views[id], *view);
+                }
             }
             assert_eq!(app.controller.coordinator().undo_len(), 0);
         }
@@ -2890,10 +3555,25 @@ mod chrome_tests {
         let context = egui::Context::default();
         let size = Vec2::new(1280., 720.);
         app.toolbar_tab = TABS.iter().position(|tab| *tab == "Display").unwrap();
-        for _ in 0..3 { window_frame(&mut app, &context, size, vec![]); }
-        for name in ["Display Rendered Viewport", "Display X-Ray Viewport", "Display Pen Viewport", "Display Artistic Viewport", "Display Render Mesh Settings", "Display Flat Shade", "Display Object Shading", "Display Panel"] {
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        for name in [
+            "Display Rendered Viewport",
+            "Display X-Ray Viewport",
+            "Display Pen Viewport",
+            "Display Artistic Viewport",
+            "Display Render Mesh Settings",
+            "Display Flat Shade",
+            "Display Object Shading",
+            "Display Panel",
+        ] {
             assert!(crate::icons::feature_for(name).is_none(), "{name}");
-            let rect: Rect = context.memory(|m| m.data.get_temp(egui::Id::new(("toolbar-test", "Display", &name))).unwrap());
+            let rect: Rect = context.memory(|m| {
+                m.data
+                    .get_temp(egui::Id::new(("toolbar-test", "Display", &name)))
+                    .unwrap()
+            });
             window_frame(&mut app, &context, size, pointer(rect.center(), true));
             window_frame(&mut app, &context, size, pointer(rect.center(), false));
             assert!(!app.controller.is_running(), "{name}");
@@ -2972,20 +3652,39 @@ mod chrome_tests {
 
     #[test]
     fn subd_flyouts_preserve_catalog_and_open_from_toolbar() {
-        let names = ["SubD Primitives", "SubD Creation", "SubD Edition", "SubD Selection"];
-        let all: Vec<_> = names.iter().flat_map(|name| subd_flyout_items(name).copied()).collect();
-        let original: std::collections::BTreeSet<_> = crate::menu_catalog::SUBD.iter().copied().collect();
+        let names = [
+            "SubD Primitives",
+            "SubD Creation",
+            "SubD Edition",
+            "SubD Selection",
+        ];
+        let all: Vec<_> = names
+            .iter()
+            .flat_map(|name| subd_flyout_items(name).copied())
+            .collect();
+        let original: std::collections::BTreeSet<_> =
+            crate::menu_catalog::SUBD.iter().copied().collect();
         let grouped: std::collections::BTreeSet<_> = all.iter().copied().collect();
         assert_eq!(grouped, original);
-        assert_eq!(all.len(), grouped.len(), "every original icon appears exactly once");
+        assert_eq!(
+            all.len(),
+            grouped.len(),
+            "every original icon appears exactly once"
+        );
 
         let mut app = MatrixApp::new(Document::new("subd toolbar")).unwrap();
         let context = egui::Context::default();
         let size = Vec2::new(1280., 720.);
         app.toolbar_tab = TABS.iter().position(|tab| *tab == "SubD").unwrap();
-        for _ in 0..3 { window_frame(&mut app, &context, size, vec![]); }
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
         for name in names {
-            let rect: Rect = context.memory(|m| m.data.get_temp(egui::Id::new(("toolbar-test", "SubD", &name))).unwrap());
+            let rect: Rect = context.memory(|m| {
+                m.data
+                    .get_temp(egui::Id::new(("toolbar-test", "SubD", &name)))
+                    .unwrap()
+            });
             window_frame(&mut app, &context, size, pointer(rect.center(), true));
             window_frame(&mut app, &context, size, pointer(rect.center(), false));
             assert!(egui::Popup::is_any_open(&context), "{name} opens a flyout");
@@ -3023,6 +3722,78 @@ mod chrome_tests {
             assert!(!app.controller.is_running(), "{name}");
             assert!(app.controller.document().entities.is_empty(), "{name}");
         }
+    }
+
+    #[test]
+    fn top11_ringrail_sidebar_click_builds_and_undoes_a_rail() {
+        use om9_core::geometry::{Curve, Geometry};
+        let mut app =
+            MatrixApp::new(Document::with_template_tolerance("ring rail sidebar")).unwrap();
+        let before = app.controller.document().clone();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let ring = context.memory(|memory| {
+            memory
+                .data
+                .get_temp::<Rect>(egui::Id::new(("top11-sidebar", &"RingRail")))
+                .expect("ring rail icon")
+                .center()
+        });
+        window_frame(&mut app, &context, size, pointer(ring, true));
+        window_frame(&mut app, &context, size, pointer(ring, false));
+        assert!(app.controller.builder().is_some());
+        app.controller.submit("Diameter=20").unwrap();
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let sidebar = app.sidebar_content_rect.unwrap().center();
+        window_frame(
+            &mut app,
+            &context,
+            size,
+            vec![
+                egui::Event::PointerMoved(sidebar),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: Vec2::new(0., -600.),
+                    phase: egui::TouchPhase::Move,
+                    modifiers: Modifiers::NONE,
+                },
+            ],
+        );
+        for _ in 0..4 {
+            window_frame(
+                &mut app,
+                &context,
+                size,
+                vec![egui::Event::PointerMoved(sidebar)],
+            );
+        }
+        let apply = context.memory(|memory| {
+            memory
+                .data
+                .get_temp::<Rect>(egui::Id::new("builder-apply-test"))
+                .expect("builder Apply")
+                .center()
+        });
+        window_frame(&mut app, &context, size, pointer(apply, true));
+        window_frame(&mut app, &context, size, pointer(apply, false));
+        let after = app.controller.document().clone();
+        assert_eq!(after.entities.len(), 1);
+        assert_eq!(after.history.recipes.len(), 1);
+        let Geometry::Curve(Curve::Circle { radius, .. }) =
+            &after.entities.values().next().unwrap().geometry
+        else {
+            panic!("ring rail circle")
+        };
+        assert_eq!(*radius, 10.);
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
+        app.controller.redo().unwrap();
+        assert_eq!(app.controller.document(), &after);
     }
 
     #[test]
@@ -3073,8 +3844,1494 @@ mod chrome_tests {
     }
 
     #[test]
+    fn trim_many_viewport_click_targets_a_curve() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        let mut doc = Document::with_template_tolerance("trim viewport");
+        let line = |name, start, end| {
+            Entity::new(
+                name,
+                Geometry::Curve(Curve::Line {
+                    start,
+                    end,
+                    domain: [0., 20.],
+                }),
+                None,
+            )
+        };
+        let first = line("first", [-10., 0., 0.], [10., 0., 0.]);
+        let second = line("second", [-10., 4., 0.], [10., 4., 0.]);
+        let cutter = line("cutter", [0., -5., 0.], [0., 10., 0.]);
+        let (first_id, second_id, cutter_id) = (first.id, second.id, cutter.id);
+        for entity in [first, second, cutter] {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller
+            .select_objects(&[first_id, second_id, cutter_id])
+            .unwrap();
+        app.controller.submit("Trim").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let screen = camera
+            .project([5., 0., 0.], viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+        window_frame(&mut app, &context, size, pointer(pos, true));
+        window_frame(&mut app, &context, size, pointer(pos, false));
+        let Geometry::Curve(first_curve) = &app.controller.document().entities[&first_id].geometry
+        else {
+            panic!("curve")
+        };
+        let Geometry::Curve(second_curve) =
+            &app.controller.document().entities[&second_id].geometry
+        else {
+            panic!("curve")
+        };
+        assert!(
+            (om9_core::curve_ops::arc_length(first_curve, app.controller.coordinator().limits())
+                .unwrap()
+                - 10.)
+                .abs()
+                < 1e-7
+        );
+        assert!(
+            (om9_core::curve_ops::arc_length(second_curve, app.controller.coordinator().limits())
+                .unwrap()
+                - 20.)
+                .abs()
+                < 1e-7
+        );
+        let screen = camera
+            .project([-5., 0., 0.], viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+        window_frame(&mut app, &context, size, pointer(pos, true));
+        window_frame(&mut app, &context, size, pointer(pos, false));
+        assert!(!app.controller.document().entities.contains_key(&first_id));
+        app.controller.submit("").unwrap();
+        app.controller.undo().unwrap();
+        let Geometry::Curve(curve) = &app.controller.document().entities[&first_id].geometry else {
+            panic!("curve")
+        };
+        assert!(
+            (om9_core::curve_ops::arc_length(curve, app.controller.coordinator().limits())
+                .unwrap()
+                - 10.)
+                .abs()
+                < 1e-7
+        );
+        app.controller.undo().unwrap();
+        let Geometry::Curve(curve) = &app.controller.document().entities[&first_id].geometry else {
+            panic!("curve")
+        };
+        assert!(
+            (om9_core::curve_ops::arc_length(curve, app.controller.coordinator().limits())
+                .unwrap()
+                - 20.)
+                .abs()
+                < 1e-7
+        );
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn split_isocurve_picks_selected_surface_in_viewport() {
+        use om9_core::geometry::Geometry;
+        use om9_core::model::Entity;
+        let limits = om9_core::budget::Limits::default();
+        let surface = om9_core::surface_kernel::plane(
+            [0., 0., 3.],
+            [1., 0., 0.],
+            [0., 1., 0.],
+            10.,
+            20.,
+            &limits,
+        )
+        .unwrap();
+        let target = Entity::new("surface", Geometry::Surface(surface), None);
+        let id = target.id;
+        let mut doc = Document::with_template_tolerance("isocurve viewport");
+        doc.entities.insert(id, target);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller
+            .top11_invoke(om9_core::top11::Top11Action::Split)
+            .unwrap();
+        app.controller.submit("Isocurve").unwrap();
+        app.controller.submit("V").unwrap();
+        app.controller.submit("Shrink=Yes").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let screen = camera
+            .project([2., 6., 3.], viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+        window_frame(&mut app, &context, size, pointer(pos, true));
+        window_frame(&mut app, &context, size, pointer(pos, false));
+        assert!(!app.controller.document().entities.contains_key(&id));
+        assert_eq!(app.controller.document().entities.len(), 2);
+        for entity in app.controller.document().entities.values() {
+            let Geometry::Surface(surface) = &entity.geometry else {
+                panic!("surface")
+            };
+            let [low, high] = surface.domain[0];
+            assert!(high <= 0.21 || low >= 0.19, "{low} {high}");
+            assert!((surface.knots[0][0] - low).abs() < 1e-8);
+            assert!((*surface.knots[0].last().unwrap() - high).abs() < 1e-8);
+        }
+        app.controller.undo().unwrap();
+        assert!(app.controller.document().entities.contains_key(&id));
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn split_isocurve_picks_brep_face_in_viewport() {
+        use om9_core::geometry::Geometry;
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Profile};
+        let limits = om9_core::budget::Limits::default();
+        let profile = Profile::new(vec![
+            [0., 0., 3.],
+            [10., 0., 3.],
+            [10., 20., 3.],
+            [0., 20., 3.],
+        ])
+        .unwrap();
+        let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
+        let target = Entity::new("face", Geometry::Brep(face), None);
+        let id = target.id;
+        let mut doc = Document::with_template_tolerance("brep isocurve viewport");
+        doc.entities.insert(id, target);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller
+            .top11_invoke(om9_core::top11::Top11Action::Split)
+            .unwrap();
+        app.controller.submit("Isocurve").unwrap();
+        app.controller.submit("Both").unwrap();
+        app.controller.submit("Shrink=Yes").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let screen = camera
+            .project([2., 6., 3.], viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+        window_frame(&mut app, &context, size, pointer(pos, true));
+        window_frame(&mut app, &context, size, pointer(pos, false));
+        assert!(!app.controller.document().entities.contains_key(&id));
+        assert_eq!(app.controller.document().entities.len(), 4);
+        let area: f64 = app
+            .controller
+            .document()
+            .entities
+            .values()
+            .map(|e| {
+                let Geometry::Brep(brep) = &e.geometry else {
+                    panic!("BRep")
+                };
+                let bounds =
+                    om9_kernel::measurement::face_underlying_bounds(brep, &limits).unwrap();
+                assert!((bounds[1] - bounds[0]) < 10.0001 && (bounds[3] - bounds[2]) < 20.0001);
+                creation::measure(brep, &limits).unwrap().area_mm2
+            })
+            .sum();
+        assert!((area - 200.).abs() < 1e-6);
+        app.controller.undo().unwrap();
+        assert!(app.controller.document().entities.contains_key(&id));
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn split_isocurve_picks_curved_face_in_viewport() {
+        use om9_core::geometry::Geometry;
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Primitive};
+        let limits = om9_core::budget::Limits::default();
+        let body = creation::primitive(
+            Primitive::Cylinder {
+                radius_mm: 5.,
+                height_mm: 10.,
+            },
+            creation::DEFAULT_DEFLECTION_MM,
+            &limits,
+        )
+        .unwrap();
+        let side = (0..creation::measure(&body, &limits).unwrap().faces)
+            .map(|i| {
+                om9_kernel::editing::extract_face(
+                    &body,
+                    i,
+                    creation::DEFAULT_DEFLECTION_MM,
+                    &limits,
+                )
+                .unwrap()
+            })
+            .find(|face| {
+                (creation::measure(face, &limits).unwrap().area_mm2 - 100. * std::f64::consts::PI)
+                    .abs()
+                    < 1e-5
+            })
+            .unwrap();
+        let target = Entity::new("cylinder side", Geometry::Brep(side), None);
+        let id = target.id;
+        let mut doc = Document::with_template_tolerance("curved isocurve viewport");
+        doc.entities.insert(id, target);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller.submit("Split").unwrap();
+        app.controller.submit("Isocurve").unwrap();
+        app.controller.submit("U").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Through Finger")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Through Finger")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let screen = camera
+            .project([0., 5., 5.], viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+        window_frame(&mut app, &context, size, pointer(pos, true));
+        window_frame(&mut app, &context, size, pointer(pos, false));
+        assert!(!app.controller.document().entities.contains_key(&id));
+        assert_eq!(app.controller.document().entities.len(), 2);
+        for entity in app.controller.document().entities.values() {
+            let Geometry::Brep(brep) = &entity.geometry else {
+                panic!("BRep")
+            };
+            assert!(
+                (creation::measure(brep, &limits).unwrap().area_mm2 - 50. * std::f64::consts::PI)
+                    .abs()
+                    < 0.5
+            );
+        }
+        app.controller.undo().unwrap();
+        assert!(app.controller.document().entities.contains_key(&id));
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn split_surface_select_cutter_via_viewport() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Profile};
+        let limits = om9_core::budget::Limits::default();
+        let profile = Profile::new(vec![
+            [-10., -10., 0.],
+            [10., -10., 0.],
+            [10., 10., 0.],
+            [-10., 10., 0.],
+        ])
+        .unwrap();
+        let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
+        let target = Entity::new("face", Geometry::Brep(face), None);
+        let cutter = Entity::new(
+            "cutter",
+            Geometry::Curve(Curve::Line {
+                start: [0., -15., 0.],
+                end: [0., 15., 0.],
+                domain: [0., 1.],
+            }),
+            None,
+        );
+        let ids = [target.id, cutter.id];
+        let mut doc = Document::with_template_tolerance("split surface viewport");
+        for entity in [target, cutter] {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[ids[0]]).unwrap();
+        app.controller.submit("Split").unwrap();
+        app.controller.submit("Shrink=Yes").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let screen = camera
+            .project([0., 13., 0.], viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+        window_frame(&mut app, &context, size, pointer(pos, true));
+        window_frame(&mut app, &context, size, pointer(pos, false));
+        app.controller.submit("").unwrap();
+        assert!(!app.controller.document().entities.contains_key(&ids[0]));
+        assert_eq!(app.controller.document().entities.len(), 3);
+        for entity in app
+            .controller
+            .document()
+            .entities
+            .values()
+            .filter(|e| e.id != ids[1])
+        {
+            let Geometry::Brep(brep) = &entity.geometry else {
+                panic!("BRep")
+            };
+            let bounds = om9_kernel::measurement::face_underlying_bounds(brep, &limits).unwrap();
+            assert!(
+                (bounds[1] - bounds[0]).abs() <= 20.0001
+                    && (bounds[3] - bounds[2]).abs() <= 20.0001
+            );
+        }
+        app.controller.undo().unwrap();
+        assert!(app.controller.document().entities.contains_key(&ids[0]));
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn split_polysurface_select_cutter_via_viewport() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Profile};
+        let limits = om9_core::budget::Limits::default();
+        for along_seam in [false, true] {
+            let face = |points| {
+                creation::planar(
+                    &Profile::new(points).unwrap(),
+                    creation::DEFAULT_DEFLECTION_MM,
+                    &limits,
+                )
+                .unwrap()
+            };
+            let left = face(vec![
+                [-10., -10., 0.],
+                [0., -10., 0.],
+                [0., 10., 0.],
+                [-10., 10., 0.],
+            ]);
+            let right = face(vec![
+                [0., -10., 0.],
+                [10., -10., 0.],
+                [10., 10., 0.],
+                [0., 10., 0.],
+            ]);
+            let joined = om9_kernel::editing::sew(
+                &left,
+                &right,
+                0.001,
+                creation::DEFAULT_DEFLECTION_MM,
+                &limits,
+            )
+            .unwrap();
+            let target = Entity::new("joined", Geometry::Brep(joined), None);
+            let (start, end, pick) = if along_seam {
+                ([0., -15., 0.], [0., 15., 0.], [0., 13., 0.])
+            } else {
+                ([-15., 0., 0.], [15., 0., 0.], [13., 0., 0.])
+            };
+            let cutter = Entity::new(
+                "cutter",
+                Geometry::Curve(Curve::Line {
+                    start,
+                    end,
+                    domain: [0., 1.],
+                }),
+                None,
+            );
+            let ids = [target.id, cutter.id];
+            let mut doc = Document::with_template_tolerance("split polysurface viewport");
+            for entity in [target, cutter] {
+                doc.entities.insert(entity.id, entity);
+            }
+            let mut app = MatrixApp::new(doc).unwrap();
+            app.controller.select_objects(&[ids[0]]).unwrap();
+            app.controller
+                .top11_invoke(om9_core::top11::Top11Action::Split)
+                .unwrap();
+            app.controller.submit("Shrink=Yes").unwrap();
+            let context = egui::Context::default();
+            let size = Vec2::new(1280., 720.);
+            for _ in 0..3 {
+                window_frame(&mut app, &context, size, vec![]);
+            }
+            let rect = app
+                .view_rects
+                .iter()
+                .find(|(id, _)| id.title() == "Looking Down")
+                .unwrap()
+                .1;
+            let camera = app
+                .controller
+                .view_cameras()
+                .into_iter()
+                .find(|(title, _, _)| *title == "Looking Down")
+                .unwrap()
+                .1;
+            let viewport = om9_scene::camera::Viewport {
+                origin: [rect.min.x as f64, rect.min.y as f64],
+                size: [rect.width() as f64, rect.height() as f64],
+            };
+            let screen = camera.project(pick, viewport).unwrap().unwrap().screen;
+            let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+            window_frame(&mut app, &context, size, pointer(pos, true));
+            window_frame(&mut app, &context, size, pointer(pos, false));
+            app.controller.submit("").unwrap();
+            assert!(!app.controller.document().entities.contains_key(&ids[0]));
+            let pieces: Vec<_> = app
+                .controller
+                .document()
+                .entities
+                .values()
+                .filter(|e| e.id != ids[1])
+                .collect();
+            assert_eq!(pieces.len(), 2);
+            for piece in pieces {
+                let Geometry::Brep(brep) = &piece.geometry else {
+                    panic!("expected BRep")
+                };
+                let m = creation::measure(brep, &limits).unwrap();
+                assert_eq!(m.faces, if along_seam { 1 } else { 2 });
+                assert!((m.area_mm2 - 200.).abs() < 1e-6);
+                for i in 0..m.faces {
+                    let face = om9_kernel::editing::extract_face(
+                        brep,
+                        i,
+                        creation::DEFAULT_DEFLECTION_MM,
+                        &limits,
+                    )
+                    .unwrap();
+                    let bounds =
+                        om9_kernel::measurement::face_underlying_bounds(&face, &limits).unwrap();
+                    assert!(
+                        (bounds[1] - bounds[0]) <= 20.0001 && (bounds[3] - bounds[2]) <= 20.0001
+                    );
+                }
+            }
+            app.controller.undo().unwrap();
+            assert!(app.controller.document().entities.contains_key(&ids[0]));
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn trim_surface_regions_via_viewport_clicks() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Profile};
+        let profile = Profile::new(vec![
+            [-10., -10., 0.],
+            [10., -10., 0.],
+            [10., 10., 0.],
+            [-10., 10., 0.],
+        ])
+        .unwrap();
+        let face = creation::planar(
+            &profile,
+            creation::DEFAULT_DEFLECTION_MM,
+            &om9_core::budget::Limits::default(),
+        )
+        .unwrap();
+        let target = Entity::new("face", Geometry::Brep(face), None);
+        let line = |name, start, end| {
+            Entity::new(
+                name,
+                Geometry::Curve(Curve::Line {
+                    start,
+                    end,
+                    domain: [0., 1.],
+                }),
+                None,
+            )
+        };
+        let a = line("vertical", [0., -12., 0.], [0., 12., 0.]);
+        let b = line("horizontal", [-12., 0., 0.], [12., 0., 0.]);
+        let ids = [target.id, a.id, b.id];
+        let mut doc = Document::with_template_tolerance("trim surface viewport");
+        for entity in [target, a, b] {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&ids).unwrap();
+        app.controller.submit("Trim").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        for (point, area) in [([-5., -5., 0.], 300.), ([5., 5., 0.], 200.)] {
+            let screen = camera.project(point, viewport).unwrap().unwrap().screen;
+            let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+            window_frame(&mut app, &context, size, pointer(pos, true));
+            window_frame(&mut app, &context, size, pointer(pos, false));
+            let Geometry::Brep(brep) = &app.controller.document().entities[&ids[0]].geometry else {
+                panic!("face")
+            };
+            let actual = creation::measure(brep, app.controller.coordinator().limits())
+                .unwrap()
+                .area_mm2;
+            assert!((actual - area).abs() < 1e-6, "{actual}");
+        }
+        app.controller.submit("").unwrap();
+        app.controller.undo().unwrap();
+        app.controller.undo().unwrap();
+        let Geometry::Brep(brep) = &app.controller.document().entities[&ids[0]].geometry else {
+            panic!("face")
+        };
+        assert!(
+            (creation::measure(brep, app.controller.coordinator().limits())
+                .unwrap()
+                .area_mm2
+                - 400.)
+                .abs()
+                < 1e-6
+        );
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn trim_surface_and_curve_via_viewport_clicks() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Profile};
+        let profile = Profile::new(vec![
+            [-10., -10., 0.],
+            [10., -10., 0.],
+            [10., 10., 0.],
+            [-10., 10., 0.],
+        ])
+        .unwrap();
+        let face = creation::planar(
+            &profile,
+            creation::DEFAULT_DEFLECTION_MM,
+            &om9_core::budget::Limits::default(),
+        )
+        .unwrap();
+        let target = Entity::new("face", Geometry::Brep(face), None);
+        let line = |name, start, end| {
+            Entity::new(
+                name,
+                Geometry::Curve(Curve::Line {
+                    start,
+                    end,
+                    domain: [0., 1.],
+                }),
+                None,
+            )
+        };
+        let a = line("vertical", [0., -12., 0.], [0., 12., 0.]);
+        let b = line("horizontal", [-12., 0., 0.], [12., 0., 0.]);
+        let ids = [target.id, a.id, b.id];
+        let mut doc = Document::with_template_tolerance("trim mixed viewport");
+        for entity in [target, a, b] {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&ids).unwrap();
+        app.controller.submit("Trim").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        for point in [[0., -5., 0.], [-5., -5., 0.]] {
+            let screen = camera.project(point, viewport).unwrap().unwrap().screen;
+            let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+            window_frame(&mut app, &context, size, pointer(pos, true));
+            window_frame(&mut app, &context, size, pointer(pos, false));
+        }
+        let Geometry::Brep(brep) = &app.controller.document().entities[&ids[0]].geometry else {
+            panic!("face")
+        };
+        let actual = creation::measure(brep, app.controller.coordinator().limits())
+            .unwrap()
+            .area_mm2;
+        assert!((actual - 200.).abs() < 1e-6, "{actual}");
+        app.controller.submit("").unwrap();
+        app.controller.undo().unwrap();
+        app.controller.undo().unwrap();
+        let Geometry::Brep(brep) = &app.controller.document().entities[&ids[0]].geometry else {
+            panic!("face")
+        };
+        assert!(
+            (creation::measure(brep, app.controller.coordinator().limits())
+                .unwrap()
+                .area_mm2
+                - 400.)
+                .abs()
+                < 1e-6
+        );
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn trim_two_surfaces_via_viewport_clicks() {
+        use om9_core::geometry::Geometry;
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Profile};
+        let limits = om9_core::budget::Limits::default();
+        let horizontal = Profile::new(vec![
+            [-10., -10., 0.],
+            [10., -10., 0.],
+            [10., 10., 0.],
+            [-10., 10., 0.],
+        ])
+        .unwrap();
+        let vertical = Profile::new(vec![
+            [-10., 0., -10.],
+            [10., 0., -10.],
+            [10., 0., 10.],
+            [-10., 0., 10.],
+        ])
+        .unwrap();
+        let a = Entity::new(
+            "horizontal",
+            Geometry::Brep(
+                creation::planar(&horizontal, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap(),
+            ),
+            None,
+        );
+        let b = Entity::new(
+            "vertical",
+            Geometry::Brep(
+                creation::planar(&vertical, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap(),
+            ),
+            None,
+        );
+        let ids = [a.id, b.id];
+        let mut doc = Document::with_template_tolerance("mutual surfaces viewport");
+        for entity in [a, b] {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&ids).unwrap();
+        app.controller.submit("Trim").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        for (title, point, id) in [
+            ("Looking Down", [0., -5., 0.], ids[0]),
+            ("Through Finger", [0., 0., -5.], ids[1]),
+        ] {
+            let rect = app
+                .view_rects
+                .iter()
+                .find(|(view, _)| view.title() == title)
+                .unwrap()
+                .1;
+            let camera = app
+                .controller
+                .view_cameras()
+                .into_iter()
+                .find(|(view, _, _)| *view == title)
+                .unwrap()
+                .1;
+            let viewport = om9_scene::camera::Viewport {
+                origin: [rect.min.x as f64, rect.min.y as f64],
+                size: [rect.width() as f64, rect.height() as f64],
+            };
+            let screen = camera.project(point, viewport).unwrap().unwrap().screen;
+            let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+            window_frame(&mut app, &context, size, pointer(pos, true));
+            window_frame(&mut app, &context, size, pointer(pos, false));
+            let Geometry::Brep(face) = &app.controller.document().entities[&id].geometry else {
+                panic!("face")
+            };
+            assert!((creation::measure(face, &limits).unwrap().area_mm2 - 200.).abs() < 1e-6);
+        }
+        app.controller.submit("").unwrap();
+        app.controller.undo().unwrap();
+        app.controller.undo().unwrap();
+        for id in ids {
+            let Geometry::Brep(face) = &app.controller.document().entities[&id].geometry else {
+                panic!("face")
+            };
+            assert!((creation::measure(face, &limits).unwrap().area_mm2 - 400.).abs() < 1e-6);
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn trim_multiple_surfaces_and_curve_via_viewport_clicks() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Profile};
+        let limits = om9_core::budget::Limits::default();
+        let horizontal = Profile::new(vec![
+            [-10., -10., 0.],
+            [10., -10., 0.],
+            [10., 10., 0.],
+            [-10., 10., 0.],
+        ])
+        .unwrap();
+        let vertical = Profile::new(vec![
+            [-10., 0., -10.],
+            [10., 0., -10.],
+            [10., 0., 10.],
+            [-10., 0., 10.],
+        ])
+        .unwrap();
+        let a = Entity::new(
+            "horizontal",
+            Geometry::Brep(
+                creation::planar(&horizontal, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap(),
+            ),
+            None,
+        );
+        let b = Entity::new(
+            "vertical",
+            Geometry::Brep(
+                creation::planar(&vertical, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap(),
+            ),
+            None,
+        );
+        let curve = Entity::new(
+            "curve",
+            Geometry::Curve(Curve::Line {
+                start: [0., -12., 0.],
+                end: [0., 12., 0.],
+                domain: [0., 1.],
+            }),
+            None,
+        );
+        let ids = [a.id, b.id, curve.id];
+        let mut doc = Document::with_template_tolerance("mixed mutual viewport");
+        for entity in [a, b, curve] {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&ids).unwrap();
+        app.controller.submit("Trim").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        for (title, point) in [
+            ("Looking Down", [0., -5., 0.]),
+            ("Looking Down", [-5., -5., 0.]),
+            ("Through Finger", [5., 0., -5.]),
+        ] {
+            let rect = app
+                .view_rects
+                .iter()
+                .find(|(view, _)| view.title() == title)
+                .unwrap()
+                .1;
+            let camera = app
+                .controller
+                .view_cameras()
+                .into_iter()
+                .find(|(view, _, _)| *view == title)
+                .unwrap()
+                .1;
+            let viewport = om9_scene::camera::Viewport {
+                origin: [rect.min.x as f64, rect.min.y as f64],
+                size: [rect.width() as f64, rect.height() as f64],
+            };
+            let screen = camera.project(point, viewport).unwrap().unwrap().screen;
+            let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+            window_frame(&mut app, &context, size, pointer(pos, true));
+            window_frame(&mut app, &context, size, pointer(pos, false));
+        }
+        for id in &ids[..2] {
+            let Geometry::Brep(face) = &app.controller.document().entities[id].geometry else {
+                panic!("face")
+            };
+            assert!((creation::measure(face, &limits).unwrap().area_mm2 - 200.).abs() < 1e-6);
+        }
+        app.controller.submit("").unwrap();
+        for _ in 0..3 {
+            app.controller.undo().unwrap();
+        }
+        for id in &ids[..2] {
+            let Geometry::Brep(face) = &app.controller.document().entities[id].geometry else {
+                panic!("face")
+            };
+            assert!((creation::measure(face, &limits).unwrap().area_mm2 - 400.).abs() < 1e-6);
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn trim_multiface_brep_and_curve_via_viewport_clicks() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Profile};
+        let limits = om9_core::budget::Limits::default();
+        let left = Profile::new(vec![
+            [-10., -10., 0.],
+            [0., -10., 0.],
+            [0., 10., 0.],
+            [-10., 10., 0.],
+        ])
+        .unwrap();
+        let right = Profile::new(vec![
+            [0., -10., 0.],
+            [10., -10., 0.],
+            [10., 10., 0.],
+            [0., 10., 0.],
+        ])
+        .unwrap();
+        let left = creation::planar(&left, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
+        let right = creation::planar(&right, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
+        let joined = om9_kernel::editing::sew(
+            &left,
+            &right,
+            1e-6,
+            creation::DEFAULT_DEFLECTION_MM,
+            &limits,
+        )
+        .unwrap();
+        let target = Entity::new("face", Geometry::Brep(joined), None);
+        let line = |name, start, end| {
+            Entity::new(
+                name,
+                Geometry::Curve(Curve::Line {
+                    start,
+                    end,
+                    domain: [0., 1.],
+                }),
+                None,
+            )
+        };
+        let a = line("vertical", [-6., -12., 0.], [-6., 12., 0.]);
+        let b = line("horizontal", [-12., 0., 0.], [12., 0., 0.]);
+        let ids = [target.id, a.id, b.id];
+        let mut doc = Document::with_template_tolerance("multiface trim viewport");
+        for entity in [target, a, b] {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&ids).unwrap();
+        app.controller.submit("Trim").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        for point in [[-8., -5., 0.], [-6., 5., 0.], [-8., 5., 0.]] {
+            let screen = camera.project(point, viewport).unwrap().unwrap().screen;
+            let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+            window_frame(&mut app, &context, size, pointer(pos, true));
+            window_frame(&mut app, &context, size, pointer(pos, false));
+        }
+        let Geometry::Brep(face) = &app.controller.document().entities[&ids[0]].geometry else {
+            panic!("face")
+        };
+        let measure = creation::measure(face, &limits).unwrap();
+        assert_eq!(measure.faces, 2);
+        assert!(
+            (measure.area_mm2 - 260.).abs() < 1e-6,
+            "{}",
+            measure.area_mm2
+        );
+        app.controller.submit("").unwrap();
+        for _ in 0..3 {
+            app.controller.undo().unwrap();
+        }
+        let Geometry::Brep(face) = &app.controller.document().entities[&ids[0]].geometry else {
+            panic!("face")
+        };
+        assert!((creation::measure(face, &limits).unwrap().area_mm2 - 400.).abs() < 1e-6);
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn trim_two_multiface_breps_and_curve_via_viewport_clicks() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Profile};
+        let limits = om9_core::budget::Limits::default();
+        let face = |points| {
+            creation::planar(
+                &Profile::new(points).unwrap(),
+                creation::DEFAULT_DEFLECTION_MM,
+                &limits,
+            )
+            .unwrap()
+        };
+        let join = |a, b| {
+            om9_kernel::editing::sew(&a, &b, 1e-6, creation::DEFAULT_DEFLECTION_MM, &limits)
+                .unwrap()
+        };
+        let a = join(
+            face(vec![
+                [-10., -10., 0.],
+                [0., -10., 0.],
+                [0., 10., 0.],
+                [-10., 10., 0.],
+            ]),
+            face(vec![
+                [0., -10., 0.],
+                [10., -10., 0.],
+                [10., 10., 0.],
+                [0., 10., 0.],
+            ]),
+        );
+        let b = join(
+            face(vec![
+                [-10., 0., -10.],
+                [0., 0., -10.],
+                [0., 0., 10.],
+                [-10., 0., 10.],
+            ]),
+            face(vec![
+                [0., 0., -10.],
+                [10., 0., -10.],
+                [10., 0., 10.],
+                [0., 0., 10.],
+            ]),
+        );
+        let a = Entity::new("horizontal", Geometry::Brep(a), None);
+        let b = Entity::new("vertical", Geometry::Brep(b), None);
+        let curve = Entity::new(
+            "curve",
+            Geometry::Curve(Curve::Line {
+                start: [-6., -12., 0.],
+                end: [-6., 12., 0.],
+                domain: [0., 1.],
+            }),
+            None,
+        );
+        let ids = [a.id, b.id, curve.id];
+        let mut doc = Document::with_template_tolerance("two multiface trim viewport");
+        for entity in [a, b, curve] {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&ids).unwrap();
+        app.controller.submit("Trim").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        for (title, point) in [
+            ("Through Finger", [-5., 0., -5.]),
+            ("Looking Down", [-8., -5., 0.]),
+            ("Looking Down", [-6., 5., 0.]),
+            ("Looking Down", [-8., 5., 0.]),
+        ] {
+            let rect = app
+                .view_rects
+                .iter()
+                .find(|(view, _)| view.title() == title)
+                .unwrap()
+                .1;
+            let camera = app
+                .controller
+                .view_cameras()
+                .into_iter()
+                .find(|(view, _, _)| *view == title)
+                .unwrap()
+                .1;
+            let viewport = om9_scene::camera::Viewport {
+                origin: [rect.min.x as f64, rect.min.y as f64],
+                size: [rect.width() as f64, rect.height() as f64],
+            };
+            let screen = camera.project(point, viewport).unwrap().unwrap().screen;
+            let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+            window_frame(&mut app, &context, size, pointer(pos, true));
+            window_frame(&mut app, &context, size, pointer(pos, false));
+        }
+        for (id, area) in [(ids[0], 260.), (ids[1], 300.)] {
+            let Geometry::Brep(face) = &app.controller.document().entities[&id].geometry else {
+                panic!("face")
+            };
+            let measured = creation::measure(face, &limits).unwrap();
+            assert_eq!(measured.faces, 2);
+            assert!(
+                (measured.area_mm2 - area).abs() < 1e-6,
+                "{}",
+                measured.area_mm2
+            );
+        }
+        app.controller.submit("").unwrap();
+        for _ in 0..4 {
+            app.controller.undo().unwrap();
+        }
+        for id in &ids[..2] {
+            let Geometry::Brep(face) = &app.controller.document().entities[id].geometry else {
+                panic!("face")
+            };
+            assert!((creation::measure(face, &limits).unwrap().area_mm2 - 400.).abs() < 1e-6);
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn trim_solid_boundary_via_viewport_click() {
+        use om9_core::geometry::Geometry;
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Primitive, Profile};
+        let limits = om9_core::budget::Limits::default();
+        let solid = creation::primitive(
+            Primitive::Box {
+                x_mm: 10.,
+                y_mm: 10.,
+                z_mm: 10.,
+            },
+            creation::DEFAULT_DEFLECTION_MM,
+            &limits,
+        )
+        .unwrap();
+        let profile = Profile::new(vec![
+            [5., -5., -5.],
+            [5., 15., -5.],
+            [5., 15., 15.],
+            [5., -5., 15.],
+        ])
+        .unwrap();
+        let cutter = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
+        let a = Entity::new("solid", Geometry::Brep(solid), None);
+        let b = Entity::new("cutter", Geometry::Brep(cutter), None);
+        let ids = [a.id, b.id];
+        let mut doc = Document::with_template_tolerance("solid trim viewport");
+        for entity in [a, b] {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&ids).unwrap();
+        app.controller.submit("Trim").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let screen = camera
+            .project([2., 2., 10.], viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+        window_frame(&mut app, &context, size, pointer(pos, true));
+        window_frame(&mut app, &context, size, pointer(pos, false));
+        let Geometry::Brep(face) = &app.controller.document().entities[&ids[0]].geometry else {
+            panic!("BRep")
+        };
+        let measured = creation::measure(face, &limits).unwrap();
+        assert_eq!(measured.solids, 0);
+        assert!(
+            (measured.area_mm2 - 550.).abs() < 1e-6,
+            "{}",
+            measured.area_mm2
+        );
+        app.controller.submit("").unwrap();
+        app.controller.undo().unwrap();
+        let Geometry::Brep(solid) = &app.controller.document().entities[&ids[0]].geometry else {
+            panic!("BRep")
+        };
+        assert_eq!(creation::measure(solid, &limits).unwrap().solids, 1);
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn trim_sphere_boundary_via_viewport_click() {
+        use om9_core::geometry::Geometry;
+        use om9_core::model::Entity;
+        use om9_kernel::creation::{self, Primitive, Profile};
+        let limits = om9_core::budget::Limits::default();
+        let sphere = creation::primitive(
+            Primitive::Sphere { radius_mm: 5. },
+            creation::DEFAULT_DEFLECTION_MM,
+            &limits,
+        )
+        .unwrap();
+        let profile = Profile::new(vec![
+            [-10., -10., 0.],
+            [10., -10., 0.],
+            [10., 10., 0.],
+            [-10., 10., 0.],
+        ])
+        .unwrap();
+        let cutter = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
+        let a = Entity::new("sphere", Geometry::Brep(sphere), None);
+        let b = Entity::new("cutter", Geometry::Brep(cutter), None);
+        let ids = [a.id, b.id];
+        let mut doc = Document::with_template_tolerance("sphere trim viewport");
+        for entity in [a, b] {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&ids).unwrap();
+        app.controller.submit("Trim").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let screen = camera
+            .project([0., 3., 4.], viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+        window_frame(&mut app, &context, size, pointer(pos, true));
+        window_frame(&mut app, &context, size, pointer(pos, false));
+        let Geometry::Brep(result) = &app.controller.document().entities[&ids[0]].geometry else {
+            panic!("BRep")
+        };
+        let measure = creation::measure(result, &limits).unwrap();
+        assert_eq!(measure.solids, 0);
+        assert!(
+            (measure.area_mm2 - 50. * std::f64::consts::PI).abs() < 1e-5,
+            "{}",
+            measure.area_mm2
+        );
+        app.controller.submit("").unwrap();
+        app.controller.undo().unwrap();
+        let Geometry::Brep(result) = &app.controller.document().entities[&ids[0]].geometry else {
+            panic!("BRep")
+        };
+        assert_eq!(creation::measure(result, &limits).unwrap().solids, 1);
+    }
+
+    #[test]
+    fn copy_and_mirror_cmd_widget_accept_typed_coordinates() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        for mirror in [false, true] {
+            let entity = Entity::new(
+                "source",
+                Geometry::Curve(Curve::Line {
+                    start: [2., 0., 0.],
+                    end: [3., 0., 0.],
+                    domain: [0., 1.],
+                }),
+                None,
+            );
+            let id = entity.id;
+            let mut doc = Document::with_template_tolerance("typed cmd widget");
+            doc.entities.insert(id, entity);
+            let mut app = MatrixApp::new(doc).unwrap();
+            app.controller.select_objects(&[id]).unwrap();
+            let before = app.controller.document().clone();
+            let ctx = egui::Context::default();
+            let size = Vec2::new(1280., 720.);
+            app.focus_cmd = true;
+            for _ in 0..3 {
+                window_frame(&mut app, &ctx, size, vec![]);
+            }
+            let enter = || egui::Event::Key {
+                key: Key::Enter,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Modifiers::NONE,
+            };
+            let words = if mirror {
+                vec!["Mirror", "Copy=No", "W1,2,0", "@0,3,0"]
+            } else {
+                vec!["Copy", "W1,2,0", "@0,3,0"]
+            };
+            for word in words {
+                window_frame(&mut app, &ctx, size, vec![egui::Event::Text(word.into())]);
+                window_frame(&mut app, &ctx, size, vec![enter()]);
+            }
+            if !mirror {
+                window_frame(&mut app, &ctx, size, vec![enter()]);
+                let copy = app
+                    .controller
+                    .document()
+                    .entities
+                    .values()
+                    .find(|e| e.id != id)
+                    .unwrap();
+                let p = copy.placement.point([0.; 3]).unwrap();
+                assert!((p[1] - 3.).abs() < 1e-9, "{p:?}");
+            } else {
+                let Geometry::Curve(Curve::Line { start, end, .. }) =
+                    &app.controller.document().entities[&id].geometry
+                else {
+                    panic!("line")
+                };
+                assert!(
+                    start[0].abs() < 1e-9 && (end[0] + 1.).abs() < 1e-9,
+                    "{start:?} {end:?}"
+                );
+            }
+            app.controller.undo().unwrap();
+            assert_eq!(app.controller.document(), &before);
+        }
+    }
+
+    #[test]
+    fn split_point_cmd_widget_preserves_mode_after_object_selection() {
+        let mut document = Document::with_template_tolerance("split point cmd");
+        let entity = om9_core::model::Entity::new(
+            "line",
+            om9_core::geometry::Geometry::Curve(om9_core::geometry::Curve::Line {
+                start: [0., 0., 0.],
+                end: [10., 0., 0.],
+                domain: [0., 10.],
+            }),
+            None,
+        );
+        let id = entity.id;
+        document.entities.insert(id, entity);
+        let mut app = MatrixApp::new(document).unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        app.focus_cmd = true;
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let enter = || egui::Event::Key {
+            key: egui::Key::Enter,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: Modifiers::NONE,
+        };
+        window_frame(
+            &mut app,
+            &context,
+            size,
+            vec![egui::Event::Text("Split Point".into())],
+        );
+        window_frame(&mut app, &context, size, vec![enter()]);
+        assert!(app.controller.top11_needs_object());
+        let pos = app
+            .view_rects
+            .iter()
+            .find(|(view, _)| view.title() == "Perspective")
+            .expect("perspective viewport")
+            .1
+            .center();
+        window_frame(&mut app, &context, size, pointer(pos, true));
+        window_frame(&mut app, &context, size, pointer(pos, false));
+        assert!(
+            app.controller.selected().contains(&id),
+            "viewport pick selects the line"
+        );
+        app.focus_cmd = true;
+        window_frame(&mut app, &context, size, vec![]);
+        window_frame(&mut app, &context, size, vec![enter()]);
+        assert_eq!(
+            app.controller.top11_prompt(),
+            Some("pick a point on the curve")
+        );
+        window_frame(
+            &mut app,
+            &context,
+            size,
+            vec![egui::Event::Text("W4,0,0".into())],
+        );        window_frame(&mut app, &context, size, vec![enter()]);
+        eprintln!(
+            "DBG prompt={:?} with_options={:?} running={} entities={} transcript={:?}",
+            app.controller.top11_prompt(),
+            app.controller.prompt_with_options(),
+            app.controller.is_running(),
+            app.controller.document().entities.len(),
+            app.transcript.text()
+        );
+        assert_eq!(app.controller.document().entities.len(), 2);
+        let mut lengths: Vec<_> = app
+            .controller
+            .document()
+            .entities
+            .values()
+            .map(|entity| {
+                let om9_core::geometry::Geometry::Curve(curve) = &entity.geometry else {
+                    panic!("curve")
+                };
+                om9_core::curve_ops::arc_length(curve, app.controller.coordinator().limits())
+                    .unwrap()
+            })
+            .collect();
+        lengths.sort_by(f64::total_cmp);
+        assert!((lengths[0] - 4.).abs() < 1e-8 && (lengths[1] - 6.).abs() < 1e-8);
+        app.controller.undo().unwrap();
+        assert!(app.controller.document().entities.contains_key(&id));
+    }
+
+    #[test]
     fn top11_multi_split_cmd_undo_redo_from_clean_document() {
-        let mut app = MatrixApp::new(Document::new("split ui history")).unwrap();
+        let mut app =
+            MatrixApp::new(Document::with_template_tolerance("split ui history")).unwrap();
         let mut ids = Vec::new();
         for (start, end) in [
             ("-10,0,0", "10,0,0"),
@@ -3188,5 +5445,1217 @@ mod chrome_tests {
         window_frame(&mut app, &context, size, pointer(redo, false));
         assert_eq!(app.controller.document().entities.len(), 5, "toolbar Redo");
         assert_eq!(app.controller.coordinator().redo_len(), 0);
+    }
+    #[test]
+    fn control_surface_grips_pointer_shift_delete_and_undo() {
+        use om9_core::geometry::{Geometry, NurbsSurface};
+        use om9_core::model::Entity;
+        let surface = NurbsSurface {
+            degree: [2, 2],
+            size: [4, 4],
+            poles: (0..4)
+                .flat_map(|u| (0..4).map(move |v| [u as f64 * 10. - 15., v as f64 * 10. - 15., 0.]))
+                .collect(),
+            weights: vec![1.; 16],
+            knots: [
+                vec![0., 0., 0., 0.5, 1., 1., 1.],
+                vec![0., 0., 0., 0.5, 1., 1., 1.],
+            ],
+            domain: [[0., 1.], [0., 1.]],
+            periodic: [false, false],
+            reversed: false,
+        };
+        let entity = Entity::new("surface", Geometry::Surface(surface), None);
+        let id = entity.id;
+        let mut doc = Document::with_template_tolerance("surface pointer delete");
+        doc.entities.insert(id, entity);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller.submit("PointsOn").unwrap();
+        app.controller.workspace.active = om9_scene::workspace::ViewId::LookingDown;
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = *app
+            .view_rects
+            .iter()
+            .find(|(id, _)| id.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let handles = app.controller.top11_grip_handles().unwrap();
+        let before = app.controller.document().clone();
+        for index in 4..8 {
+            let screen = camera
+                .project(handles[index].point, viewport)
+                .unwrap()
+                .unwrap()
+                .screen;
+            let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+            assert!(rect.contains(pos));
+            let modifiers = if index == 4 {
+                Modifiers::NONE
+            } else {
+                Modifiers {
+                    shift: true,
+                    ..Modifiers::NONE
+                }
+            };
+            for pressed in [true, false] {
+                let events = vec![
+                    egui::Event::ModifiersChanged(modifiers),
+                    egui::Event::PointerMoved(pos),
+                    egui::Event::PointerButton {
+                        pos,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers,
+                    },
+                ];
+                let raw = egui::RawInput {
+                    screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, size)),
+                    events,
+                    ..Default::default()
+                };
+                let _ = context.run_ui(raw, |ui| app.show(ui));
+            }
+            assert_eq!(app.selected_grips.len(), index - 3, "grip {index}");
+        }
+        let mut raw = egui::RawInput {
+            events: vec![egui::Event::Key {
+                key: Key::Delete,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Modifiers::NONE,
+            }],
+            ..Default::default()
+        };
+        app.delete_selection_from_input(&context, &mut raw);
+        let Geometry::Surface(edited) = &app.controller.document().entities[&id].geometry else {
+            panic!("surface lost")
+        };
+        assert_eq!(edited.size, [3, 4]);
+        let after = app.controller.document().clone();
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
+        app.controller.redo().unwrap();
+        assert_eq!(app.controller.document(), &after);
+    }
+
+    #[test]
+    fn mixed_object_selection_still_allows_pointer_grip_edit() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_scene::workspace::ViewId;
+        for mode in ["PointsOn", "EditPtOn"] {
+            let line = Entity::new(
+                "line",
+                Geometry::Curve(Curve::Line {
+                    start: [0., 0., 0.],
+                    end: [2., 0., 0.],
+                    domain: [0., 1.],
+                }),
+                None,
+            );
+            let point = Entity::new("point", Geometry::Point([8., 0., 0.]), None);
+            let ids = [line.id, point.id];
+            let mut doc = Document::with_template_tolerance("mixed grip viewport");
+            doc.entities.insert(ids[0], line);
+            doc.entities.insert(ids[1], point);
+            let mut app = MatrixApp::new(doc).unwrap();
+            app.controller.select_objects(&ids).unwrap();
+            app.controller.submit(mode).unwrap();
+            app.controller.workspace.active = ViewId::LookingDown;
+            let context = egui::Context::default();
+            let size = Vec2::new(1280., 720.);
+            for _ in 0..3 {
+                window_frame(&mut app, &context, size, vec![]);
+            }
+            let rect = *app
+                .view_rects
+                .iter()
+                .find(|(v, _)| **v == ViewId::LookingDown)
+                .unwrap()
+                .1;
+            let camera = app
+                .controller
+                .view_cameras()
+                .into_iter()
+                .find(|(title, _, _)| *title == "Looking Down")
+                .unwrap()
+                .1;
+            let viewport = om9_scene::camera::Viewport {
+                origin: [rect.min.x as f64, rect.min.y as f64],
+                size: [rect.width() as f64, rect.height() as f64],
+            };
+            let screen = |p| {
+                let q = camera.project(p, viewport).unwrap().unwrap().screen;
+                egui::pos2(q[0] as f32, q[1] as f32)
+            };
+            let start = screen([2., 0., 0.]);
+            let end = screen([4., 1., 0.]);
+            let before = app.controller.document().clone();
+            assert_eq!(app.controller.top11_grip_handles().unwrap().len(), 2);
+            window_frame(&mut app, &context, size, pointer(start, true));
+            window_frame(
+                &mut app,
+                &context,
+                size,
+                vec![egui::Event::PointerMoved(end)],
+            );
+            window_frame(
+                &mut app,
+                &context,
+                size,
+                vec![egui::Event::PointerMoved(end)],
+            );
+            window_frame(&mut app, &context, size, pointer(end, false));
+            let Geometry::Curve(Curve::Line { end, .. }) =
+                &app.controller.document().entities[&ids[0]].geometry
+            else {
+                panic!("line")
+            };
+            assert!(
+                (end[0] - 4.).abs() < 1e-4 && (end[1] - 1.).abs() < 1e-4,
+                "{mode} {end:?}"
+            );
+            assert_eq!(
+                app.controller.document().entities[&ids[1]],
+                before.entities[&ids[1]]
+            );
+            app.controller.undo().unwrap();
+            assert_eq!(app.controller.document(), &before);
+        }
+    }
+
+    #[test]
+    fn grip_drag_cancels_on_context_change_and_escape() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_scene::workspace::ViewId;
+        for scenario in [
+            "selection",
+            "geometry",
+            "camera",
+            "view",
+            "plane",
+            "maximize",
+            "resize",
+            "mode",
+            "focus",
+            "escape",
+        ] {
+            let make = |name, start, end| {
+                Entity::new(
+                    name,
+                    Geometry::Curve(Curve::Line {
+                        start,
+                        end,
+                        domain: [0., 1.],
+                    }),
+                    None,
+                )
+            };
+            let first = make("first", [0., 0., 0.], [2., 0., 0.]);
+            let second = make("second", [6., 0., 0.], [8., 0., 0.]);
+            let ids = [first.id, second.id];
+            let mut doc = Document::with_template_tolerance("grip lifecycle");
+            doc.entities.insert(ids[0], first);
+            doc.entities.insert(ids[1], second);
+            let mut app = MatrixApp::new(doc).unwrap();
+            app.controller.select_objects(&[ids[0]]).unwrap();
+            app.controller.submit("PointsOn").unwrap();
+            app.controller.workspace.active = ViewId::LookingDown;
+            let context = egui::Context::default();
+            let size = Vec2::new(1280., 720.);
+            for _ in 0..3 {
+                window_frame(&mut app, &context, size, vec![]);
+            }
+            let rect = *app
+                .view_rects
+                .iter()
+                .find(|(v, _)| **v == ViewId::LookingDown)
+                .unwrap()
+                .1;
+            let camera = app
+                .controller
+                .view_cameras()
+                .into_iter()
+                .find(|(title, _, _)| *title == "Looking Down")
+                .unwrap()
+                .1;
+            let viewport = om9_scene::camera::Viewport {
+                origin: [rect.min.x as f64, rect.min.y as f64],
+                size: [rect.width() as f64, rect.height() as f64],
+            };
+            let screen = |p| {
+                let v = camera.project(p, viewport).unwrap().unwrap().screen;
+                egui::pos2(v[0] as f32, v[1] as f32)
+            };
+            let start = screen([2., 0., 0.]);
+            let end = screen([4., 1., 0.]);
+            window_frame(&mut app, &context, size, pointer(start, true));
+            window_frame(
+                &mut app,
+                &context,
+                size,
+                vec![egui::Event::PointerMoved(end)],
+            );
+            window_frame(
+                &mut app,
+                &context,
+                size,
+                vec![egui::Event::PointerMoved(end)],
+            );
+            assert!(app.grip_drag.is_some(), "{scenario}");
+            match scenario {
+                "selection" => app.controller.select_objects(&[ids[1]]).unwrap(),
+                "geometry" => {
+                    let h = app.grip_drag.as_ref().unwrap().handle;
+                    app.controller.top11_move_grip(h, [3., 0., 0.]).unwrap();
+                }
+                "camera" => app
+                    .controller
+                    .workspace
+                    .views
+                    .get_mut(&ViewId::LookingDown)
+                    .unwrap()
+                    .camera
+                    .zoom(2.)
+                    .unwrap(),
+                "view" => app.controller.workspace.active = ViewId::ThroughFinger,
+                "plane" => app
+                    .controller
+                    .set_cplane_preset(om9_scene::camera::CPlanePreset::Front)
+                    .unwrap(),
+                "maximize" => app.controller.workspace.maximized = Some(ViewId::Perspective),
+                "resize" => window_frame(&mut app, &context, size + egui::vec2(50., 0.), vec![]),
+                "mode" => {
+                    app.controller.submit("PointsOn").unwrap();
+                }
+                "focus" => {
+                    let raw = egui::RawInput {
+                        screen_rect: Some(Rect::from_min_size(egui::Pos2::ZERO, size)),
+                        focused: false,
+                        ..Default::default()
+                    };
+                    let mut output = context.run_ui(raw, |ui| app.show(ui));
+                    output.textures_delta.clear();
+                }
+                "escape" => window_frame(
+                    &mut app,
+                    &context,
+                    size,
+                    vec![egui::Event::Key {
+                        key: Key::Escape,
+                        physical_key: None,
+                        pressed: true,
+                        repeat: false,
+                        modifiers: Modifiers::NONE,
+                    }],
+                ),
+                _ => unreachable!(),
+            }
+            let expected = app.controller.document().clone();
+            let undo = app.controller.coordinator().undo_len();
+            window_frame(&mut app, &context, size, pointer(end, false));
+            assert_eq!(
+                app.controller.document(),
+                &expected,
+                "{scenario} committed a stale grip drag"
+            );
+            assert_eq!(app.controller.coordinator().undo_len(), undo, "{scenario}");
+            assert!(app.grip_drag.is_none(), "{scenario}");
+        }
+    }
+
+    #[test]
+    fn grip_drag_parallel_construction_plane_reports_failure_without_losing_selection() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_scene::{
+            camera::{CPlane, CPlanePreset},
+            workspace::ViewId,
+        };
+        let entity = Entity::new(
+            "line",
+            Geometry::Curve(Curve::Line {
+                start: [0.; 3],
+                end: [2., 0., 0.],
+                domain: [0., 1.],
+            }),
+            None,
+        );
+        let id = entity.id;
+        let mut doc = Document::with_template_tolerance("parallel grip");
+        doc.entities.insert(id, entity);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller.submit("PointsOn").unwrap();
+        app.controller.workspace.active = ViewId::LookingDown;
+        app.controller
+            .workspace
+            .views
+            .get_mut(&ViewId::ThroughFinger)
+            .unwrap()
+            .cplane = CPlane::preset(CPlanePreset::Top);
+        let handle = app
+            .controller
+            .top11_grip_handles()
+            .unwrap()
+            .into_iter()
+            .find(|h| h.index == 1)
+            .unwrap();
+        app.selected_grips
+            .push((handle, app.controller.document().revision));
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = *app
+            .view_rects
+            .iter()
+            .find(|(v, _)| **v == ViewId::ThroughFinger)
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Through Finger")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let p = camera
+            .project(handle.point, viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let start = egui::pos2(p[0] as f32, p[1] as f32);
+        let end = start + egui::vec2(0., -25.);
+        let before = app.controller.document().clone();
+        window_frame(&mut app, &context, size, pointer(start, true));
+        window_frame(
+            &mut app,
+            &context,
+            size,
+            vec![egui::Event::PointerMoved(end)],
+        );
+        window_frame(&mut app, &context, size, pointer(end, false));
+        assert_eq!(app.controller.document(), &before);
+        assert_eq!(app.controller.coordinator().undo_len(), 0);
+        assert_eq!(app.controller.workspace.active, ViewId::LookingDown);
+        assert_eq!(app.selected_grips.len(), 1);
+        assert!(
+            app.status.message().contains("construction plane"),
+            "{}",
+            app.status.message()
+        );
+    }
+
+    #[test]
+    fn grip_drag_uses_the_clicked_view_plane_when_another_view_is_active() {
+        use om9_core::geometry::{Curve, Geometry, NurbsSurface};
+        use om9_core::model::Entity;
+        use om9_scene::{camera::CPlane, workspace::ViewId};
+        let q = std::f64::consts::FRAC_1_SQRT_2;
+        for surface in [false, true] {
+            for mode in ["PointsOn", "EditPtOn"] {
+                for (view_id, start, target, active, tilted) in [
+                    (
+                        ViewId::ThroughFinger,
+                        [2., 0., 0.],
+                        [2., 0., 2.],
+                        ViewId::LookingDown,
+                        false,
+                    ),
+                    (
+                        ViewId::SideView,
+                        [0., 2., 0.],
+                        [0., 2., 2.],
+                        ViewId::LookingDown,
+                        false,
+                    ),
+                    (
+                        ViewId::Perspective,
+                        [2., 0., 0.],
+                        [2., 2., 0.],
+                        ViewId::LookingDown,
+                        false,
+                    ),
+                    (
+                        ViewId::LookingDown,
+                        [2., 0., 2.],
+                        [2. + 2. * q, -2., 2. + 2. * q],
+                        ViewId::ThroughFinger,
+                        true,
+                    ),
+                ] {
+                    let offset = if tilted { [0., -3., 0.] } else { [0., 0., -3.] };
+                    let geometry = if surface {
+                        Geometry::Surface(NurbsSurface {
+                            degree: [1, 1],
+                            size: [2, 2],
+                            poles: vec![
+                                [0.; 3],
+                                start,
+                                offset,
+                                std::array::from_fn(|i| start[i] + offset[i]),
+                            ],
+                            weights: vec![1.; 4],
+                            knots: [vec![0., 0., 1., 1.], vec![0., 0., 1., 1.]],
+                            domain: [[0., 1.], [0., 1.]],
+                            periodic: [false, false],
+                            reversed: false,
+                        })
+                    } else {
+                        Geometry::Curve(Curve::Line {
+                            start: [0.; 3],
+                            end: start,
+                            domain: [0., 1.],
+                        })
+                    };
+                    let entity = Entity::new("view geometry", geometry, None);
+                    let id = entity.id;
+                    let mut doc = Document::with_template_tolerance("inactive view grip");
+                    doc.entities.insert(id, entity);
+                    let mut app = MatrixApp::new(doc).unwrap();
+                    app.controller.select_objects(&[id]).unwrap();
+                    app.controller.submit(mode).unwrap();
+                    app.controller.workspace.active = active;
+                    if tilted {
+                        app.controller
+                            .workspace
+                            .views
+                            .get_mut(&view_id)
+                            .unwrap()
+                            .cplane = CPlane {
+                            origin: [0.; 3],
+                            x: [q, 0., q],
+                            y: [0., 1., 0.],
+                            revision: 1,
+                        };
+                    }
+                    let context = egui::Context::default();
+                    let size = Vec2::new(1280., 720.);
+                    for _ in 0..3 {
+                        window_frame(&mut app, &context, size, vec![]);
+                    }
+                    let rect = *app
+                        .view_rects
+                        .iter()
+                        .find(|(v, _)| **v == view_id)
+                        .unwrap()
+                        .1;
+                    let camera = app
+                        .controller
+                        .view_cameras()
+                        .into_iter()
+                        .find(|(title, _, _)| *title == view_id.title())
+                        .unwrap()
+                        .1;
+                    let viewport = om9_scene::camera::Viewport {
+                        origin: [rect.min.x as f64, rect.min.y as f64],
+                        size: [rect.width() as f64, rect.height() as f64],
+                    };
+                    let screen = |p| {
+                        let a = camera.project(p, viewport).unwrap().unwrap().screen;
+                        egui::pos2(a[0] as f32, a[1] as f32)
+                    };
+                    let from = screen(start);
+                    let to = screen(target);
+                    assert!(rect.contains(from) && rect.contains(to));
+                    let before = app.controller.document().clone();
+                    window_frame(&mut app, &context, size, pointer(from, true));
+                    window_frame(
+                        &mut app,
+                        &context,
+                        size,
+                        vec![egui::Event::PointerMoved(to)],
+                    );
+                    window_frame(
+                        &mut app,
+                        &context,
+                        size,
+                        vec![egui::Event::PointerMoved(to)],
+                    );
+                    let preview = app
+                        .grip_drag
+                        .as_ref()
+                        .expect("grip drag in clicked view")
+                        .current;
+                    assert!(
+                        (0..3).all(|i| (preview[i] - target[i]).abs() < 1e-4),
+                        "{view_id:?} {preview:?}"
+                    );
+                    assert_eq!(app.controller.document(), &before);
+                    window_frame(&mut app, &context, size, pointer(to, false));
+                    let point = match &app.controller.document().entities[&id].geometry {
+                        Geometry::Curve(Curve::Line { end, .. }) => *end,
+                        Geometry::Surface(s) => s.poles[1],
+                        _ => panic!("geometry"),
+                    };
+                    assert!(
+                        (0..3).all(|i| (point[i] - target[i]).abs() < 1e-4),
+                        "{view_id:?} {mode} surface={surface} {point:?}"
+                    );
+                    assert_eq!(app.controller.workspace.active, view_id);
+                    let after = app.controller.document().clone();
+                    let path = std::env::temp_dir()
+                        .join(format!("om9-view-grip-{}.om9", uuid::Uuid::new_v4()));
+                    om9_archive::Archive::save(
+                        &path,
+                        &after,
+                        &om9_core::budget::Limits::default(),
+                        &om9_core::transaction::Cancellation::default(),
+                    )
+                    .unwrap();
+                    assert_eq!(
+                        om9_archive::Archive::open(&path, &om9_core::budget::Limits::default())
+                            .unwrap(),
+                        after
+                    );
+                    std::fs::remove_file(path).unwrap();
+                    app.controller.undo().unwrap();
+                    assert_eq!(app.controller.document(), &before);
+                    app.controller.redo().unwrap();
+                    assert_eq!(app.controller.document(), &after);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn control_grip_pointer_drag_preserves_small_visible_motion() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        use om9_scene::{camera::Projection, workspace::ViewId};
+        for mode in ["PointsOn", "EditPtOn"] {
+            for delta in [[5e-10, 0.], [-5e-10, 0.], [0., 5e-10], [0., -5e-10]] {
+                let entity = Entity::new(
+                    "small line",
+                    Geometry::Curve(Curve::Line {
+                        start: [-2e-9, 0., 0.],
+                        end: [2e-9, 0., 0.],
+                        domain: [0., 1.],
+                    }),
+                    None,
+                );
+                let id = entity.id;
+                let mut doc = Document::with_template_tolerance("small grip drag");
+                doc.tolerance.as_mut().unwrap().absolute_mm = 1e-13;
+                doc.entities.insert(id, entity);
+                let mut app = MatrixApp::new(doc).unwrap();
+                app.controller.select_objects(&[id]).unwrap();
+                app.controller.submit(mode).unwrap();
+                app.controller.workspace.active = ViewId::LookingDown;
+                app.controller
+                    .workspace
+                    .views
+                    .get_mut(&ViewId::LookingDown)
+                    .unwrap()
+                    .camera
+                    .projection = Projection::Orthographic {
+                    vertical_span_mm: 1e-8,
+                };
+                let context = egui::Context::default();
+                let size = Vec2::new(1280., 720.);
+                for _ in 0..3 {
+                    window_frame(&mut app, &context, size, vec![]);
+                }
+                let rect = *app
+                    .view_rects
+                    .iter()
+                    .find(|(v, _)| **v == ViewId::LookingDown)
+                    .unwrap()
+                    .1;
+                let camera = app
+                    .controller
+                    .view_cameras()
+                    .into_iter()
+                    .find(|(title, _, _)| *title == "Looking Down")
+                    .unwrap()
+                    .1;
+                let viewport = om9_scene::camera::Viewport {
+                    origin: [rect.min.x as f64, rect.min.y as f64],
+                    size: [rect.width() as f64, rect.height() as f64],
+                };
+                let target = [2e-9 + delta[0], delta[1], 0.];
+                let from = camera
+                    .project([2e-9, 0., 0.], viewport)
+                    .unwrap()
+                    .unwrap()
+                    .screen;
+                let to = camera.project(target, viewport).unwrap().unwrap().screen;
+                let start = egui::pos2(from[0] as f32, from[1] as f32);
+                let end = egui::pos2(to[0] as f32, to[1] as f32);
+                assert!((end - start).length() > 8.);
+                let before = app.controller.document().clone();
+                window_frame(&mut app, &context, size, pointer(start, true));
+                window_frame(
+                    &mut app,
+                    &context,
+                    size,
+                    vec![egui::Event::PointerMoved(end)],
+                );
+                window_frame(
+                    &mut app,
+                    &context,
+                    size,
+                    vec![egui::Event::PointerMoved(end)],
+                );
+                let preview = app.grip_drag.as_ref().expect("active grip preview").current;
+                assert!((0..3).all(|i| (preview[i] - target[i]).abs() < 1e-11));
+                assert_eq!(app.controller.document(), &before);
+                window_frame(&mut app, &context, size, pointer(end, false));
+                let Geometry::Curve(Curve::Line { end: line_end, .. }) =
+                    &app.controller.document().entities[&id].geometry
+                else {
+                    panic!("line")
+                };
+                assert!(
+                    (0..3).all(|i| (line_end[i] - target[i]).abs() < 1e-11),
+                    "{mode} {line_end:?}"
+                );
+                let after = app.controller.document().clone();
+                let file = std::env::temp_dir()
+                    .join(format!("om9-small-grip-{}.om9", uuid::Uuid::new_v4()));
+                om9_archive::Archive::save(
+                    &file,
+                    &after,
+                    &om9_core::budget::Limits::default(),
+                    &om9_core::transaction::Cancellation::default(),
+                )
+                .unwrap();
+                assert_eq!(
+                    om9_archive::Archive::open(&file, &om9_core::budget::Limits::default())
+                        .unwrap(),
+                    after
+                );
+                std::fs::remove_file(file).unwrap();
+                app.controller.undo().unwrap();
+                assert_eq!(app.controller.document(), &before);
+                app.controller.redo().unwrap();
+                assert_eq!(app.controller.document(), &after);
+                app.controller.undo().unwrap();
+                let undo_depth = app.controller.coordinator().undo_len();
+                let off_center = start + egui::vec2(1., 0.);
+                window_frame(&mut app, &context, size, pointer(off_center, true));
+                window_frame(
+                    &mut app,
+                    &context,
+                    size,
+                    vec![egui::Event::PointerMoved(end)],
+                );
+                window_frame(
+                    &mut app,
+                    &context,
+                    size,
+                    vec![egui::Event::PointerMoved(off_center)],
+                );
+                window_frame(&mut app, &context, size, pointer(off_center, false));
+                assert_eq!(
+                    app.controller.document(),
+                    &before,
+                    "returning the pointer to its press point must not edit the grip"
+                );
+                assert_eq!(app.controller.coordinator().undo_len(), undo_depth);
+                let off_end = end + egui::vec2(1., 0.);
+                window_frame(&mut app, &context, size, pointer(off_center, true));
+                window_frame(
+                    &mut app,
+                    &context,
+                    size,
+                    vec![egui::Event::PointerMoved(off_end)],
+                );
+                window_frame(
+                    &mut app,
+                    &context,
+                    size,
+                    vec![egui::Event::PointerMoved(off_end)],
+                );
+                window_frame(&mut app, &context, size, pointer(off_end, false));
+                let Geometry::Curve(Curve::Line { end: line_end, .. }) =
+                    &app.controller.document().entities[&id].geometry
+                else {
+                    panic!("line")
+                };
+                assert!(
+                    (0..3).all(|i| (line_end[i] - target[i]).abs() < 1e-11),
+                    "off-center {mode} {line_end:?}"
+                );
+                app.controller.undo().unwrap();
+                assert_eq!(app.controller.document(), &before);
+            }
+        }
+    }
+
+    #[test]
+    fn control_grip_pointer_drag_does_not_trigger_selection_band() {
+        use om9_core::geometry::{Curve, Geometry, NurbsCurve};
+        use om9_core::model::Entity;
+        let curve = NurbsCurve {
+            degree: 2,
+            poles: vec![[-10., 0., 0.], [-5., 5., 0.], [5., 5., 0.], [10., 0., 0.]],
+            weights: vec![1.; 4],
+            knots: vec![0., 0., 0., 0.5, 1., 1., 1.],
+            domain: [0., 1.],
+            periodic: false,
+            reversed: false,
+            seam: None,
+        };
+        let entity = Entity::new("curve", Geometry::Curve(Curve::Nurbs(curve.clone())), None);
+        let id = entity.id;
+        let mut doc = Document::with_template_tolerance("grip drag viewport");
+        doc.entities.insert(id, entity);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller.submit("PointsOn").unwrap();
+        app.controller.workspace.active = om9_scene::workspace::ViewId::LookingDown;
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = *app
+            .view_rects
+            .iter()
+            .find(|(view, _)| view.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let from = camera
+            .project(curve.poles[1], viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let to = camera
+            .project([-3., 7., 0.], viewport)
+            .unwrap()
+            .unwrap()
+            .screen;
+        let start = egui::pos2(from[0] as f32, from[1] as f32);
+        let end = egui::pos2(to[0] as f32, to[1] as f32);
+        window_frame(&mut app, &context, size, pointer(start, true));
+        window_frame(
+            &mut app,
+            &context,
+            size,
+            vec![egui::Event::PointerMoved(end)],
+        );
+        window_frame(
+            &mut app,
+            &context,
+            size,
+            vec![egui::Event::PointerMoved(end)],
+        );
+        window_frame(&mut app, &context, size, pointer(end, false));
+        assert!(app.controller.selected().contains(&id));
+        let Geometry::Curve(Curve::Nurbs(result)) =
+            &app.controller.document().entities[&id].geometry
+        else {
+            panic!("curve lost")
+        };
+        assert!(
+            (0..3).all(|i| (result.poles[1][i] - [-3., 7., 0.][i]).abs() < 1e-4),
+            "{:?}",
+            result.poles[1]
+        );
+        app.controller.undo().unwrap();
+        let Geometry::Curve(Curve::Nurbs(result)) =
+            &app.controller.document().entities[&id].geometry
+        else {
+            panic!("curve lost")
+        };
+        assert_eq!(result, &curve);
+    }
+
+    #[test]
+    fn duplicate_invalid_viewport_point_keeps_prompt_for_retry() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        let source = Entity::new(
+            "line",
+            Geometry::Curve(Curve::Line {
+                start: [0., 0., 0.],
+                end: [1., 0., 0.],
+                domain: [0., 1.],
+            }),
+            None,
+        );
+        let id = source.id;
+        let mut doc = Document::with_template_tolerance("duplicate retry pointer");
+        doc.entities.insert(id, source);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller.submit("Copy UseLastDistance=Yes").unwrap();
+        app.controller.accept_world_point([0.; 3]).unwrap();
+        app.controller.accept_world_point([10., 0., 0.]).unwrap();
+        app.controller.workspace.active = om9_scene::workspace::ViewId::LookingDown;
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = *app
+            .view_rects
+            .iter()
+            .find(|(view, _)| view.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let pick = |world| {
+            let p = camera.project(world, viewport).unwrap().unwrap().screen;
+            egui::pos2(p[0] as f32, p[1] as f32)
+        };
+        let invalid = pick([0., 0., 0.]);
+        let before = app.controller.document().clone();
+        window_frame(&mut app, &context, size, pointer(invalid, true));
+        window_frame(&mut app, &context, size, pointer(invalid, false));
+        assert_eq!(app.controller.document(), &before);
+        assert!(app.controller.is_running());
+        let valid = pick([0., 5., 0.]);
+        window_frame(&mut app, &context, size, pointer(valid, true));
+        window_frame(&mut app, &context, size, pointer(valid, false));
+        assert_eq!(app.controller.document().entities.len(), 3);
+        assert!(
+            app.controller.document().entities.values().any(|e| (e
+                .placement
+                .point([0.; 3])
+                .unwrap()[1]
+                - 10.)
+                .abs()
+                < 1e-3)
+        );
+        app.controller.submit("").unwrap();
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
+    }
+
+    #[test]
+    fn mirror_invalid_viewport_point_keeps_first_point_for_retry() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        let source = Entity::new(
+            "line",
+            Geometry::Curve(Curve::Line {
+                start: [1., 0., 0.],
+                end: [2., 0., 0.],
+                domain: [0., 1.],
+            }),
+            None,
+        );
+        let id = source.id;
+        let mut doc = Document::with_template_tolerance("mirror retry pointer");
+        doc.entities.insert(id, source);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller.submit("Mirror").unwrap();
+        app.controller.workspace.active = om9_scene::workspace::ViewId::LookingDown;
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = *app
+            .view_rects
+            .iter()
+            .find(|(view, _)| view.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let pick = |world| {
+            let p = camera.project(world, viewport).unwrap().unwrap().screen;
+            egui::pos2(p[0] as f32, p[1] as f32)
+        };
+        let origin = pick([0.; 3]);
+        for _ in 0..2 {
+            window_frame(&mut app, &context, size, pointer(origin, true));
+            window_frame(&mut app, &context, size, pointer(origin, false));
+        }
+        assert!(app.controller.is_running());
+        assert_eq!(app.controller.document().entities.len(), 1);
+        let end = pick([0., 5., 0.]);
+        window_frame(&mut app, &context, size, pointer(end, true));
+        window_frame(&mut app, &context, size, pointer(end, false));
+        assert_eq!(app.controller.document().entities.len(), 2);
+        assert!(!app.controller.is_running());
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document().entities.len(), 1);
+    }
+
+    #[test]
+    fn mirror_block_with_viewport_points_keeps_definition() {
+        use om9_core::{
+            geometry::{Geometry, Transform},
+            model::{Definition, Entity},
+        };
+        let leaf = Entity::new("point", Geometry::Point([1., 2., 0.]), None);
+        let leaf_id = leaf.id;
+        let def = Definition::new("block", vec![leaf]);
+        let def_id = def.id;
+        let mut block = Entity::new("instance", Geometry::Instance(def_id), None);
+        block.placement = Transform::translation([4., 0., 0.]);
+        let id = block.id;
+        let mut doc = Document::with_template_tolerance("mirror block pointer");
+        doc.definitions.insert(def_id, def);
+        doc.entities.insert(id, block);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller
+            .top11_invoke(om9_core::top11::Top11Action::Mirror)
+            .unwrap();
+        app.controller.workspace.active = om9_scene::workspace::ViewId::LookingDown;
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = *app
+            .view_rects
+            .iter()
+            .find(|(view, _)| view.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        for p in [[0., -5., 0.], [0., 5., 0.]] {
+            let screen = camera.project(p, viewport).unwrap().unwrap().screen;
+            let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+            window_frame(&mut app, &context, size, pointer(pos, true));
+            window_frame(&mut app, &context, size, pointer(pos, false));
+        }
+        assert!(!app.controller.is_running());
+        let doc = app.controller.document();
+        assert_eq!(doc.entities.len(), 2);
+        assert_eq!(doc.definitions.len(), 1);
+        let copy = *app.controller.selected().iter().next().unwrap();
+        let p = doc
+            .member_transform(copy, &[leaf_id])
+            .unwrap()
+            .point([1., 2., 0.])
+            .unwrap();
+        assert!(
+            (p[0] + 5.).abs() < 1e-3 && (p[1] - 2.).abs() < 1e-3,
+            "{p:?}"
+        );
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document().entities.len(), 1);
+    }
+
+    #[test]
+    fn join_loop_and_tail_selects_curves_via_viewport() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        let ends = [
+            ([-15., -10., 0.], [-5., -10., 0.]),
+            ([-5., -10., 0.], [5., -10., 0.]),
+            ([-5., -10., 0.], [-5., 0., 0.]),
+            ([-5., 0., 0.], [-15., 0., 0.]),
+            ([-15., 0., 0.], [-5., -10., 0.]),
+        ];
+        let mut entities: Vec<_> = (0..5)
+            .map(|_| {
+                Entity::new(
+                    "edge",
+                    Geometry::Curve(Curve::Line {
+                        start: [0.; 3],
+                        end: [1., 0., 0.],
+                        domain: [0., 1.],
+                    }),
+                    None,
+                )
+            })
+            .collect();
+        entities.sort_by_key(|e| e.id);
+        for (e, (start, end)) in entities.iter_mut().zip(ends) {
+            e.geometry = Geometry::Curve(Curve::Line {
+                start,
+                end,
+                domain: [0., 1.],
+            });
+        }
+        let mut doc = Document::with_template_tolerance("join pointer");
+        for entity in entities {
+            doc.entities.insert(entity.id, entity);
+        }
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.workspace.active = om9_scene::workspace::ViewId::LookingDown;
+        app.controller.submit("Join").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = *app
+            .view_rects
+            .iter()
+            .find(|(view, _)| view.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        for (i, (a, b)) in ends.iter().enumerate() {
+            let point = std::array::from_fn(|j| (a[j] + b[j]) * 0.5);
+            let screen = camera.project(point, viewport).unwrap().unwrap().screen;
+            let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+            window_frame(&mut app, &context, size, pointer(pos, true));
+            window_frame(&mut app, &context, size, pointer(pos, false));
+            assert_eq!(app.controller.selected().len(), i + 1, "selection {i}");
+        }
+        let before = app.controller.document().clone();
+        app.controller.submit("").unwrap();
+        let joined = app.controller.document().entities.values().next().unwrap();
+        let Geometry::Curve(Curve::Polycurve { segments, .. }) = &joined.geometry else {
+            panic!("polycurve")
+        };
+        assert_eq!(segments.len(), 5);
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
+    }
+
+    #[test]
+    fn join_toleranced_gap_uses_midpoint_after_viewport_selection() {
+        use om9_core::geometry::{Curve, Geometry};
+        use om9_core::model::Entity;
+        let edge = |start, end| {
+            Entity::new(
+                "edge",
+                Geometry::Curve(Curve::Line {
+                    start,
+                    end,
+                    domain: [0., 1.],
+                }),
+                None,
+            )
+        };
+        let a = edge([-10., 0., 0.], [0., 0., 0.]);
+        let b = edge([0.0008, 0., 0.], [10., 0., 0.]);
+        let mut doc = Document::with_template_tolerance("join midpoint pointer");
+        doc.entities.insert(a.id, a);
+        doc.entities.insert(b.id, b);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.workspace.active = om9_scene::workspace::ViewId::LookingDown;
+        app.controller.submit("Join").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = *app
+            .view_rects
+            .iter()
+            .find(|(view, _)| view.title() == "Looking Down")
+            .unwrap()
+            .1;
+        let camera = app
+            .controller
+            .view_cameras()
+            .into_iter()
+            .find(|(title, _, _)| *title == "Looking Down")
+            .unwrap()
+            .1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        for point in [[-5., 0., 0.], [5., 0., 0.]] {
+            let p = camera.project(point, viewport).unwrap().unwrap().screen;
+            let pos = egui::pos2(p[0] as f32, p[1] as f32);
+            window_frame(&mut app, &context, size, pointer(pos, true));
+            window_frame(&mut app, &context, size, pointer(pos, false));
+        }
+        assert_eq!(app.controller.selected().len(), 2);
+        let before = app.controller.document().clone();
+        app.controller.submit("").unwrap();
+        let Geometry::Curve(Curve::Polycurve { segments, .. }) = &app
+            .controller
+            .document()
+            .entities
+            .values()
+            .next()
+            .unwrap()
+            .geometry
+        else {
+            panic!("polycurve")
+        };
+        let a = om9_core::curve_ops::curve_endpoints(
+            &segments[0],
+            &om9_core::budget::Limits::default(),
+        )
+        .unwrap()[1];
+        let b = om9_core::curve_ops::curve_endpoints(
+            &segments[1],
+            &om9_core::budget::Limits::default(),
+        )
+        .unwrap()[0];
+        assert!((a[0] - 0.0004).abs() < 1e-12 && (a[0] - b[0]).abs() < 1e-12);
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
     }
 }

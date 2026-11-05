@@ -9,8 +9,8 @@ use crate::{
 };
 use om9_core::{
     Error, Result,
-    geometry::{Curve, Geometry, Point3, finite},
-    identity::ObjectId,
+    geometry::{Curve, Geometry, Point3, Transform, finite},
+    identity::{ObjectId, SourceStamp},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -133,6 +133,23 @@ pub struct SnapCandidate {
     pub distance_px: f64,
     pub normal: Option<Point3>,
     pub parameter: Option<f64>,
+    /// Source of a B-rep surface candidate. Its point and normal are display-mesh
+    /// approximations until an owning kernel verifies the same source and face.
+    pub surface_source: Option<SurfaceCandidateSource>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SurfaceCandidateSource {
+    pub path: Vec<ObjectId>,
+    pub leaf: ObjectId,
+    pub source: SourceStamp,
+    pub scene_epoch: u64,
+    pub placement: Transform,
+    pub camera: Camera,
+    pub viewport: Viewport,
+    pub cursor: [f64; 2],
+    /// None when the retained native display does not provide a B-rep face binding.
+    pub face: Option<uuid::Uuid>,
 }
 
 impl SnapCandidate {
@@ -234,6 +251,7 @@ impl SmartTrack {
             distance_px: 0.,
             normal: None,
             parameter: None,
+            surface_source: None,
         })
     }
     pub fn clear(&mut self) {
@@ -273,16 +291,80 @@ impl SnapState {
 }
 
 pub fn choose(candidates: &[SnapCandidate]) -> Option<SnapCandidate> {
-    candidates
-        .iter()
-        .min_by(|left, right| {
-            left.kind
-                .priority()
-                .cmp(&right.kind.priority())
-                .then(left.distance_px.total_cmp(&right.distance_px))
-                .then(left.root.cmp(&right.root))
+    choose_iter(candidates.iter())
+}
+
+/// Select without building another candidate array; preserves iterator order for ties.
+pub fn choose_iter<'a>(candidates: impl Iterator<Item = &'a SnapCandidate>) -> Option<SnapCandidate> {
+    candidates.min_by(|left, right| snap_order(left, right)).cloned()
+}
+
+/// True if a visible filled display surface intersects the view ray before the target.
+/// Vertices/triangles are the same displayed buffers used by scene picking.
+pub fn visible_display_occludes(
+    scene: &Scene,
+    camera: &Camera,
+    viewport: Viewport,
+    cursor: [f64; 2],
+    target: Point3,
+    tolerance: f64,
+    excluded: &[ObjectId],
+    target_source: Option<&SurfaceCandidateSource>,
+) -> Result<bool> {
+    let ray = camera.ray(cursor, viewport)?;
+    let target_distance = distance(ray.origin, target);
+    let mut candidates = scene.spatial_index()?.ray_candidates(ray.origin, ray.direction);
+    // Unusable bounds cannot establish a miss. Include them conservatively,
+    // even if the index has already returned the same object.
+    candidates.extend(scene.object_spheres()?.iter().enumerate().filter_map(|(index, (center, radius))| {
+        (!radius.is_finite() || *radius <= 0. || center.iter().any(|value| !value.is_finite())).then_some(index)
+    }));
+    candidates.sort_unstable();
+    candidates.dedup();
+    for index in candidates {
+        let object = &scene.objects[index];
+        if target_source.is_some_and(|source| object.root == source.source.object && object.path == source.path && object.leaf == source.leaf) {
+            continue;
+        }
+        if !object.visible || excluded.contains(&object.root)
+            || !matches!(scene.entity_for(object)?.geometry, Geometry::Mesh(_) | Geometry::Hatch(_) | Geometry::Surface(_) | Geometry::Brep(_) | Geometry::NativeBrep(_)) {
+            continue;
+        }
+        let crate::scene::RenderBuffers::Mesh { vertices, triangles, .. } = object.buffers.as_ref() else { continue };
+        let transform = object.display_transform()?;
+        for (indices, _) in triangles {
+            let a = transform.point(vertices[indices[0] as usize])?;
+            let b = transform.point(vertices[indices[1] as usize])?;
+            let c = transform.point(vertices[indices[2] as usize])?;
+            if let Some((point, _)) = ray_triangle(ray, a, b, c)
+                && camera.project(point, viewport)?.is_some()
+                && distance(ray.origin, point) <= target_distance + tolerance {
+                return Ok(true);
+            }
+        }
+    }
+    Ok(false)
+}
+
+fn snap_order(left: &SnapCandidate, right: &SnapCandidate) -> std::cmp::Ordering {
+    let surface_depth = |candidate: &SnapCandidate| {
+        candidate.surface_source.as_ref()
+            .map(|source| distance(source.camera.eye, candidate.world))
+            .unwrap_or(f64::INFINITY)
+    };
+    left.kind.priority().cmp(&right.kind.priority())
+        // Surface candidates are intersections at the same cursor. Their
+        // projected distances can differ by floating-point rounding; use the
+        // captured display depth before pixel distance or object identity.
+        .then_with(|| {
+            if left.kind == SnapKind::Surface && right.kind == SnapKind::Surface {
+                surface_depth(left).total_cmp(&surface_depth(right))
+            } else {
+                std::cmp::Ordering::Equal
+            }
         })
-        .cloned()
+        .then(left.distance_px.total_cmp(&right.distance_px))
+        .then(left.root.cmp(&right.root))
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -305,12 +387,27 @@ pub fn candidates(
     }
     let mut out = Vec::new();
     let mut segments = Vec::new();
-    for object in &scene.objects {
+    let mut surface_broad_phase = None;
+    for (object_index, object) in scene.objects.iter().enumerate() {
         if !object.visible || !(object.selectable || object.reference_snappable) {
             continue;
         }
         let transform = object.display_transform()?;
         let entity = scene.entity_for(object)?;
+        if matches!(entity.geometry, Geometry::Brep(_) | Geometry::NativeBrep(_) | Geometry::Surface(_)) {
+            if !settings.is_enabled(SnapKind::Surface) { continue; }
+            if surface_broad_phase.is_none() {
+                let ray = camera.visible_ray(cursor, viewport)?;
+                let mut included = vec![false; scene.objects.len()];
+                for index in scene.spatial_index()?.ray_candidates(ray.origin, ray.direction) { included[index] = true; }
+                // Unknown or degenerate bounds must never cause a false negative.
+                for (index, (_, radius)) in scene.object_spheres()?.iter().enumerate() {
+                    if !radius.is_finite() || *radius <= 0. { included[index] = true; }
+                }
+                surface_broad_phase = Some((ray, included));
+            }
+            if !surface_broad_phase.as_ref().expect("initialized above").1[object_index] { continue; }
+        }
         match &entity.geometry {
             Geometry::Point(point) => {
                 let world = transform.point(*point)?;
@@ -340,12 +437,51 @@ pub fn candidates(
                 &mut segments,
             )?,
             Geometry::Brep(brep) => {
-                let ray = camera.ray(cursor, viewport)?;
-                let mut best: Option<(f64, Point3, Point3)> = None;
+                let ray = surface_broad_phase.as_ref().expect("initialized for surfaces").0;
+                let mut best = std::collections::BTreeMap::<u32, (f64, Point3, Point3, Option<uuid::Uuid>)>::new();
                 for triangle in &brep.display.triangles {
                     let a = transform.point(brep.display.points[triangle[0] as usize])?;
                     let b = transform.point(brep.display.points[triangle[1] as usize])?;
                     let c = transform.point(brep.display.points[triangle[2] as usize])?;
+                    if let Some((point, normal)) = ray_triangle(ray, a, b, c) {
+                        let distance = distance(camera.eye, point);
+                        if best.get(&triangle[3]).is_none_or(|(old, _, _, _)| distance < *old) {
+                            best.insert(triangle[3], (distance, point, normal, brep.display.faces.get(triangle[3] as usize).copied()));
+                        }
+                    }
+                }
+                for (_, (_, point, normal, face)) in best {
+                    let previous = out.len();
+                    push(
+                        SnapKind::Surface,
+                        Some(object.root),
+                        point,
+                        Some(normal),
+                        None,
+                        camera,
+                        viewport,
+                        cursor,
+                        settings.radius_px,
+                        &mut out,
+                    )?;
+                    if out.len() > previous {
+                        out.last_mut().expect("surface candidate was appended").surface_source = Some(SurfaceCandidateSource {
+                            path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch,
+                            placement: transform, camera: camera.clone(), viewport, cursor, face,
+                        });
+                    }
+                }
+            }
+            Geometry::NativeBrep(_) => {
+                let ray = surface_broad_phase.as_ref().expect("initialized for surfaces").0;
+                let mut best: Option<(f64, Point3, Point3)> = None;
+                // Use the same triangulation as the displayed image, including
+                // the fan diagonal chosen for quad faces.
+                let crate::scene::RenderBuffers::Mesh { vertices, triangles, .. } = object.buffers.as_ref() else { continue };
+                for (triangle, _) in triangles {
+                    let a = transform.point(vertices[triangle[0] as usize])?;
+                    let b = transform.point(vertices[triangle[1] as usize])?;
+                    let c = transform.point(vertices[triangle[2] as usize])?;
                     if let Some((point, normal)) = ray_triangle(ray, a, b, c) {
                         let distance = distance(camera.eye, point);
                         if best.is_none_or(|(old, _, _)| distance < old) {
@@ -354,6 +490,7 @@ pub fn candidates(
                     }
                 }
                 if let Some((_, point, normal)) = best {
+                    let previous = out.len();
                     push(
                         SnapKind::Surface,
                         Some(object.root),
@@ -366,37 +503,37 @@ pub fn candidates(
                         settings.radius_px,
                         &mut out,
                     )?;
+                    if out.len() > previous {
+                        out.last_mut().expect("surface candidate was appended").surface_source = Some(SurfaceCandidateSource {
+                            path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch,
+                            placement: transform, camera: camera.clone(), viewport, cursor, face: None,
+                        });
+                    }
                 }
             }
-            Geometry::NativeBrep(brep) => {
-                let ray = camera.ray(cursor, viewport)?;
+            Geometry::Surface(_) => {
+                let ray = surface_broad_phase.as_ref().expect("initialized for surfaces").0;
+                let crate::scene::RenderBuffers::Mesh { vertices, triangles, .. } = object.buffers.as_ref() else { continue };
                 let mut best: Option<(f64, Point3, Point3)> = None;
-                for face in &brep.display.faces {
-                    for triangle in face.windows(3) {
-                        let a = transform.point(brep.display.vertices[triangle[0] as usize])?;
-                        let b = transform.point(brep.display.vertices[triangle[1] as usize])?;
-                        let c = transform.point(brep.display.vertices[triangle[2] as usize])?;
-                        if let Some((point, normal)) = ray_triangle(ray, a, b, c) {
-                            let distance = distance(camera.eye, point);
-                            if best.is_none_or(|(old, _, _)| distance < old) {
-                                best = Some((distance, point, normal));
-                            }
-                        }
+                for (indices, _) in triangles {
+                    let a = transform.point(vertices[indices[0] as usize])?;
+                    let b = transform.point(vertices[indices[1] as usize])?;
+                    let c = transform.point(vertices[indices[2] as usize])?;
+                    if let Some((point, normal)) = ray_triangle(ray, a, b, c) {
+                        let depth = distance(ray.origin, point);
+                        if best.is_none_or(|(old, _, _)| depth < old) { best = Some((depth, point, normal)); }
                     }
                 }
                 if let Some((_, point, normal)) = best {
-                    push(
-                        SnapKind::Surface,
-                        Some(object.root),
-                        point,
-                        Some(normal),
-                        None,
-                        camera,
-                        viewport,
-                        cursor,
-                        settings.radius_px,
-                        &mut out,
-                    )?;
+                    let previous = out.len();
+                    push(SnapKind::Surface, Some(object.root), point, Some(normal), None,
+                        camera, viewport, cursor, settings.radius_px, &mut out)?;
+                    if out.len() > previous {
+                        out.last_mut().expect("surface candidate was appended").surface_source = Some(SurfaceCandidateSource {
+                            path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch,
+                            placement: transform, camera: camera.clone(), viewport, cursor, face: None,
+                        });
+                    }
                 }
             }
             _ => {}
@@ -427,17 +564,12 @@ pub fn candidates(
         }
     }
     out.retain(|candidate| settings.is_enabled(candidate.kind));
-    out.sort_by(|left, right| {
-        left.kind
-            .priority()
-            .cmp(&right.kind.priority())
-            .then(left.distance_px.total_cmp(&right.distance_px))
-            .then(left.root.cmp(&right.root))
-    });
+    out.sort_by(snap_order);
     out.dedup_by(|left, right| {
         left.kind == right.kind
             && left.root == right.root
             && left.parameter == right.parameter
+            && (left.kind != SnapKind::Surface || left.surface_source == right.surface_source)
             && distance(left.world, right.world) <= 1.0e-9
     });
     Ok(out)
@@ -710,6 +842,7 @@ fn push(
             distance_px: distance,
             normal,
             parameter,
+            surface_source: None,
         });
     }
     Ok(())
@@ -810,27 +943,41 @@ fn ray_triangle(
 ) -> Option<(Point3, Point3)> {
     let edge1 = sub(b, a);
     let edge2 = sub(c, a);
-    let h = cross(ray.direction, edge2);
-    let determinant = dot(edge1, h);
-    if determinant.abs() <= 1.0e-12 {
+    // Normalize edge lengths before the parallelism test: an absolute
+    // determinant threshold rejects small, perfectly visible triangles.
+    let length1 = edge1[0].hypot(edge1[1]).hypot(edge1[2]);
+    let length2 = edge2[0].hypot(edge2[1]).hypot(edge2[2]);
+    let ray_length = ray.direction[0].hypot(ray.direction[1]).hypot(ray.direction[2]);
+    if !length1.is_finite() || !length2.is_finite() || !ray_length.is_finite()
+        || length1 == 0. || length2 == 0. || ray_length == 0. {
+        return None;
+    }
+    let unit1 = edge1.map(|value| value / length1);
+    let unit2 = edge2.map(|value| value / length2);
+    let h = cross(ray.direction, unit2);
+    let determinant = dot(unit1, h);
+    if !determinant.is_finite() || determinant.abs() <= 1.0e-12 * ray_length {
         return None;
     }
     let inverse = 1.0 / determinant;
     let s = sub(ray.origin, a);
-    let u = inverse * dot(s, h);
-    if !(0.0..=1.0).contains(&u) {
+    let u = (inverse * dot(s, h)) / length1;
+    // Allow roundoff at a shared edge: exact refinement still verifies
+    // surface candidates against the canonical geometry.
+    const BARYCENTRIC_EPSILON: f64 = 1.0e-12;
+    if !(-BARYCENTRIC_EPSILON..=1.0 + BARYCENTRIC_EPSILON).contains(&u) {
         return None;
     }
-    let q = cross(s, edge1);
-    let v = inverse * dot(ray.direction, q);
-    if v < 0. || u + v > 1.0 {
+    let q = cross(s, unit1);
+    let v = (inverse * dot(ray.direction, q)) / length2;
+    if !v.is_finite() || v < -BARYCENTRIC_EPSILON || u + v > 1.0 + BARYCENTRIC_EPSILON {
         return None;
     }
-    let t = inverse * dot(edge2, q);
-    if t < 0. {
+    let t = inverse * dot(unit2, q);
+    if !t.is_finite() || t < 0. {
         return None;
     }
-    Some((add(ray.origin, mul(ray.direction, t)), normal(edge1, edge2)))
+    Some((add(ray.origin, mul(ray.direction, t)), normal(unit1, unit2)))
 }
 
 fn midpoint(a: Point3, b: Point3) -> Point3 {

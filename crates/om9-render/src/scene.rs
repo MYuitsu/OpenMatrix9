@@ -39,6 +39,10 @@ pub struct FrameStats {
     /// Objects inside the frustum but smaller than the visible-pixel threshold.
     pub culled_small: usize,
     pub draw_calls: usize,
+    /// Bytes initialized for the per-pass camera buffer (not retained geometry).
+    pub camera_snapshot_bytes: u64,
+    /// Bytes initialized for the per-pass instance buffer (not retained geometry).
+    pub instance_snapshot_bytes: u64,
 }
 
 /// A merged range of static meshes: they share a chunk and are drawn with one draw call.
@@ -79,10 +83,10 @@ fn chunk_capacity_for(needed: u64, device_max: u64) -> u64 {
         .min(device_max.max(needed))
 }
 
-fn new_chunk(device: &wgpu::Device, capacity: u64) -> Chunk {
+fn new_chunk(device: &wgpu::Device, vertex_capacity: u64, index_capacity: u64) -> Chunk {
     let vertices = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("scene vertices"),
-        size: capacity,
+        size: vertex_capacity,
         usage: wgpu::BufferUsages::VERTEX
             | wgpu::BufferUsages::COPY_DST
             | wgpu::BufferUsages::COPY_SRC,
@@ -90,7 +94,7 @@ fn new_chunk(device: &wgpu::Device, capacity: u64) -> Chunk {
     });
     let indices = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("scene indices"),
-        size: capacity,
+        size: index_capacity,
         usage: wgpu::BufferUsages::INDEX
             | wgpu::BufferUsages::COPY_DST
             | wgpu::BufferUsages::COPY_SRC,
@@ -101,8 +105,8 @@ fn new_chunk(device: &wgpu::Device, capacity: u64) -> Chunk {
         indices,
         vertex_bytes: 0,
         index_bytes: 0,
-        vertex_capacity: capacity,
-        index_capacity: capacity,
+        vertex_capacity,
+        index_capacity,
     }
 }
 
@@ -123,6 +127,9 @@ pub struct SceneBatch {
     culling: bool,
     min_pixel_radius: f32,
     last_stats: FrameStats,
+    /// Last immutable instance snapshot; previous submitted buffers remain
+    /// owned by wgpu commands if this cache is replaced.
+    instance_snapshot: Option<InstanceSnapshot>,
     /// Vertex/index bytes appended since the last flush. One write per chunk instead of two per object,
     /// which is what made a 42,000-object scene spend most of its open time in queue submissions.
     pending_vertices: Vec<PendingWrite>,
@@ -134,6 +141,13 @@ struct PendingWrite {
     offset: u64,
     bytes: Vec<u8>,
     consumed: usize,
+}
+
+struct InstanceSnapshot {
+    objects: std::sync::Weak<Vec<SceneObject>>,
+    visible: Vec<usize>,
+    static_tint: [u32; 4],
+    buffer: wgpu::Buffer,
 }
 
 impl SceneBatch {
@@ -260,7 +274,9 @@ impl SceneBatch {
         let pipeline = make_pipeline(false);
         let overlay_pipeline = make_pipeline(true);
         let max_buffer_size = device.limits().max_buffer_size.max(1 << 20);
-        let chunks = vec![new_chunk(&device, chunk_capacity_for(0, max_buffer_size))];
+        // An empty scene needs no geometry arena. Allocate the first pair only
+        // when actual geometry arrives, avoiding a throwaway minimum-size pair.
+        let chunks = Vec::new();
         Self {
             device,
             queue,
@@ -276,6 +292,7 @@ impl SceneBatch {
             culling: true,
             min_pixel_radius: 0.5,
             last_stats: FrameStats::default(),
+            instance_snapshot: None,
             pending_vertices: Vec::new(),
             pending_indices: Vec::new(),
         }
@@ -314,7 +331,8 @@ impl SceneBatch {
             None => {
                 self.chunks.push(new_chunk(
                     &self.device,
-                    chunk_capacity_for(needed_v.max(needed_i), self.max_buffer_size),
+                    chunk_capacity_for(needed_v, self.max_buffer_size),
+                    chunk_capacity_for(needed_i, self.max_buffer_size),
                 ));
                 self.chunks.len() - 1
             }
@@ -406,6 +424,48 @@ impl SceneBatch {
         self.last_stats
     }
 
+    /// Allocated sizes of retained vertex/index and instance buffers, not used
+    /// geometry bytes or buffers still owned only by in-flight GPU commands.
+    /// Batches produced by `fork_samples` can share geometry buffers.
+    pub fn gpu_buffer_capacity_bytes(&self) -> u64 {
+        let geometry = self.chunks.iter().fold(0u64, |sum, chunk| {
+            sum.saturating_add(chunk.vertices.size()).saturating_add(chunk.indices.size())
+        });
+        geometry.saturating_add(self.instance_snapshot.as_ref().map_or(0, |snapshot| snapshot.buffer.size()))
+    }
+
+    /// Immutable arena handles for lifetime accounting. Batches with different
+    /// sample counts can share these handles; callers must deduplicate them.
+    pub fn geometry_buffer_handles(&self) -> Vec<wgpu::Buffer> {
+        self.chunks.iter().flat_map(|chunk| [chunk.vertices.clone(), chunk.indices.clone()]).collect()
+    }
+
+    /// Visit retained arena handles without allocating a temporary handle list.
+    pub fn for_each_geometry_buffer(&self, mut visit: impl FnMut(&wgpu::Buffer)) {
+        for chunk in &self.chunks {
+            visit(&chunk.vertices);
+            visit(&chunk.indices);
+        }
+    }
+
+    /// Logical allocation of the cached visible-index list; excludes allocator
+    /// metadata and a weak reference's possibly retained Arc control block.
+    pub fn instance_snapshot_cpu_bytes(&self) -> u64 {
+        self.instance_snapshot.as_ref().map_or(0, |snapshot|
+            (snapshot.visible.capacity() as u64).saturating_mul(std::mem::size_of::<usize>() as u64))
+    }
+
+    /// Clone the immutable buffer referenced by the most recently encoded pass.
+    pub fn instance_snapshot_buffer(&self) -> Option<wgpu::Buffer> {
+        self.instance_snapshot.as_ref().map(|snapshot| snapshot.buffer.clone())
+    }
+
+    /// Release the optional cache owner. Submitted commands can retain the GPU
+    /// buffer until completion, so this is not evidence of immediate VRAM release.
+    pub fn evict_instance_snapshot(&mut self) {
+        self.instance_snapshot = None;
+    }
+
     /// A different MSAA pipeline over the same resident geometry and occurrence records.
     /// Call only after pending uploads are drained; no mesh bytes are copied or uploaded.
     pub fn fork_samples(&self, samples: u32) -> Self {
@@ -440,6 +500,7 @@ impl SceneBatch {
     }
 
     pub fn clear(&mut self) {
+        self.evict_instance_snapshot();
         std::sync::Arc::make_mut(&mut self.objects).clear();
         self.static_ranges.clear();
         self.static_meshes = 0;
@@ -479,7 +540,8 @@ impl SceneBatch {
             None => {
                 let chunk = new_chunk(
                     &self.device,
-                    chunk_capacity_for(needed_v.max(needed_i), self.max_buffer_size),
+                    chunk_capacity_for(needed_v, self.max_buffer_size),
+                    chunk_capacity_for(needed_i, self.max_buffer_size),
                 );
                 self.chunks.push(chunk);
                 self.chunks.len() - 1
@@ -694,7 +756,7 @@ impl SceneBatch {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("scene wrapper"),
             });
-        self.encode_pass(
+        let _ = self.encode_pass(
             &mut encoder,
             colour_view,
             resolve_view,
@@ -721,7 +783,7 @@ impl SceneBatch {
         width: u32,
         height: u32,
         clear: bool,
-    ) -> Result<(), RenderError> {
+    ) -> Result<wgpu::Buffer, RenderError> {
         self.flush_uploads();
         let view_projection = camera.view_projection(width as f32 / height as f32);
         let frustum = Frustum::from_view_projection(view_projection);
@@ -804,38 +866,39 @@ impl SceneBatch {
                 }),
             }],
         });
-        let mut instance_bytes = Vec::with_capacity((visible.len() + 1) * 80);
-        let append = |bytes: &mut Vec<u8>, model: [[f32; 4]; 4], tint: [f32; 4]| {
-            for col in 0..4 {
-                for row in &model {
-                    bytes.extend_from_slice(&row[col].to_le_bytes());
+        let objects = std::sync::Arc::downgrade(&self.objects);
+        let tint = self.static_tint.map(f32::to_bits);
+        let (instances, instance_uploaded) = match &self.instance_snapshot {
+            Some(cached) if cached.objects.ptr_eq(&objects)
+                && cached.visible == visible && cached.static_tint == tint => (cached.buffer.clone(), 0),
+            _ => {
+                let mut instance_bytes = Vec::with_capacity((visible.len() + 1) * 80);
+                let append = |bytes: &mut Vec<u8>, model: [[f32; 4]; 4], tint: [f32; 4]| {
+                    for col in 0..4 {
+                        for row in &model { bytes.extend_from_slice(&row[col].to_le_bytes()); }
+                    }
+                    for value in tint { bytes.extend_from_slice(&value.to_le_bytes()); }
+                };
+                append(&mut instance_bytes, [
+                    [1., 0., 0., 0.], [0., 1., 0., 0.],
+                    [0., 0., 1., 0.], [0., 0., 0., 1.],
+                ], self.static_tint);
+                for index in &visible {
+                    let object = &self.objects[*index];
+                    append(&mut instance_bytes, object.model, object.tint);
                 }
-            }
-            for value in tint {
-                bytes.extend_from_slice(&value.to_le_bytes());
+                let buffer = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("view occurrence snapshot"),
+                    contents: &instance_bytes,
+                    usage: wgpu::BufferUsages::VERTEX,
+                });
+                let bytes = instance_bytes.len() as u64;
+                self.instance_snapshot = Some(InstanceSnapshot {
+                    objects, visible: visible.clone(), static_tint: tint, buffer: buffer.clone(),
+                });
+                (buffer, bytes)
             }
         };
-        append(
-            &mut instance_bytes,
-            [
-                [1., 0., 0., 0.],
-                [0., 1., 0., 0.],
-                [0., 0., 1., 0.],
-                [0., 0., 0., 1.],
-            ],
-            self.static_tint,
-        );
-        for index in &visible {
-            let o = &self.objects[*index];
-            append(&mut instance_bytes, o.model, o.tint);
-        }
-        let instances = self
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("view occurrence snapshot"),
-                contents: &instance_bytes,
-                usage: wgpu::BufferUsages::VERTEX,
-            });
         let mut draw_calls = 0;
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -935,8 +998,10 @@ impl SceneBatch {
             culled,
             culled_small,
             draw_calls,
+            camera_snapshot_bytes: camera_bytes.len() as u64,
+            instance_snapshot_bytes: instance_uploaded,
         };
-        Ok(())
+        Ok(camera_buffer)
     }
 }
 

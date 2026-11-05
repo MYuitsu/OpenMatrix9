@@ -250,13 +250,23 @@ impl NurbsCurve {
     /// Admit an explicitly repeated-pole periodic basis. This is deliberately
     /// stricter than metadata validation and does not certify arbitrary imports.
     pub fn certify_repeated_periodic(&self, limits: &Limits) -> Result<()> {
-        self.validate(limits)?;
-        let degree=self.degree;let count=self.poles.len();
-        if !self.periodic || count<=degree*2 || self.domain != [self.knots[degree],self.knots[count]] {
+        self.certify_repeated_periodic_basis(limits)?;
+        if self.domain != [self.knots[self.degree], self.knots[self.poles.len()]] {
             return Err(Error::Unsupported("periodic NURBS basis is not certified"));
         }
-        let period=count-degree;let span=self.domain[1]-self.domain[0];
-        let seam=self.domain[0];
+        Ok(())
+    }
+
+    /// Certify the repeated basis independently of a possibly trimmed active interval.
+    pub fn certify_repeated_periodic_basis(&self, limits: &Limits) -> Result<()> {
+        self.validate(limits)?;
+        let degree=self.degree;let count=self.poles.len();
+        if !self.periodic || count<=degree*2 {
+            return Err(Error::Unsupported("periodic NURBS basis is not certified"));
+        }
+        let period=count-degree;let span=self.knots[count]-self.knots[degree];
+        if !span.is_finite() || span <= 0. {return Err(Error::Unsupported("periodic NURBS basis span"));}
+        let seam=self.knots[degree];
         let multiplicity=self.knots.partition_point(|k|*k<=seam)-self.knots.partition_point(|k|*k<seam);
         if multiplicity>degree {return Err(Error::Unsupported("periodic NURBS seam is discontinuous"));}
         for i in 0..degree {
@@ -334,6 +344,43 @@ pub struct NurbsSurface {
     pub reversed: bool,
 }
 impl NurbsSurface {
+    /// Admit periodic axes represented by repeated pole rows and extended knots.
+    pub fn certify_repeated_periodic_basis(&self, l: &Limits) -> Result<()> {
+        self.validate(l)?;
+        for axis in 0..2 {
+            if !self.periodic[axis] {continue;}
+            let degree=self.degree[axis];
+            let count=self.size[axis];
+            if count<=degree.checked_mul(2).ok_or(Error::Overflow("periodic surface degree"))? {
+                return Err(Error::Unsupported("periodic surface basis is not certified"));
+            }
+            let period=count-degree;
+            let knots=&self.knots[axis];
+            let span=knots[count]-knots[degree];
+            if !span.is_finite() || span<=0. {return Err(Error::Unsupported("periodic surface basis span"));}
+            let seam=knots[degree];
+            let multiplicity=knots.partition_point(|k|*k<=seam)-knots.partition_point(|k|*k<seam);
+            if multiplicity>degree {return Err(Error::Unsupported("periodic surface seam is discontinuous"));}
+            for i in 0..degree {
+                for j in 0..self.size[1-axis] {
+                    let (a,b)=if axis==0 {(i*self.size[1]+j,(period+i)*self.size[1]+j)}
+                        else {(j*self.size[1]+i,j*self.size[1]+period+i)};
+                    if self.poles[a]!=self.poles[b] || self.weights[a]!=self.weights[b] {
+                        return Err(Error::Unsupported("periodic surface control rows do not repeat"));
+                    }
+                }
+            }
+            for i in 0..knots.len()-period {
+                let left=knots[i];let right=knots[i+period];
+                let roundoff=2.*f64::EPSILON*left.abs().max(right.abs()).max(span.abs());
+                if roundoff>span.abs()*1e-5 || ((right-left)-span).abs()>span.abs()*1e-12+roundoff {
+                    return Err(Error::Unsupported("periodic surface knots do not repeat"));
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub fn validate(&self, l: &Limits) -> Result<Usage> {
         let size = self.size[0]
             .checked_mul(self.size[1])
@@ -491,7 +538,8 @@ impl Mesh {
         )?;
         usage.add(Usage::array::<Vec<u32>>(self.faces.capacity())?, l)?;
         if !self.corner_uvs.is_empty() {
-            let expected: usize = self.faces.iter().map(Vec::len).sum();
+            let expected = self.faces.iter().try_fold(0usize, |sum, face| sum.checked_add(face.len()))
+                .ok_or(Error::Overflow("mesh corner count"))?;
             if self.corner_uvs.len() != expected
                 || self
                     .corner_uvs
@@ -500,8 +548,8 @@ impl Mesh {
             {
                 return Err(Error::Invalid("mesh corner uvs"));
             }
-            usage.add(Usage::array::<[f64; 2]>(self.corner_uvs.len())?, l)?;
         }
+        usage.add(Usage::array::<[f64; 2]>(self.corner_uvs.capacity())?, l)?;
         for face in &self.faces {
             if !(3..=4).contains(&face.len())
                 || face.iter().any(|i| *i as usize >= self.vertices.len())
@@ -531,6 +579,26 @@ pub struct Cloud {
     pub normals: Vec<Point3>,
     pub colors: Vec<[u8; 4]>,
     pub hidden: Vec<bool>,
+}
+
+/// Choose an interior diagonal for a quadrilateral in its dominant-axis
+/// projection. Invalid or crossed quads have no consistent triangulation.
+pub fn quad_diagonal_ac(p: [[f64; 3]; 4]) -> Result<bool> {
+    let cross = |a: [f64; 3], b: [f64; 3]| [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];
+    let delta = |a: [f64; 3], b: [f64; 3]| std::array::from_fn(|i| a[i] - b[i]);
+    let n1 = cross(delta(p[1], p[0]), delta(p[2], p[0]));
+    let n2 = cross(delta(p[2], p[0]), delta(p[3], p[0]));
+    let normal: [f64; 3] = std::array::from_fn(|i| n1[i] + n2[i]);
+    let axis = (0..3).max_by(|a,b| normal[*a].abs().total_cmp(&normal[*b].abs())).unwrap();
+    if !normal[axis].is_finite() || normal[axis] == 0.0 { return Err(Error::Invalid("STL degenerate or crossed quad")); }
+    let u = (axis + 1) % 3;
+    let v = (axis + 2) % 3;
+    let area = |a: usize, b: usize, c: usize| (p[b][u]-p[a][u])*(p[c][v]-p[a][v]) - (p[b][v]-p[a][v])*(p[c][u]-p[a][u]);
+    let sign = normal[axis].signum();
+    let oriented = |a,b,c| { let area = area(a,b,c); area.is_finite() && area * sign > 0.0 };
+    if oriented(0, 1, 2) && oriented(0, 2, 3) { Ok(true) }
+    else if oriented(0, 1, 3) && oriented(1, 2, 3) { Ok(false) }
+    else { Err(Error::Invalid("STL degenerate or crossed quad")) }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -583,40 +651,94 @@ impl GeometryKind {
 pub struct NativeBrep {
     pub display: Mesh,
     #[serde(with = "payload_chunks")]
-    pub payload: Vec<u8>,
+    pub payload: std::sync::Arc<Vec<u8>>,
     pub crc: u32,
 }
 mod payload_chunks {
-    use super::*;
     pub fn serialize<S: serde::Serializer>(
         bytes: &[u8],
         serializer: S,
     ) -> std::result::Result<S::Ok, S::Error> {
-        let chunks: Vec<&[u8]> = bytes.chunks(32 * 1024).collect();
-        chunks.serialize(serializer)
+        use serde::ser::SerializeSeq;
+        let mut sequence = serializer.serialize_seq(Some(bytes.len().div_ceil(32 * 1024)))?;
+        for chunk in bytes.chunks(32 * 1024) {
+            sequence.serialize_element(chunk)?;
+        }
+        sequence.end()
     }
     pub fn deserialize<'de, D: serde::Deserializer<'de>>(
         deserializer: D,
-    ) -> std::result::Result<Vec<u8>, D::Error> {
-        let chunks = Vec::<Vec<u8>>::deserialize(deserializer)?;
-        let mut bytes = Vec::new();
-        for chunk in chunks {
-            bytes
-                .try_reserve_exact(chunk.len())
-                .map_err(serde::de::Error::custom)?;
-            bytes.extend_from_slice(&chunk);
+    ) -> std::result::Result<std::sync::Arc<Vec<u8>>, D::Error> {
+        struct PayloadVisitor;
+        impl<'de> serde::de::Visitor<'de> for PayloadVisitor {
+            type Value = std::sync::Arc<Vec<u8>>;
+            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+                formatter.write_str("a sequence of native B-rep byte chunks")
+            }
+            fn visit_seq<A: serde::de::SeqAccess<'de>>(self, mut sequence: A) -> std::result::Result<Self::Value, A::Error> {
+                let mut bytes = Vec::new();
+                while let Some(chunk) = sequence.next_element::<Vec<u8>>()? {
+                    bytes.try_reserve_exact(chunk.len()).map_err(serde::de::Error::custom)?;
+                    bytes.extend_from_slice(&chunk);
+                }
+                Ok(std::sync::Arc::new(bytes))
+            }
         }
-        Ok(bytes)
+        deserializer.deserialize_seq(PayloadVisitor)
     }
 }
 impl NativeBrep {
+    pub(crate) fn payload_allocation_key(&self) -> usize {
+        std::sync::Arc::as_ptr(&self.payload) as usize
+    }
+    pub(crate) fn payload_allocation_bytes(&self) -> Result<u64> {
+        Usage::array::<u8>(self.payload.capacity())?.bytes
+            .checked_add((std::mem::size_of::<Vec<u8>>() + 2 * std::mem::size_of::<usize>()) as u64)
+            .ok_or(Error::Overflow("native BRep payload accounting"))
+    }
     pub fn validate(&self, l: &Limits) -> Result<Usage> {
         if self.payload.is_empty() {
             return Err(Error::Invalid("native BRep payload"));
         }
         let mut usage = self.display.validate(l)?;
-        usage.add(Usage::array::<u8>(self.payload.capacity())?, l)?;
+        usage.add(Usage { bytes: self.payload_allocation_bytes()?, ..Usage::default() }, l)?;
         Ok(usage)
+    }
+}
+
+#[cfg(test)]
+mod native_brep_payload_tests {
+    use super::{Mesh, NativeBrep};
+    use std::sync::Arc;
+
+    #[test]
+    fn payload_is_shared_on_clone_and_keeps_legacy_chunk_encoding() {
+        let source = NativeBrep {
+            display: Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] },
+            payload: vec![1, 2, 3, 4].into(), crc: 17,
+        };
+        let copy = source.clone();
+        assert!(Arc::ptr_eq(&source.payload, &copy.payload));
+        let json = serde_json::to_value(&source).unwrap();
+        assert_eq!(json["payload"], serde_json::json!([[1, 2, 3, 4]]));
+        let decoded: NativeBrep = serde_json::from_value(json).unwrap();
+        assert_eq!(decoded, source);
+        assert!(!Arc::ptr_eq(&decoded.payload, &source.payload));
+    }
+    #[test]
+    fn chunked_payload_preserves_boundaries_and_accepts_legacy_irregular_chunks() {
+        let source = NativeBrep {
+            display: Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] },
+            payload: vec![23; 65_537].into(), crc: 42,
+        };
+        let mut encoded = serde_json::to_value(&source).unwrap();
+        let chunks = encoded["payload"].as_array().unwrap();
+        assert_eq!(chunks.iter().map(|chunk| chunk.as_array().unwrap().len()).collect::<Vec<_>>(), [32_768, 32_768, 1]);
+        let decoded: NativeBrep = serde_json::from_value(encoded.clone()).unwrap();
+        assert_eq!(decoded, source);
+        encoded["payload"] = serde_json::json!([[1, 2], [], [3, 4, 5]]);
+        let legacy: NativeBrep = serde_json::from_value(encoded).unwrap();
+        assert_eq!(&*legacy.payload, &[1, 2, 3, 4, 5]);
     }
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -687,6 +809,11 @@ fn channels(
     Ok(usage)
 }
 impl Geometry {
+    fn validate_mesh(m: &Mesh, l: &Limits) -> Result<Usage> {
+        let mut total = Usage { bytes: std::mem::size_of::<Self>() as u64, ..Usage::default() };
+        total.add(m.validate(l)?, l)?;
+        Ok(total)
+    }
     pub fn kind(&self) -> GeometryKind {
         match self {
             Self::Brep(_) | Self::NativeBrep(_) => GeometryKind::Brep,
@@ -742,7 +869,8 @@ impl Geometry {
                 total.add(light.validate(l)?, l)?;
             }
             Self::Hatch(h) => {
-                total.add(Geometry::Mesh(h.display.clone()).validate(l)?, l)?;
+                total.add(Self::validate_mesh(&h.display, l)?, l)?;
+                total.add(Usage::array::<Vec<Point3>>(h.loops.capacity())?, l)?;
                 for loop_ in &h.loops {
                     if loop_.len() < 3 {
                         return Err(Error::Invalid("hatch loop"));
@@ -754,43 +882,10 @@ impl Geometry {
                 }
                 if let Some(pattern) = &h.pattern {
                     name(pattern, l)?;
+                    total.add(Usage { bytes: pattern.capacity() as u64, ..Usage::default() }, l)?;
                 }
             }
-            Self::Mesh(m) => {
-                total.add(channels(&m.vertices, &m.normals, &m.colors, l)?, l)?;
-                total.add(
-                    Usage::spare::<Point3>(m.vertices.len(), m.vertices.capacity())?,
-                    l,
-                )?;
-                total.add(
-                    Usage::spare::<Point3>(m.normals.len(), m.normals.capacity())?,
-                    l,
-                )?;
-                total.add(
-                    Usage::spare::<[u8; 4]>(m.colors.len(), m.colors.capacity())?,
-                    l,
-                )?;
-                total.add(Usage::array::<Vec<u32>>(m.faces.capacity())?, l)?;
-                for face in &m.faces {
-                    if !(3..=4).contains(&face.len())
-                        || face.iter().any(|i| *i as usize >= m.vertices.len())
-                    {
-                        return Err(Error::Invalid("mesh face indices"));
-                    }
-                    for (i, v) in face.iter().enumerate() {
-                        if face[..i].contains(v) {
-                            return Err(Error::Invalid("repeated mesh face vertex"));
-                        }
-                    }
-                    total.add(
-                        Usage {
-                            nodes: 1,
-                            ..Usage::array::<u32>(face.capacity())?
-                        },
-                        l,
-                    )?;
-                }
-            }
+            Self::Mesh(m) => return Self::validate_mesh(m, l),
         }
         total.check(l)?;
         Ok(total)

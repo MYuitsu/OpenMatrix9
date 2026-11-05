@@ -1,0 +1,13 @@
+# Top11 periodic quadratic tangencies and closed-curve Trim
+
+The general sampler returned eight near-duplicate hits for a single tangent on a certified periodic quadratic NURBS. The span-based line/quadratic solver now also handles tested certified repeated-basis periodic curves. For an active domain cut inside a knot span, it extracts the whole original basis span, filters the resulting native parameter to the active domain, and rechecks the point against the source. For a changed seam it solves the original closed curve and remaps the parameters, avoiding new control-point rounding at the moved seam. Duplicate old-seam hits are merged before and after remapping. Unsupported periodic bases keep the general solver path.
+
+Core fixtures check the tangent in both operand orders, reversed and moved-seam forms; an active interval containing the tangent, excluding it and starting at it; and a moved-seam rational ellipse with two crossings and an output limit of two. A convex-hull side check avoids reporting a precision error for a quadratic span wholly outside the line's tolerance. This does not certify ambiguous roots in general.
+
+The application fixture exposed a separate Trim error: picking the portion of a closed curve that crosses its parameter seam removed only one side and left a false endpoint at the seam. Trim now removes both sides of that cyclic interval, keeping the complement between the actual cuts. A circle test checks picks on either side of the seam. Split and Trim with two tangent cutters were exercised through CMD and toolbar, for both curve directions and both original and moved seams; tests check actual endpoints, `.om9` roundtrip and Undo/Redo. The first application attempts revealed the seam-interval defect and a precision refusal while rebuilding trimmed spans; the final fixture passes.
+
+The moved-seam Split result also survived real 3DM export/import with both tangent boundaries, using admitted native adapter SHA-256 `bddca46577747333f9377b379351a077b710158f47ce6e279d7b6e21e6439615`. This is an interoperability check, not an openNURBS measurement batch.
+
+Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: 204 core library, 35 core Top11, 28 core curve/surface, 125 app Top11 and 83 app Top11 BRep tests passed; 125 no-default app Top11 tests passed with existing warnings. One native 3DM roundtrip passed.
+
+Uncertified periodic bases, higher-degree tangencies, overlap, very close or ill-conditioned roots, very large knot counts, Trim cases where a cutter lies exactly on the active seam, and physical desktop acceptance remain open. These checks do not establish completion of Top11.

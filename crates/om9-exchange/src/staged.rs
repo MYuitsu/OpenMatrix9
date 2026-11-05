@@ -11,7 +11,7 @@ use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::{
     fs::{self, File, OpenOptions},
-    io::{Read, Write},
+    io::{BufWriter, Read, Write},
     path::{Path, PathBuf},
 };
 
@@ -24,6 +24,44 @@ fn canceled(token: &Cancellation) -> Result<()> {
     } else {
         Ok(())
     }
+}
+
+const PACKET_BUFFER_BYTES: u64 = 64 * 1024;
+
+struct StreamingPacketWriter<'a, W> {
+    output: W,
+    hash: Sha256,
+    bytes: u64,
+    limit: u64,
+    cancel: &'a Cancellation,
+    error: Option<Error>,
+}
+impl<W: Write> Write for StreamingPacketWriter<'_, W> {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        if self.cancel.is_canceled() {
+            self.error = Some(Error::Canceled);
+            return Err(std::io::Error::other("exchange packet canceled"));
+        }
+        let Some(next) = self.bytes.checked_add(bytes.len() as u64).filter(|n| *n <= self.limit) else {
+            self.error = Some(Error::Budget("exchange packet bytes"));
+            return Err(std::io::Error::other("exchange packet budget"));
+        };
+        self.output.write_all(bytes)?;
+        self.hash.update(bytes);
+        self.bytes = next;
+        Ok(bytes.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> { self.output.flush() }
+}
+
+fn stream_packet<W: Write>(capture: &ExportCapture, output: W, limit: u64, cancel: &Cancellation)
+    -> Result<(W, [u8; 32])> {
+    let mut writer = StreamingPacketWriter { output, hash: Sha256::new(), bytes: 0, limit, cancel, error: None };
+    if let Err(error) = serde_json::to_writer(&mut writer, &capture.packet()?) {
+        return Err(writer.error.take().unwrap_or_else(|| Error::Io(error.to_string())));
+    }
+    writer.flush().map_err(io)?;
+    Ok((writer.output, writer.hash.finalize().into()))
 }
 pub(crate) fn native(error: om9_native_owner::Failure) -> Error {
     if error.kind == FailureKind::Canceled {
@@ -111,6 +149,7 @@ pub struct ExportReceipt {
     pub diagnostics: Vec<String>,
     pub write: ProcessStats,
     pub inspect: ProcessStats,
+    pub brep_fingerprints: Option<ProcessStats>,
 }
 /// Trusted application code admits the binary. Serialized documents cannot
 /// supply its executable path, digest or process limits.
@@ -149,12 +188,16 @@ impl NativeExchange {
     ) -> Result<ValidatedExport> {
         canceled(cancel)?;
         capture.revalidate(coordinator)?;
+        capture.reserve_brep_projection(coordinator)?;
         capture.convert_breps(bridge, coordinator.limits())?;
         let mut held = coordinator.retained_usage()?;
         held.add(
             Usage::array::<SourceStamp>(capture.sources.len())?,
             coordinator.limits(),
         )?;
+        if let Some(projected) = &capture.converted {
+            held.add(projected.validate(coordinator.limits())?, coordinator.limits())?;
+        }
         let base = held;
         held.add(
             Usage {
@@ -170,9 +213,26 @@ impl NativeExchange {
             .ok_or(Error::Budget("export operation aggregate"))?;
         let packet_limit = usize::try_from((available / 2).min(16 * 1024 * 1024))
             .map_err(|_| Error::Overflow("export packet address space"))?;
-        // Account both old and new buffer storage before every serialization
-        // growth. Native geometry/DOM/temporary allocations share its Job cap.
-        let packet = capture.encode_up_to(packet_limit)?;
+        // The native process allowance must be visible to other operations on
+        // this coordinator, not just subtracted from a local estimate. Keep it
+        // through every native write/inspection call, including error paths.
+        let mut auxiliary = Usage::array::<SourceStamp>(capture.sources.len())?;
+        if let Some(projected) = &capture.converted && capture.projection_reservation.is_none() {
+            let usage = projected.validate(coordinator.limits())?;
+            auxiliary.add(Usage { bytes: usage.bytes, ..Usage::default() }, coordinator.limits())?;
+        }
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let _native_reservation = coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel,
+            self.limits.reservation_bytes().map_err(native)?, physical, auxiliary,
+        ).map_err(|error| match error {
+            Error::Budget("bytes") => Error::Budget("3DM native export reservation"),
+            other => other,
+        })?;
+        let expected_needed = capture.document().entities.values()
+            .chain(capture.document().definitions.values().flat_map(|d| &d.members))
+            .any(|e| matches!(e.geometry, om9_core::geometry::Geometry::NativeBrep(_))
+                && e.placement != om9_core::geometry::Transform::identity());
         let filename = path.file_name().ok_or(Error::Invalid("export filename"))?;
         let parent = path
             .parent()
@@ -182,16 +242,20 @@ impl NativeExchange {
         let target = parent.join(filename);
         destination(&target)?;
         let staging = Staging::new(&parent)?;
-        let mut file = OpenOptions::new()
+        let file = OpenOptions::new()
             .write(true)
             .create_new(true)
             .open(staging.packet())
             .map_err(io)?;
-        file.write_all(&packet).map_err(io)?;
-        file.flush().map_err(io)?;
-        file.sync_all().map_err(io)?;
-        drop(file);
-        drop(packet);
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let packet_buffer = coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::CpuCache, PACKET_BUFFER_BYTES, physical, auxiliary,
+        )?;
+        let buffered = BufWriter::with_capacity(PACKET_BUFFER_BYTES as usize, file);
+        let (buffered, packet_hash) = stream_packet(&capture, buffered, packet_limit as u64, cancel)?;
+        buffered.get_ref().sync_all().map_err(io)?;
+        drop(buffered);
+        drop(packet_buffer);
         canceled(cancel)?;
         let l = coordinator.limits();
         let remaining = |max: u64, used: u64| {
@@ -241,6 +305,30 @@ impl NativeExchange {
         drop(response);
         drop(output.stdout);
         drop(output.stderr);
+        let (expected_breps, brep_fingerprints) = if expected_needed {
+            if fingerprint(&staging.packet(), packet_limit as u64, cancel)?.0 != packet_hash {
+                return Err(Error::Stale("export packet changed"));
+            }
+            let expected = self.program.run(
+                &["--expected-brep-fingerprints".into(), staging.packet().into_os_string()],
+                &self.limits, cancel,
+            ).map_err(native)?;
+            if !expected.stats.exited || expected.stats.active_processes != 0 {
+                return Err(Error::Invalid("native BRep expectation lifetime"));
+            }
+            if fingerprint(&staging.packet(), packet_limit as u64, cancel)?.0 != packet_hash {
+                return Err(Error::Stale("export packet changed"));
+            }
+            (inspection::expected_breps(capture.document(), &expected.stdout, &response_limits)?, Some(expected.stats))
+        } else {
+            (inspection::ExpectedBreps::new(), None)
+        };
+        let mut inspect_limits = response_limits;
+        if !expected_breps.is_empty() {
+            let held = Usage::btree::<om9_core::identity::ObjectId, (u32, usize)>(expected_breps.len())?;
+            inspect_limits.max_bytes = inspect_limits.max_bytes.checked_sub(held.bytes)
+                .ok_or(Error::Budget("export BRep fingerprints"))?;
+        }
         fs::remove_file(staging.packet()).map_err(io)?;
         // Sync the native output before its cold read. Hash the actual file on
         // both sides of inspection; never validate cached input geometry.
@@ -263,7 +351,14 @@ impl NativeExchange {
         if !output.stats.exited || output.stats.active_processes != 0 {
             return Err(Error::Invalid("native inspect lifetime"));
         }
-        let diagnostics = inspection::verify(capture.document(), &output.stdout, &response_limits)?;
+        let mut diagnostics = inspection::verify_with_brep(capture.document(), &output.stdout, &inspect_limits, &expected_breps)?;
+        let dropped_retained_sources = capture.document().retained_sources.len();
+        let dropped_native_records: usize = capture.document().import_namespaces.values().map(|ns| ns.records.len()).sum();
+        if dropped_retained_sources > 0 || dropped_native_records > 0 {
+            diagnostics.push(format!(
+                "EXPORT_RETAINED_OMITTED: {dropped_native_records} original native records and {dropped_retained_sources} retained sources were not written to the 3DM; original source bytes remain in the project"
+            ));
+        }
         let dropped_om9_hidden_distinctions = capture
             .document
             .entities
@@ -297,18 +392,14 @@ impl NativeExchange {
             dropped_history_recipes: capture.document().history.recipes.len(),
             dropped_results: capture.document().results.len(),
             dropped_resources: capture.document().resources.len(),
-            dropped_retained_sources: capture.document().retained_sources.len(),
-            dropped_native_records: capture
-                .document()
-                .import_namespaces
-                .values()
-                .map(|ns| ns.records.len())
-                .sum(),
+            dropped_retained_sources,
+            dropped_native_records,
             diagnostics,
             dropped_om9_hidden_distinctions,
             dropped_om9_preset_slots,
             write,
             inspect: output.stats,
+            brep_fingerprints,
         };
         Ok(ValidatedExport {
             capture,
@@ -350,5 +441,32 @@ impl ValidatedExport {
             .publish(&self.receipt.path, cancel)
             .map_err(native)?;
         Ok(self.receipt)
+    }
+}
+
+#[cfg(test)]
+mod streaming_packet_tests {
+    use super::*;
+    use om9_core::{geometry::{Cloud, Geometry}, model::{Document, Entity}, transaction::World};
+
+    #[test]
+    fn streamed_packet_matches_existing_encoding_and_checks_limit_and_cancel() {
+        let limits = Limits::default();
+        let mut document = Document::with_template_tolerance("streamed packet");
+        let cloud = Entity::new("cloud", Geometry::Cloud(Cloud {
+            points: vec![[1., 2., 3.]; 20_000], normals: vec![], colors: vec![], hidden: vec![],
+        }), None);
+        document.entities.insert(cloud.id, cloud);
+        let id = document.id;
+        let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let capture = ExportCapture::all(&coordinator, id).unwrap();
+        let expected = capture.encode(&limits).unwrap();
+        let cancel = Cancellation::default();
+        let (streamed, digest) = stream_packet(&capture, Vec::new(), expected.len() as u64, &cancel).unwrap();
+        assert_eq!(streamed, expected);
+        assert_eq!(digest, <[u8; 32]>::from(Sha256::digest(&expected)));
+        assert!(matches!(stream_packet(&capture, Vec::new(), expected.len() as u64 - 1, &cancel), Err(Error::Budget("exchange packet bytes"))));
+        cancel.cancel();
+        assert!(matches!(stream_packet(&capture, Vec::new(), expected.len() as u64, &cancel), Err(Error::Canceled)));
     }
 }

@@ -1012,3 +1012,18 @@ fn l3_008_a_definition_insert_is_admitted_on_a_layerless_document() {
         "the two definition members are not document objects; only the occurrence is"
     );
 }
+
+#[test]
+fn group_replace_rejects_stale_conflicting_and_missing_members_atomically() {
+    let (mut c,d,a,b)=grouped_coordinator();
+    let group=Group::new("pair",vec![a,b]);let gid=group.id;
+    let p=c.prepare(TransactionRequest::new("group",vec![Mutation::GroupCreate{document:d,expected_revision:1,group:Box::new(group)}])).unwrap();c.commit(p).unwrap();
+    let before=c.snapshot();let doc=&c.world().documents[&d];let mut changed=doc.groups[&gid].clone();changed.revision+=1;changed.members=vec![a];let revision=doc.revision;
+    let replacement=||Mutation::GroupReplace{document:d,expected_revision:revision,group:Box::new(changed.clone())};
+    assert!(c.prepare(TransactionRequest::new("duplicate",vec![replacement(),replacement()])).is_err());
+    let mut stale=changed.clone();stale.revision-=1;
+    assert!(c.prepare(TransactionRequest::new("stale",vec![Mutation::GroupReplace{document:d,expected_revision:revision,group:Box::new(stale)}])).is_err());
+    let mut missing=changed.clone();missing.members.push(ObjectId::new());
+    assert!(c.prepare(TransactionRequest::new("missing",vec![Mutation::GroupReplace{document:d,expected_revision:revision,group:Box::new(missing)}])).is_err());
+    assert_eq!(c.snapshot(),before);
+}

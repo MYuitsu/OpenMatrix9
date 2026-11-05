@@ -228,9 +228,16 @@ impl Controller {
         };
         let mut tokens = Vec::new();
         if pending.points.is_empty() {
-            tokens.push(("3Point", "3Point"));
-            tokens.push(("Center", "Center"));
-            tokens.push(("StartPoint", "StartPoint"));
+            // Mode words only before the first point; the current mode is the prompt.
+            for (label, mode) in [
+                ("3Point", "ThreePoint"),
+                ("Center", "Center"),
+                ("StartPoint", "StartPoint"),
+            ] {
+                if pending.mode != mode {
+                    tokens.push((label, label));
+                }
+            }
         }
         if pending.mode == "Center" && pending.points.is_empty() {
             tokens.push(("Radius=", "Radius="));

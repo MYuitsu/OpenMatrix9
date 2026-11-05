@@ -1,0 +1,11 @@
+# Top11 Join: continuous trails through loops — 2026-10-31
+
+Status: PARTIAL_CHECKS_PASSED. The previous greedy ordering failed a connected loop-and-tail fixture when object ID order led first into the tail, despite a continuous route through all segments. This was reproduced before the change.
+
+The Rust curve Join path groups endpoints within the requested world tolerance and builds a continuous edge trail, allowing a loop to be visited before continuing. Disconnected selections and graphs with no single continuous trail are refused. Consecutive physical endpoints are rechecked after ordering because tolerance proximity is not transitive; a route that would bridge a larger gap is rejected rather than joined. Endpoint and adjacency scratch sizes receive basic checked budget admission. Endpoint grouping currently compares pairs quadratically; large-selection performance and full aggregate memory accounting are unverified.
+
+A core fixture checks all 120 ID orders of one five-edge loop/tail and rejects a T with no single trail and two disconnected loops. A node-budget negative fixture passes. A controller fixture checks joined geometry and Undo/Redo. A synthetic egui viewport fixture starts Join, selects five segments with pointer events and verifies the output and Undo. These tests do not establish the original Matrix choice for every ambiguous graph or toleranced cluster, seam healing, full 3DM behavior or physical M03-UI acceptance.
+
+Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: core curve_ops/top11 45 passed before the added node-budget fixture, which passed separately; app Top11/options/BRep/snapshot 160 passed; no-default app 92 passed; the default-feature synthetic viewport fixture passed. No openNURBS measurement batch was run. Full Top11 remains incomplete.
+
+Source SHA-256: `crates/om9-core/src/top11.rs` 48d63a4641fcc3800d4a5dd6eeadba0b4c4aa2abfc941885f37892298a49cec8; `crates/om9-core/tests/top11.rs` 240508d3d7e451bf468bd6afd080347f9b992d16f8dc2a7298e9822401266127; `crates/om9-app/tests/top11.rs` 003dfe7993e215261dde61704da2cdd0a1baff2d03837c234f75bd2ce390227a; `crates/om9-app/src/ui/chrome.rs` 81efebb3a66ddbff9a3311a2d460fbeb66549a8a9f878d4a104594836fd488ea.

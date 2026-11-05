@@ -48,6 +48,10 @@ Quy tắc người dùng duyệt ngày 2026-10-12; áp dụng khi làm launcher/
 - Lỗi tải/xác minh giữ nguyên bản đang cài; cài lỗi phải rollback cả runtime/component và launcher/cache trong AppData, giữ cấu hình/bản vẽ của người dùng.
 - `installed` chỉ chứng minh cài xong và đã yêu cầu mở lại; cần báo cáo startup để xác nhận đúng executable/UI đã mở. Phân biệt code/gói đã kiểm chứng với ZIP release đã phát hành; launcher cũ có thể cần cài mới một lần để nhận luồng này.
 
+## MCP với cửa sổ OM9
+
+Quy tắc người dùng duyệt 2026-11-02: Codex kết nối `om9-live` để thao tác tài liệu của cửa sổ OM9 có cầu nối đang mở, dùng Controller và Undo của cửa sổ. Nếu không có cửa sổ có cầu nối hoặc có nhiều cửa sổ như vậy, báo lỗi thay vì chọn bừa; bản cũ không có cầu nối không được nhận diện. Tạo/mở bản vẽ tại giao diện OM9; `om9_save` dùng vòng đời lưu của cửa sổ. Không coi MCP headless `--mcp` là phiên tài liệu đang mở. Trên máy này biểu tượng **OpenMatrix9 MCP** và cấu hình Codex hiện dùng bản debug; kiểm tra lại sau khi đổi bản dựng. Phạm vi kiểm thử và giới hạn tại `docs/validation/2026-11-02-mcp-live-window.md`.
+
 ## Cập nhật nghiệp vụ sau khi code
 
 Trong mục tiêu Solid hiện tại, người dùng đã yêu cầu ngày 2026-10-28 tự động cập nhật skill sau khi triển khai và kiểm thử, không hỏi từng quy tắc. Chỉ ghi phạm vi đã kiểm thử, nêu rõ suy luận OM9 và bằng chứng gốc còn thiếu; đồng bộ bản nguồn và bản cài đặt. Chỉ áp dụng chỉ dẫn này cho mục tiêu Solid hiện tại.

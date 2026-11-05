@@ -6,7 +6,7 @@ use om9_app::session::{Controller, InvocationOrigin};
 use om9_app::ui::MatrixApp;
 use om9_core::{
     budget::Limits,
-    geometry::{Curve, Geometry},
+    geometry::{Curve, Geometry, Transform},
     model::{Document, Entity},
 };
 
@@ -339,6 +339,239 @@ fn escape_cancels_a_gumball_drag_without_committing() {
         placement_before,
         "the object keeps its placement"
     );
+}
+
+#[test]
+fn pending_large_hover_does_not_publish_after_preview_moves() {
+    let mut document = Document::new("stale large hover");
+    let point = Entity::new("target", Geometry::Point([0., 0., 0.]), None);
+    let target = point.id;
+    document.entities.insert(target, point);
+    for index in 0..129 {
+        let point = Entity::new("far", Geometry::Point([1000. + index as f64, 1000., 0.]), None);
+        document.entities.insert(point.id, point);
+    }
+    let context = egui::Context::default();
+    let mut app = MatrixApp::new(document).unwrap();
+    frames(&mut app, &context, 3);
+    let baseline = app.controller.coordinator().external_reserved_bytes(om9_core::budget::memory::MemoryClass::CpuCache);
+    let pointer = screen_of(&app, [0., 0., 0.]);
+    events(&mut app, &context, vec![Event::PointerMoved(pointer)]);
+    app.controller.select_objects(&[target]).unwrap();
+    app.controller.preview_gumball(Transform::translation([1000., 0., 0.])).unwrap();
+    // The one-ID selection now has a persistent owner independent of hover.
+    // Keep an exact completion oracle, including this live tree/Vec storage.
+    let selection_bytes = om9_core::budget::Usage::btree::<om9_core::identity::ObjectId, ()>(1).unwrap().bytes
+        + std::mem::size_of::<om9_core::identity::ObjectId>() as u64;
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+    loop {
+        frames(&mut app, &context, 1);
+        assert_eq!(app.hovered_object(), None, "stale background hit must not publish");
+        if app.controller.coordinator().external_reserved_bytes(om9_core::budget::memory::MemoryClass::CpuCache) == baseline + selection_bytes { break; }
+        assert!(std::time::Instant::now() < deadline, "background hover did not finish");
+        std::thread::yield_now();
+    }
+    app.controller.clear_gumball_preview();
+}
+
+#[test]
+#[ignore = "opt-in release responsiveness measurement"]
+fn large_scene_hover_tracks_latest_pointer_during_sustained_motion() {
+    use std::time::{Duration, Instant};
+    let mut document = Document::new("sustained hover motion");
+    let brep_target = std::env::var_os("OM9_HOVER_BREP_TARGET").is_some();
+    let target_geometry = if brep_target {
+        #[cfg(feature = "occt-brep")]
+        { Geometry::Brep(om9_kernel::brep::sphere_brep(3., 0.005, &Limits::default()).unwrap()) }
+        #[cfg(not(feature = "occt-brep"))]
+        panic!("OM9_HOVER_BREP_TARGET requires the occt-brep feature");
+    } else { Geometry::Point([0., 0., 0.]) };
+    let entity = Entity::new("target", target_geometry, None);
+    let target = entity.id;
+    document.entities.insert(target, entity);
+    let brep_scene = brep_target || std::env::var_os("OM9_HOVER_BREP").is_some();
+    let objects = if brep_scene {
+        #[cfg(feature = "occt-brep")]
+        {
+            use om9_core::model::Definition;
+            let brep = om9_kernel::brep::sphere_brep(3., 0.005, &Limits::default()).unwrap();
+            let definition = Definition::new("shared sphere", vec![Entity::new("sphere", Geometry::Brep(brep), None)]);
+            let definition_id = definition.id;
+            document.definitions.insert(definition_id, definition);
+            for index in 0..200 {
+                let mut instance = Entity::new("far sphere", Geometry::Instance(definition_id), None);
+                instance.placement = Transform::translation([1000. + index as f64 * 10., 1000., 0.]);
+                document.entities.insert(instance.id, instance);
+            }
+            201
+        }
+        #[cfg(not(feature = "occt-brep"))]
+        panic!("OM9_HOVER_BREP requires the occt-brep feature");
+    } else {
+        for index in 0..2000 {
+            let point = Entity::new("far", Geometry::Point([1000. + index as f64, 1000., 0.]), None);
+            document.entities.insert(point.id, point);
+        }
+        2001
+    };
+    let interval_ms = std::env::var("OM9_HOVER_INTERVAL_MS").ok().and_then(|value| value.parse::<u64>().ok()).unwrap_or(0);
+    assert!(interval_ms <= 100, "fixture interval must be at most 100 ms");
+    let context = egui::Context::default();
+    let mut app = MatrixApp::new(document).unwrap();
+    frames(&mut app, &context, 3);
+    let screen = screen_of(&app, [0., 0., 0.]);
+    let inside = if brep_target { screen } else { screen + Vec2::new(4., 0.) };
+    let outside = if brep_target { screen_of(&app, [15., 0., 0.]) } else { screen + Vec2::new(6.5, 0.) };
+    assert!(view_rect(&app).contains(inside) && view_rect(&app).contains(outside));
+    let rect = view_rect(&app);
+    let viewport = om9_scene::camera::Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+    let camera = &app.controller.workspace.views[&om9_scene::workspace::ViewId::Perspective].camera;
+    let pick = |p: Pos2| app.controller.scene().unwrap().pick([p.x as f64, p.y as f64], camera, viewport, 6., om9_scene::scene::PickIntent::Select).unwrap().map(|hit| hit.root);
+    assert_eq!(pick(inside), Some(target), "fixture inside point must pick the target");
+    assert_eq!(pick(outside), None, "fixture outside point must miss all objects");
+    let mut times = Vec::new();
+    let mut hits = 0usize;
+    let mut settled_hits = 0usize;
+    for index in 0..200 {
+        let is_inside = index % 2 == 0;
+        let started = Instant::now();
+        events(&mut app, &context, vec![Event::PointerMoved(if is_inside { inside } else { outside })]);
+        times.push(started.elapsed().as_secs_f64() * 1000.);
+        if is_inside && app.hovered_object() == Some(target) { hits += 1; }
+        if !is_inside { assert_eq!(app.hovered_object(), None, "out-of-tolerance pointer must not show stale hit"); }
+        let next = started + Duration::from_millis(interval_ms);
+        while Instant::now() < next {
+            std::thread::sleep(Duration::from_millis(1));
+            frames(&mut app, &context, 1);
+            if !is_inside { assert_eq!(app.hovered_object(), None, "an old worker must not publish after the pointer leaves"); }
+        }
+        if is_inside && app.hovered_object() == Some(target) { settled_hits += 1; }
+        std::thread::yield_now();
+    }
+    let started = Instant::now();
+    events(&mut app, &context, vec![Event::PointerMoved(inside)]);
+    let deadline = started + Duration::from_secs(10);
+    while app.hovered_object() != Some(target) {
+        frames(&mut app, &context, 1);
+        assert!(Instant::now() < deadline, "latest pointer hover did not complete");
+        std::thread::yield_now();
+    }
+    let final_ms = started.elapsed().as_secs_f64() * 1000.;
+    times.sort_by(|a, b| a.total_cmp(b));
+    eprintln!("hover_motion scene={} objects={objects} interval_ms={interval_ms} samples=200 p50_ms={:.3} p95_ms={:.3} p99_ms={:.3} immediate_inside={hits}/100 settled_inside={settled_hits}/100 final_ms={final_ms:.3}", if brep_target { "brep-target" } else if brep_scene { "shared-brep" } else { "points" }, times[99], times[189], times[197]);
+}
+
+#[test]
+fn changing_active_view_clears_hover_from_the_previous_view() {
+    use om9_scene::workspace::ViewId;
+    let context = egui::Context::default();
+    let mut document = Document::new("hover across viewports");
+    let point = Entity::new("point", Geometry::Point([0., 0., 0.]), None);
+    let id = point.id;
+    document.entities.insert(id, point);
+    let mut app = MatrixApp::new(document).unwrap();
+    frames(&mut app, &context, 3);
+    let pointer = screen_of(&app, [0., 0., 0.]);
+    events(&mut app, &context, vec![Event::PointerMoved(pointer)]);
+    assert_eq!(app.hovered_object(), Some(id));
+    assert!(!app.view_rects[&ViewId::LookingDown].contains(pointer));
+    app.controller.workspace.active = ViewId::LookingDown;
+    frames(&mut app, &context, 1);
+    assert_eq!(app.hovered_object(), None, "old view hover must not survive activation of another view");
+    app.controller.workspace.active = ViewId::Perspective;
+    frames(&mut app, &context, 1);
+    assert_eq!(app.hovered_object(), Some(id), "hover should resume when the original view is active again");
+}
+
+#[test]
+fn hover_updates_when_a_small_pointer_move_leaves_pick_tolerance() {
+    let context = egui::Context::default();
+    let mut document = Document::new("small hover movement");
+    let target = Entity::new("point", Geometry::Point([0., 0., 0.]), None);
+    let id = target.id;
+    document.entities.insert(id, target);
+    let mut app = MatrixApp::new(document).unwrap();
+    frames(&mut app, &context, 3);
+    let screen = screen_of(&app, [0., 0., 0.]);
+    let inside = screen + Vec2::new(4., 0.);
+    let outside = screen + Vec2::new(6.5, 0.);
+    events(&mut app, &context, vec![Event::PointerMoved(inside)]);
+    assert_eq!(app.hovered_object(), Some(id), "fixture starts within the six-point tolerance");
+    events(&mut app, &context, vec![Event::PointerMoved(outside)]);
+    assert_eq!(app.hovered_object(), None, "even a small motion must refresh a hit outside the tolerance");
+}
+
+#[test]
+fn stationary_hover_is_recomputed_when_gumball_preview_moves_the_object() {
+    let context = egui::Context::default();
+    let mut app = MatrixApp::new(document_with_two_points()).unwrap();
+    let target = app.controller.document().entities.values().find(|entity| {
+        matches!(entity.geometry, Geometry::Point([-6., 0., 0.]))
+    }).unwrap().id;
+    frames(&mut app, &context, 3);
+    let pointer = screen_of(&app, [-6., 0., 0.]);
+    events(&mut app, &context, vec![Event::PointerMoved(pointer)]);
+    frames(&mut app, &context, 2);
+    assert_eq!(app.hovered_object(), Some(target));
+    app.controller.select_objects(&[target]).unwrap();
+    app.controller.preview_gumball(Transform::translation([1000., 0., 0.])).unwrap();
+    frames(&mut app, &context, 2);
+    assert_eq!(app.hovered_object(), None, "old hover must not survive preview movement");
+    app.controller.clear_gumball_preview();
+}
+
+#[test]
+fn large_scene_hover_completes_and_releases_its_snapshot_reservation() {
+    let mut document = Document::new("large hover");
+    let point = Entity::new("target", Geometry::Point([0., 0., 0.]), None);
+    let target = point.id;
+    document.entities.insert(target, point);
+    for index in 0..129 {
+        let point = Entity::new("far", Geometry::Point([1000. + index as f64, 1000., 0.]), None);
+        document.entities.insert(point.id, point);
+    }
+    let context = egui::Context::default();
+    let mut app = MatrixApp::new(document).unwrap();
+    frames(&mut app, &context, 3);
+    let baseline = app.controller.coordinator().external_reserved_bytes(om9_core::budget::memory::MemoryClass::CpuCache);
+    let hovered = screen_of(&app, [0., 0., 0.]);
+    events(&mut app, &context, vec![Event::PointerMoved(hovered)]);
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+    loop {
+        frames(&mut app, &context, 1);
+        if app.hovered_object() == Some(target) { break; }
+        assert!(std::time::Instant::now() < deadline, "background hover did not finish");
+        std::thread::yield_now();
+    }
+    assert_eq!(app.controller.coordinator().external_reserved_bytes(om9_core::budget::memory::MemoryClass::CpuCache), baseline);
+}
+
+#[test]
+fn large_scene_hover_is_optional_under_memory_pressure() {
+    use om9_core::budget::memory::MemoryClass;
+    let mut document = Document::new("hover pressure");
+    let target = Entity::new("target", Geometry::Point([0., 0., 0.]), None);
+    document.entities.insert(target.id, target);
+    for index in 0..129 {
+        let point = Entity::new("far", Geometry::Point([1000. + index as f64, 1000., 0.]), None);
+        document.entities.insert(point.id, point);
+    }
+    let context = egui::Context::default();
+    let mut app = MatrixApp::new(document).unwrap();
+    frames(&mut app, &context, 3);
+    let baseline = app.controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache);
+    let held = app.controller.scene_cache_usage().unwrap();
+    app.controller.coordinator().constrain_managed_ram(128 * 1024 * 1024, held).unwrap();
+    let mut reservation = app.controller.coordinator().reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, held).unwrap();
+    reservation.shrink_to(reservation.bytes() - 1024).unwrap();
+    let before = app.controller.coordinator().snapshot();
+    let pointer = screen_of(&app, [0., 0., 0.]);
+    events(&mut app, &context, vec![Event::PointerMoved(pointer)]);
+    frames(&mut app, &context, 3);
+    assert_eq!(app.hovered_object(), None);
+    assert_eq!(app.controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache), baseline);
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    drop(reservation);
 }
 
 #[test]

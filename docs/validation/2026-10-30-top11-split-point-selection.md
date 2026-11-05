@@ -1,0 +1,7 @@
+# Top 11 Split Point: select after invocation (2026-10-30)
+
+Standalone Rust OM9 on Windows, base `89ef2676b597ebc5ab38fa5c6acf0ad47a2f261b` plus working-tree changes. Previously `Split Point` or `Split P` returned an error with no preselection. The new regression first failed with `Missing("select a curve before Split Point")`.
+
+The command now starts the shared object-selection stage, retains Point mode when Enter confirms a single curve, and shows the corresponding prompt. Empty, unsupported or multiple selections keep the selection stage available for correction. A controller test checks typed world point, resulting 4 mm and 6 mm pieces, Undo and Redo; another tests invalid and multiple selection, removal, retry and Cancel without document changes. A simulated egui test types through the CMD widget, clicks the perspective viewport to select the line, checks geometry and Undo. The test explicitly returns focus to CMD after the synthetic click; it does not prove native focus, OS input, GPU display or M03-UI human acceptance.
+
+Checks use `CARGO_TARGET_DIR=L:\om9-target` and `-j 2`. The focused new CMD-widget test passed and the focused controller regression passed after failing before the fix. The application Top 11, options and OCCT BRep suites passed 61 tests. Public source audit passed. Multiple open-curve split points, periodic/reseamed NURBS, certified closest-point projection under general transforms and broader Top 11 acceptance remain open.

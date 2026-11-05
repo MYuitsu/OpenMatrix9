@@ -76,7 +76,7 @@ fn texture(
 }
 
 /// Draws one 45-degree line through a cleared frame and returns the resolved pixels.
-fn render_line(samples: u32) -> Option<Vec<u8>> {
+fn render_line(samples: u32, on_top: bool, depth_clear: f32) -> Option<Vec<u8>> {
     let (device, queue) = gpu()?;
     let resolve = texture(&device, "AA resolve", wgpu::TextureFormat::Rgba8Unorm, 1);
     let resolve_view = resolve.create_view(&wgpu::TextureViewDescriptor::default());
@@ -114,7 +114,7 @@ fn render_line(samples: u32) -> Option<Vec<u8>> {
             depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                 view: &depth_view,
                 depth_ops: Some(wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(1.0),
+                    load: wgpu::LoadOp::Clear(depth_clear),
                     store: wgpu::StoreOp::Store,
                 }),
                 stencil_ops: None,
@@ -136,7 +136,7 @@ fn render_line(samples: u32) -> Option<Vec<u8>> {
         near: 0.1,
         far: 100.0,
     };
-    let mut overlay = OverlayBatch::with_samples(device.clone(), queue.clone(), samples);
+    let mut overlay = if on_top { OverlayBatch::on_top(device.clone(), queue.clone(), samples) } else { OverlayBatch::with_samples(device.clone(), queue.clone(), samples) };
     overlay.line([-4.0, -4.0, 0.0], [4.0, 4.0, 0.0], [1.0, 1.0, 1.0, 1.0]);
     overlay.upload();
     // A single-sample attachment cannot have a resolve target; it is read back directly.
@@ -225,11 +225,20 @@ fn partial_coverage_pixels(pixels: &[u8]) -> usize {
 }
 
 #[test]
+fn selected_box_overlay_is_visible_through_depth() {
+    let Some(hidden) = render_line(1, false, 0.0) else { return };
+    let Some(visible) = render_line(1, true, 0.0) else { return };
+    let brightness = |pixels: &[u8]| pixels.chunks_exact(4).map(|p| u64::from(p[0])).sum::<u64>();
+    assert_eq!(brightness(&hidden), 0);
+    assert!(brightness(&visible) > 0);
+}
+
+#[test]
 fn a_diagonal_line_resolves_to_partial_coverage() {
-    let Some(plain) = render_line(1) else {
+    let Some(plain) = render_line(1, false, 1.0) else {
         return;
     };
-    let Some(smooth) = render_line(4) else {
+    let Some(smooth) = render_line(4, false, 1.0) else {
         return;
     };
     let hard_edges = partial_coverage_pixels(&plain);

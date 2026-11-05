@@ -50,7 +50,8 @@ impl CirclePending {
     pub fn prompt(&self) -> &'static str {
         match (self.mode, self.points.len()) {
             ("Center", 0) => "Center of circle",
-            ("Center", _) => "Radius",
+            // The current measure is the prompt word; the other measures are options.
+            ("Center", _) => self.size,
             ("TwoPoint", 0) => "First diameter point",
             ("TwoPoint", _) => "Second diameter point",
             ("ThreePoint", 0) => "First point on circle",
@@ -62,6 +63,8 @@ impl CirclePending {
             ("FitPoints", _) => "Next fit point or Enter to fit",
             ("AroundCurve", 0) => "OnCurve=fraction or point on curve",
             ("AroundCurve", _) => "Radius or point on circle",
+            ("Orientation", _) if self.normal.is_none() => "Normal direction point",
+            ("Orientation", _) => self.size,
             ("Tangent", _) if self.size == "Radius" => "Radius=, or Enter after Solution=",
             ("Tangent", _) => "Solution=1/2 or Enter",
             _ => "Circle",
@@ -169,6 +172,35 @@ impl Controller {
             pending.mode = mode;
             pending.points.clear();
             pending.normal = None;
+            self.circle_pending = Some(pending);
+            return Some(Ok(()));
+        }
+        // Orientation keeps the placed center and asks for a normal-direction point.
+        if option == "orientation" {
+            if pending.mode != "Center" || pending.points.len() != 1 {
+                self.circle_pending = Some(pending);
+                return Some(Err(Error::Invalid("Orientation needs a placed center")));
+            }
+            pending.mode = "Orientation";
+            pending.normal = None;
+            self.circle_pending = Some(pending);
+            return Some(Ok(()));
+        }
+        // A bare measure word switches the measure, like clicking it in the prompt.
+        if pending.points.len() == 1
+            && matches!(
+                pending.mode,
+                "Center" | "Vertical" | "AroundCurve" | "Orientation"
+            )
+            && let Some(size) = match option.as_str() {
+                "radius" => Some("Radius"),
+                "diameter" => Some("Diameter"),
+                "circumference" => Some("Circumference"),
+                "area" => Some("Area"),
+                _ => None,
+            }
+        {
+            pending.size = size;
             self.circle_pending = Some(pending);
             return Some(Ok(()));
         }
@@ -332,17 +364,21 @@ impl Controller {
                 "FitPoints accepts points, Undo or Enter",
             )));
         }
-        if matches!(pending.mode, "Center" | "Vertical" | "AroundCurve")
-            && pending.points.len() == 1
+        if matches!(
+            pending.mode,
+            "Center" | "Vertical" | "AroundCurve" | "Orientation"
+        ) && pending.points.len() == 1
         {
             let trimmed = text.trim();
-            let (raw, size) = if let Some(value) = trimmed.strip_prefix("Radius=") {
+            // Typed assignments are case-insensitive, like every other command word.
+            let lower = trimmed.to_ascii_lowercase();
+            let (raw, size) = if let Some(value) = lower.strip_prefix("radius=") {
                 (value, "Radius")
-            } else if let Some(value) = trimmed.strip_prefix("Diameter=") {
+            } else if let Some(value) = lower.strip_prefix("diameter=") {
                 (value, "Diameter")
-            } else if let Some(value) = trimmed.strip_prefix("Circumference=") {
+            } else if let Some(value) = lower.strip_prefix("circumference=") {
                 (value, "Circumference")
-            } else if let Some(value) = trimmed.strip_prefix("Area=") {
+            } else if let Some(value) = lower.strip_prefix("area=") {
                 (value, "Area")
             } else {
                 (trimmed, pending.size)
@@ -382,6 +418,13 @@ impl Controller {
                 });
                 return Some(self.commit_circle_normal(center, normal, radius));
             }
+            if pending.mode == "Orientation" {
+                let Some(normal) = pending.normal else {
+                    self.circle_pending = Some(pending);
+                    return Some(Err(Error::Invalid("Orientation needs a normal direction")));
+                };
+                return Some(self.commit_circle_normal(center, normal, radius));
+            }
             return Some(self.commit_circle_center(center, plane.x, plane.y, radius));
         }
         self.circle_pending = Some(pending);
@@ -408,6 +451,36 @@ impl Controller {
             pending.normal = Some(tangent);
             self.circle_pending = Some(pending);
             return Ok(());
+        }
+        // Orientation: the placed center stays; the next pick is the plane normal and
+        // the pick after that is the radius point (not a circumference input).
+        if pending.mode == "Orientation" {
+            let Some(&center) = pending.points.first() else {
+                self.circle_pending = Some(pending);
+                return Err(Error::Missing("circle center"));
+            };
+            let direction = [
+                point[0] - center[0],
+                point[1] - center[1],
+                point[2] - center[2],
+            ];
+            let length =
+                (direction[0].powi(2) + direction[1].powi(2) + direction[2].powi(2)).sqrt();
+            if length <= 1e-9 {
+                self.circle_pending = Some(pending);
+                return Err(Error::Invalid(
+                    "orientation point must differ from the center",
+                ));
+            }
+            if pending.normal.is_none() {
+                pending.normal = Some(direction);
+                self.circle_pending = Some(pending);
+                return Ok(());
+            }
+            let normal = pending.normal.expect("orientation normal");
+            self.circle_rebuild = Some((pending.deformable, pending.degree, pending.point_count));
+            self.circle_pending = None;
+            return self.commit_circle_normal(center, normal, length);
         }
         pending.points.push(point);
         match pending.mode {
@@ -528,6 +601,52 @@ impl Controller {
         points.windows(2).map(|pair| [pair[0], pair[1]]).collect()
     }
 
+    /// Preview for an oriented circle: the frame is built from the picked normal,
+    /// and the cursor point supplies the radius.
+    fn circle_preview_on_normal(
+        &self,
+        center: Point3,
+        normal: Point3,
+        point: Point3,
+    ) -> Vec<[Point3; 2]> {
+        let norm = (normal[0].powi(2) + normal[1].powi(2) + normal[2].powi(2)).sqrt();
+        if norm <= 1e-12 {
+            return Vec::new();
+        }
+        let normal = [normal[0] / norm, normal[1] / norm, normal[2] / norm];
+        let plane = self.input_plane();
+        let dot = plane.x[0] * normal[0] + plane.x[1] * normal[1] + plane.x[2] * normal[2];
+        let mut x = [
+            plane.x[0] - normal[0] * dot,
+            plane.x[1] - normal[1] * dot,
+            plane.x[2] - normal[2] * dot,
+        ];
+        let mut x_norm = (x[0].powi(2) + x[1].powi(2) + x[2].powi(2)).sqrt();
+        if x_norm <= 1e-12 {
+            x = plane.y;
+            x_norm = (x[0].powi(2) + x[1].powi(2) + x[2].powi(2)).sqrt();
+        }
+        if x_norm <= 1e-12 {
+            return Vec::new();
+        }
+        x = [x[0] / x_norm, x[1] / x_norm, x[2] / x_norm];
+        let mut y = [
+            normal[1] * x[2] - normal[2] * x[1],
+            normal[2] * x[0] - normal[0] * x[2],
+            normal[0] * x[1] - normal[1] * x[0],
+        ];
+        let y_norm = (y[0].powi(2) + y[1].powi(2) + y[2].powi(2)).sqrt();
+        if y_norm <= 1e-12 {
+            return Vec::new();
+        }
+        y = [y[0] / y_norm, y[1] / y_norm, y[2] / y_norm];
+        let radius = distance(center, point);
+        if radius <= 1e-9 {
+            return Vec::new();
+        }
+        self.circle_preview_ring(center, x, y, radius)
+    }
+
     fn commit_circle_normal(
         &mut self,
         center: Point3,
@@ -645,42 +764,65 @@ impl Controller {
         let Some(pending) = self.circle_pending.as_ref() else {
             return Vec::new();
         };
-        let mut tokens = vec![
-            ("Center", "Center"),
-            ("2Point", "2Point"),
-            ("3Point", "3Point"),
-            ("Vertical", "Vertical"),
-            ("FitPoints", "FitPoints"),
-            ("AroundCurve", "AroundCurve"),
-            ("Tangent", "Tangent"),
-        ];
-        tokens.push(("Deformable", "Deformable"));
-        tokens.push(("Approx", "Approx"));
-        if pending.deformable {
-            tokens.push(("Degree=", "Degree="));
-            tokens.push(("PointCount=", "PointCount="));
+        // The documented prompt names the modes that are *not* current; the current
+        // mode is the prompt word itself (`Center of circle`, `First diameter point`).
+        // Once the first point exists the mode switch is gone and the prompt only
+        // offers the measures, exactly like `Diameter <value> ( Radius ... )`.
+        let mut tokens = Vec::new();
+        if pending.points.is_empty() {
+            tokens.push(("Deformable", "Deformable"));
+            for (label, mode) in [
+                ("Center", "Center"),
+                ("Vertical", "Vertical"),
+                ("2Point", "TwoPoint"),
+                ("3Point", "ThreePoint"),
+                ("Tangent", "Tangent"),
+                ("AroundCurve", "AroundCurve"),
+                ("FitPoints", "FitPoints"),
+            ] {
+                if pending.mode != mode {
+                    tokens.push((label, label));
+                }
+            }
+            if pending.deformable {
+                tokens.push(("Degree=", "Degree="));
+                tokens.push(("PointCount=", "PointCount="));
+            }
+            if pending.mode == "Tangent" {
+                tokens.push(("Radius=", "Radius="));
+                tokens.push(("Point=", "Point="));
+                tokens.push(("Solution=", "Solution="));
+            }
+            if pending.mode == "AroundCurve" {
+                tokens.push(("OnCurve=", "OnCurve="));
+            }
         }
-        if pending.mode == "Tangent" {
-            tokens.push(("Radius=", "Radius="));
-            tokens.push(("Point=", "Point="));
-            tokens.push(("Solution=", "Solution="));
+        // Once the center (or the curve point) exists the prompt offers the other
+        // measures plus Orientation, exactly like the Matrix `Diameter <value> (...)`
+        // line. The waiting-for-normal stage has no size options yet.
+        let sizing = pending.points.len() == 1
+            && matches!(
+                pending.mode,
+                "Center" | "Vertical" | "AroundCurve" | "Orientation"
+            )
+            && !(pending.mode == "Orientation" && pending.normal.is_none());
+        if sizing {
+            for (label, command) in [
+                ("Radius", "Size=Radius"),
+                ("Orientation", "Orientation"),
+                ("Diameter", "Size=Diameter"),
+                ("Circumference", "Size=Circumference"),
+                ("Area", "Size=Area"),
+            ] {
+                if label == "Orientation" {
+                    if pending.mode != "Orientation" {
+                        tokens.push((label, command));
+                    }
+                } else if pending.size != label {
+                    tokens.push((label, command));
+                }
+            }
         }
-        if pending.points.is_empty() && pending.mode == "AroundCurve" {
-            tokens.push(("OnCurve=", "OnCurve="));
-        }
-        if pending.points.len() == 1 && pending.mode == "Center" {
-            tokens.push(("Size=Diameter", "Size=Diameter"));
-            tokens.push(("Size=Circumference", "Size=Circumference"));
-            tokens.push(("Size=Area", "Size=Area"));
-            tokens.push(("Radius=", "Radius="));
-            tokens.push(("Diameter=", "Diameter="));
-            tokens.push(("Circumference=", "Circumference="));
-            tokens.push(("Area=", "Area="));
-        }
-        if !pending.points.is_empty() {
-            tokens.push(("Undo", "Undo"));
-        }
-        tokens.push(("Cancel", "Cancel"));
         tokens
     }
 
@@ -726,47 +868,12 @@ impl Controller {
             };
             return self.circle_preview_ring(center, x, y, radius);
         }
-        if pending.mode == "AroundCurve" && pending.points.len() == 1 {
+        if matches!(pending.mode, "AroundCurve" | "Orientation") && pending.points.len() == 1 {
             let center = pending.points[0];
             let Some(normal) = pending.normal else {
                 return Vec::new();
             };
-            let norm = (normal[0].powi(2) + normal[1].powi(2) + normal[2].powi(2)).sqrt();
-            if norm <= 1e-12 {
-                return Vec::new();
-            }
-            let normal = [normal[0] / norm, normal[1] / norm, normal[2] / norm];
-            let plane = self.input_plane();
-            let dot = plane.x[0] * normal[0] + plane.x[1] * normal[1] + plane.x[2] * normal[2];
-            let mut x = [
-                plane.x[0] - normal[0] * dot,
-                plane.x[1] - normal[1] * dot,
-                plane.x[2] - normal[2] * dot,
-            ];
-            let mut x_norm = (x[0].powi(2) + x[1].powi(2) + x[2].powi(2)).sqrt();
-            if x_norm <= 1e-12 {
-                x = plane.y;
-                x_norm = (x[0].powi(2) + x[1].powi(2) + x[2].powi(2)).sqrt();
-            }
-            if x_norm <= 1e-12 {
-                return Vec::new();
-            }
-            x = [x[0] / x_norm, x[1] / x_norm, x[2] / x_norm];
-            let mut y = [
-                normal[1] * x[2] - normal[2] * x[1],
-                normal[2] * x[0] - normal[0] * x[2],
-                normal[0] * x[1] - normal[1] * x[0],
-            ];
-            let y_norm = (y[0].powi(2) + y[1].powi(2) + y[2].powi(2)).sqrt();
-            if y_norm <= 1e-12 {
-                return Vec::new();
-            }
-            y = [y[0] / y_norm, y[1] / y_norm, y[2] / y_norm];
-            let radius = distance(center, point);
-            if radius <= 1e-9 {
-                return Vec::new();
-            }
-            return self.circle_preview_ring(center, x, y, radius);
+            return self.circle_preview_on_normal(center, normal, point);
         }
         if pending.mode == "FitPoints" {
             let mut points = pending.points.clone();

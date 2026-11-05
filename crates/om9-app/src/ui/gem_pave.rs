@@ -75,6 +75,8 @@ impl MatrixApp {
         let mut cancel = false;
         let mut refresh = false;
         let mut dirty = false;
+        let limits = *self.controller.coordinator().limits();
+        let mut reset_error = None;
         let style_names = self.controller.gem_pave_style_names();
         let style_error = self.controller.gem_pave_style_error().map(str::to_owned);
         let mut style_name = session.style_name.clone();
@@ -323,11 +325,17 @@ impl MatrixApp {
                         refresh = true;
                     }
                     if ui.button("Reset").clicked() {
-                        dirty = true;
-                        session = reset(&session);
+                        match crate::session::gem_pave::reset_session(&session, &limits) {
+                            Ok(reset) => { session = reset; dirty = true; }
+                            Err(error) => reset_error = Some(error),
+                        }
                     }
                 });
             });
+        if let Some(error) = reset_error {
+            self.status.error(&error.to_string());
+            return;
+        }
         if !open || cancel {
             self.controller.gem_pave_cancel();
             self.status.info("Pavé builder canceled");
@@ -551,10 +559,4 @@ fn correction_label(value: PaveCorrection) -> &'static str {
         PaveCorrection::Grow => "Grow",
         PaveCorrection::Shrink => "Shrink",
     }
-}
-
-fn reset(
-    session: &crate::session::gem_pave::GemPaveSession,
-) -> crate::session::gem_pave::GemPaveSession {
-    crate::session::gem_pave::reset_session(session).unwrap_or_else(|_| session.clone())
 }

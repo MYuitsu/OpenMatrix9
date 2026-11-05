@@ -1,0 +1,9 @@
+# Top11 Mirror and Join: line parameter domains
+
+`bake_curve` and Mirror's reflection previously replaced each line's stored domain with `[0, transformed length]`; Mirror Copy=No could change it again while converting back into the original placement. This also affected line segments in a polycurve and curves baked during Join. Both transformations now retain each line's original domain while transforming its endpoints. Circle-to-NURBS conversion has separate parameterization questions and is not covered by this change.
+
+The new application regression was observed failing before the fix: `[2,5]` became `[0,2]`. After the fix, line and two-line polycurve fixtures with domains `[2,5]` and `[5,9]` pass through CMD and toolbar Mirror with Copy Yes/No and a nonuniform placed transform. They assert the stored domains, a reflected world-space endpoint, `.om9` save/open and Undo/Redo. The existing placed-curve Join regression now also checks that the joined line segments keep `[0,1]`.
+
+An explicitly invoked real-native 3DM integration test exports and cold imports a mirrored line and a two-segment polycurve with the same custom contiguous domains; it compares complete imported geometry with the post-Mirror geometry. An initial invocation supplied an incorrect admission hash and failed before launching the adapter; the corrected invocation passed. Native adapter SHA-256: `d2e2ae9501a23b0568c28359f8d25058f249c85636598b8a76ba2c07bc98b1ab`. This is an interoperability test, not an openNURBS measurement batch.
+
+Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: 105 app Top11 tests, 30 core Top11 tests, 204 core library tests and 105 no-default-feature app Top11 tests passed. The no-default build emitted existing unused-code/import warnings. Other curve types, noncontiguous polycurve domains in native 3DM, broader geometry and physical desktop interaction remain open.

@@ -1,0 +1,7 @@
+# Encoded STL shell orientation under reflection
+
+An analytic box-with-box-cavity B-rep (one solid, two shells) is placed with scale `[-2, 1.5, 0.5]` and exported to binary STL. The fixture separates the known encoded outer and inner box triangles by their analytic coordinate ranges and measures oriented signed volume separately. It expects 12 outer triangles with volume `+96 mm³` and 12 cavity triangles with volume `-12 mm³`; the focused test passes, and the indexed receipt reports watertight. This checks one known two-shell geometry under one mirror/nonuniform scale, not arbitrary shell containment or self-intersection.
+
+The first version of this fixture failed because it reused the existing `signed_volume` test helper, which returns the absolute value. That result was an oracle error, not evidence of an export winding defect. A separate `oriented_volume` helper now retains the sign; a tetrahedron and its reversed winding validate that helper independently. Existing unsigned-volume assertions remain explicitly unsigned unless separately changed.
+
+On E: with `-j 2`, all 56 STL integration tests passed before strengthening two existing cavity assertions from absolute to oriented volume. After that test-only strengthening, the three focused cavity tests and the tetrahedron oracle test passed. Public-source audit passed. No production code changed and no release/desktop test was performed.

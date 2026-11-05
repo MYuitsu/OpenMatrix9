@@ -75,6 +75,203 @@ fn source() -> (
 
 #[test]
 #[ignore = "requires built openNURBS operation executable"]
+fn native_packet_stream_rejects_malformed_duplicate_trailing_and_oversized_input() {
+    let folder = Directory::new();
+    let packet = folder.0.join("packet.json");
+    let output = folder.0.join("private.3dm");
+    let executable = std::env::var_os("OM9_EXCHANGE_NATIVE").expect("native executable");
+    for bytes in [b"".as_slice(), b"{\"x\":1,\"x\":2}", b"{} {}", b"{\"x\":", b"{\"x\":\"\xff\"}"] {
+        fs::write(&packet, bytes).unwrap();
+        let result = std::process::Command::new(&executable).arg("--write").arg(&packet).arg(&output).output().unwrap();
+        assert!(!result.status.success(), "invalid packet unexpectedly accepted");
+        assert!(!output.exists(), "invalid packet created output");
+    }
+    let file = fs::OpenOptions::new().write(true).truncate(true).open(&packet).unwrap();
+    file.set_len(16 * 1024 * 1024 + 1).unwrap();
+    drop(file);
+    let result = std::process::Command::new(&executable).arg("--write").arg(&packet).arg(&output).output().unwrap();
+    assert!(!result.status.success());
+    assert!(!output.exists());
+    fs::remove_file(packet).unwrap();
+}
+
+#[test]
+#[ignore = "requires built openNURBS operation executable"]
+fn native_packet_stream_rejects_file_with_existing_writer() {
+    use std::os::windows::fs::OpenOptionsExt;
+    let folder = Directory::new();
+    let packet = folder.0.join("packet.json");
+    let output = folder.0.join("private.3dm");
+    fs::write(&packet, b"{}").unwrap();
+    // Existing writer permits read/write sharing; the adapter must still
+    // refuse because its own two-pass read requires writers to be absent.
+    let writer = fs::OpenOptions::new().read(true).write(true).share_mode(3).open(&packet).unwrap();
+    let executable = std::env::var_os("OM9_EXCHANGE_NATIVE").expect("native executable");
+    let result = std::process::Command::new(executable).arg("--write").arg(&packet).arg(&output).output().unwrap();
+    assert!(!result.status.success());
+    assert!(String::from_utf8_lossy(&result.stderr).contains("open held native archive"));
+    assert!(!output.exists());
+    drop(writer);
+    fs::remove_file(packet).unwrap();
+}
+
+#[test]
+#[ignore = "requires two pinned native adapter builds for isolated comparison"]
+fn native_packet_stream_compares_write_peak_on_same_cloud_fixture() {
+    let old = PathBuf::from(std::env::var_os("OM9_NATIVE_BASELINE").expect("baseline adapter"));
+    let new = PathBuf::from(std::env::var_os("OM9_EXCHANGE_NATIVE").expect("updated adapter"));
+    let adapter = |path: &PathBuf| {
+        let hash: [u8; 32] = Sha256::digest(fs::read(path).unwrap()).into();
+        NativeExchange::new(NativeProgram::admit(path, hash).unwrap(), ProcessLimits::default()).unwrap()
+    };
+    let adapters = [("baseline", adapter(&old)), ("streamed", adapter(&new))];
+    let limits = Limits::default();
+    let cloud_count: usize = std::env::var("OM9_BENCH_CLOUD_COUNT").ok().map(|s| s.parse().unwrap()).unwrap_or(4);
+    assert!((1..=8).contains(&cloud_count));
+    let definitions = std::env::var_os("OM9_BENCH_DEFINITIONS").is_some();
+    let document = profile_cloud_document(cloud_count, definitions);
+    let id = document.id;
+    let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+    let packet_bytes = ExportCapture::all(&coordinator, id).unwrap().encode(&limits).unwrap().len();
+    println!("packet_bytes={packet_bytes}, cloud_count={cloud_count}, points_per_cloud=32000, definitions={definitions}");
+    let folder = Directory::new();
+    for repetition in 0..3 {
+        for (label, exchange) in &adapters {
+            let capture = ExportCapture::all(&coordinator, id).unwrap();
+            let receipt = exchange.prepare(&coordinator, capture, &folder.target(), &Cancellation::default()).unwrap()
+                .publish(&coordinator, &Cancellation::default()).unwrap();
+            assert_eq!(receipt.root_objects, cloud_count);
+            println!("comparison={label}, repetition={repetition}, write_peak_bytes={}, write_ms={}, output_bytes={}",
+                receipt.write.peak_committed_bytes, receipt.write.elapsed.as_millis(), receipt.bytes);
+        }
+    }
+    folder.assert_clean();
+}
+
+fn profile_cloud_document(cloud_count: usize, definitions: bool) -> Document {
+    use om9_core::{geometry::Cloud, model::Definition};
+    let mut document = Document::with_template_tolerance("native packet benchmark");
+    for cloud_index in 0..cloud_count {
+        let points = (0..32_000).map(|i| [i as f64 * 0.012345, cloud_index as f64, (i % 17) as f64 * 0.125]).collect();
+        let cloud = Entity::new("cloud", Geometry::Cloud(Cloud { points, normals: vec![], colors: vec![], hidden: vec![] }), None);
+        let entity = if definitions {
+            let definition = Definition::new(format!("cloud block {cloud_index}"), vec![cloud]);
+            let id = definition.id;
+            document.definitions.insert(id, definition);
+            Entity::new("instance", Geometry::Instance(id), None)
+        } else { cloud };
+        document.entities.insert(entity.id, entity);
+    }
+    document
+}
+
+#[test]
+#[ignore = "requires native adapter built with -ProfileMemory"]
+fn native_memory_profile_reports_packet_and_model_phases() {
+    struct Cleanup(PathBuf);
+    impl Drop for Cleanup { fn drop(&mut self) { let _ = fs::remove_file(&self.0); } }
+    let path = PathBuf::from(std::env::var_os("OM9_NATIVE_PROFILE").expect("profile adapter"));
+    let hash: [u8; 32] = Sha256::digest(fs::read(&path).unwrap()).into();
+    let program = NativeProgram::admit(&path, hash).unwrap();
+    let limits = Limits::default();
+    let definitions = std::env::var_os("OM9_BENCH_DEFINITIONS").is_some();
+    let document = profile_cloud_document(8, definitions);
+    let id = document.id;
+    let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+    let packet = ExportCapture::all(&coordinator, id).unwrap().encode(&limits).unwrap();
+    let folder = Directory::new();
+    let packet_path = Cleanup(folder.0.join("input.json"));
+    fs::write(&packet_path.0, &packet).unwrap();
+    println!("packet_bytes={}", packet.len());
+    drop(packet);
+    for repetition in 0..3 {
+        let output = Cleanup(folder.0.join(format!("profile-{repetition}.3dm")));
+        let result = program.run(&["--write".into(), packet_path.0.as_os_str().to_owned(), output.0.as_os_str().to_owned()],
+            &ProcessLimits::default(), &Cancellation::default()).unwrap();
+        let response: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(response["status"], "written");
+        assert_eq!(response["objects"], if definitions { 16 } else { 8 });
+        let samples = String::from_utf8(result.stderr).unwrap();
+        for stage in ["packet_open", "preflight_done", "dom_ready", "native_model_ready", "archive_written"] {
+            assert!(samples.contains(&format!("stage={stage} ")), "missing profile stage: {samples}");
+        }
+        println!("repetition={repetition}, job_peak={}, elapsed_ms={}\n{samples}", result.stats.peak_committed_bytes, result.stats.elapsed.as_millis());
+    }
+}
+
+#[test]
+#[ignore = "requires built openNURBS operation executable"]
+fn model_tolerance_is_cold_checked_and_unrepresentable_values_preserve_destination() {
+    for (absolute, relative, angle) in [(0.02, 0.005, 0.1), (0.00001, 0.0001, 0.02)] {
+        let folder = Directory::new();
+        let path = folder.target();
+        let mut document = Document::new("tolerance metadata");
+        document.tolerance = Some(om9_core::history::Tolerance::try_new(absolute, relative, angle).unwrap());
+        let entity = Entity::new("point", Geometry::Point([1., 2., 3.]), None);
+        document.entities.insert(entity.id, entity);
+        let id = document.id;
+        let limits = Limits::default();
+        let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let cancel = Cancellation::default();
+        let receipt = native().prepare(&coordinator, ExportCapture::all(&coordinator, id).unwrap(), &path, &cancel)
+            .unwrap().publish(&coordinator, &cancel).unwrap();
+        assert!(receipt.bytes > 0);
+    }
+    for (relative, angle) in [(0., 0.1), (1., 0.1), (0.01, 0.), (0.01, 4.)] {
+        let folder = Directory::new();
+        let path = folder.target();
+        fs::write(&path, b"original destination").unwrap();
+        let mut document = Document::new("unrepresentable tolerance");
+        document.tolerance = Some(om9_core::history::Tolerance::try_new(0.01, relative, angle).unwrap());
+        let entity = Entity::new("point", Geometry::Point([1., 2., 3.]), None);
+        document.entities.insert(entity.id, entity);
+        let id = document.id;
+        let limits = Limits::default();
+        let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        assert!(native().prepare(&coordinator, ExportCapture::all(&coordinator, id).unwrap(), &path, &Cancellation::default()).is_err());
+        assert_eq!(fs::read(&path).unwrap(), b"original destination");
+    }
+}
+
+#[test]
+#[ignore = "requires built openNURBS operation executable"]
+fn selected_export_writes_only_selected_current_geometry() {
+    let folder = Directory::new();
+    let path = folder.target();
+    let mut d = Document::new("selected");
+    let a = Entity::new("A", Geometry::Point([1., 2., 3.]), None);
+    let id = a.id;
+    let b = Entity::new("B", Geometry::Point([4., 5., 6.]), None);
+    d.entities.insert(id, a);
+    d.entities.insert(b.id, b);
+    let did = d.id;
+    let limits = Limits::default();
+    let c = TransactionCoordinator::new(World::new(vec![d], &limits).unwrap(), limits).unwrap();
+    let cancel = Cancellation::default();
+    let receipt = native().prepare(&c, ExportCapture::selected(&c, did, &[id]).unwrap(), &path, &cancel)
+        .unwrap().publish(&c, &cancel).unwrap();
+    assert_eq!(receipt.root_objects, 1);
+    assert_eq!(c.world().documents[&did].entities.len(), 2);
+    assert_eq!(c.undo_len(), 0);
+    folder.assert_clean();
+}
+
+#[test]
+#[ignore = "requires built openNURBS operation executable"]
+fn mesh_corner_uv_export_refuses_without_replacing_target() {
+    use om9_core::geometry::Mesh;
+    let folder=Directory::new(); let path=folder.target(); fs::write(&path,b"previous good").unwrap();
+    let mut d=Document::new("UV mesh");
+    let mesh=Mesh{vertices:vec![[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]],faces:vec![vec![0,1,2]],normals:vec![],colors:vec![],corner_uvs:vec![[0.,0.],[1.,0.],[0.,1.]]};
+    let entity=Entity::new("UV mesh",Geometry::Mesh(mesh),None); d.entities.insert(entity.id,entity);
+    let id=d.id; let limits=Limits::default();
+    let c=TransactionCoordinator::new(World::new(vec![d],&limits).unwrap(),limits).unwrap();
+    let result=native().prepare(&c,ExportCapture::all(&c,id).unwrap(),&path,&Cancellation::default());
+    assert!(result.is_err()); assert_eq!(fs::read(&path).unwrap(),b"previous good"); folder.assert_clean();
+}
+
+#[test]
+#[ignore = "requires built openNURBS operation executable"]
 fn hidden_preset_native_projection_is_cold_verified_with_explicit_om9_losses() {
     use om9_core::{layers::PresetSlot, model::Layer};
     let folder = Directory::new();

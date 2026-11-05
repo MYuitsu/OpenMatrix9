@@ -40,6 +40,31 @@ fn pick(c: &Controller, world: [f64; 3], kind: PickKind) -> Option<om9_scene::sc
         .unwrap()
 }
 #[test]
+fn placement_undo_and_redo_share_immutable_brep_source() {
+    let limits = Limits::default();
+    let shape = box_brep([2., 3., 4.], 0.1, &limits).unwrap();
+    let (mut controller, id) = controller(Geometry::Brep(shape));
+    controller.select_objects(&[id]).unwrap();
+    let original = controller.coordinator().snapshot();
+    let document_id = controller.document().id;
+    let Geometry::Brep(original_shape) = &original.world.documents[&document_id].entities[&id].geometry else { panic!("B-rep required") };
+    let source = original_shape.source().as_ptr();
+    let face_ids = original_shape.display.faces.clone();
+    controller.numeric_move([5., 0., 0.]).unwrap();
+    let Geometry::Brep(moved) = &controller.document().entities[&id].geometry else { panic!("B-rep required") };
+    assert_eq!(moved.source().as_ptr(), source);
+    assert_eq!(moved.display.faces, face_ids);
+    assert!((source_volume(moved, &limits).unwrap() - 24.).abs() < 1e-9);
+    controller.undo().unwrap();
+    let Geometry::Brep(undone) = &controller.document().entities[&id].geometry else { panic!("B-rep required") };
+    assert_eq!(undone.source().as_ptr(), source);
+    assert_eq!(controller.document().entities[&id].placement, Transform::identity());
+    controller.redo().unwrap();
+    let Geometry::Brep(redone) = &controller.document().entities[&id].geometry else { panic!("B-rep required") };
+    assert_eq!(redone.source().as_ptr(), source);
+    assert_eq!(controller.document().entities[&id].placement, Transform::translation([5., 0., 0.]));
+}
+#[test]
 fn actual_box_faces_edges_and_vertices_use_topology_ids_not_mesh_offsets() {
     let l = Limits::default();
     let shape = box_brep([2.; 3], 0.01, &l).unwrap();

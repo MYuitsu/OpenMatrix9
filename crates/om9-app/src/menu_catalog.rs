@@ -183,8 +183,6 @@ pub const SOLID: &[&str] = &[
     "SolidDifference",
     "SolidIntersection",
     "SolidBooleanTwoObjects",
-    "SolidBooleanSplit",
-    "SolidCreateSolid",
     "SolidCapPlanarHoles",
     "SolidExtractSurface",
     "SolidFilletEdgeFilletEdge",
@@ -192,19 +190,8 @@ pub const SOLID: &[&str] = &[
     "SolidExtrudePlanarCurveStraight",
     "SolidGVDAllExtrude",
     "SolidPipe",
-    "SolidGVDMultiPipe",
     "SolidBoxCornertoCornerHeight",
-    "SolidBoxDiagonal",
-    "SolidBox3PointsHeight",
-    "SolidBoxVerticalBase",
-    "SolidBoxCenterofBaseCornerHeight",
     "SolidSphereCenterRadius",
-    "SolidSphere2Points",
-    "SolidSphere3Points",
-    "SolidSphere4Points",
-    "SolidSphereAroundCurve",
-    "SolidSphereTangenttoCurves",
-    "SolidSphereFitSpheretoPoints",
     "SolidEllipsoidFromCenter",
     "SolidTorus",
     "SolidCylinder",
@@ -222,6 +209,21 @@ pub const SOLID: &[&str] = &[
     "SolidSolidEditToolsFacesMoveFace",
     "SolidShell",
     "SolidPtOn",
+    // Recovered variants that the authored 30-icon Matrix menu does not show as
+    // separate icons; kept reachable after the documented rows.
+    "SolidBooleanSplit",
+    "SolidCreateSolid",
+    "SolidGVDMultiPipe",
+    "SolidBoxDiagonal",
+    "SolidBox3PointsHeight",
+    "SolidBoxVerticalBase",
+    "SolidBoxCenterofBaseCornerHeight",
+    "SolidSphere2Points",
+    "SolidSphere3Points",
+    "SolidSphere4Points",
+    "SolidSphereAroundCurve",
+    "SolidSphereTangenttoCurves",
+    "SolidSphereFitSpheretoPoints",
 ];
 pub const TRANSFORM: &[&str] = &[
     "TransformScaleScale3D",
@@ -508,7 +510,7 @@ mod tests {
         for (name, expected) in [
             ("Curve", 58),
             ("Surface", 40),
-            ("Solid", 30),
+            ("Solid", 43),
             ("Transform", 40),
             ("SubD", 58),
             ("Art", 7),
@@ -533,6 +535,83 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn every_palette_matches_the_authored_menu_ini_order() {
+        // Resources/menu/MainMenu.ini is the authored Matrix menu: one section per
+        // menu, IconN entries in the visible order. The palette arrays are the compiled
+        // form of that same document, so a row may never be added, dropped or reordered
+        // in only one of the two.
+        let authored = authored_menus();
+        let aliases = [
+            ("SubD", "Clayoo"),
+            ("Art", "Emboss"),
+            ("Setting", "Settings"),
+        ];
+        for name in [
+            "File",
+            "View",
+            "Utilities",
+            "Measure",
+            "Custom",
+            "Curve",
+            "Surface",
+            "Solid",
+            "Transform",
+            "SubD",
+            "Art",
+            "Builder",
+            "Tools",
+            "Gems",
+            "Setting",
+            "Cutters",
+            "Render",
+        ] {
+            let ini_name = aliases
+                .iter()
+                .find_map(|(ours, ini)| (*ours == name).then_some(*ini))
+                .unwrap_or(name);
+            let expected = authored
+                .iter()
+                .find(|(menu, _)| menu == ini_name)
+                .unwrap_or_else(|| panic!("{ini_name} is not authored in MainMenu.ini"))
+                .1
+                .clone();
+            let actual: Vec<String> = category(name)
+                .unwrap_or_else(|| panic!("{name} menu"))
+                .iter()
+                .map(|icon| (*icon).to_owned())
+                .collect();
+            assert_eq!(actual, expected, "{name} menu order");
+        }
+    }
+
+    fn authored_menus() -> Vec<(String, Vec<String>)> {
+        let text = include_str!("../../../Resources/menu/MainMenu.ini");
+        let mut menus = Vec::new();
+        let mut name: Option<String> = None;
+        let mut icons: Vec<String> = Vec::new();
+        for raw in text.lines() {
+            let line = raw.trim();
+            if line.starts_with('[') {
+                if let Some(previous) = name.take() {
+                    menus.push((previous, std::mem::take(&mut icons)));
+                }
+                icons.clear();
+            } else if let Some(value) = line.strip_prefix("Name=") {
+                name = Some(value.to_owned());
+            } else if let Some((key, value)) = line.split_once('=')
+                && key.starts_with("Icon")
+                && key[4..].chars().all(|character| character.is_ascii_digit())
+            {
+                icons.push(value.to_owned());
+            }
+        }
+        if let Some(previous) = name {
+            menus.push((previous, icons));
+        }
+        menus
     }
 
     #[test]

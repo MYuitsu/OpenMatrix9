@@ -1,0 +1,7 @@
+# STL worker reservation lifetime
+
+P3b partial: the background job retains its coordinator-owned reservation until its worker stops, including after the job handle is dropped and requests cancellation. The worker catches Rust unwinding and reports an error before releasing its reservation; its destination path is resolved before launch. The existing temporary-file guard handles normal error and Rust unwinding, subject to OS filesystem behavior.
+
+Windows with default OCCT/openNURBS, `CARGO_TARGET_DIR=L:/om9-target`, Cargo `-j 2`: five STL cancellation unit tests passed. A controlled worker was held at a barrier while its handle was dropped: cancellation was observed and the reservation stayed charged until the worker was released. A simulated Rust panic produced an error and released its reservation. Two STL background-job integration tests then passed for captured export and same-account reservation validation. These are controlled tests, not evidence of UI responsiveness or native-kernel crash recovery.
+
+The UI does not yet start this worker, offer cancellation, or cancel it on New/Open/close. The caller-provided reservation has no verified relationship to actual peak allocations; a native OCCT operation is not interruptible mid-call. Process abort, native crashes, power failure, production OS pressure and the full 60% owner budget remain unverified. The 256 MiB aggregate byte limit remains, and the active OM9 session was not modified.

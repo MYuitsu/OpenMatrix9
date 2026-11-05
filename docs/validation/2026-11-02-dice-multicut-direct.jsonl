@@ -1,0 +1,26 @@
+{"event": "cavity_prepared", "elapsed_s": 0.883, "face": 1, "index": 1}
+{"event": "cavity_prepared", "elapsed_s": 0.924, "face": 6, "index": 2}
+{"event": "cavity_prepared", "elapsed_s": 0.977, "face": 6, "index": 3}
+{"event": "cavity_prepared", "elapsed_s": 1.041, "face": 6, "index": 4}
+{"event": "cavity_prepared", "elapsed_s": 1.115, "face": 6, "index": 5}
+{"event": "cavity_prepared", "elapsed_s": 1.206, "face": 6, "index": 6}
+{"event": "cavity_prepared", "elapsed_s": 1.303, "face": 6, "index": 7}
+{"event": "cavity_prepared", "elapsed_s": 1.412, "face": 2, "index": 8}
+{"event": "cavity_prepared", "elapsed_s": 1.536, "face": 2, "index": 9}
+{"event": "cavity_prepared", "elapsed_s": 1.671, "face": 5, "index": 10}
+{"event": "cavity_prepared", "elapsed_s": 1.809, "face": 5, "index": 11}
+{"event": "cavity_prepared", "elapsed_s": 1.959, "face": 5, "index": 12}
+{"event": "cavity_prepared", "elapsed_s": 2.124, "face": 5, "index": 13}
+{"event": "cavity_prepared", "elapsed_s": 2.302, "face": 5, "index": 14}
+{"event": "cavity_prepared", "elapsed_s": 2.492, "face": 3, "index": 15}
+{"event": "cavity_prepared", "elapsed_s": 2.692, "face": 3, "index": 16}
+{"event": "cavity_prepared", "elapsed_s": 2.922, "face": 3, "index": 17}
+{"event": "cavity_prepared", "elapsed_s": 3.154, "face": 4, "index": 18}
+{"event": "cavity_prepared", "elapsed_s": 3.41, "face": 4, "index": 19}
+{"event": "cavity_prepared", "elapsed_s": 3.679, "face": 4, "index": 20}
+{"event": "cavity_prepared", "elapsed_s": 3.95, "face": 4, "index": 21}
+{"event": "boolean_committed", "elapsed_s": 7.09, "seconds": 3.122}
+{"event": "saved", "elapsed_s": 8.874, "undo": 23}
+{"event": "geometry", "elapsed_s": 9.278, "sha256": "22ce14cab9bf89e8e5b5a45b806ce1196f8d44b2b16bec5645a0ba4f3783a23f", "faces": 31, "mesh_volume": 7852.342630767965, "ideal_volume": 7851.559747117883}
+{"event": "undo_verified", "elapsed_s": 9.437, "objects": 22, "undo": 22}
+{"event": "redo_verified", "elapsed_s": 10.073, "objects": 1, "sha256": "22ce14cab9bf89e8e5b5a45b806ce1196f8d44b2b16bec5645a0ba4f3783a23f"}

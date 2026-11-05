@@ -23,6 +23,31 @@ mod tests {
         raw
     }
     #[test]
+    #[cfg(feature = "occt-brep")]
+    fn close_request_discards_pending_stl_capture() {
+        let mut app = MatrixApp::new(Document::with_template_tolerance("close stl")).unwrap();
+        app.controller.submit("Box 10 10 10").unwrap();
+        let id = *app.controller.document().entities.keys().next().unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.begin_stl_export_options();
+        assert!(app.stl_capture.is_some());
+        let detached = app.controller.capture_stl_selected().unwrap();
+        let ctx = egui::Context::default();
+        let _ = ctx.run_logic(&raw_close(), |ctx| { app.service_window_close(ctx); });
+        assert!(app.stl_capture.is_none());
+        assert!(app.stl_profile_draft.is_none());
+        let path = std::env::temp_dir().join(format!("om9-close-stl-{}.stl", uuid::Uuid::new_v4()));
+        std::fs::write(&path, b"previous destination").unwrap();
+        let profile = crate::session::StlExportProfile { linear_tolerance_mm: 0.001, angular_tolerance_rad: 0.3 };
+        assert!(matches!(detached.export_with_profile(&path, profile), Err(om9_core::Error::Canceled)));
+        assert_eq!(std::fs::read(&path).unwrap(), b"previous destination");
+        let token = app.controller.file_operation().unwrap().token();
+        app.controller.cancel_file_operation(token).unwrap();
+        let fresh = app.controller.capture_stl_selected().unwrap();
+        fresh.export_with_profile(&path, profile).unwrap();
+        std::fs::remove_file(path).unwrap();
+    }
+    #[test]
     fn minimized_logic_vetoes_dirty_close_and_retains_one_prompt_owner() {
         let mut app = MatrixApp::new(Document::new("Minimized")).unwrap();
         app.controller.submit("Point").unwrap();
@@ -136,6 +161,10 @@ impl MatrixApp {
     /// document mutation cannot reuse consent captured for an older owner.
     pub(super) fn service_window_close(&mut self, ctx: &egui::Context) -> bool {
         let requested = ctx.input(|input| input.viewport().close_requested());
+        if requested {
+            self.cancel_stl_export_options();
+            self.controller.invalidate_stl_session_for_close();
+        }
         let approved = self.controller.file_operation().is_some_and(|operation| {
             operation.phase() == FilePhase::CloseReady
                 && self
@@ -533,6 +562,241 @@ impl MatrixApp {
                 ctx.request_repaint();
             }
         }
+    }
+
+    pub(super) fn begin_stl_export_options(&mut self) {
+        if self.stl_capture.is_some() {
+            self.status.error("STL export is already in progress");
+            return;
+        }
+        let result = self.controller.document().effective_tolerance()
+            .and_then(|tolerance| self.controller.capture_stl_selected().map(|capture| (tolerance, capture)));
+        match result {
+            Ok((tolerance, capture)) => {
+                self.stl_capture = Some(capture);
+                self.stl_profile_draft = Some(tolerance.absolute_mm);
+                self.stl_angle_draft = 0.3;
+                self.stl_selected_profile = None;
+                self.stl_request = false;
+                self.focus_cmd = false;
+                self.status.info("Choose STL export quality");
+            }
+            Err(error) => self.feedback(Err(error)),
+        }
+    }
+
+    pub(super) fn cancel_stl_export_options(&mut self) {
+        self.stl_profile_draft = None;
+        self.stl_selected_profile = None;
+        self.stl_request = false;
+        self.stl_capture = None;
+    }
+
+    pub(super) fn stl_profile_ui(&mut self, ctx: &egui::Context) {
+        let Some(mut tolerance) = self.stl_profile_draft else { return };
+        let mut open = true;
+        let mut accept = false;
+        let mut cancel = false;
+        let mut angle = self.stl_angle_draft;
+        egui::Window::new("STL Export")
+            .id(egui::Id::new("stl-profile"))
+            .open(&mut open)
+            .collapsible(false)
+            .resizable(false)
+            .show(ctx, |ui| {
+                ui.horizontal(|ui| {
+                    ui.label("Requested linear tolerance (mm):");
+                    ui.add(egui::DragValue::new(&mut tolerance).speed(0.0001).max_decimals(12));
+                });
+                ui.horizontal(|ui| {
+                    ui.label("Angular deflection (radians):");
+                    ui.add(egui::DragValue::new(&mut angle).speed(0.01).max_decimals(8));
+                });
+                ui.label("The final geometric deviation is not yet certified.");
+                ui.horizontal(|ui| {
+                    let profile = crate::session::StlExportProfile { linear_tolerance_mm: tolerance, angular_tolerance_rad: angle };
+                    let button = ui.add_enabled(profile.validate().is_ok(), egui::Button::new("Choose file"));
+                    ctx.data_mut(|data| data.insert_temp(egui::Id::new("stl-profile-accept-rect"), button.rect));
+                    accept = button.clicked();
+                    let button = ui.button("Cancel");
+                    ctx.data_mut(|data| data.insert_temp(egui::Id::new("stl-profile-cancel-rect"), button.rect));
+                    cancel = button.clicked();
+                });
+            });
+        if ctx.input_mut(|input| input.consume_key(egui::Modifiers::NONE, egui::Key::Escape)) {
+            cancel = true;
+        }
+        if accept {
+            self.stl_selected_profile = Some(crate::session::StlExportProfile { linear_tolerance_mm: tolerance, angular_tolerance_rad: angle });
+            self.stl_request = true;
+            self.stl_profile_draft = None;
+            self.status.info("Choose an STL destination");
+        } else if cancel || !open {
+            self.cancel_stl_export_options();
+            self.focus_cmd = true;
+            self.status.info("STL export cancelled");
+        } else {
+            self.stl_profile_draft = Some(tolerance);
+            self.stl_angle_draft = angle;
+        }
+    }
+
+    /// File ▸ Export Selected: pick the `.stl` destination, then export the
+    /// selected meshes/solids through the Controller. Export never changes the document.
+    pub(super) fn service_stl_picker(&mut self, ctx: &egui::Context, frame: &eframe::Frame) {
+        if !self.stl_request {
+            return;
+        }
+        self.stl_request = false;
+        let Some(profile) = self.stl_selected_profile.take() else {
+            self.stl_capture = None;
+            self.status.error("Missing STL export quality");
+            return;
+        };
+        let Some(capture) = self.stl_capture.take() else {
+            self.status.error("Missing captured STL source");
+            return;
+        };
+        let current = self
+            .controller
+            .active_file_path()
+            .map(std::path::Path::to_path_buf);
+        match crate::native_picker::pick_stl(frame, current.as_deref()) {
+            Ok(Some(path)) => match self.controller.export_captured_stl(capture, &path, profile) {
+                Ok(receipt) => {
+                    let message = receipt.message();
+                    self.transcript.append_history(&message);
+                    self.status.complete_success();
+                }
+                Err(error) => {
+                    let message = crate::transcript::redact_paths(&format!("{error}"));
+                    self.transcript.append_history(&message);
+                    self.status.error(&message);
+                }
+            },
+            Ok(None) => {}
+            Err(error) => {
+                let message = crate::transcript::redact_paths(&format!("{error}"));
+                self.transcript.append_history(&message);
+                self.status.error(&message);
+            }
+        }
+        self.focus_cmd = true;
+        ctx.request_repaint();
+    }
+
+    /// Load application-scoped Gumball preferences. A missing file is defaults;
+    /// a corrupt file is reported without blocking startup.
+    pub fn load_gumball_settings(&mut self, path: &std::path::Path) -> Result<()> {
+        use crate::session::gumball;
+        self.gumball_settings_path = Some(path.to_path_buf());
+        self.gumball_settings_saved = self.controller.gumball_settings();
+        if !path.exists() {
+            return Ok(());
+        }
+        match gumball::load_settings(path) {
+            Ok(settings) => {
+                self.controller.apply_gumball_settings(settings)?;
+                self.gumball_settings_saved = settings;
+                Ok(())
+            }
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Write changed preferences once; a failed write stays visible but never spams
+    /// the status line on every frame.
+    pub(super) fn persist_gumball_settings(&mut self) {
+        let Some(path) = self.gumball_settings_path.clone() else {
+            return;
+        };
+        let current = self.controller.gumball_settings();
+        if current == self.gumball_settings_saved {
+            return;
+        }
+        match crate::session::gumball::save_settings(&path, &current) {
+            Ok(()) => {
+                self.gumball_settings_saved = current;
+                self.gumball_settings_error_reported = false;
+            }
+            Err(error) => {
+                if !self.gumball_settings_error_reported {
+                    self.gumball_settings_error_reported = true;
+                    self.status.error(&format!("Gumball settings: {error}"));
+                }
+            }
+        }
+    }
+
+    pub fn gumball_settings_path(&self) -> Option<&std::path::Path> {
+        self.gumball_settings_path.as_deref()
+    }
+
+    /// Gumball settings menu: axes, Smooth/Snappy, drag strength, pivot reset and
+    /// the documented defaults. Opened from the Info & Settings alignment icon.
+    pub(super) fn gumball_settings_ui(&mut self, ctx: &egui::Context) {
+        use crate::session::GumballAlignment;
+        if !self.gumball_settings_open {
+            return;
+        }
+        let mut open = true;
+        let mut alignment = self.controller.gumball_alignment();
+        let mut snappy = self.controller.gumball_snappy();
+        let mut strength = self.controller.gumball_drag_strength() * 100.0;
+        let mut reset_pivot = false;
+        let mut restore = false;
+        egui::Window::new("Gumball settings")
+            .id(egui::Id::new("gumball-settings"))
+            .open(&mut open)
+            .resizable(false)
+            .collapsible(false)
+            .show(ctx, |ui| {
+                ui.label("Alignment");
+                ui.horizontal(|ui| {
+                    for (label, mode) in [
+                        ("World", GumballAlignment::World),
+                        ("Object", GumballAlignment::Object),
+                        ("CPlane", GumballAlignment::CPlane),
+                    ] {
+                        if ui.selectable_label(alignment == mode, label).clicked() {
+                            alignment = mode;
+                        }
+                    }
+                });
+                ui.separator();
+                ui.label("Drag");
+                ui.horizontal(|ui| {
+                    if ui.selectable_label(!snappy, "Smooth").clicked() {
+                        snappy = false;
+                    }
+                    if ui.selectable_label(snappy, "Snappy").clicked() {
+                        snappy = true;
+                    }
+                });
+                ui.add(
+                    egui::Slider::new(&mut strength, 1.0..=200.0)
+                        .suffix("%")
+                        .text("Drag strength"),
+                );
+                ui.separator();
+                reset_pivot = ui.button("Reset pivot").clicked();
+                restore = ui.button("Restore defaults").clicked();
+            });
+        if restore {
+            self.controller.restore_gumball_defaults();
+        } else {
+            if self.controller.gumball_alignment() != alignment {
+                self.controller.set_gumball_alignment(alignment);
+            }
+            if self.controller.gumball_snappy() != snappy {
+                self.controller.set_gumball_snappy(snappy);
+            }
+            let _ = self.controller.set_gumball_drag_strength(strength / 100.0);
+            if reset_pivot {
+                self.controller.relocate_gumball(None);
+            }
+        }
+        self.gumball_settings_open = open;
     }
 
     pub(super) fn update_file_title(&mut self, ctx: &egui::Context) {

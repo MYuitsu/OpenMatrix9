@@ -1,0 +1,11 @@
+# Top11 Trim: curved solid boundary and exact viewport pick
+
+Trim's viewport path now resolves a picked surface along the camera ray against the exact world-space BRep partition. The tessellated scene hit identifies the object and approximate depth; the closest exact ray intersection supplies the point for region selection. If the ray misses the exact partition, the operation fails without a document change. Curve picks keep the existing curve path. Typed points continue to use document tolerance and are not silently snapped.
+
+Controller fixtures trim the boundary of a radius-5 mm sphere at its equator and a radius-5 mm, height-10 mm cylinder at mid-height, each at the origin and translated. They assert 50π and 100π mm² remaining respectively, open non-solid topology, positive naked-edge count, distance from the removed region, Undo/Redo and exact `.om9` save/open with retained placement. Translated cases use intentionally offset display-like points and an exact ray; a miss is rejected without mutation. A simulated egui viewport sphere click failed before the fix and passed after it, with Undo restoring the solid. Eight other simulated Trim viewport tests also passed.
+
+Windows MSVC, pinned OCCT 8.0.1 runtime and `CARGO_TARGET_DIR=L:\om9-target`: Top11/options/BRep suites passed 101 tests, then the strengthened curved/persistence/ray fixture passed separately. No-default Top11/options passed 65 tests. The `--lib trim_` filter passed 10 tests, including nine simulated Trim viewport tests and one unrelated formatting test. Public source audit reported zero errors. The native work here uses the existing synchronous OCCT curve/BRep intersection; document, selection and transaction ownership remain in Rust.
+
+SHA-256: `session/top11.rs` 5cf602f48263c1f3fa66466677c4e57ff738aa7cfb946c795ea868be5ca2512d; `ui.rs` 9ff2056670d74a5e6bfd19b33ef1ae427000dbbad5976f276739b3450e721251; `ui/chrome.rs` d3ea2d4a423682ae1829dadfe20c4e2f142a955e3d116d9d612b86283885dcf7; `tests/top11_brep.rs` 63f750c3394bebe5eb8628537ecd2ab64b5bf1568909b10d12ffe91d6c6d41ad.
+
+These fixtures do not prove general curved/periodic and non-manifold topology, nonuniform affine placements, grazing rays, 3DM interchange, performance or physical desktop/GPU acceptance. An edge-only viewport hit whose camera ray misses the exact face is rejected rather than extrapolated.

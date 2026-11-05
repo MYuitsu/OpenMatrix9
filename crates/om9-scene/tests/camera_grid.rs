@@ -1,6 +1,20 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 use om9_scene::{camera::*, grid::*, workspace::*};
 #[test]
+fn visible_ray_starts_on_near_plane_for_off_axis_views() {
+    let viewport = Viewport { origin: [0., 0.], size: [640., 480.] };
+    for perspective in [false, true] {
+        let mut camera = if perspective {
+            Camera::perspective([0., 0., 100.], [0., 0., 0.], [0., 1., 0.], 0.8).unwrap()
+        } else { Camera::orthographic([0., 0., 100.], [0., 0., 0.], [0., 1., 0.], 40.).unwrap() };
+        camera.near_mm = 17.;
+        let ray = camera.visible_ray([500., 140.], viewport).unwrap();
+        assert!((ray.origin[2] - 83.).abs() < 1e-10, "{ray:?}");
+        let original = camera.ray([500., 140.], viewport).unwrap();
+        assert_eq!(ray.direction, original.direction);
+    }
+}
+#[test]
 fn orthographic_projection_and_ray_share_world_frame_after_pan() {
     let mut camera = Camera::orthographic([0., 0., 100.], [0., 0., 0.], [0., 1., 0.], 40.).unwrap();
     let viewport = Viewport {
@@ -59,6 +73,29 @@ fn finite_grid_is_world_geometry_for_display_only_with_exact_subdivision() {
             .screen,
         [0., 400.]
     );
+}
+
+#[test]
+fn side_view_grid_uses_blue_horizontal_y_and_yellow_vertical_z() {
+    let workspace = Workspace::new();
+    let view = &workspace.views[&ViewId::SideView];
+    let grid = Grid::new(view.cplane).unwrap();
+    let horizontal = grid.lines.iter().find(|line| line.axis && line.start[1] != line.end[1]).unwrap();
+    let vertical = grid.lines.iter().find(|line| line.axis && line.start[2] != line.end[2]).unwrap();
+    assert_eq!(horizontal.color, [0, 200, 220, 255], "world Y must use the blue grid axis");
+    assert_eq!(vertical.color, [235, 180, 50, 255], "world Z must use the yellow axis");
+    let viewport = Viewport { origin: [0., 0.], size: [400., 400.] };
+    let a = view.camera.project(horizontal.start, viewport).unwrap().unwrap().screen;
+    let b = view.camera.project(horizontal.end, viewport).unwrap().unwrap().screen;
+    assert!((a[1] - b[1]).abs() < 1e-9 && (a[0] - b[0]).abs() > 100.);
+    let a = view.camera.project(vertical.start, viewport).unwrap().unwrap().screen;
+    let b = view.camera.project(vertical.end, viewport).unwrap().unwrap().screen;
+    assert!((a[0] - b[0]).abs() < 1e-9 && (a[1] - b[1]).abs() > 100.);
+    for id in [ViewId::LookingDown, ViewId::Perspective, ViewId::ThroughFinger] {
+        let grid = Grid::new(workspace.views[&id].cplane).unwrap();
+        let axes: Vec<_> = grid.lines.iter().filter(|line| line.axis).map(|line| line.color).collect();
+        assert_eq!(axes, [[0, 200, 220, 255], [210, 35, 35, 255]], "other views keep their existing grid colours");
+    }
 }
 #[test]
 fn cplane_coordinate_resolution_is_independent_from_camera_navigation() {

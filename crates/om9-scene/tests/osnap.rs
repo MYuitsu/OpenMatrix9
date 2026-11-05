@@ -12,6 +12,20 @@ use om9_scene::{
     scene::Scene,
 };
 
+#[test]
+fn iterator_selection_matches_slice_selection_for_ties_and_empty_input() {
+    use om9_scene::osnap::{SnapCandidate, choose, choose_iter};
+    let first = SnapCandidate { kind: SnapKind::End, root: None, world: [1., 0., 0.], screen: [0., 0.],
+        distance_px: 0., normal: None, parameter: None, surface_source: None };
+    let mut second = first.clone();
+    second.world = [2., 0., 0.];
+    let values = vec![first, second];
+    assert_eq!(choose(&values), choose_iter(values.iter()));
+    let reversed: Vec<_> = values.iter().cloned().rev().collect();
+    assert_eq!(choose(&reversed), choose_iter(reversed.iter()));
+    assert_eq!(choose_iter(std::iter::empty()), None);
+}
+
 fn camera() -> Camera {
     Camera::orthographic([0., 0., 100.], [0.; 3], [0., 1., 0.], 40.).unwrap()
 }
@@ -83,6 +97,31 @@ fn settings(radius: f64) -> SnapSettings {
     SnapSettings {
         radius_px: radius,
         ..SnapSettings::default()
+    }
+}
+
+#[test]
+fn native_brep_surface_candidates_follow_display_quad_triangulation() {
+    use om9_core::geometry::NativeBrep;
+    let mut document = Document::new("native quad");
+    let entity = Entity::new("quad", Geometry::NativeBrep(NativeBrep {
+        display: Mesh {
+            vertices: vec![[-5., -5., 0.], [5., -5., 0.], [5., 5., 0.], [-5., 5., 4.]],
+            faces: vec![vec![0, 1, 2, 3]], normals: vec![], colors: vec![], corner_uvs: vec![],
+        },
+        payload: vec![1].into(), crc: 0,
+    }), None);
+    let id = entity.id;
+    document.entities.insert(id, entity);
+    let document_id = document.id;
+    let limits = Limits::default();
+    let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+    let scene = Scene::capture_in_world(&coordinator, document_id, Default::default()).unwrap();
+    for (x, y, z) in [(-4., 3., 2.8), (-1., 3., 1.6), (3., -1., 0.)] {
+        let hits = candidates(&scene, &camera(), viewport(), screen([x, y, 0.]), settings(8.), None).unwrap();
+        let hit = hits.iter().find(|hit| hit.kind == SnapKind::Surface && hit.root == Some(id))
+            .unwrap_or_else(|| panic!("no candidate at {x}, {y}"));
+        assert!((hit.world[2] - z).abs() < 1e-9, "display depth mismatch at {x}, {y}: {:?}", hit.world);
     }
 }
 

@@ -1,0 +1,11 @@
+# Top11 Trim: multiple surface targets
+
+Top11 Trim accepts two or more selected typed surfaces or single-face open BReps as mutually cutting and trimmable objects. It prepares a world-space partition for each surface that is actually split. Before publishing each pick, it builds the prospective surface geometry and recomputes partitions of the other selected surfaces; the chosen surface retains its remaining partition for further picks. Each removal is one transaction. The retained geometry of a single original face is unified before publication. BReps with multiple faces or solids are refused by this branch to avoid merging authored face boundaries.
+
+Controller fixtures exercise two perpendicular BRep faces in both pick orders, choosing either the same face again or the other face, checking area and Undo/Redo. Removing one face completely makes the other no longer selectable when its cutter disappears. Two typed NURBS surfaces are selected after CMD invocation and trimmed in turn; a three-plane fixture trims two targets and undoes both; disjoint faces and an ambiguous typed point leave no transaction. An egui simulated viewport fixture picks one face in Looking Down and the other in Through Finger and undoes both.
+
+Windows MSVC, pinned OCCT 8.0.1 runtime and `CARGO_TARGET_DIR=L:\om9-target`: Top11/options/BRep suites passed 94 tests; no-default Top11/options passed 65 tests; four simulated Trim viewport tests passed (the `--lib trim_` filter also ran one unrelated formatting test); public source audit reported zero errors. No physical desktop or GPU acceptance was performed.
+
+SHA-256: `session/top11.rs` 49d62b6f39e8f1c22913428794abf63a4cc35f64d297910596253326a70b9343; `ui/chrome.rs` 7cb0881f3b6e7a72ee9dee276ad59e010ba0f78ed3c5dc8915c175228dbb5f05; `tests/top11_brep.rs` 142f5f0fa0ea54d783d6a72fbaad1bee88442008bb80a976e649c52ded1bdaf5.
+
+At the time of this record the selection was surface-only; subsequent curve integration is recorded in `2026-10-30-top11-trim-multiple-surfaces-curves.md`. Multi-face/solid BRep targets, reversed typed surfaces, arbitrary curved and periodic topology, performance and .om9/3DM round trips remain open. Area and selected planar fixtures do not establish general topology or UV correctness.

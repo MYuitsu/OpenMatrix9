@@ -65,7 +65,7 @@ impl ZoomResponse {
         }
         self.last_direction = points.signum();
         let initial = self.base.ortho_span.unwrap_or(self.base.distance);
-        self.target = (self.target + points / 40. * 0.9_f64.ln())
+        self.target = (self.target + points / 40. * 0.81_f64.ln())
             .clamp((1e-6 / initial).ln(), (1e15 / initial).ln());
         let remaining = self.target - self.x;
         // A reversal must not continue travelling away from the user's new target.
@@ -160,7 +160,7 @@ impl NavigationController {
         self.gesture = None;
         for s in self.views.values_mut() {
             s.zoom = None;
-            if s.phase != NavigationPhase::Idle {
+            if matches!(s.phase, NavigationPhase::Dragging | NavigationPhase::Settling) {
                 s.phase = NavigationPhase::Refining;
                 s.generation = s.generation.wrapping_add(1);
             }
@@ -229,7 +229,8 @@ impl NavigationController {
         } else {
             // Perspective orbit: dragging right turns the model right, matching the
             // direction users expect from the turntable.
-            rig.orbit_turntable(-delta[0] * 0.01, -delta[1] * 0.01);
+            let radians_per_point = std::f64::consts::PI / 600.;
+            rig.orbit_turntable(-delta[0] * radians_per_point, -delta[1] * radians_per_point);
         }
         let out = rig.to_camera(camera)?;
         s.expected_camera = out.clone();
@@ -365,6 +366,19 @@ mod tests {
         Camera::perspective([0., -100., 20.], [0.; 3], [0., 0., 1.], 0.6).unwrap()
     }
     #[test]
+    fn repeated_cancel_keeps_refinement_generation_stable() {
+        let now = Instant::now();
+        let mut nav = NavigationController::default();
+        let id = ViewId::Perspective;
+        nav.begin_drag(id, eframe::egui::PointerButton::Secondary, eframe::egui::Pos2::ZERO, &camera(), now);
+        nav.cancel();
+        let generation = nav.generation(id);
+        nav.cancel();
+        assert_eq!(nav.generation(id), generation, "repeated input blocking must not invalidate an in-flight publication");
+        nav.completed(id, generation);
+        assert_eq!(nav.views[&id].phase, NavigationPhase::Idle);
+    }
+    #[test]
     fn wheel_conserves_burst_and_finishes_exactly() {
         let now = Instant::now();
         let c = camera();
@@ -372,7 +386,7 @@ mod tests {
         let mut z = ZoomResponse::new(base, base.pivot, now, 1.);
         z.add_points(1024., now);
         z.add_points(-252., now + Duration::from_millis(10));
-        assert!((z.target_scale() - 0.9_f64.powf((1024. - 252.) / 40.)).abs() < 1e-12);
+        assert!((z.target_scale() - 0.81_f64.powf((1024. - 252.) / 40.)).abs() < 1e-12);
         let (p, done) = z.sample(now + Duration::from_millis(190));
         assert!(done);
         assert!((p.distance - base.distance * z.target_scale()).abs() < 1e-12);
@@ -515,7 +529,7 @@ mod tests {
         };
         let before = c.project(anchor, vp).unwrap().unwrap().screen;
         let mut z = ZoomResponse::new(base, anchor, now, 1.);
-        z.add_points(40. * (0.2_f64 / 100.).ln() / 0.9_f64.ln(), now);
+        z.add_points(40. * (0.2_f64 / 100.).ln() / 0.81_f64.ln(), now);
         for ms in 1..=180 {
             let (pose, _) = z.sample(now + Duration::from_millis(ms));
             let p = pose

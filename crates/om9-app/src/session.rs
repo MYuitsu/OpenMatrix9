@@ -15,6 +15,357 @@ use om9_scene::{
     workspace::Workspace,
 };
 use std::{collections::VecDeque, sync::Arc};
+
+// Fields drop in declaration order: scene buffers must be released before
+// their shared-account reservation, including on validation/commit errors.
+struct ReservedCandidateScene {
+    scene: Scene,
+    buffer_owner: Option<SceneBufferOwner>,
+    reservation: om9_core::transaction::ExternalMemoryReservation,
+}
+
+struct SceneBufferOwner {
+    epoch: u64,
+    document: std::sync::Weak<Document>,
+    bytes: u64,
+    lease: Arc<SceneBufferLease>,
+}
+
+pub(crate) struct SceneBufferLease {
+    previous: Option<Arc<SceneBufferLease>>,
+    _reservation: om9_core::transaction::ExternalMemoryReservation,
+}
+impl SceneBufferLease {
+    fn new(previous: Option<Arc<Self>>, reservation: om9_core::transaction::ExternalMemoryReservation) -> Result<Arc<Self>> {
+        let mut lease = Arc::new(Self { previous, _reservation: reservation });
+        // The render buffers and this Arc now exist. Keep their managed charge,
+        // but stop treating them as an allocation still to be made.
+        let reservation = &mut Arc::get_mut(&mut lease).expect("new scene buffer lease")._reservation;
+        reservation.mark_allocated(reservation.pending_bytes())?;
+        Ok(lease)
+    }
+}
+
+fn scene_buffer_lease_overhead() -> u64 {
+    std::mem::size_of::<SceneBufferLease>() as u64 + 4 * std::mem::size_of::<usize>() as u64
+}
+
+impl Drop for SceneBufferLease {
+    fn drop(&mut self) {
+        // A long edit session can build a long chain. Release uniquely owned
+        // predecessors iteratively rather than overflowing the call stack.
+        let mut next = self.previous.take();
+        while let Some(previous) = next {
+            match Arc::try_unwrap(previous) {
+                Ok(mut previous) => { next = previous.previous.take(); drop(previous); }
+                Err(_) => break,
+            }
+        }
+    }
+}
+#[cfg(test)]
+mod incremental_scene_memory_tests {
+    use super::*;
+    use om9_core::{budget::{Usage, memory::MemoryClass}, geometry::Mesh, identity::ObjectId,
+        transaction::PreparedTransaction};
+
+    fn prepare(controller: &Controller) -> (PreparedTransaction, Usage, Usage, ObjectId) {
+        let entity = Entity::new("mesh", Geometry::Mesh(Mesh {
+            vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]],
+            faces: vec![vec![0,1,2]; 10_000], normals: vec![], colors: vec![], corner_uvs: vec![],
+        }), None);
+        let id = entity.id;
+        let increment = controller.scene.as_ref().unwrap().update_held_usage(Some(&entity)).unwrap();
+        let mut held = controller.scene_cache_usage().unwrap();
+        held.add(increment, controller.coordinator.limits()).unwrap();
+        let request = TransactionRequest::new("mesh", vec![Mutation::Insert { document: controller.document, entity }]);
+        let prepared = controller.coordinator.prepare_with_held_usage(request, held).unwrap();
+        (prepared, held, increment, id)
+    }
+
+    #[test]
+    fn incremental_scene_reserves_before_build_and_cancellation_preserves_redo() {
+        const MIB: u64 = 1024 * 1024;
+        let limits = Limits { max_bytes: 64 * MIB, ..Limits::default() };
+        let mut controller = Controller::new(Document::with_template_tolerance("incremental"), limits).unwrap();
+        for point in ["1,2,3", "4,5,6"] { controller.submit("Point").unwrap(); controller.submit(point).unwrap(); }
+        controller.undo().unwrap();
+        let before = controller.coordinator.snapshot();
+        let scene_epoch = controller.scene.as_ref().unwrap().epoch;
+        let mut baseline = controller.coordinator.external_reserved_bytes(MemoryClass::CpuCache);
+        let initial_buffers = controller.scene.as_ref().unwrap().shared_buffer_bytes();
+        assert_eq!(controller.coordinator.redo_len(), 1);
+        let mut peer = TransactionCoordinator::new(World::new(vec![Document::new("peer")], &limits).unwrap(), limits).unwrap();
+        peer.adopt_external_captures(&controller.coordinator).unwrap();
+        let (prepared, held, increment, id) = prepare(&controller);
+        let refused = controller.commit_incremental_scene_with_guard(prepared, held, increment, Some(id), false,
+            || Some((1024 * MIB, 256 * MIB)), || panic!("low RAM must refuse before scene construction"));
+        assert!(matches!(refused, Err(Error::Budget("available physical RAM"))));
+        assert_eq!(controller.coordinator.snapshot(), before);
+        assert_eq!(controller.coordinator.redo_len(), 1);
+        assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), baseline - controller.scene.as_ref().unwrap().picking_arena_bytes().unwrap(),
+            "physical refusal releases unused arena quota, preserving source/history owners");
+        baseline = peer.external_reserved_bytes(MemoryClass::CpuCache);
+        let initial_memory = controller.scene.as_ref().unwrap().memory_allowance_bytes();
+        let (prepared, held, increment, id) = prepare(&controller);
+        let canceled = controller.commit_incremental_scene_with_guard(prepared, held, increment, Some(id), false,
+            || Some((1024 * MIB, 1024 * MIB)), || {
+                assert!(peer.external_reserved_bytes(MemoryClass::CpuCache) >= increment.bytes);
+                let rest = peer.reserve_remaining_external_memory_with_held(MemoryClass::Export, None, Usage::default())?;
+                assert!(matches!(peer.reserve_external_memory(MemoryClass::Export, 1, None), Err(Error::Budget(_))));
+                drop(rest);
+                Err(Error::Canceled)
+            });
+        assert!(matches!(canceled, Err(Error::Canceled)));
+        assert_eq!(controller.coordinator.snapshot(), before);
+        assert_eq!(controller.coordinator.redo_len(), 1);
+        assert_eq!(controller.scene.as_ref().unwrap().epoch, scene_epoch);
+        assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), baseline);
+        let (prepared, held, increment, id) = prepare(&controller);
+        let mut competing = None;
+        let refused = controller.commit_incremental_scene_with_guard(prepared, held, increment, Some(id), false,
+            || Some((1024 * MIB, 1024 * MIB)), || {
+                competing = Some(peer.reserve_remaining_external_memory_with_held(MemoryClass::Export, None, Usage::default())?);
+                Ok(())
+            });
+        assert!(matches!(refused, Err(Error::Budget(_))));
+        assert_eq!(controller.coordinator.snapshot(), before);
+        assert_eq!(controller.coordinator.redo_len(), 1);
+        assert_eq!(controller.scene.as_ref().unwrap().epoch, scene_epoch);
+        assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), baseline);
+        drop(competing);
+        let (prepared, held, increment, id) = prepare(&controller);
+        let receipt = controller.commit_incremental_scene_with_guard(prepared, held, increment, Some(id), false,
+            || Some((1024 * MIB, 1024 * MIB)), || {
+                assert!(peer.external_reserved_bytes(MemoryClass::CpuCache) >= increment.bytes);
+                Ok(())
+            }).unwrap();
+        assert!(receipt.published);
+        assert!(controller.document().entities.contains_key(&id));
+        assert!(controller.scene.as_ref().unwrap().objects.iter().any(|object| object.root == id));
+        assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), baseline
+            + controller.scene.as_ref().unwrap().shared_buffer_bytes() - initial_buffers + scene_buffer_lease_overhead()
+            - initial_memory + controller.scene.as_ref().unwrap().memory_allowance_bytes());
+    }
+
+    #[test]
+    fn system_commit_refusal_preserves_scene_and_redo_then_allows_retry() {
+        use om9_core::budget::memory::CommitMemory;
+        const MIB: u64 = 1024 * 1024;
+        let limits = Limits { max_bytes: 64 * MIB, ..Limits::default() };
+        let mut controller = Controller::new(Document::with_template_tolerance("commit refusal"), limits).unwrap();
+        for point in ["1,2,3", "4,5,6"] { controller.submit("Point").unwrap(); controller.submit(point).unwrap(); }
+        controller.undo().unwrap();
+        let before = controller.coordinator.snapshot();
+        let epoch = controller.scene.as_ref().unwrap().epoch;
+        let baseline = controller.coordinator.external_reserved_bytes(MemoryClass::CpuCache);
+        let pending_before = controller.coordinator.external_pending_bytes(MemoryClass::CpuCache);
+        let (prepared, held, increment, id) = prepare(&controller);
+        controller.coordinator.set_commit_memory_sampler(|| Some(CommitMemory {
+            limit_bytes: 1024 * MIB, used_bytes: 768 * MIB,
+        }));
+        let refused = controller.commit_incremental_scene_with_guard(prepared, held, increment, Some(id), false,
+            || Some((1024 * MIB, 1024 * MIB)), || panic!("commit pressure must refuse before scene build"));
+        assert!(matches!(refused, Err(Error::Budget("available system commit"))));
+        assert_eq!(controller.coordinator.snapshot(), before);
+        assert_eq!(controller.coordinator.redo_len(), 1);
+        assert_eq!(controller.scene.as_ref().unwrap().epoch, epoch);
+        let optional = controller.scene.as_ref().unwrap().picking_arena_bytes().unwrap();
+        assert_eq!(controller.coordinator.external_reserved_bytes(MemoryClass::CpuCache), baseline - optional);
+        assert_eq!(controller.coordinator.external_pending_bytes(MemoryClass::CpuCache), pending_before - optional);
+        controller.coordinator.set_commit_memory_sampler(|| Some(CommitMemory {
+            limit_bytes: 1024 * MIB, used_bytes: 0,
+        }));
+        let (prepared, held, increment, id) = prepare(&controller);
+        let receipt = controller.commit_incremental_scene_with_guard(prepared, held, increment, Some(id), false,
+            || Some((1024 * MIB, 1024 * MIB)), || Ok(())).unwrap();
+        assert!(receipt.published);
+        assert!(controller.document().entities.contains_key(&id));
+        assert_eq!(controller.coordinator.redo_len(), 0);
+        assert_eq!(controller.coordinator.external_pending_bytes(MemoryClass::CpuCache), controller.scene.as_ref().unwrap().picking_arena_bytes().unwrap());
+    }
+
+    #[test]
+    fn layer_and_property_edits_refuse_pressure_without_losing_scene_or_redo() {
+        use super::properties::PropertyEdit;
+        const MIB: u64 = 1024 * 1024;
+        for property in [false, true] {
+            let limits = Limits { max_bytes: 64 * MIB, ..Limits::default() };
+            let mut controller = Controller::new(Document::with_template_tolerance("metadata pressure"), limits).unwrap();
+            for point in ["1,2,3", "4,5,6"] { controller.submit("Point").unwrap(); controller.submit(point).unwrap(); }
+            controller.undo().unwrap();
+            let id = *controller.document().entities.keys().next().unwrap();
+            let before = controller.coordinator.snapshot();
+            let epoch = controller.scene.as_ref().unwrap().epoch;
+            let baseline = controller.coordinator.external_reserved_bytes(MemoryClass::CpuCache);
+            let held = controller.scene_cache_usage().unwrap();
+            let pressure = controller.coordinator.reserve_remaining_external_memory_with_held(MemoryClass::Export, None, held).unwrap();
+            let stamp = controller.document().stamp(id).unwrap();
+            let result = if property {
+                controller.edit_object_property(vec![stamp], PropertyEdit::Label("changed".into()))
+            } else {
+                controller.set_objects_hidden(vec![stamp], true)
+            };
+            assert!(matches!(result, Err(Error::Budget(_))), "unexpected refusal: {result:?}");
+            assert_eq!(controller.coordinator.snapshot(), before);
+            assert_eq!(controller.coordinator.redo_len(), 1);
+            assert_eq!(controller.scene.as_ref().unwrap().epoch, epoch);
+            drop(pressure);
+            let stamp = controller.document().stamp(id).unwrap();
+            if property {
+                controller.edit_object_property(vec![stamp], PropertyEdit::Label("changed".into())).unwrap();
+                assert_eq!(controller.document().entities[&id].label, "changed");
+            } else {
+                controller.set_objects_hidden(vec![stamp], true).unwrap();
+                assert!(!controller.scene.as_ref().unwrap().objects.iter().find(|object| object.root == id).unwrap().visible);
+            }
+            assert_eq!(controller.coordinator.external_reserved_bytes(MemoryClass::CpuCache), baseline);
+            controller.undo().unwrap();
+        }
+    }
+
+    #[test]
+    fn clipboard_paste_under_shared_pressure_preserves_redo_and_can_retry() {
+        const MIB: u64 = 1024 * 1024;
+        let limits = Limits { max_bytes: 64 * MIB, ..Limits::default() };
+        let mut controller = Controller::new(Document::with_template_tolerance("paste pressure"), limits).unwrap();
+        for point in ["1,2,3", "4,5,6"] {
+            controller.submit("Point").unwrap();
+            controller.submit(point).unwrap();
+        }
+        controller.undo().unwrap();
+        let id = *controller.document().entities.keys().next().unwrap();
+        controller.select_objects(&[id]).unwrap();
+        let clipboard = controller.copy_selected_om9().unwrap();
+        let before = controller.coordinator.snapshot();
+        let scene_epoch = controller.scene.as_ref().unwrap().epoch;
+        let selected = controller.selected().clone();
+        let held = controller.scene_cache_usage().unwrap();
+        let pressure = controller.coordinator.reserve_remaining_external_memory_with_held(
+            MemoryClass::Export, None, held,
+        ).unwrap();
+        assert!(matches!(controller.paste_om9(&clipboard), Err(Error::Budget(_))));
+        assert_eq!(controller.coordinator.snapshot(), before);
+        assert_eq!(controller.coordinator.redo_len(), 1);
+        assert_eq!(controller.scene.as_ref().unwrap().epoch, scene_epoch);
+        assert_eq!(controller.selected(), &selected);
+        drop(pressure);
+        let pasted = controller.paste_om9(&clipboard).unwrap();
+        assert_eq!(pasted.len(), 1);
+        assert!(controller.scene.as_ref().unwrap().objects.iter().any(|object| object.root == pasted[0]));
+        controller.undo().unwrap();
+        assert_eq!(controller.coordinator.world(), &before.world);
+        controller.redo().unwrap();
+        assert!(controller.document().entities.contains_key(&pasted[0]));
+    }
+
+    #[test]
+    fn long_scene_buffer_lease_chain_releases_without_recursive_drop() {
+        let limits = Limits::default();
+        let coordinator = TransactionCoordinator::new(World::new(vec![], &limits).unwrap(), limits).unwrap();
+        let mut chain = None;
+        let mut retained_prefix = None;
+        for index in 0..10_000 {
+            let reservation = coordinator.reserve_external_memory(MemoryClass::CpuCache, 1, None).unwrap();
+            let next = Arc::new(SceneBufferLease { previous: chain, _reservation: reservation });
+            if index == 4_999 { retained_prefix = Some(next.clone()); }
+            chain = Some(next);
+        }
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 10_000);
+        drop(chain);
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 5_000);
+        drop(retained_prefix);
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    }
+
+    #[test]
+    fn incremental_scene_grows_shared_reservation_for_actual_capacity_before_commit() {
+        use std::cell::Cell;
+        const MIB: u64 = 1024 * 1024;
+        let limits = Limits { max_bytes: 64 * MIB, ..Limits::default() };
+        let mut controller = Controller::new(Document::with_template_tolerance("scene actual capacity"), limits).unwrap();
+        for point in ["1,2,3", "4,5,6"] { controller.submit("Point").unwrap(); controller.submit(point).unwrap(); }
+        controller.undo().unwrap();
+        let before = controller.coordinator.snapshot();
+        let epoch = controller.scene.as_ref().unwrap().epoch;
+        let mut peer = TransactionCoordinator::new(World::new(vec![Document::new("peer")], &limits).unwrap(), limits).unwrap();
+        peer.adopt_external_captures(&controller.coordinator).unwrap();
+        let make_small = |held: &mut Usage, increment: &mut Usage| {
+            held.bytes = held.bytes.checked_sub(increment.bytes).unwrap() + 1;
+            increment.bytes = 1;
+        };
+        let mut baseline = peer.external_reserved_bytes(MemoryClass::CpuCache);
+        let initial_buffers = controller.scene.as_ref().unwrap().shared_buffer_bytes();
+        let (prepared, mut held, mut increment, id) = prepare(&controller);
+        make_small(&mut held, &mut increment);
+        let samples = Cell::new(0);
+        let refused = controller.commit_incremental_scene_with_guard(prepared, held, increment, Some(id), false,
+            || { let n = samples.get(); samples.set(n + 1); Some((1024 * MIB, if n == 0 { 1024 * MIB } else { 256 * MIB })) },
+            || { assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), baseline + 1); Ok(()) });
+        assert!(matches!(refused, Err(Error::Budget("available physical RAM"))));
+        assert_eq!(samples.get(), 2, "actual capacity must require a fresh admission");
+        assert_eq!(controller.coordinator.snapshot(), before);
+        assert_eq!(controller.coordinator.redo_len(), 1);
+        assert_eq!(controller.scene.as_ref().unwrap().epoch, epoch);
+        assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), baseline - controller.scene.as_ref().unwrap().picking_arena_bytes().unwrap());
+        baseline = peer.external_reserved_bytes(MemoryClass::CpuCache);
+        let initial_memory = controller.scene.as_ref().unwrap().memory_allowance_bytes();
+
+        let (prepared, mut held, mut increment, id) = prepare(&controller);
+        make_small(&mut held, &mut increment);
+        let samples = Cell::new(0);
+        let receipt = controller.commit_incremental_scene_with_guard(prepared, held, increment, Some(id), false,
+            || { samples.set(samples.get() + 1); Some((1024 * MIB, 1024 * MIB)) },
+            || { assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), baseline + 1); Ok(()) }).unwrap();
+        assert!(receipt.published);
+        assert_eq!(samples.get(), 2);
+        assert!(controller.scene.as_ref().unwrap().objects.iter().any(|object| object.root == id));
+        assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), baseline
+            + controller.scene.as_ref().unwrap().shared_buffer_bytes() - initial_buffers + scene_buffer_lease_overhead()
+            - initial_memory + controller.scene.as_ref().unwrap().memory_allowance_bytes());
+    }
+
+    #[test]
+    fn full_candidate_scene_reconciles_actual_capacity_before_commit() {
+        use std::cell::Cell;
+        const MIB: u64 = 1024 * 1024;
+        let limits = Limits { max_bytes: 64 * MIB, ..Limits::default() };
+        let mut controller = Controller::new(Document::with_template_tolerance("full scene capacity"), limits).unwrap();
+        for point in ["1,2,3", "4,5,6"] { controller.submit("Point").unwrap(); controller.submit(point).unwrap(); }
+        controller.undo().unwrap();
+        let before = controller.coordinator.snapshot();
+        let epoch = controller.scene.as_ref().unwrap().epoch;
+        let mut peer = TransactionCoordinator::new(World::new(vec![Document::new("peer")], &limits).unwrap(), limits).unwrap();
+        peer.adopt_external_captures(&controller.coordinator).unwrap();
+
+        let (prepared, mut held, increment, _) = prepare(&controller);
+        let baseline = peer.external_reserved_bytes(MemoryClass::CpuCache);
+        held.bytes -= increment.bytes;
+        let samples = Cell::new(0);
+        let refused = controller.commit_with_candidate_scene_guard(prepared, held,
+            || { let n = samples.get(); samples.set(n + 1); Some((1024 * MIB, if n < 2 { 1024 * MIB } else { 256 * MIB })) },
+            |reservation| { reservation.shrink_to(1)?; assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), baseline + 1); Ok(()) });
+        assert!(matches!(refused, Err(Error::Budget("available physical RAM"))));
+        assert_eq!(samples.get(), 3);
+        assert_eq!(controller.coordinator.snapshot(), before);
+        assert_eq!(controller.coordinator.redo_len(), 1);
+        assert_eq!(controller.scene.as_ref().unwrap().epoch, epoch);
+        assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), baseline - controller.scene.as_ref().unwrap().picking_arena_bytes().unwrap());
+
+        let (prepared, mut held, increment, id) = prepare(&controller);
+        held.bytes -= increment.bytes;
+        let samples = Cell::new(0);
+        let receipt = controller.commit_with_candidate_scene_guard(prepared, held,
+            || { samples.set(samples.get() + 1); Some((1024 * MIB, 1024 * MIB)) },
+            |reservation| reservation.shrink_to(1)).unwrap();
+        assert!(receipt.published);
+        assert_eq!(samples.get(), 3);
+        assert!(controller.scene.as_ref().unwrap().objects.iter().any(|object| object.root == id));
+        let scene = controller.scene.as_ref().unwrap();
+        assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), scene.shared_buffer_bytes() + scene_buffer_lease_overhead() + scene.memory_allowance_bytes());
+        assert_eq!(controller.registered_scene_buffer_bytes(scene), scene.shared_buffer_bytes());
+    }
+}
 mod angle_isocurve;
 pub mod annotation;
 mod apply_crv;
@@ -92,6 +443,8 @@ mod sketch;
 mod sketch_on_surface;
 mod spiral;
 pub mod stress;
+mod surface_snap;
+pub use surface_snap::{SurfaceSnapJob, SurfaceSnapReceipt, SurfaceSnapScheduler};
 mod subobjects;
 mod through_points;
 mod to_lines;
@@ -103,8 +456,12 @@ pub use subobjects::SelectedSubobject;
 mod display_state;
 mod f6_state;
 mod files;
+mod clipboard;
+mod stl;
+pub use stl::{StlCancellation, StlExportCapture, StlExportJob, StlExportProfile};
 pub use files::format_import_summary;
-mod gumball;
+pub mod gumball;
+pub use gumball::GumballAlignment;
 mod jobbag;
 mod layer_dialogs;
 mod layers;
@@ -113,6 +470,7 @@ mod plugins;
 mod project_state;
 mod properties;
 mod solid;
+mod selection_memory;
 mod solid_pending;
 mod solid_geometry;
 mod solid_pipe;
@@ -141,6 +499,10 @@ pub enum InvocationOrigin {
 pub enum DispatchOutcome {
     Command,
     File(crate::file_lifecycle::FileOutcome),
+    Top11(top11::Top11Result),
+    /// File ▸ Export Selected asks the UI to open the `.stl` save dialog; the
+    /// Controller owns the export itself.
+    StlExport,
 }
 /// Which step of an interactive command is waiting for the user
 /// (OM9-L3-01-02-004). It is derived from the one session state, so the prompt,
@@ -394,6 +756,9 @@ struct SlashPending {
 }
 pub struct Controller {
     coordinator: TransactionCoordinator,
+    /// Invalidated when this document session is replaced; captured exports
+    /// retain the old token until they finish or acknowledge cancellation.
+    stl_session: stl::StlSessionOwner,
     /// Monotonic command-start generation used to reject stale option IDs.
     command_run: u64,
     invoked_feature: Option<String>,
@@ -407,6 +772,13 @@ pub struct Controller {
     /// Gumball placement: an explicit origin (relocate) and the alignment of its axes.
     gumball_origin: Option<om9_core::geometry::Point3>,
     gumball_alignment: crate::session::gumball::GumballAlignment,
+    gumball_bounds_cache: std::cell::RefCell<Option<crate::session::gumball::BoundsCache>>,
+    /// Snappy drag uses the active object-snap candidate; Smooth (default) uses
+    /// the raw pointer ray. Stored as a session setting, not a widget cache.
+    gumball_snappy: bool,
+    /// Drag strength: 1.0 moves the pointer distance, 0.5 half. Snapped and
+    /// numeric input remain exact.
+    gumball_drag_strength: f64,
     /// Pending Top 11 point command (OM9-L2-03-08).
     top11_pending: Option<self::top11::Top11Pending>,
     solid_pending: Option<solid::SolidPending>,
@@ -555,11 +927,15 @@ pub struct Controller {
     top11_grip: Option<om9_core::top11::GripMode>,
     /// Faces, edges and vertices picked with Ctrl+Shift+click, in pick order.
     subselection: Vec<SelectedSubobject>,
+    // Drop nested paths/slots before releasing their shared-account owner.
+    subselection_reservation: Option<om9_core::transaction::ExternalMemoryReservation>,
     sub_revision: u64,
     /// Bumped while a gumball drag previews, so every viewport redraws the moving object.
     preview_revision: u64,
     document: DocumentId,
     scene: Option<Scene>,
+    // Declared after scene so its last lease is released after scene buffers.
+    scene_buffer_owner: std::sync::Mutex<Option<SceneBufferOwner>>,
     session: Option<CommandSession>,
     recent: VecDeque<String>,
     repeat: Option<String>,
@@ -568,6 +944,8 @@ pub struct Controller {
     /// Selection in pick order, filtered by the live set. Commands that combine
     /// multiple curves/surfaces use this order; stale entries are ignored.
     selection_order: Vec<om9_core::identity::ObjectId>,
+    // Declared after the collections: drop their storage before its lease.
+    selection_reservation: Option<om9_core::transaction::ExternalMemoryReservation>,
     /// Bumped whenever the selection set changes, so a published selection
     /// state has a revision a caller can compare.
     selection_revision: u64,
@@ -688,7 +1066,14 @@ impl Controller {
         Ok(())
     }
     pub fn new(document: Document, limits: Limits) -> Result<Self> {
-        Self::new_with_held(document, limits, om9_core::budget::Usage::default())
+        let controller = Self::new_with_held(document, limits, om9_core::budget::Usage::default())?;
+        let scene = controller.scene.as_ref().ok_or(Error::Missing("initial scene"))?;
+        if scene.shared_buffer_bytes() != 0 {
+            controller.share_scene_buffer_owner(scene)?;
+        }
+        scene.reserve_memory_allowance(&controller.coordinator, controller.auxiliary_usage()?,
+            om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes)))?;
+        Ok(controller)
     }
     fn new_with_held(
         document: Document,
@@ -707,12 +1092,23 @@ impl Controller {
         )?;
         peak.add(om9_core::budget::Usage::array::<Document>(1)?, &limits)?;
         let file = crate::file_lifecycle::FileState::initialized(&document)?;
-        let coordinator = TransactionCoordinator::new_with_held(
+        let mut coordinator = TransactionCoordinator::new_with_held(
             World::new(vec![document], &remaining)?,
             limits,
             held,
         )?;
-        let scene = Scene::capture_in_world(&coordinator, id, held)?;
+        coordinator.set_physical_memory_sampler(|| {
+            om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes))
+        });
+        #[cfg(windows)]
+        coordinator.set_commit_memory_sampler(om9_native_owner::commit_memory);
+        if let Some(total) = om9_native_owner::physical_memory_bytes() {
+            coordinator.constrain_managed_ram(total, held)?;
+            coordinator.set_undo_ram_capacity(total)?;
+        }
+        let scene = Scene::capture_in_world_with_physical_samples(&coordinator, id, held, || {
+            om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes))
+        })?;
         Ok(Self {
             coordinator,
             command_run: 0,
@@ -724,6 +1120,9 @@ impl Controller {
             project: false,
             gumball_origin: None,
             gumball_alignment: crate::session::gumball::GumballAlignment::World,
+            gumball_bounds_cache: std::cell::RefCell::new(None),
+            gumball_snappy: false,
+            gumball_drag_strength: 1.0,
             top11_pending: None,
             solid_pending: None,
             circle_pending: None,
@@ -844,8 +1243,11 @@ impl Controller {
             last_settings_mass: None,
             top11_grip: None,
             subselection: Vec::new(),
+            subselection_reservation: None,
             sub_revision: 1,
             preview_revision: 1,
+            stl_session: stl::StlSessionOwner::new(),
+            scene_buffer_owner: std::sync::Mutex::new(None),
             document: id,
             scene: Some(scene),
             session: None,
@@ -854,6 +1256,7 @@ impl Controller {
             view_menu_generation: 0,
             selection: std::collections::BTreeSet::new(),
             selection_order: Vec::new(),
+            selection_reservation: None,
             selection_revision: 1,
             layer_dialog: None,
             layer_dialog_serial: 0,
@@ -870,11 +1273,70 @@ impl Controller {
     pub fn coordinator(&self) -> &TransactionCoordinator {
         &self.coordinator
     }
+    pub fn set_undo_policy(&mut self, policy: om9_core::transaction::UndoPolicy) -> Result<()> {
+        if self.is_running() { return Err(Error::Busy); }
+        self.coordinator.set_undo_policy(policy)
+    }
+    pub(crate) fn disable_undo_for_benchmark(&mut self) -> Result<()> {
+        self.coordinator.disable_undo_for_benchmark()
+    }
     pub fn document(&self) -> &Document {
         &self.coordinator.world().documents[&self.document]
     }
     pub fn scene(&self) -> Option<&Scene> {
         self.scene.as_ref()
+    }
+    fn publish_owned_scene(&mut self, scene: Scene, buffer_owner: Option<SceneBufferOwner>) {
+        let old_scene = self.scene.replace(scene);
+        drop(old_scene);
+        let old_owner = std::mem::replace(&mut *self.scene_buffer_owner.lock().unwrap_or_else(|e| e.into_inner()), buffer_owner);
+        drop(old_owner);
+    }
+    fn clear_scene(&mut self) {
+        drop(self.scene.take());
+        let old_owner = self.scene_buffer_owner.lock().unwrap_or_else(|e| e.into_inner()).take();
+        drop(old_owner);
+    }
+    fn registered_scene_buffer_bytes(&self, scene: &Scene) -> u64 {
+        let owner = self.scene_buffer_owner.lock().unwrap_or_else(|e| e.into_inner());
+        owner.as_ref().filter(|owner| owner.epoch == scene.epoch
+            && owner.document.ptr_eq(&Arc::downgrade(&scene.document)))
+            .map_or(0, |owner| owner.bytes)
+    }
+    pub(crate) fn share_scene_buffer_owner(&self, scene: &Scene)
+        -> Result<Arc<SceneBufferLease>> {
+        self.share_scene_buffer_owner_with_sample(scene,
+            om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes)))
+    }
+    pub(crate) fn share_scene_buffer_owner_with_sample(&self, scene: &Scene, physical: Option<(u64, u64)>)
+        -> Result<Arc<SceneBufferLease>> {
+        if !self.scene.as_ref().is_some_and(|current| std::ptr::eq(current, scene)) {
+            return Err(Error::Stale("viewport scene"));
+        }
+        let mut owner = self.scene_buffer_owner.lock().unwrap_or_else(|e| e.into_inner());
+        if let Some(existing) = owner.as_ref() {
+            if existing.epoch != scene.epoch || !existing.document.ptr_eq(&Arc::downgrade(&scene.document)) {
+                return Err(Error::Invalid("scene buffer owner mismatch"));
+            }
+            if existing.bytes == scene.shared_buffer_bytes() {
+                return Ok(existing.lease.clone());
+            }
+        }
+        let bytes = scene.shared_buffer_bytes();
+        let already = owner.as_ref().map_or(0, |owner| owner.bytes);
+        let new_bytes = bytes.checked_sub(already).ok_or(Error::Invalid("scene buffer accounting"))?;
+        let overhead = scene_buffer_lease_overhead();
+        let charge = new_bytes.checked_add(overhead).ok_or(Error::Overflow("scene buffer lease"))?;
+        let mut held = scene.cache_held_usage()?;
+        held.bytes = held.bytes.checked_sub(bytes).ok_or(Error::Invalid("scene buffer accounting"))?;
+        held.add(self.auxiliary_usage()?, self.coordinator.limits())?;
+        let reservation = self.coordinator.reserve_external_memory_with_allocated(
+            om9_core::budget::memory::MemoryClass::CpuCache, charge, new_bytes, physical, held,
+        )?;
+        let previous = owner.as_ref().map(|owner| owner.lease.clone());
+        let lease = SceneBufferLease::new(previous, reservation)?;
+        *owner = Some(SceneBufferOwner { epoch: scene.epoch, document: Arc::downgrade(&scene.document), bytes, lease: lease.clone() });
+        Ok(lease)
     }
     /// The ordered command events of this session, for text readers and audits.
     pub fn events(&self) -> &crate::command_events::EventLog {
@@ -1140,7 +1602,9 @@ impl Controller {
         if self::ring_tools::handles_command(feature) {
             return Ok(());
         }
-        if crate::file_lifecycle::FileKind::from_feature(feature).is_some() {
+        if crate::file_lifecycle::FileKind::from_feature(feature).is_some()
+            || feature == self::stl::STL_EXPORT
+        {
             return Ok(());
         }
         if let Some((target, _)) = solid::mode_command(feature) {
@@ -1333,8 +1797,27 @@ impl Controller {
             }
             return Ok(DispatchOutcome::Command);
         }
+        // The Top 11 toolbar owns the same action ids: a published feature id
+        // dispatches the action the icon click runs, not a second implementation.
+        if let Some(action) = om9_core::top11::Top11Action::from_feature(feature) {
+            if self.is_running() {
+                return Err(Error::Busy);
+            }
+            let result = self.top11_invoke(action)?;
+            self.invoked_feature = self.is_running().then(|| feature.to_owned());
+            return Ok(DispatchOutcome::Top11(result));
+        }
         if let Some(kind) = crate::file_lifecycle::FileKind::from_feature(feature) {
             return self.begin_file_operation(kind).map(DispatchOutcome::File);
+        }
+        // File ▸ Export Selected: the Controller validates the selection; the UI
+        // opens the native `.stl` save dialog and calls `export_stl_selected`.
+        if feature == self::stl::STL_EXPORT {
+            if self.is_running() {
+                return Err(Error::Busy);
+            }
+            self.stl_export_ready()?;
+            return Ok(DispatchOutcome::StlExport);
         }
         let result = self.dispatch_geometry(feature, origin);
         if result.is_ok() {
@@ -1963,14 +2446,16 @@ impl Controller {
         if text.trim().is_empty()
             && let Some(result) = self.top11_finish()
         {
-            result?;
-            return Ok(DispatchOutcome::Command);
+            return result.map(DispatchOutcome::Top11);
         }
         if let Some(result) = self.submit_plugin_text(text.trim()) {
             return result.map(|_| DispatchOutcome::Command);
         }
         if let Some(kind) = crate::file_lifecycle::FileKind::from_command(text.trim()) {
             return self.dispatch_effect(kind.feature_id(), InvocationOrigin::Cmd);
+        }
+        if let Some(feature) = Self::stl_export_feature(text) {
+            return self.dispatch_effect(feature, InvocationOrigin::Cmd);
         }
         if let Some(result) = self.submit_circle_text(text.trim()) {
             return result.map(|_| DispatchOutcome::Command);
@@ -2124,10 +2609,8 @@ impl Controller {
             return Err(Error::Stale("command scene"));
         }
         let mut held = self.scene_cache_usage()?;
-        held.add(
-            old_scene.update_usage(Some(&entity))?,
-            self.coordinator.limits(),
-        )?;
+        let increment = old_scene.update_held_usage(Some(&entity))?;
+        held.add(increment, self.coordinator.limits())?;
         let added = entity.id;
         let prepared = self.coordinator.prepare_with_held_usage(
             TransactionRequest::new(
@@ -2139,20 +2622,8 @@ impl Controller {
             ),
             held,
         )?;
-        let epoch = self
-            .coordinator
-            .epoch()
-            .checked_add(1)
-            .ok_or(Error::Overflow("scene publication epoch"))?;
-        let scene = old_scene.update_owned(
-            prepared.candidate_world().documents[&self.document].clone(),
-            epoch,
-            Some(added),
-            self.coordinator.limits(),
-        )?;
-        let receipt = self.coordinator.commit(prepared)?;
+        let receipt = self.commit_incremental_scene(prepared, held, increment, Some(added), false)?;
         if receipt.published {
-            self.scene = Some(scene);
             self.recent.push_back(feature.into());
             while self.recent.len() > 9 {
                 self.recent.pop_front();
@@ -2216,10 +2687,8 @@ impl Controller {
             return Err(Error::Stale("command scene"));
         }
         let mut held = self.scene_cache_usage()?;
-        held.add(
-            old_scene.update_usage(Some(&entity))?,
-            self.coordinator.limits(),
-        )?;
+        let increment = old_scene.update_held_usage(Some(&entity))?;
+        held.add(increment, self.coordinator.limits())?;
         let expected_revision = self.document().revision;
         let mut mutations = vec![Mutation::Insert {
             document: self.document,
@@ -2236,20 +2705,8 @@ impl Controller {
         let prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new(name, mutations), held)?;
-        let epoch = self
-            .coordinator
-            .epoch()
-            .checked_add(1)
-            .ok_or(Error::Overflow("scene publication epoch"))?;
-        let scene = old_scene.update_owned(
-            prepared.candidate_world().documents[&self.document].clone(),
-            epoch,
-            Some(output),
-            self.coordinator.limits(),
-        )?;
-        let receipt = self.coordinator.commit(prepared)?;
+        let receipt = self.commit_incremental_scene(prepared, held, increment, Some(output), !record)?;
         if receipt.published || !record {
-            self.scene = Some(scene);
             self.recent.push_back(feature.into());
             while self.recent.len() > 9 {
                 self.recent.pop_front();
@@ -2289,15 +2746,18 @@ impl Controller {
         let mut held = self.scene_cache_usage()?;
         let mut mutations = Vec::with_capacity(items.len());
         let mut added = None;
+        let multiple = items.len() > 1;
+        let mut increment = om9_core::budget::Usage::default();
+        let mut scene_points = old_scene.cache_usage()?.points;
         for (label, geometry) in items {
             let mut entity = Entity::new(label, geometry, self.document().current_layer);
             if entity.attributes.layer.is_some() {
                 entity.attributes.color = None;
             }
-            held.add(
-                old_scene.update_usage(Some(&entity))?,
-                self.coordinator.limits(),
-            )?;
+            if !multiple {
+                increment = old_scene.update_held_usage_counted(Some(&entity), &mut scene_points)?;
+                held.add(increment, self.coordinator.limits())?;
+            }
             added = Some(entity.id);
             mutations.push(Mutation::Insert {
                 document: self.document,
@@ -2309,9 +2769,8 @@ impl Controller {
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new(name, mutations), held)?;
         if count > 1 {
-            let receipt = self.coordinator.commit(prepared)?;
+            let receipt = self.commit_with_candidate_scene(prepared, held)?;
             if receipt.published {
-                self.refresh_scene()?;
                 self.recent.push_back(feature.into());
                 while self.recent.len() > 9 {
                     self.recent.pop_front();
@@ -2333,20 +2792,8 @@ impl Controller {
             self.session = None;
             return Ok(());
         }
-        let epoch = self
-            .coordinator
-            .epoch()
-            .checked_add(1)
-            .ok_or(Error::Overflow("scene publication epoch"))?;
-        let scene = old_scene.update_owned(
-            prepared.candidate_world().documents[&self.document].clone(),
-            epoch,
-            added,
-            self.coordinator.limits(),
-        )?;
-        let receipt = self.coordinator.commit(prepared)?;
+        let receipt = self.commit_incremental_scene(prepared, held, increment, added, false)?;
         if receipt.published {
-            self.scene = Some(scene);
             self.recent.push_back(feature.into());
             while self.recent.len() > 9 {
                 self.recent.pop_front();
@@ -2368,14 +2815,166 @@ impl Controller {
         self.session = None;
         Ok(())
     }
+    #[cfg(test)]
     fn refresh_scene(&mut self) -> Result<()> {
-        // On a cache failure after Undo/Redo, never present the prior world as
-        // current. The document action has succeeded; the display is unavailable.
-        self.scene = None;
+        // Test fixtures can deliberately mutate the coordinator directly.
+        self.clear_scene();
         let held = self.auxiliary_usage()?;
-        let scene = Scene::capture_in_world(&self.coordinator, self.document, held)?;
-        self.scene = Some(scene);
+        let scene = Scene::capture_in_world_with_physical_samples(&self.coordinator, self.document, held, || {
+            om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes))
+        })?;
+        let mut memory_held = held;
+        memory_held.add(om9_core::budget::Usage { bytes: scene.shared_buffer_bytes(), ..Default::default() }, self.coordinator.limits())?;
+        scene.reserve_memory_allowance(&self.coordinator, memory_held,
+            om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes)))?;
+        self.publish_owned_scene(scene, None);
         Ok(())
+    }
+    /// Hold the incremental scene estimate on the shared account through
+    /// construction and publication. Non-byte structural quotas remain in
+    /// `held`; only the bytes move to the peer-visible reservation.
+    fn commit_incremental_scene(
+        &mut self,
+        prepared: om9_core::transaction::PreparedTransaction,
+        held: om9_core::budget::Usage,
+        increment: om9_core::budget::Usage,
+        addition: Option<om9_core::identity::ObjectId>,
+        publish_unrecorded: bool,
+    ) -> Result<om9_core::transaction::CommitReceipt> {
+        self.commit_incremental_scene_with_guard(prepared, held, increment, addition, publish_unrecorded,
+            || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes)), || Ok(()))
+    }
+
+    fn commit_incremental_scene_with_guard(
+        &mut self,
+        mut prepared: om9_core::transaction::PreparedTransaction,
+        mut held: om9_core::budget::Usage,
+        increment: om9_core::budget::Usage,
+        addition: Option<om9_core::identity::ObjectId>,
+        publish_unrecorded: bool,
+        mut sample: impl FnMut() -> Option<(u64, u64)>,
+        before_build: impl FnOnce() -> Result<()>,
+    ) -> Result<om9_core::transaction::CommitReceipt> {
+        let old_scene = self.scene.as_ref().ok_or(Error::Missing("command scene"))?;
+        if old_scene.epoch != self.coordinator.epoch() { return Err(Error::Stale("command scene")); }
+        let document = self.coordinator.register_prepared_document(&prepared, self.document)?;
+        let epoch = self.coordinator.epoch().checked_add(1).ok_or(Error::Overflow("scene publication epoch"))?;
+        held.bytes = held.bytes.checked_sub(increment.bytes).ok_or(Error::Invalid("scene reservation estimate"))?;
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::CpuCache, increment.bytes.max(1), sample(), held,
+        )?;
+        self.coordinator.reserve_prepared_held_usage(&mut prepared, held)?;
+        before_build()?;
+        let (scene, actual_bytes) = old_scene.update_owned_with_retained_bytes(document, epoch, addition, self.coordinator.limits())?;
+        let new_buffers = scene.shared_buffer_bytes().checked_sub(old_scene.shared_buffer_bytes())
+            .ok_or(Error::Invalid("incremental scene buffers"))?;
+        let overhead = if new_buffers == 0 { 0 } else { scene_buffer_lease_overhead() };
+        let arena = scene.picking_arena_bytes()?;
+        let required = actual_bytes.checked_add(overhead).and_then(|bytes| bytes.checked_add(arena))
+            .ok_or(Error::Overflow("incremental scene owner"))?;
+        if required > reservation.bytes() {
+            let additional = required - reservation.bytes();
+            self.coordinator.grow_external_memory_with_held(&mut reservation, additional, sample(), held)?;
+        }
+        let previous = self.scene_buffer_owner.lock().unwrap_or_else(|e| e.into_inner()).as_ref()
+            .map(|owner| (owner.bytes, owner.lease.clone()));
+        scene.transfer_memory_allowance(&mut reservation, &self.coordinator, held)?;
+        let buffer_owner = if new_buffers != 0 {
+            let split = reservation.split_off(new_buffers + overhead)?;
+            let bytes = previous.as_ref().map_or(0, |(bytes, _)| *bytes).checked_add(new_buffers)
+                .ok_or(Error::Overflow("incremental scene owner"))?;
+            Some(SceneBufferOwner { epoch, document: Arc::downgrade(&scene.document), bytes,
+                lease: SceneBufferLease::new(previous.map(|(_, lease)| lease), split)? })
+        } else {
+            previous.map(|(bytes, lease)| SceneBufferOwner { epoch, document: Arc::downgrade(&scene.document), bytes, lease })
+        };
+        let candidate = ReservedCandidateScene { scene, buffer_owner, reservation };
+        let receipt = self.coordinator.commit(prepared)?;
+        let ReservedCandidateScene { scene, buffer_owner, reservation } = candidate;
+        if receipt.published || publish_unrecorded { self.publish_owned_scene(scene, buffer_owner); }
+        else { drop(scene); drop(buffer_owner); }
+        drop(reservation);
+        Ok(receipt)
+    }
+
+    /// Build the candidate scene before making an edit visible. `held` is the
+    /// same caller-owned allocation admitted during transaction preparation.
+    fn commit_with_candidate_scene(
+        &mut self,
+        prepared: om9_core::transaction::PreparedTransaction,
+        held: om9_core::budget::Usage,
+    ) -> Result<om9_core::transaction::CommitReceipt> {
+        self.commit_with_candidate_scene_guard(prepared, held,
+            || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes)), |_| Ok(()))
+    }
+
+    fn commit_with_candidate_scene_guard(
+        &mut self,
+        mut prepared: om9_core::transaction::PreparedTransaction,
+        held: om9_core::budget::Usage,
+        sample: impl FnMut() -> Option<(u64, u64)>,
+        before_build: impl FnOnce(&mut om9_core::transaction::ExternalMemoryReservation) -> Result<()>,
+    ) -> Result<om9_core::transaction::CommitReceipt> {
+        let candidate = self.prepare_candidate_scene_guard(&mut prepared, held, sample, before_build)?;
+        let receipt = self.coordinator.commit(prepared)?;
+        let ReservedCandidateScene { scene, buffer_owner, reservation } = candidate;
+        if receipt.published {
+            self.publish_owned_scene(scene, buffer_owner);
+        } else {
+            drop(scene);
+            drop(buffer_owner);
+        }
+        drop(reservation);
+        Ok(receipt)
+    }
+
+    fn prepare_candidate_scene_guard(
+        &self,
+        prepared: &mut om9_core::transaction::PreparedTransaction,
+        held: om9_core::budget::Usage,
+        mut sample: impl FnMut() -> Option<(u64, u64)>,
+        before_build: impl FnOnce(&mut om9_core::transaction::ExternalMemoryReservation) -> Result<()>,
+    ) -> Result<ReservedCandidateScene> {
+        let old_scene = self.scene.as_ref().ok_or(Error::Missing("edit scene"))?;
+        if old_scene.epoch != self.coordinator.epoch() {
+            return Err(Error::Stale("edit scene"));
+        }
+        let document = self.coordinator.register_prepared_document(prepared, self.document)?;
+        let epoch = self.coordinator.epoch().checked_add(1).ok_or(Error::Overflow("edit scene epoch"))?;
+        let mut limits = self.coordinator.prepared_remaining_limits(prepared, held)?;
+        // The candidate document is already charged by the prepared
+        // transaction; Scene validates that same document again. Keep its
+        // structural object quota instead of subtracting the document twice.
+        limits.max_objects = self.coordinator.limits().max_objects;
+        let scratch = Scene::candidate_preflight_scratch(&document, &limits)?;
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::CpuCache, scratch.bytes.max(1), sample(), held,
+        )?;
+        let peak = Scene::candidate_scene_peak(&document, &limits)?;
+        if peak != 0 {
+            self.coordinator.grow_external_memory_with_held(&mut reservation, peak, sample(), held)?;
+        }
+        before_build(&mut reservation)?;
+        let scene = Scene::capture(document, epoch, &limits)?;
+        let buffer_bytes = scene.shared_buffer_bytes();
+        let overhead = if buffer_bytes == 0 { 0 } else { scene_buffer_lease_overhead() };
+        let arena = scene.picking_arena_bytes()?;
+        let actual_bytes = scene.cache_held_usage()?.bytes.checked_add(overhead).and_then(|bytes| bytes.checked_add(arena))
+            .ok_or(Error::Overflow("candidate scene buffer owner"))?;
+        if actual_bytes > reservation.bytes() {
+            let additional = actual_bytes - reservation.bytes();
+            self.coordinator.grow_external_memory_with_held(&mut reservation, additional, sample(), held)?;
+        }
+        // The reservation already covers the candidate scene and must remain
+        // visible to peers through commit; do not charge it again as `held`.
+        self.coordinator.reserve_prepared_held_usage(prepared, held)?;
+        scene.transfer_memory_allowance(&mut reservation, &self.coordinator, held)?;
+        let buffer_owner = if buffer_bytes == 0 { None } else {
+            let split = reservation.split_off(buffer_bytes + overhead)?;
+            Some(SceneBufferOwner { epoch: scene.epoch, document: Arc::downgrade(&scene.document), bytes: buffer_bytes,
+                lease: SceneBufferLease::new(None, split)? })
+        };
+        Ok(ReservedCandidateScene { scene, buffer_owner, reservation })
     }
     /// Health entries for every object in the current document.
     pub fn health_entries(&self) -> Vec<crate::utilities::HealthEntry> {
@@ -2638,12 +3237,12 @@ impl Controller {
         label: &'static str,
         mutations: Vec<Mutation>,
     ) -> Result<()> {
+        let held = self.scene_cache_usage()?;
         let prepared = self
             .coordinator
-            .prepare(TransactionRequest::new(label, mutations))?;
-        let receipt = self.coordinator.commit(prepared)?;
+            .prepare_with_held_usage(TransactionRequest::new(label, mutations), held)?;
+        let receipt = self.commit_with_candidate_scene(prepared, held)?;
         if receipt.published {
-            self.refresh_scene()?;
             self.sync_published(om9_core::changes::ChangeCause::Edit);
         }
         Ok(())
@@ -2652,9 +3251,15 @@ impl Controller {
         if self.is_running() {
             return Err(Error::Busy);
         }
-        let before = self.document().clone();
-        self.coordinator.undo()?;
-        self.refresh_scene()?;
+        let before = self.coordinator.capture_retained_document(self.document)?;
+        let held = self.scene_cache_usage()?;
+        let id = self.document;
+        let candidate = self.coordinator.undo_with(|coordinator, world, epoch, staged| {
+            Self::prepare_history_scene(coordinator, world, epoch, id, held, staged)
+        })?;
+        let ReservedCandidateScene { scene, buffer_owner, reservation } = candidate;
+        self.publish_owned_scene(scene, buffer_owner);
+        drop(reservation);
         self.record_history_change(&before, om9_core::changes::ChangeCause::Undo);
         self.sync_published(om9_core::changes::ChangeCause::Undo);
         Ok(())
@@ -2735,13 +3340,13 @@ impl Controller {
         };
         let output = recipe.outputs[0];
         let source = self.document().stamp(output)?;
-        let prepared = self.coordinator.prepare(TransactionRequest::new(
+        let held = self.scene_cache_usage()?;
+        let prepared = self.coordinator.prepare_with_held_usage(TransactionRequest::new(
             "ReplayHistory",
             vec![Mutation::Geometry { source, geometry }],
-        ))?;
-        let receipt = self.coordinator.commit(prepared)?;
+        ), held)?;
+        let receipt = self.commit_with_candidate_scene(prepared, held)?;
         if receipt.published {
-            self.refresh_scene()?;
             self.recent.push_back("ReplayHistory".into());
             while self.recent.len() > 9 {
                 self.recent.pop_front();
@@ -2755,12 +3360,52 @@ impl Controller {
         if self.is_running() {
             return Err(Error::Busy);
         }
-        let before = self.document().clone();
-        self.coordinator.redo()?;
-        self.refresh_scene()?;
+        let before = self.coordinator.capture_retained_document(self.document)?;
+        let held = self.scene_cache_usage()?;
+        let id = self.document;
+        let candidate = self.coordinator.redo_with(|coordinator, world, epoch, staged| {
+            Self::prepare_history_scene(coordinator, world, epoch, id, held, staged)
+        })?;
+        let ReservedCandidateScene { scene, buffer_owner, reservation } = candidate;
+        self.publish_owned_scene(scene, buffer_owner);
+        drop(reservation);
         self.record_history_change(&before, om9_core::changes::ChangeCause::Redo);
         self.sync_published(om9_core::changes::ChangeCause::Redo);
         Ok(())
+    }
+    fn prepare_history_scene(
+        coordinator: &TransactionCoordinator,
+        world: &om9_core::transaction::World,
+        epoch: u64,
+        id: DocumentId,
+        held: om9_core::budget::Usage,
+        staged: om9_core::budget::Usage,
+    ) -> Result<ReservedCandidateScene> {
+        let mut construction_held = held;
+        construction_held.add(staged, coordinator.limits())?;
+        let document = world.documents.get(&id).ok_or(Error::Missing("history scene document"))?.clone();
+        let sample = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let (scene, mut reservation) = Scene::capture_retained_reserved_with_physical_samples(
+            coordinator, document, epoch, construction_held, sample,
+        )?;
+        // Transfer staged bytes from caller-held usage into the same continuous
+        // reservation before the coordinator and Controller publish the scene.
+        reservation.shrink_to(scene.cache_held_usage()?.bytes.max(1))?;
+        if staged.bytes != 0 {
+            coordinator.grow_external_memory_with_held(&mut reservation, staged.bytes, sample(), held)?;
+        }
+        let arena = scene.picking_arena_bytes()?;
+        if arena != 0 { coordinator.grow_external_memory_with_held(&mut reservation, arena, sample(), held)?; }
+        scene.transfer_memory_allowance(&mut reservation, coordinator, held)?;
+        let buffer_bytes = scene.shared_buffer_bytes();
+        let buffer_owner = if buffer_bytes == 0 { None } else {
+            let overhead = scene_buffer_lease_overhead();
+            coordinator.grow_external_memory_with_held(&mut reservation, overhead, sample(), held)?;
+            let split = reservation.split_off(buffer_bytes.checked_add(overhead).ok_or(Error::Overflow("history scene owner"))?)?;
+            Some(SceneBufferOwner { epoch: scene.epoch, document: Arc::downgrade(&scene.document), bytes: buffer_bytes,
+                lease: SceneBufferLease::new(None, split)? })
+        };
+        Ok(ReservedCandidateScene { scene, buffer_owner, reservation })
     }
     /// Record a host Undo/Redo batch in the plugin change feed so a following plugin
     /// command sees the last committed document change, not only plugin commands.
@@ -2796,9 +3441,7 @@ impl Controller {
     pub fn input_plane(&self) -> CPlane {
         self.session
             .as_ref()
-            .map_or(self.workspace.views[&self.workspace.active].cplane, |s| {
-                s.plane
-            })
+            .map_or_else(|| self.workspace.views[&self.workspace.active].cplane, |s| s.plane)
     }
 }
 
@@ -3456,6 +4099,10 @@ fn rail_intersections(
 fn parse_gumball_placement(text: &str) -> Option<GumballPlacement> {
     let mut words = text.split_whitespace();
     let command = words.next()?.to_ascii_lowercase();
+    let command = match command.as_str() {
+        "gumball" => format!("gumball{}", words.next()?.to_ascii_lowercase()),
+        other => other.to_owned(),
+    };
     match command.as_str() {
         "gumballreset" => Some(GumballPlacement::Reset),
         "gumballworld" => Some(GumballPlacement::World),
@@ -3488,25 +4135,36 @@ impl Controller {
             return Err(Error::Missing("preview scene"));
         };
         let selection = &self.selection;
+        let mut changed = false;
         for object in scene.objects.iter_mut() {
-            if selection.contains(&object.root) && object.visible && object.editable {
-                object.preview = delta;
+            let preview = if selection.contains(&object.root) && object.visible && object.editable {
+                delta
             } else {
-                object.preview = om9_core::geometry::Transform::identity();
-            }
+                om9_core::geometry::Transform::identity()
+            };
+            changed |= object.preview != preview;
+            object.preview = preview;
         }
-        self.preview_revision = self.preview_revision.saturating_add(1);
+        if changed {
+            scene.invalidate_picking_bounds();
+            self.preview_revision = self.preview_revision.saturating_add(1);
+        }
         Ok(())
     }
 
     /// Drops the transient transform, leaving the document as it was before the drag.
     pub fn clear_gumball_preview(&mut self) {
         if let Some(scene) = self.scene.as_mut() {
+            let mut changed = false;
             for object in scene.objects.iter_mut() {
+                changed |= object.preview != om9_core::geometry::Transform::identity();
                 object.preview = om9_core::geometry::Transform::identity();
             }
+            if changed {
+                scene.invalidate_picking_bounds();
+                self.preview_revision = self.preview_revision.saturating_add(1);
+            }
         }
-        self.preview_revision = self.preview_revision.saturating_add(1);
     }
 
     /// Revision of the transient transform, for viewport caches.

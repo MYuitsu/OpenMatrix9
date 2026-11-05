@@ -128,7 +128,7 @@ fn generate_instance_stress_project() {
                     .placement
                     .compose(member.placement)
                     .expect("instance member transform");
-                let mut display = brep.display.clone();
+                let mut display = (*brep.display).clone();
                 for point in &mut display.points {
                     *point = placement.point(*point).expect("instance member point");
                 }

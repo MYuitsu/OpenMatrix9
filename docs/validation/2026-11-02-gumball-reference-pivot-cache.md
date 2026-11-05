@@ -1,0 +1,19 @@
+# Gumball reference comparison and pivot cache — 2026-11-02
+
+Scope: selected-object Gumball centre in standalone OM9. No source code was copied from the references.
+
+- The local Rhino 5 RhinoCommon wrapper passes a bounding box or a frame and box to native Gumball; its display conduit has separate base/current Gumball and transform state. The local native decompilation shows that the bounding-box overload forwards a plane and box to `CRhinoGumballFrame::SetFromBoundingBox`. This establishes the call structure, not its measured speed or the full bounds algorithm. Decompiler types and calls remain qualified by the source's warnings.
+- Blender's [`transform_gizmo_3d.cc`](https://github.com/blender/blender/blob/main/source/blender/editors/transform/transform_gizmo_3d.cc) obtains object-mode evaluated bounds and processes their corners when required; [`view3d_gizmo_tool_generic.cc`](https://github.com/blender/blender/blob/main/source/blender/editors/space_view3d/view3d_gizmo_tool_generic.cc) refreshes gizmo centre and axes and subscribes to refresh notifications. Blender also uses other paths for editing elements. These observations do not establish that either program is fastest; no matched native runtime benchmark was performed.
+- OM9 retains its existing world-space centre of the selected display vertices, including exact behaviour for rotated/asymmetric geometry. The centre is cached against scene document ID, epoch and selected roots; alignment and explicit relocation are evaluated separately. This avoids replacing the exact selected-vertex bounds by a transformed local AABB, which can enlarge world bounds and change the pivot. No Blender or Rhino code is imported.
+
+## Validation
+
+On the same 23,368-vertex saved dice and a Windows debug build, a 100-call controller microbenchmark measured 22.91 ms/call before and 0.163 ms/call after (including first-call fill). These were single separate runs, not a controlled cross-product benchmark; the earlier measurement coincided with a release build. They prove neither overall application speed nor displayed FPS. A temporary probe used the same fixture and was removed.
+
+`CARGO_TARGET_DIR=L:/om9-target cargo test -p om9-app --test gumball_interaction --test gumball_placement --test navigation_drag -j 2`: 20 passed, including new selection/move/Undo cache invalidation, Gumball placement/alignment and navigation checks. `cargo build -p om9-app --bin om9 -j 2` passed. Public source audit: zero errors.
+
+The visible debug application loaded the saved dice with Gumball selected, FPS and `OM9_INTERACTION_LOG` enabled; its executable SHA-256 is `72e1cd54853d18f61f5fbe8c4b9ce086b5143b8d6f84864cf1e9bb24f504d120`. Automated wheel input produced short Perspective navigation samples. Typical logged window intervals were 115–123 ms and reported work 107–113 ms, with pane work about 2 ms and GPU samples about 0.3–0.4 ms; a brief unselected zoom still showed about 111 ms between ticks and 103 ms work. These are diagnostic window/CPU wall times and sampled GPU pass timings, not display/presentation FPS or a controlled gesture benchmark. Both results are below the requested 30 FPS target; the remaining UI/frame cost is not identified. Log stays outside the checkout at `L:/om9-target/dice-gumball-fps-20261102.jsonl`.
+
+The release build was retried after space became available, but Cargo failed when its `release/.fingerprint` output directory disappeared during compilation (OS error 3); no release result is claimed. `wpr -start CPU -filemode` failed with `0xc5585011` because Windows refused the system performance profiling policy. No CPU sampling trace was produced.
+
+Next: split time from the raw input hook through egui layout/sidebar and viewport work, then measure actual pointer orbit/pan/zoom and presentation on the user's visible window. Do not mark the 30 FPS goal complete from the microbenchmark. Release build and physical mouse review remain separate gates.

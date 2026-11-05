@@ -346,6 +346,7 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "NURBS_CURVE",
   "runtime_implementation": {
+    "rectangle_numeric_input_2026_11_01": "Corners: after first point accept bare length, then bare width or Enter for equal sides. Controller geometry and invalid retry tested; running executable locked, desktop verification pending. See docs/validation/2026-11-01-rectangle-numeric-input.md.",
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",

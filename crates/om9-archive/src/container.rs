@@ -15,25 +15,44 @@ const MAGIC: &[u8; 8] = b"OM9\0\r\n\x1a\n";
 const VERSION: u32 = 4;
 const HEADER: usize = 16;
 const ENTRY: usize = 72;
-struct BoundedWriter {
+struct BoundedWriter<'a> {
     data: Vec<u8>,
     limit: usize,
     failed: bool,
+    admission: &'a mut dyn FnMut(u64, u64) -> Result<()>,
+    admission_error: Option<Error>,
 }
-impl Write for BoundedWriter {
+impl Write for BoundedWriter<'_> {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
-        if self
-            .data
-            .len()
-            .checked_add(bytes.len())
-            .is_none_or(|n| n > self.limit)
-        {
+        let Some(needed) = self.data.len().checked_add(bytes.len()) else {
+            self.failed = true;
+            return Err(io::Error::other("serialization budget"));
+        };
+        if needed > self.limit {
             self.failed = true;
             return Err(io::Error::other("serialization budget"));
         }
-        self.data
-            .try_reserve_exact(bytes.len())
-            .map_err(|_| io::Error::other("serialization allocation"))?;
+        if needed > self.data.capacity() {
+            // JSON emits many tiny writes. Grow geometrically, bounded by the
+            // existing serialization budget, instead of reallocating per token.
+            let capacity = self.data.capacity().saturating_mul(2).max(needed).max(256).min(self.limit);
+            // Reallocation may retain the old allocation until the new one is
+            // obtained. Admit that overlap, then reconcile actual capacity.
+            if let Err(error) = (self.admission)(self.data.capacity() as u64, capacity as u64) {
+                self.admission_error = Some(error);
+                return Err(io::Error::other("serialization admission"));
+            }
+            if self.data.try_reserve_exact(capacity - self.data.len()).is_err()
+                || self.data.capacity() > self.limit
+            {
+                self.failed = true;
+                return Err(io::Error::other("serialization allocation"));
+            }
+            if let Err(error) = (self.admission)(self.data.capacity() as u64, 0) {
+                self.admission_error = Some(error);
+                return Err(io::Error::other("serialization capacity admission"));
+            }
+        }
         self.data.extend_from_slice(bytes);
         Ok(bytes.len())
     }
@@ -41,8 +60,45 @@ impl Write for BoundedWriter {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod bounded_writer_tests {
+    use super::BoundedWriter;
+    use std::io::Write;
+
+    #[test]
+    fn small_writes_grow_amortized_without_exceeding_the_limit() {
+        let mut admission = |_, _| Ok(());
+        let mut writer = BoundedWriter { data: Vec::new(), limit: 10_000, failed: false,
+            admission: &mut admission, admission_error: None };
+        let mut changes = 0;
+        let mut capacity = 0;
+        for _ in 0..10_000 {
+            writer.write_all(b"x").unwrap();
+            if writer.data.capacity() != capacity {
+                changes += 1;
+                capacity = writer.data.capacity();
+            }
+            assert!(capacity <= writer.limit);
+        }
+        assert!(changes <= 8, "expected geometric growth, got {changes} reallocations");
+        assert_eq!(writer.data, vec![b'x'; 10_000]);
+        assert!(writer.write_all(b"y").is_err());
+        assert!(writer.failed);
+        assert_eq!(writer.data.len(), 10_000);
+    }
+}
 pub fn encode(document: &Document, limits: &Limits) -> Result<Vec<u8>> {
+    encode_with_admission(document, limits, &mut |_, _| Ok(()))
+}
+/// Callback reports existing owned buffer capacity and additional pending
+/// storage, excluding the caller's original document. Decoder estimates are
+/// separate from these exact buffer capacities.
+pub(crate) fn encode_with_admission(document: &Document, limits: &Limits,
+    admit: &mut dyn FnMut(u64, u64) -> Result<()>) -> Result<Vec<u8>> {
+    admit(0, document.validation_scratch_usage(limits)?.bytes)?;
     let source = document.validate(limits)?;
+    admit(0, 0)?;
     let count = document
         .resources
         .len()
@@ -73,8 +129,11 @@ pub fn encode(document: &Document, limits: &Limits) -> Result<Vec<u8>> {
         data: vec![],
         limit,
         failed: false,
+        admission: admit,
+        admission_error: None,
     };
     if let Err(error) = serde_json::to_writer(&mut writer, document) {
+        if let Some(error) = writer.admission_error.take() { return Err(error); }
         return Err(if writer.failed {
             Error::Budget("archive serialization peak")
         } else {
@@ -94,9 +153,12 @@ pub fn encode(document: &Document, limits: &Limits) -> Result<Vec<u8>> {
         limits,
     )?;
     peak.add(Usage::array::<u8>(size)?, limits)?;
+    (writer.admission)(writer.data.capacity() as u64, size as u64)?;
     let mut out = Vec::new();
     out.try_reserve_exact(size)
         .map_err(|_| Error::Budget("archive allocation"))?;
+    (writer.admission)((writer.data.capacity() as u64).checked_add(out.capacity() as u64)
+        .ok_or(Error::Overflow("archive buffer capacity"))?, 0)?;
     out.resize(table, 0);
     out[..8].copy_from_slice(MAGIC);
     out[8..12].copy_from_slice(&VERSION.to_le_bytes());
@@ -116,6 +178,8 @@ pub fn encode(document: &Document, limits: &Limits) -> Result<Vec<u8>> {
         out[position + 40..position + 72].copy_from_slice(&resource.sha256());
         out.extend_from_slice(resource.payload()?);
     }
+    drop(writer);
+    admit(out.capacity() as u64, 0)?;
     Ok(out)
 }
 fn u32_at(bytes: &[u8], offset: usize) -> Result<u32> {
@@ -154,18 +218,21 @@ struct Chunk<'a> {
     hash: &'a [u8],
 }
 pub fn decode(bytes: &[u8], limits: &Limits) -> Result<Document> {
-    decode_schema(bytes, limits, VERSION)
+    decode_schema(bytes, limits, VERSION, &mut |_| Ok(()))
+}
+pub(crate) fn decode_with_admission(bytes: &[u8], limits: &Limits, admit: &mut impl FnMut(u64) -> Result<()>) -> Result<Document> {
+    decode_schema(bytes, limits, VERSION, admit)
 }
 pub fn decode_legacy_v1(bytes: &[u8], limits: &Limits) -> Result<Document> {
-    decode_schema(bytes, limits, 1)
+    decode_schema(bytes, limits, 1, &mut |_| Ok(()))
 }
 pub fn decode_legacy_v2(bytes: &[u8], limits: &Limits) -> Result<Document> {
-    decode_schema(bytes, limits, 2)
+    decode_schema(bytes, limits, 2, &mut |_| Ok(()))
 }
 pub fn decode_legacy_v3(bytes: &[u8], limits: &Limits) -> Result<Document> {
-    decode_schema(bytes, limits, 3)
+    decode_schema(bytes, limits, 3, &mut |_| Ok(()))
 }
-fn decode_schema(bytes: &[u8], limits: &Limits, version: u32) -> Result<Document> {
+fn decode_schema(bytes: &[u8], limits: &Limits, version: u32, admit: &mut impl FnMut(u64) -> Result<()>) -> Result<Document> {
     if bytes.get(..8) != Some(MAGIC.as_slice()) {
         return Err(Error::Invalid("OM9 magic"));
     }
@@ -197,6 +264,7 @@ fn decode_schema(bytes: &[u8], limits: &Limits, version: u32) -> Result<Document
         },
         limits,
     )?;
+    admit(usage.bytes)?;
     let mut chunks = Vec::new();
     chunks
         .try_reserve_exact(count)
@@ -241,6 +309,7 @@ fn decode_schema(bytes: &[u8], limits: &Limits, version: u32) -> Result<Document
     let mut ids = BTreeSet::new();
     let mut metadata = None;
     usage.add(Usage::btree::<&[u8], ()>(count)?, limits)?;
+    admit(usage.bytes)?;
     for chunk in &chunks {
         if !ids.insert(chunk.id) {
             return Err(Error::Invalid("duplicate chunk ID"));
@@ -269,7 +338,13 @@ fn decode_schema(bytes: &[u8], limits: &Limits, version: u32) -> Result<Document
     if version < 4 {
         crate::json_admission::check_legacy_document(metadata, bytes.len(), limits)?;
     } else {
-        crate::json_admission::check(metadata, bytes.len(), limits)?;
+        let chunk_bytes = usage.bytes.checked_sub(bytes.len() as u64)
+            .ok_or(Error::Overflow("archive chunk admission"))?;
+        crate::json_admission::check_usage_with_admission(metadata, bytes.len(), limits, &mut |estimated| {
+            let total = estimated.checked_add(chunk_bytes).ok_or(Error::Overflow("archive preflight admission"))?;
+            if total > limits.max_bytes { return Err(Error::Budget("archive preflight bytes")); }
+            admit(total)
+        })?;
     }
     let mut document: Document = serde_json::from_slice(metadata).map_err(|error| {
         let message = error.to_string();
@@ -306,6 +381,9 @@ fn decode_schema(bytes: &[u8], limits: &Limits, version: u32) -> Result<Document
     }
     // Admit the entire hydrated document alongside the serialized input and
     // retained table bookkeeping before any resource allocation.
+    let mut validation_peak = usage;
+    validation_peak.add(document.validation_peak_estimate(limits, false)?, limits)?;
+    admit(validation_peak.bytes)?;
     usage.add(document.validate_manifest(limits)?, limits)?;
     for chunk in chunks.iter().filter(|c| c.kind == 2) {
         let id = om9_core::identity::ResourceId(

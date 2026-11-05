@@ -2,7 +2,7 @@
 //! One protected text document and one native editor state. The live row is a
 //! pinned projection of that same document, never a second editable text buffer.
 use super::*;
-use crate::command_options::{CommandOption, CommandOptionInterface};
+use crate::command_options::CommandOptionInterface;
 use std::sync::Arc;
 
 // Sampled from the user's 2026-10-20 green/gold reference.
@@ -36,31 +36,6 @@ fn apply_command_theme(ui: &mut egui::Ui) {
     visuals.widgets.hovered.weak_bg_fill = COMMAND_SELECTION;
 }
 
-fn shortcut_button(ui: &mut egui::Ui, option: &CommandOption) -> egui::Response {
-    let mut job = egui::text::LayoutJob::default();
-    let mut underlined = false;
-    for ch in option.label.chars() {
-        let underline = !underlined
-            && option
-                .shortcut
-                .is_some_and(|key| ch.eq_ignore_ascii_case(&key));
-        underlined |= underline;
-        job.append(
-            &ch.to_string(),
-            0.0,
-            egui::TextFormat {
-                underline: if underline {
-                    Stroke::new(1.0, COMMAND_GOLD)
-                } else {
-                    Stroke::NONE
-                },
-                color: COMMAND_GOLD,
-                ..Default::default()
-            },
-        );
-    }
-    ui.add(egui::Button::new(job))
-}
 fn consume_command_shortcut(ctx: &egui::Context, shortcut: char) -> bool {
     let text = shortcut.to_string();
     ctx.input_mut(|input| {
@@ -89,8 +64,71 @@ fn consume_command_shortcut(ctx: &egui::Context, shortcut: char) -> bool {
     })
 }
 impl MatrixApp {
+    /// Available command names matching the typed prefix, prefix matches first. The
+    /// features catalog is the same list the icons bind, so a suggestion is always a
+    /// command this build can actually dispatch.
+    pub(super) fn command_suggestions_for(&self, query: &str) -> Vec<String> {
+        let query = query.trim().to_ascii_lowercase();
+        if query.is_empty() {
+            return Vec::new();
+        }
+        let names: std::collections::BTreeSet<String> = self
+            .features
+            .iter()
+            .filter(|feature| Controller::availability(&feature.id).is_ok())
+            .filter_map(|feature| feature.command.clone())
+            .collect();
+        let mut matches: Vec<(u8, String)> = names
+            .into_iter()
+            .filter_map(|name| {
+                let lower = name.to_ascii_lowercase();
+                let rank = if lower == query {
+                    0
+                } else if lower.starts_with(&query) {
+                    1
+                } else if lower.contains(&query) {
+                    2
+                } else {
+                    return None;
+                };
+                Some((rank, name))
+            })
+            .collect();
+        matches.sort_by(|left, right| {
+            left.0
+                .cmp(&right.0)
+                .then_with(|| left.1.len().cmp(&right.1.len()))
+                .then_with(|| {
+                    left.1
+                        .to_ascii_lowercase()
+                        .cmp(&right.1.to_ascii_lowercase())
+                })
+        });
+        matches.truncate(8);
+        matches.into_iter().map(|(_, name)| name).collect()
+    }
+
+    fn accept_command_suggestion(&mut self, command: &str) {
+        self.transcript.set_draft(&format!("{command} "));
+        self.focus_cmd = true;
+        self.cmd_suggestions.clear();
+        self.cmd_suggestion_index = 0;
+        self.cmd_suggestions_query.clear();
+    }
+
     pub(super) fn command_ui(&mut self, ui: &mut egui::Ui) {
         apply_command_theme(ui);
+        // One prompt for every invocation path (typed, menu, toolbar, MCP). The
+        // controller owns the current stage text and its inline option signature;
+        // refreshing here means a command that started without a feedback call
+        // still names its options inside the live row instead of a chip row.
+        let prompt = self.controller.prompt_with_options();
+        if self.transcript.prompt() != prompt {
+            self.transcript.set_prompt(&prompt);
+            // The prompt grew or shrank, so the editor's stored character index
+            // no longer points at the draft end. Land the caret there again.
+            self.focus_cmd = true;
+        }
         let ctx = ui.ctx().clone();
         let id = egui::Id::new("matrix-command-transcript");
         let popup_open = self.viewport_menu_owns_frame || egui::Popup::is_any_open(&ctx);
@@ -118,19 +156,56 @@ impl MatrixApp {
             self.cmd_ime_composing = false;
         }
         let composing = was_composing || self.cmd_ime_composing || ime_frame;
+        let draft = self.transcript.draft().to_owned();
+        let query = draft.trim().to_owned();
+        let suggestions_visible = focused
+            && !popup_open
+            && !composing
+            && !query.is_empty()
+            && !draft.ends_with(' ')
+            && !query.chars().any(char::is_whitespace)
+            && self.controller.command_options().is_empty();
+        if suggestions_visible {
+            if query != self.cmd_suggestions_query {
+                self.cmd_suggestions_query = query.clone();
+                self.cmd_suggestion_index = 0;
+                self.cmd_suggestions = self.command_suggestions_for(&query);
+            } else if self.cmd_suggestion_index >= self.cmd_suggestions.len() {
+                self.cmd_suggestion_index = 0;
+            }
+        } else {
+            self.cmd_suggestions.clear();
+            self.cmd_suggestion_index = 0;
+            self.cmd_suggestions_query.clear();
+        }
+        let suggestions_open = suggestions_visible && !self.cmd_suggestions.is_empty();
         let enter =
             focused && !composing && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Enter));
         if focused && !composing && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::ArrowUp))
         {
-            self.transcript.recall_up();
-            self.focus_cmd = true;
+            if suggestions_open {
+                let count = self.cmd_suggestions.len();
+                self.cmd_suggestion_index = (self.cmd_suggestion_index + count - 1) % count;
+            } else {
+                self.transcript.recall_up();
+                self.focus_cmd = true;
+            }
         }
         if focused
             && !composing
             && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::ArrowDown))
         {
-            self.transcript.recall_down();
-            self.focus_cmd = true;
+            if suggestions_open {
+                self.cmd_suggestion_index =
+                    (self.cmd_suggestion_index + 1) % self.cmd_suggestions.len();
+            } else {
+                self.transcript.recall_down();
+                self.focus_cmd = true;
+            }
+        }
+        if suggestions_open && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Tab)) {
+            let selected = self.cmd_suggestions[self.cmd_suggestion_index].clone();
+            self.accept_command_suggestion(&selected);
         }
         // Delete removes the selection when the editor holds no draft. The
         // command line normally keeps focus, so the global viewport handler
@@ -163,7 +238,16 @@ impl MatrixApp {
             }
         }
         if enter {
-            self.submit_draft();
+            if suggestions_open {
+                let selected = self.cmd_suggestions[self.cmd_suggestion_index].clone();
+                if selected.eq_ignore_ascii_case(&query) {
+                    self.submit_draft();
+                } else {
+                    self.accept_command_suggestion(&selected);
+                }
+            } else {
+                self.submit_draft();
+            }
         } else if !focused
             && !popup_open
             && self.transcript.draft().is_empty()
@@ -188,7 +272,36 @@ impl MatrixApp {
         let font = egui::TextStyle::Monospace.resolve(ui.style());
         let row_height = ui.fonts_mut(|f| f.row_height(&font)) + 2.;
         let area = ui.available_rect_before_wrap();
-        let history_height = (area.height() - row_height - 2.).max(1.);
+        // The prompt names every option inline, so an idle prompt may wrap to more
+        // rows; a draft keeps the single pinned row and scrolls horizontally like
+        // the Matrix command line. Measuring the prompt before the history area
+        // lets the panel reserve the exact height in the same frame.
+        let draft_empty = self.transcript.draft().is_empty();
+        let prompt_wrap = if draft_empty {
+            (area.width() - 2.).max(1.)
+        } else {
+            f32::INFINITY
+        };
+        let live_height = if draft_empty {
+            let mut job = egui::text::LayoutJob::default();
+            job.wrap.max_width = prompt_wrap;
+            job.append(
+                self.transcript.prompt(),
+                0.,
+                egui::TextFormat {
+                    font_id: font.clone(),
+                    ..Default::default()
+                },
+            );
+            let measured = ui.fonts_mut(|f| f.layout_job(job)).size().y + 2.;
+            measured.clamp(
+                row_height,
+                (area.height() - row_height - 2.).max(row_height),
+            )
+        } else {
+            row_height
+        };
+        let history_height = (area.height() - live_height - 2.).max(1.);
         // The editor keeps every character for selection, keyboard editing,
         // clipboard, and IME. Only its live row's glyphs are hidden here; that
         // row is painted below, outside the history scroll clipping rectangle.
@@ -323,10 +436,15 @@ impl MatrixApp {
                 ..Default::default()
             },
         );
+        live_job.wrap.max_width = if self.transcript.draft().is_empty() {
+            (area.width() - 2.).max(1.)
+        } else {
+            f32::INFINITY
+        };
         let live_galley = ui.fonts_mut(|f| f.layout_job(live_job));
         let rect = Rect::from_min_size(
-            egui::pos2(area.left(), area.bottom() - row_height),
-            Vec2::new(area.width(), row_height),
+            egui::pos2(area.left(), area.bottom() - live_height),
+            Vec2::new(area.width(), live_height),
         );
         self.cmd_rect = Some(rect);
         let response = ui.interact(
@@ -373,13 +491,19 @@ impl MatrixApp {
                     let byte = option_offset + relative;
                     option_offset = byte + label.len();
                     let chars = live[..byte].chars().count();
-                    let x = origin.x + live_galley.pos_from_cursor(CCursor::new(chars)).left();
-                    let end = live_galley
-                        .pos_from_cursor(CCursor::new(chars + label.chars().count()))
-                        .left();
-                    let hit = Rect::from_min_size(
-                        egui::pos2(x, origin.y),
-                        Vec2::new(end - (x - origin.x), row_height),
+                    let start = live_galley.pos_from_cursor(CCursor::new(chars));
+                    let end =
+                        live_galley.pos_from_cursor(CCursor::new(chars + label.chars().count()));
+                    // A label can straddle a wrap point; its click span then ends at
+                    // the right edge of the row it starts on.
+                    let (right, bottom) = if (end.top() - start.top()).abs() < 0.5 {
+                        (end.right(), end.bottom())
+                    } else {
+                        (live_galley.rect.right(), start.bottom())
+                    };
+                    let hit = Rect::from_min_max(
+                        origin + Vec2::new(start.left(), start.top()),
+                        origin + Vec2::new(right, bottom),
                     )
                     .intersect(rect);
                     self.cmd_token_rects
@@ -435,8 +559,8 @@ impl MatrixApp {
                 let b = live_galley.pos_from_cursor(CCursor::new(end));
                 painter.rect_filled(
                     Rect::from_min_max(
-                        origin + Vec2::new(a.left(), 0.),
-                        origin + Vec2::new(b.left(), row_height - 2.),
+                        origin + Vec2::new(a.left(), a.top()),
+                        origin + Vec2::new(b.left(), b.bottom()),
                     ),
                     0,
                     COMMAND_SELECTION,
@@ -444,8 +568,8 @@ impl MatrixApp {
                 if self.cmd_ime_composing {
                     painter.line_segment(
                         [
-                            origin + Vec2::new(a.left(), row_height - 2.),
-                            origin + Vec2::new(b.left(), row_height - 2.),
+                            origin + Vec2::new(a.left(), b.bottom()),
+                            origin + Vec2::new(b.left(), b.bottom()),
                         ],
                         Stroke::new(1., COMMAND_GOLD),
                     );
@@ -470,63 +594,49 @@ impl MatrixApp {
             }
         }
         painter.galley(origin, Arc::clone(&live_galley), COMMAND_GOLD);
-        // All other owners use the same descriptors and activation route.
-        // Wrap inside the command area's width, never position after a long prompt.
-        if !inline_options && !options.is_empty() && !popup_open {
-            let mut width = 0.;
-            let mut rows = 1.;
-            for option in &options {
-                let w =
-                    ui.fonts_mut(|f| {
-                        f.layout_no_wrap(option.label.clone(), font.clone(), COMMAND_GOLD)
-                    })
-                    .size()
-                    .x + 18.;
-                if width + w > rect.width() {
-                    rows += 1.;
-                    width = 0.;
-                }
-                width += w;
+        if suggestions_open && focused && !self.cmd_suggestions.is_empty() {
+            let suggestions = self.cmd_suggestions.clone();
+            let selected = self.cmd_suggestion_index.min(suggestions.len() - 1);
+            let line = ui.fonts_mut(|f| f.row_height(&font)) + 6.;
+            let height = line * suggestions.len() as f32 + 8.;
+            let content = ui.ctx().content_rect();
+            // The list drops below the command row like the Matrix8 autocomplete; the
+            // above-the-row fallback exists only when the row itself sits near the
+            // bottom edge of the window.
+            let below = rect.bottom() + 2.;
+            let top = if below + height <= content.bottom() {
+                below
+            } else {
+                (rect.top() - height).max(content.top())
             }
-            let mut clicked = None;
-            egui::Area::new(id.with("option-tokens"))
-                .fixed_pos(egui::pos2(
-                    rect.left(),
-                    (rect.top() - rows * 23.).max(area.top()),
-                ))
-                .order(egui::Order::Middle)
+            .clamp(
+                content.top(),
+                (content.bottom() - height).max(content.top()),
+            );
+            let mut picked = None;
+            let shown = egui::Area::new(id.with("command-suggestions"))
+                .fixed_pos(egui::pos2(rect.left(), top))
+                .order(egui::Order::Foreground)
                 .show(&ctx, |ui| {
-                    apply_command_theme(ui);
-                    ui.set_max_width(rect.width());
-                    ui.horizontal_wrapped(|ui| {
-                        for option in &options {
-                            let response = ui
-                                .add_enabled_ui(
-                                    !composing && self.transcript.draft().is_empty(),
-                                    |ui| shortcut_button(ui, option),
-                                )
-                                .inner;
-                            self.cmd_token_rects
-                                .insert(option.id.name().to_owned(), response.rect);
-                            // Keep the legacy lookup key for external UI audits.
-                            if matches!(
-                                option.kind,
-                                crate::command_options::CommandOptionKind::Number
-                                    | crate::command_options::CommandOptionKind::Point
-                                    | crate::command_options::CommandOptionKind::Text
-                            ) {
-                                self.cmd_token_rects
-                                    .insert(format!("{}=", option.id.name()), response.rect);
+                    egui::Frame::popup(ui.style())
+                        .fill(COMMAND_BG)
+                        .stroke(Stroke::new(1., COMMAND_GOLD.gamma_multiply(0.6)))
+                        .show(ui, |ui| {
+                            ui.set_min_width(rect.width().clamp(260., 420.));
+                            for (index, name) in suggestions.iter().enumerate() {
+                                let response = ui.selectable_label(index == selected, name);
+                                if response.clicked() {
+                                    picked = Some(name.clone());
+                                }
                             }
-                            if response.clicked() {
-                                clicked = Some(option.id);
-                            }
-                        }
-                    });
+                        });
                 });
-            if let Some(option) = clicked {
-                self.submit_command_option(option);
+            self.cmd_suggestions_rect = Some(shown.response.rect);
+            if let Some(name) = picked {
+                self.accept_command_suggestion(&name);
             }
+        } else {
+            self.cmd_suggestions_rect = None;
         }
         state.store(&ctx, id);
         ui.allocate_rect(rect, Sense::hover());

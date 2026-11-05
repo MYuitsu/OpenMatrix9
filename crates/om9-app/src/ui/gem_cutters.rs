@@ -161,25 +161,14 @@ impl MatrixApp {
                             session.library.preset = preset;
                             dirty = true;
                         }
-                        dirty |= number_row(
-                            ui,
-                            "Scale X",
-                            &mut session.library.scale_x_percent,
-                            " %",
-                        );
-                        dirty |= number_row(
-                            ui,
-                            "Scale Y",
-                            &mut session.library.scale_y_percent,
-                            " %",
-                        );
-                        dirty |= number_row(
-                            ui,
-                            "Z scale",
-                            &mut session.library.z_scale_percent,
-                            " %",
-                        );
-                        dirty |= number_row(ui, "Z offset", &mut session.library.z_offset_mm, " mm");
+                        dirty |=
+                            number_row(ui, "Scale X", &mut session.library.scale_x_percent, " %");
+                        dirty |=
+                            number_row(ui, "Scale Y", &mut session.library.scale_y_percent, " %");
+                        dirty |=
+                            number_row(ui, "Z scale", &mut session.library.z_scale_percent, " %");
+                        dirty |=
+                            number_row(ui, "Z offset", &mut session.library.z_offset_mm, " mm");
                     }
                 }
                 ui.separator();
@@ -203,7 +192,11 @@ impl MatrixApp {
                         .selected_text(session.keep.label())
                         .show_ui(ui, |ui| {
                             for candidate in CutterKeep::ALL {
-                                ui.selectable_value(&mut session.keep, candidate, candidate.label());
+                                ui.selectable_value(
+                                    &mut session.keep,
+                                    candidate,
+                                    candidate.label(),
+                                );
                             }
                         });
                 });

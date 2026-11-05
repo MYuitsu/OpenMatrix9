@@ -34,6 +34,7 @@ unsafe extern "C" {
         context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_boolean(
         op: c_int,
+        require_solids: c_int,
         source_a: *const u8,
         length_a: usize,
         source_b: *const u8,
@@ -46,6 +47,12 @@ unsafe extern "C" {
         context: *mut c_void,
         message: *mut std::ffi::c_char,
         capacity: c_int,
+    ) -> c_int;
+    fn om9_occt_cut_disjoint_tools(
+        source: *const u8, source_len: usize,
+        tools: *const *const u8, lengths: *const usize, count: usize,
+        deflection: f64, max_points: usize, max_nodes: usize, max_bytes: usize,
+        sink: NativeSink, context: *mut c_void, message: *mut c_char, capacity: c_int,
     ) -> c_int;
     fn om9_occt_split_face(
         source: *const u8,
@@ -250,6 +257,36 @@ unsafe extern "C" {
         message: *mut std::ffi::c_char,
         capacity: c_int,
     ) -> c_int;
+    fn om9_occt_remove_region(
+        source: *const u8,
+        length: usize,
+        face_index: c_int,
+        deflection: f64,
+        max_points: usize,
+        max_nodes: usize,
+        max_bytes: usize,
+        sink: NativeSink,
+        context: *mut c_void,
+        message: *mut c_char,
+        capacity: c_int,
+    ) -> c_int;
+    fn om9_occt_unify_surface_regions(
+        source: *const u8,
+        length: usize,
+        deflection: f64,
+        max_points: usize,
+        max_nodes: usize,
+        max_bytes: usize,
+        sink: NativeSink,
+        context: *mut c_void,
+        message: *mut c_char,
+        capacity: c_int,
+    ) -> c_int;
+    fn om9_occt_unify_surface_preserving_edges(
+        source: *const u8, length: usize, original_source: *const u8, original_length: usize,
+        deflection: f64, max_points: usize, max_nodes: usize, max_bytes: usize,
+        sink: NativeSink, context: *mut c_void, message: *mut c_char, capacity: c_int,
+    ) -> c_int;
     fn om9_occt_remove_faces(
         source: *const u8,
         length: usize,
@@ -270,6 +307,7 @@ unsafe extern "C" {
         source_b: *const u8,
         length_b: usize,
         reverse_b: c_int,
+        preserve_surfaces: c_int,
         tolerance: f64,
         deflection: f64,
         max_points: usize,
@@ -373,19 +411,17 @@ pub fn boolean(
     limits: &Limits,
 ) -> Result<BooleanOutcome, EditingError> {
     let deflection = checked_deflection(deflection_mm)?;
-    let measures_a = checked_brep(a, limits)?;
-    let measures_b = checked_brep(b, limits)?;
-    if measures_a.solids == 0 || measures_b.solids == 0 {
-        return Err(EditingError::Invalid(
-            "boolean requires two closed solids".into(),
-        ));
-    }
+    // Validate the retained data here; the native adapter checks source topology and solid
+    // membership while reading each shape. Boolean does not need expensive area/volume integrals.
+    a.validate(limits).map_err(|error| EditingError::Invalid(error.to_string()))?;
+    b.validate(limits).map_err(|error| EditingError::Invalid(error.to_string()))?;
     let budget = snapshot_budget(limits);
     let brep = snapshot_via_optional(deflection, limits, |sink, context, message, capacity| {
         // SAFETY: both sources, the callback context and every output live through this call.
         unsafe {
             om9_occt_boolean(
                 op.native(),
+                1,
                 a.source().as_ptr(),
                 a.source().len(),
                 b.source().as_ptr(),
@@ -406,6 +442,38 @@ pub fn boolean(
         Some(brep) => BooleanOutcome::Body(brep),
         None => BooleanOutcome::Empty,
     })
+}
+
+/// Subtract several provably disjoint solid tools in one operation. `None` requests the caller's
+/// general overlapping-tool path; `Some(Empty)` is a successful cut with no remaining faces.
+pub fn cut_disjoint_tools(
+    target: &Brep, tools: &[Brep], deflection_mm: f64, limits: &Limits,
+) -> Result<Option<BooleanOutcome>, EditingError> {
+    let deflection = checked_deflection(deflection_mm)?;
+    if tools.is_empty() { return Err(EditingError::Invalid("boolean requires tools".into())); }
+    // Pairwise bounding-box screening is quadratic; keep large groups on the general path.
+    if tools.len() > 128 { return Ok(None); }
+    target.validate(limits).map_err(|e| EditingError::Invalid(e.to_string()))?;
+    let mut pointers = Vec::new();
+    let mut lengths = Vec::new();
+    pointers.try_reserve_exact(tools.len()).map_err(|_| EditingError::Budget("boolean tools".into()))?;
+    lengths.try_reserve_exact(tools.len()).map_err(|_| EditingError::Budget("boolean tools".into()))?;
+    for tool in tools {
+        tool.validate(limits).map_err(|e| EditingError::Invalid(e.to_string()))?;
+        pointers.push(tool.source().as_ptr());
+        lengths.push(tool.source().len());
+    }
+    let budget = snapshot_budget(limits);
+    let mut fallback = false;
+    let result = snapshot_via_optional(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: all sources, pointer arrays and callback context live through this synchronous call.
+        let status = unsafe { om9_occt_cut_disjoint_tools(target.source().as_ptr(), target.source().len(),
+            pointers.as_ptr(), lengths.as_ptr(), pointers.len(), deflection, budget.points,
+            budget.nodes, budget.bytes, sink, context, message, capacity) };
+        if status == 4 { fallback = true; 3 } else { status }
+    }).map_err(EditingError::from)?;
+    if fallback { return Ok(None); }
+    Ok(Some(match result { Some(body) => BooleanOutcome::Body(body), None => BooleanOutcome::Empty }))
 }
 
 /// Cut a surface-only B-Rep by a solid tool, preserving exact face geometry.
@@ -429,7 +497,7 @@ pub fn trim_surface_by_solid(
     let budget = snapshot_budget(limits);
     let result = snapshot_via_optional(deflection, limits, |sink, context, message, capacity| {
         // SAFETY: validated sources and callback context remain alive during the synchronous call.
-        unsafe { om9_occt_boolean(BooleanOp::Difference.native(), surface.source().as_ptr(), surface.source().len(),
+        unsafe { om9_occt_boolean(BooleanOp::Difference.native(), 0, surface.source().as_ptr(), surface.source().len(),
             tool.source().as_ptr(), tool.source().len(), deflection, budget.points, budget.nodes,
             budget.bytes, sink, context, message, capacity) }
     }).map_err(EditingError::from)?;
@@ -449,7 +517,7 @@ pub fn intersect_surface_with_solid(
     let budget = snapshot_budget(limits);
     let result = snapshot_via_optional(deflection, limits, |sink, context, message, capacity| {
         // SAFETY: validated sources and callback context remain alive during the synchronous call.
-        unsafe { om9_occt_boolean(BooleanOp::Intersection.native(), surface.source().as_ptr(), surface.source().len(),
+        unsafe { om9_occt_boolean(BooleanOp::Intersection.native(), 0, surface.source().as_ptr(), surface.source().len(),
             solid.source().as_ptr(), solid.source().len(), deflection, budget.points, budget.nodes,
             budget.bytes, sink, context, message, capacity) }
     }).map_err(EditingError::from)?;
@@ -1440,6 +1508,138 @@ pub fn split_face(
     Ok(SplitResult { brep, pieces })
 }
 
+/// Remove the uniquely picked region after splitting a face by a polyline.
+/// Points on a shared boundary or outside the requested tolerance are rejected.
+pub fn trim_face_by_polyline(
+    face: &Brep,
+    trim_line: &[Point3],
+    remove_point: Point3,
+    tolerance_mm: f64,
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<Brep, EditingError> {
+    positive(tolerance_mm, "trim pick tolerance")?;
+    if remove_point.iter().any(|value| !value.is_finite()) {
+        return Err(EditingError::Invalid("non-finite trim pick".into()));
+    }
+    let split = split_face(face, trim_line, deflection_mm, limits)?;
+    remove_picked_face(&split.brep, remove_point, tolerance_mm, deflection_mm, limits)?
+        .ok_or_else(|| EditingError::Invalid("trim removed every face".into()))
+}
+
+/// Remove one uniquely picked face from an already partitioned open BRep.
+/// Returns None when the last face was picked.
+pub fn remove_picked_face(
+    partition: &Brep,
+    remove_point: Point3,
+    tolerance_mm: f64,
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<Option<Brep>, EditingError> {
+    let deflection = checked_deflection(deflection_mm)?;
+    positive(tolerance_mm, "trim pick tolerance")?;
+    if remove_point.iter().any(|value| !value.is_finite()) {
+        return Err(EditingError::Invalid("non-finite trim pick".into()));
+    }
+    let count = checked_brep(partition, limits)?.faces;
+    if count == 0 {
+        return Err(EditingError::Invalid("trim partition has no faces".into()));
+    }
+    let mut picked = None;
+    for index in 0..count {
+        let piece = extract_face(partition, index, deflection_mm, limits)?;
+        let distance = crate::measurement::distance(
+            &om9_core::geometry::Geometry::Brep(piece),
+            om9_core::geometry::Transform::identity(),
+            &om9_core::geometry::Geometry::Point(remove_point),
+            om9_core::geometry::Transform::identity(),
+            limits,
+        )
+        .map_err(|error| EditingError::Kernel(format!("trim pick distance: {error}")))?;
+        if !distance.millimetres.is_finite() || distance.millimetres < 0.0 {
+            return Err(EditingError::Kernel("invalid trim pick distance".into()));
+        }
+        if distance.millimetres <= tolerance_mm {
+            if picked.replace(index).is_some() {
+                return Err(EditingError::Invalid("trim pick is on multiple regions".into()));
+            }
+        }
+    }
+    let picked = picked.ok_or_else(|| EditingError::Invalid("trim pick is off the face".into()))?;
+    if count == 1 { return Ok(None); }
+    let index = c_int::try_from(picked).map_err(|_| EditingError::Budget("face index".into()))?;
+    let budget = snapshot_budget(limits);
+    let remaining = snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: the immutable source and callback buffers remain live until the call returns.
+        unsafe { om9_occt_remove_region(partition.source().as_ptr(), partition.source().len(), index,
+            deflection, budget.points, budget.nodes, budget.bytes, sink, context, message, capacity) }
+    }).map_err(EditingError::from)?;
+    if checked_brep(&remaining, limits)?.faces != count - 1 {
+        return Err(EditingError::Kernel("removed region face count mismatch".into()));
+    }
+    Ok(Some(remaining))
+}
+
+/// Remove artificial boundaries between adjacent regions of a single original face.
+/// The caller must not use this on independently authored faces whose boundaries matter.
+pub fn unify_surface_regions(
+    partition: &Brep,
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<Brep, EditingError> {
+    let deflection = checked_deflection(deflection_mm)?;
+    let before = checked_brep(partition, limits)?;
+    if before.faces == 0 || before.solids != 0 {
+        return Err(EditingError::Invalid("expected open surface regions".into()));
+    }
+    let budget = snapshot_budget(limits);
+    let result = snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: immutable source and callback buffers live until the synchronous call returns.
+        unsafe {
+            om9_occt_unify_surface_regions(partition.source().as_ptr(), partition.source().len(),
+                deflection, budget.points, budget.nodes, budget.bytes, sink, context, message, capacity)
+        }
+    }).map_err(EditingError::from)?;
+    let after = checked_brep(&result, limits)?;
+    if after.faces == 0 || after.faces > before.faces || after.solids != 0
+        || (after.area_mm2 - before.area_mm2).abs() > before.area_mm2.abs() * 1e-8 + 1e-9
+    {
+        return Err(EditingError::Kernel("unified regions changed topology or area".into()));
+    }
+    Ok(result)
+}
+
+/// Unify temporary region boundaries while retaining edges from the original BRep.
+pub fn unify_surface_regions_preserving_edges(
+    partition: &Brep,
+    original: &Brep,
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<Brep, EditingError> {
+    let deflection = checked_deflection(deflection_mm)?;
+    let before = checked_brep(partition, limits)?;
+    let original_measure = checked_brep(original, limits)?;
+    if before.faces == 0 || before.solids != 0 || original_measure.faces == 0 {
+        return Err(EditingError::Invalid("expected surface regions and original faces".into()));
+    }
+    let budget = snapshot_budget(limits);
+    let result = snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: both sources and callback buffers live through the synchronous operation.
+        unsafe {
+            om9_occt_unify_surface_preserving_edges(partition.source().as_ptr(), partition.source().len(),
+                original.source().as_ptr(), original.source().len(), deflection,
+                budget.points, budget.nodes, budget.bytes, sink, context, message, capacity)
+        }
+    }).map_err(EditingError::from)?;
+    let after = checked_brep(&result, limits)?;
+    if after.faces == 0 || after.faces > before.faces || after.solids != 0
+        || (after.area_mm2 - before.area_mm2).abs() > before.area_mm2.abs() * 1e-8 + 1e-9
+    {
+        return Err(EditingError::Kernel("unified regions changed topology or area".into()));
+    }
+    Ok(result)
+}
+
 /* ------------------------- cap ------------------------- */
 
 /// Cap supported planar boundary loops, retaining any non-planar openings.
@@ -2207,18 +2407,25 @@ pub fn sew(
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, EditingError> {
-    sew_with_orientation(a, b, false, tolerance_mm, deflection_mm, limits)
+    sew_with_orientation(a, b, false, false, tolerance_mm, deflection_mm, limits)
+}
+
+/// Sew only when every input face keeps its exact native supporting surface.
+pub fn sew_preserving_surfaces(
+    a: &Brep, b: &Brep, tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
+) -> Result<Brep, EditingError> {
+    sew_with_orientation(a,b,false,true,tolerance_mm,deflection_mm,limits)
 }
 
 /// Sew shapes while reversing the second shape's topology before sewing.
 pub fn sew_reversing_second(
     a: &Brep, b: &Brep, tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
 ) -> Result<Brep, EditingError> {
-    sew_with_orientation(a, b, true, tolerance_mm, deflection_mm, limits)
+    sew_with_orientation(a, b, true, false, tolerance_mm, deflection_mm, limits)
 }
 
 fn sew_with_orientation(
-    a: &Brep, b: &Brep, reverse_b: bool, tolerance_mm: f64,
+    a: &Brep, b: &Brep, reverse_b: bool, preserve_surfaces: bool, tolerance_mm: f64,
     deflection_mm: f64, limits: &Limits,
 ) -> Result<Brep, EditingError> {
     let deflection = checked_deflection(deflection_mm)?;
@@ -2235,6 +2442,7 @@ fn sew_with_orientation(
                 b.source().as_ptr(),
                 b.source().len(),
                 i32::from(reverse_b),
+                i32::from(preserve_surfaces),
                 tolerance_mm,
                 deflection,
                 budget.points,
@@ -2382,4 +2590,22 @@ pub fn shell_faces(
         }
     })
     .map_err(EditingError::from)
+}
+
+#[cfg(test)]
+mod surface_guard_tests {
+    use super::*;
+    #[test]
+    fn native_surface_serialization_budget_rejects_before_snapshot() {
+        unsafe extern "C" fn sink(context:*mut c_void,_:*const crate::brep::Snapshot)->c_int {
+            // SAFETY: the test passes a live mutable bool as the callback context.
+            unsafe {*context.cast::<bool>()=true};0
+        }
+        let limits=Limits::default();let surface=om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],2.,3.,&limits).unwrap();
+        let face=crate::measurement::surface_to_face(&surface,om9_core::geometry::Transform::identity(),crate::creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();
+        let source=face.source().as_bytes();let mut called=false;let mut message=[0 as c_char;512];
+        // SAFETY: source, message and callback context stay live for this synchronous call.
+        let status=unsafe {om9_occt_sew(source.as_ptr(),source.len(),source.as_ptr(),source.len(),0,1,0.001,0.1,1000,1000,4,sink,(&mut called as *mut bool).cast(),message.as_mut_ptr(),512)};
+        assert_ne!(status,0);assert!(!called);
+    }
 }

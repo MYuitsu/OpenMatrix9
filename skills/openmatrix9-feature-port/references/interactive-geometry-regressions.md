@@ -11,6 +11,7 @@ Người dùng duyệt lưu ngày 2026-10-26 sau khi kiểm tra lỗi Rectangle.
 
 - Tách **độ dài** khỏi **hướng**. Giữ các thành phần có dấu của độ lệch trong CPlane/frame đang dùng; chỉ lấy trị tuyệt đối cho đại lượng cần không âm. Không dùng `.abs()` rồi dựng lại theo hai trục dương làm mất phía con trỏ. Không thay bằng phép xét dấu world-X/Y khi CPlane xoay.
 - Rectangle Corners mặc định, không Square/Length hay ràng buộc khác: hai điểm được chọn là hai góc đối diện của hình. Điểm thứ hai chiếu lên mặt phẳng dựng phải là một đỉnh của cả preview và hình canonical sau commit. Dấu của Width nhập số, Center, 3Point, Vertical và các ràng buộc theo exact owner; không suy ra quy tắc mới từ Corners.
+- Rectangle Corners: sau góc đầu tiên, có thể nhập số chiều dài rồi nhập số chiều rộng; Enter ở bước chiều rộng dùng chiều dài làm chiều rộng. Người dùng duyệt lưu ngày 2026-11-01 sau khi đối chiếu ảnh Matrix9. Giữ input không hợp lệ có thể sửa và kiểm hình học thật qua CMD; không suy rộng quy tắc này sang Center, 3Point hay Vertical. Phạm vi kiểm và giới hạn executable: `docs/validation/2026-11-01-rectangle-numeric-input.md`.
 - Preview và commit dùng chung phép dựng/validation hình học có hướng do Rust owner quản lý. UI chỉ chuyển input và vẽ kết quả; không duy trì công thức dựng khác cho preview để tạo ra hai hành vi lệch nhau.
 
 ## Điểm nhập qua CMD phải tới cùng owner

@@ -352,6 +352,72 @@
     "host_only": "Grip/edit state ở host; SDK đổi điểm."
   },
   "runtime_implementation": {
+    "control_grip_pointer_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-control-grip-pointer.md",
+      "scope": "Synthetic egui viewport Shift grip selection, raw Delete and drag with Undo on typed curves/surfaces.",
+      "limitations": "Physical UI, native focus, GPU presentation, full grip behavior and 3DM remain open."
+    },
+    "surface_control_delete_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-surface-control-delete.md",
+      "scope": "Delete complete typed NURBS surface control-net rows/columns with mixed curve transactions and Undo.",
+      "limitations": "General surface selections, periodic/trimmed directions, 3DM and physical UI remain open."
+    },
+    "multiple_control_delete_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-multiple-control-delete.md",
+      "scope": "Multiple selected supported NURBS control grips deleted atomically across curves with Undo.",
+      "limitations": "Surfaces, periodic/trimmed/polycurve deletion, 3DM and physical UI remain open."
+    },
+    "control_point_delete_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-control-point-delete.md",
+      "scope": "Single selected control grip deletion for clamped nonperiodic NURBS with protected object Delete and Undo.",
+      "limitations": "Multiple grips, surfaces, periodic/trimmed curves, 3DM and physical UI remain open."
+    },
+    "smooth_fusion_rational_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-smooth-fusion-rational.md",
+      "scope": "Output allocation admission and sampled rational multi-span/affine fusion, degree elevation and .om9 round trip.",
+      "limitations": "Aggregate budget, control point deletion, general curves, 3DM and physical UI remain open."
+    },
+    "smooth_control_fuse_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-smooth-control-fuse.md",
+      "scope": "Control edit fuses supported smooth line and arc polycurves to a single rational NURBS with Undo.",
+      "limitations": "Tolerance-sized gaps, periodic/trimmed curves, general placement, degree elevation, 3DM and physical UI remain open."
+    },
+    "grip_world_joint_tolerance_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-grip-world-joint-tolerance.md",
+      "scope": "Document grip edits compare polycurve joints using world-space absolute tolerance, including nonuniform placement and near-closed seam.",
+      "limitations": "Smooth curve fusion, general curves, 3DM and physical UI remain open."
+    },
+    "polycurve_control_joint_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-polycurve-control-joint.md",
+      "scope": "Control-grip edits preserve tested coincident polycurve joints and reversed traversal with atomic Undo.",
+      "limitations": "Smooth curve fusion, world-space tolerance, general curves, 3DM and physical UI remain open."
+    },
+    "polycurve_edit_joint_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-polycurve-edit-joint.md",
+      "scope": "Move tested coincident polycurve edit joints on both sides, with closure and reversed traversal.",
+      "limitations": "World-space join tolerance, control grips, general curves, 3DM and physical UI remain open."
+    },
+    "circle_edit_point_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-circle-edit-point.md",
+      "scope": "Circle and arc edit grips reach tested 3D targets via exact NURBS conversion, with closed seam and Undo.",
+      "limitations": "Seam fairness, general curves, periodic NURBS, placement, 3DM and physical UI remain open."
+    },
+    "nurbs_edit_points_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-nurbs-edit-points.md",
+      "scope": "Rational nonperiodic NURBS edit points preserve source representation and tested closed seam with Undo.",
+      "limitations": "Periodic, trimmed and singular NURBS, creation-point provenance, >512 poles, pointer UI and human acceptance remain open."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",

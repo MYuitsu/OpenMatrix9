@@ -4,7 +4,8 @@
 //! is the one a mouse takes, not a direct controller call.
 use eframe::egui::{self, Event, Modifiers, Pos2, Rect, Vec2};
 use om9_app::ui::MatrixApp;
-use om9_core::model::Document;
+use om9_core::geometry::Geometry;
+use om9_core::model::{Document, Entity};
 use om9_scene::camera::Viewport;
 use om9_scene::workspace::ViewId;
 
@@ -85,6 +86,145 @@ fn left(app: &MatrixApp, view: ViewId, point: [f64; 3]) -> (Pos2, Pos2) {
         position.y.clamp(rect.top() + 26.0, rect.bottom() - 8.0),
     );
     (position, clamped)
+}
+
+#[test]
+fn drag_strength_and_defaults_are_typed_and_bounded() {
+    let mut app = MatrixApp::new(Document::new("gumball strength")).unwrap();
+    assert_eq!(app.controller.gumball_drag_strength(), 1.0);
+    app.controller.submit("Gumball DragStrength=50").unwrap();
+    assert!((app.controller.gumball_drag_strength() - 0.5).abs() < 1e-9);
+    app.controller.submit("DragStrength=10").unwrap();
+    assert!((app.controller.gumball_drag_strength() - 0.1).abs() < 1e-9);
+    assert!(app.controller.submit("DragStrength=0").is_err());
+    assert!(app.controller.submit("DragStrength=500").is_err());
+    app.controller.submit("Gumball Snappy").unwrap();
+    app.controller.submit("Gumball RestoreDefaults").unwrap();
+    assert_eq!(app.controller.gumball_drag_strength(), 1.0);
+    assert!(!app.controller.gumball_snappy());
+}
+
+#[test]
+fn fifty_percent_strength_moves_half_the_pointer_distance() {
+    let context = egui::Context::default();
+    let mut app = MatrixApp::new(Document::new("gumball strength ui")).expect("app");
+    line(&mut app);
+    frames(&mut app, &context, 4);
+    let id = *app.controller.document().entities.keys().next().unwrap();
+    app.controller.select_objects(&[id]).unwrap();
+    app.controller.submit("Gumball DragStrength=50").unwrap();
+    frames(&mut app, &context, 2);
+    let pivot = app.controller.gumball_pivot().expect("pivot").origin;
+    let anchor = screen_point(&app, ViewId::Perspective, pivot);
+    events(&mut app, &context, vec![Event::PointerMoved(anchor)]);
+    events(
+        &mut app,
+        &context,
+        vec![Event::PointerButton {
+            pos: anchor,
+            button: egui::PointerButton::Primary,
+            pressed: true,
+            modifiers: Modifiers::NONE,
+        }],
+    );
+    for step in 1..=4 {
+        let moved = anchor + Vec2::new(12.0 * step as f32, 0.0);
+        events(&mut app, &context, vec![Event::PointerMoved(moved)]);
+    }
+    let released = anchor + Vec2::new(48.0, 0.0);
+    events(
+        &mut app,
+        &context,
+        vec![Event::PointerButton {
+            pos: released,
+            button: egui::PointerButton::Primary,
+            pressed: false,
+            modifiers: Modifiers::NONE,
+        }],
+    );
+    frames(&mut app, &context, 2);
+    let after = app.controller.gumball_pivot().expect("selected").origin;
+    let drawn = screen_point(&app, ViewId::Perspective, after);
+    assert!(
+        (drawn.x - (anchor.x + 24.0)).abs() < 0.5,
+        "50% strength must move half the pointer distance: {drawn:?} anchor {anchor:?}"
+    );
+}
+
+#[test]
+fn snappy_mode_is_typed_and_smooth_is_the_default() {
+    let mut app = MatrixApp::new(Document::new("gumball modes")).unwrap();
+    assert!(!app.controller.gumball_snappy(), "Smooth is the default");
+    app.controller.submit("Gumball Snappy").unwrap();
+    assert!(app.controller.gumball_snappy());
+    app.controller.submit("Gumball Smooth").unwrap();
+    assert!(!app.controller.gumball_snappy());
+}
+
+#[test]
+fn snappy_drag_follows_the_object_snap_marker() {
+    let context = egui::Context::default();
+    let mut document = Document::new("gumball snappy");
+    let snap = Entity::new("snap point", Geometry::Point([10.0, 10.0, 0.0]), None);
+    let snap_id = snap.id;
+    document.entities.insert(snap_id, snap);
+    let mut app = MatrixApp::new(document).expect("app");
+    line(&mut app);
+    frames(&mut app, &context, 4);
+    let line_id = *app
+        .controller
+        .document()
+        .entities
+        .keys()
+        .find(|id| **id != snap_id)
+        .expect("line");
+    app.controller.select_objects(&[line_id]).unwrap();
+    app.controller.submit("Gumball Snappy").unwrap();
+    frames(&mut app, &context, 2);
+    let pivot = app.controller.gumball_pivot().expect("pivot").origin;
+    assert!((pivot[0] - 10.0).abs() < 1e-6, "{pivot:?}");
+
+    let anchor = screen_point(&app, ViewId::Perspective, pivot);
+    let snap_screen = screen_point(&app, ViewId::Perspective, [10.0, 10.0, 0.0]);
+    let raw = snap_screen + Vec2::new(3.0, 0.0);
+    events(&mut app, &context, vec![Event::PointerMoved(anchor)]);
+    events(
+        &mut app,
+        &context,
+        vec![Event::PointerButton {
+            pos: anchor,
+            button: egui::PointerButton::Primary,
+            pressed: true,
+            modifiers: Modifiers::NONE,
+        }],
+    );
+    for step in 1..=4 {
+        let t = step as f32 / 4.0;
+        let moved = anchor + (raw - anchor) * t;
+        events(&mut app, &context, vec![Event::PointerMoved(moved)]);
+    }
+    events(
+        &mut app,
+        &context,
+        vec![Event::PointerButton {
+            pos: raw,
+            button: egui::PointerButton::Primary,
+            pressed: false,
+            modifiers: Modifiers::NONE,
+        }],
+    );
+    frames(&mut app, &context, 2);
+
+    let after = app.controller.gumball_pivot().expect("selected").origin;
+    assert!(
+        (0..3).all(|i| (after[i] - [10.0, 10.0, 0.0][i]).abs() < 1e-6),
+        "Snappy must land the pivot at the 3D snap point: {after:?}"
+    );
+    let drawn = screen_point(&app, ViewId::Perspective, after);
+    assert!(
+        (drawn.x - snap_screen.x).abs() < 0.01 && (drawn.y - snap_screen.y).abs() < 0.01,
+        "the pivot must land on the snap marker, not the raw pointer: {drawn:?} snap {snap_screen:?} raw {raw:?}"
+    );
 }
 
 #[test]

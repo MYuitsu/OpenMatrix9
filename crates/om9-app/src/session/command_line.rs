@@ -363,21 +363,24 @@ impl Controller {
             return pending.prompt().to_owned();
         }
         match &self.session {
-            None => "Command: ",
-            Some(s) if s.feature == POINT => "Location of point: ",
+            None => "Command: ".to_owned(),
+            Some(s) if s.feature == POINT => "Location of point: ".to_owned(),
             Some(s) if surface_edit::plane_like(s.feature) => match s.points.len() {
                 0 => "First corner: ",
                 1 => "Second corner: ",
                 _ => "Third corner: ",
-            },
+            }
+            .to_owned(),
             Some(s) => match (s.start.is_some(), s.both_sides) {
-                (false, false) => "Start of line (BothSides=No Length=): ",
-                (false, true) => "Start of line (BothSides=Yes Length=): ",
-                (true, false) => "End of line (BothSides=No Length=): ",
-                (true, true) => "End of line (BothSides=Yes Length=): ",
+                // Matrix Line: BothSides before the first point; after it the end point
+                // is picked, or a length is typed as a bare number (no Length option).
+                (false, both_sides) => format!(
+                    "Start of line (BothSides={}): ",
+                    if both_sides { "Yes" } else { "No" }
+                ),
+                (true, _) => "End of line: ".to_owned(),
             },
         }
-        .to_owned()
     }
     /// Prompt text for the command line with every clickable option spelled inline.
     ///
@@ -411,7 +414,9 @@ impl Controller {
         if all_present {
             return prompt;
         }
-        let signature = format!(" ({})", labels.join(" "));
+        // Matrix spells the option list with a space inside the parentheses
+        // (`Center of circle ( Deformable ... ):`).
+        let signature = format!(" ( {} )", labels.join(" "));
         let trimmed = prompt.trim_end();
         if let Some(head) = trimmed.strip_suffix(':') {
             format!("{}{signature}: ", head.trim_end())
@@ -454,7 +459,15 @@ impl Controller {
         let owner = options
             .first()
             .map(|option| option.id.owner)
-            .or_else(|| self.active_positional_owner());
+            .or_else(|| self.active_positional_owner())
+            // A running Line keeps its owner even when the end stage publishes no
+            // option (Matrix: point or typed length, no Length token).
+            .or_else(|| {
+                self.session
+                    .as_ref()
+                    .filter(|session| session.feature == super::LINE)
+                    .map(|_| "line")
+            });
         CommandInputSnapshot {
             owner,
             run: self.command_run,

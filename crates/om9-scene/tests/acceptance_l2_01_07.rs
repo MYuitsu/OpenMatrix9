@@ -8,7 +8,7 @@
 //! * L3-003 positive/negative: the exact face/edge/vertex, and a miss when the geometry is gone.
 use om9_core::{
     budget::Limits,
-    geometry::{Geometry, Mesh},
+    geometry::{Cloud, Curve, Geometry, Mesh},
     model::{Document, Entity},
     transaction::{Mutation, TransactionCoordinator, TransactionRequest, World},
 };
@@ -98,6 +98,67 @@ fn screen(point: [f64; 3]) -> [f64; 2] {
         .expect("project")
         .expect("front")
         .screen
+}
+
+#[test]
+fn nearest_pick_matches_full_list_for_many_overlapping_roots_and_depth_ties() {
+    let mut document = Document::new("overlapping roots");
+    for index in 0..150 {
+        let z = if index % 3 == 0 { 1. } else { 0. };
+        let point = Entity::new("point", Geometry::Point([0., 0., z]), None);
+        document.entities.insert(point.id, point);
+    }
+    let scene = Scene::capture(std::sync::Arc::new(document), 1, &Limits::default()).unwrap();
+    let screen = screen([0., 0., 0.]);
+    let all = scene.pick_all(screen, &camera(), viewport(), 6., PickIntent::Select).unwrap();
+    let nearest = scene.pick(screen, &camera(), viewport(), 6., PickIntent::Select).unwrap().unwrap();
+    assert_eq!(all.len(), 150);
+    assert_eq!(nearest.root, all[0].root);
+    assert_eq!(nearest.path, all[0].path);
+    assert_eq!(nearest.depth, all[0].depth);
+}
+
+#[test]
+fn dense_cloud_selects_nearest_of_many_coincident_screen_points() {
+    let mut document = Document::new("dense cloud pick");
+    let cloud = Entity::new("cloud", Geometry::Cloud(Cloud {
+        points: (0..512).map(|i| [0., 0., i as f64 / 512.]).collect(),
+        normals: vec![], colors: vec![], hidden: vec![],
+    }), None);
+    let root = cloud.id;
+    document.entities.insert(root, cloud);
+    let scene = Scene::capture(std::sync::Arc::new(document), 1, &Limits::default()).unwrap();
+    let nearest = scene.pick_kind(screen([0., 0., 0.]), &camera(), viewport(), 6., PickIntent::Select, PickKind::Vertex).unwrap().unwrap();
+    assert_eq!(nearest.root, root);
+    assert_eq!(nearest.subset, Subelement::CloudPoint(511));
+}
+
+#[test]
+fn overlapping_curve_and_mesh_are_both_available_for_disambiguation() {
+    let mut document = Document::new("curve and mesh");
+    let mesh = Entity::new("mesh", Geometry::Mesh(cube()), document.current_layer);
+    let curve = Entity::new(
+        "curve",
+        Geometry::Curve(Curve::Line {
+            start: [-0.5, 0., 2.],
+            end: [0.5, 0., 2.],
+            domain: [0., 1.],
+        }),
+        document.current_layer,
+    );
+    let (mesh_id, curve_id, document_id) = (mesh.id, curve.id, document.id);
+    document.entities.insert(mesh_id, mesh);
+    document.entities.insert(curve_id, curve);
+    let coordinator = TransactionCoordinator::new(
+        World::new(vec![document], &Limits::default()).unwrap(),
+        Limits::default(),
+    ).unwrap();
+    let scene = Scene::capture_in_world(&coordinator, document_id, Default::default()).unwrap();
+    let hits = scene.pick_all(screen([0., 0., 2.]), &camera(), viewport(), 6., PickIntent::Select).unwrap();
+    assert_eq!(hits.iter().map(|hit| hit.root).collect::<Vec<_>>(), vec![curve_id, mesh_id]);
+    let nearest = scene.pick(screen([0., 0., 2.]), &camera(), viewport(), 6., PickIntent::Select).unwrap().unwrap();
+    assert_eq!(nearest.root, hits[0].root);
+    assert_eq!(nearest.path, hits[0].path);
 }
 
 #[test]

@@ -1,0 +1,7 @@
+# Top 11 NURBS projection near narrow knot spans (2026-10-30)
+
+Standalone Rust OM9 on Windows, base `89ef2676b597ebc5ab38fa5c6acf0ad47a2f261b` plus working-tree changes. A degree-1 NURBS fixture has a very narrow pair of knot spans around 0.90001. The previous 64 uniform samples missed a point exactly on that knot and returned a fraction near zero; the core regression failed before the change.
+
+The shared closest-point search now includes knot boundaries and span midpoints as candidates in the original fraction domain, including reversed curves, alongside uniform samples. It refines near the best candidate but retains that candidate if refinement worsens the distance. A captured evaluator avoids repeating whole-curve validation on each sample, and candidate allocation checks the configured point and byte budgets. Tests cover a scaled forward/reversed fixture at the narrow knot and its span midpoint, budget rejection, and CMD Split Point with geometry and Undo/Redo.
+
+With `CARGO_TARGET_DIR=L:\om9-target` and `-j 2`, four core curve/Top 11 suites passed 57 tests and app Top 11, options and OCCT BRep suites passed 65. Public-source audit passed. This sampled method still does not certify the global minimum within an arbitrary knot span; highly curved/rational cases, periodic/reseamed NURBS, large knot-count runtime, viewport/OS interaction and human M03-UI acceptance remain open. This does not complete Top 11.

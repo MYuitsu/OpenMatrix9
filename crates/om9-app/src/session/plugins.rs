@@ -165,7 +165,7 @@ impl Controller {
                 );
             }
             let staged_selection = run.selection.clone();
-            let before = self.document().clone();
+            let before = self.coordinator.capture_retained_document(self.document)?;
             if let Some(request) = run.request {
                 self.publish_plugin_request(request, staged_selection.as_deref())?;
             } else if let Some(ids) = staged_selection.as_deref() {
@@ -228,35 +228,17 @@ impl Controller {
 
     /// Validate one staged plugin selection against a scene with the same rule
     /// `select_objects` uses: a canonical, selectable root with pick geometry.
-    fn validate_plugin_selection(
-        scene: &Scene,
-        ids: &[ObjectId],
-        limits: &om9_core::budget::Limits,
-    ) -> Result<std::collections::BTreeSet<ObjectId>> {
-        if ids.len() as u64 > limits.max_outputs {
-            return Err(Error::Budget("plugin selection"));
-        }
-        let mut next = std::collections::BTreeSet::new();
-        for id in ids {
-            if id.is_nil()
-                || !scene.objects.iter().any(|object| {
-                    object.root == *id && object.selectable && object.has_pick_geometry()
-                })
-            {
-                return Err(Error::Permission("plugin selected root"));
-            }
-            next.insert(*id);
-        }
-        Ok(next)
+    fn prepare_plugin_selection(&self, scene: &Scene, ids: &[ObjectId])
+        -> Result<super::selection_memory::ReservedRootSelection> {
+        self.prepare_root_selection(scene, ids, true).map_err(|error| match error {
+            Error::Budget("root selection count") => Error::Budget("plugin selection"),
+            Error::Permission("selected root") => Error::Permission("plugin selected root"),
+            other => other,
+        })
     }
 
-    fn apply_plugin_selection(&mut self, selection: std::collections::BTreeSet<ObjectId>) {
-        let order: Vec<_> = selection.iter().copied().collect();
-        if selection != self.selection || order != self.selection_order {
-            self.selection_revision = self.selection_revision.saturating_add(1);
-        }
-        self.selection = selection;
-        self.selection_order = order;
+    fn apply_plugin_selection(&mut self, selection: super::selection_memory::ReservedRootSelection) {
+        self.publish_root_selection(selection);
         self.clear_subselection();
     }
 
@@ -270,7 +252,7 @@ impl Controller {
             if scene.epoch != self.coordinator.epoch() {
                 return Err(Error::Stale("plugin selection scene"));
             }
-            Self::validate_plugin_selection(scene, ids, self.coordinator.limits())?
+            self.prepare_plugin_selection(scene, ids)?
         };
         self.apply_plugin_selection(next);
         Ok(())
@@ -302,11 +284,7 @@ impl Controller {
             &self.coordinator.world().documents[&self.document],
         ) {
             let staged = match selection {
-                Some(ids) => Some(Self::validate_plugin_selection(
-                    old_scene,
-                    ids,
-                    self.coordinator.limits(),
-                )?),
+                Some(ids) => Some(self.prepare_plugin_selection(old_scene, ids)?),
                 None => None,
             };
             self.coordinator.commit(prepared)?;
@@ -315,40 +293,33 @@ impl Controller {
             }
             return Ok(());
         }
-        let epoch = self
-            .coordinator
-            .epoch()
-            .checked_add(1)
-            .ok_or(Error::Overflow("plugin scene epoch"))?;
-        // Include the candidate, private Undo and preparation maps before any
-        // scene allocation, then reserve the actual new cache before publish.
-        let scene_limits = self
-            .coordinator
-            .prepared_remaining_limits(&prepared, old_usage)?;
-        let scene = Scene::capture(candidate, epoch, &scene_limits)?;
+        // Keep the construction reservation alive through validation and
+        // publication, so concurrent jobs see this scene while it is built.
+        let candidate_scene = self.prepare_candidate_scene_guard(
+            &mut prepared, old_usage,
+            || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes)),
+            |_| Ok(()),
+        )?;
         let staged = match selection {
-            Some(ids) => Some(Self::validate_plugin_selection(
-                &scene,
-                ids,
-                self.coordinator.limits(),
-            )?),
+            Some(ids) => Some(self.prepare_plugin_selection(&candidate_scene.scene, ids)?),
             None => None,
         };
-        let mut held = old_usage;
-        held.add(scene.cache_usage()?, self.coordinator.limits())?;
-        self.coordinator
-            .reserve_prepared_held_usage(&mut prepared, held)?;
         let receipt = self.coordinator.commit(prepared)?;
+        let super::ReservedCandidateScene { scene, buffer_owner, reservation } = candidate_scene;
         if receipt.published {
-            self.scene = Some(scene);
+            self.publish_owned_scene(scene, buffer_owner);
             self.prune_selection();
             self.clear_subselection();
             self.clear_gumball_preview();
             self.sync_published(ChangeCause::Edit);
+        } else {
+            drop(scene);
+            drop(buffer_owner);
         }
         if let Some(selection) = staged {
             self.apply_plugin_selection(selection);
         }
+        drop(reservation);
         Ok(())
     }
 
@@ -392,6 +363,32 @@ mod tests {
         model::{Document, Entity},
         transaction::Mutation,
     };
+
+    #[test]
+    fn staged_plugin_selection_transfers_its_owner_before_publication() {
+        let mut controller = Controller::new(Document::with_template_tolerance("plugin selection owner"), Limits::default()).unwrap();
+        let first = Entity::new("point", Geometry::Point([1., 0., 0.]), None);
+        let second = Entity::new("point", Geometry::Point([2., 0., 0.]), None);
+        let mut ids = vec![first.id, second.id];
+        let request = TransactionRequest::new("plugin selection", vec![
+            Mutation::Insert { document: controller.document, entity: first },
+            Mutation::Insert { document: controller.document, entity: second },
+        ]);
+        controller.publish_plugin_request(request, Some(&ids)).unwrap();
+        ids.sort_unstable();
+        assert_eq!(controller.selected_ordered(), ids);
+        let bytes = om9_core::budget::Usage::btree::<ObjectId, ()>(2).unwrap().bytes
+            + om9_core::budget::Usage::array::<ObjectId>(controller.selection_order.capacity()).unwrap().bytes;
+        assert_eq!(controller.selection_reservation.as_ref().unwrap().bytes(), bytes);
+        assert_eq!(controller.selection_reservation.as_ref().unwrap().pending_bytes(), 0);
+        controller.undo().unwrap();
+        assert!(controller.selected().is_empty());
+        let order_bytes = om9_core::budget::Usage::array::<ObjectId>(controller.selection_order.capacity()).unwrap().bytes;
+        assert_eq!(controller.selection_reservation.as_ref().unwrap().bytes(), order_bytes);
+        controller.redo().unwrap();
+        assert_eq!(controller.document().entities.len(), 2);
+        assert!(controller.selected().is_empty());
+    }
 
     #[test]
     fn plugin_budget_refusal_preserves_scene_and_document() {
@@ -596,6 +593,7 @@ mod tests {
         // A selection that names an unknown root refuses the whole command.
         let before = controller.document().clone();
         let epoch = controller.scene().unwrap().epoch;
+        let live_buffers = controller.coordinator().external_reserved_bytes(om9_core::budget::memory::MemoryClass::CpuCache);
         let stranger = Entity::new(
             "stranger",
             Geometry::Point([2.0; 3]),
@@ -618,6 +616,8 @@ mod tests {
         assert_eq!(controller.document(), &before);
         assert_eq!(controller.scene().unwrap().epoch, epoch);
         assert_eq!(controller.coordinator().undo_len(), 1);
+        assert_eq!(controller.coordinator().external_reserved_bytes(
+            om9_core::budget::memory::MemoryClass::CpuCache), live_buffers);
         assert!(!controller.document().entities.contains_key(&stranger_id));
         assert_eq!(
             controller.selected(),

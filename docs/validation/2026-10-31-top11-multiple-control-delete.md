@@ -1,0 +1,9 @@
+# Top11 Control Points: multiple-grip deletion — 2026-10-31
+
+Status: PARTIAL_CHECKS_PASSED. This extends the single-grip deletion record. A plain viewport grip pick replaces the selection; Shift adds or toggles a grip. Delete gathers the selected current-revision handles, validates them, groups them by object, removes each curve's indices in descending order, and publishes all geometry mutations as one transaction. A duplicate, stale, unsupported or invalid deletion rejects the batch without a partial commit. The lower-level NURBS knot-selection rule remains the OM9 interpretation documented in the single-grip record.
+
+A controller fixture deletes two poles from one curve and one from another, checks a duplicate-handle refusal, minimum-pole rollback, one Undo/Redo and `.om9` round trip. The UI headless fixture projects and selects two grip locations with additive selection and sends Delete; it is not a full simulated physical pointer path. The four Top11 UI unit tests passed. Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: core curve_ops/top11 44 passed; app Top11/options/BRep/snapshot 148 passed before adding the `.om9` assertion, whose fixture passed after; no-default app 80 passed before that assertion.
+
+Surface control-net deletion, periodic/trimmed NURBS, polycurves, selection bands and drag of multiple grips, exact Matrix modifier/knot semantics, 3DM, physical UI and M03-UI acceptance remain open. No openNURBS measurement batch was performed. Full Top11 remains incomplete.
+
+Source SHA-256: `crates/om9-app/src/session/top11.rs` 789e4e2c33dc2330abe1f811166e839c700f59c02e9d7a08524726b5987d2420; `crates/om9-app/src/ui.rs` 5c2c187dfd569b78ee14343c982ca6265ea852ddd923f4aab6c018e405fc3538; `crates/om9-app/src/ui/top11.rs` 76a60efe91ef5e467a6e84708f6dd804e3c947ea0601bf45652072e24db51a96; `crates/om9-app/tests/top11.rs` 8f6326956b6c6767a9589ef2d1a911655f95987608fd63db4baac830bcf1a036.

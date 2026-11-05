@@ -27,6 +27,13 @@ def percentiles(values):
     return {"count": len(values), **{f"p{p}": values[max(0, math.ceil(len(values)*p/100)-1)] if values else None for p in (50, 95, 99)}, "max": max(values, default=None)}
 
 
+def report_path(path):
+    try:
+        return path.relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def analyze(records):
     frames = [r for r in records if r.get("event") == "nav_frame"]
     active = [r for r in frames if r.get("phase") in ("dragging", "settling") and r.get("encoded_frame_id") == r.get("frame_id")]
@@ -96,9 +103,10 @@ def main():
     parser.add_argument("--timeout",type=float,default=120)
     parser.add_argument("--output",type=Path)
     parser.add_argument("--presentmon",type=Path)
+    parser.add_argument("--hidden",action="store_true",help="Request a hidden audit window on Windows; does not measure desktop presentation")
     args=parser.parse_args()
     if args.auto:args.hz=[60]
-    output=args.output or ROOT/"build/standalone-validation/ui-artifacts"/time.strftime("navigation-%Y%m%d-%H%M%S")
+    output=(args.output or ROOT/"build/standalone-validation/ui-artifacts"/time.strftime("navigation-%Y%m%d-%H%M%S")).resolve()
     output.mkdir(parents=True,exist_ok=False)
     # Freeze the executable for the entire batch: a concurrent Cargo link must not change later runs
     # or hold the developer's build output open. SDK DLLs resolve from the original binary directory.
@@ -112,6 +120,10 @@ def main():
         original_fixture=hashlib.sha256(fixture.read_bytes()).hexdigest()
         env=os.environ.copy()
         env["PATH"]=str(args.exe.parent)+os.pathsep+env.get("PATH","")
+        # Audit-owned paths keep replay startup and any future preference writes
+        # independent from an existing OM9 session and the user's settings.
+        env["OM9_UI_LAYOUT"]=str(directory/"ui-layout.json")
+        env["OM9_GUMBALL_SETTINGS"]=str(directory/"gumball.json")
         for key in ("OM9_GPU_STRESS","OM9_GPU_CLUSTER","OM9_CAMERA_AUDIT","OM9_VIEWPORT_LOD"):
             env.pop(key,None)
         env.update(OM9_NAVIGATION_AUDIT=str(args.frames),OM9_FRAME_HZ=str(hz),OM9_FRAME_LATENCY=str(latency),OM9_NAV_SPEED="1",OM9_NAVIGATION_AUDIT_STDIN_GATE="0",OM9_NAVIGATION_AUDIT_VIEWS=str(views),OM9_NAVIGATION_AUDIT_DPI=str(dpi),OM9_NAVIGATION_AUDIT_SCREENSHOT=str(directory/"final.png"),OM9_INTERACTION_LOG=str(directory/"interaction.jsonl"),OM9_STARTUP_DIALOG="0")
@@ -119,7 +131,12 @@ def main():
         if args.presentmon:env["OM9_NAVIGATION_AUDIT_STDIN_GATE"]="1"
         started=time.monotonic();timed_out=False;clock=calibrate_clock()
         with (directory/"stdout.log").open("w") as stdout,(directory/"stderr.log").open("w") as stderr:
-            child=subprocess.Popen([str(executable),"--ui",str(fixture)],cwd=args.exe.parent,env=env,stdin=subprocess.PIPE if args.presentmon else subprocess.DEVNULL,stdout=stdout,stderr=stderr)
+            startup = None
+            if args.hidden and os.name == "nt":
+                startup = subprocess.STARTUPINFO()
+                startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                startup.wShowWindow = subprocess.SW_HIDE
+            child=subprocess.Popen([str(executable),"--ui",str(fixture)],cwd=args.exe.parent,env=env,stdin=subprocess.PIPE if args.presentmon else subprocess.DEVNULL,stdout=stdout,stderr=stderr,startupinfo=startup)
             monitor=None
             monitor_log=(directory/"presentmon.log").open("w")
             session=f"OM9-nav-{child.pid}-{time.time_ns()}"
@@ -146,7 +163,7 @@ def main():
             for line in path.read_text(encoding="utf-8").splitlines():
                 try:records.append(json.loads(line))
                 except json.JSONDecodeError:pass
-        run={"name":name,"count":count,"views":views,"dpi":dpi,"fixed_hz":hz,"frame_latency":latency,"repeat":repeat,"fixture_sha256":hashlib.sha256(fixture.read_bytes()).hexdigest(),"exit_code":code,"timeout":timed_out,"elapsed_seconds":time.monotonic()-started,"log":path.relative_to(ROOT).as_posix(),"screenshot_saved":(directory/"final.png").exists(),"presentmon_exit":monitor.returncode if monitor else None,"presentmon_csv":str(directory/"presentmon.csv") if (directory/"presentmon.csv").exists() else None,**analyze(records)}
+        run={"name":name,"count":count,"views":views,"dpi":dpi,"fixed_hz":hz,"frame_latency":latency,"repeat":repeat,"fixture_sha256":hashlib.sha256(fixture.read_bytes()).hexdigest(),"exit_code":code,"timeout":timed_out,"elapsed_seconds":time.monotonic()-started,"log":report_path(path),"screenshot_saved":(directory/"final.png").exists(),"presentmon_exit":monitor.returncode if monitor else None,"presentmon_csv":str(directory/"presentmon.csv") if (directory/"presentmon.csv").exists() else None,**analyze(records)}
         if args.auto:run["fixed_hz"]=None
         run["fixture_sha256_before"]=original_fixture;run["fixture_unchanged"]=run["fixture_sha256"]==original_fixture
         moves=[r["t_ms"] for r in records if r.get("event")=="navigation_input" and r.get("raw_event","").startswith("PointerMoved")]

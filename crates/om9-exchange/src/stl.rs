@@ -9,20 +9,25 @@
 //! strict entry point refuses such a mesh and reports how many edges are open.
 
 use om9_core::Error;
+use std::io::{self, Write};
 
 /// A triangle soup: positions plus counter-clockwise triangles that index into them.
 #[derive(Debug, Clone, PartialEq)]
 pub struct TriangleSoup {
-    pub positions: Vec<[f32; 3]>,
+    pub positions: Vec<[f64; 3]>,
     pub triangles: Vec<[u32; 3]>,
 }
 
 impl TriangleSoup {
     pub fn new(positions: Vec<[f32; 3]>, triangles: Vec<[u32; 3]>) -> Self {
         Self {
-            positions,
+            positions: positions.into_iter().map(|p| p.map(f64::from)).collect(),
             triangles,
         }
+    }
+
+    pub fn new_f64(positions: Vec<[f64; 3]>, triangles: Vec<[u32; 3]>) -> Self {
+        Self { positions, triangles }
     }
 }
 
@@ -40,8 +45,18 @@ pub enum StlError {
     BadScale,
     /// A triangle has no area, so it has no normal.
     Degenerate { triangle: usize },
+    /// Conversion to binary-STL coordinates exceeds the requested error budget.
+    Quantization { vertex: usize },
+    /// A triangle collapses or reverses during f32 conversion.
+    QuantizedTriangle { triangle: usize },
+    /// Different input positions become the same encoded STL position.
+    QuantizationCollision { first: usize, second: usize },
+    /// The encoder could not allocate its quantized-position index.
+    Allocation,
     /// `strict` was asked for and the surface is not closed.
     OpenSurface { open_edges: usize },
+    /// Edge incidence, winding or vertex-fan defects prevent a manifold claim.
+    InvalidTopology { non_manifold_edges: usize, inconsistent_edges: usize, disconnected_vertices: usize, duplicate_faces: usize },
     /// The binary format stores the triangle count in a `u32`.
     TooManyTriangles { count: usize },
 }
@@ -64,12 +79,17 @@ impl std::fmt::Display for StlError {
                 "the export scale must be finite and greater than zero"
             ),
             Self::Degenerate { triangle } => write!(formatter, "triangle {triangle} has no area"),
+            Self::Quantization { vertex } => write!(formatter, "vertex {vertex} exceeds STL quantization tolerance"),
+            Self::QuantizedTriangle { triangle } => write!(formatter, "triangle {triangle} collapses or reverses after STL quantization"),
+            Self::QuantizationCollision { first, second } => write!(formatter, "STL quantization merges distinct vertices {first} and {second}"),
+            Self::Allocation => write!(formatter, "not enough memory for STL validation"),
             Self::OpenSurface { open_edges } => {
                 write!(
                     formatter,
                     "the surface is not watertight: {open_edges} open edges"
                 )
             }
+            Self::InvalidTopology { non_manifold_edges, inconsistent_edges, disconnected_vertices, duplicate_faces } => write!(formatter, "invalid STL topology: {non_manifold_edges} non-manifold edges, {inconsistent_edges} inconsistent edges, {disconnected_vertices} disconnected vertices, {duplicate_faces} duplicate faces"),
             Self::TooManyTriangles { count } => {
                 write!(formatter, "binary STL cannot hold {count} triangles")
             }
@@ -79,15 +99,34 @@ impl std::fmt::Display for StlError {
 
 impl std::error::Error for StlError {}
 
+#[derive(Debug)]
+pub enum StlStreamError {
+    Geometry(StlError),
+    Io(io::Error),
+}
+impl From<StlError> for StlStreamError { fn from(error: StlError) -> Self { Self::Geometry(error) } }
+impl From<io::Error> for StlStreamError { fn from(error: io::Error) -> Self { Self::Io(error) } }
+impl std::fmt::Display for StlStreamError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self { Self::Geometry(error) => error.fmt(f), Self::Io(error) => error.fmt(f) }
+    }
+}
+impl std::error::Error for StlStreamError {}
+
 impl From<StlError> for Error {
     fn from(value: StlError) -> Self {
         match value {
             StlError::IndexOutOfRange { .. }
             | StlError::NonFinite { .. }
             | StlError::BadScale
-            | StlError::Degenerate { .. } => Error::Invalid("stl geometry"),
+            | StlError::Degenerate { .. }
+            | StlError::Quantization { .. }
+            | StlError::QuantizedTriangle { .. } => Error::Invalid("stl geometry or quantization"),
+            StlError::QuantizationCollision { .. } => Error::Invalid("STL quantization merges distinct vertices"),
+            StlError::Allocation => Error::Budget("STL validation"),
             StlError::Empty => Error::Invalid("empty mesh"),
             StlError::OpenSurface { .. } => Error::Invalid("stl surface not watertight"),
+            StlError::InvalidTopology { .. } => Error::Invalid("stl non-manifold topology"),
             StlError::TooManyTriangles { .. } => Error::Unsupported("stl triangle count"),
         }
     }
@@ -126,8 +165,8 @@ fn normal_of(a: [f64; 3], b: [f64; 3], c: [f64; 3]) -> Option<[f32; 3]> {
     let ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
     let ac = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
     let n = cross(ab, ac);
-    let length = (n[0] * n[0] + n[1] * n[1] + n[2] * n[2]).sqrt();
-    if !length.is_finite() || length <= 1e-30 {
+    let length = n[0].hypot(n[1]).hypot(n[2]);
+    if !length.is_finite() || length == 0.0 {
         return None;
     }
     Some([
@@ -137,21 +176,259 @@ fn normal_of(a: [f64; 3], b: [f64; 3], c: [f64; 3]) -> Option<[f32; 3]> {
     ])
 }
 
-/// Counts edges used by an odd number of triangles: zero means a closed surface.
-pub fn open_edges(soup: &TriangleSoup) -> usize {
+/// Topological checks on indices. These do not detect geometric self-intersections.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct EdgeTopology {
+    pub boundary: usize,
+    pub non_manifold: usize,
+    pub inconsistent_winding: usize,
+    pub disconnected_vertices: usize,
+    /// Triangle components connected through shared indexed edges, not geometric contact.
+    pub edge_connected_components: usize,
+    /// Repeated indexed triangles after their first occurrence, ignoring winding.
+    pub duplicate_faces: usize,
+}
+
+pub fn edge_topology(soup: &TriangleSoup) -> EdgeTopology {
+    edge_topology_with_check(soup, || Ok::<(), std::convert::Infallible>(())).unwrap()
+}
+
+/// Check cancellation periodically while building and traversing topology.
+pub fn edge_topology_with_check<E>(soup: &TriangleSoup, mut check: impl FnMut() -> Result<(), E>) -> Result<EdgeTopology, E> {
+    try_edge_topology_with_check(soup, &mut check, || panic!("STL topology allocation failed"))
+}
+
+/// Fallible topology validation for callers that must preserve the destination
+/// when scratch allocations cannot be satisfied.
+pub fn try_edge_topology_with_check<E>(soup: &TriangleSoup, check: impl FnMut() -> Result<(), E>, allocation_error: impl FnMut() -> E) -> Result<EdgeTopology, E> {
+    try_edge_topology_with_admission(soup, check, allocation_error, |_| Ok(()))
+}
+
+/// Check known edge, fan and traversal storage at allocation boundaries.
+/// Hash-table metadata and allocator overhead are excluded.
+pub fn try_edge_topology_with_admission<E>(
+    soup: &TriangleSoup, mut check: impl FnMut() -> Result<(), E>, mut allocation_error: impl FnMut() -> E,
+    mut admit: impl FnMut(u64) -> Result<(), E>,
+) -> Result<EdgeTopology, E> {
     use std::collections::HashMap;
-    let mut edges: HashMap<(u32, u32), usize> = HashMap::new();
-    for triangle in &soup.triangles {
+    fn known(edges: usize, faces: usize, parents: usize, ranks: usize, extra: usize) -> Option<u64> {
+        let bytes = edges.checked_mul(std::mem::size_of::<((u32, u32), (usize, usize, usize))>())?
+            .checked_add(faces.checked_mul(std::mem::size_of::<[u32; 3]>())?)?
+            .checked_add(parents.checked_mul(std::mem::size_of::<usize>())?)?
+            .checked_add(ranks.checked_mul(std::mem::size_of::<u8>())?)?
+            .checked_add(extra)?;
+        u64::try_from(bytes).ok()
+    }
+    fn fan_known(table: usize, links: usize, extra: usize) -> Option<u64> {
+        let bytes = table.checked_mul(std::mem::size_of::<(u32, Vec<(u32, u32)>)>())?
+            .checked_add(links)?.checked_add(extra)?;
+        u64::try_from(bytes).ok()
+    }
+    check()?;
+    let mut edges: HashMap<(u32, u32), (usize, usize, usize)> = HashMap::new();
+    let mut faces = std::collections::HashSet::new();
+    let mut duplicates = 0;
+    let mut parents = Vec::new();
+    admit(known(0, 0, 0, 0, soup.triangles.len().checked_mul(std::mem::size_of::<usize>()).ok_or_else(&mut allocation_error)?).ok_or_else(&mut allocation_error)?)?;
+    parents.try_reserve_exact(soup.triangles.len()).map_err(|_| allocation_error())?;
+    parents.extend(0..soup.triangles.len());
+    let mut ranks = Vec::new();
+    admit(known(0, 0, parents.capacity(), 0, soup.triangles.len()).ok_or_else(&mut allocation_error)?)?;
+    ranks.try_reserve_exact(soup.triangles.len()).map_err(|_| allocation_error())?;
+    ranks.resize(soup.triangles.len(), 0u8);
+    admit(known(0, 0, parents.capacity(), ranks.capacity(), 0).ok_or_else(&mut allocation_error)?)?;
+    let mut components = soup.triangles.len();
+    fn root(parents: &mut [usize], mut node: usize) -> usize {
+        while parents[node] != node {
+            parents[node] = parents[parents[node]];
+            node = parents[node];
+        }
+        node
+    }
+    for (index, triangle) in soup.triangles.iter().enumerate() {
+        if index % 1024 == 0 { check()?; }
+        let mut face = *triangle;
+        face.sort_unstable();
+        let face_target = faces.len().checked_add(1).ok_or_else(&mut allocation_error)?;
+        let face_grows = face_target > faces.capacity();
+        if face_grows {
+            let extra = face_target.checked_mul(std::mem::size_of::<[u32; 3]>()).ok_or_else(&mut allocation_error)?;
+            admit(known(edges.capacity(), faces.capacity(), parents.capacity(), ranks.capacity(), extra).ok_or_else(&mut allocation_error)?)?;
+        }
+        faces.try_reserve(1).map_err(|_| allocation_error())?;
+        if face_grows { admit(known(edges.capacity(), faces.capacity(), parents.capacity(), ranks.capacity(), 0).ok_or_else(&mut allocation_error)?)?; }
+        if !faces.insert(face) { duplicates += 1; }
+        let edge_target = edges.len().checked_add(3).ok_or_else(&mut allocation_error)?;
+        let edge_grows = edge_target > edges.capacity();
+        if edge_grows {
+            let extra = edge_target.checked_mul(std::mem::size_of::<((u32, u32), (usize, usize, usize))>()).ok_or_else(&mut allocation_error)?;
+            admit(known(edges.capacity(), faces.capacity(), parents.capacity(), ranks.capacity(), extra).ok_or_else(&mut allocation_error)?)?;
+        }
+        edges.try_reserve(3).map_err(|_| allocation_error())?;
+        if edge_grows { admit(known(edges.capacity(), faces.capacity(), parents.capacity(), ranks.capacity(), 0).ok_or_else(&mut allocation_error)?)?; }
         for (a, b) in [
             (triangle[0], triangle[1]),
             (triangle[1], triangle[2]),
             (triangle[2], triangle[0]),
         ] {
             let key = if a <= b { (a, b) } else { (b, a) };
-            *edges.entry(key).or_insert(0) += 1;
+            match edges.entry(key) {
+                std::collections::hash_map::Entry::Vacant(entry) => { entry.insert((1, usize::from(a < b), index)); }
+                std::collections::hash_map::Entry::Occupied(mut entry) => {
+                    let edge = entry.get_mut();
+                    edge.0 += 1;
+                    if a < b { edge.1 += 1; }
+                    let mut first = root(&mut parents, edge.2);
+                    let mut second = root(&mut parents, index);
+                    if first != second {
+                        if ranks[first] < ranks[second] { std::mem::swap(&mut first, &mut second); }
+                        parents[second] = first;
+                        if ranks[first] == ranks[second] { ranks[first] += 1; }
+                        components -= 1;
+                    }
+                }
+            }
         }
     }
-    edges.values().filter(|count| **count % 2 != 0).count()
+    let mut result = EdgeTopology { duplicate_faces: duplicates, edge_connected_components: components, ..EdgeTopology::default() };
+    for (index, &(count, forward, _)) in edges.values().enumerate() {
+        if index % 1024 == 0 { check()?; }
+        match count {
+            1 => result.boundary += 1,
+            2 if forward != 1 => result.inconsistent_winding += 1,
+            2 => {},
+            _ => result.non_manifold += 1,
+        }
+    }
+    // The face/edge maps and union-find arrays are no longer needed while
+    // inspecting vertex fans. Avoid keeping both large scratch sets alive.
+    drop(faces);
+    drop(edges);
+    drop(parents);
+    drop(ranks);
+    let mut fans: HashMap<u32, Vec<(u32, u32)>> = HashMap::new();
+    let mut links_bytes = 0usize;
+    for (index, triangle) in soup.triangles.iter().enumerate() {
+        if index % 1024 == 0 { check()?; }
+        let target = fans.len().checked_add(3).ok_or_else(&mut allocation_error)?;
+        let grows = target > fans.capacity();
+        if grows {
+            let extra = target.checked_mul(std::mem::size_of::<(u32, Vec<(u32, u32)>)>()).ok_or_else(&mut allocation_error)?;
+            admit(fan_known(fans.capacity(), links_bytes, extra).ok_or_else(&mut allocation_error)?)?;
+        }
+        fans.try_reserve(3).map_err(|_| allocation_error())?;
+        if grows { admit(fan_known(fans.capacity(), links_bytes, 0).ok_or_else(&mut allocation_error)?)?; }
+        let table_capacity = fans.capacity();
+        for (v, a, b) in [(triangle[0], triangle[1], triangle[2]), (triangle[1], triangle[2], triangle[0]), (triangle[2], triangle[0], triangle[1])] {
+            let links = fans.entry(v).or_default();
+            let old_capacity = links.capacity();
+            let target = links.len().checked_add(1).ok_or_else(&mut allocation_error)?;
+            let grows = target > old_capacity;
+            if grows {
+                let extra = target.checked_mul(std::mem::size_of::<(u32, u32)>()).ok_or_else(&mut allocation_error)?;
+                admit(fan_known(table_capacity, links_bytes, extra).ok_or_else(&mut allocation_error)?)?;
+            }
+            links.try_reserve(1).map_err(|_| allocation_error())?;
+            if grows {
+                let old_bytes = old_capacity.checked_mul(std::mem::size_of::<(u32, u32)>()).ok_or_else(&mut allocation_error)?;
+                let new_bytes = links.capacity().checked_mul(std::mem::size_of::<(u32, u32)>()).ok_or_else(&mut allocation_error)?;
+                links_bytes = links_bytes.checked_sub(old_bytes).and_then(|bytes| bytes.checked_add(new_bytes)).ok_or_else(&mut allocation_error)?;
+                admit(fan_known(table_capacity, links_bytes, 0).ok_or_else(&mut allocation_error)?)?;
+            }
+            links.push((a, b));
+        }
+    }
+    for (index, links) in fans.values().enumerate() {
+        if index % 1024 == 0 { check()?; }
+        let mut adjacency: HashMap<u32, Vec<u32>> = HashMap::new();
+        let fan_bytes = fan_known(fans.capacity(), links_bytes, 0).ok_or_else(&mut allocation_error)?;
+        let mut adjacency_links = 0usize;
+        for (link_index, &(a, b)) in links.iter().enumerate() {
+            if link_index % 1024 == 0 { check()?; }
+            let target = adjacency.len().checked_add(2).ok_or_else(&mut allocation_error)?;
+            let grows = target > adjacency.capacity();
+            let entry_size = std::mem::size_of::<(u32, Vec<u32>)>();
+            let table_bytes = adjacency.capacity().checked_mul(entry_size).ok_or_else(&mut allocation_error)?;
+            let base = fan_bytes.checked_add(u64::try_from(table_bytes.checked_add(adjacency_links).ok_or_else(&mut allocation_error)?).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?;
+            if grows {
+                let extra = target.checked_mul(entry_size).ok_or_else(&mut allocation_error)?;
+                admit(base.checked_add(u64::try_from(extra).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?)?;
+            }
+            adjacency.try_reserve(2).map_err(|_| allocation_error())?;
+            let table_bytes = adjacency.capacity().checked_mul(entry_size).ok_or_else(&mut allocation_error)?;
+            if grows {
+                admit(fan_bytes.checked_add(u64::try_from(table_bytes.checked_add(adjacency_links).ok_or_else(&mut allocation_error)?).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?)?;
+            }
+            for (key, value) in [(a, b), (b, a)] {
+                let adjacent = adjacency.entry(key).or_default();
+                let old = adjacent.capacity();
+                let target = adjacent.len().checked_add(1).ok_or_else(&mut allocation_error)?;
+                let grows = target > old;
+                if grows {
+                    let extra = target.checked_mul(std::mem::size_of::<u32>()).ok_or_else(&mut allocation_error)?;
+                    let bytes = table_bytes.checked_add(adjacency_links).and_then(|n| n.checked_add(extra)).ok_or_else(&mut allocation_error)?;
+                    admit(fan_bytes.checked_add(u64::try_from(bytes).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?)?;
+                }
+                adjacent.try_reserve(1).map_err(|_| allocation_error())?;
+                if grows {
+                    adjacency_links = adjacency_links.checked_sub(old.checked_mul(4).ok_or_else(&mut allocation_error)?)
+                        .and_then(|n| n.checked_add(adjacent.capacity().checked_mul(4)?)).ok_or_else(&mut allocation_error)?;
+                    let bytes = table_bytes.checked_add(adjacency_links).ok_or_else(&mut allocation_error)?;
+                    admit(fan_bytes.checked_add(u64::try_from(bytes).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?)?;
+                }
+                adjacent.push(value);
+            }
+        }
+        let Some(&start) = adjacency.keys().next() else { continue };
+        let adjacency_bytes = adjacency.capacity().checked_mul(std::mem::size_of::<(u32, Vec<u32>)>())
+            .and_then(|n| n.checked_add(adjacency_links)).ok_or_else(&mut allocation_error)?;
+        let base = fan_bytes.checked_add(u64::try_from(adjacency_bytes).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?;
+        let mut visited = std::collections::HashSet::new();
+        let mut pending = Vec::new();
+        admit(base.checked_add(4).ok_or_else(&mut allocation_error)?)?;
+        pending.try_reserve(1).map_err(|_| allocation_error())?;
+        admit(base.checked_add(u64::try_from(pending.capacity().checked_mul(4).ok_or_else(&mut allocation_error)?).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?)?;
+        pending.push(start);
+        let mut visited_count = 0usize;
+        while let Some(vertex) = pending.pop() {
+            visited_count += 1;
+            if visited_count % 1024 == 0 { check()?; }
+            let target = visited.len().checked_add(1).ok_or_else(&mut allocation_error)?;
+            let grows = target > visited.capacity();
+            if grows {
+                let bytes = visited.capacity().checked_add(pending.capacity()).and_then(|n: usize| n.checked_add(target)).and_then(|n| n.checked_mul(4)).ok_or_else(&mut allocation_error)?;
+                admit(base.checked_add(u64::try_from(bytes).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?)?;
+            }
+            visited.try_reserve(1).map_err(|_| allocation_error())?;
+            if grows {
+                let bytes = visited.capacity().checked_add(pending.capacity()).and_then(|n| n.checked_mul(4)).ok_or_else(&mut allocation_error)?;
+                admit(base.checked_add(u64::try_from(bytes).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?)?;
+            }
+            if visited.insert(vertex) {
+                let additional = adjacency[&vertex].len();
+                let target = pending.len().checked_add(additional).ok_or_else(&mut allocation_error)?;
+                let grows = target > pending.capacity();
+                if grows {
+                    let bytes = visited.capacity().checked_add(pending.capacity()).and_then(|n| n.checked_add(target)).and_then(|n| n.checked_mul(4)).ok_or_else(&mut allocation_error)?;
+                    admit(base.checked_add(u64::try_from(bytes).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?)?;
+                }
+                pending.try_reserve(additional).map_err(|_| allocation_error())?;
+                if grows {
+                    let bytes = visited.capacity().checked_add(pending.capacity()).and_then(|n| n.checked_mul(4)).ok_or_else(&mut allocation_error)?;
+                    admit(base.checked_add(u64::try_from(bytes).map_err(|_| allocation_error())?).ok_or_else(&mut allocation_error)?)?;
+                }
+                pending.extend(adjacency[&vertex].iter().copied());
+            }
+        }
+        if visited.len() != adjacency.len() { result.disconnected_vertices += 1; }
+    }
+    check()?;
+    Ok(result)
+}
+
+/// Number of boundary edges. Use `edge_topology` for other defects.
+pub fn open_edges(soup: &TriangleSoup) -> usize {
+    edge_topology(soup).boundary
 }
 
 /// Writes a binary STL. `strict` refuses open surfaces, degenerate triangles and bad indices; the lenient
@@ -160,40 +437,117 @@ pub fn write_binary_stl(
     soup: &TriangleSoup,
     options: StlOptions,
 ) -> std::result::Result<Vec<u8>, StlError> {
+    write_binary_stl_with_tolerance(soup, options, None)
+}
+
+/// `max_quantization_error` is Euclidean distance in exported units.
+pub fn write_binary_stl_with_tolerance(
+    soup: &TriangleSoup,
+    options: StlOptions,
+    max_quantization_error: Option<f64>,
+) -> std::result::Result<Vec<u8>, StlError> {
+    let mut bytes = Vec::new();
+    match write_binary_stl_to(&mut bytes, soup, options, max_quantization_error) {
+        Ok(()) => Ok(bytes),
+        Err(StlStreamError::Geometry(error)) => Err(error),
+        Err(StlStreamError::Io(_)) => unreachable!("Vec writes do not return I/O errors"),
+    }
+}
+
+/// Stream an STL to a writer. On failure, the writer can contain a partial file;
+/// callers publishing to disk must use a temporary destination.
+pub fn write_binary_stl_to(
+    writer: &mut impl Write,
+    soup: &TriangleSoup,
+    options: StlOptions,
+    max_quantization_error: Option<f64>,
+) -> std::result::Result<(), StlStreamError> {
+    write_binary_stl_to_with_check(writer, soup, options, max_quantization_error, || Ok(()))
+}
+
+/// As `write_binary_stl_to`, with periodic cancellation checks during preflight,
+/// strict topology validation, and encoding. A failed writer may be partial.
+pub fn write_binary_stl_to_with_check(
+    writer: &mut impl Write,
+    soup: &TriangleSoup,
+    options: StlOptions,
+    max_quantization_error: Option<f64>,
+    check: impl FnMut() -> io::Result<()>,
+) -> std::result::Result<(), StlStreamError> {
+    write_binary_stl_to_with_report(writer, soup, options, max_quantization_error, check).map(|_| ())
+}
+
+/// Encoding observations, without an encoded-topology or self-intersection check.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct StlWriteReport {
+    /// Distinct used source indices have the same encoded position. STL does
+    /// not preserve their identity, even when their input positions are equal.
+    pub coincident_distinct_indices: bool,
+}
+
+/// As `write_binary_stl_to_with_check`, also reporting identity ambiguity.
+pub fn write_binary_stl_to_with_report(
+    writer: &mut impl Write,
+    soup: &TriangleSoup,
+    options: StlOptions,
+    max_quantization_error: Option<f64>,
+    check: impl FnMut() -> io::Result<()>,
+) -> std::result::Result<StlWriteReport, StlStreamError> {
+    write_binary_stl_to_with_report_and_admission(writer, soup, options, max_quantization_error, check, |_| Ok(()))
+}
+
+/// Admit known topology and quantized-position table slots. Hash control bytes,
+/// allocator overhead and temporary over-allocation are not included.
+pub fn write_binary_stl_to_with_report_and_admission(
+    writer: &mut impl Write,
+    soup: &TriangleSoup,
+    options: StlOptions,
+    max_quantization_error: Option<f64>,
+    mut check: impl FnMut() -> io::Result<()>,
+    mut admit: impl FnMut(u64) -> std::result::Result<(), StlError>,
+) -> std::result::Result<StlWriteReport, StlStreamError> {
+    check()?;
     if soup.triangles.is_empty() {
-        return Err(StlError::Empty);
+        return Err(StlError::Empty.into());
     }
     if !options.scale.is_finite() || options.scale <= 0.0 {
-        return Err(StlError::BadScale);
+        return Err(StlError::BadScale.into());
+    }
+    if max_quantization_error.is_some_and(|t| !t.is_finite() || t <= 0.0) {
+        return Err(StlError::BadScale.into());
     }
     if soup.triangles.len() > u32::MAX as usize {
         return Err(StlError::TooManyTriangles {
             count: soup.triangles.len(),
-        });
+        }.into());
     }
     for (index, position) in soup.positions.iter().enumerate() {
+        if index % 1024 == 0 { check()?; }
         if position.iter().any(|value| !value.is_finite()) {
-            return Err(StlError::NonFinite { vertex: index });
+            return Err(StlError::NonFinite { vertex: index }.into());
         }
     }
     // Indices are checked before the watertight rule so a malformed mesh reports the real defect.
     for (index, triangle) in soup.triangles.iter().enumerate() {
+        if index % 1024 == 0 { check()?; }
         for vertex_index in triangle {
             if *vertex_index as usize >= soup.positions.len() {
                 return Err(StlError::IndexOutOfRange {
                     triangle: index,
                     index: *vertex_index,
-                });
+                }.into());
             }
         }
     }
     if options.strict {
-        let open = open_edges(soup);
-        if open > 0 {
-            return Err(StlError::OpenSurface { open_edges: open });
+        let topology = try_edge_topology_with_admission(soup, || check().map_err(StlStreamError::Io), || StlStreamError::Geometry(StlError::Allocation), |bytes| admit(bytes).map_err(StlStreamError::Geometry))?;
+        if topology.boundary > 0 {
+            return Err(StlError::OpenSurface { open_edges: topology.boundary }.into());
+        }
+        if topology.non_manifold > 0 || topology.inconsistent_winding > 0 || topology.disconnected_vertices > 0 || topology.duplicate_faces > 0 {
+            return Err(StlError::InvalidTopology { non_manifold_edges: topology.non_manifold, inconsistent_edges: topology.inconsistent_winding, disconnected_vertices: topology.disconnected_vertices, duplicate_faces: topology.duplicate_faces }.into());
         }
     }
-    let mut bytes = Vec::with_capacity(84 + soup.triangles.len() * 50);
     // The header is free text; say what the coordinates mean so a reader can check.
     let header = format!(
         "OM9 binary STL, {} triangles, scale {} mm-per-unit",
@@ -204,9 +558,12 @@ pub fn write_binary_stl(
     let header_bytes_written = header.len().min(80);
     header_bytes[..header_bytes_written]
         .copy_from_slice(&header.as_bytes()[..header_bytes_written]);
-    bytes.extend_from_slice(&header_bytes);
-    bytes.extend_from_slice(&(soup.triangles.len() as u32).to_le_bytes());
+    writer.write_all(&header_bytes)?;
+    writer.write_all(&(soup.triangles.len() as u32).to_le_bytes())?;
+    let mut encoded_positions = std::collections::HashMap::<[u32; 3], ([f64; 3], usize)>::new();
+    let mut report = StlWriteReport::default();
     for (index, triangle) in soup.triangles.iter().enumerate() {
+        if index % 1024 == 0 { check()?; }
         let mut vertices = [[0.0f64; 3]; 3];
         for (slot, vertex_index) in triangle.iter().enumerate() {
             let position =
@@ -217,31 +574,175 @@ pub fn write_binary_stl(
                         index: *vertex_index,
                     })?;
             for axis in 0..3 {
-                vertices[slot][axis] = f64::from(position[axis]) * options.scale;
+                vertices[slot][axis] = position[axis] * options.scale;
+            }
+        }
+        let mut quantized = [[0.0f64; 3]; 3];
+        for (slot, vertex) in vertices.iter().enumerate() {
+            let mut distance_sq = 0.0;
+            for axis in 0..3 {
+                let value = vertex[axis] as f32;
+                if !value.is_finite() { return Err(StlError::Quantization { vertex: triangle[slot] as usize }.into()); }
+                quantized[slot][axis] = f64::from(value);
+                distance_sq += (quantized[slot][axis] - vertex[axis]).powi(2);
+            }
+            if max_quantization_error.is_some_and(|t| distance_sq.sqrt() > t) {
+                return Err(StlError::Quantization { vertex: triangle[slot] as usize }.into());
+            }
+        }
+        let source_normal = normal_of(vertices[0], vertices[1], vertices[2]).ok_or(StlError::Degenerate { triangle: index })?;
+        let encoded_normal = normal_of(quantized[0], quantized[1], quantized[2]).ok_or(StlError::QuantizedTriangle { triangle: index })?;
+        if (0..3).map(|i| f64::from(source_normal[i]) * f64::from(encoded_normal[i])).sum::<f64>() <= 0.0 {
+            return Err(StlError::QuantizedTriangle { triangle: index }.into());
+        }
+        let entry_size = std::mem::size_of::<([u32; 3], ([f64; 3], usize))>();
+        let target = encoded_positions.len().checked_add(3).ok_or(StlError::Allocation)?;
+        let grows = target > encoded_positions.capacity();
+        if grows {
+            let peak = encoded_positions.capacity().checked_add(target).and_then(|n| n.checked_mul(entry_size)).ok_or(StlError::Allocation)?;
+            admit(u64::try_from(peak).map_err(|_| StlError::Allocation)?)?;
+        }
+        encoded_positions.try_reserve(3).map_err(|_| StlError::Allocation)?;
+        if grows {
+            let bytes = encoded_positions.capacity().checked_mul(entry_size).ok_or(StlError::Allocation)?;
+            admit(u64::try_from(bytes).map_err(|_| StlError::Allocation)?)?;
+        }
+        for slot in 0..3 {
+            let key = quantized[slot].map(|value| {
+                let value = value as f32;
+                if value == 0.0 { 0 } else { value.to_bits() }
+            });
+            match encoded_positions.entry(key) {
+                std::collections::hash_map::Entry::Occupied(entry) if entry.get().0 != vertices[slot] => {
+                    return Err(StlError::QuantizationCollision { first: entry.get().1, second: triangle[slot] as usize }.into());
+                }
+                std::collections::hash_map::Entry::Occupied(entry) => {
+                    if entry.get().1 != triangle[slot] as usize { report.coincident_distinct_indices = true; }
+                }
+                std::collections::hash_map::Entry::Vacant(entry) => { entry.insert((vertices[slot], triangle[slot] as usize)); }
             }
         }
         let (a, b, c) = if options.flip_winding {
-            (vertices[0], vertices[2], vertices[1])
+            (quantized[0], quantized[2], quantized[1])
         } else {
-            (vertices[0], vertices[1], vertices[2])
+            (quantized[0], quantized[1], quantized[2])
         };
         let normal = normal_of(a, b, c).ok_or(StlError::Degenerate { triangle: index })?;
         for value in normal {
-            bytes.extend_from_slice(&value.to_le_bytes());
+            writer.write_all(&value.to_le_bytes())?;
         }
         for vertex in [a, b, c] {
             for value in vertex {
-                bytes.extend_from_slice(&(value as f32).to_le_bytes());
+                writer.write_all(&(value as f32).to_le_bytes())?;
             }
         }
-        bytes.extend_from_slice(&0u16.to_le_bytes());
+        writer.write_all(&0u16.to_le_bytes())?;
     }
-    Ok(bytes)
+    Ok(report)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn tiny_representable_triangle_is_not_mistaken_for_zero_area() {
+        let soup = TriangleSoup::new_f64(
+            vec![[0., 0., 0.], [1e-16, 0., 0.], [0., 1e-16, 0.]],
+            vec![[0, 1, 2]],
+        );
+        let options = StlOptions { strict: false, ..Default::default() };
+        let encoded = write_binary_stl_with_tolerance(&soup, options, Some(1e-20)).unwrap();
+        assert_eq!(encoded.len(), 134);
+        let read = |offset| f32::from_le_bytes(encoded[offset..offset + 4].try_into().unwrap());
+        assert_eq!(read(92), 1.0, "encoded normal must point along +Z");
+        assert!(read(108) > 0.0 && read(124) > 0.0, "encoded vertices must remain distinct");
+        let collapsed = TriangleSoup::new_f64(vec![[0., 0., 0.]; 3], vec![[0, 1, 2]]);
+        assert!(write_binary_stl_with_tolerance(&collapsed, options, Some(1e-20)).is_err());
+    }
+
+    #[test]
+    fn cancellation_interrupts_vertex_preflight_before_any_output() {
+        let soup = TriangleSoup::new_f64(vec![[0., 0., 0.]; 4096], vec![[0, 1, 2]]);
+        let mut checks = 0;
+        let mut output = Vec::new();
+        let result = write_binary_stl_to_with_check(&mut output, &soup, StlOptions::default(), None, || {
+            checks += 1;
+            if checks == 3 { Err(io::Error::other("canceled")) } else { Ok(()) }
+        });
+        assert!(matches!(result, Err(StlStreamError::Io(_))));
+        assert_eq!(checks, 3);
+        assert!(output.is_empty());
+    }
+
+    #[test]
+    fn cancellation_interrupts_strict_topology_before_any_output() {
+        let soup = cube();
+        let mut checks = 0;
+        let mut output = Vec::new();
+        let result = write_binary_stl_to_with_check(&mut output, &soup, StlOptions::default(), None, || {
+            checks += 1;
+            // Initial check, vertex preflight, index preflight, then topology.
+            if checks == 4 { Err(io::Error::other("canceled")) } else { Ok(()) }
+        });
+        assert!(matches!(result, Err(StlStreamError::Io(_))));
+        assert_eq!(checks, 4);
+        assert!(output.is_empty());
+    }
+
+    #[test]
+    fn quantization_cannot_merge_distinct_surfaces_even_when_triangles_survive() {
+        let soup = TriangleSoup::new_f64(
+            vec![[0., 0., 1.], [1., 0., 1.], [0., 1., 1.],
+                 [0., 0., 1.00000002], [1., 0., 1.00000002], [0., 1., 1.00000002]],
+            vec![[0, 1, 2], [3, 4, 5]],
+        );
+        let options = StlOptions { strict: false, ..Default::default() };
+        assert!(write_binary_stl_with_tolerance(&soup, options, Some(0.0001)).is_err(),
+            "distinct faces must not silently become coincident in the encoded STL");
+        let identical = TriangleSoup::new_f64(
+            vec![[0., 0., 1.], [1., 0., 1.], [0., 1., 1.],
+                 [-0., 0., 1.], [1., 0., 1.], [0., 1., 1.]],
+            vec![[0, 1, 2], [3, 4, 5]],
+        );
+        assert!(write_binary_stl_with_tolerance(&identical, options, Some(0.0001)).is_ok(),
+            "pre-existing identical positions, including signed zero, are not new quantization collisions");
+    }
+
+    #[test]
+    fn stream_reports_io_failure_without_materializing_the_file() {
+        struct FailsAfter(usize);
+        impl Write for FailsAfter {
+            fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+                if self.0 == 0 { return Err(io::Error::other("simulated disk failure")); }
+                let written = self.0.min(bytes.len());
+                self.0 -= written;
+                Ok(written)
+            }
+            fn flush(&mut self) -> io::Result<()> { Ok(()) }
+        }
+        let mut writer = FailsAfter(90);
+        assert!(matches!(write_binary_stl_to(&mut writer, &cube(), StlOptions::default(), None), Err(StlStreamError::Io(_))));
+    }
+
+    #[test]
+    fn topology_traversal_stops_when_check_requests_cancellation() {
+        let soup = TriangleSoup::new_f64(vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], vec![[0,1,2]; 4_000]);
+        let mut checks = 0;
+        let result = try_edge_topology_with_check(&soup, || {
+            checks += 1;
+            if checks == 3 { Err("cancelled") } else { Ok(()) }
+        }, || "allocation");
+        assert_eq!(result, Err("cancelled"));
+        assert_eq!(checks, 3);
+    }
+
+    #[test]
+    fn fallible_topology_matches_legacy_result() {
+        let soup = cube();
+        let result = try_edge_topology_with_check(&soup, || Ok::<(), StlError>(()), || StlError::Allocation).unwrap();
+        assert_eq!(result, edge_topology(&soup));
+    }
 
     /// A closed unit cube, wound counter-clockwise seen from outside.
     fn cube() -> TriangleSoup {

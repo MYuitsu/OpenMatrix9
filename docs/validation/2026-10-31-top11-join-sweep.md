@@ -1,0 +1,9 @@
+# Top11 Join: endpoint sweep — 2026-10-31
+
+Status: PARTIAL_CHECKS_PASSED. The earlier trail builder compared every endpoint pair. It now sorts endpoints on the axis with the widest extent and compares only candidates within the tolerance on that axis, then checks their true 3D distance and builds the same connectivity graph. Roots use a stable minimum index; ambiguous tolerance clusters are still checked before publication. Distance now uses `hypot` to avoid underflow or overflow in the former squared-distance calculation. Scratch admission accounts for the added index array.
+
+A 2,000-line spread-chain fixture preserves all segments and checks every connection. One debug test run on this machine measured 250.167 ms before the change and 42.061 ms after; these are single observations, not a benchmark distribution or performance guarantee. Fixtures also cover gaps inside/outside tolerance on all three axes, zero tolerance with extremely small separated coordinates, 120 loop/tail object orders, invalid graphs and the synthetic viewport Join test.
+
+Windows x64, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: core curve_ops/top11 48 passed; app Top11/options/BRep/snapshot 160 passed; no-default app 92 passed; one default-feature synthetic viewport test passed. Dense endpoints sharing the sweep window remain quadratic, and performance under those conditions, full aggregate budget, nontransitive clusters, seam healing, 3DM and physical M03-UI acceptance remain open. No openNURBS measurement batch was run. Full Top11 remains incomplete.
+
+Source SHA-256: `crates/om9-core/src/top11.rs` 0478a81fe1560f6b0db35e0972a5e29793f200104c6902b8871cd0db29c0f701; `crates/om9-core/tests/top11.rs` fb54f5d21d8d613fc3f75565c6d60a1c6714d4c8d76184b882a72e2aec6e439c; `crates/om9-app/src/ui/chrome.rs` 81efebb3a66ddbff9a3311a2d460fbeb66549a8a9f878d4a104594836fd488ea.

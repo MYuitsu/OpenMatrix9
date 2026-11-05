@@ -138,26 +138,14 @@ impl Controller {
         if old_scene.epoch != self.coordinator.epoch() {
             return Err(om9_core::Error::Stale("property edit scene"));
         }
-        let held = self.scene_cache_usage()?;
+        let mut held = self.scene_cache_usage()?;
+        let increment = old_scene.update_held_usage(None)?;
+        held.add(increment, self.coordinator.limits())?;
         let prepared = self.coordinator.prepare_with_held_usage(
             TransactionRequest::new("Object properties", mutations),
             held,
         )?;
-        let epoch = self
-            .coordinator
-            .epoch()
-            .checked_add(1)
-            .ok_or(om9_core::Error::Overflow("property edit epoch"))?;
-        let scene = old_scene.update_owned(
-            prepared.candidate_world().documents[&self.document].clone(),
-            epoch,
-            None,
-            self.coordinator.limits(),
-        )?;
-        let receipt = self.coordinator.commit(prepared)?;
-        if receipt.published {
-            self.scene = Some(scene);
-        }
+        self.commit_incremental_scene(prepared, held, increment, None, false)?;
         Ok(())
     }
 }

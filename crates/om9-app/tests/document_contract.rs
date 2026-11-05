@@ -324,3 +324,44 @@ fn l3_012_a_restore_inside_a_running_command_is_busy() {
         SnapshotOutcome::Restored
     );
 }
+
+#[test]
+fn snapshot_and_master_pressure_keep_history_and_observers_then_retry() {
+    use om9_core::{budget::memory::MemoryClass, Error};
+    for master in [false, true] {
+        let limits = Limits { max_bytes: 64 * 1024 * 1024, ..Limits::default() };
+        let mut c = Controller::new(Document::with_template_tolerance("restore pressure"), limits).unwrap();
+        let id = one_point(&mut c);
+        let snapshot = c.capture_snapshot().unwrap();
+        let master_document = c.document().clone();
+        c.submit("Point").unwrap(); c.submit("4,5,6").unwrap();
+        c.submit("Point").unwrap(); c.submit("7,8,9").unwrap();
+        c.undo().unwrap();
+        c.select_objects(&[id]).unwrap();
+        let recorder = Recorder::default();
+        c.add_document_observer(Box::new(recorder.clone()));
+        let before = c.coordinator().snapshot();
+        let selection = c.selected().clone();
+        let cpu_before = c.coordinator().external_reserved_bytes(MemoryClass::CpuCache);
+        let pressure = c.coordinator().reserve_remaining_external_memory_with_held(
+            MemoryClass::Export, None, c.scene_cache_usage().unwrap(),
+        ).unwrap();
+        let result = if master { c.restore_master_document(master_document.clone()) }
+            else { c.restore_snapshot(&snapshot).map(|_| ()) };
+        assert!(matches!(result, Err(Error::Budget(_))), "{result:?}");
+        assert_eq!(c.coordinator().snapshot(), before);
+        assert_eq!(c.selected(), &selection);
+        assert!(recorder.0.lock().unwrap().is_empty());
+        assert_eq!(c.coordinator().external_reserved_bytes(MemoryClass::CpuCache), cpu_before);
+        drop(pressure);
+        if master { c.restore_master_document(master_document).unwrap(); }
+        else { c.restore_snapshot(&snapshot).unwrap(); }
+        assert_eq!(c.document().entities.len(), 1);
+        assert_eq!(c.coordinator().undo_len(), 0);
+        assert_eq!(c.coordinator().redo_len(), 0);
+        assert!(c.coordinator().external_reserved_bytes(MemoryClass::CpuCache) >= c.scene().unwrap().shared_buffer_bytes());
+        let batches = recorder.0.lock().unwrap();
+        assert_eq!(batches.len(), 1);
+        assert_eq!(batches[0].0, if master { ChangeCause::Replace } else { ChangeCause::Restore });
+    }
+}

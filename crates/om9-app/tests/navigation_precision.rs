@@ -30,7 +30,7 @@ fn deep_zoom_anchor_stays_within_a_tenth_physical_pixel_at_large_coordinates() {
             let now = Instant::now();
             let mut zoom = ZoomResponse::new(rig, anchor, now, 1.);
             let initial = rig.ortho_span.unwrap_or(rig.distance);
-            zoom.add_points(40. * (0.2 / initial).ln() / 0.9_f64.ln(), now);
+            zoom.add_points(40. * (0.2 / initial).ln() / 0.81_f64.ln(), now);
             for ms in 0..=180 {
                 let (pose, _) = zoom.sample(now + Duration::from_millis(ms));
                 let sampled = pose.to_camera(&camera).unwrap();

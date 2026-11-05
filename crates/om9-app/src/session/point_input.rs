@@ -259,8 +259,9 @@ impl Controller {
             );
         }
         if self.top11_pending.is_some() {
-            self.last_point = Some(om9_core::coords::WorldPoint::try_new(point)?);
+            let accepted = om9_core::coords::WorldPoint::try_new(point)?;
             self.top11_accept_point(point)?;
+            self.last_point = Some(accepted);
             return Ok(());
         }
         let s = self.validate_session()?.clone();

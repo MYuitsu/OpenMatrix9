@@ -1,0 +1,73 @@
+{
+  "schema": "om9-stl-independent-viewer/v1",
+  "date": "2026-11-01",
+  "viewer": {
+    "library": "trimesh",
+    "version": "5.2.0",
+    "numpy_version": "2.4.4",
+    "mode": "independent binary STL parse + mesh predicates"
+  },
+  "fixtures": [
+    {
+      "name": "box 10 mm",
+      "stl": "build\\command-audit\\viewer-box.stl",
+      "sha256": "71bab79a282ac25a5e13a0d32ba1d51751d2b1629d2e6dcc14c7724e51186b48",
+      "bytes": 684,
+      "export_triangles": 12,
+      "viewer_triangles": 12,
+      "watertight": true,
+      "winding_consistent": true,
+      "bounds": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          10.0,
+          10.0,
+          10.0
+        ]
+      ],
+      "volume_mm3": 1000.0,
+      "degenerate_faces": 0
+    },
+    {
+      "name": "sphere r5 mm",
+      "stl": "build\\command-audit\\viewer-sphere.stl",
+      "sha256": "5e277257d3ddc17b6d5790cfff9c6adb3ea498f457b50de20e0a66a8fe41f53c",
+      "bytes": 250384,
+      "export_triangles": 5006,
+      "viewer_triangles": 5006,
+      "watertight": true,
+      "winding_consistent": true,
+      "bounds": [
+        [
+          -4.995106220245361,
+          -4.998776435852051,
+          -5.0
+        ],
+        [
+          5.0,
+          4.998776435852051,
+          5.0
+        ]
+      ],
+      "volume_mm3": 522.0933275577534,
+      "degenerate_faces": 0
+    }
+  ],
+  "checks": {
+    "box_triangles": true,
+    "box_watertight": true,
+    "box_winding": true,
+    "box_volume": true,
+    "box_bounds": true,
+    "sphere_watertight": true,
+    "sphere_winding": true,
+    "sphere_volume": true,
+    "no_degenerate_faces": true,
+    "triangle_counts_match": true
+  },
+  "all_passed": true
+}

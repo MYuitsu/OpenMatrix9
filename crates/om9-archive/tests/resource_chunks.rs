@@ -138,6 +138,49 @@ fn aggregate_container_plus_document_and_payload_copy_is_admitted_before_hydrati
 }
 
 #[test]
+fn external_reservation_can_refuse_resource_hydration_before_restore() {
+    let limits = Limits::default();
+    let mut d = Document::new("resource reservation");
+    let resource = Resource::from_bytes("large", ResourceKind::OpaqueBinary, &[7; 64 * 1024], &limits).unwrap();
+    d.resources.insert(resource.id, resource);
+    let path = std::env::temp_dir().join(format!("om9-resource-admission-{}.om9", uuid::Uuid::new_v4()));
+    Archive::save(&path, &d, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut estimates = Vec::new();
+    Archive::open_restored_reserved_preflight(&path, &limits, &Default::default(),
+        |_| Ok(()), |_, _| Ok(()), |_, estimate| { estimates.push(estimate); Ok(()) }).unwrap();
+    assert!(estimates.len() > 3);
+    let hydration_call = estimates.len() - 2; // before validation and restoration admissions
+    let mut calls = 0;
+    let refused = Archive::open_restored_reserved_preflight(&path, &limits, &Default::default(),
+        |_| Ok(()), |_, _| Ok(()), |_, estimate| {
+            calls += 1;
+            if calls == hydration_call {
+                assert_eq!(estimate, estimates[hydration_call - 1]);
+                Err(Error::Budget("test resource hydration"))
+            } else { Ok(()) }
+        });
+    assert!(matches!(refused, Err(Error::Budget("test resource hydration"))));
+    assert_eq!(calls, hydration_call);
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn document_validation_peak_includes_validation_scratch() {
+    let limits = Limits::default();
+    let mut d = document();
+    for i in 0..100 {
+        let e = om9_core::model::Entity::new("point", om9_core::geometry::Geometry::Point([i as f64, 0., 0.]), None);
+        d.entities.insert(e.id, e);
+    }
+    let owned = d.validate(&limits).unwrap();
+    let peak = d.validation_peak_estimate(&limits, true).unwrap();
+    assert!(peak.bytes > owned.bytes);
+    let tight = Limits { max_bytes: peak.bytes - 1, ..limits };
+    assert!(matches!(d.validation_peak_estimate(&tight, true), Err(Error::Budget(_))));
+    assert!(matches!(d.validate(&tight), Err(Error::Budget(_))));
+}
+
+#[test]
 fn legacy_schema1_requires_explicit_migration_with_empty_resources_and_unchanged_ids() {
     let d = Document::new("schema1");
     let bytes = pack(1, &serde_json::to_vec(&d).unwrap(), &[]);

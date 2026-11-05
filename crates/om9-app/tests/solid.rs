@@ -507,7 +507,7 @@ fn solid_slab_certified_periodic_nurbs_foundation() {
     let periodic_curve=Curve::Nurbs(source.clone());
     for f in [0.,0.13,0.5,1.] {
         let a=om9_core::curve_ops::point_at(&periodic_curve,f,&limits).unwrap();
-        let b=om9_core::curve_ops::point_at(&curve,f,&limits).unwrap();
+        let b=om9_core::curve_ops::point_at(&curve,(f+0.25).rem_euclid(1.),&limits).unwrap();
         assert!((0..3).all(|i|(a[i]-b[i]).abs()<1e-10));
     }
     let t0=om9_core::curve_ops::tangent_at(&periodic_curve,0.,&limits).unwrap();
@@ -3396,8 +3396,10 @@ fn solid_box_numeric_dimensions_use_document_units_once() {
             c.submit("0").unwrap();
             match mode {
                 "default" | "enter" => {
-                    assert!(c.submit("3").is_err());
-                    c.submit("1,2,0").unwrap();
+                    // A single number after the first corner is the base length in
+                    // document units (1 cm = 10 mm), then Width and Height.
+                    c.submit("1").unwrap();
+                    c.submit("Width=2").unwrap();
                     if mode == "enter" {
                         c.submit("").unwrap();
                     } else {
@@ -3521,7 +3523,7 @@ fn solid_box_rejects_mode_changes_after_the_first_point() {
     c.submit("Box").unwrap();
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
     assert!(c.submit("Diagonal").is_err());
-    assert_eq!(c.prompt(), "Other corner of base or length ( 3Point ) :");
+    assert_eq!(c.prompt(), "Other corner of base or length ( 3Point ):");
 }
 
 #[test]
@@ -3777,6 +3779,22 @@ fn solid_sphere_center_then_radius_point_matches_freecad() {
 }
 
 #[test]
+fn typed_cancel_ends_a_solid_prompt_without_mutation() {
+    for command in ["Sphere", "Box", "Cylinder", "Cone"] {
+        let mut c = controller();
+        let before = c.document().clone();
+        if c.submit(command).is_err() {
+            continue;
+        }
+        assert!(c.is_running(), "{command} did not start");
+        c.submit("Cancel").unwrap();
+        assert!(!c.is_running(), "{command} ignored Cancel");
+        assert_eq!(c.document(), &before, "{command} mutated the document");
+        assert_eq!(c.coordinator().undo_len(), 0, "{command} recorded an undo");
+    }
+}
+
+#[test]
 fn solid_sphere_recovered_macros_and_variant_ids_share_modes() {
     use om9_app::session::InvocationOrigin;
     for (id, mac, prompt) in [
@@ -3981,7 +3999,7 @@ fn solid_sphere_four_point_preview_and_invalid_point_retry() {
     assert!(c.document().entities.is_empty());
     let fourth = [10.0, 20.0, 32.0];
     let wire = c.solid_preview(fourth);
-    assert_eq!(wire.len(), 192);
+    assert_eq!(wire.len(), 384);
     for [a, _] in wire {
         let radius =
             ((a[0] - 10.0).powi(2) + (a[1] - 20.0).powi(2) + (a[2] - 30.75).powi(2)).sqrt();
@@ -4247,14 +4265,24 @@ fn solid_box_accepts_width_and_height_options() {
     assert!((measures(&c, id).volume_mm3 - 200.0).abs() < 1e-6);
 }
 
+/// Matrix: after the first corner a single number is the base length, then Width and
+/// Height each accept Enter to reuse the previous dimension, and the CMD draft clears.
 #[test]
-fn solid_box_exposes_a_twelve_edge_wire_preview() {
+fn solid_box_accepts_one_length_after_the_first_corner() {
     let mut c = controller();
     c.submit("Box").unwrap();
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
-    let wire = c.solid_preview([10.0, 20.0, 0.0]);
-    assert_eq!(wire.len(), 12);
-    assert!(wire.iter().all(|[a, b]| a != b));
+    c.submit("10").unwrap();
+    assert_eq!(
+        c.prompt(),
+        "Width. Press Enter to use length ( 3Point ):"
+    );
+    c.submit("10").unwrap();
+    assert_eq!(c.prompt(), "Height. Press Enter to use width:");
+    c.submit("10").unwrap();
+    let id = *c.document().entities.keys().next().unwrap();
+    assert_eq!(c.document().entities.len(), 1);
+    assert!((measures(&c, id).volume_mm3 - 1000.0).abs() < 1e-6);
 }
 
 #[test]
@@ -4584,12 +4612,16 @@ fn solid_box_exposes_clickable_mode_tokens() {
     let mut c = controller();
     c.submit("Box").unwrap();
     let tokens = c.solid_option_tokens();
-    assert!(
-        tokens
-            .iter()
-            .any(|(_, command)| *command == "Mode=Diagonal")
-    );
-    assert!(tokens.iter().any(|(_, command)| *command == "Mode=Cube"));
+    for command in ["Mode=Diagonal", "Mode=3Point", "Mode=Vertical", "Mode=Center"] {
+        assert!(
+            tokens.iter().any(|(_, value)| *value == command),
+            "{command}"
+        );
+    }
+    // Cube belongs to the Diagonal second stage and Cancel is the Esc key: neither is a
+    // word of the documented first prompt.
+    assert!(!tokens.iter().any(|(_, command)| *command == "Mode=Cube"));
+    assert!(!tokens.iter().any(|(_, command)| *command == "Cancel"));
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
     let tokens = c.solid_option_tokens();
     assert!(tokens.iter().any(|(_, command)| *command == "Undo"));
@@ -4986,7 +5018,7 @@ fn solid_sphere_aroundcurve_accepts_named_circular_brep_edge() {
             c.cancel();
             continue;
         }
-        assert_eq!(c.solid_preview([expected[0], expected[1], expected[2] + 3.]).len(), 192);
+        assert_eq!(c.solid_preview([expected[0], expected[1], expected[2] + 3.]).len(), 384);
         c.submit("3").unwrap();
         let sphere = c.document().entities.values().find(|e| e.id != body_id).unwrap();
         let center = sphere.placement.point([0., 0., 0.]).unwrap();
@@ -5060,7 +5092,7 @@ fn solid_sphere_aroundcurve_accepts_named_straight_brep_edge() {
             c.cancel();
             continue;
         }
-        assert_eq!(c.solid_preview([expected[0] + 3., expected[1], expected[2]]).len(), 192);
+        assert_eq!(c.solid_preview([expected[0] + 3., expected[1], expected[2]]).len(), 384);
         c.submit("3").unwrap();
         let sphere = c.document().entities.values().find(|e| e.id != body_id).unwrap();
         let center = sphere.placement.point([0., 0., 0.]).unwrap();
@@ -5090,7 +5122,7 @@ fn solid_sphere_aroundcurve_fraction_and_preview_match_committed_geometry() {
     let center = [100. + component, 20. + component, 0.];
     let picked = [center[0], center[1], 5.];
     let preview = c.solid_preview(picked);
-    assert_eq!(preview.len(), 192);
+    assert_eq!(preview.len(), 384);
     for segment in &preview {
         for p in segment {
             let radius = (0..3).map(|i| (p[i] - center[i]).powi(2)).sum::<f64>().sqrt();
@@ -5189,12 +5221,12 @@ fn solid_sphere_fit_points_accepts_a_selection_batch() {
 }
 
 #[test]
-fn solid_sphere_exposes_a_three_circle_wire_preview() {
+fn solid_sphere_exposes_six_circle_wire_preview() {
     let mut c = controller();
     c.submit("Sphere").unwrap();
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
     let wire = c.solid_preview([3.0, 0.0, 0.0]);
-    assert_eq!(wire.len(), 192);
+    assert_eq!(wire.len(), 384);
     for [a, _] in wire {
         let radius = (a[0].powi(2) + a[1].powi(2) + a[2].powi(2)).sqrt();
         assert!((radius - 3.0).abs() < 1e-9);
@@ -5208,7 +5240,7 @@ fn solid_sphere_two_point_previews_the_diameter_sphere() {
     c.submit("2Point").unwrap();
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
     let wire = c.solid_preview([10.0, 0.0, 0.0]);
-    assert_eq!(wire.len(), 192);
+    assert_eq!(wire.len(), 384);
     for [a, _] in wire {
         let distance = ((a[0] - 5.0).powi(2) + a[1].powi(2) + a[2].powi(2)).sqrt();
         assert!((distance - 5.0).abs() < 1e-9);
@@ -5223,7 +5255,7 @@ fn solid_sphere_three_point_previews_the_circumcircle_sphere() {
     c.accept_world_point([1.0, 0.0, 0.0]).unwrap();
     c.accept_world_point([-1.0, 0.0, 0.0]).unwrap();
     let wire = c.solid_preview([0.0, 1.0, 0.0]);
-    assert_eq!(wire.len(), 192);
+    assert_eq!(wire.len(), 384);
     for [a, _] in wire {
         let radius = (a[0].powi(2) + a[1].powi(2) + a[2].powi(2)).sqrt();
         assert!((radius - 1.0).abs() < 1e-9);

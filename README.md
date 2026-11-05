@@ -1,10 +1,223 @@
 # OpenMatrix9
 
+**Validation 2026-11-05, hieu-nang:** release build passed; one workspace test run: **4,497 passed, 21 failed, 183 ignored**. Native adapter builds, but its first inventory fixture is rejected by packet preflight. [Results, failures and scope](docs/validation/2026-11-05-workspace-build-test-commit.md). This checkpoint is not a green regression baseline.
+
+Interactive startup now derives its managed byte limit from physical RAM, with an explicitly reported conservative fallback; [coverage and remaining RAM gaps](docs/validation/2026-11-04-interactive-ram-transition.md).
+
+Document and display points have separate structural quotas while their memory remains jointly charged; [tested paths and limitations](docs/validation/2026-11-04-interactive-ram-transition.md#independent-document-and-scene-point-quotas).
+
+The native project writer uses bounded geometric buffer growth; a >256 MiB in-memory synthetic mesh passed a release Save/New/Open fixture after structural-limit fixes. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#large-mesh-release-savenewopen-after-structural-separation).
+
+Save verification now keeps per-document structural limits, and archive parser tokens have a separate input/byte bound; [checks and remaining limits](docs/validation/2026-11-04-interactive-ram-transition.md#structural-limits-during-save-verification-and-json-preflight).
+
+Open reserves archive input, schema-4 preflight, estimated document validation and restoration memory; [coverage and remaining RAM gaps](docs/validation/2026-11-04-open-archive-input-reservation.md).
+
+Open reserves estimated candidate controller and scene overhead and transfers its reservation under the replacement-publication lock; [tests and remaining ownership gaps](docs/validation/2026-11-04-open-archive-input-reservation.md#candidate-controller-overhead-follow-up).
+
+Open keeps replaced document versions and estimated old-controller auxiliary memory accounted through destruction; [coverage and limitations](docs/validation/2026-11-04-open-archive-input-reservation.md#retired-controller-auxiliary-reservation-follow-up).
+
+Direct and scoped staged document versions are registered for shared-account peers; [coverage and remaining lifecycle limits](docs/validation/2026-11-04-open-archive-input-reservation.md#scoped-staged-version-peer-visibility-follow-up).
+
+Scope Finish rechecks shared reservations before publishing; [tested race and remaining limits](docs/validation/2026-11-04-open-archive-input-reservation.md#scope-finish-shared-account-recheck).
+
+Core coordinator `open_document` registers new documents for peers; [tests and limits](docs/validation/2026-11-04-open-archive-input-reservation.md#coordinator-open-document-peer-inventory).
+
+Account adoption registers retained documents in both directions and retires stale joining-account handles; [remaining memory limits](docs/validation/2026-11-04-open-archive-input-reservation.md#retired-joining-account-handles).
+
+Save admits serializer buffers and verification scratch by phase on the shared memory account, leaving unused headroom available to other work; [scope and limits](docs/validation/2026-11-05-scene-picking-save-phases.md).
+
+STL capture retains a reservation for its copied selection IDs; [scope and limits](docs/validation/2026-11-04-stl-capture-selection-reservation.md).
+
+STL soup construction eliminates a per-triangle source flag allocation; [validation and limits](docs/validation/2026-11-04-stl-triangle-flags.md).
+
+STL construction reuses the first B-rep snapshot point buffer; [validation and limits](docs/validation/2026-11-04-stl-reuse-brep-points.md).
+
+Initial release process-memory probes cover simple Boolean, Fillet and Loft; [fixtures and limits](docs/validation/2026-11-04-kernel-operation-memory-probe.md).
+
+OCCT snapshot copies and grouped topology arrays share an admission check; [scope and limits](docs/validation/2026-11-04-occt-snapshot-copy-preflight.md#grouped-topology-accounting).
+
+The experimental STL worker caps its native snapshot budget at its reservation; [scope and limits](docs/validation/2026-11-03-stl-worker-sampled-reservation.md#native-adapter-ceiling-from-worker-reservation).
+
+STL admission checks known soup, remap, output buffers and indexed topology capacities, including fan traversal; [scope and limits](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#indexed-fan-adjacency-and-traversal-admission).
+
+STL streaming also checks known quantized-position table slots; [scope and limits](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#quantized-position-table-admission-during-stl-writing).
+
+The STL writer buffer is also included in per-export admission, and staged verification avoids an extra heap read buffer; [evidence](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#stl-streaming-and-staged-verification-buffers).
+
+Retained STL receipt notes and the output path are included in later admission checks. [Evidence](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#receipt-notes-and-output-path-during-stl-validation).
+
+Skipped-object note allocation now has an earlier partial budget check; [scope and limits](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#skipped-object-note-allocation).
+
+Existing STL receipt notes now reduce the allowance for later geometry construction; [scope and limits](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#receipt-notes-during-later-geometry-construction).
+
+STL warning creation now checks known soup and receipt storage before allocation; [scope and limits](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#warning-note-allocation).
+
+Converted STL native sources are released before receipt warnings are built; [scope and limits](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#converted-native-source-lifetime).
+
+The STL writer accounts for its retained temporary path and avoids duplicating it; [scope and limits](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#temporary-output-path-during-stl-writing).
+
+Controller/captured and detached STL reserve managed buffer/scratch phases instead of remaining headroom; native allocations before copy callbacks and other owners remain open. [Evidence](docs/validation/2026-11-05-stl-staged-memory.md).
+
+STL capture reuses the shared admission peer instead of constructing and adopting a temporary account, avoiding unnecessary cache reclamation at the tested budget boundary. [Scope and remaining R1a work](docs/validation/2026-11-05-stl-shared-admission-peer.md).
+
+Root selection tree/order now have a live shared-account owner, so detached STL admission observes subsequent selection changes and releases. Selection semantics stay unchanged; [evidence and remaining auxiliary ownership](docs/validation/2026-11-05-live-root-selection-memory.md).
+
+Subobject selection slots and nested path buffers now have a live CPU owner; slot growth moves path ownership without cloning or double charging retained paths. [Validated scope and remaining RAM gaps](docs/validation/2026-11-05-live-subselection-memory.md).
+
+STL admission no longer carries a historical viewport scene peak; capture requires registered scene ownership and uses the shared live owners. Auxiliary capture estimates remain open. [Scope and fixture limitations](docs/validation/2026-11-05-remove-scene-high-water.md).
+
+The synchronous STL route also shares the background worker's single-export permit; [scope and limits](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#shared-synchronous-and-worker-export-gate).
+
+Direct STL capture export now also takes the shared permit; [scope and limits](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#direct-capture-export-gate).
+
+A controlled live worker test covers competing STL routes and permit release; [scope and limits](docs/validation/2026-11-04-stl-soup-snapshot-admission.md#running-worker-and-competing-export-routes).
+
+Native B-rep payloads share storage across document versions and stream their serialized chunks. A generated sphere passes snapshot and OCCT reconstruction checks; [evidence and limits](docs/validation/2026-11-04-native-brep-shared-payload.md).
+
+Undo's tracked-memory inventory deduplicates shared B-rep source allocations across the live document and history, and recognizes live tracked captures; [coverage and accounting limits](docs/validation/2026-11-03-undo-tracked-capture-attribution.md).
+
 The managed RAM account initializes a 60% physical-RAM ceiling when available. The tested interactive paths support more than the legacy 256 MiB cap; remaining local limits, OS safety margins and the unverified-GPU fallback have separate purposes. Owner/native accounting remains incomplete. [Current RAM plan and limits](implementation/design/M01/viewport-export-separation-20261102/PLAN.md).
+
+Large-scene background hover tracks its document and a conservative snapshot reservation; nearest-object picking keeps only its best result. [Tests and remaining memory/latency limits](docs/validation/2026-11-04-hover-snapshot-reservation.md).
+
+Hover results are invalidated when their document, camera, viewport or Gumball preview changes; [headless evidence and desktop limits](docs/validation/2026-11-03-published-scene-picking.md#hover-preview-freshness).
+
+An obsolete hover highlight is also cleared while a prior picking job remains pending; [evidence and limits](docs/validation/2026-11-03-published-scene-picking.md#clear-old-hover-while-a-worker-is-pending).
+
+Active viewport hover state is cleared while its published scene is outdated; [GPU/egui evidence and limits](docs/validation/2026-11-03-published-scene-picking.md#hover-state-while-the-published-scene-is-outdated).
+
+Hover also refreshes for pointer movement smaller than three logical points; [precision and performance limits](docs/validation/2026-11-03-published-scene-picking.md#small-pointer-movements-and-hover-freshness).
+
+Hover from a previous view is cleared when the newly active viewport has no pointer; [tested scope](docs/validation/2026-11-03-published-scene-picking.md#hover-state-on-active-viewport-change).
+
+An opt-in synthetic probe measures sustained hover motion; [results and limitations](docs/validation/2026-11-03-published-scene-picking.md#sustained-hover-motion-probe).
+
+Paced synthetic hover probes include point and shared B-rep instance scenes; [results and limits](docs/validation/2026-11-03-published-scene-picking.md#paced-hover-probes-with-points-and-b-rep-instances).
+
+The same probe measures hover on a B-rep sphere's display mesh; [results and limits](docs/validation/2026-11-03-published-scene-picking.md#paced-hover-of-a-b-rep-target).
+
+Background hover requires a current physical-RAM sample; [platform limits](docs/validation/2026-11-04-hover-snapshot-reservation.md#required-ram-sample-before-optional-hover-worker).
+
+Open scene planning samples available RAM before its temporary reservation; [evidence and limits](docs/validation/2026-11-04-open-archive-input-reservation.md#physical-headroom-at-open-scene-planning).
+
+Open also reserves the larger sequential validation or scene-planning scratch estimate; [evidence and limits](docs/validation/2026-11-04-open-archive-input-reservation.md#open-candidate-preflight-scratch).
+
+New reserves identified candidate and scene preparation before construction; [evidence and limits](docs/validation/2026-11-04-open-archive-input-reservation.md#new-candidate-preparation-reservation).
+
+World scene capture samples available RAM at planning and construction admission; [scope and limits](docs/validation/2026-11-03-scene-managed-ceiling.md#physical-ram-samples-for-world-scene-capture).
+
+The explicit document-validation step also reserves its known scratch estimate; [scope and limits](docs/validation/2026-11-03-scene-managed-ceiling.md#world-scene-document-validation-scratch-reservation).
+
+On Windows, optional hover retries after temporary memory refusal even with a stationary pointer; [test scope](docs/validation/2026-11-04-hover-snapshot-reservation.md#stationary-hover-retry-after-temporary-refusal).
+
+The retry renews its repaint deadline through intervening egui frames; [evidence and limits](docs/validation/2026-11-04-hover-snapshot-reservation.md#retry-repaint-after-intervening-frames).
+
+The STL encoder preserves representable nonzero tiny triangles without a fixed area floor; [scope and accuracy limits](docs/validation/2026-11-04-stl-small-triangle-normal.md).
+
+STL quantization checks Euclidean error in output units; a [large-coordinate fixture](docs/validation/2026-11-03-stl-f64-quantization.md#three-axis-quantization-at-large-coordinates-2026-11-04) covers refusal without replacing the destination.
+
+A [reflected cavity fixture](docs/validation/2026-11-04-stl-mirrored-cavity-orientation.md) checks encoded outer and inner shell orientation independently.
+
+Valid concave mesh quads use the same interior diagonal for viewport picking and STL export; [coverage and limits](docs/validation/2026-11-04-concave-quad-display-export.md).
+
+STL and experimental Surface snap captures use explicit lifetime handles; [accounting integration and limitations](docs/validation/2026-11-03-tracked-external-captures.md) remain open.
+
+Viewport Gumball press routing rejects tested same-layer controls covering a handle; offscreen interaction passes while [desktop validation remains open](docs/validation/2026-11-03-perspective-gumball-early-gate.md#same-layer-overlay-press).
+
+Offscreen Gumball testing also covers focus loss during a batched press and a fresh drag after focus returns; [scope and limits](docs/validation/2026-11-03-perspective-gumball-early-gate.md#focus-loss-during-batched-gumball-input).
+
+The latest separate desktop follow-up bundle passed fixture startup; [capture limitation and remaining gate](docs/validation/2026-11-03-perspective-gumball-early-gate.md#desktop-follow-up-build-and-capture-availability).
+
+STL receipts report OCCT topology tolerance metadata and conditional encoded-coordinate topology checks; neither is a global error or printability certificate. [Tolerance evidence](docs/validation/2026-11-03-stl-occt-source-tolerance.md), [encoded topology limits](docs/validation/2026-11-03-stl-encoded-vertex-identity.md#conditional-encoded-combinatorial-result).
+
+STL export supports independent per-request linear and angular meshing settings through the menu, command and Controller/MCP; [coverage and remaining work](docs/validation/2026-11-03-stl-angular-profile.md).
+
+The OCCT snapshot adapter supports explicit angular deflection; [adapter evidence](docs/validation/2026-11-03-occt-angular-adapter.md).
+
+NURBS surface STL export uses the OCCT face conversion instead of a fixed sampled grid; [test coverage and limits](docs/validation/2026-11-03-stl-nurbs-occt.md).
+
+STL export captures its source at invocation; the picker and export remain synchronous. [Evidence](docs/validation/2026-11-03-stl-capture-invocation.md).
+
+STL bytes are streamed into a temporary destination instead of assembled as a full in-memory file; geometry processing still uses memory. [Evidence](docs/validation/2026-11-03-stl-streamed-writer.md).
+
+A cooperative STL cancellation API protects publication, but is not yet wired to a background job or UI. [Evidence](docs/validation/2026-11-03-stl-cancellation-foundation.md).
+
+STL weld and topology loops periodically check cancellation and avoid a duplicate topology pass. [Evidence](docs/validation/2026-11-03-stl-cancel-topology.md).
+
+Optional diagnostics can sample DXGI or Vulkan memory for the active wgpu device when supported; GPU budget enforcement is not yet implemented. [Evidence](docs/validation/2026-11-03-vulkan-selected-device-memory.md).
+
+A background STL job foundation exists with captured source and reservation lifetime; it is not yet used by the UI. [Evidence](docs/validation/2026-11-03-stl-background-job-foundation.md).
+
+Controlled tests cover reservation lifetime on STL worker cancellation and panic. [Evidence](docs/validation/2026-11-03-stl-worker-reservation-lifetime.md).
+
+Explicit external scratch reservations are now charged to coordinator-retained usage; the interactive STL UI does not yet use them. [Evidence](docs/validation/2026-11-03-transaction-external-reservations.md).
+
+Authored STL mesh quads use a checked diagonal for tested concave faces. [Evidence and limits](docs/validation/2026-11-03-stl-concave-quad.md).
+
+The RAM-budget prototype accounts for concurrent pending requests and can sample available Windows physical memory, but is not yet integrated into interactive allocation. [Evidence](docs/validation/2026-11-03-memory-available-reservations.md).
+
+STL capture accounting follows controller replacement; global owner and export scratch budgets remain incomplete. [Evidence](docs/validation/2026-11-03-capture-across-replacement.md).
+
+Retained Undo versions no longer sum point counts in the tested transaction paths; [evidence and remaining limits](docs/validation/2026-11-03-undo-point-limit.md).
+
+STL export preserves authored mesh vertex identities and reports or rejects collapsed generated triangles; [verification and limits](docs/validation/2026-11-03-stl-weld-authored-mesh.md).
+
+STL welding checks source and actual point distance within a document-derived limit; [verification and limitations](docs/validation/2026-11-03-stl-weld-distance.md).
+
+STL B-rep meshing requests a document-derived tolerance independently of display deflection; [sampled verification and limits](docs/validation/2026-11-03-stl-document-deflection.md).
+
+STL writing retains f64 positions until binary encoding and checks a document-derived quantization budget; [coverage and remaining accuracy work](docs/validation/2026-11-03-stl-f64-quantization.md).
+
+STL topology checks detect repeated indexed faces, including opposite winding; [test coverage and limits](docs/validation/2026-11-03-stl-duplicate-faces.md).
+
+STL export reports edge-incidence, winding and disconnected-vertex defects; [verification and limitations](docs/validation/2026-11-03-stl-edge-topology.md).
+
+STL export keeps weld keys separate for selected objects; [coverage and remaining topology limits](docs/validation/2026-11-03-stl-source-welding.md).
+
+STL export corrects triangle winding after reflected placement; [test coverage and open accuracy work](docs/validation/2026-11-03-stl-reflection-winding.md).
 
 Undo supports a minimum step count and a soft memory budget through Options: defaults of 1 step and 1024 MB, a configurable ceiling of 50% physical RAM, and full tracked-memory reconciliation every 100 MB of accounted growth. Retaining the minimum can exceed the soft quota; Undo shares the overall managed 60% ceiling. [Validation and limits](docs/validation/2026-11-02-undo-ram-cap-and-inventory.md). The [viewport/export plan](implementation/design/M01/viewport-export-separation-20261102/PLAN.md) removes verified work from the remaining checklist, including [FileState/Open regressions](docs/validation/2026-11-05-live-file-state-memory.md). It groups export-path RAM/native work and UI background export into one functional delivery, with focused tests during edits and a combined integration batch at the milestone boundary. Wider audits remain separate; implementation stays paused. This documentation update does not close the remaining implementation or accuracy gates.
 
+Codex can attach through `--mcp-live` to one running interactive OM9 window, with the same document and Undo; [setup, validation and limits](docs/validation/2026-11-02-mcp-live-window.md).
+
+The Windows MSVC build reserves additional GUI-thread stack for debug command processing; [Sphere crash regression and limits](docs/validation/2026-11-02-mcp-sphere-stack-fix.md).
+
+Boolean Difference cuts provably disjoint cutter sets in one OCCT operation; a 21-cavity MCP dice comparison with normal Undo and its limits is in [validation](docs/validation/2026-11-02-boolean-multi-cutter-dice.md).
+
+OCCT Boolean now uses oriented bounding-box filtering; [debug dice experiments and limits](docs/validation/2026-11-02-boolean-obb-blender-rhino.md) include Blender and bounded Rhino 5 reference review.
+
+Retained-document validation proofs now avoid revalidating unchanged Undo owners under compatible budgets; a 21-cavity debug MCP run took 40.038 s versus 239.924 s previously, with Undo enabled. [Evidence and limits](docs/validation/2026-11-02-undo-validated-owner-cache.md).
+
+Boolean operand checks now avoid full area/volume integration; a 21-cavity MCP debug comparison and its limitations are recorded in [validation](docs/validation/2026-11-02-boolean-dice-topology-performance.md).
+
+With Undo enabled, the 21-cavity dice MCP debug fixture completed in 239.924 s after avoiding repeated B-Rep validation during storage inventory, versus 1212.506 s before; [validation and limits](docs/validation/2026-11-02-undo-brep-inventory-optimization.md).
+
+An opt-in MCP benchmark without Undo completed the 21-cavity dice in 120.182 s versus 1212.506 s with Undo in single debug runs; ordinary sessions retain Undo. [Validation and limits](docs/validation/2026-11-02-dice-undo-benchmark.md).
+
+MCP dice profiling found growing retained-validation cost; buffered fingerprint writes reduce a four-cavity debug fixture's latency while preserving the digest. Full-dice and release performance remain open. [Validation](docs/validation/2026-11-02-dice-fingerprint-performance.md).
+
+The command option parser is available as a separate Rust crate; its extraction and preliminary build timings are recorded in [validation](docs/validation/2026-11-02-command-options-crate.md).
+
+Viewport orbit and wheel sensitivity now use Rhino-inspired defaults; automated input checks pass, while real desktop and DPI comparison remains open. [Validation](docs/validation/2026-11-01-rhino-inspired-navigation.md).
+
+Gumball navigation refinement no longer repeatedly invalidates pending viewport publication; Perspective desktop acceptance remains open. [Validation](docs/validation/2026-11-01-gumball-navigation-refinement.md).
+
+Gumball reuses the selected geometry's exact pivot while the scene and selection are unchanged. The dice microbenchmark improved, but visible debug navigation still falls below 30 FPS; [reference comparison and evidence](docs/validation/2026-11-02-gumball-reference-pivot-cache.md).
+
+Indexed icon lookup removes repeated toolbar scans; a short visible dice zoom improved, while sustained 30 FPS and physical orbit/pan remain unverified. [Evidence](docs/validation/2026-11-02-toolbar-icon-index-navigation.md).
+
+Selection avoids duplicate picking and repeated current-document validation; exact BRep Object Info is measured in a bounded background worker. One debug dice click comparison and its limits are in [validation](docs/validation/2026-11-02-selection-highlight-latency.md).
+
+User-recorded viewport trace captured Present calls for an earlier OM9 build; display latency and optimized-build performance remain open. [Trace scope](docs/validation/2026-11-01-user-viewport-present-trace.md).
+
+Viewport navigation reuses unchanged view textures and records opt-in resource counters; visible desktop performance remains unverified. [Validation](docs/validation/2026-11-01-viewport-navigation-cache.md).
+
+Object Info now measures selected root BRep dimensions through OCCT with placement and document units; desktop acceptance remains open. [Validation](docs/validation/2026-11-01-object-info-brep-bounds.md).
+
+Viewport navigation targets 30/24 FPS while retaining full-resolution preview; actual performance and desktop sharpness remain to be measured. [Validation](docs/validation/2026-11-01-viewport-navigation-sharpness.md).
+
 <!-- measure-annotation-transform-20261027 -->
+Standalone 2026-11-01: kiểm tra 26 mục lệnh qua menu, Command Line và hình học đo được — 21/21 dòng chạy bằng MCP PASS; STL xuất mesh/B-Rep/retained payload/surface thích nghi với 10 test, trimesh độc lập 10/10, dialog Windows thật và GPU render; Gumball có Snappy 3D, Drag strength 1–200%, cửa sổ settings, lưu preferences và acceptance OS mouse trên GPU (3 lần PASS); Command line có gợi ý command khả dụng khi gõ. Đã sửa dispatch Top11 và Cancel solid. [Bằng chứng và giới hạn](docs/validation/2026-11-01-stl-gumball-completion/README.md).
 Standalone 2026-10-27: Measure mở rộng, 13 annotation/model-space commands (owner OM9-L2-03-21), ArrayCrv Spacing/Roadlike và SetPt control coordinates/preview đã qua kiểm tra tự động. 019/025/037 vẫn khóa với lý do đúng; M03-UI chưa ký. [Phạm vi và bằng chứng](docs/validation/2026-10-26-measure-completion/README.md).
 
 **Open-source jewelry CAD for FreeCAD.** Rust owns the logic; FreeCAD provides native geometry and UI.
@@ -145,6 +358,8 @@ its host; do not replace dependencies with DLLs from another FreeCAD version.
 
 **Standalone Rectangle fix (2026-10-26):** preview/commit preserve CPlane drag direction, and typed CMD corners use the shared coordinate parser. **42 focused tests passed**, including 5 regressions with 24 quadrant cases; icon/mouse and typed CMD creation were checked in the new Windows GPU app. Continuous frame/present timing and full manual acceptance remain open. [Evidence](docs/validation/2026-10-26-rectangle-fix/README.md).
 
+**Rectangle numeric input (2026-11-01):** after the first corner, Corners accepts a bare length and width, or Enter to use equal sides. Focused controller geometry tests passed; the running executable was locked and remains to be rebuilt and checked. [Evidence](docs/validation/2026-11-01-rectangle-numeric-input.md).
+
 **Gumball 0.3.5**: Shift-click or window-select multiple objects to use one shared Gumball in all four views. Move, Scale and Rotate use the selection center; one Undo restores the whole batch. Local validation: **848 Rust tests**, **31 native cases / 1,099 checks**. [Evidence](docs/validation/2026-10-12-gumball-multi-selection.md). GitHub Actions builds and packages only.
 
 
@@ -275,6 +490,12 @@ Mesh CSG kernel (2026-10-23): the original 16,384-triangle curved fixture now pa
 
 **Active direction (2026-10-19):** [M01 CAD Shell, Viewport](<OM9_Milestones/M01 - CAD Shell, Viewport/L1.json>) supplies the foundation contracts; exact features use their `OM9_Milestones` owner. Standalone Rust OM9 owns the document/history/UI/scene, with selected OCCT/openNURBS adapters. Matrix9 milestone references and the approved workspace/layers contracts define UI behavior. Existing FreeCAD support tables/runtime reports below remain historical evidence.
 
+Ctrl shortcuts (2026-11-01): Ctrl+Z routes to document Undo when the command input is idle; focused text editing retains its shortcut. This has a scoped egui test, while desktop validation and Ctrl+C/V for selected geometry remain open. [Evidence](docs/validation/2026-11-01-ctrl-shortcuts.md).
+
+Selected 3DM export foundation (2026-11-01): the exchange host can capture selected current objects and referenced block definitions; a point export and filtering tests pass. Clipboard publication and Ctrl+C/V remain open. [Evidence](docs/validation/2026-11-01-clipboard-selected-export.md).
+
+Windows clipboard (2026-11-01): Ctrl+C copies selected OM9 objects, Ctrl+Shift+C copies Rhino 3DM, and Ctrl+V chooses a supported clipboard format; Edit and the Standard toolbar use the same actions. Self-contained gem, UV, trimmed-surface and extrusion data, four-rail profiles with all rails selected, and matching 3DM layer sidecars are supported. Automatic transfer of dependent metadata, differing 3DM layer sidecars and real Rhino interoperability remain open. [Evidence](docs/validation/2026-11-01-clipboard-metadata.md).
+
 Polyline Command options (2026-10-25): `M` and clicking `Mode` now toggle Line/Arc through one Rust session; `P`/`H` toggle their displayed values. Arc segments remain analytic curves in a mixed Polycurve, with preview, Direction/Center input and one Enter/Undo transaction. Command input keeps nonempty drafts, paste and IME. Helpers tracking, continuously closed PersistentClose preview and full M03-UI acceptance remain open. [Validation and limits](docs/validation/2026-10-25-command-polyline-shortcuts/README.md).
 
 Polyline parameter interface (2026-10-25): all eight Polyline parameters now share typed descriptors for names, keys, kinds, current values and activation. Keyboard, pointer and typed-name input use the same session parser; accepted Length/Direction/Center values update the prompt. A 24-scenario route/parameter matrix and 216 app tests pass. [Interface evidence](docs/validation/2026-10-25-polyline-parameter-interface/README.md).
@@ -288,6 +509,146 @@ Rhino 3DM import (2026-10-22): the standalone Rust host now has a registered 14-
 Freeform surface workflows (2026-10-22): the standalone Rust host now owns portable NURBS services for sweep1/sweep2, loft and four-sided network, revolve/rail revolve/extrude, planar/patch, trim/split/untrim/shrink, rebuild/refit/softedit, G0/G1/G2 match/blend/join, offset/fillet/chamfer/thicken, UV reverse/isocurve/seam, and normal extrude/unroll. 16 core tests and 6 OCCT kernel tests pass; all 55 planned L4 records have receipts under `implementation/evidence/M03/OM9-L3-02-05-*`. All ten M03-UI selection/preview/commit workflows remain unsigned; n-sided networks, full surface optimization, true periodic seams and exact developable unroll are explicitly out of the supported scope. [Module evidence](implementation/design/M03/OM9-L2-02-05/README.md) · [milestone](<OM9_Milestones/M03 - Geometry 3DM/L2-02-05 - 05/L2.json>).
 
 Top 11 (2026-10-28): the sidebar has an ordered row above DISPLAY; object actions can start before selection; Move Vertical, Rotate Copy and Mirror CPlane axes have focused tests. Explode separates an OCCT BRep into faces; Join sews connected BReps using document tolerance; Split Point supports one line, and Split can process multiple curve targets in one transaction. Targeted tests include Undo/Redo; broader geometry and manual UI acceptance remain open. [Sidebar and clean UI regression](docs/validation/2026-10-28-top11-sidebar-ui.md) · [Multi-curve Split evidence](docs/validation/2026-10-28-top11-split-multiple.md).
+
+Top 11 Mirror mesh (2026-10-31): face winding and per-corner UVs remain aligned after reflection, including quads. A mesh without UVs passed real 3DM export/import through CMD and sidebar invocation with Copy Yes/No; populated mesh UV export remains unsupported. The staged writer also preserves tested contiguous polycurve segment domains. [Evidence](docs/validation/2026-10-31-top11-mirror-mesh-uv-3dm.md) · [Native mesh roundtrip](docs/validation/2026-10-31-top11-mirror-mesh-native-roundtrip.md).
+
+Top 11 line domains (2026-10-31): Mirror and placed-curve Join retain line parameter domains, including tested polycurve segments; a custom-domain Mirror fixture passed native 3DM export/import. [Evidence](docs/validation/2026-10-31-top11-mirror-line-domains.md).
+
+Top 11 circular transforms (2026-10-31): a circle remains a circle with its angular parameters when its transformed in-plane axes have the same scale and remain orthogonal; a mirrored custom-domain arc passed native 3DM export/import. General affine ellipse parameter fidelity remains open. [Evidence](docs/validation/2026-10-31-top11-circle-plane-similarity.md).
+
+Top 11 Join reversal (2026-10-31): reversing tested line and circle segments retains their parameter domains; joining oppositely directed custom-domain lines passes CMD, toolbar and Undo/Redo tests. [Evidence](docs/validation/2026-10-31-top11-reversed-domains.md).
+
+Top 11 Join 3DM (2026-10-31): tested joined and mixed polycurves with independent segment domains survive native 3DM export/import with uniform parent fraction mapping; native polycurves with unequal parent intervals are retained rather than silently reparameterized. [Evidence](docs/validation/2026-10-31-top11-polycurve-independent-domains-3dm.md).
+
+Top 11 Ring Rail (2026-10-31): sidebar and CMD entrypoints reach the M04 builder and create the tested diameter-20 rail with history, Undo/Redo and `.om9` persistence; its geometry also passed 3DM export/import with history loss reported. Desktop acceptance remains open. [Evidence](docs/validation/2026-10-31-top11-ringrail-entrypoint.md).
+
+Top 11 Split precision (2026-10-31): tested point cuts near long-curve endpoints, polycurve joints and closed seams retain their locations. Curve and BRep cutters now classify and merge tested intersections by document tolerance along the placed curve; broader solver behavior remains open. [Point evidence](docs/validation/2026-10-31-top11-split-point-precision.md) · [Cutter evidence](docs/validation/2026-10-31-top11-cutter-intersection-precision.md).
+
+Top 11 line intersections (2026-10-31): tested short and near-parallel line pairs no longer lose their crossing to an absolute determinant cutoff; Split and Trim use the corrected result. [Evidence](docs/validation/2026-10-31-top11-line-intersection-conditioning.md).
+
+Top 11 arc intersections (2026-10-31): Split and Trim check the actual angular intervals of tested circle arcs instead of using crossings outside those arcs; general sampled and overlapping-arc cases remain open. [Evidence](docs/validation/2026-10-31-top11-arc-intersection-domains.md).
+
+Top 11 line/circle and closed Split (2026-10-31): tested near-tangent line/circle crossings are retained, and closed curves are split at actual crossings without an extra seam piece. [Evidence and limits](docs/validation/2026-10-31-top11-line-circle-and-closed-split.md).
+
+Top 11 polycurve intersections (2026-10-31): tested short segments no longer disappear between whole-curve samples; Split/Trim and a native 3DM roundtrip retain the crossings. [Evidence and limits](docs/validation/2026-10-31-top11-polycurve-intersection-segments.md).
+
+Top 11 NURBS intersections (2026-10-31): knot-aware sampling and corrected refinement retain the tested crossings in narrow knot spans through Split/Trim and 3DM. [Evidence and limits](docs/validation/2026-10-31-top11-nurbs-knot-intersections.md).
+
+Top 11 quadratic NURBS tangency (2026-10-31): tested line/quadratic crossings and tangencies use an algebraic solver, preserving distinct roots and refusing ambiguous precision. [Evidence and limits](docs/validation/2026-10-31-top11-quadratic-nurbs-tangency.md).
+
+Top 11 multi-span tangency (2026-10-31): tested nonperiodic quadratic NURBS spans retain one tangent hit, including reversed and rational fixtures; mapped hits are checked against the source curve. [Evidence and limits](docs/validation/2026-10-31-top11-multispan-quadratic-tangency.md).
+
+Top 11 periodic tangency and closed Trim (2026-10-31): tested periodic and reseamed quadratic curves retain tangent cuts; Trim removes a picked cyclic interval across the parameter seam. [Evidence and limits](docs/validation/2026-10-31-top11-periodic-tangent-and-closed-trim.md).
+
+Top 11 Trim at seam (2026-10-31): an actual cutter at a closed curve's seam now bounds the selected interval, rather than causing the adjacent interval to be removed too. [Evidence and limits](docs/validation/2026-10-31-top11-closed-trim-seam-cutter.md).
+
+Top 11 BRep seam and small arcs (2026-10-31): tested moved-seam NURBS Trim with a BRep cutter retains the expected arc through 3DM, and small open circular arcs no longer become closed solely because of their scale. [Evidence and limits](docs/validation/2026-10-31-top11-brep-seam-tiny-arc.md).
+
+Top 11 periodic retained data (2026-10-31): geometry-only 3DM export now reports retained native omissions in the shared receipt as well as the desktop workflow; unrelated native data remains in `.om9`, not the new 3DM. [Evidence and limits](docs/validation/2026-10-31-top11-periodic-retained-export.md).
+
+Top 11 periodic grips 3DM (2026-10-31): tested periodic edits now roundtrip the two omitted expanded outer knots using disclosed OM9 user data; external editors may remove it. [Evidence and limits](docs/validation/2026-10-31-top11-periodic-grips-3dm.md).
+
+Top 11 periodic curve grips (2026-10-31): Edit Points and Control Points handle tested certified periodic quadratic NURBS with `.om9` and Undo/Redo. [Original implementation evidence](docs/validation/2026-10-31-top11-periodic-curve-grips.md).
+
+Top 11 reseamed parameterization (2026-10-31): compatible exact NURBS pieces retain tested source fraction ratios across the old seam; nested Trim passes real 3DM checks at interior fractions. Fallback and general composite parameterization remain open. [Evidence and limits](docs/validation/2026-10-31-top11-reseamed-affine-parameter.md).
+
+Top 11 nested reseamed NURBS (2026-10-31): knot-aware display and tested Split/Trim support changed-seam nested curves; the tested Split result survives native 3DM. [Evidence and limits](docs/validation/2026-10-31-top11-nested-reseamed-nurbs.md).
+
+Top 11 nested closed curves (2026-10-31): tested full circles and unseamed periodic NURBS now display in polycurves; closed-curve Split accepts a cutter at the seam. CMD/toolbar, `.om9` and Split 3DM fixtures pass. [Evidence and limits](docs/validation/2026-10-31-top11-nested-closed-curves.md).
+
+Top 11 nested mixed curves (2026-10-31): tested nested arcs and continuous NURBS display and support Split/Trim from CMD and toolbar, with `.om9` and Split 3DM checks. [Evidence and limits](docs/validation/2026-10-31-top11-nested-mixed-curves.md).
+
+Top 11 nested polycurves (2026-10-31): Split and Trim handle the tested connected nested line target through CMD and toolbar, with `.om9` and Undo/Redo checks. [Evidence and limits](docs/validation/2026-10-31-top11-nested-polycurves.md).
+
+Top 11 desktop and 3DM investigation (2026-10-31): one real desktop Duplicate/Move and toolbar Undo/Redo sequence was visually observed; saving and broader acceptance remain open. The short-line 3DM refusal originates in the pinned SDK's line validity tolerance. [Evidence and limits](docs/validation/2026-10-31-top11-desktop-and-short-line-investigation.md).
+
+Top 11 small NURBS and polycurves (2026-10-31): tested small open curves remain open for Split/Trim; native 3DM still refuses the tested very short line cutters. [Evidence and limits](docs/validation/2026-10-31-top11-small-nurbs-polycurve-closure.md).
+
+Top 11 Trim (2026-10-30): selection of a cut interval now measures distance to each piece instead of its midpoint; an uneven line cut is covered through the core and CMD/Undo paths. Curved projection and UI acceptance remain open. [Evidence](docs/validation/2026-10-30-top11-trim-picked-interval.md).
+
+Top 11 Split/Trim (2026-10-30): differently placed curve, surface and BRep cutters now use the target frame, and Trim picks in world space. Translated fixtures pass; tolerance scaling, general intersections and UI acceptance remain open. [Evidence](docs/validation/2026-10-30-top11-placed-cutters.md).
+
+Top 11 polycurve cuts (2026-10-30): cutting by intersections uses the same segment-uniform parameters as curve evaluation while preserving the older length-based Trim API; unequal-segment Split/Trim and Undo/Redo have regression coverage. [Evidence](docs/validation/2026-10-30-top11-polycurve-trim-parameter.md).
+
+Top 11 Split Point (2026-10-30): open curves accept one point; closed curves collect multiple distinct points and commit on Enter. Circle, arc, rectangular polycurve and tested periodic or reseamed NURBS fixtures pass; general numerical projection and UI acceptance remain open. [Reseamed evidence](docs/validation/2026-10-31-top11-reseamed-nurbs-split.md) · [Periodic evidence](docs/validation/2026-10-31-top11-split-periodic-points.md).
+
+`Split Point` and `Split P` can also start before selection; the Point mode survives selection and retry. Controller geometry and simulated CMD/viewport picking checks pass; native focus and desktop acceptance remain unverified. [Evidence](docs/validation/2026-10-30-top11-split-point-selection.md).
+
+Split Point projection (2026-10-30) measures the picked point in world space while retaining the original curve parameter; scaled line and circle fixtures pass. General nonlinear closest-point certification remains open. [Evidence](docs/validation/2026-10-30-top11-split-point-world-projection.md).
+
+Polycurve point projection (2026-10-30) checks every segment before choosing the nearest, including reversed and scaled fixtures; a 128-segment Split Point regression verifies geometry and Undo/Redo. Nonlinear segment search remains bounded. [Evidence](docs/validation/2026-10-30-top11-polycurve-point-projection.md).
+
+NURBS point projection (2026-10-30) samples knot boundaries and span midpoints as well as uniform fractions; a narrow-span Split Point fixture passes. Global closest-point certification remains open. [Evidence](docs/validation/2026-10-30-top11-nurbs-knot-projection.md).
+
+Split/Trim cutter intersections (2026-10-30) use the document's absolute tolerance in world space, with mapped source parameters for affine arcs and reversed polycurves. Complex numerical and desktop cases remain open. [Evidence](docs/validation/2026-10-30-top11-cutter-world-tolerance.md).
+
+Trim multiple curves (2026-10-30) lets selected curves cut one another and recomputes their intersections after each pick; endpoint-only open residuals, including short lines below document tolerance, can be removed with Undo. Surface/BRep targets, numerical edge cases and desktop acceptance remain open. [Evidence](docs/validation/2026-10-30-top11-trim-short-line.md).
+
+Top11 Trim supports mixed curve and surface-region picks for a single-face surface/BRep with curve cutters, recomputing partitions after edits and supporting per-pick Undo. General surface/BRep cases and desktop acceptance remain open. [Evidence and limits](docs/validation/2026-10-30-top11-trim-mixed-curve-surface.md).
+
+Two or more selected single-face surfaces can also trim one another with per-pick recomputation and Undo; planar fixtures include simulated viewport clicks. [Evidence and limits](docs/validation/2026-10-30-top11-trim-mutual-surfaces.md).
+
+Curve and multiple single-face surface targets now share a Trim session with transactional recomputation. [Evidence and limits](docs/validation/2026-10-30-top11-trim-multiple-surfaces-curves.md).
+
+A single multi-face open BRep can be trimmed with curve cutters while preserving tested authored face boundaries. [Evidence and limits](docs/validation/2026-10-30-top11-trim-multiface-boundaries.md).
+
+Multiple open multi-face BReps can now participate in the same Trim session with curves; the planar fixture checks separate authored edges and Undo. [Evidence](docs/validation/2026-10-30-top11-trim-multiple-multiface.md).
+
+Trim can also remove a region from a solid BRep boundary, producing an open BRep; box fixtures cover surface, line and overlapping-solid cutters. [Evidence and limits](docs/validation/2026-10-30-top11-trim-solid-boundary.md).
+
+Curved sphere and cylinder fixtures preserve the trimmed result through `.om9` save/open; viewport Trim now resolves surface clicks on the exact BRep along the camera ray. [Evidence](docs/validation/2026-10-30-top11-trim-curved-viewport.md).
+
+For a single original face, committed Trim results merge adjacent kept regions while preserving disjoint remnants; the active session retains regions for subsequent picks. [Evidence](docs/validation/2026-10-30-top11-trim-unify-regions.md).
+
+When a curve pierces a surface or solid BRep without dividing the surface, Trim can remove portions of the curve and recomputes the remaining intersections. [Evidence and limits](docs/validation/2026-10-30-top11-trim-piercing-curves.md).
+
+The planar circular-cut fixture also passes with nonuniform placement using adaptive exact-BRep area integration. [Evidence](docs/validation/2026-10-30-top11-trim-affine-area.md).
+
+The kernel geometry-tool splitter is connected to Top11 Trim and Split for tested surface/BRep cutters. Top11 Split supports tested surface and connected polysurface targets, retaining authored face seams and using one Undo transaction; isocurve options and general topology remain open. [Surface evidence](docs/validation/2026-10-31-top11-split-surface.md) · [Polysurface evidence](docs/validation/2026-10-31-top11-split-polysurface.md).
+
+Split also recognizes tested cutters coincident with an existing polysurface seam, while retaining seams crossed by the cutter. [Evidence and limits](docs/validation/2026-10-31-top11-split-existing-seam.md).
+
+For a selected typed NURBS surface or single-face BRep, Top11 Split offers Isocurve with U, V, Both and Toggle. General face cases remain open. [Typed surface evidence](docs/validation/2026-10-31-top11-split-isocurve.md) · [BRep evidence](docs/validation/2026-10-31-top11-split-brep-isocurve.md).
+
+Curve Join uses an endpoint sweep for tested spread-out selections; dense-cluster scaling remains open. [Evidence](docs/validation/2026-10-31-top11-join-sweep.md).
+
+Top11 Join sews tested adjacent surfaces and BReps with an OCCT supporting-surface preservation guard; tested repeated-basis periodic surfaces retain periodic metadata across Join and .om9. [Evidence and limits](docs/validation/2026-10-31-top11-periodic-metadata.md).
+
+Top11 Duplicate and Trim report an empty finish as no changes, with command feedback shown in status and history. [Evidence and limits](docs/validation/2026-10-31-top11-empty-finish-feedback.md).
+
+Top11 Split and Trim support tested certified periodic NURBS with BRep intersections and periodic cutting boundaries on planar faces. [Evidence and limits](docs/validation/2026-10-31-top11-periodic-brep-cutters.md).
+
+Top11 Mirror handles tested nested block instances, point clouds, hatches, lights and retained native BRep records, including Copy and Undo/Redo; a nested mesh/BRep case matches a separate reference in four offscreen views. [Transformed BRep 3DM evidence and limits](docs/validation/2026-10-31-top11-transformed-brep-3dm.md) · [Retained-object evidence](docs/validation/2026-10-31-top11-mirror-retained-objects.md) · [Controller evidence](docs/validation/2026-10-31-top11-mirror-block-cloud.md) · [Render evidence and limits](docs/validation/2026-10-31-top11-mirror-block-render.md).
+
+Top11 prepares its candidate scene before publishing edits, with tested budget failure leaving the document and scene intact. [Evidence and limits](docs/validation/2026-10-31-top11-scene-atomic.md).
+
+Top11 Explode retains blocks on the toolbar and can unpack tested block instances through CMD, including hidden and locked members. [Evidence and limits](docs/validation/2026-10-31-top11-explode-block-permissions.md).
+
+Top11 Explode preserves tested group memberships across mixed curve/mesh/BRep replacement, and keeps isolated mesh vertices. [Evidence and limits](docs/validation/2026-10-31-top11-explode-mixed.md).
+
+Top11 Explode separates tested meshes at unwelded edges while preserving vertex and corner channels. [Evidence and limits](docs/validation/2026-10-31-top11-explode-mesh.md).
+
+Curve Join heals tested toleranced endpoints at their world-space midpoint, including near-closed loops and tested rational NURBS including unclamped support and certified periodic seams, trimmed periodic intervals and selected discontinuous trim starts. [Evidence and limits](docs/validation/2026-10-31-top11-join-discontinuous-start.md).
+
+Curve Join uses document tolerance in world space for tested independently placed curves and can order a tested continuous loop-and-tail selection. [Placement evidence](docs/validation/2026-10-31-top11-join-world-curves.md) · [Trail evidence](docs/validation/2026-10-31-top11-join-trail.md).
+
+Move, Mirror and Rotate retain tested prompts after rejected points; Rotate uses CPlane-projected reference directions. [Evidence](docs/validation/2026-10-31-top11-transform-retry.md).
+
+Duplicate retains its prompt after tested rejected placements so the user can retry. [Evidence](docs/validation/2026-10-31-top11-duplicate-retry.md).
+
+Synthetic viewport click, Shift-selection, Delete and grip drag have targeted regression coverage. [Pointer evidence](docs/validation/2026-10-31-top11-control-grip-pointer.md).
+
+Control Points can delete tested NURBS curve poles and complete surface control-net rows or columns in one Undo; general curve and surface deletion remain open. [Surface evidence](docs/validation/2026-10-31-top11-surface-control-delete.md). [Single-point evidence](docs/validation/2026-10-31-top11-control-point-delete.md) · [Multiple-point evidence](docs/validation/2026-10-31-top11-multiple-control-delete.md).
+
+Control editing fuses tested smooth joined line, arc and rational NURBS segments into one NURBS curve. General fusion cases remain open. [Evidence](docs/validation/2026-10-31-top11-smooth-control-fuse.md) · [Rational regressions](docs/validation/2026-10-31-top11-smooth-fusion-rational.md).
+
+Edit Points and Control Points preserve tested polycurve joints within the document tolerance in world space, including closed, reversed and nonuniformly placed examples. [Tolerance evidence](docs/validation/2026-10-31-top11-grip-world-joint-tolerance.md). [Edit evidence](docs/validation/2026-10-31-top11-polycurve-edit-joint.md) · [Control evidence and limits](docs/validation/2026-10-31-top11-polycurve-control-joint.md).
+
+Top11 Edit Points retains the representation of tested rational NURBS curves and moves tested circle/arc endpoints through the requested location by converting them to NURBS; periodic curve edits and general grip behavior remain open. [NURBS evidence](docs/validation/2026-10-31-top11-nurbs-edit-points.md) · [Circle/arc evidence](docs/validation/2026-10-31-top11-circle-edit-point.md).
+
+Split Shrink=Yes restricts tested nonperiodic typed NURBS and BRep results, including connected multi-face boundary components, with Isocurve or object cutters as applicable; periodic and general topology cases remain open. [Multi-face evidence](docs/validation/2026-10-31-top11-split-shrink-shell.md). [NURBS evidence](docs/validation/2026-10-31-top11-split-shrink-nurbs.md) · [BRep evidence](docs/validation/2026-10-31-top11-split-shrink-brep.md) · [Cutter evidence](docs/validation/2026-10-31-top11-split-cutter-shrink.md).
+
+Isocurve viewport picks now intersect the viewing ray with the exact selected face before splitting, including tested curved BRep and NURBS cases. [Evidence and limits](docs/validation/2026-10-31-top11-isocurve-viewport-ray.md).
 
 Command toolbar icons (2026-10-28): toolbar slots and artwork have been reduced to 75% of their previous responsive size. Standard, Visibility and Display have reference-order button rows; Display's Wireframe and Shaded use the active viewport owner. SubD has ten authored toolbar icons and four flyouts preserving its existing catalog; Sculpt and Emboss have nine and six authored SVGs respectively. Unsupported operations remain disabled. Full group coverage, individual button functionality and real UI review remain open. [Evidence and remaining work](docs/validation/2026-10-28-toolbar-icons-partial.md).
 
@@ -390,6 +751,22 @@ Rib straight planar foundation (2026-10-29): Rust strip-to-planar-boundary adapt
 
 Rib development follow-up (2026-10-29): a hidden session handles disjoint linear curves against a planar boundary in one atomic document transaction. Offset modes, taper, full interaction and the public command remain open. [Evidence](docs/validation/2026-10-29-solid-rib-development-session.md).
 
+Box display (2026-10-30): a six-face rectangular box receives display-only face midpoint guides; selection shows magenta outlines and guides. The measured representation and GPU checks are scoped in the [evidence](docs/validation/2026-10-30-rectangular-box-display.md).
+
+Sphere display (2026-10-30): recognized full spherical display meshes show three display-only great circles, green normally and magenta when selected. [Evidence and limits](docs/validation/2026-10-30-sphere-viewport-guides.md).
+
+Sphere construction grid (2026-11-01): the preview shows six meridian arcs and three latitude circles, changing to four arcs and one equator on the completed recognized sphere. [Evidence](docs/validation/2026-11-01-sphere-preview-grid.md).
+
+Viewport object lines (2026-10-30): object lines and points are green when unselected and magenta when selected, independently of stored object or layer colour. [Evidence](docs/validation/2026-10-30-object-line-colours.md).
+
+Box base preview (2026-10-30): the first-to-second corner preview shows the base rectangle; the height stage previews the 3D box. Controller checks passed and the rebuilt GUI was launched; actual pointer preview remains unverified. [Evidence](docs/validation/2026-10-30-box-base-preview.md).
+
+Box pointer preview (2026-11-01): the hovered viewport computes the current pointer before painting command previews; simulated egui tests cover top and perspective views. [Evidence and limits](docs/validation/2026-11-01-box-pointer-preview-frame.md).
+
+Box viewport preparation (2026-11-01): removed unused GPU batches and an empty pass; a small offscreen Box fixture was measured before and after. Interactive Matrix9 parity remains open. [Evidence](docs/validation/2026-11-01-box-matrix-reference-performance.md).
+
+Box height transition (2026-11-01): the height-picking plane is anchored to the second base corner, avoiding a jump when the pointer stays still. Perspective, rotated CPlane and simulated mouse tests pass. [Evidence](docs/validation/2026-11-01-box-height-transition.md).
+
 Periodic knot certification precision (2026-10-29): period-scaled roundoff checks reject a tiny nonperiodic mismatch; 9 core, 3 kernel, 32 Slab and 16 simulated viewport tests passed. See `docs/validation/2026-10-29-solid-periodic-knot-certification-scale.md`.
 
 Periodic double-seam parameter scale (2026-10-29): exact OCCT splitting normalizes narrow or translated knot domains; 3 kernel, 32 Slab controller/core and 16 simulated viewport tests passed. See `docs/validation/2026-10-29-solid-periodic-double-seam-parameter-scale.md`.
@@ -461,3 +838,187 @@ Polyline option-owner check (2026-10-26): an older running release can display L
 Command interaction handoff specification (2026-10-26): a detailed Vietnamese Polyline-based specification and GPT Luna prompt cover active owner/run identity, typed values, value/point/text entry, inline prompt/spans, all 39 existing option declaration groups, 19 extra pending-owner audit rows, 13 future work packages and 50 unexecuted acceptance templates. Documentation/source consistency checks pass; no production migration or gate promotion is claimed. [Specification and handoff](implementation/design/M01/command-options-polyline-standard-20261026/README.md).
 
 Command integration skill rule (2026-10-26): user-authorized guidance now requires icon/variant mapping, correct default invocation and working owner parameters with Polyline-style underlined shortcuts before declaring a command integrated. The source and installed rule sections/reference are synchronized; four skill validators pass. This is a skill update, not product acceptance. [Rule and scope](skills/openmatrix9-feature-port/references/command-integration-contract.md).
+
+Top11 periodic Preserve checkpoint (2026-10-31): validated owned periodic knot metadata can be edited and roundtripped through the retained-current native API; unrelated user data remains retained. GUI export is still geometry-only and desktop acceptance remains open. [Evidence and limits](docs/validation/2026-10-31-top11-periodic-preserve.md).
+
+Top11 small-curve inspection (2026-10-31): geometry-only 3DM validation now rejects collapsed tiny line endpoints and NURBS poles; 50 real-native 3DM integration cases pass. Native short-line interchange remains open. [Evidence](docs/validation/2026-10-31-top11-small-curve-inspection.md).
+
+Top11 short-line 3DM checkpoint (2026-10-31): selected short lines and Split cutters roundtrip using disclosed degree-one NURBS metadata. General Preserve-mode editing and external-editor interoperability remain open. [Evidence and limits](docs/validation/2026-10-31-top11-short-line-3dm.md).
+
+Top11 short-line Preserve checkpoint (2026-10-31): an exactly owned short-line marker can be edited and saved through the retained-current API; additional foreign userdata remains retained. The normal GUI still uses Geometry import/export. [Evidence and limits](docs/validation/2026-10-31-top11-short-line-preserve.md).
+
+Top11 Split/Trim endpoint tolerance (2026-10-31): nonparallel finite lines now use their nearest endpoints when the infinite-line intersection lies outside a segment, subject to the document tolerance. [Evidence and limits](docs/validation/2026-10-31-top11-line-endpoint-tolerance.md).
+
+Top11 grip-drag checkpoint (2026-10-31): Control and Edit Point dragging preserves visible small motions and anchors off-center presses; simulated viewport tests cover preview and Undo. [Evidence and limits](docs/validation/2026-10-31-top11-small-grip-drag.md).
+
+Top11 viewport-plane checkpoint (2026-10-31): grip dragging uses the clicked viewport's CPlane and reports an edge-on plane without losing grip selection. [Evidence and limits](docs/validation/2026-10-31-top11-grip-viewport-plane.md).
+
+Top11 grip lifetime checkpoint (2026-10-31): stale drag previews cancel on selection, document, viewport or focus changes instead of overwriting newer edits. [Evidence and limits](docs/validation/2026-10-31-top11-grip-gesture-lifetime.md).
+
+Top11 mixed selection checkpoint (2026-10-31): compatible grips remain usable alongside other selected objects, and curve Join is disabled for unsupported mixed selections. [Evidence and limits](docs/validation/2026-10-31-top11-mixed-selection.md).
+
+Top11 typed-point checkpoint (2026-10-31): Copy and Mirror accept CMD coordinates through their shared point handler, and rejected Top11 points no longer replace the relative base. [Evidence and limits](docs/validation/2026-10-31-top11-copy-mirror-typed-points.md).
+
+Top11 transform preview checkpoints (2026-10-31): Copy/Move share their translation calculation with point acceptance; Mirror/Rotate preview uses their plane and rotation calculations. [Copy/Move evidence](docs/validation/2026-10-31-top11-copy-move-preview.md); [Mirror/Rotate evidence and limits](docs/validation/2026-10-31-top11-mirror-rotate-preview.md). Desktop acceptance remains open.
+
+Top11 viewport preview also shares snapped-point projection with click acceptance; [Move egui evidence and limits](docs/validation/2026-10-31-top11-projected-snap-preview.md).
+
+Top11 transform hover across viewports uses the pointed viewport's CPlane; [egui evidence and limits](docs/validation/2026-10-31-top11-inactive-view-cplane.md).
+
+Top11 Mirror normalizes plane directions before crossing, avoiding rejection caused by small plane-defining edges; [geometry evidence and limits](docs/validation/2026-10-31-top11-mirror-plane-scale.md).
+
+Top11 Copy and Rotate handle tested small and large direction vectors without a fixed displacement-length cutoff; [evidence and limits](docs/validation/2026-10-31-top11-copy-rotate-direction-scale.md).
+
+Top11 disables unavailable topology edits on retained native BReps while keeping supported placement transforms; [availability evidence and limits](docs/validation/2026-10-31-top11-native-brep-availability.md).
+
+Sphere STL memory investigation (2026-11-03): export uses OCCT's alternate triangulator for valid one-face spherical solids without changing requested meshing tolerances. [Measurements, precision checks and limits](docs/validation/2026-11-03-sphere-stl-mesher-memory.md).
+
+Surface-snap precision (2026-11-03): the display-triangle intersection now uses scale-relative parallelism for small visible candidates and occluders. [Regression evidence and limits](docs/validation/2026-11-03-brep-picking-precision.md#scale-dependent-display-triangle-intersections).
+
+STL staging (2026-11-03): before replacement, the streamed temporary file is read back for byte, length and count consistency, and decoded triangles are checked for finite coordinates, area and normal orientation; this is not a topology or geometric-error certificate. [Evidence and limits](docs/validation/2026-11-03-stl-staging-readback.md).
+
+Retained-memory admission (2026-11-03): immutable resource payloads shared by coordinator-held document versions and live captures are no longer charged once per version. The interactive 256 MiB ceiling and other owner-accounting work remain open. [Evidence and limits](docs/validation/2026-11-03-retained-shared-resource-admission.md).
+
+Sampled external reservations (2026-11-03): the shared account retains a learned 60%-of-total-RAM ceiling across later reservations and relevant retained-owner checks; complete session-wide admission is still open. [Evidence and limits](docs/validation/2026-11-03-sampled-reservation-60-percent.md).
+
+Transaction memory publication (2026-11-03): the commit path rechecks shared admission after its acceptance guard before publishing; preparation and other allocation paths remain open. [Evidence and limits](docs/validation/2026-11-03-transaction-ram-commit-race.md).
+
+B-rep display sharing (2026-11-04): document and history clones share immutable, source-bound display data, with scoped owner accounting and regression tests. The separate evictable display cache, native peak accounting and v5 migration remain open. [Evidence and limits](docs/validation/2026-11-04-brep-shared-display.md).
+
+STL snapshot transfer (2026-11-04): unique OCCT display buffers move into export without copying; a shared snapshot is refused instead of cloned without memory admission. Native peak accounting remains open. [Evidence and limits](docs/validation/2026-11-04-brep-shared-display.md#snapshot-handoff-follow-up).
+
+Pavé Reset (2026-11-04): typed and floating-window reset use the active session limits and retain the current preview on refusal; large previews and desktop click validation remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#pavé-reset-uses-session-limits).
+
+Large geometry lifecycle (2026-11-04): an optimized release test saved and reopened a 288,314,639-byte synthetic mesh archive through the Controller; representative models, desktop and complete managed-memory admission remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#release-geometry-archive-larger-than-256-mib).
+
+Prepared transaction owners (2026-11-04): a prepared document version is registered with the shared RAM account before being returned to a caller. Complete pre-allocation admission and desktop/performance verification remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#prepared-transaction-candidate-peer-accounting).
+
+Transaction document copies (2026-11-04): estimated participant document clones are reserved before copying and transferred to candidate owners under the shared account lock. Other temporary/native allocations and large-model desktop performance remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#transaction-document-clone-reservation).
+
+Transaction free-RAM check (2026-11-04): Controller transactions sample physical headroom before reserving document-copy storage. The check is point-in-time; other temporary and native memory remain separate open work. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#sample-physical-headroom-before-transaction-document-clone).
+
+Transaction planning (2026-11-04): estimated temporary indexes now reserve shared RAM before construction; empty transactions retain the prior Undo/Redo behavior. Other scratch and native owners remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#transaction-planning-index-reservation).
+
+Viewport overlay accounting (2026-11-04): opt-in diagnostics track deduplicated live and in-flight overlay buffers. GPU budget enforcement and desktop verification remain open. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#overlay-buffers-in-encoded-and-submitted-work).
+
+Viewport camera accounting (2026-11-04): opt-in diagnostics track actual scene camera buffers until GPU queue completion; staging, budget enforcement and desktop verification remain open. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#scene-camera-buffers-in-flight).
+
+Viewport arena capacity (2026-11-04): vertex and index buffers use independent size classes, avoiding an equal-size allocation for asymmetric meshes. Real-scene savings and GPU budget enforcement remain open. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#independent-vertex-and-index-arena-capacities).
+
+Empty viewport geometry (2026-11-04): scene geometry buffers are created on first mesh rather than for an empty scene. Other viewport resources still exist, and GPU budget enforcement remains open. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#allocate-geometry-arenas-only-for-nonempty-scenes).
+
+Viewport minimum target guard (2026-11-04): an individually impossible full-resolution target set is refused while the previous same-document image is retained. This is not complete GPU budget enforcement or batching. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#minimum-viewport-target-budget-guard).
+
+Vulkan target budget (2026-11-04): a single device-local heap's OS budget also constrains the minimum viewport target guard; the 256 MiB hardware fallback remains unverified. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#vulkan-local-heap-budget-in-minimum-target-guard).
+
+GPU target headroom (2026-11-04): the viewport minimum also respects sampled remaining OS budget when available. This does not reserve GPU memory or establish a window-wide cap. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#sampled-os-headroom-in-minimum-target-guard).
+
+Window target inventory (2026-11-04): before target allocation the normal UI counts known live and in-flight targets across viewports. Other GPU owners and complete batching remain open. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#window-target-inventory-during-allocation).
+
+Scene buffers in target admission (2026-11-04): known live, encoded and in-flight geometry and instance buffers are included even when diagnostics are disabled. Other owners and measured overhead remain open. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#known-scene-buffers-in-viewport-target-admission).
+
+Overlay and camera buffers (2026-11-04): known live or submitted buffers join the same deduplicated target-admission inventory without requiring logging. Worker/staging and driver owners remain open. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#overlay-and-camera-buffers-in-viewport-target-admission).
+
+Viewport worker inventory (2026-11-04): target allocation waits while GPU preparation is active and accounts for completed results pending receipt. Worker admission, staging and driver owners remain open. [Evidence](docs/validation/2026-11-03-viewport-snapshot-diagnostics.md#viewport-worker-preparation-inventory).
+
+Vulkan adapter identity (2026-11-04): exact Vulkan LUID matching to DXGI corrected a false 256 MiB fallback on the tested RTX 3060; the previously stalled 729-object fixture completed twice in release. Unknown-adapter batching and desktop acceptance remain open. [Evidence](docs/validation/2026-11-04-gpu-vulkan-luid-replay.md).
+
+Shared viewport world lines (2026-11-04): four views reuse unselected scene edges; the tested 729-object release replay reduced maximum sampled overlay-buffer inventory from 1,490,910,976 to 372,741,744 bytes. Full GPU budgeting, broader Perspective coverage and desktop acceptance remain open. [Evidence](docs/validation/2026-11-04-shared-viewport-world-lines.md).
+
+Perspective image comparison (2026-11-04): one mixed-geometry GPU fixture matches the previous line path pixel-for-pixel for specified selection, visibility and camera changes. Broader geometry and desktop acceptance remain open. [Evidence](docs/validation/2026-11-04-shared-viewport-world-lines.md#controlled-perspective-image-comparison).
+
+Selected viewport overlays (2026-11-04): selected lines, guides and Gumball ghosts are shared across views. A controlled offscreen fixture reduced logical overlay bytes by about 74.9% and matched Perspective pixels; physical VRAM, desktop behavior and complete GPU budgeting remain open. [Evidence](docs/validation/2026-11-04-shared-selected-world-lines.md).
+
+Large geometry Open pressure (2026-11-04): a release test rejects a 288 MB synthetic archive under a controlled low budget and preserves usable Undo/Redo. OS-wide pressure and desktop behavior remain unverified. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#geometry-archive-above-256-mib-fixture-development).
+
+CLI inspect and audit (2026-11-04): these use staged archive and report reservations with RAM-derived limits without constructing a scene; release tests cover a large synthetic archive and cold-process regressions. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#cli-inspect-and-audit-open-admission).
+
+Plugin CLI RAM admission (2026-11-04): batch plugin document Open and Save use the same RAM-derived limits and reservations as the Controller. A real plugin passed a small controlled refusal and retry; large-model and native memory coverage remain open. [Evidence](docs/validation/2026-11-04-plugin-cli-ram-admission.md).
+
+Inline hover RAM admission (2026-11-04): small scenes reserve estimated picking workspace even when a single mesh is large, and retry after managed pressure. Persistent scene accounting and desktop cost remain open. [Evidence](docs/validation/2026-11-04-inline-hover-ram-admission.md).
+
+STL capture session (2026-11-04): the pending UI capture and Controller export reject a capture from a previous runtime session even if the same file is reopened. [Evidence](docs/validation/2026-11-04-stl-capture-session-identity.md).
+
+STL session cancellation (2026-11-04): detached and experimental worker captures are invalidated by document replacement or close, serialized with the final file rename. Background UI integration and full native memory admission remain open. [Evidence](docs/validation/2026-11-04-stl-capture-session-identity.md#session-invalidation-through-final-publication).
+
+STL Controller lifetime (2026-11-04): destroying a Controller invalidates its captures, including on headless replacement; a failed headless Open preserves them. [Evidence](docs/validation/2026-11-04-stl-capture-session-identity.md#controller-owner-destruction).
+
+Detached STL admission (2026-11-04): direct capture export now reserves shared managed headroom and observes registered document versions. Scene estimates can become stale, and native memory and background UI remain open. [Evidence](docs/validation/2026-11-04-detached-stl-shared-reservation.md).
+
+Viewport snapshot RAM lifetime (2026-11-04): GPU preparation workers for the same scene version share a tracked snapshot lease; controlled pressure/recovery checks pass. Current-scene double charging, GPU staging and desktop validation remain open. [Evidence](docs/validation/2026-11-04-viewport-snapshot-ram-owners.md).
+
+Viewport pressure retry (2026-11-04): repeated snapshot RAM refusals back off while a changed scene can retry immediately; offscreen pressure tests pass. [Evidence](docs/validation/2026-11-04-viewport-snapshot-ram-owners.md#admission-pressure-retry-backoff).
+
+Viewport preview snapshots (2026-11-04): GPU workers share one scene snapshot across preview motion and skip unused bounds; offscreen preview/picking/Gumball tests pass. Full scene accounting and desktop measurement remain open. [Evidence](docs/validation/2026-11-04-viewport-snapshot-ram-owners.md#share-across-preview-revisions).
+
+Legacy migration RAM admission (2026-11-04): explicit schema-1/2/3 CLI migration uses RAM-derived managed headroom; a schema-3 point cloud passed refusal preservation and retry. Schema-5 migration and large-file coverage remain open. [Evidence](docs/validation/2026-11-04-legacy-cli-ram-admission.md).
+
+STL instance traversal (2026-11-04): ancestor tracking uses the existing recursive frames instead of a separate heap stack; full export admission and native-memory peaks remain open. [Evidence](docs/validation/2026-11-04-stl-capture-selection-reservation.md#instance-traversal-without-a-heap-stack).
+
+STL selection capture (2026-11-04): its ID-array reservation samples physical RAM when available; the entire direct export and native allocation peak are not yet covered. [Evidence](docs/validation/2026-11-04-stl-capture-selection-reservation.md#physical-ram-sample-for-selection-capture).
+
+OCCT memory samples (2026-11-04): multi-edge fillet and curved loft were measured in isolated release processes with geometry checks. These samples do not bound native memory. [Evidence](docs/validation/2026-11-04-kernel-operation-memory-probe.md#twelve-edge-fillet-and-curved-32-section-loft).
+
+STL export snapshots (2026-11-04): skip sampled viewport edge polylines while retaining triangle/topology bindings; process-memory savings remain unmeasured. [Evidence](docs/validation/2026-11-04-stl-export-no-display-edge-sampling.md).
+
+Scene preflight and commit (2026-11-04): incremental mesh/surface sizes are counted without constructing them, and single-entity scene construction holds a shared reservation through commit. Published-scene lifetime and actual peak RAM remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#incremental-scene-reservation-through-commit).
+
+Large-mesh history limits (2026-11-04): node counts are no longer summed across document versions while retained bytes remain charged; a release fixture over 256 MiB passed edit, Undo/Redo and save/reopen. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#per-document-node-limits-across-retained-history).
+
+Multiple-document quotas (2026-11-04): point and node limits are applied per document, with a shared byte budget; large multi-document and desktop validation remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#independent-node-and-point-quotas-for-multiple-documents).
+
+Layer and property scene admission (2026-11-04): metadata-scene updates hold a shared reservation through commit; persistent scene ownership and desktop validation remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#layer-and-property-scene-reservations).
+
+Scene display buffers (2026-11-04): major mesh, B-rep, surface and curve arrays use fallible capacity requests. Other memory paths and OS-wide exhaustion remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#fallible-display-buffer-allocation).
+
+Scene capacity check (2026-11-04): actual incremental scene capacity is reconciled with its shared reservation before commit, excluding reused buffers. Allocation-time excess and persistent ownership remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#reconcile-incremental-scene-capacity-before-commit).
+
+Full candidate scene capacity (2026-11-04): the shared construction reservation is also reconciled before commit on full scene rebuilds. This is after allocation and is not persistent scene-owner accounting. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#reconcile-full-candidate-scene-capacity-before-commit).
+
+Undo/Redo scene handoff (2026-11-04): scene construction reservation stays held through history and scene publication. Published scene ownership remains open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#continuous-undo-and-redo-scene-reservation).
+
+Worker snapshots (2026-11-04): viewport and hover scene metadata use fallible allocation while sharing geometry. Injected pre-allocation failures preserve the source; real allocator failure and persistent ownership remain open. [Evidence](docs/validation/2026-11-04-interactive-ram-transition.md#fallible-viewport-and-hover-scene-snapshots).
+
+STL capture and document quotas (2026-11-04): selected scene-growth observations reduce detached-export headroom, and structural node/point quotas apply independently per document. Live scene ownership, native peaks and full RAM admission remain open. [Evidence](docs/validation/2026-11-04-stl-scene-high-water-and-structural-quotas.md).
+
+Native 3DM clipboard follow-up (2026-11-04): the three previously ignored native clipboard regression cases pass with a configured adapter on small fixtures. [Evidence and limits](docs/validation/2026-11-04-stl-scene-high-water-and-structural-quotas.md#native-3dm-clipboard-follow-up).
+
+Top11 scene admission (2026-11-04): changed-document Top11 scene builds use the existing shared construction reservation and avoid double-subtracting the candidate document's object quota. Persistent published-scene ownership and native peaks remain open. [Evidence](docs/validation/2026-11-04-top11-scene-admission.md).
+
+Clipboard scene admission (2026-11-04): paste uses shared candidate-scene construction admission; controlled pressure preserves selection and history. Live scene ownership and native peaks remain open. [Evidence](docs/validation/2026-11-04-clipboard-scene-admission.md).
+
+Plugin scene admission (2026-11-04): plugin edits retain shared scene-construction reservations through staged selection checks and publication. Persistent scene ownership remains open. [Evidence](docs/validation/2026-11-04-plugin-scene-admission.md).
+
+Viewport buffer lease (2026-11-05): the current scene and its viewport worker snapshots share one render-buffer reservation in the tested path. Cross-epoch deduplication and complete owner coverage remain open. [Evidence](docs/validation/2026-11-05-viewport-shared-buffer-lease.md).
+
+Incremental scene leases (2026-11-05): buffer reservations now follow retained buffers across incremental scene versions; other rebuild paths remain open. [Evidence](docs/validation/2026-11-05-viewport-shared-buffer-lease.md#incremental-scene-follow-up).
+
+Hover buffer sharing (2026-11-05): background hover and viewport preparation share the current scene buffer lease; worker scratch stays separately reserved. [Evidence](docs/validation/2026-11-05-hover-shared-buffer-lease.md).
+
+Initial scene registration (2026-11-05): nonempty startup and New/Open scene buffers are registered before viewport use; detached STL no longer recharges the registered buffer in the tested path. Full scene ownership remains incomplete. [Evidence](docs/validation/2026-11-05-initial-scene-buffer-registration.md).
+
+Full candidate scene buffers (2026-11-05): common full-scene edits and plugin publication retain buffer leases from construction through commit. History and snapshot/Master follow-ups are recorded below. [Evidence](docs/validation/2026-11-05-full-candidate-buffer-publication.md).
+
+History scene buffers (2026-11-05): Undo/Redo retain buffer leases through publication and old-worker completion. [Evidence](docs/validation/2026-11-05-history-scene-buffer-registration.md).
+
+Snapshot/Master publication (2026-11-05): reserved replacement retains observers/history on refusal and registers new buffers while old workers keep their own leases. First incremental edits register buffers before viewport work. Selected R0 checks pass; metadata/cache, pending/live accounting, native peaks and desktop remain open. [Evidence](docs/validation/2026-11-05-snapshot-master-reservation.md).
+
+RAM phases (2026-11-05): the production shared account distinguishes pending allocations from allocated scene buffers without reducing their managed charge. Physical samples refresh under the shared lock; transaction-clone handoff clears its pending allowance atomically. Snapshot metadata and Windows commit follow-ups are recorded below; main-scene metadata/cache, staged Save/STL budgets and desktop remain open. [Evidence](docs/validation/2026-11-05-pending-allocated-ram.md).
+
+Snapshot metadata and system commit (2026-11-05): viewport/hover metadata excludes source picking caches and reconciles actual capacity; hover keeps scratch until worker completion. Windows shared-account admission checks system commit separately from physical RAM. Native/account/Controller checks, UI/GPU/STL regressions and one real 270 MiB resource fixture pass within the report's source scopes. Main-scene metadata/lazy caches and remaining plan gates stay open. [Evidence](docs/validation/2026-11-05-snapshot-metadata-system-commit.md).
+
+Scene/picking and Save phases (2026-11-05): main scenes and viewport/hover snapshots retain metadata/arena owners; preview reuses picking storage, with explicit eviction/re-admission and cold commit refusal tested. Save now reserves buffer/decoder phases instead of remaining headroom; a 1 MiB payload saves while a peer retains 16 MiB under a 32 MiB limit, and phase refusal preserves destination/document/Redo. Final scene, archive and file regressions pass. Automatic pressure eviction, other owner audits, captured/detached STL budgets, native/release/desktop and P1–P5 remain open. This follow-up supersedes the open main-scene ownership scope in the earlier entries above. [Evidence](docs/validation/2026-11-05-scene-picking-save-phases.md).
+
+STL phase admission (2026-11-05): Controller/captured and detached export now share per-stage reservations, including Rust copies from native snapshots/sources. A two-thread backend test edits and performs Undo/Redo while an export lease and 16 MiB competing capacity are held, preserving captured STL bytes; refusal preserves destination/history. Final kernel/STL/document/file regressions pass. This supersedes the whole-headroom STL limitation above; native peak, scratch/hash ownership, pressure eviction, staged UI worker, release/desktop and the full plan remain open. [Evidence](docs/validation/2026-11-05-stl-staged-memory.md).
+
+Picking cache pressure (2026-11-05): shared-account admission now reclaims idle picking arenas or unused quotas and retries per cache. Owned read handles pin arena data/leases through preview/eviction/Scene drop; lazy reads re-admit and can release another cold quota on commit pressure. Active readers are protected, concurrent requests cannot spend the same reclaimed bytes, and weak owner slots retire before metadata charge returns. This supersedes the open picking-pressure integration above. Near-ceiling churn/QoS, other owners/diagnostics, native/worker/GPU and release/desktop gates remain open. [Evidence](docs/validation/2026-11-05-picking-cache-pressure-reclamation.md).
+
+Picking cache recency/QoS (2026-11-05): admission returns unused quotas before retiring materialized arenas; actual picking reads promote the existing weak index by recency. Passive render bounds cannot allocate, reclaim or promote a cache. Two reproduced policy failures now pass, with four-snapshot pressure/pinning checks and cold/warm GPU publication coverage. This supersedes the registration-order policy above; model-scale churn/latency, other owners/native/GPU, UI export and release/desktop remain open. [Evidence](docs/validation/2026-11-05-picking-cache-recency-qos.md).
+
+RAM metadata roots (2026-11-05): the active shared account now inventories its fixed allocation bodies/counters once; startup admits those owners before creating them. Expired external Document Weak handles retain a charged fixed Arc block until pruning, while expired validation proofs retire immediately. Three regressions reproduce the previous omissions; selected current-source checks total 641 distinct passes/7 ignored, including core 312 and GPU 29. Retired account handles, other owners/diagnostics, native/RSS, UI export and full plan remain open. [Evidence](docs/validation/2026-11-05-account-root-and-weak-document-memory.md).
+
+On-demand memory diagnostics (2026-11-05): `om9_memory` reads known managed storage, external pending/materialized classes, cached Undo policy/inventory and independent physical/commit probes with age/status. It never admits a request, changes policy, reclaims caches or changes document/history. Current checks: 452 distinct passes; headless binary accepts 9 JSON-RPC replies with unchanged Point fixture and measured Windows probes. Actual failure/codec attribution, missing owners, large-model UI responsiveness and native/RSS remain open; the live desktop binary was preserved. [Evidence](docs/validation/2026-11-05-on-demand-memory-diagnostics.md).
+
+External RAM refusal provenance (2026-11-05): `om9_memory.last_external_refusal` retains one final external-reservation/grow refusal with historical operands/headroom, caller authority/epoch and age. Successful eviction retries do not create a new event; the cheap getter does no storage walk/probes. Final checks: 440 distinct passes including GPU 29, plus headless binary/9 replies with unchanged Point state. Other admission/recheck/codec/native/job provenance and full R1/P1-P5 remain open; this does not mean an entire CAD command failed. [Evidence](docs/validation/2026-11-05-external-memory-refusal-provenance.md).
+
+Presentation Weak allocation (2026-11-05): Scene storage is boxed and remains under its existing lease; the small presentation allocation/guard is charged through cache Weak and strong-reader lifetimes. Expired entries retire before admitting successors. One reproduced undercharge is fixed; 176 distinct selected checks pass/1 opt-in measurement ignored, including GPU 29 and picking/Gumball. Cache-container/auxiliary/peer ownership, native/RSS and desktop gates remain open. Incremental buffer-chain leakage was not reproduced and is not claimed fixed. [Evidence](docs/validation/2026-11-05-presentation-weak-allocation-lifetime.md).

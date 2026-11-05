@@ -30,6 +30,35 @@ const POINT_MEMBER: Point3 = [4., 12., 0.];
 /// The second occurrence moves; the first stays at the identity placement.
 const SECOND_PLACEMENT: Point3 = [0., -15., 0.];
 
+#[test]
+fn shared_local_bounds_keep_each_instance_transform_and_preview() {
+    let member = Entity::new("line", Geometry::Curve(Curve::Line {
+        start: [-2., -1., 0.], end: [3., 4., 1.], domain: [0., 1.],
+    }), None);
+    let definition = Definition::new("shared line", vec![member]);
+    let definition_id = definition.id;
+    let mut document = Document::new("shared bounds");
+    document.definitions.insert(definition_id, definition);
+    for transform in [
+        Transform::identity(),
+        Transform::translation([20., -5., 3.]),
+        Transform::scale([-2., 3., 0.5]).unwrap(),
+    ] {
+        let mut instance = Entity::new("instance", Geometry::Instance(definition_id), None);
+        instance.placement = transform;
+        document.entities.insert(instance.id, instance);
+    }
+    let mut scene = Scene::capture(std::sync::Arc::new(document), 1, &Limits::default()).unwrap();
+    assert_eq!(scene.objects.len(), 3);
+    assert!(std::sync::Arc::ptr_eq(&scene.objects[0].buffers, &scene.objects[1].buffers));
+    scene.objects[1].preview = Transform::translation([0., 0., 9.]);
+    let cached = scene.object_spheres().unwrap();
+    for (object, actual) in scene.objects.iter().zip(cached.iter()) {
+        let expected = object.sphere_bounds().unwrap();
+        assert_eq!(*actual, expected, "shared local bounds must preserve each instance transform");
+    }
+}
+
 struct Fixture {
     coordinator: TransactionCoordinator,
     document: DocumentId,

@@ -519,17 +519,17 @@ const PALETTE: &[Icon] = &[
     icon!("SolidSphereAroundCurve","SolidSphereAroundCurve","SolidSphereAroundCurve","solid-minimal/SolidSphereAroundCurve.svg"),
     icon!("SolidSphereTangenttoCurves","SolidSphereTangenttoCurves","SolidSphereTangenttoCurves","solid-minimal/SolidSphereTangenttoCurves.svg"),
     icon!("SolidSphereFitSpheretoPoints","SolidSphereFitSpheretoPoints","SolidSphereFitSpheretoPoints","solid-minimal/SolidSphereFitSpheretoPoints.svg"),
-    icon!("Union", "SolidUnion", "", "solid-minimal/SolidUnion.svg"),
+    icon!("Union", "SolidUnion", "OM9-SOLID-003", "solid-minimal/SolidUnion.svg"),
     icon!(
         "Difference",
         "SolidDifference",
-        "",
+        "OM9-SOLID-001",
         "solid-minimal/SolidDifference.svg"
     ),
     icon!(
         "Intersection",
         "SolidIntersection",
-        "",
+        "OM9-SOLID-002",
         "solid-minimal/SolidIntersection.svg"
     ),
     icon!(
@@ -1701,13 +1701,13 @@ const MENU_PALETTE: &[Icon] = &[
     icon!(
         "SolidExtrudePlanarCurveStraight",
         "SolidExtrudePlanarCurveStraight",
-        "",
+        "OM9-SOLID-009",
         "solid-minimal/SolidExtrudePlanarCurveStraight.svg"
     ),
     icon!(
         "SolidGVDAllExtrude",
         "SolidGVDAllExtrude",
-        "",
+        "OM9-SOLID-010",
         "solid-minimal/SolidGVDAllExtrude.svg"
     ),
     icon!(
@@ -1818,7 +1818,7 @@ const MENU_PALETTE: &[Icon] = &[
         "OM9-SOLID-029",
         "solid-minimal/SolidShell.svg"
     ),
-    icon!("SolidPtOn", "SolidPtOn", "", "solid-minimal/SolidPtOn.svg"),
+    icon!("SolidPtOn", "SolidPtOn", "OM9-TRANSFORM-019", "solid-minimal/SolidPtOn.svg"),
     icon!(
         "TransformScaleScale2D",
         "TransformScaleScale2D",
@@ -3381,15 +3381,25 @@ fn lookup(name: &str) -> Option<&'static Icon> {
         "Scale3D" => "Scale",
         other => other,
     };
-    PALETTE
-        .iter()
-        .chain(MENU_PALETTE.iter())
-        .chain(SIDEBAR_PALETTE.iter())
-        .find(|icon| {
-            icon.name.eq_ignore_ascii_case(name)
-                || icon.command_key.eq_ignore_ascii_case(name)
-                || (!icon.feature.is_empty() && icon.feature.eq_ignore_ascii_case(name))
-        })
+    static INDEX: std::sync::OnceLock<std::collections::HashMap<String, &'static Icon>> =
+        std::sync::OnceLock::new();
+    let index = INDEX.get_or_init(|| {
+        let mut index = std::collections::HashMap::new();
+        for icon in PALETTE.iter().chain(MENU_PALETTE).chain(SIDEBAR_PALETTE) {
+            for key in [
+                Some(icon.name),
+                Some(icon.command_key),
+                (!icon.feature.is_empty()).then_some(icon.feature),
+            ]
+            .into_iter()
+            .flatten()
+            {
+                index.entry(key.to_ascii_lowercase()).or_insert(icon);
+            }
+        }
+        index
+    });
+    index.get(&name.to_ascii_lowercase()).copied()
 }
 
 /// Resolve a real menu command key, feature ID, or short palette label to its
@@ -3512,5 +3522,38 @@ mod tests {
         assert!(icons.textures["Line"].is_some());
         assert_eq!(icon_name("OM9-GEM-013"), Some("Emerald"));
         assert_eq!(icon_name("not-an-icon"), None);
+    }
+
+    #[test]
+    fn indexed_lookup_preserves_palette_precedence_and_case() {
+        for icon in PALETTE.iter().chain(MENU_PALETTE).chain(SIDEBAR_PALETTE) {
+            for key in [icon.name, icon.command_key, icon.feature] {
+                if key.is_empty() {
+                    continue;
+                }
+                let key = key.to_ascii_uppercase();
+                let key = match key.as_str() {
+                    "CURVE" | "SURFACE" | "SOLID" | "TRANSFORM" | "GEMS" | "PROJECTS"
+                    | "SNAPMIDPOINT" | "END" | "MID" | "CENTER" | "SCALE3D" => continue,
+                    _ => key,
+                };
+                let expected = PALETTE
+                    .iter()
+                    .chain(MENU_PALETTE)
+                    .chain(SIDEBAR_PALETTE)
+                    .find(|item| {
+                        item.name.eq_ignore_ascii_case(&key)
+                            || item.command_key.eq_ignore_ascii_case(&key)
+                            || (!item.feature.is_empty() && item.feature.eq_ignore_ascii_case(&key))
+                    });
+                let actual = lookup(&key).unwrap();
+                let expected = expected.unwrap();
+                assert_eq!(
+                    (actual.name, actual.command_key, actual.feature, actual.svg),
+                    (expected.name, expected.command_key, expected.feature, expected.svg),
+                    "{key}"
+                );
+            }
+        }
     }
 }

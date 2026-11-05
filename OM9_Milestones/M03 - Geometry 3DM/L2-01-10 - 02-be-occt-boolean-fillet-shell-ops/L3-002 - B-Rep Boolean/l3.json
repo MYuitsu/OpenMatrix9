@@ -480,6 +480,9 @@
     "rust_test_name": "m03_01_10_002"
   },
   "runtime_implementation": {
+    "multi_cutter_validation_2026_11_02": "docs/validation/2026-11-02-boolean-multi-cutter-dice.md",
+    "obb_validation_2026_11_02": "docs/validation/2026-11-02-boolean-obb-blender-rhino.md",
+    "performance_validation_2026_11_02": "docs/validation/2026-11-02-boolean-dice-topology-performance.md",
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED",
     "target": "standalone Rust OM9, Windows x64",

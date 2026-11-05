@@ -918,6 +918,15 @@
       "scope": "Build/package/loader only; no UI or geometry gate promotion",
       "manual_gate_promoted": false,
       "release_url": "https://github.com/MYuitsu/OpenMatrix9/releases/tag/v0.3.6-202610211407"
+    },
+    "workspace_validation_20261105": {
+      "status": "BUILD_PASSED_TESTS_FAILED",
+      "evidence": [
+        "docs/validation/2026-11-05-workspace-build-test-commit.md",
+        "docs/validation/2026-11-05-workspace-build-test-commit.json"
+      ],
+      "scope": "Integrated build/test observation only; planning, feature completion and manual approvals unchanged.",
+      "results": "release build 0; workspace tests 101, 4497 passed/21 failed/183 ignored; native fixture protocol rejected"
     }
   },
   "sdk_integration_plan": {

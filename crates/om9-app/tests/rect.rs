@@ -255,19 +255,12 @@ fn rectangle_three_point_accepts_numeric_height() {
 }
 
 #[test]
-fn rectangle_square_uses_the_shared_option_snapshot() {
-    use om9_app::command_options::{CommandOptionEffect, CommandOptionInterface};
+fn rectangle_square_uses_the_owner_transient_flag() {
+    // Matrix makes a square with Shift at the corner pick, not with an option token;
+    // the UI drives the same owner flag through `set_rect_square`.
     let mut c = controller();
     c.submit("Rectangle").unwrap();
-    let square = c
-        .command_options()
-        .into_iter()
-        .find(|option| option.id.name() == "Square")
-        .expect("Square option");
-    assert_eq!(
-        c.activate_command_option(square.id).unwrap(),
-        CommandOptionEffect::Applied
-    );
+    c.set_rect_square(true).expect("rectangle running");
     c.accept_world_point([0.0, 0.0, 0.0]).unwrap();
     c.accept_world_point([10.0, 20.0, 0.0]).unwrap();
     let (_, max) = bounds(&c);

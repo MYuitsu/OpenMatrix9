@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T22:53:23+00:00",
+  "updated_at": "2026-11-05T09:01:00+07:00",
   "full_exchange_complete": false,
   "approved_plan": "docs/superpowers/plans/2026-10-07-full-opennurbs-completion.md",
   "counting_rule": "A named fixture matrix is one test batch. Fixtures, assertions, execution attempts and package milestones are separate counts. A retry does not create a new planned batch.",
@@ -913,5 +913,23 @@
     "opennurbs_fixture_groups": 0,
     "distinct_tests": 169,
     "fixture_manifest": "docs/validation/2026-10-26-measure-completion/measurement-fixtures.json"
+  },
+  "native_source_inventory_attempt_20261105": {
+    "status": "fixture_protocol_failure",
+    "matrix": "tools/validate_native_source_inventory.py",
+    "attempts": 1,
+    "fixture_packets_attempted": 1,
+    "native_calls_attempted": 1,
+    "completed_3dm_fixtures": 0,
+    "source_inventory_views_completed": 0,
+    "unexpected_rejection": "NativeExit(1): missing/unknown record fields",
+    "prepared_pending_batches_changed": false,
+    "packages_closed": [],
+    "future_total_batches": null,
+    "evidence": [
+      "docs/validation/2026-11-05-workspace-build-test-commit.md",
+      "docs/validation/2026-11-05-workspace-build-test-commit.json"
+    ],
+    "next_action": "Compare canonical packet to current native schema before a targeted retry; later inventory fixtures were not executed."
   }
 }

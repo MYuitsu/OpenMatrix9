@@ -88,6 +88,7 @@ impl super::Controller {
             self.selection.remove(&id);
         }
         self.selection_order.retain(|id| self.selection.contains(id));
+        self.release_removed_root_selection();
         self.selection_revision = self.selection_revision.saturating_add(1);
         true
     }
@@ -185,7 +186,7 @@ impl super::Controller {
     /// Move the contract state (observers, diagnostics, change ring) onto a
     /// replacement controller and keep the replaced document as the diff
     /// baseline, so a replacement is published as one ordered batch.
-    pub(crate) fn adopt_contract_state(&mut self, previous: &mut Self) {
+    pub(crate) fn move_contract_state(&mut self, previous: &mut Self) {
         self.observers = std::mem::take(&mut previous.observers);
         self.observer_diagnostics = std::mem::take(&mut previous.observer_diagnostics);
         self.changes = std::mem::take(&mut previous.changes);
@@ -253,22 +254,37 @@ impl super::Controller {
             return Err(Error::Busy);
         }
         let limits = *self.coordinator.limits();
-        let held = self.replacement_hold(Usage {
-            bytes: 512,
-            ..Usage::default()
+        let input = snapshot.storage_usage()?;
+        let held = self.replacement_hold(input)?;
+        let mut auxiliary = self.scene_cache_usage()?;
+        auxiliary.add(input, &limits)?;
+        let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::CpuCache, 512, physical, auxiliary,
+        )?;
+        let mut decode_limits = limits.remaining_after(held)?;
+        decode_limits.max_bytes = decode_limits.max_bytes.checked_add(snapshot.encoded_len()).ok_or(Error::Overflow("snapshot decode allowance"))?;
+        decode_limits.max_objects = limits.max_objects;
+        decode_limits.max_points = limits.max_points;
+        decode_limits.max_nodes = limits.max_nodes;
+        let document = snapshot.restore_with_admission(&decode_limits, &mut |estimated| {
+            let scratch = estimated.saturating_sub(snapshot.encoded_len());
+            if scratch > reservation.bytes() {
+                let additional = scratch - reservation.bytes();
+                let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+                self.coordinator.grow_external_memory_with_held(&mut reservation, additional, physical, auxiliary)?;
+            }
+            Ok(())
         })?;
-        let document = snapshot.restore(&limits.remaining_after(held)?)?;
         if document.id != self.document {
             return Err(Error::Invalid("snapshot document"));
         }
         let workspace = self.workspace.clone();
         let path = self.file.path.clone();
-        let mut candidate = Self::new_with_held(document, limits, held)?;
+        let (mut candidate, reservation) = self.build_reserved_document_replacement(document, held, auxiliary, reservation)?;
         candidate.workspace = workspace;
         candidate.file.path = path;
-        candidate.adopt_contract_state(self);
-        *self = candidate;
-        self.sync_published(ChangeCause::Restore);
+        self.publish_reserved_replacement(reservation, candidate, ChangeCause::Restore, input)?;
         Ok(SnapshotOutcome::Restored)
     }
     /// The document a caller would save right now, for provenance queries.

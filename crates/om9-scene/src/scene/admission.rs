@@ -3,9 +3,16 @@
 use super::*;
 use std::collections::BTreeSet;
 type Key = (ObjectId, u64, u64);
+pub(super) fn planning_scratch(document: &Document) -> Result<Usage> {
+    let members = document.definitions.values().try_fold(document.entities.len(), |n, definition| {
+        n.checked_add(definition.members.len()).ok_or(Error::Overflow("scene unique sources"))
+    })?;
+    Usage::btree::<Key, ()>(members)
+}
 pub(super) struct AllocationPlan {
     pub objects: usize,
     pub diagnostics: usize,
+    pub peak_bytes: u64,
 }
 fn buffer_bound(geometry: &Geometry, limits: &Limits) -> Result<Option<Usage>> {
     let mut usage = Usage {
@@ -31,6 +38,17 @@ fn buffer_bound(geometry: &Geometry, limits: &Limits) -> Result<Option<Usage>> {
         }
         Geometry::Curve(curve) => {
             if matches!(curve, Curve::Polycurve { .. }) {
+                if has_nested_segments(curve) {
+                    let count = match nested_display_count(curve, limits) {
+                        Ok(count) => count,
+                        Err(Error::Unsupported(_)) => return Ok(None),
+                        Err(error) => return Err(error),
+                    };
+                    usage.add(Usage::array::<Point3>(count)?, limits)?;
+                    usage.points = count as u64;
+                    usage.check(limits)?;
+                    return Ok(Some(usage));
+                }
                 let segments = match connected_polyline_segments(curve, limits) {
                     Ok(segments) => segments,
                     Err(Error::Unsupported(_)) => {
@@ -223,9 +241,12 @@ pub(super) fn admit(document: &Document, limits: &Limits, held: Usage) -> Result
                 .ok_or(Error::Overflow("scene unique sources"))
         })?;
     let mut usage = held;
+    // Document point complexity and derived display-point complexity each
+    // have their own cap; their bytes still coexist and remain aggregated.
+    usage.points = 0;
     // The preflight seen set and actual capture's shared cache map have
     // separately admitted lifetimes; conservatively reserve both here.
-    usage.add(Usage::btree::<Key, ()>(members)?, limits)?;
+    usage.add(planning_scratch(document)?, limits)?;
     usage.add(Usage::btree::<Key, Arc<RenderBuffers>>(members)?, limits)?;
     usage.add(Usage::btree::<LayerId, ()>(document.layers.len())?, limits)?;
     let mut planner = Planner {
@@ -252,6 +273,8 @@ pub(super) fn admit(document: &Document, limits: &Limits, held: Usage) -> Result
     usage.add(Usage::array::<ObjectId>(path_scratch)?, limits)?;
     for allocation in [
         Usage::array::<Scene>(1)?,
+        Usage::array::<Mutex<super::SceneMemory>>(1)?,
+        Usage::array::<usize>(2)?,
         Usage::array::<SceneObject>(planner.objects)?,
         Usage::array::<ObjectId>(planner.paths)?,
         Usage::array::<String>(planner.diagnostics)?,
@@ -274,5 +297,6 @@ pub(super) fn admit(document: &Document, limits: &Limits, held: Usage) -> Result
     Ok(AllocationPlan {
         objects: planner.objects,
         diagnostics: planner.diagnostics,
+        peak_bytes: usage.bytes.checked_sub(held.bytes).ok_or(Error::Overflow("scene preparation bytes"))?,
     })
 }

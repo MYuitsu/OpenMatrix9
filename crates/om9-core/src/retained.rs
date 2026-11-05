@@ -17,20 +17,42 @@ use std::{
 
 /// Hash typed host state directly into the digest, without a serialized buffer.
 pub fn fingerprint<T: Serialize>(value: &T) -> Result<[u8; 32]> {
-    struct HashWriter(Sha256);
+    struct HashWriter {
+        hash: Sha256,
+        buffer: [u8; 4096],
+        len: usize,
+    }
     impl Write for HashWriter {
-        fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
-            self.0.update(bytes);
-            Ok(bytes.len())
+        fn write(&mut self, mut bytes: &[u8]) -> io::Result<usize> {
+            let total = bytes.len();
+            while !bytes.is_empty() {
+                let n = bytes.len().min(self.buffer.len() - self.len);
+                self.buffer[self.len..self.len + n].copy_from_slice(&bytes[..n]);
+                self.len += n;
+                bytes = &bytes[n..];
+                if self.len == self.buffer.len() {
+                    self.flush()?;
+                }
+            }
+            Ok(total)
         }
         fn flush(&mut self) -> io::Result<()> {
+            self.hash.update(&self.buffer[..self.len]);
+            self.len = 0;
             Ok(())
         }
     }
-    let mut writer = HashWriter(Sha256::new());
+    let mut writer = HashWriter {
+        hash: Sha256::new(),
+        buffer: [0; 4096],
+        len: 0,
+    };
     serde_json::to_writer(&mut writer, value)
         .map_err(|_| Error::Invalid("host fingerprint serialization"))?;
-    Ok(writer.0.finalize().into())
+    writer
+        .flush()
+        .map_err(|_| Error::Invalid("host fingerprint serialization"))?;
+    Ok(writer.hash.finalize().into())
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -670,6 +692,15 @@ impl Document {
         }
         Ok(())
     }
+    /// Reconcile native bindings on a private, derived export document after
+    /// representation conversion. Original baselines remain intact; modified
+    /// hosts become Edited. This does not modify the live source document.
+    pub fn reconcile_derived_export_bindings(&mut self, limits: &Limits) -> Result<()> {
+        let held = self.storage_usage(limits)?;
+        self.reconcile_retained(limits, held)?;
+        self.validate(limits)?;
+        Ok(())
+    }
     pub(crate) fn reconcile_retained(&mut self, limits: &Limits, held: Usage) -> Result<()> {
         if !self
             .import_namespaces
@@ -808,6 +839,21 @@ mod indexed_reconciliation_tests {
             original
         );
     }
+    #[test]
+    fn derived_export_reconciles_changed_binding_without_changing_original() {
+        let limits = Limits::default();
+        let (original, object, namespace) = fixture(&limits);
+        let baseline = original.import_namespaces[&namespace].records[0].baseline_sha256;
+        let mut derived = original.clone();
+        derived.entities.get_mut(&object).unwrap().geometry = Geometry::Point([2.; 3]);
+        assert!(derived.validate(&limits).is_err());
+        derived.reconcile_derived_export_bindings(&limits).unwrap();
+        assert_eq!(derived.import_namespaces[&namespace].records[0].disposition, RecordDisposition::Edited);
+        assert_eq!(derived.import_namespaces[&namespace].records[0].baseline_sha256, baseline);
+        assert_eq!(original.import_namespaces[&namespace].records[0].disposition, RecordDisposition::Unchanged);
+        original.validate(&limits).unwrap();
+        derived.validate(&limits).unwrap();
+    }
     fn member_fixture() -> (Document, ObjectId, DefinitionId, ImportNamespaceId) {
         let (mut d, object, ns) = fixture(&Limits::default());
         let entity = d.entities.remove(&object).unwrap();
@@ -915,7 +961,9 @@ pub struct ImportBundle {
     pub exchange: crate::exchange::ExchangeMetadata,
 }
 impl ImportBundle {
-    pub(crate) fn storage_usage(&self, l: &Limits) -> Result<Usage> {
+    /// Managed storage estimate for retaining this immutable import bundle.
+    /// Native transient allocations and allocator overhead are not included.
+    pub fn storage_usage(&self, l: &Limits) -> Result<Usage> {
         let mut u = self.resource.validate(l)?;
         u.add(Usage::array::<Self>(1)?, l)?;
         let objects = self

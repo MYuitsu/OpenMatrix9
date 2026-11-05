@@ -235,3 +235,7 @@ records arbitrarily oriented common planes, Tangent Vertical and analytic
 AroundCurve dependencies, including parent Undo/Redo and cold restore.
 The [remaining-branches validation](../validation/2026-10-09-circle-complete-branches.md)
 records noncoplanar NURBS contacts, all-mode History replay and layer integration.
+The [prompt-stage validation](../validation/2026-11-02-circle-prompt-stages.md) records the
+Matrix-matching option stages (`Center of circle ( Deformable … )`, then the measure words
+plus Orientation) and the Orientation normal/size flow in the standalone OM9 runtime; the
+live measure value in the prompt remains open.

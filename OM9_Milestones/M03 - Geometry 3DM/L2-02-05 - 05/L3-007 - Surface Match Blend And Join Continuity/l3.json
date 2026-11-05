@@ -341,6 +341,42 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "NURBS_CURVE",
   "runtime_implementation": {
+    "join_periodic_metadata_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-periodic-metadata.md",
+      "scope": "Preserve and directly inspect tested OCCT periodic surface axes; validate U-periodic joined faces across .om9, trimmed U and doubly periodic sampled conversion.",
+      "limitations": "Other encodings and topology, doubly periodic Join, 3DM interoperability, peak native memory and physical UI remain open."
+    },
+    "join_periodic_surfaces_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-periodic-surfaces.md",
+      "scope": "Validate repeated periodic surface bases and join tested U-periodic NURBS surfaces.",
+      "limitations": "Other periodic encodings, two-axis/trimmed periodic cases, 3DM metadata and physical UI remain open."
+    },
+    "join_cylinders_budget_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-cylinders-budget.md",
+      "scope": "Bound supporting-surface guard serialization and join tested closed cylinder surfaces.",
+      "limitations": "Mutation rejection unobserved; general periodic surfaces, trim behavior, 3DM and physical UI remain open."
+    },
+    "join_surface_guard_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-surface-guard.md",
+      "scope": "Guard supporting-surface representation during tested Top11 OCCT sewing.",
+      "limitations": "Rejection branch not exercised; trim behavior, custom surfaces, native allocation, 3DM and physical UI remain open."
+    },
+    "join_reversed_curved_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-reversed-curved.md",
+      "scope": "Join tested U/V-reversed planar and rational curved surfaces; measure toleranced seam behavior.",
+      "limitations": "Toleranced trim area changed in tested gap; underlying identity, wider topology, 3DM and physical UI remain open."
+    },
+    "join_surfaces_2026_10_31": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-10-31-top11-join-surfaces.md",
+      "scope": "Sew tested adjacent NURBS surfaces and mixed surface/BRep chains using bounded OCCT face snapshots.",
+      "limitations": "Reversed/periodic and general curved surfaces, wider topology, 3DM and physical UI remain open."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",

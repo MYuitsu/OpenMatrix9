@@ -65,3 +65,52 @@ fn cache_refresh_refuses_changed_geometry_owner_and_unreserved_metadata_clone() 
             .is_err()
     );
 }
+
+#[test]
+fn mesh_and_surface_update_estimates_match_published_buffers() {
+    use om9_core::geometry::Mesh;
+    use om9_scene::scene::RenderBuffers;
+    let limits = Limits::default();
+    let document = Document::new("bounded additions");
+    let scene = Scene::capture(Arc::new(document.clone()), 1, &limits).unwrap();
+    let surface = om9_core::surface_kernel::plane([0., 0., 0.], [1., 0., 0.], [0., 1., 0.], 2., 2., &limits).unwrap();
+    let mesh = Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [1.,1.,0.], [0.,1.,0.]],
+        faces: vec![vec![0,1,2,3], vec![0,2,3]], normals: vec![], colors: vec![], corner_uvs: vec![] };
+    for (geometry, expected_vertices, expected_triangles, expected_edges) in [
+        (Geometry::Mesh(mesh), 4, 3, 7),
+        (Geometry::Surface(surface), 144, 242, 44),
+    ] {
+        let entity = Entity::new("added", geometry, None);
+        let id = entity.id;
+        let estimated = scene.update_usage(Some(&entity)).unwrap();
+        assert_eq!(estimated.points, expected_vertices as u64);
+        let mut updated = document.clone();
+        updated.entities.insert(id, entity);
+        let too_small = Limits { max_bytes: estimated.bytes - 1, ..limits };
+        assert!(scene.update_owned(Arc::new(updated.clone()), 2, Some(id), &too_small).is_err());
+        assert!(scene.objects.is_empty(), "refusal must leave the original scene unchanged");
+        let result = scene.update_owned(Arc::new(updated), 2, Some(id), &limits).unwrap();
+        let RenderBuffers::Mesh { vertices, triangles, edges } = result.objects[0].buffers.as_ref() else { panic!("mesh buffers") };
+        assert_eq!((vertices.len(), triangles.len(), edges.len()), (expected_vertices, expected_triangles, expected_edges));
+    }
+}
+
+#[test]
+fn incremental_retained_bytes_exclude_only_reused_buffers() {
+    use om9_scene::scene::RenderBuffers;
+    let limits = Limits::default();
+    let mut document = Document::new("shared old buffer");
+    let first = Entity::new("first", Geometry::Point([0., 0., 0.]), None);
+    document.entities.insert(first.id, first);
+    let old = Scene::capture(Arc::new(document.clone()), 1, &limits).unwrap();
+    let RenderBuffers::Points { points, native_indices } = old.objects[0].buffers.as_ref() else { panic!("point buffers") };
+    let shared_bytes = std::mem::size_of::<RenderBuffers>() + 16
+        + points.capacity() * std::mem::size_of::<[f64; 3]>()
+        + native_indices.capacity() * std::mem::size_of::<u32>();
+    let added = Entity::new("second", Geometry::Point([1., 2., 3.]), None);
+    let id = added.id;
+    document.entities.insert(id, added);
+    let (new, retained_bytes) = old.update_owned_with_retained_bytes(Arc::new(document), 2, Some(id), &limits).unwrap();
+    assert!(new.objects.iter().any(|object| Arc::ptr_eq(&object.buffers, &old.objects[0].buffers)));
+    assert_eq!(retained_bytes + shared_bytes as u64, new.cache_usage().unwrap().bytes);
+}

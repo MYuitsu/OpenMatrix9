@@ -45,6 +45,30 @@ fn change(
 }
 
 #[test]
+fn benchmark_undo_policy_applies_to_scopes_and_cannot_change_after_edit() {
+    let (mut c, d, id) = fixture();
+    c.disable_undo_for_benchmark().unwrap();
+    let token = c.book("caller", true).unwrap();
+    c.begin(&token).unwrap();
+    let p = c.prepare(change(&c, &token, d, id, 10.)).unwrap();
+    c.commit(p).unwrap();
+    c.finish(&token).unwrap();
+    assert_eq!(c.world().documents[&d].entities[&id].placement.0[0][3], 10.);
+    assert_eq!(c.undo_len(), 0);
+    assert!(c.undo().is_err());
+    assert!(c.disable_undo_for_benchmark().is_err());
+
+    let (mut ordinary, d, id) = fixture();
+    let token = ordinary.book("caller", true).unwrap();
+    ordinary.begin(&token).unwrap();
+    let p = ordinary.prepare(change(&ordinary, &token, d, id, 10.)).unwrap();
+    ordinary.commit(p).unwrap();
+    ordinary.finish(&token).unwrap();
+    assert_eq!(ordinary.undo_len(), 1);
+    assert!(ordinary.disable_undo_for_benchmark().is_err());
+}
+
+#[test]
 fn rolled_back_caller_identity_is_retired_and_global_prior_redo_remains_executable() {
     let (mut c, d, id) = fixture();
     let source = c.world().documents[&d].stamp(id).unwrap();

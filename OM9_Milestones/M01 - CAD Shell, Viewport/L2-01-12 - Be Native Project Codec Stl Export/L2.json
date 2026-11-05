@@ -54,6 +54,336 @@
     "l3_count": 10
   },
   "runtime_implementation": {
+    "remove_scene_high_water_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Remove obsolete shared scene high-water and scene-byte capture estimates; require registered scene ownership before STL capture. Preserve live owners, structural quantities and explicit remaining auxiliary-snapshot limitation.",
+      "evidence": [
+        "docs/validation/2026-11-05-remove-scene-high-water.md"
+      ],
+      "verification": "Final scene-peak-removal-20261105-071248: 287 distinct passed/7 ignored/0 failed; STL 63 incl 2 new, GPU 29/no SKIP, native STL 60; source scan has no legacy counter names.",
+      "remaining": "Caller auxiliary remains a snapshot; workspace/file/recent/pending R1a, wider R1b/native/RSS/UI export/P1-P5 and desktop remain open. No measured memory/FPS gain or global STL/3DM accuracy claim."
+    },
+    "live_subselection_memory_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "R1a subselection: live CPU ownership of slots and nested paths, allocated-only transfer between same-account/class guards, phased old/new slots and input-path materialization, removal/drop without stale capture double charge",
+      "evidence": [
+        "docs/validation/2026-11-05-live-subselection-memory.md"
+      ],
+      "verification": "601 distinct passed/7 ignored/0 failed: core 325 includes allocated-transfer 2; subselection 3; app/native/GPU groups documented. GPU 29/no SKIP, native STL 60; no new release/desktop/RSS measurements.",
+      "remaining": "Workspace/path/recent/pending/high-water R1a and caller/query/peer/retired R1b remain. Native peak, UI export, P1-P5, GPU batching and STL/3DM accuracy gates remain open; allocation ownership does not certify process RSS or native safety."
+    },
+    "live_root_selection_memory_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "R1a root selection: pre-admitted live CPU owner for tree/order and staged plugin selection; detach capture observes growth/removal/drop via shared account without capture-time double charge",
+      "evidence": [
+        "docs/validation/2026-11-05-live-root-selection-memory.md"
+      ],
+      "verification": "Final scoped groups: 322 distinct passed/7 ignored/0 failed; GPU 29/no SKIP, native STL 60. Original overlay baseline oracle failure retained; exact live selection bill added, timeout/stale assertions unchanged.",
+      "remaining": "Root selection only. BTree bill is a pinned-profile allowance; other auxiliary/high-water, scratch/peer/retired/native/RSS, UI export, P1-P5 and release/desktop remain open. No FPS or global geometric certification claim."
+    },
+    "stl_shared_admission_peer_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "R1a peer portion: reuse the existing shared-account admission peer for STL capture, preserving cache quota at the tested managed ceiling and source authority without a temporary identity/account adoption",
+      "evidence": [
+        "docs/validation/2026-11-05-stl-shared-admission-peer.md"
+      ],
+      "verification": "Final stl-peer-20261105-061229: 169 distinct passed/6 large ignored/0 failed; STL unit 60 includes new peer 2, replacement 8, lifecycle 12+20+9, native STL integration 60. Initial zero-test filter run rejected, not evidence.",
+      "remaining": "R1a live auxiliary/high-water ownership, wider peer/journal/retired inventory, native pre-copy peak, UI worker and P1-P5 remain open. No new RSS/native peak, GPU, release or desktop measurement; no claimed material memory/FPS gain."
+    },
+    "staged_stl_shared_admission_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Replace whole-headroom captured/Controller and detached STL leases with shared phase admission; add Rust native-source/snapshot copy hooks, preserve typed refusal and selection allocation phases",
+      "evidence": "docs/validation/2026-11-05-stl-staged-memory.md",
+      "limitations": "Native conversion/meshing allocations precede copy callbacks and are not bounded by this admission. Topology/hash scratch stays estimated pending; full allocator/path/worker/receipt ownership, automatic eviction, UI background integration, release/desktop and the rest of P1-P5 remain open."
+    },
+    "snapshot_restore_admission_2026_11_05": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Snapshot decode callback admission and atomic reserved Controller replacement with retained observers/history on refusal",
+      "evidence": "docs/validation/2026-11-05-snapshot-master-reservation.md",
+      "limitations": "Does not implement archive v5, native allocation upper bounds, all metadata ownership or a process memory cap."
+    },
+    "native_clipboard_quota_followup_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Native 3DM clipboard line/Undo, B-rep nondefault tolerances and layer-sidecar conflict tests after structural quota fix",
+      "evidence": "docs/validation/2026-11-04-stl-scene-high-water-and-structural-quotas.md#native-3dm-clipboard-follow-up",
+      "limitations": "Small fixtures only; large files, desktop and full 3DM fidelity remain open."
+    },
+    "detached_stl_scene_high_water_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Reconcile selected observed scene growth during detached STL admission and reset the high water after old captures are released",
+      "evidence": "docs/validation/2026-11-04-stl-scene-high-water-and-structural-quotas.md",
+      "limitations": "Not live owner accounting; auxiliary caches and native peak remain incomplete; UI background is not enabled."
+    },
+    "detached_stl_shared_reservation_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Reserve sampled shared managed headroom during direct STL capture export through a retained-document peer",
+      "evidence": "docs/validation/2026-11-04-detached-stl-shared-reservation.md",
+      "limitations": "Capture-time scene estimate can become stale; native/allocator/staging and other owners remain incomplete; UI background not enabled."
+    },
+    "stl_controller_owner_drop_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Invalidate STL capture session when its Controller owner is destroyed",
+      "evidence": "docs/validation/2026-11-04-stl-capture-session-identity.md#controller-owner-destruction",
+      "limitations": "Headless and controlled tests; desktop shutdown, full native admission and UI worker integration remain open."
+    },
+    "stl_session_invalidation_publication_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Invalidate detached and worker STL captures on replacement/close and serialize against final publication",
+      "evidence": "docs/validation/2026-11-04-stl-capture-session-identity.md#session-invalidation-through-final-publication",
+      "limitations": "Worker is not integrated into UI; direct export RAM admission and native cancellation/peaks remain incomplete."
+    },
+    "stl_capture_session_identity_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Reject UI and Controller STL capture from an earlier runtime session even for the same document UUID",
+      "evidence": "docs/validation/2026-11-04-stl-capture-session-identity.md",
+      "limitations": "Detached capture, background worker, native memory and desktop behavior remain open."
+    },
+    "legacy_cli_ram_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Use hardware-derived memory ceiling and shared-account reservation for explicit legacy migration",
+      "evidence": "docs/validation/2026-11-04-legacy-cli-ram-admission.md",
+      "limitations": "One schema-3 cloud fixture; large archives, other schemas, full memory peaks and v5 compatibility remain open."
+    },
+    "stl_selection_physical_headroom_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "STL selection capture samples physical RAM before ID array reservation",
+      "evidence": "docs/validation/2026-11-04-stl-capture-selection-reservation.md#physical-ram-sample-for-selection-capture",
+      "limitations": "Unknown sample falls back to managed accounting; direct export admission, native peak, release and desktop remain open"
+    },
+    "stl_instance_traversal_without_heap_stack_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "STL instance traversal uses linked recursive ancestors instead of a separate heap stack",
+      "evidence": "docs/validation/2026-11-04-stl-capture-selection-reservation.md#instance-traversal-without-a-heap-stack",
+      "limitations": "Recursive stack, other allocation owners, direct-capture admission, native peaks and desktop remain open"
+    },
+    "cli_inspect_reserved_open_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Inspect and audit use staged archive/report reservations and hardware-derived limits without constructing a scene; large synthetic archive tested",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#cli-inspect-and-audit-open-admission",
+      "limitations": "Conservative archive lease may refuse early; no desktop, OS-wide pressure, other CLI commands or complete native memory proof"
+    },
+    "large_geometry_budget_refusal_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Low-budget Open of a 288314639-byte geometry archive is refused while the current document and usable Undo/Redo remain; the same file opens under a higher budget",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#geometry-archive-above-256-mib-fixture-development",
+      "limitations": "Synthetic overlapping mesh and controlled managed limit only; no OS-wide pressure, native peaks, other entrypoints or desktop proof"
+    },
+    "large_mesh_release_roundtrip_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Save and reopen an over-256 MiB in-memory synthetic mesh under the interactive RAM policy",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#large-mesh-release-savenewopen-after-structural-separation",
+      "limitations": "Overlapping synthetic geometry; file itself was 198 MiB; other structural/native and desktop gates remain open"
+    },
+    "save_structural_parser_limits_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Separate verification-copy structural limits and archive JSON token limits",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#structural-limits-during-save-verification-and-json-preflight",
+      "limitations": "Large mesh release roundtrip and complete input-safety acceptance remain pending"
+    },
+    "large_mesh_save_node_limit_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Bounded geometric project-writer growth; identify large mesh Save structural-node refusal",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#large-mesh-save-buffer-growth-and-structural-node-refusal",
+      "limitations": "Large mesh Save/New/Open remains blocked by Budget(nodes); parser and verification-copy limits need isolation"
+    },
+    "stl_running_worker_export_gate_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Exercise live STL worker exclusion and reservation release with competing routes",
+      "limitations": "Controlled pause before writing; desktop, native concurrency and complete direct-capture admission remain open",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#running-worker-and-competing-export-routes"
+    },
+    "stl_direct_capture_export_gate_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Acquire the shared single-export permit for direct STL capture export",
+      "limitations": "Direct capture still lacks managed headroom reservation; desktop and cancellable UI remain open",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#direct-capture-export-gate"
+    },
+    "stl_synchronous_worker_gate_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Share the export permit between synchronous STL and worker routes",
+      "limitations": "Direct capture export bypasses permit; synchronous UI has no cancellation and is not desktop verified",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#shared-synchronous-and-worker-export-gate"
+    },
+    "stl_synchronous_export_reservation_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Reserve managed export headroom for the synchronous STL UI and Controller wrapper",
+      "limitations": "Direct capture export bypasses this path; native peaks and desktop operation remain unverified",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#synchronous-ui-export-reservation"
+    },
+    "stl_temporary_path_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Charge the retained temporary STL path during writing and avoid duplicating it",
+      "limitations": "Path allocation precedes the check; OS, allocator, native and other owners remain incomplete",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#temporary-output-path-during-stl-writing"
+    },
+    "stl_native_source_lifetime_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Drop converted native STL source before allocating receipt warnings",
+      "limitations": "No process peak measurement; OCCT internals and other export owners remain incomplete",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#converted-native-source-lifetime"
+    },
+    "stl_warning_allocation_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Check known soup and receipt storage before formatting STL warnings",
+      "limitations": "Coexisting native source, allocator metadata and other export owners are not fully accounted",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#warning-note-allocation"
+    },
+    "stl_notes_during_geometry_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Charge retained receipt notes when processing subsequent STL geometry",
+      "limitations": "Warning allocation and native and other export owners remain incomplete",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#receipt-notes-during-later-geometry-construction"
+    },
+    "stl_skipped_note_allocation_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Precheck known soup and receipt storage when allocating STL skipped-object notes",
+      "limitations": "Warning allocation, later geometry growth, allocator metadata, native and other owners are not fully accounted",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#skipped-object-note-allocation"
+    },
+    "stl_receipt_notes_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Charge retained STL skipped and warning strings and output path against later per-export stages",
+      "limitations": "Notes are created before admission; allocator, selection, native and other owners are not fully accounted",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#receipt-notes-and-output-path-during-stl-validation"
+    },
+    "stl_streaming_buffer_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Account explicit STL writer buffer and avoid redundant buffered staged reader",
+      "limitations": "Stack, allocator/native owners and full encoded topology remain outside this bound",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#stl-streaming-and-staged-verification-buffers"
+    },
+    "stl_quantized_position_table_admission_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Check known encoded-position hash table slots while streaming STL",
+      "limitations": "Hash metadata, allocator peaks and later encoded verification remain outside the lower bound",
+      "evidence": "docs/validation/2026-11-04-stl-soup-snapshot-admission.md#quantized-position-table-admission-during-stl-writing"
+    },
+    "stl_worker_authored_mesh_floor_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Refuse background STL reservation smaller than the known minimum authored-mesh arrays across selected occurrences.",
+      "evidence": "docs/validation/2026-11-03-stl-worker-sampled-reservation.md",
+      "limitations": "Only a lower bound: generated geometry, topology, native scratch, excess capacity and aggregate owner accounting remain open."
+    },
+    "stl_worker_launch_ram_recheck_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Resample physical RAM and recheck outstanding reservations and tightened policy before starting the background STL worker.",
+      "evidence": "docs/validation/2026-11-03-stl-worker-sampled-reservation.md",
+      "limitations": "No native peak bound or sufficient lifetime reservation; UI and overall RAM policy remain incomplete."
+    },
+    "stl_worker_sampled_reservation_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Require the background STL worker reservation to have been admitted with a physical RAM sample.",
+      "evidence": "docs/validation/2026-11-03-stl-worker-sampled-reservation.md",
+      "limitations": "Does not prove sample freshness, sufficient reservation, native peak bounds or UI integration."
+    },
+    "stl_in_place_finalization_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Compact private STL triangles in place while preserving validation, cancellation and order.",
+      "evidence": "docs/validation/2026-11-03-stl-in-place-finalization.md",
+      "limitations": "No aggregate memory guarantee; one release fixture showed nearly unchanged whole-process peak."
+    },
+    "stl_snapshot_inventory_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Count owned grouped B-rep snapshot, shell and edge-binding capacities and report them in the diagnostic probe.",
+      "evidence": "docs/validation/2026-11-03-stl-snapshot-inventory.md",
+      "limitations": "Post-construction Rust inventory only; does not reserve memory or bound native and other owners."
+    },
+    "stl_instance_release_baseline_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Isolated same-executable release measurements for one, eight independent and eight shared-definition spherical STL sources.",
+      "evidence": "docs/validation/2026-11-03-stl-repeated-instances-release.md",
+      "limitations": "Single uncontrolled process-wide measurements; no native allocation attribution, aggregate RAM bound or desktop evidence."
+    },
+    "stl_nested_instance_export_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Expand selected nested mesh and B-rep occurrences with composed placement and reflection winding; report included hidden members.",
+      "evidence": "docs/validation/2026-11-03-stl-instance-export.md",
+      "limitations": "No global deviation proof or aggregate memory reservation; broader visibility and desktop behavior remain open."
+    },
+    "stl_staging_triangle_decode_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Decode every staged binary STL triangle in bounded blocks and reject nonfinite, collapsed or normal-reversed records before publication.",
+      "evidence": "docs/validation/2026-11-03-stl-staging-readback.md",
+      "limitations": "Local encoded triangle checks do not establish whole-mesh topology, source deviation, release performance or desktop acceptance."
+    },
+    "stl_staging_readback_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Before atomic publication, re-read the staged binary STL and compare encoded length, count and SHA-256 against the streamed output.",
+      "evidence": "docs/validation/2026-11-03-stl-staging-readback.md",
+      "limitations": "Byte consistency and basic layout only; not an independent topology or deviation proof, release performance or desktop worker validation."
+    },
+    "sphere_stl_mesher_memory_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Export-only lower-memory OCCT mesher for valid single-face spherical solids, retaining the requested deflection and angle.",
+      "evidence": "docs/validation/2026-11-03-sphere-stl-mesher-memory.md",
+      "limitations": "Synthetic sphere and selected regression fixtures only; no universal error certificate, process-wide memory bound or desktop validation."
+    },
+    "stl_process_memory_probe_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Isolated release process memory high-water measurements for STL and tessellation fixtures.",
+      "evidence": "docs/validation/2026-11-03-stl-process-memory-probe.md",
+      "limitations": "Whole-process counters, not OCCT-only attribution or safe upper bounds; production admission and desktop remain open."
+    },
+    "stl_mesh_allocation_checks_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Checked mesh index bounds, fallible output capacity and periodic cancellation checks during STL assembly.",
+      "evidence": "docs/validation/2026-11-03-stl-mesh-allocation-checks.md",
+      "limitations": "No forced OOM or mid-copy cancellation; managed/native peak and background UI remain open."
+    },
+    "stl_fallible_topology_allocation_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Fallible STL topology scratch allocation in application export and strict stream validation.",
+      "evidence": "docs/validation/2026-11-03-stl-fallible-topology-allocation.md",
+      "limitations": "No forced OOM; does not enforce aggregate managed budget or bound native peak."
+    },
+    "stl_background_single_slot_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "One background STL worker per shared account, held through cancellation and worker exit.",
+      "evidence": "docs/validation/2026-11-03-stl-worker-single-slot.md",
+      "limitations": "Synchronous UI, memory sizing, New/Open cancellation and desktop interaction remain open."
+    },
+    "periodic_nurbs_encoded_stl_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "scope": "Encoded boundary and winding checks plus sampled source-to-STL distances for periodic NURBS fixtures.",
+      "evidence": "docs/validation/2026-11-03-stl-unverified-seams.md",
+      "limitations": "Sampled one-way error only; general topology, global deviation, runtime admission and desktop remain unverified."
+    },
+    "stl_edge_node_snapshot_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-unverified-seams.md",
+      "scope": "Brep, retained NativeBrep and NURBS STL export uses snapshot-local source-site remap, displacement and triangle checks",
+      "limitations": "Incomplete bindings may leave open mesh. Periodic seams, full error budget, native cancellation, resource admission and native costs remain open."
+    },
+    "stl_unverified_seams_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-unverified-seams.md",
+      "scope": "OCCT and retained NativeBrep export groups mesh faces by source shell, preserving tested close-solid and cavity boundaries",
+      "limitations": "Shell grouping is not edge identity; nearby features within a shell, unowned faces and direct NURBS remain unprotected. Native conversion and tessellation costs and reservations are unmeasured."
+    },
+    "stl_receipt_scope_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-receipt-scope.md",
+      "scope": "Captured STL document identity and honest requested tolerance, topology, self-intersection and units reporting",
+      "limitations": "Does not prove global deviation, encoded topology or absence of self-intersection; desktop presentation unverified."
+    },
+    "stl_quantization_collision_2026_11_03": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-03-stl-quantization-collision.md",
+      "scope": "Reject distinct input positions merged by binary STL quantization while preserving the destination on failure",
+      "limitations": "Index memory not production-reserved; no global error, self-intersection, full encoded-topology or desktop guarantee."
+    },
+    "om9_clipboard_payload_2026_11_01": {
+      "status": "PARTIAL_WINDOWS_SHORTCUTS_TESTED",
+      "scope": "Windows Ctrl+C OM9, Ctrl+Shift+C 3DM and Ctrl+V, Edit/toolbar; selected OM9 one-transaction paste including nested blocks and layers; native 3DM line roundtrip.",
+      "evidence": "docs/validation/2026-11-01-clipboard-metadata.md",
+      "limitations": "Self-contained gem, UV, trim and extrusion extensions, material/line-pattern dependencies, fully selected feature outputs, clean history with all dependencies selected, four-rail profiles when all rails are selected, and equivalent 3DM layer sidecars are supported. Other automatic dependency transfer, non-clean history/semantic references, extensions/resources, differing sidecars and real Rhino interoperability remain open."
+    },
+    "selected_3dm_capture_2026_11_01": {
+      "status": "PARTIAL_SELECTED_EXPORT_TESTED_CLIPBOARD_OPEN",
+      "scope": "Capture selected objects and referenced block definitions for staged 3DM export; tested with a selected point.",
+      "evidence": "docs/validation/2026-11-01-clipboard-selected-export.md",
+      "limitations": "Windows clipboard, Ctrl+C/V, BRep projection and real Rhino exchange not verified."
+    },
     "date": "2026-10-19",
     "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
     "target": "standalone Rust OM9",

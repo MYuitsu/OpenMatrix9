@@ -20,6 +20,7 @@
 #include <BRepGProp.hxx>
 #include <GProp_GProps.hxx>
 #include <Geom_Plane.hxx>
+#include <GeomTools.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
 #include <BRepBuilderAPI_MakeSolid.hxx>
@@ -43,10 +44,12 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
+#include <TopoDS_Compound.hxx>
 #include <TopoDS_Shell.hxx>
 #include <ShapeFix_Face.hxx>
 #include <ShapeFix_Shell.hxx>
 #include <ShapeFix_Solid.hxx>
+#include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <TopoDS_Wire.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Cylinder.hxx>
@@ -59,7 +62,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <iomanip>
 #include <limits>
+#include <sstream>
+#include <streambuf>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -277,31 +283,50 @@ extern "C" int om9_occt_trim_surface_plane(const char* source, size_t length,
  }
 }
 
-extern "C" int om9_occt_boolean(int op, const char* source_a, size_t length_a,
+extern "C" int om9_occt_boolean(int op, int require_solids, const char* source_a, size_t length_a,
                                 const char* source_b, size_t length_b, double deflection,
                                 size_t max_points, size_t max_nodes, size_t max_bytes,
                                 Om9BrepSink sink, void* context, char* message, int capacity) {
  try {
   const TopoDS_Shape a = read_shape(source_a, length_a, "boolean argument");
   const TopoDS_Shape b = read_shape(source_b, length_b, "boolean tool");
+  if (require_solids) {
+   TopTools_IndexedMapOfShape solids_a, solids_b;
+   TopExp::MapShapes(a, TopAbs_SOLID, solids_a);
+   TopExp::MapShapes(b, TopAbs_SOLID, solids_b);
+   if (solids_a.IsEmpty() || solids_b.IsEmpty())
+    throw std::invalid_argument("boolean requires two closed solids");
+  }
+  TopTools_ListOfShape arguments, tools;
+  arguments.Append(a);
+  tools.Append(b);
   TopoDS_Shape result;
   switch (op) {
    case 0: {
-    BRepAlgoAPI_Fuse fuse(a, b);
+    BRepAlgoAPI_Fuse fuse;
+    fuse.SetArguments(arguments);
+    fuse.SetTools(tools);
+    fuse.SetUseOBB(true);
     fuse.Build();
     if (!fuse.IsDone() || fuse.HasErrors()) throw std::runtime_error("boolean union failed");
     result = fuse.Shape();
     break;
    }
    case 1: {
-    BRepAlgoAPI_Cut cut(a, b);
+    BRepAlgoAPI_Cut cut;
+    cut.SetArguments(arguments);
+    cut.SetTools(tools);
+    cut.SetUseOBB(true);
     cut.Build();
     if (!cut.IsDone() || cut.HasErrors()) throw std::runtime_error("boolean difference failed");
     result = cut.Shape();
     break;
    }
    case 2: {
-    BRepAlgoAPI_Common common(a, b);
+    BRepAlgoAPI_Common common;
+    common.SetArguments(arguments);
+    common.SetTools(tools);
+    common.SetUseOBB(true);
     common.Build();
     if (!common.IsDone() || common.HasErrors())
      throw std::runtime_error("boolean intersection failed");
@@ -327,6 +352,55 @@ extern "C" int om9_occt_boolean(int op, const char* source_a, size_t length_a,
  } catch (...) {
   if (message && capacity > 0) std::snprintf(message, capacity, "Unknown boolean failure");
   return 2;
+ }
+}
+
+// Status 4 means boxes overlap or cannot be bounded: use the general tool-union path.
+extern "C" int om9_occt_cut_disjoint_tools(
+    const char* source, size_t source_len, const char* const* tool_sources,
+    const size_t* lengths, size_t count, double deflection, size_t max_points,
+    size_t max_nodes, size_t max_bytes, Om9BrepSink sink, void* context,
+    char* message, int capacity) {
+ try {
+  if (!tool_sources || !lengths || count == 0 || count > 128 || count > max_nodes)
+   throw std::invalid_argument("invalid boolean tools");
+  const TopoDS_Shape target = read_shape(source, source_len, "boolean argument");
+  TopTools_IndexedMapOfShape solids;
+  TopExp::MapShapes(target, TopAbs_SOLID, solids);
+  if (solids.IsEmpty()) throw std::invalid_argument("boolean requires solid target");
+  TopTools_ListOfShape arguments, tools;
+  arguments.Append(target);
+  std::vector<Bnd_Box> bounds;
+  bounds.reserve(count);
+  for (size_t i = 0; i < count; ++i) {
+   const TopoDS_Shape tool = read_shape(tool_sources[i], lengths[i], "boolean tool");
+   TopTools_IndexedMapOfShape tool_solids;
+   TopExp::MapShapes(tool, TopAbs_SOLID, tool_solids);
+   if (tool_solids.IsEmpty()) throw std::invalid_argument("boolean requires solid tool");
+   Bnd_Box box;
+   BRepBndLib::AddOptimal(tool, box, false, true);
+   if (box.IsVoid() || box.IsOpen()) return 4;
+   for (const Bnd_Box& existing : bounds) if (!box.IsOut(existing)) return 4;
+   bounds.push_back(box);
+   tools.Append(tool);
+  }
+  BRepAlgoAPI_Cut cut;
+  cut.SetArguments(arguments);
+  cut.SetTools(tools);
+  cut.SetUseOBB(true);
+  cut.Build();
+  if (!cut.IsDone() || cut.HasErrors()) throw std::runtime_error("boolean difference failed");
+  const TopoDS_Shape result = cut.Shape();
+  TopTools_IndexedMapOfShape faces;
+  if (!result.IsNull()) TopExp::MapShapes(result, TopAbs_FACE, faces);
+  if (result.IsNull() || faces.IsEmpty()) return 3;
+  return emit(result, deflection, max_points, max_nodes, max_bytes, sink, context, message, capacity);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown multi-tool boolean failure"); return 2;
  }
 }
 
@@ -1082,6 +1156,103 @@ extern "C" int om9_occt_extract_face(const char* source, size_t length, int face
  }
 }
 
+extern "C" int om9_occt_remove_region(const char* source, size_t length, int face_index,
+                                    double deflection, size_t max_points, size_t max_nodes,
+                                    size_t max_bytes, Om9BrepSink sink, void* context,
+                                    char* message, int capacity) {
+ try {
+  const TopoDS_Shape shape = read_shape(source, length, "remove region");
+  TopTools_IndexedMapOfShape faces;
+  TopExp::MapShapes(shape, TopAbs_FACE, faces);
+  if (faces.Extent() < 2 || face_index < 0 || face_index >= faces.Extent())
+   throw std::invalid_argument("remove region: invalid face index or empty remainder");
+  BRep_Builder builder;
+  TopoDS_Compound compound;
+  builder.MakeCompound(compound);
+  for (int i = 1; i <= faces.Extent(); ++i)
+   if (i != face_index + 1) builder.Add(compound, faces(i));
+  if (!BRepCheck_Analyzer(compound).IsValid()) throw std::runtime_error("invalid region remainder");
+  return emit(compound, deflection, max_points, max_nodes, max_bytes, sink, context, message, capacity);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown remove-region failure"); return 2;
+ }
+}
+
+extern "C" int om9_occt_unify_surface_regions(const char* source, size_t length,
+                                    double deflection, size_t max_points, size_t max_nodes,
+                                    size_t max_bytes, Om9BrepSink sink, void* context,
+                                    char* message, int capacity) {
+ try {
+  const TopoDS_Shape shape = read_shape(source, length, "unify surface regions");
+  ShapeUpgrade_UnifySameDomain operation(shape, false, true, false);
+  operation.SetSafeInputMode(true);
+  operation.Build();
+  const TopoDS_Shape result = operation.Shape();
+  if (result.IsNull() || !BRepCheck_Analyzer(result).IsValid())
+   throw std::runtime_error("unify surface regions produced invalid topology");
+  return emit(result, deflection, max_points, max_nodes, max_bytes, sink, context, message, capacity);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown unify surface regions failure"); return 2;
+ }
+}
+
+extern "C" int om9_occt_unify_surface_preserving_edges(
+    const char* source, size_t length, const char* original_source, size_t original_length,
+    double deflection, size_t max_points, size_t max_nodes, size_t max_bytes,
+    Om9BrepSink sink, void* context, char* message, int capacity) {
+ try {
+  const TopoDS_Shape shape = read_shape(source, length, "unify surface regions");
+  const TopoDS_Shape original = read_shape(original_source, original_length, "original surface");
+  TopTools_IndexedMapOfShape current_edges, original_edges;
+  TopExp::MapShapes(shape, TopAbs_EDGE, current_edges);
+  TopExp::MapShapes(original, TopAbs_EDGE, original_edges);
+  const size_t count = static_cast<size_t>(current_edges.Extent());
+  const size_t source_count = static_cast<size_t>(original_edges.Extent());
+  if (source_count && count > max_nodes / source_count)
+   throw std::invalid_argument("unify surface edge comparison budget");
+  ShapeUpgrade_UnifySameDomain operation(shape, false, true, false);
+  operation.SetSafeInputMode(true);
+  for (int i = 1; i <= current_edges.Extent(); ++i) {
+   const TopoDS_Shape edge = current_edges(i);
+   GProp_GProps length_props;
+   BRepGProp::LinearProperties(edge, length_props);
+   const double length_mm = std::abs(length_props.Mass());
+   if (length_mm <= 1e-9) { operation.KeepShape(edge); continue; }
+   for (int j = 1; j <= original_edges.Extent(); ++j) {
+    BRepAlgoAPI_Common common(edge, original_edges(j));
+    common.Build();
+    if (!common.IsDone() || common.HasErrors())
+     throw std::runtime_error("unify surface edge comparison failed");
+    GProp_GProps overlap;
+    BRepGProp::LinearProperties(common.Shape(), overlap);
+    if (!std::isfinite(overlap.Mass())) throw std::runtime_error("unify surface invalid edge overlap");
+    if (std::abs(overlap.Mass()) > 0.0) {
+     operation.KeepShape(edge); break;
+    }
+   }
+  }
+  operation.Build();
+  const TopoDS_Shape result = operation.Shape();
+  if (result.IsNull() || !BRepCheck_Analyzer(result).IsValid())
+   throw std::runtime_error("unify surface produced invalid topology");
+  return emit(result, deflection, max_points, max_nodes, max_bytes, sink, context, message, capacity);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown unify surface failure"); return 2;
+ }
+}
+
 extern "C" int om9_occt_remove_face(const char* source, size_t length, int face_index,
                                     double deflection, size_t max_points, size_t max_nodes,
                                     size_t max_bytes, Om9BrepSink sink, void* context,
@@ -1151,7 +1322,7 @@ extern "C" int om9_occt_remove_faces(const char* source, size_t length, const in
 }
 
 extern "C" int om9_occt_sew(const char* source_a, size_t length_a, const char* source_b,
-                            size_t length_b, int reverse_b, double tolerance, double deflection, size_t max_points,
+                            size_t length_b, int reverse_b, int preserve_surfaces, double tolerance, double deflection, size_t max_points,
                             size_t max_nodes, size_t max_bytes, Om9BrepSink sink, void* context,
                             char* message, int capacity) {
  try {
@@ -1160,12 +1331,74 @@ extern "C" int om9_occt_sew(const char* source_a, size_t length_a, const char* s
   const TopoDS_Shape a = read_shape(source_a, length_a, "sew argument");
   TopoDS_Shape b = read_shape(source_b, length_b, "sew tool");
   if (reverse_b != 0) b.Reverse();
+  struct SurfaceSnapshot {
+   Handle(Geom_Surface) surface;
+   TopLoc_Location location;
+   std::string serialized;
+  };
+  class LimitedSurfaceBuffer : public std::streambuf {
+   public:
+    explicit LimitedSurfaceBuffer(size_t limit) : limit_(limit) {}
+    std::string text;
+   protected:
+    std::streamsize xsputn(const char* source, std::streamsize size) override {
+     if (size<0 || size_t(size)>limit_-text.size()) throw std::length_error("sew: surface snapshot budget");
+     text.append(source,size_t(size));return size;
+    }
+    int_type overflow(int_type ch) override {
+     if (traits_type::eq_int_type(ch,traits_type::eof())) return traits_type::not_eof(ch);
+     if (text.size()>=limit_) throw std::length_error("sew: surface snapshot budget");
+     text.push_back(traits_type::to_char_type(ch));return ch;
+    }
+   private:
+    size_t limit_;
+  };
+  auto serialize_surface=[](const Handle(Geom_Surface)& surface,size_t budget) {
+   LimitedSurfaceBuffer buffer(budget);
+   std::ostream stream(&buffer);
+   stream.exceptions(std::ios::badbit | std::ios::failbit);
+   stream << std::setprecision(std::numeric_limits<double>::max_digits10);
+   GeomTools::Write(surface,stream);
+   if (!stream || buffer.text.empty()) throw std::runtime_error("sew: cannot serialize surface");
+   return std::move(buffer.text);
+  };
+  std::vector<SurfaceSnapshot> originals;
+  size_t surface_bytes=0;
+  if (preserve_surfaces) {
+   for (const auto& shape : {a,b}) {
+    TopTools_IndexedMapOfShape faces; TopExp::MapShapes(shape,TopAbs_FACE,faces);
+    for (int i=1;i<=faces.Extent();++i) {
+     TopLoc_Location location;
+     Handle(Geom_Surface) surface=BRep_Tool::Surface(TopoDS::Face(faces(i)),location);
+     if (surface.IsNull()) throw std::runtime_error("sew: missing input surface");
+     std::string serialized=serialize_surface(surface,max_bytes-surface_bytes);
+     if (originals.size()>=max_nodes || serialized.size()>max_bytes-surface_bytes)
+      throw std::invalid_argument("sew: surface snapshot budget");
+     surface_bytes+=serialized.size();
+     originals.push_back({surface,location,std::move(serialized)});
+    }
+   }
+  }
   BRepBuilderAPI_Sewing sewing(tolerance);
   sewing.Add(a);
   sewing.Add(b);
   sewing.Perform();
   const TopoDS_Shape sewed = sewing.SewedShape();
   if (sewed.IsNull()) throw std::runtime_error("sew produced no shape");
+  if (preserve_surfaces) {
+   TopTools_IndexedMapOfShape faces;TopExp::MapShapes(sewed,TopAbs_FACE,faces);
+   if (size_t(faces.Extent())!=originals.size()) throw std::invalid_argument("sew changed face count");
+   for (int i=1;i<=faces.Extent();++i) {
+    TopLoc_Location location;
+    Handle(Geom_Surface) surface=BRep_Tool::Surface(TopoDS::Face(faces(i)),location);
+    const auto found=std::find_if(originals.begin(),originals.end(),[&](const SurfaceSnapshot& item) {
+     return item.surface==surface && item.location.IsEqual(location);
+    });
+    if (found==originals.end()) throw std::invalid_argument("sew changed underlying surface");
+    if (serialize_surface(surface,found->serialized.size())!=found->serialized) throw std::invalid_argument("sew mutated underlying surface");
+    originals.erase(found);
+   }
+  }
   // A closed sewn shell becomes an exact solid; an open join stays a shell.
   TopTools_IndexedMapOfShape shells;
   TopExp::MapShapes(sewed, TopAbs_SHELL, shells);

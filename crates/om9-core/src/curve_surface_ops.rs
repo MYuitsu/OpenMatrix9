@@ -12,7 +12,8 @@ use crate::{
     budget::Limits,
     curve_build::{KnotMode, interpolate_any},
     curve_ops::{fraction_derivatives, point_at},
-    geometry::{Curve, Mesh, NurbsCurve, NurbsSurface, Point3, finite},
+    evaluation::{CurveEvaluator, Parameter},
+    geometry::{Curve, Mesh, NurbsCurve, NurbsSurface, Point3, Transform, finite},
     surface_kernel::{self, SurfaceIso},
 };
 use uuid::Uuid;
@@ -153,62 +154,142 @@ pub fn closest_point_on_surface(
     })
 }
 
-/// Closest point on a curve, by a bounded golden-section search around the best of 64
-/// coarse samples.
+/// Closest point on a curve, by bounded sampling and golden-section refinement.
 pub fn closest_point_on_curve(
     curve: &Curve,
     point: Point3,
     limits: &Limits,
 ) -> Result<(f64, Point3, f64)> {
+    closest_point_on_placed_curve(curve, Transform::identity(), point, limits)
+}
+
+/// Find the closest point in world space while preserving the source curve parameter.
+/// Nonlinear curves retain the bounded sampled-search limitations of the local solver.
+pub fn closest_point_on_placed_curve(
+    curve: &Curve,
+    placement: Transform,
+    point: Point3,
+    limits: &Limits,
+) -> Result<(f64, Point3, f64)> {
     finite(point)?;
+    placement.validate()?;
+    if let Curve::Polycurve { segments, reversed } = curve {
+        curve.validate(limits)?;
+        let mut best: Option<(f64, Point3, f64)> = None;
+        for (index, segment) in segments.iter().enumerate() {
+            let (local, nearest, measured) =
+                closest_point_on_placed_curve(segment, placement, point, limits)?;
+            let forward = (index as f64 + local) / segments.len() as f64;
+            let fraction = if *reversed { 1.0 - forward } else { forward };
+            if best.as_ref().is_none_or(|(_, _, distance)| measured < *distance) {
+                best = Some((fraction, nearest, measured));
+            }
+        }
+        return best.ok_or(Error::Invalid("polycurve segments"));
+    }
     if let Curve::Line { start, end, .. } = curve {
         curve.validate(limits)?;
-        let direction = sub(*end, *start);
+        let start = placement.point(*start)?;
+        let end = placement.point(*end)?;
+        let direction = sub(end, start);
         let squared = dot(direction, direction);
         if squared <= f64::MIN_POSITIVE {
             return Err(Error::Invalid("closest point on degenerate line"));
         }
-        let fraction = clamp(dot(sub(point, *start), direction) / squared, 0., 1.);
-        let value = add(*start, scale(direction, fraction));
+        let fraction = clamp(dot(sub(point, start), direction) / squared, 0., 1.);
+        let value = add(start, scale(direction, fraction));
         return Ok((fraction, value, distance(value, point)));
     }
-    let samples = 64;
-    let mut best = 0.0;
+    let evaluator = CurveEvaluator::capture(curve, limits)?;
+    let evaluate = |fraction| {
+        evaluator.evaluate(Parameter::Fraction(fraction), 0, placement)?
+            .first().copied().ok_or(Error::Invalid("curve point"))
+    };
+    let additional = if let Curve::Nurbs(nurbs) = curve {
+        nurbs.knots.len().checked_mul(2).ok_or(Error::Overflow("projection samples"))?
+    } else {
+        0
+    };
+    let total = 65usize.checked_add(additional).ok_or(Error::Overflow("projection samples"))?;
+    if total as u64 > limits.max_points || (total as u64).saturating_mul(8) > limits.max_bytes {
+        return Err(Error::Budget("projection samples"));
+    }
+    let mut candidates = Vec::new();
+    candidates.try_reserve_exact(total).map_err(|_| Error::Budget("projection samples"))?;
+    candidates.extend((0..=64).map(|index| index as f64 / 64.0));
+    if let Curve::Nurbs(nurbs) = curve {
+        let [start, end] = nurbs.domain;
+        let mut last = None;
+        for &knot in &nurbs.knots {
+            if knot < start || knot > end { continue; }
+            let native = (knot - start) / (end - start);
+            let mut fraction = if nurbs.reversed { 1.0 - native } else { native };
+            if let Some(seam)=nurbs.seam {
+                let origin=(seam-start)/(end-start);
+                let offset=if nurbs.reversed {1.-origin} else {origin};
+                fraction=(fraction-offset).rem_euclid(1.);
+            }
+            if let Some(previous) = last {
+                if previous != fraction {
+                    candidates.push(previous + (fraction - previous) * 0.5);
+                }
+            }
+            candidates.push(fraction);
+            last = Some(fraction);
+        }
+    }
+    candidates.sort_by(f64::total_cmp);
+    candidates.dedup_by(|a, b| *a == *b);
+    let mut best_index = 0;
     let mut best_distance = f64::INFINITY;
-    for index in 0..=samples {
-        let fraction = index as f64 / samples as f64;
-        let value = point_at(curve, fraction, limits)?;
+    for (index, &fraction) in candidates.iter().enumerate() {
+        let value = evaluate(fraction)?;
         let measured = distance(value, point);
         if measured < best_distance {
             best_distance = measured;
-            best = fraction;
+            best_index = index;
         }
     }
-    let span = 1.0 / samples as f64;
-    let (mut low, mut high) = ((best - span).max(0.0), (best + span).min(1.0));
+    let best = candidates[best_index];
+    let (low, high) = (
+        candidates[best_index.saturating_sub(1)],
+        candidates[(best_index + 1).min(candidates.len() - 1)],
+    );
+    let refine = |mut low:f64,mut high:f64| -> Result<(f64,Point3,f64)> {
     let golden = 0.618_033_988_749_895;
     let mut c = high - golden * (high - low);
     let mut d = low + golden * (high - low);
-    let mut fc = distance(point_at(curve, c, limits)?, point);
-    let mut fd = distance(point_at(curve, d, limits)?, point);
+    let mut fc = distance(evaluate(c)?, point);
+    let mut fd = distance(evaluate(d)?, point);
     for _ in 0..80 {
         if fc < fd {
             high = d;
             d = c;
             fd = fc;
             c = high - golden * (high - low);
-            fc = distance(point_at(curve, c, limits)?, point);
+            fc = distance(evaluate(c)?, point);
         } else {
             low = c;
             c = d;
             fc = fd;
             d = low + golden * (high - low);
-            fd = distance(point_at(curve, d, limits)?, point);
+            fd = distance(evaluate(d)?, point);
         }
     }
     let fraction = 0.5 * (low + high);
-    let value = point_at(curve, fraction, limits)?;
-    Ok((fraction, value, distance(value, point)))
+    let value = evaluate(fraction)?;
+    let measured = distance(value, point);
+    Ok((fraction,value,measured))
+    };
+    let mut answer=(best,evaluate(best)?,best_distance);
+    let trial=refine(low,high)?;
+    if trial.2<answer.2 {answer=trial;}
+    if best_index==0 || best_index+1==candidates.len() {
+        let other=if best_index==0 {(candidates[candidates.len()-2],1.)} else {(0.,candidates[1])};
+        let trial=refine(other.0,other.1)?;
+        if trial.2<answer.2 {answer=trial;}
+    }
+    Ok(answer)
 }
 
 /* -------------------------------- pullback -------------------------------- */
@@ -290,11 +371,12 @@ pub struct SurfaceIntersection {
     pub distance: f64,
 }
 
-fn circle_fraction(circle: &Curve, point: Point3) -> Result<f64> {
+fn circle_fractions(circle: &Curve, point: Point3, tolerance: f64, limits: &Limits) -> Result<Vec<f64>> {
     let Curve::Circle {
         center,
         x,
         y,
+        radius,
         domain,
         angle_domain,
         ..
@@ -309,17 +391,273 @@ fn circle_fraction(circle: &Curve, point: Point3) -> Result<f64> {
     if !span.is_finite() || span <= 0.0 {
         return Err(Error::Invalid("circle angle domain"));
     }
-    let mut fraction = (angle - angles[0]) / span;
-    while fraction < 0.0 {
-        fraction += 1.0;
+    let tau=std::f64::consts::TAU;
+    let mut offset=(angle-angles[0]).rem_euclid(tau);
+    if tau-offset <= 8.0*f64::EPSILON*tau && radius*(tau-offset) <= tolerance { offset=0.0; }
+    if offset > span {
+        let mut endpoints=Vec::new();
+        if radius*(tau-offset) <= tolerance {endpoints.push(0.0);}
+        if radius*(offset-span) <= tolerance {endpoints.push(1.0);}
+        return Ok(endpoints);
     }
-    while fraction > 1.0 {
-        fraction -= 1.0;
+    let count=((span-offset)/tau).floor()+1.0;
+    let maximum=limits.max_outputs.min(limits.max_points).min(limits.max_bytes/8);
+    if !count.is_finite() || count > maximum as f64 { return Err(Error::Budget("circle intersection parameters")); }
+    let mut fractions=Vec::new();
+    fractions.try_reserve_exact(count as usize).map_err(|_| Error::Budget("circle intersection parameters"))?;
+    for index in 0..count as usize {
+        let fraction=(offset+index as f64*tau)/span;
+        if (0.0..=1.0).contains(&fraction) { fractions.push(fraction); }
     }
-    Ok(fraction)
+    // The final endpoint of a closed traversal is the same seam as its start.
+    if fractions.first()==Some(&0.0) && fractions.last()==Some(&1.0) { fractions.pop(); }
+    Ok(fractions)
 }
 
-fn line_line(first: &Curve, second: &Curve, tolerance: f64) -> Result<Vec<CurveIntersection>> {
+fn line_circle(first:&Curve,second:&Curve,tolerance:f64,limits:&Limits) -> Result<Option<Vec<CurveIntersection>>> {
+    let (line,circle,swapped)=match (first,second) {
+        (Curve::Line{..},Curve::Circle{..})=>(first,second,false),
+        (Curve::Circle{..},Curve::Line{..})=>(second,first,true),
+        _=>return Ok(None),
+    };
+    let Curve::Line{start,end,..}=line else {unreachable!()};
+    let Curve::Circle{center,x,y,radius,..}=circle else {unreachable!()};
+    let direction=sub(*end,*start);let length=direction[0].hypot(direction[1]).hypot(direction[2]);
+    if !length.is_finite() || length==0.0 {return Err(Error::Invalid("line circle direction"));}
+    let unit=direction.map(|value|value/length);let delta=sub(*start,*center);finite(delta)?;
+    let px=dot(delta,*x);let py=dot(delta,*y);let vx=dot(unit,*x);let vy=dot(unit,*y);
+    let projected=vx.hypot(vy);let normal=cross(*x,*y);let z0=dot(delta,normal);let vz=dot(unit,normal);
+    let mut line_fractions=Vec::new();
+    if projected==0.0 {
+        if vz==0.0 {return Err(Error::Invalid("line circle frame"));}
+        line_fractions.push((-z0/vz/length).clamp(0.0,1.0));
+    } else {
+        let magnitude=px.abs().max(py.abs()).max(*radius);
+        if !magnitude.is_finite() || magnitude==0.0 {return Err(Error::Invalid("line circle scale"));}
+        let p=[px/magnitude,py/magnitude];let q=[vx/projected,vy/projected];let r=radius/magnitude;
+        let center_distance=-(p[0]*q[0]+p[1]*q[1]);let perpendicular=(p[0]*q[1]-p[1]*q[0]).abs();
+        let gap=r-perpendicular;
+        if gap < 0.0 && -gap*magnitude>tolerance {return Ok(Some(Vec::new()));}
+        let half=(gap.max(0.0)*(r+perpendicular)).sqrt();
+        let mut roots=[center_distance-half,center_distance+half];
+        // Avoid cancellation in the root nearest the line origin.
+        if half>0.0 && center_distance.abs()>half {
+            let product=p[0]*p[0]+p[1]*p[1]-r*r;
+            if center_distance>0.0 && roots[1]!=0.0 {roots[0]=product/roots[1];}
+            if center_distance<0.0 && roots[0]!=0.0 {roots[1]=product/roots[0];}
+        }
+        for root in roots {
+            let fraction=(root/projected)*(magnitude/length);
+            if !fraction.is_finite() {return Err(Error::Invalid("line circle parameter overflow"));}
+            if (0.0..=1.0).contains(&fraction) {line_fractions.push(fraction);}
+            else if fraction<0.0 && -fraction*length<=tolerance {line_fractions.push(0.0);}
+            else if fraction>1.0 && (fraction-1.0)*length<=tolerance {line_fractions.push(1.0);}
+        }
+    }
+    line_fractions.sort_by(f64::total_cmp);line_fractions.dedup_by(|a,b|*a==*b);
+    let mut hits=Vec::new();
+    for line_fraction in line_fractions {
+        let line_point=point_at(line,line_fraction,limits)?;
+        for circle_fraction in circle_fractions(circle,line_point,tolerance,limits)? {
+            let circle_point=point_at(circle,circle_fraction,limits)?;let difference=sub(line_point,circle_point);
+            let measured=difference[0].hypot(difference[1]).hypot(difference[2]);
+            if measured<=tolerance {
+                if hits.len() as u64 >= limits.max_outputs || hits.len() as u64 >= limits.max_points || (hits.len()+1) as u64 > limits.max_bytes/std::mem::size_of::<CurveIntersection>() as u64 {return Err(Error::Budget("line circle intersections"));}
+                let (first_fraction,second_fraction)=if swapped {(circle_fraction,line_fraction)}else{(line_fraction,circle_fraction)};
+                hits.push(CurveIntersection{point:add(scale(line_point,0.5),scale(circle_point,0.5)),first_fraction,second_fraction,distance:measured});
+            }
+        }
+    }
+    // A tilted line may approach the circle between projected crossings. Let
+    // the general solver investigate those tolerance-only cases.
+    if hits.is_empty() && vz!=0.0 && projected!=0.0 {return Ok(None);}
+    Ok(Some(hits))
+}
+
+// A single rational quadratic Bezier span has an exact quadratic intersection
+// equation with a line, including a double root at tangency.
+fn line_quadratic_nurbs(first: &Curve, second: &Curve, tolerance: f64, limits: &Limits) -> Result<Option<Vec<CurveIntersection>>> {
+    let (line, nurbs_curve, swapped) = match (first, second) {
+        (Curve::Line { .. }, Curve::Nurbs(_)) => (first, second, false),
+        (Curve::Nurbs(_), Curve::Line { .. }) => (second, first, true),
+        _ => return Ok(None),
+    };
+    let Curve::Line { start, end, .. } = line else { unreachable!() };
+    let Curve::Nurbs(n) = nurbs_curve else { unreachable!() };
+    if n.degree != 2 || n.poles.len() != 3 || n.periodic || n.seam.is_some() || n.knots.len() != 6 ||
+        n.knots[..3] != [n.domain[0]; 3] || n.knots[3..] != [n.domain[1]; 3] { return Ok(None); }
+    let direction = sub(*end, *start);
+    let length = direction[0].hypot(direction[1]).hypot(direction[2]);
+    if !length.is_finite() || length == 0.0 { return Err(Error::Invalid("line NURBS direction")); }
+    let unit = direction.map(|value| value / length);
+    let values: [Point3; 3] = std::array::from_fn(|i| scale(cross(sub(n.poles[i], *start), unit), n.weights[i]));
+    if values.iter().flatten().any(|value| !value.is_finite()) { return Err(Error::Invalid("line NURBS coefficients")); }
+    let mut coefficients = [0.; 3]; let mut selected_values = [0.; 3]; let mut magnitude = 0.0_f64;
+    for axis in 0..3 {
+        let v = [values[0][axis], values[1][axis], values[2][axis]];
+        let c = [v[0], 2.0 * (v[1] - v[0]), v[0] - 2.0 * v[1] + v[2]];
+        let size = c[0].abs().max(c[1].abs()).max(c[2].abs());
+        if !size.is_finite() { return Err(Error::Invalid("line NURBS coefficients")); }
+        if size > magnitude { magnitude = size; coefficients = c; selected_values = v; }
+    }
+    if magnitude == 0.0 {
+        let positions: [f64; 3] = std::array::from_fn(|i| dot(sub(n.poles[i], *start), unit));
+        if positions.iter().any(|value| !value.is_finite()) { return Err(Error::Invalid("line NURBS position")); }
+        if positions.iter().all(|value| *value < -tolerance) || positions.iter().all(|value| *value > length + tolerance) {
+            return Ok(Some(Vec::new()));
+        }
+        return Err(Error::Unsupported("overlapping line and NURBS"));
+    }
+    // Positive rational weights keep the curve inside its control-point hull.
+    // A whole span strictly on one side of the line's projection plane cannot
+    // intersect it within tolerance, even if its polynomial has a root outside.
+    let signed: [f64; 3] = std::array::from_fn(|i| selected_values[i] / n.weights[i]);
+    if signed.iter().all(|v| *v > tolerance) || signed.iter().all(|v| *v < -tolerance) {
+        return Ok(Some(Vec::new()));
+    }
+    let [c, b, a] = coefficients.map(|v| v / magnitude);
+    let mut roots = Vec::new();
+    if a == 0.0 {
+        if b == 0.0 { return Ok(None); }
+        roots.push(-c / b);
+    } else {
+        let four_ac = 4.0 * a * c;
+        let discriminant = b.mul_add(b, -four_ac);
+        let uncertainty = 8.0 * f64::EPSILON * (b*b + four_ac.abs());
+        if discriminant == 0.0 {
+            // A rounded zero is not proof of tangency. Reject it if coefficient
+            // construction, normalization, or either product discarded bits.
+            let two_sum = |x: f64, y: f64| { let s = x + y; let z = s - x; (s, (x - (s-z)) + (y-z)) };
+            let (d, de) = two_sum(selected_values[1], -selected_values[0]);
+            let (s, se) = two_sum(selected_values[0], -2.0 * selected_values[1]);
+            let (_, ae) = two_sum(s, selected_values[2]);
+            let normalized_exact = [c, b, a].iter().zip(coefficients).all(|(scaled, original)| scaled.mul_add(magnitude, -original) == 0.0);
+            let product_error = b.mul_add(b, -(b*b)) - 4.0*a.mul_add(c, -(a*c));
+            if de != 0.0 || se != 0.0 || ae != 0.0 || d * 2.0 != coefficients[1] || !normalized_exact || product_error != 0.0 {
+                return Err(Error::Unsupported("quadratic intersection needs higher precision"));
+            }
+        }
+        if discriminant != 0.0 && discriminant.abs() <= uncertainty {
+            return Err(Error::Unsupported("quadratic intersection needs higher precision"));
+        }
+        if discriminant < 0.0 { return Ok(None); }
+        if discriminant == 0.0 { roots.push(-b / (2.0*a)); }
+        else {
+            let q = -0.5 * (b + discriminant.sqrt().copysign(b));
+            roots.push(q / a); roots.push(c / q);
+        }
+    }
+    let mut hits = Vec::new();
+    for root in roots {
+        if !root.is_finite() || !(0.0..=1.0).contains(&root) { continue; }
+        let fraction = if n.reversed { 1.0-root } else { root };
+        let p = point_at(nurbs_curve, fraction, limits)?;
+        let line_fraction = (dot(sub(p, *start), unit) / length).clamp(0.0, 1.0);
+        let q = point_at(line, line_fraction, limits)?; let delta = sub(p, q);
+        let distance = delta[0].hypot(delta[1]).hypot(delta[2]);
+        if distance > tolerance { continue; }
+        if hits.len() as u64 >= limits.max_outputs || hits.len() as u64 >= limits.max_points || (hits.len()+1) as u64 > limits.max_bytes / std::mem::size_of::<CurveIntersection>() as u64 { return Err(Error::Budget("line NURBS intersections")); }
+        let (first_fraction, second_fraction) = if swapped { (fraction, line_fraction) } else { (line_fraction, fraction) };
+        hits.push(CurveIntersection { point: add(scale(p, 0.5), scale(q, 0.5)), first_fraction, second_fraction, distance });
+    }
+    hits.sort_by(|a, b| a.first_fraction.total_cmp(&b.first_fraction));
+    if hits.is_empty() { return Ok(None); }
+    Ok(Some(hits))
+}
+
+fn line_multispan_quadratic(first: &Curve, second: &Curve, tolerance: f64, limits: &Limits) -> Result<Option<Vec<CurveIntersection>>> {
+    let (line, curve, swapped) = match (first, second) {
+        (Curve::Line { .. }, Curve::Nurbs(_)) => (first, second, false),
+        (Curve::Nurbs(_), Curve::Line { .. }) => (second, first, true),
+        _ => return Ok(None),
+    };
+    let Curve::Nurbs(n) = curve else { unreachable!() };
+    if n.degree != 2 { return Ok(None); }
+    if n.periodic && n.certify_repeated_periodic_basis(limits).is_err() { return Ok(None); }
+    if let Some(seam) = n.seam {
+        let mut base = n.clone(); base.seam = None;
+        let base = Curve::Nurbs(base);
+        if !crate::curve_ops::is_closed(&base, 1e-9, limits)? { return Err(Error::Invalid("NURBS seam needs a closed curve")); }
+        let mut hits = match if swapped { line_multispan_quadratic(&base, line, tolerance, limits)? } else { line_multispan_quadratic(line, &base, tolerance, limits)? } {
+            Some(hits) => hits,
+            None => return Ok(None),
+        };
+        let offset = if n.reversed { (n.domain[1]-seam)/(n.domain[1]-n.domain[0]) } else { (seam-n.domain[0])/(n.domain[1]-n.domain[0]) };
+        for hit in &mut hits {
+            let fraction = if swapped { &mut hit.first_fraction } else { &mut hit.second_fraction };
+            *fraction = (*fraction-offset).rem_euclid(1.0);
+            let (curve_fraction,line_fraction) = if swapped { (hit.first_fraction,hit.second_fraction) } else { (hit.second_fraction,hit.first_fraction) };
+            let p=point_at(curve,curve_fraction,limits)?;let q=point_at(line,line_fraction,limits)?;let delta=sub(p,q);
+            hit.distance=delta[0].hypot(delta[1]).hypot(delta[2]);hit.point=add(scale(p,0.5),scale(q,0.5));
+        }
+        hits.retain(|hit| hit.distance<=tolerance);
+        hits.sort_by(|a,b| a.first_fraction.total_cmp(&b.first_fraction).then(a.second_fraction.total_cmp(&b.second_fraction)));
+        hits.dedup_by(|a,b| (a.first_fraction-b.first_fraction).abs()<=8.0*f64::EPSILON && (a.second_fraction-b.second_fraction).abs()<=8.0*f64::EPSILON && distance(a.point,b.point)<=tolerance);
+        return Ok(Some(hits));
+    }
+    // For a trimmed periodic interval, extract whole basis spans first; cutting
+    // a span at the active endpoint can perturb a tangent's double root.
+    let basis_domain = [n.knots[n.degree], n.knots[n.poles.len()]];
+    let expanded = if n.periodic && n.domain != basis_domain {
+        let mut base = n.clone(); base.domain = basis_domain; Some(Curve::Nurbs(base))
+    } else { None };
+    let working_curve = expanded.as_ref().unwrap_or(curve);
+    let Curve::Nurbs(working) = working_curve else { unreachable!() };
+    let capacity = working.knots.len().checked_add(2).ok_or(Error::Overflow("quadratic spans"))?;
+    if capacity as u64 > limits.max_points || capacity as u64 > limits.max_bytes / 8 { return Err(Error::Budget("quadratic spans")); }
+    let mut boundaries = Vec::new();
+    boundaries.try_reserve_exact(capacity).map_err(|_| Error::Budget("quadratic spans"))?;
+    boundaries.extend([0.0, 1.0]);
+    for knot in &working.knots {
+        if *knot < working.domain[0] || *knot > working.domain[1] { continue; }
+        let t = (*knot - working.domain[0]) / (working.domain[1] - working.domain[0]);
+        let t = if working.reversed { 1.0 - t } else { t };
+        boundaries.push(t);
+    }
+    boundaries.sort_by(f64::total_cmp); boundaries.dedup();
+    if boundaries.len() <= 2 { return Ok(None); }
+    let closed = crate::top11::curve_closed_for_cut(curve, limits)?;
+    let mut hits: Vec<CurveIntersection> = Vec::new();
+    let native = |f: f64| if working.reversed { working.domain[1]-f*(working.domain[1]-working.domain[0]) } else { working.domain[0]+f*(working.domain[1]-working.domain[0]) };
+    for pair in boundaries.windows(2) {
+        if expanded.is_some() && (native(pair[0]).max(native(pair[1])) < n.domain[0] || native(pair[0]).min(native(pair[1])) > n.domain[1]) { continue; }
+        let span = match crate::curve_ops::trim_curve_by_parameter(working_curve, pair[0], pair[1], limits) {
+            Ok(span) => span,
+            Err(Error::Unsupported(_)) => return Ok(None),
+            Err(error) => return Err(error),
+        };
+        let local = if swapped { line_quadratic_nurbs(&span, line, tolerance, limits)? } else { line_quadratic_nurbs(line, &span, tolerance, limits)? };
+        let local = match local {
+            Some(hits) => hits,
+            None => if swapped { numeric_intersections(&span, line, tolerance, limits)? } else { numeric_intersections(line, &span, tolerance, limits)? },
+        };
+        for mut hit in local {
+            let fraction = if swapped { &mut hit.first_fraction } else { &mut hit.second_fraction };
+            *fraction = pair[0] + *fraction * (pair[1] - pair[0]);
+            if expanded.is_some() {
+                let parameter = native(*fraction);
+                let roundoff = 8.0*f64::EPSILON*n.domain[0].abs().max(n.domain[1].abs()).max(1.0);
+                if parameter < n.domain[0]-roundoff || parameter > n.domain[1]+roundoff { continue; }
+                let t = (parameter.clamp(n.domain[0],n.domain[1])-n.domain[0])/(n.domain[1]-n.domain[0]);
+                *fraction = if n.reversed {1.0-t} else {t};
+            }
+            if closed && *fraction == 1.0 { *fraction = 0.0; }
+            let (curve_fraction, line_fraction) = if swapped { (hit.first_fraction, hit.second_fraction) } else { (hit.second_fraction, hit.first_fraction) };
+            let curve_point = point_at(curve, curve_fraction, limits)?; let line_point = point_at(line, line_fraction, limits)?;
+            let delta = sub(curve_point, line_point); hit.distance = delta[0].hypot(delta[1]).hypot(delta[2]);
+            if hit.distance > tolerance { continue; }
+            hit.point = add(scale(curve_point, 0.5), scale(line_point, 0.5));
+            if hits.iter().any(|previous| (previous.first_fraction-hit.first_fraction).abs() <= 8.0*f64::EPSILON && (previous.second_fraction-hit.second_fraction).abs() <= 8.0*f64::EPSILON && distance(previous.point,hit.point) <= tolerance) { continue; }
+            if hits.len() as u64 >= limits.max_outputs || hits.len() as u64 >= limits.max_points || (hits.len()+1) as u64 > limits.max_bytes/std::mem::size_of::<CurveIntersection>() as u64 { return Err(Error::Budget("quadratic span intersections")); }
+            hits.try_reserve(1).map_err(|_| Error::Budget("quadratic span intersections"))?;
+            hits.push(hit);
+        }
+    }
+    hits.sort_by(|a,b| a.first_fraction.total_cmp(&b.first_fraction).then(a.second_fraction.total_cmp(&b.second_fraction)));
+    Ok(Some(hits))
+}
+
+fn line_line(first: &Curve, second: &Curve, tolerance: f64) -> Result<Option<Vec<CurveIntersection>>> {
     let (
         Curve::Line {
             start: p1, end: e1, ..
@@ -329,43 +667,83 @@ fn line_line(first: &Curve, second: &Curve, tolerance: f64) -> Result<Vec<CurveI
         },
     ) = (first, second)
     else {
-        return Ok(Vec::new());
+        return Ok(None);
     };
     let d1 = sub(*e1, *p1);
     let d2 = sub(*e2, *p2);
-    let a = dot(d1, d1);
-    let b = dot(d1, d2);
-    let c = dot(d2, d2);
-    let w = sub(*p1, *p2);
-    let d = dot(d1, w);
-    let e = dot(d2, w);
-    let denominator = a * c - b * b;
-    if !denominator.is_finite() || denominator.abs() <= 1e-20 {
-        return Ok(Vec::new());
+    let length1=d1[0].hypot(d1[1]).hypot(d1[2]);
+    let length2=d2[0].hypot(d2[1]).hypot(d2[2]);
+    if !length1.is_finite() || !length2.is_finite() || length1 == 0.0 || length2 == 0.0 {
+        return Err(Error::Invalid("line intersection direction"));
     }
-    let s = (b * e - c * d) / denominator;
-    let t = (a * e - b * d) / denominator;
+    let u=d1.map(|value|value/length1);let v=d2.map(|value|value/length2);
+    let normal=cross(u,v);let denominator=dot(normal,normal);
+    let delta=sub(*p2,*p1);finite(delta)?;
+    if denominator == 0.0 {
+        let offset = cross(delta, u);
+        if offset[0].hypot(offset[1]).hypot(offset[2]) > tolerance { return Ok(Some(Vec::new())); }
+        let start = dot(delta, u);
+        let direction = dot(v, u) * length2;
+        let end = start + direction;
+        if !start.is_finite() || !end.is_finite() || !direction.is_finite() || direction == 0.0 {
+            return Err(Error::Invalid("parallel line intersection overflow"));
+        }
+        let low = 0.0_f64.max(start.min(end));
+        let high = length1.min(start.max(end));
+        if low - high > tolerance { return Ok(Some(Vec::new())); }
+        if high - low > tolerance { return Err(Error::Unsupported("overlapping line segments")); }
+        let coordinate = low * 0.5 + high * 0.5;
+        let s = (coordinate / length1).clamp(0.0, 1.0);
+        let t = ((coordinate - start) / direction).clamp(0.0, 1.0);
+        let left = add(*p1, scale(d1, s)); let right = add(*p2, scale(d2, t));
+        let difference = sub(left, right);
+        let measured = difference[0].hypot(difference[1]).hypot(difference[2]);
+        if measured > tolerance { return Ok(Some(Vec::new())); }
+        return Ok(Some(vec![CurveIntersection { point: add(scale(left, 0.5), scale(right, 0.5)), first_fraction: s, second_fraction: t, distance: measured }]));
+    }
+    let mut s=dot(cross(delta,v),normal)/denominator/length1;
+    let mut t=dot(cross(delta,u),normal)/denominator/length2;
+    if !s.is_finite() || !t.is_finite() { return Err(Error::Invalid("line intersection overflow")); }
     if !(0.0..=1.0).contains(&s) || !(0.0..=1.0).contains(&t) {
-        return Ok(Vec::new());
+        // The infinite-line minimum lies outside at least one segment. The
+        // constrained minimum is an endpoint projected onto the other segment.
+        let projections = [
+            (0., dot(sub(*p1,*p2),v)/length2),
+            (1., dot(sub(*e1,*p2),v)/length2),
+            (dot(sub(*p2,*p1),u)/length1, 0.),
+            (dot(sub(*e2,*p1),u)/length1, 1.),
+        ];
+        if projections.iter().any(|(a,b)| !a.is_finite() || !b.is_finite()) {
+            return Err(Error::Invalid("line intersection overflow"));
+        }
+        let mut best = f64::INFINITY;
+        for (a,b) in projections {
+            let a=a.clamp(0.,1.);let b=b.clamp(0.,1.);
+            let d=sub(add(*p1,scale(d1,a)),add(*p2,scale(d2,b)));
+            let distance=d[0].hypot(d[1]).hypot(d[2]);
+            if distance < best {best=distance;s=a;t=b;}
+        }
     }
     let left = add(*p1, scale(d1, s));
     let right = add(*p2, scale(d2, t));
-    let measured = distance(left, right);
+    let difference=sub(left,right);
+    let measured = difference[0].hypot(difference[1]).hypot(difference[2]);
     if measured > tolerance {
-        return Ok(Vec::new());
+        return Ok(Some(Vec::new()));
     }
-    Ok(vec![CurveIntersection {
-        point: scale(add(left, right), 0.5),
+    Ok(Some(vec![CurveIntersection {
+        point: add(scale(left, 0.5),scale(right, 0.5)),
         first_fraction: clamp(s, 0.0, 1.0),
         second_fraction: clamp(t, 0.0, 1.0),
         distance: measured,
-    }])
+    }]))
 }
 
 fn coplanar_circles(
     first: &Curve,
     second: &Curve,
     tolerance: f64,
+    limits: &Limits,
 ) -> Result<Option<Vec<CurveIntersection>>> {
     let (
         Curve::Circle {
@@ -388,25 +766,32 @@ fn coplanar_circles(
     };
     let n1 = cross(*x1, *y1);
     let n2 = cross(*x2, *y2);
-    if norm(cross(n1, n2)) > 1e-9 || dot(sub(*c2, *c1), n1).abs() > tolerance.max(1e-9) {
+    if norm(cross(n1, n2)) > 8.0*f64::EPSILON || dot(sub(*c2, *c1), n1).abs() > tolerance {
         return Ok(None);
     }
-    let centers = sub(*c2, *c1);
-    let d = norm(centers);
-    if d <= 1e-12 {
+    let delta = sub(*c2, *c1);
+    let centers = sub(delta,scale(n1,dot(delta,n1)));
+    let d = centers[0].hypot(centers[1]).hypot(centers[2]);
+    if !d.is_finite() {return Err(Error::Invalid("circle intersection center distance"));}
+    if d == 0.0 {
         return Ok(Some(Vec::new()));
     }
-    if d > r1 + r2 + tolerance || d < (r1 - r2).abs() - tolerance {
-        return Ok(Some(Vec::new()));
-    }
-    let a = (r1 * r1 - r2 * r2 + d * d) / (2.0 * d);
-    let h_squared = r1 * r1 - a * a;
+    // Scale before squaring so valid small or large circles do not underflow or overflow.
+    let magnitude=d.max(*r1).max(*r2);
+    let ds=d/magnitude;let r1s=r1/magnitude;let r2s=r2/magnitude;
+    let tolerance_scaled=tolerance/magnitude;
+    if ds > r1s+r2s+tolerance_scaled || ds < (r1s-r2s).abs()-tolerance_scaled {return Ok(Some(Vec::new()));}
+    if ds == 0.0 {return Err(Error::Invalid("circle intersection scale"));}
+    let a_scaled=(r1s*r1s-r2s*r2s+ds*ds)/(2.0*ds);
+    let h_squared=r1s*r1s-a_scaled*a_scaled;
+    let a=a_scaled*magnitude;
     let h = if h_squared > 0.0 {
-        h_squared.sqrt()
+        h_squared.sqrt()*magnitude
     } else {
         0.0
     };
-    let unit = scale(centers, 1.0 / d);
+    if !a.is_finite() || !h.is_finite() {return Err(Error::Invalid("circle intersection overflow"));}
+    let unit = centers.map(|value|value/d);
     let base = add(*c1, scale(unit, a));
     let perpendicular = cross(n1, unit);
     let perpendicular = if norm(perpendicular) > 1e-12 {
@@ -414,21 +799,66 @@ fn coplanar_circles(
     } else {
         [0.0; 3]
     };
-    let candidates = if h <= 1e-12 {
+    let candidates = if h == 0.0 {
         vec![base]
     } else {
         vec![add(base, perpendicular), sub(base, perpendicular)]
     };
     let mut result = Vec::new();
     for point in candidates {
-        result.push(CurveIntersection {
-            point,
-            first_fraction: circle_fraction(first, point)?,
-            second_fraction: circle_fraction(second, point)?,
-            distance: 0.0,
-        });
+        let first_fractions=circle_fractions(first,point,tolerance,limits)?;
+        let second_fractions=circle_fractions(second,point,tolerance,limits)?;
+        let combinations=first_fractions.len().checked_mul(second_fractions.len()).ok_or(Error::Overflow("circle intersection combinations"))?;
+        let capacity=result.len().checked_add(combinations).ok_or(Error::Overflow("circle intersection combinations"))?;
+        let maximum=limits.max_outputs.min(limits.max_points).min(limits.max_bytes/std::mem::size_of::<CurveIntersection>() as u64);
+        if capacity as u64 > maximum {return Err(Error::Budget("circle intersections"));}
+        result.try_reserve(combinations).map_err(|_| Error::Budget("circle intersections"))?;
+        for first_fraction in first_fractions {
+            for &second_fraction in &second_fractions {
+                let a=point_at(first,first_fraction,limits)?;let b=point_at(second,second_fraction,limits)?;
+                let difference=sub(a,b);let measured=difference[0].hypot(difference[1]).hypot(difference[2]);
+                let da=sub(a,point);let db=sub(b,point);
+                let a_error=da[0].hypot(da[1]).hypot(da[2]);let b_error=db[0].hypot(db[1]).hypot(db[2]);
+                if measured <= tolerance && a_error <= tolerance && b_error <= tolerance {
+                    if result.len() as u64 >= limits.max_outputs {return Err(Error::Budget("circle intersections"));}
+                    result.push(CurveIntersection {point:add(scale(a,0.5),scale(b,0.5)),first_fraction,second_fraction,distance:measured});
+                }
+            }
+        }
     }
     Ok(Some(result))
+}
+
+fn intersection_samples(curve: &Curve, limits: &Limits) -> Result<Vec<(f64, Point3)>> {
+    let extra = match curve { Curve::Nurbs(n) => n.knots.len().checked_mul(2).and_then(|n| n.checked_add(3)).ok_or(Error::Overflow("intersection samples"))?, _ => 0 };
+    let capacity = 257usize.checked_add(extra).ok_or(Error::Overflow("intersection samples"))?;
+    if capacity as u64 > limits.max_points || capacity as u64 > limits.max_bytes / std::mem::size_of::<(f64, Point3)>() as u64 {
+        return Err(Error::Budget("intersection samples"));
+    }
+    let mut fractions = Vec::new();
+    fractions.try_reserve_exact(capacity).map_err(|_| Error::Budget("intersection samples"))?;
+    fractions.extend((0..=256).map(|index| index as f64 / 256.0));
+    if let Curve::Nurbs(n) = curve {
+        let [start, end] = n.domain;
+        let offset = n.seam.map(|seam| if n.reversed { (end-seam)/(end-start) } else { (seam-start)/(end-start) }).unwrap_or(0.0);
+        let mut knots = Vec::new();
+        knots.try_reserve_exact(n.knots.len().checked_add(2).ok_or(Error::Overflow("intersection knots"))?).map_err(|_| Error::Budget("intersection knots"))?;
+        for &knot in &n.knots {
+            if knot < start || knot > end { continue; }
+            let native = (knot-start)/(end-start);
+            let fraction = if n.reversed { 1.0-native } else { native };
+            knots.push(if n.seam.is_some() { (fraction-offset).rem_euclid(1.0) } else { fraction });
+        }
+        knots.push(0.0); knots.push(1.0);
+        knots.sort_by(f64::total_cmp); knots.dedup();
+        fractions.extend(knots.iter().copied());
+        fractions.extend(knots.windows(2).map(|pair| pair[0] + (pair[1]-pair[0])*0.5));
+    }
+    fractions.sort_by(f64::total_cmp); fractions.dedup();
+    let mut samples = Vec::new();
+    samples.try_reserve_exact(fractions.len()).map_err(|_| Error::Budget("intersection samples"))?;
+    for fraction in fractions { samples.push((fraction, point_at(curve, fraction, limits)?)); }
+    Ok(samples)
 }
 
 fn numeric_intersections(
@@ -437,19 +867,20 @@ fn numeric_intersections(
     tolerance: f64,
     limits: &Limits,
 ) -> Result<Vec<CurveIntersection>> {
-    let samples = 256usize;
+    let capacity = |curve: &Curve| -> Result<usize> {
+        let knots = match curve { Curve::Nurbs(n) => n.knots.len().checked_mul(2).and_then(|n| n.checked_add(3)).ok_or(Error::Overflow("intersection samples"))?, _ => 0 };
+        257usize.checked_add(knots).ok_or(Error::Overflow("intersection samples"))
+    };
+    let count = capacity(first)?.checked_add(capacity(second)?).ok_or(Error::Overflow("intersection samples"))?;
+    // Covers both retained sample arrays, the sample-building scratch and candidate pairs.
+    let scratch_bytes = (count as u64).saturating_mul(64);
+    if scratch_bytes > limits.max_bytes { return Err(Error::Budget("intersection scratch")); }
+    let first_samples = intersection_samples(first, limits)?;
+    let second_samples = intersection_samples(second, limits)?;
     let mut candidates: Vec<(f64, f64)> = Vec::new();
     let mut low = [f64::INFINITY; 3];
     let mut high = [f64::NEG_INFINITY; 3];
-    for index in 0..=samples {
-        let point = point_at(first, index as f64 / samples as f64, limits)?;
-        for axis in 0..3 {
-            low[axis] = low[axis].min(point[axis]);
-            high[axis] = high[axis].max(point[axis]);
-        }
-    }
-    for index in 0..=samples {
-        let point = point_at(second, index as f64 / samples as f64, limits)?;
+    for (_, point) in first_samples.iter().chain(&second_samples) {
         for axis in 0..3 {
             low[axis] = low[axis].min(point[axis]);
             high[axis] = high[axis].max(point[axis]);
@@ -461,17 +892,17 @@ fn numeric_intersections(
     } else {
         1.0
     };
-    let threshold = (span_scale / samples as f64 * 3.0)
+    let threshold = (span_scale / 256.0 * 3.0)
         .max(tolerance * 8.0)
         .max(1e-6);
-    for index in 0..=samples {
-        let fraction = index as f64 / samples as f64;
-        let point = point_at(first, fraction, limits)?;
+    let capacity = first_samples.len().checked_add(second_samples.len()).ok_or(Error::Overflow("intersection candidates"))?;
+    if (capacity as u64).saturating_mul(std::mem::size_of::<(f64,f64)>() as u64) > limits.max_bytes { return Err(Error::Budget("intersection candidates")); }
+    candidates.try_reserve_exact(capacity).map_err(|_| Error::Budget("intersection candidates"))?;
+    for &(fraction, point) in &first_samples {
         let mut best_other = 0.0;
         let mut best_distance = f64::INFINITY;
-        for other in 0..=samples {
-            let other_fraction = other as f64 / samples as f64;
-            let measured = distance(point, point_at(second, other_fraction, limits)?);
+        for &(other_fraction, other_point) in &second_samples {
+            let measured = distance(point, other_point);
             if measured < best_distance {
                 best_distance = measured;
                 best_other = other_fraction;
@@ -481,19 +912,31 @@ fn numeric_intersections(
             candidates.push((fraction, best_other));
         }
     }
-    candidates.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap_or(std::cmp::Ordering::Equal));
-    let mut refined: Vec<CurveIntersection> = Vec::new();
-    let mut last_fraction = -1.0;
-    for (mut f, mut g) in candidates {
-        if f - last_fraction < 2.0 / samples as f64 {
-            continue;
+    for &(fraction, point) in &second_samples {
+        let mut best_other = 0.0; let mut best_distance = f64::INFINITY;
+        for &(other_fraction, other_point) in &first_samples {
+            let measured = distance(point, other_point);
+            if measured < best_distance { best_distance = measured; best_other = other_fraction; }
         }
-        last_fraction = f;
+        if best_distance <= threshold { candidates.push((best_other, fraction)); }
+    }
+    candidates.sort_by(|a, b| a.0.total_cmp(&b.0).then(a.1.total_cmp(&b.1)));
+    candidates.dedup();
+    let mut refined: Vec<CurveIntersection> = Vec::new();
+    for (mut f, mut g) in candidates {
         let mut best = distance(point_at(first, f, limits)?, point_at(second, g, limits)?);
-        let mut factor = 0.5;
+        let mut factor = 1.0;
         for _ in 0..40 {
-            let a = fraction_derivatives(first, f, 1, limits)?;
-            let b = fraction_derivatives(second, g, 1, limits)?;
+            let a = match fraction_derivatives(first, f, 1, limits) {
+                Ok(jet) => jet,
+                Err(Error::Unsupported("derivative at insufficient knot continuity")) => break,
+                Err(error) => return Err(error),
+            };
+            let b = match fraction_derivatives(second, g, 1, limits) {
+                Ok(jet) => jet,
+                Err(Error::Unsupported("derivative at insufficient knot continuity")) => break,
+                Err(error) => return Err(error),
+            };
             let residual = sub(a[0], b[0]);
             let aa = dot(a[1], a[1]);
             let ab = dot(a[1], b[1]);
@@ -504,8 +947,8 @@ fn numeric_intersections(
             if !determinant.is_finite() || determinant.abs() <= 1e-20 {
                 break;
             }
-            let step_f = -(bb * g1 - ab * g2) / determinant;
-            let step_g = -(-ab * g1 + aa * g2) / determinant;
+            let step_f = -(bb * g1 + ab * g2) / determinant;
+            let step_g = -(ab * g1 + aa * g2) / determinant;
             let candidate_f = clamp(f + step_f * factor, 0.0, 1.0);
             let candidate_g = clamp(g + step_g * factor, 0.0, 1.0);
             let measured = distance(
@@ -532,10 +975,16 @@ fn numeric_intersections(
         );
         if refined
             .iter()
-            .any(|existing| distance(existing.point, point) <= tolerance.max(1e-6))
+            .any(|existing| distance(existing.point, point) <= tolerance &&
+                (existing.first_fraction-f).abs() <= 1e-7 && (existing.second_fraction-g).abs() <= 1e-7)
         {
             continue;
         }
+        if refined.len() as u64 >= limits.max_outputs || refined.len() as u64 >= limits.max_points ||
+            (refined.len() + 1) as u64 > (limits.max_bytes - scratch_bytes) / std::mem::size_of::<CurveIntersection>() as u64 {
+            return Err(Error::Budget("curve intersections"));
+        }
+        refined.try_reserve(1).map_err(|_| Error::Budget("curve intersections"))?;
         refined.push(CurveIntersection {
             point,
             first_fraction: f,
@@ -546,7 +995,41 @@ fn numeric_intersections(
     Ok(refined)
 }
 
-/// Intersections of two curves. Lines and coplanar circles use closed forms; every
+fn polycurve_intersections(
+    segments: &[Curve], reversed: bool, other: &Curve, swapped: bool,
+    tolerance: f64, limits: &Limits,
+) -> Result<Vec<CurveIntersection>> {
+    let mut hits: Vec<CurveIntersection> = Vec::new();
+    for (index, segment) in segments.iter().enumerate() {
+        let local = if swapped {
+            curve_curve_intersections(other, segment, tolerance, limits)?
+        } else {
+            curve_curve_intersections(segment, other, tolerance, limits)?
+        };
+        for mut hit in local {
+            let fraction = if swapped { &mut hit.second_fraction } else { &mut hit.first_fraction };
+            let forward = (index as f64 + *fraction) / segments.len() as f64;
+            *fraction = if reversed { 1.0 - forward } else { forward };
+            // Adjacent segments may both report the same joint; retain repeated
+            // crossings at different parameters, even at the same position.
+            if hits.iter().any(|previous|
+                (previous.first_fraction - hit.first_fraction).abs() <= 8.0 * f64::EPSILON &&
+                (previous.second_fraction - hit.second_fraction).abs() <= 8.0 * f64::EPSILON &&
+                distance(previous.point, hit.point) <= tolerance
+            ) { continue; }
+            if hits.len() as u64 >= limits.max_outputs || hits.len() as u64 >= limits.max_points ||
+                (hits.len() + 1) as u64 > limits.max_bytes / std::mem::size_of::<CurveIntersection>() as u64 {
+                return Err(Error::Budget("polycurve intersections"));
+            }
+            hits.try_reserve(1).map_err(|_| Error::Budget("polycurve intersections"))?;
+            hits.push(hit);
+        }
+    }
+    hits.sort_by(|a, b| a.first_fraction.total_cmp(&b.first_fraction).then(a.second_fraction.total_cmp(&b.second_fraction)));
+    Ok(hits)
+}
+
+/// Intersections of two curves. Lines, line/circle pairs and coplanar circles use closed forms; every
 /// other pair refines a sampled candidate set and returns only points within
 /// `tolerance`.
 pub fn curve_curve_intersections(
@@ -560,11 +1043,17 @@ pub fn curve_curve_intersections(
     }
     first.validate(limits)?;
     second.validate(limits)?;
-    let exact = line_line(first, second, tolerance)?;
-    if !exact.is_empty() {
-        return Ok(exact);
+    if let Curve::Polycurve { segments, reversed } = first {
+        return polycurve_intersections(segments, *reversed, second, false, tolerance, limits);
     }
-    if let Some(circles) = coplanar_circles(first, second, tolerance)? {
+    if let Curve::Polycurve { segments, reversed } = second {
+        return polycurve_intersections(segments, *reversed, first, true, tolerance, limits);
+    }
+    if let Some(exact) = line_line(first, second, tolerance)? { return Ok(exact); }
+    if let Some(exact) = line_circle(first, second, tolerance, limits)? { return Ok(exact); }
+    if let Some(exact) = line_quadratic_nurbs(first, second, tolerance, limits)? { return Ok(exact); }
+    if let Some(exact) = line_multispan_quadratic(first, second, tolerance, limits)? { return Ok(exact); }
+    if let Some(circles) = coplanar_circles(first, second, tolerance, limits)? {
         return Ok(circles);
     }
     numeric_intersections(first, second, tolerance, limits)
@@ -597,12 +1086,35 @@ pub fn curve_surface_intersections(
         distances.push(projection.distance);
         projections.push(projection);
     }
+    if distances.iter().all(|distance| *distance <= tolerance) {
+        return Err(Error::Unsupported("curve may overlap surface"));
+    }
+    for index in 1..=samples {
+        if distances[index - 1] <= tolerance && distances[index] <= tolerance {
+            let a = point_at(curve, (index - 1) as f64 / samples as f64, limits)?;
+            let b = point_at(curve, index as f64 / samples as f64, limits)?;
+            if distance(a, b) > 2.0 * tolerance {
+                return Err(Error::Unsupported("curve may overlap surface"));
+            }
+        }
+    }
     let mut result = Vec::new();
+    for (index, neighbor) in [(0, 1), (samples, samples - 1)] {
+        if distances[index] <= tolerance && distances[neighbor] > distances[index] + 1e-14 {
+            let fraction = index as f64 / samples as f64;
+            result.push(SurfaceIntersection {
+                point: scale(add(point_at(curve, fraction, limits)?, projections[index].point), 0.5),
+                curve_fraction: fraction,
+                parameters: projections[index].parameters,
+                distance: distances[index],
+            });
+        }
+    }
     for index in 1..samples {
-        if distances[index] > tolerance {
+        if distances[index] > distances[index - 1] || distances[index] > distances[index + 1] {
             continue;
         }
-        if distances[index] > distances[index - 1] || distances[index] > distances[index + 1] {
+        if distances[index] == distances[index - 1] && distances[index] == distances[index + 1] {
             continue;
         }
         let mut t = index as f64 / samples as f64;
@@ -620,6 +1132,9 @@ pub fn curve_surface_intersections(
                 break;
             }
             best = next_distance;
+        }
+        if best > tolerance {
+            continue;
         }
         let point = scale(
             add(

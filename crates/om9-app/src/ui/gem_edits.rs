@@ -114,7 +114,10 @@ impl MatrixApp {
 
     /// The key window of an open Gem Map or Gem Reporter.
     pub(super) fn gem_edits_window_ui(&mut self, ctx: &egui::Context) {
-        let tool = self.controller.gem_edits_session().map(|session| session.tool);
+        let tool = self
+            .controller
+            .gem_edits_session()
+            .map(|session| session.tool);
         match tool {
             Some(GemEditsTool::Map) => self.gem_map_window(ctx),
             Some(GemEditsTool::Reporter) => self.gem_report_window(ctx),
@@ -136,11 +139,13 @@ impl MatrixApp {
             .open(&mut open)
             .show(ctx, |ui| {
                 ui.label("Numbers match the viewport markers. Sizes are girdle L × W in mm.");
-                egui::ScrollArea::vertical().max_height(260.0).show(ui, |ui| {
-                    for row in &rows {
-                        ui.monospace(om9_core::gem_edits::map_line(row));
-                    }
-                });
+                egui::ScrollArea::vertical()
+                    .max_height(260.0)
+                    .show(ui, |ui| {
+                        for row in &rows {
+                            ui.monospace(om9_core::gem_edits::map_line(row));
+                        }
+                    });
                 if ui.button("Close (Enter)").clicked() {
                     close = true;
                 }
@@ -165,11 +170,13 @@ impl MatrixApp {
         .resizable(true)
         .open(&mut open)
         .show(ctx, |ui| {
-            egui::ScrollArea::vertical().max_height(280.0).show(ui, |ui| {
-                for row in &report.rows {
-                    ui.monospace(om9_core::gem_edits::report_line(row));
-                }
-            });
+            egui::ScrollArea::vertical()
+                .max_height(280.0)
+                .show(ui, |ui| {
+                    for row in &report.rows {
+                        ui.monospace(om9_core::gem_edits::report_line(row));
+                    }
+                });
             ui.separator();
             ui.label(format!(
                 "Total {:.3} ct · {:.3} g · tolerance ±{:.0}% vs trade formula",
@@ -210,10 +217,7 @@ impl MatrixApp {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use om9_core::{
-        gem::GemId,
-        identity::ObjectId,
-    };
+    use om9_core::{gem::GemId, identity::ObjectId};
 
     fn camera() -> Camera {
         Camera::orthographic([0.0, 0.0, 100.0], [0.0; 3], [0.0, 1.0, 0.0], 20.0).expect("camera")
@@ -249,7 +253,11 @@ mod tests {
         assert_eq!(labels.len(), 3);
         assert_eq!(labels[0].text, "#1  6.00 × 6.00");
         assert_eq!(labels[2].text, "#3  6.00 × 6.00");
-        assert!(labels[0].key.starts_with("#1 Round Diamond Cut · 6.00 × 6.00 mm @ (-4.00,"));
+        assert!(
+            labels[0]
+                .key
+                .starts_with("#1 Round Diamond Cut · 6.00 × 6.00 mm @ (-4.00,")
+        );
         for label in &labels {
             assert!(rect().contains(label.anchor), "anchor on screen");
             assert!(rect().contains(label.label), "caption stays on screen");

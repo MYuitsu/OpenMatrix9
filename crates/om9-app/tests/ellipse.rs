@@ -187,9 +187,11 @@ fn ellipse_exposes_mode_tokens() {
     let mut c = controller();
     c.submit("Ellipse").unwrap();
     let tokens = c.ellipse_option_tokens();
-    for expected in ["Center", "Corner", "Diameter", "Vertical", "FromFoci"] {
+    // The current mode (Center) is the prompt word, not an option.
+    for expected in ["Corner", "Diameter", "Vertical", "FromFoci"] {
         assert!(tokens.iter().any(|(_, command)| *command == expected));
     }
+    assert!(!tokens.iter().any(|(_, command)| *command == "Center"));
 }
 
 #[test]
@@ -370,8 +372,9 @@ fn ellipse_center_mode_can_mark_foci() {
 fn ellipse_accepts_approx_alias() {
     let mut c = controller();
     c.submit("Ellipse").unwrap();
+    // Matrix documents `Deformable`; `Approx` stays a typed alias, not an option.
     assert!(
-        c.ellipse_option_tokens()
+        !c.ellipse_option_tokens()
             .iter()
             .any(|(_, command)| *command == "Approx")
     );

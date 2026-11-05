@@ -1,0 +1,7 @@
+# Ctrl shortcuts — 2026-11-01
+
+The standalone egui host now routes Ctrl+Z to the existing document Undo when no command is running, no modal/popup owns input, and the focused command editor has an empty draft (or no widget is focused). A nonempty draft and other editors retain their text shortcut behavior. This uses the existing transaction owner.
+
+With `CARGO_TARGET_DIR=L:/om9-target`, `cargo test -j 2 -p om9-app --test ui_events ctrl_z_undoes_document_with_idle_command_focus_but_not_while_editing` passed (1 test). `pinned_command` passed 7 tests, including selection and text-copy output. The combined `ui_events` run passed 6 and failed `construction_grid_colors_only_positive_axes_like_the_reference` at its grid-shape lookup; no inference is made about its cause. `cargo build -j 2 -p om9-app --bin om9` passed; debug executable SHA-256 `E90BF2D665BE348971B19FEA3A3D540A07AE9F6DCF6CC76D13883C93F3EA05C2`. `python tools/public_source_audit.py` passed (0 errors).
+
+The current standalone Standard Copy/Paste buttons are disabled, and the Rhino 5 clipboard data adapter in `om9-exchange` is not connected to Windows clipboard or the application document. Ctrl+C for selected CAD objects remains unimplemented; no Rhino clipboard or desktop keyboard verification is claimed. The already running release executable was not replaced or restarted. Next: implement and validate the approved native geometry clipboard and one-transaction Paste in the standalone host, then verify real Windows input and cross-application exchange.

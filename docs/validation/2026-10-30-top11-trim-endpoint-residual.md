@@ -1,0 +1,9 @@
+# Top 11 Trim: open curve with endpoint-only intersection (2026-10-30)
+
+Standalone Rust OM9 on Windows, base `89ef2676b597ebc5ab38fa5c6acf0ad47a2f261b` plus working-tree changes. After a cut, an open residual whose only intersection was at its endpoint was previously omitted from the mutual Trim session. The new regression first failed because the residual was not available for a second pick.
+
+Mutual Trim now retains endpoint intersection fractions. When an open curve has no interior cuts but has an endpoint intersection, picking it deletes that whole residual in one transaction; subsequent intersections are prepared before publication. A curve whose endpoints coincide within the document tolerance is not admitted for whole-curve deletion on a seam-only hit. Ordinary Split and prior separate-cutter helpers continue filtering endpoint-only fractions. This is an OM9 interpretation of the selected-portion behavior; it does not prove all original Matrix edge cases.
+
+Tests cover a crossing line trimmed and then removed, two curves touching only at their endpoints, Undo/Redo, and a closed circle at a single seam hit that must not be deleted. The simulated egui viewport test clicks both portions and verifies two Undo steps; it does not prove OS mouse input, GPU presentation or human M03-UI acceptance. With `CARGO_TARGET_DIR=L:\om9-target` and `-j 2`, app Top 11/options/OCCT BRep suites passed 79 tests, no-default Top 11/options passed 64, and the focused egui test passed. Public-source audit passed.
+
+Near-closed open curves, tangent/overlap classifications, sub-tolerance scales and general NURBS/periodic cases remain unverified; closure uses world endpoint separation against document tolerance and the existing fixed fraction thresholds. Surface/BRep targets, mutual-selection scaling, OS UI and full Top 11 remain open.

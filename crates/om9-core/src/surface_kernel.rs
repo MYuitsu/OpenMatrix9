@@ -13,6 +13,111 @@ use crate::{
     geometry::{Curve, NurbsCurve, NurbsSurface, Point3, finite},
 };
 
+/// Delete complete control-net rows and/or columns while retaining a rectangular NURBS net.
+pub fn delete_control_points(
+    surface: &NurbsSurface,
+    indices: &std::collections::BTreeSet<usize>,
+    limits: &Limits,
+) -> Result<NurbsSurface> {
+    surface.validate(limits)?;
+    if indices.is_empty() {
+        return Err(Error::Invalid("empty surface grip selection"));
+    }
+    let [nu, nv] = surface.size;
+    if indices.iter().any(|index| *index >= surface.poles.len()) {
+        return Err(Error::Invalid("surface grip index"));
+    }
+    let mut row_counts = vec![0usize; nu];
+    let mut col_counts = vec![0usize; nv];
+    for &index in indices {
+        row_counts[index / nv] += 1;
+        col_counts[index % nv] += 1;
+    }
+    let rows: Vec<_> = row_counts
+        .iter()
+        .enumerate()
+        .filter_map(|(i, count)| (*count == nv).then_some(i))
+        .collect();
+    let cols: Vec<_> = col_counts
+        .iter()
+        .enumerate()
+        .filter_map(|(i, count)| (*count == nu).then_some(i))
+        .collect();
+    if indices
+        .iter()
+        .any(|index| !rows.contains(&(index / nv)) && !cols.contains(&(index % nv)))
+    {
+        return Err(Error::Invalid(
+            "select complete surface control rows or columns",
+        ));
+    }
+    let mut knots = surface.knots.clone();
+    for (axis, selected) in [&rows, &cols].into_iter().enumerate() {
+        if selected.is_empty() {
+            continue;
+        }
+        if surface.periodic[axis] {
+            return Err(Error::Unsupported("periodic surface control deletion"));
+        }
+        let count = surface.size[axis];
+        let points: Vec<_> = (0..count)
+            .map(|i| surface.poles[if axis == 0 { i * nv } else { i }])
+            .collect();
+        let weights: Vec<_> = (0..count)
+            .map(|i| surface.weights[if axis == 0 { i * nv } else { i }])
+            .collect();
+        let mut curve = Curve::Nurbs(NurbsCurve {
+            degree: surface.degree[axis],
+            poles: points,
+            weights,
+            knots: knots[axis].clone(),
+            domain: surface.domain[axis],
+            periodic: false,
+            reversed: false,
+            seam: None,
+        });
+        for &index in selected.iter().rev() {
+            curve = crate::curve_ops::delete_control_point(&curve, index, limits)?;
+        }
+        let Curve::Nurbs(curve) = curve else {
+            unreachable!()
+        };
+        knots[axis] = curve.knots;
+    }
+    let size = [nu - rows.len(), nv - cols.len()];
+    let count = size[0]
+        .checked_mul(size[1])
+        .ok_or(Error::Overflow("surface control net"))?;
+    let mut poles = Vec::new();
+    let mut weights = Vec::new();
+    poles
+        .try_reserve_exact(count)
+        .map_err(|_| Error::Budget("surface control net"))?;
+    weights
+        .try_reserve_exact(count)
+        .map_err(|_| Error::Budget("surface control net"))?;
+    for u in 0..nu {
+        for v in 0..nv {
+            if !rows.contains(&u) && !cols.contains(&v) {
+                poles.push(surface.poles[u * nv + v]);
+                weights.push(surface.weights[u * nv + v]);
+            }
+        }
+    }
+    let result = NurbsSurface {
+        degree: surface.degree,
+        size,
+        poles,
+        weights,
+        knots,
+        domain: surface.domain,
+        periodic: surface.periodic,
+        reversed: surface.reversed,
+    };
+    result.validate(limits)?;
+    Ok(result)
+}
+
 /// Which direction an iso-curve runs in.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SurfaceIso {

@@ -215,7 +215,9 @@ fn bspline_fractions(
             knots.len(),
             knots.as_ptr(),
             mults.as_ptr(),
-            i32::from(nurbs.periodic),
+            // Certified repeated poles/knots are an exact extended nonperiodic
+            // basis; OCCT's periodic constructor expects another encoding.
+            0,
             domain[0],
             domain[1],
             tolerance,
@@ -260,7 +262,19 @@ fn curve_fractions(
                 source, *center, *x, *y, *radius, angles[0], angles[1], tolerance,
             )
         }
-        Curve::Nurbs(nurbs) => bspline_fractions(source, nurbs, tolerance),
+        Curve::Nurbs(nurbs) => {
+            if nurbs.periodic {
+                nurbs.certify_repeated_periodic_basis(limits)
+                    .map_err(|error| KernelError::InvalidInput(error.to_string()))?;
+            }
+            let mut fractions=bspline_fractions(source,nurbs,tolerance)?;
+            if let Some(seam)=nurbs.seam {
+                let offset=(seam-nurbs.domain[0])/(nurbs.domain[1]-nurbs.domain[0]);
+                for fraction in &mut fractions {*fraction=(*fraction-offset).rem_euclid(1.);}
+                fractions.sort_by(f64::total_cmp);
+            }
+            Ok(fractions)
+        },
         Curve::Polycurve { .. } => Err(KernelError::InvalidInput(
             "polycurve is handled by the caller".into(),
         )),
@@ -270,6 +284,18 @@ fn curve_fractions(
 /// Exact curve/B-Rep intersection fractions in `[0, 1]`. Polycurves are evaluated
 /// segment-by-segment with the documented segment-uniform parameterisation.
 pub fn curve_brep_fractions(
+    brep: &Brep,
+    curve: &Curve,
+    tolerance: f64,
+    limits: &Limits,
+) -> Result<Vec<f64>, KernelError> {
+    let fractions = curve_brep_fractions_including_endpoints(brep, curve, tolerance, limits)?;
+    om9_core::top11::normalize_cut_fractions(curve, om9_core::geometry::Transform::identity(), fractions, tolerance, false, limits)
+        .map_err(|error| KernelError::InvalidInput(error.to_string()))
+}
+
+/// Exact curve/BRep intersections including intersections at curve endpoints.
+pub fn curve_brep_fractions_including_endpoints(
     brep: &Brep,
     curve: &Curve,
     tolerance: f64,
@@ -305,11 +331,12 @@ pub fn curve_brep_fractions(
                 *value = 1.0 - *value;
             }
         }
-        fractions.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
-        fractions.dedup_by(|a, b| (*a - *b).abs() <= 1e-7);
-        return Ok(fractions);
+        return om9_core::top11::normalize_cut_fractions(curve, om9_core::geometry::Transform::identity(), fractions, tolerance, true, limits)
+            .map_err(|error| KernelError::InvalidInput(error.to_string()));
     }
-    curve_fractions(source, &normalized, tolerance, limits)
+    let fractions=curve_fractions(source, &normalized, tolerance, limits)?;
+    om9_core::top11::normalize_cut_fractions(curve, om9_core::geometry::Transform::identity(), fractions, tolerance, true, limits)
+        .map_err(|error| KernelError::InvalidInput(error.to_string()))
 }
 
 /// Closest line-curve parameter for one exact NURBS curve through OCCT's

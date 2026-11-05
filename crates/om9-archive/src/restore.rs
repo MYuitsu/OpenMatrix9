@@ -64,6 +64,13 @@ pub(crate) fn admit(
     limits: &Limits,
     available: &BTreeSet<ReplayKey>,
 ) -> Result<usize> {
+    admit_with_usage(document, limits, available).map(|(count, _)| count)
+}
+fn admit_with_usage(
+    document: &Document,
+    limits: &Limits,
+    available: &BTreeSet<ReplayKey>,
+) -> Result<(usize, Usage)> {
     document
         .session_generation
         .checked_add(1)
@@ -119,7 +126,7 @@ pub(crate) fn admit(
         Usage::array::<SourceStamp>(document.entities.len())?,
         limits,
     )?;
-    Ok(count)
+    Ok((count, peak))
 }
 fn message(recipe: &Recipe) -> Result<String> {
     let mut reason = String::new();
@@ -145,11 +152,21 @@ fn copy_message(message: &str) -> Result<String> {
     Ok(copy)
 }
 pub fn restore(
-    mut document: Document,
+    document: Document,
     limits: &Limits,
     available: &BTreeSet<ReplayKey>,
 ) -> Result<RestoredDocument> {
-    let count = admit(&document, limits, available)?;
+    restore_with_admission(document, limits, available, &mut |_| Ok(()))
+}
+pub(crate) fn restore_with_admission(
+    mut document: Document,
+    limits: &Limits,
+    available: &BTreeSet<ReplayKey>,
+    admit_external: &mut impl FnMut(u64) -> Result<()>,
+) -> Result<RestoredDocument> {
+    admit_external(document.validation_peak_estimate(limits, true)?.bytes)?;
+    let (count, peak) = admit_with_usage(&document, limits, available)?;
+    admit_external(peak.bytes)?;
     document.renew_session(limits)?;
     let mut diagnostics = Vec::new();
     diagnostics
@@ -205,6 +222,24 @@ mod admission_tests {
         history::{ReplayEnvironment, Tolerance},
         model::Entity,
     };
+    #[test]
+    fn external_restoration_refusal_precedes_session_mutation() {
+        let mut source = Document::new("restoration reservation");
+        let point = Entity::new("point", Geometry::Point([1., 2., 3.]), None);
+        source.entities.insert(point.id, point);
+        let limits = Limits::default();
+        let owned = source.validate(&limits).unwrap().bytes;
+        let before = source.clone();
+        let mut calls = 0;
+        let result = restore_with_admission(source.clone(), &limits, &BTreeSet::new(), &mut |peak| {
+            calls += 1;
+            assert!(peak >= owned);
+            Err(Error::Budget("test restore reservation"))
+        });
+        assert!(matches!(result, Err(Error::Budget("test restore reservation"))));
+        assert_eq!(calls, 1);
+        assert_eq!(source, before);
+    }
     #[test]
     fn two_diagnostic_owners_are_reserved_before_restoration_grows_them() {
         let mut d = Document::new("restoration admission");

@@ -1,0 +1,11 @@
+# Reuse transient B-rep points for STL
+
+After computing the topology remap, STL construction now consumes the transient edge-topology snapshot and drops its bindings. When the output point array is empty, it transforms and reuses the snapshot's owned point vector in place; later B-reps append into the existing output as before. Source geometry and topology remapping stay unchanged, and reflection/orientation checks still use the transformed points. This eliminates one output point-buffer allocation for that first B-rep, rather than claiming all export geometry or native meshing is zero-copy.
+
+The implementation retains the old triangle validation and cancellation checks; failures discard the private export. An isolated unit fixture verifies pointer identity, transformed coordinates, later append and cancellation. The complete STL integration suite includes nonuniform scale, reflection, cavities, open and periodic surfaces and the 12 mm sphere. The change does not itself establish a bound on OCCT transients, total process memory or desktop performance.
+
+On the external E: target with `-j 2`, 25 STL session tests, five kernel edge-topology tests and all 60 serial STL integration tests passed. The pointer test checks the first B-rep buffer is actually reused; these checks do not establish a physical memory saving for every model.
+
+## Isolated release probe
+
+On the same machine and native runtime, one fresh process per executable exported the existing radius-12-mm sphere fixture at 0.001 mm tolerance. The previously built executable (SHA-256 `77D6EF5DF45E08D7C2CD5B0229BA2072E3E064D3355E3BA8F4D3CBE44130B136`, built 2026-11-03) and the new executable (`6AB90C8E35BC07C533D071974D719F1C4B2F7F25C1179FC779D628BA6B53CF40`) each reported 241,322 triangles. Old/new process peak commit was 198,828,032 / 198,709,248 bytes; peak working set was 194,232,320 / 193,921,024 bytes. Elapsed times were 1,099.957 / 973.000 ms. These are single runs with uncontrolled system load; the old executable predates other code changes as well. The nearly equal process high-water values do not establish a meaningful peak-memory or speed improvement attributable to this change. Peak commit covers the process lifetime and is not GPU memory or a native allocation breakdown.

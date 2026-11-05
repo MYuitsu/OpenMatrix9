@@ -1,5 +1,9 @@
 # Third-party notices
 
+The OCCT 8.0.1 meshing toolkit can use Delabella, copyright 2018 GUMIX - Marcin
+Sokalski, under the MIT license. The upstream notice is retained in
+`Resources/licenses/delabella-LICENSE`; source: https://github.com/msokalski/delabella.
+
 The standalone plugin host/package tool uses `libloading` 0.8.9 (ISC,
 https://github.com/nagisa/rust_libloading/) and `zip` 9.0.5 (MIT,
 https://github.com/zip-rs/zip2). Their original notices are retained in

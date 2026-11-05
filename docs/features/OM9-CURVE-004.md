@@ -3,6 +3,13 @@
 
 # OM9-CURVE-004 — Rectangle
 
+## Standalone numeric input — 2026-11-01
+
+Corners mode accepts first-corner coordinates, a bare length, and a bare width;
+Enter at the width prompt uses the length. Controller geometry and invalid-input
+retry passed focused library tests. The running executable was locked and has
+not been rebuilt or checked for this change. [Evidence](../validation/2026-11-01-rectangle-numeric-input.md).
+
 ## Standalone correction — 2026-10-26
 
 Corners now keeps signed CPlane direction in a shared Rust preview/commit frame;

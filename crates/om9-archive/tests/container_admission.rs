@@ -73,6 +73,32 @@ fn typed_document_roundtrip_preserves_master_identity_basis_attributes_and_chann
     assert_eq!(decoded.entities.len(), 4);
 }
 #[test]
+fn document_nodes_are_not_json_scalar_token_count() {
+    let mut document = Document::new("parser structural units");
+    let mesh = Mesh {
+        vertices: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+        faces: (0..100).map(|_| vec![0, 1, 2]).collect(),
+        normals: vec![], colors: vec![], corner_uvs: vec![],
+    };
+    let entity = Entity::new("mesh", Geometry::Mesh(mesh), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let used = document.validate(&Limits::default()).unwrap();
+    let limits = Limits { max_nodes: used.nodes + 8, ..Limits::default() };
+    let bytes = Archive::encode(&document, &limits).unwrap();
+    assert_eq!(Archive::decode(&bytes, &limits).unwrap(), document);
+    let mut oversized = document.clone();
+    let Geometry::Mesh(mesh) = &mut oversized.entities.values_mut().next().unwrap().geometry else { panic!("expected mesh") };
+    mesh.faces.extend((0..16).map(|_| vec![0, 1, 2]));
+    let oversized_bytes = Archive::encode(&oversized, &Limits::default()).unwrap();
+    assert!(matches!(Archive::decode(&oversized_bytes, &limits), Err(Error::Budget("nodes"))),
+        "the typed document must still respect its structural node limit");
+    let tight_bytes = Limits { max_bytes: bytes.len() as u64 + 64, ..limits };
+    assert!(Archive::decode(&bytes, &tight_bytes).is_err(), "JSON preflight remains byte-bounded");
+    assert!(om9_archive::admit_json(br#"{"a":[1,2,3]}"#, &Limits { max_nodes: 3, ..Limits::default() }).is_err(),
+        "generic untrusted JSON must retain its explicit token limit");
+}
+
+#[test]
 fn checksum_truncation_version_and_trailing_payload_corruption_reject() {
     let bytes = Archive::encode(&fixture(), &Limits::default()).unwrap();
     let mut corrupt = bytes.clone();
@@ -190,16 +216,18 @@ fn unknown_fields_and_missing_required_metadata_do_not_migrate_implicitly() {
     );
 }
 #[test]
-fn aggregate_json_nodes_and_strings_are_preflighted_before_typed_decode() {
+fn generic_json_nodes_and_archive_bytes_are_preflighted_before_typed_decode() {
     let bytes = Archive::encode(&fixture(), &Limits::default()).unwrap();
     let limits = Limits {
         max_nodes: 3,
         ..Limits::default()
     };
     assert!(matches!(
-        Archive::decode(&bytes, &limits),
+        om9_archive::admit_json(&serde_json::to_vec(&fixture()).unwrap(), &limits),
         Err(Error::Budget(_))
     ));
+    let byte_limits = Limits { max_bytes: bytes.len() as u64, ..Limits::default() };
+    assert!(matches!(Archive::decode(&bytes, &byte_limits), Err(Error::Budget(_))));
     let deep = "[".repeat(40) + &"]".repeat(40);
     assert!(matches!(
         Archive::decode(&pack_json(deep.as_bytes()), &Limits::default()),

@@ -127,6 +127,68 @@ fn perspective_right_drag_orbits_without_moving_target_or_model() {
 }
 
 #[test]
+fn horizontal_orbit_uses_thirty_degrees_per_hundred_points() {
+    let mut h = Harness::new();
+    let before = h.app.controller.workspace.views[&ViewId::Perspective]
+        .camera
+        .clone();
+    h.drag(ViewId::Perspective, Vec2::new(100., 0.), false);
+    let after = &h.app.controller.workspace.views[&ViewId::Perspective].camera;
+    let a = direction(&before);
+    let b = direction(after);
+    let dot = a[0] * b[0] + a[1] * b[1];
+    let cross = a[0] * b[1] - a[1] * b[0];
+    assert!((cross.atan2(dot).abs() - std::f64::consts::PI / 6.).abs() < 1e-5);
+}
+
+#[test]
+fn pan_distance_tracks_visible_span_at_target_depth() {
+    for view in [ViewId::LookingDown, ViewId::Perspective] {
+        let mut h = Harness::new();
+        let before = h.app.controller.workspace.views[&view].camera.clone();
+        let height = h.app.view_rects[&view].height() as f64;
+        let span = match before.projection {
+            Projection::Orthographic { vertical_span_mm } => vertical_span_mm,
+            Projection::Perspective { vertical_fov_rad } => {
+                let d = direction(&before);
+                2. * (d.iter().map(|x| x * x).sum::<f64>()).sqrt()
+                    * (vertical_fov_rad / 2.).tan()
+            }
+        };
+        h.drag(view, Vec2::new(80., 0.), true);
+        let after = &h.app.controller.workspace.views[&view].camera;
+        let distance = (0..3)
+            .map(|i| (after.target[i] - before.target[i]).powi(2))
+            .sum::<f64>()
+            .sqrt();
+        assert!((distance - 80. * span / height).abs() < 1e-6, "{view:?}: {distance}");
+    }
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn orbit_keeps_the_published_brep_display_buffers() {
+    use om9_core::budget::Limits;
+    use om9_kernel::creation::{self, Primitive, DEFAULT_DEFLECTION_MM};
+    let brep = creation::primitive(
+        Primitive::Box { x_mm: 4., y_mm: 6., z_mm: 8. },
+        DEFAULT_DEFLECTION_MM,
+        &Limits::default(),
+    ).unwrap();
+    let entity = Entity::new("box", Geometry::Brep(brep), None);
+    let mut document = Document::new("camera-only BRep");
+    document.entities.insert(entity.id, entity);
+    let mut h = Harness::from_document(document);
+    let before = h.app.controller.scene().unwrap();
+    let epoch = before.epoch;
+    let buffers = before.objects[0].buffers.clone();
+    h.drag(ViewId::Perspective, Vec2::new(100., 20.), false);
+    let after = h.app.controller.scene().unwrap();
+    assert_eq!(after.epoch, epoch);
+    assert!(std::sync::Arc::ptr_eq(&buffers, &after.objects[0].buffers));
+}
+
+#[test]
 fn orthographic_right_drag_pans_without_changing_zoom_or_model() {
     let mut h = Harness::new();
     let before = h.app.controller.workspace.views[&ViewId::LookingDown]

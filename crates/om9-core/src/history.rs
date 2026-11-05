@@ -215,7 +215,11 @@ impl Recipe {
         }
         if self.state == EvaluationState::Clean {
             for input in &self.inputs {
-                d.resolve(&input.source)?;
+                // An input inserted by this transaction is validated against
+                // the complete staged document before publication.
+                if !pending.contains(&input.source.object) {
+                    d.resolve(&input.source)?;
+                }
             }
             if self
                 .outputs

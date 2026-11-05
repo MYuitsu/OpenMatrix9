@@ -5,6 +5,7 @@
 #include <opennurbs.h>
 #include <json.hpp>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
@@ -22,6 +23,9 @@
 #include <share.h>
 #include <sys/stat.h>
 #include <bcrypt.h>
+#ifdef OM9_NATIVE_MEMORY_PROFILE
+#include <psapi.h>
+#endif
 
 namespace {
 using J = nlohmann::json;
@@ -33,6 +37,16 @@ constexpr uintmax_t max_packet_bytes = 16 * 1024 * 1024, max_archive_bytes = 64 
 constexpr const char* default_layer = "ffffffff-ffff-4fff-8fff-ffffffffffff";
 std::string operation_record = "arguments";
 void require(bool yes, const char* message) { if (!yes) throw std::runtime_error(message); }
+#ifdef OM9_NATIVE_MEMORY_PROFILE
+void memory_sample(const char* stage) {
+  PROCESS_MEMORY_COUNTERS_EX counters{}; counters.cb = sizeof(counters);
+  if (GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&counters), sizeof(counters)))
+    std::cerr << "OM9_MEMORY stage=" << stage << " private=" << counters.PrivateUsage
+              << " peak_commit=" << counters.PeakPagefileUsage << " working_set=" << counters.WorkingSetSize << '\n';
+}
+#else
+void memory_sample(const char*) {}
+#endif
 struct Library { Library() { ON::Begin(); } ~Library() { ON::End(); } };
 struct File {
   FILE* value=nullptr;
@@ -88,17 +102,44 @@ struct Preflight : nlohmann::json_sax<J> {
   bool end_array() override { frames.pop_back(); return true; }
   bool parse_error(size_t, const std::string&, const nlohmann::detail::exception&) override { throw std::runtime_error("invalid/trailing JSON bytes"); }
 };
+class PacketStreamBuf : public std::streambuf {
+  FILE* file_;
+  std::array<char, 64 * 1024> buffer_{};
+protected:
+  int_type underflow() override {
+    if (gptr() && gptr() < egptr()) return traits_type::to_int_type(*gptr());
+    const auto count = std::fread(buffer_.data(), 1, buffer_.size(), file_);
+    if (count == 0) return traits_type::eof();
+    setg(buffer_.data(), buffer_.data(), buffer_.data() + count);
+    return traits_type::to_int_type(*gptr());
+  }
+public:
+  explicit PacketStreamBuf(FILE* file) : file_(file) { setg(buffer_.data(), buffer_.data(), buffer_.data()); }
+};
 J packet(const std::filesystem::path& path) {
-  const auto size = std::filesystem::file_size(path);
-  require(size > 0 && size <= max_packet_bytes, "packet byte budget");
-  std::ifstream in(path, std::ios::binary); require(in.good(), "open packet");
-  std::string bytes(static_cast<size_t>(size), '\0');
-  in.read(bytes.data(), static_cast<std::streamsize>(bytes.size())); require(in.good() && in.peek() == EOF, "packet changed while reading");
-  Preflight guard; require(J::sax_parse(bytes, &guard), "packet preflight");
-  return J::parse(bytes);
+  // Hold one read handle that denies concurrent writers for both passes.
+  // Parsing from FILE* avoids keeping a full packet string alongside the DOM.
+  File input(path, true);
+  const auto size = _filelengthi64(_fileno(input.value));
+  require(size > 0 && static_cast<uintmax_t>(size) <= max_packet_bytes, "packet byte budget");
+  memory_sample("packet_open");
+  {
+    PacketStreamBuf buffer(input.value); std::istream stream(&buffer);
+    Preflight guard; require(J::sax_parse(stream, &guard), "packet preflight");
+    require(!std::ferror(input.value), "packet read error");
+  }
+  memory_sample("preflight_done");
+  require(_fseeki64(input.value, 0, SEEK_SET) == 0, "rewind packet");
+  PacketStreamBuf buffer(input.value); std::istream stream(&buffer);
+  J result = J::parse(stream);
+  require(!std::ferror(input.value), "packet read error");
+  memory_sample("dom_ready");
+  require(_filelengthi64(_fileno(input.value)) == size, "packet changed while reading");
+  return result;
 }
 void fields(const J& j, std::initializer_list<const char*> names) {
-  require(j.is_object() && j.size() == names.size(), "missing/unknown record fields");
+  require(j.is_object(), "expected record object");
+  require(j.size()==names.size(), "missing/unknown record fields");
   for (auto name : names) require(j.contains(name), "missing/unknown record fields");
 }
 void array(const J& j, size_t n) { require(j.is_array() && j.size() == n, "array shape"); }
@@ -179,10 +220,10 @@ std::string unit_string(ON::LengthUnitSystem u) {
   }
 }
 
-void axis(size_t degree,size_t n,const J& knots,const J& dom) {
+void axis(size_t degree,size_t n,const J& knots,const J& dom,bool allow_periodic_outer=false) {
   require(degree>=1 && degree<=16 && n>degree && n<=max_array, "NURBS degree/pole count");
   array(knots,n+degree+1); const auto d=domain(dom); size_t run=1;
-  require(real(knots[0])==real(knots[1]) && real(knots[knots.size()-1])==real(knots[knots.size()-2]), "unsupported noncanonical expanded outer knots");
+  require(allow_periodic_outer || (real(knots[0])==real(knots[1]) && real(knots[knots.size()-1])==real(knots[knots.size()-2])), "unsupported noncanonical expanded outer knots");
   for(size_t i=0;i<knots.size();++i) {
     const double v=real(knots[i]);
     if(i) { const double prev=real(knots[i-1]); require(prev<=v,"NURBS sorted knots"); run=prev==v?run+1:1; require(run<=degree+1,"NURBS knot multiplicity"); }
@@ -197,15 +238,35 @@ void poles(const J& p,const J& w) {
 }
 void nurbs_curve_validate(const J& j) {
   fields(j,{"degree","poles","weights","knots","domain","periodic","reversed","seam"});
-  poles(j["poles"],j["weights"]); axis(count(j["degree"],16),j["poles"].size(),j["knots"],j["domain"]);
+  poles(j["poles"],j["weights"]); axis(count(j["degree"],16),j["poles"].size(),j["knots"],j["domain"],flag(j["periodic"]));
   (void)flag(j["periodic"]); require(!flag(j["reversed"]),"unsupported reversed curve metadata"); require(j["seam"].is_null(),"unsupported curve seam metadata");
+}
+bool periodic_outer_consistent(const J& knots,size_t degree,size_t poles,const J& d) {
+  if(poles<=2*degree) return false;
+  const double span=real(d[1])-real(d[0]);
+  const double first=real(knots[poles-degree])-span;
+  const double last=real(knots[2*degree])+span;
+  const auto matches=[&](double a,double b) {
+    const double rounding=2*std::numeric_limits<double>::epsilon()*std::max({std::abs(a),std::abs(b),std::abs(span)});
+    return std::isfinite(a)&&std::isfinite(b)&&rounding<=std::abs(span)*1e-5&&std::abs(a-b)<=std::abs(span)*1e-12+rounding;
+  };
+  return matches(real(knots[0]),first)&&matches(real(knots.back()),last);
+}
+std::unique_ptr<ON_NurbsCurve> short_line_curve(const ON_3dPoint& a,const ON_3dPoint& b,const ON_Interval& d) {
+  auto n=std::make_unique<ON_NurbsCurve>(3,false,2,2);
+  require(a!=b && n->SetCV(0,a)&&n->SetCV(1,b)&&n->SetKnot(0,d[0])&&n->SetKnot(1,d[1])&&n->IsValid(),"short line NURBS validity");
+  require(n->SetUserString(L"org.openmatrix9.short_line.v1",L"1"),"short line metadata");return n;
 }
 std::unique_ptr<ON_Curve> curve(const J& j,size_t depth=0) {
   require(depth<=max_depth && j.is_object() && j.size()==1,"curve variant/depth");
   const auto& name=j.begin().key(); const auto& v=j.begin().value();
   if(name=="Line") {
     fields(v,{"start","end","domain"}); const auto a=point(v["start"]),b=point(v["end"]); require(a!=b,"degenerate line"); const auto d=domain(v["domain"]);
-    auto c=std::make_unique<ON_LineCurve>(a,b); require(c->SetDomain(d[0],d[1]),"line domain"); return c;
+    auto c=std::make_unique<ON_LineCurve>(a,b); require(c->SetDomain(d[0],d[1]),"line domain");
+    if(c->IsValid())return c;
+    // openNURBS rejects distinct endpoints below its coincidence threshold.
+    // A degree-one NURBS keeps the exact linear parameterization in 3DM.
+    return short_line_curve(a,b,d);
   }
   if(name=="Circle") {
     if(v.contains("angle_domain"))fields(v,{"center","x","y","radius","domain","angle_domain"});
@@ -228,15 +289,22 @@ std::unique_ptr<ON_Curve> curve(const J& j,size_t depth=0) {
     auto c=std::make_unique<ON_NurbsCurve>(3,rational,degree+1,n);
     for(int i=0;i<n;++i) { const auto p=point(v["poles"][i]); const double w=real(v["weights"][i]); require(c->SetCV(i,exact_homogeneous(p,w)),"curve homogeneous pole"); }
     for(int i=0;i<c->KnotCount();++i) require(c->SetKnot(i,real(v["knots"][i+1])),"curve compact knot");
-    require(c->IsValid(),"native NURBS curve validity"); require(c->IsPeriodic()==flag(v["periodic"]),"unsupported unmatched curve periodic metadata"); return c;
+    require(c->IsValid(),"native NURBS curve validity"); require(c->IsPeriodic()==flag(v["periodic"]),"unsupported unmatched curve periodic metadata");
+    if(flag(v["periodic"]) && (real(v["knots"][0])!=real(v["knots"][1]) || real(v["knots"].back())!=real(v["knots"][v["knots"].size()-2]))) {
+      require(periodic_outer_consistent(v["knots"],degree,n,v["domain"]),"unsupported nonperiodic expanded outer knots");
+      const auto extra=J::array({v["knots"][0],v["knots"].back()}).dump();
+      const ON_wString value(extra.c_str());
+      require(c->SetUserString(L"org.openmatrix9.periodic_outer_knots.v1",value.Array()),"periodic outer knot metadata");
+    }
+    return c;
   }
   if(name=="Polycurve") {
     fields(v,{"segments","reversed"}); require(!flag(v["reversed"]),"unsupported reversed polycurve metadata");
     const auto& seg=v["segments"]; require(seg.is_array() && !seg.empty() && seg.size()<=max_records,"polycurve segment budget");
-    // A chain of line segments is a polyline, not a generic polycurve: ON_PolylineCurve
-    // preserves every point exactly and has no per-segment parameter-domain mapping to lose.
+    // Preserve the normalized local segment domains used by this polyline projection.
+    // Other domains need a polycurve so the independent curve domains survive.
     bool all_lines=true;
-    for(const auto& item:seg) { all_lines = all_lines && item.is_object() && item.size()==1 && item.contains("Line"); }
+    for(const auto& item:seg) { all_lines = all_lines && item.is_object() && item.size()==1 && item.contains("Line") && item["Line"].contains("domain") && item["Line"]["domain"]==J::array({0.0,1.0}); }
     if(all_lines) {
       ON_3dPointArray points;
       ON_3dPoint previous;
@@ -247,15 +315,25 @@ std::unique_ptr<ON_Curve> curve(const J& j,size_t depth=0) {
         points.Append(b); previous=b;
       }
       require(points.Count()>=2,"polyline point count");
-      auto c=std::make_unique<ON_PolylineCurve>(points); require(c->IsValid(),"native polyline validity"); return c;
+      auto c=std::make_unique<ON_PolylineCurve>(points); if(c->IsValid())return c;
     }
     auto c=std::make_unique<ON_PolyCurve>();
     for(const auto& item:seg) {
-      auto child=curve(item,depth+1);
-      // Append may change noncontiguous parameter domains. Refuse that mapping.
-      if(c->Count()) { require(c->Domain()[1]==child->Domain()[0],"unsupported noncontiguous polycurve domains"); require(c->PointAtEnd().DistanceTo(child->PointAtStart())<=1e-12,"disconnected polycurve segments"); }
-      require(c->Append(child.get()),"polycurve append"); child.release();
+      auto original=curve(item,depth+1);
+      if(c->Count()) {
+        require(c->PointAtEnd().DistanceTo(original->PointAtStart())<=1e-12,"disconnected polycurve segments");
+      }
+      // Append chooses parent intervals from each child's domain. Give it a
+      // temporary unit-domain copy, then restore the exact child representation.
+      // This is linear in segment count and never reparameterizes the source.
+      auto child=std::unique_ptr<ON_Curve>(original->DuplicateCurve());require(bool(child),"polycurve child copy");
+      const double start=static_cast<double>(c->Count());
+      require(child->SetDomain(start,start+1.),"polycurve temporary child domain");
+      auto* appended=child.get();require(c->Append(appended),"polycurve append");child.release();
+      require(appended->CopyFrom(original.get()),"polycurve restore child");
     }
+    // OM9's polycurve fraction assigns an equal interval to each segment.
+    // ON_PolyCurve stores that parent mapping independently of child domains.
     require(c->IsValid(),"native polycurve validity"); return c;
   }
   throw std::runtime_error("unsupported curve variant");
@@ -286,7 +364,10 @@ std::unique_ptr<ON_Geometry> geometry(const J& j,const ON_Xform& placement,const
   }
   else if(name=="Mesh"||name=="Cloud") {
     const bool mesh=name=="Mesh";
-    if(mesh) fields(v,{"vertices","faces","normals","colors"}); else fields(v,{"points","normals","colors","hidden"});
+    if(mesh) {
+      fields(v,{"vertices","faces","normals","colors","corner_uvs"});
+      require(v["corner_uvs"].is_array() && v["corner_uvs"].empty(),"mesh corner UV export unsupported");
+    } else fields(v,{"points","normals","colors","hidden"});
     const auto& points=v[mesh?"vertices":"points"]; const auto& normals=v["normals"]; const auto& colors=v["colors"];
     require(points.is_array() && !points.empty() && points.size()<=max_array,"point channel budget");
     require(normals.is_array() && (normals.empty()||normals.size()==points.size()),"normal channel count"); require(colors.is_array() && (colors.empty()||colors.size()==points.size()),"color channel count");
@@ -340,7 +421,11 @@ std::unique_ptr<ON_Geometry> geometry(const J& j,const ON_Xform& placement,const
     ON_Xform normal; require(placement.GetSurfaceNormalXform(normal)!=0,"cloud normal inverse transpose");
     for(int i=0;i<cloud->m_N.Count();++i) { auto n=normal*cloud->m_N[i]; require(n.IsValid() && n.Unitize(),"unsupported zero/nonfinite cloud normal"); cloud->m_N[i]=n; }
   }
-  require(g->Transform(placement) && g->IsValid(),"native world placement");
+  require(g->Transform(placement),"native world placement");
+  if(!g->IsValid()) {
+    const auto* line=ON_LineCurve::Cast(g.get());require(line,"native world placement");
+    g=short_line_curve(line->PointAtStart(),line->PointAtEnd(),line->Domain());
+  }
   // Keep the authored polygon indices and covector-normal convention. Native
   // mesh Transform adds an orientation sign for mirrored matrices; the owned
   // representation defines normals by inverse transpose alone.
@@ -388,21 +473,33 @@ struct Writer {
     const auto a=attributes(e,member); auto g=geometry(e["geometry"],matrix(e["placement"]),boxes); const auto box=g->BoundingBox(); require(box.IsValid(),"native entity bounding box");
     require(!model.AddModelGeometryComponent(g.get(),&a,false).IsEmpty(),"native owned geometry component"); return box;
   }
-  void add_definition(const std::string& id,const J& definitions,std::set<std::string>& active,size_t depth) {
+  void add_definition(const std::string& id,J& definitions,std::set<std::string>& active,size_t depth) {
     require(depth<=max_depth,"definition depth budget"); if(boxes.contains(id)) return; require(active.insert(id).second,"definition cycle"); require(definitions.contains(id),"missing definition");
-    const auto& d=definitions[id]; operation_record="definition "+id; fields(d,{"id","label","revision","members"}); require(id_string(uuid(d["id"]))==id,"definition key mismatch"); revision(d["revision"]);
-    const auto& members=d["members"]; require(members.is_array() && !members.empty() && members.size()<=max_records,"empty/oversized definition members unsupported");
+    auto& d=definitions[id]; operation_record="definition "+id; fields(d,{"id","label","revision","members"}); require(id_string(uuid(d["id"]))==id,"definition key mismatch"); revision(d["revision"]);
+    auto& members=d["members"]; require(members.is_array() && !members.empty() && members.size()<=max_records,"empty/oversized definition members unsupported");
     for(const auto& m:members) if(m.contains("geometry") && m["geometry"].is_object() && m["geometry"].contains("Instance")) add_definition(id_string(uuid(m["geometry"]["Instance"])),definitions,active,depth+1);
     ON_BoundingBox box; ON_SimpleArray<ON_UUID> ids;
-    for(const auto& m:members) { box.Union(add_entity(m,true)); ids.Append(uuid(m["id"])); }
+    for(auto& m:members) {
+      box.Union(add_entity(m,true)); ids.Append(uuid(m["id"]));
+      // Dependencies were traversed above; completed definitions are reused
+      // through boxes/model, so this JSON geometry has no later reader.
+      m["geometry"] = nullptr;
+    }
     operation_record="definition "+id; const auto label=text(d["label"]); ON_InstanceDefinition def; require(def.SetId(uuid(d["id"])) && def.SetName(ON_wString(label.c_str())) && native_text(def.Name())==label,"unsupported native definition ID/name normalization"); def.SetUnitSystem(ON::LengthUnitSystem::Millimeters); def.SetInstanceGeometryIdList(ids); def.SetBoundingBox(box);
     require(def.IsValid() && !model.AddModelComponent(def,false).IsEmpty(),"native static instance definition"); boxes.emplace(id,box); active.erase(id);
   }
-  J write(const J& p,const std::filesystem::path& output) {
+  J write(J& p,const std::filesystem::path& output) {
     fields(p,{"schema_version","mode","document"}); require(count(p["schema_version"],1)==1,"unsupported schema version"); require(text(p["mode"])=="geometry_only_current","unsupported export mode");
-    const auto& d=p["document"]; fields(d,{"id","name","page_unit","current_layer","layer_order","layers","entities","definitions","groups","exchange"}); (void)uuid(d["id"]); (void)text(d["name"]);
+    auto& d=p["document"]; fields(d,{"id","name","page_unit","tolerance","current_layer","layer_order","layers","entities","definitions","groups","exchange"}); (void)uuid(d["id"]); (void)text(d["name"]);
     model.m_settings.m_ModelUnitsAndTolerances.m_unit_system=ON::LengthUnitSystem::Millimeters; model.m_settings.m_PageUnitsAndTolerances.m_unit_system=unit(d["page_unit"]); model.m_properties.m_Application.m_application_name=L"OpenMatrix9 standalone current geometry export";
-    const auto& layers=d["layers"]; const auto& order=d["layer_order"]; const auto& entities=d["entities"]; const auto& definitions=d["definitions"]; const auto& groups=d["groups"]; const auto& exchange=d["exchange"];
+    if(!d["tolerance"].is_null()) {
+      const auto& t=d["tolerance"]; fields(t,{"absolute_mm","relative","angular_rad"});
+      const double absolute=real(t["absolute_mm"]), relative=real(t["relative"]), angular=real(t["angular_rad"]);
+      require(absolute>0. && relative>0. && relative<1. && angular>0. && angular<=ON_PI,"unrepresentable 3DM model tolerance");
+      auto& units=model.m_settings.m_ModelUnitsAndTolerances;
+      units.m_absolute_tolerance=absolute; units.m_relative_tolerance=relative; units.m_angle_tolerance=angular;
+    }
+    const auto& layers=d["layers"]; const auto& order=d["layer_order"]; auto& entities=d["entities"]; auto& definitions=d["definitions"]; const auto& groups=d["groups"]; const auto& exchange=d["exchange"];
     require(layers.is_object() && layers.size()<=max_records && order.is_array() && order.size()==layers.size(),"layer table/order budget"); require(entities.is_object() && entities.size()<=max_records && definitions.is_object() && definitions.size()<=max_records,"object/definition table budget");
     require(groups.is_object() && groups.size()<=max_records,"group table budget"); fields(exchange,{"line_patterns","text_styles","materials","dim_styles","hatch_patterns","lights"}); const auto& line_patterns=exchange["line_patterns"]; require(line_patterns.is_object()&&line_patterns.size()<=max_records,"line pattern table budget"); const auto& text_styles=exchange["text_styles"]; require(text_styles.is_object()&&text_styles.size()<=max_records,"text style table budget"); const auto& materials=exchange["materials"]; require(materials.is_object()&&materials.size()<=max_records,"material table budget"); const auto& dim_styles=exchange["dim_styles"]; require(dim_styles.is_object()&&dim_styles.size()<=max_records,"dimension style table budget"); const auto& hatch_patterns=exchange["hatch_patterns"]; require(hatch_patterns.is_object()&&hatch_patterns.size()<=max_records,"hatch pattern table budget"); const auto& lights=exchange["lights"]; require(lights.is_object()&&lights.size()<=max_records,"light table budget");
     // Check longest occurrence depth before native masters are allocated.
@@ -488,7 +585,14 @@ struct Writer {
     else { const auto key=text(order[0]); model.m_settings.SetCurrentLayerId(uuid(order[0])); model.m_settings.SetV5CurrentLayerIndex(layer_indices.at(key)); }
     std::set<std::string> active;
     for(const auto& [key,def]:definitions.items()) { (void)def; (void)uuid(J(key)); add_definition(key,definitions,active,0); }
-    for(const auto& [key,e]:entities.items()) { require(e.contains("id")&&id_string(uuid(e["id"]))==key,"entity key mismatch"); (void)add_entity(e,false); }
+    for(auto& [key,e]:entities.items()) {
+      require(e.contains("id")&&id_string(uuid(e["id"]))==key,"entity key mismatch");
+      (void)add_entity(e,false);
+      // The native model owns the converted geometry now. The remaining
+      // root records no longer reference this JSON geometry value.
+      e["geometry"] = nullptr;
+    }
+    memory_sample("native_model_ready");
     operation_record="write private archive"; require(!std::filesystem::exists(output),"output already exists; private unique destination required");
     // No output path is touched until the complete conversion succeeds. Failed
     // writes remove only the new private file; public atomic publish is Rust-owned.
@@ -497,6 +601,7 @@ struct Writer {
       PrivateFile file(output); ON_BinaryFile archive(ON::archive_mode::write3dm,file.value);
       require(model.Write(archive,5,&log),"native Rhino 5 writer"); require(std::fflush(file.value)==0,"flush private native archive"); file.complete=true;
     }
+    memory_sample("archive_written");
     require(std::filesystem::file_size(output)>32,"native writer output size");
     J diagnostics=J::array(); if(default_needed) diagnostics.push_back("unlayered entities mapped to native default layer");
     if(!text_styles.empty()) diagnostics.push_back("text style table is retained-only; V5 text style export is not implemented");
@@ -507,7 +612,56 @@ struct Writer {
 };
 
 J compact_knots(const ON_NurbsCurve& c) {
-  const int n=c.KnotCount(); require(n>0&&static_cast<size_t>(n)<=max_array,"native knot budget"); J values=J::array(); values.push_back(c.Knot(0)); for(int i=0;i<n;++i) values.push_back(c.Knot(i)); values.push_back(c.Knot(n-1)); return values;
+  const int n=c.KnotCount(); require(n>0&&static_cast<size_t>(n)<=max_array,"native knot budget"); J values=J::array(); values.push_back(c.Knot(0)); for(int i=0;i<n;++i) values.push_back(c.Knot(i)); values.push_back(c.Knot(n-1));
+  ON_wString stored;
+  if(c.GetUserString(L"org.openmatrix9.periodic_outer_knots.v1",stored)) {
+    require(c.IsPeriodic(),"periodic outer knot metadata on nonperiodic curve");
+    require(stored.Length()<=128,"periodic outer knot metadata budget");
+    const auto extra=J::parse(native_text(stored),nullptr,false); require(!extra.is_discarded(),"invalid periodic outer knot metadata"); array(extra,2);
+    const double first=real(extra[0]),last=real(extra[1]);
+    require(first<=c.Knot(0) && last>=c.Knot(n-1),"periodic outer knot metadata ordering");
+    values[0]=first;values[values.size()-1]=last;
+    require(periodic_outer_consistent(values,c.Degree(),c.CVCount(),interval_json(c.Domain())),"stale periodic outer knot metadata");
+  }
+  return values;
+}
+bool owned_periodic_userdata_only(const ON_Object& value) {
+  const auto* n=ON_NurbsCurve::Cast(&value);if(!n||!n->IsPeriodic())return false;
+  const auto* data=value.FirstUserData();if(!data||data->Next()||!ON_UserStringList::Cast(data))return false;
+  ON_ClassArray<ON_UserString> strings;if(value.GetUserStrings(strings)!=1||strings.Count()!=1||strings[0].m_key!=L"org.openmatrix9.periodic_outer_knots.v1")return false;
+  try { (void)compact_knots(*n);return true; } catch(const std::runtime_error&) { return false; }
+}
+bool short_line_projection(const ON_NurbsCurve& n,ON_3dPoint& a,ON_3dPoint& b) {
+  ON_wString marker;if(!n.GetUserString(L"org.openmatrix9.short_line.v1",marker))return false;
+  require(marker==L"1" && n.IsValid() && n.Dimension()==3 && n.Degree()==1 && n.CVCount()==2 && !n.IsRational() && !n.IsPeriodic() && n.KnotCount()==2,"invalid short line metadata");
+  require(n.GetCV(0,a)&&n.GetCV(1,b)&&a!=b,"invalid short line endpoints");return true;
+}
+bool owned_short_line_userdata_only(const ON_Object& value) {
+  const auto* n=ON_NurbsCurve::Cast(&value);if(!n)return false;
+  const auto* data=value.FirstUserData();if(!data||data->Next()||!ON_UserStringList::Cast(data))return false;
+  ON_ClassArray<ON_UserString> strings;if(value.GetUserStrings(strings)!=1||strings.Count()!=1||strings[0].m_key!=L"org.openmatrix9.short_line.v1")return false;
+  try { ON_3dPoint a,b;return short_line_projection(*n,a,b); } catch(const std::runtime_error&) { return false; }
+}
+bool owned_replaceable_userdata_only(const ON_Object& value) {
+  return owned_periodic_userdata_only(value)||owned_short_line_userdata_only(value);
+}
+bool contains_periodic_outer_metadata(const ON_Curve& curve,size_t depth=0) {
+  require(depth<=max_depth,"periodic metadata curve depth");
+  if(const auto* n=ON_NurbsCurve::Cast(&curve)) { ON_wString value; return n->GetUserString(L"org.openmatrix9.periodic_outer_knots.v1",value); }
+  if(const auto* p=ON_PolyCurve::Cast(&curve)) for(int i=0;i<p->Count();++i) {
+    require(p->SegmentCurve(i),"null metadata polycurve segment");
+    if(contains_periodic_outer_metadata(*p->SegmentCurve(i),depth+1)) return true;
+  }
+  return false;
+}
+bool contains_short_line_metadata(const ON_Curve& curve,size_t depth=0) {
+  require(depth<=max_depth,"short line metadata curve depth");
+  ON_wString value;if(curve.GetUserString(L"org.openmatrix9.short_line.v1",value))return true;
+  if(const auto* p=ON_PolyCurve::Cast(&curve))for(int i=0;i<p->Count();++i) {
+    require(p->SegmentCurve(i),"null short line polycurve segment");
+    if(contains_short_line_metadata(*p->SegmentCurve(i),depth+1))return true;
+  }
+  return false;
 }
 J curve_inventory(const ON_Curve& c,size_t depth=0) {
   require(depth<=max_depth && c.IsValid(),"native curve validity/depth");
@@ -533,6 +687,10 @@ J curve_inventory(const ON_Curve& c,size_t depth=0) {
     return J{{"Polycurve",{{"segments",segments},{"reversed",false}}}};
   }
   if(const auto* n=ON_NurbsCurve::Cast(&c)) {
+    ON_3dPoint a,b;
+    if(short_line_projection(*n,a,b)) {
+      return J{{"Line",{{"start",point_json(a)},{"end",point_json(b)},{"domain",interval_json(n->Domain())}}}};
+    }
     require(n->Dimension()==3 && n->CVCount()>0 && static_cast<size_t>(n->CVCount())<=max_array,"native curve pole budget/dimension"); J p=J::array(),w=J::array();
     for(int i=0;i<n->CVCount();++i) { ON_3dPoint pt; require(n->GetCV(i,pt),"native rational Euclidean pole"); p.push_back(point_json(pt)); w.push_back(n->Weight(i)); }
     return J{{"Nurbs",{{"degree",n->Degree()},{"poles",p},{"weights",w},{"knots",compact_knots(*n)},{"domain",interval_json(n->Domain())},{"periodic",n->IsPeriodic()},{"reversed",false},{"seam",nullptr}}}};
@@ -644,10 +802,49 @@ J native_brep_json(const ON_Brep& brep) {
   }
   return J{{"NativeBrep",{{"display",std::move(display)},{"payload",std::move(payload)},{"crc",brep.DataCRC(0)}}}};
 }
+
+// Compute the expected transformed BRep fingerprints from the held export packet.
+// Rust checks the packet identity, object IDs and response budgets before using these.
+J expected_brep_fingerprints(const J& p) {
+  fields(p,{"schema_version","mode","document"});
+  require(count(p["schema_version"],1)==1 && text(p["mode"])=="geometry_only_current","unsupported export packet");
+  const auto& d=p["document"]; const auto& entities=d["entities"]; const auto& definitions=d["definitions"];
+  require(entities.is_object() && entities.size()<=max_records && definitions.is_object() && definitions.size()<=max_records,"expected BRep table budget");
+  J values=J::array();std::set<std::string> ids;
+  auto add=[&](const J& e) {
+    require(e.is_object() && e.contains("id") && e.contains("geometry") && e.contains("placement"),"expected BRep entity");
+    const auto& g=e["geometry"];if(!g.is_object() || !g.contains("NativeBrep"))return;
+    const auto key=id_string(uuid(e["id"]));require(ids.insert(key).second,"expected BRep duplicate id");
+    const auto& input=g["NativeBrep"];fields(input,{"display","payload","crc"});
+    const auto& chunks=input["payload"];require(chunks.is_array()&&!chunks.empty(),"expected BRep chunks");
+    std::vector<unsigned char> bytes;
+    for(const auto& chunk:chunks) {
+      require(chunk.is_array()&&chunk.size()<=max_array,"expected BRep chunk budget");
+      require(bytes.size()+chunk.size()<=max_archive_bytes,"expected BRep bytes");
+      for(const auto& byte:chunk)bytes.push_back(static_cast<unsigned char>(count(byte,255)));
+    }
+    ON_Read3dmBufferArchive reader(bytes.size(),bytes.data(),true,50,ON::Version());ON_Object* raw=nullptr;
+    require(reader.ReadObject(&raw)==1 && raw,"expected BRep payload read");std::unique_ptr<ON_Object> owner(raw);
+    auto* brep=ON_Brep::Cast(raw);require(brep && brep->IsValid(),"expected source BRep");
+    const unsigned source_crc=brep->DataCRC(0);
+    require(brep->Transform(matrix(e["placement"])) && brep->IsValid(),"expected transformed BRep");
+    ON_Write3dmBufferArchive archive(0,max_archive_bytes,50,ON::Version());
+    require(archive.WriteObject(brep),"expected BRep serialization");
+    values.push_back(J{{"id",key},{"source_crc",source_crc},{"crc",brep->DataCRC(0)},{"payload_bytes",archive.SizeOfArchive()}});
+    require(values.size()<=max_records,"expected BRep count");
+  };
+  for(auto i=entities.begin();i!=entities.end();++i)add(i.value());
+  for(auto i=definitions.begin();i!=definitions.end();++i) {
+    const auto& members=i.value()["members"];require(members.is_array()&&members.size()<=max_records,"expected BRep members");
+    for(const auto& member:members)add(member);
+  }
+  return J{{"schema_version",1},{"status","expected_brep_fingerprints"},{"objects",values}};
+}
+bool exact_curve_parameters(const ON_Curve& curve,size_t depth);
 J geometry_inventory(const ON_Geometry& g) {
   require(g.IsValid(),"invalid native geometry");
   if(const auto* p=ON_Point::Cast(&g))return J{{"Point",point_json(p->point)}};
-  if(const auto* c=ON_Curve::Cast(&g))return J{{"Curve",curve_inventory(*c)}};
+  if(const auto* c=ON_Curve::Cast(&g)) { require(exact_curve_parameters(*c,0),"polycurve parent parameter correspondence"); return J{{"Curve",curve_inventory(*c)}}; }
   if(const auto* s=ON_NurbsSurface::Cast(&g)) {
     const int nu=s->CVCount(0),nv=s->CVCount(1); require(nu>0&&nv>0&&static_cast<size_t>(nu)<=max_array/static_cast<size_t>(nv)&&s->Dimension()==3,"native surface grid/dimension budget"); J p=J::array(),w=J::array(),knots=J::array();
     for(int u=0;u<nu;++u)for(int v=0;v<nv;++v) { ON_3dPoint pt; require(s->GetCV(u,v,pt),"native surface Euclidean pole"); p.push_back(point_json(pt)); w.push_back(s->Weight(u,v)); }
@@ -681,7 +878,8 @@ J geometry_inventory(const ON_Geometry& g) {
 J inspect(const std::filesystem::path& path) {
   require(std::filesystem::file_size(path)<=max_archive_bytes,"archive file-byte budget"); ONX_Model model; ON_wString log_text; ON_TextLog log(log_text);
   { File file(path); ON_BinaryFile archive(ON::archive_mode::read3dm,file.value); require(model.Read(archive,&log),"native archive read"); require(archive.BadCRCCount()==0 && archive.CriticalErrorCount()==0,"native archive CRC/critical errors"); }
-  J result{{"schema_version",1},{"status","inspected"},{"archive_version",model.m_3dm_file_version},{"model_unit",unit_string(model.m_settings.m_ModelUnitsAndTolerances.m_unit_system.UnitSystem())},{"page_unit",unit_string(model.m_settings.m_PageUnitsAndTolerances.m_unit_system.UnitSystem())},{"objects",J::array()},{"layers",J::array()},{"definitions",J::array()},{"diagnostics",J::array()}};
+  const auto& tolerances=model.m_settings.m_ModelUnitsAndTolerances;
+  J result{{"schema_version",1},{"status","inspected"},{"archive_version",model.m_3dm_file_version},{"model_unit",unit_string(tolerances.m_unit_system.UnitSystem())},{"model_tolerance",{{"absolute_mm",tolerances.m_absolute_tolerance},{"relative",tolerances.m_relative_tolerance},{"angular_rad",tolerances.m_angle_tolerance}}},{"page_unit",unit_string(model.m_settings.m_PageUnitsAndTolerances.m_unit_system.UnitSystem())},{"objects",J::array()},{"layers",J::array()},{"definitions",J::array()},{"diagnostics",J::array()}};
   std::map<int,std::string> layers; std::map<std::string,std::string> layer_parents; size_t count_records=0;
   ONX_ModelComponentIterator layer_it(model,ON_ModelComponent::Type::Layer);
   for(const auto* c=layer_it.FirstComponent();c;c=layer_it.NextComponent()) {
@@ -710,6 +908,8 @@ J inspect(const std::filesystem::path& path) {
     try { object["geometry"]=geometry_inventory(*g); }
     catch(const std::runtime_error& error) { object["geometry"]=nullptr; object["diagnostics"].push_back(error.what()); }
     if(ON_PointCloud::Cast(g))object["diagnostics"].push_back("cloud hidden flags are runtime-only and absent from native 3DM");
+    if(const auto* c=ON_Curve::Cast(g); c && contains_periodic_outer_metadata(*c)) object["diagnostics"].push_back("expanded periodic outer knots use OM9 user data; external edits may remove or invalidate it");
+    if(const auto* c=ON_Curve::Cast(g); c && contains_short_line_metadata(*c)) object["diagnostics"].push_back("short line uses degree-one NURBS and OM9 user data; external edits may remove or invalidate the metadata");
     if(a->ColorSource()!=ON::color_from_layer&&a->ColorSource()!=ON::color_from_object)object["diagnostics"].push_back("native color source is not represented by owned attributes");
     result["objects"].push_back(std::move(object));
   }
@@ -945,8 +1145,8 @@ J layer_preservation(const ON_Layer& layer,const J& userdata,int version,unsigne
     normalized.SetParentLayerId(defaults.ParentLayerId()); normalized.SetVisible(defaults.IsVisible()); normalized.SetLocked(defaults.IsLocked()); normalized.SetColor(defaults.Color());
     // The fingerprint archive has no material/line-pattern tables or manifest. Referenced
     // indices are recorded separately by layer_values; clear them before standalone Write.
-    normalized.SetRenderMaterialIndex(ON_UNSET_INT_INDEX);
-    normalized.SetLinetypeIndex(ON_UNSET_INT_INDEX);
+    normalized.SetRenderMaterialIndex(defaults.RenderMaterialIndex());
+    normalized.SetLinetypeIndex(defaults.LinetypeIndex());
     actual["opaque_native_extensions"]=record_fingerprint(normalized,version,ov); baseline["opaque_native_extensions"]=record_fingerprint(defaults,version,ov);
   } else actual["opaque_native_extensions"]=J{{"serialization_omitted",true},{"native_sizeof_bytes",layer.SizeOf()}};
   return preservation(actual,baseline);
@@ -990,9 +1190,17 @@ bool exact_curve_parameters(const ON_Curve& curve,size_t depth=0) {
   require(depth<=max_depth,"native source curve depth budget");
   if(const auto* poly=ON_PolyCurve::Cast(&curve)) {
     require(poly->Count()>0&&static_cast<size_t>(poly->Count())<=max_records,"native source polycurve segment budget");
+    const double width=poly->SegmentDomain(0).Length();
+    if(!std::isfinite(width)||width<=0)return false;
     for(int i=0;i<poly->Count();++i) {
-      const auto* segment=poly->SegmentCurve(i); if(!segment || poly->SegmentDomain(i)!=segment->Domain() || !exact_curve_parameters(*segment,depth+1))return false;
+      const auto* segment=poly->SegmentCurve(i);const double actual=poly->SegmentDomain(i).Length();
+      if(!segment || !std::isfinite(actual) || std::abs(actual-width)>8*std::numeric_limits<double>::epsilon()*std::max(actual,width) || !exact_curve_parameters(*segment,depth+1))return false;
     }
+  }
+  if(const auto* poly=ON_PolylineCurve::Cast(&curve)) {
+    if(poly->PointCount()<2 || poly->m_t.Count()!=poly->PointCount())return false;
+    const double width=poly->m_t[1]-poly->m_t[0];if(!std::isfinite(width)||width<=0)return false;
+    for(int i=1;i+1<poly->PointCount();++i)if(poly->m_t[i+1]-poly->m_t[i]!=width)return false;
   }
   return true;
 }
@@ -1119,6 +1327,7 @@ struct SourceInventory {
       {"unsupported_fields",J::array()},{"unrepresented_attributes",J::array({"material_source","native_material_index","groups","line_pattern_source","native_line_pattern_index",
         "viewport_id","space","display_order","plot_weight_mm","plot_color","plot_color_source","plot_weight_source","display_mode_overrides","render_material_references","texture_mapping_channels","userdata","independent_selectable"})},
       {"diagnostics",J::array()}};
+    if(projecting()){item["owned_periodic_userdata_only"]=owned_periodic_userdata_only(object);item["owned_short_line_userdata_only"]=owned_short_line_userdata_only(object);}
     if(projecting()) { item["native_component_type"]=static_cast<unsigned>(type); item["preservation"]=attribute_preservation(a,attrs["userdata"],archive_version,opennurbs_version); }
     size_t n=0;
     if(const auto* mesh=ON_Mesh::Cast(g)) {
@@ -1157,7 +1366,7 @@ struct SourceInventory {
     if(!local_units_resolved)item["diagnostics"].push_back(projecting()?"definition units require explicit resolution before canonical geometry projection":"model units require explicit resolution before canonical geometry admission");
     else if(g && opaque_geometry_only && type==Type::ModelGeometry) {
       try {
-        if(const auto* curve=ON_Curve::Cast(g))require(exact_curve_parameters(*curve),"polycurve segment parameter correspondence is not identity");
+        if(const auto* curve=ON_Curve::Cast(g))require(exact_curve_parameters(*curve),"polycurve parent parameter intervals are not uniform");
         if(projecting()&&ON_InstanceRef::Cast(g))(void)matrix(item["native_placement"]);
         auto geometry=geometry_inventory(*g); geometry_to_mm(geometry,object_scale);
         auto placement=item["native_placement"];
@@ -1176,7 +1385,7 @@ struct SourceInventory {
         }
         item["geometry"]=std::move(geometry); item["placement"]=std::move(placement); item["capability"]="geometry_projection_exact";
         item["projection_units_basis"]=projecting()?(definition.empty()?"resolved_model_units_to_canonical_mm":"resolved_definition_units_to_canonical_mm"):"archive_model_units_to_canonical_mm";
-        if(!item["userdata"].empty())item["diagnostics"].push_back("native geometry userdata is retained in source and omitted from the host representation");
+        if(!item["userdata"].empty())item["diagnostics"].push_back(item.value("owned_periodic_userdata_only",false)?"OM9 periodic outer-knot userdata is decoded; original source remains retained":item.value("owned_short_line_userdata_only",false)?"OM9 short-line userdata is decoded; original source remains retained":"native geometry userdata is retained in source and omitted from the host representation");
       } catch(const UnitProjectionError& error) { if(projecting())throw; item["diagnostics"].push_back(error.what()); }
       catch(const std::runtime_error& error) { item["diagnostics"].push_back(error.what()); }
     }
@@ -1389,7 +1598,8 @@ J inventory_source(const std::filesystem::path& path,const J* resolution=nullptr
 int wmain(int argc,wchar_t** argv) {
   try {
     require(argc>=2,"usage: om9-exchange-native --write packet.json private.3dm | --inspect model.3dm"); const std::wstring mode(argv[1]); J result;
-    if(mode==L"--write") { require(argc==4,"--write requires packet and unique private output"); operation_record="packet preflight"; const auto p=packet(std::filesystem::path(argv[2])); Library library; Writer writer; result=writer.write(p,std::filesystem::path(argv[3])); }
+    if(mode==L"--write") { require(argc==4,"--write requires packet and unique private output"); operation_record="packet preflight"; auto p=packet(std::filesystem::path(argv[2])); Library library; Writer writer; result=writer.write(p,std::filesystem::path(argv[3])); }
+    else if(mode==L"--expected-brep-fingerprints") { require(argc==3,"--expected-brep-fingerprints requires held packet"); operation_record="expected BRep packet"; const auto p=packet(std::filesystem::path(argv[2])); Library library; result=expected_brep_fingerprints(p); }
     else if(mode==L"--inventory-source") { require(argc==3,"--inventory-source requires archive"); operation_record="source archive"; Library library; result=inventory_source(std::filesystem::path(argv[2])); }
     else if(mode==L"--project-source") { require(argc==4,"--project-source requires held archive and resolution packet"); operation_record="source resolution preflight"; const auto resolution=source_resolution(std::filesystem::path(argv[3])); Library library; result=inventory_source(std::filesystem::path(argv[2]),&resolution); }
     else if(mode==L"--prepare-retained-source") { require(argc==3,"--prepare-retained-source requires archive"); operation_record="retained source preparation"; Library library; result=prepare_retained_source(std::filesystem::path(argv[2])); }

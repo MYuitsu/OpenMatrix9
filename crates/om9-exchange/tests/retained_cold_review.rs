@@ -113,6 +113,7 @@ fn case_with_label_cancel(
     let mut d = Document::new("cold capture");
     d.page_unit = Unit::Inch;
     let mut e = Entity::new(label, Geometry::Point([1., 2., 3.]), None);
+    e.attributes.color = None;
     e.placement = Transform::translation([5., 0., 0.]);
     let oid = e.id;
     d.entities.insert(e.id, e);
@@ -293,7 +294,7 @@ fn strict_keys_required_nulls_digest_spelling_budget_and_cancel_reject() {
 fn malformed_rich_metadata_and_unrequested_new_master_properties_reject() {
     let _serial = TEST.lock().unwrap_or_else(|e| e.into_inner());
     case(|wire, held, report, expected| {
-        for variant in 0..5 {
+        for variant in 0..8 {
             let mut bad = report.clone();
             match variant {
                 0 => {
@@ -311,7 +312,10 @@ fn malformed_rich_metadata_and_unrequested_new_master_properties_reject() {
                     bad["actual"]["objects"][0]["preservation"]["url"] =
                         json!("unrequested native property")
                 }
-                _ => bad["actual"]["layers"][0]["preservation"]["plot_weight_mm"] = json!(42.),
+                4 => bad["actual"]["layers"][0]["preservation"]["plot_weight_mm"] = json!(42.),
+                5 => bad["actual"]["objects"][0]["attributes"]["plot_color_source"] = json!(1),
+                6 => bad["actual"]["objects"][0]["attributes"]["plot_weight_source"] = json!(1),
+                _ => bad["actual"]["objects"][0]["attributes"]["plot_color"] = json!([1,2,3,255]),
             }
             assert!(
                 verify(wire, held, &bad, expected).is_err(),
@@ -329,16 +333,19 @@ fn nested_native_instance_ids_members_and_independent_leaf_bounds_match_capture(
     let mut d = Document::new("nested cold");
     d.page_unit = Unit::Inch;
     let mut point = Entity::new("point", Geometry::Point([1., 2., 3.]), None);
+    point.attributes.color = None;
     point.placement = Transform::translation([2., 0., 0.]);
     let point_id = point.id;
     let leaf = Definition::new("leaf", vec![point]);
     let leaf_id = leaf.id;
     let mut member = Entity::new("member", Geometry::Instance(leaf_id), None);
+    member.attributes.color = None;
     member.placement = Transform::translation([5., 0., 0.]);
     let member_id = member.id;
     let parent = Definition::new("parent", vec![member]);
     let parent_id = parent.id;
     let mut root = Entity::new("root", Geometry::Instance(parent_id), None);
+    root.attributes.color = None;
     root.placement = Transform([
         [-2e-12, 0., 0., 10e-12],
         [0., 3e-12, 0., 0.],
@@ -624,4 +631,4 @@ fn cold_report_acceptance_and_refusal_obey_measured_remaining_allocation_peak() 
 }
 
 // Documented schema shape copied into source; toy bytes above are not native archives.
-const TEMPLATE: &str = r#"{"actual":{"bounds":[],"current_layer":{"archive_reference_index":0,"id":"20000000-0000-4000-8000-000000000001","sdk_destination_index":0},"definitions":[],"layers":[{"color":[20,30,40,255],"id":"20000000-0000-4000-8000-000000000001","locked":false,"name":"Default","native_class_uuid":"95809813-e985-11d3-bfe5-0010830122f0","native_component_type":5,"native_kind":"ON_Layer","parent":null,"preservation":{"display_material_id":null,"expanded":true,"iges_level":-1,"native_line_pattern_index":-1,"native_material_index":-1,"per_viewport_settings":{"crc":0,"present":false},"persistent_locking":false,"persistent_visibility":true,"plot_color":[255,255,255,0],"plot_weight_mm":0.0,"render_material_references":[],"userdata":[]},"visible":true,"wire":{"archive_reference_index":0,"sdk_destination_index":0,"serialized_index":0}}],"model_units":{"absolute_tolerance":0.001,"angle_tolerance_radians":0.017453292519943295,"distance_display_mode":0,"distance_display_precision":3,"meters_per_unit":0.001,"millimeters_per_unit":1.0,"name":"millimeters","native_enum":2,"relative_tolerance":0.01,"requires_resolution":false},"objects":[{"attributes":{"color":null,"color_source":0,"display_order":0,"groups":[],"layer":"20000000-0000-4000-8000-000000000001","line_pattern_source":0,"locked":false,"material_source":0,"mode":0,"native_layer_index":0,"native_line_pattern_index":-1,"native_material_index":-1,"plot_weight_mm":0.0,"space":1,"userdata":[],"viewport_id":null,"visible":true},"geometry":{"Point":[25.4,50.8,0.0]},"id":"20000000-0000-4000-8000-00000000000a","is_definition_member":false,"label":"Current point","native_class_uuid":"c3101a1d-f157-11d3-bfe7-0010830122f0","native_component_type":12,"native_kind":"ON_Point","placement":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]],"preservation":{"casts_shadows":true,"clipping_plane_label_style":0,"color_source":0,"custom_linetype_present":false,"custom_section_style_present":false,"display_mode_overrides":[],"display_order":0,"groups":[],"hatch_background_fill":[255,255,255,0],"hatch_boundary_visible":false,"line_pattern_source":0,"linetype_scale":1.0,"material_source":0,"native_color":[255,255,255,0],"native_line_pattern_index":-1,"native_material_index":-1,"object_decoration":0,"object_frame":null,"plot_color":[0,0,0,255],"plot_color_source":0,"plot_weight_mm":0.0,"plot_weight_source":0,"receives_shadows":true,"render_material_references":[],"section_attributes_source":0,"space":1,"texture_mapping_channels":[],"url":"","userdata":[],"viewport_id":null,"wire_density":1},"wire":{"archive_reference_index":null,"sdk_destination_index":null,"serialized_index":null}}],"page_units":{"absolute_tolerance":0.001,"angle_tolerance_radians":0.017453292519943295,"distance_display_mode":0,"distance_display_precision":3,"meters_per_unit":0.0254,"millimeters_per_unit":25.4,"name":"inches","native_enum":8,"relative_tolerance":0.01,"requires_resolution":false}},"admission_required":true,"archive_version":50,"bounds_policy":"cold_leaf_hull_v1","checks":{"bounds":0,"live_records":2,"opaque_chunks":0,"raw_records":0,"raw_tables":0},"cold_validation_required":true,"definitions":0,"host_ready":false,"layers":1,"objects":1,"output_bytes":2709,"output_sha256":"25501039f460bd8b2ab191a9f0df5fef0f83f9e3c2d76b2e574afce4aa6f7022","primary_source_sha256":null,"raw_spans":[],"request_sha256":"d1401a7de8f3cdd73fc28537cff6def1e68d466bbd2e5ca90d561a50649f4f98","schema_version":4,"status":"validated_retained_current","writer_policy":"om9-retained-current-v1"}"#;
+const TEMPLATE: &str = r#"{"actual":{"bounds":[],"current_layer":{"archive_reference_index":0,"id":"20000000-0000-4000-8000-000000000001","sdk_destination_index":0},"definitions":[],"layers":[{"color":[20,30,40,255],"id":"20000000-0000-4000-8000-000000000001","locked":false,"name":"Default","native_class_uuid":"95809813-e985-11d3-bfe5-0010830122f0","native_component_type":5,"native_kind":"ON_Layer","parent":null,"preservation":{"display_material_id":null,"expanded":true,"iges_level":-1,"native_line_pattern_index":-1,"native_material_index":-1,"per_viewport_settings":{"crc":0,"present":false},"persistent_locking":false,"persistent_visibility":true,"plot_color":[255,255,255,0],"plot_weight_mm":0.0,"render_material_references":[],"userdata":[]},"visible":true,"wire":{"archive_reference_index":0,"sdk_destination_index":0,"serialized_index":0}}],"model_units":{"absolute_tolerance":0.001,"angle_tolerance_radians":0.017453292519943295,"distance_display_mode":0,"distance_display_precision":3,"meters_per_unit":0.001,"millimeters_per_unit":1.0,"name":"millimeters","native_enum":2,"relative_tolerance":0.01,"requires_resolution":false},"objects":[{"attributes":{"color":null,"color_source":0,"display_order":0,"groups":[],"layer":"20000000-0000-4000-8000-000000000001","line_pattern_source":0,"locked":false,"material_source":0,"mode":0,"native_layer_index":0,"native_line_pattern_index":-1,"native_material_index":-1,"plot_color":null,"plot_color_source":0,"plot_weight_mm":0.0,"plot_weight_source":0,"space":1,"userdata":[],"viewport_id":null,"visible":true},"geometry":{"Point":[25.4,50.8,0.0]},"id":"20000000-0000-4000-8000-00000000000a","is_definition_member":false,"label":"Current point","native_class_uuid":"c3101a1d-f157-11d3-bfe7-0010830122f0","native_component_type":12,"native_kind":"ON_Point","placement":[[1.0,0.0,0.0,0.0],[0.0,1.0,0.0,0.0],[0.0,0.0,1.0,0.0],[0.0,0.0,0.0,1.0]],"preservation":{"casts_shadows":true,"clipping_plane_label_style":0,"color_source":0,"custom_linetype_present":false,"custom_section_style_present":false,"display_mode_overrides":[],"display_order":0,"groups":[],"hatch_background_fill":[255,255,255,0],"hatch_boundary_visible":false,"line_pattern_source":0,"linetype_scale":1.0,"material_source":0,"native_color":[255,255,255,0],"native_line_pattern_index":-1,"native_material_index":-1,"object_decoration":0,"object_frame":null,"plot_color":[0,0,0,255],"plot_color_source":0,"plot_weight_mm":0.0,"plot_weight_source":0,"receives_shadows":true,"render_material_references":[],"section_attributes_source":0,"space":1,"texture_mapping_channels":[],"url":"","userdata":[],"viewport_id":null,"wire_density":1},"wire":{"archive_reference_index":null,"sdk_destination_index":null,"serialized_index":null}}],"page_units":{"absolute_tolerance":0.001,"angle_tolerance_radians":0.017453292519943295,"distance_display_mode":0,"distance_display_precision":3,"meters_per_unit":0.0254,"millimeters_per_unit":25.4,"name":"inches","native_enum":8,"relative_tolerance":0.01,"requires_resolution":false}},"admission_required":true,"archive_version":50,"bounds_policy":"cold_leaf_hull_v1","checks":{"bounds":0,"live_records":2,"opaque_chunks":0,"raw_records":0,"raw_tables":0},"cold_validation_required":true,"definitions":0,"host_ready":false,"layers":1,"objects":1,"output_bytes":2709,"output_sha256":"25501039f460bd8b2ab191a9f0df5fef0f83f9e3c2d76b2e574afce4aa6f7022","primary_source_sha256":null,"raw_spans":[],"request_sha256":"d1401a7de8f3cdd73fc28537cff6def1e68d466bbd2e5ca90d561a50649f4f98","schema_version":4,"status":"validated_retained_current","writer_policy":"om9-retained-current-v1"}"#;

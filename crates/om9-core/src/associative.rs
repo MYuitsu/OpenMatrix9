@@ -231,7 +231,9 @@ pub(crate) fn validate_typed_ports_with_pending(
     }
     if recipe.state == EvaluationState::Clean {
         for (port, input) in recipe.input_ports.iter().zip(&recipe.inputs) {
-            port.admits_entity(d.resolve(&input.source)?)?;
+            if !pending.contains(&input.source.object) {
+                port.admits_entity(d.resolve(&input.source)?)?;
+            }
         }
         for (port, output) in recipe.output_ports.iter().zip(&recipe.outputs) {
             if pending.contains(output) {

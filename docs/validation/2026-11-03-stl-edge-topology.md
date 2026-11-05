@@ -1,0 +1,9 @@
+# Partial STL topology checks
+
+STL topology inventory now distinguishes boundary edges, edges incident to more than two triangles, same-direction shared edges and disconnected triangle fans at a vertex. Strict codec export refuses closed-edge soups with the latter defects; the application preserves lenient export for open or defective sources but reports the separate counts. Its displayed success text explicitly says self-intersections are unchecked.
+
+Windows default features, `CARGO_TARGET_DIR=L:/om9-target`, Cargo `-j 2`: `cargo test -p om9-exchange -j 2 --test stl_export_policy` passed 5 tests and `cargo test -p om9-app -j 2 --test stl_export` passed 12. The new independent cases include a four-triangle edge, inconsistent edge direction, and two individually closed tetrahedra touching only at one vertex. The latter has no defective edge but has a disconnected vertex fan.
+
+This is partial evidence, not complete STL manifold, solid or printability certification. Self-intersections, duplicate opposite-winding faces, shell containment and cavity orientation are not yet checked. The legacy `watertight` Boolean (including MCP) means these current index-topology checks pass and must not be interpreted as a self-intersection or geometric-accuracy certificate. Fan analysis currently uses additional in-memory maps and has no runtime memory reservation integration. The app integration suite does not yet inject the new defective fixtures through the receipt path. Mesh coordinates are still quantized to f32 early and welding uses quantized keys. Export tolerance, background capture, geometry coverage, GPU and checkpoint phases remain open.
+
+Next: cover receipt/MCP behavior with defective authored meshes, detect duplicate faces and containment/self-intersection where supported, then implement the independent export profile and f64-to-writer path under the plan's resource budget.

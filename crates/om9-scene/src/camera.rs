@@ -392,6 +392,19 @@ impl Camera {
         finite(ray.direction)?;
         Ok(ray)
     }
+    /// Start a picking ray on the camera's near clipping plane. Hits before
+    /// this plane cannot appear in the viewport and must not hide later hits.
+    pub fn visible_ray(&self, screen: [f64; 2], viewport: Viewport) -> Result<Ray> {
+        let mut ray = self.ray(screen, viewport)?;
+        let [_, _, forward] = self.basis()?;
+        let advance = self.near_mm / dot(ray.direction, forward);
+        if !advance.is_finite() || advance < 0. {
+            return Err(Error::Invalid("camera visible ray"));
+        }
+        ray.origin = add(ray.origin, mul(ray.direction, advance));
+        finite(ray.origin)?;
+        Ok(ray)
+    }
     /// Keep the visible portion without changing the source edge's topology key.
     pub fn clip_segment(&self, a: Point3, b: Point3) -> Result<Option<[Point3; 2]>> {
         self.validate()?;

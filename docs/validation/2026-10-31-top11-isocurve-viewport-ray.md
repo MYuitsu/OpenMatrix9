@@ -1,0 +1,15 @@
+# Top11 Isocurve viewport ray — 2026-10-31
+
+Previously the viewport used a tessellated face hit and projected that point onto the analytic surface. On a curved face, this could choose a different isocurve from the one under the mouse. The viewport now passes the camera ray to a synchronous OCCT face intersector. The target must be one face; among forward ray intersections it selects the one nearest the display hit, rejects distinct equally close hits, and refuses a miss without changing the active command or document. The resulting exact world point goes through the existing shared Split Isocurve handler. Typed NURBS UV projection remains numerical; the BRep handler obtains face parameters through its existing OCCT solver.
+
+Native exception: exact ray/face intersection and trim-boundary classification require OCCT topology and geometry. Rust owns the session, validation, result selection and Undo; the native adapter returns a point and retains no native handles or document state. This is an OCCT geometry operation, not an openNURBS measurement attempt. OCCT itself is not certified memory-safe by its Rust caller.
+
+Windows x64, OCCT 8.0.1, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`:
+
+- Two controller tests use deliberately displaced display hits on a cylindrical BRep and rational NURBS, including nonuniform placement, and verify the exact ray-selected split, Undo and preserved state on miss. The cylinder fixture also rejects an equally distant two-hit ambiguity. A ray through a trimmed hole is refused.
+- Three simulated egui viewport tests pass for typed, planar BRep and curved cylindrical BRep surfaces. The cylinder area tolerance of 0.5 mm² accounts for screen-pixel placement; the direct ray fixture verifies each half against 50π mm² within 1e-5.
+- Top11/options/BRep/snapshot suites passed 126 tests before the final ambiguity guard; the two affected ray tests passed afterward. The adjusted trimmed-hole fixture passed separately before that guard. No-default Top11/options/snapshot: 68 passed; the no-OCCT viewport path explicitly refuses this operation. Kernel `--features 3dm-brep --test l2_01_10`: 69 passed after the native change.
+
+Limits: grazing/tangent rays, complex periodic or self-overlapping faces, extremely large coordinates, projection convergence, performance, physical desktop input and GPU-present are unverified. A true display miss or ambiguous intersection is rejected rather than guessing. BRep Shrink, object-cutter Shrink, 3DM interchange, SDK plugin parity and human M03-UI acceptance remain open.
+
+SHA-256: `session/top11.rs` 263f323690192120d86f9e98cf582dc0b4a52293a260d889ece30222f17a22f3; `ui.rs` 013844f1ac8515d8fe2a75520f19f98fde850e9ae531c96e73d241d908c47c63; `ui/chrome.rs` 4bf2b2a299a713563da85bf9d7fca8d71a98fd3834c2e07ebfaf30bae131040e; `tests/top11_brep.rs` 540e6e6f7f99cc80131f14dbe696b2254d08373d6274a3d445e42d805c6eb287; `measurement.rs` cba13638bbe114046bf72d98e9bc94252bddb10ebe4c7dc3b2c59e75439f8c5d; `measurement_bridge.cpp` 8397a5044bf27aca3ed1c9ed816625ce4deb0e450cc036cc03df5daf3689971d.

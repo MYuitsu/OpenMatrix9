@@ -783,12 +783,12 @@ impl Controller {
             "four rail profile",
             None,
         );
+        let held = self.scene_cache_usage()?;
         let prepared = self
             .coordinator
-            .prepare(TransactionRequest::new("FourRailProfile", mutations))?;
-        let receipt = self.coordinator.commit(prepared)?;
+            .prepare_with_held_usage(TransactionRequest::new("FourRailProfile", mutations), held)?;
+        let receipt = self.commit_with_candidate_scene(prepared, held)?;
         if receipt.published {
-            self.refresh_scene()?;
             self.sync_published(om9_core::changes::ChangeCause::Edit);
         }
         self.events.emit(
@@ -1226,7 +1226,7 @@ impl Controller {
             None => Vec::new(),
         }
     }
-    /// Top11 Duplicate flags. Other Top11 actions are positional and expose no row.
+    /// Options belonging to the active Top11 command and its input stage.
     pub fn top11_option_tokens(&self) -> Vec<(&'static str, &'static str)> {
         self.top11_pending
             .as_ref()

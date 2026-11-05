@@ -283,6 +283,10 @@ pub(crate) struct Object {
     pub is_definition_member: bool,
     pub channels: IgnoredAny,
     pub userdata: Vec<IgnoredAny>,
+    #[serde(default)]
+    pub owned_periodic_userdata_only: bool,
+    #[serde(default)]
+    pub owned_short_line_userdata_only: bool,
     pub diagnostics: Vec<String>,
     pub unrepresented_attributes: Vec<String>,
     pub unsupported_fields: Vec<String>,
@@ -425,8 +429,8 @@ fn resolved(
     })
 }
 impl Inventory {
-    pub fn decode(bytes: &[u8], l: &Limits) -> Result<Self> {
-        om9_archive::admit_json(bytes, l)?;
+    pub fn decode_with_admission(bytes: &[u8], l: &Limits, admit: impl FnMut(u64) -> Result<()>) -> Result<Self> {
+        om9_archive::admit_json_usage_with_admission(bytes, l, admit)?;
         let value: Self = serde_json::from_slice(bytes).map_err(|_| invalid())?;
         if value.schema_version != 3
             || value.status != "source_projected"

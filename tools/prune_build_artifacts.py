@@ -3,9 +3,8 @@
 
 Rule của dự án: chỉ giữ **10** run gần nhất để dung lượng không phình (mỗi run UI
 artifact có thể vài chục MB; `build/` là thư mục gitignored, không phải bằng chứng
-bền vững). Bản ghi bằng chứng trong `implementation/evidence/**` chỉ *dẫn chiếu*
-đường dẫn artifact và không chứa artifact; run cũ bị xoá thì dẫn chiếu đó thành
-lịch sử, không phải nguồn sống.
+bền vững). Giữ mọi run được dẫn trong `implementation/**` hoặc `docs/**`, kể cả
+khi run đó cũ hơn giới hạn số lượng.
 
     python tools/prune_build_artifacts.py             # xem sẽ xoá gì (dry-run)
     python tools/prune_build_artifacts.py --apply     # xoá thật
@@ -65,7 +64,7 @@ def cited_runs() -> set[str]:
                     start = at + len(marker)
                     name = ""
                     for char in text[start:]:
-                        if char in "/\\\"' \n\r\t),;]":
+                        if char in "/\\\"'` \n\r\t),;]":
                             break
                         name += char
                     if name:

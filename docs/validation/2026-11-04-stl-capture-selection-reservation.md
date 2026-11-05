@@ -1,0 +1,17 @@
+# STL capture selection reservation
+
+STL capture previously copied selected object IDs without registering that separate allocation. It now reserves the requested ID array on the shared export account before allocation, includes the controller's current scene/auxiliary usage at admission, and retains the guard with the immutable capture. If the allocator reports a larger capacity than requested, admission is increased before the capture is published; a failed increase drops the vector and reservation. Capture or worker destruction releases the guard, and the reservation follows the shared account across New/Open.
+
+The capacity increase is checked after allocation, so allocator over-allocation can briefly exceed the requested reservation; allocator overhead and transient selection traversal are not covered. No physical sample is taken for this small capture allocation. This change does not provide an upper bound for the export worker or OCCT, implement background export in the UI, or complete the managed RAM budget.
+
+On the external E: target with `-j 2`, all 19 STL internal cancellation/worker tests and all 60 serial STL export integration tests passed. A budget-pressure fixture rejects capture without changing the document, then verifies the selection reservation remains until drop. The two New/Open capture tests were extended and rerun to check the exact reservation remains charged across replacement and is released on drop. The public source audit reported no errors.
+
+## Instance traversal without a heap stack
+
+STL instance traversal now links ancestor IDs through the existing recursive call frames instead of growing a separate heap `Vec`. This applies to selection readiness, capture preflight and actual STL source traversal. Cycle, depth, cancellation and occurrence-count checks remain, as do composed placement and inherited visibility. The existing recursive call stack still consumes memory; this change does not measure its peak or bound traversal and other allocation owners, nor does it provide managed admission to direct captured-source exports.
+
+With default features on the external E: debug target and `-j 2`, 47 STL session tests passed, including cycle/depth/cancellation and inherited visibility, and all 60 serial STL integration tests passed in 113.58 seconds, including nested shared instances, placement/reflection, B-rep and NURBS. An initial overly narrow test filter ran zero tests and was corrected; it is not counted as a pass. No release, desktop or native-memory peak measurement was collected.
+
+## Physical RAM sample for selection capture
+
+Selection capture now samples physical RAM when reserving the ID array and again if the allocation's actual capacity needs an increased reservation. A controlled sample with only the required 256 MiB physical reserve remaining refuses before allocating the selection array; document snapshot, selection and export reservation remain intact. A later sufficient sample permits capture and its reservation is released on drop. With default features on the E: debug target and `-j 2`, 48 STL session tests and 60 serial integration tests passed. This is simulated headroom, not actual OS-wide exhaustion; the sample can become stale, allocator over-allocation is checked after allocation, and unavailable samples still use the existing managed-only fallback. It does not reserve the full export for direct capture calls, bound OCCT, enable background UI export or prove desktop behavior.

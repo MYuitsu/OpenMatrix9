@@ -108,6 +108,93 @@ fn label(c: &Controller, name: &str) -> String {
         .label
 }
 
+fn option_names(c: &Controller) -> Vec<String> {
+    c.command_options()
+        .into_iter()
+        .map(|option| option.id.name().to_owned())
+        .collect()
+}
+
+#[test]
+fn line_options_follow_their_stage() {
+    let mut c = Controller::new(Document::new("line stages"), Limits::default()).unwrap();
+    c.submit("Line").unwrap();
+    let start = option_names(&c);
+    assert!(start.iter().any(|name| name == "BothSides"), "{start:?}");
+    assert!(!start.iter().any(|name| name == "Length"), "{start:?}");
+    c.accept_world_point([0.; 3]).unwrap();
+    // Matrix Line: the end prompt takes a point or a typed length, not an option.
+    let end = option_names(&c);
+    assert!(end.is_empty(), "{end:?}");
+}
+
+#[test]
+fn rectangle_length_is_hidden_until_the_first_corner() {
+    let mut c = Controller::new(Document::new("rect stages"), Limits::default()).unwrap();
+    c.submit("Rectangle").unwrap();
+    let start = option_names(&c);
+    assert!(start.iter().any(|name| name == "Vertical"), "{start:?}");
+    assert!(!start.iter().any(|name| name == "Square"), "{start:?}");
+    assert!(!start.iter().any(|name| name == "Length"), "{start:?}");
+    c.accept_world_point([0.; 3]).unwrap();
+    let after = option_names(&c);
+    assert!(after.iter().any(|name| name == "Length"), "{after:?}");
+    assert!(!after.iter().any(|name| name == "Square"), "{after:?}");
+}
+
+#[test]
+fn arc_modes_are_pre_point_and_the_current_mode_is_the_prompt() {
+    let mut c = Controller::new(Document::new("arc stages"), Limits::default()).unwrap();
+    c.submit("Arc").unwrap();
+    assert_eq!(c.prompt(), "Start of arc");
+    let start = option_names(&c);
+    assert!(start.iter().any(|name| name == "Center"), "{start:?}");
+    assert!(start.iter().any(|name| name == "StartPoint"), "{start:?}");
+    assert!(
+        !start.iter().any(|name| name == "3Point"),
+        "current mode listed: {start:?}"
+    );
+    c.submit("Center").unwrap();
+    let center = option_names(&c);
+    assert!(center.iter().any(|name| name == "3Point"), "{center:?}");
+    assert!(!center.iter().any(|name| name == "Center"), "{center:?}");
+    assert!(center.iter().any(|name| name == "Radius"), "{center:?}");
+    assert!(center.iter().any(|name| name == "Diameter"), "{center:?}");
+    c.accept_world_point([0.; 3]).unwrap();
+    let after = option_names(&c);
+    assert!(
+        !after
+            .iter()
+            .any(|name| matches!(name.as_str(), "3Point" | "Center" | "Radius")),
+        "{after:?}"
+    );
+    assert!(after.iter().any(|name| name == "Undo"), "{after:?}");
+}
+
+#[test]
+fn sphere_modes_omit_the_current_mode() {
+    let mut c = Controller::new(Document::new("sphere stages"), Limits::default()).unwrap();
+    c.submit("Sphere").unwrap();
+    assert_eq!(c.prompt(), "Center of sphere");
+    let start = option_names(&c);
+    for mode in [
+        "2Point",
+        "3Point",
+        "4Point",
+        "Vertical",
+        "AroundCurve",
+        "FitPoints",
+        "Tangent",
+    ] {
+        assert!(start.iter().any(|name| name == mode), "{mode}: {start:?}");
+    }
+    assert!(!start.iter().any(|name| name == "Center"), "{start:?}");
+    c.submit("3Point").unwrap();
+    let after = option_names(&c);
+    assert!(after.iter().any(|name| name == "Center"), "{after:?}");
+    assert!(!after.iter().any(|name| name == "3Point"), "{after:?}");
+}
+
 #[test]
 fn boss_cancel_option_uses_shared_routes() {
     for route in [Route::Pointer, Route::Typed] {
@@ -1147,17 +1234,15 @@ fn boolean_two_additional_operations_use_shared_option_routes() {
 fn commands_share_keyboard_pointer_and_typed_activation() {
     let cases = [
         ("Line", "BothSides", None, "BothSides=Yes"),
-        ("Rectangle", "Square", None, "Square=Yes"),
-        ("Circle", "Deformable", None, "Deformable=Yes"),
         ("Ellipse", "Deformable", None, "Deformable=Yes"),
-        ("Arc", "Center", None, "Center=Yes"),
         ("Polygon", "Circumscribed", None, "Circumscribed=Yes"),
         ("Helix", "Turns", Some("2"), "Turns=2"),
         ("Spiral", "Height", Some("5"), "Height=5"),
         ("Curve", "Degree", Some("2"), "Degree=2"),
         ("InterpCrv", "Degree", Some("5"), "Degree=5"),
-        ("Box", "Center", None, "Center=Yes"),
-        ("Sphere", "3Point", None, "3Point=Yes"),
+        // Box names its modes as plain words inside the prompt (see chrome_actions),
+        // so the active mode shows in the prompt text, not in an `=Yes` label.
+        ("Box", "Center", None, "Center"),
     ];
     for route in [Route::Keyboard, Route::Pointer, Route::Typed] {
         for (command, name, value, expected) in cases {
@@ -1194,11 +1279,14 @@ fn numeric_options_keep_invalid_draft_and_commit_actual_geometry_once() {
         for _ in 0..3 {
             frame(&mut app, &ctx, vec![]);
         }
-        activate(&mut app, &ctx, "Radius", route);
-        assert_eq!(app.transcript.draft(), "Radius=");
+        // The measure word is the current prompt; a bad value keeps the draft, and the
+        // typed assignment still commits the real circle once.
+        activate(&mut app, &ctx, "Diameter", route);
+        assert_eq!(app.controller.prompt(), "Diameter");
+        assert_eq!(app.transcript.draft(), "");
         frame(&mut app, &ctx, vec![Event::Text("-5".into())]);
         enter(&mut app, &ctx);
-        assert_eq!(app.transcript.draft(), "Radius=-5");
+        assert_eq!(app.transcript.draft(), "-5");
         assert!(app.controller.document().entities.is_empty());
         app.transcript.set_draft("radius=5");
         enter(&mut app, &ctx);
@@ -1235,14 +1323,8 @@ fn collisions_are_unique_numeric_input_and_paste_are_preserved() {
             );
         }
     }
-    assert!(
-        options
-            .iter()
-            .find(|o| o.id.name() == "Cancel")
-            .unwrap()
-            .shortcut
-            .is_none()
-    );
+    // Circle cancels with Esc; the prompt does not advertise a Cancel word.
+    assert!(options.iter().all(|o| o.id.name() != "Cancel"));
     frame(
         &mut app,
         &ctx,
@@ -1251,7 +1333,7 @@ fn collisions_are_unique_numeric_input_and_paste_are_preserved() {
     assert_eq!(app.transcript.draft(), "2");
     app.transcript.set_draft("");
     frame(&mut app, &ctx, vec![Event::Paste("Deformable".into())]);
-    assert_eq!(label(&app.controller, "Deformable"), "Deformable=No");
+    assert_eq!(label(&app.controller, "Deformable"), "Deformable");
     assert_eq!(app.transcript.draft(), "Deformable");
 }
 
@@ -1264,18 +1346,13 @@ fn fixed_choices_refresh_the_selected_value_on_every_input_route() {
         for _ in 0..3 {
             frame(&mut app, &ctx, vec![]);
         }
-        activate(&mut app, &ctx, "Size=Area", route);
-        assert_eq!(label(&app.controller, "Size=Area"), "Size=Area (Yes)");
-        assert_eq!(
-            label(&app.controller, "Size=Diameter"),
-            "Size=Diameter (No)"
-        );
-        activate(&mut app, &ctx, "Size=Diameter", route);
-        assert_eq!(
-            label(&app.controller, "Size=Diameter"),
-            "Size=Diameter (Yes)"
-        );
-        assert_eq!(label(&app.controller, "Size=Area"), "Size=Area (No)");
+        assert_eq!(app.controller.prompt(), "Radius");
+        // The chosen measure becomes the prompt word and leaves the option list.
+        activate(&mut app, &ctx, "Area", route);
+        assert_eq!(app.controller.prompt(), "Area");
+        assert_eq!(label(&app.controller, "Diameter"), "Diameter");
+        activate(&mut app, &ctx, "Diameter", route);
+        assert_eq!(app.controller.prompt(), "Diameter");
         assert!(app.controller.document().entities.is_empty());
         assert_eq!(app.controller.coordinator().undo_len(), 0);
     }
@@ -1358,9 +1435,9 @@ fn line_length_snapshot_uses_the_input_unit_without_rescaling_geometry() {
     document.page_unit = om9_core::geometry::Unit::Inch;
     let mut c = Controller::new(document, Limits::default()).unwrap();
     c.submit("Line").unwrap();
-    c.submit("length=2.5").unwrap();
-    assert_eq!(label(&c, "Length"), "Length=2.5");
+    // Matrix Line: type a bare length at the end prompt; no Length option exists.
     c.accept_world_point([0.; 3]).unwrap();
+    c.submit("2.5").unwrap();
     c.accept_world_point([100., 0., 0.]).unwrap();
     assert!(
         matches!(&c.document().entities.values().next().unwrap().geometry, Geometry::Curve(Curve::Line { end, .. }) if (end[0]-63.5).abs() < 1e-9)
@@ -1370,46 +1447,46 @@ fn line_length_snapshot_uses_the_input_unit_without_rescaling_geometry() {
 
 #[test]
 fn accelerators_do_not_repeat_or_interrupt_ime_drafts_and_other_editors() {
-    let (mut app, ctx) = setup("Rectangle");
+    let (mut app, ctx) = setup("Line");
     frame(
         &mut app,
         &ctx,
-        vec![key(Key::S, true), Event::Text("s".into())],
+        vec![key(Key::B, true), Event::Text("b".into())],
     );
-    assert_eq!(label(&app.controller, "Square"), "Square=Yes");
-    let mut repeat = key(Key::S, true);
+    assert_eq!(label(&app.controller, "BothSides"), "BothSides=Yes");
+    let mut repeat = key(Key::B, true);
     if let Event::Key { repeat, .. } = &mut repeat {
         *repeat = true;
     }
-    frame(&mut app, &ctx, vec![repeat, Event::Text("s".into())]);
-    assert_eq!(label(&app.controller, "Square"), "Square=Yes");
+    frame(&mut app, &ctx, vec![repeat, Event::Text("b".into())]);
+    assert_eq!(label(&app.controller, "BothSides"), "BothSides=Yes");
     assert_eq!(app.transcript.draft(), "");
-    frame(&mut app, &ctx, vec![key(Key::S, false)]);
-    app.transcript.set_draft("Length=12");
+    frame(&mut app, &ctx, vec![key(Key::B, false)]);
+    app.transcript.set_draft("BothSides=No");
     frame(
         &mut app,
         &ctx,
-        vec![key(Key::S, true), Event::Text("s".into())],
+        vec![key(Key::B, true), Event::Text("b".into())],
     );
-    assert_eq!(label(&app.controller, "Square"), "Square=Yes");
-    assert!(app.transcript.draft().contains("Length=12"));
+    assert_eq!(label(&app.controller, "BothSides"), "BothSides=Yes");
+    assert!(app.transcript.draft().contains("BothSides=No"));
     app.transcript.set_draft("");
     frame(
         &mut app,
         &ctx,
         vec![
             Event::Ime(egui::ImeEvent::Preedit {
-                text: "s".into(),
+                text: "b".into(),
                 active_range_chars: None,
             }),
-            key(Key::S, true),
+            key(Key::B, true),
         ],
     );
-    assert_eq!(label(&app.controller, "Square"), "Square=Yes");
+    assert_eq!(label(&app.controller, "BothSides"), "BothSides=Yes");
     frame(
         &mut app,
         &ctx,
-        vec![Event::Ime(egui::ImeEvent::Commit("s".into()))],
+        vec![Event::Ime(egui::ImeEvent::Commit("b".into()))],
     );
     app.transcript.set_draft("");
     let other = egui::Id::new("another-editor");
@@ -1417,9 +1494,9 @@ fn accelerators_do_not_repeat_or_interrupt_ime_drafts_and_other_editors() {
     frame(
         &mut app,
         &ctx,
-        vec![key(Key::S, true), Event::Text("s".into())],
+        vec![key(Key::B, true), Event::Text("b".into())],
     );
-    assert_eq!(label(&app.controller, "Square"), "Square=Yes");
+    assert_eq!(label(&app.controller, "BothSides"), "BothSides=Yes");
 }
 
 #[test]
@@ -1429,7 +1506,14 @@ fn line_prompt_carries_its_options_inline() {
     frame(&mut app, &ctx, vec![]);
     let prompt = app.controller.prompt();
     assert!(prompt.contains("BothSides=No"), "{prompt}");
-    assert!(prompt.contains("Length="), "{prompt}");
+    assert!(!prompt.contains("Length="), "{prompt}");
     assert!(app.command_option_token_rect("BothSides").is_some());
-    assert!(app.command_option_token_rect("Length").is_some());
+    assert!(app.command_option_token_rect("Length").is_none());
+    // Matrix Line: the end stage has no options; a bare number is the length.
+    app.controller.accept_world_point([0.; 3]).unwrap();
+    frame(&mut app, &ctx, vec![]);
+    let prompt = app.controller.prompt();
+    assert_eq!(prompt, "End of line: ");
+    assert!(app.command_option_token_rect("Length").is_none());
+    assert!(app.command_option_token_rect("BothSides").is_none());
 }

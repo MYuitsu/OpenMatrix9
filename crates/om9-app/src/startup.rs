@@ -93,6 +93,8 @@ pub struct AppConfig {
     pub audit_dir: Option<PathBuf>,
     /// Application-scoped layout store; `None` keeps the layout in memory only.
     pub layout_path: Option<PathBuf>,
+    /// Application-scoped Gumball settings store; `None` keeps defaults only.
+    pub gumball_settings_path: Option<PathBuf>,
     /// Whether a failed start may show the native diagnostic dialog.
     pub startup_dialog: bool,
 }
@@ -107,6 +109,7 @@ impl Default for AppConfig {
             maximized: true,
             audit_dir: None,
             layout_path: None,
+            gumball_settings_path: None,
             startup_dialog: true,
         }
     }
@@ -121,6 +124,7 @@ impl AppConfig {
             maximized: !audit,
             audit_dir,
             layout_path: crate::dock_layout::DockLayout::default_store_path(),
+            gumball_settings_path: crate::session::gumball::default_settings_path(),
             startup_dialog: should_report_dialog(
                 std::env::var(StartupFailure::DIALOG_ENV).ok().as_deref(),
             ),

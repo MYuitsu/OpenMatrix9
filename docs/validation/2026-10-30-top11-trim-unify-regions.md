@@ -1,0 +1,13 @@
+# Top11 Trim: remove temporary surface partition edges
+
+When a surface target originally has one face, each Trim publication now unifies adjacent same-domain kept regions before storing the result. The session retains its separate exact partition for subsequent picks. Disconnected kept regions stay separate; original multi-face BReps do not take this unification path, so independently authored boundaries are not intentionally merged. Each pick remains an atomic transaction with Undo/Redo.
+
+The OCCT adapter invokes `ShapeUpgrade_UnifySameDomain` in safe-input mode without edge or spline concatenation, validates the returned shape and returns a bounded snapshot. Rust checks open-face counts and area and owns document/session/transaction state. The helper is intended only for regions derived from one original face; it is not an unrestricted BRep simplifier.
+
+Planar tests remove a corner of a four-region face, verify the three remaining regions unify into an L-shaped face of 150 mm² with the removed corner absent, and verify diagonal remnants remain two faces. Resplitting that L shape with only one remaining cutter yields regions of 50 and 100 mm², without the obsolete divider. A cylindrical face split into sectors unifies to one face; after deleting a quadrant, the remaining 75π mm² surface still excludes the removed quadrant. The application regression verifies face counts 1, 2, 1 as successive regions are removed, then four Undo/Redo operations; an egui simulated viewport test clicks two regions and undoes both.
+
+Windows MSVC, pinned OCCT 8.0.1 SDK/runtime, `CARGO_TARGET_DIR=L:\om9-target`: kernel editing/transform suites passed 78 tests; app Top11/options/BRep passed 89 tests; no-default Top11/options passed 65 tests; the simulated viewport fixture passed; public source audit reported zero errors.
+
+SHA-256: `session/top11.rs` e6f3685f1bfd1731917a4a763fb36412366f4f04b532f28fa34fcf00f670a1b1; `tests/top11_brep.rs` b2352fb481acf1b01285e7a434b99fd23f61110f4c534a479e00c911749bbcdf; `editing.rs` 0258ea3c981d9c8e119369b74f9c4ffb37cd6e66ad1dc191a1e8d5ca169dfbcd; `editing_bridge.cpp` 4aa0562047c24dc9769a7673e8325d5973560e69dd8e27ef0814d1fb1344e9a9; `l2_01_10.rs` 678414b0417fe6d05df6c3370b940988fe9c2bfc58271f07478673c89221ab28.
+
+At the time of this record, resplitting was kernel-only. Subsequent limited application integration is recorded in `2026-10-30-top11-trim-mixed-curve-surface.md`. Multiple surface targets, general topology/periodic surfaces, file round trips, performance and physical desktop acceptance remain open. Area and validity checks do not prove all UV and topology invariants.

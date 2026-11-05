@@ -91,13 +91,7 @@ pub fn fraction_derivatives(
         index = count - 1;
     }
     let local = scaled - index as f64;
-    let mut jet = evaluate_curve(
-        &segments[index],
-        Parameter::Fraction(local),
-        order,
-        identity(),
-        limits,
-    )?;
+    let mut jet = fraction_derivatives(&segments[index], local, order, limits)?;
     if *reversed {
         for (k, value) in jet.iter_mut().enumerate().skip(1) {
             if k % 2 == 1 {
@@ -398,11 +392,10 @@ pub fn reverse_curve(curve: &Curve, limits: &Limits) -> Result<Curve> {
     curve.validate(limits)?;
     Ok(match curve {
         Curve::Line { start, end, domain } => {
-            let length = (domain[1] - domain[0]).abs();
             Curve::Line {
                 start: *end,
                 end: *start,
-                domain: [0.0, length],
+                domain: *domain,
             }
         }
         Curve::Circle {
@@ -419,7 +412,7 @@ pub fn reverse_curve(curve: &Curve, limits: &Limits) -> Result<Curve> {
                 x: *x,
                 y: scale(*y, -1.0),
                 radius: *radius,
-                domain: [0.0, 1.0],
+                domain: *domain,
                 angle_domain: Some([-angles[1], -angles[0]]),
             }
         }
@@ -474,6 +467,10 @@ pub fn is_closed(curve: &Curve, tolerance: f64, limits: &Limits) -> Result<bool>
     if !tolerance.is_finite() || tolerance < 0.0 {
         return Err(Error::Invalid("closure tolerance"));
     }
+    if let Curve::Nurbs(n)=curve && n.seam.is_some() {
+        let mut base=n.clone();base.seam=None;
+        return is_closed(&Curve::Nurbs(base),tolerance,limits);
+    }
     let [start, end] = curve_endpoints(curve, limits)?;
     Ok(distance(start, end) <= tolerance)
 }
@@ -518,11 +515,7 @@ pub fn validate_ring_rail(curve: &Curve, tolerance: f64, limits: &Limits) -> Res
             ];
             let length = normal[0].hypot(normal[1]).hypot(normal[2]);
             if length > 1.0e-9 {
-                plane = Some([
-                    normal[0] / length,
-                    normal[1] / length,
-                    normal[2] / length,
-                ]);
+                plane = Some([normal[0] / length, normal[1] / length, normal[2] / length]);
                 break 'search;
             }
         }
@@ -650,7 +643,11 @@ fn plane_axis(normal: Point3) -> Result<Point3> {
         ];
         let length = projection[0].hypot(projection[1]).hypot(projection[2]);
         if length > 1.0e-9 {
-            return Ok([projection[0] / length, projection[1] / length, projection[2] / length]);
+            return Ok([
+                projection[0] / length,
+                projection[1] / length,
+                projection[2] / length,
+            ]);
         }
     }
     Err(Error::Invalid("profile section plane"))
@@ -775,7 +772,10 @@ pub fn set_seam(curve: &Curve, fraction: f64, tolerance: f64, limits: &Limits) -
         }
         Curve::Nurbs(nurbs) => {
             let mut shifted = nurbs.clone();
-            shifted.seam = Some(nurbs.domain[0] + fraction * (nurbs.domain[1] - nurbs.domain[0]));
+            let [start,end]=nurbs.domain; let span=end-start;
+            let origin=nurbs.seam.map_or(if nurbs.reversed {1.} else {0.}, |seam| (seam-start)/span);
+            let next=(origin+if nurbs.reversed {-fraction} else {fraction}).rem_euclid(1.);
+            shifted.seam = Some(start+next*span);
             Ok(Curve::Nurbs(shifted))
         }
         Curve::Polycurve { .. } => {
@@ -787,6 +787,284 @@ pub fn set_seam(curve: &Curve, fraction: f64, tolerance: f64, limits: &Limits) -
 }
 
 /* ------------------------------ split / trim ------------------------------ */
+
+/// Materialize an active interval with the requested endpoint clamped, without refitting.
+pub(crate) fn clamped_active_nurbs(n: &NurbsCurve, start: bool, limits: &Limits) -> Result<NurbsCurve> {
+    n.validate(limits)?;
+    let support = [n.knots[n.degree], n.knots[n.poles.len()]];
+    if n.periodic { n.certify_repeated_periodic_basis(limits)?; }
+    let mut active = n.clone();
+    active.domain = support;
+    active.periodic = false;
+    active.reversed = false;
+    active.seam = None;
+    if n.domain[0] > support[0] {
+        let first=active.knots.partition_point(|k| *k < n.domain[0]);
+        let last=active.knots.partition_point(|k| *k <= n.domain[0]);
+        if last-first == active.degree+1 {
+            // At a full-multiplicity knot evaluation chooses the right side.
+            // Retain that side directly; splitting at the jump cannot share a pole.
+            active.poles=active.poles[first..].to_vec();
+            active.weights=active.weights[first..].to_vec();
+            active.knots=active.knots[first..].to_vec();
+            active.domain[0]=n.domain[0];
+            active.validate(limits)?;
+        } else {
+            let (_, Curve::Nurbs(right)) = split_nurbs(&active, n.domain[0], limits)? else { unreachable!() };
+            active = right;
+        }
+    }
+    if n.domain[1] < support[1] {
+        let (Curve::Nurbs(left), _) = split_nurbs(&active, n.domain[1], limits)? else { unreachable!() };
+        active = left;
+    }
+    let lower = start != n.reversed;
+    let unclamped = if lower {
+        active.knots[..=active.degree].iter().any(|k| *k != active.domain[0])
+    } else {
+        active.knots[active.knots.len() - active.degree - 1..].iter().any(|k| *k != active.domain[1])
+    };
+    if unclamped {
+        let parameter = active.domain[usize::from(!lower)];
+        let first = active.knots.partition_point(|k| *k < parameter);
+        let last = active.knots.partition_point(|k| *k <= parameter);
+        let multiplicity = last - first;
+        let inserted = crate::curve_build::insert_support_knot(
+            &active, parameter, active.degree.saturating_sub(multiplicity), limits,
+        )?;
+        let first = inserted.knots.partition_point(|k| *k < parameter);
+        let last = inserted.knots.partition_point(|k| *k <= parameter);
+        if lower {
+            let offset = last - 1 - inserted.degree;
+            active.poles = inserted.poles[offset..].to_vec();
+            active.weights = inserted.weights[offset..].to_vec();
+            active.knots = vec![parameter; inserted.degree + 1];
+            active.knots.extend_from_slice(&inserted.knots[last..]);
+        } else {
+            active.poles = inserted.poles[..first].to_vec();
+            active.weights = inserted.weights[..first].to_vec();
+            active.knots = inserted.knots[..first].to_vec();
+            active.knots.extend(std::iter::repeat_n(parameter, inserted.degree + 1));
+        }
+    }
+    active.reversed = n.reversed;
+    active.seam = n.seam;
+    active.validate(limits)?;
+    Ok(active)
+}
+
+#[cfg(test)]
+mod join_active_interval_tests {
+    use super::*;
+
+    #[test]
+    fn rational_multispan_restriction_preserves_active_curve_and_orientation() {
+        let limits = Limits::default();
+        for domain in [[0.1, 0.9], [0.0, 0.7], [0.3, 1.0]] {
+            for reversed in [false, true] {
+                let n = NurbsCurve {
+                    degree: 2,
+                    poles: vec![[0., 0., 0.], [1., 2., 0.], [2., -1., 0.], [3., 0., 0.]],
+                    weights: vec![1., 0.7, 1.4, 0.9],
+                    knots: vec![0., 0., 0., 0.5, 1., 1., 1.],
+                    domain, periodic: false, reversed, seam: None,
+                };
+                let restricted = clamped_active_nurbs(&n, true, &limits).unwrap();
+                assert_eq!(restricted.domain, domain);
+                assert_eq!(restricted.reversed, reversed);
+                for i in 0..=100 {
+                    let t = i as f64 / 100.;
+                    let a = point_at(&Curve::Nurbs(n.clone()), t, &limits).unwrap();
+                    let b = point_at(&Curve::Nurbs(restricted.clone()), t, &limits).unwrap();
+                    assert!(a.iter().zip(b).all(|(x, y)| (x - y).abs() < 1e-10), "{domain:?} {reversed} {t}: {a:?} {b:?}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn trimmed_nonclamped_backing_preserves_curve() {
+        let n = NurbsCurve {
+            degree: 2, poles: vec![[0., 0., 0.], [1., 2., 0.], [2., -1., 0.], [3., 0., 0.]],
+            weights: vec![1.; 4], knots: vec![-1., -0.5, 0., 0.5, 1., 1.5, 2.],
+            domain: [0.1, 0.9], periodic: false, reversed: false, seam: None,
+        };
+        let limits = Limits::default();
+        for reversed in [false, true] {
+            let mut source = n.clone();
+            source.reversed = reversed;
+            let restricted = clamped_active_nurbs(&source, true, &limits).unwrap();
+            for i in 0..=100 {
+                let t = i as f64 / 100.;
+                let a = point_at(&Curve::Nurbs(source.clone()), t, &limits).unwrap();
+                let b = point_at(&Curve::Nurbs(restricted.clone()), t, &limits).unwrap();
+                assert!(a.iter().zip(b).all(|(x, y)| (x - y).abs() < 1e-10));
+            }
+        }
+    }
+
+    #[test]
+    fn only_the_endpoint_being_adjusted_needs_to_be_clamped() {
+        let limits = Limits::default();
+        for reversed in [false, true] {
+            for domain in [[0., 0.9], [0.1, 1.]] {
+                let n = NurbsCurve {
+                    degree: 2, poles: vec![[0., 0., 0.], [1., 2., 0.], [2., -1., 0.], [3., 0., 0.]],
+                    weights: vec![1., 0.7, 1.4, 0.9], knots: vec![-1., -0.5, 0., 0.5, 1., 1.5, 2.],
+                    domain, periodic: false, reversed, seam: None,
+                };
+                let lower_clamped = domain[0] > 0.;
+                let start = lower_clamped != reversed;
+                let restricted = clamped_active_nurbs(&n, start, &limits).unwrap();
+                let other = clamped_active_nurbs(&n, !start, &limits).unwrap();
+                for i in 0..=100 {
+                    let t = i as f64 / 100.;
+                    let a = point_at(&Curve::Nurbs(n.clone()), t, &limits).unwrap();
+                    let b = point_at(&Curve::Nurbs(restricted.clone()), t, &limits).unwrap();
+                    let c = point_at(&Curve::Nurbs(other.clone()), t, &limits).unwrap();
+                    assert!(a.iter().zip(b).all(|(x, y)| (x - y).abs() < 1e-10));
+                    assert!(a.iter().zip(c).all(|(x, y)| (x - y).abs() < 1e-10));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn support_boundary_clamping_preserves_rational_curves() {
+        let limits = Limits::default();
+        let fixtures = [
+            NurbsCurve {
+                degree: 2, poles: vec![[0., 0., 0.], [1., 2., 0.], [2., -1., 0.], [3., 0., 0.]],
+                weights: vec![1., 0.7, 1.4, 0.9], knots: vec![-1., -0.5, 0., 0.5, 1., 1.5, 2.],
+                domain: [0., 1.], periodic: false, reversed: false, seam: None,
+            },
+            NurbsCurve {
+                degree: 3, poles: vec![[0., 0., 0.], [1., 2., 0.], [2., -1., 1.], [3., 0., 0.], [4., 3., 0.], [5., 1., 0.]],
+                weights: vec![1., 0.7, 1.4, 0.9, 1.2, 0.8],
+                knots: vec![-2., -1., 0., 0., 0.5, 1., 1.5, 2., 3., 4.],
+                domain: [0., 1.5], periodic: false, reversed: false, seam: None,
+            },
+            NurbsCurve {
+                degree: 2, poles: vec![[0., 0., 0.], [1., 2., 0.], [2., -1., 0.], [3., 0., 0.], [4., 1., 0.]],
+                weights: vec![1., 0.7, 1.4, 0.9, 1.2], knots: vec![-1., 0., 0., 0., 0.5, 1., 1., 1.],
+                domain: [0., 1.], periodic: false, reversed: false, seam: None,
+            },
+            NurbsCurve {
+                degree: 2, poles: vec![[0., 0., 0.], [1., 2., 0.], [2., -1., 0.], [3., 0., 0.], [4., 1., 0.]],
+                weights: vec![1., 0.7, 1.4, 0.9, 1.2], knots: vec![-1., -0.5, 0., 1., 1., 1., 1.5, 2.],
+                domain: [0., 1.], periodic: false, reversed: false, seam: None,
+            },
+        ];
+        for mut n in fixtures {
+            for reversed in [false, true] {
+                n.reversed = reversed;
+                for start in [false, true] {
+                    let restricted = clamped_active_nurbs(&n, start, &limits).unwrap();
+                    let lower = start != reversed;
+                    let boundary = n.domain[usize::from(!lower)];
+                    let knots = if lower { &restricted.knots[..=n.degree] }
+                        else { &restricted.knots[restricted.knots.len()-n.degree-1..] };
+                    assert!(knots.iter().all(|k| *k == boundary));
+                    for i in 0..=200 {
+                        let t = i as f64 / 200.;
+                        let a = point_at(&Curve::Nurbs(n.clone()), t, &limits).unwrap();
+                        let b = point_at(&Curve::Nurbs(restricted.clone()), t, &limits).unwrap();
+                        assert!(a.iter().zip(b).all(|(x, y)| (x - y).abs() < 1e-10), "{reversed} {start} {t}: {a:?} {b:?}");
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn certified_periodic_curve_can_be_opened_at_either_seam_without_refitting() {
+        let limits = Limits::default();
+        let mut n = NurbsCurve {
+            degree: 2,
+            poles: vec![[0.,0.,0.],[2.,0.,0.],[2.,2.,0.],[0.,2.,0.],[0.,0.,0.],[2.,0.,0.]],
+            weights: vec![1.,0.7,1.2,0.9,1.,0.7],
+            knots: vec![-2.,-1.,0.,1.,2.,3.,4.,5.,6.],
+            domain: [0.,4.], periodic: true, reversed: false, seam: None,
+        };
+        n.certify_repeated_periodic(&limits).unwrap();
+        for reversed in [false, true] {
+            n.reversed = reversed;
+            for start in [false, true] {
+                let opened = clamped_active_nurbs(&n, start, &limits).unwrap();
+                assert!(!opened.periodic);
+                for i in 0..=200 {
+                    let t=i as f64/200.;
+                    let a=point_at(&Curve::Nurbs(n.clone()),t,&limits).unwrap();
+                    let b=point_at(&Curve::Nurbs(opened.clone()),t,&limits).unwrap();
+                    assert!(a.iter().zip(b).all(|(x,y)| (x-y).abs()<1e-10), "{reversed} {start} {t}: {a:?} {b:?}");
+                }
+            }
+        }
+        n.poles[5][0] += 1.;
+        assert!(matches!(clamped_active_nurbs(&n, true, &limits), Err(Error::Unsupported(_))));
+    }
+
+    #[test]
+    fn trimmed_periodic_curve_retains_its_exact_active_interval() {
+        let limits=Limits::default();
+        let mut n=NurbsCurve {
+            degree:2, poles:vec![[0.,0.,0.],[2.,0.,0.],[2.,2.,0.],[0.,2.,0.],[0.,0.,0.],[2.,0.,0.]],
+            weights:vec![1.,0.7,1.2,0.9,1.,0.7], knots:vec![-2.,-1.,0.,1.,2.,3.,4.,5.,6.],
+            domain:[0.,4.], periodic:true, reversed:false, seam:None,
+        };
+        for domain in [[0.3,3.7],[0.,2.6],[0.4,4.]] {
+            n.domain=domain;
+            for reversed in [false,true] {
+                n.reversed=reversed;
+                for start in [false,true] {
+                    let opened=clamped_active_nurbs(&n,start,&limits).unwrap();
+                    assert_eq!(opened.domain,domain);
+                    assert!(!opened.periodic);
+                    for i in 0..=200 {
+                        let t=i as f64/200.;
+                        let a=point_at(&Curve::Nurbs(n.clone()),t,&limits).unwrap();
+                        let b=point_at(&Curve::Nurbs(opened.clone()),t,&limits).unwrap();
+                        assert!(a.iter().zip(b).all(|(x,y)| (x-y).abs()<1e-10), "{domain:?} {reversed} {start} {t}: {a:?} {b:?}");
+                    }
+                }
+            }
+        }
+        n.domain=[0.3,3.7];
+        n.reversed=false;
+        let curve=Curve::Nurbs(n.clone());
+        assert!(crate::evaluation::evaluate_curve(&curve,Parameter::Fraction(0.),2,identity(),&limits).is_ok());
+        assert!(crate::evaluation::evaluate_curve(&curve,Parameter::Fraction(1.),2,identity(),&limits).is_ok());
+        assert!(n.certify_repeated_periodic(&limits).is_err());
+        n.domain=[0.,2.7];
+        assert!(crate::evaluation::evaluate_curve(&Curve::Nurbs(n),Parameter::Fraction(0.),2,identity(),&limits).is_err());
+    }
+
+    #[test]
+    fn trim_start_at_discontinuous_knot_keeps_the_right_hand_piece() {
+        let limits=Limits::default();
+        let mut n=NurbsCurve {
+            degree:2,
+            poles:vec![[0.,0.,0.],[1.,2.,0.],[2.,0.,0.],[10.,0.,0.],[11.,-1.,0.],[12.,0.,0.]],
+            weights:vec![1.,0.7,1.2,0.8,1.1,1.],
+            knots:vec![0.,0.,0.,0.5,0.5,0.5,1.,1.,1.],
+            domain:[0.5,0.9],periodic:false,reversed:false,seam:None,
+        };
+        for reversed in [false,true] {
+            n.reversed=reversed;
+            for start in [false,true] {
+                let active=clamped_active_nurbs(&n,start,&limits).unwrap();
+                for i in 0..=100 {
+                    let t=i as f64/100.;
+                    let a=point_at(&Curve::Nurbs(n.clone()),t,&limits).unwrap();
+                    let b=point_at(&Curve::Nurbs(active.clone()),t,&limits).unwrap();
+                    assert!(a.iter().zip(b).all(|(x,y)| (x-y).abs()<1e-10), "{reversed} {start} {t}: {a:?} {b:?}");
+                }
+            }
+        }
+        n.domain=[0.1,0.5];
+        assert!(matches!(clamped_active_nurbs(&n,true,&limits),Err(Error::Unsupported(_))));
+    }
+}
 
 fn split_nurbs(nurbs: &NurbsCurve, parameter: f64, limits: &Limits) -> Result<(Curve, Curve)> {
     if nurbs.reversed {
@@ -902,6 +1180,18 @@ pub fn split_curve(curve: &Curve, fraction: f64, limits: &Limits) -> Result<(Cur
             ))
         }
         Curve::Nurbs(nurbs) => {
+            if nurbs.seam.is_some() {
+                // A seam-spanning polycurve has segment-uniform parameters and
+                // cannot preserve this API's affine subcurve parameterization.
+                return Err(Error::Unsupported("split of a reseamed NURBS; use parameter trim"));
+            }
+            if nurbs.periodic {
+                // Materialize the certified active interval before splitting: the
+                // repeated periodic basis must not be treated as a clamped one.
+                let opened = clamped_active_nurbs(nurbs, true, limits)?;
+                let opened = clamped_active_nurbs(&opened, false, limits)?;
+                return split_curve(&Curve::Nurbs(opened), fraction, limits);
+            }
             if nurbs.reversed {
                 let reversed = reverse_curve(curve, limits)?;
                 let (left, right) = split_curve(&reversed, 1.0 - fraction, limits)?;
@@ -975,13 +1265,16 @@ pub fn trim_curve(curve: &Curve, from: f64, to: f64, limits: &Limits) -> Result<
     if from == 0.0 && to == 1.0 {
         return Ok(curve.clone());
     }
+    if let Curve::Nurbs(n)=curve && n.seam.is_some() {
+        return trim_seamed_nurbs(n,from,to,limits);
+    }
     if let Curve::Polycurve { segments, reversed } = curve {
         if *reversed {
-            let forward = reverse_curve(curve, limits)?;
+            let forward = forward_polycurve(curve, limits)?;
             return trim_curve(&forward, from, to, limits);
         }
         let total = polycurve_length(segments, 0.0, 1.0, limits)?;
-        return trim_polycurve(segments, from * total, to * total, limits);
+        return trim_polycurve_by_length(segments, from * total, to * total, limits);
     }
     let (head, _) = if to < 1.0 {
         split_curve(curve, to, limits)?
@@ -995,9 +1288,113 @@ pub fn trim_curve(curve: &Curve, from: f64, to: f64, limits: &Limits) -> Result<
     Ok(tail)
 }
 
-/// Trim a forward polycurve by absolute arc length; each member keeps its exact
-/// geometry and partial members are split at the measured length.
-fn trim_polycurve(
+/// Trim using the same segment-uniform parameter fractions as `point_at` and `split_curve`.
+/// This differs from `trim_curve`'s historical polycurve arc-length fractions.
+pub fn trim_curve_by_parameter(
+    curve: &Curve,
+    from: f64,
+    to: f64,
+    limits: &Limits,
+) -> Result<Curve> {
+    check_fraction(from)?;
+    check_fraction(to)?;
+    if from >= to {
+        return Err(Error::Invalid("trim interval"));
+    }
+    if from == 0.0 && to == 1.0 {
+        return Ok(curve.clone());
+    }
+    if let Curve::Nurbs(n)=curve && n.seam.is_some() {
+        return trim_seamed_nurbs(n,from,to,limits);
+    }
+    if let Curve::Polycurve { segments, reversed } = curve {
+        if *reversed {
+            return trim_curve_by_parameter(&forward_polycurve(curve, limits)?, from, to, limits);
+        }
+        return trim_polycurve_by_parameter(segments, from, to, limits);
+    }
+    trim_curve(curve, from, to, limits)
+}
+
+fn trim_seamed_nurbs(n:&NurbsCurve,from:f64,to:f64,limits:&Limits)->Result<Curve> {
+    n.validate(limits)?;
+    let mut base=n.clone();base.seam=None;
+    let curve=Curve::Nurbs(base);
+    if !is_closed(&curve,1e-9,limits)? {return Err(Error::Invalid("NURBS seam needs a closed curve"));}
+    let [start,end]=n.domain;let seam=n.seam.ok_or(Error::Missing("curve seam"))?;
+    let offset=if n.reversed {(end-seam)/(end-start)} else {(seam-start)/(end-start)};
+    let lo=offset+from;let hi=offset+to;
+    let mut pieces=Vec::with_capacity(2);
+    for turn in 0..=1 {
+        let a=(lo-turn as f64).clamp(0.,1.);let b=(hi-turn as f64).clamp(0.,1.);
+        if b>a {pieces.push(trim_curve_by_parameter(&curve,a,b,limits)?);}
+    }
+    if pieces.len()==1 {return Ok(pieces.remove(0));}
+    let split=(1.0-lo)/(to-from);
+    if let Some(curve)=join_parameterized_nurbs(&pieces,split,limits)? {return Ok(curve);}
+    join_curves(&pieces,1e-9,limits)
+}
+
+// Combine two exact clamped NURBS using the original fraction at their joint.
+fn join_parameterized_nurbs(pieces:&[Curve],split:f64,limits:&Limits)->Result<Option<Curve>> {
+    if pieces.len()!=2 || !(0.0..1.0).contains(&split) {return Ok(None);}
+    let mut parts=Vec::with_capacity(2);
+    for piece in pieces {
+        let Curve::Nurbs(n)=piece else {return Ok(None)};
+        let mut n=n.clone();
+        if n.reversed {
+            n.poles.reverse();n.weights.reverse();
+            n.knots=n.knots.iter().rev().map(|k|n.domain[0]+n.domain[1]-k).collect();
+            n.reversed=false;
+        }
+        if n.periodic || n.seam.is_some() || n.knots[..=n.degree].iter().any(|k|*k!=n.domain[0]) || n.knots[n.knots.len()-n.degree-1..].iter().any(|k|*k!=n.domain[1]) {return Ok(None);}
+        parts.push(n);
+    }
+    let (a,b)=(&parts[0],&parts[1]);
+    if a.degree!=b.degree || a.poles.last()!=b.poles.first() {return Ok(None);}
+    let poles_count=a.poles.len().checked_add(b.poles.len()-1).ok_or(Error::Overflow("joined NURBS poles"))?;
+    let knots_count=poles_count.checked_add(a.degree+1).ok_or(Error::Overflow("joined NURBS knots"))?;
+    let mut usage=crate::budget::Usage::array::<Point3>(poles_count)?;usage.points=poles_count as u64;
+    usage.add(crate::budget::Usage::array::<f64>(poles_count)?,limits)?;usage.add(crate::budget::Usage::array::<f64>(knots_count)?,limits)?;
+    let mut poles=Vec::new();let mut weights=Vec::new();let mut knots=Vec::new();
+    poles.try_reserve_exact(poles_count).map_err(|_|Error::Budget("joined NURBS poles"))?;
+    weights.try_reserve_exact(poles_count).map_err(|_|Error::Budget("joined NURBS weights"))?;
+    knots.try_reserve_exact(knots_count).map_err(|_|Error::Budget("joined NURBS knots"))?;
+    poles.extend_from_slice(&a.poles);poles.extend_from_slice(&b.poles[1..]);
+    weights.extend_from_slice(&a.weights);let factor=a.weights[a.weights.len()-1]/b.weights[0];weights.extend(b.weights[1..].iter().map(|w|w*factor));
+    for k in &a.knots[..a.knots.len()-1] {knots.push((k-a.domain[0])/(a.domain[1]-a.domain[0])*split);}
+    for k in &b.knots[b.degree+1..] {knots.push(split+(k-b.domain[0])/(b.domain[1]-b.domain[0])*(1.-split));}
+    let n=NurbsCurve{degree:a.degree,poles,weights,knots,domain:[0.,1.],periodic:false,reversed:false,seam:None};
+    n.validate(limits)?;Ok(Some(Curve::Nurbs(n)))
+}
+
+fn trim_polycurve_by_parameter(
+    segments: &[Curve],
+    from: f64,
+    to: f64,
+    limits: &Limits,
+) -> Result<Curve> {
+    let mut result = Vec::new();
+    let count = segments.len() as f64;
+    for (index, segment) in segments.iter().enumerate() {
+        let low = (from * count - index as f64).clamp(0.0, 1.0);
+        let high = (to * count - index as f64).clamp(0.0, 1.0);
+        if high > low {
+            result.push(trim_curve_by_parameter(segment, low, high, limits)?);
+        }
+    }
+    match result.len() {
+        0 => Err(Error::Invalid("trim interval")),
+        1 => Ok(result.remove(0)),
+        _ => Ok(Curve::Polycurve {
+            segments: result,
+            reversed: false,
+        }),
+    }
+}
+
+/// Preserve the original polycurve trim API's arc-length fraction behavior.
+fn trim_polycurve_by_length(
     segments: &[Curve],
     from_length: f64,
     to_length: f64,
@@ -1042,12 +1439,12 @@ fn trim_polycurve(
 }
 
 fn trim_segment(segment: &Curve, from: f64, to: f64, limits: &Limits) -> Result<Curve> {
-    let (head, _) = if to < 1.0 - 1e-12 {
+    let (head, _) = if to < 1.0 {
         split_curve(segment, to, limits)?
     } else {
         (segment.clone(), segment.clone())
     };
-    if from <= 1e-12 {
+    if from == 0.0 {
         return Ok(head);
     }
     let (_, tail) = split_curve(&head, from / to, limits)?;
@@ -1136,13 +1533,23 @@ pub struct CurveGrips {
 
 /// Move one edit point (a point that lies on the curve) to `target`.
 ///
-/// A line moves the matching end. A NURBS curve is re-interpolated through the edited
-/// Greville points, so the result passes through the new point while keeping the source
-/// degree; the parameterisation may change, which is the documented edit-point trade-off.
+/// A line moves the matching end. For a NURBS curve, solve for pole displacements
+/// at the existing Greville points without changing knots, weights or parameterisation.
 pub fn move_edit_point(
     curve: &Curve,
     index: usize,
     target: Point3,
+    limits: &Limits,
+) -> Result<Curve> {
+    move_edit_point_with_joints(curve, index, target, identity(), 1e-9, limits)
+}
+
+pub(crate) fn move_edit_point_with_joints(
+    curve: &Curve,
+    index: usize,
+    target: Point3,
+    placement: Transform,
+    tolerance: f64,
     limits: &Limits,
 ) -> Result<Curve> {
     finite(target)?;
@@ -1153,15 +1560,111 @@ pub fn move_edit_point(
     match curve {
         Curve::Line { .. } => move_grip(curve, index, target, limits),
         Curve::Nurbs(nurbs) => {
-            let mut points = grips.edit_points;
-            points[index] = target;
-            let degree = nurbs.degree.min(points.len() - 1);
-            Ok(Curve::Nurbs(interpolate_any(
-                &points,
-                degree,
-                KnotMode::ChordLength,
-                limits,
-            )?))
+            if nurbs.periodic { nurbs.certify_repeated_periodic(limits)?; }
+            if grips.edit_points[index] == target {
+                return Ok(curve.clone());
+            }
+            let count = if nurbs.periodic { nurbs.poles.len()-nurbs.degree } else { nurbs.poles.len() };
+            // ponytail: dense collocation capped at 512; use a banded solver for larger curves.
+            if count > 512 {
+                return Err(Error::Budget("curve edit point solver"));
+            }
+            let cells = count
+                .checked_mul(count + 3)
+                .ok_or(Error::Overflow("curve edit matrix"))?;
+            crate::budget::Usage::array::<f64>(cells)?.check(limits)?;
+            let mut matrix = Vec::new();
+            matrix
+                .try_reserve_exact(count)
+                .map_err(|_| Error::Budget("curve edit matrix"))?;
+            for row in 0..count {
+                let parameter = edit_greville(nurbs, row);
+                let mut values = Vec::new();
+                values
+                    .try_reserve_exact(count + 3)
+                    .map_err(|_| Error::Budget("curve edit matrix"))?;
+                values.resize(count, 0.0);
+                for column in 0..nurbs.poles.len() {
+                    values[column % count] += crate::curve_build::basis(nurbs.degree, &nurbs.knots, column, parameter)? * nurbs.weights[column];
+                }
+                let denominator: f64 = values.iter().sum();
+                if !denominator.is_finite() || denominator.abs() < 1e-12 {
+                    return Err(Error::Invalid("curve edit basis"));
+                }
+                for value in &mut values {
+                    *value /= denominator;
+                }
+                let move_row = row == index
+                    || (!nurbs.periodic && grips.closed
+                        && (index == 0 || index + 1 == count)
+                        && (row == 0 || row + 1 == count));
+                let delta = if move_row {
+                    sub(target, grips.edit_points[row])
+                } else {
+                    [0.0; 3]
+                };
+                values.extend_from_slice(&delta);
+                matrix.push(values);
+            }
+            for column in 0..count {
+                let best = (column..count)
+                    .max_by(|&a, &b| matrix[a][column].abs().total_cmp(&matrix[b][column].abs()))
+                    .unwrap();
+                if matrix[best][column].abs() < 1e-12 {
+                    return Err(Error::Invalid("singular curve edit matrix"));
+                }
+                matrix.swap(column, best);
+                let pivot = matrix[column][column];
+                for value in &mut matrix[column][column..] {
+                    *value /= pivot;
+                }
+                for row in column + 1..count {
+                    let factor = matrix[row][column];
+                    for col in column..count + 3 {
+                        matrix[row][col] -= factor * matrix[column][col];
+                    }
+                }
+            }
+            let mut displacements = vec![[0.0; 3]; count];
+            for row in (0..count).rev() {
+                for axis in 0..3 {
+                    let mut value = matrix[row][count + axis];
+                    for col in row + 1..count {
+                        value -= matrix[row][col] * displacements[col][axis];
+                    }
+                    displacements[row][axis] = value;
+                }
+            }
+            let mut edited = nurbs.clone();
+            for (pole, delta) in edited.poles.iter_mut().zip(displacements) {
+                *pole = add(*pole, delta);
+            }
+            if nurbs.periodic {
+                for i in 0..nurbs.degree { edited.poles[count+i]=edited.poles[i]; }
+            }
+            edited.validate(limits)?;
+            let result = Curve::Nurbs(edited);
+            let actual = curve_grips(&result, 1e-9, limits)?.edit_points;
+            for (row, point) in actual.iter().enumerate() {
+                let moved = row == index
+                    || (!nurbs.periodic && grips.closed
+                        && (index == 0 || index + 1 == count)
+                        && (row == 0 || row + 1 == count));
+                let expected = if moved {
+                    target
+                } else {
+                    grips.edit_points[row]
+                };
+                let magnitude = expected.iter().fold(1.0_f64, |a, b| a.max(b.abs()));
+                if point
+                    .iter()
+                    .zip(expected)
+                    .any(|(a, b)| (a - b).abs() > magnitude * 1e-8)
+                {
+                    return Err(Error::Invalid("inaccurate curve edit solution"));
+                }
+            }
+            Ok(result)
         }
         Curve::Circle {
             center,
@@ -1171,59 +1674,113 @@ pub fn move_edit_point(
             domain,
             angle_domain,
         } => {
-            let local = sub(target, *center);
-            let angle = dot(local, *y).atan2(dot(local, *x));
-            let (start, end) = match angle_domain {
-                None => (angle, angle + std::f64::consts::TAU),
-                Some(angles) => {
-                    if index == 0 {
-                        (angle, angle + (angles[1] - angles[0]))
-                    } else {
-                        let mut end = angle;
-                        while end <= angles[0] {
-                            end += std::f64::consts::TAU;
-                        }
-                        (angles[0], end)
-                    }
-                }
-            };
-            if !stacked_angle_domain(*radius, start, end) {
-                return Err(Error::Invalid("edit point angle"));
+            if grips.edit_points[index] == target {
+                return Ok(curve.clone());
             }
-            Ok(Curve::Circle {
-                center: *center,
-                x: *x,
-                y: *y,
-                radius: *radius,
-                domain: if angle_domain.is_none() {
-                    [0.0, 1.0]
-                } else {
-                    *domain
-                },
-                angle_domain: Some([start, end]),
-            })
+            let nurbs = crate::top11::affine_circle(
+                *center,
+                *x,
+                *y,
+                *radius,
+                angle_domain.unwrap_or(*domain),
+                identity(),
+            )?;
+            let last = match &nurbs {
+                Curve::Nurbs(n) => n.poles.len() - 1,
+                _ => unreachable!(),
+            };
+            move_edit_point_with_joints(
+                &nurbs,
+                if index == 0 { 0 } else { last },
+                target,
+                placement,
+                tolerance,
+                limits,
+            )
         }
         Curve::Polycurve { reversed, .. } => {
             let forward = forward_polycurve(curve, limits)?;
+            let ends = curve_endpoints(&forward, limits)?;
+            let closed = joint_within(ends[0], ends[1], placement, tolerance)?;
             let Curve::Polycurve { segments, .. } = forward else {
                 return Err(Error::Invalid("polycurve"));
             };
             let mut offset = 0usize;
-            let mut edited = segments.clone();
             for (segment_index, segment) in segments.iter().enumerate() {
-                let count = curve_grips(segment, 1e-9, limits)?.edit_points.len();
+                let segment_grips = curve_grips(segment, 1e-9, limits)?.edit_points;
+                let count = segment_grips.len();
                 if index < offset + count {
-                    edited[segment_index] =
-                        move_edit_point(segment, index - offset, target, limits)?;
+                    let local_index = index - offset;
+                    let selected = segment_grips[local_index];
+                    if selected == target {
+                        return Ok(curve.clone());
+                    }
+                    let ends = curve_endpoints(segment, limits)?;
+                    let mut edited = segments.clone();
+                    edited[segment_index] = move_edit_point_with_joints(
+                        segment,
+                        local_index,
+                        target,
+                        placement,
+                        tolerance,
+                        limits,
+                    )?;
+                    for side in 0..2 {
+                        if distance(selected, ends[side]) > 1e-9 {
+                            continue;
+                        }
+                        let neighbor = if side == 0 {
+                            if segment_index > 0 {
+                                Some(segment_index - 1)
+                            } else if closed && segments.len() > 1 {
+                                Some(segments.len() - 1)
+                            } else {
+                                None
+                            }
+                        } else if segment_index + 1 < segments.len() {
+                            Some(segment_index + 1)
+                        } else if closed && segments.len() > 1 {
+                            Some(0)
+                        } else {
+                            None
+                        };
+                        let Some(neighbor) = neighbor else {
+                            continue;
+                        };
+                        let other_end = curve_endpoints(&segments[neighbor], limits)?[1 - side];
+                        if !joint_within(ends[side], other_end, placement, tolerance)? {
+                            continue;
+                        }
+                        let other_grips =
+                            curve_grips(&segments[neighbor], 1e-9, limits)?.edit_points;
+                        let other_index = other_grips
+                            .iter()
+                            .position(|p| distance(*p, other_end) <= 1e-9)
+                            .ok_or(Error::Unsupported("polycurve endpoint edit grip"))?;
+                        edited[neighbor] = move_edit_point_with_joints(
+                            &segments[neighbor],
+                            other_index,
+                            target,
+                            placement,
+                            tolerance,
+                            limits,
+                        )?;
+                    }
                     let result = Curve::Polycurve {
                         segments: edited,
                         reversed: false,
                     };
-                    return if *reversed {
-                        reverse_curve(&result, limits)
-                    } else {
-                        Ok(result)
-                    };
+                    if *reversed {
+                        let Curve::Polycurve { segments, .. } = reverse_curve(&result, limits)?
+                        else {
+                            unreachable!()
+                        };
+                        return Ok(Curve::Polycurve {
+                            segments,
+                            reversed: true,
+                        });
+                    }
+                    return Ok(result);
                 }
                 offset += count;
             }
@@ -1232,18 +1789,14 @@ pub fn move_edit_point(
     }
 }
 
-fn stacked_angle_domain(radius: f64, start: f64, end: f64) -> bool {
-    radius.is_finite()
-        && radius > 0.0
-        && start.is_finite()
-        && end.is_finite()
-        && end > start
-        && (end - start) <= std::f64::consts::TAU + 1e-9
-}
-
 /// Grip points for a curve. A NURBS edit point is the curve point at the Greville
 /// abscissa of each pole; a line exposes its two ends; a circle exposes its centre plus
 /// the quadrant points and its arc ends.
+fn edit_greville(n: &NurbsCurve, index: usize) -> f64 {
+    let value=(1..=n.degree).map(|offset|n.knots[index+offset]).sum::<f64>()/n.degree as f64;
+    if n.periodic {n.domain[0]+(value-n.domain[0]).rem_euclid(n.domain[1]-n.domain[0])} else {value}
+}
+
 pub fn curve_grips(curve: &Curve, tolerance: f64, limits: &Limits) -> Result<CurveGrips> {
     curve.validate(limits)?;
     let closed = is_closed(curve, tolerance, limits)?;
@@ -1289,16 +1842,14 @@ pub fn curve_grips(curve: &Curve, tolerance: f64, limits: &Limits) -> Result<Cur
             }
         }
         Curve::Nurbs(nurbs) => {
-            let degree = nurbs.degree;
+            if nurbs.periodic {nurbs.certify_repeated_periodic(limits)?;}
+            let count=if nurbs.periodic {nurbs.poles.len()-nurbs.degree}else{nurbs.poles.len()};
             let mut edit_points = Vec::new();
             edit_points
-                .try_reserve_exact(nurbs.poles.len())
+                .try_reserve_exact(count)
                 .map_err(|_| Error::Budget("curve edit points"))?;
-            for index in 0..nurbs.poles.len() {
-                let greville: f64 = (1..=degree)
-                    .map(|offset| nurbs.knots[index + offset])
-                    .sum::<f64>()
-                    / degree as f64;
+            for index in 0..count {
+                let greville=edit_greville(nurbs,index);
                 edit_points.push(
                     *evaluate_curve(curve, Parameter::Native(greville), 0, identity(), limits)?
                         .first()
@@ -1306,7 +1857,7 @@ pub fn curve_grips(curve: &Curve, tolerance: f64, limits: &Limits) -> Result<Cur
                 );
             }
             CurveGrips {
-                poles: nurbs.poles.clone(),
+                poles: nurbs.poles[..count].to_vec(),
                 edit_points,
                 knots: nurbs.knots.clone(),
                 closed,
@@ -1338,6 +1889,24 @@ pub fn curve_grips(curve: &Curve, tolerance: f64, limits: &Limits) -> Result<Cur
 
 /// Move control point `index` to `target` and return a validated curve.
 pub fn move_grip(curve: &Curve, index: usize, target: Point3, limits: &Limits) -> Result<Curve> {
+    move_grip_with_joints(curve, index, target, identity(), 1e-9, limits)
+}
+
+fn joint_within(a: Point3, b: Point3, placement: Transform, tolerance: f64) -> Result<bool> {
+    if !tolerance.is_finite() || tolerance < 0.0 {
+        return Err(Error::Invalid("joint tolerance"));
+    }
+    Ok(distance(placement.point(a)?, placement.point(b)?) <= tolerance)
+}
+
+pub(crate) fn move_grip_with_joints(
+    curve: &Curve,
+    index: usize,
+    target: Point3,
+    placement: Transform,
+    tolerance: f64,
+    limits: &Limits,
+) -> Result<Curve> {
     finite(target)?;
     curve.validate(limits)?;
     match curve {
@@ -1358,11 +1927,14 @@ pub fn move_grip(curve: &Curve, index: usize, target: Point3, limits: &Limits) -
             })
         }
         Curve::Nurbs(nurbs) => {
-            if index >= nurbs.poles.len() {
+            if nurbs.periodic {nurbs.certify_repeated_periodic(limits)?;}
+            let count=if nurbs.periodic {nurbs.poles.len()-nurbs.degree}else{nurbs.poles.len()};
+            if index >= count {
                 return Err(Error::Invalid("grip index"));
             }
             let mut moved = nurbs.clone();
             moved.poles[index] = target;
+            if nurbs.periodic && index<nurbs.degree {moved.poles[count+index]=target;}
             moved.validate(limits)?;
             Ok(Curve::Nurbs(moved))
         }
@@ -1402,30 +1974,332 @@ pub fn move_grip(curve: &Curve, index: usize, target: Point3, limits: &Limits) -
         }
         Curve::Polycurve { reversed, .. } => {
             let forward = forward_polycurve(curve, limits)?;
+            let ends = curve_endpoints(&forward, limits)?;
+            let closed = joint_within(ends[0], ends[1], placement, tolerance)?;
             let Curve::Polycurve { segments, .. } = forward else {
                 return Err(Error::Invalid("polycurve"));
             };
             let mut offset = 0usize;
-            let mut edited = segments.clone();
             for (segment_index, segment) in segments.iter().enumerate() {
-                let count = curve_grips(segment, 1e-9, limits)?.poles.len();
-                if index < offset + count {
-                    edited[segment_index] = move_grip(segment, index - offset, target, limits)?;
+                let poles = curve_grips(segment, 1e-9, limits)?.poles;
+                if index < offset + poles.len() {
+                    let local_index = index - offset;
+                    if poles[local_index] == target {
+                        return Ok(curve.clone());
+                    }
+                    let old_ends = curve_endpoints(segment, limits)?;
+                    let changed = move_grip_with_joints(
+                        segment,
+                        local_index,
+                        target,
+                        placement,
+                        tolerance,
+                        limits,
+                    )?;
+                    let new_ends = curve_endpoints(&changed, limits)?;
+                    let mut edited = segments.clone();
+                    edited[segment_index] = changed;
+                    for side in 0..2 {
+                        if distance(old_ends[side], new_ends[side]) <= 1e-12 {
+                            continue;
+                        }
+                        let neighbor = if side == 0 {
+                            if segment_index > 0 {
+                                Some(segment_index - 1)
+                            } else if closed && segments.len() > 1 {
+                                Some(segments.len() - 1)
+                            } else {
+                                None
+                            }
+                        } else if segment_index + 1 < segments.len() {
+                            Some(segment_index + 1)
+                        } else if closed && segments.len() > 1 {
+                            Some(0)
+                        } else {
+                            None
+                        };
+                        let Some(neighbor) = neighbor else {
+                            continue;
+                        };
+                        let other_end = curve_endpoints(&segments[neighbor], limits)?[1 - side];
+                        if !joint_within(old_ends[side], other_end, placement, tolerance)? {
+                            continue;
+                        }
+                        let other = &edited[neighbor];
+                        let other_grips = curve_grips(other, 1e-9, limits)?;
+                        let control = match other {
+                            Curve::Line { .. } | Curve::Nurbs(_) => other_grips
+                                .poles
+                                .iter()
+                                .position(|p| distance(*p, other_end) <= 1e-9),
+                            _ => None,
+                        };
+                        let adjusted = if let Some(control) = control {
+                            move_grip_with_joints(
+                                other,
+                                control,
+                                new_ends[side],
+                                placement,
+                                tolerance,
+                                limits,
+                            )?
+                        } else {
+                            let point = other_grips
+                                .edit_points
+                                .iter()
+                                .position(|p| distance(*p, other_end) <= 1e-9)
+                                .ok_or(Error::Unsupported("polycurve endpoint grip"))?;
+                            move_edit_point_with_joints(
+                                other,
+                                point,
+                                new_ends[side],
+                                placement,
+                                tolerance,
+                                limits,
+                            )?
+                        };
+                        let adjusted_end = curve_endpoints(&adjusted, limits)?[1 - side];
+                        if distance(adjusted_end, new_ends[side]) > 1e-9 {
+                            return Err(Error::Invalid("polycurve control joint"));
+                        }
+                        edited[neighbor] = adjusted;
+                    }
                     let result = Curve::Polycurve {
                         segments: edited,
                         reversed: false,
                     };
-                    return if *reversed {
-                        reverse_curve(&result, limits)
-                    } else {
-                        Ok(result)
-                    };
+                    if *reversed {
+                        let Curve::Polycurve { segments, .. } = reverse_curve(&result, limits)?
+                        else {
+                            unreachable!()
+                        };
+                        return Ok(Curve::Polycurve {
+                            segments,
+                            reversed: true,
+                        });
+                    }
+                    return Ok(result);
                 }
-                offset += count;
+                offset += poles.len();
             }
             Err(Error::Invalid("grip index"))
         }
     }
+}
+
+/// Fuse a smooth polycurve after control editing, when its pieces admit an exact
+/// clamped rational representation. Returns None when that conversion is unavailable.
+pub(crate) fn fuse_smooth_control_polycurve(
+    original: &Curve,
+    edited: &Curve,
+    placement: Transform,
+    tolerance: f64,
+    angular_tolerance: f64,
+    limits: &Limits,
+) -> Result<Option<Curve>> {
+    if original == edited {
+        return Ok(None);
+    }
+    let Curve::Polycurve {
+        segments: before, ..
+    } = forward_polycurve(original, limits)?
+    else {
+        return Ok(None);
+    };
+    let Curve::Polycurve {
+        segments: after, ..
+    } = forward_polycurve(edited, limits)?
+    else {
+        return Ok(None);
+    };
+    if before.len() < 2 || before.len() != after.len() {
+        return Ok(None);
+    }
+    let vector = |v: Point3| -> Point3 {
+        std::array::from_fn(|r| (0..3).map(|c| placement.0[r][c] * v[c]).sum())
+    };
+    let smooth = |first: &Curve, second: &Curve| -> Result<bool> {
+        let end = curve_endpoints(first, limits)?[1];
+        let start = curve_endpoints(second, limits)?[0];
+        if !joint_within(end, start, placement, tolerance)? {
+            return Ok(false);
+        }
+        let (Ok(a), Ok(b)) = (
+            tangent_at(first, 1.0, limits),
+            tangent_at(second, 0.0, limits),
+        ) else {
+            return Ok(false);
+        };
+        let (Ok(a), Ok(b)) = (unit(vector(a)), unit(vector(b))) else {
+            return Ok(false);
+        };
+        Ok(dot(a, b).clamp(-1.0, 1.0).acos() <= angular_tolerance)
+    };
+    for pair in before.windows(2) {
+        if !smooth(&pair[0], &pair[1])? {
+            return Ok(None);
+        }
+    }
+    let first = curve_endpoints(&before[0], limits)?[0];
+    let last = curve_endpoints(before.last().unwrap(), limits)?[1];
+    if joint_within(first, last, placement, tolerance)?
+        && !smooth(before.last().unwrap(), &before[0])?
+    {
+        return Ok(None);
+    }
+    let mut parts = Vec::new();
+    for part in &after {
+        let candidate = match part {
+            Curve::Line { start, end, .. } => line_to_nurbs(*start, *end, limits)?,
+            Curve::Circle {
+                center,
+                x,
+                y,
+                radius,
+                domain,
+                angle_domain,
+            } => crate::top11::affine_circle(
+                *center,
+                *x,
+                *y,
+                *radius,
+                angle_domain.unwrap_or(*domain),
+                identity(),
+            )?,
+            Curve::Nurbs(n) if !n.periodic => Curve::Nurbs(n.clone()),
+            _ => return Ok(None),
+        };
+        let Curve::Nurbs(mut n) = candidate else {
+            unreachable!()
+        };
+        if n.knots[..=n.degree].iter().any(|k| *k != n.domain[0])
+            || n.knots[n.knots.len() - n.degree - 1..]
+                .iter()
+                .any(|k| *k != n.domain[1])
+        {
+            return Ok(None);
+        }
+        if n.reversed {
+            n.poles.reverse();
+            n.weights.reverse();
+            n.knots = n
+                .knots
+                .iter()
+                .rev()
+                .map(|k| n.domain[0] + n.domain[1] - k)
+                .collect();
+            n.reversed = false;
+        }
+        parts.push(n);
+    }
+    let degree = parts.iter().map(|p| p.degree).max().unwrap();
+    for part in &mut parts {
+        while part.degree < degree {
+            *part = crate::curve_build::elevate_degree(part, limits)?;
+        }
+    }
+    let count = parts.len();
+    let pole_count = parts.iter().try_fold(1usize, |total, part| {
+        total
+            .checked_add(part.poles.len() - 1)
+            .ok_or(Error::Overflow("fused curve poles"))
+    })?;
+    let knot_count = pole_count
+        .checked_add(degree + 1)
+        .ok_or(Error::Overflow("fused curve knots"))?;
+    let mut usage = crate::budget::Usage::array::<Point3>(pole_count)?;
+    usage.points = u64::try_from(pole_count).map_err(|_| Error::Overflow("fused curve points"))?;
+    usage.add(crate::budget::Usage::array::<f64>(pole_count)?, limits)?;
+    usage.add(crate::budget::Usage::array::<f64>(knot_count)?, limits)?;
+    let mut poles: Vec<Point3> = Vec::new();
+    let mut weights: Vec<f64> = Vec::new();
+    let mut knots: Vec<f64> = Vec::new();
+    poles
+        .try_reserve_exact(pole_count)
+        .map_err(|_| Error::Budget("fused curve poles"))?;
+    weights
+        .try_reserve_exact(pole_count)
+        .map_err(|_| Error::Budget("fused curve weights"))?;
+    knots
+        .try_reserve_exact(knot_count)
+        .map_err(|_| Error::Budget("fused curve knots"))?;
+    for (i, part) in parts.iter().enumerate() {
+        if i > 0 && *poles.last().unwrap() != part.poles[0] {
+            return Ok(None);
+        }
+        let factor = if i == 0 {
+            1.0
+        } else {
+            weights.last().unwrap() / part.weights[0]
+        };
+        let start = usize::from(i > 0);
+        poles.extend_from_slice(&part.poles[start..]);
+        weights.extend(part.weights[start..].iter().map(|w| w * factor));
+        let span = part.domain[1] - part.domain[0];
+        for knot in &part.knots[if i == 0 { 0 } else { degree + 1 }..if i + 1 == count {
+            part.knots.len()
+        } else {
+            part.knots.len() - 1
+        }] {
+            knots.push((i as f64 + (*knot - part.domain[0]) / span) / count as f64);
+        }
+    }
+    let result = NurbsCurve {
+        degree,
+        poles,
+        weights,
+        knots,
+        domain: [0.0, 1.0],
+        periodic: false,
+        reversed: false,
+        seam: None,
+    };
+    result.validate(limits)?;
+    Ok(Some(Curve::Nurbs(result)))
+}
+
+/// Delete one control pole from a clamped nonperiodic NURBS curve.
+/// The removed interior knot is chosen near the pole's Greville station.
+pub fn delete_control_point(curve: &Curve, index: usize, limits: &Limits) -> Result<Curve> {
+    curve.validate(limits)?;
+    let Curve::Nurbs(source) = curve else {
+        return Err(Error::Unsupported("control point deletion needs NURBS"));
+    };
+    if source.periodic {
+        return Err(Error::Unsupported("periodic control point deletion"));
+    }
+    if index >= source.poles.len() {
+        return Err(Error::Invalid("control point index"));
+    }
+    if source.poles.len() <= source.degree + 1 {
+        return Err(Error::Invalid("too few control points"));
+    }
+    if source.knots[..=source.degree]
+        .iter()
+        .any(|k| *k != source.domain[0])
+        || source.knots[source.knots.len() - source.degree - 1..]
+            .iter()
+            .any(|k| *k != source.domain[1])
+    {
+        return Err(Error::Unsupported("trimmed control point deletion"));
+    }
+    let station = (1..=source.degree)
+        .map(|offset| source.knots[index + offset])
+        .sum::<f64>()
+        / source.degree as f64;
+    let knot = (source.degree + 1..source.poles.len())
+        .min_by(|&a, &b| {
+            (source.knots[a] - station)
+                .abs()
+                .total_cmp(&(source.knots[b] - station).abs())
+        })
+        .ok_or(Error::Invalid("control point knot"))?;
+    let mut result = source.clone();
+    result.poles.remove(index);
+    result.weights.remove(index);
+    result.knots.remove(knot);
+    result.validate(limits)?;
+    Ok(Curve::Nurbs(result))
 }
 
 /// Insert one control point without changing the geometry. A line becomes an equivalent

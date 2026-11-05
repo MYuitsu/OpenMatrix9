@@ -8,7 +8,8 @@ param(
     [string]$OpenNurbsZlib = "",
     [string]$JsonDir = "",
     [string]$OutDir = "",
-    [string]$VcVars = ""
+    [string]$VcVars = "",
+    [switch]$ProfileMemory
 )
 
 $ErrorActionPreference = "Stop"
@@ -46,7 +47,8 @@ if ($actualLicense -ne $expectedLicense) { throw "nlohmann/json license pin mism
 New-Item -ItemType Directory -Force $OutDir | Out-Null
 $exe = Join-Path $OutDir "om9-exchange-native.exe"
 $source = Join-Path $root "native/native_exchange.cpp"
-$command = 'call "' + $VcVars + '" >nul && cl /nologo /MD /std:c++20 /EHsc /utf-8 /O2 /DNDEBUG ' +
+$profileDefine = if ($ProfileMemory) { '/DOM9_NATIVE_MEMORY_PROFILE ' } else { '' }
+$command = 'call "' + $VcVars + '" >nul && cl /nologo /MD /std:c++20 /EHsc /utf-8 /O2 /DNDEBUG ' + $profileDefine +
     '/DNOMINMAX /DON_CMAKE_BUILD ' +
     '/I "' + $JsonDir + '" /I "' + $OpenNurbsInclude + '" "' + $source + '" ' +
     '/Fe:"' + $exe + '" /link /SUBSYSTEM:WINDOWS /ENTRY:wmainCRTStartup ' +
@@ -57,6 +59,7 @@ if ($LASTEXITCODE -ne 0) { throw "native exchange compilation failed: $LASTEXITC
 $fingerprint = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLower()
 Set-Content -LiteralPath (Join-Path $OutDir "om9-exchange-native.sha256") -Value $fingerprint -Encoding ascii
 @{ executable = "om9-exchange-native.exe"; sha256 = $fingerprint;
+   memory_profile = [bool]$ProfileMemory;
    opennurbs_pin = "eb92af3ba1806b0a34a99aba0d3bda83e3d46083";
    nlohmann_json_sha256 = $actualHeader } |
     ConvertTo-Json | Set-Content -LiteralPath (Join-Path $OutDir "om9-exchange-native.manifest.json") -Encoding utf8

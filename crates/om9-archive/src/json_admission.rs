@@ -12,6 +12,7 @@ struct Budget<'a> {
     usage: Usage,
     failure: Option<Error>,
     legacy_document: bool,
+    admit: &'a mut dyn FnMut(u64) -> Result<()>,
 }
 #[derive(Clone, Copy)]
 enum Location {
@@ -65,10 +66,12 @@ impl Location {
 }
 impl Budget<'_> {
     fn reserve<E: de::Error>(&mut self, usage: Usage) -> std::result::Result<(), E> {
-        if let Err(error) = self.usage.add(usage, self.limits) {
+        let mut next = self.usage;
+        if let Err(error) = next.add(usage, self.limits).and_then(|()| (self.admit)(next.bytes)) {
             self.failure = Some(error);
             return Err(E::custom("JSON admission budget"));
         }
+        self.usage = next;
         Ok(())
     }
     fn fail<E: de::Error>(&mut self, error: Error) -> E {
@@ -247,20 +250,39 @@ pub fn check(metadata: &[u8], container_bytes: usize, limits: &Limits) -> Result
     check_usage(metadata, container_bytes, limits).map(|_| ())
 }
 pub fn check_usage(metadata: &[u8], container_bytes: usize, limits: &Limits) -> Result<Usage> {
-    check_kind(metadata, container_bytes, limits, false)
+    check_kind(metadata, container_bytes, limits, false, &mut |_| Ok(()))
+}
+pub(crate) fn check_external_with_admission(metadata: &[u8], limits: &Limits, admit: &mut dyn FnMut(u64) -> Result<()>) -> Result<Usage> {
+    check_kind(metadata, metadata.len(), limits, false, admit)
+}
+pub(crate) fn check_usage_with_admission(metadata: &[u8], container_bytes: usize, limits: &Limits, admit: &mut dyn FnMut(u64) -> Result<()>) -> Result<Usage> {
+    let parser = document_parser_limits(metadata, limits)?;
+    check_kind(metadata, container_bytes, &parser, false, admit)
 }
 pub fn check_legacy_document(
     metadata: &[u8],
     container_bytes: usize,
     limits: &Limits,
 ) -> Result<()> {
-    check_kind(metadata, container_bytes, limits, true).map(|_| ())
+    let parser = document_parser_limits(metadata, limits)?;
+    check_kind(metadata, container_bytes, &parser, true, &mut |_| Ok(())).map(|_| ())
+}
+
+/// JSON scalar/key tokens are not model nodes. The input itself bounds the
+/// number of tokens, and the existing byte budget charges every visited token.
+/// Typed document validation separately enforces the original node limit.
+fn document_parser_limits(metadata: &[u8], limits: &Limits) -> Result<Limits> {
+    Ok(Limits {
+        max_nodes: u64::try_from(metadata.len()).map_err(|_| Error::Overflow("JSON token limit"))?,
+        ..*limits
+    })
 }
 fn check_kind(
     metadata: &[u8],
     container_bytes: usize,
     limits: &Limits,
     legacy_document: bool,
+    admit: &mut dyn FnMut(u64) -> Result<()>,
 ) -> Result<Usage> {
     // Account the input/container copy and geometrically growing UTF-unescape
     // scratch before walking any values. A late escape after a long prefix can
@@ -270,6 +292,8 @@ fn check_kind(
         .checked_mul(2)
         .and_then(|n| n.checked_add(metadata.len() as u64))
         .ok_or(Error::Overflow("JSON input peak"))?;
+    Usage { bytes, ..Usage::default() }.check(limits)?;
+    admit(bytes)?;
     let mut budget = Budget {
         legacy_document,
         limits,
@@ -278,6 +302,7 @@ fn check_kind(
             ..Usage::default()
         },
         failure: None,
+        admit,
     };
     budget.usage.check(limits)?;
     let mut deserializer = serde_json::Deserializer::from_slice(metadata);
@@ -297,4 +322,35 @@ fn check_kind(
         return Err(budget.failure.unwrap_or(Error::Invalid("JSON syntax")));
     }
     Ok(budget.usage)
+}
+
+#[cfg(test)]
+mod external_admission_tests {
+    use super::*;
+
+    #[test]
+    fn incremental_external_admission_preserves_limits_and_propagates_refusal() {
+        let input = br#"{"data":[1,2,3],"name":"part"}"#;
+        let limits = Limits::default();
+        let mut requests = Vec::new();
+        let usage = check_external_with_admission(input, &limits, &mut |bytes| {
+            requests.push(bytes);
+            Ok(())
+        }).unwrap();
+        assert!(requests.len() > 2);
+        assert!(requests.windows(2).all(|pair| pair[0] <= pair[1]));
+        assert_eq!(*requests.last().unwrap(), usage.bytes);
+        let threshold = requests[1];
+        let mut calls = 0;
+        let refused = check_external_with_admission(input, &limits, &mut |bytes| {
+            calls += 1;
+            if bytes > threshold { Err(Error::Budget("shared JSON preflight")) } else { Ok(()) }
+        });
+        assert!(matches!(refused, Err(Error::Budget("shared JSON preflight"))));
+        assert!(calls < requests.len());
+        let tight = Limits { max_nodes: 2, ..limits };
+        assert!(matches!(check_external_with_admission(input, &tight, &mut |_| Ok(())), Err(Error::Budget(_))));
+        assert!(matches!(check_external_with_admission(br#"{"x":1,"x":2}"#, &limits, &mut |_| Ok(())), Err(Error::Invalid("duplicate JSON key"))));
+        assert!(matches!(check_external_with_admission(br#"{"x": [}"#, &limits, &mut |_| Ok(())), Err(Error::Invalid(_))));
+    }
 }

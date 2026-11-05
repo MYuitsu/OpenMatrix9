@@ -123,6 +123,12 @@
     ]
   },
   "runtime_implementation": {
+    "reset_session_limits_2026_11_04": {
+      "status": "PARTIAL_CHECKS_PASSED",
+      "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#pavé-reset-uses-session-limits",
+      "scope": "Reset uses active Controller limits and retains preview on refusal",
+      "limitations": "Desktop click and large-data tests, and complete preview memory admission remain open"
+    },
     "date": "2026-10-28",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",

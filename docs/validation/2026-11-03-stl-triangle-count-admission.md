@@ -1,0 +1,7 @@
+# Cumulative STL triangle count admission
+
+The STL soup builder previously checked cumulative vertex counts but did not check the combined triangle count before extending output buffers. A focused authored-quad fixture with one existing triangle and a configured two-node limit reproduced the omission: the append succeeded rather than refusing three triangles. The append now checks the checked sum against both the configured operation `max_nodes` and the binary-STL `u32` triangle-count limit before reserving or appending. The same check is applied to a newly tessellated B-rep before allocating its topology remap and appending its triangles. A boundary test covers exactly-at-limit, over-limit, `usize` addition overflow and, where applicable, the STL `u32` limit. The red fixture now passes and verifies existing output vectors remain unchanged on refusal.
+
+This is a structural count limit, not a complete managed-memory reservation. B-rep tessellation and its native peak occur before the cumulative count is known; vector capacity overhead, topology/encoding maps, retained owners, native scratch and physical free RAM still require the plan's aggregate admission work. It does not establish a safe process-RSS limit or resolve the existing 256 MiB setting. A B-rep-specific over-limit fixture and an actual >256 MiB user workload remain open.
+
+On the default-feature E: build with `-j 2`, 12 app cancellation/admission unit tests and all 42 app STL integration tests passed. Public-source audit reported no errors.

@@ -1,0 +1,11 @@
+# OM9 clipboard payload foundation — 2026-11-01
+
+This records the earlier controller-only checkpoint. Windows clipboard, menu and keyboard integration and later layer work are documented in [clipboard-windows](2026-11-01-clipboard-windows.md); the limitations and test counts below are historical.
+
+`Controller::copy_selected_om9` creates a validated detached OM9 archive from the current selection, and `paste_om9` inserts independent root entities as one Undo transaction. This is a controller API only: it is not connected to the OS clipboard, Edit menu, toolbar or shortcuts.
+
+The current implementation remaps nested block definitions, member IDs, root IDs and groups. It deliberately rejects objects with extensions, history, published results or feature ownership. These are explicit limits, not the completed clipboard contract. Unit mismatch and invalid archive also fail. Target layers must match the source; unlayered cross-document paste is tested. Full layer and metadata remapping, Windows clipboard publication and rollback, selection/focus routing and cross-application verification remain open.
+
+The controller now has separate 3DM selected-export and import methods, using a private temporary archive and the existing native exchange host. Rhino clipboard header validation runs first; paired layer metadata is refused until its import is implemented. With `CARGO_TARGET_DIR=L:/om9-target` and `-j 2`, `cargo test -p om9-app --test clipboard_om9 -- --include-ignored` passed 8 tests, including one real native 3DM line export/import/Undo, nested blocks, groups, unlayered cross-document paste, invalid payloads and unsupported extension refusal. The native executable fingerprint is recorded in `2026-11-01-clipboard-selected-export.md`. `cargo check -p om9-app` and `python tools/public_source_audit.py` passed before the final 3DM additions. No desktop keyboard, OS clipboard or Rhino application test was run.
+
+Next: implement bounded OS clipboard ownership/publication with failure restoration, layer and extension dependency remapping, and paired 3DM metadata import. Connect Edit/menu/keyboard only when the respective operation is implemented and testable; validate the full plan before marking it complete.

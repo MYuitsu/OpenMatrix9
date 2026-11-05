@@ -17,6 +17,9 @@ impl Controller {
         if text.eq_ignore_ascii_case("redo") {
             return Some("redo");
         }
+        if let Some(feature) = Self::stl_export_feature(text) {
+            return Some(feature);
+        }
         if let Some(command) = Self::view_command(text) {
             return Some(command);
         }
