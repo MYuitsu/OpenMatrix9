@@ -158,24 +158,38 @@ pub fn eval_geo(g: &Geo, t: f64) -> Option<Vec3> {
     }
 }
 
-/// Solve `a · x = b` (dense, partial pivoting) for several right-hand sides.
-fn solve(mut a: Vec<Vec<f64>>, mut b: Vec<Vec3>) -> Option<Vec<Vec3>> {
-    let n = a.len();
+/// Solve a banded system: row `i` holds its non-zeros `rows[i].1` from column `rows[i].0`.
+/// Gaussian elimination without pivoting, which is stable for B-spline collocation
+/// matrices (totally positive, de Boor); refuses a vanishing pivot.
+fn solve_band(rows: &[(usize, Vec<f64>)], n: usize, mut b: Vec<Vec3>) -> Option<Vec<Vec3>> {
+    // Band limits: kl below, ku above the diagonal.
+    let mut kl = 0usize;
+    let mut ku = 0usize;
+    for (i, (lo, vals)) in rows.iter().enumerate() {
+        kl = kl.max(i.saturating_sub(*lo));
+        ku = ku.max((lo + vals.len()).saturating_sub(i + 1));
+    }
+    let w = kl + ku + 1;
+    // band[i][j - i + kl] = a[i][j]
+    let mut band = vec![vec![0.0; w]; n];
+    for (i, (lo, vals)) in rows.iter().enumerate() {
+        for (k, v) in vals.iter().enumerate() {
+            band[i][lo + k + kl - i] = *v;
+        }
+    }
     for col in 0..n {
-        let piv = (col..n).max_by(|&i, &j| a[i][col].abs().total_cmp(&a[j][col].abs()))?;
-        if a[piv][col].abs() < 1e-14 {
+        let piv = band[col][kl];
+        if !piv.is_finite() || piv.abs() < 1e-14 {
             return None;
         }
-        a.swap(col, piv);
-        b.swap(col, piv);
-        for row in col + 1..n {
-            let f = a[row][col] / a[col][col];
+        for row in col + 1..(col + kl + 1).min(n) {
+            let f = band[row][col + kl - row] / piv;
             if f == 0.0 {
                 continue;
             }
-            let (above, below) = a.split_at_mut(row);
-            for (v, p) in below[0].iter_mut().zip(&above[col]).skip(col) {
-                *v -= f * p;
+            for j in col..(col + ku + 1).min(n) {
+                let v = band[col][j + kl - col];
+                band[row][j + kl - row] -= f * v;
             }
             b[row] = sub(b[row], scale(b[col], f));
         }
@@ -183,10 +197,10 @@ fn solve(mut a: Vec<Vec<f64>>, mut b: Vec<Vec3>) -> Option<Vec<Vec3>> {
     let mut x = vec![[0.0; 3]; n];
     for row in (0..n).rev() {
         let mut acc = b[row];
-        for k in row + 1..n {
-            acc = sub(acc, scale(x[k], a[row][k]));
+        for k in row + 1..(row + ku + 1).min(n) {
+            acc = sub(acc, scale(x[k], band[row][k + kl - row]));
         }
-        x[row] = scale(acc, 1.0 / a[row][row]);
+        x[row] = scale(acc, 1.0 / band[row][kl]);
     }
     Some(x)
 }
@@ -225,14 +239,14 @@ pub fn interpolate(points: &[Vec3], degree: usize, closed: bool) -> Option<Geo> 
         knots.push((j..j + p).map(|i| u[i]).sum::<f64>() / p as f64);
     }
     knots.extend(std::iter::repeat_n(1.0, p + 1));
-    let mut a = vec![vec![0.0; n]; n];
-    for (i, row) in a.iter_mut().enumerate() {
-        let span = find_span(n, p, u[i], &knots);
-        for (j, v) in basis(span, u[i], p, &knots).into_iter().enumerate() {
-            row[span - p + j] = v;
-        }
+    // The collocation matrix is banded (each row: p + 1 basis values): solve it as a band,
+    // O(n·p²) time and memory, so long curves (helixes of many turns) stay fast.
+    let mut rows: Vec<(usize, Vec<f64>)> = Vec::with_capacity(n);
+    for &ui in &u {
+        let span = find_span(n, p, ui, &knots);
+        rows.push((span - p, basis(span, ui, p, &knots)));
     }
-    let poles = solve(a, q)?;
+    let poles = solve_band(&rows, n, q)?;
     Some(Geo::Nurbs {
         degree: p,
         points: poles,

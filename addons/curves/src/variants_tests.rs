@@ -1093,3 +1093,64 @@ fn click_then_type_numbers_makes_the_shape() {
     let g = created(&run(LINE, vec![pt(1.0, 1.0), text("5"), Input::Enter]));
     assert_eq!(ends(&g), ([1.0, 1.0, 0.0], [6.0, 1.0, 0.0]));
 }
+
+// ---- Helix/Spiral limits (review of PR #3): turns, points, tolerance, no hang ----------
+
+#[test]
+fn helix_pitch_far_too_small_is_refused_without_hanging() {
+    let t0 = std::time::Instant::now();
+    // Axis 10 mm, Pitch 0.001 → 10 000 turns: more than 1000.
+    let base = vec![pt(0.0, 0.0), pt(10.0, 0.0), set("Pitch", "0.001")];
+    // Preview while the pointer moves: no shape, no error, and quick.
+    let mut hover = base.clone();
+    hover.push(Input::Hover { point: [0.0, 1.0, 0.0] });
+    let r = run(HELIX, hover);
+    assert!(r.last().unwrap().preview.is_empty(), "no preview for a refused shape");
+    // The radius typed: refused with the reason, the command stays open.
+    let mut typed = base.clone();
+    typed.push(text("1"));
+    let r = run(HELIX, typed);
+    let last = r.last().unwrap();
+    assert!(!last.done);
+    let why = last.error.clone().unwrap_or_default();
+    assert!(why.contains("Too many turns") && why.contains("at most 1000"), "{why}");
+    // Spiral the same.
+    let r = run(SPIRAL, vec![pt(0.0, 0.0), pt(10.0, 0.0), set("Pitch", "0.0001"), text("1"), text("2")]);
+    assert!(r.last().unwrap().error.as_deref().is_some_and(|w| w.contains("Too many turns")));
+    assert!(t0.elapsed().as_secs_f64() < 5.0, "took {:?}", t0.elapsed());
+}
+
+#[test]
+fn helix_values_that_are_not_finite_are_refused() {
+    for (name, value) in [("Pitch", "inf"), ("Pitch", "NaN"), ("Pitch", "0"), ("Pitch", "-1"), ("Turns", "1e400"), ("Turns", "0"), ("Turns", "1001")] {
+        let r = run(HELIX, vec![pt(0.0, 0.0), pt(10.0, 0.0), set(name, value)]);
+        assert!(r.last().unwrap().error.is_some(), "{name}={value} accepted");
+    }
+    for radius in ["inf", "NaN", "-2", "0"] {
+        let r = run(HELIX, vec![pt(0.0, 0.0), pt(10.0, 0.0), text(radius)]);
+        let last = r.last().unwrap();
+        assert!(!last.done && last.error.is_some(), "radius {radius} accepted");
+    }
+}
+
+#[test]
+fn helix_normal_and_largest_cases_stay_within_tolerance_and_limits() {
+    // Normal: axis 10, pitch 0.5 → 20 turns of radius 2, within 0.001 everywhere.
+    let g = created(&run(HELIX, vec![pt(0.0, 0.0), pt(10.0, 0.0), set("Pitch", "0.5"), text("2")]));
+    let s = g::nurbs::samples(&g, 8000);
+    assert!(s.iter().all(|p| ((p[1] * p[1] + p[2] * p[2]).sqrt() - 2.0).abs() < 1e-3));
+    let ups = s.windows(2).filter(|w| w[0][1] < 0.0 && w[1][1] >= 0.0).count();
+    assert_eq!(ups, 20);
+    // The most turns allowed: made, within the point limit, and in reasonable time.
+    let t0 = std::time::Instant::now();
+    let g = created(&run(HELIX, vec![pt(0.0, 0.0), pt(10.0, 0.0), set("Turns", "1000"), text("1")]));
+    let Geo::Nurbs { points, .. } = &g else { panic!() };
+    assert!(points.len() <= 20_002, "{}", points.len());
+    for p in g::nurbs::samples(&g, 40_000) {
+        assert!(((p[1] * p[1] + p[2] * p[2]).sqrt() - 1.0).abs() < 1e-3, "{p:?}");
+    }
+    // Its preview while the pointer moves also stays quick.
+    let r = run(HELIX, vec![pt(0.0, 0.0), pt(10.0, 0.0), set("Turns", "1000"), Input::Hover { point: [0.0, 1.0, 0.0] }]);
+    assert_eq!(r.last().unwrap().preview.len(), 1);
+    assert!(t0.elapsed().as_secs_f64() < 20.0, "took {:?}", t0.elapsed());
+}
