@@ -1,0 +1,54 @@
+schema_version = "1.0.0"
+id = "gem_on_curve"
+version = "0.2.0"
+name = "Gem On Curve"
+tagline = "Rải đá tròn đều theo đường cong (ring rail, viền halo)"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["any"]
+runtime = "python"
+entry = "__init__.py"
+tags = ["Gems"]
+
+[[commands]]
+id = "BuilderGemOnCrv"
+label = "Gem On Crv"
+handler = "gem_on_curve"
+icon = "icons/gem_on_crv.svg"
+shortcut = "Ctrl+Shift+G"
+
+[[commands]]
+id = "BuilderGemCountOnCrv"
+label = "Gem Count On Crv"
+handler = "gem_count_on_curve"
+
+[[settings]]
+key = "diameter"
+type = "length"
+label = "Đường kính đá mặc định"
+default = 1.5
+min = 0.3
+max = 30.0
+step = 0.05
+
+[[settings]]
+key = "gap"
+type = "length"
+label = "Khe tối thiểu giữa hai viên"
+default = 0.2
+min = 0.0
+max = 5.0
+step = 0.01
+
+[[settings]]
+key = "layout"
+type = "enum"
+label = "Cách chia"
+description = "fit: dàn đều cho khít đường cong; fixed_gap: giữ đúng khe, phần dư để trống ở cuối"
+choices = ["fit", "fixed_gap"]
+default = "fit"
+
+[build]
+paths_exclude_pattern = ["tests/"]

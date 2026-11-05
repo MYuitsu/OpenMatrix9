@@ -1,0 +1,354 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_gems"
+version = "0.1.0"
+name = "Gems"
+tagline = "Menu Gems kiểu Matrix: Gem Loader, Halo, Gem Reporter …"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Gems"]
+
+[[commands]]
+id = "BuilderGemLoader"
+label = "Gem Loader"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvLoader", "GemLoader"]
+summary = "Nạp đá theo kiểu cắt và kích thước, bấm để đặt lên CPlane hoặc thay cho đá đang chọn."
+steps = ["Chọn Gem Loader trong menu Gems (hoặc gõ GemLoader).", "Chọn Cut, Length, Width, Material ở bảng BUILDERS hoặc trên dòng lệnh (Cut=oval, Length=7).", "Bấm vào viewport để đặt từng viên; U hoặc Undo bỏ viên vừa đặt.", "Enter: tạo các viên đã đặt. Không bấm điểm nào thì đá đặt ở gốc CPlane; nếu đang chọn đá thì thay đá đó bằng kiểu mới."]
+options = ["Cut: kiểu cắt (Round, Oval, Princess, Cushion, Emerald, Asscher, Baguette, Marquise, Pear, Heart, Trillion, Radiant, Cabochon).", "Length / Width: kích thước (mm). Width = 0 dùng tỉ lệ chuẩn của kiểu cắt.", "Material: chất liệu (tính carat).", "Undo: bỏ điểm vừa đặt."]
+
+[[commands]]
+id = "BuilderEmerald"
+label = "Emerald Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvEmerald"]
+summary = "Tạo đá Emerald cut (chữ nhật vát góc) theo chiều dài và rộng."
+steps = ["Chọn Emerald Builder.", "Đặt Length/Width.", "Bấm để đặt, Enter để tạo (hoặc thay đá đang chọn)."]
+options = ["Length / Width (mm)."]
+
+[[commands]]
+id = "BuilderBaguette"
+label = "Baguette Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvBaguette"]
+summary = "Tạo đá Baguette (chữ nhật) theo chiều dài và rộng."
+steps = ["Chọn Baguette Builder.", "Đặt Length/Width.", "Bấm để đặt, Enter để tạo (hoặc thay đá đang chọn)."]
+options = ["Length / Width (mm)."]
+
+[[commands]]
+id = "BuilderCustomGem"
+label = "Custom Gem"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["CustomGem"]
+summary = "Tạo viên đá có gờ (girdle) theo một đường cong kín bạn vẽ."
+steps = ["Vẽ đường cong kín phẳng làm hình gờ.", "Chọn Custom Gem rồi chọn đường cong.", "Enter để tạo đá."]
+
+[[commands]]
+id = "BuilderHalo"
+label = "Halo Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvHaloBuilder", "Halo"]
+summary = "Tạo vòng đá nhỏ (halo) và khung kim loại quanh viên đá chủ."
+steps = ["Chọn Halo Builder.", "Chọn viên đá chủ (đá tạo bởi Gem Loader, Gem On Crv …).", "Chỉnh Size, Spacing, Offset … xem trước trực tiếp.", "Enter để tạo."]
+options = ["Size: cỡ đá halo (mm).", "Spacing: khe giữa các viên halo.", "Offset: khoảng cách từ gờ đá chủ tới gờ đá halo.", "Height: nâng/hạ đá halo theo trục đá chủ.", "Rotation: xoay vị trí viên đầu tiên (độ).", "Angle: nghiêng đá halo ra ngoài (độ).", "Metal: tạo khung kim loại; ProfileHeight, Wall: chiều cao và độ dày thành khung."]
+
+[[commands]]
+id = "BuilderGemReporter"
+label = "Gem Reporter"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["gvBuilderGemReporter", "GemReporter"]
+summary = "Báo số lượng, kích thước, carat từng nhóm đá và tổng; gán chất liệu cho đá đang chọn."
+steps = ["Chọn các viên đá.", "Chọn Gem Reporter; dòng nhắc hiện tổng số viên và tổng carat.", "Material=… để gán chất liệu (Set Material).", "Enter: ghi báo cáo vào lịch sử lệnh (và lưu chất liệu vào đá)."]
+options = ["Material: chất liệu gán cho đá đang chọn."]
+
+[[commands]]
+id = "BuilderGemMap"
+label = "Gem Map"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["gvGemMap", "GemMap"]
+summary = "Sơ đồ vị trí đá: liệt kê từng viên (kiểu, cỡ, tọa độ) và đặt điểm tại tâm mỗi viên."
+steps = ["Chọn các viên đá.", "Chọn Gem Map, Enter."]
+options = ["Material: như Gem Reporter."]
+
+[[commands]]
+id = "BuilderGemGuides"
+label = "Gem Guides"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvGemGemGuides", "GemGuides"]
+summary = "Vẽ đường gờ (có thể nới ra) quanh đá để kiểm tra khoảng cách."
+steps = ["Chọn đá.", "Chọn Gem Guides, chỉnh Offset.", "Enter để tạo đường."]
+options = ["Offset: khoảng nới ra ngoài gờ (mm)."]
+
+[[commands]]
+id = "BuilderGemBetweenTwoCurves"
+label = "Gems Between Two Curves"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["GemsBetweenCurves"]
+summary = "Rải đá tròn giữa hai đường cong, cỡ đá thay đổi theo khoảng hở."
+steps = ["Chọn đúng hai đường cong.", "Chọn Gems Between Two Curves, chỉnh Spacing/Margin/Min/Max.", "Enter để đặt đá."]
+options = ["Spacing: khe giữa đá.", "Margin: khoảng chừa với mỗi đường.", "Min / Max: giới hạn cỡ đá (mm)."]
+
+[[commands]]
+id = "BuilderGemUpdate"
+label = "Gem Update"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["gvGemUpdater", "GemUpdate"]
+summary = "Dựng lại mesh đá từ thông tin đá (sau khi chỉnh tay hoặc đổi tỉ lệ)."
+steps = ["Chọn đá.", "Chọn Gem Update, Enter."]
+
+[[settings]]
+key = "loader_cut"
+type = "enum"
+option = "Cut"
+label = "Kiểu cắt"
+choices = ["round", "oval", "princess", "cushion", "emerald", "asscher", "baguette", "marquise", "pear", "heart", "trillion", "radiant", "cabochon_round", "cabochon_oval"]
+choice_labels = ["Round", "Oval", "Princess", "Cushion", "Emerald", "Asscher", "Baguette", "Marquise", "Pear", "Heart", "Trillion", "Radiant", "Cabochon tròn", "Cabochon oval"]
+default = "round"
+commands = ["BuilderGemLoader"]
+
+[[settings]]
+key = "loader_length"
+type = "length"
+option = "Length"
+label = "Chiều dài / đường kính"
+default = 1.5
+min = 0.3
+max = 40.0
+step = 0.05
+commands = ["BuilderGemLoader"]
+
+[[settings]]
+key = "loader_width"
+type = "length"
+option = "Width"
+label = "Chiều rộng (0 = tỉ lệ chuẩn)"
+default = 0.0
+min = 0.0
+max = 40.0
+step = 0.05
+commands = ["BuilderGemLoader"]
+
+[[settings]]
+key = "loader_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderGemLoader"]
+
+[[settings]]
+key = "emerald_length"
+type = "length"
+option = "Length"
+label = "Chiều dài"
+default = 7.0
+min = 0.5
+max = 40.0
+step = 0.05
+commands = ["BuilderEmerald"]
+
+[[settings]]
+key = "emerald_width"
+type = "length"
+option = "Width"
+label = "Chiều rộng"
+default = 5.0
+min = 0.5
+max = 40.0
+step = 0.05
+commands = ["BuilderEmerald"]
+
+[[settings]]
+key = "baguette_length"
+type = "length"
+option = "Length"
+label = "Chiều dài"
+default = 4.0
+min = 0.5
+max = 40.0
+step = 0.05
+commands = ["BuilderBaguette"]
+
+[[settings]]
+key = "baguette_width"
+type = "length"
+option = "Width"
+label = "Chiều rộng"
+default = 2.0
+min = 0.3
+max = 40.0
+step = 0.05
+commands = ["BuilderBaguette"]
+
+[[settings]]
+key = "halo_size"
+type = "length"
+option = "Size"
+label = "Cỡ đá halo"
+default = 1.0
+min = 0.3
+max = 5.0
+step = 0.05
+commands = ["BuilderHalo"]
+
+[[settings]]
+key = "halo_spacing"
+type = "length"
+option = "Spacing"
+label = "Khe giữa đá"
+default = 0.15
+min = 0.0
+max = 2.0
+step = 0.01
+commands = ["BuilderHalo"]
+
+[[settings]]
+key = "halo_offset"
+type = "length"
+option = "Offset"
+label = "Cách đá chủ"
+default = 0.3
+min = -1.0
+max = 5.0
+step = 0.01
+commands = ["BuilderHalo"]
+
+[[settings]]
+key = "halo_height"
+type = "length"
+option = "Height"
+label = "Nâng/hạ đá halo"
+default = 0.0
+min = -5.0
+max = 5.0
+step = 0.01
+commands = ["BuilderHalo"]
+
+[[settings]]
+key = "halo_rotation"
+type = "angle"
+option = "Rotation"
+label = "Xoay viên đầu"
+default = 0.0
+min = -360.0
+max = 360.0
+step = 1.0
+commands = ["BuilderHalo"]
+
+[[settings]]
+key = "halo_angle"
+type = "angle"
+option = "Angle"
+label = "Nghiêng đá ra ngoài"
+default = 0.0
+min = -60.0
+max = 60.0
+step = 1.0
+commands = ["BuilderHalo"]
+
+[[settings]]
+key = "halo_metal"
+type = "bool"
+option = "Metal"
+label = "Tạo khung kim loại"
+default = true
+commands = ["BuilderHalo"]
+
+[[settings]]
+key = "halo_profile_height"
+type = "length"
+option = "ProfileHeight"
+label = "Chiều cao khung"
+default = 1.2
+min = 0.1
+max = 10.0
+step = 0.05
+commands = ["BuilderHalo"]
+
+[[settings]]
+key = "halo_wall"
+type = "length"
+option = "Wall"
+label = "Độ dày thành khung"
+default = 0.25
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderHalo"]
+
+[[settings]]
+key = "guides_offset"
+type = "length"
+option = "Offset"
+label = "Nới ra ngoài gờ"
+default = 0.1
+min = -2.0
+max = 5.0
+step = 0.01
+commands = ["BuilderGemGuides"]
+
+[[settings]]
+key = "g2c_spacing"
+type = "length"
+option = "Spacing"
+label = "Khe giữa đá"
+default = 0.1
+min = 0.0
+max = 2.0
+step = 0.01
+commands = ["BuilderGemBetweenTwoCurves"]
+
+[[settings]]
+key = "g2c_margin"
+type = "length"
+option = "Margin"
+label = "Chừa với mỗi đường"
+default = 0.05
+min = 0.0
+max = 2.0
+step = 0.01
+commands = ["BuilderGemBetweenTwoCurves"]
+
+[[settings]]
+key = "g2c_min"
+type = "length"
+option = "Min"
+label = "Cỡ đá nhỏ nhất"
+default = 0.8
+min = 0.1
+max = 20.0
+step = 0.05
+commands = ["BuilderGemBetweenTwoCurves"]
+
+[[settings]]
+key = "g2c_max"
+type = "length"
+option = "Max"
+label = "Cỡ đá lớn nhất"
+default = 4.0
+min = 0.1
+max = 30.0
+step = 0.05
+commands = ["BuilderGemBetweenTwoCurves"]

@@ -1,0 +1,734 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_subd"
+version = "0.1.0"
+name = "SubD"
+tagline = "Menu SubD (Clayoo) kiểu Matrix: lồng, làm mịn, chọn mặt, đùn, thụt, cầu nối …"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["SubD"]
+
+[[commands]]
+id = "ClayooEditItem"
+label = "Edit Item"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooItem"]
+summary = "Dời / co / xoay các mặt đang chọn (hoặc cả vật)."
+steps = ["Chọn vật SubD (lồng).", "Mode=Move/Scale/Rotate.", "Bấm điểm gốc và điểm đích."]
+options = ["Mode."]
+
+[[commands]]
+id = "ClayooEditDivide"
+label = "Divide"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooDivide"]
+summary = "Chia mặt đang chọn (hoặc tất cả) thành 4."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooEditSplitSides"
+label = "Split Sides"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooSplitSides", "InsertEdge"]
+summary = "Chèn vòng cạnh mới qua vòng mặt tại cạnh bấm."
+steps = ["Chọn vật SubD (lồng).", "Gõ vị trí (0–1).", "Bấm cạnh."]
+
+[[commands]]
+id = "ClayooEditInset"
+label = "Inset"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooInset"]
+summary = "Thụt mặt vào trong (tạo viền)."
+steps = ["Chọn vật SubD (lồng).", "Làm trên các mặt đang chọn (lệnh Select …), nếu không thì bấm chọn một mặt.", "Gõ lượng thụt."]
+
+[[commands]]
+id = "ClayooEditKnife"
+label = "Knife"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooKnife"]
+summary = "Cắt lồng theo đường bấm (mặt phẳng đứng)."
+steps = ["Chọn vật SubD (lồng).", "Bấm đầu và cuối đường cắt."]
+
+[[commands]]
+id = "ClayooEditOffset"
+label = "Offset"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooOffset"]
+summary = "Dời các đỉnh theo pháp tuyến."
+steps = ["Chọn vật SubD (lồng).", "Gõ khoảng."]
+
+[[commands]]
+id = "ClayooEditExtrude"
+label = "Extrude"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooExtrude", "tsExtrude"]
+summary = "Đùn mặt ra theo pháp tuyến, tạo thành vách."
+steps = ["Chọn vật SubD (lồng).", "Làm trên các mặt đang chọn (lệnh Select …), nếu không thì bấm chọn một mặt.", "Gõ khoảng đùn."]
+
+[[commands]]
+id = "ClayooEditBridge"
+label = "Bridge"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooBridge"]
+summary = "Nối hai lỗ hở (hoặc hai nhóm mặt đang chọn) bằng dải mặt."
+steps = ["Chọn vật SubD (lồng).", "Gõ số đoạn."]
+
+[[commands]]
+id = "ClayooCreationAppendFace"
+label = "Append Face"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooAppend"]
+summary = "Thêm một mặt từ cạnh hở."
+steps = ["Chọn vật SubD (lồng).", "Bấm gần cạnh hở.", "Bấm điểm mặt mới vươn tới."]
+
+[[commands]]
+id = "ClayooCreationPipe"
+label = "SubD Pipe"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooPipe"]
+summary = "Ống SubD theo đường cong."
+steps = ["Chọn đường cong.", "Gõ bán kính."]
+
+[[commands]]
+id = "ClayooEditCrease"
+label = "Crease"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooCrease", "tsCrease"]
+summary = "Làm sắc cạnh (giữ sắc khi Subdivision Level)."
+steps = ["Chọn vật SubD (lồng).", "Action=Add/Remove, Pick=Loop/Edge.", "Bấm cạnh (hoặc Enter: viền các mặt đang chọn)."]
+options = ["Action", "Pick"]
+
+[[commands]]
+id = "ClayooEditFlipNormals"
+label = "Flip Normals"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooFlip"]
+summary = "Lật pháp tuyến lồng."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooEditProjectToPlane"
+label = "Project to Plane"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooFlatten"]
+summary = "Ép các mặt đang chọn (hoặc tất cả) lên mặt phẳng SubD / CPlane."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooEditCollapse"
+label = "Collapse"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooCollapse"]
+summary = "Thu các mặt đang chọn (hoặc mặt bấm) về một điểm."
+steps = ["Chọn vật SubD (lồng).", "Làm trên các mặt đang chọn (lệnh Select …), nếu không thì bấm chọn một mặt."]
+
+[[commands]]
+id = "ClayooEditMatch"
+label = "Match"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooMatch"]
+summary = "Khớp viền hở của lồng vào một đường cong."
+steps = ["Chọn vật SubD và đường cong.", "Enter."]
+
+[[commands]]
+id = "ClayooEditWeld"
+label = "Weld"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooWeld", "tsWeld"]
+summary = "Hàn các đỉnh trùng (và gộp các vật SubD đã chọn)."
+steps = ["Chọn vật SubD.", "Enter."]
+
+[[commands]]
+id = "ClayooEditSymmetry"
+label = "Symmetry"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooSymmetry"]
+summary = "Đối xứng: giữ nửa dương, lấy đối xứng và hàn mép."
+steps = ["Chọn vật SubD (lồng).", "Axis trong bảng BUILDERS.", "Enter."]
+
+[[commands]]
+id = "ClayooPrimitivesBox"
+label = "SubD Box"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooBox", "tsBox"]
+summary = "Hộp SubD."
+steps = ["Bấm hai góc đáy.", "Gõ chiều cao."]
+
+[[commands]]
+id = "ClayooPrimitivesSphere"
+label = "SubD Sphere"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooSphere", "tsSphere"]
+summary = "Cầu SubD."
+steps = ["Bấm tâm.", "Gõ bán kính."]
+
+[[commands]]
+id = "ClayooPrimitivesCylinder"
+label = "SubD Cylinder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooCylinder", "tsCylinder"]
+summary = "Trụ SubD."
+steps = ["Bấm tâm đáy.", "Gõ bán kính, chiều cao."]
+
+[[commands]]
+id = "ClayooPrimitivesCone"
+label = "SubD Cone"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooCone", "tsCone"]
+summary = "Nón SubD."
+steps = ["Bấm tâm đáy.", "Gõ bán kính, chiều cao."]
+
+[[commands]]
+id = "ClayooPrimitivesTorus"
+label = "SubD Torus"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooTorus", "tsTorus"]
+summary = "Xuyến SubD."
+steps = ["Bấm tâm.", "Gõ bán kính lớn, bán kính ống."]
+
+[[commands]]
+id = "ClayooPrimitivesPlane"
+label = "SubD Plane"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooPlane", "tsPlane"]
+summary = "Mặt phẳng SubD."
+steps = ["Bấm hai góc."]
+
+[[commands]]
+id = "ClayooCreationSweep1Rail"
+label = "SubD Sweep 1 Rail"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooSweep1"]
+summary = "Quét SubD theo một ray."
+steps = ["Chọn ray và profile.", "Enter."]
+
+[[commands]]
+id = "ClayooCreationSweep2Rails"
+label = "SubD Sweep 2 Rails"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooSweep2"]
+summary = "Quét SubD theo hai ray."
+steps = ["Chọn hai ray và profile.", "Enter."]
+
+[[commands]]
+id = "ClayooCreationLoft"
+label = "SubD Loft"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooLoft"]
+summary = "Loft SubD qua các tiết diện."
+steps = ["Chọn tiết diện theo thứ tự.", "Enter."]
+
+[[commands]]
+id = "ClayooEditWrap"
+label = "Wrap"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooWrap", "tsPull"]
+summary = "Kéo các đỉnh lồng bám lên vật khác."
+steps = ["Chọn vật SubD rồi vật đích.", "Enter."]
+
+[[commands]]
+id = "ClayooCreationRevolve"
+label = "SubD Revolve"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooRevolve"]
+summary = "Xoay profile thành SubD."
+steps = ["Chọn profile.", "Bấm hai điểm trục."]
+
+[[commands]]
+id = "ClayooCreationFromCurve"
+label = "SubD from Curve"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooFromCurve"]
+summary = "Tấm SubD từ đường kín (hoặc dải từ đường hở)."
+steps = ["Chọn đường cong.", "Enter."]
+
+[[commands]]
+id = "ClayooCreationFrom2Curves"
+label = "SubD from 2 Curves"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooFrom2Curves"]
+summary = "SubD giữa hai đường cong."
+steps = ["Chọn hai đường cong.", "Enter."]
+
+[[commands]]
+id = "ClayooEditFill"
+label = "Fill"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooFill", "tsFillHole"]
+summary = "Lấp các lỗ hở của lồng."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooEditShell"
+label = "Shell"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooShell", "tsThicken"]
+summary = "Làm dày lồng thành khối có thành."
+steps = ["Chọn vật SubD (lồng).", "Gõ độ dày."]
+
+[[commands]]
+id = "ClayooEditExtract"
+label = "Extract"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooExtract"]
+summary = "Tách các mặt đang chọn (hoặc mặt bấm) thành vật riêng."
+steps = ["Chọn vật SubD (lồng).", "Làm trên các mặt đang chọn (lệnh Select …), nếu không thì bấm chọn một mặt."]
+
+[[commands]]
+id = "ClayooCreationFromSurface"
+label = "SubD from Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooFromSurface"]
+summary = "Lồng SubD trên mặt NURBS."
+steps = ["Chọn mặt NURBS.", "Enter."]
+
+[[commands]]
+id = "ClayooCreationFromTSplines"
+label = "SubD from T-Splines"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooFromTSplines"]
+summary = "Đổi lưới (T-Splines đã xuất lưới) thành lồng SubD."
+steps = ["Chọn lưới.", "Enter."]
+
+[[commands]]
+id = "ClayooCreationFromMesh"
+label = "SubD from Mesh"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooFromMesh"]
+summary = "Đổi lưới thành lồng SubD (ghép tam giác thành tứ giác)."
+steps = ["Chọn lưới.", "Enter."]
+
+[[commands]]
+id = "ClayooCreationToNurbs"
+label = "SubD to NURBS"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooToNurbs", "tsConvert"]
+summary = "Đổi lồng dạng lưới đều thành mặt NURBS."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooSelectionSelectionSets"
+label = "Selection Sets"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooSelectionSets"]
+summary = "Lưu / nạp nhóm mặt đang chọn theo tên."
+steps = ["Chọn vật SubD (lồng).", "Action=Save/Load, tên trong bảng BUILDERS.", "Enter."]
+options = ["Action"]
+
+[[commands]]
+id = "ClayooSelectionSelectRing"
+label = "Select Ring"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooSelectRing"]
+summary = "Chọn vòng mặt cắt ngang cạnh bấm."
+steps = ["Chọn vật SubD (lồng).", "Bấm các cạnh, Enter."]
+
+[[commands]]
+id = "ClayooSelectionSelectLoop"
+label = "Select Loop"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooSelectLoop"]
+summary = "Chọn vòng mặt chạy dọc cạnh bấm."
+steps = ["Chọn vật SubD (lồng).", "Bấm các cạnh, Enter."]
+
+[[commands]]
+id = "ClayooSelectUV"
+label = "Select UV"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooSelectUV"]
+summary = "Chọn hàng mặt theo U hoặc V qua mặt bấm."
+steps = ["Chọn vật SubD (lồng).", "Bấm mặt, Enter."]
+
+[[commands]]
+id = "ClayooSelectionSelectAll"
+label = "Select All"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooSelectAll"]
+summary = "Chọn tất cả mặt."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooSelectionSelectNone"
+label = "Select None"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooSelectNone"]
+summary = "Bỏ chọn mặt."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooSelectionPaintSelection"
+label = "Paint Selection"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooPaint"]
+summary = "Bấm từng mặt để chọn / bỏ chọn."
+steps = ["Chọn vật SubD (lồng).", "Bấm các mặt, Enter."]
+
+[[commands]]
+id = "ClayooSelectionGrowSelection"
+label = "Grow Selection"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooGrow"]
+summary = "Mở rộng vùng chọn thêm một vòng mặt."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooSelectionShrink"
+label = "Shrink Selection"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooShrink"]
+summary = "Thu hẹp vùng chọn một vòng mặt."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooSelectionInvertSelection"
+label = "Invert Selection"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooInvert"]
+summary = "Đảo vùng chọn."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooSelectionSelectCreased"
+label = "Select Creased"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooSelectCreased"]
+summary = "Chọn các mặt cạnh đã crease."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooSelectionSelectNaked"
+label = "Select Naked"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooSelectNaked"]
+summary = "Chọn các mặt ở viền hở."
+steps = ["Chọn vật SubD (lồng).", "Enter."]
+
+[[commands]]
+id = "ClayooSelectionSelectCoplanar"
+label = "Select Coplanar"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooSelectCoplanar"]
+summary = "Chọn vùng mặt đồng phẳng quanh mặt bấm."
+steps = ["Chọn vật SubD (lồng).", "Bấm mặt, Enter."]
+
+[[commands]]
+id = "ClayooEditSubdivisionLevel"
+label = "Subdivision Level"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooSmooth", "ClayooLevel"]
+summary = "Làm mịn lồng (Catmull–Clark) N lần, giữ cạnh crease."
+steps = ["Chọn vật SubD (lồng).", "Gõ số mức."]
+options = ["KeepCage trong bảng BUILDERS."]
+
+[[commands]]
+id = "ClayooCreationClayooLibrary"
+label = "SubD Library"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooLibrary"]
+summary = "Thư viện hình SubD (tim, giọt nước, lá, sao, bi)."
+steps = ["Chọn hình, cỡ.", "Bấm vị trí."]
+
+[[commands]]
+id = "ClayooSelectionSetPlane"
+label = "Set SubD Plane"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ClayooSetPlane"]
+summary = "Đặt mặt phẳng SubD theo mặt bấm (dùng cho Project, Symmetry)."
+steps = ["Chọn vật SubD (lồng).", "Bấm mặt."]
+
+[[commands]]
+id = "ClayooSelectionResetPlane"
+label = "Reset SubD Plane"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["ClayooResetPlane"]
+summary = "Trả mặt phẳng SubD về CPlane."
+steps = ["Gọi lệnh."]
+
+[[commands]]
+id = "ClayooCreateIsocurves"
+label = "Create Isocurves"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooIsocurves"]
+summary = "Tạo đường cong theo vòng cạnh của lồng."
+steps = ["Chọn vật SubD (lồng).", "Bấm cạnh."]
+options = ["Smooth trong bảng BUILDERS."]
+
+[[settings]]
+key = "sd_levels"
+type = "int"
+option = "Levels"
+label = "Mức làm mịn khi tạo (0 = lồng)"
+default = 0
+min = 0
+max = 4
+commands = ["ClayooCreationPipe", "ClayooPrimitivesBox", "ClayooPrimitivesSphere", "ClayooPrimitivesCylinder", "ClayooPrimitivesCone", "ClayooPrimitivesTorus", "ClayooPrimitivesPlane", "ClayooCreationSweep1Rail", "ClayooCreationSweep2Rails", "ClayooCreationLoft", "ClayooCreationRevolve", "ClayooCreationFromCurve", "ClayooCreationFrom2Curves", "ClayooCreationFromSurface", "ClayooCreationFromTSplines", "ClayooCreationFromMesh", "ClayooCreationClayooLibrary"]
+
+[[settings]]
+key = "sd_faces"
+type = "int"
+option = "Faces"
+label = "Số mặt mỗi cạnh"
+default = 2
+min = 1
+max = 32
+commands = ["ClayooPrimitivesBox", "ClayooPrimitivesSphere", "ClayooPrimitivesCylinder", "ClayooPrimitivesCone", "ClayooPrimitivesPlane"]
+
+[[settings]]
+key = "sd_sides"
+type = "int"
+option = "Sides"
+label = "Số cạnh vòng"
+default = 8
+min = 3
+max = 64
+commands = ["ClayooPrimitivesCylinder", "ClayooPrimitivesCone", "ClayooPrimitivesTorus", "ClayooCreationPipe", "ClayooCreationRevolve"]
+
+[[settings]]
+key = "sd_stations"
+type = "int"
+option = "Stations"
+label = "Số mặt dọc"
+default = 12
+min = 1
+max = 400
+commands = ["ClayooCreationPipe", "ClayooCreationSweep1Rail", "ClayooCreationSweep2Rails", "ClayooCreationLoft", "ClayooCreationFrom2Curves", "ClayooCreationFromSurface"]
+
+[[settings]]
+key = "sd_points"
+type = "int"
+option = "Points"
+label = "Số điểm ngang"
+default = 8
+min = 2
+max = 200
+commands = ["ClayooCreationSweep1Rail", "ClayooCreationSweep2Rails", "ClayooCreationLoft", "ClayooCreationRevolve", "ClayooCreationFromCurve", "ClayooCreationFrom2Curves", "ClayooCreationFromSurface"]
+
+[[settings]]
+key = "sd_thickness"
+type = "length"
+option = "Thickness"
+label = "Độ dày"
+default = 1.0
+min = 0.05
+max = 50.0
+step = 0.05
+commands = ["ClayooCreationFromCurve", "ClayooCreationClayooLibrary"]
+
+[[settings]]
+key = "sd_library"
+type = "enum"
+option = "Shape"
+label = "Hình"
+choices = ["heart", "teardrop", "leaf", "star", "bead"]
+choice_labels = ["Trái tim", "Giọt nước", "Lá", "Ngôi sao", "Hạt"]
+default = "heart"
+commands = ["ClayooCreationClayooLibrary"]
+
+[[settings]]
+key = "sd_library_size"
+type = "length"
+option = "Size"
+label = "Cỡ"
+default = 10.0
+min = 0.5
+max = 100.0
+step = 0.1
+commands = ["ClayooCreationClayooLibrary"]
+
+[[settings]]
+key = "sd_delete_input"
+type = "bool"
+option = "DeleteInput"
+label = "Xoá lồng gốc"
+default = false
+commands = ["ClayooCreationToNurbs"]
+
+[[settings]]
+key = "sd_tolerance"
+type = "length"
+option = "Tolerance"
+label = "Dung sai hàn"
+default = 0.01
+min = 1e-05
+max = 5.0
+step = 0.001
+commands = ["ClayooEditWeld"]
+
+[[settings]]
+key = "sd_symmetry"
+type = "enum"
+option = "Axis"
+label = "Trục đối xứng"
+choices = ["x", "y"]
+choice_labels = ["Qua mặt YZ (trục X)", "Qua mặt XZ (trục Y)"]
+default = "x"
+commands = ["ClayooEditSymmetry"]
+
+[[settings]]
+key = "sd_keep_cage"
+type = "bool"
+option = "KeepCage"
+label = "Giữ lồng (tạo bản mịn riêng)"
+default = false
+commands = ["ClayooEditSubdivisionLevel"]
+
+[[settings]]
+key = "sd_uv"
+type = "enum"
+option = "Direction"
+label = "Hướng"
+choices = ["u", "v"]
+choice_labels = ["U", "V"]
+default = "u"
+commands = ["ClayooSelectUV"]
+
+[[settings]]
+key = "sd_coplanar_angle"
+type = "angle"
+option = "Angle"
+label = "Góc đồng phẳng tối đa"
+default = 5.0
+min = 0.0
+max = 45.0
+step = 0.5
+commands = ["ClayooSelectionSelectCoplanar"]
+
+[[settings]]
+key = "sd_set_name"
+type = "string"
+option = "Name"
+label = "Tên nhóm"
+default = "1"
+commands = ["ClayooSelectionSelectionSets"]
+
+[[settings]]
+key = "sd_iso_smooth"
+type = "bool"
+option = "Smooth"
+label = "Đường mượt"
+default = true
+commands = ["ClayooCreateIsocurves"]

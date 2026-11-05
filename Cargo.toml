@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/om9-core", "crates/om9-command-options", "crates/om9-archive", "crates/om9-app", "crates/om9-scene", "crates/om9-native-owner", "crates/om9-exchange", "crates/om9-kernel", "crates/om9-render", "crates/om9-3dm", "crates/om9-sdk", "crates/om9-plugin-host", "sdk/examples/hello-plugin"]
+members = ["crates/om9-core", "crates/om9-command-options", "crates/om9-archive", "crates/om9-app", "crates/om9-scene", "crates/om9-native-owner", "crates/om9-exchange", "crates/om9-kernel", "crates/om9-render", "crates/om9-3dm", "crates/om9-sdk", "crates/om9-plugin-host", "sdk/examples/hello-plugin", "crates/om9-addons", "crates/om9-addon-abi", "addons/gem_on_curve", "addons/geom", "addons/curves", "addons/transform", "addons/gem_cutter", "addons/gems", "addons/settings", "addons/cutters", "addons/transform_tools", "addons/solid", "addons/curve_tools", "addons/gem_tools", "addons/setting_tools", "addons/builders", "addons/tools", "addons/surfaces", "addons/subd", "addons/top11", "addons/matrix"]
 resolver = "3"
 
 [workspace.package]

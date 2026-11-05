@@ -638,6 +638,129 @@ impl MatrixApp {
         } else {
             self.cmd_suggestions_rect = None;
         }
+        // An interactive add-on command shows its sub-options: `Close=No  Length  Undo …`.
+        // A click on a flag/choice/action sends it at once; a number puts `Length=` in the line.
+        if !popup_open
+            && self.controller.phase() == crate::session::CmdPhase::Idle
+            && let Some(session) = self.controller.addon_session()
+        {
+            use om9_addon_abi::session::OptionKind;
+            let mut options = session.reply.options.clone();
+            let mut tokens = session.tokens(self.controller.tr());
+            // A command with a builder panel also shows the panel values: `GirdleScale=105 …`.
+            if let Some(b) = self
+                .controller
+                .addon_builder()
+                .filter(|b| b.code == session.code)
+            {
+                for (key, label) in b.tokens() {
+                    let spec = b.specs.iter().find(|s| s.key == key).expect("token spec");
+                    let kind = match &spec.kind {
+                        om9_addons::settings::Kind::Bool => OptionKind::Toggle,
+                        om9_addons::settings::Kind::Enum { choices } => OptionKind::Choice {
+                            choices: choices.clone(),
+                        },
+                        _ => OptionKind::Number,
+                    };
+                    options.push(om9_addon_abi::session::OptionToken {
+                        name: spec.option.clone(),
+                        value: None,
+                        kind,
+                    });
+                    tokens.push((key, label));
+                }
+            }
+            let mut clicked: Option<usize> = None;
+            egui::Area::new(egui::Id::new("cmd-session-tokens"))
+                .fixed_pos(egui::pos2(rect.left(), rect.top() - 21.0))
+                .order(egui::Order::Middle)
+                .show(&ctx, |ui| {
+                    apply_command_theme(ui);
+                    ui.horizontal(|ui| {
+                        for (i, (name, label)) in tokens.iter().enumerate() {
+                            let response = ui.small_button(label);
+                            self.cmd_token_rects.insert(name.clone(), response.rect);
+                            if response.clicked() {
+                                clicked = Some(i);
+                            }
+                        }
+                    });
+                });
+            if let Some(i) = clicked {
+                let option = &options[i];
+                match option.kind {
+                    OptionKind::Number => {
+                        self.transcript.set_draft(&format!("{}=", option.name));
+                    }
+                    _ => {
+                        let result = self.controller.submit_effect(&option.name).map(|_| ());
+                        self.feedback(result);
+                    }
+                }
+                self.focus_cmd = true;
+            }
+        }
+        // An open add-on builder shows its options the same way: `Size=1.5  Spacing=0.2 …`.
+        // A click on a choice/flag steps it; a click on a number puts `Size=` in the line.
+        if !popup_open
+            && self.controller.phase() == crate::session::CmdPhase::Idle
+            && self.controller.addon_session().is_none()
+            && let Some(b) = self.controller.addon_builder()
+        {
+            let tokens = b.tokens();
+            let steppable: std::collections::BTreeSet<String> = b
+                .specs
+                .iter()
+                .filter(|s| {
+                    matches!(
+                        s.kind,
+                        om9_addons::settings::Kind::Bool | om9_addons::settings::Kind::Enum { .. }
+                    )
+                })
+                .map(|s| s.key.clone())
+                .collect();
+            let options: std::collections::BTreeMap<String, String> = b
+                .specs
+                .iter()
+                .map(|s| (s.key.clone(), s.option.clone()))
+                .collect();
+            let can_accept = b.preview.count > 0;
+            let mut clicked: Option<String> = None;
+            let mut accept = false;
+            egui::Area::new(egui::Id::new("cmd-builder-tokens"))
+                .fixed_pos(egui::pos2(rect.left(), rect.top() - 21.0))
+                .order(egui::Order::Middle)
+                .show(&ctx, |ui| {
+                    apply_command_theme(ui);
+                    ui.horizontal(|ui| {
+                        for (key, label) in &tokens {
+                            let response = ui.small_button(label);
+                            self.cmd_token_rects.insert(key.clone(), response.rect);
+                            if response.clicked() {
+                                clicked = Some(key.clone());
+                            }
+                        }
+                        let response =
+                            ui.add_enabled(can_accept, egui::Button::new("Enter = Đặt").small());
+                        self.cmd_token_rects.insert("Accept".into(), response.rect);
+                        accept = response.clicked();
+                    });
+                });
+            if let Some(key) = clicked {
+                if steppable.contains(&key) {
+                    if let Err(e) = self.controller.step_builder_value(&key) {
+                        self.status.error(&e.to_string());
+                    }
+                } else if let Some(option) = options.get(&key) {
+                    self.transcript.set_draft(&format!("{option}="));
+                }
+                self.focus_cmd = true;
+            }
+            if accept {
+                let result = self.controller.accept_addon_builder();
+                self.feedback(result);
+            }
+        }
         state.store(&ctx, id);
         ui.allocate_rect(rect, Sense::hover());
     }

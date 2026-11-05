@@ -20,6 +20,8 @@ use om9_scene::{
     workspace::ViewId,
 };
 mod channel_cutters;
+mod addons_window;
+mod builder_panel;
 mod chrome;
 mod clipboard;
 mod command;
@@ -280,6 +282,9 @@ pub struct MatrixApp {
     gumball_settings_error_reported: bool,
     /// Opt-in OS-mouse/GPU gumball acceptance (`OM9_GUMBALL_OS_AUDIT`).
     os_audit: Option<os_audit::GumballOsAudit>,
+    /// Tools › Add-ons… window and pending Install from Disk.
+    addons_ui: addons_window::AddonsUi,
+    builder_ui: builder_panel::BuilderUi,
     file_ime_composing: bool,
     file_f6_rects: BTreeMap<crate::file_lifecycle::FileKind, Rect>,
     /// Window title owned by this document's path/name and dirty marker.
@@ -504,6 +509,8 @@ struct GripDrag {
     maximized: Option<ViewId>,
     viewport: Viewport,
     view_plane: CPlane,
+    /// Every grip moving with this drag (the picked group), the pressed one included.
+    group: Vec<om9_core::top11::GripHandle>,
     plane: CPlane,
     press_world: Point3,
     current: Point3,
@@ -816,6 +823,8 @@ impl MatrixApp {
             gumball_settings_saved: crate::session::gumball::GumballSettings::default(),
             gumball_settings_error_reported: false,
             os_audit: None,
+            addons_ui: Default::default(),
+            builder_ui: Default::default(),
             file_ime_composing: false,
             file_f6_rects: BTreeMap::new(),
             window_title: String::new(),
@@ -1144,6 +1153,9 @@ impl MatrixApp {
         self.stage_project_state()
     }
     fn feedback(&mut self, result: Result<()>) {
+        for message in self.controller.take_addon_messages() {
+            self.transcript.append_history(&message);
+        }
         // A Measure read-out is the command's answer, so it is shown in the
         // Command Line instead of the generic "Ready" (OM9-L3-03-20-005).
         let measurement = self.controller.take_measurement_label();
@@ -1499,7 +1511,15 @@ impl MatrixApp {
             return;
         }
 
+        let builder_before = self
+            .controller
+            .addon_session()
+            .map(|s| s.code.clone())
+            .or_else(|| self.controller.addon_builder().map(|b| b.code.clone()));
         let result = self.controller.dispatch_effect(id, origin);
+        if result.is_ok() {
+            self.echo_builder_start(builder_before);
+        }
         if result.is_ok() && self.controller.is_running() {
             // The first prompt belongs to the live row; history records the command that
             // started, exactly like the Matrix command line (`Command: Box`).
@@ -2708,6 +2728,8 @@ impl MatrixApp {
             self.nav_frame_started = std::time::Instant::now();
         }
         self.passes += 1;
+        self.addons_frame(ui.ctx());
+        self.builder_frame();
         self.sync_pictureframe_textures(ui.ctx());
         if self
             .camera_audit
@@ -2733,7 +2755,7 @@ impl MatrixApp {
         {
             self.top11_action("ControlPoints");
         }
-        if self.controller.is_running() && !self.focus_cmd {
+        if self.picking_points() && !self.focus_cmd {
             for (key, kind) in [
                 (Key::E, om9_scene::osnap::SnapKind::End),
                 (Key::M, om9_scene::osnap::SnapKind::Mid),
@@ -2755,7 +2777,9 @@ impl MatrixApp {
                 }
             }
         }
-        if !self.controller.is_running() {
+        // An interactive add-on command waiting for a point snaps like a built-in command.
+        let picking_points = self.picking_points();
+        if !picking_points {
             self.snap = None;
             self.smarttrack.clear();
         }
@@ -2838,9 +2862,13 @@ impl MatrixApp {
                 self.band_view = None;
                 // Escape ends a Top 11 prompt or grip display without touching the
                 // selection, matching the manual's Esc rule for those commands.
-                if self.controller.top11_grip_mode().is_some() || self.grip_drag.is_some() {
+                if self.grip_drag.is_some() {
                     self.grip_drag = None;
                     self.selected_grips.clear();
+                    self.controller.select_grips(&[], crate::session::GripPick::Replace);
+                } else if self.controller.grips_selected() {
+                    self.selected_grips.clear();
+                    self.controller.select_grips(&[], crate::session::GripPick::Replace);
                 } else if !dragging && !self.controller.is_running() {
                     // No gesture in flight: Esc cancels the selection itself, which is the manual's rule.
                     self.controller.clear_selection();
@@ -3957,11 +3985,11 @@ impl MatrixApp {
             self.object_info_label(ui, &view, viewport, rect);
             self.subselection_overlay(ui, &view, viewport, rect);
             self.top11_grip_overlay(ui, &view, viewport, rect);
-            if published_scene_current || self.grip_drag.is_some() {
-                self.top11_grip_drag_ui(ui, &response, &view, viewport);
-            }
             if published_scene_current || self.gumball_session.is_some() {
                 self.gumball_ui(ui, &response, &view, viewport, rect);
+            }
+            if published_scene_current || self.grip_drag.is_some() {
+                self.top11_grip_drag_ui(ui, &response, &view, viewport);
             }
         }
         self.builder_handles_ui(ui, &response, &view, viewport, rect);
@@ -4128,7 +4156,7 @@ impl MatrixApp {
                 let world = self.controller.constrain_point(world).unwrap_or(world);
                 let mut snap = None;
                 let mut unsupported_surface = false;
-                if self.controller.is_running()
+                if self.picking_points()
                     && let Some(scene) = self.controller.scene()
                 {
                     let from = self.controller.relative_base().map(|point| point.xyz());
@@ -4186,6 +4214,9 @@ impl MatrixApp {
                     self.snap = None;
                 }
                 self.hover_view = Some(id);
+                if let Some(point) = self.hover {
+                    self.controller.session_hover(point);
+                }
             } else if self.controller.top11_transform_is_pending() {
                 self.hover = None;
                 self.hover_view = None;
@@ -4420,6 +4451,7 @@ impl MatrixApp {
                 );
             }
         }
+        self.paint_builder_preview(&painter, &view.camera, viewport);
         let title_width = ui.fonts_mut(|fonts| {
             fonts
                 .layout_no_wrap(
@@ -4483,11 +4515,16 @@ impl MatrixApp {
             && response.hovered()
             && let Some(pos) = response.hover_pos()
         {
+            if response.secondary_clicked() && self.controller.addon_session().is_some() {
+                let result = self.controller.submit_effect("").map(|_| ());
+                self.feedback(result);
+                return;
+            }
             if response.clicked() && !published_scene_current {
                 self.status.info("Viewport is updating; try selecting again");
             } else if response.clicked() {
                 self.controller.workspace.active = id;
-                if self.select_control_grip_at(
+                if !ctrl_or_command(ui).1 && self.select_control_grip_at(
                     &view,
                     viewport,
                     [pos.x as f64, pos.y as f64],
@@ -4496,7 +4533,13 @@ impl MatrixApp {
                     self.focus_cmd = false;
                     return;
                 }
-                if self.controller.is_running() {
+                if !self.controller.is_running() && self.controller.session_wants_point() {
+                    if let Some(point) = self.hover {
+                        let result = self.controller.session_point(point);
+                        if result.is_ok() { self.snap_state.accept(); }
+                        self.feedback(result);
+                    }
+                } else if self.controller.is_running() {
                     if self.controller.solid_boolean_two_preview_mode().is_some() {
                         let result = self.controller.submit("Next");
                         if result.is_ok() {
@@ -5200,6 +5243,30 @@ impl MatrixApp {
                         }
                     }
                 } else {
+                    // Grips on: a click on a grip picks it (Shift adds, Ctrl removes); a click
+                    // elsewhere drops the picked grips and selects objects as usual.
+                    if self.controller.top11_grip_mode().is_some() {
+                        let (shift, ctrl) = ctrl_or_command(ui);
+                        if let Some(grip) =
+                            self.grip_at(&view, viewport, [pos.x as f64, pos.y as f64])
+                        {
+                            let change = if shift {
+                                crate::session::GripPick::Add
+                            } else if ctrl {
+                                crate::session::GripPick::Remove
+                            } else {
+                                crate::session::GripPick::Replace
+                            };
+                            self.controller.select_grips(&[grip], change);
+                            return;
+                        }
+                        if !shift && !ctrl {
+                            self.controller
+                                .select_grips(&[], crate::session::GripPick::Replace);
+                        }
+                    }
+                    // A session picking curves by location (Fillet, Extend …) reads where.
+                    self.controller.note_session_pick(self.hover);
                     let candidates = self.controller.scene().and_then(|scene| {
                         scene
                             .pick_all(
@@ -5548,9 +5615,24 @@ impl MatrixApp {
                     // Matrix9: dragging left to right selects objects fully inside the box, right to left
                     // selects anything the box touches.
                     let window = pointer.x >= start.x;
-                    let picked = self.objects_in_band(&view.camera, viewport, band, window);
                     // Rhino: Shift adds to the selection, Ctrl removes from it, plain replaces it.
                     let (shift, ctrl) = ctrl_or_command(ui);
+                    if self.controller.top11_grip_mode().is_some() {
+                        // Grips on: the band picks grips, and the gumball appears on them.
+                        let grips = self.grips_in_band(view, viewport, band);
+                        let change = if shift {
+                            crate::session::GripPick::Add
+                        } else if ctrl {
+                            crate::session::GripPick::Remove
+                        } else {
+                            crate::session::GripPick::Replace
+                        };
+                        self.controller.select_grips(&grips, change);
+                        self.band_start = None;
+                        self.band_view = None;
+                        return;
+                    }
+                    let picked = self.objects_in_band(&view.camera, viewport, band, window);
 
                     let result = if shift {
                         self.controller.add_objects(&picked)
@@ -6128,6 +6210,14 @@ impl MatrixApp {
             self.gumball_last = None;
             self.gumball_basis = None;
         }
+    }
+
+    /// Whether the pointer is placing a point: a running command, an add-on prompt waiting for
+    /// a point, or a grip being dragged. Object snaps apply only then.
+    fn picking_points(&self) -> bool {
+        self.controller.is_running()
+            || self.controller.session_wants_point()
+            || self.grip_drag.is_some()
     }
 
     fn cancel_gumball(&mut self) {
@@ -7011,6 +7101,7 @@ impl eframe::App for MatrixApp {
         self.service_native_file_picker(ui.ctx(), frame);
         self.service_three_dm_picker(ui.ctx(), frame);
         self.service_stl_picker(ui.ctx(), frame);
+        self.service_addon_picker(ui.ctx(), frame);
     }
 
     fn raw_input_hook(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
@@ -7306,6 +7397,10 @@ fn launch_with(mut app: MatrixApp, config: &crate::startup::AppConfig) -> Result
         std::fs::create_dir_all(directory).map_err(|e| Error::Io(e.to_string()))?;
     }
     app.audit = config.audit_dir.clone().map(UiAudit::new);
+    // Add-ons read the user's configuration; audits stay deterministic without them.
+    if app.audit.is_none() {
+        app.attach_addons();
+    }
     if app.dock_layout_path().is_none()
         && let Some(path) = &config.layout_path
     {

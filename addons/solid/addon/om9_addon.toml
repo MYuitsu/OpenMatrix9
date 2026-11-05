@@ -1,0 +1,348 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_solid"
+version = "0.1.0"
+name = "Solid"
+tagline = "Menu Solid kiểu Matrix: khối cơ bản, Boolean, đùn, lỗ, Shell …"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Solid"]
+
+[[commands]]
+id = "SolidUnion"
+label = "Boolean Union"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["BooleanUnion", "Union"]
+summary = "Gộp các khối thành một."
+steps = ["Chọn hai khối trở lên.", "Enter."]
+
+[[commands]]
+id = "SolidDifference"
+label = "Boolean Difference"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["BooleanDifference", "Difference"]
+summary = "Trừ khối: chọn khối bị trừ, rồi chọn dao (khối trừ)."
+steps = ["Chọn khối bị trừ, Enter.", "Chọn khối dùng để trừ, Enter."]
+
+[[commands]]
+id = "SolidIntersection"
+label = "Boolean Intersection"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["BooleanIntersection"]
+summary = "Giữ phần giao của hai nhóm khối."
+steps = ["Chọn nhóm thứ nhất, Enter.", "Chọn nhóm thứ hai, Enter."]
+
+[[commands]]
+id = "SolidBooleanTwoObjects"
+label = "Boolean Two Objects"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["BooleanTwoObjects"]
+summary = "Boolean giữa đúng hai khối, chọn kiểu trên dòng lệnh, xem trước."
+steps = ["Chọn hai khối.", "Mode=Union/Difference/Intersection/ReverseDifference.", "Enter."]
+options = ["Mode: kiểu boolean."]
+
+[[commands]]
+id = "SolidCapPlanarHoles"
+label = "Cap Planar Holes"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Cap"]
+summary = "Bịt kín các lỗ hở (mép hở) của khối."
+steps = ["Chọn khối hở.", "Enter."]
+
+[[commands]]
+id = "SolidExtractSurface"
+label = "Extract Surface"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ExtractSrf"]
+summary = "Tách một mặt (vùng mặt liền) ra khỏi khối."
+steps = ["Chọn khối.", "Bấm lên mặt cần tách (nhìn từ trên CPlane)."]
+
+[[commands]]
+id = "SolidFilletEdgeFilletEdge"
+label = "Fillet Edge"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["FilletEdge"]
+summary = "Bo tròn các cạnh sắc của khối theo bán kính."
+steps = ["Chọn khối.", "Gõ bán kính."]
+
+[[commands]]
+id = "SolidText"
+label = "Text"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["TextObject"]
+summary = "Tạo chữ nổi (khối) từ chuỗi chữ, cao và dày tuỳ chọn."
+steps = ["Gõ chữ ở bảng BUILDERS (Text=…), chỉnh Height, Depth.", "Bấm điểm bắt đầu."]
+options = ["Text: nội dung (A–Z, 0–9, - . & ♥).", "Height: cao chữ.", "Depth: dày (nổi).", "Stroke: nét chữ (0 = tự động)."]
+
+[[commands]]
+id = "SolidExtrudePlanarCurveStraight"
+label = "Extrude Planar Curve"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["ExtrudeCrv"]
+summary = "Đùn đường cong phẳng thành khối (kín) hoặc mặt (đường hở); đường nằm trong đường khác thành lỗ."
+steps = ["Chọn đường cong.", "Gõ khoảng đùn."]
+options = ["BothSides: đùn hai phía."]
+
+[[commands]]
+id = "SolidGVDAllExtrude"
+label = "Extrude All"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["ExtrudeAll"]
+summary = "Đùn tất cả đường cong đang chọn một lần (lỗ tự nhận)."
+steps = ["Chọn các đường cong.", "Gõ khoảng đùn."]
+options = ["BothSides."]
+
+[[commands]]
+id = "SolidPipe"
+label = "Pipe"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Pipe"]
+summary = "Tạo ống tròn theo đường cong."
+steps = ["Chọn đường cong.", "Gõ bán kính."]
+
+[[commands]]
+id = "SolidBoxCornertoCornerHeight"
+label = "Box"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Box"]
+summary = "Tạo hộp theo hai góc đáy và chiều cao."
+steps = ["Bấm góc đáy thứ nhất.", "Bấm góc đối diện.", "Gõ/bấm chiều cao."]
+
+[[commands]]
+id = "SolidSphereCenterRadius"
+label = "Sphere"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Sphere"]
+summary = "Tạo khối cầu."
+steps = ["Bấm tâm.", "Gõ/bấm bán kính."]
+
+[[commands]]
+id = "SolidEllipsoidFromCenter"
+label = "Ellipsoid"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Ellipsoid"]
+summary = "Tạo khối elip."
+steps = ["Bấm tâm.", "Gõ ba bán kính."]
+
+[[commands]]
+id = "SolidTorus"
+label = "Torus"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Torus"]
+summary = "Tạo xuyến (vòng)."
+steps = ["Bấm tâm.", "Gõ bán kính tới tâm ống và bán kính ống."]
+
+[[commands]]
+id = "SolidCylinder"
+label = "Cylinder"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Cylinder"]
+summary = "Tạo khối trụ."
+steps = ["Bấm tâm đáy.", "Gõ bán kính và chiều cao."]
+
+[[commands]]
+id = "SolidTube"
+label = "Tube"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Tube"]
+summary = "Tạo ống trụ rỗng."
+steps = ["Bấm tâm đáy.", "Gõ bán kính ngoài, trong và chiều cao."]
+
+[[commands]]
+id = "SolidPyramid"
+label = "Pyramid"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Pyramid"]
+summary = "Tạo khối chóp đều."
+steps = ["Bấm tâm đáy.", "Gõ bán kính tới đỉnh đáy và chiều cao."]
+options = ["NumSides: số cạnh đáy."]
+
+[[commands]]
+id = "SolidCone"
+label = "Cone"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Cone"]
+summary = "Tạo khối nón."
+steps = ["Bấm tâm đáy.", "Gõ bán kính đáy và chiều cao."]
+
+[[commands]]
+id = "SolidTruncatedCone"
+label = "Truncated Cone"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["TCone"]
+summary = "Tạo khối nón cụt."
+steps = ["Bấm tâm đáy.", "Gõ bán kính đáy, bán kính đỉnh và chiều cao."]
+
+[[commands]]
+id = "SolidBoss"
+label = "Boss"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Boss"]
+summary = "Đùn một đường cong kín lên khối và gộp vào khối."
+steps = ["Chọn khối và đường cong kín.", "Gõ chiều cao."]
+
+[[commands]]
+id = "SolidRib"
+label = "Rib"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Rib"]
+summary = "Tạo gân (vách) từ đường cong hở và gộp vào khối."
+steps = ["Chọn khối và đường cong.", "Gõ chiều cao và độ dày."]
+
+[[commands]]
+id = "SolidSlab"
+label = "Slab"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Slab"]
+summary = "Tạo tấm dày theo đường cong (kín hoặc hở)."
+steps = ["Chọn đường cong (và khối nếu muốn gộp).", "Gõ chiều cao và độ dày."]
+
+[[commands]]
+id = "SolidSolidEditToolsHolesMakeHole"
+label = "Make Hole"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["MakeHole"]
+summary = "Khoan lỗ xuyên khối theo đường cong kín."
+steps = ["Chọn khối và đường cong kín.", "Enter."]
+
+[[commands]]
+id = "SolidSolidEditToolsHolesArrayHole"
+label = "Array Hole"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ArrayHole"]
+summary = "Khoan mảng lỗ theo lưới."
+steps = ["Chọn khối và đường cong lỗ.", "Gõ số lỗ X, Y và khoảng cách X, Y."]
+
+[[commands]]
+id = "SolidSolidEditToolsHolesArrayHolePolar"
+label = "Array Hole Polar"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ArrayHolePolar"]
+summary = "Khoan mảng lỗ tròn quanh tâm."
+steps = ["Chọn khối và đường cong lỗ.", "Bấm tâm, gõ số lỗ và góc."]
+
+[[commands]]
+id = "SolidSolidEditToolsHolesMoveHole"
+label = "Move Hole"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["MoveHole"]
+summary = "Dời lỗ: lấp chỗ cũ (theo đường cong lỗ) và khoan ở chỗ mới."
+steps = ["Chọn khối và đường cong của lỗ.", "Bấm điểm gốc và điểm đích."]
+
+[[commands]]
+id = "SolidSolidEditToolsFacesMoveFace"
+label = "Move Face"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["MoveFace"]
+summary = "Dời một mặt phẳng của khối theo pháp tuyến."
+steps = ["Chọn khối.", "Bấm lên mặt (nhìn từ trên CPlane).", "Gõ khoảng dời."]
+
+[[commands]]
+id = "SolidShell"
+label = "Shell"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Shell"]
+summary = "Làm rỗng khối với thành dày đều."
+steps = ["Chọn khối.", "Gõ độ dày thành."]
+
+[[commands]]
+id = "SolidPtOn"
+label = "Solid Points On"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["SolidPtOnCmd"]
+summary = "Bật điểm của khối (đỉnh lưới, điểm điều khiển NURBS) để sửa: bấm điểm, bấm chỗ mới, lặp lại."
+steps = ["Chọn khối.", "Bấm điểm cần dời.", "Bấm (hoặc gõ) vị trí mới. Lặp lại.", "Enter."]
+
+[[settings]]
+key = "text_string"
+type = "string"
+option = "Text"
+label = "Nội dung chữ"
+default = "OM9"
+commands = ["SolidText"]
+
+[[settings]]
+key = "text_height"
+type = "length"
+option = "Height"
+label = "Cao chữ"
+default = 3.0
+min = 0.2
+max = 50.0
+step = 0.1
+commands = ["SolidText"]
+
+[[settings]]
+key = "text_depth"
+type = "length"
+option = "Depth"
+label = "Dày chữ"
+default = 0.5
+min = 0.05
+max = 20.0
+step = 0.05
+commands = ["SolidText"]
+
+[[settings]]
+key = "text_stroke"
+type = "length"
+option = "Stroke"
+label = "Nét chữ (0 = tự động)"
+default = 0.0
+min = 0.0
+max = 5.0
+step = 0.05
+commands = ["SolidText"]

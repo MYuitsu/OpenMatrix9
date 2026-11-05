@@ -1,0 +1,25 @@
+[package]
+name = "om9-addon-transform"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "OM9 add-on: Matrix 9 Transform menu and Top 11 commands (Move, Rotate, Mirror, Scale, Array …), interactive"
+publish = false
+
+[lib]
+name = "om9_transform"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+# Export the C symbols OM9 loads. Off when several add-ons are linked into one test binary.
+default = ["export"]
+export = []
+
+[dependencies]
+om9-addon-abi = { path = "../../crates/om9-addon-abi", features = ["session"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+om9-addons = { path = "../../crates/om9-addons", features = ["native"] }

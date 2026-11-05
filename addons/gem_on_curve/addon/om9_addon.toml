@@ -1,0 +1,103 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "gem_on_curve"
+version = "0.4.1"
+name = "Gem On Curve"
+tagline = "Rải đá tròn đều theo đường cong (halo, ring rail)"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Gems"]
+
+[[commands]]
+id = "BuilderGemOnCrv"
+label = "Gem On Crv"
+handler = "om9_addon_invoke"
+# Mở builder: thông số hiện trên thanh Command và panel Builders, xem trước rồi Enter mới đặt đá.
+builder = true
+icon = "icons/gem_on_crv.svg"
+shortcut = "Ctrl+Shift+G"
+summary = "Rải đá tròn đều theo đường cong (halo, ring rail)."
+steps = ["Chọn đường cong.", "Chọn Gem On Crv: bảng BUILDERS và tuỳ chọn dòng lệnh hiện ra, xem trước số đá.", "Enter để đặt đá (một lần Undo gỡ tất cả)."]
+
+[[commands]]
+id = "BuilderGemCountOnCrv"
+label = "Gem Count On Crv"
+handler = "om9_addon_invoke"
+summary = "Báo số đá vừa với đường cong theo cỡ và khe hiện tại."
+steps = ["Chọn đường cong.", "Chọn Gem Count On Crv."]
+
+[[settings]]
+key = "diameter"
+type = "length"
+option = "Size"
+label = "Đường kính đá"
+default = 1.5
+min = 0.3
+max = 30.0
+step = 0.05
+
+[[settings]]
+key = "spacing"
+type = "length"
+option = "Spacing"
+label = "Khe giữa đá"
+default = 0.2
+min = 0.0
+max = 5.0
+step = 0.01
+
+[[settings]]
+key = "start"
+type = "percent"
+option = "Start"
+label = "Điểm bắt đầu"
+default = 0.0
+min = 0.0
+max = 100.0
+step = 1.0
+
+[[settings]]
+key = "end"
+type = "percent"
+option = "End"
+label = "Điểm kết thúc"
+default = 100.0
+min = 0.0
+max = 100.0
+step = 1.0
+
+[[settings]]
+key = "z_offset"
+type = "length"
+option = "ZOffset"
+label = "Nâng/hạ (Z)"
+description = "Nâng/hạ tâm gờ đá theo pháp tuyến mặt bàn"
+default = 0.0
+min = -10.0
+max = 10.0
+step = 0.01
+
+[[settings]]
+key = "layout"
+type = "enum"
+label = "Cách chia"
+description = "fit: dàn đều cho khít; fixed_gap: giữ đúng Spacing, phần dư ở cuối"
+choices = ["fit", "fixed_gap"]
+choice_labels = ["Dàn đều", "Giữ khe"]
+option = "Layout"
+default = "fit"
+
+[[settings]]
+key = "orientation"
+type = "enum"
+label = "Hướng mặt đá"
+description = "plane: theo pháp tuyến CPlane (halo); outward: hướng ra ngoài tâm (eternity)"
+choices = ["plane", "outward"]
+choice_labels = ["Theo CPlane", "Hướng ra ngoài"]
+option = "Orient"
+default = "plane"

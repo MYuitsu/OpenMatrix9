@@ -390,10 +390,15 @@ impl Controller {
     /// prompt would carry (`Location of point (Undo Cancel): `) keeps one presentation
     /// for every command and lets the existing inline renderer underline and click it.
     /// History echoes keep [`Self::prompt`] so recorded lines stay stable.
+    /// The command-line prompt, including an open add-on session's or builder's.
+    pub fn prompt_text(&self) -> String {
+        self.prompt_with_options()
+    }
     pub fn prompt_with_options(&self) -> String {
         let prompt = self.prompt();
         if !self.is_running() {
-            return prompt;
+            // An open add-on session or builder asks its own question.
+            return self.session_prompt().or_else(|| self.addon_builder_prompt()).unwrap_or(prompt);
         }
         let options = crate::command_options::CommandOptionInterface::command_options(self);
         if options.is_empty() {

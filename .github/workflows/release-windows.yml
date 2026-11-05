@@ -59,6 +59,18 @@ jobs:
           Start-Transcript -Path build/ci/standalone/build.log
           try { ./tools/ci/build-standalone-windows.ps1 }
           finally { Stop-Transcript }
+      - name: Build add-on packages (Tools > Add-ons > Install from Disk)
+        shell: pwsh
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/om9-target
+        run: ./tools/ci/build-addons-windows.ps1
+      - name: Keep add-on packages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: om9-addons
+          path: build/ci/standalone/addons/*
+          if-no-files-found: error
+          retention-days: 30
       - name: Attest ZIP provenance
         if: github.event_name != 'pull_request'
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4

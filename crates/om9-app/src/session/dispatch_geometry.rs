@@ -10,10 +10,22 @@ impl Controller {
         feature: &str,
         _origin: InvocationOrigin,
     ) -> Result<()> {
+        // An enabled add-on that provides the command (by its code, or by the catalog code of
+        // the icon bound to this built-in feature) runs instead of the built-in.
+        if let Some(code) = self.addon_code(feature).or_else(|| {
+            crate::icons::command_key_for(feature)
+                .filter(|_| Self::availability(feature).is_ok())
+                .and_then(|key| self.addon_code(key))
+        }) {
+            return self.run_addon_command(&code);
+        }
         Self::availability(feature)?;
         if self.is_running() {
             return Err(Error::Busy);
         }
+        // One command at a time: a built-in command closes an open add-on builder or session.
+        self.cancel_addon_builder();
+        self.cancel_addon_session();
         if super::metal::handles_command(feature) {
             return self.dispatch_metal_tool(feature);
         }

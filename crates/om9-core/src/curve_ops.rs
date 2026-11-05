@@ -1887,6 +1887,75 @@ pub fn curve_grips(curve: &Curve, tolerance: f64, limits: &Limits) -> Result<Cur
     })
 }
 
+/// Move a grip of a joined curve together with every grip of the other segments that sits on
+/// the same point, so dragging a polyline vertex moves both segments and the join holds.
+/// `edit` picks edit points instead of control points. Other curves fall back to the
+/// single-grip moves.
+pub fn move_joint_grip(
+    curve: &Curve,
+    index: usize,
+    target: Point3,
+    edit: bool,
+    limits: &Limits,
+) -> Result<Curve> {
+    let single = |curve: &Curve, index: usize| {
+        if edit {
+            move_edit_point(curve, index, target, limits)
+        } else {
+            move_grip(curve, index, target, limits)
+        }
+    };
+    let Curve::Polycurve { reversed, .. } = curve else {
+        return single(curve, index);
+    };
+    finite(target)?;
+    let forward = forward_polycurve(curve, limits)?;
+    let Curve::Polycurve { segments, .. } = forward else {
+        return Err(Error::Invalid("polycurve"));
+    };
+    let grips_of = |segment: &Curve| -> Result<Vec<Point3>> {
+        let grips = curve_grips(segment, 1e-9, limits)?;
+        Ok(if edit { grips.edit_points } else { grips.poles })
+    };
+    // The whole-curve index is in forward order only when the curve is not reversed.
+    let all: Vec<Point3> = {
+        let grips = curve_grips(curve, 1e-9, limits)?;
+        if edit { grips.edit_points } else { grips.poles }
+    };
+    let source = *all.get(index).ok_or(Error::Invalid("grip index"))?;
+    let mut edited = segments.clone();
+    let mut moved = false;
+    for (segment_index, segment) in segments.iter().enumerate() {
+        let points = grips_of(segment)?;
+        let mut current = segment.clone();
+        for (local, point) in points.iter().enumerate() {
+            if distance(*point, source) <= 1e-9 {
+                current = if edit {
+                    move_edit_point(&current, local, target, limits)?
+                } else {
+                    move_grip(&current, local, target, limits)?
+                };
+                moved = true;
+            }
+        }
+        edited[segment_index] = current;
+    }
+    if !moved {
+        return single(curve, index);
+    }
+    let result = Curve::Polycurve {
+        segments: edited,
+        reversed: false,
+    };
+    let result = if *reversed {
+        reverse_curve(&result, limits)?
+    } else {
+        result
+    };
+    result.validate(limits)?;
+    Ok(result)
+}
+
 /// Move control point `index` to `target` and return a validated curve.
 pub fn move_grip(curve: &Curve, index: usize, target: Point3, limits: &Limits) -> Result<Curve> {
     move_grip_with_joints(curve, index, target, identity(), 1e-9, limits)

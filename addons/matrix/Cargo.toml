@@ -1,0 +1,42 @@
+[package]
+name = "om9-addon-matrix"
+version = "0.9.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "OM9 add-on: every Matrix-style command in one package (Curve, Transform, Gems, Settings, Cutters, Tools …)"
+publish = false
+
+[lib]
+name = "om9_matrix"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+# Export the C symbols OM9 loads. Off when the suite is linked into a test binary.
+default = ["export"]
+export = []
+
+[dependencies]
+om9-addon-abi = { path = "../../crates/om9-addon-abi", features = ["session"] }
+om9-addon-curves = { path = "../curves", default-features = false }
+om9-addon-transform = { path = "../transform", default-features = false }
+om9-addon-gem-cutter = { path = "../gem_cutter", default-features = false }
+om9-addon-gem-on-curve = { path = "../gem_on_curve", default-features = false }
+om9-addon-gems = { path = "../gems" }
+om9-addon-settings = { path = "../settings" }
+om9-addon-cutters = { path = "../cutters" }
+om9-addon-transform-tools = { path = "../transform_tools" }
+om9-addon-solid = { path = "../solid" }
+om9-addon-curve-tools = { path = "../curve_tools" }
+om9-addon-gem-tools = { path = "../gem_tools" }
+om9-addon-setting-tools = { path = "../setting_tools" }
+om9-addon-builders = { path = "../builders" }
+om9-addon-tools = { path = "../tools" }
+om9-addon-surfaces = { path = "../surfaces" }
+om9-addon-subd = { path = "../subd" }
+om9-addon-top11 = { path = "../top11" }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+om9-addons = { path = "../../crates/om9-addons", features = ["native"] }
+serde_json = { workspace = true }

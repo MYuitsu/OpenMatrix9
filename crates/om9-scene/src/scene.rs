@@ -572,6 +572,23 @@ fn append_display_segment(segment: &Curve, reverse: bool, points: &mut Vec<Point
     }
     Ok(())
 }
+/// Uniform display samples for a NURBS curve: 256, or 24 per span for curves with many
+/// spans (a spiral or helix of many turns would look faceted with 256), at most 16384.
+fn nurbs_display_segments(c: &om9_core::geometry::NurbsCurve) -> usize {
+    if c.degree <= 1 {
+        return 256;
+    }
+    let mut spans = 1usize;
+    let inside = c.knots.iter().filter(|t| **t > c.domain[0] && **t < c.domain[1]);
+    let mut last = f64::NAN;
+    for &t in inside {
+        if t != last {
+            spans += 1;
+            last = t;
+        }
+    }
+    spans.saturating_mul(24).clamp(256, 16384)
+}
 
 fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
     match g {
@@ -689,12 +706,31 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
                     }
                     (*domain, estimate as usize)
                 }
-                Curve::Nurbs(c) if !c.periodic => (c.domain, 256),
-                Curve::Nurbs(c) if c.periodic => {c.certify_repeated_periodic_basis(l)?;(c.domain,256)},
+                Curve::Nurbs(c) if !c.periodic => (c.domain, nurbs_display_segments(c)),
+                Curve::Nurbs(c) if c.periodic => {c.certify_repeated_periodic_basis(l)?;(c.domain,nurbs_display_segments(c))},
                 _ => return Err(Error::Unsupported("curve display family/segment binding")),
+            };
+            // NURBS kinks sit on knots (a polyline's corners, a joined curve's joints):
+            // sample every distinct interior knot too, or uniform samples cut the corners.
+            let knot_params: Vec<f64> = match c {
+                Curve::Nurbs(n) => {
+                    let mut k: Vec<f64> = n
+                        .knots
+                        .iter()
+                        .copied()
+                        .filter(|t| *t > domain[0] && *t < domain[1])
+                        .collect();
+                    k.dedup_by(|a, b| (*a - *b).abs() <= 1e-12 * (domain[1] - domain[0]).abs().max(1.));
+                    if k.len() > 65535 {
+                        return Err(Error::Budget("curve display knot samples"));
+                    }
+                    k
+                }
+                _ => Vec::new(),
             };
             let count = segments
                 .checked_add(1)
+                .and_then(|c| c.checked_add(knot_params.len()))
                 .ok_or(Error::Overflow("display samples"))?;
             usage.add(
                 Usage {
@@ -706,13 +742,24 @@ fn cache(g: &Geometry, usage: &mut Usage, l: &Limits) -> Result<RenderBuffers> {
             let mut points = display_vector(count, "curve display allocation")?;
             let mut parameters = display_vector(count, "curve parameter allocation")?;
             let evaluator = CurveEvaluator::capture(c, l)?;
-            for i in 0..count {
-                let fraction = i as f64 / segments as f64;
-                let t = if i == segments {
-                    domain[1]
-                } else {
-                    domain[0] + (domain[1] - domain[0]) * fraction
-                };
+            // Uniform parameters merged with the knots, increasing.
+            let mut ts: Vec<f64> = (0..=segments)
+                .map(|i| {
+                    if i == segments {
+                        domain[1]
+                    } else {
+                        domain[0] + (domain[1] - domain[0]) * (i as f64 / segments as f64)
+                    }
+                })
+                .collect();
+            if !knot_params.is_empty() {
+                ts.extend(&knot_params);
+                ts.sort_by(f64::total_cmp);
+                let span = (domain[1] - domain[0]).abs().max(1.);
+                ts.dedup_by(|a, b| (*a - *b).abs() <= 1e-12 * span);
+            }
+            for (i, &t) in ts.iter().enumerate() {
+                let fraction = if knot_params.is_empty() { i as f64 / segments as f64 } else { (t - domain[0]) / (domain[1] - domain[0]) };
                 if matches!(
                     c,
                     Curve::Circle {

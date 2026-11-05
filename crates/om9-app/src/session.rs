@@ -453,6 +453,12 @@ mod tween_curves;
 mod uv_curves;
 mod wireframe;
 pub use subobjects::SelectedSubobject;
+mod addon_builder;
+mod addon_session;
+pub use addon_session::AddonSession;
+mod addon_command;
+pub use addon_command::IconTarget;
+pub use addon_builder::{AddonBuilder, BuilderPreview, display_value};
 pub(crate) mod display_state;
 pub(crate) mod f6_state;
 mod files;
@@ -481,6 +487,7 @@ mod solid_text_stages;
 mod surface_commands;
 mod surface_edit;
 mod top11;
+pub use top11::GripPick;
 pub use properties::{FIELDS, FieldState, PropertyEdit, PropertyField};
 pub const LINE: &str = "OM9-CURVE-002";
 pub const ZOOM_EXTENTS: &str = "ViewZoomZoomExtents";
@@ -925,6 +932,10 @@ pub struct Controller {
     last_settings_mass: Option<self::settings_commands::SettingsMassReport>,
     /// Active edit/control point display for the selected curves.
     top11_grip: Option<om9_core::top11::GripMode>,
+    /// Grips picked by click or window while grips are on: (object, grip index).
+    grip_selection: Vec<(om9_core::identity::ObjectId, usize)>,
+    /// The gumball transform being previewed on the selected grips.
+    grip_preview: Option<om9_core::geometry::Transform>,
     /// Faces, edges and vertices picked with Ctrl+Shift+click, in pick order.
     subselection: Vec<SelectedSubobject>,
     // Drop nested paths/slots before releasing their shared-account owner.
@@ -966,6 +977,21 @@ pub struct Controller {
     /// `Arc`, so recording costs an `Arc` clone, never a document copy.
     published: Option<std::sync::Arc<Document>>,
     pub workspace: Workspace,
+    /// Installed add-ons (Preferences › Add-ons). `None` in tests and audits.
+    addons: Option<crate::addons::SharedHost>,
+    /// lowercase command name / feature id / catalog code → catalog code an add-on provides.
+    addon_names: std::collections::BTreeMap<String, String>,
+    /// Messages add-on commands produced, drained into the CMD history by the UI.
+    addon_messages: Vec<String>,
+    /// catalog code → typed Matrix command name.
+    addon_typed: std::collections::BTreeMap<String, String>,
+    /// The open builder of an add-on command, if any.
+    addon_builder: Option<addon_builder::AddonBuilder>,
+    /// The running interactive add-on command (Polyline, Move, Gem Cutter …), if any.
+    addon_session: Option<addon_session::AddonSession>,
+    /// Interface language of the add-on commands (Tiếng Việt / English), from the enabled
+    /// add-ons' `lang` tables and their `language` setting. English without add-ons.
+    tr: om9_addons::i18n::Tr,
 }
 impl Controller {
     pub fn capture_view_menu(
@@ -1242,6 +1268,8 @@ impl Controller {
             settings_sequence: 0,
             last_settings_mass: None,
             top11_grip: None,
+            grip_selection: Vec::new(),
+            grip_preview: None,
             subselection: Vec::new(),
             subselection_reservation: None,
             sub_revision: 1,
@@ -1268,6 +1296,13 @@ impl Controller {
             plugin_change: None,
             published: None,
             workspace: Workspace::new(),
+            addons: None,
+            addon_names: std::collections::BTreeMap::new(),
+            addon_messages: Vec::new(),
+            addon_typed: Default::default(),
+            addon_builder: None,
+            addon_session: None,
+            tr: om9_addons::i18n::Tr::english(),
         })
     }
     pub fn coordinator(&self) -> &TransactionCoordinator {
@@ -2084,6 +2119,8 @@ impl Controller {
         plane.point([local[0], local[1], 0.])
     }
     pub fn cancel(&mut self) {
+        self.cancel_addon_builder();
+        self.cancel_addon_session();
         if self.solid_face_needs_pick() || self.solid_pending.as_ref().is_some_and(|p| p.feature == "OM9-SOLID-029" || p.pipe_chain) || self.solid_fillet_needs_edge() || self.solid_fillet_preview().is_some() {
             self.clear_subselection();
         }
@@ -2147,6 +2184,7 @@ impl Controller {
             );
         }
         self.top11_grip = None;
+        self.grip_selection.clear();
         if let Some(pending) = self.surface_pending.take() {
             self.events.emit(
                 crate::command_events::EventKind::Finished,
@@ -2347,6 +2385,17 @@ impl Controller {
         if text.len() > 4096 {
             return Err(Error::Budget("command input"));
         }
+        {
+            let text = text.trim();
+            // An interactive add-on command reads the line first (points, options, Enter).
+            if !self.is_running() && self.addon_session.is_some() && self.submit_session_text(text)? {
+                return Ok(DispatchOutcome::Command);
+            }
+            // An open add-on builder reads its options first (`Size=2`, Enter = accept).
+            if !self.is_running() && self.addon_builder.is_some() && self.submit_builder_text(text)? {
+                return Ok(DispatchOutcome::Command);
+            }
+        }
         // An open builder owns the command line: a field, Apply, Reset or Cancel.
         if let Some(result) = self.builder_text(text) {
             return result.map(|_| DispatchOutcome::Command);
@@ -2386,6 +2435,13 @@ impl Controller {
         // Matrix History switches/report live on the same command line (`-006`).
         if let Some(result) = self.submit_history_text(text) {
             return result.map(|_| DispatchOutcome::Command);
+        }
+        // An installed, enabled add-on takes the command name over from OM9's own command
+        // (disable or remove the add-on to get the built-in back).
+        if !self.is_running()
+            && let Some(code) = self.addon_code(text.trim())
+        {
+            return self.run_addon_command(&code).map(|_| DispatchOutcome::Command);
         }
         if let Some(command) = self::metal::parse_command(text)? {
             return self
@@ -4131,6 +4187,12 @@ impl Controller {
     /// their cached image is stale.
     pub fn preview_gumball(&mut self, delta: om9_core::geometry::Transform) -> Result<()> {
         delta.validate()?;
+        if self.grips_selected() {
+            // Grips move, not whole objects: the viewport previews the edited grips.
+            self.grip_preview = Some(delta);
+            self.preview_revision = self.preview_revision.saturating_add(1);
+            return Ok(());
+        }
         let Some(scene) = self.scene.as_mut() else {
             return Err(Error::Missing("preview scene"));
         };
@@ -4154,6 +4216,7 @@ impl Controller {
 
     /// Drops the transient transform, leaving the document as it was before the drag.
     pub fn clear_gumball_preview(&mut self) {
+        self.grip_preview = None;
         if let Some(scene) = self.scene.as_mut() {
             let mut changed = false;
             for object in scene.objects.iter_mut() {

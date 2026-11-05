@@ -1642,12 +1642,251 @@ dependencies = [
 ]
 
 [[package]]
+name = "om9-addon-abi"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-builders"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-gem-cutter",
+ "om9-addon-geom",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-curve-tools"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-curves"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "om9-addons",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-cutters"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-gem-cutter",
+ "om9-addon-geom",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-gem-cutter"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "om9-addons",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-gem-on-curve"
+version = "0.4.1"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addons",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-gem-tools"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-gem-cutter",
+ "om9-addon-geom",
+ "om9-addon-settings",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-gems"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-geom"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-matrix"
+version = "0.9.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-builders",
+ "om9-addon-curve-tools",
+ "om9-addon-curves",
+ "om9-addon-cutters",
+ "om9-addon-gem-cutter",
+ "om9-addon-gem-on-curve",
+ "om9-addon-gem-tools",
+ "om9-addon-gems",
+ "om9-addon-setting-tools",
+ "om9-addon-settings",
+ "om9-addon-solid",
+ "om9-addon-subd",
+ "om9-addon-surfaces",
+ "om9-addon-tools",
+ "om9-addon-top11",
+ "om9-addon-transform",
+ "om9-addon-transform-tools",
+ "om9-addons",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-setting-tools"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-settings"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-solid"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "om9-addon-top11",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-subd"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "om9-addon-surfaces",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-surfaces"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "om9-addon-tools",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-tools"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "png 0.18.1",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-top11"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "om9-addon-surfaces",
+ "om9-addon-tools",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-transform"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addons",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addon-transform-tools"
+version = "0.1.0"
+dependencies = [
+ "om9-addon-abi",
+ "om9-addon-geom",
+ "om9-addon-top11",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "om9-addons"
+version = "0.1.0"
+dependencies = [
+ "libloading",
+ "om9-addon-abi",
+]
+
+[[package]]
 name = "om9-app"
 version = "0.1.0"
 dependencies = [
  "eframe",
  "epaint_default_fonts",
  "image",
+ "om9-addon-abi",
+ "om9-addon-curves",
+ "om9-addon-gem-cutter",
+ "om9-addon-gem-on-curve",
+ "om9-addon-matrix",
+ "om9-addon-transform",
+ "om9-addons",
  "om9-archive",
  "om9-command-options",
  "om9-core",

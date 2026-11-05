@@ -1,0 +1,21 @@
+schema_version = "1.0.0"
+id = "ring_sizes"
+version = "1.0.0"
+name = "Ring Sizes"
+tagline = "Bảng size nhẫn US và ISO 8653 cho Ring Rail / Resize"
+maintainer = "OpenMatrix9 contributors"
+type = "library"
+license = ["SPDX:CC0-1.0"]
+om9_version_min = "0.1.0"
+tags = ["Tools", "Builder"]
+
+[[assets]]
+kind = "ring_size_table"
+path = "tables"
+
+[[settings]]
+key = "system"
+type = "enum"
+label = "Hệ size mặc định"
+choices = ["US", "ISO8653"]
+default = "US"

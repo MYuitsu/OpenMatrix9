@@ -1,0 +1,1457 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_gem_tools"
+version = "0.1.0"
+name = "Gem Tools"
+tagline = "Menu Gems kiểu Matrix: rải đá theo đường/mặt, pavé, cụm, baguette vát, style …"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Gems"]
+
+[[commands]]
+id = "BuilderGemOnCrvAdvanced"
+label = "Gem on Curve Advanced"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["GemOnCrvAdvanced", "gvGemOnCrvAdvanced"]
+summary = "Rải đá theo đường cong có lệch Y/Z, thu nhỏ dần, bám góc, hoặc rải bi / vật thể."
+steps = ["Chọn đường cong (và một viên đá mẫu nếu muốn dùng đá đó).", "Chỉnh trong bảng BUILDERS: kiểu đá, kích thước, khoảng cách, vị trí, hướng.", "Enter để đặt đá."]
+options = ["Mode: Gem / Sphere (bi) / Object (rải vật thể đặt ở gốc F4).", "SnapCorners: đặt đá ở các góc.", "Facing, Flip, TaperDiameter, TaperSpacing."]
+
+[[commands]]
+id = "BuilderGemListOnCrv"
+label = "Gem List on Curve"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["GemListOnCrv"]
+summary = "Rải lần lượt các viên đá đã chọn (đúng thứ tự, kích thước, kiểu) dọc đường cong."
+steps = ["Chọn đường cong và các viên đá của danh sách.", "Chỉnh vị trí, khoảng cách, hướng, lệch.", "Enter."]
+options = ["Direction: bắt đầu từ đầu hay cuối.", "Fill: lặp danh sách đến hết đường."]
+
+[[commands]]
+id = "BuilderGemOnCrvMulti"
+label = "Gem on Curve Multi"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["GemOnCrvMulti"]
+summary = "Rải nhiều hàng đá cùng lúc: đường thứ nhất quyết định vị trí, các đường còn lại thêm hàng."
+steps = ["Chọn đường giữa trước, rồi các đường khác.", "Chỉnh kích thước, khoảng cách.", "Enter."]
+
+[[commands]]
+id = "BuilderGemProfile"
+label = "Gem Profile"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["GemProfile"]
+summary = "Tạo biên dạng (profile) bao quanh gờ đá, nằm trong mặt cắt đứng của đá."
+steps = ["Chọn đá.", "Chỉnh cao, dày, lệch, kiểu.", "Enter."]
+
+[[commands]]
+id = "BuilderOrientToGem"
+label = "Orient to Gem"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["OrientToGem", "gvOrientGems"]
+summary = "Đặt và co giãn vật thể (dựng ở gốc F4 cho đá 10 mm) lên từng viên đá."
+steps = ["Chọn các viên đá, Enter.", "Chọn vật thể, Enter."]
+options = ["ScaleToGem: co theo kích thước đá."]
+
+[[commands]]
+id = "BuilderGemOnSurface"
+label = "Gem on Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["GemOnSurface"]
+summary = "Bấm lên mặt để đặt từng viên đá, đá xoay theo pháp tuyến mặt."
+steps = ["Chọn mặt.", "Bấm các điểm trên mặt (xem trước khi rê chuột).", "Enter để kết thúc."]
+options = ["VerticalOffset, Angle, Flip, Spacing (vòng hướng dẫn), Copy."]
+
+[[commands]]
+id = "BuilderTaperBagChannel"
+label = "Baguette Channel"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["TaperBagChannel"]
+summary = "Rải baguette vát theo đường cong kênh: hai đầu vuông góc đường cong nên đá tự vát khi cong."
+steps = ["Chọn đường tâm kênh.", "Chỉnh rộng, dài, khoảng cách.", "Enter."]
+
+[[commands]]
+id = "BuilderTaperBagBetweenTwoCurves"
+label = "Tapered Baguette Between Two Curves"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["TaperBagBetweenTwoCurves"]
+summary = "Lấp đầy khoảng giữa hai đường cong bằng các baguette vát."
+steps = ["Chọn hai đường cong.", "Chỉnh số đá / chiều dài, khoảng cách.", "Enter."]
+
+[[commands]]
+id = "BuilderClusterBuilderOld"
+label = "Cluster Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClusterBuilder"]
+summary = "Tạo cụm đá: một viên giữa và 1–3 vòng đá quanh, nghiêng dần như hoa."
+steps = ["Chọn viên đá giữa (hoặc bấm tâm cụm).", "Chỉnh số vòng, kích thước, độ nghiêng.", "Enter."]
+
+[[commands]]
+id = "BuilderPaveDialog"
+label = "Auto Pavé"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["PaveDialog", "AutoPave"]
+summary = "Lát pavé tự động trong đường cong kín (lưới lục giác), viên nhỏ dần ở mép, bám mặt nếu chọn."
+steps = ["Chọn đường cong kín (và mặt cần lát).", "Chỉnh kích thước, tối thiểu, khoảng cách, lề, góc.", "Enter."]
+
+[[commands]]
+id = "BuilderPaveBuilder"
+label = "Pavé Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["PaveBuilder"]
+summary = "Bấm từng viên trên mặt; mỗi viên tự thu nhỏ vừa khe với các viên bên cạnh."
+steps = ["Chọn mặt (và đá đã có).", "Bấm điểm.", "Enter."]
+
+[[commands]]
+id = "BuilderPaveAzureBuilder"
+label = "Pavé Azure Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["PaveAzure"]
+summary = "Tạo dao cắt azure (lỗ trang trí phía dưới) cho từng viên pavé."
+steps = ["Chọn các viên pavé.", "Chỉnh tỉ lệ, sâu, góc, hình.", "Enter."]
+
+[[commands]]
+id = "BuilderPaveProngBuilder"
+label = "Pavé Prong Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["PaveProng"]
+summary = "Đặt chấu chung cho pavé: một chấu giữa mỗi 3 viên kề nhau và chấu ở cạnh hở."
+steps = ["Chọn các viên pavé.", "Chỉnh kích thước, cao, sâu.", "Enter."]
+
+[[commands]]
+id = "BuilderGemSprings"
+label = "Gem Springs"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["GemSprings"]
+summary = "Dãn đều các viên đá (như lò xo) để giữ khe đều nhau, vẫn bám mặt."
+steps = ["Chọn đá (và mặt).", "Chỉnh khe, số lần, độ mạnh.", "Enter."]
+
+[[commands]]
+id = "BuilderGemFollow"
+label = "Gem Follow"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["GemFollow"]
+summary = "Xoay trục North của các viên theo hàng đá (dọc hoặc ngang hàng)."
+steps = ["Chọn hàng đá.", "North=Along/Across.", "Enter."]
+
+[[commands]]
+id = "BuilderGemControl"
+label = "Gem Control"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["GemControl"]
+summary = "Hướng culet và/hoặc trục North của các viên về một điểm điều khiển."
+steps = ["Chọn đá, Enter.", "Control=Culet/North/Both, Direction=Toward/Away.", "Bấm điểm điều khiển."]
+options = ["Control, Direction."]
+
+[[commands]]
+id = "OthersMatchAttributes"
+label = "Match Attributes"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["MatchAttributes", "gvMatchAttributes"]
+summary = "Chép style (chấu, bezel, head, dao cắt) từ một viên sang các viên khác và dựng lại."
+steps = ["Chọn các viên nhận style, Enter.", "Chọn viên có style, Enter."]
+
+[[commands]]
+id = "OthersSaveStyle"
+label = "Save Style"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["SaveStyle"]
+summary = "Lưu style của viên đá ra tệp .om9style."
+steps = ["Chọn viên đá có style.", "Chọn ô (Slot) / thư mục.", "Enter."]
+
+[[commands]]
+id = "OthersLoadStyle"
+label = "Load Style"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["LoadStyle"]
+summary = "Nạp style từ tệp .om9style và dựng lên các viên đá đã chọn."
+steps = ["Chọn đá.", "Chọn ô (Slot) / thư mục.", "Enter."]
+
+[[commands]]
+id = "BuilderGVDGemFlow"
+label = "Gem Flow"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["GemFlow"]
+summary = "Dời đá giữ nguyên hình (rigid) từ đường gốc sang đường đích."
+steps = ["Chọn đá, đường gốc (trước) rồi đường đích.", "Enter."]
+options = ["Copy, Stretch."]
+
+[[commands]]
+id = "BuilderGVDGemSplop"
+label = "Gem Splop"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["GemSplop"]
+summary = "Đặt nhóm đá (dựng quanh gốc F4) lên mặt tại các điểm bấm, đá bám mặt."
+steps = ["Chọn đá, Enter.", "Chọn mặt, Enter.", "Bấm các điểm, Enter."]
+options = ["Rotation, Scale."]
+
+[[commands]]
+id = "BuilderPaveSphere"
+label = "Pavé Sphere"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["PaveSphere"]
+summary = "Tạo quả cầu phủ pavé đều."
+steps = ["Chỉnh bán kính, kích thước, khoảng cách.", "Bấm tâm cầu."]
+
+[[commands]]
+id = "BuilderGemPositioner"
+label = "Gem Positioner"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["GemPositioner", "GemMSR"]
+summary = "Dời / xoay / đổi kích thước từng viên theo trục riêng của viên đá."
+steps = ["Chọn đá, Enter.", "Gõ dời X, Y, Z, góc xoay, % kích thước."]
+
+[[settings]]
+key = "goca_cut"
+type = "enum"
+option = "Cut"
+label = "Kiểu cắt"
+choices = ["round", "oval", "princess", "cushion", "emerald", "asscher", "baguette", "marquise", "pear", "heart", "trillion", "radiant", "cabochon_round", "cabochon_oval"]
+choice_labels = ["Round", "Oval", "Princess", "Cushion", "Emerald", "Asscher", "Baguette", "Marquise", "Pear", "Heart", "Trillion", "Radiant", "Cabochon tròn", "Cabochon oval"]
+default = "round"
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_size"
+type = "length"
+option = "Size"
+label = "Kích thước (dài / đường kính)"
+default = 1.5
+min = 0.3
+max = 30.0
+step = 0.05
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_width"
+type = "length"
+option = "Width"
+label = "Chiều rộng (0 = tỉ lệ chuẩn)"
+default = 0.0
+min = 0.0
+max = 30.0
+step = 0.05
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_start"
+type = "percent"
+option = "Start"
+label = "Vị trí bắt đầu"
+default = 0.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_end"
+type = "percent"
+option = "End"
+label = "Vị trí kết thúc"
+default = 100.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_spacing"
+type = "length"
+option = "Spacing"
+label = "Khoảng cách giữa đá"
+default = 0.2
+min = 0.0
+max = 5.0
+step = 0.01
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_y_offset"
+type = "length"
+option = "YOffset"
+label = "Lệch ngang (Y)"
+default = 0.0
+min = -20.0
+max = 20.0
+step = 0.05
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_z_offset"
+type = "length"
+option = "ZOffset"
+label = "Lệch đứng (Z)"
+default = 0.0
+min = -20.0
+max = 20.0
+step = 0.05
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_facing"
+type = "enum"
+option = "Facing"
+label = "Hướng mặt đá"
+choices = ["cplane", "outward", "inward"]
+choice_labels = ["Theo CPlane (F4)", "Hướng ra ngoài", "Hướng vào trong"]
+default = "cplane"
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_flip"
+type = "bool"
+option = "Flip"
+label = "Lật đá (culet lên)"
+default = false
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_taper"
+type = "bool"
+option = "TaperDiameter"
+label = "Thu nhỏ dần kích thước"
+default = false
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_end_size"
+type = "length"
+option = "EndSize"
+label = "Kích thước cuối"
+default = 1.0
+min = 0.3
+max = 30.0
+step = 0.05
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_taper_spacing"
+type = "bool"
+option = "TaperSpacing"
+label = "Khoảng cách theo kích thước"
+default = false
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_mode"
+type = "enum"
+option = "Mode"
+label = "Kiểu rải"
+choices = ["gem", "sphere", "object"]
+choice_labels = ["Đá", "Bi (sphere)", "Vật thể"]
+default = "gem"
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "goca_snap_corners"
+type = "bool"
+option = "SnapCorners"
+label = "Đặt đá ở góc"
+default = false
+commands = ["BuilderGemOnCrvAdvanced"]
+
+[[settings]]
+key = "glc_start"
+type = "percent"
+option = "Start"
+label = "Vị trí bắt đầu"
+default = 0.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "glc_end"
+type = "percent"
+option = "End"
+label = "Vị trí kết thúc"
+default = 100.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "glc_spacing"
+type = "length"
+option = "Spacing"
+label = "Khoảng cách giữa đá"
+default = 0.2
+min = 0.0
+max = 5.0
+step = 0.01
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "glc_y_offset"
+type = "length"
+option = "YOffset"
+label = "Lệch ngang (Y)"
+default = 0.0
+min = -20.0
+max = 20.0
+step = 0.05
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "glc_z_offset"
+type = "length"
+option = "ZOffset"
+label = "Lệch đứng (Z)"
+default = 0.0
+min = -20.0
+max = 20.0
+step = 0.05
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "glc_facing"
+type = "enum"
+option = "Facing"
+label = "Hướng mặt đá"
+choices = ["cplane", "outward", "inward"]
+choice_labels = ["Theo CPlane (F4)", "Hướng ra ngoài", "Hướng vào trong"]
+default = "cplane"
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "glc_flip"
+type = "bool"
+option = "Flip"
+label = "Lật đá (culet lên)"
+default = false
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "glc_end_y_offset"
+type = "length"
+option = "EndYOffset"
+label = "Lệch Y cuối"
+default = 0.0
+min = -20.0
+max = 20.0
+step = 0.05
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "glc_end_z_offset"
+type = "length"
+option = "EndZOffset"
+label = "Lệch Z cuối"
+default = 0.0
+min = -20.0
+max = 20.0
+step = 0.05
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "glc_direction"
+type = "enum"
+option = "Direction"
+label = "Bắt đầu từ"
+choices = ["start", "end"]
+choice_labels = ["Đầu đường", "Cuối đường"]
+default = "start"
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "glc_fill"
+type = "bool"
+option = "Fill"
+label = "Lặp danh sách đến hết đường"
+default = false
+commands = ["BuilderGemListOnCrv"]
+
+[[settings]]
+key = "gcm_cut"
+type = "enum"
+option = "Cut"
+label = "Kiểu cắt"
+choices = ["round", "oval", "princess", "cushion", "emerald", "asscher", "baguette", "marquise", "pear", "heart", "trillion", "radiant", "cabochon_round", "cabochon_oval"]
+choice_labels = ["Round", "Oval", "Princess", "Cushion", "Emerald", "Asscher", "Baguette", "Marquise", "Pear", "Heart", "Trillion", "Radiant", "Cabochon tròn", "Cabochon oval"]
+default = "round"
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_size"
+type = "length"
+option = "Size"
+label = "Kích thước (dài / đường kính)"
+default = 1.3
+min = 0.3
+max = 30.0
+step = 0.05
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_width"
+type = "length"
+option = "Width"
+label = "Chiều rộng (0 = tỉ lệ chuẩn)"
+default = 0.0
+min = 0.0
+max = 30.0
+step = 0.05
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_start"
+type = "percent"
+option = "Start"
+label = "Vị trí bắt đầu"
+default = 0.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_end"
+type = "percent"
+option = "End"
+label = "Vị trí kết thúc"
+default = 100.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_spacing"
+type = "length"
+option = "Spacing"
+label = "Khoảng cách giữa đá"
+default = 0.2
+min = 0.0
+max = 5.0
+step = 0.01
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_y_offset"
+type = "length"
+option = "YOffset"
+label = "Lệch ngang (Y)"
+default = 0.0
+min = -20.0
+max = 20.0
+step = 0.05
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_z_offset"
+type = "length"
+option = "ZOffset"
+label = "Lệch đứng (Z)"
+default = 0.0
+min = -20.0
+max = 20.0
+step = 0.05
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_facing"
+type = "enum"
+option = "Facing"
+label = "Hướng mặt đá"
+choices = ["cplane", "outward", "inward"]
+choice_labels = ["Theo CPlane (F4)", "Hướng ra ngoài", "Hướng vào trong"]
+default = "cplane"
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_flip"
+type = "bool"
+option = "Flip"
+label = "Lật đá (culet lên)"
+default = false
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_taper"
+type = "bool"
+option = "TaperDiameter"
+label = "Thu nhỏ dần kích thước"
+default = false
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_end_size"
+type = "length"
+option = "EndSize"
+label = "Kích thước cuối"
+default = 1.0
+min = 0.3
+max = 30.0
+step = 0.05
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gcm_taper_spacing"
+type = "bool"
+option = "TaperSpacing"
+label = "Khoảng cách theo kích thước"
+default = false
+commands = ["BuilderGemOnCrvMulti"]
+
+[[settings]]
+key = "gp_height"
+type = "length"
+option = "Height"
+label = "Cao profile"
+default = 2.0
+min = 0.2
+max = 20.0
+step = 0.05
+commands = ["BuilderGemProfile"]
+
+[[settings]]
+key = "gp_width"
+type = "length"
+option = "Wall"
+label = "Dày thành quanh đá"
+default = 0.4
+min = 0.0
+max = 10.0
+step = 0.05
+commands = ["BuilderGemProfile"]
+
+[[settings]]
+key = "gp_z_offset"
+type = "length"
+option = "ZOffset"
+label = "Lệch đứng"
+default = 0.0
+min = -10.0
+max = 10.0
+step = 0.05
+commands = ["BuilderGemProfile"]
+
+[[settings]]
+key = "gp_shape"
+type = "enum"
+option = "Shape"
+label = "Hình"
+choices = ["rectangle", "round"]
+choice_labels = ["Chữ nhật", "Bầu dục"]
+default = "rectangle"
+commands = ["BuilderGemProfile"]
+
+[[settings]]
+key = "otg_scale"
+type = "bool"
+option = "ScaleToGem"
+label = "Co theo kích thước đá (mẫu 10 mm)"
+default = true
+commands = ["BuilderOrientToGem"]
+
+[[settings]]
+key = "gos_cut"
+type = "enum"
+option = "Cut"
+label = "Kiểu cắt"
+choices = ["round", "oval", "princess", "cushion", "emerald", "asscher", "baguette", "marquise", "pear", "heart", "trillion", "radiant", "cabochon_round", "cabochon_oval"]
+choice_labels = ["Round", "Oval", "Princess", "Cushion", "Emerald", "Asscher", "Baguette", "Marquise", "Pear", "Heart", "Trillion", "Radiant", "Cabochon tròn", "Cabochon oval"]
+default = "round"
+commands = ["BuilderGemOnSurface"]
+
+[[settings]]
+key = "gos_size"
+type = "length"
+option = "Size"
+label = "Kích thước (dài / đường kính)"
+default = 1.3
+min = 0.3
+max = 30.0
+step = 0.05
+commands = ["BuilderGemOnSurface"]
+
+[[settings]]
+key = "gos_width"
+type = "length"
+option = "Width"
+label = "Chiều rộng (0 = tỉ lệ chuẩn)"
+default = 0.0
+min = 0.0
+max = 30.0
+step = 0.05
+commands = ["BuilderGemOnSurface"]
+
+[[settings]]
+key = "gos_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderGemOnSurface"]
+
+[[settings]]
+key = "gos_vertical_offset"
+type = "length"
+option = "VerticalOffset"
+label = "Lệch theo pháp tuyến"
+default = 0.0
+min = -5.0
+max = 5.0
+step = 0.02
+commands = ["BuilderGemOnSurface"]
+
+[[settings]]
+key = "gos_angle"
+type = "angle"
+option = "Angle"
+label = "Góc xoay"
+default = 0.0
+min = -180.0
+max = 180.0
+step = 1.0
+commands = ["BuilderGemOnSurface"]
+
+[[settings]]
+key = "gos_flip"
+type = "bool"
+option = "Flip"
+label = "Lật đá"
+default = false
+commands = ["BuilderGemOnSurface"]
+
+[[settings]]
+key = "gos_spacing"
+type = "length"
+option = "Spacing"
+label = "Vòng khoảng cách"
+default = 0.15
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderGemOnSurface"]
+
+[[settings]]
+key = "gos_copy"
+type = "bool"
+option = "Copy"
+label = "Đặt liên tục"
+default = true
+commands = ["BuilderGemOnSurface"]
+
+[[settings]]
+key = "pb_cut"
+type = "enum"
+option = "Cut"
+label = "Kiểu cắt"
+choices = ["round", "oval", "princess", "cushion", "emerald", "asscher", "baguette", "marquise", "pear", "heart", "trillion", "radiant", "cabochon_round", "cabochon_oval"]
+choice_labels = ["Round", "Oval", "Princess", "Cushion", "Emerald", "Asscher", "Baguette", "Marquise", "Pear", "Heart", "Trillion", "Radiant", "Cabochon tròn", "Cabochon oval"]
+default = "round"
+commands = ["BuilderPaveBuilder"]
+
+[[settings]]
+key = "pb_size"
+type = "length"
+option = "Size"
+label = "Kích thước (dài / đường kính)"
+default = 1.5
+min = 0.3
+max = 30.0
+step = 0.05
+commands = ["BuilderPaveBuilder"]
+
+[[settings]]
+key = "pb_width"
+type = "length"
+option = "Width"
+label = "Chiều rộng (0 = tỉ lệ chuẩn)"
+default = 0.0
+min = 0.0
+max = 30.0
+step = 0.05
+commands = ["BuilderPaveBuilder"]
+
+[[settings]]
+key = "pb_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderPaveBuilder"]
+
+[[settings]]
+key = "pb_vertical_offset"
+type = "length"
+option = "VerticalOffset"
+label = "Lệch theo pháp tuyến"
+default = 0.0
+min = -5.0
+max = 5.0
+step = 0.02
+commands = ["BuilderPaveBuilder"]
+
+[[settings]]
+key = "pb_angle"
+type = "angle"
+option = "Angle"
+label = "Góc xoay"
+default = 0.0
+min = -180.0
+max = 180.0
+step = 1.0
+commands = ["BuilderPaveBuilder"]
+
+[[settings]]
+key = "pb_flip"
+type = "bool"
+option = "Flip"
+label = "Lật đá"
+default = false
+commands = ["BuilderPaveBuilder"]
+
+[[settings]]
+key = "pb_spacing"
+type = "length"
+option = "Spacing"
+label = "Khe giữa đá"
+default = 0.15
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderPaveBuilder"]
+
+[[settings]]
+key = "pb_min_size"
+type = "length"
+option = "MinSize"
+label = "Kích thước nhỏ nhất"
+default = 0.8
+min = 0.3
+max = 10.0
+step = 0.05
+commands = ["BuilderPaveBuilder"]
+
+[[settings]]
+key = "tbc_width"
+type = "length"
+option = "Width"
+label = "Rộng đá (ngang kênh)"
+default = 2.0
+min = 0.3
+max = 20.0
+step = 0.05
+commands = ["BuilderTaperBagChannel"]
+
+[[settings]]
+key = "tbc_length"
+type = "length"
+option = "Length"
+label = "Dài đá (dọc kênh)"
+default = 1.5
+min = 0.3
+max = 20.0
+step = 0.05
+commands = ["BuilderTaperBagChannel"]
+
+[[settings]]
+key = "tbc_spacing"
+type = "length"
+option = "Spacing"
+label = "Khoảng cách"
+default = 0.1
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderTaperBagChannel"]
+
+[[settings]]
+key = "tbc_z_offset"
+type = "length"
+option = "ZOffset"
+label = "Lệch đứng"
+default = 0.0
+min = -10.0
+max = 10.0
+step = 0.05
+commands = ["BuilderTaperBagChannel"]
+
+[[settings]]
+key = "tbc_facing"
+type = "enum"
+option = "Facing"
+label = "Hướng mặt đá"
+choices = ["cplane", "outward", "inward"]
+choice_labels = ["Theo CPlane (F4)", "Hướng ra ngoài", "Hướng vào trong"]
+default = "cplane"
+commands = ["BuilderTaperBagChannel"]
+
+[[settings]]
+key = "tbc_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderTaperBagChannel"]
+
+[[settings]]
+key = "tbb_count"
+type = "int"
+option = "Count"
+label = "Số đá (0 = theo chiều dài)"
+default = 0
+min = 0
+max = 500
+commands = ["BuilderTaperBagBetweenTwoCurves"]
+
+[[settings]]
+key = "tbb_length"
+type = "length"
+option = "Length"
+label = "Dài đá"
+default = 1.5
+min = 0.3
+max = 20.0
+step = 0.05
+commands = ["BuilderTaperBagBetweenTwoCurves"]
+
+[[settings]]
+key = "tbb_spacing"
+type = "length"
+option = "Spacing"
+label = "Khoảng cách"
+default = 0.1
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderTaperBagBetweenTwoCurves"]
+
+[[settings]]
+key = "tbb_inset"
+type = "length"
+option = "Inset"
+label = "Thụt vào từ đường cong"
+default = 0.1
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderTaperBagBetweenTwoCurves"]
+
+[[settings]]
+key = "tbb_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderTaperBagBetweenTwoCurves"]
+
+[[settings]]
+key = "cl_center_size"
+type = "length"
+option = "CenterSize"
+label = "Đá giữa (khi bấm tâm)"
+default = 4.0
+min = 0.5
+max = 30.0
+step = 0.05
+commands = ["BuilderClusterBuilderOld"]
+
+[[settings]]
+key = "cl_rows"
+type = "int"
+option = "Rows"
+label = "Số vòng"
+default = 1
+min = 1
+max = 3
+commands = ["BuilderClusterBuilderOld"]
+
+[[settings]]
+key = "cl_row1_size"
+type = "length"
+option = "Row1Size"
+label = "Đá vòng 1"
+default = 1.5
+min = 0.3
+max = 10.0
+step = 0.05
+commands = ["BuilderClusterBuilderOld"]
+
+[[settings]]
+key = "cl_row2_size"
+type = "length"
+option = "Row2Size"
+label = "Đá vòng 2"
+default = 1.2
+min = 0.3
+max = 10.0
+step = 0.05
+commands = ["BuilderClusterBuilderOld"]
+
+[[settings]]
+key = "cl_row3_size"
+type = "length"
+option = "Row3Size"
+label = "Đá vòng 3"
+default = 1.0
+min = 0.3
+max = 10.0
+step = 0.05
+commands = ["BuilderClusterBuilderOld"]
+
+[[settings]]
+key = "cl_tilt"
+type = "angle"
+option = "Tilt"
+label = "Nghiêng mỗi vòng"
+default = 10.0
+min = 0.0
+max = 60.0
+step = 1.0
+commands = ["BuilderClusterBuilderOld"]
+
+[[settings]]
+key = "cl_spacing"
+type = "length"
+option = "Spacing"
+label = "Khoảng cách"
+default = 0.2
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderClusterBuilderOld"]
+
+[[settings]]
+key = "cl_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderClusterBuilderOld"]
+
+[[settings]]
+key = "ap_size"
+type = "length"
+option = "Size"
+label = "Kích thước đá"
+default = 1.2
+min = 0.3
+max = 10.0
+step = 0.05
+commands = ["BuilderPaveDialog"]
+
+[[settings]]
+key = "ap_min_size"
+type = "length"
+option = "MinSize"
+label = "Kích thước nhỏ nhất"
+default = 0.8
+min = 0.3
+max = 10.0
+step = 0.05
+commands = ["BuilderPaveDialog"]
+
+[[settings]]
+key = "ap_spacing"
+type = "length"
+option = "Spacing"
+label = "Khe giữa đá"
+default = 0.15
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderPaveDialog"]
+
+[[settings]]
+key = "ap_margin"
+type = "length"
+option = "Margin"
+label = "Lề tới đường cong"
+default = 0.3
+min = 0.0
+max = 5.0
+step = 0.01
+commands = ["BuilderPaveDialog"]
+
+[[settings]]
+key = "ap_angle"
+type = "angle"
+option = "Angle"
+label = "Góc lưới"
+default = 0.0
+min = -90.0
+max = 90.0
+step = 1.0
+commands = ["BuilderPaveDialog"]
+
+[[settings]]
+key = "ap_z_offset"
+type = "length"
+option = "ZOffset"
+label = "Lệch đứng"
+default = 0.0
+min = -5.0
+max = 5.0
+step = 0.02
+commands = ["BuilderPaveDialog"]
+
+[[settings]]
+key = "ap_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderPaveDialog"]
+
+[[settings]]
+key = "az_scale"
+type = "percent"
+option = "Scale"
+label = "Cỡ lỗ so với đá"
+default = 70.0
+min = 10.0
+max = 150.0
+step = 1.0
+commands = ["BuilderPaveAzureBuilder"]
+
+[[settings]]
+key = "az_depth"
+type = "length"
+option = "Depth"
+label = "Sâu"
+default = 1.5
+min = 0.1
+max = 20.0
+step = 0.05
+commands = ["BuilderPaveAzureBuilder"]
+
+[[settings]]
+key = "az_angle"
+type = "angle"
+option = "Angle"
+label = "Góc loe"
+default = 15.0
+min = 0.0
+max = 60.0
+step = 1.0
+commands = ["BuilderPaveAzureBuilder"]
+
+[[settings]]
+key = "az_shape"
+type = "enum"
+option = "Shape"
+label = "Hình lỗ"
+choices = ["round", "square"]
+choice_labels = ["Tròn", "Vuông"]
+default = "round"
+commands = ["BuilderPaveAzureBuilder"]
+
+[[settings]]
+key = "pp_size"
+type = "percent"
+option = "Size"
+label = "Cỡ chấu so với đá"
+default = 30.0
+min = 5.0
+max = 100.0
+step = 1.0
+commands = ["BuilderPaveProngBuilder"]
+
+[[settings]]
+key = "pp_height"
+type = "length"
+option = "Height"
+label = "Cao trên gờ"
+default = 0.4
+min = 0.0
+max = 5.0
+step = 0.02
+commands = ["BuilderPaveProngBuilder"]
+
+[[settings]]
+key = "pp_drop"
+type = "length"
+option = "Drop"
+label = "Sâu dưới gờ"
+default = 1.0
+min = 0.0
+max = 10.0
+step = 0.05
+commands = ["BuilderPaveProngBuilder"]
+
+[[settings]]
+key = "pp_reach"
+type = "length"
+option = "Reach"
+label = "Khe tối đa coi là kề nhau"
+default = 0.4
+min = 0.0
+max = 5.0
+step = 0.02
+commands = ["BuilderPaveProngBuilder"]
+
+[[settings]]
+key = "pp_edges"
+type = "bool"
+option = "Edges"
+label = "Chấu ở cạnh hở"
+default = true
+commands = ["BuilderPaveProngBuilder"]
+
+[[settings]]
+key = "gs_spacing"
+type = "length"
+option = "Spacing"
+label = "Khe mong muốn"
+default = 0.15
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderGemSprings"]
+
+[[settings]]
+key = "gs_iterations"
+type = "int"
+option = "Iterations"
+label = "Số lần dãn"
+default = 30
+min = 1
+max = 500
+commands = ["BuilderGemSprings"]
+
+[[settings]]
+key = "gs_strength"
+type = "percent"
+option = "Strength"
+label = "Độ mạnh"
+default = 50.0
+min = 1.0
+max = 100.0
+step = 1.0
+commands = ["BuilderGemSprings"]
+
+[[settings]]
+key = "gf_north"
+type = "enum"
+option = "North"
+label = "Trục North"
+choices = ["along", "across"]
+choice_labels = ["Dọc hàng", "Ngang hàng"]
+default = "along"
+commands = ["BuilderGemFollow"]
+
+[[settings]]
+key = "ma_prongs"
+type = "bool"
+option = "Prongs"
+label = "Chép chấu"
+default = true
+commands = ["OthersMatchAttributes"]
+
+[[settings]]
+key = "ma_bezel"
+type = "bool"
+option = "Bezel"
+label = "Chép bezel"
+default = true
+commands = ["OthersMatchAttributes"]
+
+[[settings]]
+key = "ma_head"
+type = "bool"
+option = "Head"
+label = "Chép head"
+default = true
+commands = ["OthersMatchAttributes"]
+
+[[settings]]
+key = "ma_cutter"
+type = "bool"
+option = "Cutter"
+label = "Chép dao cắt"
+default = true
+commands = ["OthersMatchAttributes"]
+
+[[settings]]
+key = "ma_material"
+type = "bool"
+option = "Material"
+label = "Chép chất liệu"
+default = false
+commands = ["OthersMatchAttributes"]
+
+[[settings]]
+key = "style_folder"
+type = "dir"
+option = "Folder"
+label = "Thư mục style (trống = ~/OM9 Styles)"
+default = ""
+commands = ["OthersSaveStyle", "OthersLoadStyle"]
+
+[[settings]]
+key = "style_slot"
+type = "string"
+option = "Slot"
+label = "Ô / tên style"
+default = "1"
+commands = ["OthersSaveStyle", "OthersLoadStyle"]
+
+[[settings]]
+key = "gfl_copy"
+type = "bool"
+option = "Copy"
+label = "Giữ đá gốc"
+default = false
+commands = ["BuilderGVDGemFlow"]
+
+[[settings]]
+key = "gfl_stretch"
+type = "bool"
+option = "Stretch"
+label = "Kéo theo chiều dài đường đích"
+default = true
+commands = ["BuilderGVDGemFlow"]
+
+[[settings]]
+key = "gsp_rotation"
+type = "angle"
+option = "Rotation"
+label = "Góc xoay"
+default = 0.0
+min = -180.0
+max = 180.0
+step = 1.0
+commands = ["BuilderGVDGemSplop"]
+
+[[settings]]
+key = "gsp_scale"
+type = "percent"
+option = "Scale"
+label = "Tỉ lệ"
+default = 100.0
+min = 10.0
+max = 500.0
+step = 1.0
+commands = ["BuilderGVDGemSplop"]
+
+[[settings]]
+key = "ps_radius"
+type = "length"
+option = "Radius"
+label = "Bán kính cầu"
+default = 5.0
+min = 1.0
+max = 50.0
+step = 0.1
+commands = ["BuilderPaveSphere"]
+
+[[settings]]
+key = "ps_size"
+type = "length"
+option = "Size"
+label = "Kích thước đá"
+default = 1.2
+min = 0.3
+max = 10.0
+step = 0.05
+commands = ["BuilderPaveSphere"]
+
+[[settings]]
+key = "ps_spacing"
+type = "length"
+option = "Spacing"
+label = "Khe giữa đá"
+default = 0.15
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderPaveSphere"]
+
+[[settings]]
+key = "ps_sphere"
+type = "bool"
+option = "Sphere"
+label = "Tạo cả quả cầu"
+default = true
+commands = ["BuilderPaveSphere"]
+
+[[settings]]
+key = "ps_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderPaveSphere"]

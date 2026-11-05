@@ -1,0 +1,437 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_setting_tools"
+version = "0.1.0"
+name = "Setting Tools"
+tagline = "Menu Settings kiểu Matrix: SubD bezel, pull to rail, chấu / bi trên mặt, metal from gems"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Settings"]
+
+[[commands]]
+id = "ClayooCreationClayooBezel"
+label = "SubD Bezel"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ClayooBezel", "SubDBezel"]
+summary = "Tạo bezel mềm (thành bo tròn) quanh đá; tự cắt phần chạm finger rail nếu chọn rail."
+steps = ["Chọn đá (và finger rail nếu muốn cắt).", "Chỉnh cao, dày trên/dưới, góc, vị trí.", "Enter."]
+options = ["Boolean: cắt theo finger rail."]
+
+[[commands]]
+id = "BuilderPullToRail"
+label = "Pull Object to Rail"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["PullToRail", "gvPullToRail"]
+summary = "Kéo phần dưới của head / vật thể xuống chạm finger rail, phần trên giữ nguyên."
+steps = ["Chọn head / vật thể, Enter.", "Chọn finger rail, Enter."]
+options = ["Zone: phần chiều cao bị kéo.", "Gap: khe hở với rail."]
+
+[[commands]]
+id = "BuilderProngEditor"
+label = "Prong Editor"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ProngEditor", "EditSingleProng"]
+summary = "Sửa một chấu: đường kính, cao, vát, bo đầu, nghiêng."
+steps = ["Chọn chấu.", "Chỉnh trong bảng BUILDERS.", "Enter."]
+
+[[commands]]
+id = "BuilderProngOnSurface"
+label = "Prong on Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ProngOnSurface"]
+summary = "Bấm lên mặt để đặt từng chấu theo pháp tuyến mặt."
+steps = ["Chọn mặt.", "Bấm các điểm.", "Enter."]
+options = ["Copy: đặt liên tục."]
+
+[[commands]]
+id = "BuilderBeadOnSurface"
+label = "Bead on Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["BeadOnSurface"]
+summary = "Bấm lên mặt để đặt bi (hoặc vật thể dựng ở gốc F4)."
+steps = ["Chọn mặt (và vật thể khi Mode=Object).", "Bấm các điểm.", "Enter."]
+options = ["Mode: Bead / Object.", "Copy: đặt liên tục."]
+
+[[commands]]
+id = "BuilderMetalPiece"
+label = "Metal from Gems"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["MetalPiece", "gvMetalPiece"]
+summary = "Tạo khối kim loại ôm hàng đá: thành ngoài, máng trong, nắp, dao cắt Top, góc tròn / nhọn."
+steps = ["Chọn hàng (hoặc vòng) đá.", "Mode trong bảng BUILDERS.", "Enter."]
+options = ["Mode: Outside / Inside / OutsideCenter / Top / RoundCorners / PinchedEnds."]
+
+[[settings]]
+key = "sdb_height"
+type = "length"
+option = "Height"
+label = "Cao bezel (dưới gờ)"
+default = 2.0
+min = 0.2
+max = 20.0
+step = 0.05
+commands = ["ClayooCreationClayooBezel"]
+
+[[settings]]
+key = "sdb_top"
+type = "length"
+option = "TopThickness"
+label = "Dày đỉnh"
+default = 0.5
+min = 0.1
+max = 5.0
+step = 0.02
+commands = ["ClayooCreationClayooBezel"]
+
+[[settings]]
+key = "sdb_base"
+type = "length"
+option = "BaseThickness"
+label = "Dày chân"
+default = 0.6
+min = 0.1
+max = 5.0
+step = 0.02
+commands = ["ClayooCreationClayooBezel"]
+
+[[settings]]
+key = "sdb_angle"
+type = "angle"
+option = "Angle"
+label = "Góc thành"
+default = 10.0
+min = -45.0
+max = 45.0
+step = 1.0
+commands = ["ClayooCreationClayooBezel"]
+
+[[settings]]
+key = "sdb_placement"
+type = "length"
+option = "Placement"
+label = "Vị trí lên/xuống"
+default = 0.0
+min = -5.0
+max = 5.0
+step = 0.02
+commands = ["ClayooCreationClayooBezel"]
+
+[[settings]]
+key = "sdb_scale"
+type = "percent"
+option = "Scale"
+label = "Cỡ ổ đá"
+default = 100.0
+min = 50.0
+max = 150.0
+step = 1.0
+commands = ["ClayooCreationClayooBezel"]
+
+[[settings]]
+key = "sdb_lip"
+type = "length"
+option = "Lip"
+label = "Gờ trên mặt đá"
+default = 0.3
+min = 0.0
+max = 3.0
+step = 0.02
+commands = ["ClayooCreationClayooBezel"]
+
+[[settings]]
+key = "sdb_boolean"
+type = "bool"
+option = "Boolean"
+label = "Cắt theo finger rail"
+default = true
+commands = ["ClayooCreationClayooBezel"]
+
+[[settings]]
+key = "ptr_zone"
+type = "percent"
+option = "Zone"
+label = "Phần chiều cao bị kéo"
+default = 30.0
+min = 1.0
+max = 100.0
+step = 1.0
+commands = ["BuilderPullToRail"]
+
+[[settings]]
+key = "ptr_gap"
+type = "length"
+option = "Gap"
+label = "Khe với rail"
+default = 0.0
+min = -2.0
+max = 2.0
+step = 0.01
+commands = ["BuilderPullToRail"]
+
+[[settings]]
+key = "pe_diameter"
+type = "length"
+option = "Diameter"
+label = "Đường kính (0 = giữ)"
+default = 0.0
+min = 0.0
+max = 5.0
+step = 0.02
+commands = ["BuilderProngEditor"]
+
+[[settings]]
+key = "pe_height"
+type = "length"
+option = "Height"
+label = "Cao thêm"
+default = 0.0
+min = -5.0
+max = 5.0
+step = 0.02
+commands = ["BuilderProngEditor"]
+
+[[settings]]
+key = "pe_taper"
+type = "percent"
+option = "Taper"
+label = "Vát (rộng chân)"
+default = 0.0
+min = -50.0
+max = 100.0
+step = 1.0
+commands = ["BuilderProngEditor"]
+
+[[settings]]
+key = "pe_fillet"
+type = "percent"
+option = "Fillet"
+label = "Bo đầu"
+default = 50.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderProngEditor"]
+
+[[settings]]
+key = "pe_rotate"
+type = "angle"
+option = "Rotate"
+label = "Nghiêng"
+default = 0.0
+min = -60.0
+max = 60.0
+step = 1.0
+commands = ["BuilderProngEditor"]
+
+[[settings]]
+key = "pos_size"
+type = "length"
+option = "Size"
+label = "Đường kính chấu"
+default = 0.6
+min = 0.1
+max = 5.0
+step = 0.02
+commands = ["BuilderProngOnSurface"]
+
+[[settings]]
+key = "pos_height"
+type = "length"
+option = "Height"
+label = "Cao trên mặt"
+default = 1.0
+min = 0.1
+max = 10.0
+step = 0.05
+commands = ["BuilderProngOnSurface"]
+
+[[settings]]
+key = "pos_drop"
+type = "length"
+option = "Drop"
+label = "Sâu dưới mặt"
+default = 0.8
+min = 0.0
+max = 10.0
+step = 0.05
+commands = ["BuilderProngOnSurface"]
+
+[[settings]]
+key = "pos_taper"
+type = "percent"
+option = "Taper"
+label = "Vát"
+default = 0.0
+min = -50.0
+max = 100.0
+step = 1.0
+commands = ["BuilderProngOnSurface"]
+
+[[settings]]
+key = "pos_fillet"
+type = "percent"
+option = "Fillet"
+label = "Bo đầu"
+default = 100.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderProngOnSurface"]
+
+[[settings]]
+key = "pos_rotate"
+type = "angle"
+option = "Rotate"
+label = "Nghiêng"
+default = 0.0
+min = -60.0
+max = 60.0
+step = 1.0
+commands = ["BuilderProngOnSurface"]
+
+[[settings]]
+key = "pos_vertical_offset"
+type = "length"
+option = "VerticalOffset"
+label = "Lệch theo pháp tuyến"
+default = 0.0
+min = -5.0
+max = 5.0
+step = 0.02
+commands = ["BuilderProngOnSurface"]
+
+[[settings]]
+key = "pos_copy"
+type = "bool"
+option = "Copy"
+label = "Đặt liên tục"
+default = true
+commands = ["BuilderProngOnSurface"]
+
+[[settings]]
+key = "bos_size"
+type = "length"
+option = "Scale"
+label = "Đường kính bi"
+default = 0.8
+min = 0.1
+max = 10.0
+step = 0.02
+commands = ["BuilderBeadOnSurface"]
+
+[[settings]]
+key = "bos_vertical_offset"
+type = "length"
+option = "VerticalOffset"
+label = "Lệch theo pháp tuyến"
+default = 0.0
+min = -5.0
+max = 5.0
+step = 0.02
+commands = ["BuilderBeadOnSurface"]
+
+[[settings]]
+key = "bos_mode"
+type = "enum"
+option = "Mode"
+label = "Kiểu"
+choices = ["bead", "object"]
+choice_labels = ["Bi", "Vật thể"]
+default = "bead"
+commands = ["BuilderBeadOnSurface"]
+
+[[settings]]
+key = "bos_copy"
+type = "bool"
+option = "Copy"
+label = "Đặt liên tục"
+default = true
+commands = ["BuilderBeadOnSurface"]
+
+[[settings]]
+key = "metal_mode"
+type = "enum"
+option = "Mode"
+label = "Kiểu kim loại"
+choices = ["outside", "inside", "outside_center", "top", "round_corners", "pinched_ends"]
+choice_labels = ["Thành ngoài", "Máng trong", "Máng + bịt đầu", "Dao cắt Top", "Góc tròn", "Đầu nhọn"]
+default = "outside"
+commands = ["BuilderMetalPiece"]
+
+[[settings]]
+key = "metal_wall"
+type = "length"
+option = "Wall"
+label = "Dày thành"
+default = 0.5
+min = 0.1
+max = 5.0
+step = 0.02
+commands = ["BuilderMetalPiece"]
+
+[[settings]]
+key = "metal_height"
+type = "length"
+option = "Height"
+label = "Cao trên gờ"
+default = 0.3
+min = 0.0
+max = 5.0
+step = 0.02
+commands = ["BuilderMetalPiece"]
+
+[[settings]]
+key = "metal_depth"
+type = "length"
+option = "Depth"
+label = "Sâu dưới gờ"
+default = 1.5
+min = 0.1
+max = 10.0
+step = 0.05
+commands = ["BuilderMetalPiece"]
+
+[[settings]]
+key = "metal_floor"
+type = "length"
+option = "Floor"
+label = "Dày đáy"
+default = 0.5
+min = 0.1
+max = 5.0
+step = 0.02
+commands = ["BuilderMetalPiece"]
+
+[[settings]]
+key = "metal_gap"
+type = "length"
+option = "Gap"
+label = "Khe với đá"
+default = 0.05
+min = 0.0
+max = 1.0
+step = 0.01
+commands = ["BuilderMetalPiece"]

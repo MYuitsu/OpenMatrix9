@@ -1,0 +1,902 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_tools"
+version = "0.1.0"
+name = "Tools"
+tagline = "Menu Tools kiểu Matrix: ring rail, profile, smart target, trọng lượng, resize, thư viện, mesh, in 3D"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Tools"]
+
+[[commands]]
+id = "BuilderRingRail"
+label = "Ring Rail"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["RingRail", "gvRingRail"]
+summary = "Đặt ring rail (vòng ngón tay) theo cỡ nhẫn ở Front view."
+steps = ["Chọn hệ cỡ và cỡ nhẫn.", "Enter."]
+
+[[commands]]
+id = "BuilderProfilePlacer"
+label = "Profile Placer"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ProfilePlacer", "gvProfilePlacer"]
+summary = "Đặt các profile kín lên ring rail (đỉnh, hai bên, đáy) để quét Sweep."
+steps = ["Chọn ring rail (hoặc dùng cỡ).", "Chỉnh kiểu, rộng/cao từng vị trí.", "Enter."]
+
+[[commands]]
+id = "BuilderOutsideRingRail"
+label = "Outside Ring Rail"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["OutsideRingRail"]
+summary = "Tạo đường rail ngoài quanh ring rail theo độ dày đỉnh / bên / đáy (cho Sweep 2)."
+steps = ["Chọn ring rail (hoặc dùng cỡ).", "Chỉnh độ dày.", "Enter."]
+
+[[commands]]
+id = "BuilderCustomRail"
+label = "Custom Rail"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["CustomRail"]
+summary = "Tạo rail 3D (bypass…) từ ring rail và đường dáng vẽ ở Top view."
+steps = ["Chọn ring rail và đường dáng Top view.", "Enter."]
+options = ["Mirror: thêm rail đối xứng."]
+
+[[commands]]
+id = "BuilderFourProfile"
+label = "Four Rail Profile"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["FourRailProfile"]
+summary = "Tạo profile kín đi qua bốn đường rail tại đường cắt bấm."
+steps = ["Chọn bốn đường cong.", "Bấm đầu và cuối đường cắt."]
+options = ["DeleteCurves: xoá đường gốc."]
+
+[[commands]]
+id = "BuilderMetalWeights"
+label = "Metal Weights"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["MetalWeights"]
+summary = "Tính thể tích và trọng lượng kim loại (vàng, bạch kim, bạc …) và cara đá."
+steps = ["Chọn vật (và đá).", "Enter."]
+
+[[commands]]
+id = "BuilderResize"
+label = "Ring Resizer"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["RingResizer", "Resize"]
+summary = "Tạo các cỡ nhẫn khác từ nhẫn đã làm (giữ độ dày bản)."
+steps = ["Chọn nhẫn (không chọn đá).", "Gõ cỡ gốc và danh sách cỡ mới.", "Enter."]
+
+[[commands]]
+id = "BuilderSurfacePullback"
+label = "Surface Pullback"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["SurfacePullback"]
+summary = "Kéo thiết kế phẳng (đường cong, lưới) lên mặt, giữ chiều cao theo pháp tuyến."
+steps = ["Chọn thiết kế phẳng, Enter.", "Chọn mặt đích, Enter."]
+
+[[commands]]
+id = "BuilderBermarkLibrary"
+label = "Settings Library"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["BermarkLibrary"]
+summary = "Thư viện head / ổ đá tham số của OM9 (peg head, basket, cup)."
+steps = ["Chọn loại và kích thước.", "Bấm vị trí."]
+
+[[commands]]
+id = "BuilderStullerFindingsLibrary"
+label = "Findings Library"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["FindingsLibrary"]
+summary = "Thư viện phụ kiện tham số của OM9 (chốt bông tai, bail, khoen, chặn, khoá)."
+steps = ["Chọn loại và kích thước.", "Bấm vị trí."]
+
+[[commands]]
+id = "gvSmartTarget"
+label = "Smart Target"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["SmartTarget"]
+summary = "Tạo điểm blend và tay nắm hướng (dùng với Smart Blend)."
+steps = ["Bấm điểm blend.", "Bấm hướng tay nắm."]
+
+[[commands]]
+id = "gvSmartTargetAdd"
+label = "Smart Target Add"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["SmartTargetAdd"]
+summary = "Thêm tay nắm vào điểm blend có sẵn."
+steps = ["Chọn smart target.", "Bấm hướng mới."]
+
+[[commands]]
+id = "gvSmartTargetOnCrvEnd"
+label = "Smart Target on Curve End"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["SmartTargetOnCrvEnd"]
+summary = "Đặt smart target ở đầu đường cong, theo tiếp tuyến."
+steps = ["Chọn đường cong.", "Bấm gần đầu cần đặt."]
+
+[[commands]]
+id = "gvSmartBlend"
+label = "Smart Blend"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["SmartBlend"]
+summary = "Nối hai smart target bằng đường cong mượt."
+steps = ["Chọn hai smart target.", "Enter."]
+
+[[commands]]
+id = "gvSmartMSR"
+label = "Smart MSR"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["SmartMSR"]
+summary = "Dời / xoay / co các smart target quanh điểm blend của chúng."
+steps = ["Chọn smart target, Enter.", "Gõ góc, tỉ lệ; bấm điểm dời."]
+
+[[commands]]
+id = "gvJoinHistory"
+label = "Join"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["JoinHistory"]
+summary = "Nối các đường cong chạm nhau thành một."
+steps = ["Chọn đường cong.", "Enter."]
+
+[[commands]]
+id = "BuilderImageTrace"
+label = "Image Trace"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ImageTrace"]
+summary = "Dò ảnh (PNG, BMP, PGM) thành đường cong theo ngưỡng tối."
+steps = ["Chọn tệp ảnh trong bảng BUILDERS.", "Chỉnh rộng, ngưỡng.", "Bấm góc dưới trái."]
+
+[[commands]]
+id = "BuilderObjectChecker"
+label = "Object Checker"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ObjectChecker"]
+summary = "Kiểm tra vật: cạnh hở, không manifold, tam giác suy biến, thể tích, pháp tuyến."
+steps = ["Chọn vật.", "Enter để xem báo cáo."]
+
+[[commands]]
+id = "BuilderMeshRepair"
+label = "Mesh Repair"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["MeshRepair"]
+summary = "Sửa lưới: hàn điểm, bỏ tam giác hỏng, lấp lỗ, lật pháp tuyến ra ngoài."
+steps = ["Chọn lưới.", "Enter."]
+
+[[commands]]
+id = "Builder3dPrinting"
+label = "3D Printing Supports"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["3dPrinting", "RingSupportSprue"]
+summary = "Thêm sprue và đế đỡ để in 3D."
+steps = ["Chọn vật.", "Chỉnh số sprue, đường kính.", "Enter."]
+
+[[commands]]
+id = "BuilderProfile"
+label = "Profile"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["Profile"]
+summary = "Đặt profile thư viện (phẳng, D, comfort, knife, tròn) ở Top view."
+steps = ["Chọn kiểu, rộng, cao.", "Bấm vị trí."]
+
+[[commands]]
+id = "BuilderProfileMerge"
+label = "Profile Merge"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["ProfileMerge"]
+summary = "Gộp hai profile kín chồng nhau thành một."
+steps = ["Chọn hai profile.", "Enter."]
+
+[[commands]]
+id = "BuilderProfileEndCap"
+label = "Profile End Cap"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ProfileEndCap"]
+summary = "Tạo nắp bo tròn ở đầu profile."
+steps = ["Chọn profile kín.", "Chỉnh độ nhô.", "Enter."]
+options = ["Flip: đảo chiều."]
+
+[[commands]]
+id = "BuilderCustomRailAdvanced"
+label = "Custom Rail Advanced"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["CustomRailAdvanced"]
+summary = "Custom rail từ hai đường dáng (Top và Side) hoà theo góc."
+steps = ["Chọn ring rail, đường dáng Top và Side.", "Enter."]
+options = ["Mirror."]
+
+[[commands]]
+id = "BuilderObjectOnCrv"
+label = "Object on Curve"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ObjectOnCrv"]
+summary = "Rải bản sao vật (dựng ở gốc CPlane) dọc đường cong, co dần, xoay dần."
+steps = ["Chọn đường cong và vật.", "Chỉnh số lượng / khoảng cách.", "Enter."]
+
+[[commands]]
+id = "BuilderSurfaceInset"
+label = "Surface Inset"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["SurfaceInset"]
+summary = "Khoét lõm vùng trong đường cong kín trên mặt vật."
+steps = ["Chọn vật và đường cong kín trên mặt.", "Chỉnh sâu, thụt.", "Enter."]
+
+[[commands]]
+id = "BuilderMeshReducer"
+label = "Mesh Reducer"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["MeshReducer"]
+summary = "Giảm số tam giác của lưới theo %."
+steps = ["Chọn lưới.", "Chỉnh %.", "Enter."]
+
+[[commands]]
+id = "BuilderMesh"
+label = "Mesh"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["Mesh"]
+summary = "Đổi mặt / khối sang lưới."
+steps = ["Chọn vật.", "Enter."]
+options = ["DeleteInput: xoá vật gốc."]
+
+[[commands]]
+id = "BuilderCurveTransformTool"
+label = "Curve Transform"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["CurveTransform"]
+summary = "Uốn đường cong như dây: điểm giữ, điểm uốn, góc."
+steps = ["Chọn đường cong.", "Chỉnh giữ, uốn, góc.", "Enter."]
+
+[[commands]]
+id = "BuilderCenterLine"
+label = "Center Line"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["CenterLine"]
+summary = "Đường giữa hai đường cong, hoặc chữ thập tâm của một đường kín."
+steps = ["Chọn hai đường (hoặc một đường kín).", "Enter."]
+
+[[settings]]
+key = "rr_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ nhẫn"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
+default = "us"
+commands = ["BuilderRingRail"]
+
+[[settings]]
+key = "rr_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ nhẫn"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["BuilderRingRail"]
+
+[[settings]]
+key = "pp_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ nhẫn"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
+default = "us"
+commands = ["BuilderProfilePlacer"]
+
+[[settings]]
+key = "pp_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ nhẫn"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["BuilderProfilePlacer"]
+
+[[settings]]
+key = "pp_shape"
+type = "enum"
+option = "Shape"
+label = "Kiểu profile"
+choices = ["flat", "d", "comfort", "knife", "round"]
+choice_labels = ["Phẳng", "D", "Comfort", "Knife", "Tròn / oval"]
+default = "comfort"
+commands = ["BuilderProfilePlacer"]
+
+[[settings]]
+key = "pp_count"
+type = "int"
+option = "Count"
+label = "Số profile (3 hoặc 5)"
+default = 3
+min = 3
+max = 5
+commands = ["BuilderProfilePlacer"]
+
+[[settings]]
+key = "pp_top_width"
+type = "length"
+option = "TopWidth"
+label = "Rộng đỉnh"
+default = 4.0
+min = 0.5
+max = 30.0
+step = 0.05
+commands = ["BuilderProfilePlacer"]
+
+[[settings]]
+key = "pp_top_height"
+type = "length"
+option = "TopHeight"
+label = "Cao đỉnh"
+default = 2.0
+min = 0.2
+max = 20.0
+step = 0.05
+commands = ["BuilderProfilePlacer"]
+
+[[settings]]
+key = "pp_side_width"
+type = "length"
+option = "SideWidth"
+label = "Rộng bên"
+default = 3.0
+min = 0.5
+max = 30.0
+step = 0.05
+commands = ["BuilderProfilePlacer"]
+
+[[settings]]
+key = "pp_side_height"
+type = "length"
+option = "SideHeight"
+label = "Cao bên"
+default = 1.8
+min = 0.2
+max = 20.0
+step = 0.05
+commands = ["BuilderProfilePlacer"]
+
+[[settings]]
+key = "pp_bottom_width"
+type = "length"
+option = "BottomWidth"
+label = "Rộng đáy"
+default = 2.5
+min = 0.5
+max = 30.0
+step = 0.05
+commands = ["BuilderProfilePlacer"]
+
+[[settings]]
+key = "pp_bottom_height"
+type = "length"
+option = "BottomHeight"
+label = "Cao đáy"
+default = 1.5
+min = 0.2
+max = 20.0
+step = 0.05
+commands = ["BuilderProfilePlacer"]
+
+[[settings]]
+key = "orr_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ nhẫn"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
+default = "us"
+commands = ["BuilderOutsideRingRail"]
+
+[[settings]]
+key = "orr_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ nhẫn"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["BuilderOutsideRingRail"]
+
+[[settings]]
+key = "orr_top"
+type = "length"
+option = "TopThickness"
+label = "Dày đỉnh"
+default = 3.0
+min = 0.2
+max = 20.0
+step = 0.05
+commands = ["BuilderOutsideRingRail"]
+
+[[settings]]
+key = "orr_side"
+type = "length"
+option = "SideThickness"
+label = "Dày bên"
+default = 1.8
+min = 0.2
+max = 20.0
+step = 0.05
+commands = ["BuilderOutsideRingRail"]
+
+[[settings]]
+key = "orr_bottom"
+type = "length"
+option = "BottomThickness"
+label = "Dày đáy"
+default = 1.5
+min = 0.2
+max = 20.0
+step = 0.05
+commands = ["BuilderOutsideRingRail"]
+
+[[settings]]
+key = "cr_mirror"
+type = "bool"
+option = "Mirror"
+label = "Thêm rail đối xứng (Y)"
+default = false
+commands = ["BuilderCustomRail", "BuilderCustomRailAdvanced"]
+
+[[settings]]
+key = "frp_delete"
+type = "bool"
+option = "DeleteCurves"
+label = "Xoá đường gốc"
+default = false
+commands = ["BuilderFourProfile"]
+
+[[settings]]
+key = "rs_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO", "Đường kính mm"]
+default = "us"
+commands = ["BuilderResize"]
+
+[[settings]]
+key = "rs_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ gốc"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["BuilderResize"]
+
+[[settings]]
+key = "rs_sizes"
+type = "string"
+option = "Sizes"
+label = "Các cỡ mới (vd. 6, 8)"
+default = "6, 8"
+commands = ["BuilderResize"]
+
+[[settings]]
+key = "rs_spacing"
+type = "length"
+option = "Spacing"
+label = "Khoảng cách các nhẫn"
+default = 30.0
+min = 0.0
+max = 200.0
+step = 1.0
+commands = ["BuilderResize"]
+
+[[settings]]
+key = "lib_setting"
+type = "enum"
+option = "Item"
+label = "Loại"
+choices = ["peg_head", "basket", "cup"]
+choice_labels = ["Peg head 4 chấu", "Basket 6 chấu", "Cup"]
+default = "peg_head"
+commands = ["BuilderBermarkLibrary"]
+
+[[settings]]
+key = "lib_setting_size"
+type = "length"
+option = "Size"
+label = "Cỡ đá"
+default = 5.0
+min = 0.5
+max = 30.0
+step = 0.05
+commands = ["BuilderBermarkLibrary"]
+
+[[settings]]
+key = "lib_finding"
+type = "enum"
+option = "Item"
+label = "Loại"
+choices = ["post", "bail", "jump_ring", "clutch", "clasp"]
+choice_labels = ["Chốt bông tai", "Bail", "Khoen", "Chặn bông tai", "Khoá"]
+default = "post"
+commands = ["BuilderStullerFindingsLibrary"]
+
+[[settings]]
+key = "lib_finding_size"
+type = "length"
+option = "Size"
+label = "Cỡ"
+default = 10.0
+min = 0.5
+max = 50.0
+step = 0.1
+commands = ["BuilderStullerFindingsLibrary"]
+
+[[settings]]
+key = "st_handle"
+type = "length"
+option = "Handle"
+label = "Dài tay nắm"
+default = 2.0
+min = 0.1
+max = 50.0
+step = 0.1
+commands = ["gvSmartTarget", "gvSmartTargetAdd", "gvSmartTargetOnCrvEnd"]
+
+[[settings]]
+key = "sb_bulge"
+type = "length"
+option = "Bulge"
+label = "Độ phình"
+default = 1.0
+min = 0.1
+max = 5.0
+step = 0.05
+commands = ["gvSmartBlend"]
+
+[[settings]]
+key = "jh_tolerance"
+type = "length"
+option = "Tolerance"
+label = "Dung sai nối"
+default = 0.01
+min = 0.0001
+max = 1.0
+step = 0.001
+commands = ["gvJoinHistory"]
+
+[[settings]]
+key = "it_file"
+type = "path"
+option = "File"
+label = "Tệp ảnh (PNG, BMP, PGM)"
+default = ""
+commands = ["BuilderImageTrace"]
+
+[[settings]]
+key = "it_width"
+type = "length"
+option = "Width"
+label = "Rộng kết quả"
+default = 20.0
+min = 0.5
+max = 500.0
+step = 0.5
+commands = ["BuilderImageTrace"]
+
+[[settings]]
+key = "it_threshold"
+type = "percent"
+option = "Threshold"
+label = "Ngưỡng tối"
+default = 50.0
+min = 1.0
+max = 99.0
+step = 1.0
+commands = ["BuilderImageTrace"]
+
+[[settings]]
+key = "it_smooth"
+type = "bool"
+option = "Smooth"
+label = "Làm mượt"
+default = true
+commands = ["BuilderImageTrace"]
+
+[[settings]]
+key = "mr_tolerance"
+type = "length"
+option = "Tolerance"
+label = "Dung sai hàn"
+default = 0.001
+min = 1e-05
+max = 1.0
+step = 0.0005
+commands = ["BuilderMeshRepair"]
+
+[[settings]]
+key = "pr_sprues"
+type = "int"
+option = "Sprues"
+label = "Số sprue"
+default = 3
+min = 1
+max = 12
+commands = ["Builder3dPrinting"]
+
+[[settings]]
+key = "pr_diameter"
+type = "length"
+option = "Diameter"
+label = "Đường kính sprue"
+default = 1.2
+min = 0.2
+max = 5.0
+step = 0.05
+commands = ["Builder3dPrinting"]
+
+[[settings]]
+key = "pr_length"
+type = "length"
+option = "Length"
+label = "Dài sprue"
+default = 4.0
+min = 0.5
+max = 30.0
+step = 0.1
+commands = ["Builder3dPrinting"]
+
+[[settings]]
+key = "pr_base"
+type = "bool"
+option = "Base"
+label = "Đế"
+default = true
+commands = ["Builder3dPrinting"]
+
+[[settings]]
+key = "prof_shape"
+type = "enum"
+option = "Shape"
+label = "Kiểu profile"
+choices = ["flat", "d", "comfort", "knife", "round"]
+choice_labels = ["Phẳng", "D", "Comfort", "Knife", "Tròn / oval"]
+default = "comfort"
+commands = ["BuilderProfile"]
+
+[[settings]]
+key = "prof_width"
+type = "length"
+option = "Width"
+label = "Rộng"
+default = 4.0
+min = 0.2
+max = 50.0
+step = 0.05
+commands = ["BuilderProfile"]
+
+[[settings]]
+key = "prof_height"
+type = "length"
+option = "Height"
+label = "Cao"
+default = 2.0
+min = 0.2
+max = 50.0
+step = 0.05
+commands = ["BuilderProfile"]
+
+[[settings]]
+key = "pec_amount"
+type = "length"
+option = "Amount"
+label = "Độ nhô"
+default = 1.5
+min = 0.05
+max = 20.0
+step = 0.05
+commands = ["BuilderProfileEndCap"]
+
+[[settings]]
+key = "pec_flip"
+type = "bool"
+option = "Flip"
+label = "Đảo chiều"
+default = false
+commands = ["BuilderProfileEndCap"]
+
+[[settings]]
+key = "ooc_mode"
+type = "enum"
+option = "Mode"
+label = "Theo"
+choices = ["count", "spacing"]
+choice_labels = ["Số lượng", "Khoảng cách"]
+default = "count"
+commands = ["BuilderObjectOnCrv"]
+
+[[settings]]
+key = "ooc_count"
+type = "int"
+option = "Count"
+label = "Số bản sao"
+default = 10
+min = 1
+max = 1000
+commands = ["BuilderObjectOnCrv"]
+
+[[settings]]
+key = "ooc_spacing"
+type = "length"
+option = "Spacing"
+label = "Khoảng cách"
+default = 2.0
+min = 0.05
+max = 100.0
+step = 0.05
+commands = ["BuilderObjectOnCrv"]
+
+[[settings]]
+key = "ooc_end_scale"
+type = "percent"
+option = "EndScale"
+label = "Tỉ lệ cuối"
+default = 100.0
+min = 1.0
+max = 500.0
+step = 1.0
+commands = ["BuilderObjectOnCrv"]
+
+[[settings]]
+key = "ooc_rotation"
+type = "angle"
+option = "Rotation"
+label = "Xoay dần tới"
+default = 0.0
+min = -720.0
+max = 720.0
+step = 1.0
+commands = ["BuilderObjectOnCrv"]
+
+[[settings]]
+key = "si_depth"
+type = "length"
+option = "Depth"
+label = "Sâu"
+default = 0.5
+min = 0.01
+max = 20.0
+step = 0.01
+commands = ["BuilderSurfaceInset"]
+
+[[settings]]
+key = "si_inset"
+type = "length"
+option = "Inset"
+label = "Thụt vào"
+default = 0.0
+min = -5.0
+max = 5.0
+step = 0.01
+commands = ["BuilderSurfaceInset"]
+
+[[settings]]
+key = "mred_percent"
+type = "percent"
+option = "Percent"
+label = "Giữ lại"
+default = 50.0
+min = 1.0
+max = 100.0
+step = 1.0
+commands = ["BuilderMeshReducer"]
+
+[[settings]]
+key = "mesh_delete_input"
+type = "bool"
+option = "DeleteInput"
+label = "Xoá vật gốc"
+default = false
+commands = ["BuilderMesh"]
+
+[[settings]]
+key = "ct_hold"
+type = "percent"
+option = "Hold"
+label = "Điểm giữ"
+default = 40.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderCurveTransformTool"]
+
+[[settings]]
+key = "ct_bend"
+type = "percent"
+option = "Bend"
+label = "Điểm uốn"
+default = 50.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderCurveTransformTool"]
+
+[[settings]]
+key = "ct_angle"
+type = "angle"
+option = "Angle"
+label = "Góc uốn"
+default = 30.0
+min = -360.0
+max = 360.0
+step = 1.0
+commands = ["BuilderCurveTransformTool"]

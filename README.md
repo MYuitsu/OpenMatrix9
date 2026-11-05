@@ -1,5 +1,7 @@
 # OpenMatrix9
 
+**Add-on integration 2026-11-05:** PR #3 integrated with the `hieu-nang-2` foundations; targeted tests and remaining desktop verification are recorded in [integration evidence](docs/validation/2026-11-05-pr3-hieu-nang-2-integration.md).
+
 **Regression fixes 2026-11-05:** all 21 recorded Rust failures now pass; affected validation 669 passed/0 failed/1 ignored and release build passed. [Fixes and evidence](docs/validation/2026-11-05-fix21-regressions.md). Full-workspace rerun and desktop/WPR acceptance are not claimed.
 
 **Validation 2026-11-05, hieu-nang:** release build passed; one workspace test run: **4,497 passed, 21 failed, 183 ignored**. Native adapter builds, but its first inventory fixture is rejected by packet preflight. [Results, failures and scope](docs/validation/2026-11-05-workspace-build-test-commit.md). This checkpoint is not a green regression baseline.

@@ -5,6 +5,30 @@
   "active_item": "fix21-rust-regressions-2026-11-05",
   "items": [
     {
+      "id": "pr3-hieu-nang-2-integration-2026-11-05",
+      "date": "2026-11-05",
+      "stage": "build-validation",
+      "status": "TARGETED_TESTS_PASSED_DESKTOP_PENDING",
+      "scope": "Integrate PR #3 add-ons into hieu-nang-2; preserve scene publication, grip editing and command routing.",
+      "feature_ids": [
+        "OM9-L2-03-08",
+        "OM9-L2-03-10",
+        "OM9-L2-03-16"
+      ],
+      "outputs": [
+        "docs/validation/2026-11-05-pr3-hieu-nang-2-integration.md"
+      ],
+      "evidence": [
+        "docs/validation/2026-11-05-pr3-hieu-nang-2-integration.md"
+      ],
+      "tests": [
+        "Targeted Curve, add-on session, UI Top11, grip and scene tests passed; public source audit passed."
+      ],
+      "uncertainties": "Full workspace, desktop pointer/GPU and exhaustive geometry acceptance not run.",
+      "next_document": "docs/validation/2026-11-05-pr3-hieu-nang-2-integration.md",
+      "next_action": "Validate integrated UI menu/CMD, grips, snap and gumball on the actual desktop build."
+    },
+    {
       "id": "fix21-rust-regressions-2026-11-05",
       "date": "2026-11-05",
       "stage": "build-validation",

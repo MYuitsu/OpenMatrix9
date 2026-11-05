@@ -1,0 +1,416 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_cutters"
+version = "0.1.0"
+name = "Cutters"
+tagline = "Menu Cutters kiểu Matrix: Library, Bezel, Channel, Micro Prong …"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Cutters"]
+
+[[commands]]
+id = "BuilderGemCutterLibrary"
+label = "Gem Cutter Library"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["GemCutterLibrary"]
+summary = "Dao cắt lỗ đá theo kiểu có sẵn: Setting, Azure (thủng), Straight, Brite."
+steps = ["Chọn đá.", "Chọn Gem Cutter Library, chọn Style, ScaleXY, ScaleZ.", "Enter: dao cắt nằm ở layer Cutting."]
+options = ["Style: kiểu dao.", "ScaleXY / ScaleZ: phóng ngang / dọc (%)."]
+
+[[commands]]
+id = "BuilderBezelCutter"
+label = "Bezel Cutter"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvBezelCutter", "ScallopBezel"]
+summary = "Dao cắt răng cưa (scallop) quanh vành bezel."
+steps = ["Chọn đá (đã có bezel).", "Chọn Bezel Cutter, chỉnh Count, Size, Height, Length, Angle.", "Enter để tạo dao."]
+options = ["Count: số dao.", "Size: đường kính dao.", "Height: trục dao cao trên gờ.", "Length: dao dài tới (mm từ tâm đá, 0 = tự động).", "Angle: góc dao đầu."]
+
+[[commands]]
+id = "BuilderChannelBuilder"
+label = "Channel Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvChannelBuilder", "ChannelBuilder"]
+summary = "Một dao rãnh (channel) chạy theo hàng đá."
+steps = ["Chọn hàng đá.", "Chọn Channel Builder, chỉnh Width, Top, Bottom, Extension, ZOffset.", "Enter để tạo dao."]
+options = ["Width: rộng rãnh, % cỡ đá.", "Top / Bottom: trên / dưới gờ, % cỡ đá.", "Extension: kéo dài qua hai đầu (mm).", "ZOffset: nâng/hạ dao."]
+
+[[commands]]
+id = "BuilderBrightCutChannel"
+label = "Bright Cut Channel"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvBrightCutChannel"]
+summary = "Dao rãnh chữ V chạy theo hàng đá (bright cut)."
+steps = ["Chọn hàng đá.", "Chọn Bright Cut Channel, chỉnh Width.", "Enter."]
+options = ["Width: rộng miệng V, % cỡ đá; Top/Bottom/Extension như Channel Builder."]
+
+[[commands]]
+id = "BuilderMicroProngCutter"
+label = "Micro Prong Cutter"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvMicroProngCutter", "MicroProng"]
+summary = "Dao khía giữa các viên đá kề nhau, để lại chấu micro."
+steps = ["Chọn hàng đá.", "Chọn Micro Prong Cutter, chỉnh Width, Height, Depth, Overlap.", "Enter."]
+options = ["Width: rộng khía, % đá nhỏ hơn.", "Height / Depth: trên / dưới gờ, %.", "Overlap: ăn vào mỗi viên, %."]
+
+[[commands]]
+id = "BuilderBrightCutter"
+label = "Bright Cutter"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvBrightCutter"]
+summary = "Hai rãnh chữ V dọc hai bên hàng đá."
+steps = ["Chọn hàng đá.", "Chọn Bright Cutter, chỉnh Offset, Width, Depth, Height, Extension.", "Enter."]
+options = ["Offset: cách gờ đá.", "Width / Depth: miệng và sâu rãnh (mm).", "Height: miệng rãnh so với gờ.", "Extension: kéo dài qua hai đầu."]
+
+[[commands]]
+id = "BuilderPlaneandCubeCutters"
+label = "Plane and Cube Cutters"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["CubeCutter", "PlaneCutter"]
+summary = "Dao hộp (cube) hoặc tấm phẳng (plane) đặt bằng cách bấm điểm."
+steps = ["Chọn Plane and Cube Cutters, chọn Mode và kích thước.", "Bấm để đặt dao (nhiều lần được).", "Enter để tạo."]
+options = ["Mode: Cube (hộp tâm tại điểm bấm) / Plane (tấm dưới điểm bấm).", "X / Y / Z: kích thước (mm).", "Undo: bỏ điểm vừa đặt."]
+
+[[commands]]
+id = "OthersCuttoFingerRail"
+label = "Cut to Finger Rail"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvCutRingRail", "CutToFingerRail"]
+summary = "Tạo trụ ngón tay từ ring rail để trừ (Boolean) phần lấn vào lòng nhẫn."
+steps = ["Chọn ring rail (đường tròn trong lòng nhẫn).", "Chọn Cut to Finger Rail, chỉnh Length.", "Enter: trụ nằm ở layer Cutting."]
+options = ["Length: dài trụ (mm)."]
+
+[[commands]]
+id = "BuilderQuadFlip"
+label = "Quad Flip"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["QuadFlip"]
+summary = "Lật đối xứng một phần tư thiết kế ra ba góc phần tư còn lại của CPlane."
+steps = ["Chọn các vật của một góc phần tư.", "Chọn Quad Flip, Enter."]
+
+[[settings]]
+key = "lib_style"
+type = "enum"
+option = "Style"
+label = "Kiểu dao"
+choices = ["setting", "azure", "straight", "brite"]
+choice_labels = ["Setting", "Azure", "Straight", "Brite"]
+default = "setting"
+commands = ["BuilderGemCutterLibrary"]
+
+[[settings]]
+key = "lib_scale_xy"
+type = "percent"
+option = "ScaleXY"
+label = "Phóng ngang"
+default = 100.0
+min = 50.0
+max = 200.0
+step = 1.0
+commands = ["BuilderGemCutterLibrary"]
+
+[[settings]]
+key = "lib_scale_z"
+type = "percent"
+option = "ScaleZ"
+label = "Phóng dọc"
+default = 100.0
+min = 50.0
+max = 300.0
+step = 1.0
+commands = ["BuilderGemCutterLibrary"]
+
+[[settings]]
+key = "bzc_count"
+type = "int"
+option = "Count"
+label = "Số dao"
+default = 6
+min = 1
+max = 36
+commands = ["BuilderBezelCutter"]
+
+[[settings]]
+key = "bzc_size"
+type = "length"
+option = "Size"
+label = "Đường kính dao"
+default = 1.0
+min = 0.05
+max = 10.0
+step = 0.01
+commands = ["BuilderBezelCutter"]
+
+[[settings]]
+key = "bzc_height"
+type = "length"
+option = "Height"
+label = "Trục dao trên gờ"
+default = 0.6
+min = -5.0
+max = 5.0
+step = 0.01
+commands = ["BuilderBezelCutter"]
+
+[[settings]]
+key = "bzc_length"
+type = "length"
+option = "Length"
+label = "Dài tới (0 = tự động)"
+default = 0.0
+min = 0.0
+max = 30.0
+step = 0.05
+commands = ["BuilderBezelCutter"]
+
+[[settings]]
+key = "bzc_angle"
+type = "angle"
+option = "Angle"
+label = "Góc dao đầu"
+default = 0.0
+min = -360.0
+max = 360.0
+step = 1.0
+commands = ["BuilderBezelCutter"]
+
+[[settings]]
+key = "ch_width"
+type = "percent"
+option = "Width"
+label = "Rộng rãnh (% đá)"
+default = 100.0
+min = 20.0
+max = 200.0
+step = 1.0
+commands = ["BuilderChannelBuilder"]
+
+[[settings]]
+key = "bcc_width"
+type = "percent"
+option = "Width"
+label = "Rộng miệng V (% đá)"
+default = 130.0
+min = 20.0
+max = 300.0
+step = 1.0
+commands = ["BuilderBrightCutChannel"]
+
+[[settings]]
+key = "ch_top"
+type = "percent"
+option = "Top"
+label = "Trên gờ (% đá)"
+default = 40.0
+min = 0.0
+max = 200.0
+step = 1.0
+commands = ["BuilderChannelBuilder", "BuilderBrightCutChannel"]
+
+[[settings]]
+key = "ch_bottom"
+type = "percent"
+option = "Bottom"
+label = "Dưới gờ (% đá)"
+default = 70.0
+min = 0.0
+max = 300.0
+step = 1.0
+commands = ["BuilderChannelBuilder", "BuilderBrightCutChannel"]
+
+[[settings]]
+key = "ch_extension"
+type = "length"
+option = "Extension"
+label = "Kéo dài hai đầu"
+default = 0.5
+min = 0.0
+max = 10.0
+step = 0.05
+commands = ["BuilderChannelBuilder", "BuilderBrightCutChannel"]
+
+[[settings]]
+key = "ch_zoffset"
+type = "length"
+option = "ZOffset"
+label = "Nâng/hạ dao"
+default = 0.0
+min = -5.0
+max = 5.0
+step = 0.01
+commands = ["BuilderChannelBuilder", "BuilderBrightCutChannel"]
+
+[[settings]]
+key = "mp_width"
+type = "percent"
+option = "Width"
+label = "Rộng khía (% đá)"
+default = 30.0
+min = 5.0
+max = 100.0
+step = 1.0
+commands = ["BuilderMicroProngCutter"]
+
+[[settings]]
+key = "mp_height"
+type = "percent"
+option = "Height"
+label = "Trên gờ (% đá)"
+default = 60.0
+min = 0.0
+max = 200.0
+step = 1.0
+commands = ["BuilderMicroProngCutter"]
+
+[[settings]]
+key = "mp_depth"
+type = "percent"
+option = "Depth"
+label = "Dưới gờ (% đá)"
+default = 80.0
+min = 0.0
+max = 300.0
+step = 1.0
+commands = ["BuilderMicroProngCutter"]
+
+[[settings]]
+key = "mp_overlap"
+type = "percent"
+option = "Overlap"
+label = "Ăn vào đá (%)"
+default = 20.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderMicroProngCutter"]
+
+[[settings]]
+key = "bc_offset"
+type = "length"
+option = "Offset"
+label = "Cách gờ"
+default = 0.1
+min = -2.0
+max = 5.0
+step = 0.01
+commands = ["BuilderBrightCutter"]
+
+[[settings]]
+key = "bc_width"
+type = "length"
+option = "Width"
+label = "Miệng rãnh"
+default = 0.6
+min = 0.05
+max = 5.0
+step = 0.01
+commands = ["BuilderBrightCutter"]
+
+[[settings]]
+key = "bc_depth"
+type = "length"
+option = "Depth"
+label = "Sâu rãnh"
+default = 0.4
+min = 0.05
+max = 5.0
+step = 0.01
+commands = ["BuilderBrightCutter"]
+
+[[settings]]
+key = "bc_height"
+type = "length"
+option = "Height"
+label = "Miệng rãnh so với gờ"
+default = 0.1
+min = -5.0
+max = 5.0
+step = 0.01
+commands = ["BuilderBrightCutter"]
+
+[[settings]]
+key = "bc_extension"
+type = "length"
+option = "Extension"
+label = "Kéo dài hai đầu"
+default = 0.3
+min = 0.0
+max = 10.0
+step = 0.05
+commands = ["BuilderBrightCutter"]
+
+[[settings]]
+key = "cube_mode"
+type = "enum"
+option = "Mode"
+label = "Kiểu dao"
+choices = ["cube", "plane"]
+choice_labels = ["Cube", "Plane"]
+default = "cube"
+commands = ["BuilderPlaneandCubeCutters"]
+
+[[settings]]
+key = "cube_x"
+type = "length"
+option = "X"
+label = "Rộng X"
+default = 5.0
+min = 0.01
+max = 200.0
+step = 0.1
+commands = ["BuilderPlaneandCubeCutters"]
+
+[[settings]]
+key = "cube_y"
+type = "length"
+option = "Y"
+label = "Rộng Y"
+default = 5.0
+min = 0.01
+max = 200.0
+step = 0.1
+commands = ["BuilderPlaneandCubeCutters"]
+
+[[settings]]
+key = "cube_z"
+type = "length"
+option = "Z"
+label = "Cao Z"
+default = 5.0
+min = 0.01
+max = 200.0
+step = 0.1
+commands = ["BuilderPlaneandCubeCutters"]
+
+[[settings]]
+key = "ftr_length"
+type = "length"
+option = "Length"
+label = "Dài trụ"
+default = 30.0
+min = 1.0
+max = 200.0
+step = 0.5
+commands = ["OthersCuttoFingerRail"]

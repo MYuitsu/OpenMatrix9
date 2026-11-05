@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 #![forbid(unsafe_code)]
+pub mod addons;
 mod brep_bridge;
 pub mod command_events;
 pub mod command_options;

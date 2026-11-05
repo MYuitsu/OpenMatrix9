@@ -1,0 +1,1140 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_builders"
+version = "0.1.0"
+name = "Builders"
+tagline = "Menu Builder kiểu Matrix: eternity, signet, nhẫn, chữ, dây, nút, hoa văn, mill work"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Builder"]
+
+[[commands]]
+id = "BuilderEternity"
+label = "Eternity Band"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["Eternity", "gvEternity"]
+summary = "Nhẫn eternity kênh: đá chạy quanh cả vòng, có kênh giữ đá và dao cắt cho từng viên."
+steps = ["Chọn cỡ nhẫn, kiểu đá, kích thước (vd. 1.5 hoặc 1.5,1.2 xen kẽ).", "Chỉnh rộng, khoảng cách, phủ kênh, culet tới ngón.", "Enter."]
+
+[[commands]]
+id = "BuilderSignet"
+label = "Signet"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["Signet", "gvSignet"]
+summary = "Nhẫn signet: bản rộng và dày dần lên đỉnh, mặt trên phẳng."
+steps = ["Chọn cỡ nhẫn.", "Chỉnh rộng/dày đáy và đỉnh, cao mặt phẳng.", "Enter."]
+
+[[commands]]
+id = "ClayooCreationSignetRing"
+label = "SubD Signet"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooSignet", "SubDSignet"]
+summary = "Signet mềm (tiết diện bo tròn)."
+steps = ["Chọn cỡ nhẫn.", "Chỉnh kích thước.", "Enter."]
+
+[[commands]]
+id = "ClayooCreationRing"
+label = "SubD Ring"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ClayooRing", "SubDRing"]
+summary = "Nhẫn trơn với tiết diện comfort / D / phẳng / knife / tròn."
+steps = ["Chọn cỡ nhẫn, rộng, dày, tiết diện.", "Enter."]
+
+[[commands]]
+id = "TextOnCurve"
+label = "Text on Curve"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["TextOnCurve"]
+summary = "Chữ chạy theo đường cong: nằm trên CPlane hoặc đứng hướng ra ngoài; dạng nét hoặc khối."
+steps = ["Chọn đường cong.", "Gõ chữ, cao, khoảng cách.", "Enter."]
+
+[[commands]]
+id = "BuilderRaised"
+label = "Raised Band"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["RaisedBand"]
+summary = "Nhẫn có phần đỉnh nhô cao (bản đỉnh rộng, vai và đáy mỏng dần)."
+steps = ["Chọn cỡ nhẫn.", "Chỉnh đỉnh, vai, đáy.", "Enter."]
+
+[[commands]]
+id = "BuilderAwardRingBuilder"
+label = "Award Ring Top"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["AwardRing"]
+summary = "Tạo mặt nhẫn award (khối vát) đặt lên signet; có thể thêm đá giữa."
+steps = ["Chọn signet (tuỳ chọn).", "Chỉnh kích thước X, Y, Z, vát.", "Enter."]
+
+[[commands]]
+id = "Builder_Rope"
+label = "Rope"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["Rope"]
+summary = "Dây xoắn: nhiều sợi xoắn theo đường cong (hoặc thành vòng nhẫn)."
+steps = ["Chọn đường cong (hoặc không chọn để tạo vòng nhẫn).", "Chỉnh số sợi, dày sợi, bước xoắn.", "Enter."]
+
+[[commands]]
+id = "BuilderJump"
+label = "Jump Ring"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["JumpRing"]
+summary = "Khoen (jump ring) tròn / oval, dây tròn hoặc vuông."
+steps = ["Chỉnh đường kính, dây, tỉ lệ, kiểu.", "Enter."]
+
+[[commands]]
+id = "BuilderFreeFormKnot"
+label = "Freeform Knot"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["FreeformKnot"]
+summary = "Biến đường cong tự cắt thành nút dây đan trên/dưới."
+steps = ["Chọn đường cong (vẽ ở Top).", "Chỉnh rộng, dày, chiều cao vượt.", "Enter."]
+
+[[commands]]
+id = "BuilderKnot"
+label = "Knot Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["KnotBuilder"]
+summary = "Nút Celtic (Lissajous) theo số cột / hàng."
+steps = ["Chỉnh cột, hàng, kích thước.", "Bấm tâm nút."]
+
+[[commands]]
+id = "BuilderPatternBuilder"
+label = "Pattern Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["PatternBuilder"]
+summary = "Lặp vật thể (vẽ trong tam giác gốc) thành ô vuông đối xứng rồi lưới X × Y."
+steps = ["Chọn vật thể (quanh gốc CPlane).", "Chỉnh lặp X, Y, cỡ ô.", "Enter."]
+
+[[commands]]
+id = "BuilderNautilusBuilder"
+label = "Nautilus Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["Nautilus"]
+summary = "Rải vật thể theo xoắn ốc nautilus, nhỏ dần."
+steps = ["Chọn vật thể (ở gốc CPlane).", "Chỉnh số lượng, số vòng, bán kính, thu nhỏ.", "Enter."]
+
+[[commands]]
+id = "BuilderMillWork"
+label = "Mill Work"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["MillWork"]
+summary = "Dao cắt trang trí dọc đường cong: hạt (milgrain) hoặc rãnh V."
+steps = ["Chọn đường cong.", "Chỉnh kiểu, cỡ, khoảng cách, sâu.", "Enter."]
+
+[[commands]]
+id = "BuilderMillArea"
+label = "Mill Area"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["MillArea"]
+summary = "Dao cắt rãnh V phủ vùng (florentine) trong đường cong kín."
+steps = ["Chọn đường cong kín.", "Chỉnh khoảng cách, góc, đan chéo.", "Enter."]
+
+[[commands]]
+id = "BuilderMillWorkC"
+label = "Mill Work Across"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["MillWorkC"]
+summary = "Dao cắt khía ngang dọc đường cong (knurl)."
+steps = ["Chọn đường cong.", "Chỉnh cỡ, khoảng cách.", "Enter."]
+
+[[settings]]
+key = "et_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ nhẫn"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
+default = "us"
+commands = ["BuilderEternity"]
+
+[[settings]]
+key = "et_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ nhẫn"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["BuilderEternity"]
+
+[[settings]]
+key = "et_width"
+type = "length"
+option = "Width"
+label = "Rộng bản"
+default = 3.0
+min = 1.0
+max = 20.0
+step = 0.05
+commands = ["BuilderEternity"]
+
+[[settings]]
+key = "et_culet_to_finger"
+type = "length"
+option = "CuletToFinger"
+label = "Culet tới ngón"
+default = 0.3
+min = 0.0
+max = 5.0
+step = 0.02
+commands = ["BuilderEternity"]
+
+[[settings]]
+key = "et_spacing"
+type = "length"
+option = "GemSpacing"
+label = "Khoảng cách đá"
+default = 0.1
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderEternity"]
+
+[[settings]]
+key = "et_channel"
+type = "percent"
+option = "ChannelWidth"
+label = "Kênh phủ đá"
+default = 85.0
+min = 50.0
+max = 120.0
+step = 1.0
+commands = ["BuilderEternity"]
+
+[[settings]]
+key = "et_cut"
+type = "enum"
+option = "Cut"
+label = "Kiểu cắt"
+choices = ["round", "oval", "princess", "cushion", "emerald", "asscher", "baguette", "marquise", "pear", "heart", "trillion", "radiant", "cabochon_round", "cabochon_oval"]
+choice_labels = ["Round", "Oval", "Princess", "Cushion", "Emerald", "Asscher", "Baguette", "Marquise", "Pear", "Heart", "Trillion", "Radiant", "Cabochon tròn", "Cabochon oval"]
+default = "round"
+commands = ["BuilderEternity"]
+
+[[settings]]
+key = "et_sizes"
+type = "string"
+option = "Sizes"
+label = "Cỡ đá (xen kẽ: 1.5,1.2)"
+default = "1.5"
+commands = ["BuilderEternity"]
+
+[[settings]]
+key = "et_material"
+type = "enum"
+option = "Material"
+label = "Chất liệu"
+choices = ["diamond", "moissanite", "cz", "ruby", "sapphire", "emerald", "amethyst", "topaz", "garnet", "aquamarine", "peridot", "tanzanite"]
+default = "diamond"
+commands = ["BuilderEternity"]
+
+[[settings]]
+key = "et_band"
+type = "bool"
+option = "DrawBand"
+label = "Vẽ bản nhẫn"
+default = true
+commands = ["BuilderEternity"]
+
+[[settings]]
+key = "sg_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ nhẫn"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
+default = "us"
+commands = ["BuilderSignet"]
+
+[[settings]]
+key = "sg_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ nhẫn"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["BuilderSignet"]
+
+[[settings]]
+key = "sg_bottom_width"
+type = "length"
+option = "BottomWidth"
+label = "Rộng đáy"
+default = 3.0
+min = 1.0
+max = 20.0
+step = 0.05
+commands = ["BuilderSignet"]
+
+[[settings]]
+key = "sg_top_width"
+type = "length"
+option = "TopWidth"
+label = "Rộng đỉnh"
+default = 12.0
+min = 1.0
+max = 30.0
+step = 0.05
+commands = ["BuilderSignet"]
+
+[[settings]]
+key = "sg_bottom_thickness"
+type = "length"
+option = "BottomThickness"
+label = "Dày đáy"
+default = 1.6
+min = 0.5
+max = 10.0
+step = 0.05
+commands = ["BuilderSignet"]
+
+[[settings]]
+key = "sg_top_thickness"
+type = "length"
+option = "TopThickness"
+label = "Dày đỉnh"
+default = 6.0
+min = 0.5
+max = 20.0
+step = 0.05
+commands = ["BuilderSignet"]
+
+[[settings]]
+key = "sg_top_height"
+type = "length"
+option = "TopHeight"
+label = "Cao mặt phẳng trên ngón"
+default = 4.0
+min = 0.5
+max = 20.0
+step = 0.05
+commands = ["BuilderSignet"]
+
+[[settings]]
+key = "sds_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ nhẫn"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
+default = "us"
+commands = ["ClayooCreationSignetRing"]
+
+[[settings]]
+key = "sds_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ nhẫn"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["ClayooCreationSignetRing"]
+
+[[settings]]
+key = "sds_bottom_width"
+type = "length"
+option = "BottomWidth"
+label = "Rộng đáy"
+default = 3.0
+min = 1.0
+max = 20.0
+step = 0.05
+commands = ["ClayooCreationSignetRing"]
+
+[[settings]]
+key = "sds_top_width"
+type = "length"
+option = "TopWidth"
+label = "Rộng đỉnh"
+default = 12.0
+min = 1.0
+max = 30.0
+step = 0.05
+commands = ["ClayooCreationSignetRing"]
+
+[[settings]]
+key = "sds_bottom_thickness"
+type = "length"
+option = "BottomThickness"
+label = "Dày đáy"
+default = 1.6
+min = 0.5
+max = 10.0
+step = 0.05
+commands = ["ClayooCreationSignetRing"]
+
+[[settings]]
+key = "sds_top_thickness"
+type = "length"
+option = "TopThickness"
+label = "Dày đỉnh"
+default = 6.0
+min = 0.5
+max = 20.0
+step = 0.05
+commands = ["ClayooCreationSignetRing"]
+
+[[settings]]
+key = "sds_top_height"
+type = "length"
+option = "TopHeight"
+label = "Cao mặt trên ngón"
+default = 4.0
+min = 0.5
+max = 20.0
+step = 0.05
+commands = ["ClayooCreationSignetRing"]
+
+[[settings]]
+key = "sdr_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ nhẫn"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
+default = "us"
+commands = ["ClayooCreationRing"]
+
+[[settings]]
+key = "sdr_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ nhẫn"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["ClayooCreationRing"]
+
+[[settings]]
+key = "sdr_width"
+type = "length"
+option = "Width"
+label = "Rộng bản"
+default = 4.0
+min = 0.5
+max = 20.0
+step = 0.05
+commands = ["ClayooCreationRing"]
+
+[[settings]]
+key = "sdr_thickness"
+type = "length"
+option = "Thickness"
+label = "Dày"
+default = 1.8
+min = 0.3
+max = 10.0
+step = 0.05
+commands = ["ClayooCreationRing"]
+
+[[settings]]
+key = "sdr_profile"
+type = "enum"
+option = "Profile"
+label = "Tiết diện"
+choices = ["comfort", "d", "flat", "knife", "round"]
+choice_labels = ["Comfort", "D", "Phẳng", "Knife", "Tròn / oval"]
+default = "comfort"
+commands = ["ClayooCreationRing"]
+
+[[settings]]
+key = "toc_text"
+type = "string"
+option = "Text"
+label = "Chữ"
+default = "OM9"
+commands = ["TextOnCurve"]
+
+[[settings]]
+key = "toc_height"
+type = "length"
+option = "Height"
+label = "Cao chữ"
+default = 2.0
+min = 0.2
+max = 50.0
+step = 0.05
+commands = ["TextOnCurve"]
+
+[[settings]]
+key = "toc_spacing"
+type = "percent"
+option = "Spacing"
+label = "Khoảng cách chữ"
+default = 20.0
+min = 0.0
+max = 200.0
+step = 1.0
+commands = ["TextOnCurve"]
+
+[[settings]]
+key = "toc_start"
+type = "length"
+option = "Start"
+label = "Bắt đầu cách đầu đường"
+default = 0.0
+min = 0.0
+max = 500.0
+step = 0.1
+commands = ["TextOnCurve"]
+
+[[settings]]
+key = "toc_solid"
+type = "bool"
+option = "Solid"
+label = "Chữ khối"
+default = true
+commands = ["TextOnCurve"]
+
+[[settings]]
+key = "toc_stroke"
+type = "length"
+option = "Stroke"
+label = "Nét (0 = tự động)"
+default = 0.0
+min = 0.0
+max = 5.0
+step = 0.02
+commands = ["TextOnCurve"]
+
+[[settings]]
+key = "toc_flip"
+type = "bool"
+option = "Flip"
+label = "Lật"
+default = false
+commands = ["TextOnCurve"]
+
+[[settings]]
+key = "toc_facing"
+type = "enum"
+option = "Facing"
+label = "Hướng chữ"
+choices = ["cplane", "outward"]
+choice_labels = ["Nằm trên CPlane", "Đứng hướng ra ngoài"]
+default = "cplane"
+commands = ["TextOnCurve"]
+
+[[settings]]
+key = "rb_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ nhẫn"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
+default = "us"
+commands = ["BuilderRaised"]
+
+[[settings]]
+key = "rb_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ nhẫn"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["BuilderRaised"]
+
+[[settings]]
+key = "rb_width"
+type = "length"
+option = "Width"
+label = "Rộng bản"
+default = 4.0
+min = 1.0
+max = 20.0
+step = 0.05
+commands = ["BuilderRaised"]
+
+[[settings]]
+key = "rb_top_width"
+type = "length"
+option = "TopWidth"
+label = "Rộng đỉnh"
+default = 6.0
+min = 1.0
+max = 30.0
+step = 0.05
+commands = ["BuilderRaised"]
+
+[[settings]]
+key = "rb_top_depth"
+type = "angle"
+option = "TopDepth"
+label = "Độ dài đỉnh (góc)"
+default = 40.0
+min = 5.0
+max = 120.0
+step = 1.0
+commands = ["BuilderRaised"]
+
+[[settings]]
+key = "rb_top_thickness"
+type = "length"
+option = "TopThickness"
+label = "Dày đỉnh"
+default = 3.5
+min = 0.5
+max = 15.0
+step = 0.05
+commands = ["BuilderRaised"]
+
+[[settings]]
+key = "rb_middle_thickness"
+type = "length"
+option = "MiddleThickness"
+label = "Dày vai"
+default = 2.0
+min = 0.5
+max = 15.0
+step = 0.05
+commands = ["BuilderRaised"]
+
+[[settings]]
+key = "rb_bottom_thickness"
+type = "length"
+option = "BottomThickness"
+label = "Dày đáy"
+default = 1.5
+min = 0.5
+max = 10.0
+step = 0.05
+commands = ["BuilderRaised"]
+
+[[settings]]
+key = "aw_x"
+type = "length"
+option = "OuterX"
+label = "Kích thước X"
+default = 14.0
+min = 2.0
+max = 40.0
+step = 0.1
+commands = ["BuilderAwardRingBuilder"]
+
+[[settings]]
+key = "aw_y"
+type = "length"
+option = "OuterY"
+label = "Kích thước Y"
+default = 12.0
+min = 2.0
+max = 40.0
+step = 0.1
+commands = ["BuilderAwardRingBuilder"]
+
+[[settings]]
+key = "aw_z"
+type = "length"
+option = "OuterZ"
+label = "Cao"
+default = 2.0
+min = 0.2
+max = 10.0
+step = 0.05
+commands = ["BuilderAwardRingBuilder"]
+
+[[settings]]
+key = "aw_bevel"
+type = "length"
+option = "Bevel"
+label = "Vát vào"
+default = 1.5
+min = 0.0
+max = 10.0
+step = 0.05
+commands = ["BuilderAwardRingBuilder"]
+
+[[settings]]
+key = "aw_bevel_height"
+type = "length"
+option = "BevelHeight"
+label = "Cao vát"
+default = 1.2
+min = 0.0
+max = 10.0
+step = 0.05
+commands = ["BuilderAwardRingBuilder"]
+
+[[settings]]
+key = "aw_stone"
+type = "length"
+option = "Stone"
+label = "Đá giữa (0 = không)"
+default = 0.0
+min = 0.0
+max = 20.0
+step = 0.05
+commands = ["BuilderAwardRingBuilder"]
+
+[[settings]]
+key = "aw_union"
+type = "bool"
+option = "Union"
+label = "Gộp vào signet đã chọn"
+default = false
+commands = ["BuilderAwardRingBuilder"]
+
+[[settings]]
+key = "rope_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ nhẫn"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
+default = "us"
+commands = ["Builder_Rope"]
+
+[[settings]]
+key = "rope_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ nhẫn"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["Builder_Rope"]
+
+[[settings]]
+key = "rope_strands"
+type = "int"
+option = "Strands"
+label = "Số sợi"
+default = 3
+min = 2
+max = 12
+commands = ["Builder_Rope"]
+
+[[settings]]
+key = "rope_wire"
+type = "length"
+option = "Wire"
+label = "Dày sợi"
+default = 0.6
+min = 0.1
+max = 5.0
+step = 0.02
+commands = ["Builder_Rope"]
+
+[[settings]]
+key = "rope_pitch"
+type = "length"
+option = "Pitch"
+label = "Bước xoắn"
+default = 3.0
+min = 0.3
+max = 30.0
+step = 0.05
+commands = ["Builder_Rope"]
+
+[[settings]]
+key = "jr_diameter"
+type = "length"
+option = "Diameter"
+label = "Đường kính"
+default = 5.0
+min = 0.5
+max = 50.0
+step = 0.05
+commands = ["BuilderJump"]
+
+[[settings]]
+key = "jr_ratio"
+type = "percent"
+option = "Ratio"
+label = "Tỉ lệ oval"
+default = 100.0
+min = 20.0
+max = 300.0
+step = 1.0
+commands = ["BuilderJump"]
+
+[[settings]]
+key = "jr_wire"
+type = "length"
+option = "Wire"
+label = "Dày dây"
+default = 0.8
+min = 0.1
+max = 5.0
+step = 0.02
+commands = ["BuilderJump"]
+
+[[settings]]
+key = "jr_width"
+type = "length"
+option = "Width"
+label = "Rộng dây"
+default = 0.8
+min = 0.1
+max = 5.0
+step = 0.02
+commands = ["BuilderJump"]
+
+[[settings]]
+key = "jr_shape"
+type = "enum"
+option = "Shape"
+label = "Kích thước là"
+choices = ["inside", "outside"]
+choice_labels = ["Đường kính trong", "Đường kính ngoài"]
+default = "inside"
+commands = ["BuilderJump"]
+
+[[settings]]
+key = "jr_profile"
+type = "enum"
+option = "Profile"
+label = "Tiết diện dây"
+choices = ["round", "square"]
+choice_labels = ["Tròn", "Vuông"]
+default = "round"
+commands = ["BuilderJump"]
+
+[[settings]]
+key = "ffk_width"
+type = "length"
+option = "Width"
+label = "Rộng dây"
+default = 1.0
+min = 0.1
+max = 10.0
+step = 0.05
+commands = ["BuilderFreeFormKnot"]
+
+[[settings]]
+key = "ffk_height"
+type = "length"
+option = "Height"
+label = "Dày dây"
+default = 0.8
+min = 0.1
+max = 10.0
+step = 0.05
+commands = ["BuilderFreeFormKnot"]
+
+[[settings]]
+key = "ffk_pass"
+type = "length"
+option = "PassHeight"
+label = "Cao vượt"
+default = 1.0
+min = 0.0
+max = 10.0
+step = 0.05
+commands = ["BuilderFreeFormKnot"]
+
+[[settings]]
+key = "knot_columns"
+type = "int"
+option = "Columns"
+label = "Số cột"
+default = 3
+min = 1
+max = 12
+commands = ["BuilderKnot"]
+
+[[settings]]
+key = "knot_rows"
+type = "int"
+option = "Rows"
+label = "Số hàng"
+default = 2
+min = 1
+max = 12
+commands = ["BuilderKnot"]
+
+[[settings]]
+key = "knot_size_x"
+type = "length"
+option = "SizeX"
+label = "Rộng X"
+default = 15.0
+min = 2.0
+max = 100.0
+step = 0.1
+commands = ["BuilderKnot"]
+
+[[settings]]
+key = "knot_size_y"
+type = "length"
+option = "SizeY"
+label = "Cao Y"
+default = 10.0
+min = 2.0
+max = 100.0
+step = 0.1
+commands = ["BuilderKnot"]
+
+[[settings]]
+key = "knot_width"
+type = "length"
+option = "Width"
+label = "Rộng dây"
+default = 1.0
+min = 0.1
+max = 10.0
+step = 0.05
+commands = ["BuilderKnot"]
+
+[[settings]]
+key = "knot_height"
+type = "length"
+option = "Height"
+label = "Dày dây"
+default = 0.8
+min = 0.1
+max = 10.0
+step = 0.05
+commands = ["BuilderKnot"]
+
+[[settings]]
+key = "knot_pass"
+type = "length"
+option = "PassHeight"
+label = "Cao vượt"
+default = 1.0
+min = 0.0
+max = 10.0
+step = 0.05
+commands = ["BuilderKnot"]
+
+[[settings]]
+key = "pat_x_repeat"
+type = "int"
+option = "XRepeat"
+label = "Lặp X"
+default = 3
+min = 1
+max = 50
+commands = ["BuilderPatternBuilder"]
+
+[[settings]]
+key = "pat_y_repeat"
+type = "int"
+option = "YRepeat"
+label = "Lặp Y"
+default = 3
+min = 1
+max = 50
+commands = ["BuilderPatternBuilder"]
+
+[[settings]]
+key = "pat_size"
+type = "length"
+option = "TileSize"
+label = "Nửa cỡ ô"
+default = 5.0
+min = 0.2
+max = 100.0
+step = 0.1
+commands = ["BuilderPatternBuilder"]
+
+[[settings]]
+key = "pat_mirror"
+type = "bool"
+option = "Mirror"
+label = "Đối xứng thành ô vuông"
+default = true
+commands = ["BuilderPatternBuilder"]
+
+[[settings]]
+key = "nau_amount"
+type = "int"
+option = "Amount"
+label = "Số lượng"
+default = 24
+min = 2
+max = 400
+commands = ["BuilderNautilusBuilder"]
+
+[[settings]]
+key = "nau_length"
+type = "length"
+option = "Turns"
+label = "Số vòng"
+default = 2.0
+min = 0.1
+max = 20.0
+step = 0.1
+commands = ["BuilderNautilusBuilder"]
+
+[[settings]]
+key = "nau_rotation"
+type = "angle"
+option = "Rotation"
+label = "Góc bắt đầu"
+default = 0.0
+min = -180.0
+max = 180.0
+step = 1.0
+commands = ["BuilderNautilusBuilder"]
+
+[[settings]]
+key = "nau_shrink"
+type = "percent"
+option = "Shrink"
+label = "Tỉ lệ mỗi bước"
+default = 92.0
+min = 50.0
+max = 100.0
+step = 0.5
+commands = ["BuilderNautilusBuilder"]
+
+[[settings]]
+key = "nau_radius"
+type = "length"
+option = "Radius"
+label = "Bán kính đầu"
+default = 10.0
+min = 0.5
+max = 200.0
+step = 0.1
+commands = ["BuilderNautilusBuilder"]
+
+[[settings]]
+key = "nau_flip"
+type = "bool"
+option = "Flip"
+label = "Đảo chiều"
+default = false
+commands = ["BuilderNautilusBuilder"]
+
+[[settings]]
+key = "mw_shape"
+type = "enum"
+option = "Shape"
+label = "Kiểu"
+choices = ["bead", "v"]
+choice_labels = ["Hạt (milgrain)", "Rãnh V"]
+default = "bead"
+commands = ["BuilderMillWork", "BuilderMillWorkC"]
+
+[[settings]]
+key = "mw_size"
+type = "length"
+option = "Size"
+label = "Cỡ"
+default = 0.5
+min = 0.05
+max = 5.0
+step = 0.01
+commands = ["BuilderMillWork", "BuilderMillWorkC"]
+
+[[settings]]
+key = "mw_spacing"
+type = "length"
+option = "Spacing"
+label = "Khoảng cách"
+default = 0.1
+min = 0.0
+max = 5.0
+step = 0.01
+commands = ["BuilderMillWork", "BuilderMillWorkC"]
+
+[[settings]]
+key = "mw_depth"
+type = "length"
+option = "Depth"
+label = "Sâu"
+default = 0.25
+min = 0.0
+max = 5.0
+step = 0.01
+commands = ["BuilderMillWork", "BuilderMillWorkC"]
+
+[[settings]]
+key = "mla_spacing"
+type = "length"
+option = "Spacing"
+label = "Khoảng cách rãnh"
+default = 0.4
+min = 0.05
+max = 5.0
+step = 0.01
+commands = ["BuilderMillArea"]
+
+[[settings]]
+key = "mla_width"
+type = "length"
+option = "Width"
+label = "Rộng rãnh"
+default = 0.3
+min = 0.02
+max = 5.0
+step = 0.01
+commands = ["BuilderMillArea"]
+
+[[settings]]
+key = "mla_depth"
+type = "length"
+option = "Depth"
+label = "Sâu"
+default = 0.15
+min = 0.01
+max = 5.0
+step = 0.01
+commands = ["BuilderMillArea"]
+
+[[settings]]
+key = "mla_angle"
+type = "angle"
+option = "Angle"
+label = "Góc"
+default = 45.0
+min = -90.0
+max = 90.0
+step = 1.0
+commands = ["BuilderMillArea"]
+
+[[settings]]
+key = "mla_cross"
+type = "bool"
+option = "Cross"
+label = "Đan chéo"
+default = true
+commands = ["BuilderMillArea"]

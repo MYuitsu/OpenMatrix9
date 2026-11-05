@@ -33,6 +33,8 @@ pub enum DialogFilter {
     Om9,
     ThreeDm,
     Stl,
+    /// OM9 add-on package (Tools › Install Add-on from Disk…).
+    AddonZip,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DialogError {
@@ -166,6 +168,10 @@ pub fn choose_stl(
 ) -> Result<Option<PathBuf>, DialogError> {
     choose_impl(parent, mode, current, DialogFilter::Stl, false)
 }
+/// Open-only dialog with the OM9 add-on (.zip) filter.
+pub fn choose_addon_zip(parent: usize) -> Result<Option<PathBuf>, DialogError> {
+    choose_impl(parent, Mode::Open, None, DialogFilter::AddonZip, false)
+}
 /// Explicit own-app audit prefill. Show and GetResult remain the native
 /// selection boundary; this hint never becomes a returned selection itself.
 pub fn choose_fixture_for_audit(
@@ -248,6 +254,13 @@ fn choose_impl(
                 w!("stl"),
                 "Untitled.stl",
             ),
+            DialogFilter::AddonZip => (
+                w!("Install OM9 add-on"),
+                w!("OM9 add-on package"),
+                w!("*.zip"),
+                w!("zip"),
+                "addon.zip",
+            ),
         };
         dialog.SetTitle(title).map_err(|e| native("SetTitle", e))?;
         dialog
@@ -271,12 +284,11 @@ fn choose_impl(
                 .map_err(|e| native("SetFolder", e))?;
         }
         if mode == Mode::Save || audit_prefill {
-            let extension_text = if matches!(filter, DialogFilter::ThreeDm) {
-                "3dm"
-            } else if matches!(filter, DialogFilter::Stl) {
-                "stl"
-            } else {
-                "om9"
+            let extension_text = match filter {
+                DialogFilter::ThreeDm => "3dm",
+                DialogFilter::Stl => "stl",
+                DialogFilter::AddonZip => "zip",
+                DialogFilter::Om9 => "om9",
             };
             let suggested = if audit_prefill {
                 current

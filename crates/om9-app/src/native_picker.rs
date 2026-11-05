@@ -115,6 +115,22 @@ pub fn pick_stl(_parent: &eframe::Frame, _current: Option<&Path>) -> Result<Opti
 }
 
 #[cfg(windows)]
+pub fn pick_addon_zip(parent: &eframe::Frame) -> Result<Option<PathBuf>> {
+    use om9_native_owner::file_dialog::choose_addon_zip;
+    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+    let RawWindowHandle::Win32(handle) = parent.window_handle().map_err(|e| Error::Io(e.to_string()))?.as_raw() else {
+        return Err(Error::Unsupported("Win32 add-on picker parent"));
+    };
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| choose_addon_zip(handle.hwnd.get() as usize)))
+        .map_err(|_| Error::Io("native add-on picker panicked".into()))?
+        .map_err(|error| Error::Io(format!("Windows add-on dialog: {error}")))
+}
+#[cfg(not(windows))]
+pub fn pick_addon_zip(_parent: &eframe::Frame) -> Result<Option<PathBuf>> {
+    Err(Error::Unsupported("native add-on chooser on this platform"))
+}
+
+#[cfg(windows)]
 pub fn pick_fixture_for_audit(
     parent: &eframe::Frame,
     phase: FilePhase,

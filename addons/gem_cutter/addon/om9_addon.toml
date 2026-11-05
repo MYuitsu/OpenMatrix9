@@ -1,0 +1,102 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "gem_cutter"
+version = "0.1.0"
+name = "Gem Cutter"
+tagline = "Dao cắt lỗ đá (Gem Cutter) kiểu Matrix 9, theo % đá"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Cutters"]
+
+[[commands]]
+id = "BuilderGemCutter"
+label = "Gem Cutter"
+handler = "om9_addon_session"
+# Panel BUILDERS + lệnh phụ trên thanh Command; chọn đá, xem trước, Enter để tạo.
+interactive = true
+builder = true
+aliases = ["gvAzureCutter", "GemCutter"]
+summary = "Dao cắt lỗ cho từng viên đá (theo % cỡ đá), nằm ở layer Cutting."
+steps = ["Chọn đá.", "Chỉnh GirdleScale, GirdleWidth, TopHeight, SeatSize, LowerDepth, LowerTaper, ZOffset trên bảng BUILDERS hoặc dòng lệnh.", "Enter để tạo dao."]
+
+[[settings]]
+key = "girdle_scale"
+type = "percent"
+option = "GirdleScale"
+label = "Cỡ gờ (Girdle Scale)"
+description = "Đường kính dao tại gờ, % đường kính đá"
+default = 105.0
+min = 80.0
+max = 150.0
+step = 1.0
+
+[[settings]]
+key = "girdle_width"
+type = "percent"
+option = "GirdleWidth"
+label = "Dày gờ (Girdle Width)"
+description = "Chiều dày dải gờ, % đường kính đá"
+default = 5.0
+min = 0.0
+max = 50.0
+step = 0.5
+
+[[settings]]
+key = "top_height"
+type = "percent"
+option = "TopHeight"
+label = "Cao phần trên"
+description = "Chiều cao phần trụ trên gờ, % đường kính đá"
+default = 50.0
+min = 0.0
+max = 300.0
+step = 1.0
+
+[[settings]]
+key = "seat_size"
+type = "percent"
+option = "SeatSize"
+label = "Cỡ đế (Lower Seat)"
+description = "Đường kính đế dưới, % đường kính gờ"
+default = 50.0
+min = 10.0
+max = 100.0
+step = 1.0
+
+[[settings]]
+key = "lower_depth"
+type = "percent"
+option = "LowerDepth"
+label = "Sâu lỗ (Lower Depth)"
+description = "Từ gờ xuống đáy dao, % đường kính đá"
+default = 150.0
+min = 10.0
+max = 500.0
+step = 1.0
+
+[[settings]]
+key = "lower_taper"
+type = "percent"
+option = "LowerTaper"
+label = "Loe đáy (Lower Taper)"
+description = "Đáy rộng/hẹp hơn đế, %"
+default = 0.0
+min = -90.0
+max = 200.0
+step = 1.0
+
+[[settings]]
+key = "cutter_z_offset"
+type = "percent"
+option = "ZOffset"
+label = "Nâng/hạ (Z Offset)"
+description = "Dời dao theo trục đá, % đường kính đá"
+default = 0.0
+min = -100.0
+max = 100.0
+step = 1.0

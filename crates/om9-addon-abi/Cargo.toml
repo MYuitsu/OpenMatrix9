@@ -1,0 +1,15 @@
+[package]
+name = "om9-addon-abi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Stable C ABI between OM9 and native add-ons, plus a safe SDK for add-on authors."
+
+[features]
+# Interactive commands (points, sub-options, preview, transforms) exchange JSON steps.
+session = ["dep:serde", "dep:serde_json"]
+
+[dependencies]
+serde = { workspace = true, optional = true }
+serde_json = { workspace = true, optional = true }

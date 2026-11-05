@@ -3410,6 +3410,24 @@ pub fn feature_for(name: &str) -> Option<&'static str> {
         .filter(|feature| !feature.is_empty())
 }
 
+/// The catalog command code (MainMenu.ini key) an icon stands for, e.g. `Circle` →
+/// `CurveCircleCenterRadius`. Add-ons register commands under these codes.
+pub fn command_key_for(name: &str) -> Option<&'static str> {
+    lookup(name)
+        .map(|icon| icon.command_key)
+        .filter(|key| !key.is_empty())
+}
+
+/// The palette icon drawn for a catalog command code (reverse of [`command_key_for`]).
+pub fn icon_for_command(code: &str) -> Option<&'static str> {
+    PALETTE
+        .iter()
+        .chain(MENU_PALETTE.iter())
+        .chain(SIDEBAR_PALETTE.iter())
+        .find(|icon| icon.command_key == code)
+        .map(|icon| icon.name)
+}
+
 pub fn icon_name(name: &str) -> Option<&'static str> {
     lookup(name).map(|icon| icon.name)
 }

@@ -23,6 +23,8 @@ om9-exchange = { path = "../om9-exchange" }
 om9-scene = { path = "../om9-scene" }
 om9-native-owner = { path = "../om9-native-owner" }
 om9-render = { path = "../om9-render" }
+om9-addons = { path = "../om9-addons", features = ["native"] }
+om9-addon-abi = { path = "../om9-addon-abi", features = ["session"] }
 om9-kernel = { path = "../om9-kernel", optional = true }
 serde.workspace = true
 skrifa = "=0.44.0"
@@ -41,3 +43,9 @@ raw-window-handle = "=0.6.2"
 name = "om9"
 path = "src/main.rs"
 
+[dev-dependencies]
+om9-addon-gem-on-curve = { path = "../../addons/gem_on_curve" }
+om9-addon-curves = { path = "../../addons/curves", default-features = false }
+om9-addon-transform = { path = "../../addons/transform", default-features = false }
+om9-addon-gem-cutter = { path = "../../addons/gem_cutter", default-features = false }
+om9-addon-matrix = { path = "../../addons/matrix", default-features = false }

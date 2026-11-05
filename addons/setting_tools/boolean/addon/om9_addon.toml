@@ -1,0 +1,44 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_boolean_builder"
+version = "0.1.0"
+name = "Boolean Builder"
+tagline = "Boolean Builder kiểu Matrix"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Cutters"]
+
+[[commands]]
+id = "BuilderBooleanBuilder"
+label = "Boolean Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["BooleanBuilder"]
+summary = "Boolean có kiểm tra: chọn vật, rồi dao cắt; báo cạnh hở / không kín trước khi cắt."
+steps = ["Chọn vật cần cắt, Enter.", "Chọn dao cắt, Enter."]
+options = ["Mode: Difference / Union / Intersection.", "KeepCutters: giữ dao cắt."]
+
+[[settings]]
+key = "bb_mode"
+type = "enum"
+option = "Mode"
+label = "Kiểu boolean"
+choices = ["difference", "union", "intersection"]
+choice_labels = ["Trừ", "Hợp", "Giao"]
+default = "difference"
+commands = ["BuilderBooleanBuilder"]
+
+[[settings]]
+key = "bb_keep_cutters"
+type = "bool"
+option = "KeepCutters"
+label = "Giữ dao cắt"
+default = false
+commands = ["BuilderBooleanBuilder"]

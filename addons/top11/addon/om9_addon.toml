@@ -1,0 +1,116 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_top11"
+version = "0.1.0"
+name = "Top 11"
+tagline = "Thanh Top 11 kiểu Matrix: điểm, explode, join, split, trim, ring rail"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Top11"]
+
+[[commands]]
+id = "TopIconEditPointsOn"
+label = "Edit Points On"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["EditPtOn"]
+summary = "Bật điểm trên đường cong (đường đi qua điểm) / đỉnh lưới để sửa: bấm điểm, bấm chỗ mới, Enter xong."
+steps = ["Chọn đường cong / lưới.", "Bấm điểm cần dời.", "Bấm (hoặc gõ) vị trí mới. Lặp lại.", "Enter."]
+
+[[commands]]
+id = "TopIconControlPointsOn"
+label = "Control Points On"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["PointsOn", "F10"]
+summary = "Bật điểm điều khiển (NURBS, polyline, mặt, lưới) để sửa."
+steps = ["Chọn vật.", "Bấm điểm cần dời.", "Bấm (hoặc gõ) vị trí mới. Lặp lại.", "Enter."]
+
+[[commands]]
+id = "TopIconExplode"
+label = "Explode"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Explode"]
+summary = "Tách polyline thành đoạn, đường cong tại góc gãy, lưới thành các phần rời."
+steps = ["Chọn vật.", "Enter."]
+
+[[commands]]
+id = "TopIconJoin"
+label = "Join"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["Join"]
+summary = "Nối các đường cong chạm nhau; gộp các lưới."
+steps = ["Chọn vật.", "Enter."]
+
+[[commands]]
+id = "TopIconSplit"
+label = "Split"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Split"]
+summary = "Tách đường cong tại điểm bấm; tách lưới theo đường cắt."
+steps = ["Chọn vật.", "Bấm điểm (lưới: hai điểm đường cắt)."]
+
+[[commands]]
+id = "TopIconTrim"
+label = "Trim"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Trim"]
+summary = "Cắt bỏ phần đường cong giữa các giao điểm: bấm phần cần bỏ."
+steps = ["Chọn các đường cong (cả đường cắt), Enter.", "Bấm các phần cần bỏ, Enter."]
+
+[[commands]]
+id = "TopIconRingRail"
+label = "Ring Rail"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["RingRailTop"]
+summary = "Đặt ring rail theo cỡ nhẫn (Front view)."
+steps = ["Chọn hệ cỡ, cỡ nhẫn trong bảng BUILDERS.", "Enter."]
+
+[[settings]]
+key = "t11_join_tolerance"
+type = "length"
+option = "Tolerance"
+label = "Dung sai nối"
+default = 0.01
+min = 0.0001
+max = 5.0
+step = 0.001
+commands = ["TopIconJoin"]
+
+[[settings]]
+key = "t11_size_system"
+type = "enum"
+option = "SizeSystem"
+label = "Hệ cỡ nhẫn"
+choices = ["us", "iso", "diameter"]
+choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
+default = "us"
+commands = ["TopIconRingRail"]
+
+[[settings]]
+key = "t11_ring_size"
+type = "float"
+option = "RingSize"
+label = "Cỡ nhẫn"
+default = 7.0
+min = 0.0
+max = 80.0
+step = 0.25
+commands = ["TopIconRingRail"]

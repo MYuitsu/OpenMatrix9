@@ -500,6 +500,11 @@
   },
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
+  "integration_evidence_2026_11_05": {
+    "status": "TARGETED_AUTOMATED_TESTS_ONLY",
+    "record": "docs/validation/2026-11-05-pr3-hieu-nang-2-integration.md",
+    "remaining": "Desktop menu and CMD interaction, full geometry and UI acceptance remain unverified."
+  },
   "runtime_implementation": {
     "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",

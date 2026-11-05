@@ -1229,10 +1229,19 @@ pub fn grip_handles(
             },
             _ => continue,
         };
+        // A joined curve repeats each joint once per segment: show one grip per joint.
+        let joined = matches!(&entity.geometry, Geometry::Curve(Curve::Polycurve { .. }));
         handles
             .try_reserve(source.len())
             .map_err(|_| Error::Budget("grip points"))?;
         for (index, point) in source.iter().enumerate() {
+            if joined
+                && source[..index]
+                    .iter()
+                    .any(|earlier| (0..3).all(|axis| (earlier[axis] - point[axis]).abs() <= 1e-9))
+            {
+                continue;
+            }
             handles.push(GripHandle {
                 object: *id,
                 index,
@@ -1265,6 +1274,35 @@ pub fn delete_grip_geometry(document: &Document, handle: GripHandle, limits: &Li
     let Geometry::Curve(curve) = &entity.geometry else { return Err(Error::Unsupported("control point deletion needs a NURBS curve")); };
     Ok(Geometry::Curve(curve_ops::delete_control_point(curve, handle.index, limits)?))
 }
+/// Move several grips at once (a window-selected group dragged together or moved with the
+/// gumball). Moves are grouped per object and applied to one working copy, so each object
+/// becomes a single edited geometry in the returned list, in first-seen order.
+pub fn move_grips_geometry(
+    document: &Document,
+    moves: &[(GripHandle, Point3)],
+    limits: &Limits,
+) -> Result<Vec<(ObjectId, Geometry)>> {
+    let mut edited: Vec<(ObjectId, Geometry)> = Vec::new();
+    for (index, (handle, world)) in moves.iter().enumerate() {
+        finite(*world)?;
+        let entity = document
+            .entities
+            .get(&handle.object)
+            .ok_or(Error::Missing("object"))?;
+        let slot = match edited.iter().position(|(id, _)| *id == handle.object) {
+            Some(slot) => slot,
+            None => {
+                edited.push((handle.object, entity.geometry.clone()));
+                edited.len() - 1
+            }
+        };
+        let local = inverse_affine(entity.placement)?.point(*world)?;
+        let last_for_object = !moves[index + 1..].iter().any(|(other, _)| other.object == handle.object);
+        let next = move_grip_local(document, entity.placement, &edited[slot].1, *handle, local, last_for_object, limits)?;
+        edited[slot].1 = next;
+    }
+    Ok(edited)
+}
 
 /// Move one grip to a world point and return the edited geometry.
 pub fn move_grip_geometry(
@@ -1279,13 +1317,26 @@ pub fn move_grip_geometry(
         .get(&handle.object)
         .ok_or(Error::Missing("object"))?;
     let local = inverse_affine(entity.placement)?.point(world)?;
-    match &entity.geometry {
+    move_grip_local(document, entity.placement, &entity.geometry, handle, local, true, limits)
+}
+
+/// Move one grip of `geometry` to a point in the object's local coordinates.
+fn move_grip_local(
+    document: &Document,
+    placement: crate::geometry::Transform,
+    geometry: &Geometry,
+    handle: GripHandle,
+    local: Point3,
+    fuse: bool,
+    limits: &Limits,
+) -> Result<Geometry> {
+    match geometry {
         Geometry::Curve(curve) => {
             let edited = if matches!(curve, Curve::Polycurve { .. }) {
                 let tolerance = document.effective_tolerance()?.absolute_mm;
                 match handle.mode {
-                    GripMode::Control => curve_ops::move_grip_with_joints(curve, handle.index, local, entity.placement, tolerance, limits)?,
-                    GripMode::Edit => curve_ops::move_edit_point_with_joints(curve, handle.index, local, entity.placement, tolerance, limits)?,
+                    GripMode::Control => curve_ops::move_grip_with_joints(curve, handle.index, local, placement, tolerance, limits)?,
+                    GripMode::Edit => curve_ops::move_edit_point_with_joints(curve, handle.index, local, placement, tolerance, limits)?,
                 }
             } else {
                 match handle.mode {
@@ -1293,9 +1344,9 @@ pub fn move_grip_geometry(
                     GripMode::Edit => curve_ops::move_edit_point(curve, handle.index, local, limits)?,
                 }
             };
-            let edited = if handle.mode == GripMode::Control && matches!(curve, Curve::Polycurve { .. }) {
+            let edited = if fuse && handle.mode == GripMode::Control && matches!(curve, Curve::Polycurve { .. }) {
                 let tolerance = document.effective_tolerance()?;
-                curve_ops::fuse_smooth_control_polycurve(curve, &edited, entity.placement, tolerance.absolute_mm, tolerance.angular_rad, limits)?.unwrap_or(edited)
+                curve_ops::fuse_smooth_control_polycurve(curve, &edited, placement, tolerance.absolute_mm, tolerance.angular_rad, limits)?.unwrap_or(edited)
             } else { edited };
             edited.validate(limits)?;
             Ok(Geometry::Curve(edited))

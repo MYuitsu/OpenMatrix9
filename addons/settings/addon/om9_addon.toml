@@ -1,0 +1,381 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_settings"
+version = "0.1.0"
+name = "Settings"
+tagline = "Menu Settings kiểu Matrix: Prong, Bezel, Head, Bead …"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Settings"]
+
+[[commands]]
+id = "BuilderProngAdder"
+label = "Prong Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvProngAdder", "ProngBuilder", "Prongs"]
+summary = "Thêm chấu cho đá: N chấu mỗi viên (Gem North) hoặc chấu dùng chung giữa các viên trong một hàng (Gem Flow)."
+steps = ["Chọn các viên đá (một viên hoặc một hàng đá).", "Chọn Prong Builder; chấu xem trước hiện ngay.", "Chỉnh Mode, Count, Angle, Size, Height, Drop, Inset trên bảng BUILDERS hoặc dòng lệnh.", "Enter để tạo chấu."]
+options = ["Mode: North (N chấu/viên), Shared2 (2 chấu chung giữa hai viên, 2 chấu mỗi đầu), Shared1 (1 chấu chung, so le).", "Count, Angle: số chấu và góc bắt đầu (chế độ North).", "Size: đường kính chấu, % cỡ đá.", "Height / Drop: chấu cao trên gờ / sâu dưới gờ, % cỡ đá.", "Inset: phần chấu ăn vào gờ đá, % đường kính chấu.", "Dome: đầu chấu tròn."]
+
+[[commands]]
+id = "BuilderBezel"
+label = "Bezel Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvBezelBuilder", "Bezel"]
+summary = "Tạo ổ bezel (vành ôm) quanh mỗi viên đá."
+steps = ["Chọn đá.", "Chọn Bezel Builder, chỉnh các thông số.", "Enter để tạo."]
+options = ["Thickness: dày vành ở gờ đá (mm).", "BaseThickness: dày vành ở đáy.", "Lip: vành cao hơn gờ đá.", "Height: sâu dưới gờ (0 = tự theo đáy đá).", "Seat: cỡ bậc đỡ đá, % gờ.", "Angle: nghiêng thành vành.", "Placement: nâng/hạ cả vành."]
+
+[[commands]]
+id = "BuilderHead"
+label = "Head Builder"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvHeadBuilder", "Head"]
+summary = "Tạo ổ chấu (basket head): chấu thuôn từ trên gờ xuống đế và các vòng gallery."
+steps = ["Chọn viên đá chủ.", "Chọn Head Builder, chỉnh Count, Angle, Prong, Height, Depth, Taper, Rails.", "Enter để tạo."]
+options = ["Count / Angle: số chấu và góc.", "Prong: đường kính chấu, % cỡ đá.", "Height: chấu cao trên gờ, % cỡ đá.", "Depth: sâu từ gờ xuống đế (0 = tự động).", "Taper: bán kính đế, % gờ.", "Rails / Rail: số vòng gallery và độ dày vòng."]
+
+[[commands]]
+id = "BuilderBeadOnCrv"
+label = "Bead on Curve"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvBeadOnCrv", "BeadOnCurve", "Milgrain"]
+summary = "Rải hạt tròn (milgrain) đều theo đường cong."
+steps = ["Chọn đường cong.", "Chọn Bead on Curve, chỉnh Size, Spacing, Start, End, ZOffset.", "Enter để đặt hạt."]
+options = ["Size: đường kính hạt.", "Spacing: khe giữa hạt.", "Start / End: đoạn đường cong dùng (%).", "ZOffset: nâng/hạ hạt, % cỡ hạt."]
+
+[[commands]]
+id = "BuilderChannelBorderCurve"
+label = "Channel Border Curve"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["gvChannelBorder", "ChannelBorder"]
+summary = "Vẽ hai đường viền hai bên một hàng đá (làm thành rãnh channel)."
+steps = ["Chọn một hàng đá.", "Chọn Channel Border Curve, chỉnh Offset.", "Enter để tạo hai đường."]
+options = ["Offset: cách gờ đá (mm)."]
+
+[[settings]]
+key = "prong_mode"
+type = "enum"
+option = "Mode"
+label = "Kiểu chấu"
+choices = ["north", "shared2", "shared1"]
+choice_labels = ["Gem North", "2 Shared", "1 Shared"]
+default = "north"
+commands = ["BuilderProngAdder"]
+
+[[settings]]
+key = "prong_count"
+type = "int"
+option = "Count"
+label = "Số chấu mỗi viên"
+default = 4
+min = 1
+max = 12
+commands = ["BuilderProngAdder"]
+
+[[settings]]
+key = "prong_angle"
+type = "angle"
+option = "Angle"
+label = "Góc chấu đầu"
+default = 45.0
+min = -360.0
+max = 360.0
+step = 1.0
+commands = ["BuilderProngAdder"]
+
+[[settings]]
+key = "prong_size"
+type = "percent"
+option = "Size"
+label = "Đường kính chấu (% đá)"
+default = 25.0
+min = 5.0
+max = 80.0
+step = 1.0
+commands = ["BuilderProngAdder"]
+
+[[settings]]
+key = "prong_height"
+type = "percent"
+option = "Height"
+label = "Cao trên gờ (% đá)"
+default = 25.0
+min = 0.0
+max = 200.0
+step = 1.0
+commands = ["BuilderProngAdder"]
+
+[[settings]]
+key = "prong_drop"
+type = "percent"
+option = "Drop"
+label = "Sâu dưới gờ (% đá)"
+default = 70.0
+min = 0.0
+max = 300.0
+step = 1.0
+commands = ["BuilderProngAdder"]
+
+[[settings]]
+key = "prong_inset"
+type = "percent"
+option = "Inset"
+label = "Ăn vào gờ (% chấu)"
+default = 30.0
+min = 0.0
+max = 50.0
+step = 1.0
+commands = ["BuilderProngAdder"]
+
+[[settings]]
+key = "prong_dome"
+type = "bool"
+option = "Dome"
+label = "Đầu chấu tròn"
+default = true
+commands = ["BuilderProngAdder"]
+
+[[settings]]
+key = "bezel_thickness"
+type = "length"
+option = "Thickness"
+label = "Dày vành ở gờ"
+default = 0.4
+min = 0.05
+max = 5.0
+step = 0.01
+commands = ["BuilderBezel"]
+
+[[settings]]
+key = "bezel_base_thickness"
+type = "length"
+option = "BaseThickness"
+label = "Dày vành ở đáy"
+default = 0.4
+min = 0.05
+max = 5.0
+step = 0.01
+commands = ["BuilderBezel"]
+
+[[settings]]
+key = "bezel_lip"
+type = "length"
+option = "Lip"
+label = "Cao hơn gờ"
+default = 0.3
+min = 0.0
+max = 5.0
+step = 0.01
+commands = ["BuilderBezel"]
+
+[[settings]]
+key = "bezel_height"
+type = "length"
+option = "Height"
+label = "Sâu dưới gờ (0 = tự động)"
+default = 0.0
+min = 0.0
+max = 30.0
+step = 0.05
+commands = ["BuilderBezel"]
+
+[[settings]]
+key = "bezel_seat"
+type = "percent"
+option = "Seat"
+label = "Bậc đỡ (% gờ)"
+default = 92.0
+min = 30.0
+max = 100.0
+step = 1.0
+commands = ["BuilderBezel"]
+
+[[settings]]
+key = "bezel_angle"
+type = "angle"
+option = "Angle"
+label = "Nghiêng thành"
+default = 0.0
+min = -45.0
+max = 45.0
+step = 1.0
+commands = ["BuilderBezel"]
+
+[[settings]]
+key = "bezel_placement"
+type = "length"
+option = "Placement"
+label = "Nâng/hạ vành"
+default = 0.0
+min = -10.0
+max = 10.0
+step = 0.01
+commands = ["BuilderBezel"]
+
+[[settings]]
+key = "head_count"
+type = "int"
+option = "Count"
+label = "Số chấu"
+default = 4
+min = 2
+max = 12
+commands = ["BuilderHead"]
+
+[[settings]]
+key = "head_angle"
+type = "angle"
+option = "Angle"
+label = "Góc chấu đầu"
+default = 45.0
+min = -360.0
+max = 360.0
+step = 1.0
+commands = ["BuilderHead"]
+
+[[settings]]
+key = "head_prong"
+type = "percent"
+option = "Prong"
+label = "Đường kính chấu (% đá)"
+default = 14.0
+min = 4.0
+max = 50.0
+step = 1.0
+commands = ["BuilderHead"]
+
+[[settings]]
+key = "head_height"
+type = "percent"
+option = "Height"
+label = "Cao trên gờ (% đá)"
+default = 15.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderHead"]
+
+[[settings]]
+key = "head_depth"
+type = "length"
+option = "Depth"
+label = "Sâu xuống đế (0 = tự động)"
+default = 0.0
+min = 0.0
+max = 30.0
+step = 0.05
+commands = ["BuilderHead"]
+
+[[settings]]
+key = "head_taper"
+type = "percent"
+option = "Taper"
+label = "Bán kính đế (% gờ)"
+default = 55.0
+min = 10.0
+max = 150.0
+step = 1.0
+commands = ["BuilderHead"]
+
+[[settings]]
+key = "head_rails"
+type = "int"
+option = "Rails"
+label = "Số vòng gallery"
+default = 2
+min = 0
+max = 4
+commands = ["BuilderHead"]
+
+[[settings]]
+key = "head_rail"
+type = "percent"
+option = "Rail"
+label = "Dày vòng (% đá)"
+default = 10.0
+min = 2.0
+max = 40.0
+step = 1.0
+commands = ["BuilderHead"]
+
+[[settings]]
+key = "bead_size"
+type = "length"
+option = "Size"
+label = "Đường kính hạt"
+default = 0.6
+min = 0.05
+max = 5.0
+step = 0.01
+commands = ["BuilderBeadOnCrv"]
+
+[[settings]]
+key = "bead_spacing"
+type = "length"
+option = "Spacing"
+label = "Khe giữa hạt"
+default = 0.05
+min = 0.0
+max = 3.0
+step = 0.01
+commands = ["BuilderBeadOnCrv"]
+
+[[settings]]
+key = "bead_start"
+type = "percent"
+option = "Start"
+label = "Bắt đầu"
+default = 0.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderBeadOnCrv"]
+
+[[settings]]
+key = "bead_end"
+type = "percent"
+option = "End"
+label = "Kết thúc"
+default = 100.0
+min = 0.0
+max = 100.0
+step = 1.0
+commands = ["BuilderBeadOnCrv"]
+
+[[settings]]
+key = "bead_zoffset"
+type = "percent"
+option = "ZOffset"
+label = "Nâng/hạ (% hạt)"
+default = 0.0
+min = -100.0
+max = 100.0
+step = 1.0
+commands = ["BuilderBeadOnCrv"]
+
+[[settings]]
+key = "cbc_offset"
+type = "length"
+option = "Offset"
+label = "Cách gờ đá"
+default = 0.2
+min = -2.0
+max = 5.0
+step = 0.01
+commands = ["BuilderChannelBorderCurve"]

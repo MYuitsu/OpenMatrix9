@@ -193,6 +193,9 @@ impl super::Controller {
         // Recording continues across a replacement only if it was already on, and
         // the replaced revision is the baseline (an `Arc`, never a copy).
         self.published = previous.published.take();
+        // Installed add-ons belong to the application session, not to one document:
+        // opening or creating a document keeps them attached.
+        self.adopt_addons(previous);
     }
     /// Charge the contract state that lives beside the scene cache. Empty state
     /// charges nothing, so a fresh controller keeps its previous budget.

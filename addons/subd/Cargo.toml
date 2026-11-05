@@ -1,0 +1,18 @@
+[package]
+name = "om9-addon-subd"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "OM9 Matrix-style SubD (Clayoo) menu: cages, Catmull-Clark smoothing, face selections and edits"
+publish = false
+
+[lib]
+name = "om9_subd"
+
+[dependencies]
+om9-addon-abi = { path = "../../crates/om9-addon-abi", features = ["session"] }
+om9-addon-geom = { path = "../geom" }
+om9-addon-surfaces = { path = "../surfaces" }
+serde = { workspace = true }
+serde_json = { workspace = true }

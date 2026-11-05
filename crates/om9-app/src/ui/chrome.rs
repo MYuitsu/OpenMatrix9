@@ -175,6 +175,24 @@ impl MatrixApp {
                                 ui.close();
                             }
                         }
+                        ui.separator();
+                        let has_host = self.controller.addon_host().is_some();
+                        if ui
+                            .add_enabled(has_host, egui::Button::new("Add-ons…"))
+                            .on_hover_text("Install, enable and configure OM9 add-ons")
+                            .clicked()
+                        {
+                            self.addons_ui.open = true;
+                            ui.close();
+                        }
+                        if ui
+                            .add_enabled(has_host, egui::Button::new("Install Add-on from Disk…"))
+                            .on_hover_text("Choose an OM9 add-on .zip (or drag it onto the window)")
+                            .clicked()
+                        {
+                            self.addons_ui.install_request = true;
+                            ui.close();
+                        }
                         // Four Rail Profile (OM9-TOOLS-004): tag profiles with the
                         // four selected rails so Sweep 4 can resolve them later.
                         if ui.button("Four Rail Profile").clicked() {
@@ -419,7 +437,7 @@ impl MatrixApp {
                                     .cloned()
                                     .collect();
                                 for f in items {
-                                    let available = Controller::availability(&f.id).is_ok();
+                                    let available = self.controller.is_available(&f.id);
                                     if ui
                                         .add_enabled(available, egui::Button::new(&f.name))
                                         .on_hover_text(if available {
@@ -713,31 +731,23 @@ impl MatrixApp {
             }
             return;
         }
-        let curve = crate::curve_menu::by_icon(name);
-        let surface = crate::surface_menu::by_icon(name);
-        let catalog_feature = curve
-            .map(|binding| binding.feature)
-            .or_else(|| surface.map(|binding| binding.feature));
-        let catalog_enabled = curve.is_none_or(crate::curve_menu::CurveMenuBinding::enabled)
-            && surface.is_none_or(crate::surface_menu::SurfaceMenuBinding::enabled);
-        let catalog_reason = curve
+        let catalog_reason = crate::curve_menu::by_icon(name)
             .map(|binding| binding.disabled_reason)
-            .or_else(|| surface.map(|binding| binding.disabled_reason));
-        let actual = catalog_feature
-            .map(str::to_owned)
-            .or_else(|| crate::icons::feature_for(name).map(str::to_owned))
-            .or_else(|| {
-                self.features
-                    .iter()
-                    .find(|f| crate::icons::icon_name(&f.id) == Some(name))
-                    .map(|f| f.id.clone())
-            })
+            .or_else(|| crate::surface_menu::by_icon(name).map(|binding| binding.disabled_reason));
+        let fallback = self
+            .features
+            .iter()
+            .find(|f| crate::icons::icon_name(&f.id) == Some(name))
+            .map(|f| f.id.clone())
             .or_else(|| (id == LINE || id == POINT).then(|| id.to_owned()));
+        // An enabled add-on that provides this icon's command takes it over.
+        let target = self.controller.icon_target(name, fallback.as_deref());
+        let actual = target.as_ref().map(|t| t.command.clone());
         let feature = actual
             .as_ref()
             .and_then(|id| self.features.iter().find(|f| &f.id == id).cloned());
-        if let Some(actual) = actual {
-            let enabled = Controller::availability(&actual).is_ok() && catalog_enabled;
+        if let (Some(actual), Some(target)) = (actual, target) {
+            let enabled = target.enabled;
             let help = if enabled {
                 if actual == "OM9-FILE-001" {
                     "Export Selected STL…".to_owned()
@@ -889,7 +899,8 @@ impl MatrixApp {
                         let selected = top == Some(index);
                         let (rect, response) =
                             ui.allocate_exact_size(Vec2::new(top_width, 18.), Sense::click());
-                        let response = response.on_hover_text(format!("{label} menu"));
+                        let shown = self.controller.tr().menu(label);
+                        let response = response.on_hover_text(shown.clone());
                         let painter = ui.painter();
                         painter.rect_filled(rect, 4, Color32::from_rgb(19, 27, 36));
                         if selected {
@@ -904,7 +915,7 @@ impl MatrixApp {
                         painter.text(
                             rect.center(),
                             Align2::CENTER_CENTER,
-                            *label,
+                            &shown,
                             FontId::proportional(11.),
                             PANEL_INK,
                         );
@@ -936,15 +947,15 @@ impl MatrixApp {
                                 if card_width < 48. { 9.5 } else { 10.5 },
                             );
                             let text_color = category_text(accent);
+                            let shown = self.controller.tr().menu(category);
                             let galley = ui.painter().layout_no_wrap(
-                                (*category).to_owned(),
+                                shown.clone(),
                                 font.clone(),
                                 text_color,
                             );
                             let (rect, response) =
                                 ui.allocate_exact_size(Vec2::new(card_width, 18.), Sense::click());
-                            let response =
-                                response.on_hover_text(format!("{category} command category"));
+                            let response = response.on_hover_text(shown);
                             let painter = ui.painter();
                             // Keep the raised card separate from the brighter label.
                             painter.rect_filled(
@@ -1308,6 +1319,10 @@ impl MatrixApp {
     /// fields, the preview summary, Apply/Reset/Cancel, the profile library button and the
     /// handle read-outs.
     fn builder_slot_ui(&mut self, ui: &mut egui::Ui) {
+        if self.builder_panel_ui(ui) {
+            self.builder_slot_rect = Some(ui.min_rect());
+            return;
+        }
         self.builder_slot_rect = Some(ui.available_rect_before_wrap());
         ui.horizontal_wrapped(|ui| {
             ui.label(egui::RichText::new("BUILDERS").strong());
@@ -1886,6 +1901,11 @@ impl MatrixApp {
                                         });
                                     self.feedback(result);
                                 }
+                            }
+                            // Toolbar slots (Move, Rotate, Mirror …) run the installed
+                            // add-on that provides the command, ahead of OM9's own.
+                            _ if self.controller.icon_addon(name).is_some() => {
+                                self.feature_icon(ui, "", name);
                             }
                             _ if tab == "Top 11" => {
                                 self.top11_icon(ui, name);

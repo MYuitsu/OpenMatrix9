@@ -60,10 +60,11 @@ impl MatrixApp {
             return false;
         }
         let revision = self.controller.document().revision;
-        self.selected_grips.retain(|(_, r)| *r == revision);
+        self.selected_grips = self.controller.selected_grips().into_iter().map(|h| (h, revision)).collect();
         let Some(handle) = self.grip_at(view, viewport, screen) else {
             if !additive {
                 self.selected_grips.clear();
+                self.controller.select_grips(&[], crate::session::GripPick::Replace);
             }
             return false;
         };
@@ -79,6 +80,8 @@ impl MatrixApp {
         } else {
             self.selected_grips.push((handle, revision));
         }
+        let handles: Vec<_> = self.selected_grips.iter().map(|(handle, _)| *handle).collect();
+        self.controller.select_grips(&handles, crate::session::GripPick::Replace);
         true
     }
 
@@ -86,21 +89,19 @@ impl MatrixApp {
     pub(super) fn delete_selected_control_grip(&mut self) -> bool {
         if self.controller.top11_grip_mode().is_none() {
             self.selected_grips.clear();
+            self.controller.select_grips(&[], crate::session::GripPick::Replace);
             return false;
         }
         let revision = self.controller.document().revision;
         self.selected_grips.retain(|(_, r)| *r == revision);
-        if self.selected_grips.is_empty() {
+        let handles = self.controller.selected_grips();
+        if handles.is_empty() {
             return true;
         }
-        let handles: Vec<_> = self
-            .selected_grips
-            .iter()
-            .map(|(handle, _)| *handle)
-            .collect();
         let result = self.controller.top11_delete_grips(&handles).map(|_| ());
         if result.is_ok() {
             self.selected_grips.clear();
+            self.controller.select_grips(&[], crate::session::GripPick::Replace);
         }
         *self.grip_cache.borrow_mut() = None;
         self.feedback(result);
@@ -126,21 +127,64 @@ impl MatrixApp {
             om9_core::top11::GripMode::Edit => Color32::from_rgb(235, 150, 40),
             om9_core::top11::GripMode::Control => Color32::from_rgb(70, 200, 235),
         };
+        let picked_colour = Color32::from_rgb(255, 230, 0);
+        let gumball = self.controller.grip_preview();
+        let drag_offset = self.grip_drag.as_ref().map(|drag| {
+            [
+                drag.current[0] - drag.handle.point[0],
+                drag.current[1] - drag.handle.point[1],
+                drag.current[2] - drag.handle.point[2],
+            ]
+        });
+        let project = |point: Point3| -> Option<egui::Pos2> {
+            let projected = view.camera.project(point, viewport).ok()??;
+            Some(egui::pos2(
+                projected.screen[0] as f32,
+                projected.screen[1] as f32,
+            ))
+        };
+        // Preview of the edited curves while grips move.
+        let preview = if let (Some(drag), Some(offset)) = (self.grip_drag.as_ref(), drag_offset) {
+            let moves: Vec<_> = drag
+                .group
+                .iter()
+                .map(|grip| (*grip, add(grip.point, offset)))
+                .collect();
+            self.controller.grip_edit_preview(&moves)
+        } else if gumball.is_some() {
+            self.controller.grip_preview_curves()
+        } else {
+            Vec::new()
+        };
+        for curve in &preview {
+            let points: Vec<egui::Pos2> = curve.iter().filter_map(|point| project(*point)).collect();
+            if points.len() >= 2 {
+                painter.add(egui::Shape::line(points, Stroke::new(1.0, picked_colour)));
+            }
+        }
         for handle in handles.iter() {
-            let point = self
+            let picked = self.controller.grip_is_selected(handle);
+            let in_drag = self
                 .grip_drag
                 .as_ref()
-                .filter(|drag| same_grip(drag.handle, *handle))
-                .map_or(handle.point, |drag| drag.current);
-            let Ok(Some(projected)) = view.camera.project(point, viewport) else {
+                .is_some_and(|drag| drag.group.iter().any(|grip| same_grip(*grip, *handle)));
+            let point = match (in_drag, drag_offset, gumball) {
+                (true, Some(offset), _) => add(handle.point, offset),
+                (false, _, Some(delta)) if picked => {
+                    delta.point(handle.point).unwrap_or(handle.point)
+                }
+                _ => handle.point,
+            };
+            let Some(centre) = project(point) else {
                 continue;
             };
-            let centre = egui::pos2(projected.screen[0] as f32, projected.screen[1] as f32);
-            let square = Rect::from_center_size(centre, egui::vec2(6.0, 6.0));
-            let selected = self.selected_grips.iter().any(|(selected, revision)| {
-                *revision == self.controller.document().revision && same_grip(*selected, *handle)
-            });
-            painter.rect_filled(square, 0.0, if selected { Color32::YELLOW } else { colour });
+            let (fill, size) = if picked || in_drag {
+                (picked_colour, 7.0)
+            } else {
+                (colour, 6.0)
+            };
+            let square = Rect::from_center_size(centre, egui::vec2(size, size));
+            painter.rect_filled(square, 0.0, fill);
             painter.rect_stroke(
                 square,
                 0.0,
@@ -150,8 +194,10 @@ impl MatrixApp {
         }
     }
 
-    /// Start and update a grip drag in the viewport. A release commits one geometry
-    /// transaction; Escape cancels the drag through the normal cancel path.
+    /// Drag grips in the viewport. Pressing a picked grip drags the whole picked group;
+    /// pressing another grip picks it (Shift adds it) and drags it. A release commits one
+    /// geometry transaction; Escape cancels the drag through the normal cancel path. The drag
+    /// follows object snaps, so a grip can be put on an end, a midpoint or another grip.
     pub(super) fn top11_grip_drag_ui(
         &mut self,
         ui: &mut egui::Ui,
@@ -159,7 +205,7 @@ impl MatrixApp {
         view: &om9_scene::workspace::ViewState,
         viewport: Viewport,
     ) {
-        if self.controller.top11_grip_mode().is_none() {
+        if self.controller.top11_grip_mode().is_none() || self.gumball_session.is_some() {
             return;
         }
         if self.grip_drag.is_none() && response.drag_started_by(egui::PointerButton::Primary) {
@@ -193,13 +239,18 @@ impl MatrixApp {
                     return;
                 }
             };
-            self.selected_grips.clear();
+            if !self.controller.grip_is_selected(&handle) {
+                let (shift, _) = ctrl_or_command(ui);
+                self.controller.select_grips(&[handle], if shift { crate::session::GripPick::Add } else { crate::session::GripPick::Replace });
+            }
+            let group = self.controller.selected_grips();
             self.controller.workspace.active = view.id;
             let Ok(source) = self.controller.document().stamp(handle.object) else {
                 return;
             };
             self.grip_drag = Some(GripDrag {
                 handle,
+                group,
                 source,
                 epoch: self.controller.coordinator().epoch(),
                 selection: self.controller.selection_state().revision,
@@ -234,22 +285,29 @@ impl MatrixApp {
                 .ray([pointer.x as f64, pointer.y as f64], viewport)
                 .and_then(|ray| ray.intersect_plane(drag.plane));
             if let Ok(Some(world)) = world {
-                drag.current = std::array::from_fn(|i| {
-                    drag.handle.point[i] + (world[i] - drag.press_world[i])
-                });
+                drag.current = self.snap.as_ref().map_or_else(
+                    || std::array::from_fn(|i| drag.handle.point[i] + (world[i] - drag.press_world[i])),
+                    |candidate| candidate.world,
+                );
             }
         }
         if response.drag_stopped_by(egui::PointerButton::Primary) {
-            let handle = drag.handle;
-            let world = drag.current;
+            let offset = [
+                drag.current[0] - drag.handle.point[0],
+                drag.current[1] - drag.handle.point[1],
+                drag.current[2] - drag.handle.point[2],
+            ];
             self.grip_drag = None;
-            // egui has already applied its screen-space drag threshold. A
-            // fixed world-space epsilon discards visible edits at deep zoom.
-            if world == handle.point {
+            if drag.current == drag.handle.point {
                 return;
             }
+            let moves: Vec<_> = drag
+                .group
+                .iter()
+                .map(|grip| (*grip, add(grip.point, offset)))
+                .collect();
             *self.grip_cache.borrow_mut() = None;
-            match self.controller.top11_move_grip(handle, world) {
+            match self.controller.top11_move_grips(&moves) {
                 Ok(result) => {
                     let message = result.message();
                     self.status.info(&message);
@@ -266,7 +324,35 @@ impl MatrixApp {
         }
     }
 
-    fn grip_at(
+    /// The grips whose screen points fall inside `band` (window pick of grips).
+    pub(super) fn grips_in_band(
+        &self,
+        view: &om9_scene::workspace::ViewState,
+        viewport: Viewport,
+        band: Rect,
+    ) -> Vec<GripHandle> {
+        let Some(handles) = self.grip_handles_cached() else {
+            return Vec::new();
+        };
+        handles
+            .iter()
+            .filter(|handle| {
+                view.camera
+                    .project(handle.point, viewport)
+                    .ok()
+                    .flatten()
+                    .is_some_and(|projected| {
+                        band.contains(egui::pos2(
+                            projected.screen[0] as f32,
+                            projected.screen[1] as f32,
+                        ))
+                    })
+            })
+            .copied()
+            .collect()
+    }
+
+    pub(super) fn grip_at(
         &self,
         view: &om9_scene::workspace::ViewState,
         viewport: Viewport,
@@ -284,6 +370,10 @@ impl MatrixApp {
             .min_by(|left, right| left.0.total_cmp(&right.0))
             .map(|(_, handle)| handle)
     }
+}
+
+fn add(point: Point3, offset: [f64; 3]) -> Point3 {
+    [point[0] + offset[0], point[1] + offset[1], point[2] + offset[2]]
 }
 
 fn same_grip(left: GripHandle, right: GripHandle) -> bool {

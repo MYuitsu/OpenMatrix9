@@ -515,6 +515,24 @@ impl TransactionRequest {
                         },
                         l,
                     )?;
+                    // An inserted entity may carry semantic slots (e.g. `om9.gem`); the
+                    // request owns them until commit, exactly as the stored document does.
+                    if !entity.extensions.is_empty() {
+                        value.add(
+                            Usage::btree::<String, Extension>(entity.extensions.len())?,
+                            l,
+                        )?;
+                    }
+                    for (slot, extension) in &entity.extensions {
+                        value.add(
+                            Usage {
+                                bytes: slot.capacity() as u64,
+                                ..Usage::default()
+                            },
+                            l,
+                        )?;
+                        value.add(extension.validate(l)?, l)?;
+                    }
                 }
                 Mutation::Geometry { geometry, .. } => value = geometry.validate(l)?,
                 Mutation::DefinitionInsert {
@@ -3231,6 +3249,12 @@ impl TransactionCoordinator {
                     entity.geometry.validate(&limits)?;
                     name(&entity.label, &limits)?;
                     entity.placement.validate()?;
+                    for (slot, extension) in &entity.extensions {
+                        if !crate::model::slot_name_valid(slot) {
+                            return Err(Error::Invalid("extension slot"));
+                        }
+                        extension.validate(&limits)?;
+                    }
                     // A layer created earlier in this request has no captured state; its
                     // proposed record and parent chain decide whether it can receive output.
                     let d = base.document(*document)?;

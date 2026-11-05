@@ -1,0 +1,13 @@
+[package]
+name = "om9-addon-geom"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "Shared curve math for OM9 add-ons: interpolation, exact conics, composite NURBS."
+publish = false
+
+[dependencies]
+om9-addon-abi = { path = "../../crates/om9-addon-abi", features = ["session"] }
+serde_json = { workspace = true }
+serde = { workspace = true }

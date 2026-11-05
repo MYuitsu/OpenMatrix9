@@ -1,0 +1,752 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_surfaces"
+version = "0.1.0"
+name = "Surfaces"
+tagline = "Menu Surface kiểu Matrix: sweep, loft, patch, revolve, blend, fillet, offset …"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Surface"]
+
+[[commands]]
+id = "SurfaceSweepSweep1Rail"
+label = "Sweep 1 Rail"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["Sweep1"]
+summary = "Quét các profile dọc một đường ray (ray kín: nhẫn)."
+steps = ["Chọn ray (đường dài nhất) và các profile.", "Enter."]
+
+[[commands]]
+id = "SurfaceSweepSweep2Rails"
+label = "Sweep 2 Rails"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["Sweep2"]
+summary = "Quét profile giữa hai đường ray, profile co giãn theo khoảng cách hai ray."
+steps = ["Chọn hai ray và các profile.", "Enter."]
+options = ["MaintainHeight: giữ chiều cao profile."]
+
+[[commands]]
+id = "SurfaceSweepProfileSweep"
+label = "Profile Sweep"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ProfileSweep"]
+summary = "Quét các profile quanh ring rail thành bản nhẫn."
+steps = ["Chọn ring rail và các profile.", "Enter."]
+
+[[commands]]
+id = "SurfacePlanarCurves"
+label = "Planar Curves"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["PlanarSrf"]
+summary = "Tạo mặt phẳng từ đường cong kín phẳng (đường trong là lỗ)."
+steps = ["Chọn các đường cong kín.", "Enter."]
+
+[[commands]]
+id = "SurfacePlaneCornertoCorner"
+label = "Plane"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Plane"]
+summary = "Mặt phẳng chữ nhật theo hai góc trên CPlane."
+steps = ["Bấm góc thứ nhất.", "Bấm góc đối diện."]
+
+[[commands]]
+id = "OthersSurfaceRebuild"
+label = "Rebuild Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["RebuildSrf"]
+summary = "Dựng lại mặt với số điểm U, V và bậc mới."
+steps = ["Chọn mặt NURBS.", "Chỉnh số điểm, bậc.", "Enter."]
+
+[[commands]]
+id = "SurfaceBlendSurface"
+label = "Blend Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["BlendSrf"]
+summary = "Mặt chuyển tiếp tiếp tuyến giữa hai mép mặt gần nhau."
+steps = ["Chọn hai mặt.", "Chỉnh độ phình.", "Enter."]
+
+[[commands]]
+id = "SurfaceVariableFilletBlendChamferVariableBlendSurfaces"
+label = "Variable Blend Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["VariableBlendSrf"]
+summary = "Blend có độ phình thay đổi dọc mép."
+steps = ["Chọn hai mặt.", "Chỉnh phình đầu và cuối.", "Enter."]
+
+[[commands]]
+id = "SurfaceLoft"
+label = "Loft"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["Loft"]
+summary = "Mặt qua các đường tiết diện theo thứ tự."
+steps = ["Chọn các tiết diện theo thứ tự.", "Style=Normal/Loose/Straight.", "Enter."]
+options = ["Closed: khép kín."]
+
+[[commands]]
+id = "SurfaceCurveNetwork"
+label = "Curve Network"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["NetworkSrf"]
+summary = "Mặt từ lưới đường cong hai hướng."
+steps = ["Chọn các đường cong cả hai hướng.", "Enter."]
+
+[[commands]]
+id = "SurfaceSurfaceEditToolsShrinkTrimmedSurface"
+label = "Shrink Trimmed Surface"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ShrinkTrimmedSrf"]
+summary = "Thu miền mặt NURBS vừa phần đã cắt (trim)."
+steps = ["Chọn mặt.", "Enter."]
+
+[[commands]]
+id = "SurfacePatch"
+label = "Patch"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Patch"]
+summary = "Mặt vá qua đường biên (kín hoặc nhiều đoạn)."
+steps = ["Chọn đường biên.", "Enter."]
+
+[[commands]]
+id = "SurfaceEdgeCurves"
+label = "Edge Curves"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["EdgeSrf"]
+summary = "Mặt từ 2, 3 hoặc 4 đường mép."
+steps = ["Chọn các đường mép.", "Enter."]
+
+[[commands]]
+id = "SurfaceSurfaceEditToolsUntrim"
+label = "Untrim"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Untrim"]
+summary = "Bỏ phần cắt (trim), trả mặt về miền đầy đủ."
+steps = ["Chọn mặt.", "Enter."]
+
+[[commands]]
+id = "SurfaceGVDExtrudeAll"
+label = "Extrude All"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["ExtrudeCrvAll"]
+summary = "Đùn tất cả đường cong thành mặt theo pháp tuyến CPlane."
+steps = ["Chọn đường cong.", "Chỉnh khoảng đùn.", "Enter."]
+
+[[commands]]
+id = "SurfaceRevolve"
+label = "Revolve"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["Revolve"]
+summary = "Xoay profile quanh trục (mặt tròn xoay chính xác)."
+steps = ["Chọn profile.", "Bấm hai điểm trục."]
+options = ["Angle, Start trong bảng BUILDERS."]
+
+[[commands]]
+id = "SurfaceRailRevolve"
+label = "Rail Revolve"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["RailRevolve"]
+summary = "Xoay profile quanh trục, bán kính theo đường ray."
+steps = ["Chọn profile rồi ray.", "Bấm hai điểm trục."]
+
+[[commands]]
+id = "BuilderFourProfileSweep"
+label = "Four Profile Sweep"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["FourProfileSweep"]
+summary = "Quét bốn profile (đỉnh, hai bên, đáy) quanh ring rail."
+steps = ["Chọn ring rail và bốn profile.", "Enter."]
+
+[[commands]]
+id = "SurfaceSweepSweepMultiRail"
+label = "Sweep Multi Rail"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["SweepMultiRail"]
+summary = "Quét qua ba ray trở lên: tiết diện đi qua mọi ray."
+steps = ["Chọn các ray theo thứ tự quanh tiết diện.", "Enter."]
+options = ["Closed: tiết diện kín."]
+
+[[commands]]
+id = "SurfaceTweenSurfaces"
+label = "Tween Surfaces"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["TweenSrf"]
+summary = "Các mặt trung gian giữa hai mặt."
+steps = ["Chọn hai mặt.", "Chỉnh số mặt.", "Enter."]
+
+[[commands]]
+id = "SurfaceFilletSurfaces"
+label = "Fillet Surfaces"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["FilletSrf"]
+summary = "Bo cung giữa hai mặt cắt nhau (mặt gốc không bị cắt)."
+steps = ["Chọn hai mặt.", "Chỉnh bán kính, phía.", "Enter."]
+options = ["FlipFirst / FlipSecond: chọn phía."]
+
+[[commands]]
+id = "SurfaceVariableFilletBlendChamferVariableFilletSurfaces"
+label = "Variable Fillet"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["VariableFilletSrf"]
+summary = "Bo cung bán kính thay đổi dọc giao tuyến."
+steps = ["Chọn hai mặt.", "Chỉnh bán kính đầu, cuối.", "Enter."]
+
+[[commands]]
+id = "SurfaceChamferSurfaces"
+label = "Chamfer Surfaces"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ChamferSrf"]
+summary = "Vát phẳng giữa hai mặt cắt nhau."
+steps = ["Chọn hai mặt.", "Chỉnh khoảng vát.", "Enter."]
+
+[[commands]]
+id = "SurfaceVariableFilletBlendChamferVariableChamferSurfaces"
+label = "Variable Chamfer"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["VariableChamferSrf"]
+summary = "Vát với khoảng thay đổi dọc giao tuyến."
+steps = ["Chọn hai mặt.", "Chỉnh khoảng đầu, cuối.", "Enter."]
+
+[[commands]]
+id = "SurfaceOffsetSurface"
+label = "Offset Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["OffsetSrf"]
+summary = "Mặt song song cách đều (mặt NURBS hoặc lưới)."
+steps = ["Chọn mặt.", "Chỉnh khoảng.", "Enter."]
+options = ["Flip: phía ngược."]
+
+[[commands]]
+id = "SurfaceVariableOffsetSurface"
+label = "Variable Offset Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["VariableOffsetSrf"]
+summary = "Offset với khoảng khác nhau ở bốn góc."
+steps = ["Chọn mặt.", "Chỉnh bốn khoảng.", "Enter."]
+
+[[commands]]
+id = "SurfaceSurfaceEditToolsMerge"
+label = "Merge Surfaces"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["MergeSrf"]
+summary = "Gộp hai mặt chung mép thành một mặt."
+steps = ["Chọn hai mặt.", "Enter."]
+
+[[commands]]
+id = "SurfaceSurfaceEditToolsMatch"
+label = "Match Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["MatchSrf"]
+summary = "Khớp mép mặt thứ nhất vào mép mặt thứ hai (vị trí / tiếp tuyến)."
+steps = ["Chọn mặt cần sửa rồi mặt đích.", "Enter."]
+options = ["Continuity: Position/Tangency."]
+
+[[commands]]
+id = "SurfaceDrape"
+label = "Drape"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["Drape"]
+summary = "Phủ một tấm mặt lên các vật nhìn từ CPlane."
+steps = ["Chọn vật.", "Bấm hai góc vùng phủ."]
+
+[[commands]]
+id = "SurfaceHeightfieldfromImage"
+label = "Heightfield from Image"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["Heightfield"]
+summary = "Mặt nổi theo độ sáng ảnh (PNG, BMP, PGM)."
+steps = ["Chọn tệp ảnh, kích thước.", "Bấm góc dưới trái."]
+
+[[commands]]
+id = "SurfaceSurfaceEditToolsSplitatIsocurve"
+label = "Split at Isocurve"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["SplitSrf"]
+summary = "Cắt mặt thành hai theo đường đẳng tham số qua điểm bấm."
+steps = ["Chọn mặt.", "Direction=U/V.", "Bấm điểm trên mặt."]
+options = ["Direction."]
+
+[[commands]]
+id = "SurfaceExtendSurface"
+label = "Extend Surface"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["ExtendSrf"]
+summary = "Kéo dài một mép mặt."
+steps = ["Chọn mặt.", "Gõ độ dài.", "Bấm gần mép."]
+
+[[commands]]
+id = "SurfaceExtrudeCurveNormalToSurface"
+label = "Extrude Curve Normal to Surface"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+mesh_data = true
+aliases = ["ExtrudeCrvNormal"]
+summary = "Dựng dải mặt từ đường cong trên mặt, theo pháp tuyến mặt."
+steps = ["Chọn đường cong và mặt.", "Chỉnh cao.", "Enter."]
+options = ["Flip."]
+
+[[commands]]
+id = "SurfaceUnrollDevelopableSrf"
+label = "Unroll Developable Surface"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["UnrollSrf"]
+summary = "Trải phẳng mặt khai triển được (trụ, nón …)."
+steps = ["Chọn mặt.", "Enter."]
+
+[[commands]]
+id = "SurfaceSmash"
+label = "Smash"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Smash"]
+summary = "Trải phẳng gần đúng mặt bất kỳ."
+steps = ["Chọn mặt.", "Enter."]
+
+[[commands]]
+id = "SurfaceSurfaceEditToolsSoftEdit"
+label = "Soft Edit Surface"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["SoftEditSrf"]
+summary = "Kéo một điểm trên mặt, vùng quanh đi theo mềm mại."
+steps = ["Chọn mặt, Enter.", "Gõ vùng ảnh hưởng.", "Bấm điểm và điểm đích."]
+
+[[commands]]
+id = "SurfacePlaneCuttingPlane"
+label = "Cutting Plane"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["CutPlane"]
+summary = "Mặt phẳng cắt đứng qua đường bấm, đủ cao cho vật đã chọn."
+steps = ["Chọn vật.", "Bấm hai điểm đường cắt."]
+
+[[commands]]
+id = "SurfaceSurfaceEditToolsAdjustClosedSurfaceSeam"
+label = "Adjust Closed Surface Seam"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["SrfSeam"]
+summary = "Dời đường nối (seam) của mặt kín."
+steps = ["Chọn mặt kín.", "Bấm vị trí seam mới."]
+
+[[commands]]
+id = "SurfaceSurfaceEditToolsSetSurfaceTangent"
+label = "Set Surface Tangent"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["SetSrfTangent"]
+summary = "Đặt hướng tiếp tuyến của một mép mặt."
+steps = ["Chọn mặt.", "Bấm gần mép, rồi bấm hướng."]
+
+[[commands]]
+id = "SurfaceSurfaceEditToolsRefittoTolerance"
+label = "Refit to Tolerance"
+handler = "om9_addon_session"
+interactive = true
+builder = true
+aliases = ["RefitSrf"]
+summary = "Làm lại mặt ít điểm nhất trong dung sai."
+steps = ["Chọn mặt.", "Chỉnh dung sai.", "Enter."]
+
+[[settings]]
+key = "sw_stations"
+type = "int"
+option = "Stations"
+label = "Số trạm dọc ray"
+default = 48
+min = 4
+max = 400
+commands = ["SurfaceSweepSweep1Rail", "SurfaceSweepSweep2Rails", "SurfaceSweepProfileSweep", "BuilderFourProfileSweep", "SurfaceSweepSweepMultiRail"]
+
+[[settings]]
+key = "sw2_maintain_height"
+type = "bool"
+option = "MaintainHeight"
+label = "Giữ chiều cao profile"
+default = false
+commands = ["SurfaceSweepSweep2Rails"]
+
+[[settings]]
+key = "smr_closed"
+type = "bool"
+option = "Closed"
+label = "Tiết diện kín"
+default = true
+commands = ["SurfaceSweepSweepMultiRail"]
+
+[[settings]]
+key = "loft_style"
+type = "enum"
+option = "Style"
+label = "Kiểu loft"
+choices = ["normal", "loose", "straight"]
+choice_labels = ["Normal", "Loose", "Straight"]
+default = "normal"
+commands = ["SurfaceLoft"]
+
+[[settings]]
+key = "loft_closed"
+type = "bool"
+option = "Closed"
+label = "Khép kín"
+default = false
+commands = ["SurfaceLoft"]
+
+[[settings]]
+key = "rev_angle"
+type = "angle"
+option = "Angle"
+label = "Góc xoay"
+default = 360.0
+min = 1.0
+max = 360.0
+step = 1.0
+commands = ["SurfaceRevolve"]
+
+[[settings]]
+key = "rev_start"
+type = "angle"
+option = "Start"
+label = "Góc bắt đầu"
+default = 0.0
+min = -360.0
+max = 360.0
+step = 1.0
+commands = ["SurfaceRevolve"]
+
+[[settings]]
+key = "ea_distance"
+type = "length"
+option = "Distance"
+label = "Khoảng đùn"
+default = 2.0
+min = 0.01
+max = 500.0
+step = 0.05
+commands = ["SurfaceGVDExtrudeAll"]
+
+[[settings]]
+key = "ea_both_sides"
+type = "bool"
+option = "BothSides"
+label = "Hai phía"
+default = false
+commands = ["SurfaceGVDExtrudeAll"]
+
+[[settings]]
+key = "bl_bulge"
+type = "length"
+option = "Bulge"
+label = "Độ phình"
+default = 1.0
+min = 0.05
+max = 5.0
+step = 0.05
+commands = ["SurfaceBlendSurface", "SurfaceVariableFilletBlendChamferVariableBlendSurfaces"]
+
+[[settings]]
+key = "bl_end_bulge"
+type = "length"
+option = "EndBulge"
+label = "Độ phình cuối"
+default = 1.0
+min = 0.05
+max = 5.0
+step = 0.05
+commands = ["SurfaceVariableFilletBlendChamferVariableBlendSurfaces"]
+
+[[settings]]
+key = "fs_radius"
+type = "length"
+option = "Radius"
+label = "Bán kính / khoảng"
+default = 1.0
+min = 0.01
+max = 50.0
+step = 0.05
+commands = ["SurfaceFilletSurfaces", "SurfaceVariableFilletBlendChamferVariableFilletSurfaces", "SurfaceChamferSurfaces", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces"]
+
+[[settings]]
+key = "fs_end_radius"
+type = "length"
+option = "EndRadius"
+label = "Bán kính / khoảng cuối"
+default = 2.0
+min = 0.01
+max = 50.0
+step = 0.05
+commands = ["SurfaceVariableFilletBlendChamferVariableFilletSurfaces", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces"]
+
+[[settings]]
+key = "fs_flip_first"
+type = "bool"
+option = "FlipFirst"
+label = "Đổi phía mặt 1"
+default = false
+commands = ["SurfaceFilletSurfaces", "SurfaceVariableFilletBlendChamferVariableFilletSurfaces", "SurfaceChamferSurfaces", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces"]
+
+[[settings]]
+key = "fs_flip_second"
+type = "bool"
+option = "FlipSecond"
+label = "Đổi phía mặt 2"
+default = false
+commands = ["SurfaceFilletSurfaces", "SurfaceVariableFilletBlendChamferVariableFilletSurfaces", "SurfaceChamferSurfaces", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces"]
+
+[[settings]]
+key = "os_distance"
+type = "length"
+option = "Distance"
+label = "Khoảng offset"
+default = 1.0
+min = -50.0
+max = 50.0
+step = 0.05
+commands = ["SurfaceOffsetSurface", "SurfaceVariableOffsetSurface"]
+
+[[settings]]
+key = "os_d10"
+type = "length"
+option = "Corner10"
+label = "Khoảng góc (1,0)"
+default = 1.0
+min = -50.0
+max = 50.0
+step = 0.05
+commands = ["SurfaceVariableOffsetSurface"]
+
+[[settings]]
+key = "os_d01"
+type = "length"
+option = "Corner01"
+label = "Khoảng góc (0,1)"
+default = 1.0
+min = -50.0
+max = 50.0
+step = 0.05
+commands = ["SurfaceVariableOffsetSurface"]
+
+[[settings]]
+key = "os_d11"
+type = "length"
+option = "Corner11"
+label = "Khoảng góc (1,1)"
+default = 1.0
+min = -50.0
+max = 50.0
+step = 0.05
+commands = ["SurfaceVariableOffsetSurface"]
+
+[[settings]]
+key = "os_flip"
+type = "bool"
+option = "Flip"
+label = "Phía ngược"
+default = false
+commands = ["SurfaceOffsetSurface", "SurfaceVariableOffsetSurface"]
+
+[[settings]]
+key = "tw_count"
+type = "int"
+option = "Count"
+label = "Số mặt"
+default = 1
+min = 1
+max = 50
+commands = ["SurfaceTweenSurfaces"]
+
+[[settings]]
+key = "sm_continuity"
+type = "enum"
+option = "Continuity"
+label = "Liên tục"
+choices = ["position", "tangency"]
+choice_labels = ["Vị trí", "Tiếp tuyến"]
+default = "tangency"
+commands = ["SurfaceSurfaceEditToolsMatch"]
+
+[[settings]]
+key = "dr_density"
+type = "int"
+option = "Density"
+label = "Mật độ lưới"
+default = 30
+min = 4
+max = 200
+commands = ["SurfaceDrape"]
+
+[[settings]]
+key = "hf_file"
+type = "path"
+option = "File"
+label = "Tệp ảnh (PNG, BMP, PGM)"
+default = ""
+commands = ["SurfaceHeightfieldfromImage"]
+
+[[settings]]
+key = "hf_width"
+type = "length"
+option = "Width"
+label = "Rộng"
+default = 20.0
+min = 0.5
+max = 500.0
+step = 0.5
+commands = ["SurfaceHeightfieldfromImage"]
+
+[[settings]]
+key = "hf_height"
+type = "length"
+option = "Height"
+label = "Cao tối đa"
+default = 1.0
+min = 0.01
+max = 100.0
+step = 0.05
+commands = ["SurfaceHeightfieldfromImage"]
+
+[[settings]]
+key = "hf_density"
+type = "int"
+option = "Density"
+label = "Mật độ"
+default = 60
+min = 4
+max = 300
+commands = ["SurfaceHeightfieldfromImage"]
+
+[[settings]]
+key = "hf_invert"
+type = "bool"
+option = "Invert"
+label = "Đảo sáng / tối"
+default = false
+commands = ["SurfaceHeightfieldfromImage"]
+
+[[settings]]
+key = "sr_u_points"
+type = "int"
+option = "UPoints"
+label = "Số điểm U"
+default = 10
+min = 2
+max = 200
+commands = ["OthersSurfaceRebuild"]
+
+[[settings]]
+key = "sr_v_points"
+type = "int"
+option = "VPoints"
+label = "Số điểm V"
+default = 10
+min = 2
+max = 200
+commands = ["OthersSurfaceRebuild"]
+
+[[settings]]
+key = "sr_degree"
+type = "int"
+option = "Degree"
+label = "Bậc"
+default = 3
+min = 1
+max = 7
+commands = ["OthersSurfaceRebuild"]
+
+[[settings]]
+key = "srf_tolerance"
+type = "length"
+option = "Tolerance"
+label = "Dung sai"
+default = 0.01
+min = 0.0001
+max = 5.0
+step = 0.001
+commands = ["SurfaceSurfaceEditToolsRefittoTolerance"]
+
+[[settings]]
+key = "en_height"
+type = "length"
+option = "Height"
+label = "Cao dải"
+default = 1.0
+min = 0.01
+max = 100.0
+step = 0.05
+commands = ["SurfaceExtrudeCurveNormalToSurface"]
+
+[[settings]]
+key = "en_flip"
+type = "bool"
+option = "Flip"
+label = "Đảo phía"
+default = false
+commands = ["SurfaceExtrudeCurveNormalToSurface"]

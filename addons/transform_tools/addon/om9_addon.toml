@@ -1,0 +1,346 @@
+# Manifest của gói add-on. tools/ci/build-addons-windows.ps1 điền @ENTRY@/@PLATFORM@ theo nền tảng build.
+schema_version = "1.0.0"
+id = "om9_transform_tools"
+version = "0.1.0"
+name = "Transform Tools"
+tagline = "Menu Transform kiểu Matrix: Orient, Bend, Flow, Smart Flow, Cage …"
+maintainer = "OpenMatrix9 contributors"
+type = "add-on"
+license = ["SPDX:LGPL-2.1-or-later"]
+om9_version_min = "0.1.0"
+platforms = ["@PLATFORM@"]
+runtime = "native"
+entry = "@ENTRY@"
+tags = ["Transform"]
+
+[[commands]]
+id = "TransformScaleNonUniformScale"
+label = "Scale Non-Uniform"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["ScaleNU"]
+summary = "Phóng to/thu nhỏ khác nhau theo X, Y và pháp tuyến CPlane."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bấm điểm gốc.", "Gõ hệ số X, Y, Z (Enter giữ 1)."]
+options = ["Copy: giữ bản gốc."]
+
+[[commands]]
+id = "TransformScaleScaleByPlane"
+label = "Scale by Plane"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["ScaleByPlane"]
+summary = "Phóng to/thu nhỏ đều trong mặt CPlane, giữ chiều cao."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bấm điểm gốc.", "Gõ hệ số."]
+options = ["Copy: giữ bản gốc."]
+
+[[commands]]
+id = "TransformOrient2Points"
+label = "Orient 2 Points"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Orient", "Orient2Pt"]
+summary = "Đưa vật từ 2 điểm tham chiếu tới 2 điểm đích (dời + xoay, có thể co giãn)."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bấm 2 điểm tham chiếu.", "Bấm 2 điểm đích (xem trước khi rê chuột)."]
+options = ["Copy: giữ bản gốc.", "Scale: co giãn theo khoảng cách."]
+
+[[commands]]
+id = "TransformOrient3Points"
+label = "Orient 3 Points"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Orient3Pt"]
+summary = "Đưa vật từ 3 điểm tham chiếu tới 3 điểm đích."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bấm 3 điểm tham chiếu.", "Bấm 3 điểm đích."]
+options = ["Copy, Scale."]
+
+[[commands]]
+id = "TransformShear"
+label = "Shear"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Shear"]
+summary = "Xô nghiêng vật trong mặt CPlane theo một góc."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bấm điểm gốc.", "Bấm điểm hướng xô.", "Gõ góc."]
+options = ["Copy: giữ bản gốc."]
+
+[[commands]]
+id = "TransformSymmetry"
+label = "Symmetry"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["Symmetry"]
+summary = "Tạo bản đối xứng của vật qua trục X, Y của CPlane (hoặc cả hai)."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Chọn Axis.", "Bấm tâm đối xứng hoặc Enter để lấy gốc CPlane."]
+options = ["Axis: X, Y, XY."]
+
+[[commands]]
+id = "TransformOrientRemaptoCPlane"
+label = "Remap to CPlane"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["RemapCPlane"]
+summary = "Đưa vật từ mặt phẳng Top của thế giới lên CPlane đang dùng."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Enter."]
+options = ["Copy: giữ bản gốc."]
+
+[[commands]]
+id = "TransformMoveUVN"
+label = "Move UVN"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["MoveUVN"]
+summary = "Dời vật theo U, V (trục CPlane) và N (pháp tuyến) bằng giá trị gõ."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Gõ khoảng dời U, V, N."]
+options = ["Copy: giữ bản gốc."]
+
+[[commands]]
+id = "BuilderMakeDownFacing"
+label = "Make Down Facing"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["gvMakeDownFacing", "MakeDownFacing"]
+summary = "Lật úp từng viên đá quanh gờ của chính nó."
+steps = ["Chọn đá.", "Enter."]
+
+[[commands]]
+id = "TransformBend"
+label = "Bend"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Bend"]
+summary = "Uốn cong vật theo một trục (gân), trục thành cung tròn cùng chiều dài."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bấm đầu và cuối trục uốn.", "Gõ góc uốn (về phía pháp tuyến CPlane)."]
+
+[[commands]]
+id = "TransformTaper"
+label = "Taper"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Taper"]
+summary = "Vuốt nhỏ dần vật dọc một trục."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bấm đầu và cuối trục.", "Gõ tỉ lệ ở đầu và ở cuối."]
+
+[[commands]]
+id = "TransformTwist"
+label = "Twist"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Twist"]
+summary = "Xoắn vật quanh một trục."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bấm đầu và cuối trục.", "Gõ góc xoắn ở cuối trục."]
+
+[[commands]]
+id = "TransformStretch"
+label = "Stretch"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Stretch"]
+summary = "Kéo giãn vật dọc một trục."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bấm đầu và cuối trục.", "Bấm điểm kéo tới."]
+
+[[commands]]
+id = "TransformMaelstrom"
+label = "Maelstrom"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Maelstrom"]
+summary = "Xoáy vật quanh một tâm, mạnh ở tâm và giảm dần tới bán kính."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bấm tâm.", "Gõ bán kính và góc."]
+
+[[commands]]
+id = "TransformSoftMove"
+label = "Soft Move"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["SoftMove"]
+summary = "Dời mềm: điểm gần nhất dời hết, xa dần dời ít (theo bán kính)."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Gõ bán kính ảnh hưởng.", "Bấm điểm gốc và điểm đích."]
+
+[[commands]]
+id = "TransformSetPoints"
+label = "Set Points"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["SetPt", "SetPoints"]
+summary = "Đặt X, Y hoặc Z (theo CPlane) của mọi điểm của vật về cùng một giá trị."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Bật X/Y/Z cần đặt.", "Bấm điểm lấy giá trị."]
+options = ["X, Y, Z: trục được đặt."]
+
+[[commands]]
+id = "TransformProjecttoCPlane"
+label = "Project To C-Plane"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ProjectToCPlane"]
+summary = "Ép phẳng vật lên CPlane."
+steps = ["Chọn vật cần biến đổi (hoặc chọn sau khi gọi lệnh, Enter).", "Enter."]
+
+[[commands]]
+id = "TransformFlowAlongCurve"
+label = "Flow Along Curve"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Flow", "FlowAlongCurve"]
+summary = "Uốn vật từ đường cong gốc sang đường cong đích."
+steps = ["Chọn vật, đường gốc (gần vật) và đường đích.", "Enter."]
+options = ["Stretch: kéo giãn theo chiều dài đường đích.", "Rigid: chỉ dời/xoay từng vật, không uốn."]
+
+[[commands]]
+id = "TransformFlowAlongSurface"
+label = "Flow Along Surface"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["FlowAlongSrf"]
+summary = "Đắp vật từ CPlane lên mặt (giữ độ cao so với mặt)."
+steps = ["Chọn vật và mặt đích.", "Enter."]
+
+[[commands]]
+id = "TransformSplop"
+label = "Splop"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["Splop"]
+summary = "Đắp vật lên mặt tại điểm bấm, có xoay và co giãn."
+steps = ["Chọn vật và mặt đích.", "Bấm điểm trên mặt (nhìn từ trên CPlane).", "Gõ góc xoay và tỉ lệ."]
+
+[[commands]]
+id = "gvSmartFlow"
+label = "Smart Flow"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["gvSmartFlow", "SmartFlow"]
+summary = "Uốn thiết kế nằm dọc trục X lên ring rail (hoặc đường cong bất kỳ)."
+steps = ["Chọn thiết kế và ring rail (đường dài nhất là đích).", "Enter."]
+options = ["Stretch: kéo giãn kín vòng rail."]
+
+[[commands]]
+id = "gvSmartFlowRigid"
+label = "Smart Flow Rigid"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["SmartFlowRigid"]
+summary = "Như Smart Flow nhưng chỉ dời/xoay từng vật theo rail, không uốn."
+steps = ["Chọn vật và rail.", "Enter."]
+options = ["Stretch."]
+
+[[commands]]
+id = "gvSmartFlowBreak"
+label = "Smart Flow Break"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["SmartFlowBreak"]
+summary = "Ngắt liên kết Smart Flow (OM9 không giữ lịch sử Smart Flow nên vật đã độc lập)."
+steps = ["Gọi lệnh: báo tình trạng."]
+
+[[commands]]
+id = "gvSmartFlowPullDownCurves"
+label = "Smart Flow Pull Down Curves"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["SmartFlowPullDown"]
+summary = "Kéo các đường cong xuống bám lên mặt (theo pháp tuyến CPlane)."
+steps = ["Chọn đường cong và mặt.", "Enter."]
+
+[[commands]]
+id = "TransformSmartPattern"
+label = "Smart Pattern"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["SmartPattern"]
+summary = "Rải bản sao của vật dọc đường cong."
+steps = ["Chọn vật và đường cong.", "Gõ số lượng."]
+options = ["Orient: xoay theo đường cong."]
+
+[[commands]]
+id = "TransformCageEditingCreateCage"
+label = "Create Cage"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["CreateCage"]
+summary = "Tạo khung lồng (cage) bao quanh vật để biến dạng."
+steps = ["Chọn vật.", "Enter: tạo cage.", "Dời các điểm của cage (Edit Points) rồi dùng Cage Edit."]
+
+[[commands]]
+id = "TransformCageEditingCageEdit"
+label = "Cage Edit"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["CageEdit"]
+summary = "Biến dạng vật theo các điểm cage đã dời."
+steps = ["Chọn cage và vật.", "Enter."]
+
+[[commands]]
+id = "TransformArrayAlongCurve"
+label = "Array Along Curve"
+handler = "om9_addon_session"
+interactive = true
+aliases = ["ArrayCrv"]
+summary = "Mảng bản sao dọc đường cong."
+steps = ["Chọn vật và đường cong.", "Gõ số lượng."]
+options = ["Orient: xoay theo đường cong."]
+
+[[commands]]
+id = "TransformArrayAlongSurface"
+label = "Array Along Surface"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ArraySrf"]
+summary = "Mảng bản sao trên mặt theo lưới, đứng vuông góc mặt."
+steps = ["Chọn vật và mặt.", "Gõ số theo X và Y."]
+
+[[commands]]
+id = "TransformArrayAlongCurveonSurface"
+label = "Array Along Curve on Surface"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["ArrayCrvOnSrf"]
+summary = "Mảng bản sao dọc đường cong nằm trên mặt, vuông góc mặt."
+steps = ["Chọn vật, đường cong và mặt.", "Gõ số lượng."]
+
+[[commands]]
+id = "TransformOrientOnSurface"
+label = "Orient on Surface"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["OrientOnSrf"]
+summary = "Đặt vật đứng vuông góc lên mặt tại điểm bấm; Copy=Yes rải liên tục nhiều bản cho tới Enter."
+steps = ["Chọn vật và mặt.", "Bấm điểm trên mặt (nhìn từ trên CPlane); mỗi lần bấm đặt thêm một bản.", "Enter khi xong (Undo bỏ bản vừa đặt)."]
+options = ["Copy: Yes = rải nhiều bản liên tục, No = dời vật gốc một lần.", "Flip: lật vật sang mặt kia.", "Undo: bỏ bản vừa đặt."]
+
+[[commands]]
+id = "TransformOrientPerpendiculartoCurve"
+label = "Orient Perpendicular to Curve"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["OrientPerpToCrv"]
+summary = "Đặt vật vuông góc với đường cong tại điểm gần nhất; Copy=Yes rải liên tục nhiều bản cho tới Enter."
+steps = ["Chọn vật và đường cong.", "Bấm điểm gần đường cong; mỗi lần bấm đặt thêm một bản.", "Enter khi xong."]
+options = ["Copy: Yes = rải nhiều bản liên tục, No = dời vật gốc một lần.", "Flip: đảo chiều theo đường cong.", "Undo: bỏ bản vừa đặt."]
+
+[[commands]]
+id = "TransformSolidPtOn"
+label = "Solid Points ON"
+handler = "om9_addon_session"
+interactive = true
+mesh_data = true
+aliases = ["TransformSolidPoints"]
+summary = "Bật điểm điều khiển của khối để sửa: bấm điểm, bấm chỗ mới, lặp lại."
+steps = ["Chọn khối.", "Bấm điểm cần dời.", "Bấm (hoặc gõ) vị trí mới. Lặp lại.", "Enter."]

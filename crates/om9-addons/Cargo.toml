@@ -1,0 +1,24 @@
+[package]
+name = "om9-addons"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+description = "OM9 add-on host: zip packages, manifest, repositories, enable/disable, declarative settings, keymap"
+
+[features]
+default = []
+# Nạp add-on native (DLL/.so) qua om9-addon-abi.
+native = ["dep:libloading", "dep:om9-addon-abi"]
+
+[dependencies]
+libloading = { version = "=0.8.9", optional = true }
+om9-addon-abi = { path = "../om9-addon-abi", optional = true }
+
+[lib]
+name = "om9_addons"
+path = "src/lib.rs"
+
+[[bin]]
+name = "om9-addon"
+path = "src/bin/om9-addon.rs"
