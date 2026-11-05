@@ -1069,6 +1069,28 @@ impl Host {
             .collect())
     }
 
+    /// The settings of one command only (its builder panel), resolved like [`Self::settings`]:
+    /// the stored value when it is still valid, else the default. Interactive commands ask
+    /// for these at every step, so only the specs that apply to `command` are looked at and
+    /// nothing else is copied (a package can carry hundreds of settings).
+    pub fn command_settings(&self, id: &str, command: &str) -> Vec<(String, SettingValue)> {
+        let Some(m) = self.installed.get(id).and_then(|i| i.manifest.as_ref()) else {
+            return Vec::new();
+        };
+        let stored = self.prefs.addons.get(id).map(|a| &a.settings);
+        m.settings
+            .iter()
+            .filter(|spec| spec.applies_to(command))
+            .map(|spec| {
+                let value = stored
+                    .and_then(|st| st.get(&spec.key))
+                    .and_then(|v| spec.validate(v).ok())
+                    .unwrap_or_else(|| spec.default.clone());
+                (spec.key.clone(), value)
+            })
+            .collect()
+    }
+
     pub fn set_setting(&mut self, id: &str, key: &str, raw: &str) -> Result<SettingValue, String> {
         let specs = self
             .installed
@@ -1267,11 +1289,19 @@ impl Host {
         let owner = self.bindings.get(code)?;
         let manifest = self.installed.get(owner)?.manifest.as_ref()?;
         let command = manifest.commands.iter().find(|c| c.id == code)?.clone();
-        let settings = self
-            .settings(owner)
-            .ok()?
-            .into_iter()
-            .filter(|(spec, _)| spec.applies_to(code))
+        // Only this command's specs are resolved and copied (not the whole package's).
+        let stored = self.prefs.addons.get(owner).map(|a| &a.settings);
+        let settings = manifest
+            .settings
+            .iter()
+            .filter(|spec| spec.applies_to(code))
+            .map(|spec| {
+                let value = stored
+                    .and_then(|st| st.get(&spec.key))
+                    .and_then(|v| spec.validate(v).ok())
+                    .unwrap_or_else(|| spec.default.clone());
+                (spec.clone(), value)
+            })
             .collect();
         Some(CommandInfo {
             owner: owner.clone(),
