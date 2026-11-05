@@ -277,21 +277,40 @@ impl MatrixApp {
             self.status.info("Grip edit cancelled: viewport changed");
             return;
         }
-        if response.dragged_by(egui::PointerButton::Primary)
-            && let Some(pointer) = response.interact_pointer_pos()
+        // The release frame counts too: the grip goes where the pointer (or its snap) is let
+        // go, not where the previous frame left it (a snap is found a frame behind the pointer).
+        let released = response.drag_stopped_by(egui::PointerButton::Primary);
+        if (response.dragged_by(egui::PointerButton::Primary) || released)
+            && let Some(pointer) = response
+                .interact_pointer_pos()
+                .or_else(|| ui.input(|input| input.pointer.latest_pos()))
         {
             let world = view
                 .camera
                 .ray([pointer.x as f64, pointer.y as f64], viewport)
                 .and_then(|ray| ray.intersect_plane(drag.plane));
             if let Ok(Some(world)) = world {
-                drag.current = self.snap.as_ref().map_or_else(
+                // A snap along the edited object itself (Near, Perpendicular, Tangent, Surface)
+                // only reflects the pointer lying on that object: the grip keeps the pointer's
+                // motion. Point snaps on it (End, Mid …) still apply, e.g. to close a curve.
+                use om9_scene::osnap::SnapKind;
+                let snap = self.snap.as_ref().filter(|candidate| {
+                    let along = matches!(
+                        candidate.kind,
+                        SnapKind::Near | SnapKind::Perpendicular | SnapKind::Tangent | SnapKind::Surface
+                    );
+                    let edited = candidate.root.is_some_and(|root| {
+                        root == drag.handle.object || drag.group.iter().any(|grip| grip.object == root)
+                    });
+                    !(along && edited)
+                });
+                drag.current = snap.map_or_else(
                     || std::array::from_fn(|i| drag.handle.point[i] + (world[i] - drag.press_world[i])),
                     |candidate| candidate.world,
                 );
             }
         }
-        if response.drag_stopped_by(egui::PointerButton::Primary) {
+        if released {
             let offset = [
                 drag.current[0] - drag.handle.point[0],
                 drag.current[1] - drag.handle.point[1],

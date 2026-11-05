@@ -388,6 +388,8 @@ pub fn candidates(
     let mut out = Vec::new();
     let mut segments = Vec::new();
     let mut surface_broad_phase = None;
+    // The pointer ray and one a snap radius beside it, for the NURBS broad phase (made once).
+    let mut cull_rays: Option<(crate::camera::Ray, crate::camera::Ray)> = None;
     for (object_index, object) in scene.objects.iter().enumerate() {
         if !object.visible || !(object.selectable || object.reference_snappable) {
             continue;
@@ -423,6 +425,20 @@ pub fn candidates(
                     settings.radius_px,
                     &mut out,
                 )?;
+            }
+            Geometry::Curve(Curve::Nurbs(curve)) => {
+                if let crate::scene::RenderBuffers::Curve { points, .. } = object.buffers.as_ref() {
+                    if cull_rays.is_none() {
+                        cull_rays = Some((
+                            camera.ray(cursor, viewport)?,
+                            camera.ray([cursor[0] + settings.radius_px, cursor[1]], viewport)?,
+                        ));
+                    }
+                    nurbs_snaps(
+                        curve, object.root, transform, points, camera, viewport, cursor, settings,
+                        from, cull_rays.as_ref().expect("set above"), &mut out, &mut segments,
+                    )?;
+                }
             }
             Geometry::Curve(curve) => curve_snaps(
                 curve,
@@ -539,6 +555,28 @@ pub fn candidates(
             _ => {}
         }
     }
+    // An Intersection candidate must lie within the snap radius of the pointer, and it lies on
+    // both of its segments: only segments passing that close on screen can form one. Testing
+    // just those keeps the pair test small in a large file (every pair of every curve was
+    // tested on each pointer move). A segment that cannot be projected is kept.
+    let screen = |p: Point3| camera.project(p, viewport).ok().flatten().map(|v| v.screen);
+    let segments: Vec<Segment> = segments
+        .into_iter()
+        .filter(|segment| match (screen(segment.a), screen(segment.b)) {
+            (Some(a), Some(b)) => {
+                let ab = [b[0] - a[0], b[1] - a[1]];
+                let length = ab[0] * ab[0] + ab[1] * ab[1];
+                let t = if length > 0. {
+                    (((cursor[0] - a[0]) * ab[0] + (cursor[1] - a[1]) * ab[1]) / length).clamp(0., 1.)
+                } else {
+                    0.
+                };
+                (a[0] + ab[0] * t - cursor[0]).hypot(a[1] + ab[1] * t - cursor[1])
+                    <= settings.radius_px + 1.
+            }
+            _ => true,
+        })
+        .collect();
     for (index, left) in segments.iter().enumerate() {
         for right in &segments[index + 1..] {
             if left.root == right.root {
@@ -690,6 +728,151 @@ fn curve_snaps(
             // The display samples are exact enough for an object snap; a native branch would
             // introduce a second curve solver here.
             let _ = from;
+        }
+    }
+    Ok(())
+}
+
+/// Snaps on a NURBS curve, as Rhino gives them: End at both ends (every vertex of a degree-1
+/// curve, i.e. a polyline), Mid (each segment of a polyline, else half the length), Near and
+/// Perpendicular along it. Positions along the curve use its display polyline (the exact
+/// evaluation at the samples); the ends and polyline vertices are exact. A curve whose control
+/// hull is far from the pointer ray is skipped before any sample is looked at.
+#[allow(clippy::too_many_arguments)]
+fn nurbs_snaps(
+    curve: &om9_core::geometry::NurbsCurve,
+    root: ObjectId,
+    transform: Transform,
+    display: &[Point3],
+    camera: &Camera,
+    viewport: Viewport,
+    cursor: [f64; 2],
+    settings: SnapSettings,
+    from: Option<Point3>,
+    (ray, side): &(crate::camera::Ray, crate::camera::Ray),
+    out: &mut Vec<SnapCandidate>,
+    segments: &mut Vec<Segment>,
+) -> Result<()> {
+    if display.len() < 2 || curve.poles.is_empty() {
+        return Ok(());
+    }
+    let poles: Vec<Point3> = curve
+        .poles
+        .iter()
+        .map(|p| transform.point(*p))
+        .collect::<Result<_>>()?;
+    // Broad phase: the curve lies in the convex hull of its poles (positive weights), so a
+    // sphere around their box that misses the pointer ray by more than the snap radius cannot
+    // hold a candidate (every candidate, Perpendicular included, must be near the pointer).
+    if curve.weights.iter().all(|w| *w > 0.) {
+        let (mut lo, mut hi) = (poles[0], poles[0]);
+        for p in &poles {
+            for axis in 0..3 {
+                lo[axis] = lo[axis].min(p[axis]);
+                hi[axis] = hi[axis].max(p[axis]);
+            }
+        }
+        let center = midpoint(lo, hi);
+        let radius = distance(lo, hi) * 0.5;
+        let off_ray = |r: &crate::camera::Ray, p: Point3| -> Point3 {
+            let d = r.direction;
+            let len = dot(d, d);
+            let t = if len > 0. { dot(sub(p, r.origin), d) / len } else { 0. };
+            add(r.origin, [d[0] * t, d[1] * t, d[2] * t])
+        };
+        let near = off_ray(ray, center);
+        let pixel_radius = distance(near, off_ray(side, center));
+        if pixel_radius.is_finite() && distance(near, center) > radius + 2. * pixel_radius + 1e-9 {
+            return Ok(());
+        }
+    }
+    let world: Vec<Point3> = display
+        .iter()
+        .map(|p| transform.point(*p))
+        .collect::<Result<_>>()?;
+    let (first, last) = (world[0], world[world.len() - 1]);
+    let put = |kind, point, parameter: f64, out: &mut Vec<SnapCandidate>| {
+        push(kind, Some(root), point, None, Some(parameter), camera, viewport, cursor, settings.radius_px, out)
+    };
+    put(SnapKind::End, first, 0., out)?;
+    if distance(first, last) > 1e-9 {
+        put(SnapKind::End, last, 1., out)?;
+    }
+    if curve.degree == 1 {
+        // A polyline: its vertices are ends and each segment has a middle.
+        let count = (poles.len() - 1).max(1) as f64;
+        for (index, pole) in poles.iter().enumerate() {
+            put(SnapKind::End, *pole, index as f64 / count, out)?;
+        }
+        for (index, pair) in poles.windows(2).enumerate() {
+            put(SnapKind::Mid, midpoint(pair[0], pair[1]), (index as f64 + 0.5) / count, out)?;
+        }
+    } else {
+        let total: f64 = world.windows(2).map(|w| distance(w[0], w[1])).sum();
+        let mut walked = 0.;
+        for pair in world.windows(2) {
+            let step = distance(pair[0], pair[1]);
+            if walked + step >= total * 0.5 && step > 0. {
+                let t = (total * 0.5 - walked) / step;
+                let mid = add(pair[0], [
+                    (pair[1][0] - pair[0][0]) * t,
+                    (pair[1][1] - pair[0][1]) * t,
+                    (pair[1][2] - pair[0][2]) * t,
+                ]);
+                put(SnapKind::Mid, mid, 0.5, out)?;
+                break;
+            }
+            walked += step;
+        }
+    }
+    // Near: the display segment closest to the pointer on screen; segments near the pointer
+    // also take part in Intersection snaps (only those, so the pair test stays small).
+    let screen = |p: Point3| -> Option<[f64; 2]> { camera.project(p, viewport).ok().flatten().map(|v| v.screen) };
+    let reach = settings.radius_px * 2.;
+    let mut best: Option<(f64, Point3, f64)> = None;
+    let mut previous = screen(world[0]);
+    let count = (world.len() - 1) as f64;
+    for (index, pair) in world.windows(2).enumerate() {
+        let next = screen(pair[1]);
+        if let (Some(a), Some(b)) = (previous, next) {
+            let ab = [b[0] - a[0], b[1] - a[1]];
+            let length = ab[0] * ab[0] + ab[1] * ab[1];
+            let t = if length > 0. {
+                (((cursor[0] - a[0]) * ab[0] + (cursor[1] - a[1]) * ab[1]) / length).clamp(0., 1.)
+            } else {
+                0.
+            };
+            let gap = (a[0] + ab[0] * t - cursor[0]).hypot(a[1] + ab[1] * t - cursor[1]);
+            if gap <= reach {
+                segments.push(Segment { root, a: pair[0], b: pair[1] });
+            }
+            if best.is_none_or(|(old, _, _)| gap < old) {
+                let point = add(pair[0], [
+                    (pair[1][0] - pair[0][0]) * t,
+                    (pair[1][1] - pair[0][1]) * t,
+                    (pair[1][2] - pair[0][2]) * t,
+                ]);
+                best = Some((gap, point, (index as f64 + t) / count));
+            }
+        }
+        previous = next;
+    }
+    if let Some((_, point, parameter)) = best {
+        put(SnapKind::Near, point, parameter, out)?;
+    }
+    if let Some(from) = from {
+        let mut foot: Option<(f64, Point3, f64)> = None;
+        for (index, pair) in world.windows(2).enumerate() {
+            let (point, t) = closest_on_segment(from, pair[0], pair[1]);
+            // Only a foot inside a segment (or at a smooth joint) is perpendicular.
+            let interior = t > 0. && t < 1.;
+            let d = distance(from, point);
+            if interior && foot.is_none_or(|(old, _, _)| d < old) {
+                foot = Some((d, point, (index as f64 + t) / count));
+            }
+        }
+        if let Some((_, point, parameter)) = foot {
+            put(SnapKind::Perpendicular, point, parameter, out)?;
         }
     }
     Ok(())

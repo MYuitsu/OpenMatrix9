@@ -6227,6 +6227,65 @@ mod chrome_tests {
         }
     }
 
+    /// A grip dragged onto a point of its own curve (the start of the polyline) lands on it
+    /// through the End snap, so a curve can be closed by its grips; the gumball of the
+    /// selected curve does not take the press on the grip.
+    #[test]
+    fn control_grip_drag_snaps_to_an_end_of_its_own_curve() {
+        use om9_core::geometry::{Curve, Geometry, NurbsCurve};
+        use om9_core::model::Entity;
+        use om9_scene::workspace::ViewId;
+        let curve = NurbsCurve {
+            degree: 1,
+            poles: vec![[0., 0., 0.], [10., 0., 0.], [10., 10., 0.]],
+            weights: vec![1.; 3],
+            knots: vec![0., 0., 1., 2., 2.],
+            domain: [0., 2.],
+            periodic: false,
+            reversed: false,
+            seam: None,
+        };
+        let entity = Entity::new("open polyline", Geometry::Curve(Curve::Nurbs(curve)), None);
+        let id = entity.id;
+        let mut doc = Document::with_template_tolerance("grip end snap");
+        doc.entities.insert(id, entity);
+        let mut app = MatrixApp::new(doc).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller.submit("PointsOn").unwrap();
+        app.controller.workspace.active = ViewId::LookingDown;
+        app.snap_state.settings.enabled = om9_scene::osnap::SnapKind::End.bit();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 {
+            window_frame(&mut app, &context, size, vec![]);
+        }
+        let rect = *app.view_rects.iter().find(|(v, _)| **v == ViewId::LookingDown).unwrap().1;
+        let camera = app.controller.view_cameras().into_iter()
+            .find(|(title, _, _)| *title == "Looking Down").unwrap().1;
+        let viewport = om9_scene::camera::Viewport {
+            origin: [rect.min.x as f64, rect.min.y as f64],
+            size: [rect.width() as f64, rect.height() as f64],
+        };
+        let screen = |p| {
+            let v = camera.project(p, viewport).unwrap().unwrap().screen;
+            egui::pos2(v[0] as f32, v[1] as f32)
+        };
+        // Press the last grip, let go 3 px from the first point.
+        let start = screen([10., 10., 0.]);
+        let near_first = screen([0., 0., 0.]) + egui::vec2(3., -2.);
+        window_frame(&mut app, &context, size, pointer(start, true));
+        for _ in 0..2 {
+            window_frame(&mut app, &context, size, vec![egui::Event::PointerMoved(near_first)]);
+        }
+        assert!(app.grip_drag.is_some(), "the press on the grip drags it, not the gumball");
+        window_frame(&mut app, &context, size, pointer(near_first, false));
+        let Geometry::Curve(Curve::Nurbs(n)) = &app.controller.document().entities[&id].geometry
+        else {
+            panic!("curve")
+        };
+        assert_eq!(n.poles.last().copied(), Some([0., 0., 0.]), "{:?}", n.poles);
+    }
+
     #[test]
     fn control_grip_pointer_drag_does_not_trigger_selection_band() {
         use om9_core::geometry::{Curve, Geometry, NurbsCurve};

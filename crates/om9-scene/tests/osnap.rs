@@ -539,3 +539,92 @@ fn parallel_segments_never_produce_a_fake_intersection() {
     .unwrap();
     assert!(!result.iter().any(|c| c.kind == SnapKind::Intersection));
 }
+
+fn nurbs_scene(curves: Vec<om9_core::geometry::NurbsCurve>) -> (Scene, Vec<om9_core::identity::ObjectId>) {
+    let mut document = Document::new("nurbs osnap");
+    let mut ids = Vec::new();
+    for curve in curves {
+        let entity = Entity::new("nurbs", Geometry::Curve(Curve::Nurbs(curve)), None);
+        ids.push(entity.id);
+        document.entities.insert(entity.id, entity);
+    }
+    let document_id = document.id;
+    let coordinator = TransactionCoordinator::new(
+        World::new(vec![document], &Limits::default()).unwrap(),
+        Limits::default(),
+    )
+    .unwrap();
+    let scene =
+        Scene::capture_in_world(&coordinator, document_id, om9_core::budget::Usage::default()).unwrap();
+    (scene, ids)
+}
+
+fn nurbs(degree: usize, poles: Vec<[f64; 3]>) -> om9_core::geometry::NurbsCurve {
+    let n = poles.len();
+    let inner = n - degree - 1;
+    let mut knots = vec![0.; degree + 1];
+    knots.extend((1..=inner).map(|i| i as f64));
+    knots.extend(vec![(inner + 1) as f64; degree + 1]);
+    om9_core::geometry::NurbsCurve {
+        degree,
+        weights: vec![1.; n],
+        poles,
+        domain: [0., (inner + 1) as f64],
+        knots,
+        periodic: false,
+        reversed: false,
+        seam: None,
+    }
+}
+
+fn only(kind: SnapKind) -> SnapSettings {
+    SnapSettings { enabled: kind.bit(), radius_px: 8., one_shot: None }
+}
+
+/// Curves made by the Curve commands are NURBS: their ends, polyline vertices, middles, Near
+/// and Perpendicular snap like a line's do.
+#[test]
+fn nurbs_curves_snap_at_ends_vertices_middles_and_along() {
+    let polyline = nurbs(1, vec![[0., 0., 0.], [10., 0., 0.], [10., 10., 0.]]);
+    let arc = nurbs(2, vec![[-15., 0., 0.], [-15., 10., 0.], [-5., 10., 0.]]);
+    let (scene, ids) = nurbs_scene(vec![polyline, arc]);
+    let at = |kind, point: [f64; 3], offset: [f64; 2]| {
+        let s = screen(point);
+        candidates(&scene, &camera(), viewport(), [s[0] + offset[0], s[1] + offset[1]], only(kind), None).unwrap()
+    };
+    // End at a polyline vertex (Rhino: every vertex) and at the curve's ends.
+    for p in [[0., 0., 0.], [10., 0., 0.], [10., 10., 0.], [-15., 0., 0.], [-5., 10., 0.]] {
+        let found = at(SnapKind::End, p, [2., -2.]);
+        assert!(found.iter().any(|c| c.world == p), "End {p:?}: {found:?}");
+    }
+    // Mid of each polyline segment.
+    for p in [[5., 0., 0.], [10., 5., 0.]] {
+        let found = at(SnapKind::Mid, p, [1., 1.]);
+        assert!(found.iter().any(|c| (0..3).all(|i| (c.world[i] - p[i]).abs() < 1e-9)), "Mid {p:?}");
+    }
+    // Mid of the quadratic by length: on the curve, half way along.
+    let mid = at(SnapKind::Mid, [-12.5, 7.5, 0.], [0., 0.]);
+    let m = mid.iter().find(|c| c.root == Some(ids[1])).expect("arc middle").world;
+    assert!((m[0] + 12.5).abs() < 0.3 && (m[1] - 7.5).abs() < 0.3, "{m:?}");
+    // Near: on the polyline under the pointer.
+    let near = at(SnapKind::Near, [3., 0., 0.], [0., 2.]);
+    let n = near.iter().find(|c| c.root == Some(ids[0])).expect("near").world;
+    assert!((n[0] - 3.).abs() < 0.2 && n[1].abs() < 1e-9, "{n:?}");
+    // Perpendicular from a point to the second segment.
+    let s = screen([10., 4., 0.]);
+    let perp = candidates(&scene, &camera(), viewport(), s, only(SnapKind::Perpendicular), Some([20., 4., 0.])).unwrap();
+    assert!(perp.iter().any(|c| (c.world[0] - 10.).abs() < 1e-9 && (c.world[1] - 4.).abs() < 1e-9), "{perp:?}");
+    // Far from every curve: nothing (and the broad phase skips the curves).
+    assert!(at(SnapKind::End, [30., 30., 0.], [0., 0.]).is_empty());
+}
+
+/// Two NURBS curves crossing give an Intersection snap.
+#[test]
+fn crossing_nurbs_curves_snap_at_their_intersection() {
+    let a = nurbs(1, vec![[-5., 0., 0.], [5., 0., 0.]]);
+    let b = nurbs(1, vec![[0., -5., 0.], [0., 5., 0.]]);
+    let (scene, _) = nurbs_scene(vec![a, b]);
+    let s = screen([0., 0., 0.]);
+    let found = candidates(&scene, &camera(), viewport(), [s[0] + 2., s[1]], only(SnapKind::Intersection), None).unwrap();
+    assert!(found.iter().any(|c| c.world[0].abs() < 1e-9 && c.world[1].abs() < 1e-9), "{found:?}");
+}
