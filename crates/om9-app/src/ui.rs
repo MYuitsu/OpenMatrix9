@@ -6094,13 +6094,20 @@ impl MatrixApp {
                 .input(|input| input.pointer.press_origin())
                 .map(|p| [f64::from(p.x), f64::from(p.y)])
                 .unwrap_or(pointer));
+            // A grip under the press takes it (picked and dragged, as in Rhino), not a gumball
+            // handle that happens to cross it on screen.
+            let on_grip = self.controller.top11_grip_mode().is_some()
+                && self.grip_at(view, viewport, start).is_some();
             let box_hit = views.iter().find_map(|group| {
                 group
                     .box_at(&view.camera, viewport, start, 8.0)
                     .ok()
                     .flatten()
             });
-            let hit = box_hit.or_else(|| {
+            let hit = box_hit.filter(|_| !on_grip).or_else(|| {
+                if on_grip {
+                    return None;
+                }
                 views
                     .iter()
                     .filter_map(|group| {

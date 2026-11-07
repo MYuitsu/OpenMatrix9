@@ -3,7 +3,7 @@
 Tạo khối nón.
 
 - **Mã lệnh:** `SolidCone`
-- **Vị trí:** menu Solid, ô số 32
+- **Vị trí:** menu Solid, ô số 19
 - **Icon:** `Resources/icons/solid-minimal/SolidCone.svg`
 - **Gọi bằng dòng lệnh:** `SolidCone`, `Cone`
 - **Cách chạy:** từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ

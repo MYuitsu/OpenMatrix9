@@ -63,6 +63,33 @@ const MAX_POINTS: usize = 20_000;
 /// How close to the exact shape the curve must be (half Rhino's default 0.001).
 const FIT_TOL: f64 = 5e-4;
 
+/// The points a cubic through equal steps of a turn of radius `r` needs to stay within
+/// `tol` (measured: about 2.5·(r/tol)^¼ per turn, nearly independent of the pitch). A
+/// slight underestimate, so a shape that fits is never refused by the estimate alone.
+fn points_per_turn(r: f64, tol: f64) -> f64 {
+    (2.4 * (r / tol).powf(0.25)).max(PER_TURN as f64)
+}
+
+/// Check the turns and the expected point count before anything is sampled: past the safe
+/// limits the shape is refused with what to change.
+fn check_budget(st: &State, tn: f64, r: f64, tol: f64) -> Result<usize, String> {
+    let fix = if st.by_pitch {
+        "increase Pitch or reduce the axis length"
+    } else {
+        "reduce Turns"
+    };
+    let expected = tn * points_per_turn(r, tol);
+    if !expected.is_finite() || expected > MAX_POINTS as f64 {
+        return Err(format!(
+            "Too many points for this curve (about {}, at most {}); {}",
+            fmt(expected.ceil()),
+            MAX_POINTS,
+            fix
+        ));
+    }
+    Ok((expected.ceil() as usize).max(8))
+}
+
 /// The axis length the turns run along (the curve length around a curve; flat: the radius
 /// change).
 fn axis_length(st: &State, r0: f64, r1: f64) -> f64 {
@@ -91,9 +118,10 @@ fn turns(st: &State, r0: f64, r1: f64) -> Result<f64, String> {
     }
     if t > MAX_TURNS {
         return Err(format!(
-            "Too many turns for this curve ({}, at most {}); increase Pitch or reduce its length",
+            "Too many turns for this curve ({}, at most {}); {}",
             fmt(t.round()),
-            fmt(MAX_TURNS)
+            fmt(MAX_TURNS),
+            if st.by_pitch { "increase Pitch or reduce the axis length" } else { "reduce Turns" }
         ));
     }
     Ok(t)
@@ -160,6 +188,10 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3, preview: bool) -> R
             return Err("The radius must not be 0".into());
         }
         let tn = turns(st, r0, r1)?;
+        // Checked for the final shape even in the preview, so a preview is only shown for a
+        // shape that will be made; the preview then starts from its own (coarser) estimate.
+        check_budget(st, tn, r0.max(r1), FIT_TOL)?;
+        let start = check_budget(st, tn, r0.max(r1), tol)?;
         // Points at `2·count` steps (frames at half steps too): the even ones are fitted,
         // the odd ones measure the fit.
         let dense = |count: usize| -> Vec<Vec3> {
@@ -175,7 +207,7 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3, preview: bool) -> R
                 })
                 .collect()
         };
-        return within_tolerance(tn, &dense, tol);
+        return within_tolerance(start, &dense, tol);
     }
     let a = *st.points.first().ok_or("Start of axis")?;
     let flat = st.mode == "flat";
@@ -192,6 +224,10 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3, preview: bool) -> R
         return Err("The radius must not be 0".into());
     }
     let tn = turns(st, r0, r1)?;
+    // Checked for the final shape even in the preview, so a preview is only shown for a
+        // shape that will be made; the preview then starts from its own (coarser) estimate.
+        check_budget(st, tn, r0.max(r1), FIT_TOL)?;
+        let start = check_budget(st, tn, r0.max(r1), tol)?;
     let mut x = sub(sub(first, a), scale(n, dot(sub(first, a), n)));
     if norm(x) < g::EPS {
         x = e.plane.x;
@@ -211,19 +247,19 @@ fn build(e: &Event, st: &State, helix: bool, r1_point: Vec3, preview: bool) -> R
             })
             .collect()
     };
-    within_tolerance(tn, &dense, tol)
+    within_tolerance(start, &dense, tol)
 }
 
-/// Interpolate the exact helix/spiral points, adding points per turn until the curve is
-/// within [`FIT_TOL`] of the exact shape everywhere. `dense(count)` gives the exact points at
-/// `2·count` equal steps: the even ones are fitted, the odd ones measure the fit. The count
-/// never passes [`MAX_POINTS`]; if the tolerance is not met by then, the shape is refused.
-fn within_tolerance(tn: f64, dense: &dyn Fn(usize) -> Vec<Vec3>, tol: f64) -> Result<Geo, String> {
-    let wanted = tn * PER_TURN as f64;
-    if !wanted.is_finite() || wanted <= 0.0 || wanted > MAX_POINTS as f64 {
+/// Interpolate the exact helix/spiral points, starting from `start` points (the checked
+/// estimate) and adding points until the curve is within `tol` of the exact shape
+/// everywhere. `dense(count)` gives the exact points at `2·count` equal steps: the even ones
+/// are fitted, the odd ones measure the fit. The count never passes [`MAX_POINTS`]; if the
+/// tolerance is not met by then, the shape is refused.
+fn within_tolerance(start: usize, dense: &dyn Fn(usize) -> Vec<Vec3>, tol: f64) -> Result<Geo, String> {
+    if start == 0 || start > MAX_POINTS {
         return Err(format!("Too many points for this shape (at most {})", MAX_POINTS));
     }
-    let mut count = (wanted.ceil() as usize).max(8);
+    let mut count = start.max(8);
     loop {
         let all = dense(count);
         if all.iter().any(|p| !p.iter().all(|v| v.is_finite())) {
@@ -236,7 +272,7 @@ fn within_tolerance(tn: f64, dense: &dyn Fn(usize) -> Vec<Vec3>, tol: f64) -> Re
         }
         if count >= MAX_POINTS {
             return Err(format!(
-                "Cannot keep the shape within {} mm with at most {} points",
+                "Cannot keep the shape within {} mm with at most {} points; increase Pitch or reduce the axis length",
                 fmt(tol),
                 MAX_POINTS
             ));
@@ -562,16 +598,20 @@ mod budget_tests {
 
     #[test]
     fn rejects_excessive_and_nonfinite_turns_before_sampling() {
-        for turns in [f64::INFINITY, f64::NAN, 0.0, -1.0, 10_000_000.0] {
-            let result = within_tolerance(turns, &|_| panic!("must not allocate samples"), FIT_TOL);
-            assert!(result.is_err(), "{turns}");
+        let st = State::default();
+        for turns in [f64::INFINITY, f64::NAN, 10_000_000.0, 1000.0] {
+            assert!(check_budget(&st, turns, 50.0, FIT_TOL).is_err(), "{turns}");
+        }
+        for start in [0, MAX_POINTS + 1] {
+            let result = within_tolerance(start, &|_| panic!("must not allocate samples"), FIT_TOL);
+            assert!(result.is_err(), "{start}");
         }
     }
 
     #[test]
     fn refuses_when_sample_budget_cannot_meet_tolerance() {
         let result = within_tolerance(
-            0.01,
+            8,
             &|count| {
                 (0..=2 * count)
                     .map(|i| [i as f64, if i % 2 == 0 { 0.0 } else { 100.0 }, 0.0])

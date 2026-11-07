@@ -618,7 +618,52 @@ fn record_in_local(mut g: Value, placement: &Transform, k: f64) -> Result<Value>
     Ok(g)
 }
 
+/// Where each object's pieces sit in the published scene (`Scene::objects`), made once per
+/// scene: an add-on step looks up only the picked objects instead of walking the whole
+/// document's scene on every click and pointer move.
+#[derive(Default)]
+pub(super) struct SceneRoots {
+    key: Option<(u64, usize, usize)>,
+    map: std::collections::HashMap<om9_core::identity::ObjectId, Vec<usize>>,
+}
+
 impl Controller {
+    /// The scene objects of the selection, in scene order (as a walk over the scene gives them).
+    fn selected_scene_objects<'a>(
+        &self,
+        scene: &'a om9_scene::scene::Scene,
+    ) -> Vec<&'a om9_scene::scene::SceneObject> {
+        let key = (scene.epoch, scene.objects.as_ptr() as usize, scene.objects.len());
+        let mut roots = self.scene_roots.lock().unwrap_or_else(|e| e.into_inner());
+        let lookup = |roots: &SceneRoots| -> Option<Vec<usize>> {
+            let mut at = Vec::new();
+            for id in &self.selection {
+                for &i in roots.map.get(id).map_or(&[][..], |v| &v[..]) {
+                    // A stale table (same key, other objects) is never trusted.
+                    if scene.objects.get(i).is_none_or(|o| o.root != *id) {
+                        return None;
+                    }
+                    at.push(i);
+                }
+            }
+            Some(at)
+        };
+        let found = if roots.key == Some(key) { lookup(&roots) } else { None };
+        let mut at = match found {
+            Some(at) => at,
+            None => {
+                roots.map.clear();
+                for (i, object) in scene.objects.iter().enumerate() {
+                    roots.map.entry(object.root).or_default().push(i);
+                }
+                roots.key = Some(key);
+                lookup(&roots).unwrap_or_default()
+            }
+        };
+        at.sort_unstable();
+        at.into_iter().map(|i| &scene.objects[i]).collect()
+    }
+
     pub fn addon_session(&self) -> Option<&AddonSession> {
         self.addon_session.as_ref()
     }
@@ -635,12 +680,16 @@ impl Controller {
         use om9_scene::scene::RenderBuffers;
         let mut out: Vec<Selected> = Vec::new();
         let mut triangles_sent = 0usize;
+        // Nothing picked: nothing to walk (the scene can hold a whole large file).
+        if self.selection.is_empty() {
+            return out;
+        }
         let Some(scene) = self.scene.as_ref() else {
             return out;
         };
         let mut index = std::collections::BTreeMap::new();
-        for object in &scene.objects {
-            if !self.selection.contains(&object.root) || out.len() >= MAX_SELECTION {
+        for object in self.selected_scene_objects(scene) {
+            if out.len() >= MAX_SELECTION {
                 continue;
             }
             let Some(entity) = self.document().entities.get(&object.root) else {
@@ -727,6 +776,10 @@ impl Controller {
     fn transformed_selection_lines(&self, matrices: &[[f64; 16]], k: f64) -> Vec<[Point3; 2]> {
         use om9_scene::scene::RenderBuffers;
         let mut lines = Vec::new();
+        // Most commands preview no transform: skip the walk over the scene.
+        if matrices.is_empty() || self.selection.is_empty() {
+            return lines;
+        }
         let Some(scene) = self.scene.as_ref() else {
             return lines;
         };
@@ -734,8 +787,8 @@ impl Controller {
             .iter()
             .filter_map(|m| to_transform(m, k).ok())
             .collect();
-        for object in &scene.objects {
-            if !self.selection.contains(&object.root) || lines.len() > 200_000 {
+        for object in self.selected_scene_objects(scene) {
+            if lines.len() > 200_000 {
                 continue;
             }
             let Ok(display) = object.display_transform() else {
@@ -859,18 +912,11 @@ impl Controller {
             .addon_builder
             .as_ref()
             .filter(|b| b.code == session.code)
-            .map(|b| b.values.clone())
+            .map(|b| b.values.clone().into_iter().collect::<Vec<_>>())
             .or_else(|| {
                 let host = self.addons.as_ref()?.lock().ok()?;
-                Some(
-                    host.settings(&session.owner)
-                        .ok()?
-                        .into_iter()
-                        // Only this command's own parameters (its builder panel).
-                        .filter(|(spec, _)| spec.applies_to(&session.code))
-                        .map(|(spec, v)| (spec.key, v))
-                        .collect(),
-                )
+                // Only this command's own parameters (its builder panel).
+                Some(host.command_settings(&session.owner, &session.code))
             })
             .unwrap_or_default()
             .into_iter()
@@ -1328,8 +1374,23 @@ impl Controller {
         let scene = self.scene.as_ref().ok_or(Error::Missing("command scene"))?;
         if scene.epoch != self.coordinator.epoch() { return Err(Error::Stale("command scene")); }
         let count = mutations.len();
-        let held = self.scene_cache_usage()?;
+        let mut held = self.scene_cache_usage()?;
         let undo_label = crate::icons::icon_name(code).unwrap_or(label).to_owned();
+        // One new object (Line, Circle …): add it to the scene incrementally, as OM9's own
+        // commands do, instead of rebuilding the scene of the whole document.
+        if let [Mutation::Insert { entity, .. }] = mutations.as_slice() {
+            let increment = scene.update_held_usage(Some(entity))?;
+            held.add(increment, self.coordinator.limits())?;
+            let added = entity.id;
+            let prepared = self
+                .coordinator
+                .prepare_with_held_usage(TransactionRequest::new(&undo_label, mutations), held)?;
+            let receipt = self.commit_incremental_scene(prepared, held, increment, Some(added), false)?;
+            if receipt.published {
+                self.sync_published(om9_core::changes::ChangeCause::Edit);
+            }
+            return Ok(count);
+        }
         let prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new(&undo_label, mutations), held)?;
