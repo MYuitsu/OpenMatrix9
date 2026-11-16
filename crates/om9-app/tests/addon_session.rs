@@ -1101,3 +1101,81 @@ fn addon_solids_arrive_as_one_object() {
     }
     fs::remove_dir_all(&tmp).unwrap();
 }
+
+/// What the user does in the viewport, through the controller: each click goes through the
+/// same selection call as the viewport (a plain click; inside an add-on object prompt the
+/// picks add up). Sweep 2 picked rail, rail, sections; Boolean Difference on two
+/// window-selected solids; right-click repeats the last add-on command.
+#[test]
+fn clicks_build_up_picks_and_right_click_repeats() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-clicks-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("clicks"), Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    let new_id = |c: &Controller, before: &[om9_core::identity::ObjectId]| {
+        *c.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    let polyline = |c: &mut Controller, pts: &[[f64; 3]]| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.run_addon_command("CurvePolylinePolyline").unwrap();
+        for p in pts {
+            c.session_point(*p).unwrap();
+        }
+        c.submit("").unwrap();
+        new_id(c, &before)
+    };
+    let click = |c: &mut Controller, id| {
+        let collecting = c.addon_collects_objects();
+        c.select_root(Some(id), collecting).unwrap();
+        c.refresh_addon_session();
+    };
+    let ra = polyline(&mut c, &[[-10.0, -20.0, 0.0], [-12.0, 0.0, 0.0], [-10.0, 20.0, 0.0]]);
+    let rb = polyline(&mut c, &[[10.0, -20.0, 0.0], [12.0, 0.0, 0.0], [10.0, 20.0, 0.0]]);
+    let p1 = polyline(&mut c, &[[-10.0, -20.0, 0.0], [0.0, -20.0, 5.0], [10.0, -20.0, 0.0]]);
+    let p2 = polyline(&mut c, &[[-10.0, 20.0, 0.0], [0.0, 20.0, 3.0], [10.0, 20.0, 0.0]]);
+    c.clear_selection();
+    c.run_addon_command("SurfaceSweepSweep2Rails").unwrap();
+    assert!(c.prompt_text().starts_with("Select first rail"), "{}", c.prompt_text());
+    click(&mut c, ra);
+    assert!(c.prompt_text().starts_with("Select second rail"), "{}", c.prompt_text());
+    click(&mut c, rb);
+    assert!(c.prompt_text().starts_with("Select cross section curves"), "{}", c.prompt_text());
+    click(&mut c, p1);
+    click(&mut c, p2);
+    assert!(c.prompt_text().contains("2 selected"), "{}", c.prompt_text());
+    c.submit("").unwrap();
+    let before: Vec<_> = c.document().entities.keys().copied().collect();
+    c.submit("").unwrap();
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    assert_eq!(c.document().entities.len(), before.len() + 1, "the sweep surface");
+    // Right-click with nothing running (and nothing selected): Sweep 2 again.
+    c.clear_selection();
+    assert!(c.repeat_addon_command().unwrap());
+    assert!(c.prompt_text().starts_with("Select first rail"), "{}", c.prompt_text());
+    assert!(c.cancel_addon_session());
+    // Two boxes, window-selected, then Difference: cut at once, Enter.
+    let boxed = |c: &mut Controller, a: [f64; 3], b: [f64; 3], h: &str| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.run_addon_command("SolidBoxCornertoCornerHeight").unwrap();
+        c.session_point(a).unwrap();
+        c.session_point(b).unwrap();
+        c.submit(h).unwrap();
+        assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+        new_id(c, &before)
+    };
+    let big = boxed(&mut c, [0.0, 0.0, 0.0], [4.0, 4.0, 0.0], "4");
+    let small = boxed(&mut c, [3.0, 3.0, 0.0], [5.0, 5.0, 0.0], "5");
+    c.select_objects(&[big, small]).unwrap();
+    let count = c.document().entities.len();
+    c.run_addon_command("SolidDifference").unwrap();
+    c.submit("").unwrap();
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    assert_eq!(c.document().entities.len(), count - 1, "the cutter is gone");
+    assert!(c.document().entities.contains_key(&big));
+    fs::remove_dir_all(&tmp).unwrap();
+}

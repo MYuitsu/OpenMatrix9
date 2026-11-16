@@ -991,6 +991,9 @@ pub struct Controller {
     addon_builder: Option<addon_builder::AddonBuilder>,
     /// The running interactive add-on command (Polyline, Move, Gem Cutter …), if any.
     addon_session: Option<addon_session::AddonSession>,
+    /// The last add-on command that ran to its end: right-click or an empty Enter with no
+    /// command running starts it again (Rhino's repeat).
+    addon_last: Option<String>,
     /// Interface language of the add-on commands (Tiếng Việt / English), from the enabled
     /// add-ons' `lang` tables and their `language` setting. English without add-ons.
     tr: om9_addons::i18n::Tr,
@@ -1305,6 +1308,7 @@ impl Controller {
             addon_typed: Default::default(),
             addon_builder: None,
             addon_session: None,
+            addon_last: None,
             tr: om9_addons::i18n::Tr::english(),
         })
     }

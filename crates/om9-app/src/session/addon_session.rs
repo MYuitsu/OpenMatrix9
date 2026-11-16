@@ -1358,6 +1358,7 @@ impl Controller {
                 (s.code.clone(), s.label.clone(), s.seen.clone())
             };
             self.addon_session = None;
+            self.addon_last = Some(code.clone());
             let created = self.commit_session_result(&code, &label, &reply, &seen)?;
             // The command's panel closes with it, however it was finished (Enter in the
             // command line, right-click, Accept); its values become the next defaults.
@@ -1420,6 +1421,32 @@ impl Controller {
                 point: mm(point, k),
             });
         }
+    }
+
+    /// The add-on command right-click or an empty Enter would run again.
+    pub fn addon_repeatable(&self) -> Option<&str> {
+        self.addon_last.as_deref()
+    }
+
+    /// Run the last add-on command again (right-click or Enter with nothing running).
+    pub fn repeat_addon_command(&mut self) -> Result<bool> {
+        if self.is_running() || self.addon_session.is_some() {
+            return Ok(false);
+        }
+        let Some(code) = self.addon_last.clone() else {
+            return Ok(false);
+        };
+        self.run_addon_command(&code)?;
+        Ok(true)
+    }
+
+    /// An add-on command is waiting for objects: like Rhino's object prompts, every click or
+    /// window adds to what was picked before, instead of replacing it (the command reads the
+    /// earlier picks from the selection).
+    pub fn addon_collects_objects(&self) -> bool {
+        self.addon_session
+            .as_ref()
+            .is_some_and(|s| matches!(s.reply.want, Want::Objects))
     }
 
     /// A click in a viewport that may select an object while a session waits for objects:

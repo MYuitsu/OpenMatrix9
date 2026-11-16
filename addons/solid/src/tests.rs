@@ -487,3 +487,45 @@ fn hole_tools_pick_the_hole_and_move_face_to_boundary() {
     assert!(r.done, "{}", r.prompt);
     assert!((replaced(&r, 0).volume() - 400.0).abs() < 1e-6, "{}", replaced(&r, 0).volume());
 }
+
+/// Two solids window-selected before Boolean Difference: the biggest is cut by the other at
+/// once (preview, Enter). `Base` cuts the other one instead; `DeleteInput=No` keeps the cutter.
+/// One selected solid is the object to cut into and the command asks for the cutters
+/// (Rhino 5 / Matrix manual, Boolean Difference).
+#[test]
+fn difference_of_preselected_solids_cuts_at_once() {
+    let big = solid("big", mesh::cuboid([0.0; 3], [4.0, 4.0, 4.0]));
+    let small = solid("small", mesh::cuboid([3.0, 3.0, 3.0], [5.0, 5.0, 5.0]));
+    // Window selection order says nothing: the cutter may come first.
+    let r = Solids::step(&event(DIFFERENCE, Input::Start, vec![small.clone(), big.clone()], json!({}))).unwrap();
+    assert!(!r.done && !r.preview.is_empty(), "{}", r.prompt);
+    let mut e = event(DIFFERENCE, Input::Enter, vec![small.clone(), big.clone()], json!({}));
+    e.state = r.state.clone();
+    let done = Solids::step(&e).unwrap();
+    assert!(done.done);
+    assert_eq!(done.replace[0].id, "big");
+    assert!((replaced(&done, 0).volume() - 63.0).abs() < 1e-6, "64 - 1 = {}", replaced(&done, 0).volume());
+    assert_eq!(done.delete, vec!["small".to_string()]);
+    // Base: the small one is cut by the big one; DeleteInput=No keeps the cutter.
+    e.input = Input::Option { name: "Base".into(), value: None };
+    let r2 = Solids::step(&e).unwrap();
+    e.state = r2.state;
+    e.input = Input::Option { name: "DeleteInput".into(), value: Some("No".into()) };
+    let r3 = Solids::step(&e).unwrap();
+    e.state = r3.state;
+    e.input = Input::Enter;
+    let done = Solids::step(&e).unwrap();
+    assert_eq!(done.replace[0].id, "small");
+    assert!((replaced(&done, 0).volume() - 7.0).abs() < 1e-6, "8 - 1 = {}", replaced(&done, 0).volume());
+    assert!(done.delete.is_empty());
+    // One preselected: asks for the cutters, then picks (each click alone in the selection).
+    let r = Solids::step(&event(DIFFERENCE, Input::Start, vec![big.clone()], json!({}))).unwrap();
+    assert!(r.prompt.contains("now select"), "{}", r.prompt);
+    let mut e = event(DIFFERENCE, Input::Selection, vec![small.clone()], json!({}));
+    e.state = r.state;
+    let r = Solids::step(&e).unwrap();
+    e.state = r.state;
+    e.input = Input::Enter;
+    let done = Solids::step(&e).unwrap();
+    assert!((replaced(&done, 0).volume() - 63.0).abs() < 1e-6);
+}

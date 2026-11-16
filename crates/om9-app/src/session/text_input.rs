@@ -193,6 +193,9 @@ impl Controller {
             return self.set_current_layer(choice);
         }
         if !self.is_running() {
+            if text.is_empty() && self.addon_session.is_none() && self.repeat_addon_command()? {
+                return Ok(());
+            }
             if text.is_empty() {
                 let repeat = self
                     .repeatable_last()

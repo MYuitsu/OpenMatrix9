@@ -1956,6 +1956,8 @@ impl MatrixApp {
             } else {
                 Err(Error::Stale("Boolean selection candidates"))
             }
+        } else if self.controller.addon_collects_objects() {
+            self.controller.select_root(Some(id), true)
         } else {
             self.controller.select_objects(&[id])
         };
@@ -4520,6 +4522,18 @@ impl MatrixApp {
                 self.feedback(result);
                 return;
             }
+            // Right-click with nothing running repeats the last add-on command (Rhino).
+            if response.secondary_clicked()
+                && !self.controller.is_running()
+                && self.controller.addon_repeatable().is_some()
+            {
+                let result = self.controller.repeat_addon_command().map(|_| ());
+                if result.is_ok() {
+                    self.append_running_prompt();
+                }
+                self.feedback(result);
+                return;
+            }
             if response.clicked() && !published_scene_current {
                 self.status.info("Viewport is updating; try selecting again");
             } else if response.clicked() {
@@ -5386,9 +5400,12 @@ impl MatrixApp {
                     }
                     self.controller.clear_subselection();
                     self.sub_object = None;
+                    let collecting = self.controller.addon_collects_objects();
                     let result = match (picked, ctrl) {
                         (Some(id), true) => self.controller.toggle_selection(id),
-                        _ => self.controller.select_root(picked, shift),
+                        // Inside an add-on command a click on empty space keeps the picks.
+                        (None, _) if collecting => Ok(()),
+                        _ => self.controller.select_root(picked, shift || collecting),
                     };
                     self.feedback(result);
                     self.focus_cmd = true;
@@ -5641,7 +5658,7 @@ impl MatrixApp {
                     }
                     let picked = self.objects_in_band(&view.camera, viewport, band, window);
 
-                    let result = if shift {
+                    let result = if shift || self.controller.addon_collects_objects() {
                         self.controller.add_objects(&picked)
                     } else if ctrl {
                         self.controller.remove_objects(&picked)

@@ -584,6 +584,10 @@ struct SweepState {
     want_point: bool,
     /// The options stage's own state (a [`Flow`]).
     flow: Value,
+    /// Copies of the picked rails and sections: a pick stays valid when a later click
+    /// replaces the selection or deselects it.
+    #[serde(default)]
+    kept: Vec<Selected>,
 }
 
 /// Sweep1 from a rail and sections (point sections first or last).
@@ -665,9 +669,21 @@ fn sweep_command(e: &Event, two: bool) -> Reply {
     let label = if two { "Sweep 2 Rails" } else { "Sweep 1 Rail" };
     let need = if two { 2 } else { 1 };
     let mut st: SweepState = serde_json::from_value(e.state.clone()).unwrap_or_default();
-    let by_id = |id: &str| e.selection.iter().find(|s| s.id == id);
+    // What was picked before, updated by the current selection.
+    let mut known: Vec<Selected> = std::mem::take(&mut st.kept);
+    known.retain(|k| !e.selection.iter().any(|s| s.id == k.id));
+    known.extend(e.selection.iter().cloned());
+    let by_id = |id: &str| known.iter().find(|s| s.id == id);
     let is_section = |s: &Selected| (s.kind == "curve" && s.points.len() >= 2) || (s.kind == "point" && !s.points.is_empty());
-    let save = |st: &SweepState| serde_json::to_value(st).unwrap_or(Value::Null);
+    let save = |st: &SweepState| {
+        let mut st = st.clone();
+        st.kept = known
+            .iter()
+            .filter(|s| st.rails.contains(&s.id) || st.sections.contains(&s.id))
+            .cloned()
+            .collect();
+        serde_json::to_value(st).unwrap_or(Value::Null)
+    };
     let rail_prompt = |have: usize| match (two, have) {
         (false, _) => "Select rail",
         (true, 0) => "Select first rail",

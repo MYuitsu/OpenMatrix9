@@ -2066,3 +2066,45 @@ fn picked_edges_of_a_polysurface_are_curves() {
         }
     }
 }
+
+/// Picks made one click at a time, where each click replaces the selection (the host's plain
+/// click) or an empty click clears it: the rails and sections picked before still count, so
+/// Sweep 2 goes rail 1 → rail 2 → sections → options instead of starting over.
+#[test]
+fn sweep2_keeps_its_picks_when_each_click_replaces_the_selection() {
+    let s_curve = |id: &str, x0: f64| {
+        let pts: Vec<Vec3> = (0..=100).map(|k| { let t = k as f64 / 100.0; [x0 + 3.0 * (t * TAU).sin(), -20.0 + 40.0 * t, 0.0] }).collect();
+        curve(id, pts, false)
+    };
+    let arc = |id: &str, y: f64| exact_sel(id, Geo::Arc { center: [0.0, y, 0.0], x: [-1.0, 0.0, 0.0], y: [0.0, 0.0, 1.0], radius: 10.0, angle: PI }, false);
+    let (a, b, p1, p2) = (s_curve("a", -10.0), s_curve("b", 10.0), arc("p1", -20.0), arc("p2", 20.0));
+    for two_preselected in [false, true] {
+        let r = if two_preselected {
+            feed(SWEEP2, &Value::Null, Input::Start, vec![a.clone(), b.clone()], json!({}))
+        } else {
+            let r = feed(SWEEP2, &Value::Null, Input::Start, vec![], json!({}));
+            assert_eq!(r.prompt, "Select first rail");
+            let r = feed(SWEEP2, &r.state, Input::Selection, vec![a.clone()], json!({}));
+            assert_eq!(r.prompt, "Select second rail");
+            // A click on empty space clears the selection: still waiting for the second rail.
+            let r = feed(SWEEP2, &r.state, Input::Selection, vec![], json!({}));
+            assert_eq!(r.prompt, "Select second rail");
+            feed(SWEEP2, &r.state, Input::Selection, vec![b.clone()], json!({}))
+        };
+        assert!(r.prompt.starts_with("Select cross section curves"), "{}", r.prompt);
+        let r = feed(SWEEP2, &r.state, Input::Selection, vec![p1.clone()], json!({}));
+        let r = feed(SWEEP2, &r.state, Input::Selection, vec![p2.clone()], json!({}));
+        assert!(r.prompt.contains("2 selected"), "{}", r.prompt);
+        let r = feed(SWEEP2, &r.state, Input::Enter, vec![p2.clone()], json!({}));
+        assert!(r.error.is_none() && !r.preview.is_empty(), "{:?} {}", r.error, r.prompt);
+        let r = feed(SWEEP2, &r.state, Input::Enter, vec![], json!({}));
+        assert!(r.done && r.create.len() == 1, "{:?} {}", r.error, r.prompt);
+        // The surface runs along both rails: its corners are the rails' ends.
+        let srf = Srf::of(&r.create[0]).unwrap();
+        for (u, v) in [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0)] {
+            let p = srf.at(u, v);
+            let near = [a.points[0], *a.points.last().unwrap(), b.points[0], *b.points.last().unwrap()].iter().map(|q| dist(p, *q)).fold(f64::MAX, f64::min);
+            assert!(near < 1e-3, "corner {p:?} off the rails' ends by {near}");
+        }
+    }
+}

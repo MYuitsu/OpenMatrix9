@@ -12,7 +12,7 @@
 //! Objects from OM9's kernel (BRep) take part through their display mesh; the result is a
 //! mesh object.
 use om9_addon_abi::session::{
-    Event, Geo, Input, Interactive, Replacement, Reply, Selected, SelectedMesh, Vec3, Want, add,
+    Event, Geo, Input, Interactive, OptionToken, Replacement, Reply, Selected, SelectedMesh, Vec3, Want, add,
     dist, dot, fmt, scale, sub,
 };
 use om9_addon_geom::cmd::{Collected, Flow, Show, load, save};
@@ -192,9 +192,51 @@ fn union(e: &Event) -> Reply {
     )
 }
 
+type Kept = (String, Vec<Vec3>, Vec<[u32; 3]>);
+
 #[derive(Default, Serialize, Deserialize)]
 struct Groups {
-    first: Vec<(String, Vec<Vec3>, Vec<[u32; 3]>)>,
+    first: Vec<Kept>,
+    /// Several solids were selected before the command: they are cut at once, the biggest
+    /// (or the one `Base` chose) being cut by the others.
+    #[serde(default)]
+    quick: Vec<Kept>,
+    #[serde(default)]
+    base: usize,
+    /// `DeleteInput=No` keeps the cutters (Matrix manual, Boolean Difference).
+    #[serde(default)]
+    keep_cutters: bool,
+    #[serde(default)]
+    started: bool,
+}
+
+fn kept(s: &Selected) -> Kept {
+    let m = s.mesh.as_ref().unwrap();
+    (s.id.clone(), m.vertices.clone(), m.triangles.clone())
+}
+
+fn kept_mesh(k: &Kept) -> Mesh {
+    Mesh {
+        vertices: k.1.clone(),
+        triangles: k.2.clone(),
+    }
+}
+
+/// Cut (or intersect) `base` with the union of `tools`; replace `base` and delete the tools
+/// unless they are kept.
+fn cut(label: &str, op: Op, base: &[&Kept], tools: &[&Kept], keep_tools: bool) -> Reply {
+    let cutter = csg::fold(&tools.iter().map(|k| kept_mesh(k)).collect::<Vec<_>>(), Op::Union).unwrap();
+    let mut r = Reply::finish(Vec::new()).say(format!("{label}: {} solids with {} cutters", base.len(), tools.len()));
+    for k in base {
+        r.replace.push(Replacement {
+            id: k.0.clone(),
+            geo: csg::boolean(&kept_mesh(k), &cutter, op).geo("Solid", None, None),
+        });
+    }
+    if !keep_tools {
+        r.delete = tools.iter().map(|k| k.0.clone()).collect();
+    }
+    r
 }
 
 fn two_groups(e: &Event, op: Op) -> Reply {
@@ -205,6 +247,61 @@ fn two_groups(e: &Event, op: Op) -> Reply {
     };
     let mut st: Groups = load(e);
     let objs = solids(e);
+    let delete_option = |st: &Groups| OptionToken::toggle("DeleteInput", !st.keep_cutters);
+    match &e.input {
+        Input::Option { name, value } if name.eq_ignore_ascii_case("DeleteInput") => {
+            st.keep_cutters = match value.as_deref() {
+                Some(v) => matches!(v.to_ascii_lowercase().as_str(), "no" | "n" | "false" | "0"),
+                None => !st.keep_cutters,
+            };
+        }
+        Input::Option { name, .. } if name.eq_ignore_ascii_case("Base") && !st.quick.is_empty() => {
+            st.base = (st.base + 1) % st.quick.len();
+        }
+        _ => {}
+    }
+    // Solids selected before the command: cut right away (a preview, Enter to accept).
+    if !st.started {
+        st.started = true;
+        if objs.len() >= 2 {
+            st.quick = objs.iter().map(|s| kept(s)).collect();
+            st.base = (0..objs.len())
+                .max_by(|&a, &b| {
+                    let v = |i: usize| objs[i].mesh.as_ref().map_or(0.0, |m| m.volume().abs());
+                    v(a).total_cmp(&v(b))
+                })
+                .unwrap_or(0);
+        } else if objs.len() == 1 {
+            // Rhino: one selected object is the object to cut into; now the cutters.
+            st.first = vec![kept(objs[0])];
+            return ask_objects(
+                format!(
+                    "{label}: now select the solids to {} with, Enter",
+                    if op == Op::Difference { "subtract" } else { "intersect" }
+                ),
+                save(&st),
+            )
+            .with_options(vec![delete_option(&st)]);
+        }
+    }
+    if !st.quick.is_empty() {
+        let base = &st.quick[st.base];
+        let tools: Vec<&Kept> = st.quick.iter().enumerate().filter(|(i, _)| *i != st.base).map(|(_, k)| k).collect();
+        if matches!(e.input, Input::Enter) {
+            return cut(label, op, &[base], &tools, st.keep_cutters);
+        }
+        let preview = cut(label, op, &[base], &tools, true).replace.into_iter().map(|r| r.geo).collect();
+        return Reply::ask(
+            format!(
+                "{label}: Enter to {} the biggest solid with the other {} (Base: cut another one)",
+                if op == Op::Difference { "cut" } else { "intersect" },
+                tools.len()
+            ),
+            save(&st),
+        )
+        .preview(preview)
+        .with_options(vec![OptionToken::action("Base"), delete_option(&st)]);
+    }
     if st.first.is_empty() {
         if !matches!(e.input, Input::Enter) {
             return ask_objects(
@@ -224,13 +321,7 @@ fn two_groups(e: &Event, op: Op) -> Reply {
             return ask_objects(format!("{label}: select solids first"), save(&st))
                 .refuse(format!("{label}: nothing selected"));
         }
-        st.first = objs
-            .iter()
-            .map(|s| {
-                let m = s.mesh.as_ref().unwrap();
-                (s.id.clone(), m.vertices.clone(), m.triangles.clone())
-            })
-            .collect();
+        st.first = objs.iter().map(|s| kept(s)).collect();
         return ask_objects(
             format!(
                 "{label}: now select the solids to {} with, Enter",
@@ -241,49 +332,29 @@ fn two_groups(e: &Event, op: Op) -> Reply {
                 }
             ),
             save(&st),
-        );
+        )
+        .with_options(vec![delete_option(&st)]);
     }
     let ids: Vec<&String> = st.first.iter().map(|f| &f.0).collect();
     let second: Vec<&Selected> = objs.into_iter().filter(|s| !ids.contains(&&s.id)).collect();
     if second.is_empty() || !matches!(e.input, Input::Enter) {
         let r = ask_objects(
             format!(
-                "{label}: {} solids in the second set. Enter to finish",
+                "{label}: select the solids to {} with ({} selected), Enter",
+                if op == Op::Difference { "subtract" } else { "intersect" },
                 second.len()
             ),
             save(&st),
-        );
+        )
+        .with_options(vec![delete_option(&st)]);
         return if matches!(e.input, Input::Enter) {
             r.refuse(format!("{label}: select the second set"))
         } else {
             r
         };
     }
-    let cutter = csg::fold(
-        &second
-            .iter()
-            .map(|s| to_mesh(s.mesh.as_ref().unwrap()))
-            .collect::<Vec<_>>(),
-        Op::Union,
-    )
-    .unwrap();
-    let mut r = Reply::finish(Vec::new()).say(format!(
-        "{label}: {} solids with {} cutters",
-        st.first.len(),
-        second.len()
-    ));
-    for (id, v, t) in &st.first {
-        let a = Mesh {
-            vertices: v.clone(),
-            triangles: t.clone(),
-        };
-        r.replace.push(Replacement {
-            id: id.clone(),
-            geo: csg::boolean(&a, &cutter, op).geo("Solid", None, None),
-        });
-    }
-    r.delete = second.iter().map(|s| s.id.clone()).collect();
-    r
+    let tools: Vec<Kept> = second.iter().map(|s| kept(s)).collect();
+    cut(label, op, &st.first.iter().collect::<Vec<_>>(), &tools.iter().collect::<Vec<_>>(), st.keep_cutters)
 }
 
 fn boolean_two(e: &Event) -> Reply {
