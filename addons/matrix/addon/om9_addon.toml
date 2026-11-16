@@ -3,7 +3,7 @@
 # tools/ci/build-addons-windows.ps1 fills @ENTRY@/@PLATFORM@.
 schema_version = "1.0.0"
 id = "om9_matrix"
-version = "0.9.2"
+version = "0.9.3"
 name = "OM9 Matrix"
 tagline = "Lệnh kiểu Matrix 9 cho 11 menu: Curve, Surface, SubD, Gems …"
 maintainer = "OpenMatrix9 contributors"

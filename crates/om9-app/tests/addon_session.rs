@@ -1179,3 +1179,330 @@ fn clicks_build_up_picks_and_right_click_repeats() {
     assert!(c.document().entities.contains_key(&big));
     fs::remove_dir_all(&tmp).unwrap();
 }
+
+/// The user's case: smooth curves drawn with Curve, the two rails picked before Sweep 2 is
+/// typed or clicked, then the cross section; also `Sweep2` typed while Curve still waits.
+#[test]
+fn sweep2_from_drawn_curves_like_the_user() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-user-sweep2-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("user-sweep2"), Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    let new_id = |c: &Controller, before: &[om9_core::identity::ObjectId]| {
+        *c.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    let curve = |c: &mut Controller, pts: &[[f64; 3]]| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.submit("Curve").unwrap();
+        eprintln!("curve prompt: {}", c.prompt_text());
+        for p in pts {
+            c.session_point(*p).unwrap();
+        }
+        c.submit("").unwrap();
+        assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+        new_id(c, &before)
+    };
+    let ra = curve(&mut c, &[[-15.0, -20.0, 0.0], [-5.0, -5.0, 0.0], [-12.0, 8.0, 0.0], [-6.0, 20.0, 0.0]]);
+    let rb = curve(&mut c, &[[8.0, -22.0, 0.0], [18.0, -5.0, 0.0], [10.0, 8.0, 0.0], [16.0, 21.0, 0.0]]);
+    // The profile touches both rails at their starts.
+    let pa = c.document().entities[&ra].geometry.clone();
+    eprintln!("rail geometry: {:?}", std::mem::discriminant(&pa));
+    let p1 = curve(&mut c, &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
+    for how in ["typed", "icon"] {
+        c.clear_selection();
+        c.select_objects(&[ra, rb]).unwrap();
+        match how {
+            "typed" => c.submit("Sweep2").unwrap(),
+            _ => {
+                let t = c.icon_target("SurfaceSweepSweep2Rails", None).expect("icon target");
+                eprintln!("icon runs {} (addon {})", t.command, t.addon);
+                c.run_addon_command(&t.command).unwrap();
+            }
+        }
+        c.refresh_addon_session();
+        eprintln!("[{how}] after start: {}", c.prompt_text());
+        assert!(c.addon_session().is_some(), "{how}: no add-on session: {}", c.prompt_text());
+        c.select_root(Some(p1), c.addon_collects_objects()).unwrap();
+        c.refresh_addon_session();
+        eprintln!("[{how}] after profile: {}", c.prompt_text());
+        let before = c.document().entities.len();
+        for _ in 0..3 {
+            if c.addon_session().is_none() {
+                break;
+            }
+            c.submit("").unwrap();
+            eprintln!("[{how}] after enter: {}", c.prompt_text());
+        }
+        for m in c.take_addon_messages() {
+            eprintln!("[{how}] message: {m:?}");
+        }
+        assert!(c.addon_session().is_none(), "{how}: {}", c.prompt_text());
+        assert_eq!(c.document().entities.len(), before + 1, "{how}: the sweep surface");
+    }
+    // Sweep2 typed while Curve still waits for its first point: Curve closes, Sweep 2 runs.
+    c.clear_selection();
+    c.submit("Curve").unwrap();
+    c.submit("Sweep2").unwrap();
+    c.refresh_addon_session();
+    assert!(c.prompt_text().starts_with("Select first rail"), "{}", c.prompt_text());
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// The same through the real window code (`MatrixApp::show`): `Sweep2` typed on the command
+/// line with the rails picked, the cross section picked, then right-clicks in the viewport.
+#[test]
+fn sweep2_through_the_window_with_right_clicks() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-ui-sweep2-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut app = om9_app::ui::MatrixApp::new(Document::new("ui-sweep2")).unwrap();
+    app.controller.attach_addons(host(&tmp), &names);
+    let size = [1400.0f32, 900.0];
+    let run = |app: &mut om9_app::ui::MatrixApp, steps: serde_json::Value| -> serde_json::Value {
+        om9_app::ui_replay::replay_app(app, size, 1.0, steps.as_array().unwrap()).unwrap()
+    };
+    let r = run(&mut app, serde_json::json!([{"wait": 2}]));
+    let views = r["steps"][0]["views"].clone();
+    eprintln!("views: {views}");
+    let curve = |app: &mut om9_app::ui::MatrixApp, pts: &[[f64; 3]]| {
+        let before: Vec<_> = app.controller.document().entities.keys().copied().collect();
+        app.controller.clear_selection();
+        app.controller.submit("Curve").unwrap();
+        for p in pts {
+            app.controller.session_point(*p).unwrap();
+        }
+        app.controller.submit("").unwrap();
+        *app.controller.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    let ra = curve(&mut app, &[[-15.0, -20.0, 0.0], [-5.0, -5.0, 0.0], [-12.0, 8.0, 0.0], [-6.0, 20.0, 0.0]]);
+    let rb = curve(&mut app, &[[8.0, -22.0, 0.0], [18.0, -5.0, 0.0], [10.0, 8.0, 0.0], [16.0, 21.0, 0.0]]);
+    let p1 = curve(&mut app, &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
+    app.controller.clear_selection();
+    app.controller.select_objects(&[ra, rb]).unwrap();
+    let r = run(&mut app, serde_json::json!([{"text": "Sweep2"}, {"key": "Enter"}]));
+    for s in r["steps"].as_array().unwrap() {
+        eprintln!("step {}: prompt={} command={}", s["step"], s["prompt"], s["command"]);
+    }
+    eprintln!("history:\n{}", app.transcript.history());
+    assert!(app.controller.addon_session().is_some(), "Sweep2 did not start: {}", app.controller.prompt_text());
+    let collecting = app.controller.addon_collects_objects();
+    app.controller.select_root(Some(p1), collecting).unwrap();
+    app.controller.refresh_addon_session();
+    let persp = views.as_array().unwrap().iter().find(|v| v["view"] == "Perspective").unwrap()["rect"].clone();
+    let at = [persp[0].as_f64().unwrap() + 40.0, persp[1].as_f64().unwrap() + persp[3].as_f64().unwrap() - 40.0];
+    let before = app.controller.document().entities.len();
+    let r = run(&mut app, serde_json::json!([{"click": at, "button": "right"}, {"click": at, "button": "right"}]));
+    for s in r["steps"].as_array().unwrap() {
+        eprintln!("step {}: prompt={}", s["step"], s["prompt"]);
+    }
+    eprintln!("history:\n{}", app.transcript.history());
+    assert!(app.controller.addon_session().is_none(), "{}", app.controller.prompt_text());
+    assert_eq!(app.controller.document().entities.len(), before + 1, "the sweep surface");
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// Rhino 5 / Matrix 9: with the rails and a profile picked, Sweep 2 shows its options window
+/// (MaintainHeight, Simplify …); a checkbox changes the option and OK creates the surface.
+#[test]
+fn sweep2_options_window_ok_creates_the_surface() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-ui-dialog-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut app = om9_app::ui::MatrixApp::new(Document::new("ui-dialog")).unwrap();
+    // OM9_SHOT_LANG=vi: the same flow in Vietnamese (for the screenshot).
+    let lang = std::env::var("OM9_SHOT_LANG").unwrap_or_else(|_| "en".into());
+    app.controller.attach_addons(host_lang(&tmp, &lang), &names);
+    let size = [1400.0f32, 900.0];
+    let run = |app: &mut om9_app::ui::MatrixApp, steps: serde_json::Value| -> serde_json::Value {
+        om9_app::ui_replay::replay_app(app, size, 1.0, steps.as_array().unwrap()).unwrap()
+    };
+    let curve = |app: &mut om9_app::ui::MatrixApp, pts: &[[f64; 3]]| {
+        let before: Vec<_> = app.controller.document().entities.keys().copied().collect();
+        app.controller.clear_selection();
+        app.controller.submit("Curve").unwrap();
+        for p in pts {
+            app.controller.session_point(*p).unwrap();
+        }
+        app.controller.submit("").unwrap();
+        *app.controller.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    let ra = curve(&mut app, &[[-15.0, -20.0, 0.0], [-5.0, -5.0, 0.0], [-12.0, 8.0, 0.0], [-6.0, 20.0, 0.0]]);
+    let rb = curve(&mut app, &[[8.0, -22.0, 0.0], [18.0, -5.0, 0.0], [10.0, 8.0, 0.0], [16.0, 21.0, 0.0]]);
+    let p1 = curve(&mut app, &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
+    app.controller.clear_selection();
+    app.controller.select_objects(&[ra, rb]).unwrap();
+    let r = run(&mut app, serde_json::json!([{"text": "Sweep2"}, {"key": "Enter"}]));
+    // Picking the cross section: no window yet.
+    assert!(r["steps"][2]["dialog"].is_null(), "{}", r["steps"][2]);
+    let collecting = app.controller.addon_collects_objects();
+    app.controller.select_root(Some(p1), collecting).unwrap();
+    app.controller.refresh_addon_session();
+    // A right click (Enter) ends the selection: the options window opens with the preview.
+    let views = r["steps"][0]["views"].clone();
+    let persp = views.as_array().unwrap().iter().find(|v| v["view"] == "Perspective").unwrap()["rect"].clone();
+    let spot = [persp[0].as_f64().unwrap() + 40.0, persp[1].as_f64().unwrap() + persp[3].as_f64().unwrap() - 40.0];
+    let r = run(&mut app, serde_json::json!([{"click": spot, "button": "right"}, {"wait": 2}]));
+    let last = &r["steps"][2];
+    eprintln!("dialog: {}", last["dialog"]);
+    let title = if lang == "vi" { "Tuỳ chọn Quét 2 ray" } else { "Sweep 2 Rails Options" };
+    assert_eq!(last["dialog"]["title"], title, "{last}");
+    let rows = last["dialog"]["rows"].as_array().unwrap();
+    for name in ["MaintainHeight", "Simplify", "RebuildPoints", "RefitTolerance", "SweepTolerance"] {
+        assert!(rows.iter().any(|r| r["name"] == name), "{name} missing: {rows:?}");
+    }
+    let at = |r: &serde_json::Value, k: &str| r["controls"][k].clone();
+    // OM9_SHOT_DIR=<dir>: the whole window at this moment, for a look at the dialog.
+    if let Some(dir) = std::env::var_os("OM9_SHOT_DIR") {
+        let out = Path::new(&dir).join("sweep2-options.png");
+        om9_app::ui_replay::screenshot(&mut app, size, 1.0, 40, &out).unwrap();
+        eprintln!("screenshot: {}", out.display());
+    }
+    let check = at(last, "Dialog:MaintainHeight");
+    assert!(check.is_array(), "no checkbox: {}", last["controls"]);
+    let r = run(&mut app, serde_json::json!([{"click": check}, {"wait": 2}]));
+    let after = &r["steps"][2];
+    let row = after["dialog"]["rows"].as_array().unwrap().iter().find(|r| r["name"] == "MaintainHeight").unwrap().clone();
+    assert_eq!(row["value"], "Yes", "{after}");
+    let rebuild = at(after, "Dialog:Simplify=Rebuild");
+    let r = run(&mut app, serde_json::json!([{"click": rebuild}, {"wait": 2}]));
+    let after = &r["steps"][2];
+    let row = after["dialog"]["rows"].as_array().unwrap().iter().find(|r| r["name"] == "Simplify").unwrap().clone();
+    assert_eq!(row["value"], "Rebuild", "{after}");
+    let before = app.controller.document().entities.len();
+    let ok = at(after, "Dialog:OK");
+    let r = run(&mut app, serde_json::json!([{"click": ok}, {"wait": 2}]));
+    eprintln!("history:\n{}", app.transcript.history());
+    assert!(app.controller.addon_session().is_none(), "{}", app.controller.prompt_text());
+    assert!(r["steps"][2]["dialog"].is_null());
+    assert_eq!(app.controller.document().entities.len(), before + 1, "the sweep surface");
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// The surface commands that have options show their options window once they have
+/// something to make (Rhino 5: Surface From Curve Network, Patch Surface Options …).
+#[test]
+fn surface_commands_show_their_options_window() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-srf-dialogs-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("srf-dialogs"), Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    let curve = |c: &mut Controller, pts: &[[f64; 3]]| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.submit("Curve").unwrap();
+        for p in pts {
+            c.session_point(*p).unwrap();
+        }
+        c.submit("").unwrap();
+        *c.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    // A 2 × 2 network, slightly bent.
+    let u0 = curve(&mut c, &[[0.0, 0.0, 0.0], [5.0, 0.0, 1.0], [10.0, 0.0, 0.0]]);
+    let u1 = curve(&mut c, &[[0.0, 10.0, 0.0], [5.0, 10.0, 1.0], [10.0, 10.0, 0.0]]);
+    let v0 = curve(&mut c, &[[0.0, 0.0, 0.0], [0.0, 5.0, 1.0], [0.0, 10.0, 0.0]]);
+    let v1 = curve(&mut c, &[[10.0, 0.0, 0.0], [10.0, 5.0, 1.0], [10.0, 10.0, 0.0]]);
+    let mut report = Vec::new();
+    for (cmd, sel) in [("NetworkSrf", vec![u0, u1, v0, v1]), ("Patch", vec![u0, u1, v0, v1])] {
+        c.clear_selection();
+        c.select_objects(&sel).unwrap();
+        c.submit(cmd).unwrap();
+        c.refresh_addon_session();
+        let d = c.addon_dialog();
+        report.push(format!("{cmd}: {:?} {:?}", d.as_ref().map(|d| &d.title), d.as_ref().map(|d| d.rows.iter().map(|r| format!("{}={}", r.name, r.value)).collect::<Vec<_>>())));
+        let d = d.unwrap_or_else(|| panic!("{cmd}: no options window ({})", c.prompt_text()));
+        assert!(d.ready);
+        // A setting changed in the window is used at once and remembered.
+        if cmd == "NetworkSrf" {
+            c.set_addon_dialog_value("EdgeTolerance", "0.002").unwrap();
+            let d = c.addon_dialog().unwrap();
+            let row = d.rows.iter().find(|r| r.name == "EdgeTolerance").unwrap();
+            assert_eq!(row.value, "0.002");
+        }
+        let before = c.document().entities.len();
+        c.submit("").unwrap();
+        assert!(c.addon_session().is_none(), "{cmd}: {}", c.prompt_text());
+        assert!(c.addon_dialog().is_none());
+        assert!(c.document().entities.len() > before, "{cmd} made nothing");
+    }
+    eprintln!("{}", report.join("\n"));
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// The package as the user installs it: the built library loaded by the native runtime
+/// (`OM9_NATIVE_ADDON=<path to libom9_matrix.so>`), then the window flow of Sweep 2.
+#[test]
+#[ignore = "needs OM9_NATIVE_ADDON pointing at a built om9_matrix library"]
+fn sweep2_through_the_native_library() {
+    let Some(lib) = std::env::var_os("OM9_NATIVE_ADDON") else { return };
+    let tmp = std::env::temp_dir().join(format!("om9-app-native-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let catalog = om9_app::addons::catalog().unwrap();
+    let mut h = Host::new(HostConfig::new(om9_app::addons::om9_version(), catalog.clone(), tmp.join("config")));
+    h.register_runtime(RuntimeKind::Native, Box::new(om9_addons::native::NativeRuntime::new()));
+    h.startup(&Startup::default());
+    let stage = tmp.join("stage-native");
+    fs::create_dir_all(stage.join("icons")).unwrap();
+    let addon = repo().join("addons/matrix/addon");
+    let entry = Path::new(&lib).file_name().unwrap().to_str().unwrap().to_owned();
+    let manifest = fs::read_to_string(addon.join("om9_addon.toml")).unwrap().replace("@PLATFORM@", "linux-x64").replace("@ENTRY@", &entry);
+    fs::write(stage.join("om9_addon.toml"), manifest).unwrap();
+    fs::copy(&lib, stage.join(&entry)).unwrap();
+    for dir in ["icons", "lang"] {
+        fs::create_dir_all(stage.join(dir)).unwrap();
+        for e in fs::read_dir(addon.join(dir)).unwrap() {
+            let e = e.unwrap().path();
+            fs::copy(&e, stage.join(dir).join(e.file_name().unwrap())).unwrap();
+        }
+    }
+    let (_, zip) = build_package(&stage, Some(&catalog)).unwrap_or_else(|e| panic!("{e:?}"));
+    fs::write(tmp.join("m.zip"), zip).unwrap();
+    let r = h.install_zip(&tmp.join("m.zip"), &InstallOptions { enable: true, ..Default::default() }).unwrap_or_else(|e| panic!("{e:?}"));
+    assert!(r.enabled, "{:?}", r.warnings);
+    h.set_setting("om9_matrix", "language", "en").unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("native"), Limits::default()).unwrap();
+    c.attach_addons(Arc::new(Mutex::new(h)), &names);
+    let new_id = |c: &Controller, before: &[om9_core::identity::ObjectId]| *c.document().entities.keys().find(|k| !before.contains(k)).unwrap();
+    let curve = |c: &mut Controller, pts: &[[f64; 3]]| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.submit("Curve").unwrap();
+        for p in pts {
+            c.session_point(*p).unwrap();
+        }
+        c.submit("").unwrap();
+        new_id(c, &before)
+    };
+    let ra = curve(&mut c, &[[-15.0, -20.0, 0.0], [-5.0, -5.0, 0.0], [-12.0, 8.0, 0.0], [-6.0, 20.0, 0.0]]);
+    let rb = curve(&mut c, &[[8.0, -22.0, 0.0], [18.0, -5.0, 0.0], [10.0, 8.0, 0.0], [16.0, 21.0, 0.0]]);
+    let p1 = curve(&mut c, &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
+    c.clear_selection();
+    c.select_objects(&[ra, rb]).unwrap();
+    c.submit("Sweep2").unwrap();
+    eprintln!("native: {}", c.prompt_text());
+    c.select_root(Some(p1), c.addon_collects_objects()).unwrap();
+    c.refresh_addon_session();
+    let before = c.document().entities.len();
+    c.submit("").unwrap();
+    eprintln!("native: {}", c.prompt_text());
+    c.submit("").unwrap();
+    for m in c.take_addon_messages() {
+        eprintln!("native message: {m:?}");
+    }
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    assert_eq!(c.document().entities.len(), before + 1, "the sweep surface");
+    fs::remove_dir_all(&tmp).unwrap();
+}

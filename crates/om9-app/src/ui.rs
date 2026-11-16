@@ -22,6 +22,7 @@ use om9_scene::{
 mod channel_cutters;
 mod addons_window;
 mod builder_panel;
+mod session_dialog;
 mod chrome;
 mod clipboard;
 mod command;
@@ -243,7 +244,7 @@ pub struct MatrixApp {
     cmd_suggestions_rect: Option<Rect>,
     cmd_history_rect: Option<Rect>,
     /// Screen rectangles of the clickable command option tokens, for tests and hit reports.
-    cmd_token_rects: std::collections::BTreeMap<String, Rect>,
+    pub(crate) cmd_token_rects: std::collections::BTreeMap<String, Rect>,
     cmd_horizontal_offset: f32,
     cmd_ime_composing: bool,
     pub view_rects: BTreeMap<ViewId, Rect>,
@@ -285,6 +286,7 @@ pub struct MatrixApp {
     /// Tools › Add-ons… window and pending Install from Disk.
     addons_ui: addons_window::AddonsUi,
     builder_ui: builder_panel::BuilderUi,
+    pub(crate) session_dialog: session_dialog::SessionDialogUi,
     file_ime_composing: bool,
     file_f6_rects: BTreeMap<crate::file_lifecycle::FileKind, Rect>,
     /// Window title owned by this document's path/name and dirty marker.
@@ -343,7 +345,7 @@ pub struct MatrixApp {
     main_category: usize,
     main_category_rects: BTreeMap<usize, Rect>,
     toolbar_tab: usize,
-    style_ready: bool,
+    pub(crate) style_ready: bool,
     /// Live rectangles of the Matrix menu title bars, keyed by section key.
     pub section_rects: BTreeMap<&'static str, Rect>,
     /// The menu currently being dragged, with the last finite pointer position
@@ -386,7 +388,7 @@ pub struct MatrixApp {
     /// GPU viewport surface, created on first use from eframe's render state.
     /// One GPU target per viewport, so all four render their own camera instead of sharing pixels.
     gpu_viewports: std::collections::BTreeMap<ViewId, crate::gpu_viewport::GpuViewport>,
-    gpu_state: Option<eframe::egui_wgpu::RenderState>,
+    pub(crate) gpu_state: Option<eframe::egui_wgpu::RenderState>,
     /// One document scene shared by the four viewports; geometry is uploaded once, not once per view.
     shared_scene: crate::gpu_viewport::SharedResourcePool,
     /// Opt-in JSONL log of camera and gumball gestures (`OM9_INTERACTION_LOG`).
@@ -825,6 +827,7 @@ impl MatrixApp {
             os_audit: None,
             addons_ui: Default::default(),
             builder_ui: Default::default(),
+            session_dialog: Default::default(),
             file_ime_composing: false,
             file_f6_rects: BTreeMap::new(),
             window_title: String::new(),
@@ -2732,6 +2735,7 @@ impl MatrixApp {
         self.passes += 1;
         self.addons_frame(ui.ctx());
         self.builder_frame();
+        self.session_dialog_ui(ui.ctx());
         self.sync_pictureframe_textures(ui.ctx());
         if self
             .camera_audit

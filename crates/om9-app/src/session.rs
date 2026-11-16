@@ -454,6 +454,8 @@ mod uv_curves;
 mod wireframe;
 pub use subobjects::SelectedSubobject;
 mod addon_builder;
+mod addon_dialog;
+pub use addon_dialog::{AddonDialog, DialogKind, DialogRow, humanize};
 mod addon_session;
 pub use addon_session::AddonSession;
 mod addon_command;
