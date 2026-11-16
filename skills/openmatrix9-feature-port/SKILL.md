@@ -1,6 +1,6 @@
 ---
 name: openmatrix9-feature-port
-description: Implement or specify OpenMatrix9 standalone Rust features using milestone contracts, including Rhino 5 3DM, Copy/Paste, Box/Sphere, Gems, Builders, cutters, render, SubD and Emboss; retain Matrix9 UI behavior; include command icon bindings, default invocation and underlined parameter shortcuts.
+description: Implement, review or specify OpenMatrix9 standalone Rust features using milestone contracts, including Rhino 5 3DM, Copy/Paste, Box/Sphere, Gems, Builders, cutters, render, SubD and Emboss; retain Matrix9 UI behavior; include command icon bindings, default invocation and underlined parameter shortcuts.
 ---
 
 # Exact OM9 feature trên nền độc lập
@@ -17,6 +17,8 @@ description: Implement or specify OpenMatrix9 standalone Rust features using mil
 ## Tích hợp command từ icon đến input
 
 Đọc [hợp đồng nguồn và viewport](../openmatrix9-workflow/references/source-and-viewport-contract.md) khi triển khai/sửa command CAD: làm cả phần hình học nguồn và viewport/preview/picking chịu ảnh hưởng trong cùng bàn giao; xác minh placement, trim, dung sai, freshness và scene sau commit/Undo/lưu mở khi liên quan. Nguồn được lấy mẫu vẫn cần đánh giá sai số; không coi hình đúng hoặc kernel pass riêng là hoàn tất command.
+
+Khi kiểm tra command, cũng áp dụng mục “Kiểm tra từng lệnh” của hợp đồng trên: xác nhận phần có sẵn trước khi bổ sung preview nhẹ song song với exact và cập nhật cuối; không coi worker exact hoặc Light/High là đủ. Ghi trạng thái và evidence theo lệnh/mode trong `docs/validation/command-source-viewport-checklist.md` của checkout; làm phần thiếu trong cùng tác vụ trừ yêu cầu chỉ đọc rõ ràng.
 
 Khi implement/port/sửa command, bắt buộc làm đồng bộ binding icon đúng feature/biến thể, thao tác mặc định khi gọi lệnh và tham số có phím tắt gạch chân theo mẫu Polyline. Đọc [hợp đồng icon/default/options](references/command-integration-contract.md) trước khi sửa handler hoặc UI command; chỉ kết luận command hoàn tất khi các trục này và kết quả thực đã được kiểm.
 

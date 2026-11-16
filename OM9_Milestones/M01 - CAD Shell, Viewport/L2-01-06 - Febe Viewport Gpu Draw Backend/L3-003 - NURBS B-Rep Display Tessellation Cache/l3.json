@@ -473,6 +473,19 @@
         "768 High",
         "profile superlinear command/history inventory cost"
       ]
+    },
+    "source_viewport_current_review_20261116": {
+      "status": "STATIC_REVIEW_WITH_PRIOR_SCOPED_RUNTIME_EVIDENCE",
+      "evidence": "docs/validation/2026-11-16-source-viewport-current-status.md",
+      "scope": "Geometry::Brep holds CanonicalBrep and Geometry::NativeBrep holds payload/CRC-only NativeBrepSource. Temporary adapter result types can still carry display. Product representations have independent stores, accounted owners and pins. The coupled diagnostic is opt-in benchmark-only. Conditional OCCT history-only reclamation and worker rebuild paths exist. V5 BRep encode/decode explicitly refuse migration.",
+      "limitations": "C1-C5 and I1 not closed as a whole. Native opaque bytes may embed internal caches; generic topology/payload disposition, cold source-only reconstruction, all consumers and v5 BRep persistence remain open. Existing broad test compilation blockers remain; no new test pass claimed.",
+      "validation": "Documentation review only; reuses named existing test/native reports without rerunning them or promoting the whole feature."
+    },
+    "per_command_source_preview_skill_20261116": {
+      "status": "DOCUMENTATION_VALIDATED_NO_RUNTIME_CHANGE",
+      "evidence": "docs/validation/2026-11-16-command-separation-skill-policy.md",
+      "scope": "Approved shared skill contract and one per-command checklist; six source/installed entrypoints route to source separation, early preview, guarded final publication and scoped implementation of missing parts.",
+      "limitations": "Policy validation only; no new command runtime acceptance or C1-C5/I1 completion. Reuse existing evidence within its scope."
     }
   }
 }

@@ -7,6 +7,8 @@ description: Use when implementing or reviewing OpenMatrix9 workspace startup de
 
 Với thay đổi CAD Wireframe/Shaded, preview hoặc Line/Polyline/snap, tuân theo [hợp đồng nguồn và viewport](../openmatrix9-workflow/references/source-and-viewport-contract.md), người dùng yêu cầu 2026-11-13: làm cả phần viewport và dữ liệu nguồn chịu ảnh hưởng, xác minh liên kết giữa chúng. Thay đổi layout/Command thuần túy chỉ cần ghi căn cứ không tác động hình học; không tự mở rộng thành sửa kernel.
 
+Khi kiểm tra lệnh trong nhóm này, áp dụng thêm mục “Kiểm tra từng lệnh” được duyệt 2026-11-16 của hợp đồng trên và cập nhật `docs/validation/command-source-viewport-checklist.md` trong checkout. Tái dùng phần đã có, bổ sung phần thiếu đúng phạm vi; lệnh tức thời hoặc không tạo hình ghi căn cứ preview KHONG_AP_DUNG thay vì thêm worker hình thức.
+
 Đọc [đích milestone và giao diện Matrix9](../openmatrix9-workflow/references/milestones-target.md) trước lựa chọn kiến trúc, spec hoặc runtime. Nguồn nền tảng `OM9_Milestones/M01 - CAD Shell, Viewport`; QymCAD chỉ cho code mẫu/routine, giao diện giữ Matrix9 như mô tả hiện tại.
 
 Rust là ưu tiên số 1 khi triển khai hoặc chuyển code OM9. Đọc [quy tắc Rust và ranh giới native](../openmatrix9-workflow/references/rust-first.md) trước khi chọn ngôn ngữ/FFI/worker. Safe Rust sở hữu logic, validation và dữ liệu độc lập; C++ chỉ là bridge cho API native bắt buộc, Python cho bootstrap/test/tool khi cần. Ghi rõ lý do và owner của mọi ngoại lệ; không coi native FFI là memory-safe hoặc skill update là migration hoàn tất.

@@ -7,6 +7,8 @@ description: Build and validate OpenMatrix9 standalone Rust, selected OCCT/openN
 
 Với thay đổi CAD, kiểm theo [hợp đồng nguồn và viewport](../openmatrix9-workflow/references/source-and-viewport-contract.md): bằng chứng phải bao gồm hình học nguồn, viewport chịu ảnh hưởng và binding chọn nguồn; phân biệt semantic/scene với GPU/desktop. Hai profile display khi liên quan phải giữ cùng nguồn và dung sai tính toán, ngoại trừ thay đổi mà hợp đồng lệnh cho phép.
 
+Kiểm tra một lệnh còn phải áp dụng mục “Kiểm tra từng lệnh” của hợp đồng: ghi phần nguồn/representation/preview sớm/commit-Undo đã có và còn thiếu vào `docs/validation/command-source-viewport-checklist.md` của checkout, bổ sung trong phạm vi được giao. Khi đo preview, phân biệt thời gian thấy hình tạm với exact commit và publish cuối; không gộp chúng thành một FPS hay suy ra tất cả đã đạt từ build pass. Yêu cầu chỉ chạy test hoặc chỉ đọc không tự mở triển khai.
+
 Đọc [đích milestone](../openmatrix9-workflow/references/milestones-target.md) và [Rust/FFI](../openmatrix9-workflow/references/rust-first.md). Workflow `route build-validation` cung cấp policy/design, không chứng minh executable đã tồn tại.
 
 Theo [validation-playbook](references/validation-playbook.md), resolve target/crate/build config thực trước khi chạy. Rust core hiện có và examples là portable/legacy component evidence, không thay executable standalone. Không reconfigure/build FreeCAD root cho v2. Toolkit dependencies, ABI, version và scheduler phải kiểm theo operation được chọn.

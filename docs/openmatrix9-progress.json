@@ -1,4 +1,55 @@
 {
+  "latest_per_command_source_preview_skill_policy_2026_11_16": {
+    "stage": "inventory",
+    "status": "documentation_validated",
+    "feature_ids": [],
+    "procedure_va": null,
+    "scope": "User explicitly authorized a standing per-command skill rule: reuse and mark existing source/viewport/early-preview implementation, fill missing parts of the requested command, and maintain one shared command checklist. Explicit read-only/test-only instructions override implementation; this skill edit does not start all commands.",
+    "outputs": [
+      "skills/openmatrix9-workflow/references/source-and-viewport-contract.md",
+      "skills/openmatrix9-workflow/SKILL.md",
+      "skills/openmatrix9-feature-port/SKILL.md",
+      "skills/openmatrix9-ui/SKILL.md",
+      "skills/openmatrix9-workspace-contract/SKILL.md",
+      "skills/openmatrix9-build-validation/SKILL.md",
+      "skills/openmatrix9-headless-testing/SKILL.md",
+      "docs/validation/command-source-viewport-checklist.md",
+      "docs/validation/2026-11-16-command-separation-skill-policy.md",
+      "docs/openmatrix9-skills.md"
+    ],
+    "evidence": "docs/validation/2026-11-16-command-separation-skill-policy.md",
+    "tests": "Skill Creator quick_validate passed 12/12 source/installed copies; 7 changed file pairs byte-identical. Verified 10 new document links, 7 actual runtime IDs and JSON. Public source audit passed: 16117 source files, 594 icon bindings, 593 SVGs, no errors. git diff --check passed. No Rust/native/GPU/desktop execution for skill-only change.",
+    "uncertainties": "Initial checklist marks implemented Union/Sphere subparts without declaring either fully verified under the new contract. Five other named commands are CHUA_RA, not proven absent. Full remaining command count unknown. Existing C1-C5/I1, v5 BRep and High512 Boolean gaps remain open.",
+    "next_document": "docs/validation/command-source-viewport-checklist.md",
+    "next_action": "At the next user-requested command check, inspect its actual routes, reuse existing pieces, fill confirmed gaps within scope and update the same checklist row with implementation and validation evidence."
+  },
+  "latest_preview_refinement_research_2026_11_16": {
+    "stage": "research",
+    "status": "CURRENT_UNION_PREVIEW_PATH_AND_PRIMARY_OPEN_SOURCE_REFERENCES_REVIEWED",
+    "evidence": "docs/validation/2026-11-16-source-viewport-current-status.md#preview-nhẹ-song-song-đối-chiếu-theo-câu-hỏi-tiếp-theo",
+    "scope": "Answer feasibility of low-cost temporary viewport output while exact geometry runs, then replacement; inspect existing Union preview and compare official OpenSCAD, ParaView and Blender documentation/source. No runtime change, new benchmark or general preview implementation.",
+    "findings": "OM9 already starts a bounded disposable mesh CSG preview thread in parallel with exact Boolean Union; it is not a canonical CAD object. OpenSCAD proves separate GPU CSG preview versus geometry evaluation, ParaView proves interactive LOD followed by full detail, Blender proves separate viewport/render subdivision levels. These references do not establish identical automatic background BRep computation in all three applications.",
+    "remaining": "Generic preview for primitives/other commands is not implemented by this research. Dependencies on exact geometry, stale/cancel/failure handling, single-step Undo, source-only precision, bounded preview work and GPU/UI publication need per-command design.",
+    "next_document": "crates/om9-app/src/session/boolean_union_worker/mesh_preview.rs",
+    "next_action": "Reuse existing preview/source separation when implementing the next user-requested command; do not automatically launch a shared preview rewrite or change approved behavior from this feasibility answer."
+  },
+  "latest_source_viewport_current_review_2026_11_16": {
+    "stage": "inventory",
+    "status": "CURRENT_CODE_REVIEWED_SCOPED_RUNTIME_SEPARATION_VERIFIED_FULL_LIFECYCLE_OPEN",
+    "source_commit": "dc570216219f6fdd6b1facb0628706c05fc13173",
+    "feature_ids": [
+      "OM9-L3-01-06-003",
+      "OM9-L3-01-02-007"
+    ],
+    "evidence": "docs/validation/2026-11-16-source-viewport-current-status.md",
+    "scope": "Read current source/representation ownership, profile changes, cache reclamation/history/Open and archive product callers; reconcile older compile-only checkpoints with later scoped native evidence. Documentation only, no runtime changes or new benchmarks.",
+    "verified_code": "Geometry::Brep holds CanonicalBrep and Geometry::NativeBrep holds payload/CRC-only NativeBrepSource. Temporary adapter result types can still carry display. Product representations have independent stores, accounted owners and pins. The coupled diagnostic is opt-in benchmark-only. Conditional OCCT history-only reclamation and worker rebuild paths exist. V5 BRep encode/decode explicitly refuse migration.",
+    "runtime_evidence_reused": "Final M1-R 10 native configurations, Light/High exact-source parity and retained creation Undo, scoped 64/128 coupled A/B and normals/selection tests. These do not prove general cold restore, eviction or persistence. Prior 512 High speculative Boolean worker failure remains open.",
+    "uncertainties": "C1-C5 and I1 not closed as a whole. Native opaque bytes may embed internal caches; generic topology/payload disposition, cold source-only reconstruction, all consumers and v5 BRep persistence remain open. Existing broad test compilation blockers remain; no new test pass claimed.",
+    "user_direction": "User accepts current optimization and plans further optimization while implementing individual commands. Current request is status review and flow, not another global optimization batch.",
+    "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_SOURCE_DISPLAY_COMPLETION_M01_M09.md",
+    "next_action": "Use this snapshot when implementing the next requested command: verify source path, representation ownership, picking/Undo/export effects. Track shared lifecycle C2 and blocked v5 persistence C3 explicitly; do not launch new performance work from historical next_action entries."
+  },
   "latest_m1r_storage_receipts_2026_11_16": {
     "stage": "build-validation",
     "status": "partial_implementation_native_matrix_passed_latency_gates_open",

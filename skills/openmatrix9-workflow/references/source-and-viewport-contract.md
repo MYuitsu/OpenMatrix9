@@ -2,6 +2,57 @@
 
 Người dùng yêu cầu ngày 2026-11-13: khi triển khai hoặc sửa lệnh CAD, phải làm cả phía viewport và phía dữ liệu hình học chính xác. Đây là yêu cầu cho công việc sau này; cập nhật hướng dẫn không tự khởi chạy các lệnh còn thiếu trong inventory.
 
+## Kiểm tra từng lệnh: tái dùng, bổ sung và ghi danh sách
+
+Chỉ đạo bổ sung được người dùng duyệt 2026-11-16: mỗi lần được giao kiểm tra,
+triển khai hoặc sửa một lệnh CAD, áp dụng luồng nguồn chính xác và viewport
+tách biệt, có preview nhẹ trong lúc chờ tác vụ nguồn khi lệnh cần tính lâu.
+Mặc định công việc kiểm tra lệnh bao gồm bổ sung phần thiếu của **chính lệnh
+được giao**, không dừng ở đề xuất. Yêu cầu rõ là chỉ phân tích/chỉ chạy test/
+không sửa code vẫn giữ phạm vi đó; ghi phần thiếu thay vì tự sửa. Lượt cập
+nhật skill không tự khởi chạy quét hay triển khai toàn bộ danh mục lệnh.
+
+- Đọc code và bằng chứng trước khi sửa. Phần đã có phải được đánh dấu và tái
+  dùng, kiểm lại binding/lifetime của đường sản phẩm hiện tại; không viết lại
+  worker, cache hay pipeline chỉ để đáp ứng hình thức của quy tắc.
+- Kiểm riêng bốn phần: nguồn canonical đúng semantics/dung sai; representation
+  viewport độc lập; preview nhẹ trước kết quả exact khi có chờ; commit/cập nhật
+  scene, Undo và các consumer chịu ảnh hưởng. Có Light/High hoặc một worker
+  exact không tự chứng minh đã có preview sớm.
+- Với tính toán lâu, cho nhánh preview rẻ từ tham số, proxy đã cache hoặc mesh
+  hiển thị chạy độc lập với tác vụ nguồn chính xác. Không bắt preview đợi nguồn
+  kết quả cuối mới dựng. Preview cũng phải có giới hạn CPU/RAM/GPU; không chạy
+  việc nặng trên UI để đổi chỗ freeze. Primitive có thể dùng unit mesh và
+  transform; Boolean tái dùng nhánh mesh-preview hiện có nếu phù hợp.
+- Preview có trạng thái tạm và job/revision riêng, không trở thành nguồn đo/
+  xuất CAD hoặc identity topology chính xác. Khi worker xong, kiểm input,
+  context, cancel/stale, binding và budget rồi chuẩn bị scene và commit theo
+  transaction. Dùng một bước Undo cho thay đổi nguồn đã commit; nâng chất
+  lượng hoặc thay preview không thêm Undo. Lỗi/hủy giữ nguồn và lịch sử đã
+  commit, loại preview/kết quả cũ đúng phiên. Không tự cho lệnh sau tính CAD
+  trên preview; phụ thuộc exact phải đợi hoặc có queue đã thiết kế rõ.
+- Kết quả exact có thể tiếp tục vẽ bằng Light; độ mịn viewport không đổi dung
+  sai nguồn. Việc tách owner model không tự chứng minh mọi payload opaque
+  sạch display hoặc mọi đường lưu/mở đã hoạt động.
+- Lệnh hoàn tất ngay bằng phép biến đổi/buffer hiện có không cần thêm thread
+  hay bản hình học thứ hai chỉ để có worker. Lệnh không tạo/sửa hình có thể
+  ghi preview là KHONG_AP_DUNG kèm căn cứ cụ thể; vẫn kiểm nguồn/representation
+  chịu ảnh hưởng. Không dùng ngoại lệ này để né một tác vụ CAD đang chặn UI.
+
+Duy trì **một danh sách chung trong checkout**:
+`docs/validation/command-source-viewport-checklist.md`. Mỗi lần làm lệnh, cập
+nhật dòng theo ID thực và mode/route đã rà: phần có sẵn được tái dùng, phần
+vừa bổ sung, phần còn thiếu, code/bằng chứng và phạm vi kiểm chứng. Phân biệt
+CHUA_RA, THIEU_CAN_BO_SUNG, MOT_PHAN và DA_XAC_MINH; KHONG_AP_DUNG chỉ dùng cho
+hạng mục có căn cứ. Không coi CHUA_RA là đã xác định thiếu triển khai.
+
+Chỉ đánh dấu DA_XAC_MINH trong phạm vi đã kiểm đủ phần áp dụng; biên dịch,
+code tồn tại hoặc đạt một fixture không đóng cả lệnh/mọi alias. Alias chỉ gộp
+khi đã xác nhận cùng owner và mode. Nếu gặp lỗi nền chung như persistence,
+ghi blocker và giữ MOT_PHAN; không tự mở dự án sửa toàn lõi ngoài lệnh đang
+được giao, cũng không báo lệnh hoàn tất. Danh sách trỏ tới evidence/ledger,
+không sao chép toàn bộ nhật ký hoặc đặt tỷ lệ hoàn thành cho mọi lệnh chưa rà.
+
 ## Phạm vi thực hiện
 
 - Trước khi sửa, xác định nguồn canonical của input/output: Curve, NURBS, B-rep/topology, placement hoặc mesh do người dùng tạo/nhập. Truy vết caller tính toán và viewport/preview/picking/snap liên quan; không chỉ sửa helper kernel hoặc hình vẽ.

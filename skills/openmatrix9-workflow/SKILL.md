@@ -15,6 +15,8 @@ Rust là ưu tiên số 1 cho code OpenMatrix9 mới và chuyển code hiện h�
 
 Khi triển khai/sửa lệnh CAD, áp dụng [hình học nguồn và viewport trong cùng bàn giao](references/source-and-viewport-contract.md), theo yêu cầu người dùng 2026-11-13. Phải xử lý và kiểm chứng cả hai phía chịu ảnh hưởng cùng liên kết chọn nguồn; không báo hoàn tất chỉ từ kernel hoặc hình hiển thị. Tái dùng phần đã đúng và ghi rõ nếu một phía không cần sửa.
 
+Khi được giao kiểm tra một lệnh CAD, áp dụng thêm chỉ đạo 2026-11-16 trong cùng hợp đồng: rà nguồn/representation, preview nhẹ trong lúc chờ exact và commit/Undo; tái dùng phần đã có, triển khai phần thiếu của lệnh đang làm nếu không bị giới hạn chỉ đọc. Cập nhật một dòng trong `docs/validation/command-source-viewport-checklist.md` của checkout, phân biệt đã có code với đã kiểm chứng; không tự mở toàn bộ hàng đợi.
+
 Khi tối ưu hàm tạo mesh hoặc đường dùng mesh, truy vết nguồn và nơi dùng thực tế: viewport/preview, picking/snap, phép tính hình học, Undo và xuất. Kiểm tra có cần tách mesh hiển thị dẫn xuất khỏi hình học gốc và mesh tính toán/xuất theo dung sai riêng hay không; quyết định theo code và bằng chứng, không mặc định viết lại hoặc tạo hai pipeline khi không cần.
 
 Với B-rep/NURBS, giữ nguồn và topology/ID làm căn cứ cho phép tính chính xác; mesh viewport không được âm thầm quyết định hình học hoặc dung sai xuất. Với mesh do người dùng tạo hay nhập, các tam giác có thể chính là nguồn gốc: giữ chúng và không tự suy ra mặt cong hay ép chuyển B-rep. Khi picking/snap B-rep dùng mesh để tìm mặt ứng viên, kiểm tra khả năng hiệu chỉnh về nguồn, binding và trạng thái camera/scene; không nhận kết quả cũ hoặc không xác minh là chính xác.
