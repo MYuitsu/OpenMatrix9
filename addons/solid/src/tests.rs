@@ -28,6 +28,18 @@ fn run(command: &str, selection: Vec<Selected>, inputs: Vec<Input>) -> Reply {
     r
 }
 
+fn run_with(command: &str, settings: Value, inputs: Vec<Input>) -> Reply {
+    let mut e = event(command, Input::Start, vec![], settings);
+    let mut r = Solids::step(&e).unwrap();
+    for i in inputs {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+        assert!(r.error.is_none(), "{command}: {:?} ({})", r.error, r.prompt);
+    }
+    r
+}
+
 fn pt(p: Vec3) -> Input {
     Input::Point { point: p }
 }
@@ -299,20 +311,8 @@ fn holes_shell_fillet_and_faces() {
 }
 
 #[test]
-fn text_boss_and_pipe() {
-    let mut e = event(
-        TEXT,
-        Input::Start,
-        vec![],
-        json!({"text_string": "OM9", "text_height": 3.0, "text_depth": 0.5}),
-    );
-    let r = Solids::step(&e).unwrap();
-    e.state = r.state;
-    e.input = pt([0.0; 3]);
-    let r = Solids::step(&e).unwrap();
-    let m = created(&r);
-    let b = m.bbox();
-    assert!((b[1][2] - 0.5).abs() < 1e-9 && b[1][0] > 4.0, "{b:?}");
+fn boss_and_pipe() {
+    // Text: see `text_uses_installed_font_outlines`.
     let plate = solid("p", mesh::cuboid([-5.0, -5.0, -1.0], [5.0, 5.0, 0.0]));
     let r = run(
         BOSS,
@@ -528,4 +528,39 @@ fn difference_of_preselected_solids_cuts_at_once() {
     e.input = Input::Enter;
     let done = Solids::step(&e).unwrap();
     assert!((replaced(&done, 0).volume() - 63.0).abs() < 1e-6);
+}
+
+/// Text from an installed font (Rhino 5 TextObject): "O" is two exact closed outlines; as a
+/// solid it is one extrusion with its hole; "H" stands as high as Height (the capitals).
+#[test]
+fn text_uses_installed_font_outlines() {
+    let font = ["DejaVu Sans", "Arial", "Liberation Sans", "FreeSans"].into_iter().find(|f| text::find(f, false, false).is_some());
+    let Some(font) = font else {
+        eprintln!("no test font installed; skipped");
+        return;
+    };
+    let set = |t: &str, create: &str| json!({"text_string": t, "text_font_other": font, "text_create": create, "text_height": 5.0, "text_depth": 1.0});
+    let r = run_with(TEXT, set("O", "curves"), vec![pt([0.0; 3])]);
+    assert_eq!(r.create.len(), 2, "outer and inner outline");
+    for g in &r.create {
+        let c = om9_addon_geom::exact::Nc::from_geo(g).unwrap();
+        assert!(c.closed(1e-9));
+    }
+    let r = run_with(TEXT, set("O", "solids"), vec![pt([0.0; 3])]);
+    assert_eq!(r.create.len(), 1);
+    match &r.create[0] {
+        Geo::Brep { faces, solid, .. } => {
+            assert!(*solid);
+            assert_eq!(faces.len(), 4, "outer wall, hole wall, two caps");
+        }
+        other => panic!("{other:?}"),
+    }
+    let r = run_with(TEXT, set("H", "curves"), vec![pt([10.0, 20.0, 0.0])]);
+    let c = om9_addon_geom::exact::Nc::from_geo(&r.create[0]).unwrap();
+    let ys: Vec<f64> = (0..=400).map(|k| c.eval(k as f64 / 400.0)[1]).collect();
+    let (lo, hi) = (ys.iter().cloned().fold(f64::MAX, f64::min), ys.iter().cloned().fold(f64::MIN, f64::max));
+    assert!((lo - 20.0).abs() < 0.01 && (hi - lo - 5.0).abs() < 0.05, "H from {lo} to {hi}");
+    let r = run_with(TEXT, set("HI", "surfaces"), vec![pt([0.0; 3])]);
+    assert_eq!(r.create.len(), 2, "one planar face per letter");
+    assert!(r.create.iter().all(|g| matches!(g, Geo::Trimmed { .. })));
 }

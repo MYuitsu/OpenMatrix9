@@ -1069,51 +1069,40 @@ fn text(e: &Event) -> Reply {
     let flow = Flow::new("Text")
         .no_selection()
         .point("Start point of the text");
-    let words = e.text("text_string", "OM9").to_owned();
-    let height = e.number("text_height", 3.0).max(0.1);
-    let depth = e.number("text_depth", 0.5);
-    let stroke = e.number("text_stroke", 0.0);
-    let make = |p: Vec3| -> Option<Mesh> {
-        let f = Frame::new(p, e.plane.normal(), e.plane.x);
-        let w = if stroke > 0.0 { stroke } else { height * 0.14 };
-        let section = [
-            [w / 2.0, depth],
-            [-w / 2.0, depth],
-            [-w / 2.0, 0.0],
-            [w / 2.0, 0.0],
-        ];
-        let mut all = Mesh::default();
-        for s in shapes::text_strokes(&words, &f, height, 0.25) {
-            // Each stroke: a square bar laid on the CPlane, raised by the depth.
-            let mut dense = Vec::new();
-            for w2 in s.windows(2) {
-                dense.push(w2[0]);
-                dense.push(add(w2[0], scale(sub(w2[1], w2[0]), 0.5)));
-            }
-            dense.push(*s.last()?);
-            if let Some(m) = mesh::sweep(&dense, false, e.plane.normal(), &section) {
-                all.append(&m);
-            }
-            for &q in &[s[0], *s.last()?] {
-                all.append(&mesh::cylinder(w / 2.0, 0.0, depth, 16).placed(&Frame::new(
-                    q,
-                    e.plane.normal(),
-                    e.plane.x,
-                )));
-            }
-        }
-        (!all.triangles.is_empty()).then_some(all)
+    let font_other = e.text("text_font_other", "").trim().to_owned();
+    let spec = text::Spec {
+        text: e.text("text_string", "OM9").replace("\\n", "\n"),
+        font: if font_other.is_empty() { e.text("text_font", "Arial").to_owned() } else { font_other },
+        bold: e.flag("text_bold", false),
+        italic: e.flag("text_italic", false),
+        height: e.number("text_height", 3.0).max(0.01),
+        spacing: e.number("text_spacing", 0.0),
+        small_caps: e.flag("text_small_caps", false).then(|| (e.number("text_small_caps_size", 70.0) / 100.0).clamp(0.1, 1.0)),
     };
+    let create = e.text("text_create", "solids").to_owned();
+    let thickness = e.number("text_depth", 0.5);
+    let outlines = |p: Vec3| text::outlines(&spec, &Frame::new(p, e.plane.normal(), e.plane.x));
     flow.step(
         e,
         &|_, h| Show {
-            geo: h.and_then(make).map(|m| m.wire()).unwrap_or_default(),
+            // The outlines follow the pointer (the solids are made on the click).
+            geo: h.and_then(|p| outlines(p).ok()).map(|cs| cs.iter().map(|c| c.to_geo()).collect()).unwrap_or_default(),
             ..Default::default()
         },
         &|c| {
-            let m = make(c.p(0).unwrap()).ok_or("Text: no letters to make (A–Z, 0–9)")?;
-            Ok(Reply::finish(vec![solid_geo(m, &format!("Text {words}"))])
-                .say(format!("Text: \"{words}\" {} mm high", fmt(height))))
+            let curves = outlines(c.p(0).ok_or("Text: pick the start point")?)?;
+            let made = text::build(&curves, &create, thickness, e.plane.normal());
+            if made.is_empty() {
+                return Err("Text: this font gives no closed outlines (try Create=Curves)".into());
+            }
+            Ok(Reply::finish(made).say(format!(
+                "Text: \"{}\" in {}{}{}, {} mm high",
+                spec.text,
+                spec.font,
+                if spec.bold { " Bold" } else { "" },
+                if spec.italic { " Italic" } else { "" },
+                fmt(spec.height)
+            )))
         },
     )
 }
@@ -1348,6 +1337,7 @@ fn base_slab(m: &Mesh) -> Mesh {
 }
 
 mod rhino_tools;
+pub mod text;
 
 #[cfg(test)]
 mod tests;

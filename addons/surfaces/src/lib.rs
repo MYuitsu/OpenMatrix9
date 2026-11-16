@@ -2126,11 +2126,11 @@ fn in_polygon(p: [f64; 2], poly: &[[f64; 2]]) -> bool {
     inside
 }
 
-/// Extrusions of curves from offset `lo` to `hi`: one surface per curve, and with `solid`
-/// every closed planar curve (with the closed curves inside it in its plane as holes) is
-/// capped at both ends into a [`Geo::Brep`] solid. A closed curve inside another is a hole.
-fn extruded(curves: &[Nc], lo: Vec3, hi: Vec3, solid: bool) -> Vec<Geo> {
-    let planes: Vec<Option<(Vec3, Vec3)>> = curves.iter().map(|c| if solid { curve_plane(c) } else { None }).collect();
+/// Closed planar curves nested in their planes: for each outline (even depth), the curves
+/// directly inside it (its holes). `planes[i]` is `None` for a curve that is open or not
+/// planar; such curves are in no group.
+fn nested(curves: &[Nc]) -> (Vec<Option<(Vec3, Vec3)>>, Vec<(usize, Vec<usize>)>) {
+    let planes: Vec<Option<(Vec3, Vec3)>> = curves.iter().map(curve_plane).collect();
     // In the same plane, and inside: its first point inside the other's outline.
     let inside = |i: usize, j: usize| -> bool {
         let (Some((pi, ni)), Some((pj, nj))) = (planes[i], planes[j]) else { return false };
@@ -2143,44 +2143,71 @@ fn extruded(curves: &[Nc], lo: Vec3, hi: Vec3, solid: bool) -> Vec<Geo> {
         let q = f.local(pi);
         in_polygon([q[0], q[1]], &poly)
     };
-    let depth = |i: usize| (0..curves.len()).filter(|&j| inside(i, j)).count();
+    let depth: Vec<usize> = (0..curves.len()).map(|i| (0..curves.len()).filter(|&j| inside(i, j)).count()).collect();
+    let groups = (0..curves.len())
+        .filter(|&i| planes[i].is_some() && depth[i] % 2 == 0)
+        .map(|i| (i, (0..curves.len()).filter(|&j| depth[j] == depth[i] + 1 && inside(j, i)).collect()))
+        .collect();
+    (planes, groups)
+}
+
+/// The trimmed plane of outline `c` with `holes`, moved by `v`.
+fn planar_face(c: &Nc, holes: &[&Nc], origin: Vec3, nrm: Vec3, v: Vec3) -> Geo {
+    // The plane: a square round the outline in its plane, a little larger.
+    let f = Frame::new(origin, nrm, [1.0, 0.0, 0.0]);
+    let local: Vec<Vec3> = along(c, 128).iter().map(|p| f.local(*p)).collect();
+    let (mut x0, mut x1, mut y0, mut y1) = (f64::MAX, f64::MIN, f64::MAX, f64::MIN);
+    for p in &local {
+        (x0, x1, y0, y1) = (x0.min(p[0]), x1.max(p[0]), y0.min(p[1]), y1.max(p[1]));
+    }
+    let m = 0.05 * (x1 - x0).max(y1 - y0);
+    let (x0, x1, y0, y1) = (x0 - m, x1 + m, y0 - m, y1 + m);
+    let corner = |x: f64, y: f64| add(f.point([x, y, 0.0]), v);
+    let plane = Geo::Surface {
+        degree: [1, 1],
+        size: [2, 2],
+        points: vec![corner(x0, y0), corner(x0, y1), corner(x1, y0), corner(x1, y1)],
+        weights: Vec::new(),
+        knots: [vec![0.0, 0.0, 1.0, 1.0], vec![0.0, 0.0, 1.0, 1.0]],
+    };
+    let mut loops = vec![vec![moved(c, v).to_geo()]];
+    loops.extend(holes.iter().map(|h| vec![moved(h, v).to_geo()]));
+    Geo::Trimmed { surface: Box::new(plane), loops, display: None }
+}
+
+/// Planar faces of closed planar curves (PlanarSrf): one trimmed face per outline, the
+/// closed curves inside it in its plane as holes. Open or non-planar curves are left out.
+pub fn planar_faces(curves: &[Nc]) -> Vec<Geo> {
+    let (planes, groups) = nested(curves);
+    groups
+        .into_iter()
+        .map(|(i, holes)| {
+            let (origin, nrm) = planes[i].unwrap();
+            let holes: Vec<&Nc> = holes.iter().map(|&j| &curves[j]).collect();
+            planar_face(&curves[i], &holes, origin, nrm, [0.0; 3])
+        })
+        .collect()
+}
+
+/// Extrusions of curves from offset `lo` to `hi`: one surface per curve, and with `solid`
+/// every closed planar curve (with the closed curves inside it in its plane as holes) is
+/// capped at both ends into a [`Geo::Brep`] solid. A closed curve inside another is a hole.
+pub fn extruded(curves: &[Nc], lo: Vec3, hi: Vec3, solid: bool) -> Vec<Geo> {
+    let (planes, groups) = if solid { nested(curves) } else { (vec![None; curves.len()], Vec::new()) };
     let mut out = Vec::new();
     for (i, c) in curves.iter().enumerate() {
-        let Some((origin, nrm)) = planes[i] else {
+        if planes[i].is_none() {
             out.push(swept(c, lo, hi));
-            continue;
-        };
-        // Odd depth: a hole of the curve round it (built with that one).
-        if depth(i) % 2 == 1 {
-            continue;
         }
-        let holes: Vec<&Nc> = (0..curves.len()).filter(|&j| inside(j, i) && depth(j) == depth(i) + 1).map(|j| &curves[j]).collect();
-        // The cap plane: a square round the outline in its plane, a little larger.
-        let f = Frame::new(origin, nrm, [1.0, 0.0, 0.0]);
-        let local: Vec<Vec3> = along(c, 128).iter().map(|p| f.local(*p)).collect();
-        let (mut x0, mut x1, mut y0, mut y1) = (f64::MAX, f64::MIN, f64::MAX, f64::MIN);
-        for p in &local {
-            (x0, x1, y0, y1) = (x0.min(p[0]), x1.max(p[0]), y0.min(p[1]), y1.max(p[1]));
-        }
-        let m = 0.05 * (x1 - x0).max(y1 - y0);
-        let (x0, x1, y0, y1) = (x0 - m, x1 + m, y0 - m, y1 + m);
-        let cap = |v: Vec3| -> Geo {
-            let corner = |x: f64, y: f64| add(f.point([x, y, 0.0]), v);
-            let plane = Geo::Surface {
-                degree: [1, 1],
-                size: [2, 2],
-                points: vec![corner(x0, y0), corner(x0, y1), corner(x1, y0), corner(x1, y1)],
-                weights: Vec::new(),
-                knots: [vec![0.0, 0.0, 1.0, 1.0], vec![0.0, 0.0, 1.0, 1.0]],
-            };
-            let mut loops = vec![vec![moved(c, v).to_geo()]];
-            loops.extend(holes.iter().map(|h| vec![moved(h, v).to_geo()]));
-            Geo::Trimmed { surface: Box::new(plane), loops, display: None }
-        };
+    }
+    for (i, holes) in groups {
+        let c = &curves[i];
+        let (origin, nrm) = planes[i].unwrap();
+        let holes: Vec<&Nc> = holes.iter().map(|&j| &curves[j]).collect();
         let mut faces = vec![swept(c, lo, hi)];
         faces.extend(holes.iter().map(|h| swept(h, lo, hi)));
-        faces.push(cap(lo));
-        faces.push(cap(hi));
+        faces.push(planar_face(c, &holes, origin, nrm, lo));
+        faces.push(planar_face(c, &holes, origin, nrm, hi));
         // What a build without the B-Rep kernel shows: the same prism as a mesh.
         let hole_pts: Vec<Vec<Vec3>> = holes.iter().map(|h| along(h, 96).iter().map(|p| add(*p, lo)).collect()).collect();
         let outline: Vec<Vec3> = along(c, 96).iter().map(|p| add(*p, lo)).collect();
