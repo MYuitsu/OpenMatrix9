@@ -1,8 +1,19 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 use crate::{
     camera::{Camera, Ray, Viewport, add, cross, dot, mul, sub},
-    scene::{PickHit, PickIntent, PickKind, RenderBuffers, Scene, SceneObject, Subelement},
+    scene::{PickHit, PickIntent, PickKind, RenderBuffers, SceneObject, Subelement},
 };
+
+pub(crate) trait PickScene {
+    fn epoch(&self) -> u64;
+    fn publication_id(&self) -> uuid::Uuid;
+    fn objects(&self) -> &[SceneObject];
+    fn limits(&self) -> &om9_core::budget::Limits;
+    fn document_matches(&self, document: &om9_core::model::Document) -> bool;
+    fn entity_for<'a>(&self, document: &'a om9_core::model::Document, object: &SceneObject) -> om9_core::Result<&'a om9_core::model::Entity>;
+    fn spatial_index(&self) -> om9_core::Result<crate::scene::PickingIndex>;
+    fn object_spheres(&self) -> om9_core::Result<crate::scene::ObjectSpheres>;
+}
 
 /// Screen-space distance from `point` to the segment `a`-`b`.
 fn segment_distance(point: [f64; 2], a: [f64; 2], b: [f64; 2]) -> f64 {
@@ -211,7 +222,7 @@ fn curve_parameter(
 }
 #[allow(clippy::too_many_arguments)] // Keep world hit and view/provenance inputs explicit.
 fn hit(
-    scene: &Scene,
+    scene: &impl PickScene,
     object: &SceneObject,
     camera: &Camera,
     viewport: Viewport,
@@ -233,7 +244,8 @@ fn hit(
         subset,
         world_point,
         source: object.source,
-        world_epoch: scene.epoch,
+        world_epoch: scene.epoch(),
+        scene_publication: scene.publication_id(),
         screen_distance: d,
         depth: p.depth,
         camera: camera.clone(),
@@ -241,7 +253,8 @@ fn hit(
     }))
 }
 pub(crate) fn pick(
-    scene: &Scene,
+    scene: &impl PickScene,
+    document: &om9_core::model::Document,
     screen: [f64; 2],
     camera: &Camera,
     viewport: Viewport,
@@ -250,6 +263,7 @@ pub(crate) fn pick(
 ) -> Result<Option<PickHit>> {
     Ok(pick_candidates(
         scene,
+        document,
         screen,
         camera,
         viewport,
@@ -257,6 +271,7 @@ pub(crate) fn pick(
         intent,
         PickKind::Object,
         true,
+        false,
     )?
     .into_iter()
     .next())
@@ -271,8 +286,9 @@ fn hit_order(left: &PickHit, right: &PickHit) -> std::cmp::Ordering {
 /// Every object under the pointer, nearest first. One hit per object: the ambiguity popup offers objects,
 /// not individual faces of the same object.
 #[allow(clippy::too_many_arguments)]
-pub(crate) fn pick_candidates(
-    scene: &Scene,
+pub(crate) fn pick_candidates<'a>(
+    scene: &'a impl PickScene,
+    document: &'a om9_core::model::Document,
     screen: [f64; 2],
     camera: &Camera,
     viewport: Viewport,
@@ -280,6 +296,29 @@ pub(crate) fn pick_candidates(
     intent: PickIntent,
     kind: PickKind,
     nearest_only: bool,
+    all_edges: bool,
+) -> Result<Vec<PickHit>> {
+    if !scene.document_matches(document) {
+        return Err(Error::Stale("scene document owner"));
+    }
+    pick_candidates_resolved(scene,screen,camera,viewport,tolerance,intent,kind,nearest_only,all_edges,|_,object| {
+        let entity=scene.entity_for(document,object)?;
+        Ok(PickData {curve:match &entity.geometry {Geometry::Curve(curve)=>Some(curve),_=>None},
+            cloud:matches!(entity.geometry,Geometry::Cloud(_)),display:object.pick_brep_display(entity)?})
+    })
+}
+
+pub(crate) struct PickData<'a> {
+    pub curve: Option<&'a Curve>,
+    pub cloud: bool,
+    pub display: Option<&'a om9_core::brep::BrepDisplay>,
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn pick_candidates_resolved<'a>(
+    scene:&'a impl PickScene, screen:[f64;2], camera:&Camera, viewport:Viewport, tolerance:f64,
+    intent:PickIntent, kind:PickKind, nearest_only:bool, all_edges:bool,
+    resolve:impl Fn(usize,&'a SceneObject)->Result<PickData<'a>>,
 ) -> Result<Vec<PickHit>> {
     if !tolerance.is_finite() || tolerance < 0. {
         return Err(Error::Invalid("pixel pick tolerance"));
@@ -304,8 +343,10 @@ pub(crate) fn pick_candidates(
     let mut hits: Vec<PickHit> = Vec::new();
     let mut best_depth = f64::INFINITY;
     for index in candidates {
-        let object = &scene.objects[index];
+        let object = &scene.objects()[index];
         let mut best: Option<PickHit> = None;
+        let mut edge_hits: Vec<PickHit> = Vec::new();
+        let mut edge_allocation_failed = false;
         let allowed = object.visible
             && match intent {
                 PickIntent::Select => object.selectable,
@@ -313,6 +354,11 @@ pub(crate) fn pick_candidates(
                 PickIntent::Reference { snap_locked: false } => object.reference_unlocked,
             };
         if !allowed {
+            continue;
+        }
+        // A fallback is the untrimmed support surface, so none of its
+        // displayed vertices, edges or faces is a verified pick location.
+        if object.buffers.is_trim_display_fallback() {
             continue;
         }
         let (centre, radius) = spheres[index];
@@ -344,23 +390,39 @@ pub(crate) fn pick_candidates(
             continue;
         }
         let transform = object.display_transform()?;
-        let brep_display = match &scene.entity_for(object)?.geometry {
-            Geometry::Brep(shape) => Some(&shape.display),
-            _ => None,
-        };
+        // Resolve the document first to reject stale source/leaf receipts.
+        // Triangle and segment offsets then use the display that supplied the
+        // scene buffers, rather than assuming the document mesh has that order.
+        let data=resolve(index,object)?;
+        let brep_display = data.display.map(|display| (display, display.topology.as_ref()));
         let mut consider = |mut candidate: PickHit| {
-            if let Some(display) = brep_display {
+            if let Some((display, topology)) = brep_display {
                 let mapped = match candidate.subset {
-                    Subelement::MeshFace(face) => display.faces.get(face as usize).copied().map(Subelement::BrepFace),
+                    Subelement::MeshFace(face) => topology.faces.get(face as usize).copied().map(Subelement::BrepFace),
                     Subelement::MeshVertex(vertex) => display.vertices.iter().position(|offset| *offset == vertex)
-                        .and_then(|index| display.vertex_ids.get(index)).copied().map(Subelement::BrepVertex),
+                        .and_then(|index| topology.vertex_ids.get(index)).copied().map(Subelement::BrepVertex),
                     Subelement::MeshEdge { a, b } => display.segments.iter()
                         .find(|[x, y, _]| (*x == a && *y == b) || (*x == b && *y == a))
-                        .and_then(|[_, _, edge]| display.edges.get(*edge as usize)).copied().map(Subelement::BrepEdge),
+                        .and_then(|[_, _, edge]| topology.edges.get(*edge as usize)).copied().map(Subelement::BrepEdge),
+                    Subelement::BrepEdge(id) if all_edges && topology.edges.contains(&id) => Some(Subelement::BrepEdge(id)),
                     _ => None,
                 };
                 let Some(subset) = mapped else { return; };
                 candidate.subset = subset;
+            }
+            if all_edges {
+                if let Some(existing) = edge_hits.iter_mut().find(|hit| hit.subset == candidate.subset) {
+                    if candidate.screen_distance < existing.screen_distance {
+                        *existing = candidate;
+                    }
+                } else if edge_hits.len() as u64 >= scene.limits().max_outputs
+                    || (edge_hits.len() as u64 + 1).saturating_mul(std::mem::size_of::<PickHit>() as u64) > scene.limits().max_bytes
+                    || edge_hits.try_reserve(1).is_err() {
+                    edge_allocation_failed = true;
+                } else {
+                    edge_hits.push(candidate);
+                }
+                return;
             }
             if best.as_ref().is_none_or(|old| {
                 candidate.screen_distance < old.screen_distance
@@ -378,7 +440,7 @@ pub(crate) fn pick_candidates(
                     continue;
                 }
                 for (i, p) in points.iter().enumerate() {
-                    let subset = if matches!(scene.entity_for(object)?.geometry, Geometry::Cloud(_))
+                    let subset = if data.cloud
                     {
                         Subelement::CloudPoint(native_indices[i])
                     } else {
@@ -402,9 +464,7 @@ pub(crate) fn pick_candidates(
                 if matches!(kind, PickKind::Face | PickKind::Vertex) {
                     continue;
                 }
-                let Geometry::Curve(curve) = &scene.entity_for(object)?.geometry else {
-                    return Err(Error::Invalid("curve cache source"));
-                };
+                let curve=data.curve.ok_or(Error::Invalid("curve cache source"))?;
                 if matches!(curve, Curve::Polycurve { .. }) {
                     // Polyline display retains exact direct-line endpoints but
                     // has no certified global native parameter. Object/reference
@@ -445,7 +505,7 @@ pub(crate) fn pick_candidates(
                         }
                     }
                 } else {
-                    let evaluator = CurveEvaluator::capture(curve, &scene.limits)?;
+                    let evaluator = CurveEvaluator::capture(curve, scene.limits())?;
                     if let Some(parameter) = curve_parameter(
                         curve, &evaluator, transform, screen, camera, viewport, points, parameters,
                     )? {
@@ -487,7 +547,17 @@ pub(crate) fn pick_candidates(
                     }
                 } else if kind == PickKind::Edge {
                     // Use document polygon boundaries, never tessellation diagonals.
-                    for [first, second] in edges {
+                    for (segment_index, [first, second]) in edges.iter().enumerate() {
+                        // BRep buffers may append render-only interior wires.
+                        // They do not map to a topology edge or pick candidate.
+                        if let Some((display, _)) = brep_display {
+                            if segment_index >= display.segments.len() {
+                                if (*first as usize) < display.points.len() || (*second as usize) < display.points.len() {
+                                    return Err(Error::Stale("BRep interior wire buffer"));
+                                }
+                                continue;
+                            }
+                        }
                         let (a, b) = (
                             (*first).min(*second) as usize,
                             (*first).max(*second) as usize,
@@ -537,7 +607,24 @@ pub(crate) fn pick_candidates(
                             },
                             tolerance,
                         )? {
-                            consider(h);
+                            if all_edges {
+                                if let Some((display, topology)) = brep_display {
+                                    let [x, y, edge] = display.segments.get(segment_index)
+                                        .ok_or(Error::Stale("BRep display edge buffer"))?;
+                                    if !((*x == a as u32 && *y == b as u32) || (*x == b as u32 && *y == a as u32)) {
+                                        return Err(Error::Stale("BRep display edge buffer"));
+                                    }
+                                    let id = topology.edges.get(*edge as usize)
+                                        .ok_or(Error::Stale("BRep display edge topology"))?;
+                                    let mut candidate = h;
+                                    candidate.subset = Subelement::BrepEdge(*id);
+                                    consider(candidate);
+                                } else {
+                                    consider(h);
+                                }
+                            } else {
+                                consider(h);
+                            }
                         }
                     }
                 }
@@ -632,7 +719,16 @@ pub(crate) fn pick_candidates(
                 }
             }
         }
-        if let Some(best) = best {
+        if edge_allocation_failed { return Err(Error::Budget("edge pick candidates")); }
+        if all_edges {
+            let count = hits.len().checked_add(edge_hits.len()).ok_or(Error::Overflow("edge pick candidates"))?;
+            if count as u64 > scene.limits().max_outputs
+                || (count as u64).saturating_mul(std::mem::size_of::<PickHit>() as u64) > scene.limits().max_bytes {
+                return Err(Error::Budget("edge pick candidates"));
+            }
+            hits.try_reserve(edge_hits.len()).map_err(|_| Error::Budget("edge pick candidates"))?;
+            hits.extend(edge_hits);
+        } else if let Some(best) = best {
             best_depth = best_depth.min(best.depth);
             if nearest_only {
                 if hits.first().is_none_or(|current| hit_order(&best, current).is_lt()) {
@@ -646,7 +742,9 @@ pub(crate) fn pick_candidates(
     }
     if nearest_only { return Ok(hits); }
     hits.sort_by(hit_order);
-    let mut roots = std::collections::BTreeSet::new();
-    hits.retain(|hit| roots.insert(hit.root));
+    if !all_edges {
+        let mut roots = std::collections::BTreeSet::new();
+        hits.retain(|hit| roots.insert(hit.root));
+    }
     Ok(hits)
 }

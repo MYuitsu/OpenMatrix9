@@ -12,6 +12,27 @@ use om9_kernel::{
 };
 
 impl Controller {
+    #[cfg(feature = "occt-brep")]
+    pub(super) fn solid_pipe_radii_mm(&mut self, feature: &'static str, radii: &[f64], capped: bool, round: bool) -> Result<()> {
+        if radii.iter().any(|value| !value.is_finite() || *value <= 0.) {
+            return Err(Error::Invalid("Pipe radius must be finite and positive"));
+        }
+        match radii {
+            [radius] if round => self.solid_pipe_round(feature, *radius, *radius),
+            [start, end] if round => self.solid_pipe_round(feature, *start, *end),
+            [a, b, c, d] if round => self.solid_pipe_thick(feature, [*a, *b, *c, *d], true, true),
+            [radius] => self.solid_pipe(feature, *radius, capped),
+            [start, end] => self.solid_pipe_linear(feature, *start, *end, capped),
+            [a, b, c, d] => self.solid_pipe_thick(feature, [*a, *b, *c, *d], capped, false),
+            _ => Err(Error::Missing("Pipe radii")),
+        }
+    }
+
+    #[cfg(not(feature = "occt-brep"))]
+    pub(super) fn solid_pipe_radii_mm(&mut self, _feature: &'static str, _radii: &[f64], _capped: bool, _round: bool) -> Result<()> {
+        Err(Error::Unsupported("Pipe requires OCCT"))
+    }
+
     pub fn solid_pipe_needs_curve(&self) -> bool {
         self.solid_pending.as_ref().is_some_and(|p| {
             if p.feature == "SolidRibDevelopment" {
@@ -130,21 +151,53 @@ impl Controller {
         let om9_scene::scene::Subelement::BrepEdge(key) = reference.subset else {
             return Err(Error::Invalid("select a B-Rep edge"));
         };
-        let body = self.solid_brep(reference.root)?;
-        let index = body
-            .display
-            .edges
-            .iter()
-            .position(|id| *id == key)
-            .ok_or(Error::Stale("B-Rep edge"))?;
-        let (a, b) = editing::straight_edge_endpoints(body, index, self.coordinator.limits())
-            .map_err(|e| Error::Io(format!("Pipe edge: {e}")))?;
-        let placement = self
-            .document()
-            .entities
-            .get(&reference.root)
-            .ok_or(Error::Stale("Pipe edge"))?
-            .placement;
+        use om9_core::{budget::memory::MemoryClass, evaluation::{evaluate_curve, Parameter}, geometry::{Curve, Transform}};
+        let scene = self.scene.as_ref().ok_or(Error::Missing("Pipe scene"))?;
+        reference.validate(scene, self.coordinator.epoch())?;
+        let display = scene.root_brep_pick_display(&reference.source)?;
+        let index = display.topology.edges.iter().position(|id| *id == key).ok_or(Error::Stale("B-Rep edge"))?;
+        let segment = display.segments.iter().find(|segment| segment[2] as usize == index)
+            .ok_or(Error::Stale("Pipe display edge"))?;
+        let a = *display.points.get(segment[0] as usize).ok_or(Error::Stale("Pipe display edge"))?;
+        let b = *display.points.get(segment[1] as usize).ok_or(Error::Stale("Pipe display edge"))?;
+        let midpoint = std::array::from_fn(|i| (a[i] + b[i]) * 0.5);
+        let source = self.coordinator.capture_tracked_document(self.document)?;
+        let entity = source.entities.get(&reference.root).ok_or(Error::Stale("Pipe edge"))?;
+        let Geometry::Brep(body) = &entity.geometry else { return Err(Error::Invalid("Pipe B-Rep edge")); };
+        let placement = entity.placement;
+        let tolerance = source.tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6));
+        let source_tolerance = display.deflection_mm + tolerance;
+        if !source_tolerance.is_finite() { return Err(Error::Invalid("Pipe edge tolerance")); }
+        let limits = *self.coordinator.limits();
+        let held = self.scene_cache_usage()?;
+        let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(MemoryClass::Kernel, 1, physical(), held)?;
+        // A display edge can contain more than one segment. Verify the whole
+        // selected display edge before using its first segment to resolve the
+        // source curve; otherwise a click on a foreign segment can pick a
+        // different source edge with the same display ID.
+        reservation.recheck_pending()?;
+        om9_kernel::measurement::verified_display_edge_length(
+            body, Transform::identity(), &display.points, &display.segments,
+            u32::try_from(index).map_err(|_| Error::Overflow("Pipe display edge"))?,
+            source_tolerance, tolerance, &limits,
+        ).map_err(|e| Error::Io(format!("Pipe cannot verify the selected edge against the source: {e}")))?;
+        let mut admit = |live: u64, pending: u64| -> Result<()> {
+            let needed = live.checked_add(pending).ok_or(Error::Overflow("Pipe edge scratch"))?.max(1);
+            if needed > reservation.bytes() {
+                let extra = needed - reservation.bytes();
+                self.coordinator.grow_external_memory_with_held(&mut reservation, extra, physical(), held)?;
+            }
+            reservation.set_allocated_bytes(live)?;
+            reservation.recheck_pending()
+        };
+        let (curve, _) = editing::source_edge_curve_at_segment_admitted(body, midpoint, source_tolerance, [a,b], tolerance, &limits, &mut admit)
+            .map_err(|e| Error::Io(format!("Pipe cannot verify the selected edge against the source: {e}")))?;
+        let Curve::Nurbs(ref line) = curve else { return Err(Error::Invalid("Pipe edge is not a line")); };
+        if line.degree != 1 || line.poles.len() != 2 { return Err(Error::Invalid("Pipe edge is not a line")); }
+        let a = evaluate_curve(&curve, Parameter::Fraction(0.), 0, Transform::identity(), &limits)?[0];
+        let b = evaluate_curve(&curve, Parameter::Fraction(1.), 0, Transform::identity(), &limits)?[0];
+        drop(admit);
         let endpoints = [placement.point(a)?, placement.point(b)?];
         let pending = self.solid_pending.as_ref().expect("Pipe session");
         if pending.pipe_chain_order.iter().any(|item| matches!(item, PipeChainItem::Edge(old,_) if old.root == reference.root && old.subset == reference.subset)) { return Ok(()); }
@@ -774,7 +827,9 @@ impl Controller {
             if ids.len() as u64 > self.coordinator.limits().max_outputs {
                 return Err(Error::Budget("Pipe output count"));
             }
+            let result = (|| {
             let mut held = self.scene_cache_usage()?;
+            let (mut guards, _guard_storage) = self.reserve_solid_guard_vector_with_held(ids.len(), held)?;
             let mut mutations = Vec::new();
             mutations
                 .try_reserve_exact(ids.len())
@@ -812,14 +867,15 @@ impl Controller {
                             held,
                         )?
                     };
-                held.add(
-                    shape.validate(self.coordinator.limits())?,
-                    self.coordinator.limits(),
-                )?;
+                let mut counts = shape.storage_usage(self.coordinator.limits())?;
+                counts.bytes = 0;
+                held.add(counts, self.coordinator.limits())?;
+                let (candidate, guard) = self.reserve_solid_candidate_with_held(shape, held)?;
+                guards.push(guard);
                 self.coordinator.retained_usage_with_held_usage(held)?;
                 let result = Entity::new(
                     label(pending.feature),
-                    Geometry::Brep(shape),
+                    Geometry::Brep(candidate),
                     self.document().current_layer,
                 );
                 mutations.push(Mutation::Insert {
@@ -827,12 +883,16 @@ impl Controller {
                     entity: result,
                 });
             }
-            return self.commit_solid_result(
+            self.commit_solid_result_with_reserved_sources(
                 pending.feature,
                 label(pending.feature),
                 mutations,
                 None,
-            );
+                &mut guards,
+            )
+            })();
+            if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+            return result;
         }
         if !pending.pipe_chain && !pending.pipe_multiple && self.selection.len() == 1 {
             let id = *self.selection.iter().next().expect("one selected");
@@ -890,7 +950,9 @@ impl Controller {
             } else {
                 &pending.values[..]
             };
+        let result = (|| {
         let mut held = self.scene_cache_usage()?;
+        let (mut guards, _guard_storage) = self.reserve_solid_guard_vector_with_held(ids.len(), held)?;
         let mut mutations = Vec::new();
         mutations
             .try_reserve_exact(ids.len())
@@ -908,14 +970,15 @@ impl Controller {
                 pending.pipe_round,
                 held,
             )?;
-            held.add(
-                shape.validate(self.coordinator.limits())?,
-                self.coordinator.limits(),
-            )?;
+            let mut counts = shape.storage_usage(self.coordinator.limits())?;
+            counts.bytes = 0;
+            held.add(counts, self.coordinator.limits())?;
+            let (candidate, guard) = self.reserve_solid_candidate_with_held(shape, held)?;
+            guards.push(guard);
             self.coordinator.retained_usage_with_held_usage(held)?;
             let entity = Entity::new(
                 label(pending.feature),
-                Geometry::Brep(shape),
+                Geometry::Brep(candidate),
                 self.document().current_layer,
             );
             mutations.push(Mutation::Insert {
@@ -923,7 +986,10 @@ impl Controller {
                 entity,
             });
         }
-        self.commit_solid_result(pending.feature, label(pending.feature), mutations, None)
+        self.commit_solid_result_with_reserved_sources(pending.feature, label(pending.feature), mutations, None, &mut guards)
+        })();
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
     }
 
     #[cfg(not(feature = "occt-brep"))]

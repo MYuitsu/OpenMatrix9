@@ -136,7 +136,7 @@ impl Scene {
     }
     pub fn transfer_memory_allowance(&self, construction: &mut ExternalMemoryReservation,
         coordinator: &TransactionCoordinator, held: Usage) -> Result<()> {
-        let peer = coordinator.memory_admission_peer()?;
+        let peer = coordinator.memory_admission_peer_with_held(held)?;
         let mut state = self.memory.lock().unwrap_or_else(|e| e.into_inner());
         if state.reservation.is_some() { return Err(Error::Invalid("scene memory already registered")); }
         let metadata = self.metadata_storage_usage()?.bytes;
@@ -154,7 +154,7 @@ impl Scene {
     }
     pub fn reserve_memory_allowance(&self, coordinator: &TransactionCoordinator, held: Usage,
         physical: Option<(u64, u64)>) -> Result<()> {
-        let peer = coordinator.memory_admission_peer()?;
+        let peer = coordinator.memory_admission_peer_with_held(held)?;
         let mut state = self.memory.lock().unwrap_or_else(|e| e.into_inner());
         let metadata = self.metadata_storage_usage()?.bytes;
         let existing = state.unregistered_cache_bytes()?;
@@ -195,60 +195,8 @@ impl Scene {
             + state.cache.as_ref().and_then(|c| c.reservation.as_ref()).map_or(0, ExternalMemoryReservation::bytes)
     }
     fn picking_cache(&self) -> Result<Arc<PickingCache>> {
-        let mut state = self.memory.lock().unwrap_or_else(|e| e.into_inner());
-        if state.valid {
-            self.touch_picking_cache(&state)?;
-            return state.cache.as_ref().cloned().ok_or(Error::Missing("picking cache"));
-        }
-        if state.cache.as_ref().is_some_and(|c| Arc::strong_count(c) > 1) { drop(state.cache.take()); }
-        if state.cache.is_none() {
-            let arena = self.picking_arena_bytes()?;
-            let metadata = self.metadata_storage_usage()?.bytes;
-            let reservation = if state.managed {
-                let SceneMemory { peer, reservation, .. } = &mut *state;
-                let peer = peer.as_ref().ok_or(Error::Missing("cache admission peer"))?;
-                let reservation = reservation.as_mut().ok_or(Error::Missing("scene metadata reservation"))?;
-                let required = metadata.checked_add(arena).ok_or(Error::Overflow("picking admission"))?;
-                if required > reservation.bytes() {
-                    let additional = required - reservation.bytes();
-                    peer.grow_external_memory_with_held(reservation, additional, peer.physical_memory_sample()?, Usage::default())?;
-                }
-                peer.recheck_external_memory_with_reclamation(reservation)?;
-                Some(reservation.split_off(arena)?)
-            } else {
-                Usage { bytes: metadata.checked_add(arena).and_then(|n| n.checked_add(self.shared_buffer_bytes()))
-                    .ok_or(Error::Overflow("picking local allowance"))?, ..Usage::default() }.check(&self.limits)?;
-                None
-            };
-            let mut cache = PickingCache::allocate(self.objects.len(), reservation)?;
-            let actual = cache.storage()?;
-            if let Some(reservation) = cache.reservation.as_mut() {
-                if actual > reservation.bytes() { return Err(Error::Budget("picking actual capacity")); }
-                reservation.set_allocated_bytes(actual)?;
-            }
-            state.cache = Some(Arc::new(cache));
-        }
-        let cache = Arc::get_mut(state.cache.as_mut().expect("picking arena exists")).ok_or(Error::Busy)?;
-        if cache.spheres.capacity() < self.objects.len() { return Err(Error::Budget("picking spheres capacity")); }
-        cache.spheres.clear();
-        let mut last: Option<(&Arc<RenderBuffers>, Option<([f64; 3], [f64; 3])>)> = None;
-        for object in &self.objects {
-            let local = match &last {
-                Some((buffers, bounds)) if Arc::ptr_eq(buffers, &object.buffers) => *bounds,
-                _ => { let bounds = object.local_bounds(); last = Some((&object.buffers, bounds)); bounds }
-            };
-            cache.spheres.push(object.sphere_bounds_from_local(local).unwrap_or(([0.; 3], 0.)));
-        }
-        state.valid = true;
-        self.touch_picking_cache(&state)?;
-        Ok(state.cache.as_ref().expect("picking cache published").clone())
-    }
-    fn touch_picking_cache(&self, state: &SceneMemory) -> Result<()> {
-        if let Some(peer) = state.peer.as_ref() {
-            let owner: Arc<dyn OptionalMemoryCache> = self.memory.clone();
-            peer.touch_optional_memory_cache(&owner)?;
-        }
-        Ok(())
+        PickingCacheView { memory: &self.memory, objects: &self.objects, arena: 0, metadata: 0,
+            scene: Some(self), shared_buffer_bytes: self.shared_buffer_bytes(), limits: &self.limits }.picking_cache()
     }
     pub fn spatial_index(&self) -> Result<PickingIndex> { let cache = self.picking_cache()?; cache.index()?; Ok(PickingIndex(cache)) }
     pub fn object_spheres(&self) -> Result<ObjectSpheres> { self.picking_cache().map(ObjectSpheres) }
@@ -273,5 +221,83 @@ impl Scene {
         let metadata = state.metadata_bytes;
         if let Some(reservation) = state.reservation.as_mut() { reservation.shrink_to(metadata)?; }
         Ok(())
+    }
+}
+
+struct PickingCacheView<'a> {
+    memory: &'a Arc<SceneMemoryOwner>, objects: &'a [SceneObject], arena: u64, metadata: u64,
+    scene: Option<&'a Scene>, shared_buffer_bytes: u64, limits: &'a Limits,
+}
+impl PickingCacheView<'_> {
+    fn picking_cache(&self) -> Result<Arc<PickingCache>> {
+        let mut state = self.memory.lock().unwrap_or_else(|e| e.into_inner());
+        if state.valid {
+            self.touch_picking_cache(&state)?;
+            return state.cache.as_ref().cloned().ok_or(Error::Missing("picking cache"));
+        }
+        if state.cache.as_ref().is_some_and(|c| Arc::strong_count(c) > 1) { drop(state.cache.take()); }
+        if state.cache.is_none() {
+            let arena = if let Some(scene) = self.scene { scene.picking_arena_bytes()? } else { self.arena };
+            let metadata = if let Some(scene) = self.scene { scene.metadata_storage_usage()?.bytes } else { self.metadata };
+            let reservation = if state.managed {
+                let SceneMemory { peer, reservation, .. } = &mut *state;
+                let peer = peer.as_ref().ok_or(Error::Missing("cache admission peer"))?;
+                let reservation = reservation.as_mut().ok_or(Error::Missing("scene metadata reservation"))?;
+                let required = metadata.checked_add(arena).ok_or(Error::Overflow("picking admission"))?;
+                if required > reservation.bytes() {
+                    let additional = required - reservation.bytes();
+                    peer.grow_external_memory_with_held(reservation, additional, peer.physical_memory_sample()?, Usage::default())?;
+                }
+                peer.recheck_external_memory_with_reclamation(reservation)?;
+                Some(reservation.split_off(arena)?)
+            } else {
+                Usage { bytes: metadata.checked_add(arena).and_then(|n| n.checked_add(self.shared_buffer_bytes))
+                    .ok_or(Error::Overflow("picking local allowance"))?, ..Usage::default() }.check(self.limits)?;
+                None
+            };
+            let mut cache = PickingCache::allocate(self.objects.len(), reservation)?;
+            let actual = cache.storage()?;
+            if let Some(reservation) = cache.reservation.as_mut() {
+                if actual > reservation.bytes() { return Err(Error::Budget("picking actual capacity")); }
+                reservation.set_allocated_bytes(actual)?;
+            }
+            state.cache = Some(Arc::new(cache));
+        }
+        let cache = Arc::get_mut(state.cache.as_mut().expect("picking arena exists")).ok_or(Error::Busy)?;
+        if cache.spheres.capacity() < self.objects.len() { return Err(Error::Budget("picking spheres capacity")); }
+        cache.spheres.clear();
+        let mut last: Option<(&Arc<super::BufferPayload>, Option<([f64; 3], [f64; 3])>)> = None;
+        for object in self.objects {
+            let local = match &last {
+                Some((buffers, bounds)) if Arc::ptr_eq(buffers, &object.buffers.inner) => *bounds,
+                _ => { let bounds = object.local_bounds(); last = Some((&object.buffers.inner, bounds)); bounds }
+            };
+            cache.spheres.push(object.sphere_bounds_from_local(local).unwrap_or(([0.; 3], 0.)));
+        }
+        state.valid = true;
+        self.touch_picking_cache(&state)?;
+        Ok(state.cache.as_ref().expect("picking cache published").clone())
+    }
+    fn touch_picking_cache(&self, state: &SceneMemory) -> Result<()> {
+        if let Some(peer) = state.peer.as_ref() {
+            let owner: Arc<dyn OptionalMemoryCache> = self.memory.clone();
+            peer.touch_optional_memory_cache(&owner)?;
+        }
+        Ok(())
+    }
+}
+
+impl PickSnapshot {
+    fn picking_cache(&self) -> Result<Arc<PickingCache>> {
+        PickingCacheView { memory: &self.memory, objects: &self.objects, arena: self.arena_bytes,
+            metadata: self.metadata_bytes, scene: None, shared_buffer_bytes: self.shared_buffer_bytes,
+            limits: &self.limits }.picking_cache()
+    }
+    pub fn spatial_index(&self) -> Result<PickingIndex> { let cache = self.picking_cache()?; cache.index()?; Ok(PickingIndex(cache)) }
+    pub fn object_spheres(&self) -> Result<ObjectSpheres> { self.picking_cache().map(ObjectSpheres) }
+    pub fn memory_allowance_bytes(&self) -> u64 {
+        let state = self.memory.lock().unwrap_or_else(|e| e.into_inner());
+        state.reservation.as_ref().map_or(0, ExternalMemoryReservation::bytes)
+            + state.cache.as_ref().and_then(|c| c.reservation.as_ref()).map_or(0, ExternalMemoryReservation::bytes)
     }
 }

@@ -9,9 +9,10 @@
 
 ## Current standalone scope
 
+2026-11-11: the scoped source-based route supports edges selected before or after invoking the command, from one root OCCT B-rep with rigid placement, including tested reopened v4 and imported 3DM fixtures. Multiple selected edges commit in one Undo entry in the tested Box fixture. Source/display association uses bounded adaptive numerical verification and refuses the tested mismatch, ambiguity and exhausted-work cases. Menu icon and CMD were exercised with synthetic egui events. Desktop interaction, native peak and general imported topology are not established. See `docs/validation/2026-11-10-dupedge-source-first-slice.md`. The generic session claims below are historical and do not establish other modes for DupEdge.
+
 The Curve menu row and the typed command resolve to one command id and one Rust
-session; the session owns its prompts, options, preview and commit. The icon shown in
-the palette is the authored MainMenu.ini icon for this row and maps back to this same
-command. Parameter options are parsed by the session before the first mutation, and a
-cancelled or invalid session writes nothing. Manual M03-UI click/preview acceptance
-remains unsigned.
+session; the session owns its prompt, selection and commit. The palette icon maps
+back to this same command. The current DupEdge slice has no command options or
+preview geometry; cancel and the tested invalid inputs write nothing. Manual M03-UI
+acceptance remains unsigned.

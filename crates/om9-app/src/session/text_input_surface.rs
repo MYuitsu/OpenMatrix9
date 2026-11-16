@@ -87,11 +87,6 @@ impl Controller {
             flip,
             None,
         )?;
-        let entity = Entity::new(
-            surface_edit::label(pending.feature),
-            Geometry::Brep(brep),
-            self.document().current_layer,
-        );
         let mut inputs = Vec::with_capacity(pending.ids.len());
         for (index, id) in pending.ids.iter().enumerate() {
             inputs.push(SourceBinding {
@@ -106,10 +101,10 @@ impl Controller {
             });
         }
         self.history_options_pending = None;
-        return self.commit_entity_with_history(
+        return self.commit_brep_with_history(
             pending.feature,
             surface_edit::label(pending.feature),
-            entity,
+            brep,
             if pending.feature == surface_edit::SWEEP2_HISTORY {
                 "Sweep2History"
             } else {

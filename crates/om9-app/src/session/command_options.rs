@@ -302,8 +302,8 @@ impl Controller {
                 .map_or(CommandValue::None, |p| CommandValue::Flag(p.extract_copy)),
             "solid" if name == "NextRadius" => self.solid_pending.as_ref()
                 .filter(|p| p.feature == "OM9-SOLID-007")
-                .map_or(CommandValue::None, |p| CommandValue::Number(p.fillet_radius)),
-            "solid" if name == "CurrentRadius" => CommandValue::Number(self.solid_fillet_current_radius()),
+                .map_or(CommandValue::None, |p| CommandValue::Number(p.fillet_radius.map(|v| v / self.document().page_unit.factor()))),
+            "solid" if name == "CurrentRadius" => CommandValue::Number(self.solid_fillet_current_radius().map(|v| v / self.document().page_unit.factor())),
             "solid" if name == "Thickness" => self.solid_pending.as_ref()
                 .filter(|p| p.feature == "OM9-SOLID-029")
                 .map_or(CommandValue::None, |p| CommandValue::Number(p.shell_thickness)),
@@ -1123,8 +1123,8 @@ impl Controller {
                         }
                         "DeleteInput" if matches!(p.feature, "OM9-SOLID-001" | "OM9-SOLID-002" | "OM9-SOLID-003" | "OM9-SOLID-004" | "SolidBooleanSplit" | "SolidCreateSolid") => flag!(p.difference_delete_input),
                         "Copy" if p.feature == "OM9-SOLID-006" => flag!(p.extract_copy),
-                        "NextRadius" if p.feature == "OM9-SOLID-007" => option.label = numeric_label(name, p.fillet_radius),
-                        "CurrentRadius" if p.feature == "OM9-SOLID-007" => option.label = numeric_label(name, self.solid_fillet_current_radius()),
+                        "NextRadius" if p.feature == "OM9-SOLID-007" => option.label = numeric_label(name, p.fillet_radius.map(|v| v / self.document().page_unit.factor())),
+                        "CurrentRadius" if p.feature == "OM9-SOLID-007" => option.label = numeric_label(name, self.solid_fillet_current_radius().map(|v| v / self.document().page_unit.factor())),
                         "Thickness" if p.feature == "OM9-SOLID-029" => option.label = numeric_label(name, p.shell_thickness),
                         "ShowRadius" if p.feature == "OM9-SOLID-007" => flag!(p.fillet_show_radius),
                         "LinkHandles" if p.feature == "OM9-SOLID-007" => flag!(p.fillet_link_handles),

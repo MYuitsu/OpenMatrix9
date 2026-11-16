@@ -198,6 +198,8 @@ impl Controller {
         if self.is_running() {
             return Err(Error::Busy);
         }
+        #[cfg(feature = "occt-brep")]
+        self.cancel_ring_preview_candidate();
         let document = self.document().clone();
         let id = document
             .history
@@ -226,9 +228,21 @@ impl Controller {
                 session.set_field(name, value.clone())?;
             }
         }
-        let registry = self.builder_registry()?;
-        session.refresh(&document, &registry)?;
-        self.builder = Some(session);
+        #[cfg(feature = "occt-brep")]
+        let background = self.background_ring_preview_enabled && kind.ring_family().is_some();
+        #[cfg(not(feature = "occt-brep"))]
+        let background = false;
+        if background {
+            #[cfg(feature = "occt-brep")]
+            {
+                self.builder = Some(session);
+                if let Err(error) = self.queue_background_ring_preview() { self.builder = None; return Err(error); }
+            }
+        } else {
+            let registry = self.builder_registry()?;
+            session.refresh(&document, &registry)?;
+            self.builder = Some(session);
+        }
         let message = format!("Editing {} from history", kind.title());
         self.history_notice = Some(message.clone());
         Ok(message)
@@ -344,14 +358,8 @@ fn describe_problem(row: &history_ops::BrokenLink) -> String {
 }
 
 fn builder_kind_for_command(command: &str) -> Option<BuilderKind> {
-    match command {
-        "RingRail" | "RingBuilder" => Some(BuilderKind::RingRail),
-        "RailProfile" => Some(BuilderKind::RailProfile),
-        "RailSweep" => Some(BuilderKind::RailSweep),
-        "OutsideRail" => Some(BuilderKind::OutsideRail),
-        "RingResizer" => Some(BuilderKind::RingResizer),
-        _ => None,
-    }
+    if command == "RingBuilder" { return Some(BuilderKind::RingRail); }
+    BuilderKind::ALL.into_iter().find(|kind| kind.command() == command)
 }
 
 /// The recorded recipe behind one object, for the panel's edit row.

@@ -291,8 +291,30 @@ impl MatrixApp {
         };
         match section {
             SectionId::Display => {
-                control("Coarse Mesh ▾", 0., 28., 152., 16., false);
                 control("Shaded ▾", 156., 28., 119., 16., false);
+                let rect = slot(0., 28., 152., 16.);
+                let mut child = ui.new_child(egui::UiBuilder::new().id_salt("viewport-detail").max_rect(rect));
+                let current = self.controller.viewport_detail();
+                let mut requested = current;
+                child.add_enabled_ui(!self.controller.is_running(), |ui| {
+                    egui::ComboBox::from_id_salt("viewport-detail")
+                        .selected_text(current.label()).width(rect.width() - 10.)
+                        .show_ui(ui, |ui| {
+                            for detail in [crate::display::ViewportDetail::Light, crate::display::ViewportDetail::High] {
+                                ui.selectable_value(&mut requested, detail, detail.label());
+                            }
+                        });
+                });
+                #[cfg(feature = "occt-brep")]
+                if requested != current {
+                    match self.controller.request_viewport_detail(requested) {
+                        Ok(()) => {
+                            if !self.controller.viewport_detail_pending() { self.display_preferences.viewport_detail = requested; }
+                            self.status.info("Updating viewport detail");
+                        }
+                        Err(error) => { self.status.error(&format!("Viewport detail: {error}")); }
+                    }
+                }
                 let track = slot(281., 0., 15., 44.);
                 ui.painter().rect_filled(track, 3, chrome::PANEL_BG);
                 ui.painter().rect_stroke(

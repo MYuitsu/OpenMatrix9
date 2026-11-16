@@ -1,6 +1,563 @@
 {
+  "brep_source_archive_probe_20261114": {
+    "batch": "opennurbs-brep-source-archive",
+    "package": 3,
+    "status": "one_authored_sdk_fixture_passed_product_not_changed",
+    "executions": 2,
+    "fixture_count": 1,
+    "passed_executions": 2,
+    "scope": "Pinned SDK mesh archive flags verified against a mesh-free serialized authored box including user string and registered authored userdata; actual import/export and v5 are not covered.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": ["modeling-public-rhino5-generated-exchange"],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [2, 3, 4, 5, 6, 7, 8],
+    "remaining_total_test_batches": null,
+    "next_action": "Verify trimmed/external B-reps and actual source-only product and export paths.",
+    "evidence": "docs/validation/2026-11-14-opennurbs-source-archive-probe.md"
+  },
+  "external_v5_native_isocurve_20261113": {
+    "batch": "external-v5-native-isocurve",
+    "package": 3,
+    "status": "one_external_face_fixture_passed",
+    "executions": 2,
+    "fixture_count": 1,
+    "passed_executions": 2,
+    "scope": "One public openNURBS V5 B-rep imported as NativeBrep, saved/reopened and selected via simulated viewport ray; sampled isocurve stays inside the independently specified quadrilateral, endpoints lie on its boundary, Undo/Redo passed. Second run added boundary and nondegeneracy checks.",
+    "remaining": "Full curve equivalence, other external geometry, physical desktop, OS OOM and native peak unverified.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Continue Plan A and validate other external geometry and physical desktop as available.",
+    "evidence": "docs/validation/2026-11-13-isocurve-external-v5.md"
+  },
+  "external_v5_native_dupedge_20261113": {
+    "batch": "external-v5-native-dupedge",
+    "package": 3,
+    "status": "one_external_v5_fixture_passed_v6_rejected",
+    "executions": 4,
+    "fixture_count": 2,
+    "passed_v5_executions": 3,
+    "unsupported_v6_executions": 1,
+    "scope": "A public openNURBS V5 B-rep imported as NativeBrep, saved/reopened and produced one selected source edge with five expected points and Undo/Redo in simulated UI. An unrelated public V6 file was rejected by the Rhino 5-only importer.",
+    "remaining": "Other edges and external geometry, physical desktop, V6 support and native peak unverified.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Continue Plan A and test additional external geometry and physical desktop when available.",
+    "evidence": "docs/validation/2026-11-13-dupedge-external-v5.md"
+  },
+  "native_dupedge_3dm_trimmed_arc_20261113": {
+    "batch": "native-dupedge-3dm-trimmed-arc",
+    "package": 3,
+    "status": "authored_fixture_passed",
+    "executions": 3,
+    "fixture_count": 1,
+    "passed": 1,
+    "scope": "One authored openNURBS quarter-cylinder imported as NativeBrep, saved/reopened and selected through a simulated viewport; sampled curve, ordered endpoints, document snapshots and Undo/Redo passed. The second execution added endpoint-order checking; the third checked the source-point screen guard.",
+    "remaining": "Independent third-party files, desktop, orientation parity, broader trim and native peak remain unverified.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Continue Plan A; test representative independent 3DM input and desktop once available.",
+    "evidence": "docs/validation/2026-11-13-dupedge-native-gap.md#authored-3dm-trimmed-arc-import"
+  },
+  "debug_executable_box_20261113": {
+    "batch": "3dm-debug-executable-box",
+    "package": 3,
+    "status": "box_roundtrip_and_unsupported_fixture_refusal",
+    "attempts": 2,
+    "fixture_count": 2,
+    "passed_roundtrip": 1,
+    "expected_safe_refusals": 1,
+    "scope": "Actual om9.exe without exchange env override exported and imported an app-authored Box through its sibling adapter; reopened report preserved display bounds 2x3x4 and topology counts 8/12/6. Built-in four-object fixture was refused because its cloud contains unsupported hidden=true.",
+    "remaining": "Independent exact geometry, Rhino interchange, visible desktop and native peak unverified.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Continue Plan A independently; recover Rhino fixture environment and test visible desktop once Windows automation is available.",
+    "evidence": "docs/validation/2026-11-13-exchange-adapter-rebuild.md#actual-executable-3dm-command-line-smoke"
+  },
+  "debug_layout_update_20261113": {
+    "batch": "3dm-debug-layout-update",
+    "package": 3,
+    "status": "headless_debug_layout_pass",
+    "executions": 2,
+    "execution_fixture_counts": [
+      9,
+      1
+    ],
+    "unique_fixtures": 9,
+    "passed": 9,
+    "scope": "Existing debug adapter and fingerprint replaced with current-source P1 Release pair; nine export/reimport and safe-refusal fixtures passed; one repeated through actual debug directory sibling-digest loader. Existing Rust app build succeeds.",
+    "remaining": "Actual visible desktop/mouse and desktop 3DM exchange, third-party drawings, native peak and full exchange remain unverified. A hidden app startup and Box/ExtractWireframe/Undo/Redo command smoke passed.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Validate visible desktop interaction and actual application 3DM exchange, then representative public Rhino5-generated exchange fixtures.",
+    "evidence": "docs/validation/2026-11-13-exchange-adapter-rebuild.md#existing-debug-layout-updated"
+  },
+  "nested_curved_3dm_extractwire_20261113": {
+    "status": "passed_both_import_modes",
+    "batch": "nested-curved-3dm-extractwire",
+    "package": 3,
+    "attempts": 2,
+    "attempt_fixture_counts": [
+      1,
+      1
+    ],
+    "unique_fixtures": 1,
+    "final_fixtures_passed": 1,
+    "final_import_modes_passed": 2,
+    "scope": "One project-authored quarter-cylinder imported, placed into a two-level block with two affine instances, exported to 3DM and imported as editable and opaque B-rep. Distinct sampled curves, arc/line endpoints, OM9 save/reopen and one Undo/Redo passed.",
+    "remaining": "General curved sources, third-party files, desktop, physical OOM and native peak remain unverified.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Verify representative third-party nested blocks and update the debug adapter after active windows are saved and closed.",
+    "evidence": "docs/validation/2026-11-13-extractwire-nested-block.md#curved-nested-3dm-block"
+  },
+  "nested_3dm_block_extractwire_20261113": {
+    "status": "passed_both_import_modes",
+    "batch": "nested-3dm-block-extractwire",
+    "package": 3,
+    "attempts": 3,
+    "attempt_fixture_counts": [
+      1,
+      1,
+      1
+    ],
+    "unique_fixtures": 1,
+    "final_fixtures_passed": 1,
+    "final_import_modes_passed": 2,
+    "scope": "Authored 3DM two-level block with two affine box instances imported as EditableStrict and RetainOpaque, source type confirmed, OM9 roundtrip, 24 analytic world-space edges and one Undo/Redo passed.",
+    "remaining": "Third-party blocks, curved nested sources, desktop, physical OOM and native peak remain unverified.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Verify representative curved or third-party nested blocks and update the debug adapter after active windows are saved and closed.",
+    "evidence": "docs/validation/2026-11-13-extractwire-nested-block.md#nested-3dm-block-import"
+  },
+  "adapter_current_source_20261113": {
+    "status": "current_source_pass_old_debug_layout_failed",
+    "batch": "3dm-adapter-current-source",
+    "package": 3,
+    "attempts": 3,
+    "attempt_fixture_counts": [
+      1,
+      1,
+      8
+    ],
+    "unique_fixtures": 8,
+    "final_passed": 8,
+    "failed_old_binary": 1,
+    "scope": "Old debug native binary refused a 3DM block packet; the current-source Release rebuild passed the same fixture and all eight trimmed 3DM tests, seven export/reimport and one safe refusal.",
+    "remaining": "Old debug layout remains alongside running application; exact historical schema difference, desktop, third-party files and native peak remain unverified.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "After user saves and closes active windows, update the executable and digest together in the existing debug layout and verify actual desktop.",
+    "evidence": "docs/validation/2026-11-13-exchange-adapter-rebuild.md"
+  },
+  "imported_block_extractwire_20261113": {
+    "status": "passed_editable_and_opaque",
+    "batch": "imported-block-extractwire",
+    "package": 3,
+    "attempts": 2,
+    "attempt_fixture_counts": [
+      1,
+      1
+    ],
+    "unique_fixtures": 1,
+    "final_fixtures_passed": 1,
+    "final_import_modes_passed": 2,
+    "scope": "Authored trimmed planar face with hole exported as a 3DM block, imported with editable and opaque NativeBrep modes, and extracted to eight expected world-space edges with one Undo/Redo.",
+    "remaining": "Third-party input, arbitrary nested 3DM blocks, desktop, physical OOM and native peak remain unverified.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Verify representative third-party or nested 3DM blocks and reconcile the debug adapter without disturbing active sessions.",
+    "evidence": "docs/validation/2026-11-13-extractwire-nested-block.md#authored-3dm-block-import"
+  },
+  "nested_native_brep_extractwire_20261113": {
+    "status": "passed_after_fixture_setup_correction",
+    "batch": "nested-native-brep-extractwire",
+    "package": 3,
+    "attempts": 3,
+    "attempt_fixture_counts": [
+      1,
+      1,
+      1
+    ],
+    "unique_scenarios": 2,
+    "final_scenarios_passed": 2,
+    "initial_failure": "Imported root moved into definition without remapping retained binding; rejected by document validation. Corrected by copying geometry into a new document.",
+    "scope": "One authored quarter-cylinder 3DM imported as NativeBrep, copied into nested OM9 block; two instances, sampled arcs and lines, composed affine placements and Undo/Redo passed. A generated corrupt NativeBrep following mesh is refused with Redo intact.",
+    "remaining": "Not a 3DM block import, third-party input, desktop, physical OOM or native peak.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Test actual 3DM block import ownership and selection with a representative fixture; reconcile the debug adapter without disturbing active sessions.",
+    "evidence": "docs/validation/2026-11-13-extractwire-nested-block.md#nested-nativebrep-follow-up"
+  },
+  "native_source_allocation_20261113": {
+    "status": "passed_injected_rust_allocation",
+    "batch": "native-source-allocation",
+    "package": 3,
+    "attempts": 2,
+    "attempt_fixture_counts": [
+      1,
+      2
+    ],
+    "unique_fixtures": 2,
+    "passed": 2,
+    "failed": 0,
+    "scope": "Typed NativeBrep source conversion preserves admission errors and distinguishes Rust allocation failure from invalid payload and structural limits. Edge-output allocation failures are separately marked and mapped to memory recovery; structural edge-count limits are not. An isolated allocator injected actual Rust allocation failures in both steps; UI mapping and managed-pressure recovery were tested separately.",
+    "remaining": "The injected allocation failure was not driven end to end through desktop UI; actual OS OOM, native C++ temporary peak and arbitrary third-party B-reps remain unverified. Plan A and debug adapter compatibility remain open.",
+    "next_action": "Verify representative third-party input and desktop, and reconcile the debug adapter without disrupting active sessions.",
+    "evidence": "docs/validation/2026-11-13-extractwire-native-brep.md#native-source-and-edge-allocation-failures",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null
+  },
+  "retained_stl_regression_20261113": {
+    "status": "passed_existing_regression",
+    "batch": "retained-stl-regression",
+    "package": 3,
+    "attempts": 1,
+    "test_cases": 4,
+    "passed_test_cases": 4,
+    "fixture_count": "not separately enumerated",
+    "scope": "Existing retained-native STL tests passed after the typed source-conversion change.",
+    "remaining": "The injected allocation failure was not driven end to end through desktop UI; actual OS OOM, native C++ temporary peak and arbitrary third-party B-reps remain unverified. Plan A and debug adapter compatibility remain open.",
+    "next_action": "Verify representative third-party input and desktop, and reconcile the debug adapter without disrupting active sessions.",
+    "evidence": "docs/validation/2026-11-13-extractwire-native-brep.md#native-source-and-edge-allocation-failures",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null
+  },
+  "extractwire_native_brep_source_20261113": {
+    "status": "passed_scoped_native_source",
+    "batch": "extractwire-native-brep-source",
+    "package": 3,
+    "attempts": 11,
+    "attempt_fixture_counts": [
+      2,
+      1,
+      1,
+      1,
+      4,
+      1,
+      1,
+      2,
+      4,
+      1,
+      2
+    ],
+    "unique_fixtures": 7,
+    "passed": 7,
+    "failed": 0,
+    "scope": "Two project-authored openNURBS 3DM cylinder files were imported as opaque NativeBrep, saved/reopened in OM9 and processed by ExtractWireframe. A quarter-cylinder yielded two arcs and two side edges; a capped cylinder yielded two circles and one seam. Sampled radius, height and quadrant plus Undo/Redo passed. Both individual runs and the combined run passed.",
+    "remaining": "These are generated fixtures, not third-party drawings or independent Rhino acceptance. General topology, native peak, physical OOM and desktop remain unverified. Plan A remains open; debug native adapter compatibility remains open.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Verify additional representative NativeBrep inputs and desktop; reconcile the debug adapter without disrupting active sessions.",
+    "evidence": "docs/validation/2026-11-13-extractwire-native-brep.md#authored-3dm-input-follow-up",
+    "latest_attempt": "both authored 3DM fixtures passed after source/edge allocation classification"
+  },
+  "trimmed_surface_3dm_file_export_20261113": {
+    "status": "passed_scoped_file_export",
+    "batch": "trimmed-surface-3dm-file-export",
+    "package": 3,
+    "attempts": 25,
+    "attempt_fixture_counts": [
+      1,
+      1,
+      1,
+      2,
+      1,
+      4,
+      4,
+      5,
+      1,
+      6,
+      1,
+      1,
+      1,
+      6,
+      1,
+      7,
+      1,
+      7,
+      7,
+      7,
+      7,
+      7,
+      1,
+      8,
+      8
+    ],
+    "unique_fixtures": 8,
+    "final_passed": 8,
+    "successful_export_reimport_fixtures": 7,
+    "safe_refusal_fixtures": 1,
+    "earlier_failed_attempts": 3,
+    "earlier_failure": "One debug adapter rejected the packet schema. Two later mixed-fixture attempts used inappropriate ray/placement test oracles; source volume and world bounds corrected the oracle.",
+    "scope": "A 28x28 planar trimmed surface with a hole and metadata over 16 KiB now fits the separate default 128 KiB trim limit. Tested insertion and Undo/Redo, OM9 save/open, scene picking and incremental update, ExtractWireframe and isocurve after reopen, STL and real 3DM export/reimport. Other names and extension limits remain separate; managed-pressure refusal preserves document/Redo in the wireframe fixture.",
+    "remaining": "Older builds can reject files with trim metadata over 16 KiB. Arbitrary trim topology, physical OOM, native peak, independent Rhino and desktop remain open. The debug native adapter still rejects the packet schema; Plan A remains open.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Reconcile the debug native adapter without disrupting active user sessions, then verify the scoped workflow on desktop; continue Plan A remaining gates.",
+    "evidence": "docs/validation/2026-11-13-large-trim-support.md",
+    "last_complete_run_passed": 8,
+    "latest_attempt": "all eight file fixtures passed, including larger trim source",
+    "large_trim_setup_failed": 0,
+    "large_trim_original_setup_failure": "historical: before separate trim limit"
+  },
+  "trimmed_face_3dm_bridge_probe_20261113": {
+    "status": "passed_scoped_probe",
+    "batch": "trimmed-face-native-3dm-brep-roundtrip",
+    "package": 3,
+    "attempts": 4,
+    "attempt_fixture_counts": [
+      1,
+      2,
+      2,
+      2
+    ],
+    "unique_fixtures": 2,
+    "passed": 2,
+    "failed": 0,
+    "scope": "Plane and cylindrical patch with holes roundtrip through OCCT source to openNURBS B-rep payload and back; three source-ray probes per fixture check material, hole and outside. No 3DM document export or user workflow was exercised.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Verify the debug adapter and desktop export; the scoped admitted file export is now separately recorded.",
+    "evidence": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md#native-brep-bridge-probe"
+  },
   "schema_version": 1,
-  "updated_at": "2026-11-05T09:01:00+07:00",
+  "updated_at": "2026-11-06T12:10:53+07:00",
+  "standalone_measure_integrity_regression_20261106": {
+    "status": "passed_existing_regression",
+    "batch": "om9-app measure source integrity regression",
+    "attempts": 1,
+    "suite_tests_passed": 8,
+    "generated_3dm_positive_fixtures": 1,
+    "negative_conditions": [
+      "invalid payload",
+      "missing tolerance"
+    ],
+    "scope": "Generated 3DM box source bounds and placement remain independent of deliberately shifted display; existing app measurement regressions only.",
+    "new_planned_batches": 0,
+    "prepared_pending_batches": 1,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Continue the source/cache ownership gate; separately resolve the existing native source inventory packet rejection and obtain the prepared independent Rhino 5 exchange evidence.",
+    "evidence": "docs/validation/2026-11-06-brep-source-integrity.md"
+  },
   "full_exchange_complete": false,
   "approved_plan": "docs/superpowers/plans/2026-10-07-full-opennurbs-completion.md",
   "counting_rule": "A named fixture matrix is one test batch. Fixtures, assertions, execution attempts and package milestones are separate counts. A retry does not create a new planned batch.",
@@ -73,6 +630,21 @@
     "Next batch/action; explain any newly added regression and why the queue grew"
   ],
   "completed_batches": [
+    {
+      "name": "trimmed-face-native-3dm-brep-roundtrip-2026-11-13",
+      "status": "passed_scoped_probe",
+      "package": 3,
+      "attempts": 2,
+      "attempt_fixture_counts": [
+        1,
+        2
+      ],
+      "unique_fixtures": 2,
+      "passed": 2,
+      "failed": 0,
+      "evidence": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md#native-brep-bridge-probe",
+      "goal_complete": false
+    },
     {
       "id": "standalone-polyedge-v5-12",
       "package": 2,
@@ -931,5 +1503,113 @@
       "docs/validation/2026-11-05-workspace-build-test-commit.json"
     ],
     "next_action": "Compare canonical packet to current native schema before a targeted retry; later inventory fixtures were not executed."
+  },
+  "external_v5_native_dupedge_two_edges_20261113": {
+    "batch": "external-v5-native-dupedge-two-edges",
+    "package": 3,
+    "executions": 6,
+    "unique_fixtures": 1,
+    "passed": 2,
+    "failed": 4,
+    "scope": "Two straight edges of one public Rhino 5 B-rep, imported and reopened, selected by simulated viewport and checked against independent line samples with one Undo/Redo. Two failures used an incorrect test assumption; two observed ambiguous selection with another camera.",
+    "evidence": "docs/validation/2026-11-13-dupedge-external-v5-two-edges.md",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Broaden independent inputs and desktop evidence; await high-zoom decision."
+  },
+  "external_v5_ambiguous_projection_20261113": {
+    "batch": "external-v5-ambiguous-projection",
+    "package": 3,
+    "executions": 3,
+    "unique_fixtures": 1,
+    "passed": 3,
+    "failed": 0,
+    "scope": "Two distinct source-view edges project to same clicked pixel at different depths; simulated click refuses ambiguity and preserves document and Redo.",
+    "evidence": "docs/validation/2026-11-13-dupedge-external-v5-two-edges.md#overlapping-projection-follow-up",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Broaden independent inputs and desktop evidence; await high-zoom decision."
+  },
+  "external_v5_ambiguity_continue_20261113": {
+    "batch": "external-v5-ambiguity-continue",
+    "package": 3,
+    "executions": 1,
+    "unique_fixtures": 1,
+    "passed": 1,
+    "failed": 0,
+    "scope": "After ambiguous synthetic click and programmatic camera change, earlier selected edge and second picked edge commit together with Undo/Redo.",
+    "evidence": "docs/validation/2026-11-13-dupedge-external-v5-two-edges.md#continue-after-ambiguity",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Broaden independent inputs and desktop evidence; await high-zoom decision."
+  },
+  "external_v5_isocurve_ray_bridge_regression_20261113": {
+    "batch": "external-v5-isocurve-ray-bridge-regression",
+    "package": 3,
+    "executions": 1,
+    "unique_fixtures": 1,
+    "passed": 1,
+    "failed": 0,
+    "scope": "Existing public V5 fixture imported as NativeBrep, saved/reopened, one simulated source-ray face pick, sampled geometry and Undo/Redo passed after bridge change.",
+    "evidence": "docs/validation/2026-11-13-isocurve-external-v5.md#source-ray-bridge-regression",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Continue current Plan A product gaps; do not repeat unchanged fixtures merely for count."
   }
 }

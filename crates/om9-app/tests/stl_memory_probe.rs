@@ -5,6 +5,41 @@ use om9_app::session::{Controller, StlExportProfile};
 use om9_core::{budget::Limits, geometry::{Geometry, Transform}, model::{Document, Entity}};
 use std::ffi::{c_char, c_int, c_void};
 
+#[test]
+#[ignore = "isolated trimmed-face process memory diagnostic"]
+fn trimmed_surface_stl_memory_probe() {
+    use om9_core::{rhino_semantics::{set_trimmed_surface,TrimmedSurface},transaction::Cancellation};
+    let case=std::env::var("OM9_TRIM_STL_MEMORY_CASE").expect("choose plane or cylinder");
+    let limits=Limits::default();
+    let surface=match case.as_str() {
+        "plane"=>om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap(),
+        "cylinder"=>om9_core::surface_kernel::cylinder([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],2.,5.,&limits).unwrap(),
+        _=>panic!("unknown fixture"),
+    };
+    let outer=if case=="plane" {(0..1020).map(|i|{let a=std::f64::consts::TAU*i as f64/1020.;[0.5+0.4*a.cos(),0.5+0.4*a.sin()]}).collect()}
+    else {let mut p=Vec::new();for side in 0..4 {for i in 0..255 {let t=i as f64/255.;p.push(match side {
+        0=>[0.1*(1.-t)+0.3*t,0.2],1=>[0.3,0.2*(1.-t)+0.8*t],
+        2=>[0.3*(1.-t)+0.1*t,0.8],_=>[0.1,0.8*(1.-t)+0.2*t],
+    });}}p};
+    let hole=if case=="plane" {vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]}
+        else {vec![[0.15,0.4],[0.2,0.4],[0.2,0.6],[0.15,0.6]]};
+    let trim=TrimmedSurface {underlying:surface.clone(),outer,inners:vec![hole],reversed:false};
+    let mut entity=Entity::new("trim probe",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut doc=Document::with_template_tolerance("trim STL memory");doc.entities.insert(id,entity);
+    let folder=std::env::temp_dir().join(format!("om9-trim-stl-memory-{}",uuid::Uuid::new_v4()));std::fs::create_dir(&folder).unwrap();
+    struct Cleanup(std::path::PathBuf);impl Drop for Cleanup {fn drop(&mut self){let _=std::fs::remove_dir_all(&self.0);}}
+    let _cleanup=Cleanup(folder.clone());let input=folder.join("source.om9");let output=folder.join("output.stl");
+    om9_archive::Archive::save(&input,&doc,&limits,&Cancellation::default()).unwrap();
+    let mut c=Controller::from_file(&input,limits).unwrap();c.select_objects(&[id]).unwrap();let document_before=c.document().clone();
+    let before=om9_native_owner::process_memory().expect("before process memory");let start=std::time::Instant::now();
+    let receipt=c.export_stl_selected_with_profile(&output,StlExportProfile {linear_tolerance_mm:0.005,angular_tolerance_rad:0.3}).unwrap();
+    let elapsed=start.elapsed();let after=om9_native_owner::process_memory().expect("after process memory");
+    assert!(receipt.triangles>0);assert_eq!(std::fs::metadata(&output).unwrap().len(),receipt.bytes as u64);assert!(c.document()==&document_before);
+    println!("TRIM_STL_MEMORY case={case} edges=1024 triangles={} elapsed_ms={:.3} before_working={} before_peak_working={} before_private={} before_peak_pagefile={} after_working={} after_peak_working={} after_private={} after_peak_pagefile={}",
+        receipt.triangles,elapsed.as_secs_f64()*1000.,before.working_set_bytes,before.peak_working_set_bytes,before.private_bytes,before.peak_pagefile_bytes,
+        after.working_set_bytes,after.peak_working_set_bytes,after.private_bytes,after.peak_pagefile_bytes);
+}
+
 // Test-only ABI mirror: the callbacks observe native stages and do not retain
 // or dereference any of the arrays owned by the C++ adapter.
 #[repr(C)]
@@ -16,6 +51,7 @@ struct NativeSnapshot {
     vertices: *const u32, vertices_len: usize,
     face_edges: *const [u32; 2], face_edges_len: usize,
     faces_count: usize, edges_count: usize,
+    topology_handle: *const c_void,
 }
 unsafe extern "C" {
     fn om9_occt_brep_snapshot_grouped(source: *const u8, source_len: usize, deflection: f64, angular_deflection: f64,
@@ -51,19 +87,36 @@ unsafe extern "C" fn record_snapshot(context: *mut c_void, snapshot: *const Nati
 #[test]
 #[ignore = "isolated release memory diagnostic"]
 fn stl_memory_probe() {
-    let case = std::env::var("OM9_STL_MEMORY_CASE").expect("choose light, dense, dense_native, dense_stage, repeated or repeated_instances");
+    let case = std::env::var("OM9_STL_MEMORY_CASE").expect("choose light, dense, dense_native, dense_stage, repeated, repeated_instances, trimmed or nurbs");
     let (radius, tolerance, count) = match case.as_str() {
         "light" => (5., 0.05, 1),
         "dense" => (12., 0.001, 1),
         "dense_native" => (12., 0.001, 1),
         "dense_stage" => (12., 0.001, 1),
         "repeated" | "repeated_instances" => (5., 0.005, 8),
+        "trimmed" | "nurbs" => (3., 0.01, 1),
         _ => panic!("unknown fixture"),
     };
     let tolerance = std::env::var("OM9_STL_MEMORY_TOLERANCE").ok().map(|value| value.parse::<f64>().unwrap()).unwrap_or(tolerance);
     assert!(tolerance.is_finite() && tolerance > 0.);
     let limits = Limits::default();
     let brep = om9_kernel::brep::sphere_brep(radius, 0.1, &limits).unwrap();
+    let geometry = match case.as_str() {
+        "trimmed" => {
+            let block = om9_kernel::brep::box_brep([10.; 3], 0.1, &limits).unwrap();
+            let cutter = om9_kernel::transform_ops::transform_brep(&brep, &Transform::translation([5., 5., 10.]), 0.1, &limits).unwrap();
+            let pocket = om9_kernel::editing::boolean(&block, &cutter, om9_kernel::editing::BooleanOp::Difference, 0.1, &limits).unwrap();
+            Geometry::Brep(pocket.body().unwrap().clone())
+        }
+        "nurbs" => Geometry::Surface(om9_core::geometry::NurbsSurface {
+            degree: [2, 2], size: [3, 3],
+            poles: (0..3).flat_map(|i| (0..3).map(move |j| [5. * f64::from(i), 5. * f64::from(j), f64::from(i * i + j * j)])).collect(),
+            weights: vec![1.; 9],
+            knots: [vec![0., 0., 0., 1., 1., 1.], vec![0., 0., 0., 1., 1., 1.]],
+            domain: [[0., 1.], [0., 1.]], periodic: [false; 2], reversed: false,
+        }),
+        _ => Geometry::Brep(brep.clone()),
+    };
     let mut document = Document::with_template_tolerance("STL memory probe");
     let definition = if case == "repeated_instances" {
         let definition = om9_core::model::Definition::new("shared sphere", vec![Entity::new("sphere", Geometry::Brep(brep.clone()), None)]);
@@ -73,7 +126,7 @@ fn stl_memory_probe() {
     } else { None };
     let mut selection = Vec::new();
     for i in 0..count {
-        let geometry = definition.map_or_else(|| Geometry::Brep(brep.clone()), Geometry::Instance);
+        let geometry = definition.map_or_else(|| geometry.clone(), Geometry::Instance);
         let mut entity = Entity::new("sphere", geometry, None);
         entity.placement = Transform::translation([i as f64 * radius * 3., 0., 0.]);
         selection.push(entity.id);
@@ -82,7 +135,8 @@ fn stl_memory_probe() {
     let mut controller = Controller::new(document, limits).unwrap();
     controller.select_objects(&selection).unwrap();
     if let Some(path) = std::env::var_os("OM9_STL_MEMORY_SOURCE_OUT") {
-        std::fs::write(path, brep.source()).unwrap();
+        let Geometry::Brep(body) = &geometry else { panic!("this fixture has no canonical B-Rep text"); };
+        std::fs::write(path, body.source()).unwrap();
     }
     let before = om9_native_owner::process_memory().expect("before memory sample");
     if case == "dense_stage" {
@@ -113,7 +167,7 @@ fn stl_memory_probe() {
         let snapshot = om9_kernel::brep::read_brep_with_shell_groups_and_edges(brep.source(), tolerance * 0.5, 0.3, &limits).unwrap();
         let elapsed = start.elapsed();
         let after = om9_native_owner::process_memory().expect("after memory sample");
-        let triangles = snapshot.brep().display.triangles.len();
+        let triangles = snapshot.brep().display().triangles.len();
         let retained = snapshot.retained_usage(&limits).unwrap();
         assert!(triangles > 0);
         println!("STL_SNAPSHOT_TRACKED bytes={} points={} nodes={}", retained.bytes, retained.points, retained.nodes);

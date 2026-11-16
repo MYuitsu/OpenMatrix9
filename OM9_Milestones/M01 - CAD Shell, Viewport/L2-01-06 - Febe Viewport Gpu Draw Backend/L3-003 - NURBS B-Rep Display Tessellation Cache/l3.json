@@ -218,6 +218,138 @@
     "manual_pending": "the mesh must rebuild and look identical after a real OCCT parameter change"
   },
   "runtime_implementation": {
+    "light_navigation_smoothness_2026_11_14": {
+      "status": "SCOPED_LIGHT_GPU_COST_REDUCTION_VERIFIED",
+      "scope": "Light moving targets use 70-percent dimensions and 1x MSAA, then restore full-size 4x MSAA at rest. Source geometry and the derived tessellation are unchanged. Already-handled navigation events are consumed after native widgets; keyboard/IME/focus/primary clicks remain.",
+      "evidence": "docs/validation/2026-11-14-light-navigation-smoothness.md",
+      "measurement": "11 integration tests and 6 final paired native-window release runs passed; GPU median 0.641 to 0.139 ms. Both variants approximately 30 encoded frames/s; no measured command-to-result callback gap over 100 ms.",
+      "remaining": "Earlier 10.6 FPS was not reproduced by the final counterfactual. Client displayed FPS, larger scenes, complete source/display migration and v5 persistence remain open. This does not close this L3 globally."
+    },
+    "viewport_detail_sphere_union_2026_11_14": {
+      "status": "SCOPED_SPHERE_BOOLEAN_PROFILES_VERIFIED",
+      "scope": "Manual Light/High viewport profiles, default Light; canonical Sphere and Boolean Two Union sources with separate display representations. Nine scoped integration tests and eight native-window release runs passed.",
+      "measurement": "Light preview observed ready median 122.624 ms vs High 247.005 ms; both approximately 30 encoded Perspective frames/s. No measured callback gap above 100 ms after first command. Not RDP displayed FPS.",
+      "remaining": "Full core separation, all producers/consumers, opaque NativeBrep, durable topology and BRep v5 save/reopen remain open. Library unit-test target has 319 compile errors from canonical migration.",
+      "evidence": "docs/validation/2026-11-14-viewport-detail-sphere-boolean.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_SOURCE_DISPLAY_COMPLETION_M01_M09.md",
+      "next_action": "Continue broader canonical/source-display migration; use the reproducible paired audit for this slice, without claiming general FPS improvement."
+    },
+    "pending_representation_account_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Private transaction and history batches check display reservation account and allocated bytes; duplicate candidates release outside the store lock.",
+      "remaining": "Shared unowned producers, durable topology binding, source-only OCCT Open and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#pending-representation-account-and-lock-handoff"
+    },
+    "candidate_registration_collision_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Ordinary registration reuses only an identical source/display/profile and owner binding, rejects conflicts and releases redundant owners outside the store lock.",
+      "remaining": "Other insertion paths, concurrency, persistent topology proof and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#candidate-registration-collision-handling"
+    },
+    "primitive_topology_proof_coverage_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "General primitives, placed torus, ellipsoid without focus outputs, closed regular pyramid and closed cone/cylinder use optional in-process topology proof capture.",
+      "remaining": "Other producer paths, persistent proof, eviction behavior and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#primitive-topology-proof-coverage"
+    },
+    "representation_owner_account_check_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Existing candidate allocation owners are checked against the receiving coordinator; reserved split requires an exclusive unowned candidate.",
+      "remaining": "Shared unowned producers, persistent proof, source-only OCCT restore, runtime and failure checks remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#representation-owner-account-check"
+    },
+    "fillet_preview_owners_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Fillet previews use split source, topology and display owners; external holds omit already-accounted preview bytes.",
+      "remaining": "Native pre-admission, other shared producers, rollback and runtime behavior remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#fillet-preview-ownership"
+    },
+    "boolean_preview_split_owners_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Boolean Two Objects worker and synchronous previews use split source, topology and display owners; replacement and acceptance avoid double-counting owned previews.",
+      "remaining": "Other shared producers, native pre-admission, cancellation, native allocation peaks and runtime behavior remain unverified.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#synchronous-boolean-preview-ownership"
+    },
+    "boolean_worker_reservation_handoff_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Non-preview Boolean worker results transfer existing kernel reservations into independent display owners and retain source guards through commit.",
+      "remaining": "Boolean previews, other shared producers, native peaks, rollback, cancellation and runtime behavior remain unverified.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#boolean-worker-reservation-handoff"
+    },
+    "exclusive_producer_accounting_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Exclusive unowned producer candidates are reserved and split into independently charged cached display and canonical source; source-dead unpinned entries are pruned before later registrations.",
+      "remaining": "Shared and already-owned producers, pre-admission, durable proof, general restoration and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#exclusive-producer-display-accounting"
+    },
+    "source_dead_reclamation_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "On managed-memory refusal, remove unpinned source-dead entries or separately charged live OCCT displays backed by retained in-process topology proof.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#attested-live-source-eviction",
+      "remaining": "No runtime, concurrency or pressure checks; native and independent legacy source eviction, durable proof, recency and complete producer accounting remain open."
+    },
+    "multi_root_remesh_cache_2026_11_13": {
+      "status": "SCOPED_TRANSITIONAL_CACHE_CHECKS_PASSED",
+      "scope": "Up to four proven remesh root/profile entries reuse independent display and buffer owners; recency, pinned readers and managed reclamation tested.",
+      "limitations": "Remesh-only bounded cache; Document/Undo still own display. General source-only store, cold restore, v5 and desktop acceptance remain open.",
+      "evidence": "docs/validation/2026-11-13-multi-root-remesh-cache.md"
+    },
+    "dupedge_scene_profile_2026_11_13": {
+      "status": "SCOPED_CONSUMER_CHECKS_PASSED",
+      "scope": "DupEdge temporary OCCT source view reads the current scene profile; a remeshed sphere and history-preserving cancellation were tested.",
+      "limitations": "Document and Undo still own display; NativeBrep profile behavior, cold restore, eviction and v5 remain open.",
+      "evidence": "docs/validation/2026-11-13-dupedge-current-scene-profile.md"
+    },
+    "scene_display_batch_2026_11_13": {
+      "status": "SCOPED_BATCH_CHECKS_PASSED",
+      "scope": "Ordinary OCCT scene display leases use one admitted batch; scoped rollback, shared lease and synthetic debug timing checks passed.",
+      "limitations": "Batch remains on caller thread; five grip/hover tests fail with pins enabled or disabled. NativeBrep, source-only document/Undo, general cache, cold restore and v5 remain open.",
+      "evidence": "docs/validation/2026-11-13-scene-display-batch-admission.md"
+    },
+    "ordinary_scene_display_pin_2026_11_13": {
+      "status": "SCOPED_TRANSITION_WITH_OPEN_APP_REGRESSIONS",
+      "scope": "Accounted application scenes bind root and member OCCT displays to tracked pins before publication; New/Open rebind after account adoption. Candidate refusal and pin lifetime fixtures passed.",
+      "limitations": "Broad app suite has unresolved grip/hover failures; per-display admission latency is unmeasured. NativeBrep, source-only Document/Undo, general cache, cold restore and v5 remain open.",
+      "evidence": "docs/validation/2026-11-13-ordinary-scene-display-pins.md"
+    },
+    "tracked_brep_display_lease_2026_11_13": {
+      "status": "SCOPED_ACCOUNTING_AND_WORKER_CHECKS_PASSED",
+      "scope": "Ordinary root OCCT face-worker display pins share managed allocation accounting with document/source owners and transfer Undo quota after final release.",
+      "limitations": "Ordinary scene, NativeBrep, instances and remesh overrides are not migrated; document/Undo, general cache, cold restore and v5 remain open.",
+      "evidence": "docs/validation/2026-11-13-tracked-brep-display-lease.md"
+    },
+    "display_topology_lease_2026_11_13": {
+      "status": "SCOPED_TYPE_AND_LIFETIME_CHECKS_PASSED",
+      "scope": "Borrowed display topology no longer exposes its shared Arc; topology and display copies are independent. Compile-fail, controller teardown, cache, scene and codec checks passed.",
+      "limitations": "Document and Undo still own display; full cache, cold restore and v5 remain open. Full workspace test compilation encountered unrelated addon symbol and Curve audit failures.",
+      "evidence": "docs/validation/2026-11-13-display-topology-lease.md"
+    },
+    "previous_attested_remesh_profile_2026_11_13": {
+      "status": "SCOPED_CONTROLLER_CHECKS_PASSED",
+      "scope": "One prior attested root profile can be reused with source/proof/scene checks; scoped pin and reservation-reclamation fixtures passed.",
+      "limitations": "Public topology Arc escape on cache teardown is unresolved; document/history still own display, and complete source-only eviction, cold restore, NativeBrep and desktop are not proved.",
+      "evidence": "docs/validation/2026-11-13-remesh-representation-cache.md"
+    },
+    "trim_display_gpu_sample_2026_11_13": "Two saved/reopened 712-edge plane and cylinder fixtures passed sampled offscreen GPU checks for material, hole and outside. Other pixels, 1024-edge GPU, desktop and general curved geometry remain open. Evidence: docs/validation/2026-11-13-large-trim-support.md#offscreen-gpu-plane-and-cylinder",
+    "trim_display_1024_edges_2026_11_13": "Display topology supports up to 1024 combined edges; plane fixtures 712/1024 with holes and a reopened cylinder selection/snap case passed scene and simulated UI checks. GPU-present, arbitrary curved geometry and native/process peak remain open. Evidence: docs/validation/2026-11-13-large-trim-support.md#display-up-to-1024-trim-edges",
+    "many_edge_trim_clipboard_2026_11_13": {
+      "status": "SCOPED_BOUNDED_TRIM_PASTE_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#full-scene-admission-for-many-edge-trim",
+      "scope": "Copy/paste of a 129-edge trim succeeds at 4 MiB managed limit with Undo/Redo; simulated memory pressure preserves document and existing Redo and retry succeeds. Trim-budget 2 and clipboard 18 tests pass with three clipboard tests ignored.",
+      "remaining": "Incremental scene admission, physical desktop clipboard, real memory exhaustion and process peak remain unverified."
+    },
+    "many_edge_trim_full_scene_admission_2026_11_13": {
+      "status": "SCOPED_FULL_SCENE_ADMISSION_IMPROVED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#full-scene-admission-for-many-edge-trim",
+      "scope": "Full-scene planning counts actual scanline crossings with headroom and fallback allowance. A reopened 129-edge fixture formerly rejected at 4 MiB builds, picks the source region and preserves Redo; 64 KiB is refused. Scene suite, metadata-cache 9, osnap UI 26 and controller fixture pass.",
+      "remaining": "Incremental additions still use the prior conservative estimate; desktop, process peak, general allocator behavior and CPU near edge limits remain unverified."
+    },
+    "many_edge_trim_scratch_2026_11_13": {
+      "status": "SCOPED_TRIM_SCRATCH_REDUCTION_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#many-edge-trim-scratch-allocation",
+      "scope": "Temporary quadrilateral allocation uses actual crossing counts; conservative admission is unchanged. A 129-edge polygon preserves area with approximately 1,518 quads rather than a 97,152 capacity bound; scene suite and 26 osnap UI tests pass.",
+      "remaining": "Process peak, added count-pass cost, desktop responsiveness and general topology remain unverified."
+    },
     "plugin_sdk_v1": {
       "date": "2026-10-21",
       "target": "standalone Rust OM9",
@@ -231,6 +363,115 @@
         "macOS execution unverified",
         "full module/manual gates remain open",
         "2 unrelated broad app dock reset regressions remain failing"
+      ]
+    },
+    "trim_scene_2026_11_12": {
+      "status": "SCOPED_TRIM_SCENE_IMPLEMENTED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#scoped-scene-implementation",
+      "scope": "Scene builds trim-aware surface triangles and boundary edges using UV scanlines. Planar hole picking and full/incremental scene equivalence pass; sampled cylinder candidate passes. Scene suite and app batches 24,25,76 pass with four ignored; debug build and audit pass.",
+      "limitations": "Fallback for unsupported/invalid trim shows underlying surface with scene diagnostic, not confirmed visible to user. Curved chord accuracy, seam, desktop, trim edit Undo/Redo and process peak remain unverified. Plan A remains open; B deferred."
+    },
+    "trim_display_allocation_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "TRIM_DISPLAY_ALLOCATION_CLASSIFICATION_SCOPED_PASS",
+      "scope": "Trim display vector allocation now checks structural layout overflow first and reports allocator refusal as Budget(bytes), recognized by existing consent-based UI recovery handlers. Windows oversized valid allocation, layout overflow, UI classification and existing headless consent/retry passed; full scene suite passed.",
+      "remaining": "Allocator failure was not injected end to end through scene and desktop UI; physical OOM, native allocations and commands lacking recovery handlers remain open. Plan A open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-trim-display-allocation.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-accurate selection for unsupported trimmed display and verify desktop after the user saves and closes active windows."
+    },
+    "trim_collinear_display_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_COLLINEAR_TRIM_DISPLAY_AND_PICK_PASS",
+      "scope": "A valid planar trim with adjacent floating-point vertices on the same vertical UV edge previously fell back and could not be point-picked. Scanline builder and planner now omit only exactly collinear between-vertices for partitioning, retaining source and original boundary. Full/incremental scene, interior/exterior pick, hole and reversed controls, reopened egui click and preserved Redo passed. Scene suite, rubber_band 4 and osnap_ui 26 passed.",
+      "remaining": "Other unsupported trims, arbitrary curved surfaces, physical desktop and native peak remain unverified. Plan A open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-trim-collinear-display.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-based selection for unsupported valid trims and verify desktop after active windows are saved and closed.",
+      "superseded_implementation": "docs/validation/2026-11-13-trim-adjacent-levels.md"
+    },
+    "trim_adjacent_levels_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_ADJACENT_LEVEL_TRIM_DISPLAY_AND_PICK_PASS",
+      "scope": "A valid planar trim with a real notch between adjacent floating-point UV levels previously fell back and could not be point-picked. Scanline builder and planner now use strip endpoints without requiring a representable midpoint and preserve all source vertices, superseding the prior collinear-only display simplification. Notched and collinear saved/reopened fixtures, interior/exterior pick, full/incremental scene, hole and reversed-loop controls, egui click and preserved Redo passed. Full scene suite, rubber_band 5 and osnap_ui 26 passed.",
+      "remaining": "Arbitrary numerical or curved trims, other fallbacks, physical desktop and native peak remain unverified. Plan A open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-trim-adjacent-levels.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-accurate selection for remaining unsupported valid trims and verify desktop after active windows are saved and closed."
+    },
+    "large_trim_selection_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_LARGE_PLANAR_TRIM_SELECTION_PASS",
+      "scope": "The topology comparison counts unordered pairs within its 250000-pair limit, permitting up to 707 edges. Authored planar fixtures with 501, 505 with hole, and 707 edges pass full and incremental scene; a reopened 501-edge fixture selects via simulated egui click with document and Redo intact. A 708-edge polygon and intersecting polygon remain refused. A fixed-stack canonical loop scanner produces exact crossing counts for incremental admission, falling back conservatively when uncertain.",
+      "remaining": "Other topologies, curved sources, physical desktop, native peak and large-document responsiveness unverified. ExtractWireframe retains a separate 500-boundary limit. Plan A open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-large-trim-selection.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-based selection for remaining unsupported trims and verify desktop after user saves and closes active windows."
+    },
+    "history_representation_recency_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Reclaim least recently used eligible attested history source representation while preserving source proof and display pins; no runtime eviction-order validation.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#history-representation-recency",
+      "next_action": "Establish durable topology binding and source-only Open; complete v5 disposition and runtime validation."
+    },
+    "coupled_document_ab_2026_11_15": {
+      "status": "SCOPED_COUPLED_DOCUMENT_AB_64_128_VERIFIED",
+      "scope": "Same-binary reconstructed coupled document/display lifetime, validation and serialization versus independent representations. Quality, exact kernel, UI worker publication, GPU caching and RDP policy held constant; normal product remains separated.",
+      "measurement": "16/16 frozen-release native-window runs and 19 focused integration tests passed. 64 high UI final poll 216.7→53.5 ms (75.3% less); 64 light UI final poll 41.3→24.6 ms (40.5% less); 128 high UI final poll 486.0→151.8 ms (68.8% less); 128 light UI final poll 125.5→91.8 ms (26.9% less). Exact output source SHA and per-profile display counts matched. Both architectures stayed near 30 encoded FPS under the same cap; no material steady-FPS gain or consistent total Boolean speedup was established. High creation totals fell about 49/52 percent. Worst 128-sphere request pauses remain about 600/450 ms High/Light.",
+      "evidence": "docs/validation/2026-11-15-coupled-source-display-ab.md",
+      "data": "docs/validation/2026-11-15-coupled-source-display-ab.json",
+      "remaining": "Scoped reconstructed coupling, not a wholesale historical runtime rollback. 30-Hz cap, synthetic input, general scenes/native families, client video FPS and full migration/persistence remain outside evidence.",
+      "next_document": "crates/om9-app/src/ui.rs",
+      "next_action": "Use the separated product path; profile residual request/creation pauses independently of kernel mathematics and RDP presentation."
+    },
+    "boolean_request_source_batch_2026_11_15": {
+      "status": "SCOPED_BOOLEAN_REQUEST_BATCH_64_128_VERIFIED",
+      "scope": "Existing atomic source batch admission replaces per-operand retained-owner scans in shared Boolean request constructor. Exact source, stamps/placement, quotas, guards, native mathematics, display density and publication policies retained.",
+      "measurement": "20 focused integration tests and 16/16 same-binary native-window release runs passed. 64 high request 47.5→2.5 ms (94.7% less), worst active 182.3→138.7 ms; 64 light request 46.2→3.4 ms (92.7% less), worst active 86.6→86.5 ms; 128 high request 365.8→8.9 ms (97.6% less), worst active 626.5→266.1 ms; 128 light request 365.0→8.7 ms (97.6% less), worst active 447.3→210.2 ms. Exact native result source SHA and per-profile mesh counts matched. Both paths remain near 30 steady encoded FPS.",
+      "evidence": "docs/validation/2026-11-15-boolean-request-source-batch.md",
+      "data": "docs/validation/2026-11-15-boolean-request-source-batch.json",
+      "remaining": "Foreground selection/redraw, creation/fitting, worker admission and publication pauses remain. Large-scene Union fixtures only; full migration/persistence, arbitrary geometry and client-presented FPS remain open. Optional debug probe was interrupted and not counted as a passed test.",
+      "next_document": "crates/om9-app/src/ui.rs",
+      "next_action": "Profile selection_frame projection and associated redraw separately from the now-short Boolean request, preserving geometry and exact selection visuals."
+    },
+    "speculative_union_20261115": {
+      "status": "IMPLEMENTED_NATIVE_64_128_512_LIGHT_VERIFIED_HIGH_512_FAILED",
+      "scope": "BooleanUnion disposable mesh preview concurrent with exact source-only fold; final-only display/topology capture and existing atomic source/scene commit. CAD tolerances, checks and Undo policy retained.",
+      "evidence": "docs/validation/2026-11-15-speculative-boolean.md",
+      "limitations": "512 Light completed with identical exact source and 513 Undo; High preview passed but exact worker failed after 884.358 s, retaining 512 inputs/Undo. No High final result/source equality or post-commit FPS. Long creation image holds remain. Error text, manual/client video, repeated/general geometry and full Undo/persistence acceptance remain open.",
+      "manual_gate_promoted": false,
+      "kernel_512": "Kernel source/final Light/High captures passed independently. Native Light passed, native High worker failed before commit; kernel proof does not close the full native path.",
+      "comparison_report": "docs/validation/2026-11-15-speculative-boolean-512-comparison.md"
+    },
+    "smooth_normals_selection_cache_20261115": {
+      "status": "implemented_focused_validation_native_matrix_pending",
+      "scope": "GPU-only smooth CAD-face normals with crease boundaries; immutable shared display bounds and conservative clipped selection-frame projection. Exact source authority and picking/snapping/Boolean remain unchanged.",
+      "evidence": "docs/validation/2026-11-15-smooth-normals-selection-cache.md",
+      "checks": [
+        "17 app integration tests passed including exact source equality, Boolean and Undo/Redo",
+        "3 smooth-normal math tests passed",
+        "GPU flat/smooth readback passed with identical silhouette",
+        "2 bounds/projection tests passed",
+        "15 scene renderer tests passed in saved sequential retry; 4 ignored measurement cases"
+      ],
+      "requires_manual_test": true,
+      "manual_acceptance": false,
+      "native_performance": "512/768 Light/High pending: current Windows session 1 is disconnected; no new native FPS/freeze/RAM claim",
+      "binary_receipt": "build/standalone-validation/ui-artifacts/viewport-normals-selection-20261115/frozen-binary.json",
+      "data": "docs/validation/2026-11-15-smooth-normals-selection-cache.json"
+    },
+    "progressive_publish_20261116": {
+      "status": "renderer_and_small_native_verified_large_matrix_incomplete",
+      "evidence": "docs/validation/2026-11-16-progressive-render-publish.md",
+      "scope": "Append-only presentation cohort drains while immutable source identities are retained; strict destructive/source/preview invalidation. Native per-sphere replay waits for all four current completed images; no Boolean.",
+      "validation": "30 GPU bridge tests and one exact-source test passed. 16 Light/High native exact 1..16 presentation acknowledgements and 16 Undo/Redo passed. 512 Light reached 409 acknowledgements before RDP disconnected; no accepted large FPS/freeze/RAM result.",
+      "manual_acceptance": false,
+      "remaining": [
+        "512 Light retry",
+        "512 High",
+        "768 Light",
+        "768 High",
+        "profile superlinear command/history inventory cost"
       ]
     }
   }

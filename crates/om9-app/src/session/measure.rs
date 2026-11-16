@@ -331,6 +331,13 @@ pub fn measure_radius(curve: &Curve) -> Result<Measurement> {
 /// World bounding box of the selected objects. A non-identity placement is
 /// applied to the eight local corners, so a moved object reports its moved box.
 pub fn world_bounds(document: &Document, ids: &[ObjectId]) -> Result<Bounds> {
+    world_bounds_with_limits(document, ids, &om9_core::budget::Limits::default(), None)
+}
+
+pub(super) fn world_bounds_with_limits(document: &Document, ids: &[ObjectId], limits: &om9_core::budget::Limits,
+    account: Option<(&om9_core::transaction::TransactionCoordinator, om9_core::budget::Usage)>) -> Result<Bounds> {
+    #[cfg(not(feature = "occt-brep"))]
+    let _ = account;
     if ids.is_empty() {
         return Err(Error::Missing("bounding box selection"));
     }
@@ -340,6 +347,57 @@ pub fn world_bounds(document: &Document, ids: &[ObjectId]) -> Result<Bounds> {
             .entities
             .get(id)
             .ok_or(Error::Missing("bounding box object"))?;
+        if let Geometry::Brep(brep) = &entity.geometry {
+            #[cfg(feature = "occt-brep")]
+            {
+                let b = om9_kernel::brep::world_bounds(brep, &entity.placement, limits)
+                    .map_err(|error| Error::Io(format!("B-Rep bounding box: {error}")))?;
+                add_bounds(&mut result, Bounds { min: [b[0], b[1], b[2]], max: [b[3], b[4], b[5]] });
+                continue;
+            }
+            #[cfg(not(feature = "occt-brep"))]
+            {
+                let _ = (brep, limits);
+                return Err(Error::Unsupported("B-Rep bounding box requires OCCT"));
+            }
+        }
+        if let Geometry::NativeBrep(native) = &entity.geometry {
+            #[cfg(feature = "occt-brep")]
+            {
+                let tolerance = document.effective_tolerance()?.absolute_mm;
+                let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+                let mut reservation = match account {
+                    Some((coordinator, held)) => Some(coordinator.reserve_external_memory_with_held(
+                        om9_core::budget::memory::MemoryClass::Kernel, 1, physical(), held)?),
+                    None => None,
+                };
+                let source = om9_kernel::brep::from_3dm_source_admitted(&native.payload, tolerance, limits, |live, pending| {
+                    if let (Some((coordinator, held)), Some(reservation)) = (account, reservation.as_mut()) {
+                        let needed = live.checked_add(pending).ok_or(Error::Overflow("native bounds source"))?.max(1);
+                        if needed > reservation.bytes() {
+                            let additional = needed - reservation.bytes();
+                            coordinator.grow_external_memory_with_held(reservation, additional, physical(), held)?;
+                        }
+                        reservation.set_allocated_bytes(live)?;
+                        reservation.recheck_pending()?;
+                    }
+                    Ok(())
+                })
+                    .map_err(|error| Error::Io(format!("native B-Rep bounding box source: {error}")))?;
+                let remaining = limits.remaining_after(om9_core::budget::Usage {
+                    bytes: source.capacity() as u64, ..Default::default()
+                })?;
+                let b = om9_kernel::brep::world_bounds_source(&source, &entity.placement, &remaining)
+                    .map_err(|error| Error::Io(format!("native B-Rep bounding box: {error}")))?;
+                add_bounds(&mut result, Bounds { min: [b[0], b[1], b[2]], max: [b[3], b[4], b[5]] });
+                continue;
+            }
+            #[cfg(not(feature = "occt-brep"))]
+            {
+                let _ = (native, limits);
+                return Err(Error::Unsupported("native B-Rep bounding box requires OCCT"));
+            }
+        }
         let Some(local) = utilities::bounds(&entity.geometry) else {
             return Err(Error::Unsupported("bounding box geometry"));
         };
@@ -734,7 +792,8 @@ impl Controller {
 
     pub fn measure_selected_bounds(&mut self) -> Result<Measurement> {
         let ids = self.selected_ordered();
-        let bounds = world_bounds(self.document(), &ids)?;
+        let held = self.scene_cache_usage()?;
+        let bounds = world_bounds_with_limits(self.document(), &ids, self.coordinator.limits(), Some((&self.coordinator, held)))?;
         let measurement = bounds_measurement(bounds);
         self.report_measurement(measurement.clone());
         Ok(measurement)

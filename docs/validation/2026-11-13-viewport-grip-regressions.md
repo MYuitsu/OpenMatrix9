@@ -1,0 +1,11 @@
+# Viewport grip and hover regressions
+
+2026-11-13. Four previously failing egui grip regressions arose from two input problems. An overlapping Gumball handle could capture a drag intended for a visible grip; a grip drag could also retain its previous position when the pointer returned to the press point, or snap Near to the very curve being edited and lose the press offset. A new drag now gives a hit grip precedence over Gumball; an already captured Gumball is untouched. Grip dragging updates while the button is held and at release, checks that a retained snap belongs to the same view and remains near the pointer, and excludes Near on the grip's own object. Other snap kinds and other objects are not excluded by that rule.
+
+The fifth failure was a fixture issue: the parallel-ray test received a valid Point snap at its cursor, not a stale hover. It now disables snapping to test the intended no-intersection path. This does not establish behavior for all snap types, desktop input, GPU presentation or scale ranges.
+
+With `CARGO_TARGET_DIR=L:\om9-target`, OCCT 8.0.1 SDK runtime on PATH and `-j 2`: app `--lib grip -- --test-threads=2` passed 10; `--lib top11_parallel_view_ray_cannot_reuse_stale_hover` passed 1; `--lib gumball_drag -- --test-threads=2` passed 2, including offscreen GPU fixtures. The full app lib run with two test threads passed 872, failed 0, ignored 9 in 338.81 seconds; it printed `File was not written with this version of the topology` after the success summary. The small-line fixture checks positive/negative X/Y movement at 1e-9 mm scale, preview, commit, return to off-center press, Undo/Redo and archive roundtrip. These results are simulated egui input; they are not physical desktop evidence.
+
+Source/display separation remains incomplete: canonical Document/Undo retain display; NativeBrep, cache eviction, cold background restore and v5 remain open. Public source audit before this report: 16,006 source files, 594 bindings, 593 SVGs, no errors. Artifact pruning removed zero runs and retained 169 cited older runs.
+
+SHA-256: `ui.rs` `b4c8a16f7a75cdcb1a8f48df44ea00ff4b2de54026cf7e7bb19eefa44558f5e8`; `top11.rs` `3a0655db5e3bad8abb1dd59f3f8c083697cbf14574a212b085961dd2a533991f`; `chrome.rs` `d3a2bc2add0dfb78ca1ef61676347ea8559bb0eb05d2ac991456c7616dc456bb`.

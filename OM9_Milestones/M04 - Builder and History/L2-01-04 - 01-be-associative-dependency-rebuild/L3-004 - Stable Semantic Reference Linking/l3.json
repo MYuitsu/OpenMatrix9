@@ -224,6 +224,14 @@
     "source_pin": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
     "special_manual_flags": []
   },
+  "runtime_implementation": {
+    "source_signature_ambiguity_2026_11_14": {
+      "status": "SCOPED_AMBIGUITY_REFUSAL_CHECKS_PASSED",
+      "scope": "Source roles refuse multiple same-kind candidates within fingerprint tolerance in resolution and rebuild; synthetic rollback and OCCT Sweep tests pass.",
+      "limitations": "Source ordinals are not durable identity; the current signature metric, legacy role migration, real ambiguous topology and UI/Undo remain open.",
+      "evidence": "docs/validation/2026-11-14-history-source-signatures.md#ambiguous-source-references"
+    }
+  },
   "task_ids": [
     "OM9-L4-01-04-004-01",
     "OM9-L4-01-04-004-02",

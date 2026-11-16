@@ -220,14 +220,43 @@ impl Controller {
         }
         #[cfg(feature = "occt-brep")]
         {
-            let d = om9_kernel::measurement::distance(
-                &a.geometry,
-                a.placement,
-                &b.geometry,
-                b.placement,
-                self.coordinator.limits(),
+            let limits = *self.coordinator.limits();
+            let needs_native = [a, b].iter().any(|entity| matches!(entity.geometry, Geometry::NativeBrep(_)));
+            let held = if needs_native { self.scene_cache_usage()? } else { Default::default() };
+            let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+            let mut reservation = if needs_native {
+                Some(self.coordinator.reserve_external_memory_with_held(
+                    om9_core::budget::memory::MemoryClass::Kernel, 1, physical(), held)?)
+            } else { None };
+            // The source strings drop before their reservation on every error.
+            let mut converted: [Option<String>; 2] = [None, None];
+            let mut retained = 0u64;
+            for (index, entity) in [a, b].into_iter().enumerate() {
+                let Geometry::NativeBrep(native) = &entity.geometry else { continue; };
+                let tolerance = self.document().effective_tolerance()?.absolute_mm;
+                let remaining = limits.remaining_after(om9_core::budget::Usage { bytes: retained, ..Default::default() })?;
+                let source = om9_kernel::brep::from_3dm_source_typed_admitted(&native.payload, tolerance, &remaining, |live, pending| {
+                    let live = retained.checked_add(live).ok_or(Error::Overflow("native distance source"))?;
+                    let needed = live.checked_add(pending).ok_or(Error::Overflow("native distance source"))?.max(1);
+                    let reservation = reservation.as_mut().expect("native distance reservation");
+                    if needed > reservation.bytes() {
+                        self.coordinator.grow_external_memory_with_held(reservation, needed - reservation.bytes(), physical(), held)?;
+                    }
+                    reservation.set_allocated_bytes(live)?;
+                    reservation.recheck_pending()
+                })?;
+                retained = retained.checked_add(source.capacity() as u64).ok_or(Error::Overflow("native distance source"))?;
+                reservation.as_mut().expect("native distance reservation").set_allocated_bytes(retained)?;
+                converted[index] = Some(source);
+            }
+            let remaining = limits.remaining_after(om9_core::budget::Usage { bytes: retained, ..Default::default() })?;
+            let d = om9_kernel::measurement::distance_with_native_sources(
+                &a.geometry, a.placement, converted[0].as_deref(),
+                &b.geometry, b.placement, converted[1].as_deref(), &remaining,
             )
             .map_err(|e| Error::Io(e.to_string()))?;
+            drop(converted);
+            drop(reservation);
             Ok(Measurement::new(
                 DISTANCE,
                 "Minimum object distance",
@@ -329,17 +358,17 @@ impl Controller {
                                     "Length sub-selection requires BRep edges",
                                 ));
                             };
-                            let index = b
-                                .display
-                                .edges
-                                .iter()
-                                .position(|id| *id == edge)
+                            let scene = self.scene.as_ref().ok_or(Error::Missing("Length scene"))?;
+                            s.validate(scene, self.coordinator.epoch())?;
+                            let display = scene.root_brep_pick_display(&s.source)?;
+                            let index = display.topology.edges.iter().position(|id| *id == edge)
                                 .ok_or(Error::Stale("BRep edge"))?;
-                            total += om9_kernel::measurement::edge_length(
-                                b,
-                                Some(index),
-                                e.placement,
-                                self.coordinator.limits(),
+                            let tolerance = self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6));
+                            let pick_tolerance = display.deflection_mm + tolerance;
+                            total += om9_kernel::measurement::verified_display_edge_length(
+                                b, e.placement, &display.points, &display.segments,
+                                u32::try_from(index).map_err(|_| Error::Overflow("Length display edge"))?,
+                                pick_tolerance, tolerance, self.coordinator.limits(),
                             )
                             .map_err(|e| Error::Io(e.to_string()))?;
                         }
@@ -393,7 +422,7 @@ impl Controller {
                 #[cfg(feature = "occt-brep")]
                 Geometry::Brep(b) => {
                     let b = if e.placement == Transform::identity() {
-                        b.clone()
+                        self.coordinator.materialize_brep_with_held(b, self.scene_cache_usage()?)?
                     } else {
                         om9_kernel::transform_ops::transform_brep(
                             b,

@@ -973,6 +973,90 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "native_shell_boundary_2026_11_13": "A reopened NativeBrep cylindrical shell yields its two source boundaries, preserves placement and Undo/Redo through CMD and menu dispatch. Mixed selection and refusal atomicity have fixture coverage; desktop and broad imports remain unverified. Evidence: docs/validation/2026-11-13-dupborder-native-brep.md",
+    "trim_cylinder_3dm_boundary_reuse_2026_11_13": "One authored 1024-edge cylindrical trim roundtripped through 3DM and reopened OM9 yields uniquely matched boundaries with radius and midpoint checks, Undo/Redo, and simulated pressure refusal/retry. External Rhino files and general topology remain unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#reuse-of-a-1024-edge-cylindrical-3dm-roundtrip",
+    "trim_3dm_boundary_reuse_2026_11_13": "One authored 1024-edge plane roundtripped through 3DM and reopened OM9 yields uniquely matched source boundaries and one Undo/Redo; simulated pressure preserves document/Redo. External Rhino files and general topology unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#reuse-of-a-1024-edge-3dm-roundtrip",
+    "trim_boundary_1024_2026_11_13": "Tested reopened plane trims through 1024 edges and affine cylinder 708 edges duplicate source boundaries in one Undo/Redo; excessive output/topology and simulated memory refusal preserve document/Redo. Desktop and broad geometry unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#boundary-commands-up-to-1024-edges",
+    "rational_bilinear_diagonal_trim_2026_11_12": {
+      "status": "SCOPED_RATIONAL_BILINEAR_DIAGONAL_TRIM_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#rational-bilinear-diagonal-trim",
+      "limitations": "Tested positive weighted bilinear fixture; floating-point screen is not an interval proof, other representations and desktop unverified."
+    },
+    "bilinear_diagonal_trim_2026_11_12": {
+      "status": "SCOPED_BILINEAR_DIAGONAL_TRIM_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#diagonal-trim-on-a-bilinear-surface",
+      "limitations": "Warped unit-weight bilinear fixture; rational/higher-degree diagonal trims, arbitrary scales and desktop unverified or unsupported."
+    },
+    "certified_full_seam_trim_2026_11_12": {
+      "status": "SCOPED_FULL_SEAM_TRIM_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#certified-full-seam-rectangular-trim",
+      "limitations": "Reopened cylinder fixture with certified rectangular full-seam trim; arbitrary seam topology, desktop and physical RAM unverified."
+    },
+    "curved_uv_trim_boundaries_2026_11_12": {
+      "status": "SCOPED_CURVED_UV_TRIM_BOUNDARIES_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#curved-surface-boundaries-along-uv",
+      "limitations": "Tested cylindrical surface with U/V-aligned polygon loops; diagonal and full closed-seam trim refused, arbitrary surfaces and desktop unverified."
+    },
+    "brep_admission_recovery_2026_11_12": {
+      "status": "SCOPED_DUPBORDER_BREP_ADMISSION_RECOVERY",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md#dupborder-b-rep-admission-recovery",
+      "limitations": "Single shell and injected callback; end-to-end failure location, multi-B-rep recovery, desktop and physical RAM unverified."
+    },
+    "memory_recovery_2026_11_12": {
+      "status": "SCOPED_DUPBORDER_MEMORY_RECOVERY_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md#dupborder-with-two-standalone-surfaces",
+      "limitations": "Two standalone surfaces and managed pressure; adapter-wrapped B-rep errors, aliases, desktop and physical RAM unverified."
+    },
+    "multi_output_roundtrip_2026_11_12": {
+      "status": "SCOPED_MULTI_DUPBORDER_OUTPUT_ROUNDTRIP_PASSED",
+      "evidence": "docs/validation/2026-11-12-surface-curve-multiple-selection.md#reopened-output-and-downstream-use",
+      "limitations": "Fixture-specific planar and cylindrical boundaries; arbitrary imported B-reps, affine-boundary extrusion and desktop unverified."
+    },
+    "mixed_brep_surface_2026_11_12": {
+      "status": "SCOPED_MIXED_BREP_SURFACE_DUPBORDER_PASSED",
+      "evidence": "docs/validation/2026-11-12-surface-curve-multiple-selection.md#dupborder-with-b-reps-and-surfaces",
+      "limitations": "Reopened plane and open cylindrical shell fixtures; arbitrary B-reps, output roundtrip, desktop and native peak remain unverified."
+    },
+    "multiple_surfaces_2026_11_12": {
+      "status": "SCOPED_MULTISURFACE_DUPBORDER_PASSED",
+      "evidence": "docs/validation/2026-11-12-surface-curve-multiple-selection.md#dupborder-with-multiple-standalone-surfaces",
+      "limitations": "Tested two standalone planes; B-reps/points in mixed selection refused, arbitrary surfaces, output roundtrip and desktop unverified."
+    },
+    "ambiguous_selection_2026_11_12": {
+      "status": "SCOPED_AMBIGUOUS_MULTISELECTION_REFUSED",
+      "evidence": "docs/validation/2026-11-12-surface-curve-multiple-selection.md",
+      "limitations": "Two selected surfaces or a surface plus point; multi-surface operation, other source types and desktop unverified."
+    },
+    "large_trim_parameter_offset_2026_11_12": {
+      "status": "SCOPED_LARGE_TRIM_OFFSET_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#large-trim-parameter-offsets",
+      "limitations": "One reopened planar fixture with a 1e8 offset; arbitrary numeric scales, output roundtrip and desktop unverified."
+    },
+    "collapsed_cone_border_2026_11_12": {
+      "status": "SCOPED_CONICAL_BORDER_PASSED",
+      "evidence": "docs/validation/2026-11-12-dupborder-closed-surface.md#collapsed-conical-boundary",
+      "limitations": "One pointed cone and one small nonzero top; arbitrary surfaces, output roundtrip, desktop and physical memory pressure remain unverified."
+    },
+    "subdivided_trim_boundary_2026_11_12": {
+      "status": "SCOPED_SUBDIVIDED_TRIM_BOUNDARY_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#subdivided-straight-trim-boundaries",
+      "limitations": "One reopened planar fixture with subdivided straight edges; arbitrary topology, output reopen in this fixture and desktop remain unverified."
+    },
+    "trim_loop_topology_2026_11_12": {
+      "status": "SCOPED_AMBIGUOUS_TRIM_LOOPS_REFUSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#ambiguous-loop-topology",
+      "limitations": "Three invalid topology fixtures; conservative floating-point check with bounded work, desktop and arbitrary loops unverified."
+    },
+    "nonunit_trimmed_affine_plane_2026_11_12": {
+      "status": "SCOPED_REOPENED_INPUT_MENU_CMD_UNDO_REDO_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#non-unit-restricted-parameter-domains",
+      "limitations": "One restricted non-unit parameter fixture on an exact unit-weight affine 2x2 plane; arbitrary topology, numerical cases, curved trims and desktop remain unverified or unsupported."
+    },
+    "source_edge_update_2026_11_06": {
+      "status": "TARGETED_AUTOMATED_TESTS_PASSED_DESKTOP_PENDING",
+      "evidence": "docs/validation/2026-11-06-dupborder-source-edges.md",
+      "limitations": "Sampled fixtures only; complex topology, native memory, failure paths beyond object-limit refusal and desktop remain open."
+    },
     "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
@@ -1019,6 +1103,85 @@
       "documented_script": "DupBorder",
       "binding_state": "Implemented",
       "same_id_menu_and_commandline": true
+    },
+    "reopened_boundary_update_2026_11_11": {
+      "status": "SCOPED_AUTOMATED_FIXTURES_PASSED_DESKTOP_PENDING",
+      "scope": "Derive B-rep boundary edges from one native OCCT source map, including reordered topology after v4 reopen.",
+      "evidence": "docs/validation/2026-11-11-dupborder-source-boundary.md",
+      "limitations": "Only tested fixtures; native peak, non-manifold topology, wider inputs and desktop remain unverified."
+    },
+    "surface_placement_update_2026_11_12": {
+      "status": "SCOPED_REOPEN_AUTOMATED_FIXTURES_PASSED",
+      "scope": "Standalone NURBS plane boundary outputs retain translation or scale/shear placement; save/reopen and Undo/Redo pass.",
+      "evidence": "docs/validation/2026-11-12-dupborder-surface-placement.md",
+      "limitations": "Nonplanar and periodic surfaces, general placements, downstream commands and desktop remain unverified."
+    },
+    "closed_surface_update_2026_11_12": {
+      "status": "SCOPED_CLOSED_SURFACE_FIXTURES_PASSED",
+      "scope": "Tested clamped closed and certified periodic standalone surfaces omit internal parameter seams; partial domains retain their boundaries.",
+      "evidence": "docs/validation/2026-11-12-dupborder-closed-surface.md",
+      "limitations": "Other closure representations, arbitrary imports, trimmed B-reps and desktop remain unverified."
+    },
+    "trimmed_surface_refusal_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "TRIMMED_SURFACE_SAFE_REFUSAL_TESTED",
+      "scope": "Standalone surfaces with trim metadata are refused to avoid emitting untrimmed domain geometry; reopened plane with an outer loop and hole preserves document and Redo. ExtractWireframe CMD/menu and mixed-root paths verified.",
+      "limitations": [
+        "Trim boundaries and clipped isocurves are not yet implemented.",
+        "Desktop and arbitrary surface/source cases unverified."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md"
+      ],
+      "command": "DupBorder"
+    },
+    "affine_trimmed_plane_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "SCOPED_AUTOMATED_FIXTURE_PASSED",
+      "scope": "DupBorder uses shared admitted source-trim preparation for certified affine 2x2 planes; saved/reopened outer and inner polygon loops create seven lines with placement and one Undo/Redo. CMD/menu, output roundtrip, pressure refusal and retry verified.",
+      "tests": "Wireframe 65 passed, 5 ignored; Curve menu 6, DupBorder 17, Isocurve 11; no-OCCT test 1; debug build and audit passed.",
+      "limitations": [
+        "Canonical degree-(1,1), unit-weight affine 2x2 planes, trim metadata <=16 KiB only.",
+        "Desktop, physical memory pressure, arbitrary loops and trimmed curved surfaces unverified."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#dupborder-on-an-affine-trimmed-plane"
+      ]
+    },
+    "large_trim_boundary_commands_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_LARGE_TRIM_BOUNDARY_COMMANDS_PASSED",
+      "scope": "ExtractWireframe and DupBorder use the shared 707-edge topology limit. A reopened 505-edge planar trim with hole passed all endpoint checks for CMD/menu, placement, save/reopen, Undo/Redo and simulated managed pressure refusal/retry. Separate 707-edge fixtures passed count and Undo/Redo. 708-edge and output-count refusals preserve document and Redo. Wireframe 86 passed/8 ignored; DupBorder 24 passed; no-default check passed.",
+      "remaining": "Curved boundaries, arbitrary topology, physical RAM exhaustion, actual UI recovery for these fixtures, desktop and native peak remain unverified. Plan A open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-large-trim-boundary-commands.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-accurate selection and unresolved Plan A work; update the tested debug adapter after active windows are saved and closed."
+    },
+    "large_curved_trim_boundaries_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_LARGE_CYLINDER_TRIM_BOUNDARY_PASSED",
+      "scope": "A saved/reopened authored cylindrical patch with 501 axis-aligned UV boundary segments passed ExtractWireframe and DupBorder by CMD. All endpoints and midpoints matched the placed source, and midpoints matched analytic cylinder radius; output save/reopen, Undo/Redo and managed pressure refusal/retry passed. Focused test passed twice.",
+      "remaining": "General curved boundaries, diagonal UV trims, physical RAM exhaustion, desktop and native peak unverified. Plan A open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-large-trim-boundary-commands.md#curved-boundary-follow-up",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-based selection for unsupported trims and verify desktop once active windows are saved and closed."
+    },
+    "single_surface_managed_memory_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_SIMULATED_PRESSURE_PASSED",
+      "scope": "Single untrimmed surface uses tracked managed admission and fallible allocation. Tested planar surface retries after consent and preserves placement and Undo/Redo; one and two surface held-pressure fixtures reclaim oldest Undo through recovery helper.",
+      "limitations": [
+        "Physical RAM exhaustion, native peak, other surface shapes and desktop remain unverified.",
+        "Plan A remains open; B1-B3 deferred."
+      ],
+      "evidence": "docs/validation/2026-11-13-dupborder-single-surface-memory.md",
+      "next_action": "Continue Plan A and await user decision on high-zoom DupEdge."
+    },
+    "recovery_draft_guard_2026_11_13": {
+      "status": "SHARED_GUARD_SCOPED_TEST",
+      "scope": "Shared recovery refuses stale changed command draft before retry or Undo removal. ExtractWireframe mesh fixture and 74 recovery UI tests passed; DupBorder shares the code.",
+      "remaining": "Actual RAM exhaustion and physical desktop not tested.",
+      "evidence": "docs/validation/2026-11-13-wire-recovery-changed-draft.md"
     }
   }
 }

@@ -189,7 +189,9 @@ impl NativeExchange {
         canceled(cancel)?;
         capture.revalidate(coordinator)?;
         capture.reserve_brep_projection(coordinator)?;
+        capture.convert_trimmed_surfaces(coordinator,bridge,cancel)?;
         capture.convert_breps(bridge, coordinator.limits())?;
+        capture.validate_3dm_geometry()?;
         let mut held = coordinator.retained_usage()?;
         held.add(
             Usage::array::<SourceStamp>(capture.sources.len())?,

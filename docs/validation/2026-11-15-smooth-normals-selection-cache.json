@@ -1,0 +1,98 @@
+{
+  "status": "STOPPED_BY_USER_RENDER_PUBLICATION_STALL",
+  "evidence": "docs/validation/2026-11-15-smooth-normals-selection-cache.md",
+  "binary_receipt": "build\\standalone-validation\\ui-artifacts\\viewport-normals-selection-20261115\\frozen-binary.json",
+  "focused_tests_passed": 38,
+  "ignored_renderer_measurements": 4,
+  "checks": {
+    "app_integration": 17,
+    "normal_geometry": 3,
+    "selection_bounds": 2,
+    "gpu_readback": 1,
+    "scene_renderer": 15,
+    "public_source_audit": {
+      "source_files": 16098,
+      "icon_bindings": 594,
+      "svg_files": 593,
+      "errors": []
+    }
+  },
+  "gpu_readback": {
+    "width": 256,
+    "height": 256,
+    "painted_pixels": [
+      23666,
+      23666
+    ],
+    "unique_painted_brightness": [
+      51,
+      144
+    ],
+    "changed_pixels": 22421,
+    "silhouette_equal": true
+  },
+  "native_profiles_started": 1,
+  "native_profiles": [
+    {
+      "spheres": 512,
+      "profile": "light",
+      "status": "ABORTED_BY_USER_BEFORE_BOOLEAN",
+      "fps": null,
+      "ui_freeze_ms": null,
+      "gpu_image_hold_ms": null,
+      "ram_peak_mib": null,
+      "created_spheres": 506,
+      "observation": {
+        "t_ms": 882425,
+        "encoded_frame_id": 1535,
+        "published_frame_id": 1535,
+        "frame_id": 2046,
+        "revision": 1540,
+        "displayed_revision": 1536,
+        "scene_objects": 0,
+        "visible": 0,
+        "draw_calls": 0
+      }
+    },
+    {
+      "spheres": 512,
+      "profile": "high",
+      "status": "NOT_RUN_USER_STOPPED",
+      "fps": null,
+      "ui_freeze_ms": null,
+      "gpu_image_hold_ms": null,
+      "ram_peak_mib": null
+    },
+    {
+      "spheres": 768,
+      "profile": "light",
+      "status": "NOT_RUN_USER_STOPPED",
+      "fps": null,
+      "ui_freeze_ms": null,
+      "gpu_image_hold_ms": null,
+      "ram_peak_mib": null
+    },
+    {
+      "spheres": 768,
+      "profile": "high",
+      "status": "NOT_RUN_USER_STOPPED",
+      "fps": null,
+      "ui_freeze_ms": null,
+      "gpu_image_hold_ms": null,
+      "ram_peak_mib": null
+    }
+  ],
+  "desktop_state": "current session 1 Disc; console 3 Conn",
+  "open_checks": [
+    "native 512/768 Light/High FPS/freeze/RAM matrix",
+    "historical High512 exact Boolean worker failure",
+    "wider renderer meshlet second-LOD unit failure",
+    "full app unit canonical-BRep fixture compilation blocker",
+    "manual viewport acceptance"
+  ],
+  "production_point_limit_unchanged": 2000000,
+  "planned_fixture_object_cap": 400000,
+  "planned_history": "normal Sphere commands, unchanged retention; Boolean included by previous scenario default",
+  "accepted_native_profiles": 0,
+  "stop_receipt": "build\\standalone-validation\\ui-artifacts\\viewport-normals-selection-20261115\\user-stop-20261116.json"
+}

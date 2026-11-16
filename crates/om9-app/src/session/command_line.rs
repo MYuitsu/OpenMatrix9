@@ -12,6 +12,15 @@ impl Controller {
         if !self.is_running() {
             return "Command: ".to_owned();
         }
+        #[cfg(feature="occt-brep")]
+        if self.wireframe_worker.is_some() { return "Preparing ExtractWireframe (Esc to cancel)".to_owned(); }
+        if self.dupedge_pending.is_some() {
+            #[cfg(feature = "occt-brep")]
+            if self.dupedge_source_view_pending() {
+                return "Preparing DupEdge source view".to_owned();
+            }
+            return "Select B-Rep edges (Enter when done)".to_owned();
+        }
         if let Some(pending) = &self.head_pending {
             return pending.prompt().to_owned();
         }
@@ -116,6 +125,12 @@ impl Controller {
         if let Some(pending) = &self.blend_pending {
             return pending.prompt().to_owned();
         }
+        #[cfg(feature="occt-brep")]
+        if self.isocurve_face_verification_pending() {return "Verifying selected face (Esc to cancel)".to_owned();}
+        #[cfg(feature="occt-brep")]
+        if self.isocurve_build_worker_pending() {return "Constructing isocurve (Esc to cancel)".to_owned();}
+        #[cfg(feature = "occt-brep")]
+        if self.boolean_union_worker_pending() {return "Computing Boolean (Esc to cancel)".to_owned();}
         if let Some(pending) = &self.isocurve_pending {
             return pending.prompt().to_owned();
         }

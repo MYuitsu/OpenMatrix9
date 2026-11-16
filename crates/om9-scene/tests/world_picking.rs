@@ -44,6 +44,22 @@ fn viewport() -> Viewport {
     }
 }
 #[test]
+fn explicit_tracked_document_pick_matches_scene_and_rejects_other_owner() {
+    let (coordinator, document, object) = fixture();
+    let scene = Scene::capture(coordinator.world().documents[&document].clone(), coordinator.epoch(), &Limits::default()).unwrap();
+    let lease = coordinator.capture_tracked_document(document).unwrap();
+    let snapshot = scene.try_render_snapshot().unwrap();
+    let point = [250., 200.];
+    let usual = snapshot.pick(point, &camera(), viewport(), 5., PickIntent::Select).unwrap().unwrap();
+    let explicit = snapshot.pick_with_document(&lease, point, &camera(), viewport(), 5., PickIntent::Select).unwrap().unwrap();
+    assert_eq!(usual.root, object);
+    assert_eq!(explicit.root, usual.root);
+    assert_eq!(explicit.subset, usual.subset);
+    let unrelated_owner = (*lease).clone();
+    assert!(matches!(snapshot.pick_with_document(&unrelated_owner, point, &camera(), viewport(), 5., PickIntent::Select),
+        Err(om9_core::Error::Stale("scene document owner"))));
+}
+#[test]
 fn mapped_circle_sampling_uses_angular_span_and_keeps_native_parameters() {
     let mut doc = Document::new("mapped circle display");
     let entity = Entity::new(

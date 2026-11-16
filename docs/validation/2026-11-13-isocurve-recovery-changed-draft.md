@@ -1,0 +1,5 @@
+# ExtractIsocurve recovery with an edited draft
+
+When ExtractIsocurve was waiting to commit, a simulated managed-memory refusal opened the recovery offer. The target retained the source and committed parameter state, but did not retain the draft in the command input. A focused regression changed the draft to `V=0.25` while keeping pressure active; before this fix the retry did not report it stale and could discard Undo or retry the previous input.
+
+The recovery target now captures the draft and checks it on each retry before an Undo can be removed. In the tested planar-surface fixture, changing the draft causes a stale refusal; the document, Undo count, pending Isocurve state and new draft remain intact. The regression failed before and passed after; the `ui::undo_settings::tests` group passed 75 tests. A no-default-feature cargo check and a debug application build passed, with existing compiler warnings. This was a simulated managed-memory condition and a controller/UI state test; it did not exercise physical RAM exhaustion or a desktop dialog. The same two existing target directories were retained and the first-target window was not replaced.

@@ -241,7 +241,7 @@ impl Controller {
             return Err(Error::Invalid("metal weights need closed BRep solids"));
         };
         let brep = if entity.placement == Transform::identity() {
-            brep.clone()
+            self.coordinator.materialize_brep_with_held(brep, self.scene_cache_usage()?)?
         } else {
             om9_kernel::transform_ops::transform_brep(
                 brep,

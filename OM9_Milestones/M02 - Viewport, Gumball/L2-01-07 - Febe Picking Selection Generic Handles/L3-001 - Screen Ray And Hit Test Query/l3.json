@@ -222,6 +222,41 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
+    "hover_source_copy_worker_2026_11_14": "Large-scene hover source validation and copying runs on one admitted cancelable worker; its captured document is released before picking. Headless New/cancel/pressure and retry/permit fixtures pass. Evidence: docs/validation/2026-11-14-detached-hover-source.md#source-copy-preparation-on-the-worker",
+    "detached_hover_source_2026_11_14": "Background hover uses an admitted document-independent picking snapshot with exact curve copies and display pins, and rejects a changed scene publication. Headless parity, source lifetime, pressure and stale-result fixtures pass. Evidence: docs/validation/2026-11-14-detached-hover-source.md",
+    "grip_hover_regressions_2026_11_13": {
+      "status": "SCOPED_EGUI_CHECKS_PASSED",
+      "scope": "Grip drag and Gumball overlap, small-motion input, and parallel-ray hover fixture have targeted egui coverage.",
+      "limitations": "Physical desktop and general snap combinations remain unverified; source/display separation and cold restore remain open.",
+      "evidence": "docs/validation/2026-11-13-viewport-grip-regressions.md"
+    },
+    "scene_occurrence_overlay_2026_11_13": "Headless egui selection overlays use the published occurrence display after source-stamp validation; tested temporary OCCT/NativeBrep box edges and a translated B-rep instance. Ordinary display remains document-backed and desktop unverified. Evidence: docs/validation/2026-11-13-scene-occurrence-selection-overlay.md",
+    "curved_overlap_admission_2026_11_13": "One reopened affine cylinder and front point produced a depth-ordered egui chooser with either row selectable; unsupported curved sources are skipped before large admission/OCCT, verified under simulated pressure. Physical desktop and broad geometry remain open. Evidence: docs/validation/2026-11-13-fallback-source-selection.md#overlap-chooser-and-unsupported-source-admission",
+    "curved_trim_fallback_gap_2026_11_13": "Reopened exact-constructor cylinders now select valid rear material in tested scale/shear and reflection/shear placements, with numeric guards and refusal checks. General affine and curved geometry and physical desktop remain unverified. Evidence: docs/validation/2026-11-13-fallback-source-selection.md#affine-cylinder-source-pick-follow-up",
+    "trim_fallback_window_and_occlusion_2026_11_12": {
+      "status": "EGUI_WINDOW_PASSED_FALLBACK_OCCLUSION_GAP",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#unsupported-trim-fallback-can-select-outside-the-source-boundary",
+      "scope": "The application egui input path selects an unsupported trim through an enclosing window without document changes. Scene-level occlusion still treats a point outside that trim as blocked by its fallback display.",
+      "remaining": "Source-aware occlusion and actual desktop interaction remain open."
+    },
+    "trim_fallback_selection_guard_2026_11_12": {
+      "status": "SCOPED_TRIM_FALLBACK_SELECTION_GUARDED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#unsupported-trim-fallback-can-select-outside-the-source-boundary",
+      "scope": "Point and crossing selection skip unverified fallback surface; nested-loop fixture selects the object behind and permits enclosing-window selection of the fallback. Scene suite and source audit passed.",
+      "remaining": "Accurate point/crossing selection, rendering of unverified trim, physical desktop and general topology remain open."
+    },
+    "many_edge_trim_scene_2026_11_12": {
+      "status": "SCOPED_MANY_EDGE_TRIM_PASSED_FALLBACK_PICK_OPEN",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#unsupported-trim-fallback-can-select-outside-the-source-boundary",
+      "scope": "A 129-edge planar trim now displays, picks material and exposes the object behind the exterior; full and incremental scene preflight fixture passed.",
+      "remaining": "Unsupported trim fallback can still pick outside its outer boundary. Desktop and near-limit responsiveness remain unverified."
+    },
+    "unsupported_trim_fallback_2026_11_12": {
+      "status": "KNOWN_OBJECT_PICK_DEFECT",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#unsupported-trim-fallback-can-select-outside-the-source-boundary",
+      "scope": "Scene fallback for a valid 129-edge planar trim picks a point outside the trim; desired acceptance test fails and is ignored. Regular selection batch 13 passed and one ignored; source audit passed.",
+      "remaining": "Source-aware selection, bounded admission and product/desktop behavior remain open."
+    },
     "date": "2026-10-22",
     "target": "standalone Rust OM9",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
@@ -269,6 +304,33 @@
       "remaining": [
         "Manual M02-UI review pending; no human sign-off is claimed."
       ]
+    },
+    "fallback_source_selection_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_CONVEX_PLANAR_FALLBACK_SOURCE_SELECTION_PASSED",
+      "scope": "Ordinary point selection on an untrimmed fallback now uses source ray/UV validation and a bounded strict-convexity certificate for affine planar trims with one outer loop and at most 1024 vertices. A reopened 708-edge fixture, inside/outside/boundary, affine placement, nested occurrence, permissions, overlap chooser, simulated pressure and missing-tolerance refusal passed. Full support display remains warned. UI tests matrix selection 4, rubber band 7, shell docking 11 and two controller tests passed; no-default check passed.",
+      "remaining": "Nonconvex or holed fallbacks, curved sources, subobject selection, Surface Snap, physical desktop, actual OOM, native peak and synchronous click latency on complex drawings remain unverified. Plan A open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-fallback-source-selection.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Broaden only with reliable topology, numerical and latency evidence; update debug adapter after active windows are saved and closed."
+    },
+    "fallback_source_pick_timing_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_DEBUG_FALLBACK_PICK_TIMING_IMPROVED",
+      "scope": "On Ryzen 9 5900X, five warm sequential debug helper samples for 708 vertices were 132715,132728,132897,132605,133327 us before and 11477,11453,11457,11468,11462 us after; for 1024 vertices they were 276949,276496,276288,277176,276373 us before and 22788,22816,22806,22796,22782 us after. A global magnitude upper bound remains at least as conservative as the original per-pair bound. Focused certificate tests, sampled differential reference, matrix selection 4 and rubber band 7 passed.",
+      "remaining": "Uncontrolled sequential debug helper timing only; full frame, release, desktop, arbitrary input and general latency remain unverified. The screen can refuse more borderline cases. Plan A open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-fallback-source-selection.md#synchronous-source-pick-timing",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-based selection for unsupported trims with topology/numerical evidence; verify desktop once active windows are saved and closed."
+    },
+    "fallback_convex_holes_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_CONVEX_HOLE_FALLBACK_SELECTION_PASS",
+      "scope": "Source fallback selection now verifies convex holes lie inside the convex outer loop and are mutually separated using polygon-edge half-planes, with a combined 1024-vertex cap. A reopened planar fixture with 708 outer edges and one hole selected material but not the hole in egui while preserving document/Redo. Unit checks cover intersecting, nested, near, concave and outside holes, reversed winding and separated diagonal holes whose axis bounds overlap; managed pressure refusal/retry passed. Matrix selection 4, rubber band 8, focused fallback 6/1 ignored and no-default check passed. Five warm debug helper samples for the one-hole fixture were 11650,11648,11657,11644,11661 us on Ryzen 9 5900X.",
+      "remaining": "General nonconvex loops, curved surfaces, ambiguous topology, actual desktop, physical OOM and native peak remain unverified; source selection still has a bounded synchronous proof and full-surface fallback display. Plan A remains open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-fallback-source-selection.md#convex-holes-follow-up",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-accurate handling for nonconvex or curved fallback and verify desktop after active windows are saved and closed."
     }
   },
   "sdk_export_plan": {

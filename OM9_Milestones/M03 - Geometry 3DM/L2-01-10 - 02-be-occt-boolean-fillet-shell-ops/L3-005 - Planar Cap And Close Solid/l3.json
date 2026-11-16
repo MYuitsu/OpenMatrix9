@@ -399,7 +399,8 @@
       "implementation/fixtures/M03/OM9-L3-01-10-005/negative.json",
       "implementation/evidence/M03/OM9-L3-01-10-005/OM9-L4-01-10-005-03.focused-test.log",
       "implementation/evidence/M03/OM9-L3-01-10-005/OM9-L4-01-10-005-04.regression.log",
-      "implementation/evidence/M03/OM9-L3-01-10-005/OM9-L4-01-10-005-05.ui-review.json"
+      "implementation/evidence/M03/OM9-L3-01-10-005/OM9-L4-01-10-005-05.ui-review.json",
+      "docs/validation/2026-11-12-cap-planar-source-profiles.md"
     ],
     "tests": [
       "m03_01_10_005: passed",

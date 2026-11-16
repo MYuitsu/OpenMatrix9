@@ -2,7 +2,7 @@
 use om9_core::{
     Error, Result,
     budget::{Limits, Usage},
-    geometry::GeometryKind,
+    geometry::{Geometry, GeometryKind},
     model::Document,
 };
 use sha2::{Digest, Sha256};
@@ -12,7 +12,14 @@ use std::{
 };
 
 const MAGIC: &[u8; 8] = b"OM9\0\r\n\x1a\n";
-const VERSION: u32 = 4;
+pub(crate) const VERSION: u32 = 5;
+
+fn has_unmigrated_brep(document: &Document) -> bool {
+    let is_brep = |geometry: &Geometry| matches!(geometry, Geometry::Brep(_) | Geometry::NativeBrep(_));
+    document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
+        .any(|entity| is_brep(&entity.geometry))
+        || document.results.values().any(|result| is_brep(&result.geometry_snapshot))
+}
 const HEADER: usize = 16;
 const ENTRY: usize = 72;
 struct BoundedWriter<'a> {
@@ -96,6 +103,12 @@ pub fn encode(document: &Document, limits: &Limits) -> Result<Vec<u8>> {
 /// separate from these exact buffer capacities.
 pub(crate) fn encode_with_admission(document: &Document, limits: &Limits,
     admit: &mut dyn FnMut(u64, u64) -> Result<()>) -> Result<Vec<u8>> {
+    // The v5 container is ready for geometry whose source is self-contained.
+    // BRep output remains disabled until source-only Open has a durable topology
+    // binding and opaque native payloads have an explicit safe disposition.
+    if has_unmigrated_brep(document) {
+        return Err(Error::Unsupported("BRep archive migration to v5 is not available"));
+    }
     admit(0, document.validation_scratch_usage(limits)?.bytes)?;
     let source = document.validate(limits)?;
     admit(0, 0)?;
@@ -218,10 +231,14 @@ struct Chunk<'a> {
     hash: &'a [u8],
 }
 pub fn decode(bytes: &[u8], limits: &Limits) -> Result<Document> {
-    decode_schema(bytes, limits, VERSION, &mut |_| Ok(()))
+    decode_with_admission(bytes, limits, &mut |_| Ok(()))
 }
 pub(crate) fn decode_with_admission(bytes: &[u8], limits: &Limits, admit: &mut impl FnMut(u64) -> Result<()>) -> Result<Document> {
-    decode_schema(bytes, limits, VERSION, admit)
+    let (document, displays) = decode_open_candidate(bytes, limits, admit)?;
+    if !displays.occt.is_empty() || !displays.native.is_empty() {
+        return Err(Error::Unsupported("legacy BRep Open requires retained display migration"));
+    }
+    Ok(document)
 }
 pub fn decode_legacy_v1(bytes: &[u8], limits: &Limits) -> Result<Document> {
     decode_schema(bytes, limits, 1, &mut |_| Ok(()))
@@ -233,6 +250,31 @@ pub fn decode_legacy_v3(bytes: &[u8], limits: &Limits) -> Result<Document> {
     decode_schema(bytes, limits, 3, &mut |_| Ok(()))
 }
 fn decode_schema(bytes: &[u8], limits: &Limits, version: u32, admit: &mut impl FnMut(u64) -> Result<()>) -> Result<Document> {
+    decode_schema_inner(bytes, limits, version, admit, false).map(|(document, _)| document)
+}
+
+/// Decode v4 into a private source/display migration candidate. The caller
+/// must retain the returned displays and account for their ownership before
+/// publishing a scene; this does not attest native topology.
+pub fn decode_v4_with_displays(bytes: &[u8], limits: &Limits, admit: &mut impl FnMut(u64) -> Result<()>)
+    -> Result<(Document, om9_core::legacy_v4::LegacyDisplays)> {
+    decode_schema_inner(bytes, limits, 4, admit, true)
+}
+
+/// Open either current canonical metadata or an explicit v4 migration
+/// candidate, retaining legacy displays for scene construction.
+pub(crate) fn decode_open_candidate(bytes: &[u8], limits: &Limits, admit: &mut impl FnMut(u64) -> Result<()>)
+    -> Result<(Document, om9_core::legacy_v4::LegacyDisplays)> {
+    if bytes.get(..8) != Some(MAGIC.as_slice()) { return Err(Error::Invalid("OM9 magic")); }
+    match u32_at(bytes, 8)? {
+        4 => decode_v4_with_displays(bytes, limits, admit),
+        VERSION => decode_schema_inner(bytes, limits, VERSION, admit, false),
+        _ => Err(Error::Unsupported("OM9 schema version; no implicit migration")),
+    }
+}
+
+fn decode_schema_inner(bytes: &[u8], limits: &Limits, version: u32, admit: &mut impl FnMut(u64) -> Result<()>,
+    migrate_v4: bool) -> Result<(Document, om9_core::legacy_v4::LegacyDisplays)> {
     if bytes.get(..8) != Some(MAGIC.as_slice()) {
         return Err(Error::Invalid("OM9 magic"));
     }
@@ -335,18 +377,20 @@ fn decode_schema(bytes: &[u8], limits: &Limits, version: u32, admit: &mut impl F
         }
     }
     let metadata = metadata.ok_or(Error::Missing("document metadata chunk"))?;
+    let mut preflight_bytes = usage.bytes;
     if version < 4 {
         crate::json_admission::check_legacy_document(metadata, bytes.len(), limits)?;
     } else {
         let chunk_bytes = usage.bytes.checked_sub(bytes.len() as u64)
             .ok_or(Error::Overflow("archive chunk admission"))?;
-        crate::json_admission::check_usage_with_admission(metadata, bytes.len(), limits, &mut |estimated| {
+        crate::json_admission::check_document_usage_with_admission(metadata, bytes.len(), limits, &mut |estimated| {
             let total = estimated.checked_add(chunk_bytes).ok_or(Error::Overflow("archive preflight admission"))?;
             if total > limits.max_bytes { return Err(Error::Budget("archive preflight bytes")); }
+            preflight_bytes = preflight_bytes.max(total);
             admit(total)
         })?;
     }
-    let mut document: Document = serde_json::from_slice(metadata).map_err(|error| {
+    let map_decode_error = |error: serde_json::Error| {
         let message = error.to_string();
         if message.starts_with("noncanonical UUID map key") {
             Error::Invalid("noncanonical UUID map key")
@@ -368,7 +412,39 @@ fn decode_schema(bytes: &[u8], limits: &Limits, version: u32, admit: &mut impl F
         } else {
             Error::Invalid("typed document metadata/schema")
         }
-    })?;
+    };
+    let mut migration_peak = 0u64;
+    let (mut document, displays) = if migrate_v4 {
+        let legacy: om9_core::legacy_v4::DocumentV4 = serde_json::from_slice(metadata).map_err(map_decode_error)?;
+        let overlap = legacy.split_allocation_usage(limits)?.bytes;
+        let (occt_count, native_count) = legacy.display_counts();
+        let requested_vectors = Usage::array::<(om9_core::brep::CanonicalBrep, om9_core::brep::BrepRepresentation)>(occt_count)?.bytes
+            .checked_add(Usage::array::<(om9_core::geometry::NativeBrepSource, om9_core::geometry::NativeBrepRepresentation)>(native_count)?.bytes)
+            .ok_or(Error::Overflow("legacy display vectors"))?;
+        let total = preflight_bytes.checked_add(overlap).ok_or(Error::Overflow("legacy document migration"))?;
+        if total > limits.max_bytes { return Err(Error::Budget("legacy document migration")); }
+        admit(total)?;
+        legacy.validate_displays_admitted(limits, |live, pending| {
+            let peak = total.checked_add(live).and_then(|n| n.checked_add(pending))
+                .ok_or(Error::Overflow("legacy display validation"))?;
+            if peak > limits.max_bytes { return Err(Error::Budget("legacy display validation")); }
+            admit(peak)
+        })?;
+        let (document, displays) = legacy.split(om9_core::legacy_v4::LegacyDisplays::default())?;
+        let extra = displays.vector_storage_bytes()?.saturating_sub(requested_vectors);
+        migration_peak = total.checked_add(extra).ok_or(Error::Overflow("legacy display vector capacity"))?;
+        if migration_peak > limits.max_bytes { return Err(Error::Budget("legacy document migration")); }
+        admit(migration_peak)?;
+        (document, displays)
+    } else {
+        (serde_json::from_slice(metadata).map_err(map_decode_error)?, om9_core::legacy_v4::LegacyDisplays::default())
+    };
+    // A current-version file cannot establish the durable source/topology
+    // binding or native payload disposition merely by containing a BRep.
+    // Keep v4 migration separate so its retained displays are not discarded.
+    if version == VERSION && has_unmigrated_brep(&document) {
+        return Err(Error::Unsupported("BRep archive migration to v5 is not available"));
+    }
     if version == 1 && !document.resources.is_empty() {
         return Err(Error::Invalid("legacy schema has no resource ownership"));
     }
@@ -383,7 +459,10 @@ fn decode_schema(bytes: &[u8], limits: &Limits, version: u32, admit: &mut impl F
     // retained table bookkeeping before any resource allocation.
     let mut validation_peak = usage;
     validation_peak.add(document.validation_peak_estimate(limits, false)?, limits)?;
-    admit(validation_peak.bytes)?;
+    let admitted_validation = validation_peak.bytes.checked_add(migration_peak)
+        .ok_or(Error::Overflow("legacy document validation overlap"))?;
+    if admitted_validation > limits.max_bytes { return Err(Error::Budget("legacy document validation overlap")); }
+    admit(admitted_validation)?;
     usage.add(document.validate_manifest(limits)?, limits)?;
     for chunk in chunks.iter().filter(|c| c.kind == 2) {
         let id = om9_core::identity::ResourceId(
@@ -402,5 +481,5 @@ fn decode_schema(bytes: &[u8], limits: &Limits, version: u32, admit: &mut impl F
         resource.attach_payload(&bytes[chunk.start..chunk.end], limits)?;
     }
     document.validate(limits)?;
-    Ok(document)
+    Ok((document, displays))
 }

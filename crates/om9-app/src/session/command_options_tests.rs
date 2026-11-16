@@ -94,8 +94,19 @@ fn every_declared_owner_has_unique_options_and_safe_value_entry() {
                 })
             }
             "isocurve" => {
+                let mut source_document = Document::new("isocurve option fixture");
+                let entity = om9_core::model::Entity::new("surface", om9_core::geometry::Geometry::Surface(surface.clone()), None);
+                let id = entity.id;
+                source_document.entities.insert(id, entity);
                 c.isocurve_pending = Some(super::isocurve::IsoPending {
-                    surface: surface.clone(),
+                    source: source_document.stamp(id).unwrap(),
+                    surface: Some(std::sync::Arc::new(surface.clone())),
+                    #[cfg(feature="occt-brep")]
+                    face: None,
+                    #[cfg(feature="occt-brep")]
+                    native_face: None,
+                    _surface_reservation: None,
+                    placement: om9_core::geometry::Transform::identity(),
                     iso: om9_core::surface_kernel::SurfaceIso::U,
                     value: 1.,
                 })

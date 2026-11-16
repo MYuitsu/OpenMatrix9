@@ -207,6 +207,103 @@
       "file": "M01 - CAD Shell, Viewport/L2-01-06 - Febe Viewport Gpu Draw Backend/L3-004 - Wireframe And Isocurve Pass/L4-05 - Acceptance Test/l4.json"
     }
   ],
+  "runtime_implementation": {
+    "wire_owner_source_lifetime_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Wire owners no longer retain a temporary BRep source candidate; they conservatively reserve topology for surviving display pins.",
+      "remaining": "Exact charge de-duplication, buffer and source lifetimes, memory pressure and runtime behavior remain unverified.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#wire-owner-no-longer-retains-source-candidate"
+    },
+    "extract_source_wires_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Synchronous, worker and multi-occurrence OCCT ExtractWireframe request default source wires even when the prior scene lacks a wire receipt.",
+      "remaining": "Native face binding, remaining scene paths and runtime geometry and invocation behavior remain unverified.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#extractwireframe-source-wire-completion"
+    },
+    "nested_wire_reuse_admission_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Edit preflight tracks full nested occurrence paths and plans reuse with the same source and display checks as capture.",
+      "remaining": "Nested mixed-reuse budgets, account ownership, rollback and runtime behavior remain unverified.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#nested-wire-reuse-admission"
+    },
+    "root_wire_reuse_admission_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Edit capture validates the prior scene account and plans eligible root wire reuse without a second ordinary buffer.",
+      "remaining": "Nested planning, cross-account behavior, memory ownership and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#root-wire-reuse-admission"
+    },
+    "edit_capture_wire_reuse_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Full edit capture reuses eligible prior source-bound wire buffers before ordinary buffer construction.",
+      "remaining": "Conservative admission, transform and instance behavior, memory ownership and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#edit-capture-reuses-local-wires-directly"
+    },
+    "edit_wire_reuse_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Full edit scenes reuse prior local wire buffers for matching occurrence, source identity and pinned display allocation.",
+      "remaining": "Ordinary candidate capture still constructs buffers; transforms, ownership and runtime behavior remain unverified.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#edit-scene-local-wire-reuse"
+    },
+    "source_wire_profile_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Source-wire scene replacements retain the stored certified display profile and mark unspecified profiles unknown.",
+      "remaining": "Runtime profile behavior, durable topology binding and remaining scene paths are unverified.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#source-wire-display-profile-binding"
+    },
+    "interior_wire_receipt_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Immutable scene buffers record completed source interior-wire preparation even when it produces no segments, while preserving display-prefix validation.",
+      "remaining": "Other publication paths, native payloads, durable topology binding and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#explicit-interior-wire-preparation-receipt"
+    },
+    "edit_candidate_wires_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Incremental and full edit candidates prepare missing OCCT source wires before commit; full scene capture uses the coordinator representation store.",
+      "remaining": "Other publication paths, native payloads, durable topology binding and runtime validation remain open; edit wire preparation currently runs synchronously.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#edit-candidate-representation-and-wires"
+    },
+    "open_candidate_wires_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "The Open worker prepares source-derived interior wires for private OCCT scene occurrences before publication.",
+      "remaining": "Other scene paths, legacy compatibility, native payloads, durable topology binding and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#open-candidate-source-wires"
+    },
+    "history_retained_wires_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "History worker prepares source-derived interior wires for retained as well as rebuilt OCCT representations, including nested occurrences; direct Undo and Redo wait for the same worker.",
+      "remaining": "Other scene paths, native payloads, durable topology binding and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#retained-representation-history-wires"
+    },
+    "occurrence_wire_extraction_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "ExtractWireframe checks published OCCT buffers using the full instance path; unverified native face/trim extraction explicitly refuses before the output transaction.",
+      "remaining": "Native face support, complete I1 integration and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#exact-occurrence-wire-binding-and-opaque-refusal"
+    },
+    "history_rebuild_wires_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "The OCCT history cache-miss worker prepares source-derived interior wire buffers for roots and nested occurrences sharing an exact previously attested source allocation.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#shared-source-definition-history-rebuild",
+      "remaining": "Runtime and geometry verification, independent block and legacy attestation, shared occurrence buffers, native payloads and other scene paths remain open."
+    },
+    "date": "2026-11-13",
+    "status": "SCOPED_AUTOMATED_VALIDATION",
+    "scope": "Untrimmed standalone NURBS surfaces publish default-density knot or midpoint wires in the scene; ExtractWireframe uses the same parameters.",
+    "evidence": "docs/validation/2026-11-13-union-surface-wire-default.md",
+    "remaining": "Desktop appearance, non-default density and trimmed-surface isocurves are not established.",
+    "brep_worker_checkpoint": {
+      "status": "SCOPED_CONTROLLER_CHECKS_PASSED",
+      "scope": "Explicit attested root remesh with a display reservation publishes source-derived interior wires as render-only segments; Box source samples, two deflections, edge-pick exclusion, history and budget refusal checked.",
+      "evidence": "docs/validation/2026-11-13-brep-wire-remesh-worker.md",
+      "remaining": "Ordinary scene, broad trims and density, GPU/desktop, and source/display ownership separation remain open; later checkpoints cover scoped ExtractWireframe and NativeBrep fixtures."
+    },
+    "dupedge_source_view_checkpoint": {
+      "status": "SCOPED_HEADLESS_CHECKS_PASSED",
+      "scope": "DupEdge temporary OCCT and NativeBrep box views prepare source-derived face wires; checks cover topology edge picking, cancel and buffer refusal.",
+      "evidence": "docs/validation/2026-11-13-dupedge-source-view-face-wires.md",
+      "remaining": "Other native shapes, arbitrary trim, density and desktop rendering remain unverified; failure to generate source wires refuses the temporary view."
+    }
+  },
   "execution_evidence": {
     "crate": "crates/om9-render",
     "state": "automated slice done; manual test pending",

@@ -550,6 +550,12 @@ impl Mesh {
             }
         }
         usage.add(Usage::array::<[f64; 2]>(self.corner_uvs.capacity())?, l)?;
+        let face_count = u64::try_from(self.faces.len()).map_err(|_| Error::Overflow("mesh face count"))?;
+        if face_count > l.max_nodes.saturating_sub(usage.nodes) {
+            return Err(Error::Budget("nodes"));
+        }
+        let available_bytes = l.max_bytes.saturating_sub(usage.bytes);
+        let mut face_capacity = 0u64;
         for face in &self.faces {
             if !(3..=4).contains(&face.len())
                 || face.iter().any(|i| *i as usize >= self.vertices.len())
@@ -561,14 +567,15 @@ impl Mesh {
                     return Err(Error::Invalid("repeated mesh face vertex"));
                 }
             }
-            usage.add(
-                Usage {
-                    nodes: 1,
-                    ..Usage::array::<u32>(face.capacity())?
-                },
-                l,
-            )?;
+            let capacity = u64::try_from(face.capacity()).map_err(|_| Error::Overflow("mesh face capacity"))?;
+            face_capacity = face_capacity.checked_add(capacity).ok_or(Error::Overflow("mesh face capacity"))?;
+            if face_capacity > available_bytes / std::mem::size_of::<u32>() as u64 {
+                return Err(Error::Budget("bytes"));
+            }
         }
+        let face_bytes = face_capacity.checked_mul(std::mem::size_of::<u32>() as u64)
+            .ok_or(Error::Overflow("mesh face bytes"))?;
+        usage.add(Usage { bytes: face_bytes, nodes: face_count, ..Usage::default() }, l)?;
         Ok(usage)
     }
 }
@@ -643,13 +650,184 @@ impl GeometryKind {
         }
     }
 }
-/// Opaque native BRep: an exact openNURBS object plus a display-only tessellation.
-/// The payload is the only authority for export; `display` is never exported as
-/// replacement geometry.
+/// Opaque native B-rep source. Preserve the bytes and supplied checksum even
+/// when the native type or ability to regenerate a display is not certified.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct NativeBrepSource {
+    #[serde(with = "payload_chunks")]
+    pub payload: std::sync::Arc<Vec<u8>>,
+    pub crc: u32,
+}
+/// Process-local allocation identity. A representation keeps a weak payload
+/// receipt, so the address cannot be recycled while its entry is retained.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct NativeBrepSourceIdentity(usize, u32);
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct NativeBrepRepresentationIdentity(uuid::Uuid);
+impl NativeBrepSource {
+    pub fn canonical_source(&self) -> Self { self.clone() }
+    pub fn payload(&self) -> &[u8] { &self.payload }
+    pub fn crc(&self) -> u32 { self.crc }
+    pub(crate) fn allocation_key(&self) -> usize { std::sync::Arc::as_ptr(&self.payload) as usize }
+    pub fn identity(&self) -> NativeBrepSourceIdentity { NativeBrepSourceIdentity(self.allocation_key(), self.crc) }
+    fn weak_payload(&self) -> std::sync::Weak<Vec<u8>> { std::sync::Arc::downgrade(&self.payload) }
+    pub fn storage_bytes(&self) -> Result<u64> {
+        Usage::array::<u8>(self.payload.capacity())?.bytes
+            .checked_add((std::mem::size_of::<Vec<u8>>() + 2 * std::mem::size_of::<usize>()) as u64)
+            .ok_or(Error::Overflow("native BRep payload accounting"))
+    }
+    pub(crate) fn payload_allocation_key(&self) -> usize { self.allocation_key() }
+    pub(crate) fn payload_allocation_bytes(&self) -> Result<u64> { self.storage_bytes() }
+    pub fn validate(&self, limits: &Limits) -> Result<Usage> {
+        if self.payload.is_empty() { return Err(Error::Invalid("native BRep payload")); }
+        let usage = Usage { bytes: self.storage_bytes()?, ..Usage::default() };
+        usage.check(limits)?;
+        Ok(usage)
+    }
+}
+
+/// Native display captured alongside one immutable payload. A structural
+/// pairing does not certify the native topology or prove it can be rebuilt.
+#[derive(Clone)]
+pub struct NativeBrepRepresentation {
+    source: std::sync::Weak<Vec<u8>>,
+    crc: u32,
+    display: std::sync::Arc<Mesh>,
+    owner: Option<std::sync::Arc<std::sync::Mutex<crate::transaction::ExternalMemoryReservation>>>,
+    identity: NativeBrepRepresentationIdentity,
+}
+impl std::fmt::Debug for NativeBrepRepresentation {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("NativeBrepRepresentation").field("crc", &self.crc)
+            .field("vertices", &self.display.vertices.len()).finish()
+    }
+}
+impl NativeBrepRepresentation {
+    pub(crate) fn validate_binding(&self, source: &NativeBrepSource, limits: &Limits) -> Result<()> {
+        source.validate(limits)?;
+        self.display.validate(limits)?;
+        if !self.matches(source) || self.owner.is_none() { return Err(Error::Invalid("native BRep representation binding")); }
+        Ok(())
+    }
+    /// Create an unowned display derived from this exact retained payload.
+    /// The caller must admit and bind its allocation before publication; this
+    /// pairing does not certify arbitrary opaque data as safely rebuildable.
+    pub fn from_source_mesh(source: &NativeBrepSource, mesh: Mesh, limits: &Limits) -> Result<Self> {
+        source.validate(limits)?;
+        mesh.validate(limits)?;
+        if mesh.vertices.is_empty() || mesh.faces.is_empty() {
+            return Err(Error::Invalid("native BRep reconstructed display"));
+        }
+        Ok(Self { source: source.weak_payload(), crc: source.crc, display: std::sync::Arc::new(mesh),
+            owner: None, identity: NativeBrepRepresentationIdentity(uuid::Uuid::new_v4()) })
+    }
+    pub fn matches(&self, source: &NativeBrepSource) -> bool {
+        self.crc == source.crc && self.source.ptr_eq(&source.weak_payload())
+    }
+    pub fn display(&self) -> &Mesh { &self.display }
+    pub fn display_weak(&self) -> std::sync::Weak<Mesh> { std::sync::Arc::downgrade(&self.display) }
+    pub fn identity(&self) -> NativeBrepRepresentationIdentity { self.identity }
+    /// Transitional check for an existing legacy document owner. A different
+    /// mesh requires its own scene receipt and cannot reuse the legacy one.
+    pub fn matches_legacy_display(&self, native: &NativeBrep) -> bool {
+        self.matches(&native.canonical_source()) && std::sync::Arc::ptr_eq(&self.display, &native.display)
+    }
+    pub fn display_bytes(&self) -> Result<u64> { native_display_allocation_bytes(&self.display) }
+    pub(crate) fn display_owned_by(&self, account: &crate::transaction::ExternalMemoryAccount) -> bool {
+        let Some(owner) = &self.owner else { return false; };
+        let guard = owner.lock().unwrap_or_else(|error| error.into_inner());
+        guard.belongs_to(account) && self.display_bytes().is_ok_and(|bytes|
+            guard.bytes().saturating_sub(guard.pending_bytes()) >= bytes)
+    }
+    /// The payload can be opaque; callers must retain this representation
+    /// until a native adapter has established a safe rebuild disposition.
+    pub fn bind_owner(&mut self, source: &NativeBrepSource,
+        owner: std::sync::Arc<std::sync::Mutex<crate::transaction::ExternalMemoryReservation>>,
+        account: &crate::transaction::ExternalMemoryAccount, limits: &Limits) -> Result<()> {
+        if self.owner.is_some() || !self.matches(source) { return Err(Error::Invalid("native BRep representation owner")); }
+        let bytes = self.display_bytes()?;
+        Usage { bytes, ..Usage::default() }.check(limits)?;
+        {
+            let guard = owner.lock().unwrap_or_else(|e| e.into_inner());
+            if !guard.belongs_to(account) || guard.bytes().saturating_sub(guard.pending_bytes()) < bytes {
+                return Err(Error::Invalid("native BRep representation accounting"));
+            }
+        }
+        self.owner = Some(owner);
+        Ok(())
+    }
+    pub fn pin(&self) -> Result<NativeBrepDisplayPin> {
+        let owner = self.owner.as_ref().ok_or(Error::Missing("native BRep display owner"))?.clone();
+        Ok(NativeBrepDisplayPin { display: self.display.clone(), _owner: owner })
+    }
+}
+
+/// An independent reader pins both the display and its accounting lease.
+#[derive(Clone)]
+pub struct NativeBrepDisplayPin {
+    display: std::sync::Arc<Mesh>,
+    _owner: std::sync::Arc<std::sync::Mutex<crate::transaction::ExternalMemoryReservation>>,
+}
+impl std::fmt::Debug for NativeBrepDisplayPin {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("NativeBrepDisplayPin").field("vertices", &self.display.vertices.len()).finish()
+    }
+}
+impl NativeBrepDisplayPin {
+    pub fn display(&self) -> &Mesh { &self.display }
+    pub fn display_weak(&self) -> std::sync::Weak<Mesh> { std::sync::Arc::downgrade(&self.display) }
+}
+
+/// Opaque native entries are deliberately not optional-eviction candidates.
+/// A future adapter disposition must first establish source-only reconstruction.
+#[derive(Debug, Default)]
+pub struct NativeBrepRepresentationStore {
+    entries: std::collections::BTreeMap<NativeBrepSourceIdentity, NativeBrepRepresentation>,
+}
+impl NativeBrepRepresentationStore {
+    pub(crate) fn is_empty(&self) -> bool { self.entries.is_empty() }
+    pub(crate) fn len(&self) -> usize { self.entries.len() }
+    pub fn insert(&mut self, source: &NativeBrepSource, representation: NativeBrepRepresentation, limits: &Limits) -> Result<()> {
+        representation.validate_binding(source, limits)?;
+        self.insert_prevalidated(source, representation)
+    }
+    pub(crate) fn insert_prevalidated(&mut self, source: &NativeBrepSource, representation: NativeBrepRepresentation) -> Result<()> {
+        if !representation.matches(source) { return Err(Error::Invalid("native BRep representation binding")); }
+        // A native display may be the only usable representation of an opaque
+        // payload. Never silently replace it with a different candidate.
+        if self.entries.contains_key(&source.identity()) {
+            return Err(Error::Invalid("duplicate native BRep representation"));
+        }
+        self.entries.insert(source.identity(), representation);
+        Ok(())
+    }
+    pub fn get(&self, source: &NativeBrepSource) -> Result<&NativeBrepRepresentation> {
+        self.entries.get(&source.identity())
+            .filter(|representation| representation.matches(source))
+            .ok_or(Error::Missing("native BRep representation requires rebuild"))
+    }
+    pub(crate) fn contains(&self, source: NativeBrepSourceIdentity) -> bool { self.entries.contains_key(&source) }
+    pub(crate) fn remove_exact(&mut self, source: NativeBrepSourceIdentity,
+        representation: NativeBrepRepresentationIdentity) -> Option<NativeBrepRepresentation> {
+        if self.entries.get(&source).is_none_or(|item| item.identity != representation) { return None; }
+        self.entries.remove(&source)
+    }
+    pub(crate) fn take_orphaned(&mut self) -> Option<NativeBrepRepresentation> {
+        let key = self.entries.iter().find_map(|(key, item)|
+            (item.source.strong_count() == 0)
+                .then_some(*key))?;
+        self.entries.remove(&key)
+    }
+}
+
+/// Native adapter result: export uses the opaque payload, while `display` is
+/// a tessellation. Document migration must transfer these to separate owners
+/// only after establishing a safe rebuild disposition.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct NativeBrep {
-    pub display: Mesh,
+    pub display: std::sync::Arc<Mesh>,
     #[serde(with = "payload_chunks")]
     pub payload: std::sync::Arc<Vec<u8>>,
     pub crc: u32,
@@ -688,22 +866,59 @@ mod payload_chunks {
     }
 }
 impl NativeBrep {
+    pub fn canonical_source(&self) -> NativeBrepSource {
+        NativeBrepSource { payload: self.payload.clone(), crc: self.crc }
+    }
+    /// Transfer the adapter result without copying either allocation. The
+    /// caller must retain the display until a native rebuild disposition and
+    /// an independently accounted representation owner are established.
+    pub fn into_source_and_display(self) -> (NativeBrepSource, std::sync::Arc<Mesh>) {
+        (NativeBrepSource { payload: self.payload, crc: self.crc }, self.display)
+    }
+    pub fn into_source_and_representation(self) -> (NativeBrepSource, NativeBrepRepresentation) {
+        let source = NativeBrepSource { payload: self.payload, crc: self.crc };
+        let representation = NativeBrepRepresentation { source: source.weak_payload(), crc: source.crc,
+            display: self.display, owner: None, identity: NativeBrepRepresentationIdentity(uuid::Uuid::new_v4()) };
+        (source, representation)
+    }
+    pub(crate) fn display_allocation_key(&self) -> usize {
+        std::sync::Arc::as_ptr(&self.display) as usize
+    }
+    pub(crate) fn display_allocation_bytes(&self) -> Result<u64> {
+        native_display_allocation_bytes(&self.display)
+    }
     pub(crate) fn payload_allocation_key(&self) -> usize {
         std::sync::Arc::as_ptr(&self.payload) as usize
     }
     pub(crate) fn payload_allocation_bytes(&self) -> Result<u64> {
-        Usage::array::<u8>(self.payload.capacity())?.bytes
-            .checked_add((std::mem::size_of::<Vec<u8>>() + 2 * std::mem::size_of::<usize>()) as u64)
-            .ok_or(Error::Overflow("native BRep payload accounting"))
+        self.canonical_source().storage_bytes()
     }
     pub fn validate(&self, l: &Limits) -> Result<Usage> {
         if self.payload.is_empty() {
             return Err(Error::Invalid("native BRep payload"));
         }
         let mut usage = self.display.validate(l)?;
+        usage.add(Usage::array::<Mesh>(1)?, l)?;
+        usage.add(Usage::array::<usize>(2)?, l)?;
         usage.add(Usage { bytes: self.payload_allocation_bytes()?, ..Usage::default() }, l)?;
         Ok(usage)
     }
+}
+fn native_display_allocation_bytes(mesh: &Mesh) -> Result<u64> {
+        let sizes = [
+            Usage::array::<Mesh>(1)?.bytes,
+            Usage::array::<usize>(2)?.bytes,
+            Usage::array::<Point3>(mesh.vertices.capacity())?.bytes,
+            Usage::array::<Point3>(mesh.normals.capacity())?.bytes,
+            Usage::array::<[u8; 4]>(mesh.colors.capacity())?.bytes,
+            Usage::array::<[f64; 2]>(mesh.corner_uvs.capacity())?.bytes,
+            Usage::array::<Vec<u32>>(mesh.faces.capacity())?.bytes,
+        ];
+        let bytes = sizes.into_iter().try_fold(0u64, |sum, bytes| sum.checked_add(bytes).ok_or(Error::Overflow("native BRep display accounting")))?;
+        mesh.faces.iter().try_fold(bytes, |sum, face| {
+            sum.checked_add(Usage::array::<u32>(face.capacity())?.bytes)
+                .ok_or(Error::Overflow("native BRep display accounting"))
+        })
 }
 
 #[cfg(test)]
@@ -712,23 +927,57 @@ mod native_brep_payload_tests {
     use std::sync::Arc;
 
     #[test]
+    fn mesh_validation_counts_face_capacity_and_rejects_tight_limits() {
+        let mut first=Vec::with_capacity(12);first.extend([0,1,2]);
+        let mut faces=Vec::with_capacity(5);faces.push(first);faces.push(vec![0,2,3]);
+        let mesh=Mesh {vertices:vec![[0.,0.,0.],[1.,0.,0.],[1.,1.,0.],[0.,1.,0.]],faces,
+            normals:vec![],colors:vec![],corner_uvs:vec![]};
+        let limits=crate::budget::Limits::default();let usage=mesh.validate(&limits).unwrap();
+        let expected=mesh.vertices.capacity()*std::mem::size_of::<[f64;3]>()+
+            mesh.faces.capacity()*std::mem::size_of::<Vec<u32>>() +
+            mesh.faces.iter().map(|face|face.capacity()*std::mem::size_of::<u32>()).sum::<usize>();
+        assert_eq!(usage.bytes,expected as u64);assert_eq!(usage.points,4);assert_eq!(usage.nodes,2);
+        let mut exact=limits;exact.max_nodes=usage.nodes;exact.max_bytes=usage.bytes;
+        assert_eq!(mesh.validate(&exact).unwrap(),usage);
+        let mut tight=limits;tight.max_nodes=1;assert!(matches!(mesh.validate(&tight),Err(crate::Error::Budget("nodes"))));
+        tight=limits;tight.max_bytes=usage.bytes-1;assert!(matches!(mesh.validate(&tight),Err(crate::Error::Budget("bytes"))));
+        let mut invalid=mesh.clone();invalid.faces[1]=vec![0,2,2];assert!(mesh.validate(&limits).is_ok() && invalid.validate(&limits).is_err());
+        invalid=mesh.clone();invalid.faces[1]=vec![0,2,4];assert!(invalid.validate(&limits).is_err());
+    }
+
+    #[test]
     fn payload_is_shared_on_clone_and_keeps_legacy_chunk_encoding() {
         let source = NativeBrep {
-            display: Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] },
+            display: std::sync::Arc::new(Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }),
             payload: vec![1, 2, 3, 4].into(), crc: 17,
         };
         let copy = source.clone();
         assert!(Arc::ptr_eq(&source.payload, &copy.payload));
+        assert!(Arc::ptr_eq(&source.display, &copy.display));
         let json = serde_json::to_value(&source).unwrap();
         assert_eq!(json["payload"], serde_json::json!([[1, 2, 3, 4]]));
         let decoded: NativeBrep = serde_json::from_value(json).unwrap();
         assert_eq!(decoded, source);
         assert!(!Arc::ptr_eq(&decoded.payload, &source.payload));
+        assert!(!Arc::ptr_eq(&decoded.display, &source.display));
+    }
+    #[test]
+    fn cloned_display_is_copy_on_write() {
+        let source = NativeBrep {
+            display: Arc::new(Mesh { vertices: vec![[0., 0., 0.]], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }),
+            payload: vec![1].into(), crc: 0,
+        };
+        let mut copy = source.clone();
+        Arc::make_mut(&mut copy.display).vertices[0] = [1., 0., 0.];
+        assert_eq!(source.display.vertices[0], [0., 0., 0.]);
+        assert_eq!(copy.display.vertices[0], [1., 0., 0.]);
+        assert!(!Arc::ptr_eq(&source.display, &copy.display));
+        assert!(Arc::ptr_eq(&source.payload, &copy.payload));
     }
     #[test]
     fn chunked_payload_preserves_boundaries_and_accepts_legacy_irregular_chunks() {
         let source = NativeBrep {
-            display: Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] },
+            display: std::sync::Arc::new(Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }),
             payload: vec![23; 65_537].into(), crc: 42,
         };
         let mut encoded = serde_json::to_value(&source).unwrap();
@@ -777,8 +1026,8 @@ pub struct Hatch {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Geometry {
     #[serde(alias = "BRep", alias = "B-rep")]
-    Brep(crate::brep::Brep),
-    NativeBrep(NativeBrep),
+    Brep(crate::brep::CanonicalBrep),
+    NativeBrep(NativeBrepSource),
     Point(Point3),
     Curve(Curve),
     Surface(NurbsSurface),
@@ -833,7 +1082,12 @@ impl Geometry {
             ..Usage::default()
         };
         match self {
-            Self::Brep(shape) => total.add(shape.validate(l)?, l)?,
+            Self::Brep(shape) => {
+                if shape.has_allocation_owner() {
+                    return Err(Error::Unsupported("transient leased BRep geometry"));
+                }
+                total.add(shape.validate(l)?, l)?;
+            }
             Self::NativeBrep(shape) => total.add(shape.validate(l)?, l)?,
             Self::Point(p) => {
                 finite(*p)?;

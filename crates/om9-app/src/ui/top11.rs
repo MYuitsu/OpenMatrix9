@@ -62,7 +62,7 @@ impl MatrixApp {
         let revision = self.controller.document().revision;
         self.selected_grips = self.controller.selected_grips().into_iter().map(|h| (h, revision)).collect();
         let Some(handle) = self.grip_at(view, viewport, screen) else {
-            if !additive {
+            if !additive && (self.controller.is_running() || self.controller.session_wants_point()) {
                 self.selected_grips.clear();
                 self.controller.select_grips(&[], crate::session::GripPick::Replace);
             }
@@ -277,15 +277,21 @@ impl MatrixApp {
             self.status.info("Grip edit cancelled: viewport changed");
             return;
         }
-        if response.dragged_by(egui::PointerButton::Primary)
-            && let Some(pointer) = response.interact_pointer_pos()
+        if (response.is_pointer_button_down_on() || response.drag_stopped_by(egui::PointerButton::Primary))
+            && let Some(pointer) = response.interact_pointer_pos().or_else(|| ui.input(|input| input.pointer.latest_pos()))
         {
             let world = view
                 .camera
                 .ray([pointer.x as f64, pointer.y as f64], viewport)
                 .and_then(|ray| ray.intersect_plane(drag.plane));
             if let Ok(Some(world)) = world {
-                drag.current = self.snap.as_ref().map_or_else(
+                let snap = self.snap.as_ref().filter(|candidate| {
+                    self.hover_view == Some(drag.view)
+                        && (candidate.screen[0] - f64::from(pointer.x)).hypot(candidate.screen[1] - f64::from(pointer.y))
+                            <= self.snap_state.settings.radius_px
+                        && !(candidate.kind == om9_scene::osnap::SnapKind::Near && candidate.root == Some(drag.handle.object))
+                });
+                drag.current = snap.map_or_else(
                     || std::array::from_fn(|i| drag.handle.point[i] + (world[i] - drag.press_world[i])),
                     |candidate| candidate.world,
                 );

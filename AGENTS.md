@@ -8,6 +8,9 @@ must not be recreated. Build with `CARGO_TARGET_DIR` outside the checkout (this 
 `L:\om9-target`) and with **`-j 2`**: the 8 GiB paging file cannot hold the default parallelism (rustc
 dies with `os error 1455`).
 
+User instruction (2026-11-12): keep at most two OM9 build target directories. Reuse the existing
+targets instead of creating additional build copies; do not remove unrelated or user-owned files.
+
 Keep only the **10 newest build/validation runs** (`build/standalone-validation/ui-artifacts/*`). Prune
 with `python tools/prune_build_artifacts.py --apply` after a validation batch. The tool never removes a
 run still cited by `implementation/**` or `docs/**`, so a reference from a record stays valid; `build/`

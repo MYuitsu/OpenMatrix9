@@ -5,7 +5,8 @@
 //! never runs a second picking engine. The viewport supplies the camera, rectangle and cursor.
 use crate::{
     camera::{CPlane, Camera, Viewport},
-    scene::Scene,
+    picking::PickScene,
+    scene::{OcclusionSnapshot, Scene},
 };
 use om9_core::{
     Error, Result,
@@ -142,14 +143,21 @@ pub struct SnapCandidate {
 pub struct SurfaceCandidateSource {
     pub path: Vec<ObjectId>,
     pub leaf: ObjectId,
+    pub leaf_generation: u64,
+    pub leaf_geometry_revision: u64,
+    pub brep_display_fingerprint: Option<crate::scene::BrepDisplayReceipt>,
     pub source: SourceStamp,
     pub scene_epoch: u64,
+    pub scene_publication: uuid::Uuid,
     pub placement: Transform,
     pub camera: Camera,
     pub viewport: Viewport,
     pub cursor: [f64; 2],
     /// None when the retained native display does not provide a B-rep face binding.
     pub face: Option<uuid::Uuid>,
+    /// Local-space triangle from the exact scene display and its deflection.
+    pub face_witness: Option<([Point3; 3], f64)>,
+    pub face_witness_triangle: Option<usize>,
 }
 
 impl SnapCandidate {
@@ -296,7 +304,12 @@ pub fn choose(candidates: &[SnapCandidate]) -> Option<SnapCandidate> {
 
 /// Select without building another candidate array; preserves iterator order for ties.
 pub fn choose_iter<'a>(candidates: impl Iterator<Item = &'a SnapCandidate>) -> Option<SnapCandidate> {
-    candidates.min_by(|left, right| snap_order(left, right)).cloned()
+    choose_ref(candidates).cloned()
+}
+
+/// Select a candidate without copying its source path.
+pub fn choose_ref<'a>(candidates: impl Iterator<Item = &'a SnapCandidate>) -> Option<&'a SnapCandidate> {
+    candidates.min_by(|left, right| snap_order(left, right))
 }
 
 /// True if a visible filled display surface intersects the view ray before the target.
@@ -311,6 +324,57 @@ pub fn visible_display_occludes(
     excluded: &[ObjectId],
     target_source: Option<&SurfaceCandidateSource>,
 ) -> Result<bool> {
+    visible_display_occludes_with_margin(scene, camera, viewport, cursor, target, tolerance, excluded, target_source, &mut |_| false)
+}
+
+/// Like `visible_display_occludes`, but lets the caller prove that an
+/// unverified trim fallback cannot occlude this ray. False keeps the fallback.
+pub fn visible_display_occludes_with_fallback_proof(
+    scene: &Scene, camera: &Camera, viewport: Viewport, cursor: [f64;2], target: Point3,
+    tolerance: f64, excluded: &[ObjectId], target_source: Option<&SurfaceCandidateSource>,
+    mut prove_clear: impl FnMut(&crate::scene::SceneObject) -> bool,
+) -> Result<bool> {
+    visible_display_occludes_with_margin(scene,camera,viewport,cursor,target,tolerance,excluded,target_source,&mut prove_clear)
+}
+
+/// Whether a visible filled display surface lies strictly in front of a displayed point.
+pub fn visible_display_occludes_before(
+    scene: &Scene, camera: &Camera, viewport: Viewport, cursor: [f64; 2], target: Point3, clearance: f64,
+) -> Result<bool> {
+    if !clearance.is_finite() || clearance < 0.0 { return Err(Error::Invalid("occlusion clearance")); }
+    visible_display_occludes_with_margin(scene, camera, viewport, cursor, target, -clearance, &[], None, &mut |_| false)
+}
+
+fn visible_display_occludes_with_margin(
+    scene: &Scene, camera: &Camera, viewport: Viewport, cursor: [f64; 2], target: Point3,
+    tolerance: f64, excluded: &[ObjectId], target_source: Option<&SurfaceCandidateSource>,
+    prove_clear: &mut dyn FnMut(&crate::scene::SceneObject) -> bool,
+) -> Result<bool> {
+    visible_display_occludes_in_scene(scene, camera, viewport, cursor, target, tolerance, excluded, target_source,
+        prove_clear, &mut |object| Ok(matches!(scene.entity_for(&scene.document, object)?.geometry,
+            Geometry::Mesh(_) | Geometry::Hatch(_) | Geometry::Surface(_) | Geometry::Brep(_) | Geometry::NativeBrep(_))))
+}
+
+impl OcclusionSnapshot {
+    /// Query captured display buffers without retaining a document. A fallback
+    /// proof must itself use independently captured source data; returning
+    /// false preserves the conservative occluder.
+    pub fn visible_display_occludes_with_fallback_proof(
+        &self, camera: &Camera, viewport: Viewport, cursor: [f64; 2], target: Point3,
+        tolerance: f64, excluded: &[ObjectId], target_source: Option<&SurfaceCandidateSource>,
+        mut prove_clear: impl FnMut(&crate::scene::SceneObject) -> bool,
+    ) -> Result<bool> {
+        visible_display_occludes_in_scene(&self.0, camera, viewport, cursor, target, tolerance, excluded,
+            target_source, &mut prove_clear, &mut |_| Ok(true))
+    }
+}
+
+fn visible_display_occludes_in_scene(
+    scene: &impl PickScene, camera: &Camera, viewport: Viewport, cursor: [f64; 2], target: Point3,
+    tolerance: f64, excluded: &[ObjectId], target_source: Option<&SurfaceCandidateSource>,
+    prove_clear: &mut dyn FnMut(&crate::scene::SceneObject) -> bool,
+    valid_surface: &mut dyn FnMut(&crate::scene::SceneObject) -> Result<bool>,
+) -> Result<bool> {
     let ray = camera.ray(cursor, viewport)?;
     let target_distance = distance(ray.origin, target);
     let mut candidates = scene.spatial_index()?.ray_candidates(ray.origin, ray.direction);
@@ -322,12 +386,12 @@ pub fn visible_display_occludes(
     candidates.sort_unstable();
     candidates.dedup();
     for index in candidates {
-        let object = &scene.objects[index];
+        let object = &scene.objects()[index];
         if target_source.is_some_and(|source| object.root == source.source.object && object.path == source.path && object.leaf == source.leaf) {
             continue;
         }
         if !object.visible || excluded.contains(&object.root)
-            || !matches!(scene.entity_for(object)?.geometry, Geometry::Mesh(_) | Geometry::Hatch(_) | Geometry::Surface(_) | Geometry::Brep(_) | Geometry::NativeBrep(_)) {
+            || !valid_surface(object)? {
             continue;
         }
         let crate::scene::RenderBuffers::Mesh { vertices, triangles, .. } = object.buffers.as_ref() else { continue };
@@ -339,6 +403,7 @@ pub fn visible_display_occludes(
             if let Some((point, _)) = ray_triangle(ray, a, b, c)
                 && camera.project(point, viewport)?.is_some()
                 && distance(ray.origin, point) <= target_distance + tolerance {
+                if object.buffers.is_trim_display_fallback() && prove_clear(object) { break; }
                 return Ok(true);
             }
         }
@@ -392,8 +457,13 @@ pub fn candidates(
         if !object.visible || !(object.selectable || object.reference_snappable) {
             continue;
         }
+        // The fallback surface contains points that may be outside the trim.
+        // Do not let such a candidate prevent refinement of valid objects behind it.
+        if object.buffers.is_trim_display_fallback() {
+            continue;
+        }
         let transform = object.display_transform()?;
-        let entity = scene.entity_for(object)?;
+        let entity = scene.entity_for(&scene.document, object)?;
         if matches!(entity.geometry, Geometry::Brep(_) | Geometry::NativeBrep(_) | Geometry::Surface(_)) {
             if !settings.is_enabled(SnapKind::Surface) { continue; }
             if surface_broad_phase.is_none() {
@@ -436,21 +506,23 @@ pub fn candidates(
                 &mut out,
                 &mut segments,
             )?,
-            Geometry::Brep(brep) => {
+            Geometry::Brep(_) => {
+                let display = object.pick_brep_display(entity)?.ok_or(om9_core::Error::Stale("scene BRep snap display"))?;
                 let ray = surface_broad_phase.as_ref().expect("initialized for surfaces").0;
-                let mut best = std::collections::BTreeMap::<u32, (f64, Point3, Point3, Option<uuid::Uuid>)>::new();
-                for triangle in &brep.display.triangles {
-                    let a = transform.point(brep.display.points[triangle[0] as usize])?;
-                    let b = transform.point(brep.display.points[triangle[1] as usize])?;
-                    let c = transform.point(brep.display.points[triangle[2] as usize])?;
+                let mut best = std::collections::BTreeMap::<u32, (f64, Point3, Point3, Option<uuid::Uuid>, [Point3; 3], usize)>::new();
+                for (triangle_index, triangle) in display.triangles.iter().enumerate() {
+                    let a = transform.point(display.points[triangle[0] as usize])?;
+                    let b = transform.point(display.points[triangle[1] as usize])?;
+                    let c = transform.point(display.points[triangle[2] as usize])?;
                     if let Some((point, normal)) = ray_triangle(ray, a, b, c) {
                         let distance = distance(camera.eye, point);
-                        if best.get(&triangle[3]).is_none_or(|(old, _, _, _)| distance < *old) {
-                            best.insert(triangle[3], (distance, point, normal, brep.display.faces.get(triangle[3] as usize).copied()));
+                        if best.get(&triangle[3]).is_none_or(|(old, _, _, _, _, _)| distance < *old) {
+                            best.insert(triangle[3], (distance, point, normal, display.topology.faces.get(triangle[3] as usize).copied(),
+                                [display.points[triangle[0] as usize], display.points[triangle[1] as usize], display.points[triangle[2] as usize]], triangle_index));
                         }
                     }
                 }
-                for (_, (_, point, normal, face)) in best {
+                for (_, (_, point, normal, face, witness, triangle_index)) in best {
                     let previous = out.len();
                     push(
                         SnapKind::Surface,
@@ -466,8 +538,10 @@ pub fn candidates(
                     )?;
                     if out.len() > previous {
                         out.last_mut().expect("surface candidate was appended").surface_source = Some(SurfaceCandidateSource {
-                            path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch,
-                            placement: transform, camera: camera.clone(), viewport, cursor, face,
+                            path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch, scene_publication: scene.publication_id(),
+                            leaf_generation: object.leaf_generation, leaf_geometry_revision: object.leaf_geometry_revision,
+                            brep_display_fingerprint: object.brep_display_fingerprint.clone(),
+                            placement: transform, camera: camera.clone(), viewport, cursor, face, face_witness: Some((witness, display.deflection_mm)), face_witness_triangle: Some(triangle_index),
                         });
                     }
                 }
@@ -505,8 +579,10 @@ pub fn candidates(
                     )?;
                     if out.len() > previous {
                         out.last_mut().expect("surface candidate was appended").surface_source = Some(SurfaceCandidateSource {
-                            path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch,
-                            placement: transform, camera: camera.clone(), viewport, cursor, face: None,
+                            path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch, scene_publication: scene.publication_id(),
+                            leaf_generation: object.leaf_generation, leaf_geometry_revision: object.leaf_geometry_revision,
+                            brep_display_fingerprint: object.brep_display_fingerprint.clone(),
+                            placement: transform, camera: camera.clone(), viewport, cursor, face: None, face_witness: None, face_witness_triangle: None,
                         });
                     }
                 }
@@ -530,8 +606,10 @@ pub fn candidates(
                         camera, viewport, cursor, settings.radius_px, &mut out)?;
                     if out.len() > previous {
                         out.last_mut().expect("surface candidate was appended").surface_source = Some(SurfaceCandidateSource {
-                            path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch,
-                            placement: transform, camera: camera.clone(), viewport, cursor, face: None,
+                            path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch, scene_publication: scene.publication_id(),
+                            leaf_generation: object.leaf_generation, leaf_geometry_revision: object.leaf_geometry_revision,
+                            brep_display_fingerprint: object.brep_display_fingerprint.clone(),
+                            placement: transform, camera: camera.clone(), viewport, cursor, face: None, face_witness: None, face_witness_triangle: None,
                         });
                     }
                 }
