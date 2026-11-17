@@ -6,7 +6,7 @@
 //! add-ons the exact trimmed surfaces they work on (ReTrim, Untrim, edges as input …).
 use crate::KernelError;
 use crate::brep::{BytesContext, byte_bound, native_message, receive_bytes};
-use om9_core::{brep::Brep, budget::Limits};
+use om9_core::{brep::BrepSourceAccess, budget::Limits};
 use std::ffi::{c_char, c_int, c_void};
 
 unsafe extern "C" {
@@ -47,7 +47,7 @@ pub struct FaceNurbs {
 }
 
 /// The faces of `brep` as exact NURBS (see the module notes).
-pub fn face_nurbs(brep: &Brep, limits: &Limits) -> Result<Vec<FaceNurbs>, KernelError> {
+pub fn face_nurbs(brep: &(impl BrepSourceAccess + ?Sized), limits: &Limits) -> Result<Vec<FaceNurbs>, KernelError> {
     brep.validate(limits).map_err(|e| KernelError::InvalidInput(e.to_string()))?;
     let limit = byte_bound(limits);
     let mut context = BytesContext { bytes: Vec::new(), limit };

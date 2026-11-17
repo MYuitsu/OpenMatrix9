@@ -391,7 +391,7 @@ fn copy_repeat_direction_uses_scale_safe_previous_vector() {
 fn native_brep_toolbar_disables_unavailable_topology_operations() {
     use om9_core::geometry::{Curve, Mesh, NativeBrep};
     let native = || Entity::new("native", Geometry::NativeBrep(NativeBrep {
-        display: Mesh { vertices: vec![[0., 0., 0.], [2., 0., 0.], [0., 2., 0.]], faces: vec![vec![0, 1, 2]], normals: vec![], colors: vec![], corner_uvs: vec![] },
+        display: std::sync::Arc::new(Mesh { vertices: vec![[0., 0., 0.], [2., 0., 0.], [0., 2., 0.]], faces: vec![vec![0, 1, 2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
         payload: vec![1, 2, 3].into(), crc: 0,
     }), None);
     let first = native(); let second = native();
@@ -4055,7 +4055,7 @@ fn mirror_hatch_light_and_native_brep_preserves_payloads_and_attributes() {
     let limits=Limits::default();let mesh=Mesh{vertices:vec![[1.,0.,0.],[3.,0.,0.],[1.,2.,0.]],faces:vec![vec![0,1,2]],normals:vec![],colors:vec![],corner_uvs:vec![]};
     let geometries=[Geometry::Hatch(Hatch{display:mesh.clone(),loops:vec![vec![[1.,0.,0.],[3.,0.,0.],[1.,2.,0.]]],pattern:Some("test".into()),color:[10,20,30,255]}),
         Geometry::Light(Light{display:[1.,0.,0.],location:[1.,0.,2.],direction:[1.,2.,-1.],diffuse:[30,40,50,255],intensity:2.,style:1}),
-        Geometry::NativeBrep(NativeBrep{display:mesh,payload:vec![1,2,3,4].into(),crc:0})];
+        Geometry::NativeBrep(NativeBrep{display: std::sync::Arc::new(mesh),payload:vec![1,2,3,4].into(),crc:0})];
     for geometry in geometries {for copy in [false,true] {for toolbar in [false,true] {
         let mut entity=Entity::new("mirror",geometry.clone(),None);entity.placement=Transform::translation([4.,1.,0.]);let id=entity.id;
         let mut doc=Document::with_template_tolerance("mirror retained objects");doc.entities.insert(id,entity);

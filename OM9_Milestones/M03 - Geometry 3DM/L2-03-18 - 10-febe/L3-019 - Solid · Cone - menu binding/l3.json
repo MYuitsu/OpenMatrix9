@@ -785,6 +785,7 @@
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "feature": "OM9-SOLID-019",
+    "document_unit_direct_2026_11_12": "Centimetre CMD/menu direct dimensions, volume, saved input/output and Undo/Redo verified; physical clicks and other stages not covered. See docs/validation/2026-11-12-solid-direct-document-units.md.",
     "command": "Cone 3 6",
     "evidence": [
       "implementation/evidence/M03/OM9-L3-03-18-019/OM9-L4-03-18-019-01.focused.log",

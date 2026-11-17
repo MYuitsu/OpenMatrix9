@@ -3,6 +3,20 @@ use om9_core::{budget::{Limits, Usage, memory::{CommitMemory, MemoryClass}}, geo
     model::{Document, Entity}, transaction::{TransactionCoordinator, World}, Error};
 use om9_scene::scene::Scene;
 
+// Cache-owner metadata now includes one admitted projection header per
+// coordinator/peer. Measure that independent charge rather than assuming the
+// picking arena is the only CPU cache in the account.
+fn projection_header_bytes() -> u64 {
+    let limits = Limits::default();
+    let coordinator = TransactionCoordinator::new(World::new(Vec::new(), &limits).unwrap(), limits).unwrap();
+    coordinator.external_reserved_bytes(MemoryClass::CpuCache)
+}
+fn picking_pressure_request(coordinator: &TransactionCoordinator) -> u64 {
+    // Exhaust optional retained-owner projections as well as the byte that
+    // must be reclaimed from a picking arena. No pinned arena may be freed.
+    coordinator.memory_diagnostics(Ok(Usage::default()), None).projection_cache_accounted_bytes + 1
+}
+
 fn fixture() -> (TransactionCoordinator, Scene) {
     let limits = Limits { max_bytes: 64 * 1024 * 1024, ..Default::default() };
     let mut document = Document::new("managed picking");
@@ -25,7 +39,7 @@ fn metadata_and_cache_survive_borrow_preview_reuse_eviction_and_readmission() {
     let metadata = scene.metadata_storage_usage().unwrap().bytes;
     let arena = scene.picking_arena_bytes().unwrap();
     assert_eq!(quota, metadata + arena);
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), quota);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), quota + 2 * projection_header_bytes());
     assert_eq!(coordinator.external_pending_bytes(MemoryClass::CpuCache), arena);
     assert_eq!(scene.cache_held_usage().unwrap().bytes, scene.shared_buffer_bytes());
     let old = scene.object_spheres().unwrap()[0].0;
@@ -37,15 +51,15 @@ fn metadata_and_cache_survive_borrow_preview_reuse_eviction_and_readmission() {
     assert_eq!(scene.cache_usage().unwrap().bytes, actual, "invalidation keeps allocated arena storage");
     assert_eq!(scene.object_spheres().unwrap()[0].0, [old[0] + 25., old[1], old[2]]);
     scene.spatial_index().unwrap();
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), quota);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), quota + 2 * projection_header_bytes());
     scene.evict_picking_cache().unwrap();
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), metadata);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), metadata + 2 * projection_header_bytes());
     assert_eq!(coordinator.external_pending_bytes(MemoryClass::CpuCache), 0);
     // A read re-admits from the same account; callers need no manual re-arm.
     scene.spatial_index().unwrap();
     assert_eq!(coordinator.external_pending_bytes(MemoryClass::CpuCache), 0);
     drop(scene);
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), projection_header_bytes());
 }
 
 #[test]
@@ -56,16 +70,16 @@ fn read_handle_keeps_arena_charged_after_scene_eviction_and_drop() {
     let arena = scene.picking_arena_bytes().unwrap();
     let metadata = scene.metadata_storage_usage().unwrap().bytes;
     scene.evict_picking_cache().unwrap();
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), metadata + arena);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), metadata + arena + 2 * projection_header_bytes());
     assert_eq!(spheres[0], first);
     let retained_before = coordinator.retained_usage().unwrap().bytes;
     drop(scene);
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), arena);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), arena + projection_header_bytes());
     assert!(retained_before - coordinator.retained_usage().unwrap().bytes > metadata,
         "the last scene also retires its weak registry slot; the pinned arena remains owned separately");
     assert_eq!(spheres[0], first);
     drop(spheres);
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), projection_header_bytes());
 }
 
 #[test]
@@ -80,9 +94,9 @@ fn preview_with_an_old_reader_admits_overlap_and_keeps_both_snapshots_correct() 
     let new = scene.object_spheres().unwrap();
     assert_eq!(old[0].0, position);
     assert_eq!(new[0].0, [position[0] + 25., position[1], position[2]]);
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), metadata + 2 * arena);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), metadata + 2 * arena + 2 * projection_header_bytes());
     drop(old);
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), metadata + arena);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), metadata + arena + 2 * projection_header_bytes());
 }
 
 #[test]
@@ -94,13 +108,13 @@ fn binding_an_existing_raw_cache_requires_exclusive_ownership_and_counts_it_allo
     let reader = raw.object_spheres().unwrap();
     let held = Usage { bytes: raw.shared_buffer_bytes(), ..Default::default() };
     assert!(matches!(raw.reserve_memory_allowance(&coordinator, held, None), Err(Error::Busy)));
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), projection_header_bytes());
     drop(reader);
     raw.reserve_memory_allowance(&coordinator, held, None).unwrap();
     assert_eq!(coordinator.external_pending_bytes(MemoryClass::CpuCache), 0);
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), raw.managed_memory_allowance().unwrap());
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), raw.managed_memory_allowance().unwrap() + 2 * projection_header_bytes());
     drop(raw);
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), projection_header_bytes());
 }
 
 #[test]
@@ -117,10 +131,10 @@ fn pressure_reclaims_warm_or_unused_allowance_and_readmits_after_pressure() {
         let scratch = scene.document.validation_scratch_usage(coordinator.limits()).unwrap().bytes;
         pressure.shrink_to(pressure.bytes() - scratch).unwrap();
         assert!(coordinator.last_external_memory_refusal().is_none());
-        let request = coordinator.reserve_external_memory(MemoryClass::Export, 1, None).unwrap();
+        let request = coordinator.reserve_external_memory(MemoryClass::Export, picking_pressure_request(&coordinator), None).unwrap();
         assert!(coordinator.last_external_memory_refusal().is_none(), "successful reclamation must not publish transient refusal attempts");
         assert_eq!(scene.memory_allowance_bytes(), metadata, "only optional allowance was reclaimed");
-        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), metadata + buffers.bytes());
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), metadata + buffers.bytes() + 2 * projection_header_bytes());
         assert_eq!(coordinator.snapshot(), before);
         drop(request);
         drop(pressure);
@@ -143,11 +157,12 @@ fn pressure_does_not_evict_a_pinned_reader_or_report_its_bytes_free() {
     let mut pressure = coordinator.reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, Usage::default()).unwrap();
     let scratch = scene.document.validation_scratch_usage(coordinator.limits()).unwrap().bytes;
     pressure.shrink_to(pressure.bytes() - scratch).unwrap();
-    assert!(matches!(coordinator.reserve_external_memory(MemoryClass::Export, 1, None), Err(Error::Budget(_))));
+    let request_bytes = picking_pressure_request(&coordinator);
+    assert!(matches!(coordinator.reserve_external_memory(MemoryClass::Export, request_bytes, None), Err(Error::Budget(_))));
     assert_eq!(scene.memory_allowance_bytes(), charged);
     assert_eq!(reader[0], point);
     drop(reader);
-    let admitted = coordinator.reserve_external_memory(MemoryClass::Export, 1, None).unwrap();
+    let admitted = coordinator.reserve_external_memory(MemoryClass::Export, request_bytes, None).unwrap();
     assert!(scene.memory_allowance_bytes() < charged);
     drop(admitted);
     drop(pressure);
@@ -166,7 +181,7 @@ fn one_byte_shortage_stops_after_one_cache_and_keeps_other_cache_warm() {
     let mut pressure = coordinator.reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, Usage::default()).unwrap();
     let scratch = scene.document.validation_scratch_usage(coordinator.limits()).unwrap().bytes;
     pressure.shrink_to(pressure.bytes() - scratch).unwrap();
-    let _request = coordinator.reserve_external_memory(MemoryClass::Export, 1, None).unwrap();
+    let _request = coordinator.reserve_external_memory(MemoryClass::Export, picking_pressure_request(&coordinator), None).unwrap();
     assert_eq!(scene.memory_allowance_bytes(), scene.metadata_storage_usage().unwrap().bytes);
     assert_eq!(second.memory_allowance_bytes(), other_charge, "admission must stop before evicting another warm cache");
 }
@@ -184,7 +199,7 @@ fn unused_snapshot_quota_is_reclaimed_before_the_active_picking_arena() {
     let mut pressure = coordinator.reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, Usage::default()).unwrap();
     let scratch = scene.document.validation_scratch_usage(coordinator.limits()).unwrap().bytes;
     pressure.shrink_to(pressure.bytes() - scratch).unwrap();
-    let _request = coordinator.reserve_external_memory(MemoryClass::Export, 1, None).unwrap();
+    let _request = coordinator.reserve_external_memory(MemoryClass::Export, picking_pressure_request(&coordinator), None).unwrap();
     assert_eq!(scene.memory_allowance_bytes(), active, "unused quota must go before the active picking arena");
     assert_eq!(cold.memory_allowance_bytes(), cold.metadata_storage_usage().unwrap().bytes);
     assert_eq!(coordinator.snapshot(), before);
@@ -205,7 +220,7 @@ fn recently_used_picking_arena_survives_before_an_older_snapshot() {
     let mut pressure = coordinator.reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, Usage::default()).unwrap();
     let scratch = scene.document.validation_scratch_usage(coordinator.limits()).unwrap().bytes;
     pressure.shrink_to(pressure.bytes() - scratch).unwrap();
-    let _request = coordinator.reserve_external_memory(MemoryClass::Export, 1, None).unwrap();
+    let _request = coordinator.reserve_external_memory(MemoryClass::Export, picking_pressure_request(&coordinator), None).unwrap();
     assert_eq!(scene.memory_allowance_bytes(), active, "last access, not registration order, protects the active picker");
     assert_eq!(older.memory_allowance_bytes(), older.metadata_storage_usage().unwrap().bytes);
 }
@@ -245,10 +260,10 @@ fn passive_bounds_never_return_the_old_preview_and_keep_their_reader_lease() {
     assert_eq!(old[0].0, point);
     drop(current);
     drop(scene);
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), arena);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), arena + projection_header_bytes());
     assert_eq!(old[0].0, point);
     drop(old);
-    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), projection_header_bytes());
 }
 
 #[test]
@@ -271,7 +286,7 @@ fn four_passive_view_readers_do_not_promote_or_rebuild_caches_under_pressure() {
     let mut pressure = coordinator.reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, Usage::default()).unwrap();
     let scratch = scene.document.validation_scratch_usage(coordinator.limits()).unwrap().bytes;
     pressure.shrink_to(pressure.bytes() - scratch).unwrap();
-    let _request = coordinator.reserve_external_memory(MemoryClass::Export, 1, None).unwrap();
+    let _request = coordinator.reserve_external_memory(MemoryClass::Export, picking_pressure_request(&coordinator), None).unwrap();
     assert!(views[0].cached_object_spheres().is_none());
     assert_eq!(scene.memory_allowance_bytes(), active);
     let charged = coordinator.external_reserved_bytes(MemoryClass::CpuCache);

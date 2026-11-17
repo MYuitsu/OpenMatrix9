@@ -1,0 +1,4942 @@
+{
+  "128": {
+    "artifact": "build\\standalone-validation\\ui-artifacts\\many-spheres-128-20261115-ab",
+    "sha256": "19bd30c53cdd2a61f7ef914bb20916f8391f15a73006fcbd407e0faa62b72c4d",
+    "source_sha256": {
+      "crates/om9-app/src/ui/sphere_boolean_audit.rs": "2e156ab9d86cec04d0b2dad3a4433f61d9cc766ea4eb8015665b49f0891ab292",
+      "crates/om9-app/src/ui.rs": "4bb824abbf5a7d4a8a47543a27b191546d53e2e950d76da2df0c0706b8ea24e1",
+      "crates/om9-app/src/display.rs": "743fea54199fb9c26858999a2d75b2b11e3ac322c2ebf5e4bd0c876f89b343aa",
+      "crates/om9-app/src/gpu_viewport.rs": "7b69b5ad559cb3376aaa5ba819f73a877fbd782e91e5da2fa64bae8fb5401893",
+      "crates/om9-app/src/session/boolean_union_worker.rs": "89b75c447e65579681f44a5ac7461f15ffc908548173898c581c056e5284c21d",
+      "tools/benchmark_sphere_viewport.py": "31b0fef6c99b4ebf0b561cfd3df9bec02f8e08cfb6d62bd479fdd89f9ecec863"
+    },
+    "analysis_sha256": "07f1c5cd0ee295aa04418d5eb10951c5295b59f3f7600ec9d9fad86e3e728425",
+    "profiles": {
+      "high": {
+        "runs": 1,
+        "input_triangles": [
+          641024
+        ],
+        "result_triangles": [
+          528896
+        ],
+        "scene_fps": {
+          "median": 30.00447828034035,
+          "min": 30.00447828034035,
+          "max": 30.00447828034035,
+          "samples": [
+            30.00447828034035
+          ]
+        },
+        "result_fps": {
+          "median": 29.992576095025985,
+          "min": 29.992576095025985,
+          "max": 29.992576095025985,
+          "samples": [
+            29.992576095025985
+          ]
+        },
+        "scene_gpu_ms": {
+          "median": 0.393216,
+          "min": 0.393216,
+          "max": 0.393216,
+          "samples": [
+            0.393216
+          ]
+        },
+        "result_gpu_ms": {
+          "median": 0.432128,
+          "min": 0.432128,
+          "max": 0.432128,
+          "samples": [
+            0.432128
+          ]
+        },
+        "boolean_ms": {
+          "median": 199626.81170000002,
+          "min": 199626.81170000002,
+          "max": 199626.81170000002,
+          "samples": [
+            199626.81170000002
+          ]
+        },
+        "final_poll_ms": {
+          "median": 5114.9138,
+          "min": 5114.9138,
+          "max": 5114.9138,
+          "samples": [
+            5114.9138
+          ]
+        },
+        "worst_gap_ms": {
+          "median": 5141.7951,
+          "min": 5141.7951,
+          "max": 5141.7951,
+          "samples": [
+            5141.7951
+          ]
+        },
+        "gaps_over_100_ms": {
+          "median": 65,
+          "min": 65,
+          "max": 65,
+          "samples": [
+            65
+          ]
+        },
+        "gaps_over_500_ms": {
+          "median": 2,
+          "min": 2,
+          "max": 2,
+          "samples": [
+            2
+          ]
+        },
+        "gaps_over_1000_ms": {
+          "median": 1,
+          "min": 1,
+          "max": 1,
+          "samples": [
+            1
+          ]
+        },
+        "creation_command_sum_ms": {
+          "median": 13193.8286,
+          "min": 13193.8286,
+          "max": 13193.8286,
+          "samples": [
+            13193.8286
+          ]
+        },
+        "steady_result_p95_ms": {
+          "median": 3.3720999999999997,
+          "min": 3.3720999999999997,
+          "max": 3.3720999999999997,
+          "samples": [
+            3.3720999999999997
+          ]
+        }
+      },
+      "light": {
+        "runs": 1,
+        "input_triangles": [
+          66048
+        ],
+        "result_triangles": [
+          56064
+        ],
+        "scene_fps": {
+          "median": 30.0,
+          "min": 30.0,
+          "max": 30.0,
+          "samples": [
+            30.0
+          ]
+        },
+        "result_fps": {
+          "median": 30.005941770647652,
+          "min": 30.005941770647652,
+          "max": 30.005941770647652,
+          "samples": [
+            30.005941770647652
+          ]
+        },
+        "scene_gpu_ms": {
+          "median": 0.088064,
+          "min": 0.088064,
+          "max": 0.088064,
+          "samples": [
+            0.088064
+          ]
+        },
+        "result_gpu_ms": {
+          "median": 0.126976,
+          "min": 0.126976,
+          "max": 0.126976,
+          "samples": [
+            0.126976
+          ]
+        },
+        "boolean_ms": {
+          "median": 87237.81049999999,
+          "min": 87237.81049999999,
+          "max": 87237.81049999999,
+          "samples": [
+            87237.81049999999
+          ]
+        },
+        "final_poll_ms": {
+          "median": 5013.826,
+          "min": 5013.826,
+          "max": 5013.826,
+          "samples": [
+            5013.826
+          ]
+        },
+        "worst_gap_ms": {
+          "median": 5040.3324999999995,
+          "min": 5040.3324999999995,
+          "max": 5040.3324999999995,
+          "samples": [
+            5040.3324999999995
+          ]
+        },
+        "gaps_over_100_ms": {
+          "median": 47,
+          "min": 47,
+          "max": 47,
+          "samples": [
+            47
+          ]
+        },
+        "gaps_over_500_ms": {
+          "median": 1,
+          "min": 1,
+          "max": 1,
+          "samples": [
+            1
+          ]
+        },
+        "gaps_over_1000_ms": {
+          "median": 1,
+          "min": 1,
+          "max": 1,
+          "samples": [
+            1
+          ]
+        },
+        "creation_command_sum_ms": {
+          "median": 10401.517700000008,
+          "min": 10401.517700000008,
+          "max": 10401.517700000008,
+          "samples": [
+            10401.517700000008
+          ]
+        },
+        "steady_result_p95_ms": {
+          "median": 3.2733,
+          "min": 3.2733,
+          "max": 3.2733,
+          "samples": [
+            3.2733
+          ]
+        }
+      }
+    },
+    "runs": [
+      {
+        "run": "01-high-shaded",
+        "path": "build\\standalone-validation\\ui-artifacts\\many-spheres-128-20261115-ab\\01-high-shaded.jsonl",
+        "pairs": 64,
+        "input_triangles": 641024,
+        "result_triangles": 528896,
+        "volume_mm3": 56548.667765580394,
+        "stages": {
+          "warmup": {
+            "intervals": 1933,
+            "fps_app": 386.2404487662435,
+            "p50_ms": 2.5035000000000003,
+            "p95_ms": 2.9547000000000003,
+            "p99_ms": 3.4573,
+            "max_ms": 37.8691,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.024509803921568
+          },
+          "creation": {
+            "intervals": 128,
+            "fps_app": 9.041388226049962,
+            "p50_ms": 99.1714,
+            "p95_ms": 213.2642,
+            "p99_ms": 225.843,
+            "max_ms": 238.4269,
+            "over_50_ms": 121,
+            "over_100_ms": 62,
+            "over_200_ms": 11
+          },
+          "scene": {
+            "intervals": 2771,
+            "fps_app": 322.6158883772777,
+            "p50_ms": 2.8081,
+            "p95_ms": 3.2088,
+            "p99_ms": 5.1677,
+            "max_ms": 600.2452999999999,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 1,
+            "fps_encoded_perspective": 30.008938832843825
+          },
+          "boolean": {
+            "intervals": 12924,
+            "fps_app": 64.93290070731477,
+            "p50_ms": 12.782,
+            "p95_ms": 19.885900000000003,
+            "p99_ms": 20.9161,
+            "max_ms": 5141.7951,
+            "over_50_ms": 2,
+            "over_100_ms": 2,
+            "over_200_ms": 1
+          },
+          "result": {
+            "intervals": 2540,
+            "fps_app": 305.56218943633496,
+            "p50_ms": 2.994,
+            "p95_ms": 4.583399999999999,
+            "p99_ms": 4.9645,
+            "max_ms": 316.6859,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 1,
+            "fps_encoded_perspective": 30.002575328354364
+          }
+        },
+        "boolean_total_ms": 199626.81170000002,
+        "boolean_commit_ms": 5114.9138,
+        "sphere_ms": [
+          45.79119999999966,
+          42.246900000000096,
+          43.80069999999978,
+          44.512399999998706,
+          43.069000000000415,
+          44.32970000000023,
+          44.727099999999155,
+          45.17860000000019,
+          45.36669999999958,
+          45.486800000000585,
+          45.931000000000495,
+          45.855900000000474,
+          45.631499999999505,
+          46.74340000000029,
+          47.076200000000426,
+          47.58640000000014,
+          48.259400000000824,
+          47.79059999999936,
+          48.9334000000008,
+          49.56959999999981,
+          50.935200000000805,
+          50.11700000000019,
+          47.671400000000176,
+          51.24870000000101,
+          51.78359999999975,
+          49.566099999999096,
+          52.96090000000004,
+          53.29189999999926,
+          53.8131999999996,
+          53.52690000000075,
+          52.095900000000256,
+          55.01889999999912,
+          58.03790000000026,
+          56.71150000000125,
+          57.319400000000314,
+          58.07800000000043,
+          58.78020000000015,
+          59.47929999999997,
+          60.334499999999935,
+          61.16999999999916,
+          61.91519999999946,
+          63.53809999999976,
+          64.58480000000054,
+          64.68069999999989,
+          64.4339,
+          61.71839999999884,
+          65.20759999999973,
+          64.65440000000035,
+          64.09329999999954,
+          69.67299999999977,
+          70.56810000000041,
+          73.83460000000014,
+          72.57330000000002,
+          73.89039999999932,
+          74.67659999999887,
+          76.53490000000056,
+          76.56139999999868,
+          79.44659999999931,
+          81.71039999999994,
+          89.83729999999923,
+          83.66229999999996,
+          88.41439999999966,
+          90.95169999999962,
+          94.70250000000124,
+          93.14689999999973,
+          92.54529999999977,
+          103.56780000000072,
+          91.59050000000207,
+          91.72470000000067,
+          87.5067999999992,
+          95.85350000000108,
+          97.27239999999983,
+          91.97689999999966,
+          99.76130000000012,
+          108.6221000000005,
+          118.88839999999982,
+          119.22950000000128,
+          118.48569999999927,
+          117.27219999999943,
+          135.02920000000086,
+          122.95179999999891,
+          126.0601000000006,
+          125.76210000000174,
+          119.86179999999877,
+          117.53340000000026,
+          112.37560000000121,
+          125.93249999999898,
+          141.73289999999906,
+          140.01510000000053,
+          131.0035000000007,
+          144.310300000001,
+          143.0652000000009,
+          135.40090000000055,
+          145.57489999999962,
+          146.16899999999987,
+          131.3729999999996,
+          141.60829999999805,
+          140.04180000000088,
+          141.23610000000008,
+          138.7553999999982,
+          150.46889999999985,
+          152.875,
+          154.5166999999983,
+          159.33109999999942,
+          150.39620000000104,
+          154.01230000000032,
+          159.60430000000088,
+          157.09079999999994,
+          169.69070000000102,
+          163.35610000000088,
+          174.03139999999985,
+          167.67019999999866,
+          179.13850000000093,
+          172.14939999999842,
+          184.84860000000117,
+          183.52409999999873,
+          191.16059999999925,
+          183.39990000000034,
+          195.50650000000314,
+          199.16389999999956,
+          202.88280000000304,
+          193.9536999999982,
+          207.8142000000007,
+          210.21939999999813,
+          213.9442999999992,
+          207.0643999999993,
+          214.14490000000296,
+          226.941899999998
+        ],
+        "steady": {
+          "scene": {
+            "fps_encoded": 30.00447828034035,
+            "p95_ms": 3.1478,
+            "max_ms": 5.5073,
+            "over_100_ms": 0
+          },
+          "result": {
+            "fps_encoded": 29.992576095025985,
+            "p95_ms": 3.3720999999999997,
+            "max_ms": 5.6639,
+            "over_100_ms": 0
+          }
+        },
+        "freeze": {
+          "max_ms": 5141.7951,
+          "over_50_ms": 127,
+          "over_100_ms": 68,
+          "over_200_ms": 16,
+          "over_500_ms": 2,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 9151.796400000001,
+              "stage": 1,
+              "interval_ms": 102.4816
+            },
+            {
+              "elapsed_ms": 9252.8249,
+              "stage": 1,
+              "interval_ms": 101.0283
+            },
+            {
+              "elapsed_ms": 9353.7143,
+              "stage": 1,
+              "interval_ms": 100.8895
+            },
+            {
+              "elapsed_ms": 9465.2053,
+              "stage": 1,
+              "interval_ms": 111.49109999999999
+            },
+            {
+              "elapsed_ms": 9864.2151,
+              "stage": 1,
+              "interval_ms": 105.0174
+            },
+            {
+              "elapsed_ms": 9970.0405,
+              "stage": 1,
+              "interval_ms": 105.8255
+            },
+            {
+              "elapsed_ms": 10070.985,
+              "stage": 1,
+              "interval_ms": 100.9444
+            },
+            {
+              "elapsed_ms": 10179.233,
+              "stage": 1,
+              "interval_ms": 108.2482
+            },
+            {
+              "elapsed_ms": 10296.4471,
+              "stage": 1,
+              "interval_ms": 117.2136
+            },
+            {
+              "elapsed_ms": 10424.4761,
+              "stage": 1,
+              "interval_ms": 128.0289
+            },
+            {
+              "elapsed_ms": 10554.697,
+              "stage": 1,
+              "interval_ms": 130.2209
+            },
+            {
+              "elapsed_ms": 10684.1539,
+              "stage": 1,
+              "interval_ms": 129.457
+            },
+            {
+              "elapsed_ms": 10811.207100000001,
+              "stage": 1,
+              "interval_ms": 127.05269999999999
+            },
+            {
+              "elapsed_ms": 10953.953500000001,
+              "stage": 1,
+              "interval_ms": 142.7468
+            },
+            {
+              "elapsed_ms": 11086.7462,
+              "stage": 1,
+              "interval_ms": 132.7929
+            },
+            {
+              "elapsed_ms": 11220.599999999999,
+              "stage": 1,
+              "interval_ms": 133.85410000000002
+            },
+            {
+              "elapsed_ms": 11355.57,
+              "stage": 1,
+              "interval_ms": 134.9698
+            },
+            {
+              "elapsed_ms": 11483.0566,
+              "stage": 1,
+              "interval_ms": 127.48680000000002
+            },
+            {
+              "elapsed_ms": 11608.293899999999,
+              "stage": 1,
+              "interval_ms": 125.2374
+            },
+            {
+              "elapsed_ms": 11728.6373,
+              "stage": 1,
+              "interval_ms": 120.34309999999999
+            },
+            {
+              "elapsed_ms": 11862.4788,
+              "stage": 1,
+              "interval_ms": 133.8414
+            },
+            {
+              "elapsed_ms": 12012.388500000001,
+              "stage": 1,
+              "interval_ms": 149.9092
+            },
+            {
+              "elapsed_ms": 12160.5452,
+              "stage": 1,
+              "interval_ms": 148.157
+            },
+            {
+              "elapsed_ms": 12299.9951,
+              "stage": 1,
+              "interval_ms": 139.4493
+            },
+            {
+              "elapsed_ms": 12456.1099,
+              "stage": 1,
+              "interval_ms": 156.1151
+            },
+            {
+              "elapsed_ms": 12609.127199999999,
+              "stage": 1,
+              "interval_ms": 153.0174
+            },
+            {
+              "elapsed_ms": 12754.1909,
+              "stage": 1,
+              "interval_ms": 145.0641
+            },
+            {
+              "elapsed_ms": 12908.4165,
+              "stage": 1,
+              "interval_ms": 154.2256
+            },
+            {
+              "elapsed_ms": 13062.755,
+              "stage": 1,
+              "interval_ms": 154.33859999999999
+            },
+            {
+              "elapsed_ms": 13202.598699999999,
+              "stage": 1,
+              "interval_ms": 139.844
+            },
+            {
+              "elapsed_ms": 13352.948,
+              "stage": 1,
+              "interval_ms": 150.3487
+            },
+            {
+              "elapsed_ms": 13501.6798,
+              "stage": 1,
+              "interval_ms": 148.7319
+            },
+            {
+              "elapsed_ms": 13651.7808,
+              "stage": 1,
+              "interval_ms": 150.1015
+            },
+            {
+              "elapsed_ms": 13799.3031,
+              "stage": 1,
+              "interval_ms": 147.5222
+            },
+            {
+              "elapsed_ms": 13958.4571,
+              "stage": 1,
+              "interval_ms": 159.1539
+            },
+            {
+              "elapsed_ms": 14120.1522,
+              "stage": 1,
+              "interval_ms": 161.6948
+            },
+            {
+              "elapsed_ms": 14283.790500000001,
+              "stage": 1,
+              "interval_ms": 163.6386
+            },
+            {
+              "elapsed_ms": 14452.2121,
+              "stage": 1,
+              "interval_ms": 168.42190000000002
+            },
+            {
+              "elapsed_ms": 14613.061,
+              "stage": 1,
+              "interval_ms": 160.8487
+            },
+            {
+              "elapsed_ms": 14776.32,
+              "stage": 1,
+              "interval_ms": 163.2591
+            },
+            {
+              "elapsed_ms": 14945.2757,
+              "stage": 1,
+              "interval_ms": 168.9556
+            },
+            {
+              "elapsed_ms": 15111.7387,
+              "stage": 1,
+              "interval_ms": 166.4629
+            },
+            {
+              "elapsed_ms": 15290.8348,
+              "stage": 1,
+              "interval_ms": 179.0962
+            },
+            {
+              "elapsed_ms": 15463.9033,
+              "stage": 1,
+              "interval_ms": 173.0685
+            },
+            {
+              "elapsed_ms": 15647.5021,
+              "stage": 1,
+              "interval_ms": 183.5983
+            },
+            {
+              "elapsed_ms": 15824.9566,
+              "stage": 1,
+              "interval_ms": 177.4548
+            },
+            {
+              "elapsed_ms": 16013.824700000001,
+              "stage": 1,
+              "interval_ms": 188.8686
+            },
+            {
+              "elapsed_ms": 16195.774400000002,
+              "stage": 1,
+              "interval_ms": 181.949
+            },
+            {
+              "elapsed_ms": 16390.7523,
+              "stage": 1,
+              "interval_ms": 194.9777
+            },
+            {
+              "elapsed_ms": 16584.0998,
+              "stage": 1,
+              "interval_ms": 193.34779999999998
+            },
+            {
+              "elapsed_ms": 16785.4661,
+              "stage": 1,
+              "interval_ms": 201.3667
+            },
+            {
+              "elapsed_ms": 16979.0687,
+              "stage": 1,
+              "interval_ms": 193.6023
+            },
+            {
+              "elapsed_ms": 17184.879500000003,
+              "stage": 1,
+              "interval_ms": 205.8109
+            },
+            {
+              "elapsed_ms": 17394.9948,
+              "stage": 1,
+              "interval_ms": 210.11520000000002
+            },
+            {
+              "elapsed_ms": 17608.2595,
+              "stage": 1,
+              "interval_ms": 213.2642
+            },
+            {
+              "elapsed_ms": 17812.811400000002,
+              "stage": 1,
+              "interval_ms": 204.5524
+            },
+            {
+              "elapsed_ms": 18031.4701,
+              "stage": 1,
+              "interval_ms": 218.6586
+            },
+            {
+              "elapsed_ms": 18252.6299,
+              "stage": 1,
+              "interval_ms": 221.1595
+            },
+            {
+              "elapsed_ms": 18478.472400000002,
+              "stage": 1,
+              "interval_ms": 225.843
+            },
+            {
+              "elapsed_ms": 18697.813700000002,
+              "stage": 1,
+              "interval_ms": 219.3413
+            },
+            {
+              "elapsed_ms": 18923.3472,
+              "stage": 1,
+              "interval_ms": 225.5333
+            },
+            {
+              "elapsed_ms": 19161.7742,
+              "stage": 2,
+              "interval_ms": 238.4269
+            },
+            {
+              "elapsed_ms": 27750.935599999997,
+              "stage": 3,
+              "interval_ms": 600.2452999999999
+            },
+            {
+              "elapsed_ms": 27981.246,
+              "stage": 3,
+              "interval_ms": 105.3203
+            },
+            {
+              "elapsed_ms": 226781.4358,
+              "stage": 3,
+              "interval_ms": 5141.7951
+            },
+            {
+              "elapsed_ms": 235099.7159,
+              "stage": 5,
+              "interval_ms": 316.6859
+            },
+            {
+              "elapsed_ms": 235478.7868,
+              "stage": 5,
+              "interval_ms": 375.3655
+            },
+            {
+              "elapsed_ms": 235978.8056,
+              "stage": 5,
+              "interval_ms": 483.8159
+            }
+          ]
+        },
+        "active_freeze": {
+          "max_ms": 5141.7951,
+          "over_50_ms": 124,
+          "over_100_ms": 65,
+          "over_200_ms": 13,
+          "over_500_ms": 2,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 9151.796400000001,
+              "stage": 1,
+              "interval_ms": 102.4816
+            },
+            {
+              "elapsed_ms": 9252.8249,
+              "stage": 1,
+              "interval_ms": 101.0283
+            },
+            {
+              "elapsed_ms": 9353.7143,
+              "stage": 1,
+              "interval_ms": 100.8895
+            },
+            {
+              "elapsed_ms": 9465.2053,
+              "stage": 1,
+              "interval_ms": 111.49109999999999
+            },
+            {
+              "elapsed_ms": 9864.2151,
+              "stage": 1,
+              "interval_ms": 105.0174
+            },
+            {
+              "elapsed_ms": 9970.0405,
+              "stage": 1,
+              "interval_ms": 105.8255
+            },
+            {
+              "elapsed_ms": 10070.985,
+              "stage": 1,
+              "interval_ms": 100.9444
+            },
+            {
+              "elapsed_ms": 10179.233,
+              "stage": 1,
+              "interval_ms": 108.2482
+            },
+            {
+              "elapsed_ms": 10296.4471,
+              "stage": 1,
+              "interval_ms": 117.2136
+            },
+            {
+              "elapsed_ms": 10424.4761,
+              "stage": 1,
+              "interval_ms": 128.0289
+            },
+            {
+              "elapsed_ms": 10554.697,
+              "stage": 1,
+              "interval_ms": 130.2209
+            },
+            {
+              "elapsed_ms": 10684.1539,
+              "stage": 1,
+              "interval_ms": 129.457
+            },
+            {
+              "elapsed_ms": 10811.207100000001,
+              "stage": 1,
+              "interval_ms": 127.05269999999999
+            },
+            {
+              "elapsed_ms": 10953.953500000001,
+              "stage": 1,
+              "interval_ms": 142.7468
+            },
+            {
+              "elapsed_ms": 11086.7462,
+              "stage": 1,
+              "interval_ms": 132.7929
+            },
+            {
+              "elapsed_ms": 11220.599999999999,
+              "stage": 1,
+              "interval_ms": 133.85410000000002
+            },
+            {
+              "elapsed_ms": 11355.57,
+              "stage": 1,
+              "interval_ms": 134.9698
+            },
+            {
+              "elapsed_ms": 11483.0566,
+              "stage": 1,
+              "interval_ms": 127.48680000000002
+            },
+            {
+              "elapsed_ms": 11608.293899999999,
+              "stage": 1,
+              "interval_ms": 125.2374
+            },
+            {
+              "elapsed_ms": 11728.6373,
+              "stage": 1,
+              "interval_ms": 120.34309999999999
+            },
+            {
+              "elapsed_ms": 11862.4788,
+              "stage": 1,
+              "interval_ms": 133.8414
+            },
+            {
+              "elapsed_ms": 12012.388500000001,
+              "stage": 1,
+              "interval_ms": 149.9092
+            },
+            {
+              "elapsed_ms": 12160.5452,
+              "stage": 1,
+              "interval_ms": 148.157
+            },
+            {
+              "elapsed_ms": 12299.9951,
+              "stage": 1,
+              "interval_ms": 139.4493
+            },
+            {
+              "elapsed_ms": 12456.1099,
+              "stage": 1,
+              "interval_ms": 156.1151
+            },
+            {
+              "elapsed_ms": 12609.127199999999,
+              "stage": 1,
+              "interval_ms": 153.0174
+            },
+            {
+              "elapsed_ms": 12754.1909,
+              "stage": 1,
+              "interval_ms": 145.0641
+            },
+            {
+              "elapsed_ms": 12908.4165,
+              "stage": 1,
+              "interval_ms": 154.2256
+            },
+            {
+              "elapsed_ms": 13062.755,
+              "stage": 1,
+              "interval_ms": 154.33859999999999
+            },
+            {
+              "elapsed_ms": 13202.598699999999,
+              "stage": 1,
+              "interval_ms": 139.844
+            },
+            {
+              "elapsed_ms": 13352.948,
+              "stage": 1,
+              "interval_ms": 150.3487
+            },
+            {
+              "elapsed_ms": 13501.6798,
+              "stage": 1,
+              "interval_ms": 148.7319
+            },
+            {
+              "elapsed_ms": 13651.7808,
+              "stage": 1,
+              "interval_ms": 150.1015
+            },
+            {
+              "elapsed_ms": 13799.3031,
+              "stage": 1,
+              "interval_ms": 147.5222
+            },
+            {
+              "elapsed_ms": 13958.4571,
+              "stage": 1,
+              "interval_ms": 159.1539
+            },
+            {
+              "elapsed_ms": 14120.1522,
+              "stage": 1,
+              "interval_ms": 161.6948
+            },
+            {
+              "elapsed_ms": 14283.790500000001,
+              "stage": 1,
+              "interval_ms": 163.6386
+            },
+            {
+              "elapsed_ms": 14452.2121,
+              "stage": 1,
+              "interval_ms": 168.42190000000002
+            },
+            {
+              "elapsed_ms": 14613.061,
+              "stage": 1,
+              "interval_ms": 160.8487
+            },
+            {
+              "elapsed_ms": 14776.32,
+              "stage": 1,
+              "interval_ms": 163.2591
+            },
+            {
+              "elapsed_ms": 14945.2757,
+              "stage": 1,
+              "interval_ms": 168.9556
+            },
+            {
+              "elapsed_ms": 15111.7387,
+              "stage": 1,
+              "interval_ms": 166.4629
+            },
+            {
+              "elapsed_ms": 15290.8348,
+              "stage": 1,
+              "interval_ms": 179.0962
+            },
+            {
+              "elapsed_ms": 15463.9033,
+              "stage": 1,
+              "interval_ms": 173.0685
+            },
+            {
+              "elapsed_ms": 15647.5021,
+              "stage": 1,
+              "interval_ms": 183.5983
+            },
+            {
+              "elapsed_ms": 15824.9566,
+              "stage": 1,
+              "interval_ms": 177.4548
+            },
+            {
+              "elapsed_ms": 16013.824700000001,
+              "stage": 1,
+              "interval_ms": 188.8686
+            },
+            {
+              "elapsed_ms": 16195.774400000002,
+              "stage": 1,
+              "interval_ms": 181.949
+            },
+            {
+              "elapsed_ms": 16390.7523,
+              "stage": 1,
+              "interval_ms": 194.9777
+            },
+            {
+              "elapsed_ms": 16584.0998,
+              "stage": 1,
+              "interval_ms": 193.34779999999998
+            },
+            {
+              "elapsed_ms": 16785.4661,
+              "stage": 1,
+              "interval_ms": 201.3667
+            },
+            {
+              "elapsed_ms": 16979.0687,
+              "stage": 1,
+              "interval_ms": 193.6023
+            },
+            {
+              "elapsed_ms": 17184.879500000003,
+              "stage": 1,
+              "interval_ms": 205.8109
+            },
+            {
+              "elapsed_ms": 17394.9948,
+              "stage": 1,
+              "interval_ms": 210.11520000000002
+            },
+            {
+              "elapsed_ms": 17608.2595,
+              "stage": 1,
+              "interval_ms": 213.2642
+            },
+            {
+              "elapsed_ms": 17812.811400000002,
+              "stage": 1,
+              "interval_ms": 204.5524
+            },
+            {
+              "elapsed_ms": 18031.4701,
+              "stage": 1,
+              "interval_ms": 218.6586
+            },
+            {
+              "elapsed_ms": 18252.6299,
+              "stage": 1,
+              "interval_ms": 221.1595
+            },
+            {
+              "elapsed_ms": 18478.472400000002,
+              "stage": 1,
+              "interval_ms": 225.843
+            },
+            {
+              "elapsed_ms": 18697.813700000002,
+              "stage": 1,
+              "interval_ms": 219.3413
+            },
+            {
+              "elapsed_ms": 18923.3472,
+              "stage": 1,
+              "interval_ms": 225.5333
+            },
+            {
+              "elapsed_ms": 19161.7742,
+              "stage": 2,
+              "interval_ms": 238.4269
+            },
+            {
+              "elapsed_ms": 27750.935599999997,
+              "stage": 3,
+              "interval_ms": 600.2452999999999
+            },
+            {
+              "elapsed_ms": 27981.246,
+              "stage": 3,
+              "interval_ms": 105.3203
+            },
+            {
+              "elapsed_ms": 226781.4358,
+              "stage": 3,
+              "interval_ms": 5141.7951
+            }
+          ]
+        },
+        "settling_gaps": {
+          "max_ms": 483.8159,
+          "over_50_ms": 3,
+          "over_100_ms": 3,
+          "over_200_ms": 3,
+          "over_500_ms": 0,
+          "over_1000_ms": 0,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 235099.7159,
+              "stage": 5,
+              "interval_ms": 316.6859
+            },
+            {
+              "elapsed_ms": 235478.7868,
+              "stage": 5,
+              "interval_ms": 375.3655
+            },
+            {
+              "elapsed_ms": 235978.8056,
+              "stage": 5,
+              "interval_ms": 483.8159
+            }
+          ]
+        },
+        "moving_gpu_p50_ms": 0.432128,
+        "scene_gpu_p50_ms": 0.393216,
+        "result_motion_targets": [
+          [
+            649,
+            410,
+            4
+          ]
+        ],
+        "settled_targets": {
+          "Looking Down": {
+            "cached_frames": 20093,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 59079168,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 20880,
+            "overlay_buffer_bytes": 11609584,
+            "overlay_preparations": 131,
+            "overlay_upload_bytes": 17816512,
+            "readiness_checks": 148,
+            "scene_preparations": 131,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Perspective": {
+            "cached_frames": 18849,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 621,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 49680,
+            "main_scene_instance_snapshot_bytes": 203280,
+            "overlay_buffer_bytes": 11609584,
+            "overlay_preparations": 131,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 765,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Side View": {
+            "cached_frames": 20088,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 0,
+            "overlay_buffer_bytes": 11609584,
+            "overlay_preparations": 131,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 149,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Through Finger": {
+            "cached_frames": 20089,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 20640,
+            "overlay_buffer_bytes": 11609584,
+            "overlay_preparations": 131,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 149,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          }
+        },
+        "source_geometry": {
+          "bounds_mm": [
+            -75.0,
+            -61.0,
+            -5.0,
+            80.0,
+            61.0,
+            5.0
+          ],
+          "closed": true,
+          "naked_edges": 0,
+          "points": 280000,
+          "solids": 64,
+          "triangles": 528896,
+          "volume_mm3": 56548.667765580394
+        }
+      },
+      {
+        "run": "02-light-shaded",
+        "path": "build\\standalone-validation\\ui-artifacts\\many-spheres-128-20261115-ab\\02-light-shaded.jsonl",
+        "pairs": 64,
+        "input_triangles": 66048,
+        "result_triangles": 56064,
+        "volume_mm3": 56548.667765580394,
+        "stages": {
+          "warmup": {
+            "intervals": 1933,
+            "fps_app": 386.10694914807686,
+            "p50_ms": 2.5128,
+            "p95_ms": 2.9013,
+            "p99_ms": 3.3389,
+            "max_ms": 36.3102,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.006123698714024
+          },
+          "creation": {
+            "intervals": 128,
+            "fps_app": 11.353703989369597,
+            "p50_ms": 73.4393,
+            "p95_ms": 192.0999,
+            "p99_ms": 211.16570000000002,
+            "max_ms": 213.9845,
+            "over_50_ms": 84,
+            "over_100_ms": 45,
+            "over_200_ms": 3
+          },
+          "scene": {
+            "intervals": 2907,
+            "fps_app": 344.7856612716784,
+            "p50_ms": 2.6776,
+            "p95_ms": 2.99,
+            "p99_ms": 6.0137,
+            "max_ms": 440.7892,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 1,
+            "fps_encoded_perspective": 30.007596859964547
+          },
+          "boolean": {
+            "intervals": 14445,
+            "fps_app": 166.40556583152966,
+            "p50_ms": 4.679,
+            "p95_ms": 7.343500000000001,
+            "p99_ms": 7.863500000000001,
+            "max_ms": 5040.3324999999995,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 1
+          },
+          "result": {
+            "intervals": 2606,
+            "fps_app": 325.74717007146,
+            "p50_ms": 2.9472,
+            "p95_ms": 3.5745999999999998,
+            "p99_ms": 5.0905000000000005,
+            "max_ms": 18.637999999999998,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.0
+          }
+        },
+        "boolean_total_ms": 87237.81049999999,
+        "boolean_commit_ms": 5013.826,
+        "sphere_ms": [
+          26.76800000000003,
+          24.95049999999901,
+          26.30959999999868,
+          26.463999999999942,
+          31.268800000000738,
+          26.853500000000167,
+          26.418099999999868,
+          26.662199999999757,
+          27.02979999999934,
+          27.354999999999563,
+          29.588399999999638,
+          27.575700000000325,
+          28.433799999999792,
+          28.21769999999924,
+          28.419300000000476,
+          26.661600000000362,
+          28.738099999999577,
+          29.070199999999204,
+          29.32170000000042,
+          29.715400000000045,
+          30.392000000000735,
+          30.512300000000323,
+          30.897099999999227,
+          31.52610000000095,
+          31.745700000000397,
+          32.384100000001126,
+          32.73409999999967,
+          33.23829999999998,
+          33.697800000000825,
+          34.459899999999834,
+          34.07290000000012,
+          35.793400000000474,
+          38.47689999999966,
+          36.97350000000006,
+          37.58550000000014,
+          38.57790000000023,
+          38.89840000000004,
+          39.45600000000013,
+          40.35350000000017,
+          41.245600000000195,
+          42.22850000000017,
+          42.59810000000016,
+          43.510300000000825,
+          43.484300000000076,
+          46.529999999999745,
+          45.557699999999386,
+          46.907099999999446,
+          47.245200000000295,
+          48.686000000000604,
+          49.38159999999971,
+          50.48229999999967,
+          52.15520000000106,
+          53.08930000000055,
+          53.536300000000665,
+          52.27049999999963,
+          54.2554999999993,
+          56.180200000000696,
+          54.52490000000125,
+          58.71030000000064,
+          60.17360000000008,
+          61.114299999999275,
+          62.119699999999284,
+          60.677700000000186,
+          65.69259999999849,
+          67.15689999999995,
+          67.12049999999999,
+          68.90609999999924,
+          69.6981999999989,
+          68.04669999999987,
+          70.42909999999938,
+          74.40169999999853,
+          76.37060000000201,
+          76.66300000000047,
+          78.52329999999893,
+          79.4405999999999,
+          82.64859999999862,
+          83.3744000000006,
+          84.46310000000085,
+          86.8830999999991,
+          87.8793999999998,
+          89.48390000000109,
+          87.39749999999913,
+          91.83660000000054,
+          93.75820000000022,
+          95.3161,
+          97.03009999999995,
+          99.2583999999988,
+          101.38390000000072,
+          103.61879999999837,
+          105.49679999999898,
+          105.71519999999873,
+          109.03259999999864,
+          111.1244999999999,
+          117.63440000000082,
+          110.28989999999976,
+          119.28319999999985,
+          121.16630000000077,
+          130.51970000000074,
+          120.11590000000069,
+          125.45160000000033,
+          128.33869999999843,
+          130.46270000000004,
+          133.32030000000123,
+          134.52660000000105,
+          134.68159999999807,
+          137.4206000000013,
+          141.49089999999887,
+          144.74099999999999,
+          146.67300000000068,
+          151.26510000000053,
+          157.3633000000009,
+          163.2391000000007,
+          155.5586000000003,
+          157.62900000000081,
+          166.96640000000116,
+          164.64249999999993,
+          165.77600000000166,
+          166.19650000000001,
+          170.9280000000017,
+          174.15580000000227,
+          177.22559999999976,
+          181.12690000000111,
+          184.6135000000013,
+          184.6198000000004,
+          188.52620000000024,
+          190.75950000000012,
+          199.7341000000015,
+          202.66389999999774
+        ],
+        "steady": {
+          "scene": {
+            "fps_encoded": 30.0,
+            "p95_ms": 2.9443,
+            "max_ms": 4.8269,
+            "over_100_ms": 0
+          },
+          "result": {
+            "fps_encoded": 30.005941770647652,
+            "p95_ms": 3.2733,
+            "max_ms": 5.4448,
+            "over_100_ms": 0
+          }
+        },
+        "freeze": {
+          "max_ms": 5040.3324999999995,
+          "over_50_ms": 89,
+          "over_100_ms": 50,
+          "over_200_ms": 8,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 9549.093299999999,
+              "stage": 1,
+              "interval_ms": 101.4661
+            },
+            {
+              "elapsed_ms": 9652.102599999998,
+              "stage": 1,
+              "interval_ms": 103.0093
+            },
+            {
+              "elapsed_ms": 9756.8792,
+              "stage": 1,
+              "interval_ms": 104.7766
+            },
+            {
+              "elapsed_ms": 9864.2442,
+              "stage": 1,
+              "interval_ms": 107.36500000000001
+            },
+            {
+              "elapsed_ms": 9973.6911,
+              "stage": 1,
+              "interval_ms": 109.4465
+            },
+            {
+              "elapsed_ms": 10085.433500000001,
+              "stage": 1,
+              "interval_ms": 111.7426
+            },
+            {
+              "elapsed_ms": 10199.086599999999,
+              "stage": 1,
+              "interval_ms": 113.6532
+            },
+            {
+              "elapsed_ms": 10313.1487,
+              "stage": 1,
+              "interval_ms": 114.0621
+            },
+            {
+              "elapsed_ms": 10430.7885,
+              "stage": 1,
+              "interval_ms": 117.63990000000001
+            },
+            {
+              "elapsed_ms": 10550.2638,
+              "stage": 1,
+              "interval_ms": 119.4752
+            },
+            {
+              "elapsed_ms": 10676.6237,
+              "stage": 1,
+              "interval_ms": 126.35959999999999
+            },
+            {
+              "elapsed_ms": 10795.3826,
+              "stage": 1,
+              "interval_ms": 118.75919999999999
+            },
+            {
+              "elapsed_ms": 10923.4263,
+              "stage": 1,
+              "interval_ms": 128.04309999999998
+            },
+            {
+              "elapsed_ms": 11053.5514,
+              "stage": 1,
+              "interval_ms": 130.1253
+            },
+            {
+              "elapsed_ms": 11193.1687,
+              "stage": 1,
+              "interval_ms": 139.6176
+            },
+            {
+              "elapsed_ms": 11322.309000000001,
+              "stage": 1,
+              "interval_ms": 129.1404
+            },
+            {
+              "elapsed_ms": 11456.7288,
+              "stage": 1,
+              "interval_ms": 134.4198
+            },
+            {
+              "elapsed_ms": 11594.2248,
+              "stage": 1,
+              "interval_ms": 137.4956
+            },
+            {
+              "elapsed_ms": 11733.7323,
+              "stage": 1,
+              "interval_ms": 139.50789999999998
+            },
+            {
+              "elapsed_ms": 11876.606,
+              "stage": 1,
+              "interval_ms": 142.8732
+            },
+            {
+              "elapsed_ms": 12020.5024,
+              "stage": 1,
+              "interval_ms": 143.89679999999998
+            },
+            {
+              "elapsed_ms": 12164.6425,
+              "stage": 1,
+              "interval_ms": 144.1401
+            },
+            {
+              "elapsed_ms": 12311.5542,
+              "stage": 1,
+              "interval_ms": 146.9117
+            },
+            {
+              "elapsed_ms": 12462.6834,
+              "stage": 1,
+              "interval_ms": 151.1294
+            },
+            {
+              "elapsed_ms": 12617.3334,
+              "stage": 1,
+              "interval_ms": 154.6497
+            },
+            {
+              "elapsed_ms": 12773.6733,
+              "stage": 1,
+              "interval_ms": 156.34
+            },
+            {
+              "elapsed_ms": 12934.5757,
+              "stage": 1,
+              "interval_ms": 160.9024
+            },
+            {
+              "elapsed_ms": 13105.0971,
+              "stage": 1,
+              "interval_ms": 170.5209
+            },
+            {
+              "elapsed_ms": 13278.3359,
+              "stage": 1,
+              "interval_ms": 173.2392
+            },
+            {
+              "elapsed_ms": 13443.8671,
+              "stage": 1,
+              "interval_ms": 165.5313
+            },
+            {
+              "elapsed_ms": 13611.4063,
+              "stage": 1,
+              "interval_ms": 167.5393
+            },
+            {
+              "elapsed_ms": 13788.6091,
+              "stage": 1,
+              "interval_ms": 177.2026
+            },
+            {
+              "elapsed_ms": 13963.697400000001,
+              "stage": 1,
+              "interval_ms": 175.0885
+            },
+            {
+              "elapsed_ms": 14139.9974,
+              "stage": 1,
+              "interval_ms": 176.3
+            },
+            {
+              "elapsed_ms": 14316.4409,
+              "stage": 1,
+              "interval_ms": 176.4436
+            },
+            {
+              "elapsed_ms": 14497.7112,
+              "stage": 1,
+              "interval_ms": 181.26999999999998
+            },
+            {
+              "elapsed_ms": 14682.6299,
+              "stage": 1,
+              "interval_ms": 184.91850000000002
+            },
+            {
+              "elapsed_ms": 14870.4843,
+              "stage": 1,
+              "interval_ms": 187.8547
+            },
+            {
+              "elapsed_ms": 15062.5842,
+              "stage": 1,
+              "interval_ms": 192.0999
+            },
+            {
+              "elapsed_ms": 15258.186099999999,
+              "stage": 1,
+              "interval_ms": 195.6017
+            },
+            {
+              "elapsed_ms": 15453.637999999999,
+              "stage": 1,
+              "interval_ms": 195.4523
+            },
+            {
+              "elapsed_ms": 15653.196100000001,
+              "stage": 1,
+              "interval_ms": 199.55790000000002
+            },
+            {
+              "elapsed_ms": 15855.089899999999,
+              "stage": 1,
+              "interval_ms": 201.8938
+            },
+            {
+              "elapsed_ms": 16066.2557,
+              "stage": 1,
+              "interval_ms": 211.16570000000002
+            },
+            {
+              "elapsed_ms": 16280.2404,
+              "stage": 2,
+              "interval_ms": 213.9845
+            },
+            {
+              "elapsed_ms": 24711.5653,
+              "stage": 3,
+              "interval_ms": 440.7892
+            },
+            {
+              "elapsed_ms": 111512.42670000001,
+              "stage": 3,
+              "interval_ms": 5040.3324999999995
+            },
+            {
+              "elapsed_ms": 119978.5233,
+              "stage": 5,
+              "interval_ms": 422.9033
+            },
+            {
+              "elapsed_ms": 120478.77200000001,
+              "stage": 5,
+              "interval_ms": 481.6447
+            },
+            {
+              "elapsed_ms": 120978.5048,
+              "stage": 5,
+              "interval_ms": 483.8365
+            }
+          ]
+        },
+        "active_freeze": {
+          "max_ms": 5040.3324999999995,
+          "over_50_ms": 86,
+          "over_100_ms": 47,
+          "over_200_ms": 5,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 9549.093299999999,
+              "stage": 1,
+              "interval_ms": 101.4661
+            },
+            {
+              "elapsed_ms": 9652.102599999998,
+              "stage": 1,
+              "interval_ms": 103.0093
+            },
+            {
+              "elapsed_ms": 9756.8792,
+              "stage": 1,
+              "interval_ms": 104.7766
+            },
+            {
+              "elapsed_ms": 9864.2442,
+              "stage": 1,
+              "interval_ms": 107.36500000000001
+            },
+            {
+              "elapsed_ms": 9973.6911,
+              "stage": 1,
+              "interval_ms": 109.4465
+            },
+            {
+              "elapsed_ms": 10085.433500000001,
+              "stage": 1,
+              "interval_ms": 111.7426
+            },
+            {
+              "elapsed_ms": 10199.086599999999,
+              "stage": 1,
+              "interval_ms": 113.6532
+            },
+            {
+              "elapsed_ms": 10313.1487,
+              "stage": 1,
+              "interval_ms": 114.0621
+            },
+            {
+              "elapsed_ms": 10430.7885,
+              "stage": 1,
+              "interval_ms": 117.63990000000001
+            },
+            {
+              "elapsed_ms": 10550.2638,
+              "stage": 1,
+              "interval_ms": 119.4752
+            },
+            {
+              "elapsed_ms": 10676.6237,
+              "stage": 1,
+              "interval_ms": 126.35959999999999
+            },
+            {
+              "elapsed_ms": 10795.3826,
+              "stage": 1,
+              "interval_ms": 118.75919999999999
+            },
+            {
+              "elapsed_ms": 10923.4263,
+              "stage": 1,
+              "interval_ms": 128.04309999999998
+            },
+            {
+              "elapsed_ms": 11053.5514,
+              "stage": 1,
+              "interval_ms": 130.1253
+            },
+            {
+              "elapsed_ms": 11193.1687,
+              "stage": 1,
+              "interval_ms": 139.6176
+            },
+            {
+              "elapsed_ms": 11322.309000000001,
+              "stage": 1,
+              "interval_ms": 129.1404
+            },
+            {
+              "elapsed_ms": 11456.7288,
+              "stage": 1,
+              "interval_ms": 134.4198
+            },
+            {
+              "elapsed_ms": 11594.2248,
+              "stage": 1,
+              "interval_ms": 137.4956
+            },
+            {
+              "elapsed_ms": 11733.7323,
+              "stage": 1,
+              "interval_ms": 139.50789999999998
+            },
+            {
+              "elapsed_ms": 11876.606,
+              "stage": 1,
+              "interval_ms": 142.8732
+            },
+            {
+              "elapsed_ms": 12020.5024,
+              "stage": 1,
+              "interval_ms": 143.89679999999998
+            },
+            {
+              "elapsed_ms": 12164.6425,
+              "stage": 1,
+              "interval_ms": 144.1401
+            },
+            {
+              "elapsed_ms": 12311.5542,
+              "stage": 1,
+              "interval_ms": 146.9117
+            },
+            {
+              "elapsed_ms": 12462.6834,
+              "stage": 1,
+              "interval_ms": 151.1294
+            },
+            {
+              "elapsed_ms": 12617.3334,
+              "stage": 1,
+              "interval_ms": 154.6497
+            },
+            {
+              "elapsed_ms": 12773.6733,
+              "stage": 1,
+              "interval_ms": 156.34
+            },
+            {
+              "elapsed_ms": 12934.5757,
+              "stage": 1,
+              "interval_ms": 160.9024
+            },
+            {
+              "elapsed_ms": 13105.0971,
+              "stage": 1,
+              "interval_ms": 170.5209
+            },
+            {
+              "elapsed_ms": 13278.3359,
+              "stage": 1,
+              "interval_ms": 173.2392
+            },
+            {
+              "elapsed_ms": 13443.8671,
+              "stage": 1,
+              "interval_ms": 165.5313
+            },
+            {
+              "elapsed_ms": 13611.4063,
+              "stage": 1,
+              "interval_ms": 167.5393
+            },
+            {
+              "elapsed_ms": 13788.6091,
+              "stage": 1,
+              "interval_ms": 177.2026
+            },
+            {
+              "elapsed_ms": 13963.697400000001,
+              "stage": 1,
+              "interval_ms": 175.0885
+            },
+            {
+              "elapsed_ms": 14139.9974,
+              "stage": 1,
+              "interval_ms": 176.3
+            },
+            {
+              "elapsed_ms": 14316.4409,
+              "stage": 1,
+              "interval_ms": 176.4436
+            },
+            {
+              "elapsed_ms": 14497.7112,
+              "stage": 1,
+              "interval_ms": 181.26999999999998
+            },
+            {
+              "elapsed_ms": 14682.6299,
+              "stage": 1,
+              "interval_ms": 184.91850000000002
+            },
+            {
+              "elapsed_ms": 14870.4843,
+              "stage": 1,
+              "interval_ms": 187.8547
+            },
+            {
+              "elapsed_ms": 15062.5842,
+              "stage": 1,
+              "interval_ms": 192.0999
+            },
+            {
+              "elapsed_ms": 15258.186099999999,
+              "stage": 1,
+              "interval_ms": 195.6017
+            },
+            {
+              "elapsed_ms": 15453.637999999999,
+              "stage": 1,
+              "interval_ms": 195.4523
+            },
+            {
+              "elapsed_ms": 15653.196100000001,
+              "stage": 1,
+              "interval_ms": 199.55790000000002
+            },
+            {
+              "elapsed_ms": 15855.089899999999,
+              "stage": 1,
+              "interval_ms": 201.8938
+            },
+            {
+              "elapsed_ms": 16066.2557,
+              "stage": 1,
+              "interval_ms": 211.16570000000002
+            },
+            {
+              "elapsed_ms": 16280.2404,
+              "stage": 2,
+              "interval_ms": 213.9845
+            },
+            {
+              "elapsed_ms": 24711.5653,
+              "stage": 3,
+              "interval_ms": 440.7892
+            },
+            {
+              "elapsed_ms": 111512.42670000001,
+              "stage": 3,
+              "interval_ms": 5040.3324999999995
+            }
+          ]
+        },
+        "settling_gaps": {
+          "max_ms": 483.8365,
+          "over_50_ms": 3,
+          "over_100_ms": 3,
+          "over_200_ms": 3,
+          "over_500_ms": 0,
+          "over_1000_ms": 0,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 119978.5233,
+              "stage": 5,
+              "interval_ms": 422.9033
+            },
+            {
+              "elapsed_ms": 120478.77200000001,
+              "stage": 5,
+              "interval_ms": 481.6447
+            },
+            {
+              "elapsed_ms": 120978.5048,
+              "stage": 5,
+              "interval_ms": 483.8365
+            }
+          ]
+        },
+        "moving_gpu_p50_ms": 0.126976,
+        "scene_gpu_p50_ms": 0.088064,
+        "result_motion_targets": [
+          [
+            454,
+            287,
+            1
+          ],
+          [
+            649,
+            410,
+            4
+          ]
+        ],
+        "settled_targets": {
+          "Looking Down": {
+            "cached_frames": 21873,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 10590720,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 20880,
+            "overlay_buffer_bytes": 11215344,
+            "overlay_preparations": 131,
+            "overlay_upload_bytes": 17422272,
+            "readiness_checks": 140,
+            "scene_preparations": 131,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Perspective": {
+            "cached_frames": 20598,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 624,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 9579240,
+            "main_scene_camera_snapshot_bytes": 49920,
+            "main_scene_instance_snapshot_bytes": 233920,
+            "overlay_buffer_bytes": 11215344,
+            "overlay_preparations": 134,
+            "overlay_upload_bytes": 13293504,
+            "readiness_checks": 762,
+            "scene_preparations": 3,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 6,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Side View": {
+            "cached_frames": 21852,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 0,
+            "overlay_buffer_bytes": 11215344,
+            "overlay_preparations": 131,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 144,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Through Finger": {
+            "cached_frames": 21853,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 10320,
+            "overlay_buffer_bytes": 11215344,
+            "overlay_preparations": 131,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 144,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          }
+        },
+        "source_geometry": {
+          "bounds_mm": [
+            -75.0,
+            -61.0,
+            -5.0,
+            80.0,
+            61.0,
+            5.0
+          ],
+          "closed": true,
+          "naked_edges": 0,
+          "points": 33856,
+          "solids": 64,
+          "triangles": 56064,
+          "volume_mm3": 56548.667765580394
+        }
+      }
+    ]
+  },
+  "64": {
+    "artifact": "build\\standalone-validation\\ui-artifacts\\many-spheres-64-20261115-ab",
+    "sha256": "19bd30c53cdd2a61f7ef914bb20916f8391f15a73006fcbd407e0faa62b72c4d",
+    "source_sha256": {
+      "crates/om9-app/src/ui/sphere_boolean_audit.rs": "2e156ab9d86cec04d0b2dad3a4433f61d9cc766ea4eb8015665b49f0891ab292",
+      "crates/om9-app/src/ui.rs": "4bb824abbf5a7d4a8a47543a27b191546d53e2e950d76da2df0c0706b8ea24e1",
+      "crates/om9-app/src/display.rs": "743fea54199fb9c26858999a2d75b2b11e3ac322c2ebf5e4bd0c876f89b343aa",
+      "crates/om9-app/src/gpu_viewport.rs": "7b69b5ad559cb3376aaa5ba819f73a877fbd782e91e5da2fa64bae8fb5401893",
+      "crates/om9-app/src/session/boolean_union_worker.rs": "89b75c447e65579681f44a5ac7461f15ffc908548173898c581c056e5284c21d",
+      "tools/benchmark_sphere_viewport.py": "31b0fef6c99b4ebf0b561cfd3df9bec02f8e08cfb6d62bd479fdd89f9ecec863"
+    },
+    "analysis_sha256": "07f1c5cd0ee295aa04418d5eb10951c5295b59f3f7600ec9d9fad86e3e728425",
+    "profiles": {
+      "high": {
+        "runs": 3,
+        "input_triangles": [
+          320512
+        ],
+        "result_triangles": [
+          264448
+        ],
+        "scene_fps": {
+          "median": 29.99552305626026,
+          "min": 29.99552305626026,
+          "max": 30.008957897879963,
+          "samples": [
+            30.008957897879963,
+            29.99552305626026,
+            29.99552305626026
+          ]
+        },
+        "result_fps": {
+          "median": 30.001485222040696,
+          "min": 29.992576095025985,
+          "max": 30.001485222040696,
+          "samples": [
+            29.992576095025985,
+            30.001485222040696,
+            30.001485222040696
+          ]
+        },
+        "scene_gpu_ms": {
+          "median": 0.3072,
+          "min": 0.304128,
+          "max": 0.319488,
+          "samples": [
+            0.319488,
+            0.304128,
+            0.3072
+          ]
+        },
+        "result_gpu_ms": {
+          "median": 0.309248,
+          "min": 0.304128,
+          "max": 0.321536,
+          "samples": [
+            0.309248,
+            0.321536,
+            0.304128
+          ]
+        },
+        "boolean_ms": {
+          "median": 52652.6665,
+          "min": 52230.243299999995,
+          "max": 55085.1238,
+          "samples": [
+            55085.1238,
+            52230.243299999995,
+            52652.6665
+          ]
+        },
+        "final_poll_ms": {
+          "median": 2116.05,
+          "min": 2113.9302,
+          "max": 2148.468,
+          "samples": [
+            2148.468,
+            2116.05,
+            2113.9302
+          ]
+        },
+        "worst_gap_ms": {
+          "median": 2124.7503,
+          "min": 2122.7869,
+          "max": 2157.2707,
+          "samples": [
+            2157.2707,
+            2124.7503,
+            2122.7869
+          ]
+        },
+        "gaps_over_100_ms": {
+          "median": 2,
+          "min": 2,
+          "max": 3,
+          "samples": [
+            2,
+            2,
+            3
+          ]
+        },
+        "gaps_over_500_ms": {
+          "median": 1,
+          "min": 1,
+          "max": 1,
+          "samples": [
+            1,
+            1,
+            1
+          ]
+        },
+        "gaps_over_1000_ms": {
+          "median": 1,
+          "min": 1,
+          "max": 1,
+          "samples": [
+            1,
+            1,
+            1
+          ]
+        },
+        "creation_command_sum_ms": {
+          "median": 3764.9166000000014,
+          "min": 3757.8781000000026,
+          "max": 3772.598799999996,
+          "samples": [
+            3764.9166000000014,
+            3772.598799999996,
+            3757.8781000000026
+          ]
+        },
+        "steady_result_p95_ms": {
+          "median": 3.4034,
+          "min": 3.2590000000000003,
+          "max": 3.4072999999999998,
+          "samples": [
+            3.4072999999999998,
+            3.2590000000000003,
+            3.4034
+          ]
+        }
+      },
+      "light": {
+        "runs": 3,
+        "input_triangles": [
+          33024
+        ],
+        "result_triangles": [
+          28032
+        ],
+        "scene_fps": {
+          "median": 29.99552305626026,
+          "min": 29.99552305626026,
+          "max": 30.00447828034035,
+          "samples": [
+            29.99552305626026,
+            30.00447828034035,
+            29.99552305626026
+          ]
+        },
+        "result_fps": {
+          "median": 29.997029997029998,
+          "min": 29.992576095025985,
+          "max": 30.005941770647652,
+          "samples": [
+            29.992576095025985,
+            30.005941770647652,
+            29.997029997029998
+          ]
+        },
+        "scene_gpu_ms": {
+          "median": 0.06656,
+          "min": 0.065536,
+          "max": 0.069632,
+          "samples": [
+            0.065536,
+            0.06656,
+            0.069632
+          ]
+        },
+        "result_gpu_ms": {
+          "median": 0.094208,
+          "min": 0.09216,
+          "max": 0.094208,
+          "samples": [
+            0.094208,
+            0.09216,
+            0.094208
+          ]
+        },
+        "boolean_ms": {
+          "median": 23600.383800000003,
+          "min": 23218.326,
+          "max": 23756.657999999996,
+          "samples": [
+            23756.657999999996,
+            23218.326,
+            23600.383800000003
+          ]
+        },
+        "final_poll_ms": {
+          "median": 2064.5677,
+          "min": 2058.3211,
+          "max": 2090.8535,
+          "samples": [
+            2058.3211,
+            2064.5677,
+            2090.8535
+          ]
+        },
+        "worst_gap_ms": {
+          "median": 2073.4334,
+          "min": 2066.8244,
+          "max": 2099.6973,
+          "samples": [
+            2066.8244,
+            2073.4334,
+            2099.6973
+          ]
+        },
+        "gaps_over_100_ms": {
+          "median": 1,
+          "min": 1,
+          "max": 2,
+          "samples": [
+            1,
+            1,
+            2
+          ]
+        },
+        "gaps_over_500_ms": {
+          "median": 1,
+          "min": 1,
+          "max": 1,
+          "samples": [
+            1,
+            1,
+            1
+          ]
+        },
+        "gaps_over_1000_ms": {
+          "median": 1,
+          "min": 1,
+          "max": 1,
+          "samples": [
+            1,
+            1,
+            1
+          ]
+        },
+        "creation_command_sum_ms": {
+          "median": 2516.9473000000035,
+          "min": 2507.304299999999,
+          "max": 2533.994600000002,
+          "samples": [
+            2533.994600000002,
+            2516.9473000000035,
+            2507.304299999999
+          ]
+        },
+        "steady_result_p95_ms": {
+          "median": 3.186,
+          "min": 3.146,
+          "max": 3.3697000000000004,
+          "samples": [
+            3.3697000000000004,
+            3.146,
+            3.186
+          ]
+        }
+      }
+    },
+    "runs": [
+      {
+        "run": "01-high-shaded",
+        "path": "build\\standalone-validation\\ui-artifacts\\many-spheres-64-20261115-ab\\01-high-shaded.jsonl",
+        "pairs": 32,
+        "input_triangles": 320512,
+        "result_triangles": 264448,
+        "volume_mm3": 28274.33388276626,
+        "stages": {
+          "warmup": {
+            "intervals": 1962,
+            "fps_app": 391.96994625376817,
+            "p50_ms": 2.5003,
+            "p95_ms": 2.8066,
+            "p99_ms": 3.2104999999999997,
+            "max_ms": 35.705,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.008110300081103
+          },
+          "creation": {
+            "intervals": 64,
+            "fps_app": 15.56419968508274,
+            "p50_ms": 61.0453,
+            "p95_ms": 89.782,
+            "p99_ms": 93.5009,
+            "max_ms": 95.9234,
+            "over_50_ms": 54,
+            "over_100_ms": 0,
+            "over_200_ms": 0
+          },
+          "scene": {
+            "intervals": 2862,
+            "fps_app": 350.38549689052456,
+            "p50_ms": 2.7081000000000004,
+            "p95_ms": 3.1103,
+            "p99_ms": 5.3864,
+            "max_ms": 173.8921,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.01519756838906
+          },
+          "boolean": {
+            "intervals": 2706,
+            "fps_app": 49.275404628645255,
+            "p50_ms": 17.2269,
+            "p95_ms": 24.7296,
+            "p99_ms": 25.6162,
+            "max_ms": 2157.2707,
+            "over_50_ms": 2,
+            "over_100_ms": 1,
+            "over_200_ms": 1
+          },
+          "result": {
+            "intervals": 2617,
+            "fps_app": 320.9338844926206,
+            "p50_ms": 2.9431000000000003,
+            "p95_ms": 3.5721,
+            "p99_ms": 5.2515,
+            "max_ms": 156.3535,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.001276650070217
+          }
+        },
+        "boolean_total_ms": 55085.1238,
+        "boolean_commit_ms": 2148.468,
+        "sphere_ms": [
+          44.83680000000004,
+          42.02210000000014,
+          43.65700000000015,
+          45.38249999999971,
+          43.276599999999235,
+          44.45430000000033,
+          44.34649999999965,
+          44.76560000000063,
+          44.99249999999938,
+          45.262800000000425,
+          46.010700000000725,
+          46.01170000000002,
+          46.26389999999992,
+          46.740999999999985,
+          46.7472000000007,
+          47.599599999999555,
+          48.46020000000044,
+          48.73870000000079,
+          48.494699999999284,
+          49.52689999999893,
+          49.49629999999979,
+          49.95159999999942,
+          48.063600000000406,
+          49.425600000000486,
+          52.281299999999646,
+          51.53319999999985,
+          52.662899999999354,
+          53.411299999999756,
+          53.329499999999825,
+          54.14189999999962,
+          54.739700000000084,
+          55.451200000000426,
+          56.37039999999979,
+          56.64860000000044,
+          57.71090000000004,
+          58.29210000000057,
+          55.02280000000064,
+          59.42479999999978,
+          60.401199999999335,
+          56.85869999999886,
+          57.70679999999993,
+          58.49649999999929,
+          63.649500000000444,
+          64.85060000000067,
+          65.68920000000071,
+          66.58059999999932,
+          67.84490000000005,
+          68.52520000000004,
+          69.7498000000005,
+          70.6225000000004,
+          72.09180000000015,
+          73.22579999999925,
+          74.22329999999965,
+          72.13750000000073,
+          79.78240000000187,
+          77.73209999999926,
+          79.15129999999954,
+          74.70739999999932,
+          81.40769999999975,
+          82.26340000000164,
+          82.99239999999918,
+          84.04600000000028,
+          85.96740000000136,
+          88.66359999999986
+        ],
+        "steady": {
+          "scene": {
+            "fps_encoded": 30.008957897879963,
+            "p95_ms": 3.0503,
+            "max_ms": 6.3626000000000005,
+            "over_100_ms": 0
+          },
+          "result": {
+            "fps_encoded": 29.992576095025985,
+            "p95_ms": 3.4072999999999998,
+            "max_ms": 5.8248,
+            "over_100_ms": 0
+          }
+        },
+        "freeze": {
+          "max_ms": 2157.2707,
+          "over_50_ms": 60,
+          "over_100_ms": 5,
+          "over_200_ms": 2,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 17285.6341,
+              "stage": 3,
+              "interval_ms": 173.8921
+            },
+            {
+              "elapsed_ms": 72197.9689,
+              "stage": 3,
+              "interval_ms": 2157.2707
+            },
+            {
+              "elapsed_ms": 80355.7968,
+              "stage": 5,
+              "interval_ms": 156.3535
+            },
+            {
+              "elapsed_ms": 80514.9003,
+              "stage": 5,
+              "interval_ms": 155.80089999999998
+            },
+            {
+              "elapsed_ms": 81478.685,
+              "stage": 5,
+              "interval_ms": 483.25669999999997
+            }
+          ]
+        },
+        "active_freeze": {
+          "max_ms": 2157.2707,
+          "over_50_ms": 57,
+          "over_100_ms": 2,
+          "over_200_ms": 1,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 17285.6341,
+              "stage": 3,
+              "interval_ms": 173.8921
+            },
+            {
+              "elapsed_ms": 72197.9689,
+              "stage": 3,
+              "interval_ms": 2157.2707
+            }
+          ]
+        },
+        "settling_gaps": {
+          "max_ms": 483.25669999999997,
+          "over_50_ms": 3,
+          "over_100_ms": 3,
+          "over_200_ms": 1,
+          "over_500_ms": 0,
+          "over_1000_ms": 0,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 80355.7968,
+              "stage": 5,
+              "interval_ms": 156.3535
+            },
+            {
+              "elapsed_ms": 80514.9003,
+              "stage": 5,
+              "interval_ms": 155.80089999999998
+            },
+            {
+              "elapsed_ms": 81478.685,
+              "stage": 5,
+              "interval_ms": 483.25669999999997
+            }
+          ]
+        },
+        "moving_gpu_p50_ms": 0.309248,
+        "scene_gpu_p50_ms": 0.319488,
+        "result_motion_targets": [
+          [
+            649,
+            410,
+            4
+          ]
+        ],
+        "settled_targets": {
+          "Looking Down": {
+            "cached_frames": 10268,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 29539584,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 10640,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 8917440,
+            "readiness_checks": 79,
+            "scene_preparations": 67,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Perspective": {
+            "cached_frames": 9012,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 626,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 50080,
+            "main_scene_instance_snapshot_bytes": 76960,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 701,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Side View": {
+            "cached_frames": 10263,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 0,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 80,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Through Finger": {
+            "cached_frames": 10264,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 10400,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 80,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          }
+        },
+        "source_geometry": {
+          "bounds_mm": [
+            -55.0,
+            -45.0,
+            -5.0,
+            60.0,
+            45.0,
+            5.0
+          ],
+          "closed": true,
+          "naked_edges": 0,
+          "points": 140000,
+          "solids": 32,
+          "triangles": 264448,
+          "volume_mm3": 28274.33388276626
+        }
+      },
+      {
+        "run": "02-light-shaded",
+        "path": "build\\standalone-validation\\ui-artifacts\\many-spheres-64-20261115-ab\\02-light-shaded.jsonl",
+        "pairs": 32,
+        "input_triangles": 33024,
+        "result_triangles": 28032,
+        "volume_mm3": 28274.33388276626,
+        "stages": {
+          "warmup": {
+            "intervals": 1930,
+            "fps_app": 385.5217987608171,
+            "p50_ms": 2.5206999999999997,
+            "p95_ms": 2.9486999999999997,
+            "p99_ms": 3.2778,
+            "max_ms": 35.5445,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 29.993878800244847
+          },
+          "creation": {
+            "intervals": 64,
+            "fps_app": 22.584749802965703,
+            "p50_ms": 41.524699999999996,
+            "p95_ms": 68.23849999999999,
+            "p99_ms": 70.06020000000001,
+            "max_ms": 72.5325,
+            "over_50_ms": 20,
+            "over_100_ms": 0,
+            "over_200_ms": 0
+          },
+          "scene": {
+            "intervals": 2873,
+            "fps_app": 355.45987983847647,
+            "p50_ms": 2.7079999999999997,
+            "p95_ms": 3.085,
+            "p99_ms": 4.7508,
+            "max_ms": 87.45949999999999,
+            "over_50_ms": 1,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.026605853287723
+          },
+          "boolean": {
+            "intervals": 3763,
+            "fps_app": 158.9429233723537,
+            "p50_ms": 6.6038,
+            "p95_ms": 7.4453000000000005,
+            "p99_ms": 7.857100000000001,
+            "max_ms": 2066.8244,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 1
+          },
+          "result": {
+            "intervals": 2644,
+            "fps_app": 330.53472267261674,
+            "p50_ms": 2.9233000000000002,
+            "p95_ms": 3.6830000000000003,
+            "p99_ms": 4.7462,
+            "max_ms": 8.5978,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.003797949107483
+          }
+        },
+        "boolean_total_ms": 23756.657999999996,
+        "boolean_commit_ms": 2058.3211,
+        "sphere_ms": [
+          26.911600000000362,
+          24.92279999999937,
+          26.045199999999568,
+          26.187300000000505,
+          27.27980000000116,
+          26.607300000000578,
+          26.650400000000445,
+          26.914099999999962,
+          27.085000000000036,
+          27.22569999999996,
+          27.596700000000055,
+          27.657099999999446,
+          26.265300000000025,
+          28.322000000001026,
+          28.69669999999951,
+          28.993099999999686,
+          29.16309999999976,
+          31.610499999999774,
+          30.524000000000342,
+          30.39890000000014,
+          30.564000000000306,
+          31.30959999999959,
+          31.897500000000036,
+          31.914200000000164,
+          33.365200000000186,
+          32.82440000000133,
+          33.630200000000514,
+          33.4417999999996,
+          34.09910000000036,
+          35.003200000000106,
+          35.83510000000024,
+          36.231300000000374,
+          37.2441000000008,
+          37.14209999999912,
+          37.706600000000435,
+          36.423499999999876,
+          39.14010000000053,
+          40.69369999999981,
+          40.54150000000027,
+          41.26310000000012,
+          43.253200000000106,
+          42.95649999999932,
+          43.602200000000266,
+          44.313899999999194,
+          45.72789999999986,
+          47.05990000000111,
+          47.817299999998795,
+          48.659599999999955,
+          45.9380000000001,
+          49.587899999999536,
+          50.85009999999966,
+          51.58180000000084,
+          53.089200000000346,
+          53.78640000000087,
+          55.05569999999989,
+          56.59089999999924,
+          57.10530000000017,
+          58.71049999999923,
+          59.6912999999995,
+          60.066100000000006,
+          62.451100000000224,
+          63.03219999999965,
+          61.95879999999943,
+          65.78189999999904
+        ],
+        "steady": {
+          "scene": {
+            "fps_encoded": 29.99552305626026,
+            "p95_ms": 3.0337,
+            "max_ms": 5.3877999999999995,
+            "over_100_ms": 0
+          },
+          "result": {
+            "fps_encoded": 29.992576095025985,
+            "p95_ms": 3.3697000000000004,
+            "max_ms": 5.9762,
+            "over_100_ms": 0
+          }
+        },
+        "freeze": {
+          "max_ms": 2066.8244,
+          "over_50_ms": 25,
+          "over_100_ms": 4,
+          "over_200_ms": 4,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 39592.8457,
+              "stage": 3,
+              "interval_ms": 2066.8244
+            },
+            {
+              "elapsed_ms": 47978.4649,
+              "stage": 5,
+              "interval_ms": 343.48060000000004
+            },
+            {
+              "elapsed_ms": 48478.3787,
+              "stage": 5,
+              "interval_ms": 484.03479999999996
+            },
+            {
+              "elapsed_ms": 48978.3146,
+              "stage": 5,
+              "interval_ms": 481.47679999999997
+            }
+          ]
+        },
+        "active_freeze": {
+          "max_ms": 2066.8244,
+          "over_50_ms": 22,
+          "over_100_ms": 1,
+          "over_200_ms": 1,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 39592.8457,
+              "stage": 3,
+              "interval_ms": 2066.8244
+            }
+          ]
+        },
+        "settling_gaps": {
+          "max_ms": 484.03479999999996,
+          "over_50_ms": 3,
+          "over_100_ms": 3,
+          "over_200_ms": 3,
+          "over_500_ms": 0,
+          "over_1000_ms": 0,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 47978.4649,
+              "stage": 5,
+              "interval_ms": 343.48060000000004
+            },
+            {
+              "elapsed_ms": 48478.3787,
+              "stage": 5,
+              "interval_ms": 484.03479999999996
+            },
+            {
+              "elapsed_ms": 48978.3146,
+              "stage": 5,
+              "interval_ms": 481.47679999999997
+            }
+          ]
+        },
+        "moving_gpu_p50_ms": 0.094208,
+        "scene_gpu_p50_ms": 0.065536,
+        "result_motion_targets": [
+          [
+            454,
+            287,
+            1
+          ],
+          [
+            649,
+            410,
+            4
+          ]
+        ],
+        "settled_targets": {
+          "Looking Down": {
+            "cached_frames": 11206,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 5295360,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 10640,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 65,
+            "overlay_upload_bytes": 8720320,
+            "readiness_checks": 71,
+            "scene_preparations": 65,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Perspective": {
+            "cached_frames": 9928,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 627,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 9579240,
+            "main_scene_camera_snapshot_bytes": 50160,
+            "main_scene_instance_snapshot_bytes": 80000,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 69,
+            "overlay_upload_bytes": 6655936,
+            "readiness_checks": 697,
+            "scene_preparations": 3,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 6,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Side View": {
+            "cached_frames": 11186,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 0,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 65,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 74,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Through Finger": {
+            "cached_frames": 11187,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 5200,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 65,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 74,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          }
+        },
+        "source_geometry": {
+          "bounds_mm": [
+            -55.0,
+            -45.0,
+            -5.0,
+            60.0,
+            45.0,
+            5.0
+          ],
+          "closed": true,
+          "naked_edges": 0,
+          "points": 16928,
+          "solids": 32,
+          "triangles": 28032,
+          "volume_mm3": 28274.33388276626
+        }
+      },
+      {
+        "run": "03-light-shaded",
+        "path": "build\\standalone-validation\\ui-artifacts\\many-spheres-64-20261115-ab\\03-light-shaded.jsonl",
+        "pairs": 32,
+        "input_triangles": 33024,
+        "result_triangles": 28032,
+        "volume_mm3": 28274.33388276626,
+        "stages": {
+          "warmup": {
+            "intervals": 1936,
+            "fps_app": 386.7806292349457,
+            "p50_ms": 2.5038,
+            "p95_ms": 2.9072999999999998,
+            "p99_ms": 3.3205,
+            "max_ms": 40.069399999999995,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 29.993878800244847
+          },
+          "creation": {
+            "intervals": 64,
+            "fps_app": 22.749539970532947,
+            "p50_ms": 40.6457,
+            "p95_ms": 66.95710000000001,
+            "p99_ms": 70.3996,
+            "max_ms": 70.6595,
+            "over_50_ms": 19,
+            "over_100_ms": 0,
+            "over_200_ms": 0
+          },
+          "scene": {
+            "intervals": 2903,
+            "fps_app": 359.20520694365075,
+            "p50_ms": 2.662,
+            "p95_ms": 3.1389,
+            "p99_ms": 4.8062000000000005,
+            "max_ms": 85.4042,
+            "over_50_ms": 1,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.005042864346947
+          },
+          "boolean": {
+            "intervals": 3813,
+            "fps_app": 164.78492481645668,
+            "p50_ms": 4.884,
+            "p95_ms": 7.0298,
+            "p99_ms": 7.5654,
+            "max_ms": 2073.4334,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 1
+          },
+          "result": {
+            "intervals": 2741,
+            "fps_app": 342.5909122042357,
+            "p50_ms": 2.8639,
+            "p95_ms": 3.1909,
+            "p99_ms": 4.5465,
+            "max_ms": 12.1222,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.011396732936557
+          }
+        },
+        "boolean_total_ms": 23218.326,
+        "boolean_commit_ms": 2064.5677,
+        "sphere_ms": [
+          26.384100000000217,
+          24.373200000000907,
+          26.085100000001148,
+          25.831599999999526,
+          26.967599999999948,
+          25.453299999999217,
+          25.92529999999988,
+          26.730599999998958,
+          25.450000000000728,
+          27.3153999999995,
+          27.443300000000818,
+          27.757800000000316,
+          29.018200000000434,
+          28.29439999999977,
+          28.830799999999726,
+          29.28070000000025,
+          29.775100000000748,
+          29.670600000000377,
+          29.99669999999969,
+          30.61239999999998,
+          30.567299999999705,
+          31.42739999999958,
+          31.342400000000453,
+          33.523699999999735,
+          32.7582999999986,
+          32.812699999999495,
+          33.77950000000055,
+          33.756499999999505,
+          34.367699999999786,
+          34.9994999999999,
+          35.3746000000001,
+          35.70250000000033,
+          36.48750000000018,
+          37.33090000000084,
+          37.88199999999961,
+          35.59240000000045,
+          39.398699999998826,
+          39.593799999999646,
+          40.21520000000055,
+          41.430099999999584,
+          41.59059999999954,
+          42.1881999999996,
+          43.21839999999975,
+          44.23559999999998,
+          45.011500000000524,
+          45.82020000000102,
+          46.59050000000025,
+          49.58740000000034,
+          49.881699999999,
+          49.855899999999565,
+          50.47009999999955,
+          50.75929999999971,
+          49.99990000000071,
+          55.1889000000001,
+          51.880300000000716,
+          55.31450000000132,
+          56.791700000000674,
+          58.410400000000664,
+          57.14630000000034,
+          60.6853000000001,
+          61.29950000000099,
+          62.95960000000014,
+          64.38339999999971,
+          64.13919999999962
+        ],
+        "steady": {
+          "scene": {
+            "fps_encoded": 30.00447828034035,
+            "p95_ms": 3.0996,
+            "max_ms": 5.2940000000000005,
+            "over_100_ms": 0
+          },
+          "result": {
+            "fps_encoded": 30.005941770647652,
+            "p95_ms": 3.146,
+            "max_ms": 4.8203,
+            "over_100_ms": 0
+          }
+        },
+        "freeze": {
+          "max_ms": 2073.4334,
+          "over_50_ms": 24,
+          "over_100_ms": 4,
+          "over_200_ms": 4,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 39034.488000000005,
+              "stage": 3,
+              "interval_ms": 2073.4334
+            },
+            {
+              "elapsed_ms": 47478.4516,
+              "stage": 5,
+              "interval_ms": 399.882
+            },
+            {
+              "elapsed_ms": 47978.0076,
+              "stage": 5,
+              "interval_ms": 483.1715
+            },
+            {
+              "elapsed_ms": 48477.862,
+              "stage": 5,
+              "interval_ms": 483.62719999999996
+            }
+          ]
+        },
+        "active_freeze": {
+          "max_ms": 2073.4334,
+          "over_50_ms": 21,
+          "over_100_ms": 1,
+          "over_200_ms": 1,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 39034.488000000005,
+              "stage": 3,
+              "interval_ms": 2073.4334
+            }
+          ]
+        },
+        "settling_gaps": {
+          "max_ms": 483.62719999999996,
+          "over_50_ms": 3,
+          "over_100_ms": 3,
+          "over_200_ms": 3,
+          "over_500_ms": 0,
+          "over_1000_ms": 0,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 47478.4516,
+              "stage": 5,
+              "interval_ms": 399.882
+            },
+            {
+              "elapsed_ms": 47978.0076,
+              "stage": 5,
+              "interval_ms": 483.1715
+            },
+            {
+              "elapsed_ms": 48477.862,
+              "stage": 5,
+              "interval_ms": 483.62719999999996
+            }
+          ]
+        },
+        "moving_gpu_p50_ms": 0.09216,
+        "scene_gpu_p50_ms": 0.06656,
+        "result_motion_targets": [
+          [
+            454,
+            287,
+            1
+          ]
+        ],
+        "settled_targets": {
+          "Looking Down": {
+            "cached_frames": 11388,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 5295360,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 10640,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 66,
+            "overlay_upload_bytes": 8720320,
+            "readiness_checks": 72,
+            "scene_preparations": 66,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Perspective": {
+            "cached_frames": 10111,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 628,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 9579240,
+            "main_scene_camera_snapshot_bytes": 50240,
+            "main_scene_instance_snapshot_bytes": 83200,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 69,
+            "overlay_upload_bytes": 6655936,
+            "readiness_checks": 699,
+            "scene_preparations": 3,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 6,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Side View": {
+            "cached_frames": 11368,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 0,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 66,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 76,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Through Finger": {
+            "cached_frames": 11369,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 5200,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 66,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 76,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          }
+        },
+        "source_geometry": {
+          "bounds_mm": [
+            -55.0,
+            -45.0,
+            -5.0,
+            60.0,
+            45.0,
+            5.0
+          ],
+          "closed": true,
+          "naked_edges": 0,
+          "points": 16928,
+          "solids": 32,
+          "triangles": 28032,
+          "volume_mm3": 28274.33388276626
+        }
+      },
+      {
+        "run": "04-high-shaded",
+        "path": "build\\standalone-validation\\ui-artifacts\\many-spheres-64-20261115-ab\\04-high-shaded.jsonl",
+        "pairs": 32,
+        "input_triangles": 320512,
+        "result_triangles": 264448,
+        "volume_mm3": 28274.33388276626,
+        "stages": {
+          "warmup": {
+            "intervals": 1908,
+            "fps_app": 381.32400531143566,
+            "p50_ms": 2.5465,
+            "p95_ms": 2.9707000000000003,
+            "p99_ms": 3.3083,
+            "max_ms": 35.3461,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.01837859914233
+          },
+          "creation": {
+            "intervals": 64,
+            "fps_app": 15.532123136633636,
+            "p50_ms": 62.0174,
+            "p95_ms": 90.59,
+            "p99_ms": 93.9484,
+            "max_ms": 93.9487,
+            "over_50_ms": 52,
+            "over_100_ms": 0,
+            "over_200_ms": 0
+          },
+          "scene": {
+            "intervals": 2823,
+            "fps_app": 345.27602708549165,
+            "p50_ms": 2.7620999999999998,
+            "p95_ms": 3.1174000000000004,
+            "p99_ms": 4.9977,
+            "max_ms": 181.4886,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.013989571410402
+          },
+          "boolean": {
+            "intervals": 2753,
+            "fps_app": 52.88615723871756,
+            "p50_ms": 15.630600000000001,
+            "p95_ms": 24.3477,
+            "p99_ms": 25.2774,
+            "max_ms": 2124.7503,
+            "over_50_ms": 2,
+            "over_100_ms": 1,
+            "over_200_ms": 1
+          },
+          "result": {
+            "intervals": 2641,
+            "fps_app": 323.69346971160616,
+            "p50_ms": 2.9414,
+            "p95_ms": 3.3739,
+            "p99_ms": 5.1598,
+            "max_ms": 162.76760000000002,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.0204394481349
+          }
+        },
+        "boolean_total_ms": 52230.243299999995,
+        "boolean_commit_ms": 2116.05,
+        "sphere_ms": [
+          44.732599999999366,
+          42.45329999999922,
+          44.857099999999264,
+          44.32170000000042,
+          43.56829999999991,
+          44.69450000000052,
+          44.53259999999955,
+          44.68260000000009,
+          45.055999999999585,
+          44.95979999999963,
+          44.98479999999927,
+          46.14299999999912,
+          45.25770000000011,
+          46.746000000001004,
+          47.19509999999991,
+          47.30609999999979,
+          48.33399999999892,
+          48.27459999999974,
+          46.09689999999955,
+          46.83079999999882,
+          49.67149999999947,
+          49.53110000000015,
+          51.434400000000096,
+          50.83169999999973,
+          51.60119999999915,
+          52.46260000000075,
+          52.80069999999978,
+          52.96590000000015,
+          50.40299999999934,
+          54.47140000000036,
+          55.238500000001295,
+          53.993099999999686,
+          56.42240000000038,
+          58.03979999999956,
+          57.501100000000406,
+          59.22429999999986,
+          59.15129999999954,
+          59.555199999999786,
+          60.17309999999998,
+          61.71510000000035,
+          62.03310000000056,
+          71.09400000000005,
+          64.30460000000039,
+          65.04980000000069,
+          66.40979999999945,
+          63.63670000000002,
+          64.60620000000017,
+          68.54579999999987,
+          69.49789999999939,
+          69.85440000000108,
+          71.1221000000005,
+          71.89579999999933,
+          73.67220000000088,
+          74.69640000000072,
+          70.73439999999755,
+          75.51620000000003,
+          78.88440000000082,
+          79.8018000000011,
+          75.33470000000125,
+          82.38910000000033,
+          86.8809999999994,
+          84.33989999999903,
+          86.98839999999836,
+          87.09520000000157
+        ],
+        "steady": {
+          "scene": {
+            "fps_encoded": 29.99552305626026,
+            "p95_ms": 3.0649,
+            "max_ms": 4.833600000000001,
+            "over_100_ms": 0
+          },
+          "result": {
+            "fps_encoded": 30.001485222040696,
+            "p95_ms": 3.2590000000000003,
+            "max_ms": 4.653700000000001,
+            "over_100_ms": 0
+          }
+        },
+        "freeze": {
+          "max_ms": 2124.7503,
+          "over_50_ms": 58,
+          "over_100_ms": 5,
+          "over_200_ms": 3,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 17300.180099999998,
+              "stage": 3,
+              "interval_ms": 181.4886
+            },
+            {
+              "elapsed_ms": 69350.05320000001,
+              "stage": 3,
+              "interval_ms": 2124.7503
+            },
+            {
+              "elapsed_ms": 77514.3432,
+              "stage": 5,
+              "interval_ms": 162.76760000000002
+            },
+            {
+              "elapsed_ms": 77978.68549999999,
+              "stage": 5,
+              "interval_ms": 460.482
+            },
+            {
+              "elapsed_ms": 78478.1588,
+              "stage": 5,
+              "interval_ms": 484.0992
+            }
+          ]
+        },
+        "active_freeze": {
+          "max_ms": 2124.7503,
+          "over_50_ms": 55,
+          "over_100_ms": 2,
+          "over_200_ms": 1,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 17300.180099999998,
+              "stage": 3,
+              "interval_ms": 181.4886
+            },
+            {
+              "elapsed_ms": 69350.05320000001,
+              "stage": 3,
+              "interval_ms": 2124.7503
+            }
+          ]
+        },
+        "settling_gaps": {
+          "max_ms": 484.0992,
+          "over_50_ms": 3,
+          "over_100_ms": 3,
+          "over_200_ms": 2,
+          "over_500_ms": 0,
+          "over_1000_ms": 0,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 77514.3432,
+              "stage": 5,
+              "interval_ms": 162.76760000000002
+            },
+            {
+              "elapsed_ms": 77978.68549999999,
+              "stage": 5,
+              "interval_ms": 460.482
+            },
+            {
+              "elapsed_ms": 78478.1588,
+              "stage": 5,
+              "interval_ms": 484.0992
+            }
+          ]
+        },
+        "moving_gpu_p50_ms": 0.321536,
+        "scene_gpu_p50_ms": 0.304128,
+        "result_motion_targets": [
+          [
+            649,
+            410,
+            4
+          ]
+        ],
+        "settled_targets": {
+          "Looking Down": {
+            "cached_frames": 10072,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 29539584,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 10640,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 8917440,
+            "readiness_checks": 79,
+            "scene_preparations": 67,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Perspective": {
+            "cached_frames": 8821,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 624,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 49920,
+            "main_scene_instance_snapshot_bytes": 76960,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 699,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Side View": {
+            "cached_frames": 10067,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 0,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 80,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Through Finger": {
+            "cached_frames": 10068,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 10400,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 80,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          }
+        },
+        "source_geometry": {
+          "bounds_mm": [
+            -55.0,
+            -45.0,
+            -5.0,
+            60.0,
+            45.0,
+            5.0
+          ],
+          "closed": true,
+          "naked_edges": 0,
+          "points": 140000,
+          "solids": 32,
+          "triangles": 264448,
+          "volume_mm3": 28274.33388276626
+        }
+      },
+      {
+        "run": "05-high-shaded",
+        "path": "build\\standalone-validation\\ui-artifacts\\many-spheres-64-20261115-ab\\05-high-shaded.jsonl",
+        "pairs": 32,
+        "input_triangles": 320512,
+        "result_triangles": 264448,
+        "volume_mm3": 28274.33388276626,
+        "stages": {
+          "warmup": {
+            "intervals": 1930,
+            "fps_app": 385.73664987439776,
+            "p50_ms": 2.4711999999999996,
+            "p95_ms": 3.1029999999999998,
+            "p99_ms": 4.4388,
+            "max_ms": 36.1994,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.006123698714024
+          },
+          "creation": {
+            "intervals": 64,
+            "fps_app": 15.553416312753539,
+            "p50_ms": 62.4246,
+            "p95_ms": 92.7921,
+            "p99_ms": 95.43889999999999,
+            "max_ms": 105.4685,
+            "over_50_ms": 53,
+            "over_100_ms": 1,
+            "over_200_ms": 0
+          },
+          "scene": {
+            "intervals": 2819,
+            "fps_app": 344.69915729921127,
+            "p50_ms": 2.7575,
+            "p95_ms": 3.1368,
+            "p99_ms": 5.8499,
+            "max_ms": 182.982,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.00882612533098
+          },
+          "boolean": {
+            "intervals": 2744,
+            "fps_app": 52.290314338822654,
+            "p50_ms": 15.6279,
+            "p95_ms": 24.2549,
+            "p99_ms": 24.800900000000002,
+            "max_ms": 2122.7869,
+            "over_50_ms": 2,
+            "over_100_ms": 1,
+            "over_200_ms": 1
+          },
+          "result": {
+            "intervals": 2634,
+            "fps_app": 323.0899706580581,
+            "p50_ms": 2.9239,
+            "p95_ms": 3.7622,
+            "p99_ms": 5.1836,
+            "max_ms": 156.45999999999998,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.005107252298263
+          }
+        },
+        "boolean_total_ms": 52652.6665,
+        "boolean_commit_ms": 2113.9302,
+        "sphere_ms": [
+          44.830300000000534,
+          44.125200000000405,
+          45.56370000000061,
+          44.50500000000011,
+          42.994699999999284,
+          44.59909999999854,
+          42.64630000000034,
+          42.851300000000265,
+          45.55739999999969,
+          45.276700000000346,
+          45.55439999999999,
+          46.6273999999994,
+          46.39609999999993,
+          46.80540000000019,
+          47.2521999999999,
+          46.29639999999927,
+          45.531700000000455,
+          48.19180000000051,
+          48.590399999999136,
+          49.39289999999983,
+          49.154600000000755,
+          49.69210000000021,
+          50.631099999999606,
+          50.686899999999696,
+          51.648299999999836,
+          48.62750000000051,
+          52.196899999999914,
+          51.02680000000055,
+          49.992699999999786,
+          54.30580000000009,
+          54.965000000000146,
+          55.751000000000204,
+          56.94000000000051,
+          57.57089999999971,
+          57.437699999999495,
+          56.99319999999989,
+          58.9332000000004,
+          59.578700000000026,
+          60.56850000000031,
+          57.45350000000053,
+          57.91560000000027,
+          62.989699999999175,
+          59.861400000000685,
+          60.14730000000145,
+          61.02729999999974,
+          66.2511999999997,
+          66.71049999999923,
+          68.11790000000019,
+          70.36390000000029,
+          70.26110000000062,
+          72.59089999999924,
+          72.09390000000076,
+          85.28299999999854,
+          69.19330000000082,
+          76.02130000000034,
+          71.44470000000001,
+          76.95879999999852,
+          78.87759999999798,
+          80.04340000000047,
+          81.55240000000231,
+          97.85920000000078,
+          83.8047000000006,
+          85.41339999999946,
+          85.35280000000057
+        ],
+        "steady": {
+          "scene": {
+            "fps_encoded": 29.99552305626026,
+            "p95_ms": 3.0289,
+            "max_ms": 3.7526,
+            "over_100_ms": 0
+          },
+          "result": {
+            "fps_encoded": 30.001485222040696,
+            "p95_ms": 3.4034,
+            "max_ms": 5.6901,
+            "over_100_ms": 0
+          }
+        },
+        "freeze": {
+          "max_ms": 2122.7869,
+          "over_50_ms": 59,
+          "over_100_ms": 6,
+          "over_200_ms": 2,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 8841.3082,
+              "stage": 1,
+              "interval_ms": 105.4685
+            },
+            {
+              "elapsed_ms": 17296.4128,
+              "stage": 3,
+              "interval_ms": 182.982
+            },
+            {
+              "elapsed_ms": 69767.4285,
+              "stage": 3,
+              "interval_ms": 2122.7869
+            },
+            {
+              "elapsed_ms": 77925.19780000001,
+              "stage": 5,
+              "interval_ms": 156.45999999999998
+            },
+            {
+              "elapsed_ms": 78085.6974,
+              "stage": 5,
+              "interval_ms": 156.9929
+            },
+            {
+              "elapsed_ms": 78978.0526,
+              "stage": 5,
+              "interval_ms": 484.2749
+            }
+          ]
+        },
+        "active_freeze": {
+          "max_ms": 2122.7869,
+          "over_50_ms": 56,
+          "over_100_ms": 3,
+          "over_200_ms": 1,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 8841.3082,
+              "stage": 1,
+              "interval_ms": 105.4685
+            },
+            {
+              "elapsed_ms": 17296.4128,
+              "stage": 3,
+              "interval_ms": 182.982
+            },
+            {
+              "elapsed_ms": 69767.4285,
+              "stage": 3,
+              "interval_ms": 2122.7869
+            }
+          ]
+        },
+        "settling_gaps": {
+          "max_ms": 484.2749,
+          "over_50_ms": 3,
+          "over_100_ms": 3,
+          "over_200_ms": 1,
+          "over_500_ms": 0,
+          "over_1000_ms": 0,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 77925.19780000001,
+              "stage": 5,
+              "interval_ms": 156.45999999999998
+            },
+            {
+              "elapsed_ms": 78085.6974,
+              "stage": 5,
+              "interval_ms": 156.9929
+            },
+            {
+              "elapsed_ms": 78978.0526,
+              "stage": 5,
+              "interval_ms": 484.2749
+            }
+          ]
+        },
+        "moving_gpu_p50_ms": 0.304128,
+        "scene_gpu_p50_ms": 0.3072,
+        "result_motion_targets": [
+          [
+            649,
+            410,
+            4
+          ]
+        ],
+        "settled_targets": {
+          "Looking Down": {
+            "cached_frames": 10206,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 29539584,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 10640,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 8917440,
+            "readiness_checks": 78,
+            "scene_preparations": 67,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Perspective": {
+            "cached_frames": 8940,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 626,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 50080,
+            "main_scene_instance_snapshot_bytes": 76960,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 700,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Side View": {
+            "cached_frames": 10201,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 0,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 79,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          },
+          "Through Finger": {
+            "cached_frames": 10202,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 10400,
+            "overlay_buffer_bytes": 5807088,
+            "overlay_preparations": 67,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 79,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 33554592,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 33554432,
+            "unique_instance_bytes": 160
+          }
+        },
+        "source_geometry": {
+          "bounds_mm": [
+            -55.0,
+            -45.0,
+            -5.0,
+            60.0,
+            45.0,
+            5.0
+          ],
+          "closed": true,
+          "naked_edges": 0,
+          "points": 140000,
+          "solids": 32,
+          "triangles": 264448,
+          "volume_mm3": 28274.33388276626
+        }
+      },
+      {
+        "run": "06-light-shaded",
+        "path": "build\\standalone-validation\\ui-artifacts\\many-spheres-64-20261115-ab\\06-light-shaded.jsonl",
+        "pairs": 32,
+        "input_triangles": 33024,
+        "result_triangles": 28032,
+        "volume_mm3": 28274.33388276626,
+        "stages": {
+          "warmup": {
+            "intervals": 1929,
+            "fps_app": 385.29065346193636,
+            "p50_ms": 2.5193,
+            "p95_ms": 2.9248999999999996,
+            "p99_ms": 4.0592,
+            "max_ms": 35.534000000000006,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 29.993878800244847
+          },
+          "creation": {
+            "intervals": 64,
+            "fps_app": 22.822699328374316,
+            "p50_ms": 40.9206,
+            "p95_ms": 68.41550000000001,
+            "p99_ms": 70.2965,
+            "max_ms": 71.8768,
+            "over_50_ms": 20,
+            "over_100_ms": 0,
+            "over_200_ms": 0
+          },
+          "scene": {
+            "intervals": 2898,
+            "fps_app": 357.5505918973681,
+            "p50_ms": 2.6744999999999997,
+            "p95_ms": 3.0588,
+            "p99_ms": 4.6738,
+            "max_ms": 108.5516,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.00126055716627
+          },
+          "boolean": {
+            "intervals": 3803,
+            "fps_app": 161.8367902907254,
+            "p50_ms": 6.345899999999999,
+            "p95_ms": 7.1234,
+            "p99_ms": 7.604900000000001,
+            "max_ms": 2099.6973,
+            "over_50_ms": 1,
+            "over_100_ms": 1,
+            "over_200_ms": 1
+          },
+          "result": {
+            "intervals": 2682,
+            "fps_app": 335.27032995463264,
+            "p50_ms": 2.8933,
+            "p95_ms": 3.3228,
+            "p99_ms": 4.7316,
+            "max_ms": 12.266300000000001,
+            "over_50_ms": 0,
+            "over_100_ms": 0,
+            "over_200_ms": 0,
+            "fps_encoded_perspective": 30.007596859964547
+          }
+        },
+        "boolean_total_ms": 23600.383800000003,
+        "boolean_commit_ms": 2090.8535,
+        "sphere_ms": [
+          26.504400000000714,
+          24.84179999999924,
+          25.88799999999992,
+          25.814800000000105,
+          26.07390000000032,
+          26.27770000000055,
+          26.32800000000043,
+          27.698500000000422,
+          26.7445000000007,
+          26.974199999999655,
+          27.246799999999894,
+          26.620600000000195,
+          26.579100000000835,
+          28.266899999999623,
+          28.701500000000124,
+          28.80569999999898,
+          27.78149999999914,
+          28.79019999999946,
+          29.61619999999948,
+          30.02100000000064,
+          30.550500000000284,
+          30.987899999999172,
+          31.39139999999952,
+          31.69589999999971,
+          32.08359999999993,
+          32.82920000000013,
+          33.33230000000094,
+          33.6889000000001,
+          31.725500000000466,
+          34.13730000000032,
+          34.97180000000026,
+          35.785899999999856,
+          36.48080000000118,
+          36.63829999999962,
+          37.260699999998906,
+          38.08820000000014,
+          40.02769999999964,
+          39.30119999999897,
+          44.431700000001,
+          40.3811999999989,
+          41.79110000000037,
+          39.67100000000028,
+          41.56450000000041,
+          44.07140000000072,
+          45.15819999999985,
+          46.291299999999865,
+          47.10790000000088,
+          47.84049999999934,
+          48.796800000000076,
+          49.86499999999978,
+          50.4411999999993,
+          51.67979999999989,
+          52.679699999999684,
+          50.373499999999694,
+          54.3717000000006,
+          55.64810000000034,
+          56.661299999999756,
+          58.62329999999929,
+          58.98879999999917,
+          60.374799999999595,
+          61.76230000000123,
+          62.60109999999986,
+          64.0576000000001,
+          65.51809999999932
+        ],
+        "steady": {
+          "scene": {
+            "fps_encoded": 29.99552305626026,
+            "p95_ms": 2.9573,
+            "max_ms": 4.6594999999999995,
+            "over_100_ms": 0
+          },
+          "result": {
+            "fps_encoded": 29.997029997029998,
+            "p95_ms": 3.186,
+            "max_ms": 5.1309,
+            "over_100_ms": 0
+          }
+        },
+        "freeze": {
+          "max_ms": 2099.6973,
+          "over_50_ms": 24,
+          "over_100_ms": 4,
+          "over_200_ms": 3,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 15915.9841,
+              "stage": 3,
+              "interval_ms": 108.5516
+            },
+            {
+              "elapsed_ms": 39409.566699999996,
+              "stage": 3,
+              "interval_ms": 2099.6973
+            },
+            {
+              "elapsed_ms": 47978.8812,
+              "stage": 5,
+              "interval_ms": 482.3219
+            },
+            {
+              "elapsed_ms": 48478.786499999995,
+              "stage": 5,
+              "interval_ms": 484.1201
+            }
+          ]
+        },
+        "active_freeze": {
+          "max_ms": 2099.6973,
+          "over_50_ms": 22,
+          "over_100_ms": 2,
+          "over_200_ms": 1,
+          "over_500_ms": 1,
+          "over_1000_ms": 1,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 15915.9841,
+              "stage": 3,
+              "interval_ms": 108.5516
+            },
+            {
+              "elapsed_ms": 39409.566699999996,
+              "stage": 3,
+              "interval_ms": 2099.6973
+            }
+          ]
+        },
+        "settling_gaps": {
+          "max_ms": 484.1201,
+          "over_50_ms": 2,
+          "over_100_ms": 2,
+          "over_200_ms": 2,
+          "over_500_ms": 0,
+          "over_1000_ms": 0,
+          "gaps_over_100_ms": [
+            {
+              "elapsed_ms": 47978.8812,
+              "stage": 5,
+              "interval_ms": 482.3219
+            },
+            {
+              "elapsed_ms": 48478.786499999995,
+              "stage": 5,
+              "interval_ms": 484.1201
+            }
+          ]
+        },
+        "moving_gpu_p50_ms": 0.094208,
+        "scene_gpu_p50_ms": 0.069632,
+        "result_motion_targets": [
+          [
+            454,
+            287,
+            1
+          ]
+        ],
+        "settled_targets": {
+          "Looking Down": {
+            "cached_frames": 11309,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 5295360,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 10640,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 65,
+            "overlay_upload_bytes": 8720320,
+            "readiness_checks": 71,
+            "scene_preparations": 65,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Perspective": {
+            "cached_frames": 10026,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 628,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 9579240,
+            "main_scene_camera_snapshot_bytes": 50240,
+            "main_scene_instance_snapshot_bytes": 83200,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 69,
+            "overlay_upload_bytes": 6655936,
+            "readiness_checks": 699,
+            "scene_preparations": 3,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 6,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Side View": {
+            "cached_frames": 11287,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 0,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 65,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 75,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          },
+          "Through Finger": {
+            "cached_frames": 11288,
+            "encoded_camera_bytes": 0,
+            "encoded_frames": 4,
+            "encoded_instance_bytes": 0,
+            "encoded_overlay_bytes": 0,
+            "encoded_target_bytes": 0,
+            "geometry_upload_bytes": 0,
+            "inflight_camera_bytes": 0,
+            "inflight_geometry_buffers": 0,
+            "inflight_geometry_bytes": 0,
+            "inflight_instance_buffers": 0,
+            "inflight_instance_bytes": 0,
+            "inflight_overlay_bytes": 0,
+            "inflight_target_bytes": 0,
+            "inflight_target_count": 0,
+            "known_target_logical_bytes": 10643600,
+            "main_scene_camera_snapshot_bytes": 320,
+            "main_scene_instance_snapshot_bytes": 5200,
+            "overlay_buffer_bytes": 5609968,
+            "overlay_preparations": 65,
+            "overlay_upload_bytes": 18368,
+            "readiness_checks": 75,
+            "scene_preparations": 0,
+            "shared_scene_buffer_bytes": 8388768,
+            "shared_scene_instance_snapshot_cpu_bytes": 8,
+            "target_height": 410,
+            "target_rebuilds": 1,
+            "target_samples": 4,
+            "target_width": 649,
+            "tracked_camera_bytes": 0,
+            "tracked_instance_bytes": 0,
+            "tracked_overlay_bytes": 0,
+            "tracked_target_bytes": 0,
+            "unique_geometry_bytes": 8388608,
+            "unique_instance_bytes": 320
+          }
+        },
+        "source_geometry": {
+          "bounds_mm": [
+            -55.0,
+            -45.0,
+            -5.0,
+            60.0,
+            45.0,
+            5.0
+          ],
+          "closed": true,
+          "naked_edges": 0,
+          "points": 16928,
+          "solids": 32,
+          "triangles": 28032,
+          "volume_mm3": 28274.33388276626
+        }
+      }
+    ]
+  }
+}

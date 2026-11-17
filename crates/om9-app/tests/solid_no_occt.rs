@@ -14,6 +14,7 @@ fn sphere_and_box_fallback_reject_without_document_changes() {
     assert!(Controller::availability("OM9-SOLID-014").is_err());
     assert!(Controller::availability("OM9-SOLID-012").is_err());
     assert!(controller.submit("Sphere").is_err());
+    assert!(controller.submit("Sphere 5").is_err());
     assert!(controller.submit("Box").is_err());
     assert!(controller.dispatch("OM9-SOLID-014", InvocationOrigin::Menu).is_err());
     assert!(controller.dispatch("OM9-SOLID-012", InvocationOrigin::Menu).is_err());

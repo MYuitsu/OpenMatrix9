@@ -1,0 +1,11 @@
+# Source wires in the DupEdge temporary view
+
+2026-11-13. The DupEdge source-view worker previously prepared B-rep faces and topology edges without the source-derived interior face wires that the regular remesh worker already prepared. Both worker paths now use the same admitted source-wire and buffer construction, as does the direct remesh display preparation path. Curve, sampled-line and final-buffer overlap remains reserved during preparation; after the temporaries drop, the reservation is reduced to the final buffer size. Cancellation and reservation failures return before scene publication.
+
+For the tested OCCT box, the temporary published scene contains additional wires on box faces; a top-face center is not pickable as a topology edge, and cancel restores the previous scene and preserves the document and redo. A NativeBrep box fixture also checks additional wires, a non-pickable top-face center, a pickable actual edge, cancellation and stale-session rejection. A separate low buffer budget case confirms no scene/history mutation or reservation leak. The usual remesh ExtractWireframe fixture still compares menu/CMD results to source isocurve endpoints across two profiles.
+
+With OCCT runtime on PATH, `CARGO_TARGET_DIR=L:\om9-target`, `-j 2`: `cargo test -p om9-app -j 2 --lib remesh` passed 75, ignored 1; `--lib source_view` passed 25 after the NativeBrep pick and buffer-refusal assertions were added; `--lib extract_wireframe_matches_published_brep_wires_after_remesh` passed 1. `cargo check -p om9-app -j 2 --no-default-features` passed with 21 warnings. Public source audit: 15,996 files, 594 bindings, 593 SVGs, no errors; artifact pruning removed 0 and retained 169 older cited runs.
+
+These are headless fixtures; desktop rendering, other NativeBrep shapes, arbitrary trims and density settings are not established. Failed source-wire generation now refuses the temporary view instead of publishing a partial view; support for sources beyond the tested native adapter remains to be verified. Ordinary document/Undo still own display; the representation store, cold restore and v5 remain open.
+
+SHA-256: `topology_remesh.rs` `9dae9ffb025223b56d2f1e5a74c93723c7838c6487cd32c37ab1b5682a555f2e`; `session.rs` `b1854ddff5e52aa14dc66fe3cdf0a11ceba99057f913ea5765cddaad4251cc65`.

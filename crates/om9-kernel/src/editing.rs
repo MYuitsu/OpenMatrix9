@@ -10,8 +10,9 @@
 //! Edge and face selection is by index into the canonical OCCT map order, which is also the order
 //! of [`Brep::display`]'s `edges`/`faces`. [`edge_endpoints`] is a selection helper derived from the
 //! display snapshot; acceptance measurements always come from [`creation::measure`].
+use om9_core::brep::BrepSourceAccess;
 use crate::{
-    brep::{snapshot_budget, snapshot_via, snapshot_via_optional},
+    brep::{snapshot_budget, snapshot_via, snapshot_via_optional, snapshot_via_with_admission},
     creation::{CreationError, Measures, measure},
 };
 use om9_core::{brep::Brep, budget::Limits, geometry::Point3};
@@ -23,6 +24,57 @@ pub type EditingError = CreationError;
 type NativeSink = unsafe extern "C" fn(*mut c_void, *const crate::brep::Snapshot) -> c_int;
 
 unsafe extern "C" {
+    fn om9_occt_boolean_source(certified: c_int, a: *const u8, alen: usize, b: *const u8, blen: usize,
+        nodes: usize, bytes: usize, sink: crate::brep::intermediate::Sink, context: *mut c_void,
+        message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_transform_source(source: *const u8, length: usize, matrix: *const f64,
+        nodes: usize, bytes: usize, sink: crate::brep::intermediate::Sink, context: *mut c_void,
+        message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_default_face_isocurves(source:*const u8,length:usize,
+        max_points:usize,max_nodes:usize,max_bytes:usize,max_degree:c_int,
+        checkpoint:unsafe extern "C" fn(*mut c_void)->c_int,
+        prepare:unsafe extern "C" fn(*mut c_void,usize)->c_int,
+        sink:unsafe extern "C" fn(*mut c_void,c_int,*const f64,*const f64,usize,*const f64,usize)->c_int,
+        context:*mut c_void,message:*mut c_char,capacity:c_int)->c_int;
+    fn om9_occt_isocurve_face_bounds(source:*const u8,length:usize,max_nodes:usize,triangle:*const f64,
+        witness_deflection:f64,tolerance:f64,bounds:*mut f64,
+        message:*mut c_char,capacity:c_int)->c_int;
+    fn om9_occt_isocurve_ray_face_bounds(source:*const u8,length:usize,max_nodes:usize,origin:*const f64,
+        direction:*const f64,reference:*const f64,tolerance:f64,max_distance:f64,witness:*const f64,witness_deflection:f64,witness_tolerance:f64,bounds:*mut f64,
+        resolved:*mut f64,message:*mut c_char,capacity:c_int)->c_int;
+    fn om9_occt_face_isocurve(source:*const u8,length:usize,along_u:c_int,value:f64,
+        triangle:*const f64,witness_deflection:f64,tolerance:f64,
+        max_points:usize,max_nodes:usize,max_bytes:usize,max_degree:c_int,
+        prepare:unsafe extern "C" fn(*mut c_void,usize)->c_int,
+        sink:unsafe extern "C" fn(*mut c_void,c_int,*const f64,*const f64,usize,*const f64,usize)->c_int,
+        context:*mut c_void,message:*mut c_char,capacity:c_int)->c_int;
+    fn om9_occt_ray_face_isocurve(source:*const u8,length:usize,along_u:c_int,value:f64,
+        origin:*const f64,direction:*const f64,reference:*const f64,tolerance:f64,max_distance:f64,
+        witness:*const f64,witness_deflection:f64,witness_tolerance:f64,
+        max_points:usize,max_nodes:usize,max_bytes:usize,max_degree:c_int,
+        prepare:unsafe extern "C" fn(*mut c_void,usize)->c_int,
+        sink:unsafe extern "C" fn(*mut c_void,c_int,*const f64,*const f64,usize,*const f64,usize)->c_int,
+        context:*mut c_void,message:*mut c_char,capacity:c_int)->c_int;
+    fn om9_occt_verify_face_triangles(source: *const u8, length: usize, triangles: *const f64,
+        count: usize, tolerance: f64, vertex_tolerance: f64, max_nodes: usize, max_bytes: usize,
+        message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_verified_edge_endpoints(source: *const u8, length: usize, segment: *const f64,
+        tolerance: f64, segment_tolerance: f64, max_nodes: usize, points: *mut f64,
+        message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_all_edges_nurbs(source: *const u8, length: usize, max_edges: usize, boundary_only: c_int,
+        max_points: usize, max_nodes: usize, max_bytes: usize, max_degree: c_int,
+        prepare: unsafe extern "C" fn(*mut c_void, usize) -> c_int,
+        sink: unsafe extern "C" fn(*mut c_void, c_int, *const f64, *const f64, usize, *const f64, usize) -> c_int,
+        context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_point_edge_nurbs(source: *const u8, length: usize, point: *const f64, tolerance: f64,
+        segment: *const f64, segment_tolerance: f64, resolved_point: *mut f64, circle_data: *mut f64,
+        max_edges: usize, max_points: usize, max_nodes: usize, max_bytes: usize, max_degree: c_int,
+        sink: unsafe extern "C" fn(*mut c_void, c_int, *const f64, *const f64, usize, *const f64, usize) -> c_int,
+        context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_edges_nurbs(source: *const u8, length: usize, indices: *const c_int, count: usize,
+        max_points: usize, max_nodes: usize, max_bytes: usize, max_degree: c_int,
+        sink: unsafe extern "C" fn(*mut c_void, c_int, *const f64, *const f64, usize, *const f64, usize) -> c_int,
+        context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_coplanar_faces_plane(source: *const u8, length: usize, plane: *mut f64,
         message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_boss_cylinder_carrier(source: *const u8, length: usize, axis_data: *mut f64, extension: f64,
@@ -165,6 +217,9 @@ unsafe extern "C" {
         control_fractions: *const f64,
         control_radii: *const f64,
         control_count: usize,
+        segments: *const f64,
+        pick_tolerance: f64,
+        segment_tolerance: f64,
         deflection: f64,
         max_points: usize,
         max_nodes: usize,
@@ -185,11 +240,13 @@ unsafe extern "C" {
     fn om9_occt_edge_is_line(source: *const u8, length: usize, edge: c_int,
         is_line: *mut c_int, message: *mut std::ffi::c_char, capacity: c_int) -> c_int;
     fn om9_occt_fillet_shared_endpoints(source: *const u8, length: usize, anchor: c_int, side: c_int,
-        candidates: *const c_int, count: usize, masks: *mut u8, message: *mut c_char, capacity: c_int) -> c_int;
+        candidates: *const c_int, count: usize, segments: *const f64, anchor_slot: usize,
+        tolerance: f64, segment_tolerance: f64, max_nodes: usize, masks: *mut u8, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_circular_edge(source: *const u8, length: usize, edge: c_int,
         output: *mut f64, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_fillet_project_edge(source: *const u8, length: usize, edge: c_int,
-        point: *const f64, output: *mut f64, message: *mut c_char, capacity: c_int) -> c_int;
+        point: *const f64, segment: *const f64, tolerance: f64, segment_tolerance: f64, max_nodes: usize,
+        output: *mut f64, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_chamfer(
         source: *const u8,
         length: usize,
@@ -231,10 +288,18 @@ unsafe extern "C" {
         message: *mut std::ffi::c_char,
         capacity: c_int,
     ) -> c_int;
+    fn om9_occt_verify_face_display(source: *const u8, length: usize,
+        witness: *const f64, deflection: f64, vertex_tolerance: f64,
+        points: *const f64, point_count: usize, triangles: *const u32, triangle_count: usize,
+        display_face: u32, max_nodes: usize, canceled: Option<unsafe extern "C" fn(*mut c_void) -> c_int>,
+        cancel_context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_extract_face(
         source: *const u8,
         length: usize,
         face_index: c_int,
+        triangle: *const f64,
+        vertex_tolerance: f64,
+        witness_deflection: f64,
         deflection: f64,
         max_points: usize,
         max_nodes: usize,
@@ -248,6 +313,9 @@ unsafe extern "C" {
         source: *const u8,
         length: usize,
         face_index: c_int,
+        triangle: *const f64,
+        vertex_tolerance: f64,
+        witness_deflection: f64,
         deflection: f64,
         max_points: usize,
         max_nodes: usize,
@@ -292,6 +360,9 @@ unsafe extern "C" {
         length: usize,
         face_indices: *const c_int,
         count: usize,
+        triangles: *const f64,
+        vertex_tolerance: f64,
+        witness_deflection: f64,
         deflection: f64,
         max_points: usize,
         max_nodes: usize,
@@ -334,6 +405,456 @@ unsafe extern "C" {
     ) -> c_int;
 }
 
+/// Extract the exact native edge curve as an owned rational B-spline. Native
+/// OCCT parsing/conversion has its own allocations outside the Rust budget.
+pub fn edge_nurbs(shape: &dyn BrepSourceAccess, index: usize, limits: &Limits) -> Result<om9_core::geometry::Curve, EditingError> {
+    edges_nurbs(shape, &[index], limits)?.pop().ok_or_else(|| EditingError::Kernel("edge curve output missing".into()))
+}
+
+/// Extract selected edges in order while parsing the source only once.
+pub fn edges_nurbs(shape: &dyn BrepSourceAccess, indices: &[usize], limits: &Limits) -> Result<Vec<om9_core::geometry::Curve>, EditingError> {
+    edges_nurbs_admitted(shape, indices, limits, |_, _| Ok(()))
+}
+
+/// Caller-accounted extraction; the callback covers Rust output and scratch,
+/// not allocations made internally by OCCT while parsing/converting curves.
+pub fn edges_nurbs_admitted(shape: &dyn BrepSourceAccess, indices: &[usize], limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Vec<om9_core::geometry::Curve>, EditingError> {
+    edge_curves_admitted(shape, indices, None, None, &mut [0.; 3], None, 0, limits, &mut admit)
+}
+
+/// Extract mapped edge indices from an attested, independently retained source.
+/// The mapping must have been produced from this registered source's manifest;
+/// publication remains the caller's responsibility.
+pub fn registered_edges_nurbs_admitted(source: &crate::brep::RegisteredTopologySource, indices: &[usize], limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Vec<om9_core::geometry::Curve>, EditingError> {
+    edge_curves_raw_admitted(source.source(), Some(source.topology().edges.len()), indices,
+        None, None, &mut [0.; 3], None, 0, None, limits, &mut admit)
+}
+
+/// Extract source edges with 3D curves from one native map; verified degenerate pole edges are skipped.
+pub fn all_source_edges_nurbs_admitted(shape: &dyn BrepSourceAccess, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Vec<om9_core::geometry::Curve>, EditingError> {
+    edge_curves_admitted(shape, &[], None, None, &mut [0.; 3], None, 1, limits, &mut admit)
+}
+
+/// Extract all edges from canonical OCCT source without constructing a display
+/// mesh. The caller keeps the source alive and admits it alongside outputs.
+pub fn all_edges_from_source_admitted(source:&str, limits:&Limits,
+    mut admit:impl FnMut(u64,u64)->om9_core::Result<()>) -> Result<Vec<om9_core::geometry::Curve>,EditingError> {
+    if source.is_empty() || source.len() as u64>limits.max_bytes {
+        return Err(EditingError::Invalid("edge source".into()));
+    }
+    edge_curves_raw_admitted(source,None,&[],None,None,&mut [0.;3],None,1,None,limits,&mut admit)
+}
+
+/// Extract edges belonging to exactly one source face without building a display mesh.
+pub fn boundary_edges_from_source_admitted(source:&str, limits:&Limits,
+    mut admit:impl FnMut(u64,u64)->om9_core::Result<()>) -> Result<Vec<om9_core::geometry::Curve>,EditingError> {
+    if source.is_empty() || source.len() as u64>limits.max_bytes {
+        return Err(EditingError::Invalid("edge source".into()));
+    }
+    edge_curves_raw_admitted(source,None,&[],None,None,&mut [0.;3],None,2,None,limits,&mut admit)
+}
+
+/// Parameter bounds of an unambiguous open single-face B-rep, in source coordinates.
+pub fn single_face_isocurve_bounds(shape: &dyn BrepSourceAccess,limits:&Limits)->Result<[[f64;2];2],EditingError> {
+    shape.validate_source(limits).map_err(|e|EditingError::Invalid(e.to_string()))?;
+    single_face_isocurve_bounds_from_source(shape.source(),limits)
+}
+
+/// Inspect a caller-admitted OCCT source without constructing a display mesh.
+pub fn single_face_isocurve_bounds_from_source(source:&str,limits:&Limits)->Result<[[f64;2];2],EditingError> {
+    face_isocurve_bounds_from_source(source,None,limits)
+}
+
+#[derive(Clone,Copy)]
+pub struct IsocurveFaceWitness {pub triangle:[Point3;3],pub deflection:f64,pub tolerance:f64}
+
+/// Local-space view query. Its owner must bind it to the source and scene.
+#[derive(Clone,Copy)]
+pub struct IsocurveFaceRay {pub origin:Point3,pub direction:Point3,pub reference:Point3,pub tolerance:f64,pub max_distance:f64,pub witness:Option<IsocurveFaceWitness>}
+
+#[derive(Clone,Copy)]
+enum IsocurveFaceSelection { Witness(Option<IsocurveFaceWitness>), Ray(IsocurveFaceRay) }
+
+pub fn face_isocurve_bounds_from_source(source:&str,witness:Option<IsocurveFaceWitness>,limits:&Limits)->Result<[[f64;2];2],EditingError> {
+    if source.is_empty() || source.len() as u64>limits.max_bytes {return Err(EditingError::Invalid("isocurve source".into()));}
+    let mut bounds=[0.;4];let mut message=[0 as c_char;512];
+    let status=unsafe {om9_occt_isocurve_face_bounds(source.as_ptr(),source.len(),
+        usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),witness.as_ref().map_or(std::ptr::null(),|w|w.triangle.as_ptr().cast()),
+        witness.map_or(0.,|w|w.deflection),witness.map_or(0.,|w|w.tolerance),bounds.as_mut_ptr(),message.as_mut_ptr(),message.len() as c_int)};
+    if status!=0 {return Err(EditingError::Kernel(unsafe {std::ffi::CStr::from_ptr(message.as_ptr())}.to_string_lossy().into_owned()));}
+    Ok([[bounds[0],bounds[1]],[bounds[2],bounds[3]]])
+}
+
+/// Inspect the exact face nearest `reference` on a local-space ray. The caller
+/// admits source/native work and bounds `max_distance` for its viewport; this
+/// returns no persistent face identity and does not authorize a later edit.
+pub fn ray_face_isocurve_bounds_from_source(source:&str,origin:Point3,direction:Point3,reference:Point3,
+    tolerance:f64,max_distance:f64,limits:&Limits)->Result<[[f64;2];2],EditingError> {
+    ray_face_isocurve_hit_from_source(source,origin,direction,reference,tolerance,max_distance,limits).map(|(bounds,_)|bounds)
+}
+
+/// Returns the selected source face's bounds and exact local-space ray hit.
+/// A viewport caller must check this hit in its own world/view context.
+pub fn ray_face_isocurve_hit_from_source(source:&str,origin:Point3,direction:Point3,reference:Point3,
+    tolerance:f64,max_distance:f64,limits:&Limits)->Result<([[f64;2];2],Point3),EditingError> {
+    ray_face_isocurve_hit_with_witness_from_source(source,IsocurveFaceRay {origin,direction,reference,tolerance,max_distance,witness:None},limits)
+}
+
+pub fn ray_face_isocurve_hit_with_witness_from_source(source:&str,ray:IsocurveFaceRay,limits:&Limits)->Result<([[f64;2];2],Point3),EditingError> {
+    let IsocurveFaceRay {origin,direction,reference,tolerance,max_distance,witness}=ray;
+    if source.is_empty() || source.len() as u64>limits.max_bytes ||
+        !origin.iter().chain(direction.iter()).chain(reference.iter()).all(|v|v.is_finite()) ||
+        !tolerance.is_finite() || tolerance<=0. || !max_distance.is_finite() || max_distance<=0. {
+        return Err(EditingError::Invalid("isocurve ray input".into()));
+    }
+    if let Some(w)=witness {
+        validate_face_triangles(&[w.triangle],w.tolerance)?;
+        if !w.deflection.is_finite() || w.deflection<0. || !(w.deflection+w.tolerance).is_finite() {return Err(EditingError::Invalid("isocurve face witness".into()));}
+    }
+    let mut bounds=[0.;4];let mut resolved=[0.;3];let mut message=[0 as c_char;512];
+    let status=unsafe {om9_occt_isocurve_ray_face_bounds(source.as_ptr(),source.len(),
+        usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),origin.as_ptr(),direction.as_ptr(),reference.as_ptr(),
+        tolerance,max_distance,witness.as_ref().map_or(std::ptr::null(),|w|w.triangle.as_ptr().cast()),
+        witness.map_or(0.,|w|w.deflection),witness.map_or(0.,|w|w.tolerance),bounds.as_mut_ptr(),resolved.as_mut_ptr(),message.as_mut_ptr(),message.len() as c_int)};
+    if status!=0 {return Err(EditingError::Kernel(unsafe {std::ffi::CStr::from_ptr(message.as_ptr())}.to_string_lossy().into_owned()));}
+    if !resolved.iter().all(|v|v.is_finite()) {return Err(EditingError::Invalid("isocurve ray hit".into()));}
+    Ok(([[bounds[0],bounds[1]],[bounds[2],bounds[3]]],resolved))
+}
+
+/// Clip an isoparametric curve against one source face, including its holes.
+pub fn single_face_isocurve_admitted(shape: &dyn BrepSourceAccess,along_u:bool,value:f64,limits:&Limits,
+    mut admit:impl FnMut(u64,u64)->om9_core::Result<()>)->Result<Vec<om9_core::geometry::Curve>,EditingError> {
+    shape.validate_source(limits).map_err(|e|EditingError::Invalid(e.to_string()))?;
+    single_face_isocurve_from_source_admitted(shape.source(),along_u,value,limits,&mut admit)
+}
+
+/// Extract from caller-admitted source while accounting for the caller's retained source bytes.
+pub fn single_face_isocurve_from_source_admitted(source:&str,along_u:bool,value:f64,limits:&Limits,
+    mut admit:impl FnMut(u64,u64)->om9_core::Result<()>)->Result<Vec<om9_core::geometry::Curve>,EditingError> {
+    face_isocurve_from_source_admitted(source,along_u,value,None,limits,&mut admit)
+}
+
+/// Extract default-density interior wires from all faces in a single native
+/// source read. Curves are clipped to each face, including inner boundaries;
+/// they are display wires, not persistent topology edges. The caller owns and
+/// admits the source for the call and must guard the publication context.
+pub fn default_face_isocurves_from_source_admitted(source:&str,limits:&Limits,
+    mut admit:impl FnMut(u64,u64)->om9_core::Result<()>)->Result<Vec<om9_core::geometry::Curve>,EditingError> {
+    if source.is_empty() || source.len() as u64>limits.max_bytes {
+        return Err(EditingError::Invalid("isocurve source".into()));
+    }
+    edge_curves_raw_admitted(source,None,&[],None,None,&mut [0.;3],None,4,None,limits,&mut admit)
+}
+
+pub fn face_isocurve_from_source_admitted(source:&str,along_u:bool,value:f64,witness:Option<IsocurveFaceWitness>,limits:&Limits,
+    mut admit:impl FnMut(u64,u64)->om9_core::Result<()>)->Result<Vec<om9_core::geometry::Curve>,EditingError> {
+    if source.is_empty() || source.len() as u64>limits.max_bytes {return Err(EditingError::Invalid("isocurve source".into()));}
+    edge_curves_raw_admitted(source,None,&[],None,None,&mut [0.;3],None,3,Some((along_u,value,IsocurveFaceSelection::Witness(witness))),limits,&mut admit)
+}
+
+/// Construct exact isocurves from a tracked canonical lease, without retaining
+/// a document or display. The caller must retain admission for the returned
+/// curves, and must revalidate its command and scene before publication.
+/// Cancellation is checked at admission callbacks and after the native call;
+/// one in-flight native call cannot be interrupted.
+pub fn face_isocurve_from_captured_source_cancellable(
+    source: &om9_core::transaction::CapturedBrepSource, along_u: bool, value: f64,
+    witness: Option<IsocurveFaceWitness>, limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Vec<om9_core::geometry::Curve>> {
+    isocurve_from_captured_source_cancellable(source, along_u, value,
+        IsocurveFaceSelection::Witness(witness), limits, cancel, admit)
+}
+
+/// Resolve a face by its validated local-space ray against a captured source.
+/// As with witness selection, callers retain output admission and revalidate
+/// the selection before publishing; native work in flight is not interruptible.
+pub fn ray_face_isocurve_from_captured_source_cancellable(
+    source: &om9_core::transaction::CapturedBrepSource, along_u: bool, value: f64,
+    ray: IsocurveFaceRay, limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Vec<om9_core::geometry::Curve>> {
+    isocurve_from_captured_source_cancellable(source, along_u, value,
+        IsocurveFaceSelection::Ray(ray), limits, cancel, admit)
+}
+
+fn isocurve_from_captured_source_cancellable(
+    source: &om9_core::transaction::CapturedBrepSource, along_u: bool, value: f64,
+    selection: IsocurveFaceSelection, limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Vec<om9_core::geometry::Curve>> {
+    use om9_core::Error;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let canonical = source.validate_canonical_admitted(limits, &mut |live, pending| {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        admit(live, pending)
+    })?;
+    let remaining = limits.remaining_after(canonical)?;
+    let mut refusal = None;
+    let mut admission = |live, pending| {
+        let result = if cancel.is_canceled() { Err(Error::Canceled) } else {
+            canonical.bytes.checked_add(live).ok_or(Error::Overflow("captured isocurve admission"))
+                .and_then(|held| admit(held, pending))
+        };
+        if let Err(error) = &result { refusal = Some(error.clone()); }
+        result
+    };
+    let result = match selection {
+        IsocurveFaceSelection::Witness(witness) => face_isocurve_from_source_admitted(
+            source.source(), along_u, value, witness, &remaining, &mut admission),
+        IsocurveFaceSelection::Ray(ray) => ray_face_isocurve_from_source_admitted(
+            source.source(), along_u, value, ray, &remaining, &mut admission),
+    };
+    let curves = result.map_err(|error| refusal.unwrap_or_else(|| match error {
+        EditingError::Budget(_) => Error::Budget("bytes"),
+        other => Error::Io(format!("ExtractIsocurve: {other}")),
+    }))?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    Ok(curves)
+}
+
+/// Re-resolve a source face by the same local-space ray while extracting its
+/// isocurve. Callers must also ensure the immutable source and selection have
+/// not changed since requesting bounds; admission covers Rust outputs only.
+pub fn ray_face_isocurve_from_source_admitted(source:&str,along_u:bool,value:f64,ray:IsocurveFaceRay,limits:&Limits,
+    mut admit:impl FnMut(u64,u64)->om9_core::Result<()>)->Result<Vec<om9_core::geometry::Curve>,EditingError> {
+    if source.is_empty() || source.len() as u64>limits.max_bytes {return Err(EditingError::Invalid("isocurve source".into()));}
+    if let Some(w)=ray.witness {validate_face_triangles(&[w.triangle],w.tolerance)?; if !w.deflection.is_finite() || w.deflection<0. || !(w.deflection+w.tolerance).is_finite() {return Err(EditingError::Invalid("isocurve face witness".into()));}}
+    edge_curves_raw_admitted(source,None,&[],None,None,&mut [0.;3],None,3,Some((along_u,value,IsocurveFaceSelection::Ray(ray))),limits,&mut admit)
+}
+
+/// Extract source edges used by exactly one face, from the same native topology map.
+pub fn source_boundary_edges_nurbs_admitted(shape: &dyn BrepSourceAccess, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Vec<om9_core::geometry::Curve>, EditingError> {
+    edge_curves_admitted(shape, &[], None, None, &mut [0.; 3], None, 2, limits, &mut admit)
+}
+
+/// Resolve a local point to exactly one source edge and emit its curve from the
+/// same native edge map. The caller must validate the point and tolerance against
+/// the viewport and account all other live owners.
+pub fn source_edge_curve_at_point_admitted(shape: &dyn BrepSourceAccess, point: Point3, tolerance: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<(om9_core::geometry::Curve, Point3), EditingError> {
+    source_edge_curve_inner(shape, point, tolerance, None, false, limits, &mut admit)
+}
+
+/// Resolve a display segment only when exactly one source edge contains both endpoints.
+pub fn source_edge_curve_at_segment_admitted(shape: &dyn BrepSourceAccess, point: Point3, tolerance: f64,
+    segment: [Point3; 2], segment_tolerance: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<(om9_core::geometry::Curve, Point3), EditingError> {
+    if !segment.iter().flatten().all(|v| v.is_finite()) || !segment_tolerance.is_finite() || segment_tolerance <= 0.0
+        || (0..3).map(|i| (segment[0][i] - segment[1][i]).powi(2)).sum::<f64>() <= segment_tolerance.powi(2) {
+        return Err(EditingError::Invalid("source edge pick segment".into()));
+    }
+    source_edge_curve_inner(shape, point, tolerance, Some((segment, segment_tolerance)), false, limits, &mut admit)
+}
+
+/// Resolve one edge from canonical source without constructing a display mesh.
+/// The caller retains and admits the source string for the whole call.
+pub fn source_edge_from_text_segment_admitted(source: &str, point: Point3, tolerance: f64,
+    segment: [Point3; 2], segment_tolerance: f64, limits: &Limits,
+    mut admit: impl FnMut(u64,u64)->om9_core::Result<()>) -> Result<(om9_core::geometry::Curve,Point3),EditingError> {
+    if source.is_empty() || source.len() as u64 > limits.max_bytes
+        || !point.iter().chain(segment.iter().flatten()).all(|v|v.is_finite())
+        || !tolerance.is_finite() || tolerance <= 0.0 || !segment_tolerance.is_finite() || segment_tolerance <= 0.0
+        || (0..3).map(|i|(segment[0][i]-segment[1][i]).powi(2)).sum::<f64>() <= segment_tolerance.powi(2) {
+        return Err(EditingError::Invalid("source edge pick input".into()));
+    }
+    let mut resolved=[0.;3];
+    let mut curves=edge_curves_raw_admitted(source,None,&[],Some((point,tolerance)),Some((segment,segment_tolerance)),
+        &mut resolved,None,0,None,limits,&mut admit)?;
+    if !resolved.iter().all(|v|v.is_finite()) { return Err(EditingError::Kernel("source edge point invalid".into())); }
+    Ok((curves.pop().ok_or_else(||EditingError::Kernel("source edge output missing".into()))?,resolved))
+}
+
+/// As above, retaining the native circle's angular parameterization when applicable.
+pub fn source_edge_analytic_at_segment_admitted(shape: &dyn BrepSourceAccess, point: Point3, tolerance: f64,
+    segment: [Point3; 2], segment_tolerance: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<(om9_core::geometry::Curve, Point3), EditingError> {
+    if !segment.iter().flatten().all(|v| v.is_finite()) || !segment_tolerance.is_finite() || segment_tolerance <= 0.0
+        || (0..3).map(|i| (segment[0][i] - segment[1][i]).powi(2)).sum::<f64>() <= segment_tolerance.powi(2) {
+        return Err(EditingError::Invalid("source edge pick segment".into()));
+    }
+    source_edge_curve_inner(shape, point, tolerance, Some((segment, segment_tolerance)), true, limits, &mut admit)
+}
+
+fn source_edge_curve_inner(shape: &dyn BrepSourceAccess, point: Point3, tolerance: f64, segment: Option<([Point3; 2], f64)>, analytic: bool, limits: &Limits,
+    admit: &mut dyn FnMut(u64, u64) -> om9_core::Result<()>) -> Result<(om9_core::geometry::Curve, Point3), EditingError> {
+    if !point.iter().all(|value| value.is_finite()) || !tolerance.is_finite() || tolerance <= 0.0 {
+        return Err(EditingError::Invalid("source edge pick input".into()));
+    }
+    let mut resolved = [0.; 3];
+    let mut circle = [0.; 14];
+    let mut curves = edge_curves_admitted(shape, &[], Some((point, tolerance)), segment, &mut resolved,
+        analytic.then_some(&mut circle), 0, limits, admit)?;
+    if !resolved.iter().all(|value| value.is_finite()) { return Err(EditingError::Kernel("source edge point invalid".into())); }
+    let curve = curves.pop().ok_or_else(|| EditingError::Kernel("source edge output missing".into()))?;
+    let curve = if circle[0] == 1. { circle_from_native(&circle[1..], limits)? } else { curve };
+    Ok((curve, resolved))
+}
+
+fn edge_curves_admitted(shape: &dyn BrepSourceAccess, indices: &[usize], point: Option<(Point3, f64)>, segment: Option<([Point3; 2], f64)>, resolved: &mut Point3, circle: Option<&mut [f64; 14]>, source_mode: u8, limits: &Limits,
+    admit: &mut dyn FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Vec<om9_core::geometry::Curve>, EditingError> {
+    shape.validate_source(limits).map_err(|error| EditingError::Invalid(error.to_string()))?;
+    edge_curves_raw_admitted(shape.source(),Some(shape.topology().edges.len()),indices,point,segment,resolved,circle,source_mode,None,limits,admit)
+}
+
+fn edge_curves_raw_admitted(source:&str, edge_count:Option<usize>, indices:&[usize], point:Option<(Point3,f64)>, segment:Option<([Point3;2],f64)>, resolved:&mut Point3, circle:Option<&mut [f64;14]>, source_mode:u8, iso:Option<(bool,f64,IsocurveFaceSelection)>, limits:&Limits,
+    admit:&mut dyn FnMut(u64,u64)->om9_core::Result<()>) -> Result<Vec<om9_core::geometry::Curve>,EditingError> {
+    use om9_core::geometry::{Curve, NurbsCurve};
+    let count = if point.is_some() { 1 } else { indices.len() };
+    if (source_mode == 0 && count == 0) || count as u64 > limits.max_nodes || count as u64 > limits.max_outputs {
+        return Err(EditingError::Budget("edge curve count".into()));
+    }
+    let base_bytes = count.checked_mul(std::mem::size_of::<i32>() + std::mem::size_of::<Curve>())
+        .ok_or_else(|| EditingError::Budget("edge curve count".into()))?;
+    if base_bytes as u64 > limits.max_bytes { return Err(EditingError::Budget("edge curve count".into())); }
+    admit(0, base_bytes as u64).map_err(|e| EditingError::Budget(e.to_string()))?;
+    let mut native_indices = Vec::new();
+    std::alloc::Layout::array::<i32>(indices.len()).map_err(|_|EditingError::Budget("edge curve count".into()))?;
+    native_indices.try_reserve_exact(indices.len()).map_err(|_| EditingError::Budget("edge curve allocation".into()))?;
+    for &index in indices {
+        if edge_count.is_none_or(|count|index>=count) { return Err(EditingError::Invalid("edge index out of range".into())); }
+        native_indices.push(i32::try_from(index).map_err(|_| EditingError::Budget("edge index".into()))?);
+    }
+    struct Capture<'a> { limits: &'a Limits, result: Vec<Curve>, error: Option<EditingError>, bytes: usize, points: usize, expected: usize,
+        admit: &'a mut dyn FnMut(u64, u64) -> om9_core::Result<()> }
+    unsafe extern "C" fn checkpoint(context: *mut c_void) -> c_int {
+        let capture = unsafe { &mut *context.cast::<Capture<'_>>() };
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(||
+            (capture.admit)(capture.bytes as u64, 0)))
+            .unwrap_or_else(|_| Err(om9_core::Error::Invalid("isocurve checkpoint panic")));
+        match result { Ok(()) => 0, Err(error) => { capture.error=Some(EditingError::Budget(error.to_string())); 1 } }
+    }
+    unsafe extern "C" fn prepare(context: *mut c_void, count: usize) -> c_int {
+        let capture = unsafe { &mut *context.cast::<Capture<'_>>() };
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<(), EditingError> {
+            if count == 0 || count as u64 > capture.limits.max_nodes || count as u64 > capture.limits.max_outputs {
+                return Err(EditingError::Budget("edge curve count".into()));
+            }
+            let bytes = count.checked_mul(std::mem::size_of::<Curve>()).ok_or_else(|| EditingError::Budget("edge curve count".into()))?;
+            if bytes as u64 > capture.limits.max_bytes { return Err(EditingError::Budget("edge curve count".into())); }
+            std::alloc::Layout::array::<Curve>(count).map_err(|_|EditingError::Budget("edge curve count".into()))?;
+            (capture.admit)(capture.bytes as u64, bytes as u64).map_err(|e| EditingError::Budget(e.to_string()))?;
+            capture.result.try_reserve_exact(count).map_err(|_| EditingError::Budget("edge curve allocation".into()))?;
+            let actual = capture.result.capacity().checked_mul(std::mem::size_of::<Curve>()).ok_or_else(|| EditingError::Budget("edge curve count".into()))?;
+            capture.bytes = capture.bytes.checked_add(actual).ok_or_else(|| EditingError::Budget("edge curve count".into()))?;
+            if capture.bytes as u64 > capture.limits.max_bytes { return Err(EditingError::Budget("edge curve count".into())); }
+            (capture.admit)(capture.bytes as u64, 0).map_err(|e| EditingError::Budget(e.to_string()))?;
+            capture.expected = count;
+            Ok(())
+        })).unwrap_or_else(|_| Err(EditingError::Invalid("edge curve prepare panic".into())));
+        match result { Ok(()) => 0, Err(error) => { capture.error = Some(error); 1 } }
+    }
+    unsafe extern "C" fn receive(context: *mut c_void, degree: c_int, points: *const f64,
+        weights: *const f64, count: usize, knots: *const f64, knot_count: usize) -> c_int {
+        let capture = unsafe { &mut *context.cast::<Capture<'_>>() };
+        if capture.error.is_some() { return 1; }
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<NurbsCurve, EditingError> {
+            if capture.result.len() >= capture.expected { return Err(EditingError::Budget("edge curve count".into())); }
+            let degree = usize::try_from(degree).map_err(|_| EditingError::Invalid("edge curve degree".into()))?;
+            let bytes = count.checked_mul(4 * std::mem::size_of::<f64>())
+                .and_then(|v| v.checked_add(knot_count.checked_mul(std::mem::size_of::<f64>())?))
+                .ok_or_else(|| EditingError::Budget("edge curve size".into()))?;
+            let peak = capture.bytes.checked_add(bytes.checked_mul(2).ok_or_else(|| EditingError::Budget("edge curve size".into()))?)
+                .ok_or_else(|| EditingError::Budget("edge curve size".into()))?;
+            let points_total = capture.points.checked_add(count).ok_or_else(|| EditingError::Budget("edge curve points".into()))?;
+            if count == 0 || count as u64 > capture.limits.max_points || knot_count as u64 > capture.limits.max_nodes
+                || points_total as u64 > capture.limits.max_points || degree == 0 || degree > capture.limits.max_degree || peak as u64 > capture.limits.max_bytes
+                || points.is_null() || weights.is_null() || knots.is_null() {
+                return Err(EditingError::Budget("edge curve output".into()));
+            }
+            std::alloc::Layout::array::<Point3>(count).map_err(|_|EditingError::Budget("edge curve size".into()))?;
+            std::alloc::Layout::array::<f64>(count).map_err(|_|EditingError::Budget("edge curve size".into()))?;
+            std::alloc::Layout::array::<f64>(knot_count).map_err(|_|EditingError::Budget("edge curve size".into()))?;
+            let coords = unsafe { std::slice::from_raw_parts(points, count.checked_mul(3).ok_or_else(|| EditingError::Budget("edge curve points".into()))?) };
+            let native_weights = unsafe { std::slice::from_raw_parts(weights, count) };
+            let native_knots = unsafe { std::slice::from_raw_parts(knots, knot_count) };
+            (capture.admit)(capture.bytes as u64, (bytes * 2) as u64)
+                .map_err(|e| EditingError::Budget(e.to_string()))?;
+            let mut poles = Vec::new(); let mut owned_weights = Vec::new(); let mut owned_knots = Vec::new();
+            poles.try_reserve_exact(count).map_err(|_| EditingError::Budget("edge curve allocation".into()))?;
+            owned_weights.try_reserve_exact(count).map_err(|_| EditingError::Budget("edge curve allocation".into()))?;
+            owned_knots.try_reserve_exact(knot_count).map_err(|_| EditingError::Budget("edge curve allocation".into()))?;
+            let actual = poles.capacity().checked_mul(std::mem::size_of::<Point3>())
+                .and_then(|v| v.checked_add(owned_weights.capacity().checked_mul(std::mem::size_of::<f64>())?))
+                .and_then(|v| v.checked_add(owned_knots.capacity().checked_mul(std::mem::size_of::<f64>())?))
+                .ok_or_else(|| EditingError::Budget("edge curve capacity".into()))?;
+            let actual_peak = capture.bytes.checked_add(actual).and_then(|v| v.checked_add(bytes))
+                .ok_or_else(|| EditingError::Budget("edge curve capacity".into()))?;
+            if actual_peak as u64 > capture.limits.max_bytes { return Err(EditingError::Budget("edge curve capacity".into())); }
+            (capture.admit)((capture.bytes + actual) as u64, bytes as u64)
+                .map_err(|e| EditingError::Budget(e.to_string()))?;
+            for p in coords.chunks_exact(3) { poles.push([p[0], p[1], p[2]]); }
+            owned_weights.extend_from_slice(native_weights); owned_knots.extend_from_slice(native_knots);
+            let domain = [*owned_knots.get(degree).ok_or_else(|| EditingError::Invalid("edge curve knot domain".into()))?,
+                *owned_knots.get(count).ok_or_else(|| EditingError::Invalid("edge curve knot domain".into()))?];
+            let curve = NurbsCurve { degree, poles, weights: owned_weights, knots: owned_knots, domain,
+                periodic: false, reversed: false, seam: None };
+            curve.validate(capture.limits).map_err(|e| EditingError::Invalid(format!("edge curve: {e}")))?;
+            capture.bytes = capture.bytes.checked_add(actual).ok_or_else(|| EditingError::Budget("edge curve size".into()))?;
+            capture.points = points_total;
+            Ok(curve)
+        })).unwrap_or_else(|_| Err(EditingError::Invalid("edge curve callback panic".into())));
+        match result { Ok(curve) => { capture.result.push(Curve::Nurbs(curve)); 0 }, Err(error) => { capture.error = Some(error); 1 } }
+    }
+    let mut curves = Vec::new();
+    std::alloc::Layout::array::<Curve>(count).map_err(|_|EditingError::Budget("edge curve count".into()))?;
+    curves.try_reserve_exact(count).map_err(|_| EditingError::Budget("edge curve allocation".into()))?;
+    let actual_base = native_indices.capacity().checked_mul(std::mem::size_of::<i32>())
+        .and_then(|v| v.checked_add(curves.capacity().checked_mul(std::mem::size_of::<Curve>())?))
+        .ok_or_else(|| EditingError::Budget("edge curve count".into()))?;
+    if actual_base as u64 > limits.max_bytes { return Err(EditingError::Budget("edge curve count".into())); }
+    admit(actual_base as u64, 0).map_err(|e| EditingError::Budget(e.to_string()))?;
+    let mut capture = Capture { limits, result: curves, error: None, bytes: actual_base, points: 0, expected: count, admit };
+    let mut message = [0 as c_char; 512];
+    let status = if let Some((point, tolerance)) = point {
+        let segment_ptr = segment.as_ref().map_or(std::ptr::null(), |(points, _)| points.as_ptr().cast::<f64>());
+        unsafe { om9_occt_point_edge_nurbs(source.as_ptr(), source.len(), point.as_ptr(), tolerance,
+            segment_ptr, segment.as_ref().map_or(0.0, |(_, tolerance)| *tolerance), resolved.as_mut_ptr(),
+            circle.map_or(std::ptr::null_mut(), |values| values.as_mut_ptr()),
+            usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+            usize::try_from(limits.max_points).unwrap_or(usize::MAX), usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+            usize::try_from(limits.max_bytes / 2).unwrap_or(usize::MAX), i32::try_from(limits.max_degree).unwrap_or(i32::MAX),
+            receive, (&mut capture as *mut Capture<'_>).cast(), message.as_mut_ptr(), message.len() as c_int) }
+    } else if let Some((along_u,value,IsocurveFaceSelection::Witness(witness)))=iso { unsafe {om9_occt_face_isocurve(source.as_ptr(),source.len(),i32::from(along_u),value,
+        witness.as_ref().map_or(std::ptr::null(),|w|w.triangle.as_ptr().cast()),witness.map_or(0.,|w|w.deflection),witness.map_or(0.,|w|w.tolerance),
+        usize::try_from(limits.max_points).unwrap_or(usize::MAX),usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+        usize::try_from(limits.max_bytes/2).unwrap_or(usize::MAX),i32::try_from(limits.max_degree).unwrap_or(i32::MAX),
+        prepare,receive,(&mut capture as *mut Capture<'_>).cast(),message.as_mut_ptr(),message.len() as c_int)}
+    } else if let Some((along_u,value,IsocurveFaceSelection::Ray(ray)))=iso { unsafe {om9_occt_ray_face_isocurve(source.as_ptr(),source.len(),i32::from(along_u),value,
+        ray.origin.as_ptr(),ray.direction.as_ptr(),ray.reference.as_ptr(),ray.tolerance,ray.max_distance,
+        ray.witness.as_ref().map_or(std::ptr::null(),|w|w.triangle.as_ptr().cast()),ray.witness.map_or(0.,|w|w.deflection),ray.witness.map_or(0.,|w|w.tolerance),
+        usize::try_from(limits.max_points).unwrap_or(usize::MAX),usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+        usize::try_from(limits.max_bytes/2).unwrap_or(usize::MAX),i32::try_from(limits.max_degree).unwrap_or(i32::MAX),
+        prepare,receive,(&mut capture as *mut Capture<'_>).cast(),message.as_mut_ptr(),message.len() as c_int)}
+    } else if source_mode == 4 { unsafe { om9_occt_default_face_isocurves(source.as_ptr(),source.len(),
+        usize::try_from(limits.max_points).unwrap_or(usize::MAX),usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+        usize::try_from(limits.max_bytes/2).unwrap_or(usize::MAX),i32::try_from(limits.max_degree).unwrap_or(i32::MAX),
+        checkpoint,prepare,receive,(&mut capture as *mut Capture<'_>).cast(),message.as_mut_ptr(),message.len() as c_int)
+    } } else if source_mode != 0 { unsafe { om9_occt_all_edges_nurbs(source.as_ptr(), source.len(),
+        usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+        i32::from(source_mode == 2),
+        usize::try_from(limits.max_points).unwrap_or(usize::MAX), usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+        usize::try_from(limits.max_bytes / 2).unwrap_or(usize::MAX), i32::try_from(limits.max_degree).unwrap_or(i32::MAX),
+        prepare, receive, (&mut capture as *mut Capture<'_>).cast(), message.as_mut_ptr(), message.len() as c_int) }
+    } else { unsafe { om9_occt_edges_nurbs(source.as_ptr(), source.len(), native_indices.as_ptr(), native_indices.len(),
+        usize::try_from(limits.max_points).unwrap_or(usize::MAX), usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+        usize::try_from(limits.max_bytes / 2).unwrap_or(usize::MAX), i32::try_from(limits.max_degree).unwrap_or(i32::MAX),
+        receive, (&mut capture as *mut Capture<'_>).cast(), message.as_mut_ptr(), message.len() as c_int) } };
+    if let Some(error) = capture.error { return Err(error); }
+    if status != 0 {
+        return Err(EditingError::Kernel(unsafe { std::ffi::CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned()));
+    }
+    if capture.result.len() != capture.expected { return Err(EditingError::Kernel("edge curve output missing".into())); }
+    Ok(capture.result)
+}
+
 fn checked_deflection(deflection_mm: f64) -> Result<f64, EditingError> {
     if !deflection_mm.is_finite() || deflection_mm <= 0.0 {
         return Err(EditingError::Invalid(
@@ -343,7 +864,7 @@ fn checked_deflection(deflection_mm: f64) -> Result<f64, EditingError> {
     Ok(deflection_mm)
 }
 
-fn checked_brep(brep: &Brep, limits: &Limits) -> Result<Measures, EditingError> {
+fn checked_brep(brep: &dyn BrepSourceAccess, limits: &Limits) -> Result<Measures, EditingError> {
     measure(brep, limits).map_err(|error| match error {
         CreationError::Invalid(message) => CreationError::Invalid(message),
         other => other,
@@ -418,28 +939,92 @@ impl BooleanOutcome {
 
 /// Union, difference or intersection of two closed solids.
 pub fn boolean(
-    a: &Brep,
-    b: &Brep,
+    a: &dyn BrepSourceAccess,
+    b: &dyn BrepSourceAccess,
     op: BooleanOp,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<BooleanOutcome, EditingError> {
+    boolean_impl(a, b, op, deflection_mm, limits, false, false)
+}
+
+/// Reject results that fail OCCT's small-edge and self-interference checks before publication.
+/// This conservative check can reject usable shapes; it does not prove Boolean correctness.
+pub fn boolean_checked(
+    a: &dyn BrepSourceAccess,
+    b: &dyn BrepSourceAccess,
+    op: BooleanOp,
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<BooleanOutcome, EditingError> {
+    boolean_impl(a, b, op, deflection_mm, limits, true, false)
+}
+
+/// Checked Union may replace a strictly certified spline box with a temporary
+/// equivalent analytic operand. Other Boolean callers retain their prior path.
+pub fn boolean_checked_certified_union(
+    a: &dyn BrepSourceAccess, b: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits,
+) -> Result<BooleanOutcome, EditingError> {
+    boolean_impl(a, b, BooleanOp::Union, deflection_mm, limits, true, true)
+}
+
+fn boolean_impl(
+    a: &dyn BrepSourceAccess,
+    b: &dyn BrepSourceAccess,
+    op: BooleanOp,
+    deflection_mm: f64,
+    limits: &Limits,
+    check_result: bool,
+    certified_union: bool,
+) -> Result<BooleanOutcome, EditingError> {
     let deflection = checked_deflection(deflection_mm)?;
-    // Validate the retained data here; the native adapter checks source topology and solid
-    // membership while reading each shape. Boolean does not need expensive area/volume integrals.
-    a.validate(limits).map_err(|error| EditingError::Invalid(error.to_string()))?;
-    b.validate(limits).map_err(|error| EditingError::Invalid(error.to_string()))?;
+    // Boolean consumes only canonical sources. The native adapter checks the
+    // source topology and solid membership while reading each shape; a stale or
+    // missing presentation mesh must not determine the exact result.
+    // Both legacy values continue to retain their display allocations while
+    // OCCT runs. Count those live buffers even though they are not operands.
+    let mut inventory_limits = *limits;
+    inventory_limits.max_points = u64::MAX;
+    inventory_limits.max_nodes = u64::MAX;
+    let inventory = |shape: &dyn BrepSourceAccess| shape.storage_usage(&inventory_limits)
+        .map_err(|error| EditingError::Budget(error.to_string()));
+    let a_bytes = inventory(a)?.bytes;
+    let b_bytes = if a.shares_validation_payload(b) { 0 } else { inventory(b)?.bytes };
+    let held = a_bytes.checked_add(b_bytes).ok_or_else(|| EditingError::Budget("Boolean input accounting".into()))?;
+    let remaining = limits.remaining_after(om9_core::budget::Usage { bytes: held, ..Default::default() })
+        .map_err(|error| EditingError::Budget(error.to_string()))?;
+    let source_limits = |source_bytes: u64| {
+        let bytes = held.checked_sub(source_bytes)
+            .ok_or_else(|| EditingError::Budget("Boolean source accounting".into()))?;
+        limits.remaining_after(om9_core::budget::Usage { bytes, ..Default::default() })
+            .map_err(|error| EditingError::Budget(error.to_string()))
+    };
+    let source_error = |error: om9_core::Error| match error {
+        om9_core::Error::Budget(_) | om9_core::Error::Overflow(_) => EditingError::Budget(error.to_string()),
+        _ => EditingError::Invalid(error.to_string()),
+    };
+    a.validate_source(&source_limits(a.source_storage_bytes().map_err(|error| EditingError::Budget(error.to_string()))?)?)
+        .map_err(source_error)?;
+    if b_bytes != 0 {
+        b.validate_source(&source_limits(b.source_storage_bytes().map_err(|error| EditingError::Budget(error.to_string()))?)?)
+            .map_err(source_error)?;
+    }
+    boolean_sources_impl(a.source(),b.source(),op,deflection,&remaining,check_result,certified_union,None)
+}
+
+fn boolean_sources_impl(a:&str,b:&str,op:BooleanOp,deflection:f64,limits:&Limits,check_result:bool,certified_union:bool,
+    admission:Option<&mut dyn FnMut(u64,u64)->om9_core::Result<()>>)->Result<BooleanOutcome,EditingError> {
     let budget = snapshot_budget(limits);
-    let brep = snapshot_via_optional(deflection, limits, |sink, context, message, capacity| {
+    let invoke=|sink, context, message, capacity| {
         // SAFETY: both sources, the callback context and every output live through this call.
         unsafe {
             om9_occt_boolean(
                 op.native(),
-                1,
-                a.source().as_ptr(),
-                a.source().len(),
-                b.source().as_ptr(),
-                b.source().len(),
+                if certified_union { 3 } else if check_result { 2 } else { 1 },
+                a.as_ptr(),
+                a.len(),
+                b.as_ptr(),
+                b.len(),
                 deflection,
                 budget.points,
                 budget.nodes,
@@ -450,18 +1035,354 @@ pub fn boolean(
                 capacity,
             )
         }
-    })
-    .map_err(EditingError::from)?;
+    };
+    let brep = match admission {
+        Some(admit)=>crate::brep::snapshot_via_optional_with_admission(deflection,limits,admit,invoke),
+        None=>snapshot_via_optional(deflection,limits,invoke),
+    }.map_err(EditingError::from)?;
     Ok(match brep {
         Some(brep) => BooleanOutcome::Body(brep),
         None => BooleanOutcome::Empty,
     })
 }
 
+/// Checked Boolean from independently tracked source leases. The caller must
+/// retain the admitted output allocation and revalidate its transaction before
+/// publication. Native work in progress cannot be interrupted; Rust snapshot
+/// copying observes cancellation and the supplied admission callback.
+pub fn boolean_captured_sources_cancellable(
+    a:&om9_core::transaction::CapturedBrepSource,b:&om9_core::transaction::CapturedBrepSource,
+    op:BooleanOp,deflection_mm:f64,certified_union:bool,limits:&Limits,
+    cancel:&om9_core::transaction::Cancellation,mut admit:impl FnMut(u64,u64)->om9_core::Result<()>,
+)->om9_core::Result<BooleanOutcome> {
+    use om9_core::Error;
+    if cancel.is_canceled(){return Err(Error::Canceled);}
+    if certified_union && op!=BooleanOp::Union {return Err(Error::Invalid("certified Boolean operation"));}
+    let deflection=checked_deflection(deflection_mm).map_err(|error|Error::Io(error.to_string()))?;
+    let first=a.validate_canonical_admitted(limits,|live,pending|{
+        if cancel.is_canceled(){return Err(Error::Canceled);}admit(live,pending)
+    })?;
+    let second=if a.same_canonical_allocations(b) {om9_core::budget::Usage::default()} else {
+        b.validate_canonical_admitted(limits,|live,pending|{
+            if cancel.is_canceled(){return Err(Error::Canceled);}
+            admit(first.bytes.checked_add(live).ok_or(Error::Overflow("Boolean source admission"))?,pending)
+        })?
+    };
+    let mut held=first;held.add(second,limits)?;let remaining=limits.remaining_after(held)?;
+    let mut refusal=None;
+    let result=boolean_sources_impl(a.source(),b.source(),op,deflection,&remaining,true,certified_union,Some(&mut |live,pending| {
+        let result=if cancel.is_canceled(){Err(Error::Canceled)} else {
+            held.bytes.checked_add(live).ok_or(Error::Overflow("Boolean output admission"))
+                .and_then(|total|admit(total,pending))
+        };
+        if let Err(error)=&result {refusal=Some(error.clone());}result
+    }));
+    let result=result.map_err(|error|refusal.unwrap_or_else(||match error {
+        EditingError::Budget(_)=>Error::Budget("bytes"),other=>Error::Io(format!("Boolean: {other}")),
+    }))?;
+    if cancel.is_canceled(){return Err(Error::Canceled);}
+    let output = match &result {
+        BooleanOutcome::Body(body) => body.storage_usage(&remaining)?,
+        BooleanOutcome::Empty => om9_core::budget::Usage::default(),
+    };
+    held.add(output, limits)?;
+    admit(held.bytes, 0)?;
+    if cancel.is_canceled(){return Err(Error::Canceled);}
+    Ok(result)
+}
+
+/// Checked Boolean on captured local sources with explicit local-to-operation
+/// transforms. Intermediate transformed bodies are private and accounted;
+/// callers must retain the result reservation and revalidate before commit.
+pub fn boolean_placed_captured_sources_cancellable(
+    a: &om9_core::transaction::CapturedBrepSource,
+    a_transform: &om9_core::geometry::Transform,
+    b: &om9_core::transaction::CapturedBrepSource,
+    b_transform: &om9_core::geometry::Transform,
+    op: BooleanOp,
+    deflection_mm: f64,
+    certified_union: bool,
+    limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<BooleanOutcome> {
+    use om9_core::{Error, budget::Usage, geometry::Transform};
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    if certified_union && op != BooleanOp::Union { return Err(Error::Invalid("certified Boolean operation")); }
+    let deflection = checked_deflection(deflection_mm).map_err(|e| Error::Io(e.to_string()))?;
+    let first = a.validate_canonical_admitted(limits, |live, pending| {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        admit(live, pending)
+    })?;
+    let second = if a.same_canonical_allocations(b) { Usage::default() } else {
+        b.validate_canonical_admitted(&limits.remaining_after(first)?, |live, pending| {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            admit(first.bytes.checked_add(live).ok_or(Error::Overflow("Boolean source admission"))?, pending)
+        })?
+    };
+    let mut held = first;
+    held.add(second, limits)?;
+    let mut transform = |source: &om9_core::transaction::CapturedBrepSource,
+                         matrix: &Transform, source_usage: Usage, held: &mut Usage| -> om9_core::Result<Option<Brep>> {
+        if *matrix == Transform::identity() { return Ok(None); }
+        let other = held.bytes.checked_sub(source_usage.bytes).ok_or(Error::Overflow("Boolean placement admission"))?;
+        let reduced = limits.remaining_after(Usage { bytes: other, ..Usage::default() })?;
+        let body = crate::transform_ops::transform_captured_source_cancellable(source, matrix, deflection,
+            &reduced, cancel, |live, pending| {
+                admit(other.checked_add(live).ok_or(Error::Overflow("Boolean placement admission"))?, pending)
+            })?;
+        held.add(body.storage_usage(&limits.remaining_after(*held)?)?, limits)?;
+        Ok(Some(body))
+    };
+    let transformed_a = transform(a, a_transform, first, &mut held)?;
+    // For shared source allocations both transforms still refer to the first charge.
+    let transformed_b = transform(b, b_transform, if second.bytes == 0 { first } else { second }, &mut held)?;
+    drop(transform);
+    let a_source = transformed_a.as_ref().map_or_else(|| a.source(), |body| body.source());
+    let b_source = transformed_b.as_ref().map_or_else(|| b.source(), |body| body.source());
+    let remaining = limits.remaining_after(held)?;
+    let mut refusal = None;
+    let outcome = boolean_sources_impl(a_source, b_source, op, deflection, &remaining, true, certified_union,
+        Some(&mut |live, pending| {
+            let result = if cancel.is_canceled() { Err(Error::Canceled) } else {
+                held.bytes.checked_add(live).ok_or(Error::Overflow("Boolean output admission"))
+                    .and_then(|total| admit(total, pending))
+            };
+            if let Err(error) = &result { refusal = Some(error.clone()); }
+            result
+        })).map_err(|error| refusal.unwrap_or_else(|| match error {
+            EditingError::Budget(_) => Error::Budget("bytes"),
+            other => Error::Io(format!("Boolean: {other}")),
+        }))?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    if let BooleanOutcome::Body(body) = &outcome { held.add(body.storage_usage(&remaining)?, limits)?; }
+    admit(held.bytes, 0)?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    Ok(outcome)
+}
+
+/// Symmetric difference for a Boolean Two Objects preview. Both source leases,
+/// each difference and the final union are admitted until no longer live.
+pub fn boolean_xor_placed_captured_sources_cancellable(
+    a: &om9_core::transaction::CapturedBrepSource, a_transform: &om9_core::geometry::Transform,
+    b: &om9_core::transaction::CapturedBrepSource, b_transform: &om9_core::geometry::Transform,
+    deflection: f64, limits: &Limits, cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<BooleanOutcome> {
+    use om9_core::{Error, budget::Usage};
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let other_bytes = if a.same_canonical_allocations(b) { 0 } else { b.canonical_storage_bytes()? };
+    let first_limits = limits.remaining_after(Usage { bytes: other_bytes, ..Usage::default() })?;
+    let first = a.validate_canonical_admitted(&first_limits, |live, pending| {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        admit(other_bytes.checked_add(live).ok_or(Error::Overflow("Boolean XOR sources"))?, pending)
+    })?;
+    let second = if a.same_canonical_allocations(b) { Usage::default() } else {
+        b.validate_canonical_admitted(&limits.remaining_after(first)?, |live, pending| {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            admit(first.bytes.checked_add(live).ok_or(Error::Overflow("Boolean XOR sources"))?, pending)
+        })?
+    };
+    let mut source_usage = first;
+    source_usage.add(second, limits)?;
+    let left = boolean_placed_captured_sources_cancellable(a, a_transform, b, b_transform,
+        BooleanOp::Difference, deflection, false, limits, cancel, |live, pending| admit(live.max(source_usage.bytes), pending))?;
+    let left_usage = match &left {
+        BooleanOutcome::Body(body) => body.storage_usage(&limits.remaining_after(source_usage)?)?,
+        BooleanOutcome::Empty => Usage::default(),
+    };
+    let remaining = limits.remaining_after(left_usage)?;
+    let right = boolean_placed_captured_sources_cancellable(b, b_transform, a, a_transform,
+        BooleanOp::Difference, deflection, false, &remaining, cancel, |live, pending| {
+            admit(left_usage.bytes.checked_add(live.max(source_usage.bytes)).ok_or(Error::Overflow("Boolean XOR admission"))?, pending)
+        })?;
+    let result = match (left, right) {
+        (BooleanOutcome::Empty, BooleanOutcome::Empty) => BooleanOutcome::Empty,
+        (BooleanOutcome::Body(body), BooleanOutcome::Empty) | (BooleanOutcome::Empty, BooleanOutcome::Body(body)) => BooleanOutcome::Body(body),
+        (BooleanOutcome::Body(left), BooleanOutcome::Body(right)) => {
+            let reduced = limits.remaining_after(source_usage)?;
+            boolean_breps_cancellable_admitted(&left, &right, BooleanOp::Union, deflection, true, &reduced, cancel,
+                &mut |live, pending| admit(source_usage.bytes.checked_add(live).ok_or(Error::Overflow("Boolean XOR union"))?, pending))?
+        }
+    };
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let mut retained = source_usage;
+    if let BooleanOutcome::Body(body) = &result { retained.add(body.storage_usage(&limits.remaining_after(retained)?)?, limits)?; }
+    admit(retained.bytes, 0)?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    Ok(result)
+}
+
+/// Fold a certified union over captured sources and their operation-frame
+/// placements. The caller retains every source and the admitted output until
+/// it has revalidated and published the result.
+pub fn boolean_union_captured_group_cancellable(
+    inputs: &[(om9_core::transaction::CapturedBrepSource, om9_core::geometry::Transform)],
+    deflection_mm: f64,
+    limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Brep> {
+    if inputs.len() < 2 { return Err(om9_core::Error::Missing("Boolean union inputs")); }
+    boolean_union_captured_group_impl(inputs, deflection_mm, limits, cancel, true, admit)
+}
+
+fn boolean_union_captured_group_impl(
+    inputs: &[(om9_core::transaction::CapturedBrepSource, om9_core::geometry::Transform)],
+    deflection_mm: f64, limits: &Limits, cancel: &om9_core::transaction::Cancellation,
+    certified: bool, mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Brep> {
+    let source = boolean_union_captured_source_impl(inputs, limits, cancel, certified, &mut admit)?;
+    let outside = om9_core::budget::Usage { bytes: source.capacity() as u64, ..Default::default() };
+    let remaining = limits.remaining_after(outside)?;
+    let captured = crate::brep::capture_source_topology(&source, deflection_mm, 0.3, &remaining, |live, pending| {
+        if cancel.is_canceled() { return Err(om9_core::Error::Canceled); }
+        admit(outside.bytes.checked_add(live).ok_or(om9_core::Error::Overflow("Union final display"))?, pending)
+    }).map_err(|e| om9_core::Error::Io(e.to_string()))?;
+    if cancel.is_canceled() { return Err(om9_core::Error::Canceled); }
+    Ok(captured.into_parts().0)
+}
+
+/// Canonical-only Union fold: no placement or intermediate tessellation. The
+/// returned source stays charged until the caller captures its final display.
+pub fn boolean_union_captured_source_cancellable(
+    inputs: &[(om9_core::transaction::CapturedBrepSource, om9_core::geometry::Transform)],
+    limits: &Limits, cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<String> {
+    if inputs.len() < 2 { return Err(om9_core::Error::Missing("Boolean union inputs")); }
+    boolean_union_captured_source_impl(inputs, limits, cancel, true, &mut admit)
+}
+
+fn boolean_union_captured_source_impl(
+    inputs: &[(om9_core::transaction::CapturedBrepSource, om9_core::geometry::Transform)],
+    limits: &Limits, cancel: &om9_core::transaction::Cancellation, certified: bool,
+    admit: &mut dyn FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<String> {
+    use om9_core::{Error, budget::Usage, geometry::Transform};
+    if inputs.is_empty() { return Err(Error::Missing("Boolean union inputs")); }
+    let mut held = Usage::default();
+    for (source, _) in inputs {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        let remaining = limits.remaining_after(held)?;
+        let usage = source.validate_canonical_admitted(&remaining, |live, pending| {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            admit(held.bytes.checked_add(live).ok_or(Error::Overflow("Union inputs"))?, pending)
+        })?;
+        held.add(usage, limits)?;
+    }
+    let source_bytes = held.bytes;
+    let mut current = String::new();
+    for (index, (source, placement)) in inputs.iter().enumerate() {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        placement.validate()?;
+        let outside = source_bytes.checked_add(current.capacity() as u64).ok_or(Error::Overflow("Union sources"))?;
+        let transformed = if *placement != Transform::identity() || inputs.len() == 1 {
+            let remaining = limits.remaining_after(Usage { bytes: outside, ..held })?;
+            let budget = snapshot_budget(&remaining);
+            Some(crate::brep::intermediate::source_via(&remaining, &mut |live, pending| {
+                if cancel.is_canceled() { return Err(Error::Canceled); }
+                admit(outside.checked_add(live).ok_or(Error::Overflow("Union placement"))?, pending)
+            }, |sink, context, message, capacity| {
+                // SAFETY: the immutable source, matrix and synchronous sink live through the call.
+                unsafe { om9_occt_transform_source(source.source().as_ptr(), source.source().len(),
+                    placement.0.as_ptr().cast(), budget.nodes, budget.bytes, sink, context, message, capacity) }
+            })?)
+        } else { None };
+        let right = transformed.as_deref().unwrap_or_else(|| source.source());
+        if index == 0 {
+            if let Some(owned) = transformed { current = owned; }
+            continue;
+        }
+        let outside = outside.checked_add(transformed.as_ref().map_or(0, |s| s.capacity() as u64))
+            .ok_or(Error::Overflow("Union operand"))?;
+        let remaining = limits.remaining_after(Usage { bytes: outside, ..held })?;
+        let budget = snapshot_budget(&remaining);
+        let left = if current.is_empty() { inputs[0].0.source() } else { &current };
+        let next = crate::brep::intermediate::source_via(&remaining, &mut |live, pending| {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            admit(outside.checked_add(live).ok_or(Error::Overflow("Union output"))?, pending)
+        }, |sink, context, message, capacity| {
+            // SAFETY: both sources and callback remain borrowed until the adapter returns.
+            unsafe { om9_occt_boolean_source(i32::from(certified), left.as_ptr(), left.len(), right.as_ptr(), right.len(),
+                budget.nodes, budget.bytes, sink, context, message, capacity) }
+        })?;
+        current = next;
+        drop(transformed);
+        admit(source_bytes.checked_add(current.capacity() as u64).ok_or(Error::Overflow("Union retained source"))?, 0)?;
+    }
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    Ok(current)
+}
+
+/// Union each captured set using the checked group semantics, then perform a
+/// checked difference or intersection. Source leases and intermediate bodies
+/// remain charged until the returned output is transferred by the caller.
+pub fn boolean_binary_captured_groups_cancellable(
+    targets: &[(om9_core::transaction::CapturedBrepSource, om9_core::geometry::Transform)],
+    cutters: &[(om9_core::transaction::CapturedBrepSource, om9_core::geometry::Transform)],
+    op: BooleanOp, deflection_mm: f64, limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<BooleanOutcome> {
+    use om9_core::{Error, budget::Usage};
+    if targets.is_empty() || cutters.is_empty() { return Err(Error::Missing("Boolean sets")); }
+    if !matches!(op, BooleanOp::Difference | BooleanOp::Intersection) { return Err(Error::Invalid("Boolean binary operation")); }
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let deflection = checked_deflection(deflection_mm).map_err(|e| Error::Io(e.to_string()))?;
+    let mut held = Usage::default();
+    let mut target_sources = Usage::default();
+    let mut cutter_sources = Usage::default();
+    for (group, total) in [(targets, &mut target_sources), (cutters, &mut cutter_sources)] {
+        for (source, _) in group {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            let remaining = limits.remaining_after(held)?;
+            let usage = source.validate_canonical_admitted(&remaining, |live, pending| {
+                if cancel.is_canceled() { return Err(Error::Canceled); }
+                admit(held.bytes.checked_add(live).ok_or(Error::Overflow("Boolean sets admission"))?, pending)
+            })?;
+            held.add(usage, limits)?;
+            total.add(usage, limits)?;
+        }
+    }
+    let target_limits = limits.remaining_after(cutter_sources)?;
+    let target = boolean_union_captured_group_impl(targets, deflection, &target_limits, cancel, false, |live, pending| {
+        admit(cutter_sources.bytes.checked_add(live).ok_or(Error::Overflow("Boolean target admission"))?, pending)
+    })?;
+    let target_usage = target.storage_usage(&limits.remaining_after(held)?)?;
+    held.add(target_usage, limits)?;
+    let mut offset = target_sources;
+    offset.add(target_usage, limits)?;
+    let cutter_limits = limits.remaining_after(offset)?;
+    let cutter = boolean_union_captured_group_impl(cutters, deflection, &cutter_limits, cancel, false, |live, pending| {
+        admit(offset.bytes.checked_add(live).ok_or(Error::Overflow("Boolean cutter admission"))?, pending)
+    })?;
+    held.add(cutter.storage_usage(&limits.remaining_after(held)?)?, limits)?;
+    let remaining = limits.remaining_after(held)?;
+    let mut refusal = None;
+    let outcome = boolean_sources_impl(target.source(), cutter.source(), op, deflection, &remaining, true, false,
+        Some(&mut |live, pending| {
+            let result = if cancel.is_canceled() { Err(Error::Canceled) } else {
+                held.bytes.checked_add(live).ok_or(Error::Overflow("Boolean output admission"))
+                    .and_then(|total| admit(total, pending))
+            };
+            if let Err(error) = &result { refusal = Some(error.clone()); }
+            result
+        })).map_err(|error| refusal.unwrap_or_else(|| match error {
+            EditingError::Budget(_) => Error::Budget("bytes"),
+            other => Error::Io(format!("Boolean: {other}")),
+        }))?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    if let BooleanOutcome::Body(body) = &outcome { held.add(body.storage_usage(&remaining)?, limits)?; }
+    admit(held.bytes, 0)?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    Ok(outcome)
+}
+
 /// Subtract several provably disjoint solid tools in one operation. `None` requests the caller's
 /// general overlapping-tool path; `Some(Empty)` is a successful cut with no remaining faces.
 pub fn cut_disjoint_tools(
-    target: &Brep, tools: &[Brep], deflection_mm: f64, limits: &Limits,
+    target: &dyn BrepSourceAccess, tools: &[Brep], deflection_mm: f64, limits: &Limits,
 ) -> Result<Option<BooleanOutcome>, EditingError> {
     let deflection = checked_deflection(deflection_mm)?;
     if tools.is_empty() { return Err(EditingError::Invalid("boolean requires tools".into())); }
@@ -494,8 +1415,8 @@ pub fn cut_disjoint_tools(
 /// A disjoint tool returns the unchanged surface; complete removal returns Empty.
 /// The caller owns classification, publication and any subsequent joining.
 pub fn trim_surface_by_solid(
-    surface: &Brep,
-    tool: &Brep,
+    surface: &dyn BrepSourceAccess,
+    tool: &dyn BrepSourceAccess,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<BooleanOutcome, EditingError> {
@@ -521,7 +1442,7 @@ pub fn trim_surface_by_solid(
 /// Intersect an open surface/shell with a closed solid without changing either input.
 /// Empty intersections are reported explicitly; classification belongs to the caller.
 pub fn intersect_surface_with_solid(
-    surface: &Brep, solid: &Brep, deflection_mm: f64, limits: &Limits,
+    surface: &dyn BrepSourceAccess, solid: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits,
 ) -> Result<BooleanOutcome, EditingError> {
     let deflection = checked_deflection(deflection_mm)?;
     let source = checked_brep(surface, limits)?;
@@ -540,11 +1461,11 @@ pub fn intersect_surface_with_solid(
 
 /// Construct a finite solid carrier of a single cylindrical face and return its
 /// axis origin, unit direction and radius; neither native handles nor source ownership escape.
-pub fn boss_cylinder_carrier(boundary: &Brep, deflection_mm: f64, limits: &Limits) -> Result<(Brep, [f64;7]), EditingError> {
+pub fn boss_cylinder_carrier(boundary: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits) -> Result<(Brep, [f64;7]), EditingError> {
     boss_cylinder_carrier_extended(boundary, 0.0, deflection_mm, limits)
 }
 
-fn boss_cylinder_carrier_extended(boundary: &Brep, extension: f64, deflection_mm: f64, limits: &Limits) -> Result<(Brep, [f64;7]), EditingError> {
+fn boss_cylinder_carrier_extended(boundary: &dyn BrepSourceAccess, extension: f64, deflection_mm: f64, limits: &Limits) -> Result<(Brep, [f64;7]), EditingError> {
     if !extension.is_finite() || extension < 0.0 { return Err(EditingError::Invalid("Boss cylinder extension".into())); }
     let deflection = checked_deflection(deflection_mm)?;
     let source = checked_brep(boundary, limits)?;
@@ -562,17 +1483,17 @@ fn boss_cylinder_carrier_extended(boundary: &Brep, extension: f64, deflection_mm
 
 /// Construct a polygon Boss on one complete cylindrical face, choosing the
 /// polygon's positive normal. The entire polygon must lie inside the carrier.
-pub fn boss_cylindrical_polygon(profile: &crate::creation::Profile, boundary: &Brep, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+pub fn boss_cylindrical_polygon(profile: &crate::creation::Profile, boundary: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
     boss_cylindrical_polygons(&[profile], boundary, deflection_mm, limits)
 }
 
 /// Build disjoint polygon Boss walls on one cylindrical face as one result.
-pub fn boss_cylindrical_polygons(profiles: &[&crate::creation::Profile], boundary: &Brep, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+pub fn boss_cylindrical_polygons(profiles: &[&crate::creation::Profile], boundary: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
     boss_cylindrical_impl(profiles.iter().map(|p| CylindricalSection::Polygon(p)),profiles.len(),boundary,deflection_mm,limits)
 }
 
 /// Build disjoint exact polygon or curve Boss walls on one cylindrical face.
-pub fn boss_cylindrical_sections(profiles: &[BossSection], boundary: &Brep, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+pub fn boss_cylindrical_sections(profiles: &[BossSection], boundary: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
     boss_cylindrical_impl(profiles.iter().map(|s| match s {
         BossSection::Polygon(p) => CylindricalSection::Polygon(p),
         BossSection::Circle(c) => CylindricalSection::Circle(c),
@@ -718,7 +1639,7 @@ fn boss_refine_curve(curve: &om9_core::geometry::Curve, limits: &Limits, depth: 
     }
 }
 
-fn boss_cylindrical_impl<'a>(profiles: impl Iterator<Item=CylindricalSection<'a>>, count: usize, boundary: &Brep, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+fn boss_cylindrical_impl<'a>(profiles: impl Iterator<Item=CylindricalSection<'a>>, count: usize, boundary: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
     if count == 0 || count as u64 > limits.max_outputs {
         return Err(EditingError::Invalid("Boss needs bounded profile selection".into()));
     }
@@ -737,7 +1658,7 @@ fn boss_cylindrical_impl<'a>(profiles: impl Iterator<Item=CylindricalSection<'a>
         let t=(0..3).map(|i| (original_measure.bounds_mm[i+if corner & (1<<i)!=0 {3} else {0}]-origin[i])*axis[i]).sum::<f64>();
         axis_lo=axis_lo.min(t); axis_hi=axis_hi.max(t);
     }
-    let mut cut = boundary.clone();
+    let mut cut = crate::transform_ops::transform_brep(boundary, &om9_core::geometry::Transform::identity(), deflection_mm, limits)?;
     let mut walls = Vec::new();
     walls.try_reserve_exact(count).map_err(|_| EditingError::Budget("Boss cylinder walls".into()))?;
     let mut held = carrier.validate(limits).map_err(|e| EditingError::Budget(e.to_string()))?;
@@ -829,7 +1750,7 @@ fn boss_cylindrical_impl<'a>(profiles: impl Iterator<Item=CylindricalSection<'a>
 /// Trim a surface by an infinite plane, removing the side containing `remove_point`.
 /// The kernel returns a new snapshot; callers must classify the resulting pieces.
 pub fn trim_surface_by_plane(
-    surface: &Brep, origin: Point3, normal: Point3, remove_point: Point3,
+    surface: &dyn BrepSourceAccess, origin: Point3, normal: Point3, remove_point: Point3,
     deflection_mm: f64, limits: &Limits,
 ) -> Result<Brep, EditingError> {
     let deflection = checked_deflection(deflection_mm)?;
@@ -869,7 +1790,7 @@ pub fn boss_parallel_profiles(
 /// simple polygonal profile. Inputs are immutable.
 pub fn boss_parallel_planar_face(
     profile: &crate::creation::Profile,
-    boundary: &Brep,
+    boundary: &dyn BrepSourceAccess,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, EditingError> {
@@ -881,7 +1802,7 @@ pub fn boss_parallel_planar_face(
 /// boundary using the existing Boss adapter. This is not the full Rib command.
 pub fn rib_straight_planar_boundary(
     points: &[om9_core::geometry::Point3], normal: om9_core::geometry::Point3,
-    distance: f64, boundary: &Brep, deflection_mm: f64, limits: &Limits,
+    distance: f64, boundary: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits,
 ) -> Result<Brep, EditingError> {
     rib_straight_planar_boundary_many(&[(points, normal)], distance, boundary, deflection_mm, limits)
 }
@@ -890,7 +1811,7 @@ pub fn rib_straight_planar_boundary(
 /// individually valid; construction fails without changing any input.
 pub fn rib_straight_planar_boundary_many(
     curves: &[(&[om9_core::geometry::Point3], om9_core::geometry::Point3)],
-    distance: f64, boundary: &Brep, deflection_mm: f64, limits: &Limits,
+    distance: f64, boundary: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits,
 ) -> Result<Brep, EditingError> {
     if curves.is_empty() || curves.len() as u64 > limits.max_outputs {
         return Err(EditingError::Invalid("Rib needs bounded curve selection".into()));
@@ -917,7 +1838,7 @@ pub fn rib_straight_planar_boundary_many(
 /// Any invalid profile fails the entire operation without modifying the inputs.
 pub fn boss_parallel_planar_face_many(
     profiles: &[crate::creation::Profile],
-    boundary: &Brep,
+    boundary: &dyn BrepSourceAccess,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, EditingError> {
@@ -966,7 +1887,7 @@ fn boss_nurbs_line_hull(curve: &om9_core::geometry::Curve, q: Point3, b: Point3,
     Ok(Some((range[0]-pad,range[1]+pad)))
 }
 
-fn planar_faces_plane(boundary: &Brep, allow_multiple: bool, limits: &Limits) -> Result<[f64; 6], EditingError> {
+fn planar_faces_plane(boundary: &dyn BrepSourceAccess, allow_multiple: bool, limits: &Limits) -> Result<[f64; 6], EditingError> {
     let original = checked_brep(boundary, limits)?;
     if original.faces == 0 || (!allow_multiple && original.faces != 1) || original.solids != 0 || (allow_multiple && original.faces > 1 && original.shells != 1) {
         return Err(EditingError::Invalid("Boss boundary requires one connected surface or shell".into()));
@@ -986,7 +1907,7 @@ fn planar_faces_plane(boundary: &Brep, allow_multiple: bool, limits: &Limits) ->
 
 pub fn boss_parallel_planar_sections(
     sections: &[BossSection],
-    boundary: &Brep,
+    boundary: &dyn BrepSourceAccess,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, EditingError> {
@@ -998,7 +1919,7 @@ pub fn boss_parallel_planar_sections(
     let b = [plane[3], plane[4], plane[5]];
     let q = [plane[0], plane[1], plane[2]];
     let make = |e: crate::creation::CreationError| EditingError::Invalid(e.to_string());
-    let mut cut = boundary.clone();
+    let mut cut = crate::transform_ops::transform_brep(boundary, &om9_core::geometry::Transform::identity(), deflection_mm, limits)?;
     let mut walls = Vec::new();
     walls.try_reserve_exact(sections.len()).map_err(|_| EditingError::Budget("Boss walls".into()))?;
     let mut total_edges = 0usize;
@@ -1121,6 +2042,194 @@ pub struct SplitResult {
     pub pieces: usize,
 }
 
+/// Partition two source leases without retaining their document displays.
+/// The caller keeps the admitted compound reservation alive until it has
+/// extracted or published the pieces. Native calls cannot be interrupted.
+pub fn split_captured_sources_cancellable(
+    target: &om9_core::transaction::CapturedBrepSource,
+    cutter: &om9_core::transaction::CapturedBrepSource,
+    deflection_mm: f64,
+    limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<SplitResult> {
+    use om9_core::{Error, budget::Usage};
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let deflection = checked_deflection(deflection_mm).map_err(|e| Error::Io(e.to_string()))?;
+    let first = target.validate_canonical_admitted(limits, |live, pending| {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        admit(live, pending)
+    })?;
+    let second = if target.same_canonical_allocations(cutter) { Usage::default() } else {
+        cutter.validate_canonical_admitted(limits, |live, pending| {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            admit(first.bytes.checked_add(live).ok_or(Error::Overflow("split source admission"))?, pending)
+        })?
+    };
+    let mut held = first;
+    held.add(second, limits)?;
+    split_validated_sources(target.source(), cutter.source(), deflection, limits, held, cancel, &mut admit)
+}
+
+fn split_validated_sources(
+    target: &str, cutter: &str, deflection: f64, limits: &Limits,
+    mut held: om9_core::budget::Usage, cancel: &om9_core::transaction::Cancellation,
+    admit: &mut dyn FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<SplitResult> {
+    use om9_core::Error;
+    let remaining = limits.remaining_after(held)?;
+    let original = crate::creation::measure_validated_source(target).map_err(|e| Error::Io(format!("split target: {e}")))?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let tool = crate::creation::measure_validated_source(cutter).map_err(|e| Error::Io(format!("split cutter: {e}")))?;
+    if original.solids != 1 || tool.solids != 1 || !original.closed || !tool.closed {
+        return Err(Error::Invalid("split needs two closed single solids"));
+    }
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let budget = snapshot_budget(&remaining);
+    let mut pieces = 0;
+    let mut refusal = None;
+    let brep = crate::brep::snapshot_via_with_admission(deflection, &remaining, Some(&mut |live, pending| {
+        let result = if cancel.is_canceled() { Err(Error::Canceled) } else {
+            held.bytes.checked_add(live).ok_or(Error::Overflow("split output admission"))
+                .and_then(|total| admit(total, pending))
+        };
+        if let Err(error) = &result { refusal = Some(error.clone()); }
+        result
+    }), |sink, context, message, capacity| {
+        // SAFETY: both source buffers, scalar output and callback remain live.
+        unsafe { om9_occt_split_solid(target.as_ptr(), target.len(),
+            cutter.as_ptr(), cutter.len(), &mut pieces, deflection,
+            budget.points, budget.nodes, budget.bytes, sink, context, message, capacity) }
+    }).map_err(|error| refusal.unwrap_or_else(|| Error::Io(format!("split: {error}"))))?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let count = usize::try_from(pieces).unwrap_or(0);
+    let result = crate::creation::measure_validated_source(brep.source()).map_err(|e| Error::Io(format!("split result: {e}")))?;
+    if count == 0 || result.solids != count || !result.closed
+        || (result.volume_mm3 - original.volume_mm3).abs() > original.volume_mm3.abs() * 1e-6 + 1e-9 {
+        return Err(Error::Invalid("split solid failed topology or volume validation"));
+    }
+    held.add(brep.storage_usage(&remaining)?, limits)?;
+    admit(held.bytes, 0)?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    Ok(SplitResult { brep, pieces: count })
+}
+
+/// Split intermediate B-reps while charging both live input representations.
+/// Shared complete allocations are counted once; partial sharing is conservative.
+pub fn split_breps_cancellable_admitted(
+    target: &dyn BrepSourceAccess, cutter: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<SplitResult> {
+    use om9_core::Error;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let deflection = checked_deflection(deflection_mm).map_err(|e| Error::Io(e.to_string()))?;
+    let held = validate_brep_pair_admitted(target, cutter, limits, cancel, &mut admit)?;
+    split_validated_sources(target.source(), cutter.source(), deflection, limits, held, cancel, &mut admit)
+}
+
+fn validate_brep_pair_admitted(
+    target: &dyn BrepSourceAccess, cutter: &dyn BrepSourceAccess, limits: &Limits, cancel: &om9_core::transaction::Cancellation,
+    admit: &mut dyn FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<om9_core::budget::Usage> {
+    use om9_core::{Error, budget::Usage};
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let mut held = target.storage_usage(limits)?;
+    let shared = target.shares_validation_payload(cutter);
+    if !shared { held.add(cutter.storage_usage(limits)?, limits)?; }
+    limits.remaining_after(held)?;
+    let mut validate = |body: &dyn BrepSourceAccess| -> om9_core::Result<()> {
+        let source_bytes = body.source_storage_bytes()?;
+        let other = held.bytes.checked_sub(source_bytes).ok_or(Error::Overflow("split source accounting"))?;
+        let remaining = limits.remaining_after(Usage { bytes: other, ..Usage::default() })?;
+        body.validate_source_admitted(&remaining, &mut |live, pending| {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            admit(other.checked_add(live).ok_or(Error::Overflow("split source admission"))?, pending)
+        })?;
+        Ok(())
+    };
+    validate(target)?;
+    if !shared { validate(cutter)?; }
+    Ok(held)
+}
+
+fn boolean_breps_cancellable_admitted(
+    a: &dyn BrepSourceAccess, b: &dyn BrepSourceAccess, op: BooleanOp, deflection: f64, checked: bool, limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    admit: &mut dyn FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<BooleanOutcome> {
+    use om9_core::Error;
+    let mut held = validate_brep_pair_admitted(a, b, limits, cancel, admit)?;
+    let remaining = limits.remaining_after(held)?;
+    let mut refusal = None;
+    let result = boolean_sources_impl(a.source(), b.source(), op, deflection, &remaining, checked, false,
+        Some(&mut |live, pending| {
+            let result = if cancel.is_canceled() { Err(Error::Canceled) } else {
+                held.bytes.checked_add(live).ok_or(Error::Overflow("split duplicate admission"))
+                    .and_then(|total| admit(total, pending))
+            };
+            if let Err(error) = &result { refusal = Some(error.clone()); }
+            result
+        })).map_err(|error| refusal.unwrap_or_else(|| match error {
+            EditingError::Budget(_) => Error::Budget("bytes"),
+            other => Error::Io(format!("split duplicate: {other}")),
+        }))?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    if let BooleanOutcome::Body(body) = &result { held.add(body.storage_usage(&remaining)?, limits)?; }
+    admit(held.bytes, 0)?;
+    Ok(result)
+}
+
+/// Extract one split-local piece while accounting the retained compound and
+/// copied output. The caller accounts any other simultaneously retained pieces.
+pub fn split_piece_cancellable_admitted(
+    split: &SplitResult, index: usize, deflection_mm: f64, limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Brep> {
+    use om9_core::{Error, budget::Usage};
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    if index >= split.pieces { return Err(Error::Invalid("split solid piece index")); }
+    let index = c_int::try_from(index).map_err(|_| Error::Overflow("split piece index"))?;
+    let deflection = checked_deflection(deflection_mm).map_err(|e| Error::Io(e.to_string()))?;
+    let held = split.brep.storage_usage(limits)?;
+    let source_bytes = split.brep.source_storage_bytes()?;
+    let display_bytes = held.bytes.checked_sub(source_bytes).ok_or(Error::Overflow("split compound accounting"))?;
+    let source_limits = limits.remaining_after(Usage { bytes: display_bytes, ..Usage::default() })?;
+    split.brep.validate_source_admitted(&source_limits, |live, pending| {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        admit(display_bytes.checked_add(live).ok_or(Error::Overflow("split compound admission"))?, pending)
+    })?;
+    let remaining = limits.remaining_after(held)?;
+    let measured = crate::creation::measure_validated_source(split.brep.source())
+        .map_err(|e| Error::Io(format!("split compound: {e}")))?;
+    if measured.solids != split.pieces || !measured.closed { return Err(Error::Invalid("split solid compound mismatch")); }
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let budget = snapshot_budget(&remaining);
+    let mut refusal = None;
+    let piece = crate::brep::snapshot_via_with_admission(deflection, &remaining, Some(&mut |live, pending| {
+        let result = if cancel.is_canceled() { Err(Error::Canceled) } else {
+            held.bytes.checked_add(live).ok_or(Error::Overflow("split piece admission"))
+                .and_then(|total| admit(total, pending))
+        };
+        if let Err(error) = &result { refusal = Some(error.clone()); }
+        result
+    }), |sink, context, message, capacity| {
+        // SAFETY: the compound source and callback remain live for the native call.
+        unsafe { om9_occt_split_solid_piece(split.brep.source().as_ptr(), split.brep.source().len(),
+            index, deflection, budget.points, budget.nodes, budget.bytes, sink, context, message, capacity) }
+    }).map_err(|error| refusal.unwrap_or_else(|| Error::Io(format!("split piece: {error}"))))?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let measured = crate::creation::measure_validated_source(piece.source())
+        .map_err(|e| Error::Io(format!("split piece: {e}")))?;
+    if measured.solids != 1 || !measured.closed || measured.volume_mm3 <= 0. { return Err(Error::Invalid("split piece is not a closed solid")); }
+    let mut retained = held;
+    retained.add(piece.storage_usage(&remaining)?, limits)?;
+    admit(retained.bytes, 0)?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    Ok(piece)
+}
+
 /// Form bounded solid regions from intersecting BRep faces or polysurfaces.
 /// `None` means that no bounded solid was found. The result is an owned
 /// compound with snapshot-local solid indices; publication belongs to the host.
@@ -1215,8 +2324,8 @@ pub fn create_solid_regions(
 /// compound. This low-level operation does not implement BooleanSplit's
 /// multiple selection sets, output objects, options, or document lifecycle.
 pub fn split_solid(
-    target: &Brep,
-    cutter: &Brep,
+    target: &dyn BrepSourceAccess,
+    cutter: &dyn BrepSourceAccess,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<SplitResult, EditingError> {
@@ -1438,12 +2547,171 @@ pub fn split_solid_sets(
     Ok(results)
 }
 
+fn split_live_usage(targets: &[Brep], cutters: &[Brep], vectors: &[&Vec<Brep>], limits: &Limits) -> om9_core::Result<om9_core::budget::Usage> {
+    use om9_core::budget::Usage;
+    let mut usage = Usage::default();
+    for body in targets.iter().chain(cutters) { usage.add(body.storage_usage(limits)?, limits)?; }
+    for values in vectors {
+        usage.add(Usage::array::<Brep>(values.capacity())?, limits)?;
+        for body in values.iter() { usage.add(body.storage_usage(limits)?, limits)?; }
+    }
+    Ok(usage)
+}
+
+fn split_subtract_usage(a: om9_core::budget::Usage, b: om9_core::budget::Usage) -> om9_core::Result<om9_core::budget::Usage> {
+    use om9_core::{Error, budget::Usage};
+    Ok(Usage {
+        bytes: a.bytes.checked_sub(b.bytes).ok_or(Error::Overflow("split accounting"))?,
+        objects: a.objects.checked_sub(b.objects).ok_or(Error::Overflow("split accounting"))?,
+        nodes: a.nodes.checked_sub(b.nodes).ok_or(Error::Overflow("split accounting"))?,
+        points: a.points.checked_sub(b.points).ok_or(Error::Overflow("split accounting"))?,
+        history: a.history.checked_sub(b.history).ok_or(Error::Overflow("split accounting"))?,
+        outputs: a.outputs.checked_sub(b.outputs).ok_or(Error::Overflow("split accounting"))?,
+    })
+}
+
+fn split_pair_usage(a: &dyn BrepSourceAccess, b: &dyn BrepSourceAccess, limits: &Limits) -> om9_core::Result<om9_core::budget::Usage> {
+    let mut usage = a.storage_usage(limits)?;
+    if !a.shares_validation_payload(b) { usage.add(b.storage_usage(limits)?, limits)?; }
+    Ok(usage)
+}
+
+fn split_reserve_vec(values: &mut Vec<Brep>, additional: usize, live: om9_core::budget::Usage,
+    limits: &Limits, admit: &mut dyn FnMut(u64, u64) -> om9_core::Result<()>) -> om9_core::Result<()> {
+    use om9_core::{Error, budget::Usage};
+    if values.capacity().saturating_sub(values.len()) >= additional { return Ok(()); }
+    let count = values.len().checked_add(additional).ok_or(Error::Overflow("split vector"))?;
+    let pending = Usage::array::<Brep>(count)?.bytes;
+    let combined = live.bytes.checked_add(pending).ok_or(Error::Overflow("split vector admission"))?;
+    limits.remaining_after(Usage { bytes: combined, ..Usage::default() })?;
+    admit(live.bytes, pending)?;
+    values.try_reserve_exact(additional).map_err(|_| Error::Budget("split vector"))?;
+    Ok(())
+}
+
+/// Partition multiple materialized inputs with cancellation and incremental
+/// admission. Shared bodies are conservatively counted per retained occurrence.
+/// Callers must add any separately retained source leases and input-vector
+/// metadata to the callback and keep the returned output reservation alive.
+pub fn split_solid_sets_cancellable_admitted(
+    targets: &[Brep], cutters: &[Brep], deflection_mm: f64, limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Vec<Brep>> {
+    use om9_core::Error;
+    if targets.is_empty() || cutters.is_empty() { return Err(Error::Missing("split target and cutter sets")); }
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let deflection = checked_deflection(deflection_mm).map_err(|e| Error::Io(e.to_string()))?;
+    let mut results: Vec<Brep> = Vec::new();
+    let mut pending: Vec<Brep> = Vec::new();
+    let mut next: Vec<Brep> = Vec::new();
+    let initial = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+    admit(initial.bytes, 0)?;
+    for body in targets.iter().chain(cutters) {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        let body_usage = body.storage_usage(limits)?;
+        let outside = split_subtract_usage(initial, body_usage)?;
+        let display = body_usage.bytes.checked_sub(body.source_storage_bytes()?).ok_or(Error::Overflow("split input accounting"))?;
+        let mut input_held = outside;
+        input_held.add(om9_core::budget::Usage { bytes: display, ..Default::default() }, limits)?;
+        let reduced = limits.remaining_after(input_held)?;
+        body.validate_source_admitted(&reduced, |live, pending| {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            admit(input_held.bytes.checked_add(live).ok_or(Error::Overflow("split input admission"))?, pending)
+        })?;
+        let measure = crate::creation::measure_validated_source(body.source())
+            .map_err(|e| Error::Io(format!("split input: {e}")))?;
+        if measure.solids != 1 || !measure.closed { return Err(Error::Invalid("split needs closed single solids")); }
+    }
+    for target in targets {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        let live = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+        split_reserve_vec(&mut pending, 1, live, limits, &mut admit)?;
+        let mut after = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+        after.add(target.storage_usage(limits)?, limits)?;
+        admit(after.bytes, 0)?;
+        pending.push(target.clone());
+        for cutter in targets.iter().chain(cutters) {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            if cutter == target { continue; }
+            for candidate in &pending {
+                let live = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+                let outside = split_subtract_usage(live, split_pair_usage(candidate, cutter, limits)?)?;
+                let reduced = limits.remaining_after(outside)?;
+                let split = split_breps_cancellable_admitted(candidate, cutter, deflection, &reduced, cancel, |local, more| {
+                    admit(outside.bytes.checked_add(local).ok_or(Error::Overflow("split admission"))?, more)
+                })?;
+                let split_usage = split.brep.storage_usage(&limits.remaining_after(live)?)?;
+                let count = if split.pieces == 1 { 1 } else { split.pieces };
+                if next.len().checked_add(count).ok_or(Error::Overflow("split outputs"))? as u64 > limits.max_outputs {
+                    return Err(Error::Budget("split output count"));
+                }
+                let mut with_split = live; with_split.add(split_usage, limits)?;
+                split_reserve_vec(&mut next, count, with_split, limits, &mut admit)?;
+                if split.pieces == 1 {
+                    let mut held = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+                    held.add(split_usage, limits)?; held.add(candidate.storage_usage(limits)?, limits)?;
+                    admit(held.bytes, 0)?;
+                    next.push(candidate.clone());
+                } else {
+                    for index in 0..split.pieces {
+                        let held = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+                        let reduced = limits.remaining_after(held)?;
+                        let piece = split_piece_cancellable_admitted(&split, index, deflection, &reduced, cancel, |local, more| {
+                            admit(held.bytes.checked_add(local).ok_or(Error::Overflow("split piece admission"))?, more)
+                        })?;
+                        next.push(piece);
+                    }
+                }
+                drop(split);
+                let current = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+                admit(current.bytes, 0)?;
+            }
+            std::mem::swap(&mut pending, &mut next);
+            next.clear();
+            let current = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+            admit(current.bytes, 0)?;
+        }
+        for candidate in &pending {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            let mut duplicate = false;
+            for existing in &results {
+                let live = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+                let outside = split_subtract_usage(live, split_pair_usage(candidate, existing, limits)?)?;
+                let reduced = limits.remaining_after(outside)?;
+                let mut compare = |left: &dyn BrepSourceAccess, right: &dyn BrepSourceAccess| boolean_breps_cancellable_admitted(
+                    left, right, BooleanOp::Difference, deflection, false, &reduced, cancel, &mut |local, more| {
+                        admit(outside.bytes.checked_add(local).ok_or(Error::Overflow("split duplicate admission"))?, more)
+                    });
+                if matches!(compare(candidate, existing)?, BooleanOutcome::Empty)
+                    && matches!(compare(existing, candidate)?, BooleanOutcome::Empty) { duplicate = true; break; }
+            }
+            if !duplicate {
+                if results.len() as u64 >= limits.max_outputs { return Err(Error::Budget("split output count")); }
+                let live = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+                split_reserve_vec(&mut results, 1, live, limits, &mut admit)?;
+                let mut after = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+                after.add(candidate.storage_usage(limits)?, limits)?;
+                admit(after.bytes, 0)?;
+                results.push(candidate.clone());
+            }
+        }
+        pending.clear();
+        let current = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+        admit(current.bytes, 0)?;
+    }
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let final_usage = split_live_usage(targets, cutters, &[&results, &pending, &next], limits)?;
+    admit(final_usage.bytes, 0)?;
+    Ok(results)
+}
+
 /// Split one exact planar face with a straight trim line that crosses it.
 ///
 /// The sum of the piece areas must equal the original face area; a trim that does not cross the
 /// face is refused rather than returning the unsplit face as a "split".
 pub fn split_face(
-    face: &Brep,
+    face: &dyn BrepSourceAccess,
     trim_line: &[Point3],
     deflection_mm: f64,
     limits: &Limits,
@@ -1525,7 +2793,7 @@ pub fn split_face(
 /// Remove the uniquely picked region after splitting a face by a polyline.
 /// Points on a shared boundary or outside the requested tolerance are rejected.
 pub fn trim_face_by_polyline(
-    face: &Brep,
+    face: &dyn BrepSourceAccess,
     trim_line: &[Point3],
     remove_point: Point3,
     tolerance_mm: f64,
@@ -1544,7 +2812,7 @@ pub fn trim_face_by_polyline(
 /// Remove one uniquely picked face from an already partitioned open BRep.
 /// Returns None when the last face was picked.
 pub fn remove_picked_face(
-    partition: &Brep,
+    partition: &dyn BrepSourceAccess,
     remove_point: Point3,
     tolerance_mm: f64,
     deflection_mm: f64,
@@ -1563,7 +2831,7 @@ pub fn remove_picked_face(
     for index in 0..count {
         let piece = extract_face(partition, index, deflection_mm, limits)?;
         let distance = crate::measurement::distance(
-            &om9_core::geometry::Geometry::Brep(piece),
+            &om9_core::geometry::Geometry::Brep(piece.into_canonical_and_representation().0),
             om9_core::geometry::Transform::identity(),
             &om9_core::geometry::Geometry::Point(remove_point),
             om9_core::geometry::Transform::identity(),
@@ -1597,7 +2865,7 @@ pub fn remove_picked_face(
 /// Remove artificial boundaries between adjacent regions of a single original face.
 /// The caller must not use this on independently authored faces whose boundaries matter.
 pub fn unify_surface_regions(
-    partition: &Brep,
+    partition: &dyn BrepSourceAccess,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, EditingError> {
@@ -1625,8 +2893,8 @@ pub fn unify_surface_regions(
 
 /// Unify temporary region boundaries while retaining edges from the original BRep.
 pub fn unify_surface_regions_preserving_edges(
-    partition: &Brep,
-    original: &Brep,
+    partition: &dyn BrepSourceAccess,
+    original: &dyn BrepSourceAccess,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, EditingError> {
@@ -1658,7 +2926,7 @@ pub fn unify_surface_regions_preserving_edges(
 
 /// Cap supported planar boundary loops, retaining any non-planar openings.
 pub fn cap_planar(
-    open: &Brep,
+    open: &dyn BrepSourceAccess,
     tolerance_mm: f64,
     deflection_mm: f64,
     limits: &Limits,
@@ -1711,7 +2979,7 @@ pub fn cap_planar(
 /* ------------------------- fillet and chamfer ------------------------- */
 
 fn edge_edit(
-    solid: &Brep,
+    solid: &dyn BrepSourceAccess,
     edges: &[usize],
     value: f64,
     chamfer: bool,
@@ -1733,7 +3001,7 @@ fn edge_edit(
             "edge edit requires a closed solid".into(),
         ));
     }
-    let table = edge_table(edges, solid.display.edges.len())?;
+    let table = edge_table(edges, solid.topology().edges.len())?;
     let budget = snapshot_budget(limits);
     snapshot_via(deflection, limits, |sink, context, message, capacity| {
         // SAFETY: source, edge table and callback context live through this call.
@@ -1778,7 +3046,7 @@ fn edge_edit(
 
 /// Round the selected edges of a solid.
 pub fn fillet(
-    solid: &Brep,
+    solid: &dyn BrepSourceAccess,
     edges: &[usize],
     radius_mm: f64,
     deflection_mm: f64,
@@ -1790,7 +3058,7 @@ pub fn fillet(
 /// Apply one constant radius per selected edge. Differing values on one
 /// automatically propagated contour are rejected by the native adapter.
 pub fn fillet_with_radii(
-    solid: &Brep,
+    solid: &dyn BrepSourceAccess,
     edges: &[(usize, f64)],
     deflection_mm: f64,
     limits: &Limits,
@@ -1817,7 +3085,7 @@ pub fn fillet_with_radii(
         positive(radius, "fillet radius")?;
         let native =
             i32::try_from(index).map_err(|_| EditingError::Budget("fillet edge index".into()))?;
-        if index >= solid.display.edges.len() || indices.contains(&native) {
+        if index >= solid.topology().edges.len() || indices.contains(&native) {
             return Err(EditingError::Invalid(
                 "invalid or duplicate fillet edge".into(),
             ));
@@ -1852,9 +3120,9 @@ pub fn fillet_with_radii(
 }
 
 /// Retrieve exact endpoints in the orientation used by `fillet_with_end_radii`.
-pub fn straight_edge_endpoints(shape: &Brep, index: usize, limits: &Limits) -> Result<(Point3, Point3), EditingError> {
+pub fn straight_edge_endpoints(shape: &dyn BrepSourceAccess, index: usize, limits: &Limits) -> Result<(Point3, Point3), EditingError> {
     checked_brep(shape, limits)?;
-    if index >= shape.display.edges.len() { return Err(EditingError::Invalid("edge index out of range".into())); }
+    if index >= shape.topology().edges.len() { return Err(EditingError::Invalid("edge index out of range".into())); }
     let edge = i32::try_from(index).map_err(|_| EditingError::Budget("edge index".into()))?;
     let mut is_line = 0;
     let mut message = [0 as c_char; 512];
@@ -1871,8 +3139,26 @@ pub fn straight_edge_endpoints(shape: &Brep, index: usize, limits: &Limits) -> R
 }
 
 /// Retrieve exact endpoints in the orientation used by `fillet_with_end_radii`.
+pub fn verified_edge_endpoints(shape: &dyn BrepSourceAccess, segment: [Point3; 2], display_deflection: f64, segment_tolerance: f64,
+    limits: &Limits) -> Result<Option<(Point3, Point3)>, EditingError> {
+    shape.validate_source(limits).map_err(|error| EditingError::Invalid(error.to_string()))?;
+    if !display_deflection.is_finite() || display_deflection <= 0.0 || !segment_tolerance.is_finite() || segment_tolerance <= 0.0 || segment.iter().flatten().any(|v| !v.is_finite()) {
+        return Err(EditingError::Invalid("fillet display segment".into()));
+    }
+    let mut points = [0.; 6];
+    let mut message = [0 as c_char; 512];
+    let status = unsafe { om9_occt_verified_edge_endpoints(shape.source().as_ptr(), shape.source().len(), segment.as_ptr().cast(),
+        display_deflection + segment_tolerance, segment_tolerance,
+        usize::try_from(limits.max_nodes).unwrap_or(usize::MAX), points.as_mut_ptr(), message.as_mut_ptr(), message.len() as c_int) };
+    if status == 3 { return Ok(None); }
+    if status != 0 { return Err(EditingError::Kernel(unsafe { std::ffi::CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned())); }
+    if !points.iter().all(|v| v.is_finite()) { return Err(EditingError::Kernel("invalid edge endpoints".into())); }
+    Ok(Some(([points[0], points[1], points[2]], [points[3], points[4], points[5]])))
+}
+
+/// Retrieve exact endpoints in the orientation used by `fillet_with_end_radii`.
 pub fn oriented_edge_endpoints(
-    shape: &Brep,
+    shape: &dyn BrepSourceAccess,
     index: usize,
     limits: &Limits,
 ) -> Result<(Point3, Point3), EditingError> {
@@ -1882,12 +3168,12 @@ pub fn oriented_edge_endpoints(
 
 /// Return oriented endpoints, or None only for an edge with one shared topological vertex.
 pub fn oriented_edge_endpoints_or_closed(
-    shape: &Brep,
+    shape: &dyn BrepSourceAccess,
     index: usize,
     limits: &Limits,
 ) -> Result<Option<(Point3, Point3)>, EditingError> {
     checked_brep(shape, limits)?;
-    if index >= shape.display.edges.len() {
+    if index >= shape.topology().edges.len() {
         return Err(EditingError::Invalid("edge index out of range".into()));
     }
     let index = i32::try_from(index).map_err(|_| EditingError::Budget("edge index".into()))?;
@@ -1924,9 +3210,9 @@ pub fn oriented_edge_endpoints_or_closed(
 }
 
 /// Extract a bounded circular edge in BRep-local coordinates, preserving edge orientation.
-pub fn circular_edge(shape: &Brep, index: usize, limits: &Limits) -> Result<om9_core::geometry::Curve, EditingError> {
+pub fn circular_edge(shape: &dyn BrepSourceAccess, index: usize, limits: &Limits) -> Result<om9_core::geometry::Curve, EditingError> {
     checked_brep(shape, limits)?;
-    if index >= shape.display.edges.len() { return Err(EditingError::Invalid("edge index out of range".into())); }
+    if index >= shape.topology().edges.len() { return Err(EditingError::Invalid("edge index out of range".into())); }
     let index = i32::try_from(index).map_err(|_| EditingError::Budget("edge index".into()))?;
     let mut values = [0.0; 13];
     let mut message = [0 as c_char; 512];
@@ -1936,7 +3222,11 @@ pub fn circular_edge(shape: &Brep, index: usize, limits: &Limits) -> Result<om9_
     if status != 0 {
         return Err(EditingError::Kernel(unsafe { std::ffi::CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned()));
     }
-    if !values.iter().all(|v| v.is_finite()) || values[9] <= 0.0 || values[12] != 0.0 && values[12] != 1.0 {
+    circle_from_native(&values, limits)
+}
+
+fn circle_from_native(values: &[f64], limits: &Limits) -> Result<om9_core::geometry::Curve, EditingError> {
+    if values.len() != 13 || !values.iter().all(|v| v.is_finite()) || values[9] <= 0.0 || values[10] >= values[11] || values[12] != 0.0 && values[12] != 1.0 {
         return Err(EditingError::Kernel("invalid circular edge data".into()));
     }
     let reversed = values[12] == 1.0;
@@ -1952,9 +3242,20 @@ pub fn circular_edge(shape: &Brep, index: usize, limits: &Limits) -> Result<om9_
 }
 
 /// Project a point onto an open edge, returning oriented arc-length fraction and exact point.
-pub fn fillet_project_edge(shape: &Brep, edge: usize, point: Point3, limits: &Limits) -> Result<(f64, Point3), EditingError> {
+pub fn fillet_project_edge(shape: &dyn BrepSourceAccess, edge: usize, point: Point3, limits: &Limits) -> Result<(f64, Point3), EditingError> {
+    fillet_project_edge_inner(shape, edge, point, None, limits)
+}
+
+pub fn fillet_project_verified_edge(shape: &dyn BrepSourceAccess, edge: usize, point: Point3, segment: [Point3; 2],
+    display_deflection: f64, tolerance: f64, limits: &Limits) -> Result<(f64, Point3), EditingError> {
+    validate_fillet_segments(&[segment], tolerance)?;
+    checked_deflection(display_deflection)?;
+    fillet_project_edge_inner(shape, edge, point, Some((segment, display_deflection, tolerance)), limits)
+}
+
+fn fillet_project_edge_inner(shape: &dyn BrepSourceAccess, edge: usize, point: Point3, segment: Option<([Point3; 2], f64, f64)>, limits: &Limits) -> Result<(f64, Point3), EditingError> {
     checked_brep(shape, limits)?;
-    if edge >= shape.display.edges.len() || !point.iter().all(|x| x.is_finite()) {
+    if edge >= shape.topology().edges.len() || !point.iter().all(|x| x.is_finite()) {
         return Err(EditingError::Invalid("fillet edge projection input".into()));
     }
     let edge = i32::try_from(edge).map_err(|_| EditingError::Budget("fillet edge index".into()))?;
@@ -1962,7 +3263,10 @@ pub fn fillet_project_edge(shape: &Brep, edge: usize, point: Point3, limits: &Li
     let mut message = [0 as c_char; 512];
     // SAFETY: the source, point and fixed output buffers remain alive for this synchronous call.
     let status = unsafe { om9_occt_fillet_project_edge(shape.source().as_ptr(), shape.source().len(), edge,
-        point.as_ptr(), output.as_mut_ptr(), message.as_mut_ptr(), message.len() as c_int) };
+        point.as_ptr(), segment.as_ref().map_or(std::ptr::null(), |(s, _, _)| s.as_ptr().cast()),
+        segment.as_ref().map_or(0.0, |(_, d, t)| d + t),
+        segment.as_ref().map_or(0.0, |(_, _, t)| *t), usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+        output.as_mut_ptr(), message.as_mut_ptr(), message.len() as c_int) };
     if status != 0 {
         // SAFETY: message is initialized and NUL terminated.
         return Err(EditingError::Kernel(unsafe { std::ffi::CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned()));
@@ -1974,14 +3278,34 @@ pub fn fillet_project_edge(shape: &Brep, edge: usize, point: Point3, limits: &Li
 }
 
 /// Identify candidate oriented endpoints sharing the anchor's vertex and tangent contour.
-pub fn fillet_shared_endpoint(shape: &Brep, anchor: usize, side: usize, candidate: usize, limits: &Limits) -> Result<u8, EditingError> {
+pub fn fillet_shared_endpoint(shape: &dyn BrepSourceAccess, anchor: usize, side: usize, candidate: usize, limits: &Limits) -> Result<u8, EditingError> {
     Ok(fillet_shared_endpoints(shape, anchor, side, &[candidate], limits)?[0])
 }
 
 /// Classify a batch against one contour, reading and validating the source only once.
-pub fn fillet_shared_endpoints(shape: &Brep, anchor: usize, side: usize, candidates: &[usize], limits: &Limits) -> Result<Vec<u8>, EditingError> {
+pub fn fillet_shared_endpoints(shape: &dyn BrepSourceAccess, anchor: usize, side: usize, candidates: &[usize], limits: &Limits) -> Result<Vec<u8>, EditingError> {
+    fillet_shared_endpoints_inner(shape, anchor, side, candidates, None, limits)
+}
+
+pub fn fillet_shared_verified_endpoints(shape: &dyn BrepSourceAccess, anchor: usize, side: usize, candidates: &[usize],
+    segments: &[[Point3; 2]], anchor_slot: usize, display_deflection: f64, tolerance: f64, limits: &Limits) -> Result<Vec<u8>, EditingError> {
+    if segments.len() != candidates.len() || anchor_slot >= segments.len() { return Err(EditingError::Invalid("fillet segment count".into())); }
+    validate_fillet_segments(segments, tolerance)?;
+    checked_deflection(display_deflection)?;
+    fillet_shared_endpoints_inner(shape, anchor, side, candidates, Some((segments, anchor_slot, display_deflection, tolerance)), limits)
+}
+
+fn validate_fillet_segments(segments: &[[Point3; 2]], tolerance: f64) -> Result<(), EditingError> {
+    if !tolerance.is_finite() || tolerance <= 0.0 || segments.iter().flatten().flatten().any(|v| !v.is_finite()) {
+        return Err(EditingError::Invalid("invalid fillet display segment".into()));
+    }
+    Ok(())
+}
+
+fn fillet_shared_endpoints_inner(shape: &dyn BrepSourceAccess, anchor: usize, side: usize, candidates: &[usize],
+    segments: Option<(&[[Point3; 2]], usize, f64, f64)>, limits: &Limits) -> Result<Vec<u8>, EditingError> {
     checked_brep(shape, limits)?;
-    if anchor >= shape.display.edges.len() || candidates.is_empty() || candidates.iter().any(|&i| i >= shape.display.edges.len()) || side > 1 {
+    if anchor >= shape.topology().edges.len() || candidates.is_empty() || candidates.iter().any(|&i| i >= shape.topology().edges.len()) || side > 1 {
         return Err(EditingError::Invalid("invalid fillet endpoint".into()));
     }
     let bytes = candidates.len().checked_mul(std::mem::size_of::<c_int>() + std::mem::size_of::<u8>())
@@ -1999,7 +3323,10 @@ pub fn fillet_shared_endpoints(shape: &Brep, anchor: usize, side: usize, candida
     let mut message = [0 as c_char; 512];
     // SAFETY: immutable source and fixed output buffers remain valid for this synchronous call.
     let status = unsafe { om9_occt_fillet_shared_endpoints(shape.source().as_ptr(), shape.source().len(), anchor,
-        side as c_int, native.as_ptr(), native.len(), masks.as_mut_ptr(), message.as_mut_ptr(), message.len() as c_int) };
+        side as c_int, native.as_ptr(), native.len(), segments.map_or(std::ptr::null(), |(s, _, _, _)| s.as_ptr().cast()),
+        segments.map_or(0, |(_, slot, _, _)| slot), segments.map_or(0.0, |(_, _, d, t)| d + t),
+        segments.map_or(0.0, |(_, _, _, t)| t), usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+        masks.as_mut_ptr(), message.as_mut_ptr(), message.len() as c_int) };
     if status != 0 {
         // SAFETY: the buffer is initialized with a terminating NUL.
         return Err(EditingError::Kernel(unsafe { std::ffi::CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned()));
@@ -2012,7 +3339,7 @@ pub fn fillet_shared_endpoints(shape: &Brep, anchor: usize, side: usize, candida
 /// Variable values on an open tangent contour require all of its edges and matching radii
 /// at shared vertices; the native kernel interpolates the supplied contour law.
 pub fn fillet_with_end_radii(
-    shape: &Brep,
+    shape: &dyn BrepSourceAccess,
     edges: &[(usize, f64, f64)],
     deflection_mm: f64,
     limits: &Limits,
@@ -2023,11 +3350,31 @@ pub fn fillet_with_end_radii(
 /// Radius controls use an edge index, oriented arc-length fraction in (0,1), and radius.
 /// The contour must be open and fully selected; OCCT interpolates the supplied law.
 pub fn fillet_with_radius_controls(
-    shape: &Brep,
+    shape: &dyn BrepSourceAccess,
     edges: &[(usize, f64, f64)],
     controls: &[(usize, f64, f64)],
     deflection_mm: f64,
     limits: &Limits,
+) -> Result<Brep, EditingError> {
+    fillet_with_radius_controls_inner(shape, edges, controls, None, deflection_mm, limits)
+}
+
+/// Resolve each displayed segment against the same native shape used by the fillet.
+pub fn fillet_with_verified_segments(
+    shape: &dyn BrepSourceAccess, edges: &[(usize, f64, f64)], controls: &[(usize, f64, f64)],
+    segments: &[[Point3; 2]], display_deflection: f64, segment_tolerance: f64, deflection_mm: f64, limits: &Limits,
+) -> Result<Brep, EditingError> {
+    if segments.len() != edges.len() || !segment_tolerance.is_finite() || segment_tolerance <= 0.0
+        || segments.iter().flatten().flatten().any(|v| !v.is_finite()) {
+        return Err(EditingError::Invalid("invalid fillet display segments".into()));
+    }
+    checked_deflection(display_deflection)?;
+    fillet_with_radius_controls_inner(shape, edges, controls, Some((segments, display_deflection, segment_tolerance)), deflection_mm, limits)
+}
+
+fn fillet_with_radius_controls_inner(
+    shape: &dyn BrepSourceAccess, edges: &[(usize, f64, f64)], controls: &[(usize, f64, f64)],
+    segments: Option<(&[[Point3; 2]], f64, f64)>, deflection_mm: f64, limits: &Limits,
 ) -> Result<Brep, EditingError> {
     let deflection = checked_deflection(deflection_mm)?;
     let measures = checked_brep(shape, limits)?;
@@ -2062,7 +3409,7 @@ pub fn fillet_with_radius_controls(
         positive(end, "fillet end radius")?;
         let native =
             i32::try_from(index).map_err(|_| EditingError::Budget("fillet edge index".into()))?;
-        if index >= shape.display.edges.len() || indices.contains(&native) {
+        if index >= shape.topology().edges.len() || indices.contains(&native) {
             return Err(EditingError::Invalid(
                 "invalid or duplicate fillet edge".into(),
             ));
@@ -2105,6 +3452,9 @@ pub fn fillet_with_radius_controls(
                 fractions.as_ptr(),
                 control_radii.as_ptr(),
                 controls.len(),
+                segments.map_or(std::ptr::null(), |(segments, _, _)| segments.as_ptr().cast::<f64>()),
+                segments.map_or(0.0, |(_, display_deflection, tolerance)| display_deflection + tolerance),
+                segments.map_or(0.0, |(_, _, tolerance)| tolerance),
                 deflection,
                 budget.points,
                 budget.nodes,
@@ -2121,7 +3471,7 @@ pub fn fillet_with_radius_controls(
 
 /// Chamfer the selected edges of a solid.
 pub fn chamfer(
-    solid: &Brep,
+    solid: &dyn BrepSourceAccess,
     edges: &[usize],
     distance_mm: f64,
     deflection_mm: f64,
@@ -2135,22 +3485,22 @@ pub fn chamfer(
 /// The acceptance measurements never use this; it exists so a caller can name an edge by geometry
 /// before passing its index to [`fillet`] or [`chamfer`].
 pub fn edge_endpoints(brep: &Brep, edge_index: usize) -> Result<(Point3, Point3), EditingError> {
-    if edge_index >= brep.display.edges.len() {
+    if edge_index >= brep.display().edges.len() {
         return Err(EditingError::Invalid(format!(
             "edge index {edge_index} is outside the {} published edges",
-            brep.display.edges.len()
+            brep.display().edges.len()
         )));
     }
     let mut first: Option<Point3> = None;
     let mut last: Option<Point3> = None;
-    for [a, b, edge] in &brep.display.segments {
+    for [a, b, edge] in &brep.display().segments {
         if *edge as usize != edge_index {
             continue;
         }
         if first.is_none() {
-            first = Some(brep.display.points[*a as usize]);
+            first = Some(brep.display().points[*a as usize]);
         }
-        last = Some(brep.display.points[*b as usize]);
+        last = Some(brep.display().points[*b as usize]);
     }
     match (first, last) {
         (Some(first), Some(last)) => Ok((first, last)),
@@ -2164,7 +3514,7 @@ pub fn edge_endpoints(brep: &Brep, edge_index: usize) -> Result<(Point3, Point3)
 
 /// Thicken a face or shell into a closed solid of the given one-sided thickness.
 pub fn thicken(
-    shape: &Brep,
+    shape: &dyn BrepSourceAccess,
     thickness_mm: f64,
     deflection_mm: f64,
     limits: &Limits,
@@ -2208,7 +3558,7 @@ pub fn thicken(
 
 /// Offset a face or shell by a signed distance, preserving its face count and area.
 pub fn offset_shape(
-    shape: &Brep,
+    shape: &dyn BrepSourceAccess,
     distance_mm: f64,
     deflection_mm: f64,
     limits: &Limits,
@@ -2258,13 +3608,235 @@ pub fn offset_shape(
 
 /// Extract one face of a body as its own owned B-Rep. The source body is untouched.
 pub fn extract_face(
-    brep: &Brep,
+    brep: &dyn BrepSourceAccess,
     face_index: usize,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, EditingError> {
-    let deflection = checked_deflection(deflection_mm)?;
+    extract_face_inner(brep, face_index, None, deflection_mm, limits, None)
+}
+
+pub fn extract_verified_face(brep: &dyn BrepSourceAccess, face_index: usize, triangle: [Point3; 3], vertex_tolerance: f64,
+    deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+    extract_verified_face_with_witness_deflection(brep, face_index, triangle, vertex_tolerance, deflection_mm, deflection_mm, limits)
+}
+
+pub fn extract_verified_face_with_witness_deflection(brep: &dyn BrepSourceAccess, face_index: usize, triangle: [Point3; 3], vertex_tolerance: f64,
+    witness_deflection_mm: f64, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+    validate_face_triangles(&[triangle], vertex_tolerance)?;
+    let witness_deflection = checked_deflection(witness_deflection_mm)?;
+    extract_face_inner(brep, face_index, Some((triangle, vertex_tolerance, witness_deflection)), deflection_mm, limits, None)
+}
+
+/// Admit Rust output and snapshot scratch; OCCT internal allocations are not covered.
+pub fn extract_verified_face_with_witness_deflection_admitted(brep: &dyn BrepSourceAccess, face_index: usize, triangle: [Point3; 3], vertex_tolerance: f64,
+    witness_deflection_mm: f64, deflection_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Brep, EditingError> {
+    validate_face_triangles(&[triangle], vertex_tolerance)?;
+    let witness_deflection = checked_deflection(witness_deflection_mm)?;
+    extract_face_inner(brep, face_index, Some((triangle, vertex_tolerance, witness_deflection)), deflection_mm, limits, Some(&mut admit))
+}
+
+fn validate_face_triangles(triangles: &[[Point3; 3]], tolerance: f64) -> Result<(), EditingError> {
+    if !tolerance.is_finite() || tolerance <= 0.0 || triangles.iter().flatten().flatten().any(|v| !v.is_finite()) {
+        return Err(EditingError::Invalid("invalid face display triangle".into()));
+    }
+    Ok(())
+}
+
+/// Bind all triangles labelled as one display face to the same source face.
+pub fn verify_face_display(brep: &dyn BrepSourceAccess, display: &om9_core::brep::BrepDisplay, face: usize,
+    witness: [Point3; 3], tolerance: f64, limits: &Limits) -> Result<(), EditingError> {
+    brep.validate_source(limits).map_err(|error| EditingError::Invalid(error.to_string()))?;
+    verify_face_display_inner(brep.source(), display, face, witness, tolerance, limits, None)
+        .map_err(|error| match error { FaceCheckError::Canceled => EditingError::Kernel("face verification canceled".into()),
+            FaceCheckError::Editing(other) => other })
+}
+
+pub fn verify_face_display_cancellable(brep: &dyn BrepSourceAccess, display: &om9_core::brep::BrepDisplay, face: usize,
+    witness: [Point3; 3], tolerance: f64, limits: &Limits, cancel: &om9_core::transaction::Cancellation) -> om9_core::Result<()> {
+    if cancel.is_canceled() { return Err(om9_core::Error::Canceled); }
+    brep.validate_source(limits).map_err(|error| om9_core::Error::Io(error.to_string()))?;
+    verify_face_display_inner(brep.source(), display, face, witness, tolerance, limits, Some(cancel))
+        .map_err(|error| match error { FaceCheckError::Canceled => om9_core::Error::Canceled,
+            FaceCheckError::Editing(other) => om9_core::Error::Io(other.to_string()) })
+}
+
+/// Verify against a separately tracked canonical source without capturing its
+/// document or display. Admission includes source-validation scratch.
+pub fn verify_captured_face_display_cancellable(source: &om9_core::transaction::CapturedBrepSource,
+    display: &om9_core::brep::BrepDisplay, face: usize, witness: [Point3; 3], tolerance: f64,
+    limits: &Limits, cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> om9_core::Result<()> {
+    if cancel.is_canceled() { return Err(om9_core::Error::Canceled); }
+    let canonical = source.validate_canonical_admitted(limits, &mut admit)?;
+    match verify_face_display_inner(source.source(), display, face, witness, tolerance, limits, Some(cancel)) {
+        Ok(()) => Ok(()),
+        Err(FaceCheckError::Canceled) => Err(om9_core::Error::Canceled),
+        Err(FaceCheckError::Editing(EditingError::Kernel(message)))
+            if message.contains("source face display: triangle crosses trim boundary") => {
+                verify_captured_face_exact_remesh(source, display, face, witness, tolerance, limits, canonical, cancel, &mut admit)
+            }
+        Err(FaceCheckError::Editing(other)) => Err(om9_core::Error::Io(other.to_string())),
+    }
+}
+
+/// A fresh source mesh is an alternative binding witness only when it matches
+/// the entire displayed face mesh exactly; it does not make display facets
+/// exact source geometry. Callers must still refine the actual picked point.
+fn verify_captured_face_exact_remesh(source: &om9_core::transaction::CapturedBrepSource,
+    display: &om9_core::brep::BrepDisplay, face: usize, witness: [Point3; 3], tolerance: f64,
+    limits: &Limits, canonical: om9_core::budget::Usage, cancel: &om9_core::transaction::Cancellation,
+    admit: &mut dyn FnMut(u64, u64) -> om9_core::Result<()>) -> om9_core::Result<()> {
+    use om9_core::Error;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    if display.source_sha256 != source.source_fingerprint() || &*display.topology != source.topology()
+        || face >= source.topology().faces.len() {
+        return Err(Error::Stale("face remesh source binding"));
+    }
+    let remaining = limits.remaining_after(canonical)?;
+    let mut admission_error = None;
+    let remesh = crate::brep::capture_source_topology(source.source(), display.deflection_mm, 0.3, &remaining,
+        |live, pending| {
+            let result = if cancel.is_canceled() { Err(Error::Canceled) } else {
+                canonical.bytes.checked_add(live).ok_or(Error::Overflow("face remesh admission"))
+                    .and_then(|held| admit(held, pending))
+            };
+            if let Err(error) = &result { admission_error = Some(error.clone()); }
+            result
+        });
+    if let Some(error) = admission_error { return Err(error); }
+    let remesh = remesh.map_err(|error| Error::Io(format!("face source remesh: {error}")))?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let fresh = remesh.brep().display();
+    let topology = source.topology();
+    if fresh.topology.faces.len() != topology.faces.len() || fresh.topology.edges.len() != topology.edges.len()
+        || fresh.topology.vertex_ids.len() != topology.vertex_ids.len() || fresh.topology.face_edges != topology.face_edges
+        || fresh.points.len() != display.points.len() || fresh.triangles.len() != display.triangles.len() {
+        return Err(Error::Stale("face remesh topology or display"));
+    }
+    for (old, new) in display.points.chunks(4096).zip(fresh.points.chunks(4096)) {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        if old != new { return Err(Error::Stale("face remesh vertices")); }
+    }
+    let mut found = false;
+    for (old, new) in display.triangles.chunks(4096).zip(fresh.triangles.chunks(4096)) {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        if old != new { return Err(Error::Stale("face remesh triangles")); }
+        for triangle in old.iter().filter(|triangle| triangle[3] as usize == face) {
+            let Some(a) = display.points.get(triangle[0] as usize) else { return Err(Error::Stale("face remesh vertex")) };
+            let Some(b) = display.points.get(triangle[1] as usize) else { return Err(Error::Stale("face remesh vertex")) };
+            let Some(c) = display.points.get(triangle[2] as usize) else { return Err(Error::Stale("face remesh vertex")) };
+            if [*a, *b, *c] == witness { found = true; }
+        }
+    }
+    if !found { return Err(Error::Stale("face remesh witness")); }
+    drop(remesh);
+    admit(canonical.bytes, 0)?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    verify_face_triangles_source(source.source(), &[witness], tolerance, display.deflection_mm, limits)
+        .map_err(|error| Error::Io(format!("face remesh witness: {error}")))?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    Ok(())
+}
+
+enum FaceCheckError { Canceled, Editing(EditingError) }
+
+fn verify_face_display_inner(source: &str, display: &om9_core::brep::BrepDisplay, face: usize,
+    witness: [Point3; 3], tolerance: f64, limits: &Limits, cancel: Option<&om9_core::transaction::Cancellation>) -> Result<(), FaceCheckError> {
+    if cancel.is_some_and(|token| token.is_canceled()) { return Err(FaceCheckError::Canceled); }
+    validate_face_triangles(&[witness], tolerance).map_err(FaceCheckError::Editing)?;
+    let deflection = checked_deflection(display.deflection_mm).map_err(FaceCheckError::Editing)?;
+    let face = u32::try_from(face).map_err(|_| FaceCheckError::Editing(EditingError::Invalid("display face index".into())))?;
+    let mut message = [0 as c_char; 512];
+    unsafe extern "C" fn is_canceled(context: *mut c_void) -> c_int {
+        // SAFETY: caller supplies a live Cancellation for this synchronous call.
+        let token = unsafe { &*(context.cast::<om9_core::transaction::Cancellation>()) };
+        c_int::from(token.is_canceled())
+    }
+    // SAFETY: all slices and the output buffer live for this synchronous call;
+    // Point3 and [u32; 4] are contiguous fixed-size arrays.
+    let status = unsafe { om9_occt_verify_face_display(source.as_ptr(), source.len(),
+        witness.as_ptr().cast(), deflection, tolerance, display.points.as_ptr().cast(), display.points.len(),
+        display.triangles.as_ptr().cast(), display.triangles.len(), face,
+        usize::try_from(limits.max_nodes).unwrap_or(usize::MAX), cancel.map(|_| is_canceled as unsafe extern "C" fn(*mut c_void) -> c_int),
+        cancel.map_or(std::ptr::null_mut(), |token| token as *const _ as *mut c_void), message.as_mut_ptr(), message.len() as c_int) };
+    if status == 3 { return Err(FaceCheckError::Canceled); }
+    if status != 0 { return Err(FaceCheckError::Editing(EditingError::Kernel(unsafe { std::ffi::CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned()))); }
+    Ok(())
+}
+
+/// Reject ambiguous or duplicate face witnesses before an atomic multi-face edit.
+pub fn verify_source_face_triangles(brep: &Brep, triangles: &[[Point3; 3]], tolerance: f64,
+    limits: &Limits) -> Result<(), EditingError> {
+    verify_source_face_triangles_with_deflection(brep, triangles, tolerance, brep.display().deflection_mm, limits)
+}
+pub fn verify_source_face_triangles_with_deflection(brep: &dyn BrepSourceAccess, triangles: &[[Point3; 3]], tolerance: f64,
+    witness_deflection: f64, limits: &Limits) -> Result<(), EditingError> {
+    validate_face_triangles(triangles, tolerance)?;
+    let witness_deflection = checked_deflection(witness_deflection)?;
+    brep.validate_source(limits).map_err(|error| EditingError::Invalid(error.to_string()))?;
+    verify_face_triangles_source(brep.source(), triangles, tolerance, witness_deflection, limits)
+}
+
+fn captured_source_measure(source: &om9_core::transaction::CapturedBrepSource, limits: &Limits,
+    admit: &mut dyn FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Measures, EditingError> {
+    source.validate_canonical_admitted(limits, admit).map_err(|error| match error {
+        om9_core::Error::Budget(_) => EditingError::Budget(error.to_string()),
+        _ => EditingError::Invalid(error.to_string()),
+    })?;
+    crate::creation::measure_validated_source(source.source())
+}
+
+pub fn captured_source_face_count_admitted(source: &om9_core::transaction::CapturedBrepSource, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<usize, EditingError> {
+    Ok(captured_source_measure(source, limits, &mut admit)?.faces)
+}
+
+pub fn verify_captured_face_triangles_admitted(source: &om9_core::transaction::CapturedBrepSource,
+    triangles: &[[Point3; 3]], tolerance: f64, witness_deflection: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<(), EditingError> {
+    validate_face_triangles(triangles, tolerance)?;
+    let witness_deflection = checked_deflection(witness_deflection)?;
+    source.validate_canonical_admitted(limits, &mut admit).map_err(|error| match error {
+        om9_core::Error::Budget(_) => EditingError::Budget(error.to_string()),
+        _ => EditingError::Invalid(error.to_string()),
+    })?;
+    verify_face_triangles_source(source.source(), triangles, tolerance, witness_deflection, limits)
+}
+
+fn verify_face_triangles_source(source: &str, triangles: &[[Point3; 3]], tolerance: f64,
+    witness_deflection: f64, limits: &Limits) -> Result<(), EditingError> {
+    if triangles.is_empty() || triangles.len() as u64 > limits.max_outputs { return Err(EditingError::Budget("face witness count".into())); }
+    let mut message = [0 as c_char; 512];
+    let status = unsafe { om9_occt_verify_face_triangles(source.as_ptr(), source.len(), triangles.as_ptr().cast(),
+        triangles.len(), witness_deflection + tolerance, tolerance,
+        usize::try_from(limits.max_nodes).unwrap_or(usize::MAX), usize::try_from(limits.max_bytes).unwrap_or(usize::MAX),
+        message.as_mut_ptr(), message.len() as c_int) };
+    if status != 0 { return Err(EditingError::Kernel(unsafe { std::ffi::CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned())); }
+    Ok(())
+}
+
+fn extract_face_inner(brep: &dyn BrepSourceAccess, face_index: usize, triangle: Option<([Point3; 3], f64, f64)>,
+    deflection_mm: f64, limits: &Limits, admission: Option<&mut dyn FnMut(u64, u64) -> om9_core::Result<()>>) -> Result<Brep, EditingError> {
+    checked_deflection(deflection_mm)?;
     let before = checked_brep(brep, limits)?;
+    extract_face_source(brep.source(), before, face_index, triangle, deflection_mm, limits, admission)
+}
+
+pub fn extract_captured_face_admitted(source: &om9_core::transaction::CapturedBrepSource, face_index: usize,
+    triangle: [Point3; 3], tolerance: f64, witness_deflection: f64, deflection_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Brep, EditingError> {
+    validate_face_triangles(&[triangle], tolerance)?;
+    let witness_deflection = checked_deflection(witness_deflection)?;
+    checked_deflection(deflection_mm)?;
+    let before = captured_source_measure(source, limits, &mut admit)?;
+    extract_face_source(source.source(), before, face_index, Some((triangle, tolerance, witness_deflection)), deflection_mm, limits, Some(&mut admit))
+}
+
+fn extract_face_source(source: &str, before: Measures, face_index: usize, triangle: Option<([Point3; 3], f64, f64)>,
+    deflection_mm: f64, limits: &Limits, admission: Option<&mut dyn FnMut(u64, u64) -> om9_core::Result<()>>) -> Result<Brep, EditingError> {
+    let deflection = checked_deflection(deflection_mm)?;
     if face_index >= before.faces {
         return Err(EditingError::Invalid(format!(
             "face index {face_index} is outside the {} faces",
@@ -2274,13 +3846,16 @@ pub fn extract_face(
     let native_index =
         i32::try_from(face_index).map_err(|_| EditingError::Budget("face index".into()))?;
     let budget = snapshot_budget(limits);
-    let face = snapshot_via(deflection, limits, |sink, context, message, capacity| {
+    let face = snapshot_via_with_admission(deflection, limits, admission, |sink, context, message, capacity| {
         // SAFETY: source and callback context live through this call.
         unsafe {
             om9_occt_extract_face(
-                brep.source().as_ptr(),
-                brep.source().len(),
+                source.as_ptr(),
+                source.len(),
                 native_index,
+                triangle.as_ref().map_or(std::ptr::null(), |(t, _, _)| t.as_ptr().cast()),
+                triangle.as_ref().map_or(0.0, |(_, t, _)| *t),
+                triangle.as_ref().map_or(0.0, |(_, _, d)| *d),
                 deflection,
                 budget.points,
                 budget.nodes,
@@ -2304,13 +3879,52 @@ pub fn extract_face(
 
 /// Remove one face, leaving the remaining faces as an open shell (unjoin).
 pub fn remove_face(
-    brep: &Brep,
+    brep: &dyn BrepSourceAccess,
     face_index: usize,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, EditingError> {
-    let deflection = checked_deflection(deflection_mm)?;
+    remove_face_inner(brep, face_index, None, deflection_mm, limits, None)
+}
+
+pub fn remove_verified_face(brep: &dyn BrepSourceAccess, face_index: usize, triangle: [Point3; 3], vertex_tolerance: f64,
+    deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+    remove_verified_face_with_deflection(brep, face_index, triangle, vertex_tolerance, deflection_mm, deflection_mm, limits)
+}
+pub fn remove_verified_face_with_deflection(brep: &dyn BrepSourceAccess, face_index: usize, triangle: [Point3; 3], vertex_tolerance: f64,
+    witness_deflection: f64, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+    validate_face_triangles(&[triangle], vertex_tolerance)?;
+    remove_face_inner(brep, face_index, Some((triangle, vertex_tolerance, checked_deflection(witness_deflection)?)), deflection_mm, limits, None)
+}
+
+/// Admit Rust output and snapshot scratch; OCCT internal allocations are not covered.
+pub fn remove_verified_face_with_deflection_admitted(brep: &dyn BrepSourceAccess, face_index: usize, triangle: [Point3; 3], vertex_tolerance: f64,
+    witness_deflection: f64, deflection_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Brep, EditingError> {
+    validate_face_triangles(&[triangle], vertex_tolerance)?;
+    remove_face_inner(brep, face_index, Some((triangle, vertex_tolerance, checked_deflection(witness_deflection)?)), deflection_mm, limits, Some(&mut admit))
+}
+
+fn remove_face_inner(brep: &dyn BrepSourceAccess, face_index: usize, triangle: Option<([Point3; 3], f64, f64)>,
+    deflection_mm: f64, limits: &Limits, admission: Option<&mut dyn FnMut(u64, u64) -> om9_core::Result<()>>) -> Result<Brep, EditingError> {
+    checked_deflection(deflection_mm)?;
     let before = checked_brep(brep, limits)?;
+    remove_face_source(brep.source(), before, face_index, triangle, deflection_mm, limits, admission)
+}
+
+pub fn remove_captured_face_admitted(source: &om9_core::transaction::CapturedBrepSource, face_index: usize,
+    triangle: [Point3; 3], tolerance: f64, witness_deflection: f64, deflection_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Brep, EditingError> {
+    validate_face_triangles(&[triangle], tolerance)?;
+    let witness_deflection = checked_deflection(witness_deflection)?;
+    checked_deflection(deflection_mm)?;
+    let before = captured_source_measure(source, limits, &mut admit)?;
+    remove_face_source(source.source(), before, face_index, Some((triangle, tolerance, witness_deflection)), deflection_mm, limits, Some(&mut admit))
+}
+
+fn remove_face_source(source: &str, before: Measures, face_index: usize, triangle: Option<([Point3; 3], f64, f64)>,
+    deflection_mm: f64, limits: &Limits, admission: Option<&mut dyn FnMut(u64, u64) -> om9_core::Result<()>>) -> Result<Brep, EditingError> {
+    let deflection = checked_deflection(deflection_mm)?;
     if face_index >= before.faces {
         return Err(EditingError::Invalid(format!(
             "face index {face_index} is outside the {} faces",
@@ -2320,13 +3934,16 @@ pub fn remove_face(
     let native_index =
         i32::try_from(face_index).map_err(|_| EditingError::Budget("face index".into()))?;
     let budget = snapshot_budget(limits);
-    let shell = snapshot_via(deflection, limits, |sink, context, message, capacity| {
+    let shell = snapshot_via_with_admission(deflection, limits, admission, |sink, context, message, capacity| {
         // SAFETY: source and callback context live through this call.
         unsafe {
             om9_occt_remove_face(
-                brep.source().as_ptr(),
-                brep.source().len(),
+                source.as_ptr(),
+                source.len(),
                 native_index,
+                triangle.as_ref().map_or(std::ptr::null(), |(t, _, _)| t.as_ptr().cast()),
+                triangle.as_ref().map_or(0.0, |(_, t, _)| *t),
+                triangle.as_ref().map_or(0.0, |(_, _, d)| *d),
                 deflection,
                 budget.points,
                 budget.nodes,
@@ -2355,13 +3972,67 @@ pub fn remove_face(
 
 /// Remove faces by their indices in the original B-Rep; the remainder must be nonempty.
 pub fn remove_faces(
-    brep: &Brep,
+    brep: &dyn BrepSourceAccess,
     face_indices: &[usize],
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, EditingError> {
-    let deflection = checked_deflection(deflection_mm)?;
+    remove_faces_inner(brep, face_indices, None, deflection_mm, limits, None)
+}
+
+pub fn remove_verified_faces(brep: &dyn BrepSourceAccess, face_indices: &[usize], triangles: &[[Point3; 3]], vertex_tolerance: f64,
+    deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+    remove_verified_faces_with_deflection(brep, face_indices, triangles, vertex_tolerance, deflection_mm, deflection_mm, limits)
+}
+pub fn remove_verified_faces_with_deflection(brep: &dyn BrepSourceAccess, face_indices: &[usize], triangles: &[[Point3; 3]], vertex_tolerance: f64,
+    witness_deflection: f64, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+    if triangles.len() != face_indices.len() { return Err(EditingError::Invalid("face triangle count".into())); }
+    validate_face_triangles(triangles, vertex_tolerance)?;
+    remove_faces_inner(brep, face_indices, Some((triangles, vertex_tolerance, checked_deflection(witness_deflection)?)), deflection_mm, limits, None)
+}
+
+/// Admit Rust output and snapshot scratch; OCCT internal allocations are not covered.
+pub fn remove_verified_faces_with_deflection_admitted(brep: &dyn BrepSourceAccess, face_indices: &[usize], triangles: &[[Point3; 3]], vertex_tolerance: f64,
+    witness_deflection: f64, deflection_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Brep, EditingError> {
+    if triangles.len() != face_indices.len() { return Err(EditingError::Invalid("face triangle count".into())); }
+    validate_face_triangles(triangles, vertex_tolerance)?;
+    let scratch = face_indices.len().checked_mul(std::mem::size_of::<i32>())
+        .and_then(|bytes| u64::try_from(bytes).ok()).ok_or_else(|| EditingError::Budget("face indices".into()))?;
+    admit(0, scratch).map_err(|error| EditingError::Budget(error.to_string()))?;
+    let mut account = |live: u64, pending: u64| {
+        admit(live.checked_add(scratch).ok_or(om9_core::Error::Overflow("face indices"))?, pending)
+    };
+    remove_faces_inner(brep, face_indices, Some((triangles, vertex_tolerance, checked_deflection(witness_deflection)?)), deflection_mm, limits, Some(&mut account))
+}
+
+fn remove_faces_inner(brep: &dyn BrepSourceAccess, face_indices: &[usize], triangles: Option<(&[[Point3; 3]], f64, f64)>,
+    deflection_mm: f64, limits: &Limits, admission: Option<&mut dyn FnMut(u64, u64) -> om9_core::Result<()>>) -> Result<Brep, EditingError> {
+    checked_deflection(deflection_mm)?;
     let before = checked_brep(brep, limits)?;
+    remove_faces_source(brep.source(), before, face_indices, triangles, deflection_mm, limits, admission)
+}
+
+pub fn remove_captured_faces_admitted(source: &om9_core::transaction::CapturedBrepSource, face_indices: &[usize],
+    triangles: &[[Point3; 3]], tolerance: f64, witness_deflection: f64, deflection_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Brep, EditingError> {
+    if triangles.len() != face_indices.len() { return Err(EditingError::Invalid("face triangle count".into())); }
+    validate_face_triangles(triangles, tolerance)?;
+    let witness_deflection = checked_deflection(witness_deflection)?;
+    checked_deflection(deflection_mm)?;
+    let scratch = face_indices.len().checked_mul(std::mem::size_of::<i32>())
+        .and_then(|bytes| u64::try_from(bytes).ok()).ok_or_else(|| EditingError::Budget("face indices".into()))?;
+    admit(0, scratch).map_err(|error| EditingError::Budget(error.to_string()))?;
+    let mut account = |live: u64, pending: u64| {
+        admit(live.checked_add(scratch).ok_or(om9_core::Error::Overflow("face indices"))?, pending)
+    };
+    let before = captured_source_measure(source, limits, &mut account)?;
+    remove_faces_source(source.source(), before, face_indices, Some((triangles, tolerance, witness_deflection)), deflection_mm, limits, Some(&mut account))
+}
+
+fn remove_faces_source(source: &str, before: Measures, face_indices: &[usize], triangles: Option<(&[[Point3; 3]], f64, f64)>,
+    deflection_mm: f64, limits: &Limits, admission: Option<&mut dyn FnMut(u64, u64) -> om9_core::Result<()>>) -> Result<Brep, EditingError> {
+    let deflection = checked_deflection(deflection_mm)?;
     if face_indices.is_empty() || face_indices.len() >= before.faces {
         return Err(EditingError::Invalid(
             "remove faces requires a nonempty remainder".into(),
@@ -2382,16 +4053,20 @@ pub fn remove_faces(
         return Err(EditingError::Invalid("duplicate face index".into()));
     }
     let budget = snapshot_budget(limits);
-    let shell = snapshot_via(
+    let shell = snapshot_via_with_admission(
         deflection,
         limits,
+        admission,
         |sink, context, message, capacity| unsafe {
             // SAFETY: source, index slice, and callback context live through the call.
             om9_occt_remove_faces(
-                brep.source().as_ptr(),
-                brep.source().len(),
+                source.as_ptr(),
+                source.len(),
                 indices.as_ptr(),
                 indices.len(),
+                triangles.map_or(std::ptr::null(), |(t, _, _)| t.as_ptr().cast()),
+                triangles.map_or(0.0, |(_, tolerance, _)| tolerance),
+                triangles.map_or(0.0, |(_, _, d)| d),
                 deflection,
                 budget.points,
                 budget.nodes,
@@ -2415,8 +4090,8 @@ pub fn remove_faces(
 
 /// Sew two B-Rep parts together. A closed sewn shell becomes a solid; an open join stays a shell.
 pub fn sew(
-    a: &Brep,
-    b: &Brep,
+    a: &dyn BrepSourceAccess,
+    b: &dyn BrepSourceAccess,
     tolerance_mm: f64,
     deflection_mm: f64,
     limits: &Limits,
@@ -2426,20 +4101,20 @@ pub fn sew(
 
 /// Sew only when every input face keeps its exact native supporting surface.
 pub fn sew_preserving_surfaces(
-    a: &Brep, b: &Brep, tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
+    a: &dyn BrepSourceAccess, b: &dyn BrepSourceAccess, tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
 ) -> Result<Brep, EditingError> {
     sew_with_orientation(a,b,false,true,tolerance_mm,deflection_mm,limits)
 }
 
 /// Sew shapes while reversing the second shape's topology before sewing.
 pub fn sew_reversing_second(
-    a: &Brep, b: &Brep, tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
+    a: &dyn BrepSourceAccess, b: &dyn BrepSourceAccess, tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
 ) -> Result<Brep, EditingError> {
     sew_with_orientation(a, b, true, false, tolerance_mm, deflection_mm, limits)
 }
 
 fn sew_with_orientation(
-    a: &Brep, b: &Brep, reverse_b: bool, preserve_surfaces: bool, tolerance_mm: f64,
+    a: &dyn BrepSourceAccess, b: &dyn BrepSourceAccess, reverse_b: bool, preserve_surfaces: bool, tolerance_mm: f64,
     deflection_mm: f64, limits: &Limits,
 ) -> Result<Brep, EditingError> {
     let deflection = checked_deflection(deflection_mm)?;
@@ -2598,7 +4273,7 @@ impl GeometryHealth {
 }
 
 /// Report health for one canonical B-Rep source.
-pub fn geometry_health(brep: &Brep, limits: &Limits) -> Result<GeometryHealth, EditingError> {
+pub fn geometry_health(brep: &dyn BrepSourceAccess, limits: &Limits) -> Result<GeometryHealth, EditingError> {
     let measures = checked_brep(brep, limits)?;
     Ok(GeometryHealth {
         valid: true,
@@ -2609,7 +4284,7 @@ pub fn geometry_health(brep: &Brep, limits: &Limits) -> Result<GeometryHealth, E
         vertices: measures.vertices,
         solids: measures.solids,
         shells: measures.shells,
-        source_sha256: brep.display.source_sha256,
+        source_sha256: brep.canonical_fingerprints().0,
     })
 }
 
@@ -2619,6 +4294,9 @@ unsafe extern "C" {
         length: usize,
         face_indices: *const usize,
         face_count: usize,
+        triangles: *const f64,
+        vertex_tolerance: f64,
+        witness_deflection: f64,
         thickness: f64,
         deflection: f64,
         max_points: usize,
@@ -2633,7 +4311,7 @@ unsafe extern "C" {
 
 /// Hollow one solid by removing `face_index` and walling the remainder with `thickness_mm`.
 pub fn shell(
-    solid: &Brep,
+    solid: &dyn BrepSourceAccess,
     face_index: usize,
     thickness_mm: f64,
     deflection_mm: f64,
@@ -2644,15 +4322,71 @@ pub fn shell(
 
 /// Hollow a closed solid, removing the specified distinct faces in one operation.
 pub fn shell_faces(
-    solid: &Brep,
+    solid: &dyn BrepSourceAccess,
     face_indices: &[usize],
     thickness_mm: f64,
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, EditingError> {
-    let deflection = checked_deflection(deflection_mm)?;
+    shell_faces_inner(solid, face_indices, None, thickness_mm, deflection_mm, limits, None)
+}
+
+pub fn shell_verified_faces(solid: &dyn BrepSourceAccess, face_indices: &[usize], triangles: &[[Point3; 3]], vertex_tolerance: f64,
+    thickness_mm: f64, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+    shell_verified_faces_with_deflection(solid, face_indices, triangles, vertex_tolerance, deflection_mm, thickness_mm, deflection_mm, limits)
+}
+pub fn shell_verified_faces_with_deflection(solid: &dyn BrepSourceAccess, face_indices: &[usize], triangles: &[[Point3; 3]], vertex_tolerance: f64,
+    witness_deflection: f64, thickness_mm: f64, deflection_mm: f64, limits: &Limits) -> Result<Brep, EditingError> {
+    if triangles.len() != face_indices.len() { return Err(EditingError::Invalid("shell face triangle count".into())); }
+    validate_face_triangles(triangles, vertex_tolerance)?;
+    shell_faces_inner(solid, face_indices, Some((triangles, vertex_tolerance, checked_deflection(witness_deflection)?)), thickness_mm, deflection_mm, limits, None)
+}
+
+/// Admit Rust snapshot output and scratch before allocation. OCCT's internal
+/// construction and snapshot allocations are outside this callback.
+pub fn shell_verified_faces_with_deflection_admitted(solid: &dyn BrepSourceAccess, face_indices: &[usize], triangles: &[[Point3; 3]], vertex_tolerance: f64,
+    witness_deflection: f64, thickness_mm: f64, deflection_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Brep, EditingError> {
+    if triangles.len() != face_indices.len() { return Err(EditingError::Invalid("shell face triangle count".into())); }
+    validate_face_triangles(triangles, vertex_tolerance)?;
+    shell_faces_inner(solid, face_indices, Some((triangles, vertex_tolerance, checked_deflection(witness_deflection)?)),
+        thickness_mm, deflection_mm, limits, Some(&mut admit))
+}
+
+/// Source-only counterpart; the caller retains the tracked source lease. Rust
+/// validation and snapshot scratch use `admit`; native OCCT allocations do not.
+pub fn shell_captured_faces_with_deflection_admitted(source: &om9_core::transaction::CapturedBrepSource,
+    face_indices: &[usize], triangles: &[[Point3; 3]], vertex_tolerance: f64, witness_deflection: f64,
+    thickness_mm: f64, deflection_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Brep, EditingError> {
+    if triangles.len() != face_indices.len() { return Err(EditingError::Invalid("shell face triangle count".into())); }
+    validate_face_triangles(triangles, vertex_tolerance)?;
+    checked_deflection(deflection_mm)?;
+    positive(thickness_mm, "shell thickness")?;
+    source.validate_canonical_admitted(limits, &mut admit).map_err(|error| match error {
+        om9_core::Error::Budget(_) => EditingError::Budget(error.to_string()),
+        _ => EditingError::Invalid(error.to_string()),
+    })?;
+    let before = crate::creation::measure_validated_source(source.source())?;
+    shell_faces_source_inner(source.source(), before, face_indices,
+        Some((triangles, vertex_tolerance, checked_deflection(witness_deflection)?)),
+        thickness_mm, deflection_mm, limits, Some(&mut admit))
+}
+
+fn shell_faces_inner(solid: &dyn BrepSourceAccess, face_indices: &[usize], triangles: Option<(&[[Point3; 3]], f64, f64)>,
+    thickness_mm: f64, deflection_mm: f64, limits: &Limits,
+    admission: Option<&mut dyn FnMut(u64, u64) -> om9_core::Result<()>>) -> Result<Brep, EditingError> {
+    checked_deflection(deflection_mm)?;
     positive(thickness_mm, "shell thickness")?;
     let before = checked_brep(solid, limits)?;
+    shell_faces_source_inner(solid.source(), before, face_indices, triangles, thickness_mm, deflection_mm, limits, admission)
+}
+
+fn shell_faces_source_inner(source: &str, before: Measures, face_indices: &[usize], triangles: Option<(&[[Point3; 3]], f64, f64)>,
+    thickness_mm: f64, deflection_mm: f64, limits: &Limits,
+    admission: Option<&mut dyn FnMut(u64, u64) -> om9_core::Result<()>>) -> Result<Brep, EditingError> {
+    let deflection = checked_deflection(deflection_mm)?;
+    positive(thickness_mm, "shell thickness")?;
     if !before.closed || before.solids != 1 {
         return Err(EditingError::Invalid("shell requires one closed solid".into()));
     }
@@ -2665,14 +4399,17 @@ pub fn shell_faces(
         }
     }
     let budget = snapshot_budget(limits);
-    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+    snapshot_via_with_admission(deflection, limits, admission, |sink, context, message, capacity| {
         // SAFETY: source and callback context live through this call.
         unsafe {
             om9_occt_shell(
-                solid.source().as_ptr(),
-                solid.source().len(),
+                source.as_ptr(),
+                source.len(),
                 face_indices.as_ptr(),
                 face_indices.len(),
+                triangles.map_or(std::ptr::null(), |(triangles, _, _)| triangles.as_ptr().cast()),
+                triangles.map_or(0.0, |(_, tolerance, _)| tolerance),
+                triangles.map_or(0.0, |(_, _, d)| d),
                 thickness_mm,
                 deflection,
                 budget.points,

@@ -73,6 +73,43 @@ pub struct Projected {
     pub screen: [f64; 2],
     pub depth: f64,
 }
+/// Validated immutable camera/viewport for projecting a set of points.
+/// Point validation, clipping and projection arithmetic are shared with `Camera::project`.
+pub struct PointProjector<'a> {
+    camera: &'a Camera,
+    viewport: Viewport,
+    basis: [Point3; 3],
+}
+impl PointProjector<'_> {
+    pub fn project(&self, p: Point3) -> Result<Option<Projected>> {
+        finite(p)?;
+        self.camera.project_from_basis(p, self.viewport, self.basis)
+    }
+    /// Project a conservative affine box, clipping its edges against the depth
+    /// slab. Extremes of a perspective projection occur at clipped box vertices.
+    pub fn project_box(&self, corners: [Point3;8]) -> Result<Option<[[f64;2];2]>> {
+        let mut min = [f64::INFINITY;2];
+        let mut max = [f64::NEG_INFINITY;2];
+        let mut clipped = false;
+        let mut include = |p: Projected| {
+            for i in 0..2 { min[i]=min[i].min(p.screen[i]); max[i]=max[i].max(p.screen[i]); }
+        };
+        for p in corners {
+            if let Some(p)=self.project(p)? { include(p); } else { clipped=true; }
+        }
+        if clipped {
+            for i in 0..8 {
+                for axis in 0..3 {
+                    let j=i^(1<<axis);
+                    if j>i && let Some(segment)=self.camera.clip_segment(corners[i],corners[j])? {
+                        for p in segment { if let Some(p)=self.project(p)? {include(p);} }
+                    }
+                }
+            }
+        }
+        Ok(min[0].is_finite().then_some([min,max]))
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Ray {
     pub origin: Point3,
@@ -340,7 +377,15 @@ impl Camera {
         self.validate()?;
         viewport.validate()?;
         finite(p)?;
-        let [right, up, forward] = self.basis()?;
+        self.project_from_basis(p, viewport, self.basis()?)
+    }
+    pub fn projector(&self, viewport: Viewport) -> Result<PointProjector<'_>> {
+        self.validate()?;
+        viewport.validate()?;
+        Ok(PointProjector { camera: self, viewport, basis: self.basis()? })
+    }
+    fn project_from_basis(&self, p: Point3, viewport: Viewport, basis: [Point3; 3]) -> Result<Option<Projected>> {
+        let [right, up, forward] = basis;
         let delta = sub(p, self.eye);
         let z = dot(delta, forward);
         if !z.is_finite() || z < self.near_mm || z > self.far_mm {

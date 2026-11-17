@@ -5,6 +5,19 @@ use std::{
     time::{Duration, Instant},
 };
 
+/// Keep remote compositor/VSync waits out of the CAD frame clock. AutoNoVsync
+/// selects a supported nonblocking mode (and retains wgpu's supported fallback).
+/// Local sessions keep VSync; the override is for same-binary pacing diagnostics.
+pub fn surface_present_mode(remote_session: bool, diagnostic_override: Option<&str>) -> eframe::wgpu::PresentMode {
+    let avoid_vsync = match diagnostic_override {
+        Some("auto-vsync") => false,
+        Some("auto-no-vsync") => true,
+        _ => remote_session,
+    };
+    if avoid_vsync { eframe::wgpu::PresentMode::AutoNoVsync }
+    else { eframe::wgpu::PresentMode::AutoVsync }
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum PreviewQuality {
     #[default]

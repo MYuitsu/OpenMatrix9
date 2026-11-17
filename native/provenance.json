@@ -56,6 +56,15 @@
   ],
   "native_adapters": [
     {
+      "name": "windows_remote_presentation_session_query",
+      "mode": "read_only_scalar_win32_query",
+      "source_paths": ["crates/om9-native-owner/src/lib.rs", "crates/om9-app/src/frame_scheduler.rs", "crates/om9-app/src/ui.rs"],
+      "binding_scope": "Existing windows-sys0.61.2 Win32_UI_WindowsAndMessaging GetSystemMetrics(SM_REMOTESESSION); no new dependency, handles, desktop input or system setting changes",
+      "ownership": "Native owner returns a bool; safe Rust selects the surface mode and retains the existing bounded CAD frame scheduler",
+      "native_contract": "Scalar pointer-free query isolated behind a safe API; this does not certify native dependencies memory-safe",
+      "evidence": "docs/validation/2026-11-15-rdp-viewport-pacing.md"
+    },
+    {
       "name": "authored_openNURBS_current_geometry_exchange",
       "mode": "reuse_native_adapter",
       "source_path": "standalone/native/native_exchange.cpp",

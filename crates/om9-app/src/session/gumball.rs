@@ -16,6 +16,7 @@ use std::path::{Path, PathBuf};
 pub(super) struct BoundsCache {
     document: om9_core::identity::DocumentId,
     epoch: u64,
+    scene_publication: uuid::Uuid,
     selection: std::collections::BTreeSet<ObjectId>,
     centre: Option<om9_core::geometry::Point3>,
 }
@@ -191,6 +192,7 @@ impl Controller {
         let centre = if let Some(cache) = cached.as_ref().filter(|cache| {
             cache.document == scene.document.id
                 && cache.epoch == scene.epoch
+                && cache.scene_publication == scene.publication_id()
                 && cache.selection == self.selection
         }) {
             cache.centre
@@ -226,6 +228,7 @@ impl Controller {
             *self.gumball_bounds_cache.borrow_mut() = Some(BoundsCache {
                 document: scene.document.id,
                 epoch: scene.epoch,
+                scene_publication: scene.publication_id(),
                 selection: self.selection.clone(),
                 centre,
             });

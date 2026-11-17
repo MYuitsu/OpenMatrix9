@@ -554,6 +554,11 @@ pub fn apply(controller: &mut Controller, session: &GemEditsSession) -> Result<(
             if session.plans.is_empty() {
                 return Err(Error::Missing("gem edit plans"));
             }
+            let result = (|| {
+            #[cfg(feature = "occt-brep")]
+            let mut guards = Vec::new();
+            #[cfg(feature = "occt-brep")]
+            let mut guard_storage = None;
             let mut mutations = Vec::new();
             for plan in &session.plans {
                 let entity = controller
@@ -570,10 +575,15 @@ pub fn apply(controller: &mut Controller, session: &GemEditsSession) -> Result<(
                         return Err(Error::Invalid("gem mesh open"));
                     }
                     let brep = matches!(entity.geometry, Geometry::Brep(_));
-                    mutations.push(Mutation::Geometry {
-                        source,
-                        geometry: controller.gem_geometry(mesh, brep)?,
-                    });
+                    let (geometry, guard) = controller.gem_geometry_with_guard(mesh, brep)?;
+                    #[cfg(feature = "occt-brep")]
+                    if let Some(guard) = guard {
+                        controller.grow_solid_guard_vector(&mut guards, &mut guard_storage, 1)?;
+                        guards.push(guard);
+                    }
+                    #[cfg(not(feature = "occt-brep"))]
+                    let _ = guard;
+                    mutations.push(Mutation::Geometry { source, geometry });
                 }
                 let mut extensions = entity.extensions.clone();
                 extensions.insert(GEM_EXTENSION_SLOT.to_owned(), plan.record.as_extension()?);
@@ -589,7 +599,15 @@ pub fn apply(controller: &mut Controller, session: &GemEditsSession) -> Result<(
                     });
                 }
             }
-            controller.commit_gem("Gem edit", mutations)
+            #[cfg(feature = "occt-brep")]
+            let result = if guards.is_empty() { controller.commit_gem("Gem edit", mutations) }
+                else { controller.commit_gem_with_guards("Gem edit", mutations, Some(&mut guards)) };
+            #[cfg(not(feature = "occt-brep"))]
+            let result = controller.commit_gem("Gem edit", mutations);
+            result
+            })();
+            if result.is_err() { controller.coordinator.prune_orphaned_brep_representations(); }
+            result
         }
         GemEditsTool::SaveStyle => {
             let source = *session

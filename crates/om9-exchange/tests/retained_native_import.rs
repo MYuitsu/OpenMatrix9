@@ -583,6 +583,7 @@ fn real_source_import_keeps_native_geometry_shared_members_original_bytes_and_fr
     c.redo().unwrap();
     assert_eq!(c.world().documents[&id].entities.len(), 24);
 }
+
 #[test]
 #[ignore = "requires actual authored openNURBS source fixture and native projection binary"]
 fn real_source_import_rejects_unknown_units_and_stale_canceled_targets_without_partial_state() {

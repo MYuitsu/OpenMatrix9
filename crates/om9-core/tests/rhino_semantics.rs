@@ -28,6 +28,62 @@ fn limits() -> Limits {
     Limits::default()
 }
 
+#[test]
+fn trimmed_surface_payload_limit_is_checked_before_replacing_metadata() {
+    let limits=limits();
+    let surface=surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.1,0.1],[0.9,0.1],[0.9,0.9],[0.1,0.9]],inners:vec![],reversed:false};
+    let mut entity=Entity::new("surface",Geometry::Surface(surface),None);
+    set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    let expected=trim.to_extension().unwrap();
+    assert_eq!(entity.extensions[om9_core::model::TRIM_SURFACE_EXTENSION_SLOT],expected);
+    let exact=Limits {max_name_bytes:expected.payload.len(),..limits};
+    set_trimmed_surface(&mut entity,&trim,&exact).unwrap();
+    let before=entity.clone();
+    let restricted=Limits {max_name_bytes:expected.payload.len()-1,..limits};
+    assert!(matches!(set_trimmed_surface(&mut entity,&trim,&restricted),Err(Error::Budget("extension payload"))));
+    assert_eq!(entity,before);
+}
+
+#[test]
+fn larger_trim_metadata_fits_default_limits_without_relaxing_names() {
+    let limits=limits();let n=28usize;
+    let mut poles=Vec::new();for u in 0..n {for v in 0..n {poles.push([10.*u as f64/(n-1) as f64,10.*v as f64/(n-1) as f64,0.]);}}
+    let mut knots=vec![0.];knots.extend((0..n).map(|i|i as f64/(n-1) as f64));knots.push(1.);
+    let surface=om9_core::geometry::NurbsSurface {degree:[1,1],size:[n,n],poles,weights:vec![1.;n*n],knots:[knots.clone(),knots],domain:[[0.,1.],[0.,1.]],periodic:[false,false],reversed:false};
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.2,0.2],[0.8,0.2],[0.8,0.8],[0.2,0.8]],
+        inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("large surface",Geometry::Surface(surface),None);
+    set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    assert!(entity.extensions[om9_core::model::TRIM_SURFACE_EXTENSION_SLOT].payload.len()>16*1024);
+    let id=entity.id;let mut document=Document::new("large trim");document.entities.insert(id,entity.clone());
+    assert!(document.validate(&limits).is_ok());
+    use om9_core::transaction::{Mutation,TransactionCoordinator,TransactionRequest,World};
+    let empty=Document::new("large trim transaction");let document_id=empty.id;
+    let mut coordinator=TransactionCoordinator::new(World::new(vec![empty],&limits).unwrap(),limits).unwrap();
+    let prepared=coordinator.prepare(TransactionRequest::new("large trim",vec![Mutation::Insert {document:document_id,entity}])).unwrap();
+    coordinator.commit(prepared).unwrap();coordinator.undo().unwrap();
+    assert!(!coordinator.world().documents[&document_id].entities.contains_key(&id));
+    coordinator.redo().unwrap();assert!(coordinator.world().documents[&document_id].entities.contains_key(&id));
+}
+
+#[test]
+fn large_trim_is_bounded_and_unrelated_extensions_keep_their_limit() {
+    use om9_core::model::Extension;
+    let limits=limits();let surface=surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+    let small=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.1,0.1],[0.9,0.1],[0.9,0.9],[0.1,0.9]],inners:vec![],reversed:false};
+    let mut entity=Entity::new("surface",Geometry::Surface(surface.clone()),None);set_trimmed_surface(&mut entity,&small,&limits).unwrap();
+    let before=entity.clone();
+    let outer=(0..5000).map(|i| {let a=std::f64::consts::TAU*i as f64/5000.;[0.5+0.3*a.cos(),0.5+0.3*a.sin()]}).collect();
+    let large=TrimmedSurface {underlying:surface,outer,inners:vec![],reversed:false};
+    assert!(matches!(set_trimmed_surface(&mut entity,&large,&limits),Err(Error::Budget("extension payload"))));
+    assert_eq!(entity,before);
+    let mut doc=Document::new("other extension");let mut point=Entity::new("point",Geometry::Point([0.,0.,0.]),None);
+    point.extensions.insert("vendor.test".into(),Extension::new(1,format!("{{\"data\":\"{}\"}}","x".repeat(17*1024))).unwrap());
+    doc.entities.insert(point.id,point);
+    assert!(matches!(doc.validate(&limits),Err(Error::Budget("extension payload"))));
+}
+
 fn point(x: f64, y: f64, z: f64) -> Point3 {
     [x, y, z]
 }
@@ -321,6 +377,21 @@ fn trimmed_plane() -> TrimmedSurface {
         outer: vec![[0.2, 0.2], [0.8, 0.2], [0.8, 0.8], [0.2, 0.8]],
         inners: vec![vec![[0.4, 0.4], [0.6, 0.4], [0.5, 0.6]]],
         reversed: false,
+    }
+}
+
+#[test]
+fn trimmed_surface_area_is_stable_under_large_parameter_offsets() {
+    for offset in [1e8, -1e8] {
+        let mut trimmed = trimmed_plane();
+        trimmed.underlying.knots = [vec![offset,offset,offset+4.,offset+4.], vec![offset,offset,offset+4.,offset+4.]];
+        trimmed.underlying.domain = [[offset,offset+4.],[offset,offset+4.]];
+        trimmed.outer = vec![[offset+1.,offset+1.],[offset+3.,offset+1.],[offset+3.,offset+3.],[offset+1.,offset+3.]];
+        trimmed.inners = vec![vec![[offset+1.5,offset+1.5],[offset+2.,offset+1.5],[offset+2.,offset+2.],[offset+1.5,offset+2.]]];
+        trimmed.validate(&limits()).unwrap();
+        trimmed.outer.reverse(); trimmed.inners[0].reverse(); trimmed.validate(&limits()).unwrap();
+        trimmed.inners[0] = vec![[offset+1.5,offset+1.5],[offset+2.,offset+1.5],[offset+2.5,offset+1.5]];
+        assert_eq!(trimmed.validate(&limits()), Err(Error::Invalid("trim loop area")));
     }
 }
 
@@ -741,10 +812,12 @@ fn brep_box() -> Brep {
         triangles,
         segments: vec![[0, 1, 0], [1, 2, 1], [2, 3, 2], [3, 0, 3]],
         vertices: (0..8).collect(),
-        faces,
-        edges,
-        vertex_ids,
-        face_edges: vec![[0, 0], [0, 1], [0, 2], [0, 3]],
+        topology: om9_core::brep::BrepTopology {
+            faces,
+            edges,
+            vertex_ids,
+            face_edges: vec![[0, 0], [0, 1], [0, 2], [0, 3]],
+        }.into(),
     };
     Brep::from_native(
         "CASCADE Topology synthetic box".into(),

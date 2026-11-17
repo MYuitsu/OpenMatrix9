@@ -95,6 +95,59 @@
     }
   ],
   "runtime_implementation": {
+    "isocurve_root_start_worker_2026_11_14": "MatrixApp resolves root-only B-rep and NativeBrep Isocurve bounds on an admitted worker. Headless planar single-face and multi-face refusal fixtures cover sampled geometry, Undo/Redo, changed draft/selection and simulated quota refusal. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#root-only-command-start-on-a-worker",
+    "isocurve_ray_start_worker_2026_11_14": "MatrixApp resolves Isocurve viewport-ray source hit and UV bounds on a worker for B-rep and NativeBrep, including payload conversion, with context and CMD guards. Headless sphere and simulated stale/quota fixtures pass. Root-only route, desktop, native peak and C1-C5 remain open. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#viewport-ray-command-start-on-a-worker",
+    "isocurve_native_brep_build_worker_2026_11_14": "MatrixApp NativeBrep Isocurve construction converts captured payload and builds curves on an admitted worker. Headless sphere UI, reopened box and affine cylinder fixtures cover selection, placement, Undo/Redo, simulated quota refusal and retry. Initial conversion/bounds, opaque payload, native peak and C1-C5 remain open. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#nativebrep-construction-on-the-worker",
+    "isocurve_brep_ray_worker_2026_11_14": "Editable OCCT B-rep Isocurve construction selected by viewport ray runs on the MatrixApp source-only worker. Headless sphere UI and drilled-block hole/stale selection fixtures pass; initial ray bounds resolution, NativeBrep, desktop and C1-C5 remain open. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#viewport-ray-b-rep-construction-on-the-worker",
+    "isocurve_ui_source_worker_2026_11_14": "MatrixApp polls non-ray OCCT B-rep Isocurve source construction on a worker with draft/context guards, atomic commit and asynchronous consented memory recovery. Sphere egui and simulated managed-pressure fixtures pass; NativeBrep/ray, desktop, native peak and C1-C5 remain open. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#product-ui-worker-polling",
+    "background_history_scene_2026_11_13": {
+      "status": "SCOPED_UI_WORKER_CHECKS_PASSED",
+      "scope": "UI Undo/Redo validate candidate and prepare scene on a guarded worker; old world remains until completion, with account, cancellation, stale selection and simulated RAM refusal checks.",
+      "limitations": "Candidate capture and retained-owner inventory remain on caller; validation cannot be interrupted mid-call. Programmatic history remains synchronous; documents/history retain display. Cold restore, eviction, v5 and desktop acceptance remain open.",
+      "evidence": "docs/validation/2026-11-13-background-history-validation.md"
+    },
+    "prepared_history_candidate_2026_11_13": {
+      "status": "PREPARATION_BOUNDARY_TESTED",
+      "scope": "Undo/Redo prepare reserved candidates and validate context, history head and account before publication; a peer worker fixture builds a synthetic B-rep scene before publish.",
+      "limitations": "Product Undo/Redo remains synchronous; candidates and history still retain complete documents and display. Cold restore, eviction and v5 remain open.",
+      "evidence": "docs/validation/2026-11-13-prepared-history-scene.md"
+    },
+    "clone_admission_validation_reuse_2026_11_13": "Transaction clone admission reuses exact immutable-owner validation proof under current limits. Three debug Isocurve samples 218.30–230.67 ms vs 285.90–292.03 ms; limits/COW/history regressions passed. Desktop, real OOM and concurrent timing unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#reuse-validated-owner-for-clone-admission",
+    "large_retained_insert_validation_reuse_2026_11_13": "Insert-only candidate validation proof now also reuses evidence at 10000 retained points; sampled debug sphere Isocurve completion 285.90–292.03 ms versus 359.01–364.34 ms. Limits, COW, invalid input and history tests pass; desktop and native peak unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#large-retained-model-insertion-validation-reuse",
+    "memory_recovery_frame_steps_2026_11_12": {
+      "status": "CANCELLATION_AND_STALE_CONTEXT_EGUI_FIXTURES_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "One synchronous retry per UI frame; real desktop responsiveness and physical RAM pressure remain unverified."
+    },
+    "explicit_memory_recovery_2026_11_12": {
+      "status": "SCOPED_AUTOMATIC_EXTRACTWIRE_RETRY_TESTED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "One simulated managed-limit fixture released enough capacity from a history-only mesh; CMD and menu handler passed, while physical pressure, desktop menu clicks and other commands remain unverified."
+    },
+    "document_storage_admitted_index_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Retained-owner and Undo inventories use separately admitted per-document B-rep/native allocation indices, with a duplicate-inclusive upper bound and the prior allocation-free fallback under tight budgets.",
+      "evidence": "docs/validation/2026-11-06-undo-inventory-scaling.md",
+      "limitations": "Synthetic non-interleaved timing; other storage callers and low-memory fallback may remain quadratic. Source/display eviction, native peak and desktop remain open."
+    },
+    "undo_inventory_index_scaling_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Undo inventory uses admitted per-allocation/document indices for source and display sharing, avoiding repeated intra-document identity scans while retaining the existing memory admission guard.",
+      "evidence": "docs/validation/2026-11-06-undo-inventory-scaling.md",
+      "limitations": "Synthetic release timing only; owner validation and Document storage still exhibit quadratic scaling. Native peak, desktop and source/display eviction remain open."
+    },
+    "undo_inventory_scratch_admission_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "The production coordinator admits temporary Undo inventory indexes against managed and configured physical/commit limits before allocation, marks failed refreshes stale, and keeps peer admission serialized while scratch is live.",
+      "evidence": "docs/validation/2026-11-06-undo-inventory-scratch-admission.md",
+      "limitations": "Simulated pressure only; conservative bounds and large-history latency not benchmarked. Source/display ownership and native peak remain open."
+    },
+    "multi_entry_cache_admission_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Retry shared memory admission after individual cache entries are reclaimed, including multiple entries under one cache owner, bounded by initially accounted external bytes.",
+      "evidence": "docs/validation/2026-11-06-multi-entry-cache-admission.md",
+      "limitations": "Fixture-scoped managed admission only; concurrent churn stress, native peak, Sphere source/display and Undo integration remain open."
+    },
     "live_subselection_memory_2026_11_05": {
       "status": "PARTIAL_CHECKS_PASSED",
       "scope": "R1a subselection: live CPU ownership of slots and nested paths, allocated-only transfer between same-account/class guards, phased old/new slots and input-path materialization, removal/drop without stale capture double charge",
@@ -270,6 +323,13 @@
         "full module/manual gates remain open",
         "2 unrelated broad app dock reset regressions remain failing"
       ]
+    },
+    "large_batch_validation_reuse_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "SCOPED_LARGE_BATCH_VALIDATION_REUSE",
+      "evidence": "docs/validation/2026-11-11-extractsurface-reopened-face.md#reuse-of-validated-candidate",
+      "scope": "Single-document batches of at least 20 inserts retain a successful tighter validation proof tied to the exact immutable candidate; otherwise normal validation is retried. Core 375 passed, atomic 29 passed, Extract worker 8 passed, Solid input 95 passed. Two sequential release 22-source fixture runs max poll 669/644 ms versus 807 ms baseline.",
+      "remaining": "Uncontrolled fixture timings; desktop and native peak unverified, 20-insert threshold untuned and near-budget cases may validate twice. Plan A open; B1-B3 deferred."
     }
   },
   "sdk_integration_plan": {

@@ -46,6 +46,7 @@ impl FileKind {
 pub enum FilePhase {
     Unsaved,
     OpenPath,
+    OpenPreparing,
     SavePath,
     Overwrite,
     CloseReady,

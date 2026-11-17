@@ -9,6 +9,8 @@
 
 ## Current standalone scope
 
+2026-11-10: the implemented source-edge slice accepts one preselected, attested OCCT B-rep with rigid placement and creates one curve per topology edge in one transaction. Isocurves and wider inputs remain unsupported; no interactive selection session or preview is claimed. See `docs/validation/2026-11-10-extractwire-source-first-slice.md`. The generic session description below is historical and does not prove those modes for this command.
+
 The Curve menu row and the typed command resolve to one command id and one Rust
 session; the session owns its prompts, options, preview and commit. The icon shown in
 the palette is the authored MainMenu.ini icon for this row and maps back to this same

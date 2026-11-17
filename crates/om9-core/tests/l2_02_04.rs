@@ -437,10 +437,12 @@ fn m03_02_04_010_duplicate_edge_border_and_isocurve() {
             triangles: vec![[0, 1, 2, 0], [0, 2, 3, 0]],
             segments: vec![[0, 1, 0], [1, 2, 1], [2, 3, 2], [3, 0, 3]],
             vertices: vec![0, 1, 2, 3],
-            faces: vec![face],
-            edges: edges.clone(),
-            vertex_ids: vertices,
-            face_edges: vec![[0, 0], [0, 1], [0, 2], [0, 3]],
+            topology: om9_core::brep::BrepTopology {
+                faces: vec![face],
+                edges: edges.clone(),
+                vertex_ids: vertices,
+                face_edges: vec![[0, 0], [0, 1], [0, 2], [0, 3]],
+            }.into(),
         },
         &limits,
     )

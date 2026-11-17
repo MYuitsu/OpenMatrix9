@@ -195,9 +195,44 @@ pub fn surface_side(normal: [f64; 3], view_toward_eye: [f64; 3], determinant: f6
     }
 }
 
+/// Viewport approximation only; never a CAD or export tolerance.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ViewportDetail {
+    #[default]
+    Light,
+    High,
+}
+impl ViewportDetail {
+    pub fn label(self) -> &'static str { match self { Self::Light => "Light", Self::High => "High detail" } }
+    pub fn linear_mm(self) -> f64 { match self { Self::Light => 0.1, Self::High => 0.01 } }
+    pub fn angular(self) -> f64 { match self { Self::Light => 0.5, Self::High => 0.3 } }
+    /// Use the existing transient render tier while navigating. The renderer
+    /// restores full size / 4x MSAA when moving becomes false.
+    pub fn motion_quality(self, moving: bool, scheduled: crate::frame_scheduler::PreviewQuality)
+        -> crate::frame_scheduler::PreviewQuality {
+        if self == Self::Light && moving && scheduled.index() < 2 {
+            crate::frame_scheduler::PreviewQuality::Q2
+        } else { scheduled }
+    }
+}
+
+/// Consume only pointer navigation already routed by all widgets in a native
+/// UI pass. Keyboard/IME/focus and primary clicks must remain available to the
+/// platform tail. In particular, don't force an unchanged native IME caret to
+/// be repositioned for every orbit/pan update on Remote Desktop.
+pub fn consume_handled_navigation_events(events: &mut Vec<eframe::egui::Event>) {
+    use eframe::egui::{Event, PointerButton};
+    events.retain(|event| !matches!(event, Event::PointerMoved(_) | Event::MouseMoved(_)
+        | Event::MouseWheel { .. }
+        | Event::PointerButton { button: PointerButton::Secondary | PointerButton::Middle, .. }));
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DisplayPreferences {
     pub version: u32,
+    #[serde(default)]
+    pub viewport_detail: ViewportDetail,
     pub wireframe: bool,
     pub show_edges: bool,
     pub backface_cues: bool,
@@ -210,6 +245,7 @@ impl Default for DisplayPreferences {
     fn default() -> Self {
         Self {
             version: 1,
+            viewport_detail: ViewportDetail::default(),
             wireframe: true,
             show_edges: true,
             backface_cues: true,
@@ -254,6 +290,7 @@ impl DisplayPreferences {
         (
             Self {
                 version: 1,
+                viewport_detail: value.viewport_detail,
                 wireframe: value.wireframe,
                 show_edges: value.show_edges,
                 backface_cues: value.backface_cues,

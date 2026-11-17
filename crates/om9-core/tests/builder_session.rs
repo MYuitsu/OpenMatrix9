@@ -59,6 +59,119 @@ fn document_with_rail() -> (
 }
 
 #[test]
+fn prepared_preview_rejects_changed_builder_document_and_output() {
+    let (mut document, _, _) = document_with_rail();
+    let registry = registry();
+    let mut session = BuilderSession::new(BuilderKind::RingRail, &document, &[]).unwrap();
+
+    let prepared = session.prepare_refresh(&document).unwrap();
+    let produced = registry.produce(prepared.request()).unwrap();
+    session.adjust_field("diameter_mm", 1.0).unwrap();
+    assert!(matches!(session.finish_refresh(&document, prepared, produced), Err(Error::Stale(_))));
+    assert!(session.preview().is_none());
+
+    let prepared = session.prepare_refresh(&document).unwrap();
+    let produced = registry.produce(prepared.request()).unwrap();
+    document.context_revision += 1;
+    assert!(matches!(session.finish_refresh(&document, prepared, produced), Err(Error::Stale(_))));
+
+    let prepared = session.prepare_refresh(&document).unwrap();
+    let produced = registry.produce(prepared.request()).unwrap();
+    let foreign = Document::new("other");
+    assert!(matches!(session.finish_refresh(&foreign, prepared, produced), Err(Error::Stale(_))));
+
+    let prepared = session.prepare_refresh(&document).unwrap();
+    let mut produced = registry.produce(prepared.request()).unwrap();
+    produced.outputs[0].object = om9_core::identity::ObjectId::new();
+    assert!(matches!(session.finish_refresh(&document, prepared, produced), Err(Error::Stale(_))));
+
+    let prepared = session.prepare_refresh(&document).unwrap();
+    let produced = registry.produce(prepared.request()).unwrap();
+    session.reset(&document, &[]).unwrap();
+    assert!(matches!(session.finish_refresh(&document, prepared, produced), Err(Error::Stale(_))));
+
+    let prepared = session.prepare_refresh(&document).unwrap();
+    let produced = registry.produce(prepared.request()).unwrap();
+    session.finish_refresh(&document, prepared, produced).unwrap();
+    assert!(session.plan(&document).is_ok());
+    let mut changed = document.clone();
+    changed.revision += 1;
+    assert!(session.preview_for_document(&changed).is_none());
+    assert!(matches!(session.plan(&changed), Err(Error::Stale("builder preview document"))));
+    session.clear_preview();
+    assert!(session.plan(&document).is_err());
+}
+
+#[test]
+fn adopting_history_invalidates_a_preview_for_the_old_identity() {
+    let (document, _, _) = document_with_rail();
+    let mut session = BuilderSession::new(BuilderKind::RingRail, &document, &[]).unwrap();
+    session.refresh(&document, &registry()).unwrap();
+    let revision = session.revision();
+    session.adopt_history(om9_core::identity::ObjectId::new(), om9_core::identity::HistoryId::new());
+    assert!(session.preview().is_none());
+    assert_ne!(session.revision(), revision);
+    assert!(session.plan(&document).is_err());
+}
+
+#[test]
+fn repeating_the_same_builder_value_keeps_preview_and_revision() {
+    let (document, _, _) = document_with_rail();
+    let mut session = BuilderSession::new(BuilderKind::RingRail, &document, &[]).unwrap();
+    session.refresh(&document, &registry()).unwrap();
+    let revision = session.revision();
+    let value = session.field("diameter_mm").unwrap().value.clone();
+    session.set_field("diameter_mm", value).unwrap();
+    assert_eq!(session.revision(), revision);
+    assert!(session.preview().is_some());
+}
+
+#[test]
+fn removing_the_selected_preset_invalidates_an_in_flight_preview() {
+    let (document, rail, _) = document_with_rail();
+    let registry = registry();
+    let mut session = BuilderSession::new(BuilderKind::RailProfile, &document, &[rail]).unwrap();
+    let prepared = session.prepare_refresh(&document).unwrap();
+    let produced = registry.produce(prepared.request()).unwrap();
+    session.remove_preset("rectangle").unwrap();
+    assert!(matches!(session.finish_refresh(&document, prepared, produced), Err(Error::Stale(_))));
+    assert!(session.plan(&document).is_err());
+}
+
+#[test]
+fn rejected_diameter_does_not_change_standard_or_in_flight_request() {
+    use om9_core::request::Value;
+    let (document, _, _) = document_with_rail();
+    let registry = registry();
+    let mut session = BuilderSession::new(BuilderKind::RingRail, &document, &[]).unwrap();
+    session.set_field("standard", Value::Choice("US".into())).unwrap();
+    let prepared = session.prepare_refresh(&document).unwrap();
+    let produced = registry.produce(prepared.request()).unwrap();
+    let revision = session.revision();
+    assert!(session.set_field("diameter_mm", Value::length(
+        om9_core::units::LengthMm::try_new(0.5).unwrap())).is_err());
+    assert_eq!(session.revision(), revision);
+    assert_eq!(session.field("standard").unwrap().selected_choice(), Some("US"));
+    session.finish_refresh(&document, prepared, produced).unwrap();
+}
+
+#[test]
+fn prepared_preview_can_produce_off_thread_and_publish_on_owner() {
+    let (document, _, _) = document_with_rail();
+    let mut session = BuilderSession::new(BuilderKind::RingRail, &document, &[]).unwrap();
+    let prepared = session.prepare_refresh(&document).unwrap();
+    let owner = std::thread::current().id();
+    let worker = std::thread::spawn(move || {
+        let produced = registry().produce(prepared.request()).unwrap();
+        (prepared, produced, std::thread::current().id())
+    });
+    let (prepared, produced, worker_id) = worker.join().unwrap();
+    assert_ne!(owner, worker_id);
+    session.finish_refresh(&document, prepared, produced).unwrap();
+    assert!(session.plan(&document).is_ok());
+}
+
+#[test]
 fn a_ring_rail_builder_previews_its_field_and_exposes_a_diameter_handle() {
     let (document, _, _) = document_with_rail();
     let registry = registry();

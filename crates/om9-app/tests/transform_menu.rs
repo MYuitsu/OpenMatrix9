@@ -48,13 +48,13 @@ fn box_solid(origin: Point3, size: Point3) -> Geometry {
         vec![1, 7, 3],
     ];
     Geometry::NativeBrep(NativeBrep {
-        display: Mesh {
+        display: std::sync::Arc::new(Mesh {
             vertices,
             faces,
             normals: Vec::new(),
             colors: Vec::new(),
             corner_uvs: Vec::new(),
-        },
+        }),
         payload: vec![1, 2, 3, 4].into(),
         crc: 0,
     })
@@ -87,7 +87,7 @@ fn mesh_box(origin: Point3, size: Point3) -> Entity {
     let Geometry::NativeBrep(native) = box_solid(origin, size) else {
         panic!("box_solid builds a native solid");
     };
-    Entity::new("mesh", Geometry::Mesh(native.display), None)
+    Entity::new("mesh", Geometry::Mesh((*native.display).clone()), None)
 }
 
 /// Every display vertex of a mesh object, in world space, after a row rewrote it.

@@ -26,6 +26,9 @@ enum Location {
     Definitions,
     Definition,
     Members,
+    Extensions,
+    TrimExtension,
+    TrimPayload,
 }
 impl Location {
     fn child(self, key: &str) -> Self {
@@ -36,6 +39,9 @@ impl Location {
             (Self::Layers, _) => Self::Layer,
             (Self::Entities, _) => Self::Entity,
             (Self::Entity, "attributes") => Self::Attributes,
+            (Self::Entity, "extensions") => Self::Extensions,
+            (Self::Extensions, "om9.trim.surface") => Self::TrimExtension,
+            (Self::TrimExtension, "payload") => Self::TrimPayload,
             (Self::Definitions, _) => Self::Definition,
             (Self::Definition, "members") => Self::Members,
             _ => Self::Unknown,
@@ -161,7 +167,9 @@ impl<'de> Visitor<'de> for Node<'_, '_> {
     fn visit_str<E: de::Error>(self, value: &str) -> std::result::Result<(), E> {
         // A canonical BRep source is an owned OCCT text document, not a name.
         // It is already bounded by the document byte budget; names remain tight.
-        let limit = if self.field.as_deref() == Some("source") {
+        let limit = if matches!(self.location, Location::TrimPayload) {
+            om9_core::model::trim_surface_payload_limit(self.budget.limits) as u64
+        } else if self.field.as_deref() == Some("source") {
             self.budget.limits.max_bytes
         } else {
             self.budget.limits.max_name_bytes as u64
@@ -250,14 +258,18 @@ pub fn check(metadata: &[u8], container_bytes: usize, limits: &Limits) -> Result
     check_usage(metadata, container_bytes, limits).map(|_| ())
 }
 pub fn check_usage(metadata: &[u8], container_bytes: usize, limits: &Limits) -> Result<Usage> {
-    check_kind(metadata, container_bytes, limits, false, &mut |_| Ok(()))
+    check_kind(metadata, container_bytes, limits, false, false, &mut |_| Ok(()))
 }
 pub(crate) fn check_external_with_admission(metadata: &[u8], limits: &Limits, admit: &mut dyn FnMut(u64) -> Result<()>) -> Result<Usage> {
-    check_kind(metadata, metadata.len(), limits, false, admit)
+    check_kind(metadata, metadata.len(), limits, false, false, admit)
 }
 pub(crate) fn check_usage_with_admission(metadata: &[u8], container_bytes: usize, limits: &Limits, admit: &mut dyn FnMut(u64) -> Result<()>) -> Result<Usage> {
     let parser = document_parser_limits(metadata, limits)?;
-    check_kind(metadata, container_bytes, &parser, false, admit)
+    check_kind(metadata, container_bytes, &parser, false, false, admit)
+}
+pub(crate) fn check_document_usage_with_admission(metadata: &[u8], container_bytes: usize, limits: &Limits, admit: &mut dyn FnMut(u64) -> Result<()>) -> Result<Usage> {
+    let parser = document_parser_limits(metadata, limits)?;
+    check_kind(metadata, container_bytes, &parser, false, true, admit)
 }
 pub fn check_legacy_document(
     metadata: &[u8],
@@ -265,7 +277,7 @@ pub fn check_legacy_document(
     limits: &Limits,
 ) -> Result<()> {
     let parser = document_parser_limits(metadata, limits)?;
-    check_kind(metadata, container_bytes, &parser, true, &mut |_| Ok(())).map(|_| ())
+    check_kind(metadata, container_bytes, &parser, true, true, &mut |_| Ok(())).map(|_| ())
 }
 
 /// JSON scalar/key tokens are not model nodes. The input itself bounds the
@@ -282,6 +294,7 @@ fn check_kind(
     container_bytes: usize,
     limits: &Limits,
     legacy_document: bool,
+    root_document: bool,
     admit: &mut dyn FnMut(u64) -> Result<()>,
 ) -> Result<Usage> {
     // Account the input/container copy and geometrically growing UTF-unescape
@@ -310,7 +323,7 @@ fn check_kind(
         budget: &mut budget,
         depth: 0,
         field: None,
-        location: if legacy_document {
+        location: if root_document {
             Location::Document
         } else {
             Location::Unknown
@@ -327,6 +340,17 @@ fn check_kind(
 #[cfg(test)]
 mod external_admission_tests {
     use super::*;
+
+    #[test]
+    fn only_document_trim_payload_gets_the_scoped_larger_string_limit() {
+        let limits=Limits::default();let payload="x".repeat(17*1024);
+        let json=|slot:&str| format!(r#"{{"entities":{{"id":{{"extensions":{{"{slot}":{{"version":1,"payload":"{payload}"}}}}}}}}}}"#);
+        let trim=json("om9.trim.surface");let mut admit=|_|Ok(());
+        assert!(check_document_usage_with_admission(trim.as_bytes(),trim.len(),&limits,&mut admit).is_ok());
+        let other=json("vendor.other");
+        assert!(matches!(check_document_usage_with_admission(other.as_bytes(),other.len(),&limits,&mut admit),Err(Error::Budget("JSON string bytes"))));
+        assert!(matches!(check_usage_with_admission(trim.as_bytes(),trim.len(),&limits,&mut admit),Err(Error::Budget("JSON string bytes"))));
+    }
 
     #[test]
     fn incremental_external_admission_preserves_limits_and_propagates_refusal() {

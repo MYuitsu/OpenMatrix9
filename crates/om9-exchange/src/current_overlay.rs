@@ -316,7 +316,7 @@ fn action(
             let original = record.entity_baseline.ok_or(Error::Unsupported(
                 "edited native entity lacks field baselines",
             ))?;
-            let current = EntityBaseline::capture(entity)?;
+            let current = EntityBaseline::capture_for_version(entity, original.geometry_hash_version)?;
             let changed = ChangedFields {
                 geometry: current.geometry_sha256 != original.geometry_sha256,
                 placement: current.placement_sha256 != original.placement_sha256,

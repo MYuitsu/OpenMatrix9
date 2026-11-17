@@ -8,6 +8,26 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
+/// Scratch for a caller-admitted storage inventory. It is not document state.
+#[derive(Default)]
+pub(crate) struct BrepStorageIndex {
+    source: BTreeSet<usize>, display: BTreeSet<usize>, topology: BTreeSet<usize>,
+    native_source: BTreeSet<usize>, native_display: BTreeSet<usize>,
+}
+impl BrepStorageIndex {
+    pub(crate) fn scratch_usage(breps: usize, native: usize, limits: &Limits) -> Result<Usage> {
+        let mut usage = Usage::default();
+        for count in [breps, breps, breps, native, native] {
+            if count != 0 { usage.add(Usage::btree::<usize, ()>(count)?, limits)?; }
+        }
+        Ok(usage)
+    }
+    fn clear(&mut self) {
+        self.source.clear(); self.display.clear(); self.topology.clear();
+        self.native_source.clear(); self.native_display.clear();
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Attributes {
@@ -169,6 +189,14 @@ pub const CUTTER_CUT_EXTENSION_SLOT: &str = "om9.cutter.cut";
 /// Trimming loops over the entity's surface (OM9-L2-02-01 L3-005). The surface itself
 /// stays the entity geometry; the slot constrains the visible face.
 pub const TRIM_SURFACE_EXTENSION_SLOT: &str = "om9.trim.surface";
+/// Trim metadata contains a surface copy and is not a name. Keep its larger
+/// limit separate so unrelated extension and name limits stay unchanged.
+pub const TRIM_SURFACE_PAYLOAD_MAX: usize = 128 * 1024;
+pub fn trim_surface_payload_limit(limits: &Limits) -> usize {
+    let limit=if limits.max_name_bytes < 16 * 1024 { limits.max_name_bytes }
+    else { TRIM_SURFACE_PAYLOAD_MAX.max(limits.max_name_bytes) };
+    limit.min(usize::try_from(limits.max_bytes).unwrap_or(usize::MAX))
+}
 /// Four rail profile metadata (OM9-L3-03-17-019): the profile curve keeps its
 /// geometry and records the four rails it was attached to plus its plane.
 pub const FOUR_RAIL_PROFILE_EXTENSION_SLOT: &str = "om9.four-rail-profile";
@@ -263,7 +291,24 @@ impl Extension {
         Ok(())
     }
     pub fn validate(&self, l: &Limits) -> Result<Usage> {
+        let usage = self.storage_usage(l)?;
         self.check_shape()?;
+        Ok(usage)
+    }
+    pub(crate) fn validate_for_slot(&self, slot: &str, l: &Limits) -> Result<Usage> {
+        let usage = self.storage_usage_for_slot(slot, l)?;
+        self.check_shape()?;
+        Ok(usage)
+    }
+    pub(crate) fn storage_usage_for_slot(&self, slot: &str, l: &Limits) -> Result<Usage> {
+        if slot == TRIM_SURFACE_EXTENSION_SLOT {
+            self.storage_usage(&Limits { max_name_bytes: trim_surface_payload_limit(l), ..*l })
+        } else { self.storage_usage(l) }
+    }
+    pub(crate) fn storage_usage(&self, l: &Limits) -> Result<Usage> {
+        if self.version == 0 {
+            return Err(Error::Invalid("extension version"));
+        }
         if self.payload.len() > l.max_name_bytes {
             return Err(Error::Budget("extension payload"));
         }
@@ -848,8 +893,17 @@ impl Document {
                 },
                 l,
             )?;
-            total.add(extension.validate(l)?, l)?;
-            crate::rhino_semantics::validate_extension(slot, &extension.payload, l)?;
+            total.add(extension.validate_for_slot(slot, l)?, l)?;
+            if slot == TRIM_SURFACE_EXTENSION_SLOT {
+                let trim = crate::rhino_semantics::TrimmedSurface::from_extension(extension, l)?;
+                match &e.geometry {
+                    Geometry::Surface(surface) if surface == &trim.underlying => {}
+                    Geometry::Surface(_) => return Err(Error::Invalid("trimmed surface underlying mismatch")),
+                    _ => return Err(Error::Invalid("trimmed surface requires surface geometry")),
+                }
+            } else {
+                crate::rhino_semantics::validate_extension(slot, &extension.payload, l)?;
+            }
             if slot==crate::annotation::SLOT&&extension.version==1 {
                 crate::annotation::Annotation::read(e)?.layout(l)?;
             }
@@ -870,15 +924,25 @@ impl Document {
             },
             l,
         )?;
-        let mut geometry = e.geometry.validate(l)?;
+        if matches!(&e.geometry, Geometry::Brep(brep) if brep.has_allocation_owner()) {
+            return Err(Error::Unsupported("transient leased BRep geometry"));
+        }
+        let mut geometry = match &e.geometry {
+            Geometry::Brep(brep) if self.identical_brep_validated_before(e, brep) => {
+                let mut usage = Usage { bytes: std::mem::size_of::<Geometry>() as u64, ..Usage::default() };
+                usage.add(brep.storage_usage(l)?, l)?;
+                usage
+            }
+            geometry => geometry.validate(l)?,
+        };
         if let Geometry::Brep(brep) = &e.geometry {
             if self.brep_source_seen_before(e, brep.source_allocation_key()) {
                 geometry.bytes = geometry.bytes.checked_sub(brep.source_allocation_bytes()?)
                     .ok_or(Error::Overflow("shared BRep source accounting"))?;
             }
-            if self.brep_display_seen_before(e, brep.display_allocation_key()) {
-                geometry.bytes = geometry.bytes.checked_sub(brep.display_allocation_bytes()?)
-                    .ok_or(Error::Overflow("shared BRep display accounting"))?;
+            if self.brep_topology_seen_before(e, brep.topology_allocation_key()) {
+                geometry.bytes = geometry.bytes.checked_sub(brep.topology_allocation_bytes()?)
+                    .ok_or(Error::Overflow("shared BRep topology accounting"))?;
             }
         }
         if let Geometry::NativeBrep(brep) = &e.geometry {
@@ -935,7 +999,14 @@ impl Document {
     /// remains alive. Resource payloads, B-rep sources and native B-rep
     /// payloads are Arc-backed and remain shared by Document::clone.
     pub fn clone_owned_bytes_estimate(&self, l: &Limits) -> Result<u64> {
-        let mut bytes = self.validate(l)?.bytes;
+        let validated=self.validate(l)?;
+        self.clone_owned_bytes_estimate_from_validated(validated)
+    }
+
+    /// `validated` must describe this exact immutable document and have been
+    /// checked against the caller's current limits.
+    pub(crate) fn clone_owned_bytes_estimate_from_validated(&self, validated:Usage) -> Result<u64> {
+        let mut bytes = validated.bytes;
         for resource in self.resources.values() {
             bytes = bytes.checked_sub(resource.payload()?.len() as u64)
                 .ok_or(Error::Overflow("clone shared resource accounting"))?;
@@ -950,9 +1021,9 @@ impl Document {
             };
             bytes = bytes.checked_sub(shared).ok_or(Error::Overflow("clone shared geometry accounting"))?;
             if let Geometry::Brep(brep) = &entity.geometry
-                && !self.brep_display_seen_before(entity, brep.display_allocation_key()) {
-                bytes = bytes.checked_sub(brep.display_allocation_bytes()?)
-                    .ok_or(Error::Overflow("clone shared BRep display accounting"))?;
+                && !self.brep_topology_seen_before(entity, brep.topology_allocation_key()) {
+                bytes = bytes.checked_sub(brep.topology_allocation_bytes()?)
+                    .ok_or(Error::Overflow("clone shared BRep topology accounting"))?;
             }
         }
         Ok(bytes)
@@ -965,14 +1036,23 @@ impl Document {
     /// Estimate owned storage and the validation scratch admitted by this
     /// document. This does not establish that the document is valid.
     pub fn validation_peak_estimate(&self, l: &Limits, require_resource_payloads: bool) -> Result<Usage> {
-        let mut peak = self.storage_usage_internal(l, require_resource_payloads)?;
+        let mut peak = self.storage_usage_internal(l, require_resource_payloads, None, false)?;
         peak.add(self.validation_scratch_usage(l)?, l)?;
         Ok(peak)
     }
     /// Nonallocating inventory of immutable owned storage. Cross-document
     /// callers reserve every peer before any identity/graph validation scratch.
     pub(crate) fn storage_usage(&self, l: &Limits) -> Result<Usage> {
-        self.storage_usage_internal(l, true)
+        self.storage_usage_internal(l, true, None, false)
+    }
+    /// The caller must admit `BrepStorageIndex::scratch_usage` before use.
+    pub(crate) fn storage_usage_indexed(&self, l: &Limits, index: &mut BrepStorageIndex) -> Result<Usage> {
+        index.clear();
+        self.storage_usage_internal(l, true, Some(index), false)
+    }
+    /// Nonallocating duplicate-inclusive upper bound for admission only.
+    pub(crate) fn storage_usage_upper(&self, l: &Limits) -> Result<Usage> {
+        self.storage_usage_internal(l, true, None, true)
     }
     fn brep_source_seen_before(&self, entity: &Entity, key: usize) -> bool {
         // ponytail: allocation-free scan is quadratic in BRep count; use an
@@ -981,17 +1061,62 @@ impl Document {
             .take_while(|prior| !std::ptr::eq(*prior, entity))
             .any(|prior| matches!(&prior.geometry, Geometry::Brep(brep) if brep.source_allocation_key() == key))
     }
-    fn brep_display_seen_before(&self, entity: &Entity, key: usize) -> bool {
+    /// Traversal order is the same as validate_internal: entities first,
+    /// then definition members. Any earlier matching BRep has already passed
+    /// validation in this invocation; no proof survives the borrowed traversal.
+    fn identical_brep_validated_before(&self, entity: &Entity, brep: &crate::brep::CanonicalBrep) -> bool {
+        self.entities.values().chain(self.definitions.values().flat_map(|definition| &definition.members))
+            .take_while(|prior| !std::ptr::eq(*prior, entity))
+            .any(|prior| matches!(&prior.geometry, Geometry::Brep(previous) if brep.shares_validation_payload(previous)))
+    }
+    fn brep_topology_seen_before(&self, entity: &Entity, key: usize) -> bool {
         self.entities.values().chain(self.definitions.values().flat_map(|d| &d.members))
             .take_while(|prior| !std::ptr::eq(*prior, entity))
-            .any(|prior| matches!(&prior.geometry, Geometry::Brep(brep) if brep.display_allocation_key() == key))
+            .any(|prior| matches!(&prior.geometry, Geometry::Brep(brep) if brep.topology_allocation_key() == key))
     }
     fn native_brep_payload_seen_before(&self, entity: &Entity, key: usize) -> bool {
         self.entities.values().chain(self.definitions.values().flat_map(|d| &d.members))
             .take_while(|prior| !std::ptr::eq(*prior, entity))
             .any(|prior| matches!(&prior.geometry, Geometry::NativeBrep(brep) if brep.payload_allocation_key() == key))
     }
-    fn storage_usage_internal(&self, l: &Limits, payloads: bool) -> Result<Usage> {
+    fn result_geometry_seen_before(&self, id: ObjectId, matches: impl Fn(&Geometry) -> bool) -> bool {
+        self.entities.values().chain(self.definitions.values().flat_map(|definition| &definition.members))
+            .map(|entity| &entity.geometry).chain(self.results.range(..id).map(|(_, result)| &result.geometry_snapshot))
+            .any(matches)
+    }
+    fn result_shared_source_bytes(&self, id: ObjectId, geometry: &Geometry,
+        mut index: Option<&mut BrepStorageIndex>) -> Result<u64> {
+        match geometry {
+            Geometry::Brep(brep) => {
+                let source = brep.source_allocation_key();
+                let topology = brep.topology_allocation_key();
+                let source_seen = match index.as_deref_mut() {
+                    Some(index) => !index.source.insert(source),
+                    None => self.result_geometry_seen_before(id, |geometry|
+                        matches!(geometry, Geometry::Brep(previous) if previous.source_allocation_key() == source)),
+                };
+                let topology_seen = match index.as_deref_mut() {
+                    Some(index) => !index.topology.insert(topology),
+                    None => self.result_geometry_seen_before(id, |geometry|
+                        matches!(geometry, Geometry::Brep(previous) if previous.topology_allocation_key() == topology)),
+                };
+                let source_bytes = if source_seen { brep.source_allocation_bytes()? } else { 0 };
+                let topology_bytes = if topology_seen { brep.topology_allocation_bytes()? } else { 0 };
+                source_bytes.checked_add(topology_bytes).ok_or(Error::Overflow("shared result BRep storage"))
+            }
+            Geometry::NativeBrep(brep) => {
+                let key = brep.payload_allocation_key();
+                let seen = match index {
+                    Some(index) => !index.native_source.insert(key),
+                    None => self.result_geometry_seen_before(id, |geometry|
+                        matches!(geometry, Geometry::NativeBrep(previous) if previous.payload_allocation_key() == key)),
+                };
+                if seen { brep.payload_allocation_bytes() } else { Ok(0) }
+            }
+            _ => Ok(0),
+        }
+    }
+    fn storage_usage_internal(&self, l: &Limits, payloads: bool, mut index: Option<&mut BrepStorageIndex>, upper: bool) -> Result<Usage> {
         let mut total = Usage::array::<Self>(1)?;
         total.add(
             Usage {
@@ -1098,17 +1223,26 @@ impl Document {
                 geometry => geometry.validate(l)?,
             };
             if let Geometry::Brep(brep) = &entity.geometry {
-                if self.brep_source_seen_before(entity, brep.source_allocation_key()) {
+                if !upper && match index.as_deref_mut() {
+                    Some(index) => !index.source.insert(brep.source_allocation_key()),
+                    None => self.brep_source_seen_before(entity, brep.source_allocation_key()),
+                } {
                     geometry_usage.bytes = geometry_usage.bytes.checked_sub(brep.source_allocation_bytes()?)
                         .ok_or(Error::Overflow("shared BRep source accounting"))?;
                 }
-                if self.brep_display_seen_before(entity, brep.display_allocation_key()) {
-                    geometry_usage.bytes = geometry_usage.bytes.checked_sub(brep.display_allocation_bytes()?)
-                        .ok_or(Error::Overflow("shared BRep display accounting"))?;
+                if !upper && match index.as_deref_mut() {
+                    Some(index) => !index.topology.insert(brep.topology_allocation_key()),
+                    None => self.brep_topology_seen_before(entity, brep.topology_allocation_key()),
+                } {
+                    geometry_usage.bytes = geometry_usage.bytes.checked_sub(brep.topology_allocation_bytes()?)
+                        .ok_or(Error::Overflow("shared BRep topology accounting"))?;
                 }
             }
             if let Geometry::NativeBrep(brep) = &entity.geometry {
-                if self.native_brep_payload_seen_before(entity, brep.payload_allocation_key()) {
+                if !upper && match index.as_deref_mut() {
+                    Some(index) => !index.native_source.insert(brep.payload_allocation_key()),
+                    None => self.native_brep_payload_seen_before(entity, brep.payload_allocation_key()),
+                } {
                     geometry_usage.bytes = geometry_usage.bytes.checked_sub(brep.payload_allocation_bytes()?)
                         .ok_or(Error::Overflow("shared native BRep payload accounting"))?;
                 }
@@ -1128,7 +1262,7 @@ impl Document {
                     },
                     l,
                 )?;
-                total.add(extension.validate(l)?, l)?;
+                total.add(extension.storage_usage_for_slot(slot, l)?, l)?;
             }
         }
         let mut expanded = Usage::default();
@@ -1149,7 +1283,12 @@ impl Document {
         )?;
         total.add(self.retained_owned_usage(l)?, l)?;
         for (id, result) in &self.results {
-            total.add(result.validate(*id, self, l)?, l)?;
+            let mut result_usage = result.validate(*id, self, l)?;
+            if !upper {
+                let shared = self.result_shared_source_bytes(*id, &result.geometry_snapshot, index.as_deref_mut())?;
+                result_usage.bytes = result_usage.bytes.checked_sub(shared).ok_or(Error::Overflow("shared result storage"))?;
+            }
+            total.add(result_usage, l)?;
         }
         Ok(total)
     }
@@ -1258,6 +1397,17 @@ impl Document {
             .max()
             .unwrap_or(0);
         let mut scratch = Usage::default();
+        // Shape and known-semantic validation parse one extension at a time.
+        // Reserve for its decoded JSON tree and typed values before validating.
+        if let Some(max_payload) = self.entities.values()
+            .chain(self.definitions.values().flat_map(|d| &d.members))
+            .flat_map(|entity| entity.extensions.values())
+            .map(|extension| extension.payload.len()).max() {
+            let bytes = u64::try_from(max_payload).map_err(|_| Error::Overflow("extension validation scratch"))?
+                .checked_mul(64).and_then(|n| n.checked_add(4096))
+                .ok_or(Error::Overflow("extension validation scratch"))?;
+            scratch.add(Usage { bytes, ..Usage::default() }, l)?;
+        }
         for storage in [
             Usage::btree::<LayerId, ()>(self.layer_order.len())?,
             Usage::btree::<ObjectId, ()>(objects)?,
@@ -1276,7 +1426,7 @@ impl Document {
     fn validate_internal(&self, l: &Limits, require_resource_payloads: bool) -> Result<Usage> {
         // No validation set or graph traversal is allocated until owned storage
         // and its entire conservative scratch profile fit together.
-        let storage = self.storage_usage_internal(l, require_resource_payloads)?;
+        let storage = self.storage_usage_internal(l, require_resource_payloads, None, false)?;
         let mut admitted = storage;
         admitted.add(self.validation_scratch_usage(l)?, l)?;
         if self.id.is_nil()
@@ -1468,7 +1618,10 @@ impl Document {
         total.add(self.history.owned_usage(self, l)?, l)?;
         total.add(self.retained_owned_usage(l)?, l)?;
         for (id, result) in &self.results {
-            total.add(result.validate(*id, self, l)?, l)?;
+            let mut result_usage = result.validate(*id, self, l)?;
+            let shared = self.result_shared_source_bytes(*id, &result.geometry_snapshot, None)?;
+            result_usage.bytes = result_usage.bytes.checked_sub(shared).ok_or(Error::Overflow("shared result storage"))?;
+            total.add(result_usage, l)?;
         }
         total.check(l)?;
         let mut verification_held = total;

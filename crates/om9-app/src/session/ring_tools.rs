@@ -174,11 +174,11 @@ impl Controller {
         let capped = om9_kernel::editing::cap_planar(
             brep,
             1.0e-7,
-            brep.display.deflection_mm,
+            self.solid_output_deflection(id)?,
             self.coordinator.limits(),
         )
         .map_err(|error| Error::Io(format!("profile end cap: {error}")))?;
-        self.commit_geometry(feature, "ProfileEndCap", Geometry::Brep(capped))
+        self.insert_solid(feature, "ProfileEndCap", capped)
     }
 
     #[cfg(not(feature = "occt-brep"))]

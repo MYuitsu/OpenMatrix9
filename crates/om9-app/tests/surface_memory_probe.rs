@@ -21,7 +21,7 @@ fn surface_memory_probe() {
         }}
         let path = std::env::var_os("OM9_SURFACE_BREP_PATH").expect("temporary fixture path");
         std::fs::write(path, body.source()).unwrap();
-        println!("SURFACE_FIXTURE holes=16 source_bytes={} faces={}", body.source().len(), body.display.faces.len());
+        println!("SURFACE_FIXTURE holes=16 source_bytes={} faces={}", body.source().len(), body.display().faces.len());
         return;
     }
     let count = match case.as_str() { "one" | "holes16" => 1, "overlap50" => 50, _ => panic!("unknown case") };
@@ -30,8 +30,8 @@ fn surface_memory_probe() {
         om9_kernel::brep::read_brep(&std::fs::read_to_string(path).unwrap(), 0.1, &limits).unwrap()
     } else { om9_kernel::brep::sphere_brep(5., 0.1, &limits).unwrap() };
     let source_bytes = brep.source().len();
-    let display_triangles = brep.display.triangles.len();
-    let faces = brep.display.faces.len();
+    let display_triangles = brep.display().triangles.len();
+    let faces = brep.display().faces.len();
     let mut document = Document::with_template_tolerance("surface memory probe");
     for i in 0..count {
         let mut entity = Entity::new("probe body", Geometry::Brep(brep.clone()), None);
