@@ -564,3 +564,71 @@ fn text_uses_installed_font_outlines() {
     assert_eq!(r.create.len(), 2, "one planar face per letter");
     assert!(r.create.iter().all(|g| matches!(g, Geo::Trimmed { .. })));
 }
+
+/// Text with FilletRadius (solids only): each letter is one closed solid, flat underneath, with
+/// its top edges rounded. "I" is a rectangle w × h, so the volume is exact:
+/// w·h·t − (perimeter, corrected at the 4 corners) × (1 − π/4)·r².
+#[test]
+fn text_solids_get_rounded_top_edges() {
+    let font = ["DejaVu Sans", "Arial", "Liberation Sans", "FreeSans"].into_iter().find(|f| text::find(f, false, false).is_some());
+    let Some(font) = font else {
+        eprintln!("no test font installed; skipped");
+        return;
+    };
+    let (t, r) = (1.0, 0.3);
+    let set = |create: &str, fillet: f64| json!({"text_string": "I", "text_font_other": font, "text_create": create, "text_height": 20.0, "text_depth": t, "text_fillet": fillet});
+    // The I's rectangle, from its exact outline.
+    let c = run_with(TEXT, set("curves", 0.0), vec![pt([0.0; 3])]);
+    assert_eq!(c.create.len(), 1);
+    let nc = om9_addon_geom::exact::Nc::from_geo(&c.create[0]).unwrap();
+    let pts: Vec<Vec3> = (0..=800).map(|k| nc.eval(k as f64 / 800.0)).collect();
+    let (x0, x1) = (pts.iter().map(|p| p[0]).fold(f64::MAX, f64::min), pts.iter().map(|p| p[0]).fold(f64::MIN, f64::max));
+    let (y0, y1) = (pts.iter().map(|p| p[1]).fold(f64::MAX, f64::min), pts.iter().map(|p| p[1]).fold(f64::MIN, f64::max));
+    let (w, h) = (x1 - x0, y1 - y0);
+    let started = std::time::Instant::now();
+    let done = run_with(TEXT, set("solids", r), vec![pt([0.0; 3])]);
+    eprintln!("rounded I in {:?}: {}", started.elapsed(), done.messages.join(" | "));
+    assert_eq!(done.create.len(), 1, "one solid per letter");
+    let m = match &done.create[0] {
+        Geo::Mesh { vertices, triangles, .. } => Mesh { vertices: vertices.clone(), triangles: triangles.clone() },
+        other => panic!("{other:?}"),
+    };
+    assert!(m.is_closed(), "a closed solid");
+    let b = m.bbox();
+    assert!(b[0][2].abs() < 1e-6 && (b[1][2] - t).abs() < 0.02, "flat bottom at 0, top at t: {b:?}");
+    assert!((b[1][0] - b[0][0] - w).abs() < 0.03 && (b[1][1] - b[0][1] - h).abs() < 0.03, "same footprint");
+    // Rounded top edges: a quarter circle of radius r removes (1 − π/4)·r² along the top
+    // perimeter; the 4 corners take away a little more (a sphere octant instead of two
+    // overlapping strips).
+    let strip = (1.0 - std::f64::consts::PI / 4.0) * r * r;
+    let corners = 4.0 * (r * r * r - std::f64::consts::PI / 6.0 * r * r * r) - 4.0 * 2.0 * strip * r;
+    let expected = w * h * t - 2.0 * (w + h) * strip - corners;
+    let v = m.volume();
+    eprintln!("volume {v} vs {expected} (w {w}, h {h})");
+    assert!((v / expected - 1.0).abs() < 0.01, "{v} vs {expected}");
+    // The edges are round: at the top, the face is r in from the walls.
+    let top: Vec<&Vec3> = m.vertices.iter().filter(|p| (p[2] - t).abs() < 1e-6).collect();
+    assert!(!top.is_empty());
+    let inset = top.iter().map(|p| (p[0] - b[0][0]).min(b[1][0] - p[0])).fold(f64::MAX, f64::min);
+    assert!(inset > r * 0.85, "flat top starts {inset} in from the wall");
+    // Curves and surfaces ignore the radius.
+    let s = run_with(TEXT, set("surfaces", r), vec![pt([0.0; 3])]);
+    assert!(matches!(s.create[0], Geo::Trimmed { .. }));
+}
+
+/// Extrusion distance by a click (Rhino lets the distance be picked): with no earlier point,
+/// the click's height above the curve's plane is the distance.
+#[test]
+fn extrude_distance_from_a_click() {
+    let r = run(EXTRUDE, vec![closed_curve("c", square([0.0; 3], 1.0))], vec![pt([0.5, 0.0, 4.0])]);
+    assert!(r.done, "{:?} {:?}", r.prompt, r.error);
+    let v: f64 = r.create.iter().map(|g| match g {
+        Geo::Mesh { vertices, triangles, .. } => Mesh { vertices: vertices.clone(), triangles: triangles.clone() }.volume(),
+        Geo::Brep { display: Some(d), .. } => match &**d {
+            Geo::Mesh { vertices, triangles, .. } => Mesh { vertices: vertices.clone(), triangles: triangles.clone() }.volume(),
+            _ => 0.0,
+        },
+        _ => 0.0,
+    }).sum();
+    assert!((v.abs() - 16.0).abs() < 1e-6, "2 × 2 × 4: {v}");
+}

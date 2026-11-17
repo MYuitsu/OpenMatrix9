@@ -1435,7 +1435,75 @@ fn surface_commands_show_their_options_window() {
         assert!(c.addon_dialog().is_none());
         assert!(c.document().entities.len() > before, "{cmd} made nothing");
     }
+    // Curve Network the other way: the command first, then the curves one click at a time
+    // (each click replaces the selection, as in the viewport), Enter, the window, OK.
+    c.clear_selection();
+    c.submit("NetworkSrf").unwrap();
+    assert!(c.addon_dialog().is_none(), "no window before the curves");
+    for id in [u0, u1, v0, v1] {
+        let collecting = c.addon_collects_objects();
+        c.select_root(Some(id), collecting).unwrap();
+        c.refresh_addon_session();
+    }
+    let d = c.addon_dialog().unwrap_or_else(|| panic!("no window after picking: {}", c.prompt_text()));
+    report.push(format!("NetworkSrf one by one: {}", d.title));
+    let before = c.document().entities.len();
+    c.submit("").unwrap();
+    if c.addon_session().is_some() {
+        // Enter ended the picking; the second Enter is OK.
+        c.submit("").unwrap();
+    }
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    assert_eq!(c.document().entities.len(), before + 1, "network surface from picked curves");
     eprintln!("{}", report.join("\n"));
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// Text with Create=Solids and FilletRadius through the real builder panel: the letters come
+/// out rounded on top. OM9_SHOT_DIR=<dir> also writes a picture of the window.
+#[test]
+fn text_rounded_solids_in_the_window() {
+    let font = if cfg!(windows) { "Arial" } else { "DejaVu Sans" };
+    if !cfg!(windows) && !Path::new("/usr/share/fonts/truetype/dejavu").exists() {
+        eprintln!("no test font installed; skipped");
+        return;
+    }
+    let tmp = std::env::temp_dir().join(format!("om9-app-text-round-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut app = om9_app::ui::MatrixApp::new(Document::new("text-round")).unwrap();
+    app.controller.attach_addons(host_lang(&tmp, "vi"), &names);
+    let size = [1400.0f32, 900.0];
+    // "Text" typed, as the menu names it, runs the add-on (Windows fonts, panel), not OM9's
+    // older built-in Text.
+    let r = om9_app::ui_replay::replay_app(&mut app, size, 1.0, &[serde_json::json!({"text": "Text"}), serde_json::json!({"key": "Enter"})]).unwrap();
+    eprintln!("after typing: {}", r["steps"][2]["command"]);
+    assert!(app.controller.addon_builder().is_some(), "the Text panel: {}", r["steps"][2]["prompt"]);
+    use om9_addons::settings::SettingValue as V;
+    for (k, v) in [
+        ("text_string", V::Str("OM9".into())),
+        ("text_font_other", V::Str(font.into())),
+        ("text_height", V::Float(5.0)),
+        ("text_depth", V::Float(1.5)),
+        ("text_fillet", V::Float(0.4)),
+    ] {
+        app.controller.set_builder_value(k, v).unwrap();
+    }
+    let before = app.controller.document().entities.len();
+    app.controller.session_point([0.0, 0.0, 0.0]).unwrap();
+    let after = app.controller.document().entities.len();
+    eprintln!("history:\n{}", app.transcript.history());
+    assert_eq!(after, before + 3, "three rounded letters");
+    if let Some(dir) = std::env::var_os("OM9_SHOT_DIR") {
+        app.controller.zoom_extents(1.5).unwrap();
+        let out = Path::new(&dir).join("text-rounded.png");
+        let tris: usize = app.controller.document().entities.values().map(|e| format!("{:?}", e.geometry).matches("],").count()).sum();
+        eprintln!("about {tris} triangles/points");
+        om9_app::ui_replay::screenshot(&mut app, size, 1.0, 200, &out).unwrap();
+        eprintln!("screenshot: {}", out.display());
+    }
     fs::remove_dir_all(&tmp).unwrap();
 }
 
@@ -1504,5 +1572,279 @@ fn sweep2_through_the_native_library() {
     }
     assert!(c.addon_session().is_none(), "{}", c.prompt_text());
     assert_eq!(c.document().entities.len(), before + 1, "the sweep surface");
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+// ---- Surface and Solid menus end to end -----------------------------------------------
+
+struct Scene {
+    c: Controller,
+    named: std::collections::BTreeMap<&'static str, om9_core::identity::ObjectId>,
+    restore: bool,
+}
+
+impl Scene {
+    fn new_ids(&self, before: &[om9_core::identity::ObjectId]) -> Vec<om9_core::identity::ObjectId> {
+        self.c.document().entities.keys().copied().filter(|k| !before.contains(k)).collect()
+    }
+    fn keys(&self) -> Vec<om9_core::identity::ObjectId> {
+        self.c.document().entities.keys().copied().collect()
+    }
+    /// Runs a command with `select` preselected, feeding `points`, then Enter until done.
+    fn run(&mut self, cmd: &str, select: &[&str], points: &[[f64; 3]]) -> (String, usize, usize, Vec<String>) {
+        let before = self.keys();
+        let rev = self.c.document().revision;
+        self.c.cancel();
+        self.c.clear_selection();
+        // "name" is selected first; "@name:x,y,z" is a click on that object at that point
+        // when the command asks for objects (an edge or a face is found by where it lands).
+        let ids: Vec<om9_core::identity::ObjectId> = select.iter().filter(|n| !n.starts_with('@')).map(|n| self.named[n]).collect();
+        let mut picks = select.iter().filter_map(|n| n.strip_prefix('@')).map(|n| {
+            let (name, at) = n.split_once(':').unwrap();
+            let v: Vec<f64> = at.split(',').map(|x| x.parse().unwrap()).collect();
+            (self.named[name], [v[0], v[1], v[2]])
+        }).collect::<Vec<_>>().into_iter();
+        let mut trail = Vec::new();
+        for n in select {
+            let name = n.trim_start_matches('@').split(':').next().unwrap();
+            if !self.c.document().entities.contains_key(&self.named[name]) {
+                return (format!("scene object {name} is gone"), 0, 0, trail);
+            }
+        }
+        if !ids.is_empty()
+            && let Err(e) = self.c.select_objects(&ids)
+        {
+            return (format!("select error: {e}"), 0, 0, trail);
+        }
+        if let Err(e) = self.c.submit(cmd) {
+            return (format!("start error: {e}"), 0, 0, trail);
+        }
+        let mut pts = points.iter();
+        let mut saw_dialog = false;
+        let mut saw_builder = false;
+        for _ in 0..14 {
+            let Some(s) = self.c.addon_session() else { break };
+            let want = format!("{:?}", s.reply.want);
+            let prompt = s.reply.prompt.clone();
+            trail.push(format!("{want}:{prompt}"));
+            saw_dialog |= self.c.addon_dialog().is_some();
+            saw_builder |= self.c.addon_builder().is_some();
+            let step = match want.as_str() {
+                "Point" => match pts.next() {
+                    Some(p) => self.c.session_point(*p),
+                    // A click on an edge or a face asked as a point.
+                    None => match picks.next() {
+                        Some((_, p)) => self.c.session_point(p),
+                        None => self.c.submit(""),
+                    },
+                },
+                "Number" => self.c.submit("1"),
+                "Objects" => match picks.next() {
+                    Some((id, p)) => {
+                        self.c.note_session_pick(Some(p));
+                        let r = self.c.select_root(Some(id), true);
+                        self.c.refresh_addon_session();
+                        r
+                    }
+                    None => self.c.submit(""),
+                },
+                _ => self.c.submit(""),
+            };
+            if let Err(e) = step {
+                trail.push(format!("error: {e}"));
+                break;
+            }
+        }
+        if self.c.addon_builder().is_some() {
+            saw_builder = true;
+            let r = self.c.accept_addon_builder();
+            trail.push(format!("builder accept: {r:?}"));
+        }
+        let open = self.c.addon_session().map(|s| s.reply.prompt.clone());
+        let made = self.new_ids(&before).len();
+        let changed = (self.c.document().revision != rev) as usize;
+        let mut status = if let Some(p) = open { format!("STILL OPEN: {p}") } else { "done".into() };
+        if saw_dialog {
+            status.push_str(" [window]");
+        }
+        if saw_builder {
+            status.push_str(" [builder]");
+        }
+        self.c.cancel();
+        // Back to the scene for the next command (a Boolean consumes its inputs …).
+        if changed > 0 && self.restore {
+            let _ = self.c.undo();
+            if self.c.document().revision != rev && self.keys().len() != before.len() {
+                let _ = self.c.undo();
+            }
+        }
+        (status, made, changed, trail)
+    }
+    fn keep(&mut self, name: &'static str, cmd: &str, select: &[&str], points: &[[f64; 3]]) {
+        let before = self.keys();
+        let r = self.run(cmd, select, points);
+        let new = self.new_ids(&before);
+        // A command that changes its input in place (Make Hole) keeps the object's id.
+        let id = match new.first() {
+            Some(id) => *id,
+            None if r.2 > 0 => self.named[select.last().unwrap()],
+            None => panic!("scene {name} by {cmd}: {r:?}"),
+        };
+        self.named.insert(name, id);
+    }
+}
+
+#[test]
+fn surface_and_solid_menus_run_end_to_end() {
+    let tmp = std::env::temp_dir().join(format!("om9-menu-survey-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("survey"), Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    let mut s = Scene { c, named: Default::default(), restore: false };
+    // ---- the scene ---------------------------------------------------------------------
+    let curve = |s: &mut Scene, name: &'static str, pts: &[[f64; 3]]| s.keep(name, "Curve", &[], pts);
+    curve(&mut s, "ra", &[[-15.0, -20.0, 0.0], [-5.0, -5.0, 0.0], [-12.0, 8.0, 0.0], [-6.0, 20.0, 0.0]]);
+    curve(&mut s, "rb", &[[8.0, -22.0, 0.0], [18.0, -5.0, 0.0], [10.0, 8.0, 0.0], [16.0, 21.0, 0.0]]);
+    curve(&mut s, "p1", &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
+    curve(&mut s, "u0", &[[100.0, 0.0, 0.0], [105.0, 0.0, 1.0], [110.0, 0.0, 0.0]]);
+    curve(&mut s, "u1", &[[100.0, 10.0, 0.0], [105.0, 10.0, 1.0], [110.0, 10.0, 0.0]]);
+    curve(&mut s, "v0", &[[100.0, 0.0, 0.0], [100.0, 5.0, 1.0], [100.0, 10.0, 0.0]]);
+    curve(&mut s, "v1", &[[110.0, 0.0, 0.0], [110.0, 5.0, 1.0], [110.0, 10.0, 0.0]]);
+    curve(&mut s, "low", &[[200.0, 35.0, 0.0], [210.0, 35.0, 0.0]]);
+    curve(&mut s, "high", &[[200.0, 35.0, 10.0], [210.0, 35.0, 10.0]]);
+    s.keep("circ", "Circle", &[], &[[50.0, 50.0, 0.0], [55.0, 50.0, 0.0]]);
+    s.keep("hole", "Circle", &[], &[[80.0, 50.0, 0.0], [82.0, 50.0, 0.0]]);
+    s.keep("flat", "Plane", &[], &[[200.0, 30.0, 0.0], [210.0, 40.0, 0.0]]);
+    s.keep("flat2", "Plane", &[], &[[210.0, 30.0, 0.0], [220.0, 40.0, 0.0]]);
+    s.keep("ring", "Circle", &[], &[[50.0, 80.0, 0.0], [55.0, 80.0, 0.0]]);
+    s.keep("ringhole", "Circle", &[], &[[50.0, 80.0, 0.0], [52.0, 80.0, 0.0]]);
+    s.keep("wall", "Loft", &["low", "high"], &[]);
+    s.keep("net", "NetworkSrf", &["u0", "u1", "v0", "v1"], &[]);
+    s.keep("disc", "PlanarSrf", &["circ"], &[]);
+    s.keep("washer", "PlanarSrf", &["ring", "ringhole"], &[]);
+    s.keep("box1", "Box", &[], &[[300.0, 0.0, 0.0], [310.0, 10.0, 0.0], [310.0, 10.0, 10.0]]);
+    s.keep("box2", "Box", &[], &[[305.0, 5.0, 0.0], [315.0, 15.0, 0.0], [315.0, 15.0, 10.0]]);
+    s.keep("ball", "Sphere", &[], &[[400.0, 0.0, 0.0], [405.0, 0.0, 0.0]]);
+    // A ring rail (circle in XZ, as a ring) and four profiles across it.
+    s.keep("rr", "Circle", &[], &[[0.0, -150.0, 0.0], [8.0, -150.0, 0.0]]);
+    curve(&mut s, "q0", &[[7.0, -150.0, -1.0], [8.0, -150.0, 0.0], [9.0, -150.0, 1.0]]);
+    curve(&mut s, "q1", &[[0.0, -143.0, -1.0], [0.0, -142.0, 0.0], [0.0, -141.0, 1.0]]);
+    curve(&mut s, "q2", &[[-7.0, -150.0, -1.0], [-8.0, -150.0, 0.0], [-9.0, -150.0, 1.0]]);
+    curve(&mut s, "q3", &[[0.0, -157.0, -1.0], [0.0, -158.0, 0.0], [0.0, -159.0, 1.0]]);
+    s.keep("c0", "Circle", &[], &[[0.0, -80.0, 0.0], [3.0, -80.0, 0.0]]);
+    s.keep("c1", "Circle", &[], &[[0.0, -80.0, 10.0], [3.0, -80.0, 10.0]]);
+    s.keep("tube", "Loft", &["c0", "c1"], &[]);
+    s.keep("hc", "Circle", &[], &[[355.0, 5.0, 0.0], [356.0, 5.0, 0.0]]);
+    s.keep("hb", "Box", &[], &[[350.0, 0.0, 0.0], [360.0, 10.0, 0.0], [360.0, 10.0, 10.0]]);
+    s.keep("holed", "SolidSolidEditToolsHolesMakeHole", &["hc", "hb"], &[]);
+    // ---- the menus ---------------------------------------------------------------------
+    s.restore = true;
+    if !cfg!(windows) {
+        let host = s.c.addon_host().unwrap().clone();
+        host.lock().unwrap().set_setting("om9_matrix", "text_font_other", "DejaVu Sans").unwrap();
+    }
+    let axis = [[-15.0, -20.0, 0.0], [-15.0, 20.0, 0.0]];
+    let plan: Vec<(&str, &str, Vec<&str>, Vec<[f64; 3]>)> = vec![
+        ("Surface", "SurfaceSweepSweep1Rail", vec!["ra", "p1"], vec![]),
+        ("Surface", "SurfaceSweepSweep2Rails", vec!["ra", "rb", "p1"], vec![]),
+        ("Surface", "SurfaceSweepProfileSweep", vec!["ra", "p1"], vec![]),
+        ("Surface", "SurfacePlanarCurves", vec!["circ"], vec![]),
+        ("Surface", "SurfacePlaneCornertoCorner", vec![], vec![[0.0, 60.0, 0.0], [10.0, 70.0, 0.0]]),
+        ("Surface", "OthersSurfaceRebuild", vec!["net"], vec![]),
+        ("Surface", "SurfaceBlendSurface", vec!["@flat:205,40,0", "@wall:205,35,10"], vec![]),
+        ("Surface", "SurfaceVariableFilletBlendChamferVariableBlendSurfaces", vec!["@flat:205,40,0", "@wall:205,35,10"], vec![]),
+        ("Surface", "SurfaceLoft", vec!["u0", "u1"], vec![]),
+        ("Surface", "SurfaceCurveNetwork", vec!["u0", "u1", "v0", "v1"], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsShrinkTrimmedSurface", vec!["washer"], vec![]),
+        ("Surface", "SurfacePatch", vec!["u0", "u1", "v0", "v1"], vec![]),
+        ("Surface", "SurfaceEdgeCurves", vec!["u0", "u1", "v0", "v1"], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsUntrim", vec!["washer"], vec![]),
+        ("Surface", "SurfaceGVDExtrudeAll", vec!["circ"], vec![]),
+        ("Surface", "SurfaceRevolve", vec!["p1"], axis.to_vec()),
+        ("Surface", "SurfaceRailRevolve", vec!["p1", "ra"], vec![[-30.0, -20.0, 0.0], [-30.0, 20.0, 0.0]]),
+        ("Surface", "BuilderFourProfileSweep", vec!["rr", "q0", "q1", "q2", "q3"], vec![]),
+        ("Surface", "SurfaceSweepSweepMultiRail", vec!["ra", "rb", "p1"], vec![]),
+        ("Surface", "SurfaceTweenSurfaces", vec!["net", "wall"], vec![]),
+        ("Surface", "SurfaceFilletSurfaces", vec!["@flat:205,33,0", "@wall:205,35,5"], vec![]),
+        ("Surface", "SurfaceVariableFilletBlendChamferVariableFilletSurfaces", vec!["@flat:205,33,0", "@wall:205,35,5"], vec![]),
+        ("Surface", "SurfaceChamferSurfaces", vec!["@flat:205,33,0", "@wall:205,35,5"], vec![]),
+        ("Surface", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces", vec!["@flat:205,33,0", "@wall:205,35,5"], vec![]),
+        ("Surface", "SurfaceOffsetSurface", vec!["net"], vec![]),
+        ("Surface", "SurfaceVariableOffsetSurface", vec!["net"], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsMerge", vec!["flat", "flat2"], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsMatch", vec!["@wall:205,35,10", "@flat:205,40,0"], vec![]),
+        ("Surface", "SurfaceDrape", vec!["net"], vec![[95.0, -5.0, 0.0], [115.0, 15.0, 0.0]]),
+        ("Surface", "SurfaceHeightfieldfromImage", vec![], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsSplitatIsocurve", vec!["net"], vec![[105.0, 5.0, 0.8]]),
+        ("Surface", "SurfaceExtendSurface", vec!["@flat:205,40,0"], vec![[205.0, 45.0, 0.0]]),
+        ("Surface", "SurfaceExtrudeCurveNormalToSurface", vec!["@u0:105,0,1", "@net:105,5,0.8"], vec![[105.0, 0.0, 3.0]]),
+        ("Surface", "SurfaceUnrollDevelopableSrf", vec!["wall"], vec![]),
+        ("Surface", "SurfaceSmash", vec!["net"], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsSoftEdit", vec!["net"], vec![[105.0, 5.0, 0.8], [105.0, 5.0, 3.0]]),
+        ("Surface", "SurfacePlaneCuttingPlane", vec!["box1"], vec![[295.0, 5.0, 0.0], [320.0, 5.0, 0.0]]),
+        ("Surface", "SurfaceSurfaceEditToolsAdjustClosedSurfaceSeam", vec!["@tube:0,-80,5"], vec![[3.0, -80.0, 5.0]]),
+        ("Surface", "SurfaceSurfaceEditToolsSetSurfaceTangent", vec!["@net:105,5,0.8"], vec![[105.0, 0.0, 1.0], [105.0, 0.0, 1.0], [105.0, -3.0, 2.0]]),
+        ("Surface", "SurfaceSurfaceEditToolsRefittoTolerance", vec!["net"], vec![]),
+        ("Solid", "SolidUnion", vec!["box1", "box2"], vec![]),
+        ("Solid", "SolidDifference", vec!["box1", "box2"], vec![]),
+        ("Solid", "SolidIntersection", vec!["box1", "box2"], vec![]),
+        ("Solid", "SolidBooleanTwoObjects", vec!["box1", "box2"], vec![]),
+        ("Solid", "SolidCapPlanarHoles", vec!["wall"], vec![]),
+        ("Solid", "SolidExtractSurface", vec!["box1"], vec![[305.0, 5.0, 10.0]]),
+        ("Solid", "SolidFilletEdgeFilletEdge", vec!["box1"], vec![]),
+        ("Solid", "SolidText", vec![], vec![[0.0, -60.0, 0.0]]),
+        ("Solid", "SolidExtrudePlanarCurveStraight", vec!["circ"], vec![]),
+        ("Solid", "SolidGVDAllExtrude", vec!["circ"], vec![]),
+        ("Solid", "SolidPipe", vec!["ra"], vec![]),
+        ("Solid", "SolidBoxCornertoCornerHeight", vec![], vec![[0.0, 100.0, 0.0], [5.0, 105.0, 0.0], [5.0, 105.0, 5.0]]),
+        ("Solid", "SolidSphereCenterRadius", vec![], vec![[20.0, 100.0, 0.0], [23.0, 100.0, 0.0]]),
+        ("Solid", "SolidEllipsoidFromCenter", vec![], vec![[40.0, 100.0, 0.0], [44.0, 100.0, 0.0], [40.0, 102.0, 0.0], [40.0, 100.0, 3.0]]),
+        ("Solid", "SolidTorus", vec![], vec![[60.0, 100.0, 0.0], [65.0, 100.0, 0.0], [66.0, 100.0, 0.0]]),
+        ("Solid", "SolidCylinder", vec![], vec![[80.0, 100.0, 0.0], [83.0, 100.0, 0.0], [80.0, 100.0, 6.0]]),
+        ("Solid", "SolidTube", vec![], vec![[100.0, 100.0, 0.0], [104.0, 100.0, 0.0], [103.0, 100.0, 0.0], [100.0, 100.0, 6.0]]),
+        ("Solid", "SolidPyramid", vec![], vec![[120.0, 100.0, 0.0], [124.0, 100.0, 0.0], [120.0, 100.0, 6.0]]),
+        ("Solid", "SolidCone", vec![], vec![[140.0, 100.0, 0.0], [143.0, 100.0, 0.0], [140.0, 100.0, 6.0]]),
+        ("Solid", "SolidTruncatedCone", vec![], vec![[160.0, 100.0, 0.0], [163.0, 100.0, 0.0], [160.0, 100.0, 6.0], [161.0, 100.0, 6.0]]),
+        ("Solid", "SolidBoss", vec!["hole", "box1"], vec![]),
+        ("Solid", "SolidRib", vec!["@high:205,35,10", "@flat:205,32,0"], vec![]),
+        ("Solid", "SolidSlab", vec!["circ"], vec![[50.0, 56.0, 0.0], [50.0, 56.0, 2.0]]),
+        ("Solid", "SolidSolidEditToolsHolesMakeHole", vec!["hole", "box1"], vec![]),
+        ("Solid", "SolidSolidEditToolsHolesArrayHole", vec!["hole", "box1"], vec![[302.0, 2.0, 10.0], [304.0, 2.0, 10.0], [302.0, 4.0, 10.0]]),
+        ("Solid", "SolidSolidEditToolsHolesArrayHolePolar", vec!["hole", "box1"], vec![[305.0, 5.0, 10.0]]),
+        ("Solid", "SolidSolidEditToolsHolesMoveHole", vec!["@holed:355,5,10"], vec![[356.0, 5.0, 10.0], [355.0, 5.0, 10.0], [357.0, 6.0, 10.0]]),
+        ("Solid", "SolidSolidEditToolsFacesMoveFace", vec!["box1"], vec![[305.0, 5.0, 10.0], [305.0, 5.0, 10.0], [305.0, 5.0, 12.0]]),
+        ("Solid", "SolidShell", vec!["box1"], vec![]),
+        ("Solid", "SolidPtOn", vec!["ball"], vec![]),
+    ];
+    let mut rows = vec!["| Menu | Lệnh | Kết quả | Mới | Đổi | Các bước |".to_string(), "|---|---|---|---|---|---|".to_string()];
+    let mut bad = Vec::new();
+    for (menu, cmd, sel, pts) in &plan {
+        let (status, made, changed, trail) = s.run(cmd, sel, pts);
+        let label = trail.first().cloned().unwrap_or_default();
+        let ok = status.starts_with("done") && (made > 0 || changed > 0);
+        if !ok {
+            bad.push(format!("{cmd}: {status} | {}", trail.join(" → ")));
+        }
+        rows.push(format!(
+            "| {menu} | {cmd} | {}{status} | {made} | {changed} | {} |",
+            if ok { "✅ " } else { "⚠️ " },
+            trail.join(" → ").replace('|', "/")
+        ));
+        let _ = label;
+    }
+    let table = rows.join("\n");
+    if let Some(out) = std::env::var_os("OM9_SURVEY") {
+        fs::write(PathBuf::from(out), &table).unwrap();
+    }
+    eprintln!("{} of {} commands need a look:\n{}", bad.len(), plan.len(), bad.join("\n"));
+    // Left out on purpose: Shrink/Untrim need a trimmed surface (stored exactly only with the
+    // B-Rep kernel), Heightfield an image file, and the typed 1 makes Shell and Tube too thin
+    // here (checked with real sizes elsewhere).
+    let expected = ["ShrinkTrimmedSurface", "Untrim", "HeightfieldfromImage", "SolidShell", "SolidTube"];
+    let surprising: Vec<&String> = bad.iter().filter(|b| !expected.iter().any(|x| b.contains(x))).collect();
+    assert!(surprising.is_empty(), "{surprising:#?}");
     fs::remove_dir_all(&tmp).unwrap();
 }

@@ -384,9 +384,21 @@ impl Flow {
                     r
                 };
             }
+            // Picked during the command (Rhino): keep picking until Enter, so a command that
+            // takes several objects (curves and a boundary, two solids …) gets them all.
+            // Objects selected before the command (Matrix) go on at once.
+            if matches!(e.input, Input::Selection) {
+                let prompt = match &self.select_prompt {
+                    Some(p) => format!("{p}. Press Enter when done"),
+                    None => format!("{}: select objects, then press Enter", self.label),
+                };
+                return Reply::ask(prompt, save(&c)).with_options(self.tokens(&c)).want(Want::Objects);
+            }
             c.selected = true;
-            if matches!(e.input, Input::Start | Input::Selection | Input::Enter) {
-                return self.ask(e, c, None, None, false, show, finish);
+            // Enter after picking: a command that needs nothing more runs now.
+            if matches!(e.input, Input::Start | Input::Enter) {
+                let entered = matches!(e.input, Input::Enter) && self.needs.is_empty();
+                return self.ask(e, c, None, None, entered, show, finish);
             }
         }
         let next = self.needs.get(c.answers.len());
@@ -448,7 +460,22 @@ impl Flow {
                     // A click for a number: the distance from the last point.
                     match c.points().last() {
                         Some(&last) => c.answers.push(Answer::Number(om9_addon_abi::session::dist(last, *point))),
-                        None => error = Some("type a number".to_owned()),
+                        // No point yet (Extrusion distance): how far the click is from the
+                        // selected object along the CPlane normal (a click in a side view),
+                        // else in the CPlane.
+                        None => match e.selection.first().and_then(|s| s.points.first().copied().or(Some(s.bbox[0])).filter(|p| p.iter().all(|v| v.is_finite()))) {
+                            Some(base) => {
+                                let d = om9_addon_abi::session::sub(*point, base);
+                                let along = om9_addon_abi::session::dot(d, e.plane.normal()).abs();
+                                let v = if along > 1e-9 { along } else { om9_addon_abi::session::dist(base, *point) };
+                                if v > 1e-12 {
+                                    c.answers.push(Answer::Number(v));
+                                } else {
+                                    error = Some("type a number".to_owned());
+                                }
+                            }
+                            None => error = Some("type a number".to_owned()),
+                        },
                     }
                 }
                 Some(Need::Curve(_) | Need::Confirm(_)) | None => {}

@@ -10,6 +10,8 @@
 //! - Height is the height of the capital letters (the font's cap height).
 //! - Solids are the outlines extruded by the thickness with their holes (`extruded`, as
 //!   Extrude Curve Solid=Yes); surfaces are the planar faces with the holes trimmed.
+//! - Fillet radius (solids only): the top edges of each letter rounded, the bottom kept flat
+//!   ([`rounded`]).
 
 use om9_addon_abi::session::{Geo, Vec3};
 use om9_addon_geom::exact::Nc;
@@ -197,9 +199,13 @@ pub struct Spec {
     pub small_caps: Option<f64>,
 }
 
-/// The text's outlines, laid out on `frame` (x along the line, y up), starting at its origin.
-/// Each contour is one closed cubic NURBS curve. Lines go down by 1.6 × height.
-pub fn outlines(spec: &Spec, frame: &Frame) -> Result<Vec<Nc>, String> {
+/// One letter's contours, in the text's own plane (x along the line, y up): cubic Bézier
+/// chains `[p0, c1, c2, p1, …]`, closed.
+pub type Glyph = Vec<Vec<[f64; 2]>>;
+
+/// The letters laid out in the text's plane, starting at its origin. Lines go down by
+/// 1.6 × height.
+pub fn layout(spec: &Spec) -> Result<Vec<Glyph>, String> {
     let ff = find(&spec.font, spec.bold, spec.italic).ok_or_else(|| format!("Text: font \"{}\" is not installed", spec.font))?;
     let data = font_data(&ff.path).map_err(|e| format!("Text: {}: {e}", ff.path.display()))?;
     let face = Face::parse(&data, ff.index).map_err(|e| format!("Text: {}: {e}", ff.path.display()))?;
@@ -232,15 +238,13 @@ pub fn outlines(spec: &Spec, frame: &Frame) -> Result<Vec<Nc>, String> {
         let mut pen = Pen::default();
         face.outline_glyph(gid, &mut pen);
         pen.finish();
-        for contour in pen.contours {
-            let pts: Vec<Vec3> = contour.iter().map(|p| frame.point([x + p[0] * s, y + p[1] * s, 0.0])).collect();
-            let segs = (pts.len() - 1) / 3;
-            let mut knots = vec![0.0; 4];
-            for k in 1..segs {
-                knots.extend([k as f64 / segs as f64; 3]);
-            }
-            knots.extend([1.0; 4]);
-            out.push(Nc { degree: 3, points: pts.iter().map(|p| [p[0], p[1], p[2], 1.0]).collect(), knots });
+        let glyph: Glyph = pen
+            .contours
+            .iter()
+            .map(|contour| contour.iter().map(|p| [x + p[0] * s, y + p[1] * s]).collect())
+            .collect();
+        if !glyph.is_empty() {
+            out.push(glyph);
         }
         x += face.glyph_hor_advance(gid).unwrap_or(0) as f64 * s + spec.spacing;
     }
@@ -248,6 +252,121 @@ pub fn outlines(spec: &Spec, frame: &Frame) -> Result<Vec<Nc>, String> {
         return Err("Text: no letters to make".into());
     }
     Ok(out)
+}
+
+/// The text's outlines, laid out on `frame` (x along the line, y up), starting at its origin.
+/// Each contour is one closed cubic NURBS curve.
+pub fn outlines(spec: &Spec, frame: &Frame) -> Result<Vec<Nc>, String> {
+    Ok(layout(spec)?.iter().flatten().map(|contour| contour_curve(contour, frame)).collect())
+}
+
+fn contour_curve(contour: &[[f64; 2]], frame: &Frame) -> Nc {
+    let pts: Vec<Vec3> = contour.iter().map(|p| frame.point([p[0], p[1], 0.0])).collect();
+    let segs = (pts.len() - 1) / 3;
+    let mut knots = vec![0.0; 4];
+    for k in 1..segs {
+        knots.extend([k as f64 / segs as f64; 3]);
+    }
+    knots.extend([1.0; 4]);
+    Nc { degree: 3, points: pts.iter().map(|p| [p[0], p[1], p[2], 1.0]).collect(), knots }
+}
+
+/// A contour as a closed polyline (the cubic pieces sampled finely).
+fn polyline(contour: &[[f64; 2]], per_piece: usize) -> Vec<[f64; 2]> {
+    let mut out = vec![contour[0]];
+    for piece in contour[1..].chunks_exact(3) {
+        let p0 = *out.last().unwrap();
+        let (c1, c2, p1) = (piece[0], piece[1], piece[2]);
+        for k in 1..=per_piece {
+            let t = k as f64 / per_piece as f64;
+            let u = 1.0 - t;
+            let b = [u * u * u, 3.0 * u * u * t, 3.0 * u * t * t, t * t * t];
+            out.push([
+                b[0] * p0[0] + b[1] * c1[0] + b[2] * c2[0] + b[3] * p1[0],
+                b[0] * p0[1] + b[1] * c1[1] + b[2] * c2[1] + b[3] * p1[1],
+            ]);
+        }
+    }
+    out
+}
+
+/// Signed distance from `p` to a letter (negative inside; holes by the even-odd rule).
+fn letter_distance(p: [f64; 2], rings: &[Vec<[f64; 2]>]) -> f64 {
+    let mut best = f64::MAX;
+    let mut inside = false;
+    for ring in rings {
+        for w in ring.windows(2) {
+            let (a, b) = (w[0], w[1]);
+            let (dx, dy) = (b[0] - a[0], b[1] - a[1]);
+            let len2 = dx * dx + dy * dy;
+            let t = if len2 > 0.0 { (((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len2).clamp(0.0, 1.0) } else { 0.0 };
+            let (qx, qy) = (a[0] + t * dx - p[0], a[1] + t * dy - p[1]);
+            best = best.min(qx * qx + qy * qy);
+            if (a[1] > p[1]) != (b[1] > p[1]) && p[0] < a[0] + (p[1] - a[1]) / (b[1] - a[1]) * dx {
+                inside = !inside;
+            }
+        }
+    }
+    if inside { -best.sqrt() } else { best.sqrt() }
+}
+
+/// Letters as solids `thickness` thick with their top edges rounded by `radius` (a quarter
+/// circle meeting the side walls and the top face tangentially), flat underneath so they sit
+/// on a surface. Each letter is one closed mesh, laid out on `frame`.
+///
+/// The shape is the letter's prism eroded by `radius`, grown back by a ball of `radius`, and
+/// cut at the bottom: from the exact 2-D distance `d` to the outline, the signed distance is
+/// `|max(q, 0)| + min(max(q.x, q.y), 0) - r` with `q = (d + r, z - (t - r))`, the level
+/// surface of which is meshed on a fine grid.
+pub fn rounded(glyphs: &[Glyph], frame: &Frame, thickness: f64, radius: f64, height: f64) -> Vec<om9_addon_geom::mesh::Mesh> {
+    use om9_addon_geom::sdf::{Grid, level};
+    let t = thickness.max(1e-3);
+    let r = radius.clamp(0.0, t);
+    let cell = (r / 3.0).min(height / 90.0).max(height / 400.0).max(1e-3);
+    // A whole number of cells through the thickness: the top face lies on grid points, so it
+    // is exactly flat and exactly `t` high.
+    let cell = t / (t / cell).ceil();
+    let mut out = Vec::new();
+    for glyph in glyphs {
+        let rings: Vec<Vec<[f64; 2]>> = glyph.iter().map(|c| polyline(c, 10)).collect();
+        let (mut lo, mut hi) = ([f64::MAX; 2], [f64::MIN; 2]);
+        for p in rings.iter().flatten() {
+            for i in 0..2 {
+                lo[i] = lo[i].min(p[i]);
+                hi[i] = hi[i].max(p[i]);
+            }
+        }
+        let pad = 2.0 * cell;
+        let origin = [lo[0] - pad, lo[1] - pad, -pad];
+        let dims = [
+            ((hi[0] - lo[0] + 2.0 * pad) / cell).ceil() as usize + 1,
+            ((hi[1] - lo[1] + 2.0 * pad) / cell).ceil() as usize + 1,
+            ((t + 2.0 * pad) / cell).ceil() as usize + 1,
+        ];
+        let plane: Vec<f64> = (0..dims[1])
+            .flat_map(|j| (0..dims[0]).map(move |i| (i, j)))
+            .map(|(i, j)| letter_distance([origin[0] + i as f64 * cell, origin[1] + j as f64 * cell], &rings))
+            .collect();
+        let mut values = Vec::with_capacity(plane.len() * dims[2]);
+        for k in 0..dims[2] {
+            let z = origin[2] + k as f64 * cell;
+            for d in &plane {
+                let (qx, qy) = (d + r, z - (t - r));
+                let outside = (qx.max(0.0).powi(2) + qy.max(0.0).powi(2)).sqrt();
+                let sd = outside + qx.max(qy).min(0.0) - r;
+                values.push(sd.max(-z));
+            }
+        }
+        let mut m = level(&Grid { origin, cell, dims, values }, 0.0);
+        if m.triangles.is_empty() {
+            continue;
+        }
+        for v in &mut m.vertices {
+            *v = frame.point(*v);
+        }
+        out.push(m);
+    }
+    out
 }
 
 /// The created objects: the outline curves, the planar faces, or the solids.

@@ -5,8 +5,8 @@ Tạo chữ từ phông TrueType/OpenType đã cài: đường viền, mặt ph�
 - **Mã lệnh:** `SolidText`
 - **Vị trí:** menu Solid, ô số 8
 - **Icon:** `Resources/icons/solid-minimal/SolidText.svg`
-- **Gọi bằng dòng lệnh:** `SolidText`, `TextObject`
-- **Cách chạy:** lệnh có sẵn của OM9 (khối chính xác bằng lõi B-Rep); bản không có lõi dùng lệnh của add-on
+- **Gọi bằng dòng lệnh:** `SolidText`, `Text`, `TextObject`
+- **Cách chạy:** từng bước trên dòng lệnh, kèm bảng BUILDERS; Enter để tạo, Esc để huỷ
 
 ## Cách dùng
 
@@ -20,6 +20,7 @@ Tạo chữ từ phông TrueType/OpenType đã cài: đường viền, mặt ph�
 - Create: Curves / Surfaces / Solids.
 - Height: cao chữ hoa.
 - SolidThickness: dày khối.
+- FilletRadius: bo cạnh trên của khối chữ (chỉ khi Create=Solids; 0 = không bo).
 - Spacing, SmallCaps: khoảng cách, chữ thường thành hoa nhỏ.
 
 | Dòng lệnh | Ý nghĩa | Mặc định | Khoảng |
@@ -32,6 +33,7 @@ Tạo chữ từ phông TrueType/OpenType đã cài: đường viền, mặt ph�
 | `Create=` | Tạo (Create) | solids | curves, surfaces, solids |
 | `Height=` | Cao chữ (Height) | 3 | 0.1 … 500 |
 | `SolidThickness=` | Độ dày khối (Solid thickness) | 0.5 | 0.01 … 100 |
+| `FilletRadius=` | Bo cạnh trên khối chữ (0 = không bo) | 0 | 0 … 10 |
 | `Spacing=` | Thêm khoảng cách chữ (Add spacing) | 0 | -10 … 50 |
 | `SmallCaps=` | Chữ thường thành hoa nhỏ (Lower case as small caps) | No |  |
 | `SmallCapsSize=` | Cỡ hoa nhỏ (%) | 70 | 10 … 100 |

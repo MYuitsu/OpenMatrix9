@@ -1081,6 +1081,8 @@ fn text(e: &Event) -> Reply {
     };
     let create = e.text("text_create", "solids").to_owned();
     let thickness = e.number("text_depth", 0.5);
+    // Rounded top edges: solids only (curves and surfaces have no edges to round).
+    let fillet = if create == "solids" { e.number("text_fillet", 0.0).max(0.0) } else { 0.0 };
     let outlines = |p: Vec3| text::outlines(&spec, &Frame::new(p, e.plane.normal(), e.plane.x));
     flow.step(
         e,
@@ -1090,18 +1092,28 @@ fn text(e: &Event) -> Reply {
             ..Default::default()
         },
         &|c| {
-            let curves = outlines(c.p(0).ok_or("Text: pick the start point")?)?;
-            let made = text::build(&curves, &create, thickness, e.plane.normal());
+            let at = c.p(0).ok_or("Text: pick the start point")?;
+            let made = if fillet > 0.0 {
+                let glyphs = text::layout(&spec)?;
+                let frame = Frame::new(at, e.plane.normal(), e.plane.x);
+                text::rounded(&glyphs, &frame, thickness, fillet, spec.height)
+                    .into_iter()
+                    .map(|m| solid_geo(m, "Text"))
+                    .collect()
+            } else {
+                text::build(&outlines(at)?, &create, thickness, e.plane.normal())
+            };
             if made.is_empty() {
                 return Err("Text: this font gives no closed outlines (try Create=Curves)".into());
             }
             Ok(Reply::finish(made).say(format!(
-                "Text: \"{}\" in {}{}{}, {} mm high",
+                "Text: \"{}\" in {}{}{}, {} mm high{}",
                 spec.text,
                 spec.font,
                 if spec.bold { " Bold" } else { "" },
                 if spec.italic { " Italic" } else { "" },
-                fmt(spec.height)
+                fmt(spec.height),
+                if fillet > 0.0 { format!(", edges rounded r = {}", fmt(fillet)) } else { String::new() }
             )))
         },
     )

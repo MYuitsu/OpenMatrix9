@@ -1744,7 +1744,7 @@ dependencies = [
 
 [[package]]
 name = "om9-addon-matrix"
-version = "0.9.3"
+version = "0.9.4"
 dependencies = [
  "om9-addon-abi",
  "om9-addon-builders",
