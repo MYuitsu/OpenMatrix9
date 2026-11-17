@@ -1,6 +1,6 @@
 # Refit to Tolerance
 
-Làm lại mặt ít điểm nhất trong dung sai.
+Như FitSrf Rhino 5: làm lại mặt ít điểm nhất trong dung sai (UDegree, VDegree, DeleteInput).
 
 - **Mã lệnh:** `SurfaceSurfaceEditToolsRefittoTolerance`
 - **Vị trí:** menu Surface, ô số 40
@@ -19,4 +19,7 @@ Làm lại mặt ít điểm nhất trong dung sai.
 
 | Dòng lệnh | Ý nghĩa | Mặc định | Khoảng |
 |---|---|---|---|
+| `UDegree=` | Bậc U | 3 | 1 … 7 |
+| `VDegree=` | Bậc V | 3 | 1 … 7 |
+| `DeleteInput=` | Xoá mặt gốc | Yes |  |
 | `Tolerance=` | Dung sai | 0.01 | 0.0001 … 5 |

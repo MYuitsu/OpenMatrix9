@@ -104,8 +104,11 @@ impl Interactive for Solids {
             PIPE => pipe(e),
             BOX | SPHERE | ELLIPSOID | TORUS | CYLINDER | TUBE | PYRAMID | CONE
             | TRUNCATED_CONE => primitive(e),
-            BOSS | RIB | SLAB => boss_rib_slab(e),
-            MAKE_HOLE | ARRAY_HOLE | ARRAY_HOLE_POLAR | MOVE_HOLE => holes(e),
+            BOSS => boss_rib_slab(e),
+            SLAB => rhino_tools::slab(e),
+            RIB => rhino_tools::rib(e),
+            MAKE_HOLE => rhino_tools::make_hole(e),
+            ARRAY_HOLE | ARRAY_HOLE_POLAR | MOVE_HOLE => holes(e),
             MOVE_FACE => move_face(e),
             SHELL => shell(e),
             // The solid's points (mesh vertices, NURBS control points) in the point editor.
@@ -511,16 +514,31 @@ fn shell(e: &Event) -> Reply {
     })
 }
 
+/// Rhino 5 MoveFace: Select face (a click on it), Point to move from, Point to move to;
+/// DirectionConstraint None (any way) / Normal (along the face normal only).
 fn move_face(e: &Event) -> Reply {
-    let flow = Flow::new("Move Face")
-        .point("Click on the face to move (seen from above the CPlane)")
-        .number("Distance along the face normal", 1.0);
+    // DirectionConstraint now (as set so far, or being set by this input).
+    let constraint = match &e.input {
+        Input::Option { name, value: Some(v) } if name.eq_ignore_ascii_case("DirectionConstraint") => v.clone(),
+        _ => load::<Collected>(e).options.get("DirectionConstraint").cloned().unwrap_or_else(|| "None".into()),
+    };
+    let to_boundary = constraint.eq_ignore_ascii_case("ToBoundary");
+    let mut flow = Flow::new("Move Face").point("Select face");
+    if !to_boundary {
+        flow = flow.point("Point to move from").point("Point to move to");
+    }
+    let flow = flow
+        .choice("DirectionConstraint", &["None", "Normal", "ToBoundary"], "None")
+        .toggle("DeleteBoundary", false);
     flow.step(e, &|_, _| Show::default(), &|c| {
         let objs = solids(e);
         let s = objs.first().ok_or("Move Face: select the solid")?;
         let m = s.mesh.as_ref().unwrap();
-        let seed = triangle_under(m, c.p(0).unwrap(), e.plane.normal())
-            .ok_or("Move Face: the point is not over the solid")?;
+        let click = c.p(0).unwrap();
+        // The triangle nearest the click (the face clicked on).
+        let seed = nearest_triangle(m, click)
+            .or_else(|| triangle_under(m, click, e.plane.normal()))
+            .ok_or("Move Face: click on the solid")?;
         let face = region(m, seed, 1.0);
         let tr = m.triangles[seed];
         let n = shapes::tri_normal(
@@ -528,16 +546,42 @@ fn move_face(e: &Event) -> Reply {
             m.vertices[tr[1] as usize],
             m.vertices[tr[2] as usize],
         );
-        let d = c.n(0).unwrap();
-        let moving: std::collections::HashSet<u32> =
-            face.iter().flat_map(|&t| m.triangles[t]).collect();
+        let moving: std::collections::HashSet<u32> = face.iter().flat_map(|&t| m.triangles[t]).collect();
+        if to_boundary {
+            // ToBoundary: each point of the face runs along the face normal (either way) to
+            // the boundary object; the face takes the boundary's shape there.
+            let bound = objs.get(1).ok_or("Move Face: select the boundary object too")?;
+            let bm = bound.mesh.as_ref().unwrap();
+            let mut vertices = m.vertices.clone();
+            for &i in &moving {
+                let p = m.vertices[i as usize];
+                let hit = [n, scale(n, -1.0)]
+                    .iter()
+                    .filter_map(|d| rhino_tools::cast_mesh(bm, p, *d).map(|t| add(p, scale(*d, t))))
+                    .min_by(|a, b| dist(*a, p).total_cmp(&dist(*b, p)))
+                    .ok_or("Move Face: the face does not reach the boundary")?;
+                vertices[i as usize] = hit;
+            }
+            let mut r = Reply::finish(Vec::new()).say(format!("Move Face: {} triangles moved to the boundary", face.len()));
+            r.replace.push(Replacement {
+                id: s.id.clone(),
+                geo: Geo::Mesh { name: s.name.clone(), vertices, triangles: m.triangles.clone(), meta: None, layer: None },
+            });
+            if c.yes(&flow, "DeleteBoundary") {
+                r.delete.push(bound.id.clone());
+            }
+            return Ok(r);
+        }
+        let mv = sub(c.p(2).unwrap(), c.p(1).unwrap());
+        let mv = if c.opt(&flow, "DirectionConstraint") == "Normal" { scale(n, dot(mv, n)) } else { mv };
+        let d = dot(mv, mv).sqrt();
         let vertices = m
             .vertices
             .iter()
             .enumerate()
             .map(|(i, &v)| {
                 if moving.contains(&(i as u32)) {
-                    add(v, scale(n, d))
+                    add(v, mv)
                 } else {
                     v
                 }
@@ -560,6 +604,40 @@ fn move_face(e: &Event) -> Reply {
         });
         Ok(r)
     })
+}
+
+/// The triangle nearest a point (within a hair of the surface: the click lies on it).
+fn nearest_triangle(m: &SelectedMesh, p: Vec3) -> Option<usize> {
+    let closest = |a: Vec3, b: Vec3, c: Vec3| -> f64 {
+        // Distance to the triangle: the plane foot if inside, else the nearest edge.
+        let n = om9_addon_abi::session::cross(sub(b, a), sub(c, a));
+        let l = dot(n, n).sqrt();
+        if l < 1e-300 {
+            return f64::MAX;
+        }
+        let n = scale(n, 1.0 / l);
+        let foot = sub(p, scale(n, dot(sub(p, a), n)));
+        let inside = [(a, b), (b, c), (c, a)].iter().all(|(x, y)| dot(om9_addon_abi::session::cross(sub(*y, *x), sub(foot, *x)), n) >= -1e-12);
+        if inside {
+            return dot(sub(p, a), n).abs();
+        }
+        [(a, b), (b, c), (c, a)]
+            .iter()
+            .map(|(x, y)| {
+                let ab = sub(*y, *x);
+                let t = (dot(sub(p, *x), ab) / dot(ab, ab).max(1e-300)).clamp(0.0, 1.0);
+                dist(p, add(*x, scale(ab, t)))
+            })
+            .fold(f64::MAX, f64::min)
+    };
+    let (i, d) = m
+        .triangles
+        .iter()
+        .enumerate()
+        .map(|(i, t)| (i, closest(m.vertices[t[0] as usize], m.vertices[t[1] as usize], m.vertices[t[2] as usize])))
+        .min_by(|a, b| a.1.total_cmp(&b.1))?;
+    let size = m.vertices.iter().fold(0.0f64, |s, v| s.max(v[0].abs()).max(v[1].abs()).max(v[2].abs()));
+    (d <= 1e-3 * size.max(1.0)).then_some(i)
 }
 
 // ---- primitives ------------------------------------------------------------------------------
@@ -1037,29 +1115,45 @@ fn drill(curve: &[Vec3], n: Vec3, depth: f64) -> Option<Mesh> {
 fn holes(e: &Event) -> Reply {
     let cmd = e.command.as_str();
     let n = e.plane.normal();
+    // Rhino 5: "Select a hole" — a click on the edge of a hole in the solid. A closed curve
+    // selected with the solid still names the hole the old way.
+    let by_curve = curves(e).iter().any(|c| c.closed);
     let flow = match cmd {
         MAKE_HOLE => Flow::new("Make Hole"),
+        // Rhino 5 ArrayHole: the numbers in the A and B directions, a base point, then the
+        // A direction and spacing (a point), the B direction and spacing (Rectangular: square
+        // to A in the CPlane; UseASpacing: the A spacing).
         ARRAY_HOLE => Flow::new("Array Hole")
-            .number("Number in the CPlane x direction", 3.0)
-            .number("Number in the CPlane y direction", 1.0)
-            .number("Spacing in x", 2.0)
-            .number("Spacing in y", 2.0),
+            .number("Number of holes in the A-direction", 3.0)
+            .number("Number of holes in the B-direction", 1.0)
+            .point("Base point")
+            .point("A-direction and distance")
+            .point("B-direction and distance")
+            .toggle("Rectangular", true)
+            .toggle("UseASpacing", false),
         ARRAY_HOLE_POLAR => Flow::new("Array Hole Polar")
             .point("Center of the polar array")
             .number("Number of holes", 6.0)
             .number("Angle to fill", 360.0),
         _ => Flow::new("Move Hole")
-            .point("Point to move the hole from")
-            .point("Point to move the hole to"),
+            .point("Point to move from")
+            .point("Point to move to")
+            .toggle("Copy", false),
     };
+    let flow = if by_curve { flow } else { flow.point_first("Select a hole") };
+    let off = usize::from(!by_curve);
     let compute = |c: &Collected| -> Result<(String, Mesh, String), String> {
         let objs = solids(e);
-        let s = objs.first().ok_or("select the solid and the hole curve")?;
+        let s = objs.first().ok_or("select the solid")?;
         let cs = curves(e);
-        let hole = cs
-            .iter()
-            .find(|c| c.closed)
-            .ok_or("select a closed curve for the hole")?;
+        let hole_pts: Vec<Vec3> = match cs.iter().find(|c| c.closed) {
+            Some(h) => h.points.clone(),
+            None => rhino_tools::pick_hole(s.mesh.as_ref().unwrap(), c.p(0).ok_or("select a hole")?)
+                .ok_or("no hole there: click on the edge of a hole in a flat face")?,
+        };
+        let hole = &HoleCurve { points: hole_pts };
+        // Point answers after the hole pick.
+        let c = &c.shifted(off);
         let depth = dist(s.bbox[0], s.bbox[1]) + 1.0;
         let base = to_mesh(s.mesh.as_ref().unwrap());
         let moved = |d: Vec3| -> Vec<Vec3> { hole.points.iter().map(|&p| add(p, d)).collect() };
@@ -1083,13 +1177,30 @@ fn holes(e: &Event) -> Reply {
                     c.n(0).unwrap().round().max(1.0) as usize,
                     c.n(1).unwrap().round().max(1.0) as usize,
                 );
-                let (dx, dy) = (c.n(2).unwrap(), c.n(3).unwrap());
+                let base = c.p(0).ok_or("pick the base point")?;
+                let flat = |v: Vec3| sub(v, scale(n, dot(v, n)));
+                let a = flat(sub(c.p(1).ok_or("pick the A direction")?, base));
+                let mut b = flat(sub(c.p(2).ok_or("pick the B direction")?, base));
+                let la = dot(a, a).sqrt();
+                if la < 1e-9 {
+                    return Err("the A direction has no length".into());
+                }
+                if c.yes(&flow, "Rectangular") {
+                    // Square to A, on B's side, keeping B's length.
+                    let side = om9_addon_abi::session::cross(n, scale(a, 1.0 / la));
+                    let lb = dot(b, b).sqrt();
+                    b = scale(side, if dot(b, side) < 0.0 { -lb } else { lb });
+                }
+                if c.yes(&flow, "UseASpacing") {
+                    let lb = dot(b, b).sqrt().max(1e-300);
+                    b = scale(b, la / lb);
+                }
+                if ny > 1 && dot(b, b) < 1e-18 {
+                    return Err("the B direction has no length".into());
+                }
                 for i in 0..nx {
                     for j in 0..ny {
-                        let d = add(
-                            scale(e.plane.x, i as f64 * dx),
-                            scale(e.plane.y, j as f64 * dy),
-                        );
+                        let d = add(scale(a, i as f64), scale(b, j as f64));
                         cutters.push(
                             drill(&moved(d), n, depth).ok_or("the hole curve is not planar")?,
                         );
@@ -1116,10 +1227,12 @@ fn holes(e: &Event) -> Reply {
                 msg = format!("Array Hole Polar: {count} holes");
             }
             _ => {
-                // Fill the hole where it was, cut it where it goes.
-                let plug = drill(&hole.points, n, depth).ok_or("the hole curve is not planar")?;
-                let plug = csg::boolean(&plug, &base_slab(&base), Op::Intersection);
-                result = csg::boolean(&result, &plug, Op::Union);
+                // Fill the hole where it was (unless Copy), cut it where it goes.
+                if !c.yes(&flow, "Copy") {
+                    let plug = drill(&hole.points, n, depth).ok_or("the hole curve is not planar")?;
+                    let plug = csg::boolean(&plug, &base_slab(&base), Op::Intersection);
+                    result = csg::boolean(&result, &plug, Op::Union);
+                }
                 let d = sub(c.p(1).unwrap(), c.p(0).unwrap());
                 cutters.push(drill(&moved(d), n, depth).ok_or("the hole curve is not planar")?);
                 msg = "Move Hole: hole moved".to_owned();
@@ -1152,11 +1265,18 @@ fn holes(e: &Event) -> Reply {
     })
 }
 
+/// A hole outline (picked on the solid or a selected closed curve).
+struct HoleCurve {
+    points: Vec<Vec3>,
+}
+
 /// The box of a mesh (used to keep a plug inside the solid it fills).
 fn base_slab(m: &Mesh) -> Mesh {
     let b = m.bbox();
     mesh::cuboid(b[0], b[1])
 }
+
+mod rhino_tools;
 
 #[cfg(test)]
 mod tests;

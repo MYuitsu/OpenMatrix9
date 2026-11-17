@@ -1,6 +1,6 @@
 # Shrink Trimmed Surface
 
-Thu miền mặt NURBS vừa phần đã cắt (trim).
+Thu mặt nền vừa sát phần đã cắt như Rhino 5 ShrinkTrimmedSrf: hình không đổi (chính xác).
 
 - **Mã lệnh:** `SurfaceSurfaceEditToolsShrinkTrimmedSurface`
 - **Vị trí:** menu Surface, ô số 11

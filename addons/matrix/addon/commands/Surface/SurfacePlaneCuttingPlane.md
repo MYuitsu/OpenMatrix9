@@ -1,6 +1,6 @@
 # Cutting Plane
 
-Mặt phẳng cắt đứng qua đường bấm, đủ cao cho vật đã chọn.
+Như CutPlane Rhino 5: mặt phẳng đứng qua đường bấm, đủ lớn để cắt qua mọi vật đã chọn.
 
 - **Mã lệnh:** `SurfacePlaneCuttingPlane`
 - **Vị trí:** menu Surface, ô số 37

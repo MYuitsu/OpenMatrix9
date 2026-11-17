@@ -651,7 +651,7 @@ impl Controller {
         Ok(())
     }
 
-    fn stage_builder_preview_representations(&self, prepared: &mut om9_core::transaction::PreparedTransaction,
+    pub(super) fn stage_builder_preview_representations(&self, prepared: &mut om9_core::transaction::PreparedTransaction,
         candidates: &mut [om9_core::brep::Brep], held: om9_core::budget::Usage) -> Result<()> {
         use om9_core::{brep::{BrepRepresentation, BrepRepresentationProfile, BrepSourceAccess, BrepSourceIdentity},
             budget::{Usage, memory::MemoryClass}};

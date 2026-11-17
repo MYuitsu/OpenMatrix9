@@ -65,6 +65,10 @@ pub struct CommandSpec {
     /// `mesh_data = true`: an interactive command receives the triangles of selected meshes
     /// and solids (Metal Weights, Object Checker …). Off by default: it is heavy.
     pub mesh_data: bool,
+    /// `builtin = true`: the command is OM9's own command of the same catalog code (exact
+    /// solids …). The add-on keeps the menu entry, name and help; OM9 runs its own command
+    /// whenever it is available in this build, and the add-on's `handler` only otherwise.
+    pub builtin: bool,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -395,6 +399,7 @@ pub fn from_table(t: &Table, chk: &Check) -> Result<Manifest, Vec<String>> {
         let builder = matches!(c.get("builder"), Some(Value::Bool(true)));
         let interactive = matches!(c.get("interactive"), Some(Value::Bool(true)));
         let mesh_data = matches!(c.get("mesh_data"), Some(Value::Bool(true)));
+        let builtin = matches!(c.get("builtin"), Some(Value::Bool(true)));
         let aliases = cr.str_list("aliases").unwrap_or_default();
         let mut errs: Vec<String> = cr.errs.into_iter().map(|e| format!("{ctx}: {e}")).collect();
         for a in &aliases {
@@ -458,6 +463,7 @@ pub fn from_table(t: &Table, chk: &Check) -> Result<Manifest, Vec<String>> {
             interactive,
             aliases,
             mesh_data,
+            builtin,
         });
     }
     if addon_type == AddonType::AddOn && commands.is_empty() {

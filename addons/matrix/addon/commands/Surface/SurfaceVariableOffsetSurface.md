@@ -1,21 +1,23 @@
 # Variable Offset Surface
 
-Offset với khoảng khác nhau ở bốn góc.
+Offset với khoảng thay đổi trên mặt như Rhino 5 VariableOffsetSrf: tay nắm ở bốn góc, thêm tay nắm; mặt khớp trong dung sai.
 
 - **Mã lệnh:** `SurfaceVariableOffsetSurface`
 - **Vị trí:** menu Surface, ô số 26
 - **Icon:** `Resources/icons/surface-minimal/SurfaceVariableOffsetSurface.svg`
 - **Gọi bằng dòng lệnh:** `SurfaceVariableOffsetSurface`, `VariableOffsetSrf`
-- **Cách chạy:** từng bước trên dòng lệnh, kèm bảng BUILDERS; Enter để tạo, Esc để huỷ
+- **Cách chạy:** từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ
 
 ## Cách dùng
 
 1. Chọn mặt.
-2. Chỉnh bốn khoảng.
-3. Enter.
+2. Bấm gần tay nắm để gõ khoảng; AddHandle thêm tay nắm; Enter để tạo.
 
 ## Tuỳ chọn (lệnh phụ)
 
+- SetAll: một khoảng cho mọi tay nắm.
+- AddHandle: thêm tay nắm tại điểm trên mặt.
+- Flip: đổi phía.
 
 | Dòng lệnh | Ý nghĩa | Mặc định | Khoảng |
 |---|---|---|---|

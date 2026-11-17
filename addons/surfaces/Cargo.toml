@@ -13,6 +13,7 @@ name = "om9_surfaces"
 [dependencies]
 om9-addon-abi = { path = "../../crates/om9-addon-abi", features = ["session"] }
 om9-addon-geom = { path = "../geom" }
+om9-addon-curves = { path = "../curves", default-features = false }
 serde = { workspace = true }
 serde_json = { workspace = true }
 om9-addon-tools = { path = "../tools" }

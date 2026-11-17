@@ -249,6 +249,16 @@ pub enum Geo {
         weights: Vec<f64>,
         knots: [Vec<f64>; 2],
     },
+    /// A surface trimmed by closed loops of curves lying on it (a trimmed face, as Rhino's
+    /// PlanarSrf, Trim or Split make): `loops[0]` is the outer boundary, the others are holes;
+    /// each loop is curves end to end. The host makes an exact face with the B-Rep kernel;
+    /// `display` (a mesh) is what a build without the kernel shows.
+    Trimmed {
+        surface: Box<Geo>,
+        loops: Vec<Vec<Geo>>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        display: Option<Box<Geo>>,
+    },
     Mesh {
         #[serde(default)]
         name: String,

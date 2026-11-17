@@ -18,21 +18,20 @@ id = "SurfaceSweepSweep1Rail"
 label = "Sweep 1 Rail"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 aliases = ["Sweep1"]
-summary = "Quét các profile dọc một đường ray (ray kín: nhẫn)."
-steps = ["Chọn ray (đường dài nhất) và các profile.", "Enter."]
+summary = "Quét các mặt cắt dọc một đường ray như Rhino 5; mặt đi qua đúng từng mặt cắt."
+steps = ["Chọn ray.", "Chọn các mặt cắt theo thứ tự (Point: bắt đầu/kết thúc tại một điểm), Enter.", "Chỉnh tuỳ chọn khi xem trước, Enter để tạo."]
+options = ["Style: Freeform giữ góc với ray; Roadlike Top/Right/Front giữ theo trục cố định.", "Closed: quét kín quay về mặt cắt đầu (ray kín, từ hai mặt cắt).", "GlobalBlend: chuyển hình tuyến tính từ đầu đến cuối.", "Simplify: None / Rebuild (số điểm) / Refit (dung sai) cho mặt cắt."]
 
 [[commands]]
 id = "SurfaceSweepSweep2Rails"
 label = "Sweep 2 Rails"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 aliases = ["Sweep2"]
-summary = "Quét profile giữa hai đường ray, profile co giãn theo khoảng cách hai ray."
-steps = ["Chọn hai ray và các profile.", "Enter."]
-options = ["MaintainHeight: giữ chiều cao profile."]
+summary = "Quét mặt cắt giữa hai đường ray như Rhino 5; hai cạnh mặt nằm đúng trên hai ray."
+steps = ["Chọn ray thứ nhất.", "Chọn ray thứ hai.", "Chọn các mặt cắt theo thứ tự (Point: bắt đầu/kết thúc tại một điểm), Enter.", "Chỉnh tuỳ chọn khi xem trước, Enter để tạo."]
+options = ["MaintainHeight: mặt cắt co giãn theo bề ngang nhưng giữ chiều cao.", "Closed: quét kín quay về mặt cắt đầu (hai ray kín, từ hai mặt cắt).", "Simplify: None / Rebuild (số điểm) / Refit (dung sai) cho mặt cắt."]
 
 [[commands]]
 id = "SurfaceSweepProfileSweep"
@@ -77,20 +76,20 @@ id = "SurfaceBlendSurface"
 label = "Blend Surface"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 aliases = ["BlendSrf"]
-summary = "Mặt chuyển tiếp tiếp tuyến giữa hai mép mặt gần nhau."
-steps = ["Chọn hai mặt.", "Chỉnh độ phình.", "Enter."]
+summary = "Mặt chuyển tiếp giữa hai cạnh mặt như Rhino 5 BlendSrf: Position / Tangency / Curvature mỗi đầu, độ phồng mỗi đầu."
+steps = ["Bấm gần cạnh thứ nhất.", "Bấm gần cạnh thứ hai.", "Chỉnh liên tục và độ phồng khi xem trước, Enter."]
+options = ["Continuity1 / Continuity2: Position, Tangency, Curvature.", "Bulge1 / Bulge2: độ phồng mỗi đầu."]
 
 [[commands]]
 id = "SurfaceVariableFilletBlendChamferVariableBlendSurfaces"
 label = "Variable Blend Surface"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 aliases = ["VariableBlendSrf"]
-summary = "Blend có độ phình thay đổi dọc mép."
-steps = ["Chọn hai mặt.", "Chỉnh phình đầu và cuối.", "Enter."]
+summary = "Mặt chuyển tiếp liên tục độ cong với bán kính thay đổi dọc cạnh như Rhino 5 VariableBlendSrf, có tay nắm."
+steps = ["Chọn mặt thứ nhất (bấm phía giữ).", "Chọn mặt thứ hai (bấm phía giữ).", "Bấm gần tay nắm để gõ bán kính; AddHandle thêm tay nắm; Enter để tạo."]
+options = ["SetAll: một bán kính cho mọi tay nắm.", "AddHandle: thêm tay nắm tại điểm trên cạnh.", "Trim: cắt mặt gốc theo mép."]
 
 [[commands]]
 id = "SurfaceLoft"
@@ -109,8 +108,9 @@ label = "Curve Network"
 handler = "om9_addon_session"
 interactive = true
 aliases = ["NetworkSrf"]
-summary = "Mặt từ lưới đường cong hai hướng."
-steps = ["Chọn các đường cong cả hai hướng.", "Enter."]
+summary = "Mặt từ lưới đường cong hai hướng (Rhino 5 NetworkSrf): mặt đi qua mọi đường trong dung sai."
+steps = ["Chọn các đường cong cả hai hướng (tự sắp xếp).", "Enter."]
+options = ["Dung sai cạnh / bên trong: mặt bám đường cong trong khoảng này.", "Khoảng hở giao: hai đường cách nhau hơn mức này coi như không cắt nhau."]
 
 [[commands]]
 id = "SurfaceSurfaceEditToolsShrinkTrimmedSurface"
@@ -119,7 +119,7 @@ handler = "om9_addon_session"
 interactive = true
 mesh_data = true
 aliases = ["ShrinkTrimmedSrf"]
-summary = "Thu miền mặt NURBS vừa phần đã cắt (trim)."
+summary = "Thu mặt nền vừa sát phần đã cắt như Rhino 5 ShrinkTrimmedSrf: hình không đổi (chính xác)."
 steps = ["Chọn mặt.", "Enter."]
 
 [[commands]]
@@ -128,8 +128,9 @@ label = "Patch"
 handler = "om9_addon_session"
 interactive = true
 aliases = ["Patch"]
-summary = "Mặt vá qua đường biên (kín hoặc nhiều đoạn)."
-steps = ["Chọn đường biên.", "Enter."]
+summary = "Mặt vá khớp qua các đường và điểm như Rhino 5 Patch; tự cắt theo đường biên kín."
+steps = ["Chọn điểm, đường cong (biên và đường bên trong).", "Enter."]
+options = ["Khoảng cách điểm mẫu, số nhịp U/V, độ cứng (càng lớn càng phẳng).", "Tự cắt: cắt theo đường kín bên ngoài."]
 
 [[commands]]
 id = "SurfaceEdgeCurves"
@@ -176,8 +177,9 @@ label = "Rail Revolve"
 handler = "om9_addon_session"
 interactive = true
 aliases = ["RailRevolve"]
-summary = "Xoay profile quanh trục, bán kính theo đường ray."
-steps = ["Chọn profile rồi ray.", "Bấm hai điểm trục."]
+summary = "Xoay profile quanh trục, chân profile chạy theo đường ray (Rhino 5); mặt chính xác."
+steps = ["Chọn đường profile.", "Chọn đường ray.", "Điểm đầu trục.", "Điểm cuối trục."]
+options = ["ScaleHeight: co giãn profile theo chiều trục từ gốc trục (ray không phẳng)."]
 
 [[commands]]
 id = "BuilderFourProfileSweep"
@@ -207,7 +209,7 @@ handler = "om9_addon_session"
 interactive = true
 builder = true
 aliases = ["TweenSrf"]
-summary = "Các mặt trung gian giữa hai mặt."
+summary = "Các mặt trung gian giữa hai mặt như Rhino 5 TweenSurfaces: góc khớp, điểm điều khiển nối nhau (chính xác)."
 steps = ["Chọn hai mặt.", "Chỉnh số mặt.", "Enter."]
 
 [[commands]]
@@ -215,68 +217,66 @@ id = "SurfaceFilletSurfaces"
 label = "Fillet Surfaces"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 mesh_data = true
 aliases = ["FilletSrf"]
-summary = "Bo cung giữa hai mặt cắt nhau (mặt gốc không bị cắt)."
-steps = ["Chọn hai mặt.", "Chỉnh bán kính, phía.", "Enter."]
-options = ["FlipFirst / FlipSecond: chọn phía."]
+summary = "Bo cung bán kính không đổi giữa hai mặt như Rhino 5 FilletSrf (bi lăn); mặt bo trong dung sai."
+steps = ["Chọn mặt thứ nhất: bấm vào phía muốn giữ.", "Chọn mặt thứ hai: bấm vào phía muốn giữ."]
+options = ["Radius: bán kính bo.", "Trim: cắt hai mặt gốc theo mép bo, giữ phía đã bấm (mặc định Yes)."]
 
 [[commands]]
 id = "SurfaceVariableFilletBlendChamferVariableFilletSurfaces"
 label = "Variable Fillet"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 mesh_data = true
 aliases = ["VariableFilletSrf"]
-summary = "Bo cung bán kính thay đổi dọc giao tuyến."
-steps = ["Chọn hai mặt.", "Chỉnh bán kính đầu, cuối.", "Enter."]
+summary = "Bo cung bán kính thay đổi dọc cạnh như Rhino 5 VariableFilletSrf (bi lăn), có tay nắm."
+steps = ["Chọn mặt thứ nhất (bấm phía giữ).", "Chọn mặt thứ hai (bấm phía giữ).", "Bấm gần tay nắm để gõ bán kính; AddHandle thêm tay nắm; Enter để tạo."]
+options = ["SetAll: một bán kính cho mọi tay nắm.", "AddHandle: thêm tay nắm tại điểm trên cạnh.", "Trim: cắt mặt gốc theo mép bo."]
 
 [[commands]]
 id = "SurfaceChamferSurfaces"
 label = "Chamfer Surfaces"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 mesh_data = true
 aliases = ["ChamferSrf"]
-summary = "Vát phẳng giữa hai mặt cắt nhau."
-steps = ["Chọn hai mặt.", "Chỉnh khoảng vát.", "Enter."]
+summary = "Vát phẳng giữa hai mặt cắt nhau như Rhino 5 ChamferSrf: hai khoảng vát tính từ giao tuyến."
+steps = ["Chọn mặt thứ nhất: bấm vào phía muốn giữ.", "Chọn mặt thứ hai: bấm vào phía muốn giữ."]
+options = ["Distances: khoảng vát trên mặt thứ nhất, rồi trên mặt thứ hai.", "Trim: cắt hai mặt gốc theo mép vát, giữ phía đã bấm (mặc định Yes)."]
 
 [[commands]]
 id = "SurfaceVariableFilletBlendChamferVariableChamferSurfaces"
 label = "Variable Chamfer"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 mesh_data = true
 aliases = ["VariableChamferSrf"]
-summary = "Vát với khoảng thay đổi dọc giao tuyến."
-steps = ["Chọn hai mặt.", "Chỉnh khoảng đầu, cuối.", "Enter."]
+summary = "Vát với khoảng thay đổi dọc cạnh như Rhino 5 VariableChamferSrf, có tay nắm."
+steps = ["Chọn mặt thứ nhất (bấm phía giữ).", "Chọn mặt thứ hai (bấm phía giữ).", "Bấm gần tay nắm để gõ khoảng vát (một số, hoặc hai số: thứ nhất,thứ hai); Enter để tạo."]
+options = ["SetAll: một khoảng cho mọi tay nắm.", "AddHandle: thêm tay nắm tại điểm trên cạnh.", "Trim: cắt mặt gốc theo mép vát."]
 
 [[commands]]
 id = "SurfaceOffsetSurface"
 label = "Offset Surface"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 mesh_data = true
 aliases = ["OffsetSrf"]
-summary = "Mặt song song cách đều (mặt NURBS hoặc lưới)."
-steps = ["Chọn mặt.", "Chỉnh khoảng.", "Enter."]
-options = ["Flip: phía ngược."]
+summary = "Mặt song song cách đều như Rhino 5 OffsetSrf: mặt phẳng, cầu, trụ chính xác; mặt tự do trong dung sai."
+steps = ["Chọn mặt cần offset, Enter.", "Gõ khoảng offset (Enter: giữ mặc định)."]
+options = ["FlipAll: đổi phía.", "Loose: giữ nguyên cấu trúc điểm của mặt gốc.", "Tolerance: dung sai (0 = mặc định).", "BothSides: offset cả hai phía.", "DeleteInput: xoá mặt gốc."]
 
 [[commands]]
 id = "SurfaceVariableOffsetSurface"
 label = "Variable Offset Surface"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 mesh_data = true
 aliases = ["VariableOffsetSrf"]
-summary = "Offset với khoảng khác nhau ở bốn góc."
-steps = ["Chọn mặt.", "Chỉnh bốn khoảng.", "Enter."]
+summary = "Offset với khoảng thay đổi trên mặt như Rhino 5 VariableOffsetSrf: tay nắm ở bốn góc, thêm tay nắm; mặt khớp trong dung sai."
+steps = ["Chọn mặt.", "Bấm gần tay nắm để gõ khoảng; AddHandle thêm tay nắm; Enter để tạo."]
+options = ["SetAll: một khoảng cho mọi tay nắm.", "AddHandle: thêm tay nắm tại điểm trên mặt.", "Flip: đổi phía."]
 
 [[commands]]
 id = "SurfaceSurfaceEditToolsMerge"
@@ -284,19 +284,19 @@ label = "Merge Surfaces"
 handler = "om9_addon_session"
 interactive = true
 aliases = ["MergeSrf"]
-summary = "Gộp hai mặt chung mép thành một mặt."
-steps = ["Chọn hai mặt.", "Enter."]
+summary = "Gộp hai mặt chung một cạnh thành một mặt như Rhino 5 MergeSrf (Smooth=No: chính xác)."
+steps = ["Chọn mặt thứ nhất.", "Chọn mặt thứ hai: gộp ngay."]
+options = ["Smooth: nối mượt (đổi hình gần đường nối).", "Tolerance: hai cạnh phải trùng trong dung sai này.", "RoundnessFactor: 0 sắc … 1 mượt."]
 
 [[commands]]
 id = "SurfaceSurfaceEditToolsMatch"
 label = "Match Surface"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 aliases = ["MatchSrf"]
-summary = "Khớp mép mặt thứ nhất vào mép mặt thứ hai (vị trí / tiếp tuyến)."
-steps = ["Chọn mặt cần sửa rồi mặt đích.", "Enter."]
-options = ["Continuity: Position/Tangency."]
+summary = "Sửa mặt để cạnh của nó khớp cạnh mặt đích như Rhino 5 MatchSrf (Position / Tangency / Curvature), giữ đầu kia."
+steps = ["Bấm gần cạnh mặt cần sửa.", "Bấm gần cạnh mặt đích.", "Chọn Continuity khi xem trước, Enter."]
+options = ["Continuity: Position / Tangency / Curvature."]
 
 [[commands]]
 id = "SurfaceDrape"
@@ -325,9 +325,9 @@ label = "Split at Isocurve"
 handler = "om9_addon_session"
 interactive = true
 aliases = ["SplitSrf"]
-summary = "Cắt mặt thành hai theo đường đẳng tham số qua điểm bấm."
-steps = ["Chọn mặt.", "Direction=U/V.", "Bấm điểm trên mặt."]
-options = ["Direction."]
+summary = "Cắt mặt theo đường đẳng tham số như Rhino 5 Split (Isocurve): các mảnh chính xác."
+steps = ["Chọn mặt.", "Bấm vị trí đường đẳng tham số (đường đi theo chuột)."]
+options = ["Direction: U / V / Both."]
 
 [[commands]]
 id = "SurfaceExtendSurface"
@@ -335,20 +335,20 @@ label = "Extend Surface"
 handler = "om9_addon_session"
 interactive = true
 aliases = ["ExtendSrf"]
-summary = "Kéo dài một mép mặt."
-steps = ["Chọn mặt.", "Gõ độ dài.", "Bấm gần mép."]
+summary = "Kéo dài mặt qua một cạnh như Rhino 5 ExtendSrf: Smooth là chính mặt đó kéo dài (chính xác), Line kéo thẳng theo tiếp tuyến."
+steps = ["Chọn cạnh mặt cần kéo dài (bấm gần cạnh).", "Gõ độ dài (Enter: mặc định)."]
+options = ["Type: Smooth / Line."]
 
 [[commands]]
 id = "SurfaceExtrudeCurveNormalToSurface"
 label = "Extrude Curve Normal to Surface"
 handler = "om9_addon_session"
 interactive = true
-builder = true
 mesh_data = true
 aliases = ["ExtrudeCrvNormal"]
-summary = "Dựng dải mặt từ đường cong trên mặt, theo pháp tuyến mặt."
-steps = ["Chọn đường cong và mặt.", "Chỉnh cao.", "Enter."]
-options = ["Flip."]
+summary = "Dựng dải mặt (fin) từ đường cong trên mặt theo pháp tuyến hoặc tiếp tuyến mặt như Rhino 5 Fin."
+steps = ["Chọn đường cong trên mặt.", "Chọn mặt.", "Gõ chiều cao hoặc bấm điểm (Enter: mặc định)."]
+options = ["Direction: Normal / Tangent."]
 
 [[commands]]
 id = "SurfaceUnrollDevelopableSrf"
@@ -376,8 +376,9 @@ label = "Soft Edit Surface"
 handler = "om9_addon_session"
 interactive = true
 aliases = ["SoftEditSrf"]
-summary = "Kéo một điểm trên mặt, vùng quanh đi theo mềm mại."
-steps = ["Chọn mặt, Enter.", "Gõ vùng ảnh hưởng.", "Bấm điểm và điểm đích."]
+summary = "Kéo một điểm trên mặt như Rhino 5 SoftEditSrf: các điểm điều khiển quanh đó dời mềm, điểm bấm tới đúng chỗ."
+steps = ["Chọn mặt.", "Bấm điểm gốc trên mặt.", "Bấm điểm đích (mặt đi theo chuột)."]
+options = ["UDistance / VDistance: vùng ảnh hưởng dọc mặt (mm).", "FixEdges: giữ nguyên các cạnh.", "Copy: tạo bản sao, giữ mặt gốc."]
 
 [[commands]]
 id = "SurfacePlaneCuttingPlane"
@@ -385,7 +386,7 @@ label = "Cutting Plane"
 handler = "om9_addon_session"
 interactive = true
 aliases = ["CutPlane"]
-summary = "Mặt phẳng cắt đứng qua đường bấm, đủ cao cho vật đã chọn."
+summary = "Như CutPlane Rhino 5: mặt phẳng đứng qua đường bấm, đủ lớn để cắt qua mọi vật đã chọn."
 steps = ["Chọn vật.", "Bấm hai điểm đường cắt."]
 
 [[commands]]
@@ -394,8 +395,9 @@ label = "Adjust Closed Surface Seam"
 handler = "om9_addon_session"
 interactive = true
 aliases = ["SrfSeam"]
-summary = "Dời đường nối (seam) của mặt kín."
-steps = ["Chọn mặt kín.", "Bấm vị trí seam mới."]
+summary = "Dời đường nối (seam) của mặt kín như Rhino 5 SrfSeam; hình giữ nguyên chính xác."
+steps = ["Chọn mặt kín.", "Bấm vị trí seam mới (đường đi theo chuột)."]
+options = ["Direction: U / V."]
 
 [[commands]]
 id = "SurfaceSurfaceEditToolsSetSurfaceTangent"
@@ -403,8 +405,8 @@ label = "Set Surface Tangent"
 handler = "om9_addon_session"
 interactive = true
 aliases = ["SetSrfTangent"]
-summary = "Đặt hướng tiếp tuyến của một mép mặt."
-steps = ["Chọn mặt.", "Bấm gần mép, rồi bấm hướng."]
+summary = "Đặt hướng tiếp tuyến của mặt tại một cạnh như Rhino 5 SetSurfaceTangent; cạnh giữ nguyên, cạnh bên kia không đổi."
+steps = ["Chọn mặt.", "Bấm gần cạnh.", "Điểm gốc của hướng.", "Điểm thứ hai của hướng (mặt đi theo chuột)."]
 
 [[commands]]
 id = "SurfaceSurfaceEditToolsRefittoTolerance"
@@ -413,18 +415,411 @@ handler = "om9_addon_session"
 interactive = true
 builder = true
 aliases = ["RefitSrf"]
-summary = "Làm lại mặt ít điểm nhất trong dung sai."
+summary = "Như FitSrf Rhino 5: làm lại mặt ít điểm nhất trong dung sai (UDegree, VDegree, DeleteInput)."
 steps = ["Chọn mặt.", "Chỉnh dung sai.", "Enter."]
 
 [[settings]]
-key = "sw_stations"
-type = "int"
-option = "Stations"
-label = "Số trạm dọc ray"
-default = 48
-min = 4
-max = 400
+key = "sw_tolerance"
+type = "length"
+option = "SweepTolerance"
+label = "Dung sai quét (mm)"
+default = 0.001
+min = 0.00001
+max = 1.0
+step = 0.001
 commands = ["SurfaceSweepSweep1Rail", "SurfaceSweepSweep2Rails", "SurfaceSweepProfileSweep", "BuilderFourProfileSweep", "SurfaceSweepSweepMultiRail"]
+
+[[settings]]
+key = "sw2_closed"
+type = "bool"
+option = "Closed"
+label = "Quét kín (2 ray)"
+default = false
+commands = ["SurfaceSweepSweep2Rails"]
+
+[[settings]]
+key = "sw2_simplify"
+type = "enum"
+option = "Simplify"
+label = "Đơn giản mặt cắt (2 ray)"
+choices = ["none", "rebuild", "refit"]
+choice_labels = ["None", "Rebuild", "Refit"]
+default = "none"
+commands = ["SurfaceSweepSweep2Rails"]
+
+[[settings]]
+key = "sw2_rebuild_points"
+type = "int"
+option = "RebuildPoints"
+label = "Số điểm dựng lại mặt cắt (2 ray)"
+default = 10
+min = 4
+max = 1000
+commands = ["SurfaceSweepSweep2Rails"]
+
+[[settings]]
+key = "sw2_refit_tolerance"
+type = "length"
+option = "RefitTolerance"
+label = "Dung sai khớp lại mặt cắt (2 ray, mm)"
+default = 0.01
+min = 0.0001
+max = 10.0
+commands = ["SurfaceSweepSweep2Rails"]
+
+[[settings]]
+key = "rr_scale_height"
+type = "bool"
+option = "ScaleHeight"
+label = "Co giãn chiều cao (Rail Revolve)"
+default = false
+commands = ["SurfaceRailRevolve"]
+
+[[settings]]
+key = "nw_edge_tolerance"
+type = "length"
+option = "EdgeTolerance"
+label = "Dung sai cạnh (Curve Network, mm)"
+default = 0.001
+min = 0.00001
+max = 1.0
+commands = ["SurfaceCurveNetwork"]
+
+[[settings]]
+key = "nw_interior_tolerance"
+type = "length"
+option = "InteriorTolerance"
+label = "Dung sai bên trong (Curve Network, mm)"
+default = 0.001
+min = 0.00001
+max = 1.0
+commands = ["SurfaceCurveNetwork"]
+
+[[settings]]
+key = "nw_no_auto_sort"
+type = "bool"
+option = "NoAutoSort"
+label = "Chọn đường theo thứ tự (NetworkSrf NoAutoSort)"
+default = false
+commands = ["SurfaceCurveNetwork"]
+
+[[settings]]
+key = "nw_cross_tolerance"
+type = "length"
+option = "CrossingGap"
+label = "Khoảng hở tối đa tại giao điểm (mm)"
+default = 0.1
+min = 0.0001
+max = 10.0
+commands = ["SurfaceCurveNetwork"]
+
+[[settings]]
+key = "patch_spacing"
+type = "length"
+option = "SampleSpacing"
+label = "Khoảng cách điểm mẫu (Patch, mm)"
+default = 1.0
+min = 0.001
+max = 100.0
+commands = ["SurfacePatch"]
+
+[[settings]]
+key = "patch_u_spans"
+type = "int"
+option = "USpans"
+label = "Số nhịp U (Patch)"
+default = 10
+min = 1
+max = 40
+commands = ["SurfacePatch"]
+
+[[settings]]
+key = "patch_v_spans"
+type = "int"
+option = "VSpans"
+label = "Số nhịp V (Patch)"
+default = 10
+min = 1
+max = 40
+commands = ["SurfacePatch"]
+
+[[settings]]
+key = "patch_stiffness"
+type = "float"
+option = "Stiffness"
+label = "Độ cứng (Patch)"
+default = 1.0
+min = 0.0
+max = 100000.0
+commands = ["SurfacePatch"]
+
+[[settings]]
+key = "patch_auto_trim"
+type = "bool"
+option = "AutoTrim"
+label = "Tự cắt theo biên (Patch)"
+default = true
+commands = ["SurfacePatch"]
+
+[[settings]]
+key = "os_loose"
+type = "bool"
+option = "Loose"
+label = "Offset lỏng (giữ cấu trúc điểm)"
+default = false
+commands = ["SurfaceOffsetSurface"]
+
+[[settings]]
+key = "os_tolerance"
+type = "length"
+option = "Tolerance"
+label = "Dung sai offset (0 = mặc định, mm)"
+default = 0.0
+min = 0.0
+max = 1.0
+commands = ["SurfaceOffsetSurface"]
+
+[[settings]]
+key = "os_both_sides"
+type = "bool"
+option = "BothSides"
+label = "Offset cả hai phía"
+default = false
+commands = ["SurfaceOffsetSurface"]
+
+[[settings]]
+key = "cs_distance"
+type = "length"
+option = "FirstDistance"
+label = "Khoảng vát trên mặt thứ nhất (mm)"
+default = 1.0
+min = 0.0001
+max = 1000.0
+commands = ["SurfaceChamferSurfaces", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces"]
+
+[[settings]]
+key = "cs_second_distance"
+type = "length"
+option = "SecondDistance"
+label = "Khoảng vát trên mặt thứ hai (mm)"
+default = 1.0
+min = 0.0001
+max = 1000.0
+commands = ["SurfaceChamferSurfaces"]
+
+[[settings]]
+key = "es_type"
+type = "enum"
+option = "Type"
+label = "Kiểu kéo dài mặt"
+choices = ["smooth", "line"]
+choice_labels = ["Smooth", "Line"]
+default = "smooth"
+commands = ["SurfaceExtendSurface"]
+
+[[settings]]
+key = "es_length"
+type = "length"
+option = "ExtensionFactor"
+label = "Độ dài kéo dài mặt mặc định (mm)"
+default = 1.0
+min = 0.0001
+max = 1000.0
+commands = ["SurfaceExtendSurface"]
+
+[[settings]]
+key = "ms_smooth"
+type = "bool"
+option = "Smooth"
+label = "Gộp mượt (Merge)"
+default = true
+commands = ["SurfaceSurfaceEditToolsMerge"]
+
+[[settings]]
+key = "ms_tolerance"
+type = "length"
+option = "Tolerance"
+label = "Dung sai gộp mặt (mm)"
+default = 0.001
+min = 0.00001
+max = 1.0
+commands = ["SurfaceSurfaceEditToolsMerge"]
+
+[[settings]]
+key = "ms_roundness"
+type = "float"
+option = "RoundnessFactor"
+label = "Độ tròn khi gộp (0–1)"
+default = 1.0
+min = 0.0
+max = 1.0
+commands = ["SurfaceSurfaceEditToolsMerge"]
+
+[[settings]]
+key = "bl_continuity1"
+type = "enum"
+option = "Continuity1"
+label = "Liên tục đầu 1 (Blend)"
+choices = ["position", "tangency", "curvature", "g3", "g4"]
+choice_labels = ["Position", "Tangency", "Curvature", "G3", "G4"]
+default = "curvature"
+commands = ["SurfaceBlendSurface"]
+
+[[settings]]
+key = "bl_continuity2"
+type = "enum"
+option = "Continuity2"
+label = "Liên tục đầu 2 (Blend)"
+choices = ["position", "tangency", "curvature", "g3", "g4"]
+choice_labels = ["Position", "Tangency", "Curvature", "G3", "G4"]
+default = "curvature"
+commands = ["SurfaceBlendSurface"]
+
+[[settings]]
+key = "fs_extend"
+type = "bool"
+option = "Extend"
+label = "Kéo dài tới mép mặt dài hơn (Fillet/Chamfer)"
+default = true
+commands = ["SurfaceFilletSurfaces", "SurfaceChamferSurfaces"]
+
+[[settings]]
+key = "fs_split"
+type = "bool"
+option = "Split"
+label = "Tách mặt gốc tại mép (Fillet/Chamfer)"
+default = false
+commands = ["SurfaceFilletSurfaces", "SurfaceChamferSurfaces"]
+
+[[settings]]
+key = "vf_rail_type"
+type = "enum"
+option = "RailType"
+label = "Kiểu ray (Variable Fillet)"
+choices = ["RollingBall", "DistFromEdge", "DistBetweenRails"]
+choice_labels = ["RollingBall", "DistFromEdge", "DistBetweenRails"]
+default = "RollingBall"
+commands = ["SurfaceVariableFilletBlendChamferVariableFilletSurfaces"]
+
+[[settings]]
+key = "sm_average"
+type = "bool"
+option = "Average"
+label = "Hai mặt cùng đổi, gặp ở giữa (MatchSrf)"
+default = false
+commands = ["SurfaceSurfaceEditToolsMatch"]
+
+[[settings]]
+key = "fs_trim"
+type = "bool"
+option = "Trim"
+label = "Cắt mặt gốc (Fillet/Chamfer)"
+default = true
+commands = ["SurfaceFilletSurfaces", "SurfaceChamferSurfaces", "SurfaceVariableFilletBlendChamferVariableFilletSurfaces", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces", "SurfaceVariableFilletBlendChamferVariableBlendSurfaces"]
+
+[[settings]]
+key = "sr_degree_v"
+type = "int"
+option = "DegreeV"
+label = "Bậc V (Rebuild)"
+default = 3
+min = 1
+max = 7
+commands = ["OthersSurfaceRebuild"]
+
+[[settings]]
+key = "se_u_distance"
+type = "length"
+option = "UDistance"
+label = "Vùng ảnh hưởng U (Soft Edit, mm)"
+default = 5.0
+min = 0.001
+max = 10000.0
+commands = ["SurfaceSurfaceEditToolsSoftEdit"]
+
+[[settings]]
+key = "se_v_distance"
+type = "length"
+option = "VDistance"
+label = "Vùng ảnh hưởng V (Soft Edit, mm)"
+default = 5.0
+min = 0.001
+max = 10000.0
+commands = ["SurfaceSurfaceEditToolsSoftEdit"]
+
+[[settings]]
+key = "se_fix_edges"
+type = "bool"
+option = "FixEdges"
+label = "Giữ cạnh (Soft Edit)"
+default = false
+commands = ["SurfaceSurfaceEditToolsSoftEdit"]
+
+[[settings]]
+key = "cs_end_distance"
+type = "length"
+option = "EndDistance"
+label = "Khoảng vát ở đầu cuối (Variable Chamfer, mm)"
+default = 1.0
+min = 0.0001
+max = 1000.0
+commands = ["SurfaceVariableFilletBlendChamferVariableChamferSurfaces"]
+
+[[settings]]
+key = "sw1_style"
+type = "enum"
+option = "Style"
+label = "Kiểu khung quét"
+choices = ["freeform", "roadlike_top", "roadlike_right", "roadlike_front"]
+choice_labels = ["Freeform", "Roadlike Top", "Roadlike Right", "Roadlike Front"]
+default = "freeform"
+commands = ["SurfaceSweepSweep1Rail"]
+
+[[settings]]
+key = "sw1_closed"
+type = "bool"
+option = "Closed"
+label = "Quét kín"
+default = false
+commands = ["SurfaceSweepSweep1Rail"]
+
+[[settings]]
+key = "sw1_global_blend"
+type = "bool"
+option = "GlobalBlend"
+label = "Chuyển hình toàn cục"
+default = false
+commands = ["SurfaceSweepSweep1Rail"]
+
+[[settings]]
+key = "sw1_simplify"
+type = "enum"
+option = "Simplify"
+label = "Đơn giản mặt cắt"
+choices = ["none", "rebuild", "refit"]
+choice_labels = ["None", "Rebuild", "Refit"]
+default = "none"
+commands = ["SurfaceSweepSweep1Rail"]
+
+[[settings]]
+key = "sw1_rebuild_points"
+type = "int"
+option = "RebuildPoints"
+label = "Số điểm dựng lại mặt cắt"
+default = 10
+min = 4
+max = 1000
+commands = ["SurfaceSweepSweep1Rail"]
+
+[[settings]]
+key = "sw1_refit_tolerance"
+type = "length"
+option = "RefitTolerance"
+label = "Dung sai khớp lại mặt cắt (mm)"
+default = 0.01
+min = 0.0001
+max = 10.0
+commands = ["SurfaceSweepSweep1Rail"]
 
 [[settings]]
 key = "sw2_maintain_height"
@@ -447,10 +842,26 @@ key = "loft_style"
 type = "enum"
 option = "Style"
 label = "Kiểu loft"
-choices = ["normal", "loose", "straight"]
-choice_labels = ["Normal", "Loose", "Straight"]
+choices = ["normal", "loose", "tight", "straight", "uniform"]
+choice_labels = ["Normal", "Loose", "Tight", "Straight", "Uniform"]
 default = "normal"
 commands = ["SurfaceLoft"]
+
+[[settings]]
+key = "loft_split_at_tangents"
+type = "bool"
+option = "SplitAtTangents"
+label = "Tách mặt tại chỗ gãy (Loft)"
+default = false
+commands = ["SurfaceLoft"]
+
+[[settings]]
+key = "rev_split_at_tangents"
+type = "bool"
+option = "SplitAtTangents"
+label = "Tách mặt tại chỗ gãy (Revolve)"
+default = false
+commands = ["SurfaceRevolve"]
 
 [[settings]]
 key = "loft_closed"
@@ -458,6 +869,46 @@ type = "bool"
 option = "Closed"
 label = "Khép kín"
 default = false
+commands = ["SurfaceLoft"]
+
+[[settings]]
+key = "loft_seams"
+type = "enum"
+option = "Seams"
+label = "Đường nối"
+choices = ["automatic", "natural"]
+choice_labels = ["Automatic", "Natural"]
+default = "automatic"
+commands = ["SurfaceLoft"]
+
+[[settings]]
+key = "loft_simplify"
+type = "enum"
+option = "Simplify"
+label = "Đơn giản hóa"
+choices = ["none", "rebuild", "refit"]
+choice_labels = ["Do not simplify", "Rebuild", "Refit"]
+default = "none"
+commands = ["SurfaceLoft"]
+
+[[settings]]
+key = "loft_rebuild_points"
+type = "int"
+option = "RebuildPoints"
+label = "Số điểm dựng lại"
+default = 10
+min = 4
+max = 1000
+commands = ["SurfaceLoft"]
+
+[[settings]]
+key = "loft_refit_tolerance"
+type = "length"
+option = "RefitTolerance"
+label = "Dung sai khớp lại (mm)"
+default = 0.01
+min = 0.0001
+max = 10.0
 commands = ["SurfaceLoft"]
 
 [[settings]]
@@ -532,7 +983,7 @@ default = 1.0
 min = 0.01
 max = 50.0
 step = 0.05
-commands = ["SurfaceFilletSurfaces", "SurfaceVariableFilletBlendChamferVariableFilletSurfaces", "SurfaceChamferSurfaces", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces"]
+commands = ["SurfaceFilletSurfaces", "SurfaceVariableFilletBlendChamferVariableFilletSurfaces", "SurfaceChamferSurfaces", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces", "SurfaceVariableFilletBlendChamferVariableBlendSurfaces"]
 
 [[settings]]
 key = "fs_end_radius"
@@ -543,7 +994,7 @@ default = 2.0
 min = 0.01
 max = 50.0
 step = 0.05
-commands = ["SurfaceVariableFilletBlendChamferVariableFilletSurfaces", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces"]
+commands = ["SurfaceVariableFilletBlendChamferVariableFilletSurfaces", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces", "SurfaceVariableFilletBlendChamferVariableBlendSurfaces"]
 
 [[settings]]
 key = "fs_flip_first"
@@ -628,8 +1079,8 @@ key = "sm_continuity"
 type = "enum"
 option = "Continuity"
 label = "Liên tục"
-choices = ["position", "tangency"]
-choice_labels = ["Vị trí", "Tiếp tuyến"]
+choices = ["position", "tangency", "curvature"]
+choice_labels = ["Vị trí", "Tiếp tuyến", "Độ cong"]
 default = "tangency"
 commands = ["SurfaceSurfaceEditToolsMatch"]
 
@@ -714,12 +1165,40 @@ commands = ["OthersSurfaceRebuild"]
 [[settings]]
 key = "sr_degree"
 type = "int"
-option = "Degree"
-label = "Bậc"
+option = "DegreeU"
+label = "Bậc U"
 default = 3
 min = 1
 max = 7
 commands = ["OthersSurfaceRebuild"]
+
+[[settings]]
+key = "rf_degree_u"
+type = "int"
+option = "UDegree"
+label = "Bậc U"
+default = 3
+min = 1
+max = 7
+commands = ["SurfaceSurfaceEditToolsRefittoTolerance"]
+
+[[settings]]
+key = "rf_degree_v"
+type = "int"
+option = "VDegree"
+label = "Bậc V"
+default = 3
+min = 1
+max = 7
+commands = ["SurfaceSurfaceEditToolsRefittoTolerance"]
+
+[[settings]]
+key = "rf_delete_input"
+type = "bool"
+option = "DeleteInput"
+label = "Xoá mặt gốc"
+default = true
+commands = ["SurfaceSurfaceEditToolsRefittoTolerance"]
 
 [[settings]]
 key = "srf_tolerance"

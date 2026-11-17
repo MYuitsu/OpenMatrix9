@@ -3,10 +3,10 @@
 Đùn một đường cong kín lên khối và gộp vào khối.
 
 - **Mã lệnh:** `SolidBoss`
-- **Vị trí:** menu Solid, ô số 34
+- **Vị trí:** menu Solid, ô số 21
 - **Icon:** `Resources/icons/solid-minimal/SolidBoss.svg`
 - **Gọi bằng dòng lệnh:** `SolidBoss`, `Boss`
-- **Cách chạy:** từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ
+- **Cách chạy:** lệnh có sẵn của OM9 (khối chính xác bằng lõi B-Rep); bản không có lõi dùng lệnh của add-on
 
 ## Cách dùng
 

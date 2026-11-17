@@ -1,6 +1,6 @@
 # Rail Revolve
 
-Xoay profile quanh trục, bán kính theo đường ray.
+Xoay profile quanh trục, chân profile chạy theo đường ray (Rhino 5); mặt chính xác.
 
 - **Mã lệnh:** `SurfaceRailRevolve`
 - **Vị trí:** menu Surface, ô số 17
@@ -10,5 +10,15 @@ Xoay profile quanh trục, bán kính theo đường ray.
 
 ## Cách dùng
 
-1. Chọn profile rồi ray.
-2. Bấm hai điểm trục.
+1. Chọn đường profile.
+2. Chọn đường ray.
+3. Điểm đầu trục.
+4. Điểm cuối trục.
+
+## Tuỳ chọn (lệnh phụ)
+
+- ScaleHeight: co giãn profile theo chiều trục từ gốc trục (ray không phẳng).
+
+| Dòng lệnh | Ý nghĩa | Mặc định | Khoảng |
+|---|---|---|---|
+| `ScaleHeight=` | Co giãn chiều cao (Rail Revolve) | No |  |

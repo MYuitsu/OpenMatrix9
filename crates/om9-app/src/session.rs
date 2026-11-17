@@ -5509,6 +5509,8 @@ pub struct Controller {
     #[cfg(feature = "occt-brep")]
     topology_remesh_job: Option<topology_remesh::PendingTopologyRemesh>,
     scene: Option<Scene>,
+    /// Scene positions of each object, for add-on steps (see `addon_session::SceneRoots`).
+    scene_roots: std::sync::Mutex<addon_session::SceneRoots>,
     // Declared after scene so its last lease is released after scene buffers.
     scene_buffer_owner: std::sync::Mutex<Option<SceneBufferOwner>>,
     // Keep the old-scene reservation until after the scene and its buffers drop.
@@ -5736,6 +5738,7 @@ impl Controller {
             crate::display::ViewportDetail::High
         } else { crate::display::ViewportDetail::Light };
         Ok(Self {
+            scene_roots: Default::default(),
             coordinator,
             file_open_worker: None,
             history_worker: None,

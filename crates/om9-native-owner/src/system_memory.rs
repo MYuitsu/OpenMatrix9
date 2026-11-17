@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-/// A point-in-time Windows physical-memory sample, excluding swap and VRAM.
+/// A point-in-time physical-memory sample (Windows, Linux), excluding swap and VRAM.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PhysicalMemory {
     pub total_bytes: u64,
@@ -74,9 +74,40 @@ pub fn physical_memory() -> Option<PhysicalMemory> {
         .then_some(PhysicalMemory { total_bytes: status.ullTotalPhys, available_bytes: status.ullAvailPhys })
 }
 
-#[cfg(not(windows))]
+/// Linux: `MemTotal` and `MemAvailable` from `/proc/meminfo` (kB), the kernel's own estimate
+/// of memory available to new work without swapping.
+#[cfg(target_os = "linux")]
+pub fn physical_memory() -> Option<PhysicalMemory> {
+    meminfo(&std::fs::read_to_string("/proc/meminfo").ok()?)
+}
+
+#[cfg(any(target_os = "linux", test))]
+fn meminfo(text: &str) -> Option<PhysicalMemory> {
+    let field = |name: &str| -> Option<u64> {
+        let line = text.lines().find(|l| l.starts_with(name))?;
+        let mut parts = line[name.len()..].split_whitespace();
+        let value: u64 = parts.next()?.parse().ok()?;
+        (parts.next()? == "kB").then_some(value)?.checked_mul(1024)
+    };
+    let (total, available) = (field("MemTotal:")?, field("MemAvailable:")?);
+    (total > 0 && available <= total).then_some(PhysicalMemory { total_bytes: total, available_bytes: available })
+}
+
+#[cfg(not(any(windows, target_os = "linux")))]
 pub fn physical_memory() -> Option<PhysicalMemory> {
     None
+}
+
+#[cfg(test)]
+mod meminfo_tests {
+    #[test]
+    fn reads_total_and_available_in_bytes() {
+        let m = super::meminfo("MemTotal:  8000 kB\nMemFree: 10 kB\nMemAvailable:   6000 kB\n").unwrap();
+        assert_eq!((m.total_bytes, m.available_bytes), (8000 * 1024, 6000 * 1024));
+        assert!(super::meminfo("MemTotal: 10 kB\nMemAvailable: 20 kB\n").is_none());
+        assert!(super::meminfo("MemTotal: 10 kB\n").is_none());
+        assert!(super::meminfo("MemTotal: x kB\nMemAvailable: 1 kB\n").is_none());
+    }
 }
 
 /// Physical RAM capacity, not available RAM, swap or GPU memory.

@@ -879,3 +879,29 @@ fn build_is_deterministic_and_excludes() {
     );
     fs::remove_dir_all(&tmp).unwrap();
 }
+
+/// `command_settings` (asked at every step of an interactive command) resolves exactly what
+/// the full `settings` table gives for that command, stored values included.
+#[test]
+fn command_settings_match_the_full_table() {
+    let env = Env::new("command-settings");
+    let mut h = env.host();
+    h.install_zip(&env.good("gem_on_curve"), &InstallOptions { enable: true, ..Default::default() })
+        .unwrap();
+    h.set_setting("gem_on_curve", "gap", "0,35").unwrap();
+    for code in ["BuilderGemOnCrv", "BuilderGemCountOnCrv", "NotACommand"] {
+        let full: Vec<(String, SettingValue)> = h
+            .settings("gem_on_curve")
+            .unwrap()
+            .into_iter()
+            .filter(|(spec, _)| spec.applies_to(code))
+            .map(|(spec, v)| (spec.key, v))
+            .collect();
+        assert_eq!(h.command_settings("gem_on_curve", code), full, "{code}");
+        if let Some(info) = h.command_info(code) {
+            let keys: Vec<_> = info.settings.into_iter().map(|(s, v)| (s.key, v)).collect();
+            assert_eq!(keys, full, "{code}");
+        }
+    }
+    assert!(h.command_settings("missing", "BuilderGemOnCrv").is_empty());
+}

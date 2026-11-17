@@ -1744,7 +1744,7 @@ dependencies = [
 
 [[package]]
 name = "om9-addon-matrix"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "om9-addon-abi",
  "om9-addon-builders",
@@ -1815,6 +1815,7 @@ name = "om9-addon-surfaces"
 version = "0.1.0"
 dependencies = [
  "om9-addon-abi",
+ "om9-addon-curves",
  "om9-addon-geom",
  "om9-addon-tools",
  "serde",

@@ -1,6 +1,6 @@
 # Adjust Closed Surface Seam
 
-Dời đường nối (seam) của mặt kín.
+Dời đường nối (seam) của mặt kín như Rhino 5 SrfSeam; hình giữ nguyên chính xác.
 
 - **Mã lệnh:** `SurfaceSurfaceEditToolsAdjustClosedSurfaceSeam`
 - **Vị trí:** menu Surface, ô số 38
@@ -11,4 +11,8 @@ Dời đường nối (seam) của mặt kín.
 ## Cách dùng
 
 1. Chọn mặt kín.
-2. Bấm vị trí seam mới.
+2. Bấm vị trí seam mới (đường đi theo chuột).
+
+## Tuỳ chọn (lệnh phụ)
+
+- Direction: U / V.

@@ -500,15 +500,56 @@ fn curve_and_surface(e: &Event, st: &mut OnSurface) -> bool {
 }
 
 /// Walk `d` along the surface from `p` sideways to the curve direction `t`.
-fn walk(s: &SurfRef, p: Vec3, t: Vec3, d: f64) -> Option<Vec3> {
+/// Closest points on one surface, one after another: the first search sweeps the whole
+/// surface, the next ones start from the last answer (points along a curve, or along a walk,
+/// move a little between calls). A mesh-only surface is searched whole every time.
+struct Projector<'a> {
+    srf: Option<Srf<'a>>,
+    surface: &'a SurfRef,
+    last: Option<(f64, f64)>,
+}
+
+impl<'a> Projector<'a> {
+    fn new(surface: &'a SurfRef) -> Projector<'a> {
+        Projector { srf: surface.exact.as_ref().and_then(Srf::of), surface, last: None }
+    }
+    /// The closest point to `p` and the unit normal there.
+    fn closest(&mut self, p: Vec3) -> Option<(Vec3, Vec3)> {
+        let Some(srf) = &self.srf else { return self.surface.closest(p) };
+        let (s, t) = match self.last {
+            Some((s0, t0)) => srf.closest_st_near(p, s0, t0),
+            None => srf.closest_st(p),
+        };
+        self.last = Some((s, t));
+        Some((srf.at_st(s, t), unit(srf.normal_st(s, t))))
+    }
+}
+
+/// Walk `d` across the surface from `p`, sideways to the curve tangent `t`, in 8 steps.
+/// `base` follows the curve's own points; the walk starts from where `base` landed.
+fn walk(base: &mut Projector, p: Vec3, t: Vec3, d: f64) -> Option<Vec3> {
     let steps = 8;
-    let mut q = s.closest(p)?.0;
+    let mut q = base.closest(p)?.0;
+    let mut on = Projector { srf: base.srf, surface: base.surface, last: base.last };
     for _ in 0..steps {
-        let (_, nrm) = s.closest(q)?;
+        let (_, nrm) = on.closest(q)?;
         let side = unit(cross(nrm, t));
-        q = s.closest(add(q, scale(side, d / steps as f64)))?.0;
+        q = on.closest(add(q, scale(side, d / steps as f64)))?.0;
     }
     Some(q)
+}
+
+/// Offsets already computed, by what decides them (curve, surface, side, distance): the
+/// preview of one side is computed once while the pointer stays on that side, and the click
+/// reuses it.
+static OFFSET_ON_SURFACE: std::sync::Mutex<Vec<(u64, Geo)>> = std::sync::Mutex::new(Vec::new());
+
+fn offset_key(st: &OnSurface, extra: &[u64]) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    serde_json::to_string(st).unwrap_or_default().hash(&mut h);
+    extra.hash(&mut h);
+    h.finish()
 }
 
 pub(crate) fn offset_on_surface(e: &Event) -> Reply {
@@ -546,16 +587,28 @@ pub(crate) fn offset_on_surface(e: &Event) -> Reply {
         if d <= 0.0 {
             return Err("Distance must be more than 0".into());
         }
+        let key = offset_key(&st, &[(sign * d).to_bits()]);
+        if let Some((_, g)) = OFFSET_ON_SURFACE.lock().ok().and_then(|m| m.iter().find(|(k, _)| *k == key).cloned()) {
+            return Ok(g);
+        }
         let n = 120;
         let m = if c.closed { n } else { n + 1 };
+        let mut base = Projector::new(&s);
         let pts: Option<Vec<Vec3>> = (0..m)
             .map(|i| {
                 let t = i as f64 / n as f64;
-                walk(&s, c.at(t), c.tangent(t), sign * d)
+                walk(&mut base, c.at(t), c.tangent(t), sign * d)
             })
             .collect();
-        fit_points(&pts.ok_or("The offset leaves the surface")?, c.closed)
-            .ok_or_else(|| "Offset failed".to_owned())
+        let g = fit_points(&pts.ok_or("The offset leaves the surface")?, c.closed)
+            .ok_or_else(|| "Offset failed".to_owned())?;
+        if let Ok(mut memo) = OFFSET_ON_SURFACE.lock() {
+            if memo.len() >= 4 {
+                memo.remove(0);
+            }
+            memo.push((key, g.clone()));
+        }
+        Ok(g)
     };
     let mut inner = e.clone();
     inner.state = e
@@ -586,6 +639,12 @@ pub(crate) fn offset_on_surface(e: &Event) -> Reply {
     r
 }
 
+/// Points on a surface with the unit normals there.
+type Feet = Vec<(Vec3, Vec3)>;
+
+/// The curve's points on the surface and the normals there, by curve and surface.
+static NORMAL_FEET: std::sync::Mutex<Option<(u64, Feet)>> = std::sync::Mutex::new(None);
+
 pub(crate) fn offset_normal(e: &Event) -> Reply {
     let mut st: OnSurface = load(e);
     let ready = curve_and_surface(e, &mut st);
@@ -598,16 +657,23 @@ pub(crate) fn offset_normal(e: &Event) -> Reply {
         return Reply::ask(prompt, save(&st)).want(Want::Objects);
     }
     let (c, s) = (st.curve.clone().unwrap(), st.surface.clone().unwrap());
-    let make = |d: f64| -> Option<Geo> {
+    // The curve's points on the surface and the normals there do not depend on the distance:
+    // found once per curve and surface, then every distance (each pointer move) only scales.
+    let key = offset_key(&st, &[]);
+    let feet = NORMAL_FEET.lock().ok().and_then(|m| m.as_ref().filter(|(k, _)| *k == key).map(|(_, f)| f.clone()));
+    let feet: Option<Feet> = feet.or_else(|| {
         let n = 120;
         let m = if c.closed { n } else { n + 1 };
-        let pts: Option<Vec<Vec3>> = (0..m)
-            .map(|i| {
-                let p = c.at(i as f64 / n as f64);
-                s.closest(p).map(|(q, nrm)| add(q, scale(nrm, d)))
-            })
-            .collect();
-        fit_points(&pts?, c.closed)
+        let mut on = Projector::new(&s);
+        let f: Option<Feet> = (0..m).map(|i| on.closest(c.at(i as f64 / n as f64))).collect();
+        if let (Some(f), Ok(mut memo)) = (&f, NORMAL_FEET.lock()) {
+            *memo = Some((key, f.clone()));
+        }
+        f
+    });
+    let make = |d: f64| -> Option<Geo> {
+        let pts: Vec<Vec3> = feet.as_ref()?.iter().map(|(q, nrm)| add(*q, scale(*nrm, d))).collect();
+        fit_points(&pts, c.closed)
     };
     let d = match &e.input {
         Input::Text { text } => match parse_number(text) {
@@ -935,4 +1001,57 @@ pub(crate) fn soft_edit(e: &Event) -> Reply {
             Ok(r)
         },
     )
+}
+
+#[cfg(test)]
+mod walk_tests {
+    use super::*;
+
+    /// A bicubic dome z = 0.03 (x² + y²) over [-10, 10]², as a NURBS surface.
+    fn dome() -> SurfRef {
+        let n = 6;
+        let knots = vec![0.0, 0.0, 0.0, 0.0, 1.0 / 3.0, 2.0 / 3.0, 1.0, 1.0, 1.0, 1.0];
+        let mut points = Vec::new();
+        for i in 0..n {
+            for j in 0..n {
+                let (x, y) = (-10.0 + 20.0 * i as f64 / 5.0, -10.0 + 20.0 * j as f64 / 5.0);
+                points.push([x, y, 0.03 * (x * x + y * y)]);
+            }
+        }
+        SurfRef { id: "d".into(), exact: Some(Geo::Surface { degree: [3, 3], size: [n, n], points, weights: vec![], knots: [knots.clone(), knots] }), mesh: None }
+    }
+
+    /// Warm-started searches find points at least as close as whole-surface searches (which
+    /// stop at about 1e-5 mm), and the walks land where those land.
+    #[test]
+    fn warm_started_walks_match_whole_surface_searches() {
+        let s = dome();
+        let mut on = Projector::new(&s);
+        for i in 0..=40 {
+            let p = [-8.0 + 0.4 * i as f64, 3.0 - 0.1 * i as f64, 2.5];
+            let (q_new, _) = on.closest(p).unwrap();
+            let (q_old, _) = s.closest(p).unwrap();
+            assert!(dist(p, q_new) <= dist(p, q_old) + 1e-12, "{p:?}");
+            assert!(dist(q_new, q_old) < 1e-4, "{p:?}");
+        }
+        let old = |p: Vec3, t: Vec3, d: f64| -> Vec3 {
+            let mut q = s.closest(p).unwrap().0;
+            for _ in 0..8 {
+                let (_, nrm) = s.closest(q).unwrap();
+                q = s.closest(add(q, scale(unit(cross(nrm, t)), d / 8.0))).unwrap().0;
+            }
+            q
+        };
+        let mut base = Projector::new(&s);
+        let mut worst: f64 = 0.0;
+        for i in 0..=60 {
+            let x = -6.0 + 12.0 * i as f64 / 60.0;
+            let p = [x, 0.5 * x, 0.0];
+            let t = [1.0, 0.5, 0.0];
+            for d in [1.5, -1.5] {
+                worst = worst.max(dist(walk(&mut base, p, t, d).unwrap(), old(p, t, d)));
+            }
+        }
+        assert!(worst < 1e-4, "{worst}");
+    }
 }

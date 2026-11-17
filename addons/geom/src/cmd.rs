@@ -119,6 +119,9 @@ pub enum Need {
     Point(String),
     /// A typed number (Enter takes the default), with its prompt.
     Number(String, f64),
+    /// A value typed (a number answer), Enter for the default, or given by a click (a point
+    /// answer the command turns into the value: an angle around an axis, a distance …).
+    Value(String, f64),
     /// A curve picked by a click (its id and where on it), with its prompt.
     Curve(String),
     /// Enter to accept what the preview shows (options may change first), with its prompt.
@@ -161,6 +164,13 @@ impl Collected {
     /// A pair option's values (`Distances=1,2`); one number gives both.
     pub fn pair(&self, spec: &Flow, name: &str) -> (f64, f64) {
         pair(self.opt(spec, name)).unwrap_or((0.0, 0.0))
+    }
+    /// The answers after the first `k` (those of steps put first with
+    /// [`Flow::point_first`]), so the later steps keep their own indices.
+    pub fn shifted(&self, k: usize) -> Collected {
+        let mut c = self.clone();
+        c.answers.drain(..k.min(c.answers.len()));
+        c
     }
     /// The k-th point answer.
     pub fn p(&self, k: usize) -> Option<Vec3> {
@@ -293,8 +303,19 @@ impl Flow {
         self.needs.push(Need::Point(prompt.to_owned()));
         self
     }
+    /// A point step before all the others (a pick that comes first, e.g. "Select a hole").
+    pub fn point_first(mut self, prompt: &str) -> Flow {
+        self.needs.insert(0, Need::Point(prompt.to_owned()));
+        self
+    }
     pub fn number(mut self, prompt: &str, default: f64) -> Flow {
         self.needs.push(Need::Number(prompt.to_owned(), default));
+        self
+    }
+    /// A value step: type it, Enter for `default`, or click (a point answer the command
+    /// turns into the value).
+    pub fn value(mut self, prompt: &str, default: f64) -> Flow {
+        self.needs.push(Need::Value(prompt.to_owned(), default));
         self
     }
     pub fn toggle(mut self, name: &str, on: bool) -> Flow {
@@ -422,7 +443,7 @@ impl Flow {
         }
         match &e.input {
             Input::Point { point } => match next {
-                Some(Need::Point(_)) => c.answers.push(Answer::Point(*point)),
+                Some(Need::Point(_) | Need::Value(..)) => c.answers.push(Answer::Point(*point)),
                 Some(Need::Number(..)) => {
                     // A click for a number: the distance from the last point.
                     match c.points().last() {
@@ -453,7 +474,7 @@ impl Flow {
                         },
                     }
                 }
-                Some(Need::Number(..)) => match om9_addon_abi::session::parse_number(text) {
+                Some(Need::Number(..) | Need::Value(..)) => match om9_addon_abi::session::parse_number(text) {
                     Some(v) => c.answers.push(Answer::Number(v)),
                     None => error = Some(format!("{text}: type a number")),
                 },
@@ -511,7 +532,7 @@ impl Flow {
                 }
             }
             Input::Enter => match next {
-                Some(Need::Number(_, d)) => c.answers.push(Answer::Number(*d)),
+                Some(Need::Number(_, d) | Need::Value(_, d)) => c.answers.push(Answer::Number(*d)),
                 Some(Need::Confirm(_)) => c.answers.push(Answer::Done),
                 Some(Need::Point(p) | Need::Curve(p)) => error = Some(format!("{}: {}", self.label, p)),
                 None => {}
@@ -582,6 +603,7 @@ impl Flow {
             Some(Need::Curve(p)) => (p.clone(), Want::Objects),
             Some(Need::Confirm(p)) => (p.clone(), Want::Nothing),
             Some(Need::Number(p, d)) => (format!("{p} <{}>", om9_addon_abi::session::fmt(*d)), Want::Number),
+            Some(Need::Value(p, d)) => (format!("{p} <{}>", om9_addon_abi::session::fmt(*d)), Want::Point),
             None => match (&self.select_prompt, self.plain) {
                 (Some(p), _) => (format!("{p}. Press Enter when done"), Want::Objects),
                 (None, true) => ("Press Enter when done".to_owned(), Want::Objects),

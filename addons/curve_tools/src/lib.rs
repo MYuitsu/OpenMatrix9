@@ -123,42 +123,12 @@ impl Interactive for CurveTools {
         ARC_BLEND,
     ];
     fn step(e: &Event) -> Result<Reply, String> {
-        Ok(match e.command.as_str() {
-            REBUILD => edit::rebuild(e),
-            REFIT => edit::fit_curve(e),
-            BLEND => blend::blend(e, false),
-            BLEND_ADJ => blend::blend(e, true),
-            ARC_BLEND => blend::arc_blend(e),
-            CRV2VIEW | CRV2VIEW_HISTORY => from_two_views(e),
-            PULLBACK | PROJECT => objects::project(e, e.command == PULLBACK),
-            INTERSECTION => intersection(e),
-            INTERSECT_TWO => intersect_two_sets(e),
-            OFFSET => offset::offset(e),
-            OFFSET_ON_SRF => objects::offset_on_surface(e),
-            OFFSET_NORMAL => objects::offset_normal(e),
-            ISOCURVE => objects::isocurve(e),
-            ANGLE_ISO => isocurve(e),
-            FILLET | CHAMFER => fillet::fillet(e, e.command == CHAMFER),
-            FILLET_CORNERS => fillet::fillet_corners(e),
-            UV_CREATE => uv_create(e),
-            UV_APPLY => uv_apply(e),
-            THROUGH_POINTS => through_points(e),
-            EXTEND => extend::extend(e),
-            MARK_START | MARK_END => mark(e),
-            SEAM => seam(e),
-            CONTINUE_INTERP | CONTINUE_CURVE => continue_curve(e),
-            DIVIDE => edit::divide(e),
-            CURVE_BOOLEAN => regions::curve_boolean(e),
-            TWEEN => edit::tween(e),
-            DUP_EDGE | DUP_BORDER | SILHOUETTE | WIREFRAME => from_objects(e),
-            CROSS_SECTION => sections::csec(e),
-            SKETCH | SKETCH_SRF | SKETCH_MESH | POLY_ON_SRF | INTERP_ON_SRF => draw_on(e),
-            TO_LINES => edit::convert(e),
-            SECTION => sections::section_cmd(e),
-            MATCH => blend::match_curve(e),
-            SOFT_EDIT => objects::soft_edit(e),
-            other => return Err(format!("unknown command {other}")),
-        })
+        // Pointer moves of commands whose preview does not follow the pointer reuse the
+        // previous move's reply when nothing else changed (see `om9_addon_geom::memo`).
+        if STEADY_PREVIEW.contains(&e.command.as_str()) {
+            return om9_addon_geom::memo::steady_hover(e, dispatch);
+        }
+        dispatch(e)
     }
 }
 
@@ -1244,4 +1214,46 @@ mod tests;
 /// Helper for tests: a planar polygon offset keeps its distance.
 pub fn fmt_len(v: f64) -> String {
     fmt(v)
+}
+
+/// Commands whose reply to a pointer move never reads the pointer (Rebuild, Refit to tolerance).
+const STEADY_PREVIEW: &[&str] = &[REBUILD, REFIT];
+
+fn dispatch(e: &Event) -> Result<Reply, String> {
+    Ok(match e.command.as_str() {
+        REBUILD => edit::rebuild(e),
+        REFIT => edit::fit_curve(e),
+        BLEND => blend::blend(e, false),
+        BLEND_ADJ => blend::blend(e, true),
+        ARC_BLEND => blend::arc_blend(e),
+        CRV2VIEW | CRV2VIEW_HISTORY => from_two_views(e),
+        PULLBACK | PROJECT => objects::project(e, e.command == PULLBACK),
+        INTERSECTION => intersection(e),
+        INTERSECT_TWO => intersect_two_sets(e),
+        OFFSET => offset::offset(e),
+        OFFSET_ON_SRF => objects::offset_on_surface(e),
+        OFFSET_NORMAL => objects::offset_normal(e),
+        ISOCURVE => objects::isocurve(e),
+        ANGLE_ISO => isocurve(e),
+        FILLET | CHAMFER => fillet::fillet(e, e.command == CHAMFER),
+        FILLET_CORNERS => fillet::fillet_corners(e),
+        UV_CREATE => uv_create(e),
+        UV_APPLY => uv_apply(e),
+        THROUGH_POINTS => through_points(e),
+        EXTEND => extend::extend(e),
+        MARK_START | MARK_END => mark(e),
+        SEAM => seam(e),
+        CONTINUE_INTERP | CONTINUE_CURVE => continue_curve(e),
+        DIVIDE => edit::divide(e),
+        CURVE_BOOLEAN => regions::curve_boolean(e),
+        TWEEN => edit::tween(e),
+        DUP_EDGE | DUP_BORDER | SILHOUETTE | WIREFRAME => from_objects(e),
+        CROSS_SECTION => sections::csec(e),
+        SKETCH | SKETCH_SRF | SKETCH_MESH | POLY_ON_SRF | INTERP_ON_SRF => draw_on(e),
+        TO_LINES => edit::convert(e),
+        SECTION => sections::section_cmd(e),
+        MATCH => blend::match_curve(e),
+        SOFT_EDIT => objects::soft_edit(e),
+        other => return Err(format!("unknown command {other}")),
+    })
 }
