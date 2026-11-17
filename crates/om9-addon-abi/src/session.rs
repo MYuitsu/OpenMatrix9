@@ -79,7 +79,9 @@ pub struct Selected {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mesh: Option<SelectedMesh>,
     /// The exact world definition of a curve or NURBS surface (control points, knots …),
-    /// for commands that edit or continue it.
+    /// for commands that edit or continue it. Commands with `brep_data = true` also get a
+    /// trimmed surface (a surface with trim loops, or a one-face B-Rep) as [`Geo::Trimmed`]:
+    /// its untrimmed NURBS surface and its trim loops as 3D curves, outer loop first.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub exact: Option<Geo>,
 }

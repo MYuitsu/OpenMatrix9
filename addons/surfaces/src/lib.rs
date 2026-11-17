@@ -142,7 +142,7 @@ fn with_surface_edges(e: &Event, inner: fn(&Event) -> Reply) -> Reply {
     } else {
         serde_json::from_value(e.state.clone()).ok().filter(|x: &EdgePicks| x.inner != Value::Null || !x.picks.is_empty() || !x.seen.is_empty()).unwrap_or_else(|| EdgePicks { inner: e.state.clone(), ..Default::default() })
     };
-    let is_surface = |s: &Selected| matches!(s.exact, Some(Geo::Surface { .. }));
+    let is_surface = |s: &Selected| matches!(s.exact, Some(Geo::Surface { .. } | Geo::Trimmed { .. }));
     // A surface just added by a click: the click names its edge.
     if let (Input::Selection, Some(p)) = (&e.input, e.pick) {
         let new: Vec<&Selected> = e.selection.iter().filter(|s| !st.seen.contains(&s.id)).collect();
@@ -161,16 +161,26 @@ fn with_surface_edges(e: &Event, inner: fn(&Event) -> Reply) -> Reply {
             sel.push(s.clone());
             continue;
         }
+        // A trimmed surface (`brep_data`): its edges are the trim loops' curves — the one
+        // nearest the click.
+        if let Some(Geo::Trimmed { loops, .. }) = &s.exact {
+            for (k, p) in edges.into_iter().enumerate() {
+                let near = loops
+                    .iter()
+                    .flatten()
+                    .map(|c| (nurbs::samples(c, 32).iter().map(|q| dist(*q, *p)).fold(f64::MAX, f64::min), c))
+                    .min_by(|a, b| a.0.total_cmp(&b.0));
+                if let Some((_, g)) = near {
+                    sel.push(edge_selected(s, k, g.clone()));
+                }
+            }
+            continue;
+        }
         let Some(f) = Srf::of(s.exact.as_ref().unwrap()) else { continue };
         for (k, p) in edges.into_iter().enumerate() {
             let (dir, at) = nearest_edge(&f, *p);
             if let Some(c) = om9_addon_geom::surfedit::edge_curve(s.exact.as_ref().unwrap(), dir, at > 0.5) {
-                let g = c.to_geo();
-                let points = nurbs::samples(&g, 64);
-                let closed = c.closed(1e-9);
-                let lo = points.iter().fold([f64::MAX; 3], |a, q| [a[0].min(q[0]), a[1].min(q[1]), a[2].min(q[2])]);
-                let hi = points.iter().fold([f64::MIN; 3], |a, q| [a[0].max(q[0]), a[1].max(q[1]), a[2].max(q[2])]);
-                sel.push(Selected { id: format!("{}#edge{k}", s.id), kind: "curve".into(), name: format!("{} edge", s.name), bbox: [lo, hi], points, closed, exact: Some(g), mesh: None, ..s.clone() });
+                sel.push(edge_selected(s, k, c.to_geo()));
             }
         }
     }
@@ -186,6 +196,21 @@ fn with_surface_edges(e: &Event, inner: fn(&Event) -> Reply) -> Reply {
         r.state = serde_json::to_value(&st).unwrap_or(Value::Null);
     }
     r
+}
+
+/// An edge of surface `s` as a curve selection (`{id}#edge{k}`: never deleted or replaced).
+fn edge_selected(s: &Selected, k: usize, g: Geo) -> Selected {
+    let (points, closed) = match &g {
+        Geo::Polyline { points, closed } => (points.clone(), *closed),
+        _ => {
+            let points = nurbs::samples(&g, 64);
+            let closed = points.len() > 2 && dist(points[0], points[points.len() - 1]) < 1e-9;
+            (points, closed)
+        }
+    };
+    let lo = points.iter().fold([f64::MAX; 3], |a, q| [a[0].min(q[0]), a[1].min(q[1]), a[2].min(q[2])]);
+    let hi = points.iter().fold([f64::MIN; 3], |a, q| [a[0].max(q[0]), a[1].max(q[1]), a[2].max(q[2])]);
+    Selected { id: format!("{}#edge{k}", s.id), kind: "curve".into(), name: format!("{} edge", s.name), bbox: [lo, hi], points, closed, exact: Some(g), mesh: None, ..s.clone() }
 }
 
 fn curves(e: &Event) -> Vec<&Selected> {
@@ -3641,19 +3666,38 @@ fn shrink(e: &Event) -> Reply {
     )
 }
 
+/// Rhino 5 Untrim (all trims of the selected surfaces; `brep_data`: trimmed surfaces and
+/// one-face B-Reps arrive exactly). KeepTrimObjects=Yes also leaves the trim curves.
 fn untrim(e: &Event) -> Reply {
-    replaced(e, "Untrim", "select trimmed surfaces, Enter", || {
-        let items: Vec<(String, Geo)> = nurbs_surfaces(e)
-            .iter()
-            .map(|(s, _)| (s.id.clone(), s.exact.clone().unwrap()))
-            .collect();
+    let keep = e.state.get("keep").and_then(Value::as_bool).unwrap_or(false);
+    let keep = match &e.input {
+        Input::Option { name, .. } if name == "KeepTrimObjects" => !keep,
+        _ => keep,
+    };
+    let mut r = replaced(e, "Untrim", "select trimmed surfaces, Enter", || {
+        let mut items = Vec::new();
+        let mut kept = Vec::new();
+        for s in &e.selection {
+            match &s.exact {
+                Some(Geo::Trimmed { surface, loops, .. }) => {
+                    items.push((s.id.clone(), (**surface).clone()));
+                    if keep {
+                        kept.extend(loops.iter().flatten().cloned());
+                    }
+                }
+                // A surface with no trims stays as it is (Rhino: nothing to untrim).
+                Some(g @ Geo::Surface { .. }) => items.push((s.id.clone(), g.clone())),
+                _ => {}
+            }
+        }
         let k = items.len();
-        Ok((
-            items,
-            Vec::new(),
-            format!("{k} surfaces back to their full domain"),
-        ))
-    })
+        Ok((items, kept, format!("{k} surfaces back to their full domain")))
+    });
+    if !r.done {
+        r.state = json!({ "keep": keep });
+        r = r.with_options(vec![OptionToken::toggle("KeepTrimObjects", keep)]);
+    }
+    r
 }
 
 /// Rhino 5 Split (Isocurve): Select surface to split, Select isocurve location (Direction

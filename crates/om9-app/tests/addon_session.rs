@@ -734,11 +734,14 @@ fn surfaces_round_trip_through_the_document() {
     // Offset it 2 mm: the command reads the exact surface back.
     c.select_objects(&[plane]).unwrap();
     c.run_addon_command("SurfaceOffsetSurface").unwrap();
-    c.submit("Distance=2").unwrap();
-    c.submit("").unwrap();
+    // Rhino 5 OffsetSrf: the surface is already selected, so the next prompt is the distance.
+    c.submit("2").unwrap();
+    if c.addon_session().is_some() {
+        c.submit("").unwrap();
+    }
     assert!(c.addon_session().is_none(), "{}", c.prompt_text());
     assert_eq!(c.document().entities.len(), 2);
-    // Extrude Normal to Surface needs the plane's tessellation (mesh_data).
+    // Extrude Normal to Surface (Rhino 5 Fin) reads the exact plane.
     c.select_objects(&[]).unwrap();
     c.run_addon_command("CurvePolylinePolyline").unwrap();
     c.session_point([1.0, 1.0, 0.0]).unwrap();
@@ -753,8 +756,13 @@ fn surfaces_round_trip_through_the_document() {
     c.select_objects(&[curve, plane]).unwrap();
     c.run_addon_command("SurfaceExtrudeCurveNormalToSurface").unwrap();
     c.refresh_addon_session();
-    assert!(c.prompt_text().contains("1 ribbons"), "{}", c.prompt_text());
+    // Rhino 5 Fin: a place on the curve, its height, then Enter for a uniform height.
+    assert!(c.prompt_text().contains("Pick a location on the curve"), "{}", c.prompt_text());
+    c.session_point([2.0, 1.0, 0.0]).unwrap();
+    assert!(c.prompt_text().starts_with("Height"), "{}", c.prompt_text());
+    c.submit("1").unwrap();
     c.submit("").unwrap();
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
     assert_eq!(c.document().entities.len(), 4);
     fs::remove_dir_all(&tmp).unwrap();
 }
@@ -1009,5 +1017,75 @@ fn curves_are_picked_by_clicking_and_sketch_follows_the_pointer() {
     c.session_point([6.0, 20.0 + (4.8f64).sin(), 0.0]).unwrap();
     assert!(c.addon_session().is_none());
     assert_eq!(c.document().entities.len(), before + 1, "the stroke became a curve");
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// `brep_data`: a surface with Rhino trim loops reaches the add-on exactly (its surface and
+/// its loops run along it). Untrim with KeepTrimObjects gives the whole surface back without
+/// the trim record, and leaves the outer loop and the hole as curves on the surface.
+#[test]
+fn trimmed_surfaces_reach_brep_data_commands_exactly() {
+    use om9_core::model::{Entity, TRIM_SURFACE_EXTENSION_SLOT};
+    use om9_core::rhino_semantics::{TrimmedSurface, set_trimmed_surface, trimmed_surface_of};
+    let tmp = std::env::temp_dir().join(format!("om9-app-untrim-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats
+        .iter()
+        .map(|(id, c)| FeatureName {
+            id,
+            command: c.as_deref(),
+        })
+        .collect();
+    let limits = Limits::default();
+    let surface = om9_core::surface_kernel::plane([0., 0., 0.], [1., 0., 0.], [0., 1., 0.], 10., 10., &limits).unwrap();
+    let trim = TrimmedSurface {
+        underlying: surface.clone(),
+        outer: vec![[0.1, 0.1], [0.9, 0.1], [0.9, 0.9], [0.1, 0.9]],
+        inners: vec![vec![[0.4, 0.4], [0.6, 0.4], [0.6, 0.6], [0.4, 0.6]]],
+        reversed: false,
+    };
+    let mut doc = Document::new("untrim");
+    let mut patch = Entity::new("trimmed", Geometry::Surface(surface.clone()), doc.current_layer);
+    set_trimmed_surface(&mut patch, &trim, &limits).unwrap();
+    // A placement: the add-on works in world millimetres, the result goes back to the frame.
+    patch.placement = om9_core::geometry::Transform::translation([0.0, 0.0, 2.0]);
+    let id = patch.id;
+    doc.entities.insert(id, patch);
+    let mut c = Controller::new(doc, limits).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    c.select_objects(&[id]).unwrap();
+    c.run_addon_command("SurfaceSurfaceEditToolsUntrim").unwrap();
+    assert!(c.prompt_text().contains("1 surfaces"), "{}", c.prompt_text());
+    c.submit("KeepTrimObjects").unwrap();
+    c.submit("").unwrap();
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    let e = &c.document().entities[&id];
+    assert_eq!(e.geometry, Geometry::Surface(surface), "the whole surface, in its own frame");
+    assert!(!e.extensions.contains_key(TRIM_SURFACE_EXTENSION_SLOT), "no trims left");
+    assert!(trimmed_surface_of(e, &limits).unwrap().is_none());
+    // The two loops as closed curves at z 2: the outer square 1..9, the hole 4..6.
+    let mut spans: Vec<(f64, f64)> = c
+        .document()
+        .entities
+        .values()
+        .filter(|x| x.id != id)
+        .map(|x| {
+            let Geometry::Curve(curve) = &x.geometry else { panic!("{:?}", x.geometry) };
+            let pts: Vec<[f64; 3]> = match curve {
+                Curve::Nurbs(n) if n.degree == 1 => n.poles.iter().map(|p| x.placement.point(*p).unwrap()).collect(),
+                other => panic!("{other:?}"),
+            };
+            assert!(pts.iter().all(|p| (p[2] - 2.0).abs() < 1e-9), "{pts:?}");
+            let lo = pts.iter().map(|p| p[0].min(p[1])).fold(f64::MAX, f64::min);
+            let hi = pts.iter().map(|p| p[0].max(p[1])).fold(f64::MIN, f64::max);
+            (lo, hi)
+        })
+        .collect();
+    spans.sort_by(|a, b| a.0.total_cmp(&b.0));
+    assert_eq!(spans.len(), 2, "{spans:?}");
+    assert!((spans[0].0 - 1.0).abs() < 1e-9 && (spans[0].1 - 9.0).abs() < 1e-9, "{spans:?}");
+    assert!((spans[1].0 - 4.0).abs() < 1e-9 && (spans[1].1 - 6.0).abs() < 1e-9, "{spans:?}");
     fs::remove_dir_all(&tmp).unwrap();
 }

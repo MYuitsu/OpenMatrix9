@@ -1895,3 +1895,81 @@ fn split_at_tangents_cuts_at_kinks() {
     assert!(r.done, "{:?}", r.error);
     assert_eq!(r.create.len(), 2, "{:?}", r.messages);
 }
+
+/// A trimmed plate as `brep_data` commands receive it: a flat 10 × 10 surface at height `z`,
+/// its square outer loop (four lines as NURBS) and a hole of radius 1 round (5, 5) as one
+/// exact circle.
+fn trimmed_plate(id: &str, z: f64) -> Selected {
+    let base = flat(id, 0.0, 10.0, 0.0, 10.0, z);
+    let edge = |a: Vec3, b: Vec3| Geo::Nurbs { degree: 1, points: vec![a, b], weights: vec![1.0; 2], knots: vec![0.0, 0.0, 1.0, 1.0] };
+    let c = |x: f64, y: f64| [x, y, z];
+    let outer = vec![edge(c(0.0, 0.0), c(10.0, 0.0)), edge(c(10.0, 0.0), c(10.0, 10.0)), edge(c(10.0, 10.0), c(0.0, 10.0)), edge(c(0.0, 10.0), c(0.0, 0.0))];
+    let hole = vec![exact::arc(c(5.0, 5.0), [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], 1.0, TAU).to_geo()];
+    Selected {
+        kind: "surface".into(),
+        exact: Some(Geo::Trimmed { surface: Box::new(base.exact.clone().unwrap()), loops: vec![outer, hole], display: None }),
+        ..base
+    }
+}
+
+/// Rhino: the edges of trimmed surfaces are curves too. Loft between the holes of two
+/// trimmed plates (z 0 and z 3, picked near their hole edges) is the cylinder r 1 between them.
+#[test]
+fn trimmed_surface_edges_as_curves() {
+    let (a, b) = (trimmed_plate("a", 0.0), trimmed_plate("b", 3.0));
+    let mut e = event(LOFT, Input::Start, vec![], json!({}));
+    let r = Surfaces::step(&e).unwrap();
+    e.state = r.state;
+    e.input = Input::Selection;
+    e.selection = vec![a.clone()];
+    e.pick = Some([6.05, 5.0, 0.0]);
+    let r = Surfaces::step(&e).unwrap();
+    e.state = r.state;
+    e.selection = vec![a.clone(), b.clone()];
+    e.pick = Some([5.0, 5.95, 3.0]);
+    let r = Surfaces::step(&e).unwrap();
+    e.state = r.state;
+    e.input = Input::Enter;
+    e.pick = None;
+    let mut r = Surfaces::step(&e).unwrap();
+    if !r.done {
+        e.state = r.state;
+        r = Surfaces::step(&e).unwrap();
+    }
+    assert!(r.done, "{:?} {}", r.error, r.prompt);
+    assert!(r.delete.is_empty() && r.replace.is_empty(), "the plates stay");
+    assert_eq!(r.create.len(), 1);
+    let s = Srf::of(&r.create[0]).unwrap();
+    for i in 0..=12 {
+        for j in 0..=4 {
+            let p = s.at_st(i as f64 / 12.0, j as f64 / 4.0);
+            assert!(((p[0] - 5.0).hypot(p[1] - 5.0) - 1.0).abs() < 1e-9 && p[2] > -1e-9 && p[2] < 3.0 + 1e-9, "{p:?}");
+        }
+    }
+    // A click near the outer border picks that straight edge (x 10), not the hole.
+    let mut e = event(EDGE_CURVES, Input::Start, vec![], json!({}));
+    let r = Surfaces::step(&e).unwrap();
+    e.state = r.state;
+    e.input = Input::Selection;
+    e.selection = vec![a.clone()];
+    e.pick = Some([9.9, 4.0, 0.0]);
+    let r = Surfaces::step(&e).unwrap();
+    let st: Value = r.state.clone();
+    assert_eq!(st["picks"].as_array().map(Vec::len), Some(1), "{st}");
+}
+
+/// Rhino 5 Untrim: trimmed surfaces go back to their whole surface; KeepTrimObjects=Yes
+/// leaves the trim curves as new objects.
+#[test]
+fn untrim_restores_the_surface_and_can_keep_the_trims() {
+    let a = trimmed_plate("a", 0.0);
+    let Some(Geo::Trimmed { surface, .. }) = a.exact.clone() else { unreachable!() };
+    let r = run(UNTRIM, vec![a.clone()], json!({}), vec![Input::Enter]);
+    assert_eq!(r.replace.len(), 1);
+    assert_eq!(r.replace[0].geo, *surface, "the whole surface");
+    assert!(r.create.is_empty());
+    let keep = Input::Option { name: "KeepTrimObjects".into(), value: None };
+    let r = run(UNTRIM, vec![a], json!({}), vec![keep, Input::Enter]);
+    assert_eq!(r.replace.len(), 1);
+    assert_eq!(r.create.len(), 5, "four border lines and the hole");
+}

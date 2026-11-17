@@ -20,6 +20,7 @@ pub mod brep;
 pub mod creation;
 pub mod editing;
 pub mod extrusion;
+pub mod face_nurbs;
 pub mod gem;
 pub mod intersect;
 pub mod measurement;

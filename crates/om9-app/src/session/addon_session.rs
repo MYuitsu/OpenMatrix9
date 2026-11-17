@@ -48,6 +48,8 @@ pub struct AddonSession {
     hover_at: Option<Point3>,
     /// The command reads the triangles of selected meshes (`mesh_data = true`).
     mesh_data: bool,
+    /// The command reads trimmed surfaces exactly (`brep_data = true`).
+    brep_data: bool,
     /// Every object selected at some step: a command that asks for two groups (Boolean
     /// Difference: first the objects, then the cutters) may change all of them.
     seen: std::collections::BTreeSet<om9_core::identity::ObjectId>,
@@ -601,6 +603,97 @@ fn geo_in_local(g: &Geo, placement: &Transform, k: f64) -> Result<Geo> {
     })
 }
 
+/// Most faces' NURBS kept for `brep_data` commands (by source hash): a command asks for the
+/// same selection at every step and pointer move.
+#[cfg(feature = "occt-brep")]
+const FACE_CACHE: usize = 32;
+
+#[cfg(feature = "occt-brep")]
+thread_local! {
+    static FACES: std::cell::RefCell<Vec<([u8; 32], std::sync::Arc<Vec<om9_kernel::face_nurbs::FaceNurbs>>)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// A trimmed surface exactly, for `brep_data` commands: a one-face B-Rep (its underlying
+/// NURBS surface and trim loops from the kernel; a face that is its whole surface goes as the
+/// plain [`Geo::Surface`]) or a surface with Rhino trim loops (the parameter-space polygons,
+/// run along the surface). `None` for anything else.
+fn trimmed_in_world(entity: &Entity, k: f64) -> Option<Geo> {
+    let limits = om9_core::budget::Limits::default();
+    let placement = &entity.placement;
+    let p = |q: Point3| placement.point(q).ok().map(|w| mm(w, k));
+    if let Ok(Some(t)) = om9_core::rhino_semantics::trimmed_surface_of(entity, &limits) {
+        let surface = exact_in_world(&Geometry::Surface(t.underlying.clone()), placement, k)?;
+        // Each straight parameter-space segment is a curve on the surface: sampled so a loop
+        // has about 256 points (a dense Rhino polygon keeps its own vertices only).
+        let run = |lp: &[[f64; 2]]| -> Option<Geo> {
+            let n = lp.len();
+            let per = (256 / n.max(1)).clamp(1, 8);
+            let mut points = Vec::with_capacity(n * per);
+            for i in 0..n {
+                let (a, b) = (lp[i], lp[(i + 1) % n]);
+                for s in 0..per {
+                    let f = s as f64 / per as f64;
+                    let q = om9_core::surface_kernel::evaluate(&t.underlying, a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, &limits).ok()?;
+                    points.push(p(q)?);
+                }
+            }
+            Some(Geo::Polyline { points, closed: true })
+        };
+        let mut loops = vec![vec![run(&t.outer)?]];
+        for inner in &t.inners {
+            loops.push(vec![run(inner)?]);
+        }
+        return Some(Geo::Trimmed { surface: Box::new(surface), loops, display: None });
+    }
+    #[cfg(feature = "occt-brep")]
+    // One face only (a polysurface or solid is not a trimmed surface): the display already
+    // counts the faces, so a solid is never converted.
+    if let Geometry::Brep(brep) = &entity.geometry
+        && brep.topology().faces.len() == 1
+    {
+        let key = brep.canonical_fingerprints().0;
+        let faces = FACES.with(|c| c.borrow().iter().find(|(h, _)| *h == key).map(|(_, f)| f.clone())).or_else(|| {
+            let f = std::sync::Arc::new(om9_kernel::face_nurbs::face_nurbs(brep, &limits).ok()?);
+            FACES.with(|c| {
+                let mut c = c.borrow_mut();
+                if c.len() >= FACE_CACHE {
+                    c.remove(0);
+                }
+                c.push((key, f.clone()));
+            });
+            Some(f)
+        })?;
+        let [face] = faces.as_slice() else { return None };
+        let surface = Geo::Surface {
+            degree: face.degree,
+            size: face.size,
+            points: face.poles.iter().map(|q| p(*q)).collect::<Option<_>>()?,
+            weights: face.weights.clone(),
+            knots: face.knots.clone(),
+        };
+        let loops = face
+            .loops
+            .iter()
+            .map(|lp| {
+                lp.iter()
+                    .map(|c| {
+                        Some(Geo::Nurbs {
+                            degree: c.degree,
+                            points: c.poles.iter().map(|q| p(*q)).collect::<Option<_>>()?,
+                            weights: c.weights.clone(),
+                            knots: c.knots.clone(),
+                        })
+                    })
+                    .collect::<Option<Vec<Geo>>>()
+            })
+            .collect::<Option<Vec<_>>>()?;
+        // A face that is its whole surface (no loops) goes as the plain surface.
+        return Some(if loops.is_empty() { surface } else { Geo::Trimmed { surface: Box::new(surface), loops, display: None } });
+    }
+    None
+}
+
 /// The exact definition of a curve or NURBS surface object, in world mm.
 fn exact_in_world(g: &Geometry, placement: &Transform, k: f64) -> Option<Geo> {
     let p = |q: Point3| placement.point(q).ok().map(|w| mm(w, k));
@@ -762,7 +855,7 @@ impl Controller {
     }
 
     /// The selection as add-ons see it (world millimetres).
-    fn session_selection(&self, k: f64, mesh_data: bool) -> Vec<Selected> {
+    fn session_selection(&self, k: f64, mesh_data: bool, brep_data: bool) -> Vec<Selected> {
         use om9_scene::scene::RenderBuffers;
         let mut out: Vec<Selected> = Vec::new();
         let mut triangles_sent = 0usize;
@@ -803,7 +896,11 @@ impl Controller {
                     closed: false,
                     gem,
                     mesh: None,
-                    exact: exact_in_world(&entity.geometry, &entity.placement, k),
+                    exact: if brep_data {
+                        trimmed_in_world(entity, k).or_else(|| exact_in_world(&entity.geometry, &entity.placement, k))
+                    } else {
+                        exact_in_world(&entity.geometry, &entity.placement, k)
+                    },
                 });
                 out.len() - 1
             });
@@ -956,6 +1053,11 @@ impl Controller {
             .as_ref()
             .and_then(|h| h.lock().ok()?.command_info(code))
             .is_some_and(|i| i.command.mesh_data);
+        let brep_data = self
+            .addons
+            .as_ref()
+            .and_then(|h| h.lock().ok()?.command_info(code))
+            .is_some_and(|i| i.command.brep_data);
         self.cancel();
         self.addon_session = Some(AddonSession {
             code: code.to_owned(),
@@ -970,6 +1072,7 @@ impl Controller {
             selection_seen: self.selection_revision,
             hover_at: None,
             mesh_data,
+            brep_data,
             seen: Default::default(),
             pick: None,
         });
@@ -1032,7 +1135,7 @@ impl Controller {
                 x: plane.x,
                 y: plane.y,
             },
-            selection: self.session_selection(k, session.mesh_data),
+            selection: self.session_selection(k, session.mesh_data, session.brep_data),
             pick: session.pick.map(|p| mm(p, k)),
             settings,
         };
@@ -1377,19 +1480,34 @@ impl Controller {
         }
         for r in &reply.replace {
             let id = selected(&r.id)?;
-            let placement = self
+            let entity = self
                 .document()
                 .entities
                 .get(&id)
-                .ok_or(Error::Missing("object"))?
-                .placement;
+                .ok_or(Error::Missing("object"))?;
             // The object keeps its placement: the world geometry goes into its own frame.
-            let local = geo_in_local(&r.geo, &placement, k)?;
+            let local = geo_in_local(&r.geo, &entity.placement, k)?;
             let (geometry, _, _) = to_geometry(&local, k)?;
-            mutations.push(Mutation::Geometry {
-                source: self.document().stamp(id)?,
-                geometry,
-            });
+            let source = self.document().stamp(id)?;
+            // Trim and extrusion records describe the old geometry: the replacement carries its
+            // own shape (a trimmed result is a B-Rep face), so they go (Untrim keeps the
+            // surface and drops its trims).
+            let stale = [
+                om9_core::model::TRIM_SURFACE_EXTENSION_SLOT,
+                om9_core::model::EXTRUSION_EXTENSION_SLOT,
+            ];
+            let extensions = stale
+                .iter()
+                .any(|slot| entity.extensions.contains_key(*slot))
+                .then(|| {
+                    let mut x = entity.extensions.clone();
+                    x.retain(|slot, _| !stale.contains(&slot.as_str()));
+                    x
+                });
+            mutations.push(Mutation::Geometry { source, geometry });
+            if let Some(extensions) = extensions {
+                mutations.push(Mutation::Extensions { source, extensions });
+            }
         }
         for u in &reply.records {
             let id = selected(&u.id)?;
