@@ -167,6 +167,182 @@ fn fixture() -> (Document, ObjectId, ImportNamespaceId) {
     d.import_namespaces.insert(ns.id, ns);
     (d, object, namespace)
 }
+
+fn brep_fixture(source: &str) -> om9_core::brep::Brep {
+    use om9_core::brep::{Brep, BrepDisplay, BrepTopology};
+    Brep::from_native(source.into(), BrepDisplay { source_sha256: [0; 32], deflection_mm: 0.1,
+        points: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]], triangles: vec![[0, 1, 2, 0]],
+        segments: vec![], vertices: vec![], topology: BrepTopology { faces: vec![Uuid::from_u128(20)],
+            edges: vec![], vertex_ids: vec![], face_edges: vec![] }.into() }, &Limits::default()).unwrap()
+}
+
+#[test]
+fn source_baseline_ignores_display_only_remesh_and_detects_source_change() {
+    let (mut document, object, namespace) = fixture();
+    let entity = document.entities.get_mut(&object).unwrap();
+    entity.geometry = Geometry::Brep(brep_fixture("CASCADE Topology source A"));
+    let record = SourceRecord::bound_entity(key(), "ON_Brep", HostRef::Object(object), entity).unwrap();
+    assert_eq!(record.entity_baseline.unwrap().geometry_hash_version, 1);
+    document.import_namespaces.get_mut(&namespace).unwrap().records[0] = record;
+    document.validate(&Limits::default()).unwrap();
+    let Geometry::Brep(shape) = &mut document.entities.get_mut(&object).unwrap().geometry else { panic!() };
+    let mut display = shape.display().clone();
+    display.deflection_mm = 0.02;
+    display.points[1][0] = 2.;
+    *shape = om9_core::brep::Brep::from_native(shape.source().to_owned(), display, &Limits::default()).unwrap();
+    document.reconcile_derived_export_bindings(&Limits::default()).unwrap();
+    assert_eq!(document.import_namespaces[&namespace].records[0].disposition, RecordDisposition::Unchanged);
+    document.entities.get_mut(&object).unwrap().geometry = Geometry::Brep(brep_fixture("CASCADE Topology source B"));
+    document.reconcile_derived_export_bindings(&Limits::default()).unwrap();
+    assert_eq!(document.import_namespaces[&namespace].records[0].disposition, RecordDisposition::Edited);
+}
+
+#[test]
+fn legacy_brep_baseline_keeps_original_display_sensitive_interpretation() {
+    let (mut document, object, namespace) = fixture();
+    let entity = document.entities.get_mut(&object).unwrap();
+    entity.geometry = Geometry::Brep(brep_fixture("CASCADE Topology source A"));
+    let mut record = SourceRecord::bound(key(), "ON_Brep", HostRef::Object(object), fingerprint(entity).unwrap());
+    record.entity_baseline = Some(EntityBaseline::capture_for_version(entity, 0).unwrap());
+    let encoded = serde_json::to_value(&record).unwrap();
+    assert!(encoded["entity_baseline"].get("geometry_hash_version").is_none());
+    document.import_namespaces.get_mut(&namespace).unwrap().records[0] = serde_json::from_value(encoded).unwrap();
+    document.validate(&Limits::default()).unwrap();
+    let Geometry::Brep(shape) = &mut document.entities.get_mut(&object).unwrap().geometry else { panic!() };
+    let mut display = shape.display().clone();
+    display.points[1][0] = 2.;
+    *shape = om9_core::brep::Brep::from_native(shape.source().to_owned(), display, &Limits::default()).unwrap();
+    document.reconcile_derived_export_bindings(&Limits::default()).unwrap();
+    assert_eq!(document.import_namespaces[&namespace].records[0].disposition, RecordDisposition::Edited);
+}
+
+#[test]
+fn native_brep_baseline_ignores_separate_display_but_keeps_payload() {
+    use om9_core::geometry::{Mesh, NativeBrep};
+    let (mut document, object, namespace) = fixture();
+    let entity = document.entities.get_mut(&object).unwrap();
+    let display = Mesh { vertices: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+        faces: vec![vec![0, 1, 2]], normals: vec![], colors: vec![], corner_uvs: vec![] };
+    entity.geometry = Geometry::NativeBrep(NativeBrep { display: display.into(), payload: vec![1, 2, 3].into(), crc: 12 });
+    let record = SourceRecord::bound_entity(key(), "ON_Brep", HostRef::Object(object), entity).unwrap();
+    let bytes = serde_json::to_vec(&record).unwrap();
+    let record: SourceRecord = serde_json::from_slice(&bytes).unwrap();
+    assert_eq!(record.entity_baseline.unwrap().geometry_hash_version, 1);
+    document.import_namespaces.get_mut(&namespace).unwrap().records[0] = record;
+    document.validate(&Limits::default()).unwrap();
+    let Geometry::NativeBrep(shape) = &mut document.entities.get_mut(&object).unwrap().geometry else { panic!() };
+    std::sync::Arc::make_mut(&mut shape.display).vertices[1][0] = 2.;
+    document.reconcile_derived_export_bindings(&Limits::default()).unwrap();
+    assert_eq!(document.import_namespaces[&namespace].records[0].disposition, RecordDisposition::Unchanged);
+    let Geometry::NativeBrep(shape) = &mut document.entities.get_mut(&object).unwrap().geometry else { panic!() };
+    std::sync::Arc::make_mut(&mut shape.payload)[0] = 9;
+    document.reconcile_derived_export_bindings(&Limits::default()).unwrap();
+    assert_eq!(document.import_namespaces[&namespace].records[0].disposition, RecordDisposition::Edited);
+}
+
+#[test]
+fn unknown_entity_baseline_hash_version_is_refused() {
+    let (mut document, _, namespace) = fixture();
+    document.import_namespaces.get_mut(&namespace).unwrap().records[0].entity_baseline.as_mut().unwrap().geometry_hash_version = 2;
+    assert!(matches!(document.validate(&Limits::default()), Err(Error::Unsupported("entity baseline hash version"))));
+}
+
+fn definition_fixture(legacy: bool) -> (Document, ImportNamespaceId, DefinitionId) {
+    use om9_core::model::Definition;
+    let (mut document, _, namespace) = fixture();
+    let member = Entity::new("brep member", Geometry::Brep(brep_fixture("CASCADE Topology source A")), None);
+    let definition = Definition::new("block", vec![member]);
+    let definition_id = definition.id;
+    let mut definition_key = key();
+    definition_key.kind = NativeRecordKind::Definition;
+    let def_record = if legacy {
+        SourceRecord::bound(definition_key, "ON_InstanceDefinition", HostRef::Definition(definition_id), fingerprint(&definition).unwrap())
+    } else {
+        SourceRecord::bound_definition(definition_key, "ON_InstanceDefinition", &definition).unwrap()
+    };
+    let mut member_key = key();
+    member_key.native_index = Some(1);
+    let member_record = SourceRecord::bound_entity(member_key, "ON_Brep", HostRef::DefinitionMember {
+        definition: definition_id, object: definition.members[0].id,
+    }, &definition.members[0]).unwrap();
+    document.import_namespaces.get_mut(&namespace).unwrap().records.extend([def_record, member_record]);
+    document.definitions.insert(definition_id, definition);
+    document.validate(&Limits::default()).unwrap();
+    (document, namespace, definition_id)
+}
+
+#[test]
+fn definition_source_baseline_survives_member_remesh_and_detects_source_edits() {
+    let (document, namespace, definition) = definition_fixture(false);
+    assert_eq!(document.import_namespaces[&namespace].records[1].definition_hash_version, 1);
+    let mut document = document;
+    let cold: ImportNamespace = serde_json::from_slice(&serde_json::to_vec(&document.import_namespaces[&namespace]).unwrap()).unwrap();
+    document.import_namespaces.insert(namespace, cold);
+    let member = &mut document.definitions.get_mut(&definition).unwrap().members[0];
+    let Geometry::Brep(shape) = &mut member.geometry else { panic!() };
+    let mut display = shape.display().clone();
+    display.deflection_mm = 0.02;
+    display.points[1][0] = 2.;
+    *shape = om9_core::brep::Brep::from_native(shape.source().to_owned(), display, &Limits::default()).unwrap();
+    document.reconcile_derived_export_bindings(&Limits::default()).unwrap();
+    let records = &document.import_namespaces[&namespace].records;
+    assert_eq!((records[1].disposition, records[2].disposition), (RecordDisposition::Unchanged, RecordDisposition::Unchanged));
+    document.definitions.get_mut(&definition).unwrap().members[0].geometry = Geometry::Brep(brep_fixture("CASCADE Topology source B"));
+    document.reconcile_derived_export_bindings(&Limits::default()).unwrap();
+    let records = &document.import_namespaces[&namespace].records;
+    assert_eq!((records[1].disposition, records[2].disposition), (RecordDisposition::Edited, RecordDisposition::Edited));
+}
+
+#[test]
+fn legacy_definition_keeps_display_sensitive_baseline() {
+    let (mut document, namespace, definition) = definition_fixture(true);
+    let record = &document.import_namespaces[&namespace].records[1];
+    assert_eq!(record.definition_hash_version, 0);
+    assert!(serde_json::to_value(record).unwrap().get("definition_hash_version").is_none());
+    let Geometry::Brep(shape) = &mut document.definitions.get_mut(&definition).unwrap().members[0].geometry else { panic!() };
+    let mut display = shape.display().clone();
+    display.points[1][0] = 2.;
+    *shape = om9_core::brep::Brep::from_native(shape.source().to_owned(), display, &Limits::default()).unwrap();
+    document.reconcile_derived_export_bindings(&Limits::default()).unwrap();
+    let records = &document.import_namespaces[&namespace].records;
+    assert_eq!((records[1].disposition, records[2].disposition), (RecordDisposition::Edited, RecordDisposition::Unchanged));
+}
+
+#[test]
+fn definition_source_baseline_preserves_member_order_placement_and_metadata() {
+    use om9_core::model::Definition;
+    let member = Entity::new("brep", Geometry::Brep(brep_fixture("CASCADE Topology source A")), None);
+    let mut definition = Definition::new("block", vec![member, Entity::new("point", Geometry::Point([1., 2., 3.]), None)]);
+    let mut native_key = key(); native_key.kind = NativeRecordKind::Definition;
+    let hash = |definition: &Definition| SourceRecord::bound_definition(native_key, "ON_InstanceDefinition", definition).unwrap().baseline_sha256;
+    let original = hash(&definition);
+    definition.members.swap(0, 1);
+    assert_ne!(original, hash(&definition));
+    definition.members.swap(0, 1);
+    definition.members[0].placement = Transform::translation([1., 0., 0.]);
+    assert_ne!(original, hash(&definition));
+    definition.members[0].placement = Transform::identity();
+    definition.label.push_str(" changed");
+    assert_ne!(original, hash(&definition));
+    definition.label = "block".into();
+    let authored = om9_core::geometry::Mesh { vertices: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+        faces: vec![vec![0, 1, 2]], normals: vec![], colors: vec![], corner_uvs: vec![] };
+    definition.members[1].geometry = Geometry::Mesh(authored);
+    let mesh_baseline = hash(&definition);
+    let Geometry::Mesh(mesh) = &mut definition.members[1].geometry else { panic!() };
+    mesh.vertices[1][0] = 2.;
+    assert_ne!(mesh_baseline, hash(&definition));
+}
+
+#[test]
+fn unknown_definition_baseline_version_is_refused() {
+    let (mut document, namespace, _) = definition_fixture(false);
+    document.import_namespaces.get_mut(&namespace).unwrap().records[1].definition_hash_version = 2;
+    assert!(matches!(document.validate(&Limits::default()), Err(Error::Unsupported("definition baseline hash version"))));
+    let (mut document, _, namespace) = fixture();
+    document.import_namespaces.get_mut(&namespace).unwrap().records[0].definition_hash_version = 1;
+    assert!(matches!(document.validate(&Limits::default()), Err(Error::Invalid("definition baseline binding kind"))));
+}
 fn hashes(b: EntityBaseline) -> [[u8; 32]; 4] {
     [
         b.geometry_sha256,

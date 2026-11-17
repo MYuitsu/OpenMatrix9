@@ -75,6 +75,27 @@ fn source() -> (
 
 #[test]
 #[ignore = "requires built openNURBS operation executable"]
+fn trimmed_surface_3dm_export_refusal_keeps_file_document_and_redo() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.2,0.2],[0.8,0.2],[0.8,0.8],[0.2,0.8]],
+        inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("trim",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    let mut doc=Document::with_template_tolerance("trim export");doc.entities.insert(entity.id,entity);let id=doc.id;
+    let mut coordinator=TransactionCoordinator::new(World::new(vec![doc],&limits).unwrap(),limits).unwrap();
+    let point=Entity::new("redo",Geometry::Point([100.,100.,100.]),None);
+    let prepared=coordinator.prepare(TransactionRequest::new("point",vec![Mutation::Insert {document:id,entity:point}])).unwrap();
+    coordinator.commit(prepared).unwrap();coordinator.undo().unwrap();assert_eq!(coordinator.redo_len(),1);
+    let before=coordinator.snapshot();let folder=Directory::new();let path=folder.target();fs::write(&path,b"previous good").unwrap();
+    let result=native().prepare(&coordinator,ExportCapture::all(&coordinator,id).unwrap(),&path,&Cancellation::default());
+    assert!(matches!(result,Err(om9_core::Error::Unsupported("3DM export of trimmed standalone surfaces"))));
+    assert_eq!(fs::read(&path).unwrap(),b"previous good");assert_eq!(coordinator.snapshot(),before);
+    assert_eq!(coordinator.redo_len(),1);folder.assert_clean();
+}
+
+#[test]
+#[ignore = "requires built openNURBS operation executable"]
 fn native_packet_stream_rejects_malformed_duplicate_trailing_and_oversized_input() {
     let folder = Directory::new();
     let packet = folder.0.join("packet.json");

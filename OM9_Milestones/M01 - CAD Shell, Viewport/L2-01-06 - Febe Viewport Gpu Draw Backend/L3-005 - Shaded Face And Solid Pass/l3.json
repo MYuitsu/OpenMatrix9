@@ -213,5 +213,81 @@
     "api": "implementation/design/M01/OM9-L3-01-06-005/api.md",
     "evidence": "implementation/evidence/M01/OM9-L3-01-06-005/",
     "manual_pending": "a sphere must read as round, not as a flat disc"
+  },
+  "runtime_implementation": {
+    "boolean_publication_worker_buffers_2026_11_15": {
+      "status": "SCOPED_PUBLICATION_STALL_REDUCTION_VERIFIED",
+      "scope": "Committed single-body Boolean workers prepare exact-source interior-wire/render buffers off UI; fresh-root scene installation checks immutable display identity/fingerprint, pinned source and ownership. Atomic transaction, source geometry, profile tolerances and existing failure guards remain.",
+      "measurement": "16 focused tests and 10 native-window release runs passed (8 optimized, 2 same-binary counterfactual). 64 UI final poll High/Light 56.631/42.363 ms medians vs former approximately 2.1 s; 128 single samples 157.735/94.128 ms vs historical approximately 5.1 s.",
+      "evidence": "docs/validation/2026-11-15-boolean-publication-worker-buffers.md",
+      "remaining": "Request/creation pauses and variable steady FPS remain; no present/RDP FPS proof, global scene acceptance, full migration or persistence completion."
+    },
+    "many_sphere_profile_timing_2026_11_15": {
+      "status": "SCOPED_LARGER_SCENE_TIMING_VERIFIED_PUBLICATION_STALL_REMAINS",
+      "scope": "64 spheres with three runs per preset and 128 spheres with one per preset: eight native-window release runs passed source, GPU, restoration and zero-drop checks; 11 focused integration tests passed. Synthetic pointer navigation exercised the actual UI/render path.",
+      "measurement": "Both presets approximately 30 encoded FPS under the 30 Hz cap. Light result GPU p50 0.094/0.127 ms vs High 0.309/0.432 ms at 64/128 spheres. Active maximum gaps remain approximately 2.1/5.1 s at final UI publication.",
+      "evidence": "docs/validation/2026-11-15-many-sphere-light-high.md",
+      "remaining": "Publication stall not fixed; actual client presentation, physical input, larger/general scenes and global L3 acceptance remain open."
+    },
+    "light_navigation_smoothness_2026_11_14": {
+      "status": "SCOPED_LIGHT_GPU_COST_REDUCTION_VERIFIED",
+      "scope": "Light Shaded navigation reuses Q2 moving targets and restores full-size 4x MSAA. Six matched native-window pointer runs on two spheres and Union passed geometry/target checks; 11 integration tests passed.",
+      "evidence": "docs/validation/2026-11-14-light-navigation-smoothness.md",
+      "measurement": "Moving GPU median 0.641 to 0.139 ms; approximately 30 encoded frames/s in both variants, with zero callback gaps above 100 ms from first command through result.",
+      "limitations": "Synthetic raw pointer events, one small fixture/session, not client presentation or general hardware coverage. Earlier 10.6 FPS was not reproduced in final release comparison; general L3 acceptance remains open."
+    },
+    "trim_hole_gpu_2026_11_12": {
+      "status": "SCOPED_TRIM_GPU_PIXELS_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#gpu-pixels-for-a-reopened-trim-hole",
+      "scope": "Offscreen GPU renders a reopened trimmed plane in Shaded mode; retained material differs from deleted scene while a hole and an outside point match it. Undo and Redo restore the three sampled pixels; focused GPU test and public source audit pass.",
+      "limitations": "Only three sampled positions on a planar fixture, not full image, boundary pixels, curved surfaces, different cameras or physical desktop. Plan A open; B deferred."
+    },
+    "rdp_viewport_pacing_2026_11_15": {
+      "status": "SCOPED_RDP_PACING_64_128_VERIFIED",
+      "scope": "Remote-session surface presentation bypasses blocking VSync; local sessions keep VSync. Existing CAD clock, source BRep, Boolean tolerance, picking and atomic transactions remain.",
+      "measurement": "Ten frozen-release native-window runs passed: two VSync controls at 64 spheres, six default RDP runs at 64, two at 128. Optimized steady encoded FPS 29.987–30.010 across both phases; same-binary controls approximately 10.6 FPS. Eighteen focused tests and public-source audit passed.",
+      "remaining": "Creation/request/publication pauses and high synthetic UI callback activity remain. Client displayed FPS, local-console/dynamic-session coverage, all-overlap/general scenes and full source/persistence migration are not established.",
+      "evidence": "docs/validation/2026-11-15-rdp-viewport-pacing.md",
+      "data": "docs/validation/2026-11-15-rdp-viewport-pacing.json",
+      "next_document": "crates/om9-app/src/ui.rs",
+      "next_action": "Profile remaining source capture/registration and UI repaint load while preserving exact source; broaden physical input/client presentation coverage separately from encoded FPS."
+    },
+    "coupled_document_ab_2026_11_15": {
+      "status": "SCOPED_COUPLED_DOCUMENT_AB_64_128_VERIFIED",
+      "scope": "Same-binary reconstructed coupled document/display lifetime, validation and serialization versus independent representations. Quality, exact kernel, UI worker publication, GPU caching and RDP policy held constant; normal product remains separated.",
+      "measurement": "16/16 frozen-release native-window runs and 19 focused integration tests passed. 64 high UI final poll 216.7→53.5 ms (75.3% less); 64 light UI final poll 41.3→24.6 ms (40.5% less); 128 high UI final poll 486.0→151.8 ms (68.8% less); 128 light UI final poll 125.5→91.8 ms (26.9% less). Exact output source SHA and per-profile display counts matched. Both architectures stayed near 30 encoded FPS under the same cap; no material steady-FPS gain or consistent total Boolean speedup was established. High creation totals fell about 49/52 percent. Worst 128-sphere request pauses remain about 600/450 ms High/Light.",
+      "evidence": "docs/validation/2026-11-15-coupled-source-display-ab.md",
+      "data": "docs/validation/2026-11-15-coupled-source-display-ab.json",
+      "remaining": "Scoped reconstructed coupling, not a wholesale historical runtime rollback. 30-Hz cap, synthetic input, general scenes/native families, client video FPS and full migration/persistence remain outside evidence.",
+      "next_document": "crates/om9-app/src/ui.rs",
+      "next_action": "Use the separated product path; profile residual request/creation pauses independently of kernel mathematics and RDP presentation."
+    },
+    "boolean_request_source_batch_2026_11_15": {
+      "status": "SCOPED_BOOLEAN_REQUEST_BATCH_64_128_VERIFIED",
+      "scope": "Existing atomic source batch admission replaces per-operand retained-owner scans in shared Boolean request constructor. Exact source, stamps/placement, quotas, guards, native mathematics, display density and publication policies retained.",
+      "measurement": "20 focused integration tests and 16/16 same-binary native-window release runs passed. 64 high request 47.5→2.5 ms (94.7% less), worst active 182.3→138.7 ms; 64 light request 46.2→3.4 ms (92.7% less), worst active 86.6→86.5 ms; 128 high request 365.8→8.9 ms (97.6% less), worst active 626.5→266.1 ms; 128 light request 365.0→8.7 ms (97.6% less), worst active 447.3→210.2 ms. Exact native result source SHA and per-profile mesh counts matched. Both paths remain near 30 steady encoded FPS.",
+      "evidence": "docs/validation/2026-11-15-boolean-request-source-batch.md",
+      "data": "docs/validation/2026-11-15-boolean-request-source-batch.json",
+      "remaining": "Foreground selection/redraw, creation/fitting, worker admission and publication pauses remain. Large-scene Union fixtures only; full migration/persistence, arbitrary geometry and client-presented FPS remain open. Optional debug probe was interrupted and not counted as a passed test.",
+      "next_document": "crates/om9-app/src/ui.rs",
+      "next_action": "Profile selection_frame projection and associated redraw separately from the now-short Boolean request, preserving geometry and exact selection visuals."
+    },
+    "smooth_normals_selection_cache_20261115": {
+      "status": "implemented_focused_validation_native_matrix_pending",
+      "scope": "GPU-only smooth CAD-face normals with crease boundaries; immutable shared display bounds and conservative clipped selection-frame projection. Exact source authority and picking/snapping/Boolean remain unchanged.",
+      "evidence": "docs/validation/2026-11-15-smooth-normals-selection-cache.md",
+      "checks": [
+        "17 app integration tests passed including exact source equality, Boolean and Undo/Redo",
+        "3 smooth-normal math tests passed",
+        "GPU flat/smooth readback passed with identical silhouette",
+        "2 bounds/projection tests passed",
+        "15 scene renderer tests passed in saved sequential retry; 4 ignored measurement cases"
+      ],
+      "requires_manual_test": true,
+      "manual_acceptance": false,
+      "native_performance": "512/768 Light/High pending: current Windows session 1 is disconnected; no new native FPS/freeze/RAM claim",
+      "binary_receipt": "build/standalone-validation/ui-artifacts/viewport-normals-selection-20261115/frozen-binary.json",
+      "data": "docs/validation/2026-11-15-smooth-normals-selection-cache.json"
+    }
   }
 }

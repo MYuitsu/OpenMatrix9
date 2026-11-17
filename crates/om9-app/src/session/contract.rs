@@ -147,6 +147,7 @@ impl super::Controller {
     pub(crate) fn sync_published(&mut self, cause: ChangeCause) {
         self.prune_selection();
         self.prune_subselection();
+        self.coordinator.prune_orphaned_native_representations();
         let Some(previous) = self.published.take() else {
             return;
         };

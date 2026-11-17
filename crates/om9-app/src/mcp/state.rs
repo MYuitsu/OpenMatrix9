@@ -65,7 +65,7 @@ impl Server {
                     "selectable": entity.attributes.selectable,
                     "locked": entity.attributes.locked,
                     "placement": entity.placement,
-                    "geometry": geometry_view(&entity.geometry),
+                    "geometry": geometry_view(&entity.geometry, controller),
                 })
             })
             .collect();
@@ -148,7 +148,7 @@ impl Server {
     }
 }
 
-fn geometry_view(geometry: &Geometry) -> Value {
+fn geometry_view(geometry: &Geometry, controller: &crate::session::Controller) -> Value {
     match geometry {
         Geometry::Mesh(mesh) => json!({
             "kind": "Mesh",
@@ -159,7 +159,8 @@ fn geometry_view(geometry: &Geometry) -> Value {
         Geometry::Brep(_) => json!({"kind": "Brep"}),
         Geometry::NativeBrep(brep) => json!({
             "kind": "NativeBrep",
-            "display_vertices": brep.display.vertices.len(),
+            "display_vertices": controller.coordinator().representation_store().lock().unwrap_or_else(|e| e.into_inner())
+                .get_native(brep).ok().map(|display| display.display().vertices.len()),
             "payload_bytes": brep.payload.len(),
         }),
         other => {

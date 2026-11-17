@@ -14,6 +14,7 @@
 use crate::{Camera, MeshData, RenderError};
 
 const SORT_THRESHOLD: usize = 256;
+const VERTEX_BYTES: u64 = 24;
 
 /// One object in the batch.
 #[derive(Debug, Clone)]
@@ -26,8 +27,6 @@ pub struct SceneObject {
     centre: [f32; 3],
     radius: f32,
     vertex_count: usize,
-    /// When vertices were split at creases: the mesh vertex each uploaded vertex copies.
-    origin: Option<std::sync::Arc<[u32]>>,
     chunk: usize,
 }
 
@@ -176,27 +175,24 @@ impl SceneBatch {
                 };
 
                 @vertex
-                fn vs_main(@location(0) position: vec3<f32>, @location(6) normal: vec3<f32>,
+                fn vs_main(@location(0) position: vec3<f32>,
                     @location(1) m0:vec4<f32>, @location(2) m1:vec4<f32>,
                     @location(3) m2:vec4<f32>, @location(4) m3:vec4<f32>,
-                    @location(5) tint:vec4<f32>) -> VertexOut {
+                    @location(5) tint:vec4<f32>, @location(6) normal:vec3<f32>) -> VertexOut {
                     var out: VertexOut;
-                    let model=mat4x4<f32>(m0,m1,m2,m3);
-                    let world=model*vec4<f32>(position,1.0);
+                    let world=mat4x4<f32>(m0,m1,m2,m3)*vec4<f32>(position,1.0);
                     out.clip=object.mvp*world;
                     out.world=world.xyz;
                     out.tint=tint;
-                    out.normal=(model*vec4<f32>(normal,0.0)).xyz;
+                    out.normal=mat3x3<f32>(cross(m1.xyz,m2.xyz),cross(m2.xyz,m0.xyz),cross(m0.xyz,m1.xyz))*normal;
                     return out;
                 }
 
                 @fragment
                 fn fs_main(input: VertexOut) -> @location(0) vec4<f32> {
-                    // Smooth shading from vertex normals (split at creases on upload), as in
-                    // Rhino's shaded views; a vertex without a normal falls back to the facet.
-                    let facet = normalize(cross(dpdx(input.world), dpdy(input.world)));
-                    let n = input.normal;
-                    let normal = select(facet, normalize(n), dot(n, n) > 1e-12);
+                    var normal = cross(dpdx(input.world), dpdy(input.world));
+                    if dot(input.normal,input.normal)>1e-20 { normal=input.normal; }
+                    normal=normalize(normal);
                     let light = normalize(vec3<f32>(0.4, -0.7, 0.6));
                     let lambert = clamp(abs(dot(normal, light)), 0.0, 1.0);
                     return vec4<f32>(input.tint.rgb * (0.3 + 0.7 * lambert), input.tint.a);
@@ -232,20 +228,17 @@ impl SceneBatch {
                     entry_point: Some("vs_main"),
                     compilation_options: Default::default(),
                     buffers: &[Some(wgpu::VertexBufferLayout {
-                        array_stride: VERTEX_STRIDE,
+                        array_stride: VERTEX_BYTES,
                         step_mode: wgpu::VertexStepMode::Vertex,
-                        attributes: &[
-                            wgpu::VertexAttribute {
-                                format: wgpu::VertexFormat::Float32x3,
-                                offset: 0,
-                                shader_location: 0,
-                            },
-                            wgpu::VertexAttribute {
-                                format: wgpu::VertexFormat::Float32x3,
-                                offset: 12,
-                                shader_location: 6,
-                            },
-                        ],
+                        attributes: &[wgpu::VertexAttribute {
+                            format: wgpu::VertexFormat::Float32x3,
+                            offset: 0,
+                            shader_location: 0,
+                        }, wgpu::VertexAttribute {
+                            format: wgpu::VertexFormat::Float32x3,
+                            offset: 12,
+                            shader_location: 6,
+                        }],
                     }), Some(wgpu::VertexBufferLayout {
                         array_stride:80, step_mode:wgpu::VertexStepMode::Instance,
                         attributes:&wgpu::vertex_attr_array![1=>Float32x4,2=>Float32x4,3=>Float32x4,4=>Float32x4,5=>Float32x4],
@@ -319,8 +312,8 @@ impl SceneBatch {
     pub fn add_static(&mut self, mesh: &MeshData, model: [[f32; 4]; 4]) -> usize {
         let (local_centre, local_radius) = bounds(mesh);
         let (centre, radius) = place_bounds(local_centre, local_radius, &model);
-        let mut world = Vec::with_capacity(mesh.positions.len());
-        for position in &mesh.positions {
+        let mut bytes = Vec::with_capacity(mesh.positions.len() * VERTEX_BYTES as usize);
+        for (index, position) in mesh.positions.iter().enumerate() {
             let x = model[0][0] * position[0]
                 + model[1][0] * position[1]
                 + model[2][0] * position[2]
@@ -333,12 +326,14 @@ impl SceneBatch {
                 + model[1][2] * position[1]
                 + model[2][2] * position[2]
                 + model[3][2];
-            world.push([x, y, z]);
+            bytes.extend_from_slice(&x.to_le_bytes());
+            bytes.extend_from_slice(&y.to_le_bytes());
+            bytes.extend_from_slice(&z.to_le_bytes());
+            let normal = crate::normals::transform(mesh.normals.get(index).copied().unwrap_or([0.;3]), model);
+            for value in normal { bytes.extend_from_slice(&value.to_le_bytes()); }
         }
-        let shaded = Shaded::new(&world, &mesh.indices);
-        let bytes = shaded.vertex_bytes();
         let needed_v = bytes.len() as u64;
-        let needed_i = (shaded.indices.len() * 4) as u64;
+        let needed_i = (mesh.indices.len() * 4) as u64;
         let chunk_index = match self.chunks.iter().position(|chunk| {
             chunk.vertex_bytes + needed_v <= chunk.vertex_capacity
                 && chunk.index_bytes + needed_i <= chunk.index_capacity
@@ -354,10 +349,10 @@ impl SceneBatch {
             }
         };
         let chunk = &mut self.chunks[chunk_index];
-        let base_vertex = (chunk.vertex_bytes / VERTEX_STRIDE) as u32;
+        let base_vertex = (chunk.vertex_bytes / VERTEX_BYTES) as u32;
         let vertex_offset = chunk.vertex_bytes;
         let index_offset = chunk.index_bytes;
-        let index_bytes: Vec<u8> = shaded
+        let index_bytes: Vec<u8> = mesh
             .indices
             .iter()
             .flat_map(|index| (index + base_vertex).to_le_bytes())
@@ -382,7 +377,7 @@ impl SceneBatch {
             && last.chunk == chunk_index
             && last.index_start + last.index_count == index_start
         {
-            last.index_count += shaded.indices.len() as u32;
+            last.index_count += mesh.indices.len() as u32;
             let (merged_centre, merged_radius) =
                 union_sphere(last.centre, last.radius, centre, radius);
             last.centre = merged_centre;
@@ -392,7 +387,7 @@ impl SceneBatch {
         self.static_ranges.push(StaticRange {
             chunk: chunk_index,
             index_start,
-            index_count: shaded.indices.len() as u32,
+            index_count: mesh.indices.len() as u32,
             centre,
             radius,
         });
@@ -535,9 +530,16 @@ impl SceneBatch {
     /// Adds local geometry with a row-major core-style model transform.
     pub fn add_mesh(&mut self, mesh: &MeshData, model: [[f32; 4]; 4], tint: [f32; 4]) -> usize {
         let (centre, radius) = bounds(mesh);
-        let shaded = Shaded::new(&mesh.positions, &mesh.indices);
-        let bytes = shaded.vertex_bytes();
-        let index_bytes: Vec<u8> = shaded
+        let mut bytes = Vec::with_capacity(mesh.positions.len() * VERTEX_BYTES as usize);
+        for (index, position) in mesh.positions.iter().enumerate() {
+            for value in position {
+                bytes.extend_from_slice(&value.to_le_bytes());
+            }
+            for value in mesh.normals.get(index).copied().unwrap_or([0.;3]) {
+                bytes.extend_from_slice(&value.to_le_bytes());
+            }
+        }
+        let index_bytes: Vec<u8> = mesh
             .indices
             .iter()
             .flat_map(|value| value.to_le_bytes())
@@ -560,7 +562,7 @@ impl SceneBatch {
             }
         };
         let chunk = &mut self.chunks[chunk_index];
-        let base_vertex = (chunk.vertex_bytes / VERTEX_STRIDE) as u32;
+        let base_vertex = (chunk.vertex_bytes / VERTEX_BYTES) as u32;
         let index_start = (chunk.index_bytes / 4) as u32;
         let vertex_offset = chunk.vertex_bytes;
         let index_offset = chunk.index_bytes;
@@ -581,13 +583,12 @@ impl SceneBatch {
         std::sync::Arc::make_mut(&mut self.objects).push(SceneObject {
             base_vertex,
             index_start,
-            index_count: shaded.indices.len() as u32,
+            index_count: mesh.indices.len() as u32,
             model,
             tint,
             centre,
             radius,
             vertex_count: mesh.positions.len(),
-            origin: shaded.origin,
             chunk: chunk_index,
         });
         self.objects.len() - 1
@@ -602,30 +603,18 @@ impl SceneBatch {
         if first_vertex as usize + positions.len() > entry.vertex_count {
             return;
         }
-        // Positions move; normals stay those of the upload. A vertex split at a crease
-        // takes the position of the mesh vertex it copies.
-        let chunk = &self.chunks[entry.chunk];
-        let write = |at: u64, p: &[f32; 3]| {
-            let bytes: Vec<u8> = p.iter().flat_map(|v| v.to_le_bytes()).collect();
-            let offset = (entry.base_vertex as u64 + at) * VERTEX_STRIDE;
-            self.queue.write_buffer(&chunk.vertices, offset, &bytes);
-        };
-        match &entry.origin {
-            None => {
-                for (k, p) in positions.iter().enumerate() {
-                    write(first_vertex as u64 + k as u64, p);
-                }
+        let mut bytes = Vec::with_capacity(positions.len() * VERTEX_BYTES as usize);
+        for position in positions {
+            for value in position {
+                bytes.extend_from_slice(&value.to_le_bytes());
             }
-            Some(origin) => {
-                let end = first_vertex as usize + positions.len();
-                for (at, &v) in origin.iter().enumerate() {
-                    let v = v as usize;
-                    if v >= first_vertex as usize && v < end {
-                        write(at as u64, &positions[v - first_vertex as usize]);
-                    }
-                }
-            }
+            // Sculpt changes geometry; a partial position update cannot reuse old
+            // smooth normals. Use flat shading until a complete mesh is rebuilt.
+            bytes.extend_from_slice(&[0u8;12]);
         }
+        let offset = (entry.base_vertex as u64 + first_vertex as u64) * VERTEX_BYTES;
+        let chunk = &self.chunks[entry.chunk];
+        self.queue.write_buffer(&chunk.vertices, offset, &bytes);
     }
 
     pub fn set_transform(&mut self, object: usize, model: [[f32; 4]; 4]) {
@@ -1162,147 +1151,6 @@ fn distance2(from: &[f32; 3], to: [f32; 3]) -> f32 {
     dx * dx + dy * dy + dz * dz
 }
 
-/// Bytes per uploaded vertex: position, then normal.
-const VERTEX_STRIDE: u64 = 24;
-
-/// Faces meeting at more than this angle keep a sharp edge (their vertices are split).
-const CREASE_COS: f32 = 0.766; // cos 40°
-
-/// A mesh ready to upload with smooth vertex normals: a vertex shared by faces that meet at
-/// a crease is split, so box corners stay sharp while spheres and tori shade smoothly.
-struct Shaded {
-    positions: Vec<[f32; 3]>,
-    normals: Vec<[f32; 3]>,
-    indices: Vec<u32>,
-    /// The mesh vertex of each output vertex, when some were split.
-    origin: Option<std::sync::Arc<[u32]>>,
-}
-
-impl Shaded {
-    fn new(positions: &[[f32; 3]], indices: &[u32]) -> Self {
-        let n = positions.len();
-        let tris = indices.len() / 3;
-        let sub = |a: [f32; 3], b: [f32; 3]| [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
-        let unit = |v: [f32; 3]| {
-            let l = (v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt();
-            if l > 0.0 { [v[0] / l, v[1] / l, v[2] / l] } else { [0.0; 3] }
-        };
-        let dot = |a: [f32; 3], b: [f32; 3]| a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
-        let valid = |i: u32| (i as usize) < n;
-        // Face normals, area weighted (the cross product's length is twice the area).
-        let face: Vec<[f32; 3]> = (0..tris)
-            .map(|t| {
-                let [a, b, c] = [indices[3 * t], indices[3 * t + 1], indices[3 * t + 2]];
-                if !(valid(a) && valid(b) && valid(c)) {
-                    return [0.0; 3];
-                }
-                let (p, q, r) = (positions[a as usize], positions[b as usize], positions[c as usize]);
-                let (u, v) = (sub(q, p), sub(r, p));
-                let c = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
-                // A sliver (sine of its angle below 1e-4) has no reliable direction.
-                if dot(c, c) <= 1e-8 * dot(u, u) * dot(v, v) { [0.0; 3] } else { c }
-            })
-            .collect();
-        let face_unit: Vec<[f32; 3]> = face.iter().map(|f| unit(*f)).collect();
-        // Faces around each vertex (compressed rows).
-        let mut start = vec![0u32; n + 1];
-        for &i in &indices[..tris * 3] {
-            if valid(i) {
-                start[i as usize + 1] += 1;
-            }
-        }
-        for k in 0..n {
-            start[k + 1] += start[k];
-        }
-        let mut fill = start.clone();
-        let mut around = vec![0u32; start[n] as usize];
-        for (corner, &i) in indices[..tris * 3].iter().enumerate() {
-            if valid(i) {
-                around[fill[i as usize] as usize] = (corner / 3) as u32;
-                fill[i as usize] += 1;
-            }
-        }
-        // Around each vertex the faces fall into smoothing groups: a face joins the first
-        // group whose first face is within the crease angle, else starts a new group. The
-        // first group keeps the mesh vertex; each further group (a crease) gets a copy.
-        let mut out_pos = positions.to_vec();
-        let mut out_nrm = vec![[0.0f32; 3]; n];
-        let mut origin: Vec<u32> = (0..n as u32).collect();
-        let mut group_vertex = vec![0u32; around.len()];
-        for v in 0..n {
-            let ring = start[v] as usize..start[v + 1] as usize;
-            let mut groups: Vec<([f32; 3], [f32; 3], u32)> = Vec::new();
-            for at in ring.clone() {
-                let f = around[at] as usize;
-                let own = face_unit[f];
-                if dot(own, own) == 0.0 {
-                    continue;
-                }
-                let g = match groups.iter().position(|(seed, _, _)| dot(*seed, own) >= CREASE_COS) {
-                    Some(g) => g,
-                    None => {
-                        let k = if groups.is_empty() {
-                            v as u32
-                        } else {
-                            out_pos.push(positions[v]);
-                            out_nrm.push([0.0; 3]);
-                            origin.push(v as u32);
-                            (out_pos.len() - 1) as u32
-                        };
-                        groups.push((own, [0.0; 3], k));
-                        groups.len() - 1
-                    }
-                };
-                let sum = &mut groups[g].1;
-                *sum = [sum[0] + face[f][0], sum[1] + face[f][1], sum[2] + face[f][2]];
-                group_vertex[at] = groups[g].2;
-            }
-            for (_, sum, k) in &groups {
-                out_nrm[*k as usize] = unit(*sum);
-            }
-            // Degenerate faces (no area, as at a sphere's pole) take the first group.
-            let first = groups.first().map_or(v as u32, |g| g.2);
-            for at in ring {
-                let f = around[at] as usize;
-                if dot(face_unit[f], face_unit[f]) == 0.0 {
-                    group_vertex[at] = first;
-                }
-            }
-        }
-        let out_idx: Vec<u32> = indices
-            .iter()
-            .enumerate()
-            .map(|(corner, &i)| {
-                let t = corner / 3;
-                if t >= tris || !valid(i) {
-                    return i;
-                }
-                let v = i as usize;
-                (start[v] as usize..start[v + 1] as usize)
-                    .find(|&at| around[at] as usize == t)
-                    .map_or(i, |at| group_vertex[at])
-            })
-            .collect();
-        let split = out_pos.len() > n;
-        Shaded {
-            positions: out_pos,
-            normals: out_nrm,
-            indices: out_idx,
-            origin: split.then(|| origin.into()),
-        }
-    }
-
-    fn vertex_bytes(&self) -> Vec<u8> {
-        let mut bytes = Vec::with_capacity(self.positions.len() * VERTEX_STRIDE as usize);
-        for (p, n) in self.positions.iter().zip(&self.normals) {
-            for v in p.iter().chain(n) {
-                bytes.extend_from_slice(&v.to_le_bytes());
-            }
-        }
-        bytes
-    }
-}
-
 fn bounds(mesh: &MeshData) -> ([f32; 3], f32) {
     if mesh.positions.is_empty() {
         return ([0.0; 3], 0.0);
@@ -1331,51 +1179,6 @@ fn bounds(mesh: &MeshData) -> ([f32; 3], f32) {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    /// Smooth shading: a sphere keeps one normal per vertex (pointing out from the centre),
-    /// a cube with shared corners splits each corner into its three faces' normals.
-    #[test]
-    fn vertex_normals_are_smooth_and_split_at_creases() {
-        // UV sphere, radius 2.
-        let (rings, segs) = (12usize, 24usize);
-        let mut pos = vec![];
-        for i in 0..=rings {
-            let th = std::f32::consts::PI * i as f32 / rings as f32;
-            for j in 0..segs {
-                let ph = std::f32::consts::TAU * j as f32 / segs as f32;
-                pos.push([2.0 * th.sin() * ph.cos(), 2.0 * th.sin() * ph.sin(), 2.0 * th.cos()]);
-            }
-        }
-        let mut idx = vec![];
-        for i in 0..rings {
-            for j in 0..segs {
-                let a = (i * segs + j) as u32;
-                let b = (i * segs + (j + 1) % segs) as u32;
-                let c = a + segs as u32;
-                let d = b + segs as u32;
-                idx.extend([a, c, d, a, d, b]);
-            }
-        }
-        let s = Shaded::new(&pos, &idx);
-        assert!(s.origin.is_none(), "nothing to split on a sphere");
-        for (p, n) in s.positions.iter().zip(&s.normals).skip(segs).take(segs * (rings - 1)) {
-            let r = [p[0] / 2.0, p[1] / 2.0, p[2] / 2.0];
-            let d = r[0] * n[0] + r[1] * n[1] + r[2] * n[2];
-            assert!(d > 0.995, "normal {n:?} at {p:?}");
-        }
-        // Cube on 8 shared corners: every corner becomes 3 vertices, each with an axis normal.
-        let v: Vec<[f32; 3]> = (0..8).map(|k| [(k & 1) as f32, ((k >> 1) & 1) as f32, ((k >> 2) & 1) as f32]).collect();
-        let quads = [[0u32, 2, 3, 1], [4, 5, 7, 6], [0, 1, 5, 4], [2, 6, 7, 3], [0, 4, 6, 2], [1, 3, 7, 5]];
-        let idx: Vec<u32> = quads.iter().flat_map(|q| [q[0], q[1], q[2], q[0], q[2], q[3]]).collect();
-        let s = Shaded::new(&v, &idx);
-        assert_eq!(s.positions.len(), 24);
-        assert!(s.origin.is_some());
-        for t in s.indices.chunks(3) {
-            let n = s.normals[t[0] as usize];
-            assert!(n.iter().filter(|x| x.abs() > 0.999).count() == 1, "axis normal {n:?}");
-            assert!(t.iter().all(|&k| s.normals[k as usize] == n), "flat face");
-        }
-    }
 
     #[test]
     fn culling_keeps_an_object_that_is_in_front_of_the_camera() {

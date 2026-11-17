@@ -568,6 +568,126 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "viewport_detail_sphere_union_2026_11_14": {
+      "status": "SCOPED_SPHERE_BOOLEAN_PROFILES_VERIFIED",
+      "scope": "Manual Light/High viewport profiles, default Light; canonical Sphere and Boolean Two Union sources with separate display representations. Nine scoped integration tests and eight native-window release runs passed.",
+      "measurement": "Light preview observed ready median 122.624 ms vs High 247.005 ms; both approximately 30 encoded Perspective frames/s. No measured callback gap above 100 ms after first command. Not RDP displayed FPS.",
+      "remaining": "Full core separation, all producers/consumers, opaque NativeBrep, durable topology and BRep v5 save/reopen remain open. Library unit-test target has 319 compile errors from canonical migration.",
+      "evidence": "docs/validation/2026-11-14-viewport-detail-sphere-boolean.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_SOURCE_DISPLAY_COMPLETION_M01_M09.md",
+      "next_action": "Continue broader canonical/source-display migration; use the reproducible paired audit for this slice, without claiming general FPS improvement."
+    },
+    "reserved_source_display_transfer_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Reserved sphere candidates split source and display charges before the source-only transaction.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#reserved-primitive-transfer",
+      "remaining": "No command, runtime, failure-path or memory-pressure validation was run; the broader source/display plan remains open."
+    },
+    "fit_direct_point_memory_2026_11_13": {
+        "status": "SCOPED_SIMULATED_PRESSURE_AND_LIMIT_PASSED",
+        "evidence": "docs/validation/2026-11-13-sphere-fit-selection-memory.md#direct-fitpoints-input-and-point-limit",
+        "limitations": "Typed coordinate and viewport handlers under simulated pressure; actual OOM, desktop and peak unverified."
+      },
+    "native_fit_executable_2026_11_13": {
+        "status": "SCOPED_DEBUG_EXECUTABLE_ROUNDTRIP_PASSED",
+        "evidence": "docs/validation/2026-11-06-sphere-fit-source-vertices.md#actual-executable-with-reopened-nativebrep",
+        "limitations": "One authored fixture through MCP, no physical desktop, third-party file or native peak."
+      },
+    "fit_retained_session_admission_2026_11_13": {
+        "status": "SCOPED_SIMULATED_PRESSURE_PASSED",
+        "evidence": "docs/validation/2026-11-13-sphere-fit-selection-memory.md#retained-session-data-while-collecting",
+        "limitations": "One AroundCurve-to-FitPoints controller fixture; actual OOM, desktop and native peak unverified."
+      },
+    "fit_selection_collection_admission_2026_11_13": {
+        "status": "FOUR_SOURCE_KINDS_SIMULATED_PRESSURE_PASSED",
+        "evidence": "docs/validation/2026-11-13-sphere-fit-selection-memory.md#admission-during-source-collection",
+        "limitations": "Controller fixtures for four source kinds; internal curve/OCCT allocations, physical OOM, desktop and peak are not covered."
+      },
+    "fit_selection_append_admission_2026_11_13": {
+        "status": "SCOPED_SIMULATED_PRESSURE_PASSED",
+        "evidence": "docs/validation/2026-11-13-sphere-fit-selection-memory.md#appending-a-selection-to-existing-fit-points",
+        "limitations": "One existing and one selected point; prior source collection, physical OOM, desktop and native peak not covered."
+      },
+    "fit_selection_memory_recovery_2026_11_13": {
+        "status": "SCOPED_SIMULATED_RECOVERY_PASSED",
+        "evidence": "docs/validation/2026-11-13-sphere-fit-selection-memory.md",
+        "limitations": "Native box Selection and empty-input simulation only; desktop, physical OOM and native peak not verified."
+      },
+    "native_brep_fit_selection_2026_11_13": {
+        "status": "SCOPED_REOPEN_AND_HISTORY_PASSED",
+        "evidence": "docs/validation/2026-11-06-sphere-fit-source-vertices.md#nativebrep-source-vertices-implemented-2026-11-13",
+        "limitations": "One authored translated box and four points after reopen; invalid-source and simulated-memory fixtures separate. No desktop, physical OOM, general affine or third-party evidence."
+      },
+    "coordinate_input_memory_recovery_2026_11_12": {
+      "status": "FOUR_MODES_AND_FOUR_POINT_RECLAMATION_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "Finite comma-separated coordinates on default construction plane; other syntax, arbitrary planes, desktop and physical RAM pressure unverified."
+    },
+    "radius_diameter_memory_recovery_2026_11_12": {
+      "status": "FOUR_OPTION_FIXTURES_AND_CHANGED_DRAFT_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "Selected Center, TwoPoint and single-line Tangent options only; other modes, desktop and physical RAM pressure unverified."
+    },
+    "vertical_curve_memory_recovery_2026_11_12": {
+      "status": "SIX_INPUT_CASES_AND_AROUNDCURVE_RECLAMATION_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "Vertical and single-line AroundCurve/Tangent fixtures only; curved or multiple sources, other tangent modes, desktop and physical RAM remain unverified."
+    },
+    "fit_points_memory_recovery_2026_11_12": {
+      "status": "FIVE_POINT_RECLAMATION_AND_STALE_LIST_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "Five collected points and simulated pressure only; selection imports, arbitrary point sets, physical mouse and actual RAM pressure remain unverified."
+    },
+    "three_four_point_memory_recovery_2026_11_12": {
+      "status": "SCOPED_POINT_HANDLER_AND_FOUR_POINT_RECLAMATION_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "Point handler fixtures only; all geometries, physical mouse and actual RAM pressure remain unverified."
+    },
+    "two_point_memory_recovery_2026_11_12": {
+      "status": "NUMERIC_AND_POINT_HANDLER_FIXTURES_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "TwoPoint numerical diameter and point handler on tested plane; physical mouse, other planes and actual RAM pressure remain unverified."
+    },
+    "viewport_point_memory_recovery_2026_11_12": {
+      "status": "SCOPED_POINT_HANDLER_AND_MANAGED_RECLAMATION_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "Default center mode and direct handler; one snap candidate tested, physical mouse, general snaps, other modes and actual RAM pressure remain unverified."
+    },
+    "numeric_radius_memory_recovery_2026_11_12": {
+      "status": "SCOPED_CENTER_RADIUS_AND_HISTORY_RECLAMATION_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "Default center mode and numeric radius via CMD only; other modes, desktop and actual physical pressure remain unverified."
+    },
+    "production_topology_proof_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "evidence": "docs/validation/2026-11-06-sphere-production-topology-proof.md",
+      "limitations": "Optional in-process proof for explicit controller remesh; may be refused or reclaimed. Document/Undo display eviction, automatic scheduling, native peak, desktop and production latency remain open."
+    },
+    "curve_admission_retry_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "evidence": "docs/validation/2026-11-06-sphere-admission-retry.md",
+      "limitations": "Tangent and AroundCurve on one selected straight curve only; other sources, modes and desktop remain unverified."
+    },
+    "admission_retry_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "evidence": "docs/validation/2026-11-06-sphere-admission-retry.md",
+      "limitations": "Seven simulated-pressure completion cases; tangent/AroundCurve pressure and desktop remain unverified. Scoped skill rule approved and synchronized."
+    },
+    "numeric_snapshot_admission_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "evidence": "docs/validation/2026-11-06-sphere-snapshot-admission.md",
+      "limitations": "Direct numeric and interactive paths only; native peak, desktop and source/display/Undo separation remain open."
+    },
+    "snapshot_admission_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "evidence": "docs/validation/2026-11-06-sphere-snapshot-admission.md",
+      "limitations": "Rust snapshot admission and simulated pressure only; native peak, desktop and source/display/Undo separation remain open."
+    },
+    "fit_source_vertices_2026_11_06": {
+      "status": "TARGETED_AUTOMATED_TESTS_PASSED_DESKTOP_PENDING",
+      "evidence": "docs/validation/2026-11-06-sphere-fit-source-vertices.md",
+      "limitations": "Fixture-specific; native memory, complex sources and desktop remain unverified."
+    },
     "trimmed_arc_2026_10_29": {
       "status": "PARTIAL_CHECKS_PASSED",
       "evidence": "docs/validation/2026-10-29-solid-sphere-trimmed-arc.md",
@@ -679,6 +799,31 @@
       "solid 64 passed, 1 ignored"
     ],
     "remaining": [],
-    "manual_gate": "M03-UI"
+    "manual_gate": "M03-UI",
+    "aroundcurve_reopened_source_2026_11_11": {
+      "status": "SCOPED_AUTOMATED_FIXTURES_PASSED",
+      "scope": "Revalidate selected B-rep source edge through viewport/typed center paths; preserve circular OnCurve angular parameterization.",
+      "evidence": "docs/validation/2026-11-11-sphere-aroundcurve-reopened-regression.md",
+      "limitations": "Other trimmed/imported curves, general placement, per-stage memory pressure, native peak and desktop remain unverified; unmatched display is refused."
+    },
+    "aroundcurve_mixed_display_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "SCOPED_AUTOMATED_REGRESSION_PASSED",
+      "scope": "AroundCurve refuses a reopened Box display edge containing segments from distinct source edges through viewport-facing selection or typed Path, preserving document, pending stage and Redo.",
+      "tests": "Sphere-filtered app library 53 passed and 1 ignored; 5 simulated viewport tests, debug build and public source audit passed.",
+      "limitations": [
+        "Additional synchronous source reads and all-segment checks may repeat; detailed-edge latency and native peak not measured.",
+        "Desktop, varied sources and memory pressure unverified."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-11-sphere-aroundcurve-reopened-regression.md#mixed-displayed-edge-after-reopen--2026-11-12"
+      ]
+    },
+    "point_recovery_draft_guard_2026_11_13": {
+      "status": "SCOPED_SIMULATED_PRESSURE_PASS",
+      "scope": "Viewport-point retry refuses an edited draft before Undo removal, keeping document, Undo/Redo and pending state in the Sphere and Box Cube fixtures.",
+      "remaining": "Desktop and physical RAM exhaustion not tested.",
+      "evidence": "docs/validation/2026-11-13-viewport-point-recovery-draft.md"
+    }
   }
 }

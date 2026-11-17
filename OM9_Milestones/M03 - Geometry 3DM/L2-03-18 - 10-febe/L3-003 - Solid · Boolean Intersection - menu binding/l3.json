@@ -532,6 +532,34 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "intersection_certified_axis_box_2026_11_12": {
+      "status": "SCOPED_REOPENED_SPHERE_BOX_PASSED_WITH_SAFE_REFUSALS",
+      "evidence": "docs/validation/2026-11-12-intersection-certified-box.md",
+      "executable": "Debug application headlessly reopened the source, committed Boolean Two Intersection, undid/redid and saved a volume-checked result with sources retained.",
+      "offscreen_gpu": "Reopened fixture passed analytic volume, Undo/Redo and a sampled result pixel check using a real GPU adapter; controller selection and direct menu dispatch, not native desktop interaction.",
+      "desktop": "For one reopened fixture, physical viewport clicks selected sphere and box in two stages, the physical Intersection menu and Enter committed, and the Perspective viewport displayed the result Shaded. Ctrl+Z and the Redo icon restored expected states; saved volume and closure passed. DeleteInput and first-set confirmation used the live connector; arbitrary models remain unverified.",
+      "limitations": "Strictly certified axis-aligned spline box only; eight of 24 near-centered combinations refused. One desktop fixture passed; broader desktop coverage, general correctness and native peak remain open. Earlier refusal entries describe historical behavior for qualifying fixtures."
+    },
+    "intersection_missing_interior_witness_2026_11_12": {
+      "status": "SCOPED_CENTERED_ROTATED_SPHERE_FIXTURE_REFUSED",
+      "evidence": "docs/validation/2026-11-12-intersection-missing-witness.md",
+      "limitations": "A 24-point numerical sample can miss incomplete results; native peak and desktop remain unverified."
+    },
+    "intersection_outside_input_witness_2026_11_12": {
+      "status": "ONE_REOPENED_WRONG_BODY_FIXTURE_REFUSED_ANOTHER_KNOWN_WRONG_BODY_OPEN",
+      "evidence": "docs/validation/2026-11-12-intersection-outside-input-witness.md",
+      "limitations": "Bounded numeric sampling can miss incorrect or incomplete results; native peak and desktop unverified."
+    },
+    "intersection_false_empty_witness_2026_11_12": {
+      "status": "SCOPED_SPHERE_BOX_REFUSAL_AND_DISJOINT_CONTROLS_PASSED",
+      "evidence": "docs/validation/2026-11-12-intersection-false-empty-witness.md",
+      "limitations": "Sampling is inconclusive when no witness is found; native peak, broader shapes and desktop remain unverified."
+    },
+    "shared_affine_placement_2026_11_12": {
+      "status": "REOPENED_BOX_FIXTURES_PASSED",
+      "evidence": "docs/validation/2026-11-12-boolean-common-affine-union.md#difference-intersection-and-split-with-shared-placement",
+      "limitations": "Exactly matching placement only; arbitrary geometry, tolerances, imports, desktop and native peak remain open."
+    },
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "feature": "OM9-SOLID-002",
@@ -558,6 +586,13 @@
       "status": "BREP_STAGED_SETS_OPTIONS_PARTIAL_AUTOMATED_CHECKS_PASSED",
       "evidence": "docs/validation/2026-10-28-solid-audit.md",
       "manual_gate_promoted": false
+    },
+    "common_rigid_frame_diagnostic_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "COMMON_RIGID_FRAME_DOES_NOT_FIX_NEAR_CENTER",
+      "evidence": "docs/validation/2026-11-12-intersection-certified-box.md#common-rigid-frame-diagnostic",
+      "scope": "For a sphere-box fixture at offsets ±0.000001 mm and both operand orders, applying identity or exact-coefficient 90-degree rotations about X/Y/Z to both sources still produced 16 safe refusals; no wrong or empty result was accepted. The existing checked 24-case sweep passed. No production behavior changed.",
+      "remaining": "A verified full-sphere reparameterization is a different possible approach and user approval is pending; rigorous equivalence, native peak, broader geometry, and desktop remain open. Conical apex decision also pending; Plan A remains open, B1-B3 deferred."
     }
   }
 }

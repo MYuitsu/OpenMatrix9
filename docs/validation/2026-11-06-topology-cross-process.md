@@ -1,0 +1,6 @@
+# OCCT topology descriptors across processes
+
+- Release fixture: one OCCT box (4 × 5 × 6 mm) and one sphere (radius 3 mm), deflection 0.1 mm, angular deflection 0.3 rad. Each exact serialized source was passed unchanged to three fresh child processes of the same test executable.
+- The SHA-256 over ordered face, edge and vertex descriptors and oriented incidences matched the parent for all six child runs. Descriptor values were unique within each topology class for these fixtures. Box: 6 faces, 12 edges, 8 vertices. Sphere: 1 face, 3 edges, 2 vertices.
+- Command: `cargo test --release --locked -p om9-kernel -j 2 --lib topology_descriptor_cross_process_probe -- --ignored --nocapture`, with the local OCCT runtime on `PATH` and `CARGO_TARGET_DIR=L:\om9-target`.
+- The manifest's current kernel identity is deliberately process-scoped. This probe does not make it persistent, establish behavior across kernel builds/platforms or prove the original IDs in a legacy v4 file correspond to regenerated native indexes. Coincident topology can produce ambiguous descriptors, as documented in `2026-11-05-occt-topology-normalization.md`. A v5 codec must preserve a validated provenance/algorithm and exact kernel identity, and must fail closed or provide an explicit recovery path for ambiguous or mismatched topology.

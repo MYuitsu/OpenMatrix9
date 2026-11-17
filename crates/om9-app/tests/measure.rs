@@ -20,6 +20,79 @@ fn controller(entities: Vec<Entity>) -> Controller {
     Controller::new(document, Limits::default()).expect("controller")
 }
 
+#[cfg(feature = "occt-brep")]
+#[test]
+fn brep_bounding_box_uses_source_and_world_affine_not_display_mesh() {
+    let limits = Limits::default();
+    let seed = om9_kernel::brep::sphere_brep(5., 0.4, &limits).unwrap();
+    let mut observed = Vec::new();
+    for deflection in [0.4, 0.01] {
+        let brep = om9_kernel::brep::read_brep(seed.source(), deflection, &limits).unwrap();
+        let mut entity = Entity::new("sphere", Geometry::Brep(brep), None);
+        entity.placement = om9_core::geometry::Transform([
+            [1.2, -0.8, 0., 10.], [0.4, 0.6, 0., -3.], [0., 0., 0.5, 2.], [0., 0., 0., 1.],
+        ]);
+        let id = entity.id;
+        let mut document = Document::new("bounds");
+        document.entities.insert(id, entity);
+        let bounds = measure::world_bounds(&document, &[id]).unwrap();
+        let expected = [5. * 1.2_f64.hypot(0.8), 5. * 0.4_f64.hypot(0.6), 2.5];
+        for axis in 0..3 {
+            let center = [10., -3., 2.][axis];
+            assert!((bounds.min[axis] - (center - expected[axis])).abs() < 1e-6, "{bounds:?}");
+            assert!((bounds.max[axis] - (center + expected[axis])).abs() < 1e-6, "{bounds:?}");
+        }
+        observed.push(bounds);
+    }
+    assert_eq!(observed[0], observed[1]);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn brep_source_bounds_do_not_require_display_point_budget() {
+    let limits = Limits::default();
+    let shape = om9_kernel::brep::sphere_brep(5., 0.01, &limits).unwrap();
+    assert!(!shape.display().points.is_empty());
+    let source_only_limits = Limits { max_points: 0, ..limits };
+    assert!(shape.validate(&source_only_limits).is_err());
+    let bounds = om9_kernel::brep::world_bounds(&shape, &om9_core::geometry::Transform::identity(), &source_only_limits).unwrap();
+    for axis in 0..3 {
+        assert!((bounds[axis] + 5.).abs() < 1e-7);
+        assert!((bounds[axis + 3] - 5.).abs() < 1e-7);
+    }
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn native_brep_bounds_use_3dm_source_and_reject_invalid_payload() {
+    use om9_core::geometry::Transform;
+    let limits = Limits::default();
+    let source = om9_kernel::brep::box_brep([4., 5., 6.], 0.1, &limits).unwrap();
+    let mut native = om9_kernel::brep::to_3dm(&source, 0.001, &limits).unwrap();
+    for point in &mut std::sync::Arc::make_mut(&mut native.display).vertices { point[0] += 100.; }
+    let mut entity = Entity::new("native", Geometry::NativeBrep(native), None);
+    entity.placement = Transform::translation([10., -3., 7.]);
+    let id = entity.id;
+    let mut document = Document::with_template_tolerance("native bounds");
+    document.entities.insert(id, entity);
+    let bounds = measure::world_bounds(&document, &[id]).unwrap();
+    for (a, b) in bounds.min.into_iter().chain(bounds.max).zip([10., -3., 7., 14., 2., 13.]) {
+        assert!((a - b).abs() < 1e-6, "{bounds:?}");
+    }
+    let mut session = Controller::new(document.clone(), limits).unwrap();
+    session.select_objects(&[id]).unwrap();
+    let initial = session.coordinator().external_reserved_bytes(om9_core::budget::memory::MemoryClass::Kernel);
+    let measurement = session.measure_selected_bounds().unwrap();
+    assert!((measurement.value - 6.).abs() < 1e-6);
+    assert_eq!(session.coordinator().external_reserved_bytes(om9_core::budget::memory::MemoryClass::Kernel), initial);
+    let bad = Entity::new("bad", box_solid([0., 0., 0.], [1., 1., 1.]), None);
+    let bad_id = bad.id;
+    document.entities.insert(bad_id, bad);
+    assert!(measure::world_bounds(&document, &[bad_id]).is_err());
+    document.tolerance = None;
+    assert!(measure::world_bounds(&document, &[id]).is_err());
+}
+
 fn line(start: Point3, end: Point3) -> Curve {
     let length =
         ((end[0] - start[0]).powi(2) + (end[1] - start[1]).powi(2) + (end[2] - start[2]).powi(2))
@@ -71,13 +144,13 @@ fn box_solid(origin: Point3, size: Point3) -> Geometry {
         vec![1, 7, 3],
     ];
     Geometry::NativeBrep(NativeBrep {
-        display: Mesh {
+        display: std::sync::Arc::new(Mesh {
             vertices,
             faces,
             normals: Vec::new(),
             colors: Vec::new(),
             corner_uvs: Vec::new(),
-        },
+        }),
         payload: vec![1, 2, 3, 4].into(),
         crc: 0,
     })
@@ -215,7 +288,8 @@ fn m03_03_20_002_angle_and_radius_report_degrees_and_millimetres() {
 
 #[test]
 fn m03_03_20_003_bounding_box_reports_size_and_center() {
-    let entity = Entity::new("box", box_solid([3.0, 4.0, 5.0], [10.0, 20.0, 30.0]), None);
+    let Geometry::NativeBrep(native) = box_solid([3.0, 4.0, 5.0], [10.0, 20.0, 30.0]) else { unreachable!() };
+    let entity = Entity::new("box mesh", Geometry::Mesh((*native.display).clone()), None);
     let id = entity.id;
     let mut controller = controller(vec![entity]);
     let before = fingerprint(&controller);

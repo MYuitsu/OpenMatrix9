@@ -31,11 +31,28 @@ fn scene_cache_usage_counts_and_releases_lazy_picking_allocations() {
     let snapshot = scene.try_render_snapshot().unwrap();
     assert_eq!(snapshot.cache_usage().unwrap().bytes, initial, "render snapshot starts without picking caches");
     assert!(Arc::ptr_eq(&snapshot.document, &scene.document));
-    assert!(snapshot.objects.iter().zip(&scene.objects).all(|(a, b)| Arc::ptr_eq(&a.buffers, &b.buffers)));
+    assert!(snapshot.objects.iter().zip(&scene.objects).all(|(a, b)| a.buffers.ptr_eq(&b.buffers)));
     scene.invalidate_picking_bounds();
     assert_eq!(scene.cache_usage().unwrap().bytes, indexed, "preview invalidation retains arena capacity");
     scene.evict_picking_cache().unwrap();
     assert_eq!(scene.cache_usage().unwrap().bytes, initial);
+}
+
+#[test]
+fn candidate_scene_estimate_covers_surface_buffers() {
+    let limits = Limits::default();
+    let surface = om9_core::surface_kernel::plane(
+        [0., 0., 0.], [1., 0., 0.], [0., 1., 0.], 10., 10., &limits,
+    ).unwrap();
+    let mut document = Document::new("surface scene estimate");
+    for index in 0..20 {
+        let entity = Entity::new(format!("surface {index}"), Geometry::Surface(surface.clone()), None);
+        document.entities.insert(entity.id, entity);
+    }
+    let peak = Scene::candidate_scene_peak(&document, &limits).unwrap();
+    let scene = Scene::capture(Arc::new(document), 1, &limits).unwrap();
+    assert_eq!(scene.objects.len(), 20);
+    assert!(peak >= scene.cache_usage().unwrap().bytes, "surface cache exceeds admitted scene peak");
 }
 
 #[test]
@@ -59,6 +76,35 @@ fn candidate_scene_estimate_covers_observed_scene_cache() {
     let scene = Scene::capture(Arc::new(document), 1, &limits).unwrap();
     assert!(scratch.bytes > 0);
     assert!(peak >= scene.cache_usage().unwrap().bytes, "construction estimate should cover retained scene cache");
+}
+
+#[test]
+fn candidate_scene_single_preflight_preserves_admission_and_rejects_invalid_document() {
+    let limits = Limits::default();
+    let mut document = Document::new("single scene preflight");
+    for index in 0..20 {
+        let entity = Entity::new(format!("point {index}"), Geometry::Point([index as f64, 0., 0.]), None);
+        document.entities.insert(entity.id, entity);
+    }
+    let document = Arc::new(document);
+    let expected_peak = Scene::candidate_scene_peak(&document, &limits).unwrap();
+    let denied = Scene::capture_with_peak_admission(Arc::clone(&document), 1, &limits, |peak| {
+        assert_eq!(peak, expected_peak);
+        Err(Error::Budget("test scene admission"))
+    });
+    assert!(matches!(denied, Err(Error::Budget("test scene admission"))));
+    let scene = Scene::capture_with_peak_admission(Arc::clone(&document), 1, &limits, |peak| {
+        assert_eq!(peak, expected_peak); Ok(())
+    }).unwrap();
+    let baseline = Scene::capture(Arc::clone(&document), 1, &limits).unwrap();
+    assert_eq!(scene.objects.len(), baseline.objects.len());
+    assert_eq!(scene.cache_usage().unwrap(), baseline.cache_usage().unwrap());
+    let mut invalid = Document::new("invalid candidate");
+    let entity = Entity::new("invalid", Geometry::Point([f64::NAN, 0., 0.]), None);
+    invalid.entities.insert(entity.id, entity);
+    let mut called = false;
+    let result = Scene::capture_with_peak_admission(Arc::new(invalid), 1, &limits, |_| { called = true; Ok(()) });
+    assert!(result.is_err()); assert!(!called);
 }
 
 #[test]

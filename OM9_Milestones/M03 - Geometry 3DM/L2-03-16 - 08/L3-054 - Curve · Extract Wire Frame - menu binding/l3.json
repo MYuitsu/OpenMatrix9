@@ -969,6 +969,132 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "single_root_background_ui_2026_11_13": {
+      "status": "SCOPED_HEADLESS_UI_CHECKS_PASSED",
+      "scope": "Menu and CMD start the source worker for one root OCCT BRep; guarded recovery, Undo/Redo and reopened Box UI fixtures passed.",
+      "remaining": "Other source and occurrence paths, physical desktop and full source/display ownership migration remain open.",
+      "evidence": "docs/validation/2026-11-13-background-wireframe-ui.md"
+    },
+    "explicit_source_worker_2026_11_13": {
+      "status": "SCOPED_CONTROLLER_EGUI_CHECKS_PASSED",
+      "scope": "An explicitly started single-root source-only worker supports guarded controller and egui polling; cancellation, stale context and managed pressure tested.",
+      "remaining": "Normal menu/CMD still synchronous; recovery UI, other source types, desktop and full ownership migration remain open.",
+      "evidence": "docs/validation/2026-11-13-source-wire-worker.md"
+    },
+    "root_source_lease_transition_2026_11_13": {
+      "status": "SCOPED_BEHAVIOR_PRESERVING_CHECKS_PASSED",
+      "scope": "Single root OCCT BRep extraction uses a tracked source/topology lease rather than a whole-document capture during extraction; existing controller and wireframe regressions passed.",
+      "remaining": "Execution remains synchronous; other occurrence paths and document/Undo display ownership are not migrated.",
+      "evidence": "docs/validation/2026-11-13-extractwire-source-lease.md"
+    },
+    "remeshed_brep_multi_root_2026_11_13": {
+      "status": "SCOPED_CONTROLLER_CHECKS_PASSED",
+      "scope": "Multi-root ExtractWireframe chooses per-root published BRep wires; remeshed Box and translated unremeshed Sphere passed menu/CMD, sampled geometry and Undo/Redo.",
+      "remaining": "Block occurrences, NativeBrep, ordinary scene, broad placements and background extraction remain open.",
+      "evidence": "docs/validation/2026-11-13-extractwire-remesh-wires.md#multiple-root-follow-up"
+    },
+    "remeshed_brep_wires_2026_11_13": {
+      "status": "SCOPED_CONTROLLER_CHECKS_PASSED",
+      "scope": "One attested root BRep with published remesh wires: ExtractWireframe outputs source edges and isocurves through CMD/menu; Box two-profile, Undo/Redo and simulated pressure checks passed.",
+      "remaining": "Ordinary scene, NativeBrep, instances, general trims, physical desktop and background command execution are open; no full feature gate promotion.",
+      "evidence": "docs/validation/2026-11-13-extractwire-remesh-wires.md"
+    },
+    "trim_cylinder_3dm_boundary_reuse_2026_11_13": "One authored 1024-edge cylindrical trim roundtripped through 3DM and reopened OM9 yields uniquely matched boundaries with radius and midpoint checks, Undo/Redo, and simulated pressure refusal/retry. External Rhino files and general topology remain unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#reuse-of-a-1024-edge-cylindrical-3dm-roundtrip",
+    "trim_3dm_boundary_reuse_2026_11_13": "One authored 1024-edge plane roundtripped through 3DM and reopened OM9 yields uniquely matched source boundaries and one Undo/Redo; simulated pressure preserves document/Redo. External Rhino files and general topology unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#reuse-of-a-1024-edge-3dm-roundtrip",
+    "trim_boundary_1024_2026_11_13": "Tested reopened plane trims through 1024 edges and affine cylinder 708 edges extract source boundaries in one Undo/Redo; excessive output/topology and simulated memory refusal preserve document/Redo. Desktop and broad geometry unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#boundary-commands-up-to-1024-edges",
+    "native_source_allocation_classification_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "NATIVE_SOURCE_ALLOCATION_CLASSIFICATION_SCOPED_PASS",
+      "scope": "Typed NativeBrep source conversion preserves admission errors and distinguishes Rust allocation failure from invalid payload and structural limits. Edge-output allocation failures are separately marked and mapped to memory recovery; structural edge-count limits are not. An isolated allocator injected actual Rust allocation failures in both steps; UI mapping and managed-pressure recovery were tested separately.",
+      "remaining": "The injected allocation failure was not driven end to end through desktop UI; actual OS OOM, native C++ temporary peak and arbitrary third-party B-reps remain unverified. Plan A and debug adapter compatibility remain open.",
+      "evidence": "docs/validation/2026-11-13-extractwire-native-brep.md#native-source-and-edge-allocation-failures",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Verify representative third-party input and desktop, and reconcile the debug adapter without disrupting active sessions."
+    },
+    "native_brep_3dm_import_wireframe_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "AUTHORED_3DM_NATIVE_WIREFRAME_SCOPED_PASS",
+      "scope": "Two project-authored openNURBS 3DM cylinder files were imported as opaque NativeBrep, saved/reopened in OM9 and processed by ExtractWireframe. A quarter-cylinder yielded two arcs and two side edges; a capped cylinder yielded two circles and one seam. Sampled radius, height and quadrant plus Undo/Redo passed. Both individual runs and the combined run passed.",
+      "remaining": "These are generated fixtures, not third-party drawings or independent Rhino acceptance. General topology, native peak, physical OOM and desktop remain unverified. Plan A remains open; debug native adapter compatibility remains open.",
+      "evidence": "docs/validation/2026-11-13-extractwire-native-brep.md#authored-3dm-input-follow-up",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Verify additional representative NativeBrep inputs and desktop; reconcile the debug adapter without disrupting active sessions."
+    },
+    "native_brep_extractwire_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "NATIVE_BREP_EXTRACTWIRE_SCOPED_PASS",
+      "scope": "ExtractWireframe now converts retained NativeBrep payloads to operation-local OCCT source and extracts edges without using the display mesh. Five scoped scenarios passed: translated and affine box placements, mixed NativeBrep/mesh, invalid native payload after a valid source, and headless memory recovery. The OM9-generated payload was reopened in an OM9 document; selected outputs retain one Undo/Redo.",
+      "remaining": "External 3DM files, general topology, native peak, actual physical allocation failure and desktop are unverified. The native conversion callback preserves managed admission refusal but not every internal allocation failure. Plan A remains open; the debug 3DM adapter still needs reconciliation.",
+      "evidence": "docs/validation/2026-11-13-extractwire-native-brep.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Verify an external 3DM NativeBrep source and desktop; continue remaining Plan A gates and reconcile the debug adapter without disturbing active sessions."
+    },
+    "rational_bilinear_diagonal_trim_2026_11_12": {
+      "status": "SCOPED_RATIONAL_BILINEAR_DIAGONAL_TRIM_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#rational-bilinear-diagonal-trim",
+      "limitations": "Tested positive weighted bilinear fixture; floating-point screen is not an interval proof, other representations and desktop unverified."
+    },
+    "bilinear_diagonal_trim_2026_11_12": {
+      "status": "SCOPED_BILINEAR_DIAGONAL_TRIM_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#diagonal-trim-on-a-bilinear-surface",
+      "limitations": "Warped unit-weight bilinear fixture; rational/higher-degree diagonal trims, arbitrary scales and desktop unverified or unsupported."
+    },
+    "certified_full_seam_trim_2026_11_12": {
+      "status": "SCOPED_FULL_SEAM_TRIM_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#certified-full-seam-rectangular-trim",
+      "limitations": "Reopened cylinder fixture with certified rectangular full-seam trim; arbitrary seam topology, desktop and physical RAM unverified."
+    },
+    "curved_uv_trim_boundaries_2026_11_12": {
+      "status": "SCOPED_CURVED_UV_TRIM_BOUNDARIES_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#curved-surface-boundaries-along-uv",
+      "limitations": "Tested cylindrical surface with U/V-aligned polygon loops; diagonal and full closed-seam trim refused, arbitrary surfaces and desktop unverified."
+    },
+    "brep_admission_recovery_2026_11_12": {
+      "status": "SCOPED_EXTRACTWIRE_BREP_ADMISSION_RECOVERY",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md#extractwireframe-b-rep-admission-recovery",
+      "limitations": "Box callback injection and separate managed UI pressure fixture; other adapter errors, desktop and physical RAM unverified."
+    },
+    "large_trim_parameter_offset_2026_11_12": {
+      "status": "SCOPED_LARGE_TRIM_OFFSET_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#large-trim-parameter-offsets",
+      "limitations": "One reopened planar fixture with a 1e8 offset; arbitrary numeric scales, output roundtrip and desktop unverified."
+    },
+    "collapsed_surface_boundary_2026_11_12": {
+      "status": "SCOPED_COLLAPSED_CONICAL_BOUNDARY_PASSED",
+      "evidence": "docs/validation/2026-11-12-extractwire-closed-surfaces.md#certified-collapsed-surface-boundary",
+      "limitations": "One pointed cone and one small nonzero top; arbitrary surfaces, desktop and physical memory pressure remain unverified."
+    },
+    "subdivided_trim_boundary_2026_11_12": {
+      "status": "SCOPED_SUBDIVIDED_TRIM_BOUNDARY_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#subdivided-straight-trim-boundaries",
+      "limitations": "One reopened planar fixture with subdivided straight edges; arbitrary topology, output reopen in this fixture and desktop remain unverified."
+    },
+    "trim_loop_topology_2026_11_12": {
+      "status": "SCOPED_AMBIGUOUS_TRIM_LOOPS_REFUSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#ambiguous-loop-topology",
+      "limitations": "Three invalid topology fixtures; conservative floating-point check with bounded work, desktop and arbitrary loops unverified."
+    },
+    "nonunit_trimmed_affine_plane_2026_11_12": {
+      "status": "SCOPED_REOPENED_INPUT_MENU_CMD_UNDO_REDO_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#non-unit-restricted-parameter-domains",
+      "limitations": "One restricted non-unit parameter fixture on an exact unit-weight affine 2x2 plane; arbitrary topology, numerical cases, curved trims and desktop remain unverified or unsupported."
+    },
+    "single_mesh_edges_2026_11_12": {
+      "status": "REOPENED_TRIANGLE_QUAD_FIXTURE_AND_UNDO_REDO_PASSED",
+      "evidence": "docs/validation/2026-11-12-extractwire-mesh-edges.md",
+      "limitations": "Single root and scoped fixtures; arbitrary meshes, multi-root and desktop remain unverified."
+    },
+    "standalone_open_surface_2026_11_12": {
+      "status": "REOPENED_PLANE_AND_PARTIAL_CYLINDER_SCOPED_TESTS_PASSED",
+      "evidence": "docs/validation/2026-11-12-extractwire-standalone-surface-gap.md",
+      "limitations": "Single open surface only; periodic or certified closed axes and ambiguous corners are refused. Interior isocurves, mixed roots, mesh, arbitrary topology and desktop remain open."
+    },
+    "source_curve_update_2026_11_10": {
+      "status": "SCOPED_SOURCE_EDGE_VALIDATED",
+      "scope": "All source topology edges of one attested OCCT B-rep with rigid placement in one transaction; selected-object menu/CMD paths.",
+      "evidence": "docs/validation/2026-11-10-extractwire-source-first-slice.md",
+      "limitations": "Isocurves, degenerate edges, multiple sources, nested instances and unattested data are unsupported; desktop and general numerical parameter equivalence are unverified."
+    },
     "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
@@ -1015,6 +1141,182 @@
       "documented_script": "ExtractWireframe",
       "binding_state": "Implemented",
       "same_id_menu_and_commandline": true
+    },
+    "reopen_source_update_2026_11_11": {
+      "status": "SCOPED_REOPEN_AUTOMATED_FIXTURES_PASSED",
+      "scope": "One selected OCCT B-rep after v4 reopen without session proof; extract all source edges from one native map with rigid placement and one Undo/Redo.",
+      "evidence": "docs/validation/2026-11-11-extractwire-reopened-source.md",
+      "limitations": "Desktop, native peak, general seam, isocurves and wider inputs unverified; late-edge order observed in a separate adapter invocation on the same source."
+    },
+    "multiple_roots_update_2026_11_12": {
+      "status": "SCOPED_REOPEN_AUTOMATED_FIXTURES_PASSED",
+      "scope": "Two reopened rigid-placement boxes produce all 24 source edges in one transaction; reopened box plus cylindrical shell produces 12 box edges, two closed curves and one seam in two profiles. Failure and retry fixtures preserve document and Redo.",
+      "evidence": "docs/validation/2026-11-12-extractwire-multiple-roots.md",
+      "limitations": "Desktop, native peak, broader topology, direct in-controller late-failure instrumentation, nested blocks, isocurves and general affine placements unverified."
+    },
+    "sphere_pole_update_2026_11_12": {
+      "status": "SCOPED_REOPEN_AUTOMATED_FIXTURES_PASSED",
+      "scope": "Reopened sphere skips verified degenerate pole edges and emits its source seam; box-sphere roots and compound preserve nondegenerate edges and Undo/Redo.",
+      "evidence": "docs/validation/2026-11-12-extractwire-degenerate-poles.md",
+      "limitations": "Malformed degenerate topology, arbitrary imports, desktop, native peak, nested blocks and non-rigid placements are not independently verified."
+    },
+    "affine_placement_update_2026_11_12": {
+      "status": "SCOPED_REOPEN_AUTOMATED_FIXTURES_PASSED",
+      "scope": "Non-rigid source placement is retained on extracted curves; tested reopened boxes, mixed box/cylinder shell and scaled sphere preserve geometry and Undo/Redo.",
+      "evidence": "docs/validation/2026-11-12-extractwire-affine-placement.md",
+      "limitations": "Arbitrary matrices and topology, all downstream commands, desktop and native peak are not verified."
+    },
+    "mixed_source_roots_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "SCOPED_MIXED_BREP_MESH_OPEN_SURFACE",
+      "evidence": "docs/validation/2026-11-12-extractwire-mixed-sources.md",
+      "scope": "Reopened Box, triangle mesh and open NURBS plane produce 19 distinct source edges via CMD and menu dispatcher, with expected midpoint/placement and one Undo/Redo. Late invalid mesh and simulated managed-memory refusal retain world and Redo; menu recovery retries after pressure release. Wireframe 51 passed, 4 ignored; curve menu 6 passed.",
+      "remaining": "Other geometry, closed surfaces, all transforms, physical desktop/RAM and native peak unverified. Reservation is conservative; Plan A open and B1-B3 deferred."
+    },
+    "closed_surface_display_seam_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "SCOPED_CLOSED_AND_PERIODIC_DISPLAY_SEAMS",
+      "evidence": "docs/validation/2026-11-12-extractwire-closed-surfaces.md",
+      "scope": "Reopened closed cylinder and certified periodic surface each produce two end curves and one displayed seam; mixed closed cylinder and mesh use one Undo/Redo. Uncertified periodic closure and simulated pressure preserve document and Redo. Wireframe 54 passed, 4 ignored; DupBorder 17 and Curve menu 6 passed.",
+      "remaining": "Other closed representations, doubly closed surfaces, physical desktop, RAM exhaustion and native peak unverified; Plan A open and B1-B3 deferred."
+    },
+    "double_periodic_and_conical_apex_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "DOUBLE_PERIODIC_DOWNSTREAM_PASS_CONICAL_APEX_DEFECT_OPEN",
+      "evidence": "docs/validation/2026-11-12-extractwire-closed-surfaces.md#doubly-periodic-surface-and-collapsed-apex-follow-up",
+      "scope": "One reopened certified doubly periodic surface yields two source-matching seams; an extracted seam survives another save/open and extrudes to a closed solid with sampled-area volume and Undo/Redo. Wireframe 55 passed, five ignored; DupBorder 17 and Curve menu 6 passed.",
+      "remaining": "Conical surface produces an extra zero-length apex curve; intended two-curve regression ignored pending user authorization. General geometry, physical desktop and native peak remain open. Plan A open; B1-B3 deferred."
+    },
+    "wire_allocator_recovery_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "WIRE_ALLOCATION_REFUSAL_MAPPED_TO_MEMORY_RETRY",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "scope": "ExtractWireframe edge/output vector reservations reject impossible count or allocation layout as overflow and report otherwise valid allocator refusal as bytes budget, recognized by the existing consent-based recovery. Focused overflow and Windows allocation-refusal tests passed; UI recovery 46 passed; Wireframe 55 passed with 5 ignored; DupBorder 17 and Curve menu 6 passed.",
+      "remaining": "End-to-end actual allocator failure, desktop, errors from native adapter or other modules remain unverified. Conical apex behavior awaits user decision. Plan A open; B1-B3 deferred.",
+      "skill_update": "User approved the tested scope; repository and installed guidance synchronized."
+    },
+    "surface_buffer_allocation_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "SURFACE_ISOCURVE_BUFFERS_FALLIBLE",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "scope": "Basis rows, isocurve poles, weights and knot copy use fallible allocation; impossible layout reports overflow and allocator refusal reports bytes. Core 377 passed 1 ignored; curve_surface_ops 31; Wireframe 55 passed 5 ignored, Isocurve 11, DupBorder 17, Curve menu 6, UI recovery 46.",
+      "skill_update": "User approved recording the ExtractWireframe scope. No ExtractIsocurve skill update per prior user choice.",
+      "remaining": "No end-to-end allocator-failure injection in desktop, physical RAM exhaustion, all native allocations, or complete Plan A. B1-B3 deferred."
+    },
+    "mixed_closed_executable_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "MIXED_CLOSED_SURFACE_EXECUTABLE_ROUNDTRIP_PASSED",
+      "evidence": "docs/validation/2026-11-12-extractwire-mixed-sources.md#actual-executable-mixed-closed-surface",
+      "scope": "Separate actual debug executable opens saved Box, triangle mesh and closed cylindrical surface; ExtractWireframe creates 18 distinct sampled source edges in one Undo/Redo, saves and reopens result, and preserves all three source entities. MCP stdio suite 9 passed 1 unrelated desktop inspection ignored.",
+      "remaining": "Does not validate physical clicks, pixels, full curves, arbitrary input or native peak. Cone apex and certified sphere questions remain pending. Plan A open; B1-B3 deferred."
+    },
+    "mixed_affine_downstream_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "SCOPED_MIXED_AFFINE_AND_LENGTH_PASSED",
+      "evidence": "docs/validation/2026-11-12-extractwire-mixed-sources.md#mixed-affine-placement-and-downstream-length",
+      "scope": "After save/open, Box, triangle mesh and planar NURBS with tested nonuniform scale, shear and reflection yield all 19 expected distinct world-space edges. One Undo/Redo restores document. After another save/open, Length of one edge per source matches transformed endpoint distance. Wireframe 56 passed, 5 ignored; Curve menu 6 passed.",
+      "remaining": "One authored straight-edge fixture; curved mixed outputs, near-singular transforms, desktop and native peak unverified. Cone apex and certified sphere decisions pending. Plan A open; B1-B3 deferred."
+    },
+    "trimmed_surface_refusal_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "TRIMMED_SURFACE_SAFE_REFUSAL_TESTED",
+      "scope": "Standalone surfaces with trim metadata are refused to avoid emitting untrimmed domain geometry; reopened plane with an outer loop and hole preserves document and Redo. ExtractWireframe CMD/menu and mixed-root paths verified.",
+      "limitations": [
+        "Trim boundaries and clipped isocurves are not yet implemented.",
+        "Desktop and arbitrary surface/source cases unverified."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md"
+      ],
+      "command": "ExtractWireframe"
+    },
+    "affine_trimmed_plane_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "SCOPED_AUTOMATED_FIXTURE_PASSED",
+      "scope": "ExtractWireframe emits polygonal trim loops as exact-source lines for validated degree-(1,1), unit-weight affine 2x2 planes, keeping placement and one transaction. Reopened fixture covers outer loop and hole, CMD/menu, mixed roots, save/open, Undo/Redo, memory refusal/retry, warped and nonuniform-weight refusal.",
+      "tests": "Wireframe 63 passed and 5 ignored in batch, plus oversized metadata and exact affine predicate focused tests; Curve menu 6, DupBorder 17, Isocurve 11, no-default check, debug build and public audit passed.",
+      "limitations": [
+        "Only canonical clamped [0,1] affine 2x2 plane with unit weights and trim metadata up to 16 KiB; curved or other trims remain unsupported.",
+        "Physical RAM pressure, desktop, arbitrary loop topology and floating-point bounds remain unverified."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#affine-trimmed-plane-extraction"
+      ]
+    },
+    "nested_block_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_NESTED_BLOCK_EXTRACTWIRE_PASSED",
+      "scope": "Reopened two-level block with mesh and box, two instances and composed affine placement produces 30 distinct expected edge midpoints with CMD/menu, save/open and one Undo/Redo. Nested trimmed plane boundaries also pass. Hidden, unselectable and unsupported members and simulated managed pressure preserve document and Redo.",
+      "remaining": "NativeBrep in blocks, arbitrary nesting and topology, desktop, physical OOM and native peak remain unverified. Plan A remains open; B1-B3 remain deferred.",
+      "evidence": "docs/validation/2026-11-13-extractwire-nested-block.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Verify nested NativeBrep source and its placement or pursue the next explicit Plan A product gap; reconcile the debug native adapter without disturbing running sessions."
+    },
+    "nested_native_brep_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "NESTED_NATIVE_BREP_SCOPED_FIXTURE_PASS",
+      "scope": "One authored quarter-cylinder 3DM imported as NativeBrep, copied into nested OM9 block; two instances, sampled arcs and lines, composed affine placements and Undo/Redo passed. A generated corrupt NativeBrep following mesh is refused with Redo intact.",
+      "remaining": "Not a 3DM block import, third-party input, desktop, physical OOM or native peak. Plan A remains open; B1-B3 remain deferred.",
+      "evidence": "docs/validation/2026-11-13-extractwire-nested-block.md#nested-nativebrep-follow-up",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Test actual 3DM block import ownership and selection with a representative fixture; reconcile the debug adapter without disturbing active sessions."
+    },
+    "imported_3dm_block_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "AUTHORED_3DM_BLOCK_BOTH_IMPORT_MODES_PASSED",
+      "scope": "Authored trimmed planar face with hole exported as a 3DM block, imported with editable and opaque NativeBrep modes, and extracted to eight expected world-space edges with one Undo/Redo.",
+      "remaining": "Third-party input, arbitrary nested 3DM blocks, desktop, physical OOM and native peak remain unverified. Plan A remains open; B1-B3 remain deferred.",
+      "evidence": "docs/validation/2026-11-13-extractwire-nested-block.md#authored-3dm-block-import",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Verify representative third-party or nested 3DM blocks and reconcile the debug adapter without disturbing active sessions."
+    },
+    "nested_3dm_block_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "NESTED_3DM_BLOCK_BOTH_IMPORT_MODES_PASSED",
+      "scope": "Authored 3DM two-level block with two affine box instances imported as EditableStrict and RetainOpaque, source type confirmed, OM9 roundtrip, 24 analytic world-space edges and one Undo/Redo passed.",
+      "remaining": "Third-party blocks, curved nested sources, desktop, physical OOM and native peak remain unverified. Plan A remains open; B1-B3 remain deferred.",
+      "evidence": "docs/validation/2026-11-13-extractwire-nested-block.md#nested-3dm-block-import",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Verify representative curved or third-party nested blocks and update the debug adapter after active windows are saved and closed."
+    },
+    "nested_curved_3dm_block_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_CURVED_NESTED_3DM_BLOCK_PASS",
+      "scope": "One project-authored quarter-cylinder imported, placed into a two-level block with two affine instances, exported to 3DM and imported as editable and opaque B-rep. Distinct sampled curves, arc/line endpoints, OM9 save/reopen and one Undo/Redo passed.",
+      "remaining": "General curved sources, third-party files, desktop, physical OOM and native peak remain unverified. Plan A remains open; B1-B3 remain deferred.",
+      "evidence": "docs/validation/2026-11-13-extractwire-nested-block.md#curved-nested-3dm-block",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Verify representative third-party nested blocks and update the debug adapter after active windows are saved and closed."
+    },
+    "large_trim_boundary_commands_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_LARGE_TRIM_BOUNDARY_COMMANDS_PASSED",
+      "scope": "ExtractWireframe and DupBorder use the shared 707-edge topology limit. A reopened 505-edge planar trim with hole passed all endpoint checks for CMD/menu, placement, save/reopen, Undo/Redo and simulated managed pressure refusal/retry. Separate 707-edge fixtures passed count and Undo/Redo. 708-edge and output-count refusals preserve document and Redo. Wireframe 86 passed/8 ignored; DupBorder 24 passed; no-default check passed.",
+      "remaining": "Curved boundaries, arbitrary topology, physical RAM exhaustion, actual UI recovery for these fixtures, desktop and native peak remain unverified. Plan A open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-large-trim-boundary-commands.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-accurate selection and unresolved Plan A work; update the tested debug adapter after active windows are saved and closed."
+    },
+    "large_curved_trim_boundaries_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_LARGE_CYLINDER_TRIM_BOUNDARY_PASSED",
+      "scope": "A saved/reopened authored cylindrical patch with 501 axis-aligned UV boundary segments passed ExtractWireframe and DupBorder by CMD. All endpoints and midpoints matched the placed source, and midpoints matched analytic cylinder radius; output save/reopen, Undo/Redo and managed pressure refusal/retry passed. Focused test passed twice.",
+      "remaining": "General curved boundaries, diagonal UV trims, physical RAM exhaustion, desktop and native peak unverified. Plan A open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-large-trim-boundary-commands.md#curved-boundary-follow-up",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-based selection for unsupported trims and verify desktop once active windows are saved and closed."
+    },
+    "recovery_draft_guard_2026_11_13": {
+      "status": "SHARED_GUARD_SCOPED_TEST",
+      "scope": "Shared recovery refuses stale changed command draft before retry or Undo removal. ExtractWireframe mesh fixture and 74 recovery UI tests passed; DupBorder shares the code.",
+      "remaining": "Actual RAM exhaustion and physical desktop not tested.",
+      "evidence": "docs/validation/2026-11-13-wire-recovery-changed-draft.md"
+    },
+    "recovery_selection_revision_2026_11_13": {
+      "status": "SCOPED_SIMULATED_PRESSURE_PASS",
+      "scope": "Changed-and-restored root selection is refused before Undo pruning for tested ExtractWireframe and Isocurve-start paths.",
+      "remaining": "Worker-specific case, desktop and physical OOM not tested.",
+      "evidence": "docs/validation/2026-11-13-recovery-selection-revision.md"
     }
   }
 }

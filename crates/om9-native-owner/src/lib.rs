@@ -24,6 +24,19 @@ mod verified_file;
 mod windows;
 #[cfg(windows)]
 pub use windows::report_startup_failure;
+/// Read-only Win32 session query. Remote presentation can block a VSync surface
+/// much longer than the application's frame period; local sessions retain VSync.
+pub fn remote_desktop_session() -> bool {
+    #[cfg(windows)]
+    {
+        use windows_sys::Win32::UI::WindowsAndMessaging::{GetSystemMetrics, SM_REMOTESESSION};
+        // SAFETY: this scalar system-metric query takes no pointers or handles
+        // and has no ownership, thread-affinity or lifetime preconditions.
+        unsafe { GetSystemMetrics(SM_REMOTESESSION) != 0 }
+    }
+    #[cfg(not(windows))]
+    { false }
+}
 /// Non-Windows builds have no owned window shell: the caller keeps the diagnostic
 /// receipt and stderr text instead of claiming a dialog was shown.
 #[cfg(not(windows))]

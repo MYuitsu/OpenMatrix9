@@ -437,6 +437,12 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "scene_witness_profile_2026_11_13": {
+      "status": "SCOPED_HEADLESS_CHECKS_PASSED",
+      "scope": "Fillet verifies edge witnesses with the active scene profile and places closed-edge handles from scene data; two-profile cylinder passed direct and picked-edge paths with source-volume and handle checks and Undo/Redo.",
+      "remaining": "Other shapes, profile changes for projection/shared endpoints, desktop and source-only ownership remain unverified.",
+      "evidence": "docs/validation/2026-11-13-fillet-scene-witness-profile.md"
+    },
     "stack_regression_2026_10_29": {
       "status": "PARTIAL_CHECKS_PASSED",
       "evidence": "docs/validation/2026-10-29-solid-wide-regression.md",
@@ -446,6 +452,7 @@
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "feature": "OM9-SOLID-007",
+    "document_units_2026_11_12": "Centimetre direct, picked-edge, handle edit/add/copy and SetAll paths verified with source/output save/open, volume and Undo/Redo; physical desktop and broader geometry remain unverified. See docs/validation/2026-11-12-fillet-document-units.md.",
     "command": "FilletEdge 0 1",
     "evidence": [
       "implementation/evidence/M03/OM9-L3-03-18-007/OM9-L4-03-18-007-01.focused.log",
@@ -746,6 +753,25 @@
         "Native preview rebuild failure for copy/remove not directly induced."
       ],
       "manual_gate": "M03-UI_PENDING"
+    },
+    "reopened_source_edges_2026_11_11": {
+      "status": "SCOPED_AUTOMATED_FIXTURES_PASSED",
+      "scope": "Resolve selected display segments against the same OCCT shape/map for Fillet endpoint, projection, contour and preview; include numeric route.",
+      "evidence": "docs/validation/2026-11-11-fillet-reopened-edge-regression.md",
+      "limitations": "Imported and trimmed edges, general local placement, native peak and desktop remain unverified; unmatched display segments are refused."
+    },
+    "fillet_mixed_display_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "SCOPED_AUTOMATED_REGRESSION_PASSED",
+      "scope": "Staged and direct numeric FilletEdge refuse a reopened Box display edge containing segments from distinct source edges; document and Redo remain unchanged.",
+      "tests": "11 Fillet controller tests and 5 simulated viewport tests passed; no-default check, debug build and public source audit passed.",
+      "limitations": [
+        "Additional synchronous source reads may repeat during interaction; latency and native peak unmeasured.",
+        "Desktop, other topologies and physical memory pressure unverified."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-11-fillet-reopened-edge-regression.md#mixed-displayed-edge-after-reopen--2026-11-12"
+      ]
     }
   }
 }

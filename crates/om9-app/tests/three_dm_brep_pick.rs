@@ -26,7 +26,7 @@ fn imported_brep_faces_and_edges_are_pickable() {
     let path = std::env::var_os("OM9_THREE_DM_OM9").expect("OM9_THREE_DM_OM9");
     let mut controller =
         Controller::from_file(std::path::Path::new(&path), Limits::default()).unwrap();
-    let (entity, placement, display) = controller
+    let (entity, placement) = controller
         .document()
         .entities
         .values()
@@ -34,10 +34,12 @@ fn imported_brep_faces_and_edges_are_pickable() {
             let Geometry::Brep(brep) = &entity.geometry else {
                 return None;
             };
-            (!brep.display.points.is_empty() && !brep.display.triangles.is_empty())
-                .then(|| (entity.clone(), entity.placement, brep.display.clone()))
+            (!brep.display().points.is_empty() && !brep.display().triangles.is_empty())
+                .then(|| (entity.clone(), entity.placement))
         })
         .expect("editable Brep");
+    let Geometry::Brep(body) = &entity.geometry else { unreachable!() };
+    let display = body.display();
     let center = display.points.iter().fold([0.; 3], |acc, p| {
         [acc[0] + p[0], acc[1] + p[1], acc[2] + p[2]]
     });

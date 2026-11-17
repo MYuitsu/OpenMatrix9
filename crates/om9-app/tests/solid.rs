@@ -11,6 +11,214 @@ use om9_core::{
 };
 use om9_kernel::creation;
 
+#[test]
+fn captured_boolean_worker_releases_document_displays_and_keeps_output_charge() {
+    use om9_core::{budget::memory::MemoryClass,geometry::Transform,transaction::Cancellation};
+    use om9_kernel::editing::{self,BooleanOp,BooleanOutcome};
+    use std::sync::{Arc,mpsc};
+    let limits=Limits::default();let left=om9_kernel::brep::box_brep([10.,10.,10.],0.1,&limits).unwrap();
+    let right=om9_kernel::transform_ops::transform_brep(&left,&Transform::translation([5.,0.,0.]),0.1,&limits).unwrap();
+    let left_display=left.display_liveness();let right_display=right.display_liveness();
+    let mut document=Document::with_template_tolerance("source Boolean worker");
+    let a=Entity::new("left",Geometry::Brep(left),None);let aid=a.id;document.entities.insert(aid,a);
+    let b=Entity::new("right",Geometry::Brep(right),None);let bid=b.id;document.entities.insert(bid,b);
+    let controller=Controller::new(document,limits).unwrap();
+    let Geometry::Brep(left) = &controller.document().entities[&aid].geometry else { panic!("left") };
+    let Geometry::Brep(right) = &controller.document().entities[&bid].geometry else { panic!("right") };
+    let materialized = editing::split_breps_cancellable_admitted(left, right, 0.1, &limits,
+        &Cancellation::default(), |_, _| Ok(())).unwrap();
+    assert_eq!(materialized.pieces, 2);
+    assert!((creation::measure(&materialized.brep, &limits).unwrap().volume_mm3 - 1000.).abs() < 1e-6);
+    drop(materialized);
+    let a=controller.coordinator().capture_brep_source(&controller.document().stamp(aid).unwrap()).unwrap();
+    let b=controller.coordinator().capture_brep_source(&controller.document().stamp(bid).unwrap()).unwrap();
+    let canceled=Cancellation::default();canceled.cancel();
+    assert!(matches!(editing::boolean_captured_sources_cancellable(&a,&b,BooleanOp::Intersection,0.1,false,&limits,&canceled,|_,_|Ok(())),Err(om9_core::Error::Canceled)));
+    assert!(matches!(editing::split_captured_sources_cancellable(&a, &b, 0.1, &limits, &canceled, |_, _| Ok(())), Err(om9_core::Error::Canceled)));
+    assert!(matches!(editing::split_captured_sources_cancellable(&a, &b, 0.1, &limits, &Cancellation::default(),
+        |_, _| Err(om9_core::Error::Budget("split fixture"))), Err(om9_core::Error::Budget(_))));
+    assert!(matches!(editing::boolean_captured_sources_cancellable(&a,&b,BooleanOp::Intersection,0.1,false,&limits,&Cancellation::default(),|_,_|Err(om9_core::Error::Budget("fixture"))),Err(om9_core::Error::Budget(_))));
+    let mut validation_calls=0;
+    a.validate_canonical_admitted(&limits,|_,_|{validation_calls+=1;Ok(())}).unwrap();
+    b.validate_canonical_admitted(&limits,|_,_|{validation_calls+=1;Ok(())}).unwrap();
+    let mut split_calls = 0;
+    assert!(matches!(editing::split_captured_sources_cancellable(&a, &b, 0.1, &limits, &Cancellation::default(), |_, _| {
+        split_calls += 1;
+        if split_calls > validation_calls { Err(om9_core::Error::Budget("split output fixture")) } else { Ok(()) }
+    }), Err(om9_core::Error::Budget(_))));
+    assert!(split_calls > validation_calls);
+    let mut calls=0;
+    assert!(matches!(editing::boolean_captured_sources_cancellable(&a,&b,BooleanOp::Intersection,0.1,false,&limits,&Cancellation::default(),|_,_| {
+        calls+=1;if calls>validation_calls {Err(om9_core::Error::Budget("output fixture"))} else {Ok(())}
+    }),Err(om9_core::Error::Budget(_))));
+    assert!(calls>validation_calls,"the refusal must occur during output admission");
+    let canceled_mid=Cancellation::default();let mut calls=0;
+    assert!(matches!(editing::boolean_captured_sources_cancellable(&a,&b,BooleanOp::Intersection,0.1,false,&limits,&canceled_mid,|_,_| {
+        calls+=1;if calls>validation_calls {canceled_mid.cancel();Err(om9_core::Error::Canceled)} else {Ok(())}
+    }),Err(om9_core::Error::Canceled)));
+    let placed = editing::boolean_placed_captured_sources_cancellable(&a, &Transform::translation([2., 0., 0.]),
+        &a, &Transform::translation([5., 0., 0.]), BooleanOp::Intersection, 0.1, false, &limits,
+        &Cancellation::default(), |_, _| Ok(())).unwrap();
+    let BooleanOutcome::Body(body) = &placed else { panic!("shared source intersection") };
+    assert!((creation::measure(body, &limits).unwrap().volume_mm3 - 700.).abs() < 1e-6);
+    drop(placed);
+    assert!(matches!(editing::boolean_placed_captured_sources_cancellable(&a, &Transform::identity(),
+        &b, &Transform::identity(), BooleanOp::Intersection, 0.1, true, &limits,
+        &Cancellation::default(), |_, _| Ok(())), Err(om9_core::Error::Invalid(_))));
+    assert!(matches!(editing::boolean_placed_captured_sources_cancellable(&a, &Transform::identity(),
+        &b, &Transform::identity(), BooleanOp::Intersection, 0.1, false, &limits,
+        &canceled, |_, _| Ok(())), Err(om9_core::Error::Canceled)));
+    let mut placed_calls = 0;
+    assert!(matches!(editing::boolean_placed_captured_sources_cancellable(&a, &Transform::translation([2., 0., 0.]),
+        &b, &Transform::identity(), BooleanOp::Intersection, 0.1, false, &limits,
+        &Cancellation::default(), |_, _| {
+            placed_calls += 1;
+            if placed_calls > validation_calls { Err(om9_core::Error::Budget("placed output fixture")) } else { Ok(()) }
+        }), Err(om9_core::Error::Budget(_))));
+    assert!(placed_calls > validation_calls);
+    let group = [(a.clone(), Transform::identity()), (a.clone(), Transform::translation([5., 0., 0.])),
+        (a.clone(), Transform::translation([10., 0., 0.]))];
+    let targets = [(a.clone(), Transform::identity()), (a.clone(), Transform::translation([5., 0., 0.]))];
+    let cutters = [(a.clone(), Transform::translation([5., 0., 0.])), (a.clone(), Transform::translation([10., 0., 0.]))];
+    for (op, expected) in [(BooleanOp::Difference, 500.), (BooleanOp::Intersection, 1000.)] {
+        let outcome = editing::boolean_binary_captured_groups_cancellable(&targets, &cutters, op, 0.1,
+            &limits, &Cancellation::default(), |_, _| Ok(())).unwrap();
+        let BooleanOutcome::Body(body) = outcome else { panic!("binary group") };
+        let volume = creation::measure(&body, &limits).unwrap().volume_mm3;
+        assert!((volume - expected).abs() < 1e-6, "{op:?}: {volume}");
+    }
+    let far = [(a.clone(), Transform::translation([40., 0., 0.]))];
+    assert!(matches!(editing::boolean_binary_captured_groups_cancellable(&targets, &far, BooleanOp::Intersection,
+        0.1, &limits, &Cancellation::default(), |_, _| Ok(())).unwrap(), BooleanOutcome::Empty));
+    assert!(matches!(editing::boolean_binary_captured_groups_cancellable(&targets, &cutters, BooleanOp::Difference,
+        0.1, &limits, &canceled, |_, _| Ok(())), Err(om9_core::Error::Canceled)));
+    drop(targets); drop(cutters); drop(far);
+    assert!(matches!(editing::boolean_union_captured_group_cancellable(&group, 0.1, &limits, &canceled, |_, _| Ok(())),
+        Err(om9_core::Error::Canceled)));
+    assert!(matches!(editing::boolean_union_captured_group_cancellable(&group, 0.1, &limits, &Cancellation::default(),
+        |_, _| Err(om9_core::Error::Budget("group fixture"))), Err(om9_core::Error::Budget(_))));
+    drop(group);
+    let weak=Arc::downgrade(&controller.scene().unwrap().document);
+    let mut reservation=controller.coordinator().reserve_external_memory(MemoryClass::Kernel,16*1024*1024,None).unwrap();
+    let peer=controller.coordinator().memory_admission_peer().unwrap();let (send,receive)=mpsc::channel();
+    let caller=std::thread::current().id();let worker=std::thread::spawn(move || {
+        receive.recv().unwrap();
+        let split = editing::split_captured_sources_cancellable(&a, &b, 0.1, &limits, &Cancellation::default(), |live, pending| {
+            if live.checked_add(pending).is_none_or(|needed| needed > reservation.bytes()) { return Err(om9_core::Error::Budget("fixture")); }
+            reservation.set_allocated_bytes(live)?; reservation.recheck_pending()
+        }).unwrap();
+        assert_eq!(split.pieces, 2);
+        assert!((creation::measure(&split.brep, &limits).unwrap().volume_mm3 - 1000.).abs() < 1e-6);
+        let canceled_piece = Cancellation::default(); canceled_piece.cancel();
+        assert!(matches!(editing::split_piece_cancellable_admitted(&split, 0, 0.1, &limits, &canceled_piece,
+            |_, _| Ok(())), Err(om9_core::Error::Canceled)));
+        assert!(matches!(editing::split_piece_cancellable_admitted(&split, split.pieces, 0.1, &limits,
+            &Cancellation::default(), |_, _| Ok(())), Err(om9_core::Error::Invalid(_))));
+        let mut piece_validation_calls = 0;
+        split.brep.validate_source_admitted(&limits, |_, _| { piece_validation_calls += 1; Ok(()) }).unwrap();
+        let mut piece_calls = 0;
+        assert!(matches!(editing::split_piece_cancellable_admitted(&split, 0, 0.1, &limits, &Cancellation::default(), |_, _| {
+            piece_calls += 1;
+            if piece_calls > piece_validation_calls { Err(om9_core::Error::Budget("piece output fixture")) } else { Ok(()) }
+        }), Err(om9_core::Error::Budget(_))));
+        assert!(piece_calls > piece_validation_calls);
+        for index in 0..split.pieces {
+            let piece = editing::split_piece_cancellable_admitted(&split, index, 0.1, &limits, &Cancellation::default(), |live, pending| {
+                if live.checked_add(pending).is_none_or(|needed| needed > reservation.bytes()) { return Err(om9_core::Error::Budget("fixture")); }
+                reservation.set_allocated_bytes(live)?; reservation.recheck_pending()
+            }).unwrap();
+            assert!((creation::measure(&piece, &limits).unwrap().volume_mm3 - 500.).abs() < 1e-6);
+        }
+        drop(split);
+        let group = [(a.clone(), Transform::identity()), (a.clone(), Transform::translation([5., 0., 0.])),
+            (a.clone(), Transform::translation([10., 0., 0.]))];
+        let union = editing::boolean_union_captured_group_cancellable(&group, 0.1, &limits, &Cancellation::default(), |live, pending| {
+            if live.checked_add(pending).is_none_or(|needed| needed > reservation.bytes()) { return Err(om9_core::Error::Budget("fixture")); }
+            reservation.set_allocated_bytes(live)?; reservation.recheck_pending()
+        }).unwrap();
+        let volume = creation::measure(&union, &limits).unwrap().volume_mm3;
+        assert!((volume - 2000.).abs() < 1e-6, "{volume}");
+        drop(union); drop(group);
+        let placed = editing::boolean_placed_captured_sources_cancellable(&a, &Transform::translation([2., 0., 0.]),
+            &b, &Transform::identity(), BooleanOp::Intersection, 0.1, false, &limits, &Cancellation::default(), |live, pending| {
+                if live.checked_add(pending).is_none_or(|needed|needed>reservation.bytes()) { return Err(om9_core::Error::Budget("fixture")); }
+                reservation.set_allocated_bytes(live)?; reservation.recheck_pending()
+            }).unwrap();
+        let BooleanOutcome::Body(body) = &placed else { panic!("placed intersection") };
+        let volume = creation::measure(body, &limits).unwrap().volume_mm3;
+        assert!((volume - 700.).abs() < 1e-6, "{volume}");
+        drop(placed);
+        let result=editing::boolean_captured_sources_cancellable(&a,&b,BooleanOp::Intersection,0.1,false,&limits,&Cancellation::default(),|live,pending| {
+            if live.checked_add(pending).is_none_or(|needed|needed>reservation.bytes()){return Err(om9_core::Error::Budget("fixture"));}
+            reservation.set_allocated_bytes(live)?;reservation.recheck_pending()
+        }).unwrap();
+        drop(a);drop(b);(result,reservation,std::thread::current().id())
+    });
+    drop(controller);assert!(weak.upgrade().is_none());assert!(!left_display.is_alive());assert!(!right_display.is_alive());
+    send.send(()).unwrap();let (result,reservation,thread)=worker.join().unwrap();assert_ne!(caller,thread);
+    let BooleanOutcome::Body(body)=&result else {panic!("intersection")};
+    let volume=creation::measure(body,&limits).unwrap().volume_mm3;assert!((volume-500.).abs()<1e-6,"{volume}");
+    assert!(peer.external_reserved_bytes(MemoryClass::Kernel)>0);drop(result);drop(reservation);
+    assert_eq!(peer.external_reserved_bytes(MemoryClass::Kernel),0);
+}
+
+#[test]
+fn captured_transform_worker_uses_source_without_retaining_document_display() {
+    use om9_core::{budget::memory::MemoryClass, geometry::Transform, transaction::Cancellation};
+    use om9_kernel::transform_ops::transform_captured_source_cancellable;
+    use std::sync::{Arc, mpsc};
+    let limits = Limits::default();
+    let shape = om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &limits).unwrap();
+    let display = shape.display_liveness();
+    let mut document = Document::with_template_tolerance("captured transform");
+    let entity = Entity::new("box", Geometry::Brep(shape), None);
+    let id = entity.id;
+    document.entities.insert(id, entity);
+    let controller = Controller::new(document, limits).unwrap();
+    let source = controller.coordinator().capture_brep_source(&controller.document().stamp(id).unwrap()).unwrap();
+    let transform = Transform::translation([5., 3., -2.]);
+    let canceled = Cancellation::default();
+    canceled.cancel();
+    assert!(matches!(transform_captured_source_cancellable(&source, &transform, 0.1, &limits, &canceled, |_, _| Ok(())), Err(om9_core::Error::Canceled)));
+    assert!(matches!(transform_captured_source_cancellable(&source, &transform, 0.1, &limits, &Cancellation::default(), |_, _| Err(om9_core::Error::Budget("fixture"))), Err(om9_core::Error::Budget(_))));
+    let mut validation_calls = 0;
+    source.validate_canonical_admitted(&limits, |_, _| { validation_calls += 1; Ok(()) }).unwrap();
+    let mut calls = 0;
+    assert!(matches!(transform_captured_source_cancellable(&source, &transform, 0.1, &limits, &Cancellation::default(), |_, _| {
+        calls += 1;
+        if calls > validation_calls { Err(om9_core::Error::Budget("output fixture")) } else { Ok(()) }
+    }), Err(om9_core::Error::Budget(_))));
+    assert!(calls > validation_calls);
+    let weak = Arc::downgrade(&controller.scene().unwrap().document);
+    let mut reservation = controller.coordinator().reserve_external_memory(MemoryClass::Kernel, 16 * 1024 * 1024, None).unwrap();
+    let peer = controller.coordinator().memory_admission_peer().unwrap();
+    let (send, receive) = mpsc::channel();
+    let caller = std::thread::current().id();
+    let worker = std::thread::spawn(move || {
+        receive.recv().unwrap();
+        let result = transform_captured_source_cancellable(&source, &transform, 0.1, &limits, &Cancellation::default(), |live, pending| {
+            if live.checked_add(pending).is_none_or(|needed| needed > reservation.bytes()) { return Err(om9_core::Error::Budget("fixture")); }
+            reservation.set_allocated_bytes(live)?;
+            reservation.recheck_pending()
+        }).unwrap();
+        drop(source);
+        (result, reservation, std::thread::current().id())
+    });
+    drop(controller);
+    assert!(weak.upgrade().is_none());
+    assert!(!display.is_alive());
+    send.send(()).unwrap();
+    let (result, reservation, thread) = worker.join().unwrap();
+    assert_ne!(caller, thread);
+    let measures = creation::measure(&result, &limits).unwrap();
+    assert!((measures.volume_mm3 - 1000.).abs() < 1e-6);
+    assert!(result.display().points.iter().all(|p| p[0] >= 5. - 1e-6 && p[1] >= 3. - 1e-6 && p[2] >= -2. - 1e-6));
+    assert!(peer.external_reserved_bytes(MemoryClass::Kernel) > 0);
+    drop(result);
+    drop(reservation);
+    assert_eq!(peer.external_reserved_bytes(MemoryClass::Kernel), 0);
+}
+
 fn controller() -> Controller {
     Controller::new(Document::new("solid"), Limits::default()).unwrap()
 }
@@ -806,6 +1014,87 @@ fn solid_slab_line_foundation_builds_measured_solid_without_enabling_command() {
     assert!(line_slab([0.;3],[1.,0.,0.],[0.,0.,1.],0.,1.,false).is_err());
     let feature = om9_app::icons::feature_for("SolidSlab").expect("Slab icon binding");
     assert!(om9_app::session::Controller::availability(feature).is_err());
+}
+
+#[test]
+fn direct_solid_dimensions_follow_centimeter_document_units() {
+    use om9_core::geometry::Unit;
+    use om9_core::transaction::Cancellation;
+    use om9_app::session::InvocationOrigin;
+    use om9_archive::Archive;
+    use std::f64::consts::PI;
+    let cases = [
+        ("Ellipsoid 2 3 4", "OM9-SOLID-013", 32_000. * PI),
+        ("Torus 5 1", "OM9-SOLID-015", 10_000. * PI * PI),
+        ("Cylinder 2 10", "OM9-SOLID-016", 40_000. * PI),
+        ("Cone 3 6", "OM9-SOLID-019", 18_000. * PI),
+        ("Tube 5 3 10", "OM9-SOLID-017", 160_000. * PI),
+        ("Pyramid 4 2 5", "OM9-SOLID-018", 40_000. / 3.),
+        ("TCone 2 1 3", "OM9-SOLID-020", 7_000. * PI),
+    ];
+    for (command, feature, expected) in cases {
+      for menu in [false, true] {
+        let mut doc = Document::new("solid centimeter units");
+        doc.page_unit = Unit::Centimeter;
+        let limits = Limits::default();
+        let path = std::env::temp_dir().join(format!("om9-solid-units-{}.om9", uuid::Uuid::new_v4()));
+        Archive::save(&path, &doc, &limits, &Cancellation::default()).unwrap();
+        let reopened = Archive::open_restored(&path, &limits, &Default::default()).unwrap();
+        std::fs::remove_file(&path).unwrap();
+        let mut c = Controller::new(reopened.document, limits).unwrap();
+        let before = c.document().clone();
+        if menu {
+            c.dispatch(feature, InvocationOrigin::Menu).unwrap();
+            c.submit(command.split_once(' ').unwrap().1).unwrap();
+        } else {
+            c.submit(command).unwrap();
+        }
+        let id = *c.document().entities.keys().next().expect(command);
+        let m = measures(&c, id);
+        assert!(m.closed && m.solids == 1, "{command}: {m:?}");
+        assert!((m.volume_mm3 - expected).abs() < expected * 1e-8,
+            "{command}: volume {} expected {expected}", m.volume_mm3);
+        let committed = c.document().clone();
+        c.undo().unwrap();
+        assert_eq!(c.document(), &before, "{command}");
+        c.redo().unwrap();
+        assert_eq!(c.document(), &committed, "{command}");
+        Archive::save(&path, c.document(), c.coordinator().limits(), &Cancellation::default()).unwrap();
+        let result = Archive::open_restored(&path, c.coordinator().limits(), &Default::default()).unwrap();
+        std::fs::remove_file(&path).unwrap();
+        let Geometry::Brep(body) = &result.document.entities[&id].geometry else { panic!("{command}") };
+        let reopened_volume = creation::measure(body, c.coordinator().limits()).unwrap().volume_mm3;
+        assert!((reopened_volume - expected).abs() < expected * 1e-8, "{command}: reopened {reopened_volume}");
+      }
+    }
+}
+
+#[test]
+fn direct_cylinder_inches_and_unit_overflow_preserve_redo() {
+    use om9_app::session::InvocationOrigin;
+    use om9_core::geometry::Unit;
+    for menu in [false, true] {
+        let mut doc = Document::new("solid inches");
+        doc.page_unit = Unit::Inch;
+        let mut c = Controller::new(doc, Limits::default()).unwrap();
+        if menu {
+            c.dispatch("OM9-SOLID-016", InvocationOrigin::Menu).unwrap();
+            c.submit("2 4").unwrap();
+        } else {
+            c.submit("Cylinder 2 4").unwrap();
+        }
+        let id = *c.document().entities.keys().next().unwrap();
+        let expected = std::f64::consts::PI * 50.8_f64.powi(2) * 101.6;
+        assert!((measures(&c, id).volume_mm3 - expected).abs() < expected * 1e-8);
+        c.undo().unwrap();
+        let before = c.document().clone();
+        let redo_before = c.coordinator().redo_len();
+        assert!(c.submit("Cylinder 1e308 2").is_err());
+        assert_eq!(c.document(), &before);
+        assert_eq!(c.coordinator().redo_len(), redo_before);
+        c.redo().unwrap();
+        assert!((measures(&c, id).volume_mm3 - expected).abs() < expected * 1e-8);
+    }
 }
 
 #[test]
@@ -3157,6 +3446,14 @@ fn solid_extrude_pipe_extract_and_fillet_dispatch() {
     c.select_objects(&[box_id]).unwrap();
     let before = c.document().entities.len();
     c.submit("ExtractSrf 0 Copy=Yes").unwrap();
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    while c.face_verification_pending() {
+        assert!(std::time::Instant::now() < deadline, "face verification timed out");
+        if let Some(result) = c.poll_face_verification() {
+            result.unwrap();
+        }
+        std::thread::yield_now();
+    }
     assert_eq!(c.document().entities.len(), before + 1);
 }
 
@@ -3839,6 +4136,47 @@ fn solid_sphere_recovered_macros_and_variant_ids_share_modes() {
             c.cancel();
             assert_eq!(c.document(), &before);
         }
+    }
+}
+
+#[test]
+fn solid_sphere_two_point_menu_and_cmd_commit_the_same_geometry() {
+    use om9_app::session::InvocationOrigin;
+    for menu in [false, true] {
+        let mut c = controller();
+        if menu { c.dispatch("SolidSphere2Points", InvocationOrigin::Menu).unwrap(); }
+        else { c.submit("_Sphere _2Point").unwrap(); }
+        c.accept_world_point([0., 0., 0.]).unwrap();
+        c.accept_world_point([10., 0., 0.]).unwrap();
+        let id = *c.document().entities.keys().next().unwrap();
+        let measured = measures(&c, id);
+        assert!((measured.volume_mm3 - 4. * std::f64::consts::PI / 3. * 125.).abs() < 1e-6);
+        assert_eq!(c.document().entities[&id].placement.point([0., 0., 0.]).unwrap(), [5., 0., 0.]);
+        c.undo().unwrap();
+        assert!(c.document().entities.is_empty());
+        c.redo().unwrap();
+        assert!(c.document().entities.contains_key(&id));
+    }
+}
+
+#[test]
+fn solid_sphere_numeric_and_interactive_commands_share_units_and_origin() {
+    use om9_core::geometry::Unit;
+    for numeric in [false, true] {
+        let mut doc = Document::new("sphere numeric units");
+        doc.page_unit = Unit::Centimeter;
+        let mut c = Controller::new(doc, Limits::default()).unwrap();
+        if numeric { c.submit("Sphere 0.5").unwrap(); }
+        else {
+            c.submit("Sphere").unwrap();
+            c.accept_world_point([0., 0., 0.]).unwrap();
+            c.submit("0.5").unwrap();
+        }
+        let id = *c.document().entities.keys().next().unwrap();
+        let measured = measures(&c, id);
+        assert!((measured.volume_mm3 - 4. * std::f64::consts::PI / 3. * 125.).abs() < 1e-6);
+        assert_eq!(c.document().entities[&id].placement.point([0., 0., 0.]).unwrap(), [0., 0., 0.]);
+        assert_eq!(c.coordinator().undo_len(), 1);
     }
 }
 
@@ -4953,7 +5291,7 @@ fn solid_sphere_aroundcurve_trimmed_circular_edge_preserves_orientation_and_plac
     let profile = Profile::new(vec![[0.,-10.,0.],[10.,-10.,0.],[10.,10.,0.],[0.,10.,0.]]).unwrap();
     let cutter = creation::extrude(&profile, [0.,0.,10.], true, DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let body = editing::boolean(&cylinder, &cutter, BooleanOp::Intersection, DEFAULT_DEFLECTION_MM, &limits).unwrap().body().unwrap().clone();
-    let (index, curve) = (0..body.display.edges.len()).find_map(|i| {
+    let (index, curve) = (0..body.display().edges.len()).find_map(|i| {
         let c = editing::circular_edge(&body, i, &limits).ok()?;
         match &c { Curve::Circle { domain, .. } if domain[1] < 6.0 => Some((i,c)), _ => None }
     }).expect("trimmed circular edge");
@@ -4999,7 +5337,7 @@ fn solid_sphere_aroundcurve_accepts_named_circular_brep_edge() {
         let body_id = *c.document().entities.keys().next().unwrap();
         let body = &c.document().entities[&body_id];
         let Geometry::Brep(brep) = &body.geometry else { panic!("cylinder") };
-        let (index, curve) = (0..brep.display.edges.len()).find_map(|i| om9_kernel::editing::circular_edge(brep, i, c.coordinator().limits()).ok().map(|curve| (i, curve))).unwrap();
+        let (index, curve) = (0..brep.display().edges.len()).find_map(|i| om9_kernel::editing::circular_edge(brep, i, c.coordinator().limits()).ok().map(|curve| (i, curve))).unwrap();
         let expected = om9_core::curve_ops::point_at(&curve, 0.25, c.coordinator().limits()).unwrap();
         assert!((expected[0].hypot(expected[1]) - 5.).abs() < 1e-8);
         assert!(expected[2].abs() < 1e-8 || (expected[2] - 10.).abs() < 1e-8);
@@ -5036,8 +5374,8 @@ fn solid_sphere_aroundcurve_brep_edge_selection_stages_and_undo() {
     c.submit("Box 10 20 30").unwrap();
     let id = *c.document().entities.keys().next().unwrap();
     let Geometry::Brep(brep) = &c.document().entities[&id].geometry else { panic!("box") };
-    let edge = brep.display.edges[0];
-    let wrong_edge = brep.display.edges[1];
+    let edge = brep.display().edges[0];
+    let wrong_edge = brep.display().edges[1];
     let (a, b) = om9_kernel::editing::straight_edge_endpoints(brep, 0, c.coordinator().limits()).unwrap();
     let center = std::array::from_fn(|i| (a[i] + b[i]) * 0.5);
     c.clear_selection();

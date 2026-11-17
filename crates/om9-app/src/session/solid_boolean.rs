@@ -39,6 +39,10 @@ impl Controller {
         ))
     }
 
+    pub fn solid_boolean_two_preview_placement(&self) -> Option<om9_core::geometry::Transform> {
+        Some(self.solid_pending.as_ref()?.boolean_two_preview.as_ref()?.placement)
+    }
+
     pub fn solid_boolean_two_preview_mode(&self) -> Option<&'static str> {
         let preview = self.solid_pending.as_ref()?.boolean_two_preview.as_ref()?;
         Some(
@@ -258,10 +262,7 @@ impl Controller {
         let Some(preview) = &pending.fillet_preview else {
             return Vec::new();
         };
-        let Some(entity) = self.document().entities.get(&preview.source.object) else {
-            return Vec::new();
-        };
-        let Geometry::Brep(brep) = &entity.geometry else {
+        let Some(display) = self.scene().and_then(|scene| scene.root_brep_pick_display(&preview.source).ok()) else {
             return Vec::new();
         };
         let mut handles = Vec::new();
@@ -284,21 +285,19 @@ impl Controller {
                 let om9_scene::scene::Subelement::BrepEdge(key) = edge.reference.subset else {
                     return None;
                 };
-                let edge_index = brep.display.edges.iter().position(|id| *id == key)?;
-                let count = brep
-                    .display
+                let edge_index = display.edges.iter().position(|id| *id == key)?;
+                let count = display
                     .segments
                     .iter()
                     .filter(|segment| segment[2] as usize == edge_index)
                     .count();
-                let segment = brep
-                    .display
+                let segment = display
                     .segments
                     .iter()
                     .filter(|segment| segment[2] as usize == edge_index)
                     .nth(count / 2)?;
-                let a = brep.display.points.get(segment[0] as usize)?;
-                let b = brep.display.points.get(segment[1] as usize)?;
+                let a = display.points.get(segment[0] as usize)?;
+                let b = display.points.get(segment[1] as usize)?;
                 let midpoint = std::array::from_fn(|i| (a[i] + b[i]) * 0.5);
                 let world = preview.placement.point(midpoint).ok()?;
                 let handle = index * 2;
@@ -351,8 +350,9 @@ impl Controller {
             .ok_or(Error::Missing("CopyHandle source"))?;
         pending.fillet_copy_phase = 0;
         pending.fillet_add_mode = false;
+        let document_radius = radius / self.document().page_unit.factor();
         let result = self.solid_fillet_select_hit(hits).and_then(|_| {
-            self.submit_solid_text(&format!("CurrentRadius={radius}"))
+            self.submit_solid_text(&format!("CurrentRadius={document_radius}"))
                 .ok_or(Error::Missing("fillet session"))?
         });
         if let Some(pending) = self.solid_pending.as_mut() {
@@ -438,7 +438,7 @@ impl Controller {
                 .and_then(|new_preview| {
                     let mut held = self.scene_cache_usage()?;
                     held.add(pending.usage()?, self.coordinator.limits())?;
-                    held.add(new_preview.usage, self.coordinator.limits())?;
+                    if !new_preview.body.has_allocation_owner() { held.add(new_preview.usage, self.coordinator.limits())?; }
                     self.coordinator.retained_usage_with_held_usage(held)?;
                     Ok(new_preview)
                 });
@@ -536,7 +536,7 @@ impl Controller {
                 .and_then(|new_preview| {
                     let mut held = self.scene_cache_usage()?;
                     held.add(pending.usage()?, self.coordinator.limits())?;
-                    held.add(new_preview.usage, self.coordinator.limits())?;
+                    if !new_preview.body.has_allocation_owner() { held.add(new_preview.usage, self.coordinator.limits())?; }
                     self.coordinator.retained_usage_with_held_usage(held)?;
                     Ok(new_preview)
                 });
@@ -583,7 +583,7 @@ impl Controller {
                 return Err(Error::Stale("fillet preview source"));
             }
             let mut held = self.scene_cache_usage()?;
-            held.add(preview.usage, self.coordinator.limits())?;
+            if !preview.body.has_allocation_owner() { held.add(preview.usage, self.coordinator.limits())?; }
             held.add(
                 om9_core::budget::Usage::array::<usize>(pending.fillet_edges.len())?,
                 self.coordinator.limits(),

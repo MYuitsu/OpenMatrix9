@@ -38,7 +38,7 @@ impl SelectedSubobject {
     fn same_key(&self, other: &Self) -> bool {
         self.root == other.root && self.path == other.path && self.subset == other.subset
     }
-    fn validate<'a>(&self, scene: &'a Scene, epoch: u64) -> Result<&'a SceneObject> {
+    pub(super) fn validate<'a>(&self, scene: &'a Scene, epoch: u64) -> Result<&'a SceneObject> {
         if self.world_epoch != epoch || scene.epoch != epoch {
             return Err(Error::Stale("subobject publication"));
         }
@@ -54,9 +54,9 @@ impl SelectedSubobject {
         if !object.visible || !object.selectable || !object.has_pick_geometry() {
             return Err(Error::Permission("subobject owner"));
         }
-        validate_subset(object, &scene.entity_for(object)?.geometry, &self.subset)?;
+        validate_subset(object, &scene.entity_for(&scene.document, object)?.geometry, &self.subset)?;
         // Resolve the definition path, never a nearby or first matching member.
-        if scene.entity_for(object)?.id != object.leaf {
+        if scene.entity_for(&scene.document, object)?.id != object.leaf {
             return Err(Error::Stale("subobject leaf"));
         }
         Ok(object)
@@ -103,6 +103,8 @@ impl Controller {
             return Ok(());
         }
         self.append_subselection_owned(reference)?;
+        self.dupedge_source_picks = Vec::new();
+        self.dupedge_picks_reservation = None;
         self.sub_revision = self.sub_revision.saturating_add(1);
         Ok(())
     }
@@ -120,6 +122,8 @@ impl Controller {
         {
             self.subselection.remove(index);
             self.release_removed_subselection();
+            self.dupedge_source_picks = Vec::new();
+            self.dupedge_picks_reservation = None;
             self.sub_revision = self.sub_revision.saturating_add(1);
             Ok(())
         } else {
@@ -127,9 +131,14 @@ impl Controller {
         }
     }
     pub fn clear_subselection(&mut self) {
+        let had_temporary = self.has_dupedge_temporary_picks();
+        self.dupedge_source_picks = Vec::new();
+        self.dupedge_picks_reservation = None;
         if !self.subselection.is_empty() {
             self.subselection.clear();
             self.release_removed_subselection();
+            self.sub_revision = self.sub_revision.saturating_add(1);
+        } else if had_temporary {
             self.sub_revision = self.sub_revision.saturating_add(1);
         }
     }
@@ -149,6 +158,8 @@ impl Controller {
             .retain(|key| key.validate(scene, self.coordinator.epoch()).is_ok());
         if before != self.subselection.len() {
             self.release_removed_subselection();
+            self.dupedge_source_picks = Vec::new();
+            self.dupedge_picks_reservation = None;
             self.sub_revision = self.sub_revision.saturating_add(1);
         }
     }
@@ -234,9 +245,9 @@ fn validate_subset(
     use om9_scene::scene::RenderBuffers;
     if let om9_core::geometry::Geometry::Brep(shape) = geometry {
         let valid = match subset {
-            Subelement::BrepFace(id) => shape.display.faces.contains(id),
-            Subelement::BrepEdge(id) => shape.display.edges.contains(id),
-            Subelement::BrepVertex(id) => shape.display.vertex_ids.contains(id),
+            Subelement::BrepFace(id) => shape.topology().faces.contains(id),
+            Subelement::BrepEdge(id) => shape.topology().edges.contains(id),
+            Subelement::BrepVertex(id) => shape.topology().vertex_ids.contains(id),
             _ => false,
         };
         return if valid {

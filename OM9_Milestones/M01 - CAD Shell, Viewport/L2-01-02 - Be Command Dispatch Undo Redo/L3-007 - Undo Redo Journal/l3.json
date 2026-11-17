@@ -198,6 +198,18 @@
   ],
   "hardening_notes": "# OM9-L3-01-02-007 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-01-02`.\n- Luồng/đối tượng: undo redo stable identity.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-core/src/feature.rs`.\n- API Rust dự kiến: `UndoJournal::undo(&mut Document) -> Result<(), UndoError>`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** create→undo→redo restores same EntityId, LayerId, BRep reference.\n- **Negative:** undo after reorder/deletion does not resurrect invalid references.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n",
   "runtime_implementation": {
+    "history_wire_reuse_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "History workers keep an accounted prior scene snapshot and reuse eligible occurrence wires before preparing missing ones.",
+      "remaining": "Budget, cancellation, source-only restore, rollback and runtime behavior remain unverified.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#history-scene-wire-reuse"
+    },
+    "native_source_history_rebuild_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Missing native displays are reconstructed from retained source in the history worker and staged in the candidate rollback batch; synchronous callers retry through that worker.",
+      "remaining": "Runtime, rollback, cancellation and memory-pressure checks, native allocation containment and durable OCCT topology binding remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#native-source-only-history-candidate"
+    },
     "planning_indexes_reservation_2026_11_04": {
       "status": "PARTIAL_CHECKS_PASSED",
       "evidence": "docs/validation/2026-11-04-interactive-ram-transition.md#transaction-planning-index-reservation",
@@ -291,8 +303,29 @@
     },
     "status": "PARTIAL_CHECKS_PASSED",
     "scope": "Ordinary Undo retained; isolated new MCP benchmark session may explicitly disable recording before its first edit.",
-    "evidence": ["docs/validation/2026-11-02-dice-undo-benchmark.md", "docs/validation/2026-11-02-undo-brep-inventory-optimization.md", "docs/validation/2026-11-02-undo-validated-owner-cache.md"],
-    "limitations": ["Single debug benchmark per mode; no claim of full journal acceptance or release performance."]
+    "evidence": [
+      "docs/validation/2026-11-02-dice-undo-benchmark.md",
+      "docs/validation/2026-11-02-undo-brep-inventory-optimization.md",
+      "docs/validation/2026-11-02-undo-validated-owner-cache.md"
+    ],
+    "limitations": [
+      "Single debug benchmark per mode; no claim of full journal acceptance or release performance."
+    ],
+    "console_sphere_metrics_2026_11_16": {
+      "status": "PARTIAL_NATIVE_UI_STALL_REPRODUCED_MATRIX_STOPPED",
+      "evidence": "docs/validation/2026-11-16-console-sphere-metrics.md",
+      "data": "docs/validation/2026-11-16-console-sphere-metrics.json",
+      "measurement": "39 focused checks/release passed. Console 16 Light/High passed source/history/publication checks near 30 FPS. 512 Light has 512 commits/presentations, 512 Undo, orbit 29.729/selected 29.921 FPS, peak WS 543.41 MiB, creation UI gap max 8.094 s; stopped before final source/UndoRedo verification after user reported unresponsiveness and whole-window enlargement around 480.",
+      "remaining": "512 Light is diagnostic performance only, not a strict audit pass. 512 High/768 Light/High were not run. Native maximize/hung transition cause unresolved; window not foreground during navigation. Existing fixture compilation blockers, 1Hz/coarse global GPU counters, enabled profiling and one repetition limit evidence.",
+      "scope": "Opt-in phase telemetry only; exact source, retention and render algorithms unchanged. No large-scene performance acceptance or maximize fix claimed."
+    },
+    "m1r_retained_receipts_2026_11_16": {
+      "status": "PARTIAL_IMPLEMENTATION_NATIVE_MATRIX_PASSED_LATENCY_OPEN",
+      "scope": "M1-R immutable storage receipts, admitted shared retained-owner projection caches/reclamation, newest-first alias lookups, and an allocation-free admitted internal-document/evidence byte bound to defer capture-attribution Undo censuses below quota. Canonical geometry, configured admission and ordinary Undo policy remain active.",
+      "evidence": "docs/validation/2026-11-16-m1r-storage-receipts.md",
+      "validation": "36 named core and 31 scene checks, app library check and release build passed. Release ownership micro probe passed 3 repetitions. All 10 final physical-console 16/64/128/512/768 Light/High configurations passed strict exact-source, placement, four-view per-sphere publication and final Undo/Redo checks. Full 512/768 ordinary creation Undo retained; Light/High source fingerprint multisets match at every size. Final fixtures explicitly allow 4M points; default 2M remains unchanged. Earlier default-limit refusal at Sphere 649 preserved 648 objects/Undo.",
+      "limitations": "M1-R remains open: full owner delta registry, cold synchronous inventories, unpaced burst and full pressure/alias matrix, UI p95/p99 latency gates. High selected-phase publication latency remains; its whole-window FPS must not be replaced with the approximately 30 FPS after the initial hold. Product defaults unchanged. Earlier maximize/resize issue unresolved; no native practical capacity ceiling proved by Rhino research."
+    }
   },
   "sdk_export_plan": {
     "decided": "2026-10-21",

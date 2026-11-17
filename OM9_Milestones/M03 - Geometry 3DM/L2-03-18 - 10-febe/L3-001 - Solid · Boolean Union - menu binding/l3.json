@@ -530,6 +530,11 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "shared_affine_placement_2026_11_12": {
+      "status": "REOPENED_BOX_FIXTURES_PASSED",
+      "evidence": "docs/validation/2026-11-12-boolean-common-affine-union.md",
+      "limitations": "Exactly identical placement only; general affine tolerance, geometry, imports, native peak and desktop remain unverified. Other Boolean commands do not use this path."
+    },
     "stack_regression_2026_10_29": {
       "status": "PARTIAL_CHECKS_PASSED",
       "evidence": "docs/validation/2026-10-29-solid-wide-regression.md",
@@ -568,6 +573,15 @@
       "solid 64 passed, 1 ignored"
     ],
     "remaining": [],
-    "manual_gate": "M03-UI"
+    "manual_gate": "M03-UI",
+    "speculative_union_20261115": {
+      "status": "IMPLEMENTED_NATIVE_64_128_512_LIGHT_VERIFIED_HIGH_512_FAILED",
+      "scope": "BooleanUnion disposable mesh preview concurrent with exact source-only fold; final-only display/topology capture and existing atomic source/scene commit. CAD tolerances, checks and Undo policy retained.",
+      "evidence": "docs/validation/2026-11-15-speculative-boolean.md",
+      "limitations": "512 Light completed with identical exact source and 513 Undo; High preview passed but exact worker failed after 884.358 s, retaining 512 inputs/Undo. No High final result/source equality or post-commit FPS. Long creation image holds remain. Error text, manual/client video, repeated/general geometry and full Undo/persistence acceptance remain open.",
+      "manual_gate_promoted": false,
+      "kernel_512": "Kernel source/final Light/High captures passed independently. Native Light passed, native High worker failed before commit; kernel proof does not close the full native path.",
+      "comparison_report": "docs/validation/2026-11-15-speculative-boolean-512-comparison.md"
+    }
   }
 }

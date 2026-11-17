@@ -8,6 +8,7 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepCheck_Analyzer.hxx>
@@ -16,6 +17,7 @@
 #include <BRepTools.hxx>
 #include <BRepTools_Modification.hxx>
 #include <BRepTools_Modifier.hxx>
+#include <BRepLib.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
@@ -24,6 +26,7 @@
 #include <Geom_Surface.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom2d_Curve.hxx>
+#include <GCE2d_MakeSegment.hxx>
 #include <TColgp_Array2OfPnt.hxx>
 #include <TColStd_Array2OfReal.hxx>
 #include <Geom_Circle.hxx>
@@ -40,20 +43,28 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
+#include <TopoDS_Wire.hxx>
 #include <TopoDS_Shell.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Dir.hxx>
 #include <gp_GTrsf.hxx>
 #include <gp_Lin.hxx>
+#include <gp_Pnt2d.hxx>
 #include <gp_Vec.hxx>
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+// Shared source-face witness resolver; implemented by the OCCT editing bridge.
+int resolve_source_face(const TopTools_IndexedMapOfShape&, const double*, double, double, size_t);
+int resolve_source_edge(const TopTools_IndexedMapOfShape&, const double*, double, const double*, double, size_t, gp_Pnt&);
 
 struct Om9MeasurePart {
  int kind; int degree; int periodic;
@@ -227,6 +238,66 @@ extern "C" int om9_occt_surface_to_face_source(const Om9MeasurePart* source, int
  } catch (...) { failure(message, capacity, "Unknown surface face source failure"); return 2; }
 }
 
+// Construct a temporary face from caller-validated UV polygon loops. The first
+// loop is the outer boundary, subsequent loops are holes. No document owner or
+// native handle escapes this synchronous adapter.
+extern "C" int om9_occt_trimmed_surface_face_source(const Om9MeasurePart* source, int periodic_axes,
+ const double* uv, size_t point_count, const size_t* offsets, size_t loop_count, int seam_axis,
+ size_t max_bytes, int (*sink)(void*, const unsigned char*, size_t), void* context, char* message, int capacity) {
+ try {
+  if (!source || source->kind!=6 || !uv || !offsets || !sink || !loop_count || point_count>1024 || loop_count>point_count/3
+      || offsets[0]!=0 || offsets[loop_count]!=point_count || (periodic_axes & ~3) || seam_axis < -1 || seam_axis > 1)
+   throw std::invalid_argument("trimmed face: invalid input");
+  const TopoDS_Shape original=part(*source,periodic_axes);
+  TopTools_IndexedMapOfShape faces;TopExp::MapShapes(original,TopAbs_FACE,faces);
+  if (faces.Extent()!=1) throw std::invalid_argument("trimmed face: expected one surface");
+  const Handle(Geom_Surface) surface=BRep_Tool::Surface(TopoDS::Face(faces(1)));
+  if (surface.IsNull()) throw std::invalid_argument("trimmed face: missing surface");
+  std::vector<TopoDS_Wire> wires;wires.reserve(loop_count);
+  for (size_t l=(seam_axis>=0 ? 1 : 0);l<loop_count;++l) {
+   const size_t begin=offsets[l],end=offsets[l+1];
+   if (end<begin || end>point_count || end-begin<3) throw std::invalid_argument("trimmed face: invalid loop");
+   BRepBuilderAPI_MakeWire wire;
+   for (size_t i=begin;i<end;++i) {
+    const size_t j=(i+1==end)?begin:i+1;
+    const gp_Pnt2d a(uv[2*i],uv[2*i+1]),b(uv[2*j],uv[2*j+1]);
+    if (!std::isfinite(a.X()) || !std::isfinite(a.Y()) || !std::isfinite(b.X()) || !std::isfinite(b.Y()))
+     throw std::invalid_argument("trimmed face: non-finite UV");
+    const Handle(Geom2d_Curve) curve=GCE2d_MakeSegment(a,b).Value();
+    BRepBuilderAPI_MakeEdge make_edge(curve,surface);
+    if (!make_edge.IsDone()) throw std::invalid_argument("trimmed face: invalid edge");
+    TopoDS_Edge edge=make_edge.Edge();
+    if (!BRepLib::BuildCurves3d(edge,1e-7)) throw std::runtime_error("trimmed face: cannot construct edge curve");
+    wire.Add(edge);if (!wire.IsDone()) throw std::invalid_argument("trimmed face: disconnected loop");
+   }
+   wires.push_back(wire.Wire());
+  }
+  TopoDS_Face face;
+  if (seam_axis>=0) {
+   double u0=uv[0],u1=uv[0],v0=uv[1],v1=uv[1];
+   for (size_t i=1;i<offsets[1];++i) {u0=std::min(u0,uv[2*i]);u1=std::max(u1,uv[2*i]);v0=std::min(v0,uv[2*i+1]);v1=std::max(v1,uv[2*i+1]);}
+   BRepBuilderAPI_MakeFace make_face(surface,u0,u1,v0,v1,1e-7);
+   for (const auto& wire:wires) make_face.Add(wire);
+   if (!make_face.IsDone()) throw std::invalid_argument("trimmed face: seam construction failed");
+   face=make_face.Face();
+  } else {
+   BRepBuilderAPI_MakeFace make_face(surface,wires[0],true);
+   for (size_t i=1;i<wires.size();++i) make_face.Add(wires[i]);
+   if (!make_face.IsDone()) throw std::invalid_argument("trimmed face: construction failed");
+   face=make_face.Face();
+  }
+  if (face.IsNull() || !BRepCheck_Analyzer(face).IsValid()) throw std::invalid_argument("trimmed face: invalid topology");
+  std::ostringstream output;BRepTools::Write(face,output,false,false,TopTools_FormatVersion_CURRENT);
+  const std::string text=output.str();
+  if (text.empty() || text.size()>max_bytes) throw std::length_error("trimmed face: source budget");
+  if (sink(context,reinterpret_cast<const unsigned char*>(text.data()),text.size())!=0)
+   throw std::runtime_error("trimmed face: Rust refused source");
+  return 0;
+ } catch (const Standard_Failure& e) {failure(message,capacity,e.GetMessageString());return 2;
+ } catch (const std::exception& e) {failure(message,capacity,e.what());return 1;
+ } catch (...) {failure(message,capacity,"Unknown trimmed face failure");return 2;}
+}
+
 extern "C" int om9_occt_split_surface_parts(const Om9MeasurePart* target,
  const Om9MeasurePart* tools, size_t tool_count, int* pieces, double deflection,
  size_t max_points, size_t max_nodes, size_t max_bytes, Om9BrepSink sink,
@@ -353,10 +424,42 @@ extern "C" int om9_occt_surface_ray_hit(const Om9MeasurePart* target,
  } catch (...) { failure(message,capacity,"Unknown surface ray failure"); return 2; }
 }
 
+// Surface-only bounded query: expose every forward hit and its original UV
+// parameters so the Rust caller can classify trim and choose visibility.
+extern "C" int om9_occt_surface_ray_hits_uv(const Om9MeasurePart* target,
+ const double* origin, const double* direction, double tolerance,
+ double* output, size_t capacity, size_t* count, char* message, int message_capacity) {
+ try {
+  if (!target || target->kind!=6 || !origin || !direction || !output || !count || capacity==0
+      || !std::isfinite(tolerance) || tolerance<=0.) throw std::invalid_argument("surface UV ray: invalid input");
+  for (int i=0;i<3;++i) if (!std::isfinite(origin[i]) || !std::isfinite(direction[i]))
+   throw std::invalid_argument("surface UV ray: non-finite input");
+  const gp_Vec vector(direction[0],direction[1],direction[2]);
+  if (vector.SquareMagnitude()<=1e-24) throw std::invalid_argument("surface UV ray: zero direction");
+  const TopoDS_Shape shape=part(*target);
+  TopTools_IndexedMapOfShape faces; TopExp::MapShapes(shape,TopAbs_FACE,faces);
+  if (faces.Extent()!=1) throw std::invalid_argument("surface UV ray needs one face");
+  IntCurvesFace_ShapeIntersector intersection; intersection.Load(shape,tolerance);
+  intersection.Perform(gp_Lin(gp_Pnt(origin[0],origin[1],origin[2]),gp_Dir(vector)),0.,RealLast());
+  if (!intersection.IsDone()) throw std::runtime_error("surface UV ray intersection failed");
+  const size_t n=size_t(intersection.NbPnt());
+  if (n>capacity) throw std::length_error("surface UV ray hit limit exceeded");
+  for (size_t i=0;i<n;++i) {
+   const int j=int(i+1); const gp_Pnt p=intersection.Pnt(j);
+   const double values[6]={p.X(),p.Y(),p.Z(),intersection.UParameter(j),intersection.VParameter(j),intersection.WParameter(j)};
+   for (int k=0;k<6;++k) {if (!std::isfinite(values[k])) throw std::runtime_error("surface UV ray non-finite hit");output[6*i+k]=values[k];}
+  }
+  *count=n; return 0;
+ } catch (const Standard_Failure& e) { failure(message,message_capacity,e.GetMessageString()); return 2;
+ } catch (const std::exception& e) { failure(message,message_capacity,e.what()); return 1;
+ } catch (...) { failure(message,message_capacity,"Unknown surface UV ray failure"); return 2; }
+}
+
 // Resolve the face in the serialized source before applying placement. Face
 // indices use the same TopExp map as the snapshot that created the UUID list.
 extern "C" int om9_occt_brep_face_ray_hit(const Om9MeasurePart* target, int face_index,
  const double* origin, const double* direction, const double* reference, double tolerance,
+ const double* triangle, double deflection, size_t max_nodes,
  double* output, char* message, int capacity) {
  try {
   if (!target || target->kind!=0 || face_index<0 || !origin || !direction || !reference || !output || !std::isfinite(tolerance) || tolerance<=0.)
@@ -367,6 +470,7 @@ extern "C" int om9_occt_brep_face_ray_hit(const Om9MeasurePart* target, int face
   if (vector.SquareMagnitude()<=1e-24) throw std::invalid_argument("BRep face ray: zero direction");
   const TopoDS_Shape source=read_measure_source(target->source,target->source_len);
   TopTools_IndexedMapOfShape faces; TopExp::MapShapes(source,TopAbs_FACE,faces);
+  if (triangle) face_index = resolve_source_face(faces, triangle, deflection + tolerance, tolerance, max_nodes);
   if (face_index>=faces.Extent()) throw std::invalid_argument("BRep face ray: stale face index");
   const TopoDS_Shape face=placed(faces.FindKey(face_index+1),target->matrix);
   IntCurvesFace_ShapeIntersector intersection; intersection.Load(face,tolerance);
@@ -393,9 +497,10 @@ extern "C" int om9_occt_brep_face_ray_hit(const Om9MeasurePart* target, int face
 // escapes the call. Outputs are in the same order as the supplied face indices.
 extern "C" int om9_occt_brep_face_ray_hits(const Om9MeasurePart* target,
  const int* face_indices, size_t count, const double* origin, const double* direction,
- double tolerance, double* output, char* message, int capacity) {
+ double tolerance, const double* triangles, const double* deflections, size_t max_nodes,
+ double* output, char* message, int capacity) {
  try {
-  if (!target || target->kind!=0 || !face_indices || count==0 || count>8 || !origin || !direction || !output || !std::isfinite(tolerance) || tolerance<=0.)
+  if (!target || target->kind!=0 || !face_indices || (triangles && !deflections) || count==0 || count>8 || !origin || !direction || !output || !std::isfinite(tolerance) || tolerance<=0.)
    throw std::invalid_argument("BRep face rays: invalid input");
   for (int i=0;i<3;++i) if (!std::isfinite(origin[i]) || !std::isfinite(direction[i]))
    throw std::invalid_argument("BRep face rays: non-finite input");
@@ -405,7 +510,7 @@ extern "C" int om9_occt_brep_face_ray_hits(const Om9MeasurePart* target,
   TopTools_IndexedMapOfShape faces; TopExp::MapShapes(source,TopAbs_FACE,faces);
   const gp_Lin ray(gp_Pnt(origin[0],origin[1],origin[2]),gp_Dir(vector));
   for (size_t index=0;index<count;++index) {
-   const int face_index=face_indices[index];
+   const int face_index = triangles ? resolve_source_face(faces, triangles + index*9, deflections[index] + tolerance, tolerance, max_nodes) : face_indices[index];
    if (face_index<0 || face_index>=faces.Extent()) throw std::invalid_argument("BRep face rays: stale face index");
    const TopoDS_Shape face=placed(faces.FindKey(face_index+1),target->matrix);
    IntCurvesFace_ShapeIntersector intersection; intersection.Load(face,tolerance);
@@ -673,11 +778,28 @@ extern "C" int om9_occt_measure_distance(const Om9MeasurePart* a,size_t ac,
 }
 
 extern "C" int om9_occt_measure_edge_length(const char* source,size_t length,int index,
- const double* matrix,double* value,char* message,int capacity) {
+ const double* matrix,const double (*points)[3],size_t point_count,const uint32_t (*segments)[3],size_t segment_count,
+ uint32_t display_edge,double pick_tolerance,double segment_tolerance,size_t max_points,size_t max_nodes,double* value,char* message,int capacity) {
  try {
   if(!matrix || !value)throw std::invalid_argument("edge measurement outputs");
   const TopoDS_Shape shape=read_measure_source(source,length);
   TopTools_IndexedMapOfShape edges;TopExp::MapShapes(shape,TopAbs_EDGE,edges);
+   if(segments) {
+    if(!points || point_count > max_points || segment_count > max_nodes)throw std::invalid_argument("edge measurement display budget");
+    int selected=-1;
+    for(size_t i=0;i<segment_count;++i) {
+     if(segments[i][2]!=display_edge)continue;
+     if(segments[i][0]>=point_count || segments[i][1]>=point_count)throw std::invalid_argument("edge measurement display index");
+     double segment[6],midpoint[3];
+     for(int axis=0;axis<3;++axis) { segment[axis]=points[segments[i][0]][axis]; segment[axis+3]=points[segments[i][1]][axis]; midpoint[axis]=(segment[axis]+segment[axis+3])*0.5; }
+     gp_Pnt resolved;
+     const int current=resolve_source_edge(edges,midpoint,pick_tolerance,segment,segment_tolerance,max_nodes,resolved);
+     if(selected>=0 && current!=selected)throw std::invalid_argument("edge measurement mixed display edges");
+     selected=current;
+    }
+    if(selected<0)throw std::invalid_argument("edge measurement missing display segment");
+    index=selected;
+   }
   if(index < -1 || index>=edges.Extent())throw std::invalid_argument("edge measurement index");
   *value=0.;
   for(int i=1;i<=edges.Extent();++i)if(index==-1 || i==index+1){

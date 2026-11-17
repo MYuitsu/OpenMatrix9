@@ -18,6 +18,13 @@ fn limits() -> Limits {
     Limits::default()
 }
 
+fn inspect_ring(geometry: &Geometry) -> ring_builder::SolidReport {
+    #[cfg(feature = "occt-brep")]
+    { om9_kernel::associative::inspect_ring_geometry(geometry, &limits()).unwrap() }
+    #[cfg(not(feature = "occt-brep"))]
+    { ring_builder::inspect_geometry(geometry, &limits()).unwrap() }
+}
+
 fn document() -> Document {
     let mut document = Document::new("ring-family-ui");
     let rail = Entity::new(
@@ -54,7 +61,7 @@ fn applied_report(controller: &Controller, output: ObjectId) -> ring_builder::So
             other.kind().tag()
         ),
     }
-    ring_builder::inspect_geometry(geometry, &limits()).unwrap()
+    inspect_ring(geometry)
 }
 
 #[test]
@@ -205,7 +212,7 @@ fn the_ring_handles_move_the_same_fields_the_panel_edits() {
     let report = controller
         .builder()
         .and_then(|session| session.preview())
-        .map(|preview| ring_builder::inspect_geometry(&preview.geometry, &limits()).unwrap())
+        .map(|preview| inspect_ring(&preview.geometry))
         .unwrap();
     assert!(report.closed && report.volume_mm3 > 0.0);
     // The wall grip cannot drag the section below the family minimum.

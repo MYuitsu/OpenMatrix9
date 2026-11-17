@@ -61,6 +61,45 @@ fn circles(count: usize) -> Controller {
 }
 
 #[test]
+fn text_height_follows_document_units_after_save_and_reopen() {
+    use om9_core::geometry::Unit;
+    use om9_core::transaction::Cancellation;
+    let limits = Limits::default();
+    let mut reference = Controller::new(Document::new("Text millimeters"), limits).unwrap();
+    reference.submit("Text H 10").unwrap();
+    let Geometry::Brep(reference_body) = &reference.document().entities.values().next().unwrap().geometry else { panic!() };
+    let expected = creation::measure(reference_body, &limits).unwrap();
+    assert!((expected.bounds_mm[5] - expected.bounds_mm[2] - 2.).abs() < 1e-5);
+    for (unit, entered) in [(Unit::Centimeter, "1"), (Unit::Inch, "0.3937007874015748")] {
+      for menu in [false, true] {
+        let mut doc = Document::new("Text units"); doc.page_unit = unit;
+        let path = std::env::temp_dir().join(format!("om9-text-unit-{}.om9", uuid::Uuid::new_v4()));
+        om9_archive::Archive::save(&path, &doc, &limits, &Cancellation::default()).unwrap();
+        let mut c = Controller::from_file(&path, limits).unwrap(); std::fs::remove_file(&path).unwrap();
+        let before = c.document().clone();
+        if menu { c.dispatch("OM9-SOLID-008", InvocationOrigin::Menu).unwrap(); c.submit("H").unwrap(); c.submit(entered).unwrap(); }
+        else { c.submit(&format!("Text H {entered}")).unwrap(); }
+        let entity = c.document().entities.values().next().unwrap(); let id = entity.id;
+        let Geometry::Brep(body) = &entity.geometry else { panic!() };
+        let actual = creation::measure(body, &limits).unwrap();
+        assert!(actual.closed && (actual.volume_mm3 - expected.volume_mm3).abs() < 1e-5,
+            "unit {unit:?}, menu {menu}: {actual:?}");
+        for (a, b) in actual.bounds_mm.iter().zip(expected.bounds_mm) { assert!((a-b).abs() < 1e-5); }
+        let after = c.document().clone(); c.undo().unwrap(); assert_eq!(c.document(), &before); c.redo().unwrap(); assert_eq!(c.document(), &after);
+        om9_archive::Archive::save(&path, c.document(), &limits, &Cancellation::default()).unwrap();
+        let reopened = Controller::from_file(&path, limits).unwrap(); std::fs::remove_file(&path).unwrap();
+        let Geometry::Brep(body) = &reopened.document().entities[&id].geometry else { panic!() };
+        let restored = creation::measure(body, &limits).unwrap();
+        assert!((restored.volume_mm3 - expected.volume_mm3).abs() < 1e-5);
+        c.undo().unwrap(); let before = c.document().clone(); let redo = c.coordinator().redo_len();
+        if menu { c.dispatch("OM9-SOLID-008", InvocationOrigin::Menu).unwrap(); c.submit("H").unwrap(); assert!(c.submit("4e37").is_err()); assert_eq!(c.prompt(), "Height"); }
+        else { assert!(c.submit("Text H 4e37").is_err()); }
+        assert_eq!(c.document(), &before); assert_eq!(c.coordinator().redo_len(), redo);
+      }
+    }
+}
+
+#[test]
 fn text_menu_has_content_height_retry_and_cancel() {
     let mut c = controller();
     c.dispatch("OM9-SOLID-008", InvocationOrigin::Menu).unwrap();
@@ -1254,8 +1293,8 @@ fn pipe_full_circle_no_cap_builds_exact_surface_walls() {
         assert!((m.area_mm2 - expected).abs() < 1e-6, "{m:?}");
         if thick {
             let mut signed = [0.0_f64; 2];
-            for [ia, ib, ic, _] in &body.display.triangles {
-                let a = body.display.points[*ia as usize]; let b = body.display.points[*ib as usize]; let c = body.display.points[*ic as usize];
+            for [ia, ib, ic, _] in &body.display().triangles {
+                let a = body.display().points[*ia as usize]; let b = body.display().points[*ib as usize]; let c = body.display().points[*ic as usize];
                 let p = std::array::from_fn::<_, 3, _>(|i| (a[i] + b[i] + c[i]) / 3.0);
                 let u = std::array::from_fn::<_, 3, _>(|i| b[i] - a[i]); let v = std::array::from_fn::<_, 3, _>(|i| c[i] - a[i]);
                 let n = [u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]];
@@ -2354,10 +2393,10 @@ fn pipe_thick_open_has_two_uncapped_walls() {
             assert_eq!(m.faces, 2);
             assert_eq!(m.naked_edges, 4);
             let mut orientation = std::collections::BTreeMap::<u32, f64>::new();
-            for [a, b, c, face] in &brep.display.triangles {
-                let a = brep.display.points[*a as usize];
-                let b = brep.display.points[*b as usize];
-                let c = brep.display.points[*c as usize];
+            for [a, b, c, face] in &brep.display().triangles {
+                let a = brep.display().points[*a as usize];
+                let b = brep.display().points[*b as usize];
+                let c = brep.display().points[*c as usize];
                 let u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
                 let v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
                 let normal = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
@@ -2536,6 +2575,110 @@ fn pipe_global_stages_two_radii_and_builds_measured_frustum() {
         c.undo().unwrap();
         assert_eq!(c.document(), &before);
     }
+}
+
+#[test]
+fn pipe_centimeter_numeric_radius_preview_uses_world_millimeters() {
+    use om9_core::geometry::Unit;
+    let rail = Entity::new("rail", Geometry::Curve(Curve::Line {
+        start: [0., 0., 0.], end: [100., 0., 0.], domain: [0., 1.],
+    }), None);
+    let id = rail.id; let mut doc = Document::new("Pipe preview centimeters");
+    doc.page_unit = Unit::Centimeter; doc.entities.insert(id, rail);
+    let mut c = Controller::new(doc, Limits::default()).unwrap(); let before = c.document().clone();
+    c.select_objects(&[id]).unwrap(); c.submit("Pipe").unwrap(); c.submit("0.2").unwrap();
+    let preview = c.solid_preview([100., 4., 0.]);
+    assert_eq!(preview.len(), 176);
+    assert!((preview[64][0][0] - 25.).abs() < 1e-9);
+    assert!((preview[64][0][1] - 2.3125).abs() < 1e-9);
+    assert_eq!(c.document(), &before); assert_eq!(c.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn pipe_multiple_and_chain_centimeter_radii_are_atomic() {
+    use om9_core::geometry::Unit;
+    for chain in [false, true] {
+        let mut doc = Document::new("Pipe group centimeters"); doc.page_unit = Unit::Centimeter;
+        let paths = if chain {
+            [([0., 0., 0.], [0., 0., 50.]), ([0., 0., 50.], [0., 0., 100.])]
+        } else {
+            [([0., 0., 0.], [0., 0., 100.]), ([20., 0., 0.], [20., 0., 100.])]
+        };
+        let mut ids = Vec::new();
+        for (start, end) in paths {
+            let rail = Entity::new("rail", Geometry::Curve(Curve::Line { start, end, domain: [0., 1.] }), None);
+            ids.push(rail.id); doc.entities.insert(rail.id, rail);
+        }
+        let mut c = Controller::new(doc, Limits::default()).unwrap(); let before = c.document().clone();
+        c.submit(if chain { "PipeChain" } else { "Pipe" }).unwrap();
+        if !chain { c.submit("Multiple").unwrap(); }
+        for id in ids { c.solid_pipe_pick_curve(id).unwrap(); }
+        c.submit("").unwrap(); c.submit("0.2").unwrap(); c.submit("0.2").unwrap(); c.submit("").unwrap();
+        let result_count = c.document().entities.values().filter(|entity| matches!(entity.geometry, Geometry::Brep(_))).count();
+        assert_eq!(result_count, if chain { 1 } else { 2 });
+        let expected = if chain { 400. } else { 800. } * std::f64::consts::PI;
+        assert!((volume(&c) - expected).abs() < 1e-5, "chain {chain}: volume {}", volume(&c));
+        let after = c.document().clone(); c.undo().unwrap(); assert_eq!(c.document(), &before); c.redo().unwrap(); assert_eq!(c.document(), &after);
+    }
+}
+
+#[test]
+fn pipe_numeric_and_point_radii_use_document_units_after_reopen() {
+    use om9_core::geometry::Unit;
+    use om9_core::transaction::Cancellation;
+    let limits = Limits::default();
+    let mut doc = Document::new("Pipe centimeters"); doc.page_unit = Unit::Centimeter;
+    let rail = Entity::new("rail", Geometry::Curve(Curve::Line {
+        start: [0., 0., 0.], end: [0., 0., 100.], domain: [0., 1.],
+    }), None);
+    let id = rail.id; doc.entities.insert(id, rail);
+    let input = std::env::temp_dir().join(format!("om9-pipe-units-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&input, &doc, &limits, &Cancellation::default()).unwrap();
+    for mode in 0..12 {
+        let mut c = Controller::from_file(&input, limits).unwrap();
+        let before = c.document().clone(); c.select_objects(&[id]).unwrap();
+        match mode {
+            0 => c.submit("Pipe 0.2").unwrap(),
+            1 => { c.dispatch("OM9-SOLID-011", InvocationOrigin::Menu).unwrap(); c.submit("0.2").unwrap(); c.submit("0.2").unwrap(); c.submit("").unwrap(); }
+            2 => { c.submit("Pipe").unwrap(); c.submit("0.2").unwrap(); c.accept_world_point([2., 0., 100.]).unwrap(); c.submit("").unwrap(); }
+            3 => c.submit("Pipe 0.2 0.3").unwrap(),
+            4 => { c.submit("Pipe").unwrap(); c.submit("Diameter").unwrap(); c.submit("0.4").unwrap(); c.submit("0.4").unwrap(); c.submit("").unwrap(); }
+            5 => c.submit("Pipe 0.4 0.2 0.4 0.2").unwrap(),
+            6 => { c.submit("Pipe").unwrap(); c.submit("Thick=Yes").unwrap(); for value in ["0.4", "0.2", "0.4", "0.2"] { c.submit(value).unwrap(); } c.submit("").unwrap(); }
+            7 => { c.submit("Pipe").unwrap(); c.accept_world_point([2., 0., 0.]).unwrap(); c.submit("0.2").unwrap(); c.submit("").unwrap(); }
+            8 => { c.submit("Pipe").unwrap(); c.submit("ShapeBlending=Global").unwrap(); c.submit("0.2").unwrap(); c.submit("0.3").unwrap(); c.submit("").unwrap(); }
+            9 => { c.submit("Pipe").unwrap(); c.submit("ShapeBlending=Global").unwrap(); c.submit("0.2").unwrap(); c.submit("0.2").unwrap(); c.accept_world_point([0., 0., 50.]).unwrap(); c.submit("0.3").unwrap(); c.submit("").unwrap(); }
+            10 => c.submit("Pipe 0.2 Cap=Round").unwrap(),
+            _ => { c.submit("Pipe").unwrap(); c.submit("Cap=Round").unwrap(); c.submit("0.2").unwrap(); c.submit("0.2").unwrap(); c.submit("").unwrap(); }
+        }
+        let expected = match mode {
+            3 | 8 | 9 => 100. * std::f64::consts::PI * 19. / 3.,
+            5 | 6 => 1200. * std::f64::consts::PI,
+            10 | 11 => (400. + 32. / 3.) * std::f64::consts::PI,
+            _ => 400. * std::f64::consts::PI,
+        };
+        let result = c.document().entities.values().find(|entity| entity.id != id).unwrap();
+        let result_id = result.id;
+        let Geometry::Brep(brep) = &result.geometry else { panic!() };
+        let measure = creation::measure(brep, &limits).unwrap();
+        assert!(measure.closed && (measure.volume_mm3 - expected).abs() < 1e-5, "mode {mode}: {measure:?}, expected {expected}");
+        let after = c.document().clone(); c.undo().unwrap(); assert_eq!(c.document(), &before); c.redo().unwrap(); assert_eq!(c.document(), &after);
+        let output = std::env::temp_dir().join(format!("om9-pipe-units-output-{}.om9", uuid::Uuid::new_v4()));
+        om9_archive::Archive::save(&output, c.document(), &limits, &Cancellation::default()).unwrap();
+        let reopened = Controller::from_file(&output, limits).unwrap(); std::fs::remove_file(output).unwrap();
+        let Geometry::Brep(body) = &reopened.document().entities[&result_id].geometry else { panic!() };
+        let reopened_volume = creation::measure(body, &limits).unwrap().volume_mm3;
+        assert!((reopened_volume - expected).abs() < 1e-5, "mode {mode}: reopened {reopened_volume}");
+    }
+    for staged in [false, true] {
+        let mut c = Controller::from_file(&input, limits).unwrap();
+        c.submit("Point").unwrap(); c.submit("100,100,100").unwrap(); c.undo().unwrap();
+        c.select_objects(&[id]).unwrap(); let before = c.document().clone(); let redo = c.coordinator().redo_len();
+        if staged { c.submit("Pipe").unwrap(); assert!(c.submit("1e308").is_err()); assert!(c.prompt().to_ascii_lowercase().contains("radius")); }
+        else { assert!(c.submit("Pipe 1e308").is_err()); }
+        assert_eq!(c.document(), &before); assert_eq!(c.coordinator().redo_len(), redo);
+    }
+    std::fs::remove_file(input).unwrap();
 }
 
 #[test]
