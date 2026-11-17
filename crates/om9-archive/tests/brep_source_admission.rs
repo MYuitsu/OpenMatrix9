@@ -25,10 +25,12 @@ fn large_brep_source_round_trips_through_the_archive() {
         triangles: vec![[0, 1, 2, 0]],
         segments: Vec::new(),
         vertices: vec![0, 1, 2],
-        faces: vec![Uuid::new_v4()],
-        edges: Vec::new(),
-        vertex_ids: (0..3).map(|_| Uuid::new_v4()).collect(),
-        face_edges: Vec::new(),
+        topology: om9_core::brep::BrepTopology {
+            faces: vec![Uuid::new_v4()],
+            edges: Vec::new(),
+            vertex_ids: (0..3).map(|_| Uuid::new_v4()).collect(),
+            face_edges: Vec::new(),
+        }.into(),
     };
     let brep = Brep::from_native(source.clone(), display, &Limits::default()).unwrap();
     let mut document = Document::new("BRep source admission");

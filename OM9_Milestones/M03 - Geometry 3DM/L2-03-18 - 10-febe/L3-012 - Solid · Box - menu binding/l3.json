@@ -502,6 +502,16 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "box_modes_memory_recovery_2026_11_12": {
+      "status": "EIGHT_MODE_INPUT_CASES_AND_CENTER_RECLAMATION_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "Four modes with tested text/point fixtures; arbitrary geometry and planes, physical mouse and RAM pressure unverified."
+    },
+    "corner_box_memory_recovery_2026_11_12": {
+      "status": "HEIGHT_INPUTS_AND_MANAGED_RECLAMATION_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "Two base corners with numeric, Height= or viewport point fixtures; other modes, arbitrary planes, physical mouse and RAM pressure unverified."
+    },
     "cube_viewport_2026_10_29": {
       "status": "PARTIAL_CHECKS_PASSED",
       "evidence": "docs/validation/2026-10-29-solid-box-cube-viewport.md",
@@ -571,6 +581,12 @@
       "solid 64 passed, 1 ignored"
     ],
     "remaining": [],
-    "manual_gate": "M03-UI"
+    "manual_gate": "M03-UI",
+    "point_recovery_draft_guard_2026_11_13": {
+      "status": "SCOPED_SIMULATED_PRESSURE_PASS",
+      "scope": "Viewport-point retry refuses an edited draft before Undo removal, keeping document, Undo/Redo and pending state in the Sphere and Box Cube fixtures.",
+      "remaining": "Desktop and physical RAM exhaustion not tested.",
+      "evidence": "docs/validation/2026-11-13-viewport-point-recovery-draft.md"
+    }
   }
 }

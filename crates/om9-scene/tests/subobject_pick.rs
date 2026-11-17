@@ -149,6 +149,56 @@ fn an_edge_pick_returns_both_vertex_indices_and_a_point_on_the_edge() {
 }
 
 #[test]
+fn edge_candidates_include_multiple_edges_of_one_object() {
+    let (coordinator, document, root) = fixture();
+    let scene = scene(&coordinator, document);
+    let hits = scene.pick_edge_candidates(
+        screen_of([-1.0, -1.0, 1.0]), &camera(), viewport(), 6.0, PickIntent::Select,
+    ).unwrap();
+    assert!(hits.iter().filter(|hit| hit.root == root).count() >= 2,
+        "multiple edges meet at the corner: {hits:?}");
+}
+
+#[test]
+fn edge_candidates_refuse_when_output_limit_is_exceeded() {
+    let limits = Limits { max_outputs: 1, ..Limits::default() };
+    let mut document = Document::new("bounded edge picking");
+    let entity = Entity::new("cube", Geometry::Mesh(cube()), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let document_id = document.id;
+    let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+    let scene = scene(&coordinator, document_id);
+    let result = scene.pick_edge_candidates(
+        screen_of([-1., -1., 1.]), &camera(), viewport(), 6., PickIntent::Select,
+    );
+    assert!(matches!(result, Err(om9_core::Error::Budget("edge pick candidates"))));
+    assert!(scene.pick_kind(screen_of([-1., -1., 1.]), &camera(), viewport(), 6.,
+        PickIntent::Select, PickKind::Edge).unwrap().is_some());
+}
+
+#[test]
+fn coincident_brep_segments_keep_both_topology_candidates() {
+    use om9_core::brep::{Brep, BrepDisplay, BrepTopology};
+    let ids = [uuid::Uuid::new_v4(), uuid::Uuid::new_v4()];
+    let display = BrepDisplay {
+        source_sha256: [0; 32], deflection_mm: 0.01,
+        points: vec![[-1., 0., 0.], [1., 0., 0.], [0., 1., 0.]], triangles: vec![[0, 1, 2, 0]],
+        segments: vec![[0, 1, 0], [0, 1, 1]], vertices: vec![],
+        topology: BrepTopology { faces: vec![uuid::Uuid::new_v4()], edges: ids.to_vec(), vertex_ids: vec![], face_edges: vec![] }.into(),
+    };
+    let shape = Brep::from_native("CASCADE Topology fixture".into(), display, &Limits::default()).unwrap();
+    let mut document = Document::new("coincident edges");
+    let entity = Entity::new("brep", Geometry::Brep(shape), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let document_id = document.id;
+    let coordinator = TransactionCoordinator::new(World::new(vec![document], &Limits::default()).unwrap(), Limits::default()).unwrap();
+    let hits = scene(&coordinator, document_id).pick_edge_candidates(
+        screen_of([0., 0., 0.]), &camera(), viewport(), 6., PickIntent::Select,
+    ).unwrap();
+    for id in ids { assert!(hits.iter().any(|hit| hit.subset == Subelement::BrepEdge(id))); }
+}
+
+#[test]
 fn a_face_pick_returns_the_face_and_never_a_vertex() {
     let (coordinator, document, _root) = fixture();
     let scene = scene(&coordinator, document);

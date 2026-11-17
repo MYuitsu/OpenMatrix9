@@ -426,6 +426,11 @@
     "rust_test_name": "m03_01_11_001"
   },
   "runtime_implementation": {
+    "compound_transform_preservation_2026_11_12": {
+      "status": "TWO_DISJOINT_SOLID_FIXTURES_PASSED",
+      "evidence": "docs/validation/2026-11-12-transform-compound-preservation.md",
+      "limitations": "Mixed compounds, nested topology, imports, native peak and desktop remain unverified. This does not fix the nonuniform-affine Boolean reproducer."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED",
     "target": "standalone Rust OM9, Windows x64",
@@ -445,7 +450,8 @@
       "implementation/fixtures/M03/OM9-L3-01-11-001/negative.json",
       "implementation/evidence/M03/OM9-L3-01-11-001/OM9-L4-01-11-001-03.focused-test.log",
       "implementation/evidence/M03/OM9-L3-01-11-001/OM9-L4-01-11-001-04.regression.log",
-      "implementation/evidence/M03/OM9-L3-01-11-001/OM9-L4-01-11-001-05.ui-review.json"
+      "implementation/evidence/M03/OM9-L3-01-11-001/OM9-L4-01-11-001-05.ui-review.json",
+      "docs/validation/2026-11-12-boolean-two-placed-source.md"
     ],
     "tests": [
       "m03_01_11_001: passed",

@@ -678,10 +678,12 @@ fn square_brep() -> Brep {
         triangles: vec![[0, 1, 2, 0], [0, 2, 3, 0]],
         segments: vec![[0, 1, 0], [1, 2, 1], [2, 3, 2], [3, 0, 3]],
         vertices: vec![0, 1, 2, 3],
-        faces: vec![face],
-        edges,
-        vertex_ids: vertices,
-        face_edges: vec![[0, 0], [0, 1], [0, 2], [0, 3]],
+        topology: om9_core::brep::BrepTopology {
+            faces: vec![face],
+            edges,
+            vertex_ids: vertices,
+            face_edges: vec![[0, 0], [0, 1], [0, 2], [0, 3]],
+        }.into(),
     };
     Brep::from_native(
         "CASCADE Topology V3, (c) Open Cascade".to_string(),
@@ -699,7 +701,7 @@ fn brep_boundary_and_edge_duplication_follow_the_display_snapshot() {
     assert_eq!(boundary.len(), 4);
     // Segment 3 is the vertical edge (0,10) -> (0,0); its display chain is ordered from
     // the degree-one endpoint at the origin.
-    let edge = brep.display.edges[3];
+    let edge = brep.display().edges[3];
     let curve = duplicate_brep_edge(&brep, edge, &limits).unwrap();
     let [start, end] = om9_core::curve_ops::curve_endpoints(&curve, &limits).unwrap();
     let length = om9_core::curve_ops::arc_length(&curve, &limits).unwrap();

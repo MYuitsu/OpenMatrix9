@@ -412,6 +412,7 @@
   "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
   "acceptance_category": "THREEDM",
   "runtime_implementation": {
+    "representation_handoff_2026_11_14": "Partial and compile-only: editable B-rep conversion retains its display with an independent reservation for candidate scene preflight; transaction-owned cleanup handles failed preparation and commit. Cold restore and runtime behavior remain unverified. Evidence: docs/validation/2026-11-14-canonical-representation-transfer.md#native-source-ownership-in-progress",
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED",
     "target": "standalone Rust OM9, Windows x64",

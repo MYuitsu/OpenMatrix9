@@ -17,7 +17,7 @@ use om9_core::{
     history::{HistoryGraph, Recipe, ReplayEnvironment, Tolerance},
     identity::{HistoryId, ObjectId},
     model::{Document, Entity},
-    producers::{SnapshotTopology, TopologyProvider, recompute_registered},
+    producers::{TopologyProvider, recompute_registered},
     request::{Selection, SourceBinding, Value},
 };
 use om9_kernel::{
@@ -204,23 +204,19 @@ fn the_occt_registry_sweeps_a_real_brep_and_publishes_its_topology() {
         .iter()
         .map(|subshape| subshape.name.as_str())
         .collect();
-    assert!(names.iter().any(|name| name.starts_with("edge:")));
-    assert!(names.iter().any(|name| name.starts_with("face:")));
-    assert!(names.iter().any(|name| name.starts_with("vertex:")));
-    // The OCCT provider and the generic snapshot policy agree on the OCCT snapshot.
+    assert!(names.iter().any(|name| name.starts_with("source:edge:")));
+    assert!(names.iter().any(|name| name.starts_with("source:face:")));
+    assert!(names.iter().any(|name| name.starts_with("source:vertex:")));
+    // Source naming is independent of the viewport profile.
     let via_occt = OcctTopology
         .subshapes(
             &chain.document.entities[&chain.out_sweep].geometry,
             &limits(),
         )
         .unwrap();
-    let via_snapshot = SnapshotTopology
-        .snapshot_subshapes(
-            &chain.document.entities[&chain.out_sweep].geometry,
-            &limits(),
-        )
-        .unwrap();
-    assert_eq!(via_occt, via_snapshot);
+    let finer = om9_kernel::brep::read_brep(brep.source(), 0.02, &limits()).unwrap();
+    let via_remesh = OcctTopology.subshapes(&Geometry::Brep(finer), &limits()).unwrap();
+    assert_eq!(via_occt, via_remesh);
 }
 
 #[test]
@@ -245,6 +241,16 @@ fn an_occt_sweep_reference_resolves_after_a_profile_edit() {
         .iter()
         .find(|subshape| subshape.kind == SubshapeKind::Edge)
         .expect("the B-Rep publishes edges");
+    let legacy = bind_reference(&mut chain.document.history, &limits(), chain.sweep, chain.out_sweep,
+        "edge:0", ReferenceAnchor { kind: SubshapeKind::Edge, fingerprint: edge.signature, tolerance_mm: 100. }).unwrap();
+    assert!(matches!(resolve_semantic_reference(&chain.document.history, &chain.document, &limits(), legacy, set),
+        Err(om9_core::Error::Missing("semantic subshape"))));
+    chain.document.history.references.remove(&legacy);
+    let broad = bind_reference(&mut chain.document.history, &limits(), chain.sweep, chain.out_sweep,
+        edge.name.clone(), ReferenceAnchor { kind: SubshapeKind::Edge, fingerprint: edge.signature, tolerance_mm: 100. }).unwrap();
+    assert!(matches!(resolve_semantic_reference(&chain.document.history, &chain.document, &limits(), broad, set),
+        Err(om9_core::Error::Invalid("ambiguous source subshape signature"))));
+    chain.document.history.references.remove(&broad);
     let reference = bind_reference(
         &mut chain.document.history,
         &limits(),
@@ -254,12 +260,11 @@ fn an_occt_sweep_reference_resolves_after_a_profile_edit() {
         ReferenceAnchor {
             kind: SubshapeKind::Edge,
             fingerprint: edge.signature,
-            tolerance_mm: 100.0,
+            tolerance_mm: 0.0001,
         },
     )
     .unwrap();
-    // A profile edit changes the swept B-Rep; the reference must resolve against the new
-    // snapshot (a wide tolerance makes this an allowed edit).
+    // A small profile edit changes the swept B-Rep within the unambiguous tolerance.
     chain
         .document
         .history
@@ -267,7 +272,7 @@ fn an_occt_sweep_reference_resolves_after_a_profile_edit() {
         .get_mut(&chain.profile)
         .unwrap()
         .parameters
-        .insert("width_mm".into(), length(3.0));
+        .insert("width_mm".into(), length(2.000001));
     recompute_registered(&mut chain.document, &mut cache, chain.profile, &registry).unwrap();
     let outcome =
         recompute_registered(&mut chain.document, &mut cache, chain.sweep, &registry).unwrap();
@@ -287,4 +292,44 @@ fn an_occt_sweep_reference_resolves_after_a_profile_edit() {
     )
     .unwrap();
     assert_eq!(resolved.name, edge.name);
+}
+
+#[test]
+fn a_legacy_display_role_refuses_rebuild_without_replacing_output() {
+    let mut chain = chain(2.0);
+    let registry = history_registry().unwrap();
+    let mut cache = RecomputeCache::default();
+    let mut outcome = None;
+    for id in [chain.rail, chain.profile, chain.sweep] {
+        outcome = Some(recompute_registered(&mut chain.document, &mut cache, id, &registry).unwrap());
+    }
+    let Some(RecomputeOutcome::Rebuilt { subshapes, .. }) = outcome else { panic!("initial sweep"); };
+    let edge = subshapes[0].subshapes.iter().find(|shape| shape.kind == SubshapeKind::Edge).unwrap();
+    bind_reference(&mut chain.document.history, &limits(), chain.sweep, chain.out_sweep, "edge:0",
+        ReferenceAnchor { kind: SubshapeKind::Edge, fingerprint: edge.signature, tolerance_mm: 100. }).unwrap();
+    let previous = chain.document.entities[&chain.out_sweep].geometry.clone();
+    chain.document.history.recipes.get_mut(&chain.profile).unwrap().parameters.insert("width_mm".into(), length(3.0));
+    recompute_registered(&mut chain.document, &mut cache, chain.profile, &registry).unwrap();
+    let failed = recompute_registered(&mut chain.document, &mut cache, chain.sweep, &registry).unwrap();
+    assert!(matches!(failed, RecomputeOutcome::Failed { previous_retained: true, .. }));
+    assert_eq!(chain.document.entities[&chain.out_sweep].geometry, previous);
+}
+
+#[test]
+fn history_output_hash_survives_attested_occt_remesh() {
+    let limits = limits();
+    let seed = om9_kernel::brep::sphere_brep(20., 0.8, &limits).unwrap();
+    let original = om9_kernel::brep::capture_source_topology(seed.source(), 0.8, 0.5, &limits, |_, _| Ok(())).unwrap();
+    let (original, proof) = original.into_parts();
+    let finer = om9_kernel::brep::capture_source_topology(original.source(), 0.02, 0.2, &limits, |_, _| Ok(())).unwrap()
+        .into_rebound_for_brep(&original, &proof, &limits, |_, _| Ok(())).unwrap();
+    let (finer, _) = finer.into_parts();
+    assert_ne!(original.display().triangles.len(), finer.display().triangles.len());
+    let mut document = Document::new("attested remesh hash");
+    let entity = Entity::new("sphere", Geometry::Brep(original), None);
+    let id = entity.id;
+    document.entities.insert(id, entity);
+    let before = om9_core::associative::output_hash(&document, &[id]).unwrap();
+    document.entities.get_mut(&id).unwrap().geometry = Geometry::Brep(finer);
+    assert_eq!(before, om9_core::associative::output_hash(&document, &[id]).unwrap());
 }

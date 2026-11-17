@@ -184,6 +184,12 @@
     "OM9-L4-01-12-003-05"
   ],
   "runtime_implementation": {
+    "v5_container_partial_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Current v5 container writes non-BRep documents; normal Open dispatches v4 migration candidates and v5 metadata.",
+      "remaining": "BRep v5 save, durable topology binding, source-only scene rebuild, opaque native payload disposition and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#v5-container-and-versioned-open-in-progress"
+    },
     "date": "2026-10-19",
     "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
     "target": "standalone Rust OM9",

@@ -11,6 +11,7 @@
 //! duplication); baking creates one independent body per placement.
 //!
 //! Units are millimetres, angles are radians.
+use om9_core::brep::BrepSourceAccess;
 use crate::{
     brep::{snapshot_budget, snapshot_via},
     creation::{CreationError, PathFrame, polyline_frames},
@@ -33,6 +34,7 @@ pub const MAX_PATTERN_INSTANCES: usize = 10_000;
 type NativeSink = unsafe extern "C" fn(*mut c_void, *const crate::brep::Snapshot) -> c_int;
 
 unsafe extern "C" {
+    fn om9_occt_is_exact_rigid_transform(matrix: *const f64) -> c_int;
     fn om9_occt_transform_brep(
         source: *const u8,
         length: usize,
@@ -46,6 +48,13 @@ unsafe extern "C" {
         message: *mut std::ffi::c_char,
         capacity: c_int,
     ) -> c_int;
+}
+
+/// True only when OCCT's rigid transform reproduces all supplied coefficients exactly.
+pub fn is_exact_occt_rigid(matrix: &Transform) -> Result<bool, TransformError> {
+    checked_matrix(matrix)?;
+    // SAFETY: the validated matrix remains alive and contains 16 contiguous f64 values.
+    Ok(unsafe { om9_occt_is_exact_rigid_transform(matrix.0.as_ptr().cast()) == 1 })
 }
 
 fn map_core(error: om9_core::Error) -> TransformError {
@@ -190,7 +199,7 @@ pub fn handedness(matrix: &Transform) -> Result<f64, TransformError> {
 
 /// Apply one admissible affine matrix to a B-Rep, returning a new body. The input is immutable.
 pub fn transform_brep(
-    brep: &Brep,
+    brep: &dyn BrepSourceAccess,
     matrix: &Transform,
     deflection_mm: f64,
     limits: &Limits,
@@ -219,6 +228,51 @@ pub fn transform_brep(
         }
     })
     .map_err(TransformError::from)
+}
+
+/// Build a transformed candidate from a source lease without retaining its
+/// document or display. The caller owns the admitted result until publication.
+/// Cancellation is observed during Rust copying; an active OCCT call cannot
+/// itself be interrupted.
+pub fn transform_captured_source_cancellable(
+    source: &om9_core::transaction::CapturedBrepSource,
+    matrix: &Transform,
+    deflection_mm: f64,
+    limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Brep> {
+    use om9_core::Error;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let deflection = checked_deflection(deflection_mm).map_err(|e| Error::Io(e.to_string()))?;
+    checked_matrix(matrix).map_err(|e| Error::Io(e.to_string()))?;
+    let held = source.validate_canonical_admitted(limits, |live, pending| {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        admit(live, pending)
+    })?;
+    let remaining = limits.remaining_after(held)?;
+    let budget = snapshot_budget(&remaining);
+    let mut refusal = None;
+    let result = crate::brep::snapshot_via_with_admission(deflection, &remaining, Some(&mut |live, pending| {
+        let result = if cancel.is_canceled() { Err(Error::Canceled) } else {
+            held.bytes.checked_add(live).ok_or(Error::Overflow("transform output admission"))
+                .and_then(|total| admit(total, pending))
+        };
+        if let Err(error) = &result { refusal = Some(error.clone()); }
+        result
+    }), |sink, context, message, capacity| {
+        // SAFETY: source, matrix and callback remain alive for the native call.
+        unsafe { om9_occt_transform_brep(source.source().as_ptr(), source.source().len(),
+            matrix.0.as_ptr().cast(), deflection, budget.points, budget.nodes, budget.bytes,
+            sink, context, message, capacity) }
+    });
+    let result = result.map_err(|error| refusal.unwrap_or_else(|| Error::Io(format!("transform: {error}"))))?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    let mut retained = held;
+    retained.add(result.storage_usage(&remaining)?, limits)?;
+    admit(retained.bytes, 0)?;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    Ok(result)
 }
 
 /* ------------------------- placement frames ------------------------- */
@@ -741,7 +795,7 @@ pub enum PatternMode {
 /// An instanced pattern: one definition and the placements that reference it.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Pattern {
-    pub definition: Brep,
+    pub definition: om9_core::brep::CanonicalBrep,
     pub placements: Vec<Transform>,
 }
 
@@ -771,7 +825,7 @@ impl PatternResult {
 /// placement. Every placement is validated before any body is transformed, so a bad placement
 /// never leaves a partial result.
 pub fn apply_pattern(
-    definition: &Brep,
+    definition: &dyn BrepSourceAccess,
     placements: &[Transform],
     mode: PatternMode,
     deflection_mm: f64,
@@ -795,7 +849,7 @@ pub fn apply_pattern(
         .map_err(|error| CreationError::Invalid(error.to_string()))?;
     match mode {
         PatternMode::Instance => Ok(PatternResult::Instanced(Pattern {
-            definition: definition.clone(),
+            definition: definition.to_canonical(),
             placements: placements.to_vec(),
         })),
         PatternMode::Bake => {

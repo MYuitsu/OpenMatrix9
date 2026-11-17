@@ -62,7 +62,7 @@ impl MatrixApp {
         let revision = self.controller.document().revision;
         self.selected_grips = self.controller.selected_grips().into_iter().map(|h| (h, revision)).collect();
         let Some(handle) = self.grip_at(view, viewport, screen) else {
-            if !additive {
+            if !additive && (self.controller.is_running() || self.controller.session_wants_point()) {
                 self.selected_grips.clear();
                 self.controller.select_grips(&[], crate::session::GripPick::Replace);
             }
@@ -280,10 +280,8 @@ impl MatrixApp {
         // The release frame counts too: the grip goes where the pointer (or its snap) is let
         // go, not where the previous frame left it (a snap is found a frame behind the pointer).
         let released = response.drag_stopped_by(egui::PointerButton::Primary);
-        if (response.dragged_by(egui::PointerButton::Primary) || released)
-            && let Some(pointer) = response
-                .interact_pointer_pos()
-                .or_else(|| ui.input(|input| input.pointer.latest_pos()))
+        if (response.is_pointer_button_down_on() || released)
+            && let Some(pointer) = response.interact_pointer_pos().or_else(|| ui.input(|input| input.pointer.latest_pos()))
         {
             let world = view
                 .camera
@@ -302,7 +300,10 @@ impl MatrixApp {
                     let edited = candidate.root.is_some_and(|root| {
                         root == drag.handle.object || drag.group.iter().any(|grip| grip.object == root)
                     });
-                    !(along && edited)
+                    self.hover_view == Some(drag.view)
+                        && (candidate.screen[0] - f64::from(pointer.x)).hypot(candidate.screen[1] - f64::from(pointer.y))
+                            <= self.snap_state.settings.radius_px
+                        && !(along && edited)
                 });
                 drag.current = snap.map_or_else(
                     || std::array::from_fn(|i| drag.handle.point[i] + (world[i] - drag.press_world[i])),

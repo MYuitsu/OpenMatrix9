@@ -693,8 +693,8 @@ fn m03_01_09_regression_every_operation_is_a_valid_exact_brep() {
     .expect("box");
     let reopened = read_brep(boxed.source(), deflection(), &limits).expect("reopen");
     assert_eq!(
-        reopened.display.faces.len(),
-        boxed.display.faces.len(),
+        reopened.display().faces.len(),
+        boxed.display().faces.len(),
         "topology must survive the canonical source round trip"
     );
     let profile = rectangle(10.0, 20.0, 0.0);

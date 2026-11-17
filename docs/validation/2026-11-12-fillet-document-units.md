@@ -1,0 +1,9 @@
+# Fillet Edge radius follows document units — 2026-11-12
+
+For a saved/reopened 40 × 50 × 60 mm box in a centimetre document, `FilletEdge 0 0.1` previously used 0.1 mm rather than 1 mm. The measured result volume was 119999.871238898 mm³ rather than the separately computed 1 mm fillet volume of 119987.123889804 mm³; the new regression failed before the fix.
+
+Direct numeric radius and the `NextRadius`, `CurrentRadius` and `SetAll` entry paths now convert document lengths to millimetres before storing or applying the radius. Fillet handles and kernel geometry continue to use millimetres internally; command-option values and the viewport radius label show the document unit. Copying a handle converts its internal radius to the input unit before replaying the edit, avoiding a second conversion. No edge identity or topology verification behavior changed.
+
+The saved/reopened box test checks seven routes: direct CMD, direct menu input, picked edge, SetAll, both endpoint edits, copying a handle to the other endpoint, and adding an interior handle. Each checks geometry volume against a separate 1 mm or 2 mm OCCT result, full document Undo/Redo, and the saved/reopened result. It checks `NextRadius` and `CurrentRadius` command labels, preserved preview after overflowing SetAll, and document/Redo preservation on overflowing direct and staged entry. Fillet-filtered library, egui viewport and command-option suites each passed (10, 5 and 5 tests respectively); the Solid input group passed 99 tests. This does not establish explicit unit suffix support, every possible geometry, physical desktop display or native peak memory.
+
+The debug executable built successfully in the existing `L:/om9-target` directory with `-j 2`; the public source audit reported no errors. No physical desktop action was performed for this change.

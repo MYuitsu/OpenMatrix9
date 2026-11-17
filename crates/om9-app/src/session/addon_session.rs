@@ -304,6 +304,22 @@ fn to_geometry(g: &Geo, k: f64) -> Result<(Geometry, Option<Value>, String)> {
     })
 }
 
+#[cfg(feature = "occt-brep")]
+thread_local! {
+    /// B-Reps made for the objects being committed: their display meshes are staged with the
+    /// transaction (the document keeps only the canonical source).
+    static NEW_BREPS: std::cell::RefCell<Vec<om9_core::brep::Brep>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// The document geometry of a B-Rep made by the kernel; the B-Rep waits in [`NEW_BREPS`].
+#[cfg(feature = "occt-brep")]
+fn new_brep(brep: om9_core::brep::Brep) -> om9_core::brep::CanonicalBrep {
+    use om9_core::brep::BrepSourceAccess;
+    let source = brep.to_canonical();
+    NEW_BREPS.with(|c| c.borrow_mut().push(brep));
+    source
+}
+
 /// A trimmed surface from an add-on: an exact face made by the B-Rep kernel (the loops'
 /// curves are NURBS lying on the surface). A build without the kernel keeps the add-on's
 /// display mesh (or the untrimmed surface).
@@ -348,7 +364,7 @@ fn trimmed_geometry(
             &limits,
         )
         .map_err(|e| Error::Io(format!("trimmed surface: {e}")))?;
-        Ok((Geometry::Brep(brep), None, "Surface".into()))
+        Ok((Geometry::Brep(new_brep(brep)), None, "Surface".into()))
     }
     #[cfg(not(feature = "occt-brep"))]
     {
@@ -1291,6 +1307,8 @@ impl Controller {
     ) -> Result<usize> {
         let k = self.document().page_unit.factor();
         let layer = self.document().current_layer;
+        #[cfg(feature = "occt-brep")]
+        NEW_BREPS.with(|c| c.borrow_mut().clear());
         let mut mutations = Vec::new();
         let mut created_ids = Vec::new();
         for g in &reply.create {
@@ -1448,7 +1466,11 @@ impl Controller {
         let undo_label = crate::icons::icon_name(code).unwrap_or(label).to_owned();
         // One new object (Line, Circle …): add it to the scene incrementally, as OM9's own
         // commands do, instead of rebuilding the scene of the whole document.
-        if let [Mutation::Insert { entity, .. }] = mutations.as_slice() {
+        #[cfg(feature = "occt-brep")]
+        let mut breps: Vec<om9_core::brep::Brep> = NEW_BREPS.with(|c| std::mem::take(&mut *c.borrow_mut()));
+        #[cfg(not(feature = "occt-brep"))]
+        let breps: Vec<()> = Vec::new();
+        if let ([Mutation::Insert { entity, .. }], true) = (mutations.as_slice(), breps.is_empty()) {
             let increment = scene.update_held_usage(Some(entity))?;
             held.add(increment, self.coordinator.limits())?;
             let added = entity.id;
@@ -1461,9 +1483,15 @@ impl Controller {
             }
             return Ok(count);
         }
-        let prepared = self
+        #[allow(unused_mut)]
+        let mut prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new(&undo_label, mutations), held)?;
+        // The kernel's B-Reps bring their display meshes with the transaction.
+        #[cfg(feature = "occt-brep")]
+        if !breps.is_empty() {
+            self.stage_builder_preview_representations(&mut prepared, &mut breps, held)?;
+        }
         let receipt = self.commit_with_candidate_scene(prepared, held)?;
         if receipt.published {
             self.sync_published(om9_core::changes::ChangeCause::Edit);

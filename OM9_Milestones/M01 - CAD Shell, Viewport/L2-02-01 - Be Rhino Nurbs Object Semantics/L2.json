@@ -90,7 +90,15 @@
       "Portable solid classification refuses open/coincident topology but geometric face-face self-intersection requires OCCT.",
       "Extrusion conversion supports closed planar polyline profiles only; NURBS-profile extrusion needs a kernel-backed path.",
       "Global M00 execution gate is NOT READY (pre-existing); this work imported no QymCAD code or new upstream source."
-    ]
+    ],
+    "surface_buffer_allocation_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "SURFACE_ISOCURVE_BUFFERS_FALLIBLE",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "scope": "Basis rows, isocurve poles, weights and knot copy use fallible allocation; impossible layout reports overflow and allocator refusal reports bytes. Core 377 passed 1 ignored; curve_surface_ops 31; Wireframe 55 passed 5 ignored, Isocurve 11, DupBorder 17, Curve menu 6, UI recovery 46.",
+      "skill_update": "User approved recording the ExtractWireframe scope. No ExtractIsocurve skill update per prior user choice.",
+      "remaining": "No end-to-end allocator-failure injection in desktop, physical RAM exhaustion, all native allocations, or complete Plan A. B1-B3 deferred."
+    }
   },
   "children_l3": [
     {

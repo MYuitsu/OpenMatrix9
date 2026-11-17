@@ -98,6 +98,35 @@ fn trimmed_surface_semantics_survive_save_and_reopen_without_becoming_untrimmed(
 }
 
 #[test]
+fn larger_trim_source_roundtrips_under_default_limits() {
+    let limits=Limits::default();let n=28usize;
+    let mut poles=Vec::new();for u in 0..n {for v in 0..n {poles.push([10.*u as f64/(n-1) as f64,10.*v as f64/(n-1) as f64,0.]);}}
+    let mut knots=vec![0.];knots.extend((0..n).map(|i|i as f64/(n-1) as f64));knots.push(1.);
+    let surface=om9_core::geometry::NurbsSurface {degree:[1,1],size:[n,n],poles,weights:vec![1.;n*n],knots:[knots.clone(),knots],domain:[[0.,1.],[0.,1.]],periodic:[false,false],reversed:false};
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.2,0.2],[0.8,0.2],[0.8,0.8],[0.2,0.8]],
+        inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("large source",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    assert!(entity.extensions[om9_core::model::TRIM_SURFACE_EXTENSION_SLOT].payload.len()>16*1024);
+    let id=entity.id;let mut document=Document::new("large trim");document.entities.insert(id,entity);
+    let bytes=Archive::encode(&document,&limits).unwrap();let reopened=Archive::decode(&bytes,&limits).unwrap();
+    assert_eq!(trimmed_surface_of(&reopened.entities[&id],&limits).unwrap().unwrap(),trim);
+}
+
+#[test]
+fn mismatched_trim_is_not_saved_over_an_existing_file() {
+    let limits=Limits::default();let trim=trimmed();
+    let mut entity=Entity::new("stale trim",Geometry::Surface(trim.underlying.clone()),None);
+    set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    let Geometry::Surface(surface)=&mut entity.geometry else {unreachable!()};surface.poles[3][2]=1.;
+    let mut document=Document::new("mismatched trim");document.entities.insert(entity.id,entity);
+    let folder=std::env::temp_dir().join(format!("om9-stale-trim-{}",uuid::Uuid::new_v4()));
+    std::fs::create_dir(&folder).unwrap();let path=folder.join("drawing.om9");std::fs::write(&path,b"existing file").unwrap();
+    assert!(matches!(Archive::save(&path,&document,&limits,&Cancellation::default()),Err(Error::Invalid("trimmed surface underlying mismatch"))));
+    assert_eq!(std::fs::read(&path).unwrap(),b"existing file");
+    std::fs::remove_file(path).unwrap();std::fs::remove_dir(folder).unwrap();
+}
+
+#[test]
 fn extrusion_semantics_survive_save_and_reopen_and_still_convert() {
     let limits = Limits::default();
     let extrusion = extrusion();

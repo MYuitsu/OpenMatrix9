@@ -321,6 +321,7 @@
     "applies_to": "L3 files of this owner that have a recorded SDK slice"
   },
   "runtime_implementation": {
+    "brep_world_bounds_2026_11_06": {"state":"TARGETED_AUTOMATED_TESTS_PASSED_DESKTOP_PENDING","evidence":"docs/validation/2026-11-06-brep-source-world-bounds.md","limitations":"Fixture-specific; complex native B-rep, native memory and desktop remain open."},
     "l2_03_20_measure_2026_10_26": {
       "date": "2026-10-26",
       "state": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",

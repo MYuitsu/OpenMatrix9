@@ -188,8 +188,8 @@ fn retained_brep_export_is_independent_of_its_display_mesh() {
     let mut partial = full.clone();
     // An intentionally incomplete but valid display cache is a stronger
     // separation probe than comparing two similarly tessellated caches.
-    partial.display.faces.truncate(1);
-    partial.display.corner_uvs.clear();
+    std::sync::Arc::make_mut(&mut partial.display).faces.truncate(1);
+    std::sync::Arc::make_mut(&mut partial.display).corner_uvs.clear();
     let mut outputs = Vec::new();
     for (name, native) in [("native-display-full", full), ("native-display-partial", partial)] {
         let mut document = Document::with_template_tolerance(name);
@@ -215,7 +215,7 @@ fn brep_export_is_independent_of_display_deflection() {
     let limits = Limits::default();
     let coarse = om9_kernel::brep::sphere_brep(5.0, 0.1, &limits).unwrap();
     let finer = om9_kernel::brep::read_brep(coarse.source(), 0.02, &limits).unwrap();
-    assert_ne!(coarse.display.deflection_mm, finer.display.deflection_mm);
+    assert_ne!(coarse.display().deflection_mm, finer.display().deflection_mm);
     let mut outputs = Vec::new();
     for (name, brep) in [("display-coarse", coarse), ("display-finer", finer)] {
         let mut document = Document::with_template_tolerance(name);
@@ -894,7 +894,7 @@ fn retained_native_cavity_preserves_its_distinct_boundary() {
     assert!(om9_kernel::brep::from_3dm_source(b"not a 3dm payload", 1e-8, &limits).is_err());
     let measures = creation::measure(&imported, &limits).unwrap();
     assert_eq!((measures.solids, measures.shells), (1, 2), "retained source must retain both shells");
-    assert!(imported.display.points.iter().any(|point| point.iter().all(|x| (*x - gap).abs() < 1e-10)),
+    assert!(imported.display().points.iter().any(|point| point.iter().all(|x| (*x - gap).abs() < 1e-10)),
         "converted retained source must retain the cavity corner before STL export");
     let mut document = Document::with_template_tolerance("retained thin cavity");
     document.tolerance.as_mut().unwrap().absolute_mm = 1e-8;
@@ -1332,13 +1332,16 @@ fn background_job_exports_capture_and_releases_reservation() {
     let mut controller = controller();
     controller.submit("Box 10 10 10").unwrap();
     let id = only(&controller);
-    controller.select_objects(&[id]).unwrap();
+    controller.submit("Point").unwrap();
+    controller.submit("2,3,4").unwrap();
+    let point = *controller.document().entities.keys().find(|key| **key != id).unwrap();
+    controller.select_objects(&[id, point]).unwrap();
     let capture = controller.capture_stl_selected().unwrap();
     let epoch = capture.source_epoch();
     let reservation = controller.coordinator().reserve_external_memory(MemoryClass::Export, 64 * 1024 * 1024, Some((8 * 1024 * 1024 * 1024, 2 * 1024 * 1024 * 1024))).unwrap();
     let target = path("background-capture");
     let mut job = om9_app::session::StlExportJob::start(capture, target.clone(), om9_app::session::StlExportProfile { linear_tolerance_mm: 0.001, angular_tolerance_rad: 0.3 }, reservation).unwrap();
-    controller.delete_objects(&[id]).unwrap();
+    controller.delete_objects(&[id, point]).unwrap();
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
     let result = loop {
         if let Some(result) = job.try_result() { break result; }
@@ -1348,6 +1351,8 @@ fn background_job_exports_capture_and_releases_reservation() {
     let receipt = result.unwrap();
     assert_eq!(receipt.source_epoch, epoch);
     assert_eq!(receipt.triangles, 12);
+    assert_eq!(receipt.skipped.len(), 1);
+    assert!(receipt.skipped[0].contains("Point"), "{:?}", receipt.skipped);
     assert_eq!(bounds(&triangles(&std::fs::read(&target).unwrap())).1, [10., 10., 10.]);
     assert!(job.try_result().is_none());
     assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::Export), 0);
@@ -1691,6 +1696,242 @@ fn point_to_stl_triangle_distance(p: [f64; 3], triangle: [[f64; 3]; 3]) -> f64 {
 }
 
 #[test]
+fn export_reopened_trimmed_plane_respects_outer_boundary_and_hole() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.2,0.2],[0.8,0.2],[0.8,0.8],[0.2,0.8]],
+        inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("trimmed",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut doc=Document::with_template_tolerance("trimmed STL");doc.entities.insert(id,entity);
+    let archive=path("trim-source").with_extension("om9");
+    om9_archive::Archive::save(&archive,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut controller=Controller::from_file(&archive,limits).unwrap();std::fs::remove_file(archive).unwrap();
+    controller.select_objects(&[id]).unwrap();let target=path("trim-source");controller.export_stl_selected(&target).unwrap();
+    let output=triangles(&std::fs::read(&target).unwrap());std::fs::remove_file(target).unwrap();
+    let area:f64=output.iter().map(|t| {
+        let a=t[0];let b=t[1];let c=t[2];
+        (((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])).abs() as f64)*0.5
+    }).sum();
+    assert!((area-32.).abs()<1e-4,"expected trimmed area 32, got {area}");
+}
+
+#[test]
+fn export_reopened_many_edge_trimmed_plane_keeps_hole_and_redo() {
+    use om9_app::session::StlExportProfile;
+    use om9_core::{budget::memory::MemoryClass,rhino_semantics::{set_trimmed_surface,TrimmedSurface}};
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+    for count in [129,708,1020,1021] {
+    let outer:Vec<_>=(0..count).map(|i|{let a=std::f64::consts::TAU*i as f64/count as f64;[0.5+0.4*a.cos(),0.5+0.4*a.sin()]}).collect();
+    let area=outer.iter().enumerate().map(|(i,a)|{let b=outer[(i+1)%outer.len()];a[0]*b[1]-a[1]*b[0]}).sum::<f64>()*50.-4.;
+    let trim=TrimmedSurface {underlying:surface.clone(),outer,inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("many-edge trim",Geometry::Surface(surface.clone()),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut doc=Document::with_template_tolerance("many-edge STL");doc.entities.insert(id,entity);
+    let archive=path("many-edge-source").with_extension("om9");om9_archive::Archive::save(&archive,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut c=Controller::from_file(&archive,limits).unwrap();std::fs::remove_file(archive).unwrap();
+    c.submit("Point").unwrap();c.submit("100,100,100").unwrap();c.undo().unwrap();c.select_objects(&[id]).unwrap();let before=c.document().clone();
+    let target=path("many-edge-stl");std::fs::write(&target,b"original").unwrap();
+    if count==1021 {
+        assert!(c.export_stl_selected(&target).is_err());assert_eq!(std::fs::read(&target).unwrap(),b"original");
+        assert_eq!(c.document(),&before);assert_eq!(c.coordinator().redo_len(),1);std::fs::remove_file(target).unwrap();continue;
+    }
+    let pressure=c.coordinator().reserve_remaining_external_memory_with_held(MemoryClass::Kernel,None,c.scene_cache_usage().unwrap()).unwrap();
+    assert!(c.export_stl_selected(&target).is_err());assert_eq!(std::fs::read(&target).unwrap(),b"original");assert_eq!(c.document(),&before);assert_eq!(c.coordinator().redo_len(),1);drop(pressure);
+    if count==129 {
+        let mut pressure=c.coordinator().reserve_remaining_external_memory_with_held(MemoryClass::Kernel,None,c.scene_cache_usage().unwrap()).unwrap();
+        let remain=pressure.bytes().checked_sub(8*1024*1024).unwrap();pressure.shrink_to(remain).unwrap();
+        assert!(c.export_stl_selected(&target).is_err());assert_eq!(std::fs::read(&target).unwrap(),b"original");
+        assert_eq!(c.document(),&before);assert_eq!(c.coordinator().redo_len(),1);drop(pressure);
+    }
+    for linear_tolerance_mm in [0.05,0.005] {
+        c.export_stl_selected_with_profile(&target,StlExportProfile {linear_tolerance_mm,angular_tolerance_rad:0.3}).unwrap();
+        let output=triangles(&std::fs::read(&target).unwrap());
+        let actual:f64=output.iter().map(|t|{let a=t[0];let b=t[1];let c=t[2];(((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])).abs() as f64)*0.5}).sum();
+        assert!((actual-area).abs()<1e-3,"expected {area}, got {actual}");
+        let cross=|a:[f32;3],b:[f32;3],p:[f64;2]|(b[0] as f64-a[0] as f64)*(p[1]-a[1] as f64)-(b[1] as f64-a[1] as f64)*(p[0]-a[0] as f64);
+        let covers=|p:[f64;2]|output.iter().any(|t| {let v=[cross(t[0],t[1],p),cross(t[1],t[2],p),cross(t[2],t[0],p)];v.iter().all(|x|*x>=-1e-6)||v.iter().all(|x|*x<=1e-6)});
+        assert!(covers([7.1,5.1]));assert!(!covers([5.123,5.321]));assert!(!covers([9.5,9.5]));
+        assert_eq!(c.document(),&before);assert_eq!(c.coordinator().redo_len(),1);
+    }
+    std::fs::remove_file(target).unwrap();
+    }
+}
+
+#[test]
+fn export_reopened_large_trimmed_surface_stl_keeps_hole_and_redo() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();let n=28usize;
+    let mut poles=Vec::new();for u in 0..n {for v in 0..n {poles.push([10.*u as f64/(n-1) as f64,10.*v as f64/(n-1) as f64,0.]);}}
+    let mut knots=vec![0.];knots.extend((0..n).map(|i|i as f64/(n-1) as f64));knots.push(1.);
+    let surface=om9_core::geometry::NurbsSurface {degree:[1,1],size:[n,n],poles,weights:vec![1.;n*n],knots:[knots.clone(),knots],domain:[[0.,1.],[0.,1.]],periodic:[false,false],reversed:false};
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.2,0.2],[0.8,0.2],[0.8,0.8],[0.2,0.8]],inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("large trim",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut doc=Document::with_template_tolerance("large trimmed STL");doc.entities.insert(id,entity);
+    let archive=path("large-trim-stl").with_extension("om9");om9_archive::Archive::save(&archive,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut c=Controller::from_file(&archive,limits).unwrap();std::fs::remove_file(archive).unwrap();
+    c.submit("Point").unwrap();c.submit("100,100,100").unwrap();c.undo().unwrap();c.select_objects(&[id]).unwrap();let before=c.document().clone();
+    let target=path("large-trim-stl");c.export_stl_selected(&target).unwrap();
+    let output=triangles(&std::fs::read(&target).unwrap());std::fs::remove_file(target).unwrap();
+    let area:f64=output.iter().map(|t|{let a=t[0];let b=t[1];let c=t[2];(((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])).abs() as f64)*0.5}).sum();
+    let cross=|a:[f32;3],b:[f32;3],p:[f64;2]|(b[0] as f64-a[0] as f64)*(p[1]-a[1] as f64)-(b[1] as f64-a[1] as f64)*(p[0]-a[0] as f64);
+    let covers=|p:[f64;2]|output.iter().any(|t| {let v=[cross(t[0],t[1],p),cross(t[1],t[2],p),cross(t[2],t[0],p)];v.iter().all(|x|*x>=-1e-6)||v.iter().all(|x|*x<=1e-6)});
+    assert!((area-32.).abs()<1e-4,"area {area}");assert!(covers([3.1,3.3]));assert!(!covers([5.123,5.321]));assert!(!covers([9.,9.]));
+    assert_eq!(c.document(),&before);assert_eq!(c.coordinator().redo_len(),1);
+}
+
+#[test]
+fn trimmed_stl_affine_profiles_keep_hole_and_redo() {
+    use om9_app::session::StlExportProfile;
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();let surface=om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.2,0.2],[0.8,0.2],[0.8,0.8],[0.2,0.8]],
+        inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let placement=Transform([[2.,0.5,0.,4.],[0.25,1.,0.,-3.],[0.,0.,1.,7.],[0.,0.,0.,1.]]);
+    let mut entity=Entity::new("trim affine",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();entity.placement=placement;let id=entity.id;
+    let mesh=Mesh {vertices:vec![[100.,100.,20.],[101.,100.,20.],[100.,101.,20.]],faces:vec![vec![0,1,2]],normals:vec![],colors:vec![],corner_uvs:vec![]};
+    let mesh=Entity::new("mesh",Geometry::Mesh(mesh),None);let mesh_id=mesh.id;
+    let mut doc=Document::with_template_tolerance("trim affine");doc.entities.insert(id,entity);doc.entities.insert(mesh_id,mesh);
+    let archive=path("trim-affine").with_extension("om9");om9_archive::Archive::save(&archive,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut c=Controller::from_file(&archive,limits).unwrap();std::fs::remove_file(archive).unwrap();
+    c.submit("Point").unwrap();c.submit("100,100,100").unwrap();c.undo().unwrap();c.select_objects(&[id,mesh_id]).unwrap();let before=c.document().clone();
+    let target=path("trim-affine");
+    for tolerance in [0.05,0.005] {
+        c.export_stl_selected_with_profile(&target,StlExportProfile {linear_tolerance_mm:tolerance,angular_tolerance_rad:0.3}).unwrap();
+        let output=triangles(&std::fs::read(&target).unwrap());
+        let cross=|a:[f32;3],b:[f32;3],p:[f64;3]| (b[0] as f64-a[0] as f64)*(p[1]-a[1] as f64)-(b[1] as f64-a[1] as f64)*(p[0]-a[0] as f64);
+        let covers=|p:[f64;3]|output.iter().any(|t| {let v=[cross(t[0],t[1],p),cross(t[1],t[2],p),cross(t[2],t[0],p)];v.iter().all(|x|*x>=-1e-6)||v.iter().all(|x|*x<=1e-6)});
+        let area:f64=output.iter().map(|t|cross(t[0],t[1],[t[2][0] as f64,t[2][1] as f64,0.]).abs()*0.5).sum();
+        assert!((area-60.5).abs()<1e-4,"area {area}");
+        assert!(covers(placement.point([3.,3.,0.]).unwrap()));assert!(!covers(placement.point([5.,5.,0.]).unwrap()));
+        assert_eq!(c.document(),&before);assert_eq!(c.coordinator().redo_len(),1);
+    }
+    std::fs::remove_file(target).unwrap();
+}
+
+#[test]
+fn trimmed_cylinder_stl_uses_source_and_export_profile() {
+    use om9_app::session::StlExportProfile;
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();let surface=om9_core::surface_kernel::cylinder([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],2.,5.,&limits).unwrap();
+    let mut outer=Vec::new();for side in 0..4 {for i in 0..255 {let t=i as f64/255.;outer.push(match side {
+        0=>[0.1*(1.-t)+0.3*t,0.2],1=>[0.3,0.2*(1.-t)+0.8*t],
+        2=>[0.3*(1.-t)+0.1*t,0.8],_=>[0.1,0.8*(1.-t)+0.2*t],
+    });}}
+    let trim=TrimmedSurface {underlying:surface.clone(),outer,
+        inners:vec![vec![[0.15,0.4],[0.2,0.4],[0.2,0.6],[0.15,0.6]]],reversed:false};
+    let angle=|u| {let p=om9_core::surface_kernel::evaluate(&surface,u,0.5,&limits).unwrap();p[1].atan2(p[0])};
+    let expected=2.*3.*(angle(0.3)-angle(0.1))-2.*(angle(0.2)-angle(0.15));
+    let mut entity=Entity::new("trim cylinder",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut doc=Document::with_template_tolerance("trim cylinder STL");doc.entities.insert(id,entity);
+    let archive=path("trim-cylinder").with_extension("om9");om9_archive::Archive::save(&archive,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut c=Controller::from_file(&archive,limits).unwrap();std::fs::remove_file(archive).unwrap();c.select_objects(&[id]).unwrap();
+    let target=path("trim-cylinder");let mut errors=Vec::new();
+    for tolerance in [0.05,0.005] {
+        c.export_stl_selected_with_profile(&target,StlExportProfile {linear_tolerance_mm:tolerance,angular_tolerance_rad:0.3}).unwrap();
+        let output=triangles(&std::fs::read(&target).unwrap());
+        let area:f64=output.iter().map(|t| {
+            let u=[t[1][0] as f64-t[0][0] as f64,t[1][1] as f64-t[0][1] as f64,t[1][2] as f64-t[0][2] as f64];
+            let v=[t[2][0] as f64-t[0][0] as f64,t[2][1] as f64-t[0][1] as f64,t[2][2] as f64-t[0][2] as f64];
+            let n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+            n.into_iter().map(|x|x*x).sum::<f64>().sqrt()*0.5
+        }).sum();
+        errors.push((area-expected).abs());
+    }
+    assert!(errors[1]<0.02 && errors[1]<=errors[0]+1e-6,"expected {expected}, errors {errors:?}");
+    std::fs::remove_file(target).unwrap();
+}
+
+#[test]
+fn reopened_full_seam_trimmed_cylinder_stl_keeps_hole() {
+    use om9_app::session::StlExportProfile;
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();let surface=om9_core::surface_kernel::cylinder([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],2.,5.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.,0.2],[1.,0.2],[1.,0.8],[0.,0.8]],
+        inners:vec![vec![[0.3,0.4],[0.4,0.4],[0.4,0.6],[0.3,0.6]]],reversed:false};
+    let angle=|u| {let p=om9_core::surface_kernel::evaluate(&surface,u,0.5,&limits).unwrap();p[1].atan2(p[0])};
+    let expected=12.*std::f64::consts::PI-2.*(angle(0.4)-angle(0.3));
+    let placement=Transform::translation([3.,-4.,7.]);
+    let hole=placement.point(om9_core::surface_kernel::evaluate(&surface,0.35,0.5,&limits).unwrap()).unwrap();
+    let material=placement.point(om9_core::surface_kernel::evaluate(&surface,0.2,0.5,&limits).unwrap()).unwrap();
+    let mut entity=Entity::new("full seam",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();entity.placement=placement;let id=entity.id;
+    let mut doc=Document::with_template_tolerance("full seam STL");doc.entities.insert(id,entity);
+    let archive=path("full-seam").with_extension("om9");om9_archive::Archive::save(&archive,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut c=Controller::from_file(&archive,limits).unwrap();std::fs::remove_file(archive).unwrap();
+    c.submit("Point").unwrap();c.submit("100,100,100").unwrap();c.undo().unwrap();c.select_objects(&[id]).unwrap();let before=c.document().clone();
+    let target=path("full-seam");
+    for tolerance in [0.05,0.005] {
+        c.export_stl_selected_with_profile(&target,StlExportProfile {linear_tolerance_mm:tolerance,angular_tolerance_rad:0.3}).unwrap();
+        let output:Vec<[[f64;3];3]>=triangles(&std::fs::read(&target).unwrap()).into_iter().map(|t|t.map(|p|p.map(f64::from))).collect();
+        let area:f64=output.iter().map(|t| {let u=std::array::from_fn::<_,3,_>(|i|t[1][i]-t[0][i]);let v=std::array::from_fn::<_,3,_>(|i|t[2][i]-t[0][i]);
+            let n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];n.into_iter().map(|x|x*x).sum::<f64>().sqrt()*0.5}).sum();
+        let distance=|p|output.iter().map(|t|point_to_stl_triangle_distance(p,*t)).fold(f64::INFINITY,f64::min);
+        assert!((area-expected).abs()<0.15,"expected {expected}, got {area}");
+        assert!(distance(hole)>0.1,"hole center must remain empty");assert!(distance(material)<0.06,"retained surface must remain present");
+        assert_eq!(c.document(),&before);assert_eq!(c.coordinator().redo_len(),1);
+    }
+    std::fs::remove_file(target).unwrap();
+}
+
+#[test]
+fn reopened_one_seam_trimmed_cylinder_stl_keeps_hole_and_redo() {
+    use om9_app::session::StlExportProfile;
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();let surface=om9_core::surface_kernel::cylinder([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],2.,5.,&limits).unwrap();
+    for (index,(a,b,h0,h1)) in [(0.,0.4,0.15,0.2),(0.6,1.,0.8,0.85)].into_iter().enumerate() {
+        let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[a,0.2],[b,0.2],[b,0.8],[a,0.8]],
+            inners:vec![vec![[h0,0.4],[h1,0.4],[h1,0.6],[h0,0.6]]],reversed:false};
+        let angle=|u| {let p=om9_core::surface_kernel::evaluate(&surface,u,0.5,&limits).unwrap();p[1].atan2(p[0])};
+        let delta=|x,y| (angle(y)-angle(x)).rem_euclid(std::f64::consts::TAU);
+        let expected=6.*delta(a,b)-2.*delta(h0,h1);let placement=Transform::translation([3.,-4.,7.]);
+        let hole=placement.point(om9_core::surface_kernel::evaluate(&surface,(h0+h1)/2.,0.5,&limits).unwrap()).unwrap();
+        let material=placement.point(om9_core::surface_kernel::evaluate(&surface,(a+h0)/2.,0.5,&limits).unwrap()).unwrap();
+        let mut entity=Entity::new("one seam",Geometry::Surface(surface.clone()),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();entity.placement=placement;let id=entity.id;
+        let mut doc=Document::with_template_tolerance("one seam STL");doc.entities.insert(id,entity);
+        let archive=path(&format!("one-seam-{index}")).with_extension("om9");om9_archive::Archive::save(&archive,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+        let mut c=Controller::from_file(&archive,limits).unwrap();std::fs::remove_file(archive).unwrap();
+        c.submit("Point").unwrap();c.submit("100,100,100").unwrap();c.undo().unwrap();c.select_objects(&[id]).unwrap();let before=c.document().clone();
+        let target=path(&format!("one-seam-{index}"));
+        for tolerance in [0.05,0.005] {
+            c.export_stl_selected_with_profile(&target,StlExportProfile {linear_tolerance_mm:tolerance,angular_tolerance_rad:0.3}).unwrap();
+            let output:Vec<[[f64;3];3]>=triangles(&std::fs::read(&target).unwrap()).into_iter().map(|t|t.map(|p|p.map(f64::from))).collect();
+            let area:f64=output.iter().map(|t| {let u=std::array::from_fn::<_,3,_>(|i|t[1][i]-t[0][i]);let v=std::array::from_fn::<_,3,_>(|i|t[2][i]-t[0][i]);
+                let n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];n.into_iter().map(|x|x*x).sum::<f64>().sqrt()*0.5}).sum();
+            let distance=|p|output.iter().map(|t|point_to_stl_triangle_distance(p,*t)).fold(f64::INFINITY,f64::min);
+            assert!((area-expected).abs()<0.15,"expected {expected}, got {area}");
+            assert!(distance(hole)>0.1);assert!(distance(material)<0.06);
+            assert_eq!(c.document(),&before);assert_eq!(c.coordinator().redo_len(),1);
+        }
+        std::fs::remove_file(target).unwrap();
+    }
+}
+
+#[test]
+fn trimmed_surface_stl_refusal_preserves_destination_and_redo() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::cylinder([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],2.,5.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.,0.2],[1.,0.2],[0.5,0.8]],
+        inners:vec![],reversed:false};
+    let mut entity=Entity::new("trimmed",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    entity.id=om9_core::identity::ObjectId(uuid::Uuid::from_u128(2));let id=entity.id;
+    let mesh=Mesh {vertices:vec![[0.,0.,0.],[1.,0.,0.],[0.,1.,0.]],faces:vec![vec![0,1,2]],normals:vec![],colors:vec![],corner_uvs:vec![]};
+    let mut earlier=Entity::new("mesh first",Geometry::Mesh(mesh),None);earlier.id=om9_core::identity::ObjectId(uuid::Uuid::from_u128(1));let mesh_id=earlier.id;
+    let mut doc=Document::with_template_tolerance("trimmed STL refusal");doc.entities.insert(id,entity);doc.entities.insert(mesh_id,earlier);
+    let archive=path("trim-refusal").with_extension("om9");
+    om9_archive::Archive::save(&archive,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut controller=Controller::from_file(&archive,limits).unwrap();std::fs::remove_file(archive).unwrap();
+    controller.submit("Point").unwrap();controller.submit("100,100,100").unwrap();controller.undo().unwrap();
+    controller.select_objects(&[mesh_id,id]).unwrap();let before=controller.document().clone();
+    let target=path("trim-refusal");std::fs::write(&target,b"existing destination").unwrap();
+    let error=controller.export_stl_selected(&target).unwrap_err();
+    assert!(error.to_string().contains("seam"),"{error}");
+    assert_eq!(std::fs::read(&target).unwrap(),b"existing destination");
+    assert_eq!(controller.document(),&before);assert_eq!(controller.coordinator().redo_len(),1);
+    std::fs::remove_file(target).unwrap();
+}
+
+#[test]
 fn sampled_deviation_oracle_handles_face_edge_and_vertex() {
     let triangle = [[0.,0.,0.], [2.,0.,0.], [0.,2.,0.]];
     for (point, expected) in [([0.5,0.5,3.], 3.), ([1.,-2.,0.], 2.), ([-3.,-4.,0.], 5.)] {
@@ -1851,10 +2092,10 @@ fn occt_snapshot_honors_angular_deflection_and_rejects_invalid_values() {
     let source = om9_kernel::brep::sphere_brep(10.0, 0.5, &limits).unwrap();
     let coarse = om9_kernel::brep::read_brep_with_angle(source.source(), 0.5, 0.6, &limits).unwrap();
     let fine = om9_kernel::brep::read_brep_with_angle(source.source(), 0.5, 0.1, &limits).unwrap();
-    assert!(fine.display.triangles.len() > coarse.display.triangles.len());
+    assert!(fine.display().triangles.len() > coarse.display().triangles.len());
     let default = om9_kernel::brep::read_brep(source.source(), 0.5, &limits).unwrap();
     let explicit_default = om9_kernel::brep::read_brep_with_angle(source.source(), 0.5, 0.3, &limits).unwrap();
-    assert_eq!(default.display.triangles, explicit_default.display.triangles);
+    assert_eq!(default.display().triangles, explicit_default.display().triangles);
     for angle in [0.0, -0.1, f64::NAN, f64::INFINITY, 4.0] {
         assert!(om9_kernel::brep::read_brep_with_angle(source.source(), 0.5, angle, &limits).is_err());
     }

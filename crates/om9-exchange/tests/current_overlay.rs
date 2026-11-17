@@ -353,6 +353,41 @@ fn placement_attributes_and_label_change_only_their_explicit_native_patch_fields
 }
 
 #[test]
+fn source_brep_display_change_does_not_turn_label_patch_into_geometry_patch() {
+    use om9_core::brep::{Brep, BrepDisplay, BrepTopology};
+    let mut bundle = bundle(Some(ImportMode::Preserve));
+    let entity = &mut bundle.entities[0];
+    let shape = Brep::from_native("CASCADE Topology authored fixture".into(), BrepDisplay {
+        source_sha256: [0; 32], deflection_mm: 0.1, points: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+        triangles: vec![[0, 1, 2, 0]], segments: vec![], vertices: vec![],
+        topology: BrepTopology { faces: vec![Uuid::from_u128(42)], edges: vec![], vertex_ids: vec![], face_edges: vec![] }.into(),
+    }, &Limits::default()).unwrap();
+    entity.geometry = Geometry::Brep(shape);
+    bundle.namespace.records[0] = SourceRecord::bound_entity(key(NativeRecordKind::Geometry), "ON_Brep", HostRef::Object(entity.id), entity).unwrap();
+    let Geometry::Brep(shape) = &mut entity.geometry else { panic!() };
+    let mut display = shape.display().clone();
+    display.deflection_mm = 0.02;
+    display.points[1][0] = 2.;
+    *shape = Brep::from_native(shape.source().to_owned(), display, &Limits::default()).unwrap();
+    let (coordinator, document, _, object, _) = fixture(bundle);
+    let snapshot = om9_archive::DocumentSnapshot::capture(&coordinator.world().documents[&document], &Limits::default()).unwrap();
+    let restored = snapshot.restore(&Limits::default()).unwrap();
+    let mut coordinator = TransactionCoordinator::new(World::new(vec![restored], &Limits::default()).unwrap(), Limits::default()).unwrap();
+    let capture = ExportCapture::all(&coordinator, document).unwrap();
+    let overlay = capture.current_overlay(&coordinator, &Cancellation::default()).unwrap();
+    assert_eq!(overlay.namespaces[0].records[0].action, RecordAction::Retain);
+    drop(overlay); drop(capture);
+    let source = coordinator.world().documents[&document].stamp(object).unwrap();
+    commit(&mut coordinator, vec![Mutation::Label { source, label: "renamed".into() }]);
+    let capture = ExportCapture::all(&coordinator, document).unwrap();
+    let overlay = capture.current_overlay(&coordinator, &Cancellation::default()).unwrap();
+    let row = &overlay.namespaces[0].records[0];
+    assert_eq!(row.action, RecordAction::PatchEntity);
+    assert!(row.changed.label);
+    assert!(!row.changed.geometry);
+}
+
+#[test]
 fn overlay_scratch_is_admitted_with_current_world_before_allocation() {
     let (c, d, _, _, _) = fixture(bundle(Some(ImportMode::Preserve)));
     let capture = ExportCapture::all(&c, d).unwrap();

@@ -17,6 +17,10 @@ description: "Implement or review the Matrix9 interface described by OpenMatrix9
 
 ## Command: icon, mặc định và tham số
 
+Khi sửa UI/input/preview/picking của lệnh CAD, áp dụng [hợp đồng nguồn và viewport](../openmatrix9-workflow/references/source-and-viewport-contract.md): đồng bộ đường tương tác với hình học nguồn và kiểm kết quả commit, không dừng ở hình vẽ hoặc handler mở được. Pick/snap phải gắn đúng nguồn và trạng thái; không dùng độ mịn hiển thị để thay dung sai CAD.
+
+Khi kiểm tra lệnh qua UI, đọc cả mục “Kiểm tra từng lệnh” trong hợp đồng: tái dùng phần đã đúng, bổ sung preview nhẹ trước exact khi có chờ và kiểm việc thay preview/cancel/stale/Undo theo đúng nguồn. Cập nhật danh sách `docs/validation/command-source-viewport-checklist.md` của checkout; layout/icon thuần túy ghi căn cứ không ảnh hưởng thay vì tự mở sửa kernel.
+
 Khi triển khai command hoặc binding/hành vi gọi command, đọc [hợp đồng icon/default/options](../openmatrix9-feature-port/references/command-integration-contract.md). Icon/menu/CMD cho cùng biến thể phải tới cùng owner; thao tác mặc định và các tham số gạch chân accelerator phải hoạt động thật theo mẫu Polyline. Không nghiệm thu command chỉ từ icon hiển thị hoặc handler mở được.
 
 ## Option hiển thị theo stage (người dùng duyệt 2026-11-02)

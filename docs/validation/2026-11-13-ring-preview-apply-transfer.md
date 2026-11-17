@@ -1,0 +1,11 @@
+# Applying a lease-backed ring preview
+
+Follow-up: [the background UI record](2026-11-13-ring-background-ui.md) supersedes this record's statement that the MatrixApp does not use the worker. The remaining ownership and topology limitations still apply.
+
+2026-11-13. A coordinator-only Builder staging path now creates an unleased B-Rep alias while borrowing the current lease-backed preview. The ordinary transaction preparation registers the staged document under the shared account before returning; the original preview continues to retain its external reservation through preparation and commit. Document and Undo receive the alias without the temporary lease, avoiding lease destruction under the coordinator's account lock. An external clone of the original preview continues to retain the lease after Apply until that clone drops. This can conservatively charge the same shared allocations in both the document and the external reservation while both owners exist.
+
+Preview publication now records document/session/revision context, and planning rejects a changed document. Adopting a different history identity clears a previous preview. The History Builder router now resolves the existing ring-family command names; the end-to-end fixture specifically verifies Signet Ring.
+
+With `L:\om9-target`, `-j 2` and OCCT 8.0.1 runtime, the app worker suite passed 15 tests, including Apply/Undo/Redo with an external preview clone, reopened Signet update/Undo/Redo, History Record off, stale-scene refusal and discarded staging while retaining preview, cancellation and budget refusal. Core `builder_session` passed 13 and `ring_family` passed 7; the ordinary app ring panel passed 5. The no-default-features app check passed with 21 warnings. No physical peak or lock-contention stress measurement was made.
+
+This is an explicitly invoked staged route: the production Builder UI still starts and refreshes synchronously and does not poll or paint the worker result. The preview lease and document staging can be double charged while both owners live, and arbitrary external readers must still use the existing tracked-capture contract. The other three ring History modes are mapped but were not exercised end-to-end in this batch. Source-exact associative topology, source-only Document/Undo, independent eviction/cold restore, NativeBrep and v5 remain open.

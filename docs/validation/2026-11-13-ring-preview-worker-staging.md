@@ -1,0 +1,9 @@
+# Staged ring preview worker
+
+Follow-up: [the background UI record](2026-11-13-ring-background-ui.md) supersedes this earlier record's statement that the MatrixApp UI is not connected.
+
+2026-11-13. An internal OCCT ring preview job now runs the admitted ring feature producer on a named thread. It accepts a caller-reserved inputless request, accounts request storage, obtains additional Kernel reservations through nonblocking controller-side polling, batches growth requests with an exact-size fallback, and holds the resulting feature and its reservation together in a private result. Cancellation is checked during admission and before delivery, including when a completed result is already queued. Dropping the job requests cancellation; dropping the retained result releases its reservation.
+
+With `L:\om9-target`, `-j 2`, and the OCCT 8.0.1 runtime, six app library fixtures passed: retention until result drop, cancellation release, refused growth cleanup, batch fallback, cancellation of a queued result, and refusal of a mismatched ring kind before spawn. The fixtures exercise a `Controller` coordinator but not the production Builder route. `cargo check -p om9-app -j 2` passed with two existing warnings and five dead-code warnings because the new job is not wired yet. This test does not measure desktop responsiveness or native internal allocation.
+
+The result remains deliberately private: no API transfers its geometry into a Builder session while preserving the allocation owner. The normal Builder still runs synchronously, and no UI polling, scene/job freshness, Apply/Undo behavior or saved-tab lifetime has been connected. Input-bearing requests, native OCCT internal memory and cancellation within a native call are outside this worker's admission. Topology signatures still derive from display; canonical source-only Document/Undo, eviction, cold restore and v5 remain open.

@@ -1,0 +1,12 @@
+# Same-call source volume for sewn rings
+
+2026-11-13. The OCCT sewing adapter already validates one closed shell, constructs a valid solid and computes positive volume before emitting its B-Rep snapshot. Its selected C ABI now returns that volume with the snapshot from the same native shape. The Rust `sewed_solid_with_volume` function rejects missing, non-finite or non-positive receipt values, and returns neither shape nor volume on a snapshot error. The ring-family producer feeds the receipt into the existing positive-volume gate, avoiding a second source decode and native volume measurement. The original `sewed_solid` API remains available. The receipt is valid for the shape produced by that call; it is not a reusable attestation for an arbitrary B-Rep.
+
+With `CARGO_TARGET_DIR=L:\om9-target`, OCCT 8.0.1 SDK runtime, `3dm-brep`, and `-j 2`:
+
+- Kernel `--test ring_family_brep`: 5 passed. All four ring families compare the same-call native volume against an independent fresh source measurement within relative 1e-8. An open input and a deliberately undersized snapshot budget return no receipt. The source/display-independence fixture remains covered.
+- App `--test ring_family_panel`: 5 passed; kernel `--test extrusion`: 3 passed; kernel lib: 33 passed, 3 ignored. The kernel lib printed `File was not written with this version of the topology` after its success summary. Workspace check and `cargo build -p om9-app` passed with two existing warnings.
+
+The native bridge change is limited to the selected OCCT sewing adapter; the runtime fixtures executed against the configured SDK. This removes a duplicate native operation but does not measure UI latency or make Builder asynchronous. Native process peak, physical OOM, general representation ownership, source-only Document/Undo, cold restore and v5 remain open. Separately, the current `OcctTopology` provider still derives associative subshape signatures from display triangles; it requires a source-bound solution with attested index mapping before the M04 downstream gate can close.
+
+SHA-256: `creation_bridge.cpp` `d8f32720331fd9c7039afc2d107c5ac06ce7fc31659b7c9380ed8e2d8ae131a2`; `creation.rs` `4306c0c392b239704d8047c43fa39507c68f3757f76a94c22b8728502bbcdaee`; `associative.rs` `0eb51b7f992177c9816b6b7d1b2187d4099ac8dcf9f44938675c387922576d33`; `ring_family_brep.rs` `f1b0b0666400c2cd32813103835318a5b6966f7441d24d8c1ebe045fa9d04773`.

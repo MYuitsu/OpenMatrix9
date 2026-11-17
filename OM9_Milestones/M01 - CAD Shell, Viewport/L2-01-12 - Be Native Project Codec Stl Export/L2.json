@@ -54,6 +54,20 @@
     "l3_count": 10
   },
   "runtime_implementation": {
+    "v4_source_display_migration_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Typed v4 candidate retains legacy BRep displays and resources; UI picker Open prepares display owners and a candidate scene on a worker before replacement.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#v4-ui-open-worker",
+      "remaining": "Runtime compatibility, cancellation and memory-pressure behavior are unverified; direct/batch Open remains synchronous. Source-only worker restoration, topology attestation, v5 and opaque payload disposition remain open. V4 BRep saving is refused."
+    },
+    "trimmed_3dm_executable_followup_2026_11_13": "One translated trimmed plane with a hole passed actual debug executable 3DM export/import through the current sibling adapter; reopened material, hole and exterior were checked by rays. CLI fixture only; desktop, Rhino, general trim and native peak remain open. Evidence: docs/validation/2026-11-13-exchange-adapter-rebuild.md#actual-executable-trimmed-face-roundtrip",
+    "stl_background_ui_2026_11_05": {
+      "status": "UI_WORKER_TARGETED_TESTS_PASSED_DESKTOP_PICKER_PENDING",
+      "scope": "Export Selected background worker with live controller phase admission, capture and cancellation. The grouped B-Rep stream payload is admitted before the native call.",
+      "evidence": ["docs/validation/2026-11-05-stl-background-ui.md"],
+      "verification": "183 affected tests passed. Four release memory probes, baseline and final release builds, sphere byte parity and Perspective Gumball baseline verified.",
+      "remaining": "Desktop Windows destination-picker and heavy export interaction acceptance. Hard native allocation limits and P3a STL geometry certification remain open."
+    },
     "remove_scene_high_water_2026_11_05": {
       "status": "PARTIAL_CHECKS_PASSED",
       "scope": "Remove obsolete shared scene high-water and scene-byte capture estimates; require registered scene ownership before STL capture. Preserve live owners, structural quantities and explicit remaining auxiliary-snapshot limitation.",

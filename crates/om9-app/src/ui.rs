@@ -38,6 +38,8 @@ mod layer_dialog_audit;
 mod layers;
 mod panel_audit;
 mod sidebar_palettes;
+#[cfg(feature = "occt-brep")]
+mod sphere_boolean_audit;
 #[cfg(test)]
 mod sidebar_scroll_audit;
 mod typography;
@@ -189,6 +191,7 @@ fn panel_audit_scenario() -> Option<String> {
 }
 struct HoverBasis {
     document: std::sync::Weak<om9_core::model::Document>,
+    publication: uuid::Uuid,
     camera: om9_scene::camera::Camera,
     epoch: u64,
     preview: u64,
@@ -198,22 +201,83 @@ struct HoverBasis {
 // Drop actual snapshot allocations before their source/buffer owners and the
 // reservation, on normal completion, cancellation-by-drop and worker unwind.
 struct HoverSnapshot {
-    scene: om9_scene::scene::Scene,
-    _document: om9_core::transaction::CapturedDocument,
+    scene: om9_scene::scene::HoverPickSnapshot,
     _buffers: std::sync::Arc<crate::session::SceneBufferLease>,
+    _sources: om9_core::transaction::ExternalMemoryReservation,
     reservation: om9_core::transaction::ExternalMemoryReservation,
 }
+struct PreparedHoverSnapshot {
+    scene: om9_scene::scene::Scene,
+    document: om9_core::transaction::CapturedDocument,
+    buffers: std::sync::Arc<crate::session::SceneBufferLease>,
+    sources: om9_core::transaction::ExternalMemoryReservation,
+    reservation: om9_core::transaction::ExternalMemoryReservation,
+    weak_receipts:u64,
+}
+impl PreparedHoverSnapshot {
+    fn finish(self,mut grow:impl FnMut(&mut om9_core::transaction::ExternalMemoryReservation,u64)->om9_core::Result<()>,
+        cancel:&om9_core::transaction::Cancellation)->om9_core::Result<HoverSnapshot> {
+        let Self {scene,document,buffers,mut sources,reservation,weak_receipts}=self;
+        let mut source_bytes=0;
+        let scene=scene.into_hover_pick_snapshot(|live,pending| {
+            if cancel.is_canceled(){return Err(om9_core::Error::Canceled);}
+            let needed=live.checked_add(pending).ok_or(om9_core::Error::Overflow("hover source admission"))?.max(1);
+            if needed>sources.bytes(){let additional=needed-sources.bytes();grow(&mut sources,additional)?;}
+            sources.set_allocated_bytes(live)?;sources.recheck_pending()?;source_bytes=live;Ok(())
+        })?;
+        if cancel.is_canceled(){return Err(om9_core::Error::Canceled);}
+        sources.shrink_to(source_bytes.max(1))?;drop(document);
+        let mut snapshot=HoverSnapshot {scene,_buffers:buffers,_sources:sources,reservation};
+        snapshot.reservation.mark_allocated(hover_snapshot_overhead().checked_add(weak_receipts)
+            .ok_or(om9_core::Error::Overflow("hover weak receipt accounting"))?)?;
+        Ok(snapshot)
+    }
+}
 fn hover_snapshot_overhead() -> u64 {
-    (std::mem::size_of::<HoverSnapshot>() - std::mem::size_of::<om9_scene::scene::Scene>()) as u64
+    (std::mem::size_of::<HoverSnapshot>() - std::mem::size_of::<om9_scene::scene::HoverPickSnapshot>())
+        .max(std::mem::size_of::<PreparedHoverSnapshot>().saturating_sub(std::mem::size_of::<om9_scene::scene::Scene>())) as u64
+        + om9_scene::scene::HoverPickSnapshot::additional_metadata_bytes()
 }
 impl HoverBasis {
     fn matches(&self, document: &std::sync::Weak<om9_core::model::Document>, camera: &om9_scene::camera::Camera,
-        epoch: u64, preview: u64, viewport: Viewport, pointer: egui::Pos2) -> bool {
+        publication:uuid::Uuid, epoch: u64, preview: u64, viewport: Viewport, pointer: egui::Pos2) -> bool {
         self.document.ptr_eq(document) && self.camera == *camera && self.epoch == epoch
-            && self.preview == preview && self.viewport == viewport && self.pointer == pointer
+            && self.publication==publication && self.preview == preview && self.viewport == viewport && self.pointer == pointer
     }
 }
-type HoverJob = (HoverBasis, std::sync::mpsc::Receiver<Option<om9_core::identity::ObjectId>>);
+enum HoverEvent {
+    Grow {additional:u64,reply:std::sync::mpsc::SyncSender<om9_core::Result<om9_core::transaction::ExternalMemoryReservation>>},
+    Finished(om9_core::Result<Option<om9_core::identity::ObjectId>>),
+}
+struct HoverJob {basis:HoverBasis,receiver:std::sync::mpsc::Receiver<HoverEvent>,cancel:om9_core::transaction::Cancellation}
+impl Drop for HoverJob {fn drop(&mut self){self.cancel.cancel();}}
+struct HoverWorkerPermit(std::sync::Arc<std::sync::atomic::AtomicBool>);
+impl Drop for HoverWorkerPermit {fn drop(&mut self){self.0.store(false,std::sync::atomic::Ordering::Release);}}
+
+#[cfg(feature = "occt-brep")]
+struct DeferredLineSurfaceClick {
+    command: crate::session::CommandInputSnapshot,
+    plane: om9_scene::camera::CPlane,
+    project: bool,
+    snap_settings: om9_scene::osnap::SnapSettings,
+    view: ViewId,
+    mode: om9_scene::workspace::DisplayMode,
+    // Last: the option snapshot and its strings must drop before their charge.
+    _reservation: om9_core::transaction::ExternalMemoryReservation,
+}
+
+enum MemoryRecoveryTarget {
+    DirectSolid { authority: om9_core::identity::SessionId, epoch: u64, input: String, command: &'static str },
+    Wire { authority: om9_core::identity::SessionId, epoch: u64, selected: std::collections::BTreeSet<om9_core::identity::ObjectId>, root_revision:u64, draft: String, command: &'static str, waiting_worker:bool, retried_after_release:bool },
+    IsocurveStart { authority: om9_core::identity::SessionId, epoch: u64, selected: std::collections::BTreeSet<om9_core::identity::ObjectId>, root_revision:u64, sub_revision:u64, draft: String, waiting_face:bool, retried_after_release:bool },
+    Isocurve { authority: om9_core::identity::SessionId, epoch: u64, key: (u64, om9_core::identity::SourceStamp, om9_core::surface_kernel::SurfaceIso, u64), root_revision:u64, sub_revision:u64, draft: String, waiting_worker:bool, retried_after_release:bool },
+    DupEdge { authority: om9_core::identity::SessionId, epoch: u64, key: (uuid::Uuid,u64,u64,uuid::Uuid), draft: String, input: &'static str, view_root: Option<om9_core::identity::ObjectId>, waiting_view: bool, retried_after_release: bool },
+    Sphere { authority: om9_core::identity::SessionId, epoch: u64, key: crate::session::SphereRecoveryKey, input: String },
+    SphereSelection { authority: om9_core::identity::SessionId, epoch: u64, key: crate::session::SphereRecoveryKey, root_revision: u64, input: String },
+    SpherePoint { authority: om9_core::identity::SessionId, epoch: u64, key: crate::session::SphereRecoveryKey, point: [f64; 3], anchor: Option<om9_scene::osnap::SnapCandidate>, plane: om9_scene::camera::CPlane, one_shot: Option<om9_scene::osnap::SnapKind>, draft: String },
+    Box { authority: om9_core::identity::SessionId, epoch: u64, key: crate::session::BoxRecoveryKey, input: String },
+    BoxPoint { authority: om9_core::identity::SessionId, epoch: u64, key: crate::session::BoxRecoveryKey, point: [f64; 3], anchor: Option<om9_scene::osnap::SnapCandidate>, plane: om9_scene::camera::CPlane, one_shot: Option<om9_scene::osnap::SnapKind>, draft: String },
+}
 
 pub struct MatrixApp {
     pub controller: Controller,
@@ -227,6 +291,10 @@ pub struct MatrixApp {
     /// Project Manager rows, Job Bag slots and Master snapshot (L2-03-15).
     pub project_manager: crate::project_manager::ProjectManager,
     pub display_preferences: crate::display::DisplayPreferences,
+    /// Diagnostic control for paired runs; normal sessions always optimize Light navigation.
+    light_motion_baseline: bool,
+    #[cfg(feature = "occt-brep")]
+    sphere_boolean_audit: Option<sphere_boolean_audit::SphereBooleanAudit>,
     pub pictureframes: Vec<crate::pictureframe::PictureFrame>,
     pictureframe_textures: BTreeMap<[u8; 32], egui::TextureHandle>,
     pub project_row_rects: BTreeMap<crate::project_manager::ProjectId, Rect>,
@@ -272,9 +340,23 @@ pub struct MatrixApp {
     stl_angle_draft: f64,
     stl_selected_profile: Option<crate::session::StlExportProfile>,
     stl_capture: Option<crate::session::StlExportCapture>,
+    stl_job: Option<crate::session::InteractiveStlExport>,
     /// Gumball settings popup opened from Info & Settings.
     gumball_settings_open: bool,
     undo_settings_draft: Option<om9_core::transaction::UndoPolicy>,
+    memory_recovery_open: bool,
+    memory_recovery_running: bool,
+    memory_recovery_defer: bool,
+    memory_recovery_removed: usize,
+    memory_recovery_target: Option<MemoryRecoveryTarget>,
+    #[cfg(feature="occt-brep")]
+    wireframe_worker_draft: Option<String>,
+    #[cfg(feature="occt-brep")]
+    isocurve_build_worker_draft: Option<String>,
+    #[cfg(feature = "occt-brep")]
+    boolean_union_worker_draft: Option<String>,
+    #[cfg(feature="occt-brep")]
+    isocurve_face_worker_draft: Option<String>,
     undo_settings_path: Option<PathBuf>,
     /// Application-scoped Gumball settings and the last value written to it.
     gumball_settings_path: Option<PathBuf>,
@@ -302,6 +384,14 @@ pub struct MatrixApp {
     /// The object-snap candidate under the cursor, and its transient SmartTrack anchors.
     snap: Option<om9_scene::osnap::SnapCandidate>,
     surface_snap_cache: Vec<(std::sync::Weak<Document>, om9_scene::osnap::SnapCandidate, om9_scene::osnap::SnapCandidate)>,
+    #[cfg(feature = "occt-brep")]
+    line_surface_scheduler: crate::session::SurfaceSnapScheduler,
+    #[cfg(feature = "occt-brep")]
+    line_surface_receipt: Option<crate::session::SurfaceSnapReceipt>,
+    #[cfg(feature = "occt-brep")]
+    line_surface_click: Option<DeferredLineSurfaceClick>,
+    #[cfg(feature = "occt-brep")]
+    line_surface_view: Option<ViewId>,
     snap_state: om9_scene::osnap::SnapState,
     smarttrack: om9_scene::osnap::SmartTrack,
     smarttrack_enabled: bool,
@@ -311,6 +401,8 @@ pub struct MatrixApp {
     /// Selection frame per viewport, keyed by (selection revision, camera revision, size): projecting every
     /// selected vertex each frame is wasted work while nothing changes.
     selection_frames: std::collections::BTreeMap<ViewId, SelectionFrame>,
+    /// Opt-in same-binary control for the former per-point camera preparation.
+    selection_frame_baseline: bool,
     /// Objects under the last click when more than one was there: the disambiguation popup lists them.
     ambiguous: Vec<om9_core::identity::ObjectId>,
     ambiguous_pos: Option<egui::Pos2>,
@@ -326,6 +418,7 @@ pub struct MatrixApp {
     /// Object under the pointer, and where/when it was computed, so hovering does not pick every frame.
     hover_object: Option<om9_core::identity::ObjectId>,
     hover_job: Option<HoverJob>,
+    hover_worker_active: std::sync::Arc<std::sync::atomic::AtomicBool>,
     hover_picked_at: Option<HoverBasis>,
     hover_retry_at: Option<std::time::Instant>,
     pub audit: Option<UiAudit>,
@@ -406,6 +499,8 @@ pub struct MatrixApp {
     nav_render_due: bool,
     nav_received: Option<std::time::Instant>,
     nav_frame_started: std::time::Instant,
+    native_ui_finished: std::cell::Cell<Option<std::time::Instant>>,
+    native_paint_started: std::cell::Cell<Option<std::time::Instant>>,
     nav_document: Option<om9_core::identity::DocumentId>,
     nav_actions: std::collections::BTreeMap<ViewId, &'static str>,
     nav_cameras: std::collections::BTreeMap<ViewId, om9_scene::camera::Camera>,
@@ -624,7 +719,7 @@ impl UiAudit {
     }
 }
 /// A cached selection frame: the keys it was computed for and the rectangle itself.
-type SelectionFrame = ((u64, u64, u64, Camera, Rect), Option<Rect>);
+type SelectionFrame = ((u64, u64, u64, Option<uuid::Uuid>, Camera, Rect), Option<Rect>);
 
 /// Scripted camera gesture for interaction measurements (`OM9_CAMERA_AUDIT=<frames>`).
 struct CameraAudit {
@@ -663,6 +758,18 @@ fn surface_group_order(candidates: &[om9_scene::osnap::SnapCandidate]) -> Result
         }).then(a.cmp(&b))
     });
     Ok(order)
+}
+
+fn validate_dupedge_visibility(scene: &om9_scene::scene::Scene, hit: &om9_scene::scene::PickHit,
+    camera: &Camera, viewport: Viewport, mode: om9_scene::workspace::DisplayMode) -> Result<()> {
+    if mode != om9_scene::workspace::DisplayMode::Shaded { return Ok(()); }
+    let projected = camera.project(hit.world_point, viewport)?.ok_or(Error::Invalid("DupEdge edge outside viewport"))?;
+    let magnitude = hit.world_point.iter().fold(1.0_f64, |largest, value| largest.max(value.abs()));
+    let clearance = 1e-6_f64.max(16.0 * f64::EPSILON * magnitude);
+    if om9_scene::osnap::visible_display_occludes_before(scene, camera, viewport, projected.screen, hit.world_point, clearance)? {
+        return Err(Error::Invalid("DupEdge edge is hidden by shaded geometry"));
+    }
+    Ok(())
 }
 
 impl MatrixApp {
@@ -715,7 +822,16 @@ impl MatrixApp {
         }
         Ok(app)
     }
-    fn from_controller(controller: Controller) -> Result<Self> {
+    #[allow(unused_mut)]
+    fn from_controller(mut controller: Controller) -> Result<Self> {
+        #[cfg(feature="occt-brep")]
+        controller.enable_background_brep_wireframe();
+        #[cfg(feature="occt-brep")]
+        controller.enable_background_isocurve_build();
+        #[cfg(feature="occt-brep")]
+        controller.enable_background_boolean_union();
+        #[cfg(feature="occt-brep")]
+        controller.enable_background_ring_preview();
         let features = serde_json::from_str(include_str!("../assets/features.json"))
             .map_err(|e| Error::Io(e.to_string()))?;
         let dock = DockLayout::matrix_default();
@@ -740,6 +856,8 @@ impl MatrixApp {
             nav_render_due: true,
             nav_received: None,
             nav_frame_started: std::time::Instant::now(),
+            native_ui_finished: std::cell::Cell::new(None),
+            native_paint_started: std::cell::Cell::new(None),
             nav_document: None,
             nav_actions: Default::default(),
             nav_cameras: Default::default(),
@@ -755,6 +873,9 @@ impl MatrixApp {
                 }),
             project_manager: crate::project_manager::ProjectManager::new(project_name),
             display_preferences: crate::display::DisplayPreferences::default(),
+            light_motion_baseline: std::env::var_os("OM9_LIGHT_MOTION_BASELINE").is_some(),
+            #[cfg(feature = "occt-brep")]
+            sphere_boolean_audit: sphere_boolean_audit::SphereBooleanAudit::from_env(),
             pictureframes: Vec::new(),
             pictureframe_textures: BTreeMap::new(),
             project_row_rects: BTreeMap::new(),
@@ -816,8 +937,22 @@ impl MatrixApp {
             stl_angle_draft: 0.3,
             stl_selected_profile: None,
             stl_capture: None,
+            stl_job: None,
             gumball_settings_open: false,
             undo_settings_draft: None,
+            memory_recovery_open: false,
+            memory_recovery_running: false,
+            #[cfg(feature="occt-brep")]
+            wireframe_worker_draft: None,
+            #[cfg(feature="occt-brep")]
+            isocurve_build_worker_draft: None,
+            #[cfg(feature = "occt-brep")]
+            boolean_union_worker_draft: None,
+            #[cfg(feature="occt-brep")]
+            isocurve_face_worker_draft: None,
+            memory_recovery_defer: false,
+            memory_recovery_removed: 0,
+            memory_recovery_target: None,
             undo_settings_path: None,
             gumball_settings_path: None,
             gumball_settings_saved: crate::session::gumball::GumballSettings::default(),
@@ -838,11 +973,20 @@ impl MatrixApp {
             snap: None,
             snap_state: om9_scene::osnap::SnapState::default(),
             surface_snap_cache: Vec::new(),
+            #[cfg(feature = "occt-brep")]
+            line_surface_scheduler: crate::session::SurfaceSnapScheduler::default(),
+            #[cfg(feature = "occt-brep")]
+            line_surface_receipt: None,
+            #[cfg(feature = "occt-brep")]
+            line_surface_click: None,
+            #[cfg(feature = "occt-brep")]
+            line_surface_view: None,
             smarttrack: om9_scene::osnap::SmartTrack::new(),
             smarttrack_enabled: true,
             band_start: None,
             band_view: None,
             selection_frames: std::collections::BTreeMap::new(),
+            selection_frame_baseline: std::env::var_os("OM9_SELECTION_FRAME_BASELINE").is_some(),
             ambiguous: Vec::new(),
             ambiguous_pos: None,
             ambiguous_epoch: 0,
@@ -855,6 +999,7 @@ impl MatrixApp {
             sub_object_kind: om9_scene::scene::PickKind::Face,
             hover_object: None,
             hover_job: None,
+            hover_worker_active:std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
             hover_picked_at: None,
             hover_retry_at: None,
             audit: None,
@@ -944,6 +1089,19 @@ impl MatrixApp {
             Err(error) => app
                 .transcript
                 .append_history(&format!("project manager state: {error}")),
+        }
+        app.display_preferences.viewport_detail = app.controller.viewport_detail();
+        if let Ok(Some(bytes)) = app.controller.embedded_display_state() {
+            if let Ok(text) = std::str::from_utf8(&bytes) {
+                let (preferences, warning) = crate::display::DisplayPreferences::from_json(text);
+                if warning.is_none() {
+                    #[cfg(feature = "occt-brep")]
+                    match app.controller.request_viewport_detail(preferences.viewport_detail) {
+                        Ok(()) => app.display_preferences = preferences,
+                        Err(error) => { app.status.info(&format!("Viewport detail retained: {error}")); }
+                    }
+                }
+            }
         }
         for diagnostic in app.controller.file_diagnostics() {
             app.transcript.append_history(diagnostic);
@@ -1088,6 +1246,11 @@ impl MatrixApp {
             }
             None => crate::display::DisplayPreferences::default(),
         };
+        #[cfg(feature = "occt-brep")]
+        if let Err(error) = self.controller.request_viewport_detail(self.display_preferences.viewport_detail) {
+            self.display_preferences.viewport_detail = self.controller.viewport_detail();
+            self.status.info(&format!("Viewport detail retained: {error}"));
+        }
         self.pictureframes = match self.controller.embedded_pictureframes()? {
             Some(bytes) => {
                 let text = String::from_utf8(bytes)
@@ -1166,14 +1329,24 @@ impl MatrixApp {
                     self.status.info(&label);
                 } else if self.controller.is_running() {
                     let prompt = self.controller.prompt();
+                    #[cfg(feature="occt-brep")]
+                    if self.controller.brep_wireframe_worker_pending() {
+                        self.status.info(&prompt);
+                    } else {
                     self.status
                         .info(&format!("{prompt} — type a value and press Enter"));
+                    }
+                    #[cfg(not(feature="occt-brep"))]
+                    self.status.info(&format!("{prompt} — type a value and press Enter"));
                 } else {
                     self.status.complete_success();
                 }
             }
             Err(error) => {
                 let message = format!("{error}");
+                if std::env::var_os("OM9_SPHERE_BOOLEAN_AUDIT").is_some() {
+                    eprintln!("OM9_SPHERE_AUDIT command_error={message}");
+                }
                 self.transcript.append_history(&message);
                 self.status.error(&message);
             }
@@ -1202,7 +1375,18 @@ impl MatrixApp {
         self.dock_panel_rects.get(key).copied()
     }
     pub fn status_line(&self) -> String {
-        self.status.line()
+        let (kind,message)=self.presented_status();
+        format!("{}: {message}",kind.label())
+    }
+
+    fn presented_status(&self) -> (crate::status_surface::StatusKind,String) {
+        use crate::status_surface::StatusKind;
+        let kind=self.status.kind();
+        if kind<StatusKind::Warning && self.controller.scene().is_some_and(|scene|
+            scene.diagnostics.iter().any(|d|d.contains("trim display unsupported; showing underlying surface"))) {
+            return (StatusKind::Warning,"Trim display unsupported: full surface shown; use an enclosing selection window".into());
+        }
+        (kind,self.status.message().to_owned())
     }
     /// One-line summary of the current menu placement, used by tests and by the
     /// status bar.
@@ -1487,7 +1671,7 @@ impl MatrixApp {
 
     fn invoke(&mut self, id: &str, origin: InvocationOrigin) {
         if crate::file_lifecycle::FileKind::from_feature(id).is_some_and(|kind| matches!(kind, crate::file_lifecycle::FileKind::New | crate::file_lifecycle::FileKind::Open)) {
-            self.cancel_stl_export_options();
+            self.cancel_stl_export();
         }
         if self.open_undo_settings_command(id) { return; }
         if crate::file_lifecycle::FileKind::from_feature(id).is_some_and(|kind| {
@@ -1516,7 +1700,29 @@ impl MatrixApp {
             .addon_session()
             .map(|s| s.code.clone())
             .or_else(|| self.controller.addon_builder().map(|b| b.code.clone()));
+        let dupedge_key = if id=="OM9-CURVE-040" && !self.controller.is_running() {self.controller.dupedge_recovery_key()} else {None};
         let result = self.controller.dispatch_effect(id, origin);
+        #[cfg(feature="occt-brep")]
+        if result.is_ok() && self.controller.brep_wireframe_worker_pending() {
+            self.wireframe_worker_draft=Some(self.transcript.draft().to_owned());
+        }
+        #[cfg(feature="occt-brep")]
+        if id=="OM9-CURVE-040" && let Err(error)=&result {
+            self.offer_selected_native_dupedge_view_recovery(error,self.transcript.draft().to_owned());
+        }
+        if let Some(key)=dupedge_key && self.controller.dupedge_recovery_key()==Some(key)
+            && matches!(&result,Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_dupedge_memory_recovery(key,self.transcript.draft().to_owned(),"DupEdge");
+        }
+        if id == "OM9-CURVE-054" && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_wire_memory_recovery("ExtractWireframe");
+        }
+        if id == "OM9-CURVE-039" && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_wire_memory_recovery("DupBorder");
+        }
+        if id == "OM9-CURVE-019" && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_isocurve_start_memory_recovery();
+        }
         if result.is_ok() {
             self.echo_builder_start(builder_before);
         }
@@ -1538,6 +1744,22 @@ impl MatrixApp {
                 self.begin_stl_export_options();
             }
             other => self.feedback(other.map(|_| ())),
+        }
+    }
+
+    fn request_history_ui(&mut self, ctx: &egui::Context, redo: bool) -> bool {
+        if self.gumball_session.is_some() || self.grip_drag.is_some() || self.band_start.is_some()
+            || ctx.input(|input| input.pointer.any_down()) {
+            self.feedback(Err(Error::Busy));
+            return false;
+        }
+        match self.controller.request_history_worker(redo) {
+            Ok(()) => {
+                self.status.info(if redo { "Preparing Redo…" } else { "Preparing Undo…" });
+                ctx.request_repaint();
+                true
+            }
+            Err(error) => { self.feedback(Err(error)); false }
         }
     }
     /// F6 "Builder" action: emit the typed prefill and open the mode the selection fits.
@@ -1600,7 +1822,7 @@ impl MatrixApp {
         use crate::command_options::CommandOptionInterface;
         let draft = self.transcript.draft().to_owned();
         if !self.controller.is_running() && crate::file_lifecycle::FileKind::from_command(&draft).is_some_and(|kind| matches!(kind, crate::file_lifecycle::FileKind::New | crate::file_lifecycle::FileKind::Open)) {
-            self.cancel_stl_export_options();
+            self.cancel_stl_export();
         }
         if !self.controller.is_running() && self.open_undo_settings_command(&draft) {
             self.transcript.set_draft("");
@@ -1615,6 +1837,16 @@ impl MatrixApp {
         let prompt = self.controller.prompt();
         self.transcript
             .append_history(&prompt_echo(&prompt, &draft));
+
+        if !self.controller.is_running()
+            && (draft.trim().eq_ignore_ascii_case("Undo") || draft.trim().eq_ignore_ascii_case("Redo")) {
+            let ctx = self.current_ui_context.clone().expect("UI context");
+            if self.request_history_ui(&ctx, draft.trim().eq_ignore_ascii_case("Redo")) {
+                self.transcript.record_command(&draft);
+                self.transcript.set_draft("");
+            }
+            return;
+        }
 
         if crate::file_lifecycle::FileKind::from_command(&draft).is_some_and(|kind| {
             matches!(
@@ -1637,13 +1869,97 @@ impl MatrixApp {
             self.feedback(result);
             return;
         }
+        let isocurve_key = if draft.trim().is_empty() { self.controller.isocurve_recovery_key() } else { None };
+        let dupedge_input = if self.controller.dupedge_needs_pick() && draft.trim().is_empty() {Some("")}
+            else if !self.controller.is_running() && (draft.trim().eq_ignore_ascii_case("DupEdge")
+                || draft.trim().eq_ignore_ascii_case("OM9-CURVE-040")) {Some("DupEdge")}
+            else {None};
+        let dupedge_key = dupedge_input.and_then(|_|self.controller.dupedge_recovery_key());
+        let box_number = |text: &str| text.trim().parse::<f64>().is_ok_and(|value| value.is_finite() && value != 0.);
+        let box_height = draft.trim().split_once('=').is_some_and(|(name, value)| (name.trim().eq_ignore_ascii_case("Height") || name.trim().eq_ignore_ascii_case("H")) && box_number(value));
+        let sphere_number = |text: &str| text.trim().parse::<f64>().is_ok_and(|value| value.is_finite() && value > 0.);
+        let sphere_option = draft.trim().split_once('=').is_some_and(|(name, value)| {
+            (name.trim().eq_ignore_ascii_case("Radius") || name.trim().eq_ignore_ascii_case("Diameter")) && sphere_number(value)
+        });
+        let absolute_point_input = {
+            let mut coordinates = draft.trim().split(',');
+            let finite = |part: Option<&str>| part.is_some_and(|value| value.trim().parse::<f64>().is_ok_and(f64::is_finite));
+            finite(coordinates.next()) && finite(coordinates.next()) && finite(coordinates.next()) && coordinates.next().is_none()
+        };
+        let box_key = if draft.trim().is_empty() || box_number(&draft) || box_height || absolute_point_input { self.controller.box_recovery_key() } else { None };
+        let sphere_key = (if absolute_point_input { self.controller.sphere_point_recovery_key() }
+            else { self.controller.sphere_recovery_key() }).filter(|key| {
+            (key.kind == "FitPoints" && draft.trim().is_empty())
+                || sphere_number(&draft) || sphere_option || absolute_point_input
+        });
+        let sphere_selection_key = self.controller.sphere_fit_selection_recovery_key().filter(|key| {
+            draft.trim().eq_ignore_ascii_case("Selection") || (draft.trim().is_empty() && key.count == 0)
+        });
+        let direct_solid = if !self.controller.is_running() {
+            let mut parts = draft.split_whitespace();
+            let command = parts.next().unwrap_or("");
+            let expected = if command.eq_ignore_ascii_case("Box") { Some(("Box", 3)) }
+                else if command.eq_ignore_ascii_case("Sphere") { Some(("Sphere", 1)) } else { None };
+            expected.filter(|(_, count)| {
+                let values: Vec<_> = parts.collect();
+                values.len() == *count && values.iter().all(|value| sphere_number(value))
+            }).map(|(name, _)| name)
+        } else { None };
         let result = self.controller.submit_effect(&draft);
+        if let Some(key) = sphere_selection_key && self.controller.sphere_fit_selection_recovery_key() == Some(key)
+            && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_sphere_selection_memory_recovery(key, draft.clone());
+        }
+        if let Some(command) = direct_solid && !self.controller.is_running()
+            && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_direct_solid_memory_recovery(command, draft.clone());
+        }
+        if draft.trim().eq_ignore_ascii_case("ExtractWireframe") && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_wire_memory_recovery("ExtractWireframe");
+        }
+        if draft.trim().eq_ignore_ascii_case("DupBorder") && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_wire_memory_recovery("DupBorder");
+        }
+        if (draft.trim().eq_ignore_ascii_case("ExtractIsocurve") || draft.trim().eq_ignore_ascii_case("OM9-CURVE-019"))
+            && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_isocurve_start_memory_recovery();
+        }
+        if let Some(key) = isocurve_key && self.controller.isocurve_recovery_key() == Some(key)
+            && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_isocurve_memory_recovery(key);
+        }
+        #[cfg(feature="occt-brep")]
+        if dupedge_input==Some("DupEdge") && let Err(error)=&result {
+            self.offer_selected_native_dupedge_view_recovery(error,draft.clone());
+        }
+        if let Some(key) = dupedge_key && self.controller.dupedge_recovery_key() == Some(key)
+            && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_dupedge_memory_recovery(key,draft.clone(),dupedge_input.expect("DupEdge recovery input"));
+        }
+        let current_sphere_key = if absolute_point_input { self.controller.sphere_point_recovery_key() }
+            else { self.controller.sphere_recovery_key() };
+        if let Some(key) = sphere_key && current_sphere_key == Some(key)
+            && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_sphere_memory_recovery(key, draft.clone());
+        }
+        if let Some(key) = box_key && self.controller.box_recovery_key() == Some(key)
+            && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
+            self.offer_box_memory_recovery(key, draft.clone());
+        }
         if result.is_ok() {
             self.transcript.record_command(&draft);
             // The transcript mirrors the Matrix command log: the typed command and its
             // prompt+value lines only. The canonical feature id stays in the document
             // history/receipts instead of adding a `[OM9-…]` line to every command.
             self.transcript.set_draft("");
+            #[cfg(feature="occt-brep")]
+            if self.controller.brep_wireframe_worker_pending() {self.wireframe_worker_draft=Some(String::new());}
+            #[cfg(feature="occt-brep")]
+            if self.controller.isocurve_build_worker_pending() {self.isocurve_build_worker_draft=Some(String::new());}
+            #[cfg(feature="occt-brep")]
+            if self.controller.boolean_union_worker_pending() {self.boolean_union_worker_draft=Some(String::new());}
+            #[cfg(feature="occt-brep")]
+            if self.controller.isocurve_face_verification_pending() {self.isocurve_face_worker_draft=Some(String::new());}
         }
         match result {
             Ok(crate::session::DispatchOutcome::File(outcome)) => {
@@ -1866,8 +2182,9 @@ impl MatrixApp {
                             .views
                             .get(view_id)
                             .ok_or(Error::Stale("pick view"))?;
-                        hit.revalidate_in_view(
+                        hit.revalidate_in_scene(
                             self.controller.coordinator(),
+                            self.controller.scene(),
                             &view.camera,
                             viewport,
                         )?;
@@ -1896,8 +2213,9 @@ impl MatrixApp {
                             .views
                             .get(view_id)
                             .ok_or(Error::Stale("pick view"))?;
-                        hit.revalidate_in_view(
+                        hit.revalidate_in_scene(
                             self.controller.coordinator(),
+                            self.controller.scene(),
                             &view.camera,
                             viewport,
                         )?;
@@ -1929,8 +2247,9 @@ impl MatrixApp {
                             .views
                             .get(view_id)
                             .ok_or(Error::Stale("pick view"))?;
-                        hit.revalidate_in_view(
+                        hit.revalidate_in_scene(
                             self.controller.coordinator(),
+                            self.controller.scene(),
                             &view.camera,
                             viewport,
                         )?;
@@ -2003,7 +2322,7 @@ impl MatrixApp {
                     .get(id)
                     .and_then(|entity| match &entity.geometry {
                         om9_core::geometry::Geometry::Brep(brep) => {
-                            brep.display.edges.iter().position(|item| *item == key)
+                            brep.topology().edges.iter().position(|item| *item == key)
                         }
                         _ => None,
                     })
@@ -2030,7 +2349,7 @@ impl MatrixApp {
                 .get(id)
                 .and_then(|entity| match &entity.geometry {
                     om9_core::geometry::Geometry::Brep(brep) => {
-                        brep.display.faces.iter().position(|item| *item == face)
+                        brep.topology().faces.iter().position(|item| *item == face)
                     }
                     _ => None,
                 })
@@ -2062,9 +2381,9 @@ impl MatrixApp {
             .collect()
     }
 
-    fn ambiguous_popup(&mut self, ui: &mut egui::Ui) {
+    fn ambiguous_popup(&mut self, ui: &mut egui::Ui) -> bool {
         let Some(position) = self.ambiguous_pos else {
-            return;
+            return false;
         };
         let rows: Vec<(usize, String, Option<[u8; 4]>)> = self
             .ambiguous
@@ -2115,6 +2434,9 @@ impl MatrixApp {
                     }
                 });
             });
+        // Keep this decision even if choosing a row closes the popup this frame:
+        // the same mouse release must not select the viewport underneath it.
+        let owns_pointer = ui.input(|i| i.pointer.interact_pos().is_some_and(|pos| area.response.rect.contains(pos)));
         if let Some(index) = chosen {
             let is_pipe = self.ambiguous_pipe_context.is_some()
                 || self.ambiguous_sphere_context.is_some()
@@ -2137,6 +2459,7 @@ impl MatrixApp {
             self.ambiguous_slab_context = None;
             self.ambiguous_pipe_context = None;
         }
+        owns_pointer
     }
 
     /// Decode each embedded reference image once into an egui/GPU texture. The key is the
@@ -2298,6 +2621,8 @@ impl MatrixApp {
         let bytes = scene.render_snapshot_metadata_estimate()?.bytes
             .checked_add(hover_snapshot_overhead())
             .ok_or(om9_core::Error::Overflow("hover snapshot accounting"))?
+            .checked_add(scene.pick_snapshot_weak_receipt_bytes()?)
+            .ok_or(om9_core::Error::Overflow("hover weak receipt accounting"))?
             .checked_add(scene.render_snapshot_pick_scratch_estimate()?.bytes)
             .ok_or(om9_core::Error::Overflow("hover snapshot estimate"))?;
         let held = self.controller.scene_cache_usage()?;
@@ -2307,11 +2632,15 @@ impl MatrixApp {
         Ok((capture, buffers, reservation))
     }
 
-    fn capture_hover_snapshot(&self, physical: Option<(u64, u64)>) -> om9_core::Result<HoverSnapshot> {
+    fn prepare_hover_snapshot(&self, physical: Option<(u64, u64)>) -> om9_core::Result<PreparedHoverSnapshot> {
         let (capture, buffers, mut reservation) = self.reserve_hover_snapshot(physical)?;
         let scene = self.controller.scene().ok_or(om9_core::Error::Missing("hover scene"))?;
+        let sources=self.controller.coordinator().reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::CpuCache,1,physical,self.controller.scene_cache_usage()?)?;
         let snapshot = scene.try_render_snapshot()?;
+        let weak_receipts = snapshot.pick_snapshot_weak_receipt_bytes()?;
         let metadata = snapshot.metadata_storage_usage()?.bytes.checked_add(hover_snapshot_overhead())
+            .and_then(|bytes| bytes.checked_add(weak_receipts))
             .ok_or(om9_core::Error::Overflow("hover snapshot metadata"))?;
         let scratch = snapshot.render_snapshot_pick_scratch_estimate()?.bytes;
         let required = metadata.checked_add(scratch).ok_or(om9_core::Error::Overflow("hover snapshot estimate"))?;
@@ -2323,9 +2652,14 @@ impl MatrixApp {
         }
         reservation.shrink_to(required)?;
         snapshot.transfer_memory_allowance(&mut reservation, self.controller.coordinator(), self.controller.scene_cache_usage()?)?;
-        let mut snapshot = HoverSnapshot { scene: snapshot, _document: capture, _buffers: buffers, reservation };
-        snapshot.reservation.mark_allocated(hover_snapshot_overhead())?;
-        Ok(snapshot)
+        Ok(PreparedHoverSnapshot {scene:snapshot,document:capture,buffers,sources,reservation,weak_receipts})
+    }
+
+    #[cfg(test)]
+    fn capture_hover_snapshot(&self,physical:Option<(u64,u64)>)->om9_core::Result<HoverSnapshot> {
+        self.prepare_hover_snapshot(physical)?.finish(|reservation,additional|
+            self.controller.coordinator().grow_external_memory_with_held(reservation,additional,physical,self.controller.scene_cache_usage()?),
+            &om9_core::transaction::Cancellation::default())
     }
 
     /// Reserve transient picking work even for a scene with few objects: one
@@ -2357,20 +2691,23 @@ impl MatrixApp {
             self.hover_object = None;
             self.hover_picked_at = None;
             self.hover_retry_at = None;
+            drop(self.hover_job.take());
             return;
         };
         let Some(scene) = self.controller.scene() else {
             self.hover_object = None;
             self.hover_picked_at = None;
             self.hover_retry_at = None;
+            drop(self.hover_job.take());
             return;
         };
         let epoch = scene.epoch;
+        let publication=scene.publication_id();
         let document = std::sync::Arc::downgrade(&scene.document);
         let preview = self.controller.preview_revision();
-        let matches = |basis: &HoverBasis| basis.matches(&document, &view.camera, epoch, preview, viewport, pointer);
+        let matches = |basis: &HoverBasis| basis.matches(&document, &view.camera, publication, epoch, preview, viewport, pointer);
         let new_basis = || HoverBasis {
-            document: document.clone(), camera: view.camera.clone(), epoch, preview, pointer, viewport,
+            document: document.clone(), camera: view.camera.clone(), publication, epoch, preview, pointer, viewport,
         };
         if let Some(deadline) = self.hover_retry_at {
             let remaining = deadline.saturating_duration_since(std::time::Instant::now());
@@ -2384,18 +2721,35 @@ impl MatrixApp {
             self.hover_object = None;
         }
         let mut completed = false;
-        if let Some((basis, receiver)) = self.hover_job.as_ref() {
-            match receiver.try_recv() {
-                Ok(hit) => {
-                    let valid = matches(basis);
+        if let Some(job) = self.hover_job.as_ref() {
+            let valid=matches(&job.basis) && !job.cancel.is_canceled();
+            if !valid {job.cancel.cancel();}
+            match job.receiver.try_recv() {
+                Ok(HoverEvent::Grow {additional,reply})=>{
+                    let result=if !valid || job.cancel.is_canceled(){Err(om9_core::Error::Canceled)} else {
+                        self.controller.scene_cache_usage().and_then(|held| {
+                            let physical=om9_native_owner::physical_memory().map(|s|(s.total_bytes,s.available_bytes));
+                            let batch=additional.max(64*1024);
+                            match self.controller.coordinator().reserve_external_memory_with_held(
+                                om9_core::budget::memory::MemoryClass::CpuCache,batch,physical,held) {
+                                Err(om9_core::Error::Budget(_)) if batch>additional=>self.controller.coordinator().reserve_external_memory_with_held(
+                                    om9_core::budget::memory::MemoryClass::CpuCache,additional,physical,held),
+                                result=>result,
+                            }
+                        })
+                    };
+                    let _=reply.send(result);ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
+                }
+                Ok(HoverEvent::Finished(result)) => {
                     if valid {
-                        self.hover_object = hit;
-                        self.hover_picked_at = Some(new_basis());
-                        completed = true;
-                    } else {
-                        self.hover_picked_at = None;
-                        self.hover_object = None;
-                    }
+                        match result {
+                            Ok(hit)=>{self.hover_object=hit;self.hover_picked_at=Some(new_basis());}
+                            Err(_)=>{self.hover_object=None;self.hover_picked_at=Some(new_basis());
+                                self.hover_retry_at=Some(std::time::Instant::now()+std::time::Duration::from_secs(1));
+                                ui.ctx().request_repaint_after(std::time::Duration::from_secs(1));}
+                        }
+                        completed=true;
+                    } else {self.hover_picked_at=None;self.hover_object=None;}
                     self.hover_job = None;
                 }
                 Err(std::sync::mpsc::TryRecvError::Disconnected) => {
@@ -2411,30 +2765,51 @@ impl MatrixApp {
                 if scene.objects.len() > 128 {
                     let physical = om9_native_owner::physical_memory()
                         .map(|sample| (sample.total_bytes, sample.available_bytes));
-                    let admission = self.capture_hover_snapshot(physical);
-                    if let Ok(snapshot) = admission {
+                    let admission=if self.hover_worker_active.compare_exchange(false,true,std::sync::atomic::Ordering::AcqRel,
+                        std::sync::atomic::Ordering::Acquire).is_ok() {
+                        let permit=HoverWorkerPermit(std::sync::Arc::clone(&self.hover_worker_active));
+                        self.prepare_hover_snapshot(physical).map(|prepared|(prepared,permit))
+                    } else {Err(om9_core::Error::Busy)};
+                    if let Ok((prepared,permit)) = admission {
                         self.hover_retry_at = None;
                         let camera = view.camera.clone();
                         let basis = new_basis();
                         let ctx = ui.ctx().clone();
                         let (tx, rx) = std::sync::mpsc::channel();
-                        std::thread::spawn(move || {
-                            let hit = snapshot
-                                .scene
-                                .pick(
-                                    [pointer.x as f64, pointer.y as f64],
-                                    &camera,
-                                    viewport,
-                                    tolerance,
-                                    om9_scene::scene::PickIntent::Select,
-                                )
-                                .ok()
-                                .and_then(|hit| hit.map(|h| h.root));
-                            drop(snapshot);
-                            let _ = tx.send(hit);
+                        let cancel=om9_core::transaction::Cancellation::default();let worker_cancel=cancel.clone();
+                        let started=std::thread::Builder::new().name("om9-hover".into()).spawn(move || {
+                            let result=prepared.finish(|reservation,additional| {
+                                if worker_cancel.is_canceled(){return Err(om9_core::Error::Canceled);}
+                                let (reply,receiver)=std::sync::mpsc::sync_channel(1);
+                                tx.send(HoverEvent::Grow {additional,reply}).map_err(|_|om9_core::Error::Canceled)?;
+                                ctx.request_repaint();
+                                loop {
+                                    if worker_cancel.is_canceled(){return Err(om9_core::Error::Canceled);}
+                                    match receiver.recv_timeout(std::time::Duration::from_millis(20)) {
+                                        Ok(result)=>{let mut extra=result?;return reservation.merge_pending_from(&mut extra);}
+                                        Err(std::sync::mpsc::RecvTimeoutError::Timeout)=>(),
+                                        Err(std::sync::mpsc::RecvTimeoutError::Disconnected)=>return Err(om9_core::Error::Canceled),
+                                    }
+                                }
+                            },&worker_cancel).and_then(|snapshot| {
+                                if worker_cancel.is_canceled(){return Err(om9_core::Error::Canceled);}
+                                let hit=snapshot.scene.pick([pointer.x as f64,pointer.y as f64],&camera,viewport,tolerance,
+                                    om9_scene::scene::PickIntent::Select)?.map(|hit|hit.root);
+                                if worker_cancel.is_canceled(){return Err(om9_core::Error::Canceled);}
+                                Ok(hit)
+                            });
+                            drop(permit);
+                            let _ = tx.send(HoverEvent::Finished(result));
                             ctx.request_repaint();
                         });
-                        self.hover_job = Some((basis, rx));
+                        if started.is_ok() {
+                            self.hover_job = Some(HoverJob {basis,receiver:rx,cancel});
+                            ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
+                        } else {
+                            self.hover_picked_at=Some(new_basis());
+                            self.hover_retry_at=Some(std::time::Instant::now()+std::time::Duration::from_secs(1));
+                            ui.ctx().request_repaint_after(std::time::Duration::from_secs(1));
+                        }
                     } else {
                         // Retry transient pressure at a bounded cadence even if
                         // the pointer remains still. Unsupported platforms do
@@ -2691,6 +3066,274 @@ impl MatrixApp {
     }
 
     pub fn show(&mut self, ui: &mut egui::Ui) {
+        #[cfg(feature = "occt-brep")]
+        {
+            let changed = self.line_surface_click.is_some() && ui.input(|input| input.events.iter().any(|event|
+                matches!(event, egui::Event::Key { .. } | egui::Event::Text(_) | egui::Event::Paste(_)
+                    | egui::Event::PointerButton { .. } | egui::Event::PointerGone)));
+            if changed { self.cancel_line_surface(true); }
+            if self.line_surface_scheduler.is_busy() {
+                if let Some(result) = self.line_surface_scheduler.poll(&self.controller) {
+                    match result {
+                        Ok(receipt) => self.line_surface_receipt = Some(receipt),
+                        Err(error) => { self.cancel_line_surface(false); self.status.info(&format!("Surface snap unavailable: {error}")); }
+                    }
+                    ui.ctx().request_repaint();
+                }
+                if self.line_surface_scheduler.is_busy() { ui.ctx().request_repaint_after(std::time::Duration::from_millis(16)); }
+            }
+        }
+        #[cfg(feature = "occt-brep")]
+        if self.controller.background_ring_preview_pending() {
+            let applying = self.controller.background_ring_apply_queued();
+            if let Some(result) = self.controller.poll_background_ring_preview() {
+                if applying || result.is_err() { self.feedback(result); }
+                else { self.transcript.set_prompt(&self.controller.prompt_with_options()); }
+                ui.ctx().request_repaint();
+            }
+            if self.controller.background_ring_preview_pending() {
+                ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
+            }
+        }
+        if self.controller.file_open_worker_pending() {
+            if ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape)) {
+                if let Some(token) = self.controller.file_operation().map(|operation| operation.token()) {
+                    let result = self.controller.cancel_file_operation(token);
+                    self.feedback(result);
+                }
+                self.status.info("Cancelling Open…");
+            } else if let Some(result) = self.controller.poll_file_open_worker() {
+                let _ = self.file_feedback(ui.ctx(), result);
+                ui.ctx().request_repaint();
+            }
+            if self.controller.file_open_worker_pending() {
+                ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
+                ui.disable();
+            }
+        }
+        if self.controller.history_worker_pending() {
+            if ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape)) {
+                self.controller.cancel();
+                self.status.info("Cancelling history preparation…");
+            }
+            let gesture_active = self.gumball_session.is_some() || self.grip_drag.is_some()
+                || ui.input(|input| input.pointer.any_down() || [egui::PointerButton::Primary,
+                    egui::PointerButton::Secondary, egui::PointerButton::Middle].into_iter()
+                    .any(|button| input.pointer.button_released(button)));
+            if !gesture_active && let Some(result) = self.controller.poll_history_worker() {
+                self.feedback(result);
+                ui.ctx().request_repaint();
+            }
+            if self.controller.history_worker_pending() {
+                ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
+                ui.disable();
+            }
+        }
+        #[cfg(feature="occt-brep")]
+        if self.isocurve_recovery_waiting() && !self.isocurve_recovery_context_valid() {
+            self.stop_isocurve_face_recovery(Error::Stale("memory recovery Isocurve selection"));
+        }
+        #[cfg(feature="occt-brep")]
+        if self.controller.isocurve_face_verification_pending() {
+            if self.isocurve_face_worker_draft.is_none() {self.isocurve_face_worker_draft=Some(self.transcript.draft().to_owned());}
+            let new_input=ui.input(|input|input.events.iter().any(|event|
+                matches!(event,egui::Event::Text(_) | egui::Event::Paste(_) | egui::Event::Key {pressed:true,..})));
+            if self.isocurve_face_worker_draft.as_deref()!=Some(self.transcript.draft()) || new_input {
+                self.controller.cancel_isocurve_face_verification();
+                if self.isocurve_recovery_waiting() {self.stop_isocurve_face_recovery(Error::Stale("memory recovery Isocurve input"));}
+                else {self.status.info("ExtractIsocurve canceled because command input changed");}
+            }
+        }
+        #[cfg(feature="occt-brep")]
+        if !self.controller.isocurve_face_verification_pending(){self.isocurve_face_worker_draft=None;}
+        #[cfg(feature = "occt-brep")]
+        if self.controller.face_verification_pending() {
+            let gesture_active = self.gumball_session.is_some() || self.grip_drag.is_some()
+                || ui.input(|input| input.pointer.any_down() || [egui::PointerButton::Primary,
+                    egui::PointerButton::Secondary, egui::PointerButton::Middle].into_iter()
+                    .any(|button| input.pointer.button_released(button)));
+            let isocurve_start=self.controller.isocurve_face_verification_pending();
+            if !gesture_active && let Some(result) = self.controller.poll_face_verification() {
+                if isocurve_start && self.isocurve_recovery_waiting() {
+                    self.finish_isocurve_face_recovery(result);
+                } else {
+                    if isocurve_start && matches!(&result,Err(error) if Self::is_memory_refusal(error)) {
+                        self.offer_isocurve_start_memory_recovery();
+                    }
+                    self.feedback(result);
+                }
+                self.transcript.set_prompt(&self.controller.prompt_with_options());
+                ui.ctx().request_repaint();
+            }
+            if self.controller.face_verification_pending() { ui.ctx().request_repaint_after(std::time::Duration::from_millis(16)); }
+        }
+        #[cfg(feature="occt-brep")]
+        if self.isocurve_build_recovery_waiting() && !self.isocurve_build_recovery_context_valid() {
+            self.stop_isocurve_build_recovery(Error::Stale("memory recovery Isocurve input"));
+        }
+        #[cfg(feature="occt-brep")]
+        if self.controller.boolean_union_worker_pending() {
+            if self.boolean_union_worker_draft.is_none() {
+                self.boolean_union_worker_draft = Some(self.transcript.draft().to_owned());
+            }
+            let new_input = ui.input(|input| input.events.iter().any(|event|
+                matches!(event, egui::Event::Text(_) | egui::Event::Paste(_) | egui::Event::Key { pressed: true, .. })));
+            if self.boolean_union_worker_draft.as_deref() != Some(self.transcript.draft()) || new_input {
+                self.controller.cancel_boolean_union_worker();
+                self.boolean_union_worker_draft = None;
+                self.status.info("Boolean canceled because command input changed");
+            } else {
+                let gesture_active = self.gumball_session.is_some() || self.grip_drag.is_some()
+                    || ui.input(|input| input.pointer.primary_down()
+                        || input.pointer.button_released(egui::PointerButton::Primary));
+                if gesture_active { self.controller.service_boolean_union_worker(); }
+                if !gesture_active {
+                let poll_started = self.interaction_log.as_ref().map(|_| std::time::Instant::now());
+                if let Some(result) = self.controller.poll_boolean_union_worker() {
+                if let Some(log) = &mut self.interaction_log {
+                    log.record(serde_json::json!({"event":"boolean_worker_complete","ok":result.is_ok(),
+                        "error":result.as_ref().err().map(|error|error.to_string()),
+                        "final_poll_ms":poll_started.map(|started|started.elapsed().as_secs_f64()*1000.)}));
+                }
+                    self.boolean_union_worker_draft = None;
+                    self.feedback(result);
+                    self.transcript.set_prompt(&self.controller.prompt_with_options());
+                    ui.ctx().request_repaint();
+                }
+                }
+                if self.controller.boolean_union_worker_pending() { ui.ctx().request_repaint_after(std::time::Duration::from_millis(16)); }
+            }
+        } else { self.boolean_union_worker_draft = None; }
+        #[cfg(feature = "occt-brep")]
+        if self.controller.isocurve_build_worker_pending() {
+            if self.isocurve_build_worker_draft.is_none() {
+                self.isocurve_build_worker_draft=Some(self.transcript.draft().to_owned());
+            }
+            let new_command_input=ui.input(|input|input.events.iter().any(|event|
+                matches!(event,egui::Event::Text(_) | egui::Event::Paste(_) | egui::Event::Key {pressed:true,..})));
+            if self.isocurve_build_worker_draft.as_deref()!=Some(self.transcript.draft()) || new_command_input {
+                self.controller.cancel_isocurve_build_worker();
+                self.isocurve_build_worker_draft=None;
+                if self.isocurve_build_recovery_waiting() {self.stop_isocurve_build_recovery(Error::Stale("memory recovery Isocurve input"));}
+                else {self.status.info("ExtractIsocurve canceled because command input changed");}
+            } else {
+                let gesture_active=self.gumball_session.is_some() || self.grip_drag.is_some()
+                    || ui.input(|input|input.pointer.any_down() || [egui::PointerButton::Primary,
+                        egui::PointerButton::Secondary,egui::PointerButton::Middle].into_iter().any(|button|input.pointer.button_released(button)));
+                let key=self.controller.isocurve_recovery_key();
+                if !gesture_active && let Some(result)=self.controller.poll_isocurve_build_worker() {
+                    self.isocurve_build_worker_draft=None;
+                    if self.isocurve_build_recovery_waiting() {self.finish_isocurve_build_recovery(result);}
+                    else {
+                        if matches!(&result,Err(error) if Self::is_memory_refusal(error))
+                            && let Some(key)=key && self.controller.isocurve_recovery_key()==Some(key) {
+                            self.offer_isocurve_memory_recovery(key);
+                        }
+                        self.feedback(result);
+                    }
+                    self.transcript.set_prompt(&self.controller.prompt_with_options());
+                    ui.ctx().request_repaint();
+                }
+                if self.controller.isocurve_build_worker_pending(){ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));}
+            }
+        } else {self.isocurve_build_worker_draft=None;}
+        #[cfg(feature = "occt-brep")]
+        if self.wire_recovery_waiting() && !self.wire_recovery_context_valid() {
+            self.stop_wire_worker_recovery(Error::Stale("memory recovery ExtractWireframe selection"));
+        }
+        #[cfg(feature = "occt-brep")]
+        if self.controller.brep_wireframe_worker_pending() {
+            let gesture_active=self.gumball_session.is_some() || self.grip_drag.is_some()
+                || ui.input(|input|input.pointer.any_down() || [egui::PointerButton::Primary,
+                    egui::PointerButton::Secondary,egui::PointerButton::Middle].into_iter()
+                    .any(|button|input.pointer.button_released(button)));
+            if !gesture_active && let Some(result)=self.controller.poll_brep_wireframe_worker() {
+                if self.wire_recovery_waiting() {self.finish_wire_worker_recovery(result);}
+                else {
+                    let draft=self.wireframe_worker_draft.take();
+                    if matches!(&result,Err(error) if Self::is_memory_refusal(error))
+                        && draft.as_deref()==Some(self.transcript.draft()) {
+                        self.offer_wire_memory_recovery("ExtractWireframe");
+                    }
+                    self.feedback(result);
+                }
+                self.transcript.set_prompt(&self.controller.prompt_with_options());
+                ui.ctx().request_repaint();
+            }
+            if self.controller.brep_wireframe_worker_pending() {ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));}
+        } else {
+            self.wireframe_worker_draft=None;
+        }
+        #[cfg(feature = "occt-brep")]
+        if self.dupedge_recovery_waiting() && !self.dupedge_recovery_wait_context_valid() {
+            self.stop_dupedge_view_recovery(Error::Stale("memory recovery DupEdge selection"));
+        }
+        #[cfg(feature = "occt-brep")]
+        if self.controller.dupedge_source_view_pending() {
+            let source_view_root=self.controller.dupedge_source_view_pending_root();
+            let gesture_active = self.gumball_session.is_some() || self.grip_drag.is_some()
+                || ui.input(|input| input.pointer.any_down() || [egui::PointerButton::Primary,
+                    egui::PointerButton::Secondary, egui::PointerButton::Middle].into_iter()
+                    .any(|button| input.pointer.button_released(button)));
+            if !gesture_active && let Some(result) = self.controller.poll_dupedge_source_view() {
+                if self.dupedge_recovery_waiting() {self.finish_dupedge_view_recovery(result);}
+                else {match result {
+                    Ok(()) => {
+                        let message = "DupEdge source view ready; select the edge again";
+                        self.transcript.append_history(message);
+                        self.status.info(message)
+                    },
+                    Err(error) => {
+                        if Self::is_memory_refusal(&error) && self.transcript.draft().trim().is_empty()
+                            && let Some(key)=self.controller.dupedge_recovery_key() {
+                            self.offer_dupedge_memory_recovery(key,self.transcript.draft().to_owned(),"");
+                        } else if Self::is_memory_refusal(&error) && self.transcript.draft().trim().is_empty()
+                            && let (Some(root),Some(key))=(source_view_root,self.controller.dupedge_source_view_context_key()) {
+                            self.offer_dupedge_view_memory_recovery(root,key,self.transcript.draft().to_owned());
+                        }
+                        self.status.error(&format!("DupEdge source view unavailable: {error}"))
+                    },
+                };}
+                self.transcript.set_prompt(&self.controller.prompt_with_options());
+                ui.ctx().request_repaint();
+            }
+            if self.controller.dupedge_source_view_pending() {
+                ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
+            }
+        }
+        #[cfg(feature = "occt-brep")]
+        if self.controller.topology_remesh_pending() {
+            // Preserve the image/scene pair for an in-progress pointer gesture.
+            // A completed remesh waits until the gesture releases its input.
+            let gesture_active = self.gumball_session.is_some() || self.grip_drag.is_some()
+                || ui.input(|input| input.pointer.any_down() || [egui::PointerButton::Primary,
+                    egui::PointerButton::Secondary, egui::PointerButton::Middle].into_iter()
+                    .any(|button| input.pointer.button_released(button)));
+            if !gesture_active && let Some(result) = self.controller.poll_topology_remesh() {
+                if let Err(error) = result {
+                    self.status.info(&format!("Display refresh skipped: {error}"));
+                }
+                ui.ctx().request_repaint();
+            }
+            if let Some(result) = self.controller.poll_viewport_detail() {
+                match result {
+                    Ok(detail) => { self.display_preferences.viewport_detail = detail; self.status.info("Viewport detail updated"); }
+                    Err(error) => {
+                        self.display_preferences.viewport_detail = self.controller.viewport_detail();
+                        self.status.error(&format!("Viewport detail unchanged: {error}"));
+                    }
+                }
+                ui.ctx().request_repaint();
+            }
+            if self.controller.viewport_detail_pending() && ui.input(|i| i.key_pressed(Key::Escape)) {
+                self.controller.cancel_viewport_detail();
+                self.display_preferences.viewport_detail = self.controller.viewport_detail();
+                self.status.info("Viewport detail update cancelled");
+            }
+            if self.controller.topology_remesh_pending() || self.controller.viewport_detail_pending() {
+                ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
+            }
+        }
         if self.stl_capture.as_ref().is_some_and(|capture| !capture.belongs_to_session(self.controller.document())) {
             self.cancel_stl_export_options();
             self.status.info("STL export cancelled after document change");
@@ -2979,8 +3622,7 @@ impl MatrixApp {
                 && (focus.is_none() || focus == Some(editor))
                 && !egui::Popup::is_any_open(&ctx);
             if document_shortcut && ctx.input_mut(|input| input.consume_key(command, Key::Z)) {
-                let result = self.controller.undo();
-                self.feedback(result);
+                self.request_history_ui(&ctx, false);
             }
             let shift = Modifiers {
                 shift: true,
@@ -3346,7 +3988,9 @@ impl MatrixApp {
         self.file_ui(&ctx);
         self.gumball_settings_ui(&ctx);
         self.undo_settings_ui(&ctx);
+        self.memory_recovery_ui(&ctx);
         self.stl_profile_ui(&ctx);
+        self.stl_progress_ui(&ctx);
         self.persist_gumball_settings();
         self.os_audit_frame(&ctx);
         self.update_file_title(&ctx);
@@ -3736,6 +4380,11 @@ impl MatrixApp {
                     continue;
                 }
                 let stats = port.and_then(|p| p.frame_stats());
+                log.record(serde_json::json!({"event":"viewport_publication","view":id.title(),
+                    "frame_id":port.and_then(|p|p.published_frame),
+                    "scene_epoch":port.and_then(|p|p.displayed_scene_stamp().map(|s|s.1)),
+                    "objects":port.and_then(|p|p.published_frame_stats().map(|s|s.objects)),
+                    "visible":port.and_then(|p|p.published_frame_stats().map(|s|s.visible))}));
                 log.record(serde_json::json!({"event":"viewport_prepare","frame_id":self.nav_frame_token,"view":id.title(),"preparing":port.map(|p|p.preparing()),"pending_geometry_bytes":port.map(|p|p.pending_geometry_bytes()),"error":port.and_then(|p|p.preparation_error())}));
                 log.record(serde_json::json!({"event":"nav_frame","pixels_per_point":ui.ctx().pixels_per_point(),"zoom_factor":ui.ctx().zoom_factor(),"document_id":self.controller.document().id,"scene_epoch":self.controller.scene().map(|s|s.epoch),"selection_revision":self.controller.selection_state().revision,"physical_extent":self.view_rects.get(&id).map(|r|[(r.width()*ui.ctx().pixels_per_point()).round(),(r.height()*ui.ctx().pixels_per_point()).round()]),"encoded_frame_id":port.and_then(|p|p.encoded_frame),"published_frame_id":port.and_then(|p|p.published_frame),"final_complete":port.map(|p|p.final_complete()),"frame_id":self.nav_frame_token,"input_seq":self.navigation.input_seq,"view":id.title(),"active_view":self.controller.workspace.active.title(),"owner_view":self.navigation.gesture.map(|g|g.view.title()),"phase":state.map(|s|s.phase.name()),"render_due":self.nav_render_due,"interval_ms":self.scheduler.interval.map(|d|d.as_secs_f64()*1000.),"work_ms":self.nav_frame_started.elapsed().as_secs_f64()*1000.,"pane_work_ms":started.elapsed().as_secs_f64()*1000.,"hz":self.scheduler.hz(),"next_deadline_in_ms":self.scheduler.wait(std::time::Instant::now()).as_secs_f64()*1000.,"quality":self.scheduler.quality.index(),"revision":view.camera.revision,"displayed_revision":port.and_then(|p|p.displayed_camera().map(|c|c.revision)),"draw_counter_scope":"scene_mesh_batch","generation":self.navigation.generation(id),"prepare_ms":port.map(|p|p.last_prepare_ms()),"submit_cpu_ms":port.map(|p|p.last_draw_ms()),"gpu_ms":port.and_then(|p|p.gpu_sample.map(|s|s.1)),"gpu_frame_id":port.and_then(|p|p.gpu_sample.map(|s|s.0)),"receive_to_submit_ms":self.nav_received.map(|t|t.elapsed().as_secs_f64()*1000.),"refinement_ms":port.and_then(|p|p.refinement_ms()),"present_ms":null,"scene_objects":stats.map(|s|s.objects),"visible":stats.map(|s|s.visible),"draw_calls":stats.map(|s|s.draw_calls)}));
                 if let Some(action) = self.nav_actions.get(&id) {
@@ -3775,6 +4424,8 @@ impl MatrixApp {
     }
 
     fn viewport_ui(&mut self, ui: &mut egui::Ui, id: ViewId, rect: Rect, response: egui::Response) {
+        #[cfg(feature = "occt-brep")]
+        if self.line_surface_view == Some(id) && !response.hovered() { self.cancel_line_surface(true); }
         let primary_pressed = ui.input(|input| input.pointer.button_pressed(egui::PointerButton::Primary));
         let primary_press_origin = if primary_pressed {
             ui.input(|input| input.pointer.press_origin().or_else(|| input.events.iter().find_map(|event| {
@@ -3832,7 +4483,9 @@ impl MatrixApp {
                 generation: self.navigation.generation(id),
                 moving: self.navigation.moving(id),
                 render_due: self.nav_render_due,
-                quality: self.scheduler.quality,
+                quality: if self.light_motion_baseline { self.scheduler.quality } else {
+                    self.controller.viewport_detail().motion_quality(self.navigation.moving(id), self.scheduler.quality)
+                },
             };
             let needs_inventory = self.gpu_viewports.get(&id).is_none_or(|port| {
                 port.needs_target_inventory(rect, ui.ctx().pixels_per_point(), request)
@@ -3914,18 +4567,24 @@ impl MatrixApp {
         let primary_gesture = ui.input(|input| input.pointer.primary_down()
             || input.pointer.button_pressed(egui::PointerButton::Primary)
             || input.pointer.button_released(egui::PointerButton::Primary));
-        let published_scene_current = self.gpu_state.is_none()
+        let published_scene_content_current = self.gpu_state.is_none()
             || self.controller.scene().is_some_and(|scene| {
                 self.gpu_viewports.get(&id).is_some_and(|port| {
                     port.displays_content(scene, self.controller.selection_state().revision,
                         self.controller.preview_revision(), view.cplane.revision,
                         self.controller.solid_boolean_two_hidden_sources(), view.mode)
-                        && (!primary_gesture || self.primary_press_scene.as_ref().is_some_and(|(press_id, press_key, press_camera, _)| {
-                            *press_id == id && port.displayed_key().is_some_and(|key| key.same_input_basis(*press_key))
-                                && port.displayed_camera() == Some(press_camera)
-                        }))
                 })
             });
+        #[cfg(feature = "occt-brep")]
+        let temporary_boolean = self.controller.boolean_mesh_preview().is_some();
+        #[cfg(not(feature = "occt-brep"))]
+        let temporary_boolean = false;
+        let published_scene_current = !temporary_boolean && published_scene_content_current && (self.gpu_state.is_none()
+            || !primary_gesture || self.gpu_viewports.get(&id).is_some_and(|port|
+                self.primary_press_scene.as_ref().is_some_and(|(press_id, press_key, press_camera, _)| {
+                            *press_id == id && port.displayed_key().is_some_and(|key| key.same_input_basis(*press_key))
+                                && port.displayed_camera() == Some(press_camera)
+                        })));
         // Opt-in diagnostic: correlate a primary gesture with the image and
         // camera that were eligible for input, even if routing rejects it.
         let primary_edge = ui.input(|input| input.pointer.button_pressed(egui::PointerButton::Primary)
@@ -3980,7 +4639,16 @@ impl MatrixApp {
             );
         }
         self.paint_picture_frames(&painter, &view, viewport, rect);
-        if self.controller.solid_boolean_two_hidden_sources().is_none() {
+        if temporary_boolean {
+            painter.text(rect.min + Vec2::new(8., 56.), egui::Align2::LEFT_TOP,
+                "Boolean tạm — đang tính dữ liệu chính xác", egui::FontId::proportional(13.), Color32::LIGHT_GREEN);
+        }
+        #[cfg(feature = "occt-brep")]
+        if self.controller.boolean_mesh_preview_failure().is_some() {
+            painter.text(rect.min + Vec2::new(8., 56.), egui::Align2::LEFT_TOP,
+                "Preview không khả dụng — đang tính Boolean chính xác", egui::FontId::proportional(13.), Color32::LIGHT_YELLOW);
+        }
+        if !temporary_boolean && self.controller.solid_boolean_two_hidden_sources().is_none() {
             self.selection_frame(ui, id, &view, viewport, rect);
             self.object_info_label(ui, &view, viewport, rect);
             self.subselection_overlay(ui, &view, viewport, rect);
@@ -3999,13 +4667,14 @@ impl MatrixApp {
             self.band_start = None;
             self.band_view = None;
         }
-        if self.controller.solid_boolean_two_hidden_sources().is_none()
+        let mut ambiguous_popup_owns_pointer = false;
+        if !temporary_boolean && self.controller.solid_boolean_two_hidden_sources().is_none()
             && id == self.controller.workspace.active
             && !self.navigation.moving(id)
-            && published_scene_current
+            && published_scene_content_current
         {
-            self.hover_frame(ui, &response, &view, viewport, rect);
-            self.ambiguous_popup(ui);
+            if published_scene_current { self.hover_frame(ui, &response, &view, viewport, rect); }
+            ambiguous_popup_owns_pointer = self.ambiguous_popup(ui);
         } else if id == self.controller.workspace.active {
             // No hover can be current while interaction is gated against the
             // published image or navigation is changing its input basis.
@@ -4013,15 +4682,15 @@ impl MatrixApp {
             self.hover_picked_at = None;
             self.hover_retry_at = None;
         }
-        if self.controller.solid_boolean_two_hidden_sources().is_none() {
+        if !temporary_boolean && self.controller.solid_boolean_two_hidden_sources().is_none() {
             self.paint_osnap(&painter, id, &view, viewport);
         }
-        if let Some((body, _mode)) = self.controller.solid_boolean_two_preview() {
-            for &[a, b, _] in &body.display.segments {
+        if let (Some((body, _mode)), Some(placement)) = (self.controller.solid_boolean_two_preview(), self.controller.solid_boolean_two_preview_placement()) {
+            for &[a, b, _] in &body.display().segments {
                 if let (Some(&a), Some(&b)) = (
-                    body.display.points.get(a as usize),
-                    body.display.points.get(b as usize),
-                ) {
+                    body.display().points.get(a as usize),
+                    body.display().points.get(b as usize),
+                ) && let (Ok(a), Ok(b)) = (placement.point(a), placement.point(b)) {
                     paint_line(
                         &painter,
                         &view.camera,
@@ -4035,10 +4704,10 @@ impl MatrixApp {
             }
         }
         if let Some((body, placement)) = self.controller.solid_fillet_preview() {
-            for &[a, b, _] in &body.display.segments {
+            for &[a, b, _] in &body.display().segments {
                 if let (Some(&a), Some(&b)) = (
-                    body.display.points.get(a as usize),
-                    body.display.points.get(b as usize),
+                    body.display().points.get(a as usize),
+                    body.display().points.get(b as usize),
                 ) && let (Ok(a), Ok(b)) = (placement.point(a), placement.point(b))
                 {
                     paint_line(
@@ -4069,7 +4738,7 @@ impl MatrixApp {
                             painter.text(
                                 center + Vec2::new(7.0, -7.0),
                                 egui::Align2::LEFT_BOTTOM,
-                                format!("{radius}"),
+                                format!("{}", radius / self.controller.document().page_unit.factor()),
                                 egui::FontId::proportional(11.0),
                                 Color32::LIGHT_GREEN,
                             );
@@ -4152,10 +4821,12 @@ impl MatrixApp {
                         )
                     }
                 });
-            if let Ok(Some(world)) = world {
-                let world = self.controller.constrain_point(world).unwrap_or(world);
+            let world=world.ok().flatten().map(|point|self.controller.constrain_point(point).unwrap_or(point));
+            if world.is_some() || self.picking_points() {
                 let mut snap = None;
                 let mut unsupported_surface = false;
+                #[allow(unused_mut)]
+                let mut line_surface_pending = false;
                 if self.picking_points()
                     && let Some(scene) = self.controller.scene()
                 {
@@ -4172,18 +4843,33 @@ impl MatrixApp {
                         if let Some(one_shot) = settings.one_shot {
                             candidates.retain(|candidate| candidate.kind == one_shot);
                         }
+                        #[cfg(feature = "occt-brep")]
+                        if self.controller.is_running() && self.controller.active_command_input_snapshot().owner == Some("line")
+                            && self.transcript.draft().is_empty() {
+                            return self.line_surface_preview(candidates, &view.camera, viewport,
+                                [pos.x as f64, pos.y as f64], view.mode, id, ui.ctx()).map(|result| {
+                                    line_surface_pending = result.is_none();
+                                    result.flatten()
+                                });
+                        }
+                        #[cfg(feature = "occt-brep")]
+                        self.cancel_line_surface(true);
                         self.resolve_snap_candidates(candidates, &view.camera, viewport, view.mode, &[])
                     });
                     match candidates {
                       Ok(best) => {
                         if let Some(candidate) = best {
                             snap = Some(candidate);
-                        } else if self.snap_state.settings.one_shot == Some(om9_scene::osnap::SnapKind::Surface) {
+                        } else if !line_surface_pending && self.snap_state.settings.one_shot == Some(om9_scene::osnap::SnapKind::Surface) {
                             unsupported_surface = true;
                             self.status.info("Surface snap unavailable: no surface candidate under the pointer");
                         }
                       }
                       Err(error) => {
+                          #[cfg(feature = "occt-brep")]
+                          if self.controller.active_command_input_snapshot().owner == Some("line") {
+                              self.cancel_line_surface(true);
+                          }
                           unsupported_surface = true;
                           let label = if settings.one_shot == Some(om9_scene::osnap::SnapKind::Surface) {
                               "Surface snap unavailable"
@@ -4194,10 +4880,12 @@ impl MatrixApp {
                       }
                     }
                 }
+                if line_surface_pending { unsupported_surface = true; }
                 if self.smarttrack_enabled
                     && !unsupported_surface
                     && snap.is_none()
                     && !self.smarttrack.anchors().is_empty()
+                    && let Some(world)=world
                 {
                     let tolerance = world_per_pixel(&view.camera, viewport)
                         * self.snap_state.settings.radius_px;
@@ -4210,10 +4898,15 @@ impl MatrixApp {
                     self.hover = Some(candidate.world);
                     self.snap = Some(candidate);
                 } else {
-                    self.hover = Some(world);
+                    self.hover = world;
                     self.snap = None;
                 }
                 self.hover_view = Some(id);
+                #[cfg(feature = "occt-brep")]
+                if !line_surface_pending && self.line_surface_view == Some(id) && self.line_surface_click.is_some() {
+                    let result = self.finish_line_surface_click();
+                    self.feedback(result);
+                }
                 if let Some(point) = self.hover {
                     self.controller.session_hover(point);
                 }
@@ -4511,7 +5204,7 @@ impl MatrixApp {
             paint_world_datum(&painter, &view.camera, viewport, rect);
         }
         paint_view_marker(&painter, rect, id);
-        if !self.viewport_menu_owns_frame
+        if !self.viewport_menu_owns_frame && !ambiguous_popup_owns_pointer
             && response.hovered()
             && let Some(pos) = response.hover_pos()
         {
@@ -4540,7 +5233,75 @@ impl MatrixApp {
                         self.feedback(result);
                     }
                 } else if self.controller.is_running() {
-                    if self.controller.solid_boolean_two_preview_mode().is_some() {
+                    if self.controller.dupedge_needs_pick() {
+                        let hits = self.controller.scene().ok_or(Error::Missing("DupEdge scene"))
+                            .and_then(|scene| scene.pick_edge_candidates([pos.x as f64, pos.y as f64], &view.camera,
+                                viewport, pick_tolerance(ui), PickIntent::Select));
+                        let result = match hits {
+                            #[cfg(feature = "occt-brep")]
+                            Ok(hits) if !hits.is_empty() && hits.iter().all(|hit| hit.root==hits[0].root && hit.path.is_empty()
+                                && matches!(hit.subset,om9_scene::scene::Subelement::MeshEdge {..})
+                                && self.controller.document().entities.get(&hit.root)
+                                    .is_some_and(|entity|matches!(entity.geometry,om9_core::geometry::Geometry::NativeBrep(_)))) => {
+                                hits[0].revalidate_in_scene(self.controller.coordinator(),self.controller.scene(),&view.camera,viewport)
+                                    .and_then(|_| {
+                                        let root=hits[0].root;let result=self.controller.request_dupedge_source_view(root);
+                                        if let Err(error)=&result && Self::is_memory_refusal(error)
+                                            && let Some(key)=self.controller.dupedge_source_view_context_key() {
+                                            self.offer_dupedge_view_memory_recovery(root,key,self.transcript.draft().to_owned());
+                                        }
+                                        result
+                                    })
+                            },
+                            Ok(hits) if hits.len() == 1 => {
+                                let hit = &hits[0];
+                                let world_per_pixel = match view.camera.projection {
+                                    om9_scene::camera::Projection::Orthographic { vertical_span_mm } => vertical_span_mm / viewport.size[1].max(1.0),
+                                    om9_scene::camera::Projection::Perspective { vertical_fov_rad } =>
+                                        2.0 * (vertical_fov_rad * 0.5).tan() * hit.depth / viewport.size[1].max(1.0),
+                                };
+                                hit.revalidate_in_scene(self.controller.coordinator(), self.controller.scene(),
+                                    &view.camera, viewport).and_then(|_| validate_dupedge_visibility(
+                                        self.controller.scene().ok_or(Error::Missing("DupEdge scene"))?, hit, &view.camera, viewport, view.mode))
+                                    .and_then(|_| self.controller.dupedge_pick_with_point(
+                                        crate::session::SelectedSubobject::from_hit(hit), hit.world_point,
+                                        (pick_tolerance(ui) * world_per_pixel).max(1e-9), &view.camera, viewport,
+                                        [pos.x as f64, pos.y as f64], pick_tolerance(ui), hit.depth))
+                            },
+                            Ok(hits) if hits.is_empty() => {
+                                #[cfg(feature = "occt-brep")]
+                                {
+                                    let root = self.controller.scene().ok_or(Error::Missing("DupEdge scene"))
+                                        .and_then(|scene| scene.pick_all([pos.x as f64,pos.y as f64],&view.camera,viewport,pick_tolerance(ui),PickIntent::Select))
+                                        .and_then(|hits| {
+                                            if hits.len()!=1 {return Err(Error::Missing("B-Rep edge under the pointer"));}
+                                            let hit=&hits[0];
+                                            hit.revalidate_in_scene(self.controller.coordinator(),self.controller.scene(),&view.camera,viewport)?;
+                                            if !hit.path.is_empty() || !self.controller.document().entities.get(&hit.root)
+                                                .is_some_and(|entity|matches!(entity.geometry,om9_core::geometry::Geometry::NativeBrep(_))) {
+                                                return Err(Error::Missing("B-Rep edge under the pointer"));
+                                            }
+                                            Ok(hit.root)
+                                        });
+                                    root.and_then(|id| {
+                                        let result=self.controller.request_dupedge_source_view(id);
+                                        if let Err(error)=&result && Self::is_memory_refusal(error)
+                                            && let Some(key)=self.controller.dupedge_source_view_context_key() {
+                                            self.offer_dupedge_view_memory_recovery(id,key,self.transcript.draft().to_owned());
+                                        }
+                                        result
+                                    })
+                                }
+                                #[cfg(not(feature = "occt-brep"))]
+                                {Err(Error::Missing("B-Rep edge under the pointer"))}
+                            },
+                            Ok(_) => Err(Error::Invalid("ambiguous edges: isolate the intended edge")),
+                            Err(error) => Err(error),
+                        };
+                        if result.is_ok() { self.append_running_prompt(); }
+                        self.feedback(result);
+                        self.focus_cmd = false;
+                    } else if self.controller.solid_boolean_two_preview_mode().is_some() {
                         let result = self.controller.submit("Next");
                         if result.is_ok() {
                             self.append_running_prompt();
@@ -4579,7 +5340,7 @@ impl MatrixApp {
                             scene.pick_kind_all([pos.x as f64, pos.y as f64], &view.camera, viewport,
                                 pick_tolerance(ui), PickIntent::Select, om9_scene::scene::PickKind::Edge)
                                 .ok().map(|hits| hits.into_iter().filter(|hit| {
-                                    hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok() &&
+                                    hit.revalidate_in_scene(self.controller.coordinator(),self.controller.scene(), &view.camera, viewport).is_ok() &&
                                     self.controller.subselection().contains(&crate::session::SelectedSubobject::from_hit(hit))
                                 }).collect::<Vec<_>>())
                         }).unwrap_or_default();
@@ -4637,8 +5398,9 @@ impl MatrixApp {
                                             .filter(|hit| {
                                                 hit.path.is_empty()
                                                     && hit
-                                                        .revalidate_in_view(
+                                                        .revalidate_in_scene(
                                                             self.controller.coordinator(),
+                                                            self.controller.scene(),
                                                             &view.camera,
                                                             viewport,
                                                         )
@@ -4700,8 +5462,9 @@ impl MatrixApp {
                                     .map(|hits| {
                                         hits.into_iter()
                                             .filter(|hit| {
-                                                hit.revalidate_in_view(
+                                                hit.revalidate_in_scene(
                                                     self.controller.coordinator(),
+                                                    self.controller.scene(),
                                                     &view.camera,
                                                     viewport,
                                                 )
@@ -4730,7 +5493,7 @@ impl MatrixApp {
                                 pick_tolerance(ui), PickIntent::Select, om9_scene::scene::PickKind::Edge)
                                 .ok().map(|hits| hits.into_iter().filter(|hit|
                                     matches!(hit.subset, om9_scene::scene::Subelement::BrepEdge(_)) &&
-                                    hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok() &&
+                                    hit.revalidate_in_scene(self.controller.coordinator(),self.controller.scene(), &view.camera, viewport).is_ok() &&
                                     (self.controller.solid_sphere_brep_edge_stage() == 1 ||
                                      self.controller.solid_sphere_is_source_edge(&crate::session::SelectedSubobject::from_hit(hit)))
                                 ).collect::<Vec<_>>())
@@ -4760,7 +5523,7 @@ impl MatrixApp {
                                 let curves = self.controller.scene().and_then(|scene| {
                                     scene.pick_all([pos.x as f64, pos.y as f64], &view.camera, viewport,
                                         pick_tolerance(ui), PickIntent::Select).ok().map(|hits| hits.into_iter().filter(|hit|
-                                            hit.path.is_empty() && hit.revalidate_in_view(self.controller.coordinator(), &view.camera, viewport).is_ok() &&
+                                            hit.path.is_empty() && hit.revalidate_in_scene(self.controller.coordinator(),self.controller.scene(), &view.camera, viewport).is_ok() &&
                                             matches!(self.controller.document().entities.get(&hit.root).map(|e| &e.geometry), Some(om9_core::geometry::Geometry::Curve(_)))
                                         ).map(|hit| hit.root).fold(Vec::new(), |mut ids, id| { if !ids.contains(&id) { ids.push(id); } ids }))
                                 }).unwrap_or_default();
@@ -4802,8 +5565,9 @@ impl MatrixApp {
                                     .map(|hits| {
                                         hits.into_iter()
                                             .filter(|hit| {
-                                                hit.revalidate_in_view(
+                                                hit.revalidate_in_scene(
                                                     self.controller.coordinator(),
+                                                    self.controller.scene(),
                                                     &view.camera,
                                                     viewport,
                                                 )
@@ -4846,8 +5610,9 @@ impl MatrixApp {
                                     .map(|hits| {
                                         hits.into_iter()
                                             .filter(|hit| {
-                                                hit.revalidate_in_view(
+                                                hit.revalidate_in_scene(
                                                     self.controller.coordinator(),
+                                                    self.controller.scene(),
                                                     &view.camera,
                                                     viewport,
                                                 )
@@ -4914,8 +5679,9 @@ impl MatrixApp {
                                                         hit.subset,
                                                         om9_scene::scene::Subelement::BrepEdge(_)
                                                     ) && hit
-                                                        .revalidate_in_view(
+                                                        .revalidate_in_scene(
                                                             self.controller.coordinator(),
+                                                            self.controller.scene(),
                                                             &view.camera,
                                                             viewport,
                                                         )
@@ -4956,8 +5722,9 @@ impl MatrixApp {
                                     .map(|hits| {
                                         hits.into_iter()
                                             .filter(|hit| {
-                                                hit.revalidate_in_view(
+                                                hit.revalidate_in_scene(
                                                     self.controller.coordinator(),
+                                                    self.controller.scene(),
                                                     &view.camera,
                                                     viewport,
                                                 )
@@ -5028,8 +5795,9 @@ impl MatrixApp {
                                     .map(|hits| {
                                         hits.into_iter()
                                             .filter(|hit| {
-                                                hit.revalidate_in_view(
+                                                hit.revalidate_in_scene(
                                                     self.controller.coordinator(),
+                                                    self.controller.scene(),
                                                     &view.camera,
                                                     viewport,
                                                 )
@@ -5225,7 +5993,7 @@ impl MatrixApp {
                             let shift = ui.input(|input| input.modifiers.shift);
                             let _ = self.controller.set_rect_square(shift);
                         }
-                        let result = self.controller.accept_world_point(point);
+                        let result = self.accept_viewport_command_point(point, &anchor);
                         if result.is_ok() {
                             self.snap_state.accept();
                             if let Some(candidate) = anchor {
@@ -5241,10 +6009,19 @@ impl MatrixApp {
                         if let Some(focus) = ui.ctx().memory(|memory| memory.focused()) {
                             ui.ctx().memory_mut(|memory| memory.surrender_focus(focus));
                         }
+                    } else {
+                        #[cfg(feature = "occt-brep")]
+                        if self.line_surface_view == Some(id) && self.line_surface_scheduler.is_busy()
+                            && self.controller.active_command_input_snapshot().owner == Some("line") {
+                            let result = self.defer_line_surface_click(id, view.mode);
+                            if result.is_ok() { self.status.info("Waiting for surface snap"); }
+                            self.feedback(result);
+                        }
                     }
                 } else {
                     // Grips on: a click on a grip picks it (Shift adds, Ctrl removes); a click
                     // elsewhere drops the picked grips and selects objects as usual.
+                    let mut clear_grips = false;
                     if self.controller.top11_grip_mode().is_some() {
                         let (shift, ctrl) = ctrl_or_command(ui);
                         if let Some(grip) =
@@ -5260,13 +6037,9 @@ impl MatrixApp {
                             self.controller.select_grips(&[grip], change);
                             return;
                         }
-                        if !shift && !ctrl {
-                            self.controller
-                                .select_grips(&[], crate::session::GripPick::Replace);
-                        }
+                        clear_grips = !shift && !ctrl;
                     }
-                    // A session picking curves by location (Fillet, Extend …) reads where.
-                    self.controller.note_session_pick(self.hover);
+                    let mut pick_failure = None;
                     let candidates = self.controller.scene().and_then(|scene| {
                         scene
                             .pick_all(
@@ -5276,21 +6049,51 @@ impl MatrixApp {
                                 pick_tolerance(ui),
                                 PickIntent::Select,
                             )
+                            .map_err(|error| {pick_failure=Some(error);})
                             .ok()
                             .map(|hits| {
-                                hits.into_iter()
-                                    .filter(|hit| {
-                                        hit.revalidate_in_view(
+                                let mut ranked = Vec::new();
+                                if ranked.try_reserve_exact(hits.len()).is_err() {
+                                    pick_failure=Some(Error::Budget("bytes"));return Vec::new();
+                                }
+                                for hit in hits {
+                                    if hit.revalidate_in_scene(
                                             self.controller.coordinator(),
+                                            self.controller.scene(),
                                             &view.camera,
                                             viewport,
                                         )
                                         .is_ok()
-                                    })
-                                    .map(|hit| hit.root)
-                                    .collect::<Vec<_>>()
+                                    {ranked.push((hit.root,hit.depth));}
+                                }
+                                for object in &scene.objects {
+                                    if !object.buffers.is_trim_display_fallback() {continue;}
+                                    match self.controller.fallback_trim_source_pick(object,&view.camera,viewport,[pos.x as f64,pos.y as f64]) {
+                                        Ok(Some(depth)) => {
+                                            if let Some(existing)=ranked.iter_mut().find(|(root,_)|*root==object.root) {
+                                                existing.1=existing.1.min(depth);
+                                            } else if ranked.try_reserve(1).is_ok() {ranked.push((object.root,depth));}
+                                            else {pick_failure=Some(Error::Budget("bytes"));break;}
+                                        }
+                                        Ok(None)=>{},
+                                        Err(error)=>{pick_failure=Some(error);break;}
+                                    }
+                                }
+                                ranked.sort_by(|a,b|a.1.total_cmp(&b.1).then(a.0.cmp(&b.0)));
+                                let mut roots=Vec::new();
+                                if roots.try_reserve_exact(ranked.len()).is_err() {
+                                    pick_failure=Some(Error::Budget("bytes"));return roots;
+                                }
+                                roots.extend(ranked.into_iter().map(|(root,_)|root));roots
                             })
                     });
+                    if let Some(error)=pick_failure {self.feedback(Err(error));return;}
+                    if clear_grips {
+                        self.selected_grips.clear();
+                        self.controller.select_grips(&[], crate::session::GripPick::Replace);
+                    }
+                    // A session picking curves by location (Fillet, Extend …) reads where.
+                    self.controller.note_session_pick(self.hover);
                     // Several objects under the pointer: Matrix9 asks which one, instead of guessing.
                     if let Some(list) = candidates.as_ref()
                         && list.len() > 1
@@ -5341,8 +6144,9 @@ impl MatrixApp {
                                 return;
                             }
                             // Keep the exact hit path; no root-only member lookup is allowed.
-                            if let Err(error) = hit.revalidate_in_view(
+                            if let Err(error) = hit.revalidate_in_scene(
                                 self.controller.coordinator(),
+                                self.controller.scene(),
                                 &view.camera,
                                 viewport,
                             ) {
@@ -5350,9 +6154,40 @@ impl MatrixApp {
                                 return;
                             }
                             let reference = crate::session::SelectedSubobject::from_hit(&hit);
-                            if let Err(error) =
-                                self.controller.toggle_subobject_ref(reference.clone())
-                            {
+                            #[cfg(feature="occt-brep")]
+                            let native_face_pick = matches!(reference.subset,om9_scene::scene::Subelement::MeshFace(_) | om9_scene::scene::Subelement::BrepFace(_))
+                                && reference.path.is_empty() && self.controller.document().entities.get(&reference.root)
+                                    .is_some_and(|entity|matches!((&entity.geometry,&reference.subset),
+                                        (om9_core::geometry::Geometry::NativeBrep(_),om9_scene::scene::Subelement::MeshFace(_)) |
+                                        (om9_core::geometry::Geometry::Brep(_),om9_scene::scene::Subelement::BrepFace(_))));
+                            let can_record_edge = matches!(reference.subset, om9_scene::scene::Subelement::BrepEdge(_))
+                                && reference.path.is_empty()
+                                && self.controller.subselection().first().is_none_or(|old| old.root == reference.root)
+                                && self.controller.scene().and_then(|scene| scene.pick_edge_candidates(
+                                    [pos.x as f64, pos.y as f64], &view.camera, viewport,
+                                    pick_tolerance(ui), PickIntent::Select).ok())
+                                    .is_some_and(|hits| hits.len() == 1 && hits[0].root == reference.root
+                                        && hits[0].path == reference.path && hits[0].subset == reference.subset);
+                            #[cfg(feature="occt-brep")]
+                            let native_result = native_face_pick.then(||self.controller.toggle_native_isocurve_face_hit(
+                                &hit,&view.camera,viewport,[pos.x as f64,pos.y as f64],pick_tolerance(ui)));
+                            #[cfg(not(feature="occt-brep"))]
+                            let native_result:Option<Result<()>> = None;
+                            let result = if let Some(result)=native_result {
+                                result.or_else(|_|self.controller.toggle_subobject_ref(reference.clone()))
+                            } else if can_record_edge {
+                                let world_per_pixel = match view.camera.projection {
+                                    om9_scene::camera::Projection::Orthographic { vertical_span_mm } => vertical_span_mm / viewport.size[1].max(1.0),
+                                    om9_scene::camera::Projection::Perspective { vertical_fov_rad } =>
+                                        2.0 * (vertical_fov_rad * 0.5).tan() * hit.depth / viewport.size[1].max(1.0),
+                                };
+                                self.controller.scene().ok_or(Error::Missing("DupEdge scene"))
+                                    .and_then(|scene| validate_dupedge_visibility(scene, &hit, &view.camera, viewport, view.mode))
+                                    .and_then(|_| self.controller.dupedge_pick_with_point(reference.clone(), hit.world_point,
+                                        (pick_tolerance(ui) * world_per_pixel).max(1e-9), &view.camera, viewport,
+                                        [pos.x as f64,pos.y as f64], pick_tolerance(ui), hit.depth))
+                            } else { self.controller.toggle_subobject_ref(reference.clone()) };
+                            if let Err(error) = result {
                                 self.feedback(Err(error));
                                 return;
                             }
@@ -5503,6 +6338,7 @@ impl MatrixApp {
             self.controller.selection_state().revision,
             self.controller.coordinator().epoch(),
             self.controller.preview_revision(),
+            self.controller.scene().map(|s|s.publication_id()),
             view.camera.clone(),
             rect,
         );
@@ -5519,12 +6355,26 @@ impl MatrixApp {
             }
             return;
         }
+        let started = self.interaction_log.as_ref().map(|_|std::time::Instant::now());
+        let projector = if self.selection_frame_baseline { None } else { view.camera.projector(viewport).ok() };
+        let mut point_count = 0usize;
         let mut min = egui::pos2(f32::MAX, f32::MAX);
         let mut max = egui::pos2(f32::MIN, f32::MIN);
         let mut found = false;
         if let Some(scene) = self.controller.scene() {
             for object in &scene.objects {
                 if !self.controller.selected().contains(&object.root) {
+                    continue;
+                }
+                if !self.selection_frame_baseline {
+                    if let Ok(Some(corners)) = object.display_bounds_corners() {
+                        point_count += corners.len();
+                        if let Some(projector)=&projector && let Ok(Some([lo,hi]))=projector.project_box(corners) {
+                            min=min.min(egui::pos2(lo[0] as f32,lo[1] as f32));
+                            max=max.max(egui::pos2(hi[0] as f32,hi[1] as f32));
+                            found=true;
+                        }
+                    }
                     continue;
                 }
                 let Ok(transform) = object.display_transform() else {
@@ -5535,11 +6385,15 @@ impl MatrixApp {
                     RenderBuffers::Curve { points, .. } => points,
                     RenderBuffers::Mesh { vertices, .. } => vertices,
                 };
+                point_count += points.len();
                 for point in points {
                     let Ok(point) = transform.point(*point) else {
                         continue;
                     };
-                    if let Ok(Some(projected)) = view.camera.project(point, viewport) {
+                    let projected = if self.selection_frame_baseline {
+                        view.camera.project(point, viewport).ok().flatten()
+                    } else { projector.as_ref().and_then(|p|p.project(point).ok().flatten()) };
+                    if let Some(projected) = projected {
                         let screen =
                             egui::pos2(projected.screen[0] as f32, projected.screen[1] as f32);
                         min = min.min(screen);
@@ -5549,19 +6403,19 @@ impl MatrixApp {
                 }
             }
         }
-        if !found {
-            self.selection_frames.insert(id, (key, None));
-            return;
-        }
         // A small margin so a flat selection (two points on one line) still reads as a box.
-        let frame = Rect::from_two_pos(min, max)
+        let frame = found.then(||Rect::from_two_pos(min, max)
             .expand(3.0)
-            .intersect(rect.shrink(1.0));
-        if frame.width() <= 3.0 || frame.height() <= 3.0 {
-            self.selection_frames.insert(id, (key, None));
-            return;
+            .intersect(rect.shrink(1.0)))
+            .filter(|f|f.width()>3.0 && f.height()>3.0);
+        self.selection_frames.insert(id, (key, frame));
+        if let Some(started) = started && let Some(log) = self.interaction_log.as_mut() {
+            log.record(serde_json::json!({"event":"selection_frame_rebuild","view":id.title(),
+                "baseline":self.selection_frame_baseline,"points":point_count,
+                "elapsed_ms":started.elapsed().as_secs_f64()*1000.,
+                "rect":frame.map(|f|[f.min.x,f.min.y,f.max.x,f.max.y])}));
         }
-        self.selection_frames.insert(id, (key, Some(frame)));
+        let Some(frame) = frame else { return; };
         let painter = ui.painter().with_clip_rect(rect);
         painter.rect_stroke(
             frame,
@@ -5658,16 +6512,15 @@ impl MatrixApp {
         rect: Rect,
     ) {
         use om9_scene::scene::{RenderBuffers, Subelement};
-        if self.controller.subselection().is_empty() {
+        if self.controller.subselection().is_empty() && self.controller.dupedge_temporary_picks().next().is_none() {
             return;
         }
-        let picked = self.controller.subselection().to_vec();
         let Some(scene) = self.controller.scene() else {
             return;
         };
         let painter = ui.painter().with_clip_rect(rect);
         let green = Color32::from_rgb(90, 220, 130);
-        for reference in &picked {
+        for reference in self.controller.subselection().iter().chain(self.controller.dupedge_temporary_picks()) {
             let subset = &reference.subset;
             let Some(object) = scene
                 .objects
@@ -5676,6 +6529,7 @@ impl MatrixApp {
             else {
                 continue;
             };
+            if object.source != reference.source { continue; }
             let Ok(transform) = object.display_transform() else {
                 continue;
             };
@@ -5687,10 +6541,9 @@ impl MatrixApp {
                     projected.screen[1] as f32,
                 ))
             };
-            if let Ok(entity) = scene.entity_for(object)
-                && let om9_core::geometry::Geometry::Brep(shape) = &entity.geometry
+            if let Ok(entity) = scene.entity_for(&scene.document, object)
+                && let Ok(Some(display)) = object.pick_brep_display(entity)
             {
-                let display = &shape.display;
                 if let Subelement::BrepVertex(id) = subset {
                     if let Some(index) = display.vertex_ids.iter().position(|key| key == id)
                         && let Some(point) =
@@ -5735,7 +6588,7 @@ impl MatrixApp {
                     // Outline of the polygon: every triangle that belongs to the face contributes its
                     // corners, so a quad reads as a quad, not as two triangles.
                     let mut outline: Vec<egui::Pos2> = Vec::new();
-                    if let Ok(entity) = scene.entity_for(object)
+                    if let Ok(entity) = scene.entity_for(&scene.document, object)
                         && let om9_core::geometry::Geometry::Mesh(mesh) = &entity.geometry
                         && let Some(indices) = mesh.faces.get(*face as usize)
                     {
@@ -6089,6 +6942,14 @@ impl MatrixApp {
             return;
         };
         let pointer = [f64::from(pointer.x), f64::from(pointer.y)];
+        // A visible control grip takes precedence when its hit area overlaps
+        // a gumball handle. Keep an already captured gumball gesture intact.
+        if self.gumball_session.is_none() && self.controller.top11_grip_mode().is_some()
+            && response.drag_started_by(egui::PointerButton::Primary)
+            && ui.input(|input| input.pointer.press_origin()).is_some_and(|press|
+                self.grip_at(view, viewport, [f64::from(press.x), f64::from(press.y)]).is_some()) {
+            return;
+        }
         if response.drag_started_by(egui::PointerButton::Primary) || short_drag.is_some() {
             let start = short_drag.map(|(start, _)| start).unwrap_or_else(|| ui
                 .input(|input| input.pointer.press_origin())
@@ -6235,6 +7096,117 @@ impl MatrixApp {
         self.controller.clear_gumball_preview();
     }
 
+    #[cfg(feature = "occt-brep")]
+    fn cancel_line_surface(&mut self, explain_click: bool) {
+        self.line_surface_scheduler.cancel();
+        self.line_surface_receipt = None;
+        self.line_surface_view = None;
+        if self.line_surface_click.take().is_some() && explain_click {
+            self.status.info("Surface pick canceled because the input changed");
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    fn defer_line_surface_click(&mut self, view: ViewId, mode: om9_scene::workspace::DisplayMode) -> Result<()> {
+        use om9_core::budget::memory::MemoryClass;
+        let held = self.controller.scene_cache_usage()?;
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let mut reservation = self.controller.coordinator().reserve_external_memory_with_held(MemoryClass::CpuCache, 64*1024, physical, held)?;
+        reservation.recheck_pending()?;
+        let command = self.controller.active_command_input_snapshot();
+        if command.owner != Some("line") || !self.transcript.draft().is_empty() { return Err(Error::Stale("surface pick command")); }
+        let mut bytes = std::mem::size_of::<DeferredLineSurfaceClick>()
+            .checked_add(command.options.capacity().checked_mul(std::mem::size_of::<crate::command_options::CommandOption>())
+                .ok_or(Error::Overflow("surface click metadata"))?).ok_or(Error::Overflow("surface click metadata"))?;
+        for option in &command.options {
+            bytes = bytes.checked_add(option.label.capacity()).ok_or(Error::Overflow("surface click metadata"))?;
+            if let crate::command_options::CommandValue::Text(Some(value)) = &option.value {
+                bytes = bytes.checked_add(value.capacity()).ok_or(Error::Overflow("surface click metadata"))?;
+            }
+        }
+        let bytes = u64::try_from(bytes).map_err(|_| Error::Overflow("surface click metadata"))?.max(1);
+        if bytes > reservation.bytes() { return Err(Error::Budget("surface click metadata")); }
+        reservation.set_allocated_bytes(bytes)?;
+        reservation.shrink_to(bytes)?;
+        self.line_surface_click = Some(DeferredLineSurfaceClick { command, plane: self.controller.input_plane(),
+            project: self.controller.project(), snap_settings: self.snap_state.settings, view, mode, _reservation: reservation });
+        Ok(())
+    }
+
+    #[cfg(feature = "occt-brep")]
+    fn finish_line_surface_click(&mut self) -> Result<()> {
+        let Some(click) = self.line_surface_click.take() else { return Ok(()) };
+        let current = self.controller.active_command_input_snapshot();
+        if !self.controller.is_running() || current.owner != click.command.owner || current.run != click.command.run
+            || current.phase != click.command.phase || current.options != click.command.options
+            || self.controller.input_plane() != click.plane || self.controller.project() != click.project
+            || self.snap_state.settings.enabled != click.snap_settings.enabled
+            || self.snap_state.settings.radius_px.to_bits() != click.snap_settings.radius_px.to_bits()
+            || self.snap_state.settings.one_shot != click.snap_settings.one_shot
+            || self.line_surface_view != Some(click.view)
+            || self.controller.workspace.views.get(&click.view).is_none_or(|view| view.mode != click.mode)
+            || !self.transcript.draft().is_empty() {
+            return Err(Error::Stale("surface pick command"));
+        }
+        let point = self.hover.ok_or(Error::Missing("exact surface snap intersection"))?;
+        let anchor = self.snap.clone();
+        let point = self.viewport_command_point(point);
+        self.accept_viewport_command_point(point, &anchor)?;
+        self.snap_state.accept();
+        if let Some(candidate) = anchor { let _ = self.smarttrack.push(&candidate, self.controller.input_plane()); }
+        self.append_running_prompt();
+        self.focus_cmd = false;
+        Ok(())
+    }
+
+    /// `None` means work is pending; `Some(None)` means no source hit.
+    #[cfg(feature = "occt-brep")]
+    fn line_surface_preview(&mut self, mut candidates: Vec<om9_scene::osnap::SnapCandidate>, camera: &Camera,
+        viewport: Viewport, cursor: [f64; 2], mode: om9_scene::workspace::DisplayMode, id: ViewId,
+        ctx: &egui::Context) -> Result<Option<Option<om9_scene::osnap::SnapCandidate>>> {
+        use om9_core::budget::memory::MemoryClass;
+        if self.line_surface_click.as_ref().is_some_and(|click| click.view != id || click.mode != mode) {
+            self.cancel_line_surface(true);
+        }
+        let Some(first) = om9_scene::osnap::choose(&candidates) else {
+            self.cancel_line_surface(true); return Ok(Some(None));
+        };
+        if first.kind != om9_scene::osnap::SnapKind::Surface {
+            self.cancel_line_surface(true); return Ok(Some(Some(first)));
+        }
+        candidates.retain(|candidate| candidate.kind == om9_scene::osnap::SnapKind::Surface);
+        let receipt_matches = self.line_surface_receipt.as_ref().is_some_and(|receipt|
+            receipt.matches_request(&self.controller, &candidates, camera, viewport, cursor));
+        if !receipt_matches { self.line_surface_receipt = None; }
+        if self.line_surface_receipt.is_none() && !self.line_surface_scheduler.matches_request(&self.controller, &candidates, camera, viewport, cursor) {
+            if self.line_surface_click.is_some() { self.cancel_line_surface(true); }
+            let floor = crate::session::SurfaceSnapJob::source_only_minimum(&self.controller, &candidates, camera, viewport, cursor)?
+                .ok_or(Error::Unsupported("surface snap source"))?;
+            // This is managed headroom, not a certified bound on OCCT allocations.
+            let bytes = floor.checked_add(8*1024*1024).ok_or(Error::Overflow("surface worker admission"))?;
+            let held = self.controller.scene_cache_usage()?;
+            let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+            let reservation = self.controller.coordinator().reserve_external_memory_with_held(MemoryClass::Kernel, bytes, physical, held)?;
+            self.line_surface_scheduler.submit_with_occlusion(&self.controller, candidates, camera.clone(), viewport, cursor, reservation)?;
+            self.line_surface_view = Some(id);
+        }
+        if self.line_surface_receipt.is_none() {
+            if let Some(result) = self.line_surface_scheduler.poll(&self.controller) { self.line_surface_receipt = Some(result?); }
+        }
+        let Some(receipt) = &self.line_surface_receipt else {
+            ctx.request_repaint_after(std::time::Duration::from_millis(16));
+            return Ok(None);
+        };
+        let result = receipt.resolve(&self.controller, camera, viewport, cursor)?;
+        if mode == om9_scene::workspace::DisplayMode::Shaded && result.is_some() {
+            let occluded = receipt.display_occluded().ok_or(Error::Missing("surface worker occlusion result"))?;
+            if occluded {
+                return Err(Error::Unsupported("surface snap is occluded by shaded geometry"));
+            }
+        }
+        Ok(Some(result))
+    }
+
     #[cfg(test)]
     fn refine_snap_candidate(
         &mut self,
@@ -6323,7 +7295,8 @@ impl MatrixApp {
             let cursor = candidate.surface_source.as_ref().ok_or(Error::Missing("surface source"))?.cursor;
             let scene = self.controller.scene().ok_or(Error::Missing("surface snap scene"))?;
             let tolerance = self.controller.document().effective_tolerance()?.absolute_mm;
-            if om9_scene::osnap::visible_display_occludes(scene, camera, viewport, cursor, candidate.world, tolerance, excluded, candidate.surface_source.as_ref())? {
+            if om9_scene::osnap::visible_display_occludes_with_fallback_proof(scene, camera, viewport, cursor, candidate.world, tolerance, excluded, candidate.surface_source.as_ref(),
+                |object| self.controller.fallback_surface_proven_clear(object,camera,viewport,cursor,candidate.world,tolerance))? {
                 return Err(Error::Unsupported("surface snap is occluded by shaded geometry"));
             }
         }
@@ -7064,14 +8037,27 @@ impl MatrixApp {
     }
 }
 impl eframe::App for MatrixApp {
+    fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
+        if self.interaction_log.is_some() {
+            self.native_paint_started.set(Some(std::time::Instant::now()));
+        }
+        egui::Color32::from_rgba_unmultiplied(12, 12, 12, 180).to_normalized_gamma_f32()
+    }
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        #[cfg(feature = "occt-brep")]
+        if self.sphere_boolean_audit.as_ref().is_some_and(|audit| audit.can_discard())
+            && self.controller.file_operation().is_none() { self.audit_window_close(ctx); }
         if self.live_mcp.as_mut().is_some_and(|host| host.service(&mut self.controller)) {
             self.feedback(Ok(()));
             ctx.request_repaint();
         }
         self.service_window_close(ctx);
+        self.service_stl_export(ctx);
     }
     fn ui(&mut self, ui: &mut egui::Ui, frame: &mut eframe::Frame) {
+        if let Some(log) = self.interaction_log.as_mut() {
+            log.record(serde_json::json!({"event":"native_previous_cpu","cpu_ms":frame.info().cpu_usage.map(|s|s*1000.)}));
+        }
         self.attach_clipboard_shortcuts(frame);
         self.show(ui);
         self.health_panel_ui(ui.ctx());
@@ -7109,10 +8095,32 @@ impl eframe::App for MatrixApp {
         self.service_three_dm_picker(ui.ctx(), frame);
         self.service_stl_picker(ui.ctx(), frame);
         self.service_addon_picker(ui.ctx(), frame);
+        if !self.light_motion_baseline
+            && self.controller.viewport_detail() == crate::display::ViewportDetail::Light
+            && self.navigation.views.keys().any(|id| self.navigation.moving(*id)) {
+            // All widgets/navigation have handled these pointer events. Leaving
+            // them in egui's platform tail makes egui-winit reposition the
+            // focused CMD's native IME window for every mouse movement. On RDP
+            // that adds synchronous platform work even though the caret did
+            // not move. Keep keyboard, composition, focus and primary clicks.
+            ui.input_mut(|input| crate::display::consume_handled_navigation_events(&mut input.events));
+        }
+        if self.interaction_log.is_some() {
+            self.native_ui_finished.set(Some(std::time::Instant::now()));
+        }
     }
 
     fn raw_input_hook(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
+        let now = std::time::Instant::now();
+        if let (Some(log), Some(ui_end), Some(paint)) = (self.interaction_log.as_mut(), self.native_ui_finished.take(), self.native_paint_started.take()) {
+            log.record(serde_json::json!({"event":"native_frame_timing","frame_id":self.nav_frame_token,"ui_ms":ui_end.saturating_duration_since(self.nav_frame_started).as_secs_f64()*1000.,"platform_and_tessellation_ms":paint.saturating_duration_since(ui_end).as_secs_f64()*1000.,"paint_and_wait_ms":now.saturating_duration_since(paint).as_secs_f64()*1000.,"interval_ms":now.saturating_duration_since(self.nav_frame_started).as_secs_f64()*1000.}));
+        }
         self.nav_frame_started = std::time::Instant::now();
+        #[cfg(feature = "occt-brep")]
+        if let Some(mut audit) = self.sphere_boolean_audit.take() {
+            audit.frame(self, ctx, raw);
+            self.sphere_boolean_audit = Some(audit);
+        }
         self.clipboard_shortcuts_from_input(ctx, raw);
         self.delete_selection_from_input(ctx, raw);
         let mut audit_input = || {
@@ -7489,6 +8497,9 @@ fn launch_with(mut app: MatrixApp, config: &crate::startup::AppConfig) -> Result
         app.controller.workspace.maximized = Some(ViewId::Perspective);
     }
     let mut surface = eframe::egui_wgpu::SurfaceConfig::LOW_LATENCY;
+    let remote_session = om9_native_owner::remote_desktop_session();
+    surface.present_mode = crate::frame_scheduler::surface_present_mode(
+        remote_session, std::env::var("OM9_PRESENT_MODE").ok().as_deref());
     if std::env::var("OM9_FRAME_LATENCY").is_ok_and(|v| v == "2") {
         surface.desired_maximum_frame_latency = Some(2);
     }
@@ -7537,6 +8548,9 @@ fn launch_with(mut app: MatrixApp, config: &crate::startup::AppConfig) -> Result
                 info.device_type,
             )))?;
             app.gpu_state = Some(state.clone());
+            if let Some(log) = app.interaction_log.as_mut() {
+                log.record(serde_json::json!({"event":"presentation_policy","remote_session":remote_session,"present_mode":format!("{:?}",surface.present_mode)}));
+            }
             if let Some(log)=app.interaction_log.as_mut(){log.record(serde_json::json!({"event":"gpu_configuration","adapter":format!("{info:?}"),"timestamp_queries":state.device.features().contains(eframe::wgpu::Features::TIMESTAMP_QUERY),"frame_latency":surface.desired_maximum_frame_latency,"present_mode":format!("{:?}",surface.present_mode),"pixels_per_point":cc.egui_ctx.pixels_per_point(),"zoom_factor":cc.egui_ctx.zoom_factor(),"dpi_is_simulated":navigation_zoom.is_some()}));}
             #[cfg(windows)]
             if let Some(log) = app.interaction_log.as_mut() {
@@ -7708,6 +8722,303 @@ mod tests {
     use eframe::egui;
     use om9_core::model::Document;
 
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn ui_polls_explicit_source_wire_worker_without_blocking_frame() {
+        use om9_core::{budget::Limits,geometry::Geometry,model::Entity};
+        let limits=Limits::default();
+        let shape=om9_kernel::brep::box_brep([4.,5.,6.],0.1,&limits).unwrap();
+        let mut document=Document::new("wire worker UI");
+        let entity=Entity::new("box",Geometry::Brep(shape),None);let id=entity.id;document.entities.insert(id,entity);
+        let mut app=MatrixApp::new(document).unwrap();app.controller.select_objects(&[id]).unwrap();
+        app.controller.request_brep_wireframe_worker().unwrap();
+        let ctx=egui::Context::default();
+        let rect=egui::Rect::from_min_size(egui::Pos2::ZERO,egui::vec2(1200.,800.));
+        let deadline=std::time::Instant::now()+std::time::Duration::from_secs(30);
+        while app.controller.brep_wireframe_worker_pending() {
+            let mut out=ctx.run_ui(egui::RawInput {screen_rect:Some(rect),..Default::default()},|ui|app.show(ui));
+            out.textures_delta.clear();
+            assert!(std::time::Instant::now()<deadline);std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        assert_eq!(app.controller.document().entities.values().filter(|entity|entity.label=="ExtractWire").count(),12);
+        app.controller.undo().unwrap();assert_eq!(app.controller.document().entities.len(),1);
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn ring_builder_cmd_polls_latest_preview_and_applies() {
+        use om9_core::{builder::BuilderKind, geometry::Geometry};
+        let mut app = MatrixApp::new(Document::new("background ring UI")).unwrap();
+        app.transcript.set_draft("SignetRing");
+        app.submit_draft();
+        assert_eq!(app.controller.builder().unwrap().kind(), BuilderKind::SignetRing);
+        assert!(app.controller.background_ring_preview_pending());
+        app.controller.builder_apply().unwrap();
+        assert!(app.controller.background_ring_apply_queued());
+        // Two edits while the original job is still active must publish only the last fields.
+        app.controller.builder_adjust_field("width_mm", 0.1).unwrap();
+        app.controller.builder_adjust_field("width_mm", 0.2).unwrap();
+        assert!(!app.controller.background_ring_apply_queued(), "an edit cancels an older Apply request");
+        let expected = app.controller.builder().unwrap().field("width_mm").unwrap().numeric().unwrap();
+        let ctx = egui::Context::default();
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1200., 800.));
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(60);
+        while app.controller.background_ring_preview_pending() {
+            let mut out = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), ..Default::default() }, |ui| app.show(ui));
+            out.textures_delta.clear();
+            assert!(std::time::Instant::now() < deadline, "ring preview timed out");
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
+        let session = app.controller.builder().unwrap();
+        assert_eq!(session.field("width_mm").unwrap().numeric(), Some(expected));
+        assert!(matches!(&session.preview().unwrap().geometry, Geometry::Brep(brep) if brep.has_allocation_owner()));
+        assert!(app.controller.document().entities.is_empty());
+        let view = app.controller.workspace.views.values().next().unwrap();
+        let viewport = om9_scene::camera::Viewport { origin: [0., 0.], size: [1200., 800.] };
+        let output = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), ..Default::default() }, |ui| {
+            app.paint_builder_preview(ui.painter(), &view.camera, viewport);
+        });
+        assert!(!output.shapes.is_empty(), "the ring preview must paint its boundary");
+        app.controller.builder_apply().unwrap();
+        assert_eq!(app.controller.document().entities.len(), 1);
+        app.controller.undo().unwrap();
+        assert!(app.controller.document().entities.is_empty());
+        app.controller.redo().unwrap();
+        assert_eq!(app.controller.document().entities.len(), 1);
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn ring_builder_tab_switch_replaces_pending_work_and_cancel_keeps_document() {
+        use om9_core::builder::BuilderKind;
+        let mut app = MatrixApp::new(Document::new("background ring tabs")).unwrap();
+        app.transcript.set_draft("SignetRing");
+        app.submit_draft();
+        assert!(app.controller.background_ring_preview_pending());
+        let ctx = egui::Context::default();
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1200., 800.));
+        let mut first = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), ..Default::default() }, |ui| app.show(ui));
+        first.textures_delta.clear();
+        let sidebar = app.sidebar_content_rect.expect("sidebar").center();
+        let events = vec![egui::Event::PointerMoved(sidebar), egui::Event::MouseWheel {
+            unit: egui::MouseWheelUnit::Point, delta: egui::vec2(0., -600.),
+            phase: egui::TouchPhase::Move, modifiers: egui::Modifiers::NONE,
+        }];
+        let mut scrolled = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), events, ..Default::default() }, |ui| app.show(ui));
+        scrolled.textures_delta.clear();
+        for _ in 0..4 {
+            let mut out = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), events: vec![egui::Event::PointerMoved(sidebar)], ..Default::default() }, |ui| app.show(ui));
+            out.textures_delta.clear();
+        }
+        let tab = ctx.memory(|memory| memory.data.get_temp::<egui::Rect>(egui::Id::new(("builder-tab-test", BuilderKind::RaisedBand.tag()))))
+            .expect("Raised Band tab").center();
+        for pressed in [true, false] {
+            let events = vec![egui::Event::PointerMoved(tab), egui::Event::PointerButton {
+                pos: tab, button: egui::PointerButton::Primary, pressed, modifiers: egui::Modifiers::NONE,
+            }];
+            let mut out = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), events, ..Default::default() }, |ui| app.show(ui));
+            out.textures_delta.clear();
+        }
+        assert_eq!(app.controller.builder().unwrap().kind(), BuilderKind::RaisedBand);
+        assert!(app.controller.background_ring_preview_pending());
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(60);
+        let mut frames = 0usize;
+        while app.controller.background_ring_preview_pending() {
+            frames += 1;
+            let mut out = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), ..Default::default() }, |ui| app.show(ui));
+            out.textures_delta.clear();
+            assert!(std::time::Instant::now() < deadline, "ring tab preview timed out after {frames} frames");
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
+        let session = app.controller.builder().unwrap();
+        assert_eq!(session.kind(), BuilderKind::RaisedBand);
+        assert!(session.preview().is_some());
+        app.controller.builder_cancel();
+        assert!(app.controller.document().entities.is_empty());
+        assert!(!app.controller.background_ring_preview_pending());
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn ring_builder_apply_queued_during_preview_commits_once() {
+        let mut app = MatrixApp::new(Document::new("queued ring apply")).unwrap();
+        app.transcript.set_draft("SignetRing");
+        app.submit_draft();
+        assert!(app.controller.background_ring_preview_pending());
+        app.transcript.set_draft("Apply");
+        app.submit_draft();
+        assert!(app.controller.background_ring_apply_queued());
+        let ctx = egui::Context::default();
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(1200., 800.));
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(60);
+        while app.controller.background_ring_preview_pending() {
+            let mut out = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), ..Default::default() }, |ui| app.show(ui));
+            out.textures_delta.clear();
+            assert!(std::time::Instant::now() < deadline, "queued ring Apply timed out");
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
+        assert!(!app.controller.builder_is_open());
+        assert_eq!(app.controller.document().entities.len(), 1);
+        app.controller.undo().unwrap();
+        assert!(app.controller.document().entities.is_empty());
+        app.controller.redo().unwrap();
+        assert_eq!(app.controller.document().entities.len(), 1);
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn menu_and_cmd_start_background_brep_wireframe() {
+        use om9_core::{budget::Limits,geometry::Geometry,model::Entity};
+        for menu in [false,true] {
+            let limits=Limits::default();let shape=om9_kernel::brep::box_brep([4.,5.,6.],0.1,&limits).unwrap();
+            let mut document=Document::new("background wireframe UI");
+            let entity=Entity::new("box",Geometry::Brep(shape),None);let id=entity.id;document.entities.insert(id,entity);
+            let mut app=MatrixApp::new(document).unwrap();app.controller.select_objects(&[id]).unwrap();
+            let before=app.controller.document().clone();
+            if menu {app.invoke("OM9-CURVE-054",crate::session::InvocationOrigin::Menu);}
+            else {app.transcript.set_draft("ExtractWireframe");app.submit_draft();}
+            assert!(app.controller.brep_wireframe_worker_pending());assert_eq!(app.controller.document(),&before);
+            let ctx=egui::Context::default();let rect=egui::Rect::from_min_size(egui::Pos2::ZERO,egui::vec2(1200.,800.));
+            let deadline=std::time::Instant::now()+std::time::Duration::from_secs(30);
+            while app.controller.brep_wireframe_worker_pending() {
+                let mut out=ctx.run_ui(egui::RawInput {screen_rect:Some(rect),..Default::default()},|ui|app.show(ui));out.textures_delta.clear();
+                assert!(std::time::Instant::now()<deadline);std::thread::sleep(std::time::Duration::from_millis(5));
+            }
+            assert_eq!(app.controller.document().entities.values().filter(|e|e.label=="ExtractWire").count(),12);
+            let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);
+            app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn dupedge_temporary_edge_overlay_tracks_published_display_and_cancel() {
+        use om9_core::{budget::Limits, geometry::Geometry, model::Entity};
+        use om9_scene::{camera::{Camera, Viewport}, scene::Subelement, workspace::ViewId};
+        let limits = Limits::default();
+        let shape = om9_kernel::creation::primitive(
+            om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, 0.01, &limits).unwrap();
+        let mut document = Document::new("temporary edge overlay");
+        let entity = Entity::new("box", Geometry::Brep(shape.clone()), document.current_layer);
+        let id = entity.id;
+        document.entities.insert(id, entity);
+        let mut app = MatrixApp::new(document).unwrap();
+        let mut display = shape.display().clone();
+        for id in &mut display.topology.edges { *id = uuid::Uuid::new_v4(); }
+        let segment = display.segments[0];
+        let edge = display.edges[segment[2] as usize];
+        let a = display.points[segment[0] as usize]; let b = display.points[segment[1] as usize];
+        let point = std::array::from_fn(|i| (a[i] + b[i]) * 0.5);
+        let fresh = om9_core::brep::Brep::from_native(shape.source().to_owned(), display, &limits).unwrap();
+        app.controller.publish_paired_brep_for_test(id, &fresh).unwrap();
+        app.controller.submit("DupEdge").unwrap();
+        let reference = crate::session::SelectedSubobject {
+            root: id, path: vec![], subset: Subelement::BrepEdge(edge),
+            source: app.controller.document().stamp(id).unwrap(), world_epoch: app.controller.coordinator().epoch(),
+        };
+        let camera = Camera::orthographic([10., -10., 14.], [2., 2., 3.], [0., 0., 1.], 30.).unwrap();
+        let viewport = Viewport { origin: [0., 0.], size: [400., 400.] };
+        let projected = camera.project(point, viewport).unwrap().unwrap();
+        app.controller.dupedge_pick_with_point(reference, point, 0.1, &camera, viewport, projected.screen, 7., projected.depth).unwrap();
+        let mut view = app.controller.workspace.views[&ViewId::Perspective].clone();
+        view.camera = camera;
+        let ctx = egui::Context::default();
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(400., 400.));
+        let draw = |app: &mut MatrixApp| {
+            let mut output = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), ..Default::default() }, |ui|
+                app.subselection_overlay(ui, &view, viewport, rect));
+            output.textures_delta.clear();
+            output.shapes.into_iter().filter(|entry| matches!(&entry.shape,
+                egui::Shape::LineSegment { stroke, .. } if stroke.color == egui::Color32::from_rgb(90, 220, 130))).count()
+        };
+        assert!(draw(&mut app) > 0, "published temporary edge should be drawn");
+        app.controller.replace_scene_same_epoch_for_test(0.).unwrap();
+        assert_eq!(draw(&mut app), 0, "replaced scene should hide the stale temporary overlay");
+        app.controller.cancel();
+        assert_eq!(draw(&mut app), 0, "cancel should remove the temporary overlay");
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn native_dupedge_overlay_uses_published_source_view() {
+        use om9_core::{budget::Limits, geometry::Geometry, model::Entity};
+        use om9_scene::{camera::{Camera, Viewport}, scene::Subelement, workspace::ViewId};
+        let limits = Limits::default();
+        let shape = om9_kernel::brep::box_brep([4., 5., 6.], 0.1, &limits).unwrap();
+        let native = om9_kernel::brep::to_3dm(&shape, 1e-6, &limits).unwrap();
+        let entity = Entity::new("native box", Geometry::NativeBrep(native), None);
+        let id = entity.id;
+        let mut document = Document::with_template_tolerance("native edge overlay");
+        document.entities.insert(id, entity);
+        let mut app = MatrixApp::new(document).unwrap();
+        app.controller.submit("DupEdge").unwrap();
+        app.controller.request_dupedge_source_view(id).unwrap();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+        loop {
+            if let Some(result) = app.controller.poll_dupedge_source_view() { result.unwrap(); break; }
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        let stamp = app.controller.document().stamp(id).unwrap();
+        let display = app.controller.scene().unwrap().root_brep_pick_display(&stamp).unwrap();
+        let segment = display.segments[0];
+        let edge = display.edges[segment[2] as usize];
+        let a = display.points[segment[0] as usize]; let b = display.points[segment[1] as usize];
+        let point = std::array::from_fn(|i| (a[i] + b[i]) * 0.5);
+        let camera = Camera::orthographic([10., -10., 14.], [2., 2., 3.], [0., 0., 1.], 30.).unwrap();
+        let viewport = Viewport { origin: [0., 0.], size: [400., 400.] };
+        let projected = camera.project(point, viewport).unwrap().unwrap();
+        let reference = crate::session::SelectedSubobject { root: id, path: vec![], subset: Subelement::BrepEdge(edge),
+            source: stamp, world_epoch: app.controller.coordinator().epoch() };
+        app.controller.dupedge_pick_with_point(reference, point, 0.1, &camera, viewport, projected.screen, 7., projected.depth).unwrap();
+        let mut view = app.controller.workspace.views[&ViewId::Perspective].clone(); view.camera = camera;
+        let ctx = egui::Context::default();
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(400., 400.));
+        let draw = |app: &mut MatrixApp| {
+            let mut output = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), ..Default::default() }, |ui|
+                app.subselection_overlay(ui, &view, viewport, rect));
+            output.textures_delta.clear();
+            output.shapes.into_iter().filter(|entry| matches!(&entry.shape,
+                egui::Shape::LineSegment { stroke, .. } if stroke.color == egui::Color32::from_rgb(90, 220, 130))).count()
+        };
+        assert!(draw(&mut app) > 0, "native source edge must be highlighted");
+        app.controller.cancel();
+        assert_eq!(draw(&mut app), 0);
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn instance_brep_overlay_uses_scene_occurrence() {
+        use om9_core::{budget::Limits, geometry::{Geometry, Transform}, model::{Definition, Entity}};
+        use om9_scene::{camera::{Camera, Viewport}, scene::Subelement, workspace::ViewId};
+        let limits = Limits::default();
+        let shape = om9_kernel::brep::box_brep([4., 5., 6.], 0.1, &limits).unwrap();
+        let edge = shape.topology().edges[0];
+        let member = Entity::new("member", Geometry::Brep(shape), None);
+        let member_id = member.id;
+        let definition = Definition::new("box", vec![member]);
+        let definition_id = definition.id;
+        let mut root = Entity::new("instance", Geometry::Instance(definition_id), None);
+        root.placement = Transform::translation([8., 0., 0.]);
+        let id = root.id;
+        let mut document = Document::with_template_tolerance("instance edge overlay");
+        document.definitions.insert(definition_id, definition); document.entities.insert(id, root);
+        let mut app = MatrixApp::new(document).unwrap();
+        let reference = crate::session::SelectedSubobject { root: id, path: vec![member_id], subset: Subelement::BrepEdge(edge),
+            source: app.controller.document().stamp(id).unwrap(), world_epoch: app.controller.coordinator().epoch() };
+        app.controller.select_subobject_ref(reference).unwrap();
+        let mut view = app.controller.workspace.views[&ViewId::Perspective].clone();
+        view.camera = Camera::orthographic([18., -10., 14.], [10., 2., 3.], [0., 0., 1.], 30.).unwrap();
+        let viewport = Viewport { origin: [0., 0.], size: [400., 400.] };
+        let rect = egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(400., 400.));
+        let ctx = egui::Context::default();
+        let mut output = ctx.run_ui(egui::RawInput { screen_rect: Some(rect), ..Default::default() }, |ui|
+            app.subselection_overlay(ui, &view, viewport, rect));
+        output.textures_delta.clear();
+        assert!(output.shapes.iter().any(|entry| matches!(&entry.shape,
+            egui::Shape::LineSegment { stroke, .. } if stroke.color == egui::Color32::from_rgb(90, 220, 130))));
+    }
+
     #[test]
     fn unknown_physical_ram_is_reported_in_status_and_transcript() {
         let mut app = MatrixApp::new(Document::with_template_tolerance("memory fallback")).unwrap();
@@ -7726,26 +9037,28 @@ mod tests {
         let camera = Camera::orthographic([0., 0., 10.], [0.; 3], [0., 1., 0.], 10.).unwrap();
         let viewport = Viewport { origin: [0., 0.], size: [400., 400.] };
         let pointer = egui::pos2(200., 200.);
-        let basis = HoverBasis { document: document_weak.clone(), camera: camera.clone(), epoch: 7, preview: 3, pointer, viewport };
+        let publication=uuid::Uuid::new_v4();
+        let basis = HoverBasis { document: document_weak.clone(), camera: camera.clone(), publication, epoch: 7, preview: 3, pointer, viewport };
         let (send, receive) = mpsc::channel();
         let target = om9_core::model::Entity::new("target", om9_core::geometry::Geometry::Point([0.; 3]), None).id;
         // The result is delivered only after the receipt's source has changed.
         send.send(Some(target)).unwrap();
         assert_eq!(receive.recv().unwrap(), Some(target));
-        assert!(basis.matches(&document_weak, &camera, 7, 3, viewport, pointer));
-        assert!(!basis.matches(&document_weak, &camera, 7, 4, viewport, pointer));
-        assert!(!basis.matches(&document_weak, &camera, 8, 3, viewport, pointer));
+        assert!(basis.matches(&document_weak, &camera, publication, 7, 3, viewport, pointer));
+        assert!(!basis.matches(&document_weak, &camera, uuid::Uuid::new_v4(), 7, 3, viewport, pointer));
+        assert!(!basis.matches(&document_weak, &camera, publication, 7, 4, viewport, pointer));
+        assert!(!basis.matches(&document_weak, &camera, publication, 8, 3, viewport, pointer));
         let replacement = Arc::new((*document).clone());
         assert_eq!(replacement.id, document.id);
-        assert!(!basis.matches(&Arc::downgrade(&replacement), &camera, 7, 3, viewport, pointer));
+        assert!(!basis.matches(&Arc::downgrade(&replacement), &camera, publication, 7, 3, viewport, pointer));
         let mut moved_camera = camera.clone();
         moved_camera.eye[0] += 1.;
         assert_eq!(moved_camera.revision, camera.revision);
-        assert!(!basis.matches(&document_weak, &moved_camera, 7, 3, viewport, pointer));
+        assert!(!basis.matches(&document_weak, &moved_camera, publication, 7, 3, viewport, pointer));
         let resized = Viewport { origin: viewport.origin, size: [401., 400.] };
-        assert!(!basis.matches(&document_weak, &camera, 7, 3, resized, pointer));
-        assert!(!basis.matches(&document_weak, &camera, 7, 3, viewport, pointer + egui::vec2(4., 0.)));
-        assert!(!basis.matches(&document_weak, &camera, 7, 3, viewport, pointer + egui::vec2(1., 0.)));
+        assert!(!basis.matches(&document_weak, &camera, publication, 7, 3, resized, pointer));
+        assert!(!basis.matches(&document_weak, &camera, publication, 7, 3, viewport, pointer + egui::vec2(4., 0.)));
+        assert!(!basis.matches(&document_weak, &camera, publication, 7, 3, viewport, pointer + egui::vec2(1., 0.)));
     }
 
     #[test]
@@ -7774,18 +9087,27 @@ mod tests {
         frame(&mut app, vec![Event::PointerMoved(pointer)]);
         assert_eq!(app.hovered_object(), Some(target));
         let scene = app.controller.scene().unwrap();
-        let basis = HoverBasis { document: std::sync::Arc::downgrade(&scene.document), camera, epoch: scene.epoch,
+        let basis = HoverBasis { document: std::sync::Arc::downgrade(&scene.document), camera, publication:scene.publication_id(), epoch: scene.epoch,
             preview: app.controller.preview_revision(), pointer, viewport };
         let (send, receive) = std::sync::mpsc::channel();
-        app.hover_job = Some((basis, receive));
+        app.hover_job = Some(super::HoverJob {basis,receiver:receive,cancel:om9_core::transaction::Cancellation::default()});
         let moved = pointer + Vec2::new(40., 0.);
         assert!(rect.contains(moved));
         frame(&mut app, vec![Event::PointerMoved(moved)]);
         assert_eq!(app.hovered_object(), None, "an old hit must not remain highlighted while the worker is pending");
         assert!(app.hover_job.is_some(), "fixture must keep the old worker pending");
-        send.send(Some(target)).unwrap();
+        send.send(super::HoverEvent::Finished(Ok(Some(target)))).unwrap();
         frame(&mut app, vec![]);
         assert_eq!(app.hovered_object(), None, "the old result must not restore the highlight");
+        let scene=app.controller.scene().unwrap();let camera=app.controller.workspace.views[&ViewId::Perspective].camera.clone();
+        let basis=HoverBasis {document:std::sync::Arc::downgrade(&scene.document),camera,publication:scene.publication_id(),
+            epoch:scene.epoch,preview:app.controller.preview_revision(),pointer,viewport};
+        let cancel=om9_core::transaction::Cancellation::default();cancel.cancel();
+        let (send,receive)=std::sync::mpsc::channel();app.hover_job=Some(super::HoverJob {basis,receiver:receive,cancel});
+        let wrong=Entity::new("wrong",Geometry::Point([1.,0.,0.]),None).id;
+        send.send(super::HoverEvent::Finished(Ok(Some(wrong)))).unwrap();
+        frame(&mut app,vec![Event::PointerMoved(pointer)]);
+        assert_ne!(app.hovered_object(),Some(wrong),"a canceled result must not revive when the pointer returns");
     }
 
     #[test]
@@ -7836,6 +9158,11 @@ mod tests {
         frame(&mut app, vec![]);
         assert!(app.hover_job.is_none(), "no retry is launched before its deadline");
         drop(reservation);
+        app.hover_worker_active.store(true,std::sync::atomic::Ordering::Release);
+        app.hover_retry_at=Some(std::time::Instant::now());frame(&mut app,vec![]);
+        assert!(app.hover_job.is_none(),"an old active worker must prevent a replacement");
+        assert!(app.hover_retry_at.is_some());
+        app.hover_worker_active.store(false,std::sync::atomic::Ordering::Release);
         app.hover_retry_at = Some(std::time::Instant::now());
         let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
         while app.hovered_object() != Some(id) {
@@ -7936,6 +9263,141 @@ mod tests {
     }
 
     #[test]
+    fn detached_hover_scene_does_not_hold_old_document_after_tracked_lease_drops() {
+        use om9_core::{budget::memory::MemoryClass, geometry::{Geometry, Mesh, NativeBrep}, model::Entity};
+        let mut document = Document::new("hover detached owner");
+        let native = NativeBrep {
+            display: std::sync::Arc::new(Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]],
+                faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
+            payload: vec![1,2,3].into(), crc: 7,
+        };
+        let display = std::sync::Arc::downgrade(&native.display);
+        let payload = std::sync::Arc::downgrade(&native.payload);
+        let body = Entity::new("body", Geometry::NativeBrep(native), None);
+        document.entities.insert(body.id, body);
+        let mut app = MatrixApp::new(document).unwrap();
+        let weak = std::sync::Arc::downgrade(&app.controller.scene().unwrap().document);
+        let mib = 1024 * 1024;
+        let snapshot = app.capture_hover_snapshot(Some((1024 * mib, 1024 * mib))).unwrap();
+        app.controller.begin_file_operation(crate::file_lifecycle::FileKind::New).unwrap();
+        let super::HoverSnapshot { scene, _buffers, _sources, reservation } = snapshot;
+        assert!(weak.upgrade().is_none(), "pick snapshot must not retain the old document");
+        assert!(display.upgrade().is_none());
+        assert!(payload.upgrade().is_none());
+        drop(scene);
+        drop(_buffers);
+        drop(_sources);
+        drop(reservation);
+        assert_eq!(app.controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache),
+            app.controller.scene().unwrap().memory_allowance_bytes());
+    }
+
+    #[test]
+    fn hover_snapshot_picks_with_tracked_document_after_new() {
+        use om9_core::{geometry::Geometry, model::Entity};
+        let mut document = Document::new("hover tracked pick");
+        let point = Entity::new("point", Geometry::Point([0., 0., 0.]), None);
+        let id = point.id;
+        document.entities.insert(id, point);
+        let mut app = MatrixApp::new(document).unwrap();
+        let mib = 1024 * 1024;
+        let snapshot = app.capture_hover_snapshot(Some((1024 * mib, 1024 * mib))).unwrap();
+        app.controller.begin_file_operation(crate::file_lifecycle::FileKind::New).unwrap();
+        let camera = om9_scene::camera::Camera::orthographic([0., 0., 10.], [0., 0., 0.], [0., 1., 0.], 10.).unwrap();
+        let viewport = om9_scene::camera::Viewport { origin: [0., 0.], size: [400., 400.] };
+        let caller = std::thread::current().id();
+        let (thread, hit) = std::thread::spawn(move || {
+            let hit = snapshot.scene.pick([200., 200.], &camera, viewport,
+                5., om9_scene::scene::PickIntent::Select).unwrap().unwrap();
+            (std::thread::current().id(), hit)
+        }).join().unwrap();
+        assert_ne!(thread, caller);
+        assert_eq!(hit.root, id);
+        assert!(app.controller.document().entities.is_empty());
+    }
+
+    #[test]
+    fn hover_source_preparation_worker_releases_document_after_new_or_cancel() {
+        use om9_core::{budget::memory::MemoryClass,geometry::{Curve,Geometry,NurbsCurve},model::Entity};
+        use std::sync::mpsc;
+        for mode in 0..3 {
+            let mut document=Document::with_template_tolerance("hover worker ownership");
+            let curve=Curve::Nurbs(NurbsCurve {degree:2,poles:vec![[0.,0.,0.],[1.,1.,0.],[2.,0.,0.]],weights:vec![1.,1.,1.],
+                knots:vec![0.,0.,0.,1.,1.,1.],domain:[0.,1.],periodic:false,reversed:false,seam:None});
+            let entity=Entity::new("curve",Geometry::Curve(curve),None);document.entities.insert(entity.id,entity);
+            let mut app=MatrixApp::new(document).unwrap();let weak=std::sync::Arc::downgrade(&app.controller.scene().unwrap().document);
+            let physical=om9_native_owner::physical_memory().map(|s|(s.total_bytes,s.available_bytes));
+            let held=app.controller.scene_cache_usage().unwrap();let peer=app.controller.coordinator().memory_admission_peer().unwrap();
+            let prepared=app.prepare_hover_snapshot(physical).unwrap();let cancel=om9_core::transaction::Cancellation::default();
+            let token=cancel.clone();let (ready_tx,ready_rx)=mpsc::sync_channel(1);let (go_tx,go_rx)=mpsc::sync_channel(1);
+            let caller=std::thread::current().id();
+            let worker=std::thread::spawn(move || {
+                ready_tx.send(std::thread::current().id()).unwrap();go_rx.recv().unwrap();
+                prepared.finish(|reservation,additional|if mode==2 {Err(om9_core::Error::Budget("hover worker fixture"))} else {
+                    peer.grow_external_memory_with_held(reservation,additional,
+                        om9_native_owner::physical_memory().map(|s|(s.total_bytes,s.available_bytes)),held)
+                },&token)
+            });
+            assert_ne!(ready_rx.recv().unwrap(),caller);
+            app.controller.begin_file_operation(crate::file_lifecycle::FileKind::New).unwrap();
+            assert!(weak.upgrade().is_some(),"in-flight preparation retains its captured document");
+            if mode==1 {cancel.cancel();}go_tx.send(()).unwrap();
+            let result=worker.join().unwrap();
+            match mode {
+                0=>{let snapshot=result.unwrap();assert!(weak.upgrade().is_none());drop(snapshot);},
+                1=>assert!(matches!(result,Err(om9_core::Error::Canceled))),
+                _=>assert!(matches!(result,Err(om9_core::Error::Budget(_)))),
+            }
+            assert!(weak.upgrade().is_none());
+            assert_eq!(app.controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache),
+                app.controller.scene().unwrap().memory_allowance_bytes());
+        }
+    }
+
+    #[cfg(feature="occt-brep")]
+    #[test]
+    fn detached_hover_matches_live_picks_without_retaining_document_or_sources() {
+        use om9_core::{budget::Limits,geometry::{Cloud,Curve,Geometry,NurbsCurve,Transform},model::Entity};
+        use om9_scene::{camera::{Camera,Viewport},scene::PickIntent};
+        let limits=Limits::default();let mut document=Document::with_template_tolerance("hover source isolation");
+        let entries=[
+            Entity::new("cloud",Geometry::Cloud(Cloud {points:vec![[-12.,0.,0.]],normals:vec![],colors:vec![],hidden:vec![]}),None),
+            Entity::new("polycurve",Geometry::Curve(Curve::Polycurve {segments:vec![Curve::Line {start:[-16.,0.,0.],end:[-14.,0.,0.],domain:[0.,1.]}],reversed:false}),None),
+            Entity::new("point",Geometry::Point([-8.,0.,0.]),None),
+            Entity::new("line",Geometry::Curve(Curve::Line {start:[-5.,0.,0.],end:[-3.,0.,0.],domain:[0.,1.]}),None),
+            Entity::new("circle",Geometry::Curve(Curve::Circle {center:[0.,0.,0.],x:[1.,0.,0.],y:[0.,1.,0.],radius:1.,domain:[0.,std::f64::consts::TAU],angle_domain:None}),None),
+            Entity::new("nurbs",Geometry::Curve(Curve::Nurbs(NurbsCurve {degree:2,poles:vec![[3.,0.,0.],[4.,1.,0.],[5.,0.,0.]],weights:vec![1.,1.,1.],knots:vec![0.,0.,0.,1.,1.,1.],domain:[0.,1.],periodic:false,reversed:false,seam:None})),None),
+        ];
+        for entity in entries {document.entities.insert(entity.id,entity);}
+        let shape=om9_kernel::brep::sphere_brep(2.,0.1,&limits).unwrap();let source_liveness=shape.source_liveness();
+        let native=om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap();let payload=std::sync::Arc::downgrade(&native.payload);
+        let mut body=Entity::new("BRep",Geometry::Brep(shape),None);body.placement=Transform::translation([8.,0.,0.]);document.entities.insert(body.id,body);
+        let mut body=Entity::new("NativeBrep",Geometry::NativeBrep(native),None);body.placement=Transform::translation([13.,0.,0.]);document.entities.insert(body.id,body);
+        let mut app=MatrixApp::new(document).unwrap();let weak=std::sync::Arc::downgrade(&app.controller.scene().unwrap().document);
+        let before=app.controller.document().clone();let copy=app.controller.scene().unwrap().try_render_snapshot().unwrap();
+        let mut calls=0;
+        assert!(matches!(copy.into_hover_pick_snapshot(|_,_|{calls+=1;if calls>2 {Err(om9_core::Error::Budget("hover source test"))} else {Ok(())}}),
+            Err(om9_core::Error::Budget(_))));
+        assert!(calls>2);assert_eq!(app.controller.document(),&before);drop(before);
+        let physical=om9_native_owner::physical_memory().map(|sample|(sample.total_bytes,sample.available_bytes));
+        let snapshot=app.capture_hover_snapshot(physical).unwrap();
+        let camera=Camera::orthographic([0.,0.,30.],[0.,0.,0.],[0.,1.,0.],40.).unwrap();let viewport=Viewport {origin:[0.,0.],size:[800.,800.]};
+        for camera in [camera.clone(),Camera::perspective([0.,0.,30.],[0.,0.,0.],[0.,1.,0.],1.3).unwrap()] {
+        for world in [[-15.,0.,0.],[-12.,0.,0.],[-8.,0.,0.],[-4.,0.,0.],[1.,0.,0.],[4.,0.5,0.],[8.,0.,2.],[13.,0.,2.],[18.,8.,0.]] {
+            let screen=camera.project(world,viewport).unwrap().unwrap().screen;
+            let live=app.controller.scene().unwrap().pick(screen,&camera,viewport,5.,PickIntent::Select).unwrap();
+            let detached=snapshot.scene.pick(screen,&camera,viewport,5.,PickIntent::Select).unwrap();
+            assert_eq!(live.as_ref().map(|hit|(&hit.root,&hit.path,&hit.subset)),detached.as_ref().map(|hit|(&hit.root,&hit.path,&hit.subset)),"{world:?}");
+            if let (Some(a),Some(b))=(live,detached) {assert_eq!(a.world_point,b.world_point);assert_eq!(a.depth,b.depth);}
+        }
+        }
+        app.controller.begin_file_operation(crate::file_lifecycle::FileKind::New).unwrap();
+        assert!(weak.upgrade().is_none());assert!(!source_liveness.is_alive());assert!(payload.upgrade().is_none());
+        let screen=camera.project([4.,0.5,0.],viewport).unwrap().unwrap().screen;
+        assert!(snapshot.scene.pick(screen,&camera,viewport,5.,PickIntent::Select).unwrap().is_some());
+    }
+
+    #[test]
     fn hover_metadata_materializes_but_pick_scratch_stays_pending_across_new() {
         use om9_core::{budget::memory::MemoryClass, geometry::Geometry, model::Entity};
         let mut document = Document::new("hover metadata phases");
@@ -7951,7 +9413,7 @@ mod tests {
         let scratch = snapshot.scene.nearest_pick_scratch_estimate().unwrap().bytes;
         assert_eq!(snapshot.reservation.bytes(), metadata + scratch);
         assert_eq!(snapshot.reservation.pending_bytes(), scratch);
-        let worker = snapshot.scene.memory_allowance_bytes() + metadata + scratch;
+        let worker = snapshot.scene.memory_allowance_bytes() + metadata + scratch + snapshot._sources.bytes();
         assert_eq!(app.controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache), baseline + worker);
         assert_eq!(app.controller.coordinator().external_pending_bytes(MemoryClass::CpuCache), scratch + snapshot.scene.picking_arena_bytes().unwrap());
         app.controller.begin_file_operation(crate::file_lifecycle::FileKind::New).unwrap();
@@ -8029,13 +9491,13 @@ mod tests {
         frame(&mut app, vec![Event::PointerMoved(pointer)]);
         assert_eq!(app.hovered_object(), Some(target));
         let scene = app.controller.scene().unwrap();
-        let basis = HoverBasis { document: std::sync::Arc::downgrade(&scene.document), camera, epoch: scene.epoch,
+        let basis = HoverBasis { document: std::sync::Arc::downgrade(&scene.document), camera, publication:scene.publication_id(), epoch: scene.epoch,
             preview: app.controller.preview_revision(), pointer, viewport };
         let (send, receive) = std::sync::mpsc::channel();
-        app.hover_job = Some((basis, receive));
+        app.hover_job = Some(super::HoverJob {basis,receiver:receive,cancel:om9_core::transaction::Cancellation::default()});
         app.controller.select_objects(&[target]).unwrap();
         app.controller.preview_gumball(Transform::translation([1000., 0., 0.])).unwrap();
-        send.send(Some(target)).unwrap();
+        send.send(super::HoverEvent::Finished(Ok(Some(target)))).unwrap();
         frame(&mut app, vec![]);
         assert_eq!(app.hovered_object(), None, "the old worker receipt must not publish");
         assert!(app.hover_job.is_none());
@@ -8067,17 +9529,43 @@ mod tests {
         frame(&mut app, vec![Event::PointerMoved(pointer)]);
         assert_eq!(app.hovered_object(), Some(target));
         let scene = app.controller.scene().unwrap();
-        let basis = HoverBasis { document: std::sync::Arc::downgrade(&scene.document), camera, epoch: scene.epoch,
+        let basis = HoverBasis { document: std::sync::Arc::downgrade(&scene.document), camera, publication:scene.publication_id(), epoch: scene.epoch,
             preview: app.controller.preview_revision(), pointer, viewport };
         let (send, receive) = std::sync::mpsc::channel();
-        app.hover_job = Some((basis, receive));
+        app.hover_job = Some(super::HoverJob {basis,receiver:receive,cancel:om9_core::transaction::Cancellation::default()});
         let mut replacement = app.controller.document().clone();
         replacement.entities.clear();
         app.controller = crate::session::Controller::new(replacement, Limits::default()).unwrap();
-        send.send(Some(target)).unwrap();
+        send.send(super::HoverEvent::Finished(Ok(Some(target)))).unwrap();
         frame(&mut app, vec![]);
         assert_eq!(app.hovered_object(), None, "receipt for the old allocation must not publish");
         assert!(app.hover_job.is_none());
+    }
+
+    #[test]
+    fn delayed_hover_rejects_republished_scene_with_same_document() {
+        use super::HoverBasis;
+        use egui::{Event,Pos2,Rect,Vec2};
+        use om9_core::{geometry::{Curve,Geometry},model::Entity};
+        use om9_scene::{camera::Viewport,workspace::ViewId};
+        let mut document=Document::new("hover scene replacement");
+        let entity=Entity::new("line",Geometry::Curve(Curve::Line {start:[-1.,0.,0.],end:[1.,0.,0.],domain:[0.,1.]}),None);let target=entity.id;document.entities.insert(target,entity);
+        let mut app=MatrixApp::new(document).unwrap();let ctx=egui::Context::default();
+        let frame=|app:&mut MatrixApp,events:Vec<Event>| {let raw=egui::RawInput {screen_rect:Some(Rect::from_min_size(Pos2::ZERO,Vec2::new(1280.,720.))),events,..Default::default()};
+            let mut output=ctx.run_ui(raw,|ui|app.show(ui));output.textures_delta.clear();};
+        for _ in 0..3 {frame(&mut app,vec![]);}
+        let rect=app.view_rects[&ViewId::Perspective];let viewport=Viewport {origin:[rect.min.x as f64,rect.min.y as f64],size:[rect.width() as f64,rect.height() as f64]};
+        let camera=app.controller.workspace.views[&ViewId::Perspective].camera.clone();let at=camera.project([0.;3],viewport).unwrap().unwrap().screen;
+        let pointer=Pos2::new(at[0] as f32,at[1] as f32);frame(&mut app,vec![Event::PointerMoved(pointer)]);
+        let scene=app.controller.scene().unwrap();let old_publication=scene.publication_id();let old_document=std::sync::Arc::downgrade(&scene.document);
+        let old_epoch=scene.epoch;let preview=app.controller.preview_revision();
+        let basis=HoverBasis {document:old_document.clone(),camera,publication:old_publication,epoch:old_epoch,preview,pointer,viewport};
+        let (send,receive)=std::sync::mpsc::channel();app.hover_job=Some(super::HoverJob {basis,receiver:receive,cancel:om9_core::transaction::Cancellation::default()});
+        app.controller.replace_scene_same_epoch_for_test(1000.).unwrap();let scene=app.controller.scene().unwrap();
+        assert_ne!(scene.publication_id(),old_publication);assert!(old_document.ptr_eq(&std::sync::Arc::downgrade(&scene.document)));
+        assert_eq!(scene.epoch,old_epoch);assert_eq!(app.controller.preview_revision(),preview);
+        send.send(super::HoverEvent::Finished(Ok(Some(target)))).unwrap();frame(&mut app,vec![]);
+        assert_eq!(app.hovered_object(),None);assert!(app.hover_job.is_none());
     }
 
     #[cfg(feature = "occt-brep")]
@@ -8104,7 +9592,10 @@ mod tests {
         // must not reuse refinement cached for the previous captured source.
         let replacement = app.controller.document().clone();
         app.controller = crate::session::Controller::new(replacement, limits).unwrap();
-        assert_eq!(app.refine_snap_candidate(candidate.clone(), &camera, viewport).unwrap(), first);
+        assert!(app.refine_snap_candidate(candidate.clone(), &camera, viewport).is_err(), "a candidate from the previous scene must be rejected");
+        let candidate = osnap::candidates(app.controller.scene().unwrap(), &camera, viewport, cursor, Default::default(), None).unwrap()
+            .into_iter().find(|hit| hit.kind == SnapKind::Surface && hit.root == Some(id)).unwrap();
+        assert_eq!(app.refine_snap_candidate(candidate.clone(), &camera, viewport).unwrap().world, first.world);
         assert_eq!(app.surface_snap_cache.len(), 2);
         let mut moved = camera.clone();
         moved.pan([1., 0.]).unwrap();
@@ -8146,7 +9637,7 @@ mod tests {
         use om9_scene::{camera::{Camera, Viewport}, osnap::{self, SnapKind}, workspace::DisplayMode};
         let limits = Limits::default();
         let brep = om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &limits).unwrap();
-        let faces = brep.display.faces.clone();
+        let faces = brep.topology().faces.clone();
         let mut document = Document::with_template_tolerance("candidate miss");
         let entity = Entity::new("box", Geometry::Brep(brep), None);
         let id = entity.id;
@@ -8161,7 +9652,15 @@ mod tests {
         let visible_faces: Vec<_> = candidates.iter().map(|c| c.surface_source.as_ref().unwrap().face.unwrap()).collect();
         let missing_face = *faces.iter().find(|face| !visible_faces.contains(face)).unwrap();
         let mut false_candidate = candidates[0].clone();
-        false_candidate.surface_source.as_mut().unwrap().face = Some(missing_face);
+        let stamp = app.controller.document().stamp(id).unwrap();
+        let display = app.controller.scene().unwrap().root_brep_pick_display(&stamp).unwrap();
+        let face_index = display.topology.faces.iter().position(|face| *face == missing_face).unwrap();
+        let (triangle_index, triangle) = display.triangles.iter().enumerate().find(|(_, triangle)| triangle[3] as usize == face_index).unwrap();
+        let witness = [triangle[0], triangle[1], triangle[2]].map(|i| display.points[i as usize]);
+        let source = false_candidate.surface_source.as_mut().unwrap();
+        source.face = Some(missing_face);
+        source.face_witness = Some((witness, display.deflection_mm));
+        source.face_witness_triangle = Some(triangle_index);
         assert!(app.resolve_snap_candidates(vec![false_candidate.clone()], &camera, viewport, DisplayMode::Wireframe, &[]).unwrap().is_none());
         for index in 0..=candidates.len() {
             app.surface_snap_cache.clear();
@@ -8302,7 +9801,15 @@ mod tests {
         let front = osnap::candidates(app.controller.scene().unwrap(), &camera, viewport, cursor, Default::default(), None).unwrap()
             .into_iter().find(|hit| hit.kind == SnapKind::Surface && hit.root == Some(id)).unwrap();
         let mut clipped = front.clone();
-        clipped.surface_source.as_mut().unwrap().face = back_face;
+        let stamp = app.controller.document().stamp(id).unwrap();
+        let display = app.controller.scene().unwrap().root_brep_pick_display(&stamp).unwrap();
+        let face_index = display.topology.faces.iter().position(|face| Some(*face) == back_face).unwrap();
+        let (triangle_index, triangle) = display.triangles.iter().enumerate().find(|(_, triangle)| triangle[3] as usize == face_index).unwrap();
+        let witness = [triangle[0], triangle[1], triangle[2]].map(|i| display.points[i as usize]);
+        let source = clipped.surface_source.as_mut().unwrap();
+        source.face = back_face;
+        source.face_witness = Some((witness, display.deflection_mm));
+        source.face_witness_triangle = Some(triangle_index);
         assert!(app.resolve_snap_candidates(vec![clipped.clone()], &camera, viewport, DisplayMode::Wireframe, &[]).unwrap().is_none());
         for candidates in [vec![clipped.clone(), front.clone()], vec![front.clone(), clipped.clone()]] {
             let hit = app.resolve_snap_candidates(candidates, &camera, viewport, DisplayMode::Wireframe, &[]).unwrap().unwrap();
@@ -8460,6 +9967,474 @@ mod tests {
             let hover=app.hover.expect("height pointer");
             assert!((hover[2]-height).abs()<1e-3,"height {height} produced {hover:?}");
             assert_eq!(app.controller.solid_preview(hover).len(),12);
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn isocurve_build_ui_commits_or_preserves_changed_draft() {
+        use egui::{Event, Pos2, Rect, Vec2};
+        use om9_core::{budget::Limits, geometry::Geometry, model::Entity};
+        use om9_scene::scene::Subelement;
+        for (changed,root_only,native) in [(false,false,false),(true,false,false),(false,true,false),(true,true,false),(false,true,true)] {
+            let limits=Limits::default();
+            let shape=if root_only {
+                let surface=om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+                let trim=om9_core::rhino_semantics::TrimmedSurface {underlying:surface,
+                    outer:vec![[0.,0.],[1.,0.],[1.,1.],[0.,1.]],inners:vec![],reversed:false};
+                let source=om9_kernel::measurement::trimmed_surface_to_face_source_admitted(&trim,&limits,|_,_|Ok(())).unwrap();
+                om9_kernel::brep::read_brep(&source,0.1,&limits).unwrap()
+            } else {om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Sphere {radius_mm:3.},0.1,&limits).unwrap()};
+            let face=shape.topology().faces[0];
+            let geometry=if native {Geometry::NativeBrep(om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap())} else {Geometry::Brep(shape)};
+            let entity=Entity::new("sphere",geometry,None);let id=entity.id;
+            let mut document=Document::with_template_tolerance("isocurve build UI");document.entities.insert(id,entity);
+            let mut app=MatrixApp::new(document).unwrap();
+            app.controller.submit("Point").unwrap();app.controller.submit("50,50,50").unwrap();app.controller.undo().unwrap();
+            app.controller.select_objects(&[id]).unwrap();
+            if !root_only {app.controller.select_subobject(id,Subelement::BrepFace(face)).unwrap();}
+            app.controller.submit("ExtractIsocurve").unwrap();
+            let ctx=egui::Context::default();
+            let frame=|app:&mut MatrixApp,events:Vec<Event>| {
+                let mut raw=egui::RawInput {screen_rect:Some(Rect::from_min_size(Pos2::ZERO,Vec2::new(1280.,720.))),events,..Default::default()};
+                eframe::App::raw_input_hook(app,&ctx,&mut raw);
+                let mut output=ctx.run_ui(raw,|ui|app.show(ui));output.textures_delta.clear();
+            };
+            let deadline=std::time::Instant::now()+std::time::Duration::from_secs(30);
+            while app.controller.face_verification_pending(){assert!(std::time::Instant::now()<deadline);frame(&mut app,vec![]);std::thread::sleep(std::time::Duration::from_millis(2));}
+            assert!(app.controller.isocurve_recovery_key().is_some(),"no pending session: changed={changed} root={root_only} native={native}, prompt={}",app.controller.prompt_with_options());
+            let before=app.controller.document().clone();let redo=app.controller.coordinator().redo_len();
+            app.transcript.set_draft("");app.submit_draft();
+            assert!(app.controller.isocurve_build_worker_pending());assert_eq!(app.controller.document(),&before);
+            if changed {app.transcript.set_draft("edited");frame(&mut app,vec![Event::Text("x".into())]);}
+            else {while app.controller.isocurve_build_worker_pending(){assert!(std::time::Instant::now()<deadline);frame(&mut app,vec![]);std::thread::sleep(std::time::Duration::from_millis(2));}}
+            if changed {
+                assert!(!app.controller.isocurve_build_worker_pending());assert_eq!(app.controller.document(),&before);
+                assert_eq!(app.controller.coordinator().redo_len(),redo);assert!(app.controller.isocurve_recovery_key().is_some());
+                assert!(app.transcript.draft().starts_with("edited"));
+            } else {
+                assert_eq!(app.controller.document().entities.values().filter(|entity|entity.label=="ExtractIsocurve").count(),1);
+                if root_only {
+                    let entity=app.controller.document().entities.values().find(|entity|entity.label=="ExtractIsocurve").unwrap();
+                    let Geometry::Curve(curve)=&entity.geometry else {panic!("isocurve")};
+                    for fraction in [0.,0.5,1.] {
+                        let p=om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(fraction),0,entity.placement,&limits).unwrap()[0];
+                        assert!(p[2].abs()<1e-6 && p[0]>=-1e-6 && p[0]<=10.+1e-6 && p[1]>=-1e-6 && p[1]<=10.+1e-6,"{p:?}");
+                        assert!((p[0]-5.).abs()<1e-6 || (p[1]-5.).abs()<1e-6,"{p:?}");
+                    }
+                }
+                let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);
+                app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+            }
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn boolean_union_ui_worker_commits_and_rejects_changed_draft() {
+        use egui::{Event, Pos2, Rect, Vec2};
+        use om9_core::{budget::Limits, geometry::{Geometry, Transform}, model::Entity};
+        for (changed_draft, menu) in [(false, false), (false, true), (true, false)] {
+            let limits = Limits::default();
+            let shape = om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &limits).unwrap();
+            let mut document = Document::with_template_tolerance("union UI");
+            let mut ids = Vec::new();
+            for x in [0., 5., 10.] {
+                let mut entity = Entity::new("box", Geometry::Brep(shape.clone()), None);
+                entity.placement = Transform::translation([x, 0., 0.]);
+                ids.push(entity.id);
+                document.entities.insert(entity.id, entity);
+            }
+            let mut app = MatrixApp::new(document).unwrap();
+            let before = app.controller.document().clone();
+            app.controller.select_objects(&ids).unwrap();
+            if menu { app.invoke("OM9-SOLID-003", crate::session::InvocationOrigin::Menu); }
+            else { app.transcript.set_draft("BooleanUnion"); app.submit_draft(); }
+            app.transcript.set_draft("DeleteInput=Yes"); app.submit_draft();
+            app.transcript.set_draft("");
+            app.submit_draft();
+            assert!(app.controller.boolean_union_worker_pending());
+            assert_eq!(app.controller.document(), &before);
+            let ctx = egui::Context::default();
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+            if changed_draft { app.transcript.set_draft("changed"); }
+            while app.controller.boolean_union_worker_pending() {
+                assert!(std::time::Instant::now() < deadline);
+                let mut raw = egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 720.))),
+                    events: if changed_draft { vec![Event::Text("x".into())] } else { vec![] }, ..Default::default() };
+                eframe::App::raw_input_hook(&mut app, &ctx, &mut raw);
+                let mut output = ctx.run_ui(raw, |ui| app.show(ui)); output.textures_delta.clear();
+                std::thread::sleep(std::time::Duration::from_millis(2));
+            }
+            if changed_draft {
+                assert_eq!(app.controller.document(), &before);
+                assert!(app.transcript.draft().starts_with("changed"));
+            } else {
+                assert_eq!(app.controller.document().entities.len(), 1);
+                let after = app.controller.document().clone();
+                app.controller.undo().unwrap(); assert_eq!(app.controller.document(), &before);
+                app.controller.redo().unwrap(); assert_eq!(app.controller.document(), &after);
+            }
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn boolean_binary_ui_worker_runs_from_menu_and_cmd() {
+        use egui::{Pos2, Rect, Vec2};
+        use om9_core::{budget::Limits, geometry::{Geometry, Transform}, model::Entity};
+        for (command, feature, menu) in [("BooleanDifference", "OM9-SOLID-001", false),
+            ("BooleanDifference", "OM9-SOLID-001", true), ("BooleanIntersection", "OM9-SOLID-002", false),
+            ("BooleanIntersection", "OM9-SOLID-002", true)] {
+            let limits = Limits::default();
+            let shape = om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &limits).unwrap();
+            let mut document = Document::with_template_tolerance("binary Boolean UI");
+            let mut ids = Vec::new();
+            for x in [0., 5.] {
+                let mut entity = Entity::new("box", Geometry::Brep(shape.clone()), None);
+                entity.placement = Transform::translation([x, 0., 0.]);
+                ids.push(entity.id); document.entities.insert(entity.id, entity);
+            }
+            let mut app = MatrixApp::new(document).unwrap();
+            let before = app.controller.document().clone();
+            app.controller.select_objects(&ids[..1]).unwrap();
+            if menu { app.invoke(feature, crate::session::InvocationOrigin::Menu); }
+            else { app.transcript.set_draft(command); app.submit_draft(); }
+            app.transcript.set_draft("DeleteInput=Yes"); app.submit_draft();
+            app.transcript.set_draft(""); app.submit_draft();
+            app.controller.select_objects(&ids[1..]).unwrap();
+            app.transcript.set_draft(""); app.submit_draft();
+            assert!(app.controller.boolean_union_worker_pending(), "{command}, menu={menu}");
+            let ctx = egui::Context::default();
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+            while app.controller.boolean_union_worker_pending() {
+                assert!(std::time::Instant::now() < deadline);
+                let mut raw = egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 720.))), ..Default::default() };
+                eframe::App::raw_input_hook(&mut app, &ctx, &mut raw);
+                let mut output = ctx.run_ui(raw, |ui| app.show(ui)); output.textures_delta.clear();
+                std::thread::sleep(std::time::Duration::from_millis(2));
+            }
+            assert_eq!(app.controller.document().entities.len(), 1, "{command}, menu={menu}");
+            let entity = app.controller.document().entities.values().next().unwrap();
+            let Geometry::Brep(body) = &entity.geometry else { panic!("Boolean output") };
+            assert!((om9_kernel::creation::measure(body, &limits).unwrap().volume_mm3 - 500.).abs() < 1e-6);
+            let after = app.controller.document().clone();
+            app.controller.undo().unwrap(); assert_eq!(app.controller.document(), &before);
+            app.controller.redo().unwrap(); assert_eq!(app.controller.document(), &after);
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn boolean_split_ui_worker_runs_from_menu_and_cmd() {
+        use egui::{Pos2, Rect, Vec2};
+        use om9_core::{budget::Limits, geometry::{Geometry, Transform}, model::Entity};
+        for menu in [false, true] {
+            let limits = Limits::default();
+            let shape = om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &limits).unwrap();
+            let mut document = Document::with_template_tolerance("split Boolean UI");
+            let mut ids = Vec::new();
+            for x in [0., 5.] {
+                let mut entity = Entity::new("box", Geometry::Brep(shape.clone()), None);
+                entity.placement = Transform::translation([x, 0., 0.]);
+                ids.push(entity.id); document.entities.insert(entity.id, entity);
+            }
+            let mut app = MatrixApp::new(document).unwrap();
+            let before = app.controller.document().clone();
+            app.controller.select_objects(&ids[..1]).unwrap();
+            if menu { app.invoke("SolidBooleanSplit", crate::session::InvocationOrigin::Menu); }
+            else { app.transcript.set_draft("BooleanSplit"); app.submit_draft(); }
+            app.transcript.set_draft("DeleteInput=Yes"); app.submit_draft();
+            app.transcript.set_draft(""); app.submit_draft();
+            app.controller.select_objects(&ids[1..]).unwrap();
+            app.transcript.set_draft(""); app.submit_draft();
+            assert!(app.controller.boolean_union_worker_pending(), "menu={menu}");
+            let ctx = egui::Context::default();
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+            while app.controller.boolean_union_worker_pending() {
+                assert!(std::time::Instant::now() < deadline);
+                let mut raw = egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 720.))), ..Default::default() };
+                eframe::App::raw_input_hook(&mut app, &ctx, &mut raw);
+                let mut output = ctx.run_ui(raw, |ui| app.show(ui)); output.textures_delta.clear();
+                std::thread::sleep(std::time::Duration::from_millis(2));
+            }
+            assert_eq!(app.controller.document().entities.len(), 2, "menu={menu}");
+            for entity in app.controller.document().entities.values() {
+                let Geometry::Brep(body) = &entity.geometry else { panic!("split output") };
+                assert!((om9_kernel::creation::measure(body, &limits).unwrap().volume_mm3 - 500.).abs() < 1e-6);
+            }
+            let after = app.controller.document().clone();
+            app.controller.undo().unwrap(); assert_eq!(app.controller.document(), &before);
+            app.controller.redo().unwrap(); assert_eq!(app.controller.document(), &after);
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn boolean_two_ui_worker_preserves_preview_and_commits() {
+        use egui::{Event, Pos2, Rect, Vec2};
+        use om9_core::{budget::Limits, geometry::{Geometry, Transform}, model::Entity};
+        for (menu, cancel_draft) in [(false, false), (true, false), (false, true)] {
+            let limits = Limits::default();
+            let shape = om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &limits).unwrap();
+            let mut document = Document::with_template_tolerance("Boolean two UI");
+            let mut ids = Vec::new();
+            for x in [0., 5.] {
+                let mut entity = Entity::new("box", Geometry::Brep(shape.clone()), None);
+                entity.placement = Transform::translation([x, 0., 0.]);
+                ids.push(entity.id); document.entities.insert(entity.id, entity);
+            }
+            let mut app = MatrixApp::new(document).unwrap();
+            let before = app.controller.document().clone();
+            app.controller.select_objects(&ids).unwrap();
+            if menu { app.invoke("OM9-SOLID-004", crate::session::InvocationOrigin::Menu); }
+            else { app.transcript.set_draft("Boolean2Objects"); app.submit_draft(); }
+            app.transcript.set_draft(""); app.submit_draft();
+            assert!(app.controller.boolean_union_worker_pending());
+            let ctx = egui::Context::default();
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+            while app.controller.boolean_union_worker_pending() {
+                assert!(std::time::Instant::now() < deadline);
+                let mut raw = egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 720.))), ..Default::default() };
+                eframe::App::raw_input_hook(&mut app, &ctx, &mut raw);
+                let mut output = ctx.run_ui(raw, |ui| app.show(ui)); output.textures_delta.clear();
+                std::thread::sleep(std::time::Duration::from_millis(2));
+            }
+            assert_eq!(app.controller.solid_boolean_two_preview().unwrap().1, "Union");
+            app.transcript.set_draft("X"); app.submit_draft();
+            assert!(app.controller.boolean_union_worker_pending());
+            assert_eq!(app.controller.solid_boolean_two_preview().unwrap().1, "Union");
+            if cancel_draft { app.transcript.set_draft("changed"); }
+            while app.controller.boolean_union_worker_pending() {
+                assert!(std::time::Instant::now() < deadline);
+                let mut raw = egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 720.))),
+                    events: if cancel_draft { vec![Event::Text("x".into())] } else { vec![] }, ..Default::default() };
+                eframe::App::raw_input_hook(&mut app, &ctx, &mut raw);
+                let mut output = ctx.run_ui(raw, |ui| app.show(ui)); output.textures_delta.clear();
+                std::thread::sleep(std::time::Duration::from_millis(2));
+            }
+            if cancel_draft {
+                assert_eq!(app.controller.solid_boolean_two_preview().unwrap().1, "Union");
+                assert_eq!(app.controller.document(), &before);
+            } else {
+                let (body, mode) = app.controller.solid_boolean_two_preview().unwrap();
+                assert_eq!(mode, "InversionIntersection");
+                assert!((om9_kernel::creation::measure(body, &limits).unwrap().volume_mm3 - 1000.).abs() < 1e-6);
+                app.transcript.set_draft(""); app.submit_draft();
+                let after = app.controller.document().clone();
+                assert_ne!(after, before);
+                app.controller.undo().unwrap(); assert_eq!(app.controller.document(), &before);
+                app.controller.redo().unwrap(); assert_eq!(app.controller.document(), &after);
+            }
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn picked_brep_isocurve_build_runs_on_ui_worker() {
+        use egui::{Pos2, Rect, Vec2};
+        use om9_core::{budget::Limits, geometry::Geometry, model::Entity};
+        use om9_scene::{camera::{Camera,Viewport},scene::{PickIntent,PickKind}};
+        for native in [false,true] {
+        let limits=Limits::default();
+        let shape=om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Sphere {radius_mm:3.},0.1,&limits).unwrap();
+        let geometry=if native {Geometry::NativeBrep(om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap())}
+            else {Geometry::Brep(shape)};
+        let entity=Entity::new("sphere",geometry,None);let id=entity.id;
+        let mut document=Document::with_template_tolerance("picked isocurve UI");document.entities.insert(id,entity);
+        let mut app=MatrixApp::new(document).unwrap();
+        let camera=Camera::orthographic([1.,0.,10.],[1.,0.,0.],[0.,1.,0.],10.).unwrap();
+        let viewport=Viewport {origin:[0.,0.],size:[400.,400.]};
+        let hit=app.controller.scene().unwrap().pick_kind([200.,200.],&camera,viewport,2.,PickIntent::Select,PickKind::Face).unwrap().unwrap();
+        app.controller.toggle_native_isocurve_face_hit(&hit,&camera,viewport,[200.,200.],2.).unwrap();
+        app.controller.submit("ExtractIsocurve").unwrap();
+        assert!(app.controller.isocurve_face_verification_pending());
+        let ctx=egui::Context::default();let deadline=std::time::Instant::now()+std::time::Duration::from_secs(30);
+        while app.controller.face_verification_pending() {
+            assert!(std::time::Instant::now()<deadline);
+            let mut raw=egui::RawInput {screen_rect:Some(Rect::from_min_size(Pos2::ZERO,Vec2::new(1280.,720.))),..Default::default()};
+            eframe::App::raw_input_hook(&mut app,&ctx,&mut raw);
+            let mut output=ctx.run_ui(raw,|ui|app.show(ui));output.textures_delta.clear();
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
+        let before=app.controller.document().clone();app.transcript.set_draft("");app.submit_draft();
+        assert!(app.controller.isocurve_build_worker_pending());assert_eq!(app.controller.document(),&before);
+        while app.controller.isocurve_build_worker_pending() {
+            assert!(std::time::Instant::now()<deadline);
+            let mut raw=egui::RawInput {screen_rect:Some(Rect::from_min_size(Pos2::ZERO,Vec2::new(1280.,720.))),..Default::default()};
+            eframe::App::raw_input_hook(&mut app,&ctx,&mut raw);
+            let mut output=ctx.run_ui(raw,|ui|app.show(ui));output.textures_delta.clear();
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
+        assert_eq!(app.controller.document().entities.values().filter(|entity|entity.label=="ExtractIsocurve").count(),1);
+        let output=app.controller.document().entities.values().find(|entity|entity.label=="ExtractIsocurve").unwrap();
+        let Geometry::Curve(curve)=&output.geometry else {panic!("isocurve")};
+        for fraction in [0.,0.5,1.] {
+            let p=om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(fraction),0,output.placement,&limits).unwrap()[0];
+            assert!((p.iter().map(|v|v*v).sum::<f64>().sqrt()-3.).abs()<1e-6,"{p:?}");
+        }
+        let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);
+        app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn picked_isocurve_start_worker_rejects_stale_draft_selection_and_pressure() {
+        use egui::{Event,Pos2,Rect,Vec2};
+        use om9_core::{budget::{Limits,memory::MemoryClass},geometry::Geometry,model::Entity,Error};
+        use om9_scene::{camera::{Camera,Viewport},scene::{PickIntent,PickKind}};
+        for (scenario,root_only) in [(0,false),(1,false),(2,false),(0,true),(1,true),(2,true),(3,true)] {
+            let limits=Limits::default();let shape=om9_kernel::brep::box_brep([4.,6.,8.],0.1,&limits).unwrap();
+            let native=om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap();
+            let entity=Entity::new("box",Geometry::NativeBrep(native),None);let id=entity.id;
+            let mut document=Document::with_template_tolerance("ray start guards");document.entities.insert(id,entity);
+            let mut app=MatrixApp::new(document).unwrap();
+            app.controller.submit("Point").unwrap();app.controller.submit("30,30,30").unwrap();app.controller.undo().unwrap();
+            let before=app.controller.document().clone();let viewport=Viewport {origin:[0.,0.],size:[400.,400.]};
+            let camera=Camera::orthographic([2.,3.,20.],[2.,3.,8.],[0.,1.,0.],12.).unwrap();
+            if root_only {app.controller.select_objects(&[id]).unwrap();} else {
+                let hit=app.controller.scene().unwrap().pick_kind([200.,200.],&camera,viewport,2.,PickIntent::Select,PickKind::Face).unwrap().unwrap();
+                app.controller.toggle_native_isocurve_face_hit(&hit,&camera,viewport,[200.,200.],2.).unwrap();
+            }
+            app.controller.submit("ExtractIsocurve").unwrap();assert!(app.controller.isocurve_face_verification_pending());
+            if scenario==0 {
+                app.isocurve_face_worker_draft=Some(String::new());app.transcript.set_draft("changed");
+                let ctx=egui::Context::default();let mut raw=egui::RawInput {screen_rect:Some(Rect::from_min_size(Pos2::ZERO,Vec2::new(1280.,720.))),events:vec![Event::Text("x".into())],..Default::default()};
+                eframe::App::raw_input_hook(&mut app,&ctx,&mut raw);let mut output=ctx.run_ui(raw,|ui|app.show(ui));output.textures_delta.clear();
+                assert!(!app.controller.face_verification_pending());assert!(app.transcript.draft().starts_with("changed"));
+            } else if scenario==1 {
+                if root_only {app.controller.select_objects(&[]).unwrap();app.controller.select_objects(&[id]).unwrap();}
+                else {app.controller.clear_subselection();}
+                assert!(matches!(app.controller.poll_face_verification(),Some(Err(Error::Stale(_)))));
+            } else if scenario==2 {
+                let pressure=app.controller.coordinator().reserve_remaining_external_memory_with_held(MemoryClass::Kernel,None,app.controller.scene_cache_usage().unwrap()).unwrap();
+                let deadline=std::time::Instant::now()+std::time::Duration::from_secs(30);
+                let result=loop {if let Some(result)=app.controller.poll_face_verification(){break result;}
+                    assert!(std::time::Instant::now()<deadline);std::thread::sleep(std::time::Duration::from_millis(2));};
+                assert!(matches!(result,Err(Error::Budget(_))),"{result:?}");drop(pressure);
+            } else {
+                let deadline=std::time::Instant::now()+std::time::Duration::from_secs(30);
+                let result=loop {if let Some(result)=app.controller.poll_face_verification(){break result;}
+                    assert!(std::time::Instant::now()<deadline);std::thread::sleep(std::time::Duration::from_millis(2));};
+                assert!(result.is_err(),"multi-face NativeBrep requires a face pick");
+            }
+            assert_eq!(app.controller.document(),&before);assert_eq!(app.controller.coordinator().redo_len(),1);
+            assert!(app.controller.isocurve_recovery_key().is_none());
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn line_surface_click_refuses_simulated_memory_exhaustion() {
+        use egui::{Event, Modifiers, PointerButton, Pos2, Rect, Vec2};
+        use om9_core::{budget::{Limits, memory::MemoryClass}, geometry::Geometry, model::Entity};
+        use om9_scene::{camera::Viewport, osnap::SnapKind, workspace::ViewId};
+        let body = om9_kernel::brep::sphere_brep(2., 0.1, &Limits::default()).unwrap();
+        let mut document = Document::with_template_tolerance("line snap pressure");
+        let entity = Entity::new("sphere", Geometry::Brep(body), None);
+        document.entities.insert(entity.id, entity);
+        let mut app = MatrixApp::new(document).unwrap();
+        app.controller.submit("Line").unwrap();
+        app.set_snap_override(Some(SnapKind::Surface));
+        let ctx = egui::Context::default();
+        let frame = |app: &mut MatrixApp, events: Vec<Event>| {
+            let mut raw = egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280.,720.))), events, ..Default::default() };
+            eframe::App::raw_input_hook(app, &ctx, &mut raw);
+            let mut output = ctx.run_ui(raw, |ui| app.show(ui));
+            output.textures_delta.clear();
+        };
+        for _ in 0..4 { frame(&mut app, vec![]); }
+        let rect = app.view_rects[&ViewId::LookingDown];
+        let viewport = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+        let xy = app.controller.workspace.views[&ViewId::LookingDown].camera.project([0.,0.,0.], viewport).unwrap().unwrap().screen;
+        let pos = Pos2::new(xy[0] as f32, xy[1] as f32);
+        let before = app.controller.coordinator().snapshot();
+        let phase = app.controller.active_command_input_snapshot().phase;
+        let pressure = app.controller.coordinator().reserve_remaining_external_memory_with_held(
+            MemoryClass::CpuCache, None, app.controller.scene_cache_usage().unwrap()).unwrap();
+        frame(&mut app, vec![Event::PointerMoved(pos)]);
+        frame(&mut app, vec![Event::PointerButton { pos, button: PointerButton::Primary, pressed: true, modifiers: Modifiers::NONE }]);
+        frame(&mut app, vec![Event::PointerButton { pos, button: PointerButton::Primary, pressed: false, modifiers: Modifiers::NONE }]);
+        assert_eq!(app.controller.active_command_input_snapshot().phase, phase);
+        assert_eq!(app.controller.coordinator().snapshot(), before);
+        assert!(app.line_surface_click.is_none() && !app.line_surface_scheduler.is_busy());
+        drop(pressure);
+        frame(&mut app, vec![]);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        while app.line_surface_scheduler.is_busy() {
+            assert!(std::time::Instant::now() < deadline);
+            frame(&mut app, vec![]);
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        assert!(app.line_surface_receipt.is_some());
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn line_surface_click_waits_for_source_and_cancels_on_new_input() {
+        use egui::{Event, Modifiers, PointerButton, Pos2, Rect, Vec2};
+        use om9_core::{budget::Limits, model::Entity, geometry::Geometry};
+        use om9_scene::{camera::Viewport, osnap::SnapKind, workspace::ViewId};
+        for cancel in [0, 1, 2, 3, 4] {
+            let body = om9_kernel::brep::sphere_brep(2., 0.1, &Limits::default()).unwrap();
+            let mut document = Document::with_template_tolerance("deferred line snap");
+            let entity = Entity::new("sphere", Geometry::Brep(body), None);
+            document.entities.insert(entity.id, entity);
+            let mut app = MatrixApp::new(document).unwrap();
+            app.controller.submit("Line").unwrap();
+            app.set_snap_override(Some(SnapKind::Surface));
+            let ctx = egui::Context::default();
+            let frame = |app: &mut MatrixApp, events: Vec<Event>| {
+                let mut raw = egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 720.))), events, ..Default::default() };
+                eframe::App::raw_input_hook(app, &ctx, &mut raw);
+                let mut output = ctx.run_ui(raw, |ui| app.show(ui));
+                output.textures_delta.clear();
+            };
+            for _ in 0..4 { frame(&mut app, vec![]); }
+            let rect = app.view_rects[&ViewId::LookingDown];
+            let viewport = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+            let xy = app.controller.workspace.views[&ViewId::LookingDown].camera.project([0., 0., 0.], viewport).unwrap().unwrap().screen;
+            let pos = Pos2::new(xy[0] as f32, xy[1] as f32);
+            let permit = app.controller.coordinator().external_memory_account().try_acquire_surface_snap().unwrap();
+            frame(&mut app, vec![Event::PointerMoved(pos)]);
+            assert!(app.line_surface_scheduler.is_busy());
+            frame(&mut app, vec![Event::PointerButton { pos, button: PointerButton::Primary, pressed: true, modifiers: Modifiers::NONE }]);
+            frame(&mut app, vec![Event::PointerButton { pos, button: PointerButton::Primary, pressed: false, modifiers: Modifiers::NONE }]);
+            assert!(app.line_surface_click.is_some(), "click should wait for the worker");
+            let before = app.controller.active_command_input_snapshot();
+            if cancel == 1 { frame(&mut app, vec![Event::Text("x".into())]); }
+            if cancel == 2 { frame(&mut app, vec![Event::PointerMoved(pos + Vec2::new(20., 0.))]); }
+            if cancel == 3 {
+                app.controller.workspace.views.get_mut(&ViewId::LookingDown).unwrap().camera =
+                    om9_scene::camera::Camera::orthographic([0., 0., 20.], [0., 0., 0.], [0., 1., 0.], 12.).unwrap();
+                frame(&mut app, vec![]);
+            }
+            if cancel == 4 {
+                let view = app.controller.workspace.views.get_mut(&ViewId::LookingDown).unwrap();
+                view.mode = match view.mode {
+                    om9_scene::workspace::DisplayMode::Wireframe => om9_scene::workspace::DisplayMode::Shaded,
+                    om9_scene::workspace::DisplayMode::Shaded => om9_scene::workspace::DisplayMode::Wireframe,
+                };
+                frame(&mut app, vec![]);
+            }
+            if cancel != 0 { assert!(app.line_surface_click.is_none(), "changed input must cancel the queued click"); }
+            drop(permit);
+            let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+            while app.line_surface_scheduler.is_busy() || app.line_surface_click.is_some() {
+                assert!(std::time::Instant::now() < deadline);
+                frame(&mut app, vec![]);
+                std::thread::sleep(std::time::Duration::from_millis(5));
+            }
+            let after = app.controller.active_command_input_snapshot();
+            if cancel != 0 { assert_eq!(before.phase, after.phase); }
+            else {
+                assert_ne!(before.phase, after.phase);
+                assert_eq!(app.snap_override(), None);
+                assert_eq!(app.line_surface_receipt.as_ref().unwrap().display_occluded(), Some(false));
+                let point = app.controller.relative_base().unwrap().xyz();
+                assert!((point[2] - 2.).abs() < 1e-6, "source point {point:?}");
+            }
         }
     }
 

@@ -93,13 +93,13 @@ fn i1_to_i5_the_info_is_sourced_from_the_model() {
     // I4: a native B-rep without a payload reports unavailable, not zero.
     let i4 = &document["cases"][3];
     let native = Geometry::NativeBrep(NativeBrep {
-        display: Mesh {
+        display: std::sync::Arc::new(Mesh {
             vertices: Vec::new(),
             faces: Vec::new(),
             normals: Vec::new(),
             colors: Vec::new(),
             corner_uvs: Vec::new(),
-        },
+        }),
         payload: Vec::new().into(),
         crc: 0,
     });

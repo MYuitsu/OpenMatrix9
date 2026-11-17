@@ -557,12 +557,12 @@ impl Controller {
         &self,
         instance: &GemInstance,
         brep: bool,
-    ) -> Result<om9_core::geometry::Geometry> {
+    ) -> Result<(om9_core::geometry::Geometry, Option<om9_core::transaction::ExternalMemoryReservation>)> {
         let mesh = build_mesh(&instance.spec)?;
         if !mesh.closed {
             return Err(Error::Invalid("gem mesh open"));
         }
-        self.gem_geometry(mesh, brep)
+        self.gem_geometry_with_guard(mesh, brep)
     }
 
     fn apply_cluster_layout(&mut self, session: &GemClusterSession) -> Result<()> {
@@ -583,11 +583,23 @@ impl Controller {
             .as_ref()
             .map(|feature| feature.accents.clone())
             .unwrap_or_default();
+        let result = (|| {
+        #[cfg(feature = "occt-brep")]
+        let mut guards = Vec::new();
+        #[cfg(feature = "occt-brep")]
+        let mut guard_storage = None;
         let document = self.document;
         let mut mutations = Vec::new();
         let mut gem_ids = Vec::with_capacity(session.accents.len());
         for (index, instance) in session.accents.iter().enumerate() {
-            let geometry = self.cluster_child_geometry(instance, session.brep)?;
+            let (geometry, guard) = self.cluster_child_geometry(instance, session.brep)?;
+            #[cfg(feature = "occt-brep")]
+            if let Some(guard) = guard {
+                self.grow_solid_guard_vector(&mut guards, &mut guard_storage, 1)?;
+                guards.push(guard);
+            }
+            #[cfg(not(feature = "occt-brep"))]
+            let _ = guard;
             if let Some(id) = existing.get(index).copied() {
                 let Some(entity) = self.document().entities.get(&id.object()) else {
                     return Err(Error::Stale("gem cluster child"));
@@ -648,7 +660,15 @@ impl Controller {
         let mut extensions = host_entity.extensions.clone();
         extensions.insert(CLUSTER_EXTENSION_SLOT.to_owned(), feature.to_extension()?);
         mutations.push(Mutation::Extensions { source, extensions });
-        self.commit_gem(session.tool.title(), mutations)
+        #[cfg(feature = "occt-brep")]
+        let result = if guards.is_empty() { self.commit_gem(session.tool.title(), mutations) }
+            else { self.commit_gem_with_guards(session.tool.title(), mutations, Some(&mut guards)) };
+        #[cfg(not(feature = "occt-brep"))]
+        let result = self.commit_gem(session.tool.title(), mutations);
+        result
+        })();
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
     }
 
     fn apply_orient_to_gem(&mut self, session: &GemClusterSession) -> Result<()> {

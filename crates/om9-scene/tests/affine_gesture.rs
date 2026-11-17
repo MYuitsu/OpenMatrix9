@@ -42,7 +42,7 @@ fn warm_affine_updates_reuse_buffers_and_cancel_keeps_geometry_and_undo() {
         gesture
             .update(&c, &mut scene, Transform::translation([x as f64, 0., 0.]))
             .unwrap();
-        assert!(std::sync::Arc::ptr_eq(&buffers, &scene.objects[0].buffers));
+        assert!(buffers.ptr_eq(&scene.objects[0].buffers));
     }
     assert_eq!(c.snapshot(), before);
     gesture.cancel(&mut scene).unwrap();

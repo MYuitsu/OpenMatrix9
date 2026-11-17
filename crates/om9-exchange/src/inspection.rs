@@ -872,7 +872,7 @@ mod tests {
     #[test]
     fn transformed_native_brep_requires_bound_expected_fingerprint() {
         use om9_core::geometry::{Mesh,NativeBrep};
-        let native=NativeBrep{display:Mesh{vertices:vec![],faces:vec![],normals:vec![],colors:vec![],corner_uvs:vec![]},payload:vec![1,2,3].into(),crc:10};
+        let native=NativeBrep{display: std::sync::Arc::new(Mesh{vertices:vec![],faces:vec![],normals:vec![],colors:vec![],corner_uvs:vec![]}),payload:vec![1,2,3].into(),crc:10};
         let geometry=Geometry::NativeBrep(native);let entity=Entity::new("source",geometry.clone(),None);let id=entity.id;
         let mut document=Document::new("source");document.entities.insert(id,entity);let limits=Limits::default();
         let response=serde_json::json!({"schema_version":1,"status":"expected_brep_fingerprints","objects":[{"id":id.0.to_string(),"source_crc":10,"crc":20,"payload_bytes":4}]});

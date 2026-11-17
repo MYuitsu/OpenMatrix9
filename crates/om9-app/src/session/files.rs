@@ -6,6 +6,184 @@ use om9_core::budget::Usage;
 use std::path::{Path, PathBuf};
 const PATH_BYTES: usize = 32768;
 
+/// Restore missing native displays only when the selected 3DM/OCCT adapter can
+/// construct one from the retained payload. Sources remain opaque and are not
+/// rewritten or made eligible for eviction.
+#[cfg(feature = "occt-brep")]
+fn rebuild_empty_native_displays(coordinator: &om9_core::transaction::TransactionCoordinator,
+    document: &Document, displays: &mut om9_core::legacy_v4::LegacyDisplays,
+    archive: &mut om9_core::transaction::ExternalMemoryReservation, held: Usage,
+    check: &impl Fn() -> Result<()>) -> Result<()> {
+    use om9_core::geometry::{Mesh, NativeBrep, NativeBrepRepresentation, NativeBrepSource, NativeBrepSourceIdentity};
+    let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+    let sources = || document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
+        .map(|entity| &entity.geometry).chain(document.results.values().map(|result| &result.geometry_snapshot))
+        .filter_map(|geometry| match geometry { Geometry::NativeBrep(source) => Some(source), _ => None });
+    let source_count = sources().count();
+    let scratch = if source_count == 0 { None } else {
+        let scratch_bytes = Usage::btree::<NativeBrepSourceIdentity, ()>(source_count)?.bytes.max(1);
+        let mut scratch = coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::CpuCache, scratch_bytes, physical(), held)?;
+        scratch.set_allocated_bytes(scratch_bytes)?;
+        Some(scratch)
+    };
+    let mut missing_sources = std::collections::BTreeSet::new();
+    for source in sources() {
+        check()?;
+        missing_sources.insert(source.identity());
+    }
+    for (source, _) in &displays.native {
+        check()?;
+        missing_sources.remove(&source.identity());
+    }
+    let missing = missing_sources.len();
+    if missing != 0 {
+        let target = displays.native.len().checked_add(missing).ok_or(Error::Overflow("native Open displays"))?;
+        // The existing vector capacity is already covered by the archive
+        // reservation. When it must grow, reserve the complete new allocation
+        // as well, since both allocations can coexist during reallocation.
+        let grows = target > displays.native.capacity();
+        let slots = if grows { Usage::array::<(NativeBrepSource, NativeBrepRepresentation)>(target)?.bytes } else { 0 };
+        let placeholders = ((std::mem::size_of::<Mesh>() + 2 * std::mem::size_of::<usize>()) as u64)
+            .checked_mul(missing as u64).ok_or(Error::Overflow("native Open placeholders"))?;
+        let planned = slots.checked_add(placeholders).ok_or(Error::Overflow("native Open displays"))?;
+        coordinator.grow_external_memory_with_held(archive, planned.max(1), physical(), held)?;
+        displays.native.try_reserve_exact(missing).map_err(|_| Error::Budget("native Open displays"))?;
+        let actual_slots = Usage::array::<(NativeBrepSource, NativeBrepRepresentation)>(displays.native.capacity())?.bytes;
+        if grows && actual_slots > slots { coordinator.grow_external_memory_with_held(archive, actual_slots - slots, physical(), held)?; }
+        for source in sources() {
+            check()?;
+            if !missing_sources.remove(&source.identity()) { continue; }
+            let empty = Mesh { vertices: Vec::new(), faces: Vec::new(), normals: Vec::new(), colors: Vec::new(), corner_uvs: Vec::new() };
+            let candidate = NativeBrep { payload: source.payload.clone(), crc: source.crc, display: Arc::new(empty) };
+            displays.native.push(candidate.into_source_and_representation());
+        }
+    }
+    drop(missing_sources);
+    drop(scratch);
+    for (source, display) in &mut displays.native {
+        if !display.display().vertices.is_empty() && !display.display().faces.is_empty() { continue; }
+        let tolerance = document.effective_tolerance()?.absolute_mm;
+        *display = rebuild_native_display(coordinator, source, tolerance, archive, held, check)?;
+    }
+    Ok(())
+}
+
+#[cfg(feature = "occt-brep")]
+pub(super) fn rebuild_native_display(coordinator: &om9_core::transaction::TransactionCoordinator,
+    source: &om9_core::geometry::NativeBrepSource, tolerance: f64,
+    archive: &mut om9_core::transaction::ExternalMemoryReservation, held: Usage,
+    check: &impl Fn() -> Result<()>) -> Result<om9_core::geometry::NativeBrepRepresentation> {
+        use om9_core::{budget::memory::MemoryClass, geometry::{Mesh, NativeBrepRepresentation}};
+        let limits = *coordinator.limits();
+        let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        check()?;
+        let mut scratch = coordinator.reserve_external_memory_with_held(MemoryClass::Kernel, 1, physical(), held)?;
+        let refused = std::cell::RefCell::new(None);
+        let candidate = om9_kernel::brep::from_3dm_with_angle_admitted(source.payload(), tolerance,
+            om9_kernel::creation::DEFAULT_DEFLECTION_MM, 0.3, &limits, |live, pending| {
+                let result = (|| {
+                    check()?;
+                    let needed = live.checked_add(pending).ok_or(Error::Overflow("native Open rebuild"))?.max(1);
+                    if needed > scratch.bytes() {
+                        let extra = needed - scratch.bytes();
+                        coordinator.grow_external_memory_with_held(&mut scratch, extra, physical(), held)?;
+                    }
+                    scratch.set_allocated_bytes(live)?;
+                    scratch.recheck_pending()
+                })();
+                if let Err(error) = &result { *refused.borrow_mut() = Some(error.clone()); }
+                result
+            }).map_err(|error| refused.into_inner().unwrap_or_else(|| Error::Io(format!("native Open rebuild: {error}"))))?;
+        let geometry = candidate.display();
+        if geometry.points.is_empty() || geometry.triangles.is_empty() {
+            return Err(Error::Unsupported("native BRep rebuild has no display"));
+        }
+        let face_count = geometry.triangles.len();
+        let planned = Usage::array::<om9_core::geometry::Point3>(geometry.points.len())?.bytes
+            .checked_add(Usage::array::<Vec<u32>>(face_count)?.bytes)
+            .and_then(|n| n.checked_add(Usage::array::<u32>(3).ok()?.bytes.checked_mul(face_count as u64)?))
+            .and_then(|n| n.checked_add((std::mem::size_of::<Mesh>() + 2 * std::mem::size_of::<usize>()) as u64))
+            .ok_or(Error::Overflow("native Open display"))?;
+        coordinator.grow_external_memory_with_held(archive, planned.max(1), physical(), held)?;
+        let mut vertices = Vec::new();
+        vertices.try_reserve_exact(geometry.points.len()).map_err(|_| Error::Budget("native Open vertices"))?;
+        vertices.extend_from_slice(&geometry.points);
+        let mut faces = Vec::new();
+        faces.try_reserve_exact(face_count).map_err(|_| Error::Budget("native Open faces"))?;
+        for triangle in &geometry.triangles {
+            check()?;
+            let mut face = Vec::new();
+            face.try_reserve_exact(3).map_err(|_| Error::Budget("native Open face"))?;
+            face.extend_from_slice(&triangle[..3]);
+            faces.push(face);
+        }
+        let mesh = Mesh { vertices, faces, normals: Vec::new(), colors: Vec::new(), corner_uvs: Vec::new() };
+        let replacement = NativeBrepRepresentation::from_source_mesh(source, mesh, &limits)?;
+        let actual = replacement.display_bytes()?;
+        if actual > planned { coordinator.grow_external_memory_with_held(archive, actual - planned, physical(), held)?; }
+        drop(candidate);
+        drop(scratch);
+        Ok(replacement)
+}
+
+#[cfg(not(feature = "occt-brep"))]
+fn rebuild_empty_native_displays(coordinator: &om9_core::transaction::TransactionCoordinator, document: &Document,
+    displays: &mut om9_core::legacy_v4::LegacyDisplays, _: &mut om9_core::transaction::ExternalMemoryReservation,
+    held: Usage, check: &impl Fn() -> Result<()>) -> Result<()> {
+    use om9_core::geometry::NativeBrepSourceIdentity;
+    check()?;
+    let has_native = document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
+        .map(|entity| &entity.geometry).chain(document.results.values().map(|result| &result.geometry_snapshot))
+        .any(|geometry| matches!(geometry, Geometry::NativeBrep(_)));
+    if !has_native { return Ok(()); }
+    let bytes = Usage::btree::<NativeBrepSourceIdentity, bool>(displays.native.len())?.bytes.max(1);
+    let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+    let mut scratch = coordinator.reserve_external_memory_with_held(
+        om9_core::budget::memory::MemoryClass::CpuCache, bytes, physical, held)?;
+    scratch.set_allocated_bytes(bytes)?;
+    let mut available = std::collections::BTreeMap::new();
+    for (source, display) in &displays.native {
+        check()?;
+        available.entry(source.identity()).or_insert_with(||
+            !display.display().vertices.is_empty() && !display.display().faces.is_empty());
+    }
+    let sources = document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
+        .map(|entity| &entity.geometry).chain(document.results.values().map(|result| &result.geometry_snapshot));
+    for geometry in sources {
+        check()?;
+        let Geometry::NativeBrep(source) = geometry else { continue; };
+        if available.get(&source.identity()) != Some(&true) {
+            return Err(Error::Unsupported("native BRep display rebuild requires OCCT adapter"));
+        }
+    }
+    Ok(())
+}
+
+struct PreparedFileOpen {
+    initial: super::PreparedInitialScene,
+    reservation: om9_core::transaction::ExternalMemoryReservation,
+    path: PathBuf,
+    diagnostics: Vec<String>,
+    _owners: FileOpenOwners,
+}
+struct FileOpenOwners {
+    _metadata: om9_core::transaction::ExternalMemoryReservation,
+    _current_scene: om9_core::transaction::ExternalMemoryReservation,
+    _peer_metadata: Option<om9_core::transaction::ExternalMemoryReservation>,
+}
+pub(super) struct FileOpenWorker {
+    token: FileToken,
+    scene_publication: uuid::Uuid,
+    selection_revision: u64,
+    sub_revision: u64,
+    cancel: Arc<std::sync::atomic::AtomicBool>,
+    receiver: std::sync::mpsc::Receiver<Result<PreparedFileOpen>>,
+}
+impl Drop for FileOpenWorker {
+    fn drop(&mut self) { self.cancel.store(true, std::sync::atomic::Ordering::Release); }
+}
+
 // The path is already allocated on entry; keep it before its lease on error.
 struct ReservedFilePath {
     path: PathBuf,
@@ -710,7 +888,14 @@ impl Controller {
         extra_held: Usage,
     ) -> Result<()> {
         candidate.coordinator.set_undo_policy(self.coordinator.undo_policy())?;
-        let candidate_bytes = candidate.replacement_hold(Usage::default())?.bytes;
+        let already_shared = reservation.belongs_to(&candidate.coordinator.external_memory_account());
+        let candidate_bytes = if already_shared {
+            let mut local = candidate.coordinator.local_retained_usage()?;
+            local.add(candidate.scene_cache_usage()?, candidate.coordinator.limits())?;
+            local.bytes
+        } else {
+            candidate.replacement_hold(Usage::default())?.bytes
+        };
         let scene = candidate.scene.as_ref().ok_or(Error::Missing("replacement scene"))?;
         let buffer_bytes = scene.shared_buffer_bytes();
         let arena = scene.picking_arena_bytes()?;
@@ -725,13 +910,20 @@ impl Controller {
             let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
             self.coordinator.grow_external_memory_with_held(&mut reservation, additional, physical, auxiliary)?;
         }
-        candidate.coordinator.adopt_external_captures(&self.coordinator)?;
+        if !already_shared {
+            candidate.scene.as_mut().ok_or(Error::Missing("replacement scene"))?.clear_ordinary_brep_pins();
+            candidate.coordinator.adopt_external_captures(&self.coordinator)?;
+            candidate.scene.as_mut().ok_or(Error::Missing("replacement scene"))?.pin_ordinary_brep_displays(
+                &candidate.coordinator, auxiliary,
+                || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes)))?;
+        }
         candidate.scene.as_ref().ok_or(Error::Missing("replacement scene"))?.transfer_memory_allowance(&mut reservation, &candidate.coordinator, auxiliary)?;
         if buffer_bytes != 0 {
             let bytes = buffer_bytes.checked_add(owner_overhead).ok_or(Error::Overflow("replacement scene owner"))?;
             let buffer_reservation = reservation.split_off(bytes)?;
             let scene = candidate.scene.as_ref().ok_or(Error::Missing("replacement scene"))?;
             let lease = super::SceneBufferLease::new(None, buffer_reservation)?;
+            scene.bind_shared_buffer_owner(lease.clone());
             *candidate.scene_buffer_owner.lock().unwrap_or_else(|e| e.into_inner()) = Some(super::SceneBufferOwner {
                 epoch: scene.epoch, document: Arc::downgrade(&scene.document), bytes: buffer_bytes, lease,
             });
@@ -753,6 +945,8 @@ impl Controller {
                 // acquires this guard first publishes before the other.
                 let mut session = old_stl_session.lock().unwrap_or_else(|e| e.into_inner());
                 candidate.move_contract_state(self);
+                #[cfg(feature = "occt-brep")]
+                { candidate.background_wireframe_enabled = self.background_wireframe_enabled; }
                 old = Some(std::mem::replace(self, candidate));
                 *session = false;
             });
@@ -825,8 +1019,166 @@ impl Controller {
         self.publish_reserved_file_replacement(reservation, candidate)?;
         Ok(FileOutcome::Replaced)
     }
+    /// Start the UI Open path without changing the published world or scene.
+    pub fn request_file_open_worker(&mut self, token: FileToken, path: &Path) -> Result<FileOutcome> {
+        self.file_phase(token, FilePhase::OpenPath)?;
+        let path = self.native_file_path(path)?;
+        self.start_file_open_worker(token, path, true)
+    }
+
+    fn start_file_open_worker(&mut self, token: FileToken, path: PathBuf, name_from_path: bool) -> Result<FileOutcome> {
+        use om9_core::budget::memory::MemoryClass;
+        self.file_phase(token, FilePhase::OpenPath)?;
+        if self.file_open_worker.is_some() || self.is_running() { return Err(Error::Busy); }
+        let next = self.next_file_token(token)?;
+        let scene_publication = self.scene.as_ref().ok_or(Error::Missing("Open scene"))?.publication_id();
+        let selection_revision = self.selection_state().revision;
+        let sub_revision = self.sub_revision();
+        let limits = *self.coordinator.limits();
+        let path_usage = Usage { bytes: path.capacity() as u64, ..Usage::default() };
+        let held = self.replacement_hold(path_usage)?;
+        let mut auxiliary = self.scene_cache_usage()?;
+        auxiliary.add(path_usage, &limits)?;
+        let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let scene_bytes = self.scene_cache_usage()?.bytes;
+        let current_scene = self.coordinator.reserve_external_memory_with_allocated(
+            MemoryClass::CpuCache, scene_bytes.checked_add(4096).ok_or(Error::Overflow("Open scene owner"))?,
+            scene_bytes, physical, Usage::default())?;
+        let metadata_bytes = (std::mem::size_of::<FileOpenWorker>() + std::mem::size_of::<PreparedFileOpen>()
+            + 8 * std::mem::size_of::<usize>()) as u64 + path.capacity() as u64;
+        let metadata = self.coordinator.reserve_external_memory_with_allocated(
+            MemoryClass::CpuCache, metadata_bytes.max(1), path.capacity() as u64, physical, auxiliary)?;
+        let peer = self.coordinator.memory_admission_peer_with_held(auxiliary)?;
+        let peer_bytes = self.coordinator.peer_unshared_metadata_bytes()?;
+        let peer_metadata = if peer_bytes == 0 { None } else {
+            Some(self.coordinator.reserve_external_memory_with_allocated(MemoryClass::CpuCache,
+                peer_bytes, peer_bytes, physical, Usage::default())?)
+        };
+        let cancel = Arc::new(std::sync::atomic::AtomicBool::new(false));
+        let worker_cancel = cancel.clone();
+        let (sender, receiver) = std::sync::mpsc::sync_channel(1);
+        let owners = FileOpenOwners { _metadata: metadata, _current_scene: current_scene, _peer_metadata: peer_metadata };
+        std::thread::Builder::new().name("om9-open-scene".into()).spawn(move || {
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                Self::prepare_file_open_on_worker(&peer, path, limits, held, auxiliary, &worker_cancel, owners, name_from_path)
+            })).unwrap_or_else(|_| Err(Error::Io("Open worker panicked".into())));
+            let _ = sender.send(result);
+        }).map_err(|error| Error::Io(format!("Open worker start: {error}")))?;
+        self.publish_file_phase(next, FilePhase::OpenPreparing, None);
+        self.file_open_worker = Some(FileOpenWorker { token: next, scene_publication, selection_revision,
+            sub_revision, cancel, receiver });
+        Ok(FileOutcome::Pending)
+    }
+
+    fn prepare_file_open_on_worker(peer: &TransactionCoordinator, path: PathBuf, limits: Limits,
+        held: Usage, auxiliary: Usage, cancel: &std::sync::atomic::AtomicBool, owners: FileOpenOwners,
+        name_from_path: bool) -> Result<PreparedFileOpen> {
+        use om9_core::budget::memory::MemoryClass;
+        use std::sync::atomic::Ordering;
+        let check = || if cancel.load(Ordering::Acquire) { Err(Error::Canceled) } else { Ok(()) };
+        let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        check()?;
+        let (mut reservation, restored, mut displays) = Archive::open_restored_retaining_displays(
+            &path, &limits.remaining_after(held)?, &std::collections::BTreeSet::new(),
+            |bytes| { check()?; peer.reserve_external_memory_with_held(MemoryClass::CpuCache, bytes.max(1), physical(), auxiliary) },
+            |reservation, bytes| { check()?; if bytes == 0 { Ok(()) } else {
+                peer.grow_external_memory_with_held(reservation, bytes, physical(), auxiliary) } },
+            |reservation, estimated| {
+                check()?;
+                let extra = estimated.saturating_sub(reservation.bytes());
+                if extra == 0 { return Ok(()); }
+                let batch = extra.max(64 * 1024);
+                match peer.grow_external_memory_with_held(reservation, batch, physical(), auxiliary) {
+                    Err(Error::Budget(_)) if batch != extra => peer.grow_external_memory_with_held(reservation, extra, physical(), auxiliary),
+                    result => result,
+                }
+            },
+        )?;
+        check()?;
+        rebuild_empty_native_displays(peer, &restored.document, &mut displays, &mut reservation, auxiliary, &check)?;
+        let mut extra = Usage { bytes: path.capacity() as u64, ..Usage::default() };
+        extra.add(Usage::array::<String>(restored.diagnostics.capacity())?, &limits)?;
+        for diagnostic in &restored.diagnostics {
+            extra.add(Usage { bytes: diagnostic.capacity() as u64, ..Usage::default() }, &limits)?;
+        }
+        let overhead = Self::candidate_controller_overhead(extra, &limits)?.bytes;
+        if overhead != 0 { peer.grow_external_memory_with_held(&mut reservation, overhead, physical(), auxiliary)?; }
+        let mut document = restored.document;
+        if name_from_path && let Some(name) = path.file_name() {
+            let bounded: String = name.to_string_lossy().chars().take(240).collect();
+            if !bounded.is_empty() { document.name = bounded; }
+        }
+        let id = document.id;
+        let mut initial = Self::prepare_initial_scene(document, limits, held, |coordinator, _| {
+            check()?;
+            coordinator.adopt_external_captures(peer)?;
+            coordinator.adopt_legacy_displays(displays, &mut reservation, auxiliary)?;
+            let mut scene_held = auxiliary;
+            scene_held.add(Workspace::startup_usage()?, &limits)?;
+            let document = coordinator.world().documents.get(&id).ok_or(Error::Missing("replacement document"))?;
+            let scratch = Scene::candidate_preflight_scratch(document, &limits)?;
+            let planning = coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache,
+                scratch.bytes.max(1), physical(), scene_held)?;
+            let representations = coordinator.representation_store();
+            let peak = Scene::candidate_scene_peak_with_representations(document, &limits,
+                &representations.lock().unwrap_or_else(|e| e.into_inner()))?;
+            drop(planning);
+            if peak != 0 { coordinator.grow_external_memory_with_held(&mut reservation, peak, physical(), scene_held)?; }
+            check()?;
+            Ok(scene_held)
+        })?;
+        #[cfg(feature = "occt-brep")]
+        super::topology_remesh::prepare_open_scene_wires(&mut initial, &mut reservation, auxiliary, cancel)?;
+        check()?;
+        Ok(PreparedFileOpen { initial, reservation, path, diagnostics: restored.diagnostics, _owners: owners })
+    }
+
+    pub fn file_open_worker_pending(&self) -> bool { self.file_open_worker.is_some() }
+
+    pub fn poll_file_open_worker(&mut self) -> Option<Result<FileOutcome>> {
+        use std::sync::atomic::Ordering;
+        let worker = self.file_open_worker.take()?;
+        let result = match worker.receiver.try_recv() {
+            Ok(result) => result,
+            Err(std::sync::mpsc::TryRecvError::Empty) => { self.file_open_worker = Some(worker); return None; }
+            Err(std::sync::mpsc::TryRecvError::Disconnected) => Err(Error::Io("Open worker exited".into())),
+        };
+        let outcome = (|| {
+            if worker.cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
+            self.file_phase(worker.token, FilePhase::OpenPreparing)?;
+            if self.scene.as_ref().is_none_or(|scene| scene.publication_id() != worker.scene_publication)
+                || self.selection_state().revision != worker.selection_revision || self.sub_revision() != worker.sub_revision {
+                return Err(Error::Stale("Open scene context"));
+            }
+            let PreparedFileOpen { initial, reservation, path, diagnostics, _owners } = result?;
+            let mut candidate = Self::from_prepared_initial(initial)?;
+            candidate.file.path = Some(path);
+            if !diagnostics.is_empty() { candidate.file.saved = None; }
+            candidate.file.diagnostics = diagnostics;
+            self.publish_reserved_file_replacement(reservation, candidate)?;
+            Ok(FileOutcome::Replaced)
+        })();
+        if outcome.is_err() && self.file.operation.as_ref().is_some_and(|operation| operation.token == worker.token) {
+            if let Ok(next) = self.next_file_token(worker.token) {
+                self.publish_file_phase(next, FilePhase::OpenPath, None);
+            } else {
+                self.file.operation = None;
+                self.release_file_storage();
+            }
+        }
+        Some(outcome)
+    }
+
     fn replace_from_file(&mut self, token: FileToken, path: PathBuf) -> Result<FileOutcome> {
-        self.replace_from_file_guard(token, path, || Ok(()))
+        self.start_file_open_worker(token, path, true)?;
+        self.wait_for_file_open_worker()
+    }
+
+    fn wait_for_file_open_worker(&mut self) -> Result<FileOutcome> {
+        loop {
+            if let Some(result) = self.poll_file_open_worker() { return result; }
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
     }
     /// Load a batch input through the reserved Open path, preserving its saved
     /// document name and accepting an archive regardless of filename extension.
@@ -836,9 +1188,14 @@ impl Controller {
             return Err(Error::Invalid("batch open state"));
         }
         let token = controller.file_operation().ok_or(Error::Missing("batch open"))?.token();
-        let result = controller.replace_from_file_with_planning_sample(token, path.to_path_buf(), || Ok(()), || {
-            om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes))
-        }, false)?;
+        let bytes = path.as_os_str().as_encoded_bytes();
+        if bytes.is_empty() || bytes.len() > PATH_BYTES || bytes.contains(&0) || path.file_name().is_none() {
+            return Err(Error::Invalid("batch Open path"));
+        }
+        let path = std::path::absolute(path).map_err(|error| Error::Io(error.to_string()))?;
+        if path.as_os_str().as_encoded_bytes().len() > PATH_BYTES { return Err(Error::Budget("absolute file path bytes")); }
+        controller.start_file_open_worker(token, path, false)?;
+        let result = controller.wait_for_file_open_worker()?;
         if result != FileOutcome::Replaced { return Err(Error::Invalid("batch open outcome")); }
         Ok(controller)
     }
@@ -859,7 +1216,7 @@ impl Controller {
         let held = self.replacement_hold(path_usage)?;
         let mut auxiliary = self.scene_cache_usage()?;
         auxiliary.add(path_usage, &limits)?;
-        let (mut archive_reservation, restored) = Archive::open_restored_retaining_reservation(
+        let (mut archive_reservation, restored, mut legacy_displays) = Archive::open_restored_retaining_displays(
             &path,
             &limits.remaining_after(held)?,
             &std::collections::BTreeSet::new(),
@@ -888,6 +1245,8 @@ impl Controller {
                 }
             },
         )?;
+        rebuild_empty_native_displays(&self.coordinator, &restored.document, &mut legacy_displays,
+            &mut archive_reservation, auxiliary, &|| Ok(()))?;
         let mut extra = path_usage;
         extra.add(
             Usage::array::<String>(restored.diagnostics.capacity())?,
@@ -926,13 +1285,39 @@ impl Controller {
         let planning = self.coordinator.reserve_external_memory_with_held(
             om9_core::budget::memory::MemoryClass::CpuCache, scratch.bytes.max(1), sample(), auxiliary,
         )?;
-        let scene_peak = Scene::candidate_scene_peak(&document, &limits)?;
+        let has_legacy_displays = !legacy_displays.occt.is_empty() || !legacy_displays.native.is_empty();
+        // BRep scene planning needs its representations. The shared-account
+        // scene constructor reserves that peak after the legacy handoff.
+        let scene_peak = if has_legacy_displays { 0 } else { Scene::candidate_scene_peak(&document, &limits)? };
         drop(planning);
         if scene_peak != 0 {
             let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
             self.coordinator.grow_external_memory_with_held(&mut archive_reservation, scene_peak, physical, auxiliary)?;
         }
-        let mut candidate = Self::new_with_held(document, limits, held)?;
+        let candidate_id = document.id;
+        let mut candidate = if has_legacy_displays {
+            Self::new_with_held_and_setup(document, limits, held, |coordinator, _| {
+                coordinator.adopt_external_captures(&self.coordinator)?;
+                coordinator.adopt_legacy_displays(legacy_displays, &mut archive_reservation, auxiliary)?;
+                let mut scene_held = auxiliary;
+                scene_held.add(Workspace::startup_usage()?, &limits)?;
+                let document = coordinator.world().documents.get(&candidate_id).ok_or(Error::Missing("replacement document"))?;
+                let scratch = Scene::candidate_preflight_scratch(document, &limits)?;
+                let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+                let planning = coordinator.reserve_external_memory_with_held(
+                    om9_core::budget::memory::MemoryClass::CpuCache, scratch.bytes.max(1), physical(), scene_held)?;
+                let representations = coordinator.representation_store();
+                let peak = Scene::candidate_scene_peak_with_representations(document, &limits,
+                    &representations.lock().unwrap_or_else(|e| e.into_inner()))?;
+                drop(planning);
+                if peak != 0 {
+                    coordinator.grow_external_memory_with_held(&mut archive_reservation, peak, physical(), scene_held)?;
+                }
+                Ok(scene_held)
+            })?
+        } else {
+            Self::new_with_held(document, limits, held)?
+        };
         candidate.file.path = Some(path);
         if !restored.diagnostics.is_empty() {
             candidate.file.saved = None;
@@ -951,6 +1336,9 @@ impl Controller {
             .is_none_or(|op| op.token != token)
         {
             return Err(Error::Stale("file operation token"));
+        }
+        if let Some(worker) = self.file_open_worker.take() {
+            worker.cancel.store(true, std::sync::atomic::Ordering::Release);
         }
         self.file.operation = None;
         self.release_file_storage();
@@ -1009,6 +1397,16 @@ impl Controller {
 #[cfg(test)]
 mod replacement_budget_tests {
     use super::*;
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn document_replacement_preserves_background_wireframe_mode() {
+        for enabled in [false, true] {
+            let mut controller = Controller::new(Document::with_template_tolerance("original"), Limits::default()).unwrap();
+            controller.background_wireframe_enabled = enabled;
+            controller.restore_master_document(Document::with_template_tolerance("replacement")).unwrap();
+            assert_eq!(controller.background_wireframe_enabled, enabled);
+        }
+    }
     #[test]
     fn late_restore_publication_refusal_keeps_observers_and_history() {
         struct Observer;
@@ -1043,6 +1441,32 @@ mod replacement_budget_tests {
     }
     use om9_core::{budget::memory::MemoryClass, geometry::{Cloud, Geometry}, model::Entity,
         transaction::{TransactionCoordinator, World}};
+
+    #[test]
+    fn detached_buffers_keep_old_and_replacement_reservations() {
+        let limits = Limits::default();
+        let mut original = Document::with_template_tolerance("original");
+        let point = Entity::new("old", Geometry::Point([1., 2., 3.]), None);
+        original.entities.insert(point.id, point);
+        let mut controller = Controller::new(original, limits).unwrap();
+        let mut peer = TransactionCoordinator::new(World::new(vec![Document::new("peer")], &limits).unwrap(), limits).unwrap();
+        peer.adopt_external_captures(controller.coordinator()).unwrap();
+        let old = controller.scene().unwrap().objects[0].buffers.clone();
+        let mut replacement = Document::with_template_tolerance("replacement");
+        let point = Entity::new("new", Geometry::Point([4., 5., 6.]), None);
+        replacement.entities.insert(point.id, point);
+        controller.restore_master_document(replacement).unwrap();
+        let new = controller.scene().unwrap().objects[0].buffers.clone();
+        assert!(!old.ptr_eq(&new));
+        drop(controller);
+        let both = peer.external_reserved_bytes(MemoryClass::CpuCache);
+        assert!(both > 0);
+        drop(old);
+        let remaining = peer.external_reserved_bytes(MemoryClass::CpuCache);
+        assert!(remaining > 0 && remaining < both, "old and new buffer owners must release independently");
+        drop(new);
+        assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    }
 
     #[test]
     fn save_reserves_only_its_phases_and_allows_competing_work() {

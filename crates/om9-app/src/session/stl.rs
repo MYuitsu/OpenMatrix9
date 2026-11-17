@@ -19,6 +19,7 @@ use std::{
 /// Feature id of the File menu `FileExportSelected` row.
 pub const STL_EXPORT: &str = "OM9-FILE-001";
 type StlAdmission<'a> = dyn FnMut(u64, u64) -> Result<()> + 'a;
+type StlLease = om9_core::transaction::ExternalMemoryReservation;
 
 fn stl_soup_bytes(points: &Vec<[f64; 3]>, triangles: &Vec<[u32; 3]>) -> Result<u64> {
     om9_core::budget::Usage::array::<[f64; 3]>(points.capacity())?.bytes
@@ -107,7 +108,12 @@ pub struct StlExportReceipt {
 
 /// Immutable source and selection retained independently of later document edits.
 pub struct StlExportCapture {
-    document: om9_core::transaction::CapturedDocument,
+    document: Option<om9_core::transaction::CapturedDocument>,
+    brep_sources: Vec<StlBrepSource>,
+    document_id: om9_core::identity::DocumentId,
+    owner_session: om9_core::identity::SessionId,
+    session_generation: u64,
+    native_tolerance: Result<f64>,
     selection: Vec<om9_core::identity::ObjectId>,
     _selection_reservation: om9_core::transaction::ExternalMemoryReservation,
     limits: Limits,
@@ -120,6 +126,60 @@ pub struct StlExportCapture {
     /// Scene bytes belong to their live owners, not to this estimate. Other
     /// changing auxiliary still needs live ownership before closing R1a.
     caller_held_at_capture: om9_core::budget::Usage,
+}
+
+struct StlBrepSource {
+    source: StlCapturedSource,
+    label: String,
+    placement: Transform,
+    visible: bool,
+}
+enum StlCapturedSource {
+    Brep(om9_core::transaction::CapturedGeometrySource),
+    Mesh(om9_core::identity::ObjectId, Arc<om9_core::geometry::Mesh>),
+    MeshPending(om9_core::identity::ObjectId),
+    Surface(om9_core::identity::ObjectId, Arc<StlSurfaceSource>),
+    SurfacePending(om9_core::identity::ObjectId),
+    Skipped(om9_core::geometry::GeometryKind),
+}
+struct StlSurfaceSource {
+    surface: om9_core::geometry::NurbsSurface,
+    trim: Option<om9_core::model::Extension>,
+}
+
+fn copy_stl_vec<T: Copy>(values: &[T], cancel: &StlCancellation) -> Result<Vec<T>> {
+    let mut out = Vec::new();
+    out.try_reserve_exact(values.len()).map_err(|_| Error::Budget("STL source geometry"))?;
+    for chunk in values.chunks(4096) { cancel.check()?; out.extend_from_slice(chunk); }
+    Ok(out)
+}
+
+fn copy_stl_mesh(mesh: &om9_core::geometry::Mesh, cancel: &StlCancellation) -> Result<om9_core::geometry::Mesh> {
+    let mut faces = Vec::new();
+    faces.try_reserve_exact(mesh.faces.len()).map_err(|_| Error::Budget("STL source mesh"))?;
+    for face in &mesh.faces { cancel.check()?; faces.push(copy_stl_vec(face, cancel)?); }
+    Ok(om9_core::geometry::Mesh { vertices: copy_stl_vec(&mesh.vertices, cancel)?, faces,
+        normals: copy_stl_vec(&mesh.normals, cancel)?, colors: copy_stl_vec(&mesh.colors, cancel)?, corner_uvs: copy_stl_vec(&mesh.corner_uvs, cancel)? })
+}
+fn stl_surface_bytes(surface: &om9_core::geometry::NurbsSurface, trim: Option<&om9_core::model::Extension>, limits: &Limits) -> Result<u64> {
+    let owner = (std::mem::size_of::<StlSurfaceSource>() + 2 * std::mem::size_of::<usize>()) as u64;
+    surface.validate(limits)?.bytes.checked_add(owner)
+        .and_then(|v| v.checked_add(trim.map_or(0, |extension| extension.payload.capacity() as u64)))
+        .ok_or(Error::Overflow("STL source surface"))
+}
+fn copy_stl_surface(surface: &om9_core::geometry::NurbsSurface, trim: Option<&om9_core::model::Extension>, cancel: &StlCancellation) -> Result<StlSurfaceSource> {
+    let trim = if let Some(extension) = trim {
+        cancel.check()?;
+        let mut payload = String::new();
+        payload.try_reserve_exact(extension.payload.len()).map_err(|_| Error::Budget("STL trim source"))?;
+        payload.push_str(&extension.payload);
+        Some(om9_core::model::Extension { version: extension.version, payload })
+    } else { None };
+    Ok(StlSurfaceSource { surface: om9_core::geometry::NurbsSurface {
+        degree: surface.degree, size: surface.size, poles: copy_stl_vec(&surface.poles, cancel)?,
+        weights: copy_stl_vec(&surface.weights, cancel)?, knots: [copy_stl_vec(&surface.knots[0], cancel)?, copy_stl_vec(&surface.knots[1], cancel)?],
+        domain: surface.domain, periodic: surface.periodic, reversed: surface.reversed,
+    }, trim })
 }
 
 /// Owns one background export and requests cancellation on drop. The caller
@@ -174,6 +234,7 @@ impl StlExportJob {
             if reservation_bytes < capture.authored_mesh_array_lower_bound(&cancel)? {
                 return Err(Error::Budget("STL mesh reservation lower bound"));
             }
+            capture.detach_authored_sources(&cancel)?;
             capture.export_admitted(&target, profile, &cancel)
         })
     }
@@ -183,15 +244,26 @@ impl StlExportJob {
         permit: om9_core::transaction::ExternalExportPermit,
         work: impl FnOnce(&StlCancellation) -> Result<StlExportReceipt> + Send + 'static,
     ) -> Result<Self> {
+        Self::spawn_with_completion(permit, move |cancel| {
+            let _reservation = reservation;
+            work(cancel)
+        }, || {})
+    }
+
+    fn spawn_with_completion(
+        permit: om9_core::transaction::ExternalExportPermit,
+        work: impl FnOnce(&StlCancellation) -> Result<StlExportReceipt> + Send + 'static,
+        complete: impl FnOnce() + Send + 'static,
+    ) -> Result<Self> {
         let cancellation = StlCancellation::default();
         let worker_cancel = cancellation.clone();
         let (sender, receiver) = std::sync::mpsc::sync_channel(1);
         std::thread::Builder::new().name("om9-stl-export".into()).spawn(move || {
             let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| work(&worker_cancel)))
                 .unwrap_or_else(|_| Err(Error::Io("STL worker panicked".into())));
-            drop(reservation);
             drop(permit);
             let _ = sender.send(result);
+            complete();
         }).map_err(|error| Error::Io(format!("STL worker start: {error}")))?;
         Ok(Self { cancellation, result: Some(receiver) })
     }
@@ -214,6 +286,53 @@ impl StlExportJob {
 
 impl Drop for StlExportJob {
     fn drop(&mut self) { self.cancellation.cancel(); }
+}
+
+struct StlMemoryRequest {
+    lease: Arc<Mutex<Option<StlLease>>>,
+    additional: u64,
+    reply: std::sync::mpsc::SyncSender<Result<()>>,
+}
+
+/// One interactive export. Only reserve/grow is serviced on the UI thread so
+/// admission sees live auxiliary usage, including edits after source capture.
+pub(crate) struct InteractiveStlExport {
+    job: StlExportJob,
+    requests: std::sync::mpsc::Receiver<StlMemoryRequest>,
+    session: Arc<Mutex<bool>>,
+    _receipt_lease: Arc<Mutex<Option<StlLease>>>,
+}
+
+impl InteractiveStlExport {
+    pub(crate) fn belongs_to(&self, controller: &Controller) -> bool {
+        Arc::ptr_eq(&self.session, &controller.stl_session.token)
+    }
+
+    pub(crate) fn cancel(&self) {
+        self.job.cancel();
+    }
+
+    pub(crate) fn canceling(&self) -> bool {
+        self.job.cancellation.is_canceled()
+    }
+
+    pub(crate) fn poll(&mut self, controller: &Controller) -> Option<Result<StlExportReceipt>> {
+        if let Ok(request) = self.requests.try_recv() {
+            let result = (|| {
+                if !self.belongs_to(controller) || self.canceling() {
+                    return Err(Error::Canceled);
+                }
+                let physical = om9_native_owner::physical_memory()
+                    .map(|sample| (sample.total_bytes, sample.available_bytes))
+                    .ok_or(Error::Unsupported("physical RAM availability is unavailable"))?;
+                let held = controller.scene_cache_usage()?;
+                let mut lease = request.lease.lock().unwrap_or_else(|e| e.into_inner());
+                reserve_stl_phase(&controller.coordinator, &mut lease, request.additional, Some(physical), held)
+            })();
+            let _ = request.reply.send(result);
+        }
+        self.job.try_result()
+    }
 }
 
 /// Cancellation is serialized with final publication. A successful cancellation
@@ -298,7 +417,7 @@ fn stl_occurrences<'a>(
     document: &'a om9_core::model::Document,
     selection: impl Iterator<Item = om9_core::identity::ObjectId>,
     limits: &Limits,
-    cancel: &StlCancellation,
+    cancel: Option<&StlCancellation>,
     mut handle: impl FnMut(&'a om9_core::model::Entity, Transform, bool) -> Result<()>,
 ) -> Result<()> {
     struct Ancestor<'a> {
@@ -306,10 +425,10 @@ fn stl_occurrences<'a>(
         parent: Option<&'a Ancestor<'a>>,
     }
     fn visit<'a>(document: &'a om9_core::model::Document, entity: &'a om9_core::model::Entity,
-        parent: Transform, parent_visible: bool, limits: &Limits, cancel: &StlCancellation,
+        parent: Transform, parent_visible: bool, limits: &Limits, cancel: Option<&StlCancellation>,
         ancestors: Option<&Ancestor<'_>>, depth: usize, count: &mut u64,
         handle: &mut impl FnMut(&'a om9_core::model::Entity, Transform, bool) -> Result<()>) -> Result<()> {
-        cancel.check()?;
+        if let Some(cancel) = cancel { cancel.check()?; }
         *count = count.checked_add(1).ok_or(Error::Overflow("STL occurrences"))?;
         if *count > limits.max_nodes { return Err(Error::Budget("STL occurrences")); }
         let placement = parent.compose(entity.placement)?;
@@ -368,7 +487,7 @@ impl Controller {
             ));
         }
         let mut supported = false;
-        stl_occurrences(self.document(), self.selection.iter().copied(), self.coordinator.limits(), &StlCancellation::default(), |entity, _, _| {
+        stl_occurrences(self.document(), self.selection.iter().copied(), self.coordinator.limits(), None, |entity, _, _| {
                 supported |= matches!(
                     entity.geometry,
                     Geometry::Mesh(_)
@@ -407,19 +526,66 @@ impl Controller {
             || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes)))
     }
 
+    pub(crate) fn start_interactive_stl(
+        &self,
+        capture: StlExportCapture,
+        target: PathBuf,
+        profile: StlExportProfile,
+        wake: impl Fn() + Clone + Send + 'static,
+    ) -> Result<InteractiveStlExport> {
+        profile.validate()?;
+        self.validate_stl_capture(&capture)?;
+        let target = stl_target(&target)?;
+        let permit = capture.account.try_acquire_export()?;
+        let session = capture.session.clone();
+        let (sender, requests) = std::sync::mpsc::sync_channel(1);
+        let request_wake = wake.clone();
+        let receipt_lease = Arc::new(Mutex::new(None));
+        let worker_receipt_lease = receipt_lease.clone();
+        let job = StlExportJob::spawn_with_completion(permit, move |cancel| {
+            let cancel = cancel.with_session(capture.session.clone());
+            let mut lease = None;
+            let result = capture.export_phases(&target, profile, &cancel, &mut lease, |lease, additional| {
+                // Keep an owner on the worker even if the window drops its
+                // receiver while a growth request is queued.
+                let shared = Arc::new(Mutex::new(lease.take()));
+                let (reply, answer) = std::sync::mpsc::sync_channel(1);
+                let request = StlMemoryRequest { lease: shared.clone(), additional, reply };
+                let result = sender.send(request).map_err(|_| Error::Canceled).and_then(|()| {
+                    request_wake();
+                    answer.recv().unwrap_or(Err(Error::Canceled))
+                });
+                *lease = shared.lock().unwrap_or_else(|e| e.into_inner()).take();
+                result
+            }, |_| Ok(()));
+            if result.is_ok() {
+                // The final phase also covers the path and diagnostic strings
+                // retained by the receipt until the UI consumes it.
+                *worker_receipt_lease.lock().unwrap_or_else(|e| e.into_inner()) = lease;
+            }
+            result
+        }, wake)?;
+        Ok(InteractiveStlExport { job, requests, session, _receipt_lease: receipt_lease })
+    }
+
     fn export_captured_stl_with_sample(
         &self, capture: StlExportCapture, target: &Path, profile: StlExportProfile,
         sample: impl FnOnce() -> Option<(u64, u64)>,
     ) -> Result<StlExportReceipt> {
         profile.validate()?;
+        self.validate_stl_capture(&capture)?;
+        capture.export_staged(target, profile, &StlCancellation::default(), sample,
+            || self.scene_cache_usage(), |_| Ok(()))
+    }
+
+    fn validate_stl_capture(&self, capture: &StlExportCapture) -> Result<()> {
         if !capture.belongs_to_session(self.document()) {
             return Err(Error::Stale("STL export document session"));
         }
         if !capture._selection_reservation.belongs_to(&self.coordinator.external_memory_account()) {
             return Err(Error::Invalid("STL source account"));
         }
-        capture.export_staged(target, profile, &StlCancellation::default(), sample,
-            || self.scene_cache_usage(), |_| Ok(()))
+        Ok(())
     }
 
     /// Hold the current immutable document allocation and selected object IDs.
@@ -439,36 +605,230 @@ impl Controller {
         if scene.cache_held_usage()?.bytes != self.registered_scene_buffer_bytes(scene) {
             return Err(Error::Invalid("STL scene ownership"));
         }
-        let selection_bytes = om9_core::budget::Usage::array::<om9_core::identity::ObjectId>(self.selection.len())?.bytes;
+        let mut source_only = true;
+        let mut has_brep = false;
+        let mut occurrence_count = 0usize;
+        let mut labels = 0u64;
+        let mut has_authored = false;
+        let probe = stl_occurrences(self.document(), self.selection.iter().copied(), &limits, None, |entity, _, _| {
+            has_brep |= matches!(entity.geometry, Geometry::Brep(_) | Geometry::NativeBrep(_));
+            has_authored |= matches!(entity.geometry, Geometry::Mesh(_) | Geometry::Surface(_));
+            occurrence_count = occurrence_count.checked_add(1).ok_or(Error::Overflow("STL occurrences"))?;
+            labels = labels.checked_add(entity.label.len() as u64).ok_or(Error::Overflow("STL source labels"))?;
+            Ok(())
+        });
+        source_only &= probe.is_ok() && (has_brep || (cfg!(feature = "occt-brep") && has_authored));
         let held = self.scene_cache_usage()?;
+        let mut authored_bytes = 0u64;
+        if source_only && has_authored {
+            type SourceEstimate = (om9_core::identity::ObjectId, u64);
+            let index_bytes = Usage::array::<SourceEstimate>(occurrence_count)?.bytes.max(1);
+            let mut index_reservation = self.coordinator.reserve_external_memory_with_held(
+                om9_core::budget::memory::MemoryClass::Export, index_bytes, sample(), held)?;
+            index_reservation.recheck_pending()?;
+            let mut meshes = Vec::new();
+            meshes.try_reserve_exact(occurrence_count).map_err(|_| Error::Budget("STL source mesh index"))?;
+            let actual_index = Usage::array::<SourceEstimate>(meshes.capacity())?.bytes;
+            if actual_index > index_reservation.bytes() {
+                let additional = actual_index - index_reservation.bytes();
+                self.coordinator.grow_external_memory_with_held(&mut index_reservation, additional, sample(), held)?;
+            }
+            index_reservation.set_allocated_bytes(actual_index)?;
+            stl_occurrences(self.document(), self.selection.iter().copied(), &limits, None, |entity, _, _| {
+                if matches!(entity.geometry, Geometry::Mesh(_) | Geometry::Surface(_)) { meshes.push((entity.id, 0)); }
+                Ok(())
+            })?;
+            meshes.sort_unstable_by_key(|entry| entry.0);
+            meshes.dedup_by_key(|entry| entry.0);
+            stl_occurrences(self.document(), self.selection.iter().copied(), &limits, None, |entity, _, _| {
+                if let Geometry::Mesh(mesh) = &entity.geometry {
+                    let index = meshes.binary_search_by_key(&entity.id, |entry| entry.0).map_err(|_| Error::Stale("STL source mesh index"))?;
+                    if meshes[index].1 == 0 {
+                        let owner = (std::mem::size_of::<om9_core::geometry::Mesh>() + 2 * std::mem::size_of::<usize>()) as u64;
+                        meshes[index].1 = mesh.validate(&limits)?.bytes.checked_add(owner).ok_or(Error::Overflow("STL source meshes"))?;
+                    }
+                } else if let Geometry::Surface(surface) = &entity.geometry {
+                    let index = meshes.binary_search_by_key(&entity.id, |entry| entry.0).map_err(|_| Error::Stale("STL source surface index"))?;
+                    if meshes[index].1 == 0 {
+                        meshes[index].1 = stl_surface_bytes(surface, entity.extensions.get(om9_core::model::TRIM_SURFACE_EXTENSION_SLOT), &limits)?;
+                    }
+                }
+                Ok(())
+            })?;
+            for (_, bytes) in &meshes {
+                authored_bytes = authored_bytes.checked_add(*bytes).ok_or(Error::Overflow("STL source meshes"))?;
+            }
+        }
+        let selection_bytes = om9_core::budget::Usage::array::<om9_core::identity::ObjectId>(self.selection.len())?.bytes;
+        let labels = if source_only { labels } else { 0 };
+        let sources = if source_only { Usage::array::<StlBrepSource>(occurrence_count)?.bytes } else { 0 };
+        let scratch = if source_only {
+            Usage::array::<om9_core::transaction::CapturedGeometrySource>(occurrence_count)?.bytes
+                .checked_add(Usage::array::<om9_core::identity::ObjectId>(occurrence_count)?.bytes)
+                .and_then(|v| v.checked_add(Usage::array::<Option<&Entity>>(occurrence_count).ok()?.bytes))
+                .ok_or(Error::Overflow("STL source capture"))?
+        } else { 0 };
+        let capture_bytes = selection_bytes.checked_add(labels).and_then(|v| v.checked_add(sources)).and_then(|v| v.checked_add(scratch))
+            .and_then(|v| v.checked_add(if source_only { authored_bytes } else { 0 }))
+            .ok_or(Error::Overflow("STL source capture"))?;
         let mut selection_reservation = self.coordinator.reserve_external_memory_with_held(
-            om9_core::budget::memory::MemoryClass::Export, selection_bytes.max(1), sample(), held,
+            om9_core::budget::memory::MemoryClass::Export, capture_bytes.max(1), sample(), held,
         )?;
         let mut selection = Vec::new();
         selection.try_reserve_exact(self.selection.len()).map_err(|_| Error::Budget("STL source selection"))?;
-        let actual = om9_core::budget::Usage::array::<om9_core::identity::ObjectId>(selection.capacity())?.bytes;
+        let mut actual = om9_core::budget::Usage::array::<om9_core::identity::ObjectId>(selection.capacity())?.bytes;
         if actual > selection_reservation.bytes() {
             let additional = actual - selection_reservation.bytes();
             self.coordinator.grow_external_memory_with_held(&mut selection_reservation, additional, sample(), held)?;
         }
         selection.extend(self.selection.iter().copied());
+        let mut brep_sources = Vec::new();
+        if source_only {
+            brep_sources.try_reserve_exact(occurrence_count).map_err(|_| Error::Budget("STL source capture"))?;
+            actual = actual.checked_add(Usage::array::<StlBrepSource>(brep_sources.capacity())?.bytes)
+                .ok_or(Error::Overflow("STL source capture"))?;
+            if actual > selection_reservation.bytes() {
+                let additional = actual - selection_reservation.bytes();
+                self.coordinator.grow_external_memory_with_held(&mut selection_reservation, additional, sample(), held)?;
+            }
+            let mut source_leases = Vec::new();
+            source_leases.try_reserve_exact(occurrence_count).map_err(|_| Error::Budget("STL source capture"))?;
+            let mut occurrence_ids = Vec::new();
+            occurrence_ids.try_reserve_exact(occurrence_count).map_err(|_| Error::Budget("STL source capture"))?;
+            let mut lookup = Vec::new();
+            lookup.try_reserve_exact(occurrence_count).map_err(|_| Error::Budget("STL source capture"))?;
+            let scratch_bytes = Usage::array::<om9_core::transaction::CapturedGeometrySource>(source_leases.capacity())?.bytes
+                .checked_add(Usage::array::<om9_core::identity::ObjectId>(occurrence_ids.capacity())?.bytes)
+                .and_then(|v| v.checked_add(Usage::array::<Option<&Entity>>(lookup.capacity()).ok()?.bytes))
+                .ok_or(Error::Overflow("STL source capture"))?;
+            actual = actual.checked_add(scratch_bytes).ok_or(Error::Overflow("STL source capture"))?;
+            if actual > selection_reservation.bytes() {
+                let additional = actual - selection_reservation.bytes();
+                self.coordinator.grow_external_memory_with_held(&mut selection_reservation, additional, sample(), held)?;
+            }
+            stl_occurrences(self.document(), selection.iter().copied(), &limits, None, |entity, _, _| {
+                if matches!(entity.geometry, Geometry::Brep(_) | Geometry::NativeBrep(_)) {
+                    occurrence_ids.push(entity.id);
+                }
+                Ok(())
+            })?;
+            // Many placed instances can refer to the same definition member.
+            // Register one lease for each distinct source and share it across
+            // occurrences; the occurrence still owns its own transform/visibility.
+            occurrence_ids.sort_unstable();
+            occurrence_ids.dedup();
+            self.coordinator.capture_geometry_occurrence_sources_into(self.document().id, &occurrence_ids, &mut source_leases, &mut lookup)?;
+            stl_occurrences(self.document(), selection.iter().copied(), &limits, None, |entity, placement, visible| {
+                let source = if matches!(entity.geometry, Geometry::Brep(_) | Geometry::NativeBrep(_)) {
+                    let index = occurrence_ids.binary_search(&entity.id).map_err(|_| Error::Stale("STL source occurrences"))?;
+                    StlCapturedSource::Brep(source_leases.get(index).ok_or(Error::Stale("STL source occurrences"))?.clone())
+                } else if matches!(&entity.geometry, Geometry::Mesh(_)) {
+                    StlCapturedSource::MeshPending(entity.id)
+                } else if matches!(&entity.geometry, Geometry::Surface(_)) {
+                    StlCapturedSource::SurfacePending(entity.id)
+                } else {
+                    StlCapturedSource::Skipped(entity.geometry.kind())
+                };
+                let mut label = String::new();
+                label.try_reserve_exact(entity.label.len()).map_err(|_| Error::Budget("STL source labels"))?;
+                actual = actual.checked_add(label.capacity() as u64).ok_or(Error::Overflow("STL source labels"))?;
+                if actual > selection_reservation.bytes() {
+                    let additional = actual - selection_reservation.bytes();
+                    self.coordinator.grow_external_memory_with_held(&mut selection_reservation, additional, sample(), held)?;
+                }
+                label.push_str(&entity.label);
+                brep_sources.push(StlBrepSource { source, label, placement, visible });
+                Ok(())
+            })?;
+            drop(source_leases);
+            drop(occurrence_ids);
+            drop(lookup);
+            actual = actual.checked_sub(scratch_bytes).ok_or(Error::Overflow("STL source capture"))?;
+        }
+        let retained = actual.checked_add(if source_only { authored_bytes } else { 0 }).ok_or(Error::Overflow("STL source meshes"))?.max(1);
+        if retained > selection_reservation.bytes() {
+            let additional = retained - selection_reservation.bytes();
+            self.coordinator.grow_external_memory_with_held(&mut selection_reservation, additional, sample(), held)?;
+        }
+        if selection_reservation.bytes() > retained {
+            selection_reservation.shrink_to(retained)?;
+        }
         selection_reservation.mark_allocated(actual)?;
-        let document = self.coordinator.capture_tracked_document(self.document)?;
-        let admission_peer = self.coordinator.memory_admission_peer()?;
-        Ok(StlExportCapture { document, selection, _selection_reservation: selection_reservation, limits, epoch: self.coordinator.epoch(), account: self.coordinator.external_memory_account(), session: self.stl_session.token.clone(), admission_peer, caller_held_at_capture: held })
+        let has_pending_source = brep_sources.iter().any(|entry| matches!(entry.source, StlCapturedSource::MeshPending(_) | StlCapturedSource::SurfacePending(_)));
+        let document = if source_only && !has_pending_source { None } else { Some(self.coordinator.capture_tracked_document(self.document)?) };
+        let admission_peer = self.coordinator.memory_admission_peer_with_held(held)?;
+        Ok(StlExportCapture { document, brep_sources, document_id: self.document().id,
+            owner_session: self.document().owner_session, session_generation: self.document().session_generation,
+            native_tolerance: self.document().effective_tolerance().map(|value| value.absolute_mm),
+            selection, _selection_reservation: selection_reservation, limits, epoch: self.coordinator.epoch(), account: self.coordinator.external_memory_account(), session: self.stl_session.token.clone(), admission_peer, caller_held_at_capture: held })
     }
 }
 
 impl StlExportCapture {
+    // Runs on the export worker. Until the copies are ready, the captured
+    // document owns their immutable inputs; after the handoff it is released.
+    fn detach_authored_sources(&mut self, cancel: &StlCancellation) -> Result<()> {
+        if !self.brep_sources.iter().any(|entry| matches!(entry.source, StlCapturedSource::MeshPending(_) | StlCapturedSource::SurfacePending(_))) { return Ok(()); }
+        let document = self.document.as_ref().ok_or(Error::Missing("STL source document"))?;
+        let mut ordinal = 0usize;
+        let mut allocated = self._selection_reservation.bytes().checked_sub(self._selection_reservation.pending_bytes())
+            .ok_or(Error::Overflow("STL source meshes"))?;
+        stl_occurrences(document, self.selection.iter().copied(), &self.limits, Some(cancel), |entity, _, _| {
+            cancel.check()?;
+            if ordinal >= self.brep_sources.len() { return Err(Error::Stale("STL source occurrences")); }
+            let (previous, rest) = self.brep_sources.split_at_mut(ordinal);
+            let entry = &mut rest[0];
+            ordinal = ordinal.checked_add(1).ok_or(Error::Overflow("STL source occurrences"))?;
+            if let StlCapturedSource::MeshPending(id) = entry.source {
+                if id != entity.id { return Err(Error::Stale("STL source mesh")); }
+                let Geometry::Mesh(mesh) = &entity.geometry else { return Err(Error::Stale("STL source mesh")); };
+                if let Some(existing) = previous.iter().find_map(|entry| match &entry.source {
+                    StlCapturedSource::Mesh(other, mesh) if *other == id => Some(Arc::clone(mesh)),
+                    _ => None,
+                }) {
+                    entry.source = StlCapturedSource::Mesh(id, existing);
+                    return Ok(());
+                }
+                self._selection_reservation.recheck_pending()?;
+                let copy = copy_stl_mesh(mesh, cancel)?;
+                let owner = (std::mem::size_of::<om9_core::geometry::Mesh>() + 2 * std::mem::size_of::<usize>()) as u64;
+                allocated = allocated.checked_add(copy.validate(&self.limits)?.bytes).and_then(|v| v.checked_add(owner))
+                    .ok_or(Error::Overflow("STL source meshes"))?;
+                if allocated > self._selection_reservation.bytes() { return Err(Error::Budget("STL source meshes")); }
+                let copy = Arc::new(copy);
+                self._selection_reservation.set_allocated_bytes(allocated)?;
+                entry.source = StlCapturedSource::Mesh(id, copy);
+            } else if let StlCapturedSource::SurfacePending(id) = entry.source {
+                if id != entity.id { return Err(Error::Stale("STL source surface")); }
+                let Geometry::Surface(surface) = &entity.geometry else { return Err(Error::Stale("STL source surface")); };
+                if let Some(existing) = previous.iter().find_map(|entry| match &entry.source {
+                    StlCapturedSource::Surface(other, surface) if *other == id => Some(Arc::clone(surface)), _ => None,
+                }) { entry.source = StlCapturedSource::Surface(id, existing); return Ok(()); }
+                self._selection_reservation.recheck_pending()?;
+                let copy = copy_stl_surface(surface, entity.extensions.get(om9_core::model::TRIM_SURFACE_EXTENSION_SLOT), cancel)?;
+                allocated = allocated.checked_add(stl_surface_bytes(&copy.surface, copy.trim.as_ref(), &self.limits)?)
+                    .ok_or(Error::Overflow("STL source surface"))?;
+                if allocated > self._selection_reservation.bytes() { return Err(Error::Budget("STL source surface")); }
+                let copy = Arc::new(copy);
+                self._selection_reservation.set_allocated_bytes(allocated)?;
+                entry.source = StlCapturedSource::Surface(id, copy);
+            }
+            Ok(())
+        })?;
+        if ordinal != self.brep_sources.len() { return Err(Error::Stale("STL source occurrences")); }
+        self._selection_reservation.shrink_to(allocated.max(1))?;
+        self.document = None;
+        Ok(())
+    }
     pub fn source_epoch(&self) -> u64 { self.epoch }
-    pub fn document_id(&self) -> om9_core::identity::DocumentId { self.document.id }
+    pub fn document_id(&self) -> om9_core::identity::DocumentId { self.document_id }
     /// Normal edits retain the session; New/Open renew it even when the same
     /// persistent document UUID is reopened.
     pub fn belongs_to_session(&self, document: &om9_core::model::Document) -> bool {
         *self.session.lock().unwrap_or_else(|e| e.into_inner())
-            && self.document.id == document.id
-            && self.document.owner_session == document.owner_session
-            && self.document.session_generation == document.session_generation
+            && self.document_id == document.id
+            && self.owner_session == document.owner_session
+            && self.session_generation == document.session_generation
     }
 
     /// Known minimum for authored-mesh soup and the coexisting topology
@@ -477,15 +837,24 @@ impl StlExportCapture {
     fn authored_mesh_array_lower_bound(&self, cancel: &StlCancellation) -> Result<u64> {
         use om9_core::budget::Usage;
         let mut bytes = 0u64;
-        stl_occurrences(&self.document, self.selection.iter().copied(), &self.limits, cancel, |entity, _, _| {
-            if let Geometry::Mesh(mesh) = &entity.geometry {
+        let mut add_mesh = |mesh: &om9_core::geometry::Mesh| -> Result<()> {
                 let triangles = authored_mesh_triangle_count(mesh, || cancel.check())?;
                 for usage in [Usage::array::<[f64; 3]>(mesh.vertices.len())?, Usage::array::<[u32; 3]>(triangles)?, Usage::array::<usize>(triangles)?, Usage::array::<u8>(triangles)?] {
                     bytes = bytes.checked_add(usage.bytes).ok_or(Error::Overflow("STL mesh reservation lower bound"))?;
                 }
+                Ok(())
+        };
+        if let Some(document) = &self.document {
+            stl_occurrences(document, self.selection.iter().copied(), &self.limits, Some(cancel), |entity, _, _| {
+                if let Geometry::Mesh(mesh) = &entity.geometry { add_mesh(mesh)?; }
+                Ok(())
+            })?;
+        } else {
+            for entry in &self.brep_sources {
+                cancel.check()?;
+                if let StlCapturedSource::Mesh(_, mesh) = &entry.source { add_mesh(mesh)?; }
             }
-            Ok(())
-        })?;
+        }
         Ok(bytes)
     }
 
@@ -518,28 +887,34 @@ impl StlExportCapture {
         cancel.check()?;
         let _permit = self.account.try_acquire_export()?;
         let physical = sample().ok_or(Error::Unsupported("physical RAM availability is unavailable"))?;
+        self.export_phases(target, profile, &cancel, &mut None, |lease, additional| {
+            let physical = if lease.is_none() { Some(physical) } else {
+                om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes))
+            };
+            reserve_stl_phase(&self.admission_peer, lease, additional, physical, held()?)
+        }, admitted)
+    }
+
+    fn export_phases(&self, target: &Path, profile: StlExportProfile, cancel: &StlCancellation,
+        lease: &mut Option<StlLease>,
+        mut reserve: impl FnMut(&mut Option<StlLease>, u64) -> Result<()>,
+        admitted: impl FnOnce(&StlLease) -> Result<()>) -> Result<StlExportReceipt> {
+        cancel.check()?;
         let initial = self.authored_mesh_array_lower_bound(&cancel)?.max(1);
-        let mut reservation = self.admission_peer.reserve_external_memory_with_held(
-            om9_core::budget::memory::MemoryClass::Export, initial, Some(physical), held()?,
-        )?;
-        admitted(&reservation)?;
-        self.export_with_admission(target, profile, &cancel, &self.limits, &mut |allocated, pending| {
+        reserve(lease, initial)?;
+        admitted(lease.as_ref().ok_or(Error::Missing("STL phase reservation"))?)?;
+        self.export_with_admission(target, profile, cancel, &self.limits, &mut |allocated, pending| {
             cancel.check()?;
             let requested = stl_sum(allocated, pending)?;
+            let reservation = lease.as_mut().ok_or(Error::Missing("STL phase reservation"))?;
             if pending != 0 && requested <= reservation.bytes()
                 && reservation.bytes() - reservation.pending_bytes() == allocated { return Ok(()); }
             reservation.set_allocated_bytes(allocated.min(reservation.bytes()))?;
             if requested > reservation.bytes() {
                 let additional = requested - reservation.bytes();
-                let batch = additional.max(64 * 1024);
-                let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
-                let held = held()?;
-                match self.admission_peer.grow_external_memory_with_held(&mut reservation, batch, physical, held) {
-                    Err(Error::Budget(_)) if batch > additional => self.admission_peer.grow_external_memory_with_held(
-                        &mut reservation, additional, physical, held)?,
-                    other => other?,
-                }
+                reserve(lease, additional)?;
             } else { reservation.shrink_to(requested)?; }
+            let reservation = lease.as_mut().ok_or(Error::Missing("STL phase reservation"))?;
             reservation.set_allocated_bytes(allocated)?;
             if pending != 0 { reservation.recheck_pending()?; }
             Ok(())
@@ -590,7 +965,7 @@ impl StlExportCapture {
             requested_tolerance_mm: profile.linear_tolerance_mm,
             requested_angle_rad: profile.angular_tolerance_rad,
             max_occt_topology_tolerance_upper_mm: max_occt_tolerance,
-            source_document_id: self.document.id,
+            source_document_id: self.document_id,
             source_epoch: self.epoch,
             open_edges,
             non_manifold_edges: topology.non_manifold,
@@ -632,7 +1007,8 @@ impl StlExportCapture {
         let mut max_occt_tolerance: Option<f64> = None;
         #[cfg(not(feature = "occt-brep"))]
         let max_occt_tolerance = None;
-        stl_occurrences(&self.document, self.selection.iter().copied(), limits, cancel, |entity, placement, visible| {
+        if let Some(document) = &self.document {
+        stl_occurrences(document, self.selection.iter().copied(), limits, Some(cancel), |entity, placement, visible| {
             cancel.check()?;
             let triangle_start = triangles.len();
             // Existing receipt strings stay live while the next source is built.
@@ -667,7 +1043,7 @@ impl StlExportCapture {
                         let soup_bytes = stl_soup_bytes(&points, &triangles)?;
                         let source = stl_kernel_admitted(&mut |live, pending| geometry_admit(stl_sum(live, soup_bytes)?, pending),
                             "STL native B-Rep payload", |admit| om9_kernel::brep::from_3dm_source_admitted(
-                                &native.payload, self.document.effective_tolerance().map_err(|e| om9_kernel::KernelError::InvalidInput(e.to_string()))?.absolute_mm,
+                                &native.payload, document.effective_tolerance().map_err(|e| om9_kernel::KernelError::InvalidInput(e.to_string()))?.absolute_mm,
                                 &remaining, admit))?;
                         let source_limits = geometry_limits.remaining_after(om9_core::budget::Usage {
                             bytes: source.capacity() as u64, ..Default::default()
@@ -693,18 +1069,9 @@ impl StlExportCapture {
                 Geometry::Surface(surface) => {
                     #[cfg(feature = "occt-brep")]
                     {
-                        let remaining = limits_after_stl_soup(&geometry_limits, &points, &triangles)?;
-                        let soup_bytes = stl_soup_bytes(&points, &triangles)?;
-                        let source = stl_kernel_admitted(&mut |live, pending| geometry_admit(stl_sum(live, soup_bytes)?, pending),
-                            "STL NURBS conversion", |admit| om9_kernel::measurement::surface_to_face_source_admitted(
-                                surface, Transform::identity(), &remaining, admit))?;
-                        let source_limits = geometry_limits.remaining_after(om9_core::budget::Usage {
-                            bytes: source.capacity() as u64, ..Default::default()
-                        })?;
-                        let source_tolerance = append_brep_source_admitted(&placement, &source, &mut points, &mut triangles,
-                            export_tolerance, profile.angular_tolerance_rad, &source_limits, cancel,
-                            &mut |live, pending| geometry_admit(stl_sum(live, source.capacity() as u64)?, pending))?;
-                        drop(source);
+                        let source_tolerance = append_surface_source_admitted(&placement, surface,
+                            entity.extensions.get(om9_core::model::TRIM_SURFACE_EXTENSION_SLOT), &mut points, &mut triangles,
+                            profile, &geometry_limits, cancel, &mut geometry_admit)?;
                         max_occt_tolerance = Some(max_occt_tolerance.map_or(source_tolerance.1, |current| current.max(source_tolerance.1)));
                         push_source_tolerance_note(&mut warnings, &skipped, &entity.label, source_tolerance, export_tolerance, &points, &triangles, limits, admit)?;
                         if surface.reversed {
@@ -739,6 +1106,96 @@ impl StlExportCapture {
             admit(stl_sum(stl_soup_bytes(&points, &triangles)?, notes)?, 0)?;
             Ok(())
         })?;
+        } else {
+            #[cfg(not(feature = "occt-brep"))]
+            {
+                return Err(Error::Unsupported(match self.brep_sources.iter().find_map(|entry| match &entry.source {
+                    StlCapturedSource::Brep(source) => Some(source), StlCapturedSource::Skipped(kind) => {
+                        let _ = kind;
+                        None
+                    }, StlCapturedSource::Mesh(_, _) | StlCapturedSource::MeshPending(_)
+                        | StlCapturedSource::Surface(_, _) | StlCapturedSource::SurfacePending(_) => None,
+                }) {
+                    Some(om9_core::transaction::CapturedGeometrySource::NativeBrep(_)) => "STL export of a retained native B-Rep requires OCCT",
+                    _ => "STL export of B-Rep requires OCCT",
+                }));
+            }
+            #[cfg(feature = "occt-brep")]
+            {
+            if self.brep_sources.len() as u64 > limits.max_nodes { return Err(Error::Budget("STL occurrences")); }
+            for entry in &self.brep_sources {
+                cancel.check()?;
+                if matches!(entry.source, StlCapturedSource::MeshPending(_) | StlCapturedSource::SurfacePending(_)) {
+                    return Err(Error::Invalid("STL source geometry pending"));
+                }
+                if let StlCapturedSource::Skipped(kind) = &entry.source {
+                        push_stl_note_admitted(&mut skipped, &warnings, format_args!("{} ({})", entry.label, kind.tag()),
+                            &points, &triangles, limits, admit)?;
+                        continue;
+                }
+                let triangle_start = triangles.len();
+                let geometry_limits = limits_after_stl_notes(limits, &skipped, &warnings)?;
+                let notes = limits.max_bytes - geometry_limits.max_bytes;
+                if let StlCapturedSource::Mesh(_, mesh) = &entry.source {
+                    let mut geometry_admit = |live, pending| admit(stl_sum(live, notes)?, pending);
+                    append_mesh_admitted(&entry.placement, mesh, &mut points, &mut triangles, &geometry_limits, cancel, &mut geometry_admit)?;
+                }
+                if let StlCapturedSource::Surface(_, surface) = &entry.source {
+                    let mut geometry_admit = |live, pending| admit(stl_sum(live, notes)?, pending);
+                    let source_tolerance = append_surface_source_admitted(&entry.placement, &surface.surface, surface.trim.as_ref(),
+                        &mut points, &mut triangles, profile, &geometry_limits, cancel, &mut geometry_admit)?;
+                    max_occt_tolerance = Some(max_occt_tolerance.map_or(source_tolerance.1, |current| current.max(source_tolerance.1)));
+                    push_source_tolerance_note(&mut warnings, &skipped, &entry.label, source_tolerance, export_tolerance, &points, &triangles, limits, admit)?;
+                    if surface.surface.reversed { for triangle in &mut triangles[triangle_start..] { triangle.swap(1, 2); } }
+                    push_stl_note_admitted(&mut warnings, &skipped, format_args!("{}: open surface; requested OCCT deflection, global deviation unverified", entry.label), &points, &triangles, limits, admit)?;
+                }
+                if let StlCapturedSource::Brep(source) = &entry.source {
+                let mut geometry_admit = |live, pending| admit(stl_sum(live, notes)?, pending);
+                let source_tolerance = match source {
+                    om9_core::transaction::CapturedGeometrySource::Brep(source) => {
+                        append_brep_source_admitted(&entry.placement, source.source(), &mut points, &mut triangles,
+                            export_tolerance, profile.angular_tolerance_rad, &geometry_limits, cancel, &mut geometry_admit)?
+                    }
+                    om9_core::transaction::CapturedGeometrySource::NativeBrep(native) => {
+                        let remaining = limits_after_stl_soup(&geometry_limits, &points, &triangles)?;
+                        let soup_bytes = stl_soup_bytes(&points, &triangles)?;
+                        let tolerance = *self.native_tolerance.as_ref().map_err(Clone::clone)?;
+                        let source = stl_kernel_admitted(&mut |live, pending| geometry_admit(stl_sum(live, soup_bytes)?, pending),
+                            "STL native B-Rep payload", |admit| om9_kernel::brep::from_3dm_source_admitted(
+                                native.payload(), tolerance, &remaining, admit))?;
+                        let source_limits = geometry_limits.remaining_after(Usage { bytes: source.capacity() as u64, ..Default::default() })?;
+                        let result = append_brep_source_admitted(&entry.placement, &source, &mut points, &mut triangles,
+                            export_tolerance, profile.angular_tolerance_rad, &source_limits, cancel,
+                            &mut |live, pending| geometry_admit(stl_sum(live, source.capacity() as u64)?, pending))?;
+                        drop(source);
+                        result
+                    }
+                };
+                max_occt_tolerance = Some(max_occt_tolerance.map_or(source_tolerance.1, |current| current.max(source_tolerance.1)));
+                push_source_tolerance_note(&mut warnings, &skipped, &entry.label, source_tolerance, export_tolerance, &points, &triangles, limits, admit)?;
+                match source {
+                    om9_core::transaction::CapturedGeometrySource::Brep(_) => push_stl_note_admitted(&mut warnings, &skipped,
+                        format_args!("{}: requested OCCT deflection; global deviation unverified", entry.label), &points, &triangles, limits, admit)?,
+                    om9_core::transaction::CapturedGeometrySource::NativeBrep(_) => push_stl_note_admitted(&mut warnings, &skipped,
+                        format_args!("{}: retained native payload; requested OCCT deflection, global deviation unverified", entry.label), &points, &triangles, limits, admit)?,
+                }
+                }
+                if !entry.visible && triangles.len() > triangle_start {
+                    push_stl_note_admitted(&mut warnings, &skipped, format_args!("{}: hidden or invisible selected geometry included in STL", entry.label), &points, &triangles, limits, admit)?;
+                }
+                let m = entry.placement.0;
+                let determinant = m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
+                    - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+                    + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+                if determinant < 0.0 {
+                    for triangle in &mut triangles[triangle_start..] { triangle.swap(1, 2); }
+                }
+                mark_collapses(points.len(), &mut triangles[triangle_start..], !matches!(&entry.source, StlCapturedSource::Mesh(_, _)), cancel)?;
+                let notes = limits.max_bytes - limits_after_stl_notes(limits, &skipped, &warnings)?.max_bytes;
+                admit(stl_sum(stl_soup_bytes(&points, &triangles)?, notes)?, 0)?;
+            }
+            }
+        }
         if triangles.is_empty() {
             return Err(Error::Missing(if skipped.is_empty() {
                 "selected objects have no triangles"
@@ -755,6 +1212,56 @@ impl StlExportCapture {
             push_stl_note_admitted(&mut warnings, &skipped, format_args!("{omitted} exactly collapsed generated triangles omitted"), &soup.positions, &soup.triangles, limits, admit)?;
         }
         Ok((soup, skipped, warnings, max_occt_tolerance))
+    }
+}
+
+#[cfg(feature = "occt-brep")]
+fn append_surface_source_admitted(placement: &Transform, surface: &om9_core::geometry::NurbsSurface,
+    trim: Option<&om9_core::model::Extension>, points: &mut Vec<[f64; 3]>, triangles: &mut Vec<[u32; 3]>,
+    profile: StlExportProfile, limits: &Limits, cancel: &StlCancellation, admit: &mut StlAdmission<'_>) -> Result<(f64, f64)> {
+    let remaining = limits_after_stl_soup(limits, points, triangles)?;
+    let soup_bytes = stl_soup_bytes(points, triangles)?;
+    let source = if let Some(extension) = trim {
+        if extension.payload.len() > om9_core::model::trim_surface_payload_limit(&remaining) {
+            return Err(Error::Unsupported("STL trim metadata exceeds supported size"));
+        }
+        let scratch = u64::try_from(extension.payload.len()).map_err(|_| Error::Overflow("STL trim metadata"))?
+            .checked_mul(64).and_then(|n| n.checked_add(4096)).ok_or(Error::Overflow("STL trim metadata"))?;
+        admit(soup_bytes, scratch)?;
+        let trimmed = om9_core::rhino_semantics::TrimmedSurface::from_extension(extension, &remaining)?;
+        if trimmed.underlying != *surface { return Err(Error::Invalid("STL trim surface mismatch")); }
+        let trimmed_limits = remaining.remaining_after(Usage { bytes: scratch, ..Usage::default() })?;
+        stl_kernel_admitted(&mut |live, pending| admit(stl_sum(stl_sum(live, soup_bytes)?, scratch)?, pending),
+            "STL trimmed NURBS conversion", |admit| om9_kernel::measurement::trimmed_surface_to_face_source_admitted(&trimmed, &trimmed_limits, admit))?
+    } else {
+        stl_kernel_admitted(&mut |live, pending| admit(stl_sum(live, soup_bytes)?, pending),
+            "STL NURBS conversion", |admit| om9_kernel::measurement::surface_to_face_source_admitted(surface, Transform::identity(), &remaining, admit))?
+    };
+    let source_limits = limits.remaining_after(Usage { bytes: source.capacity() as u64, ..Usage::default() })?;
+    append_brep_source_admitted(placement, &source, points, triangles, profile.linear_tolerance_mm,
+        profile.angular_tolerance_rad, &source_limits, cancel,
+        &mut |live, pending| admit(stl_sum(live, source.capacity() as u64)?, pending))
+}
+
+fn reserve_stl_phase(
+    coordinator: &om9_core::transaction::TransactionCoordinator,
+    lease: &mut Option<StlLease>,
+    additional: u64,
+    physical: Option<(u64, u64)>,
+    held: Usage,
+) -> Result<()> {
+    let Some(reservation) = lease else {
+        *lease = Some(coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Export, additional, physical, held,
+        )?);
+        return Ok(());
+    };
+    let batch = additional.max(64 * 1024);
+    match coordinator.grow_external_memory_with_held(reservation, batch, physical, held) {
+        Err(Error::Budget(_)) if batch > additional => {
+            coordinator.grow_external_memory_with_held(reservation, additional, physical, held)
+        }
+        other => other,
     }
 }
 
@@ -954,12 +1461,14 @@ fn append_mesh_admitted(
     placement: &Transform, mesh: &Mesh, points: &mut Vec<[f64; 3]>, triangles: &mut Vec<[u32; 3]>,
     limits: &Limits, cancel: &StlCancellation, admit: &mut StlAdmission<'_>,
 ) -> Result<()> {
+    let vertices = &mesh.vertices;
+    let faces = mesh.faces.iter().map(Vec::as_slice);
     cancel.check()?;
-    let base = checked_mesh_base(points.len(), mesh.vertices.len(), limits)?;
+    let base = checked_mesh_base(points.len(), vertices.len(), limits)?;
     let mut triangle_count = 0usize;
-    for (index, face) in mesh.faces.iter().enumerate() {
+    for (index, face) in faces.clone().enumerate() {
         if index % 1024 == 0 { cancel.check()?; }
-        if face.iter().any(|corner| *corner as usize >= mesh.vertices.len()) {
+        if face.iter().any(|corner| *corner as usize >= vertices.len()) {
             return Err(Error::Invalid("STL mesh face index"));
         }
         triangle_count = triangle_count.checked_add(match face.len() {
@@ -970,30 +1479,30 @@ fn append_mesh_admitted(
         }).ok_or(Error::Overflow("STL triangle count"))?;
     }
     check_triangle_count(triangles.len(), triangle_count, limits)?;
-    let (point_capacity, _) = admit_mesh_output_growth(points, triangles, mesh.vertices.len(), triangle_count, limits)?;
+    let (point_capacity, _) = admit_mesh_output_growth(points, triangles, vertices.len(), triangle_count, limits)?;
     admit(stl_soup_bytes(points, triangles)?, if point_capacity > points.capacity() {
         om9_core::budget::Usage::array::<[f64; 3]>(point_capacity)?.bytes } else { 0 })?;
     points.try_reserve_exact(point_capacity - points.len()).map_err(|_| Error::Budget("STL mesh vertices"))?;
     admit(stl_soup_bytes(points, triangles)?, 0)?;
-    let (_, triangle_capacity) = admit_mesh_output_growth(points, triangles, mesh.vertices.len(), triangle_count, limits)?;
+    let (_, triangle_capacity) = admit_mesh_output_growth(points, triangles, vertices.len(), triangle_count, limits)?;
     admit(stl_soup_bytes(points, triangles)?, if triangle_capacity > triangles.capacity() {
         om9_core::budget::Usage::array::<[u32; 3]>(triangle_capacity)?.bytes } else { 0 })?;
     triangles.try_reserve_exact(triangle_capacity - triangles.len()).map_err(|_| Error::Budget("STL mesh triangles"))?;
     admit(stl_soup_bytes(points, triangles)?, 0)?;
-    admit_mesh_output_growth(points, triangles, mesh.vertices.len(), triangle_count, limits)?;
-    for (index, vertex) in mesh.vertices.iter().enumerate() {
+    admit_mesh_output_growth(points, triangles, vertices.len(), triangle_count, limits)?;
+    for (index, vertex) in vertices.iter().enumerate() {
         if index % 1024 == 0 { cancel.check()?; }
         points.push(placement.point(*vertex)?);
     }
-    for (index, face) in mesh.faces.iter().enumerate() {
+    for (index, face) in faces.enumerate() {
         if index % 1024 == 0 { cancel.check()?; }
         if face.len() < 3 {
             continue;
         }
-        match face.as_slice() {
+        match face {
             [a, b, c] => triangles.push([base + *a, base + *b, base + *c]),
             [a, b, c, d] => {
-                let vertices = [*a, *b, *c, *d].map(|i| mesh.vertices[i as usize]);
+                let vertices = [*a, *b, *c, *d].map(|i| vertices[i as usize]);
                 let diagonal_ac = quad_diagonal_ac(vertices)?;
                 let indices = if diagonal_ac { [[*a, *b, *c], [*a, *c, *d]] } else { [[*a, *b, *d], [*b, *c, *d]] };
                 triangles.extend(indices.map(|tri| tri.map(|i| base + i)));
@@ -1128,9 +1637,15 @@ fn append_brep_source_admitted(
     let soup_bytes = stl_soup_bytes(points, triangles)?;
     let deflection = local_deflection(placement, world_tolerance)?;
     cancel.check()?;
+    // The grouped adapter copies the source text into an input stream before
+    // OCCT reads it. The stream also coexists with the snapshot copy callbacks.
+    // This charge is separate from OCCT's internal shape/mesher allocations.
+    let stream_input = stl_sum(source.len() as u64, 1)?;
+    admit(soup_bytes, stream_input)?;
+    let native_held = stl_sum(soup_bytes, stream_input)?;
     let topology = stl_kernel_admitted(&mut |live, pending| {
         cancel.check()?;
-        admit(stl_sum(live, soup_bytes)?, pending)
+        admit(stl_sum(live, native_held)?, pending)
     }, "STL tessellation", |admit| om9_kernel::brep::read_brep_with_shell_groups_and_edges_admitted(
         source, deflection, angular_tolerance, &remaining, admit))?;
     let source_tolerance = topology.max_source_tolerance();
@@ -1139,10 +1654,10 @@ fn append_brep_source_admitted(
     cancel.check()?;
     let snapshot = topology.brep();
     let base = u32::try_from(points.len()).map_err(|_| Error::Overflow("STL B-Rep base"))?;
-    let end = points.len().checked_add(snapshot.display.points.len()).ok_or(Error::Overflow("STL B-Rep vertices"))?;
+    let end = points.len().checked_add(snapshot.display().points.len()).ok_or(Error::Overflow("STL B-Rep vertices"))?;
     if end as u64 > limits.max_points { return Err(Error::Budget("STL B-Rep vertices")); }
     if end > u32::MAX as usize { return Err(Error::Overflow("STL B-Rep vertices")); }
-    check_triangle_count(triangles.len(), snapshot.display.triangles.len(), limits)?;
+    check_triangle_count(triangles.len(), snapshot.display().triangles.len(), limits)?;
     let retained = topology.retained_usage(&remaining)?.bytes;
     admit(stl_sum(soup_bytes, retained)?, topology.topology_remap_estimated_usage()?.bytes)?;
     let remap = topology.topology_remap_with_budget(*placement, WELD_MM.min(world_tolerance / 10.0), &remaining, || cancel.check())?;
@@ -1343,7 +1858,7 @@ mod topology_orientation_tests {
         let body = om9_kernel::brep::box_brep([10.; 3], 0.1, &default).unwrap();
         let snapshot = om9_kernel::brep::read_brep_with_shell_groups_and_edges(body.source(), 0.05, 0.3, &default).unwrap();
         let mut points = vec![[0., 0., 0.]; 100_000];
-        let mut triangles = Vec::with_capacity(snapshot.brep().display.triangles.len());
+        let mut triangles = Vec::with_capacity(snapshot.brep().display().triangles.len());
         let held = (points.capacity() * std::mem::size_of::<[f64; 3]>()
             + triangles.capacity() * std::mem::size_of::<[u32; 3]>()) as u64;
         let limit = held + snapshot.retained_usage(&default).unwrap().bytes
@@ -1373,6 +1888,29 @@ mod topology_orientation_tests {
         assert!(result.is_err(), "snapshot must fit alongside retained soup capacity");
         assert!(points.is_empty() && triangles.is_empty());
         assert_eq!(points.as_ptr(), original_storage);
+    }
+
+    #[test]
+    #[cfg(feature = "occt-brep")]
+    fn stl_native_input_stream_can_be_refused_before_tessellation() {
+        use super::{Error, Limits, append_brep_source_admitted};
+        let limits = Limits::default();
+        let body = om9_kernel::brep::box_brep([10.; 3], 0.1, &limits).unwrap();
+        let mut points = Vec::new();
+        let mut triangles = Vec::new();
+        let mut calls = 0;
+        let result = append_brep_source_admitted(
+            &Transform::identity(), body.source(), &mut points, &mut triangles,
+            0.01, 0.3, &limits, &StlCancellation::default(), &mut |live, pending| {
+                calls += 1;
+                assert_eq!(live, 0);
+                assert_eq!(pending, body.source().len() as u64 + 1);
+                Err(Error::Budget("STL native input fixture"))
+            },
+        );
+        assert!(matches!(result, Err(Error::Budget("STL native input fixture"))));
+        assert_eq!(calls, 1);
+        assert!(points.is_empty() && triangles.is_empty());
     }
     #[test]
     fn first_brep_reuses_point_storage_and_later_brep_appends() {
@@ -1436,6 +1974,378 @@ mod topology_orientation_tests {
 #[cfg(test)]
 mod cancellation_tests {
     use super::*;
+
+    #[cfg(feature = "occt-brep")]
+    fn force_document_capture(controller: &Controller) -> StlExportCapture {
+        let mut capture = controller.capture_stl_selected().unwrap();
+        capture.document = Some(controller.coordinator.capture_tracked_document(controller.document).unwrap());
+        capture.brep_sources.clear();
+        capture
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn standalone_surface_export_detaches_source_on_worker() {
+        let limits = Limits::default();
+        let surface = om9_core::surface_kernel::plane([0., 0., 0.], [1., 0., 0.], [0., 1., 0.], 2., 3., &limits).unwrap();
+        let entity = Entity::new("plane", Geometry::Surface(surface), None);
+        let id = entity.id;
+        let mut document = om9_core::model::Document::with_template_tolerance("surface source");
+        document.entities.insert(id, entity);
+        let mut controller = Controller::new(document, limits).unwrap();
+        controller.select_objects(&[id]).unwrap();
+        let mut capture = controller.capture_stl_selected().unwrap();
+        assert!(capture.document.is_some());
+        assert!(capture.brep_sources.iter().any(|entry| matches!(entry.source, StlCapturedSource::SurfacePending(_))));
+        let fallback = force_document_capture(&controller);
+        capture.detach_authored_sources(&StlCancellation::default()).unwrap();
+        assert!(capture.document.is_none());
+        let profile = StlExportProfile { linear_tolerance_mm: 0.05, angular_tolerance_rad: 0.3 };
+        let actual = capture.stl_soup(profile, &StlCancellation::default()).unwrap();
+        let expected = fallback.stl_soup(profile, &StlCancellation::default()).unwrap();
+        assert_eq!(actual.0.positions, expected.0.positions);
+        assert_eq!(actual.0.triangles, expected.0.triangles);
+        assert_eq!(actual.2, expected.2);
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn mixed_trimmed_surface_worker_keeps_trim_and_releases_document() {
+        use om9_core::rhino_semantics::{set_trimmed_surface, TrimmedSurface};
+        let limits = Limits::default();
+        let surface = om9_core::surface_kernel::plane([0., 0., 0.], [1., 0., 0.], [0., 1., 0.], 10., 10., &limits).unwrap();
+        let trim = TrimmedSurface { underlying: surface.clone(), outer: vec![[0.,0.],[1.,0.],[1.,1.],[0.,1.]],
+            inners: vec![vec![[0.3,0.3],[0.7,0.3],[0.7,0.7],[0.3,0.7]]], reversed: false };
+        let mut face = Entity::new("trimmed", Geometry::Surface(surface), None);
+        set_trimmed_surface(&mut face, &trim, &limits).unwrap();
+        let mut sphere = Entity::new("sphere", Geometry::Brep(om9_kernel::brep::sphere_brep(2., 0.2, &limits).unwrap()), None);
+        sphere.placement = Transform::translation([0., 0., 10.]);
+        let ids = [face.id, sphere.id];
+        let mut document = om9_core::model::Document::with_template_tolerance("mixed trimmed export");
+        for entity in [face, sphere] { document.entities.insert(entity.id, entity); }
+        let mut controller = Controller::new(document, limits).unwrap();
+        controller.select_objects(&ids).unwrap();
+        let old_document = Arc::downgrade(&controller.scene().unwrap().document);
+        let fallback = force_document_capture(&controller);
+        let captured = controller.capture_stl_selected().unwrap();
+        let captured = std::thread::spawn(move || {
+            let mut captured = captured;
+            captured.detach_authored_sources(&StlCancellation::default()).unwrap();
+            captured
+        }).join().unwrap();
+        assert!(captured.document.is_none());
+        assert!(captured.brep_sources.iter().any(|entry| matches!(&entry.source, StlCapturedSource::Surface(_, source) if source.trim.is_some())));
+        let profile = StlExportProfile { linear_tolerance_mm: 0.05, angular_tolerance_rad: 0.3 };
+        let actual = captured.stl_soup(profile, &StlCancellation::default()).unwrap();
+        let expected = fallback.stl_soup(profile, &StlCancellation::default()).unwrap();
+        assert_eq!(actual.0.positions, expected.0.positions);
+        assert_eq!(actual.0.triangles, expected.0.triangles);
+        assert_eq!(actual.2, expected.2);
+        let mut area = 0.;
+        for tri in &actual.0.triangles {
+            let [a,b,c] = tri.map(|index| actual.0.positions[index as usize]);
+            if [a,b,c].iter().all(|p| p[2].abs() < 1e-8) {
+                area += ((b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])).abs() * 0.5;
+                let center = [(a[0]+b[0]+c[0])/3., (a[1]+b[1]+c[1])/3.];
+                assert!(!(center[0] > 3. && center[0] < 7. && center[1] > 3. && center[1] < 7.));
+            }
+        }
+        assert!((area - 84.).abs() < 1e-6, "trimmed area {area}");
+        let target = std::env::temp_dir().join(format!("om9-trim-source-{}.stl", uuid::Uuid::new_v4()));
+        let mib = 1024 * 1024;
+        let reservation = controller.coordinator().reserve_external_memory(
+            om9_core::budget::memory::MemoryClass::Export, 64 * mib, Some((1024 * mib, 1024 * mib))).unwrap();
+        let mut job = StlExportJob::start_with_sample(controller.capture_stl_selected().unwrap(), target.clone(), profile,
+            reservation, || Some((1024 * mib, 1024 * mib))).unwrap();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+        let receipt = loop {
+            if let Some(result) = job.try_result() { break result.unwrap(); }
+            assert!(std::time::Instant::now() < deadline); std::thread::yield_now();
+        };
+        assert_eq!(receipt.triangles, expected.0.triangles.len());
+        assert!(std::fs::metadata(&target).unwrap().len() > 84);
+        std::fs::remove_file(target).unwrap();
+        drop(fallback); drop(controller);
+        assert!(old_document.upgrade().is_none());
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn repeated_mesh_instances_share_one_worker_source_snapshot() {
+        use om9_core::model::Definition;
+        let limits = Limits::default();
+        let mesh = Mesh { vertices: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+            faces: vec![vec![0, 1, 2]], normals: vec![], colors: vec![], corner_uvs: vec![] };
+        let definition = Definition::new("authored", vec![Entity::new("mesh", Geometry::Mesh(mesh), None)]);
+        let definition_id = definition.id;
+        let mut document = om9_core::model::Document::with_template_tolerance("shared mesh export");
+        document.definitions.insert(definition_id, definition);
+        let first = Entity::new("first", Geometry::Instance(definition_id), None);
+        let mut second = Entity::new("second", Geometry::Instance(definition_id), None);
+        second.placement = Transform::translation([8., 0., 0.]).compose(Transform::scale([-1., 1., 1.]).unwrap()).unwrap();
+        let brep = Entity::new("sphere", Geometry::Brep(om9_kernel::brep::sphere_brep(2., 0.2, &limits).unwrap()), None);
+        let ids = [first.id, second.id, brep.id];
+        for entity in [first, second, brep] { document.entities.insert(entity.id, entity); }
+        let mut controller = Controller::new(document, limits).unwrap();
+        controller.select_objects(&ids).unwrap();
+        let mut captured = controller.capture_stl_selected().unwrap();
+        let before = captured._selection_reservation.bytes();
+        let pending = captured._selection_reservation.pending_bytes();
+        captured.detach_authored_sources(&StlCancellation::default()).unwrap();
+        assert!(captured.document.is_none());
+        let meshes: Vec<_> = captured.brep_sources.iter().filter_map(|entry| match &entry.source {
+            StlCapturedSource::Mesh(_, mesh) => Some(mesh), _ => None,
+        }).collect();
+        assert_eq!(meshes.len(), 2);
+        assert!(Arc::ptr_eq(meshes[0], meshes[1]));
+        let owner = (std::mem::size_of::<Mesh>() + 2 * std::mem::size_of::<usize>()) as u64;
+        assert_eq!(pending, meshes[0].validate(&limits).unwrap().bytes + owner);
+        assert!(captured._selection_reservation.bytes() <= before);
+        let fallback = force_document_capture(&controller);
+        let profile = StlExportProfile { linear_tolerance_mm: 0.05, angular_tolerance_rad: 0.3 };
+        let actual = captured.stl_soup(profile, &StlCancellation::default()).unwrap();
+        let expected = fallback.stl_soup(profile, &StlCancellation::default()).unwrap();
+        assert_eq!(actual.0.positions, expected.0.positions);
+        assert_eq!(actual.0.triangles, expected.0.triangles);
+        assert_eq!(actual.2, expected.2);
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn mixed_brep_and_authored_mesh_capture_does_not_retain_document_display() {
+        let limits = Limits::default();
+        let sphere = om9_kernel::brep::sphere_brep(3., 0.2, &limits).unwrap();
+        let display = sphere.display_liveness();
+        let brep = Entity::new("sphere", Geometry::Brep(sphere), None);
+        let mut mesh = Entity::new("authored mesh", Geometry::Mesh(om9_core::geometry::Mesh {
+            vertices: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+            faces: vec![vec![0, 1, 2]], normals: vec![], colors: vec![], corner_uvs: vec![],
+        }), None);
+        mesh.placement = Transform::translation([10., 0., 0.]).compose(Transform::scale([-1., 1., 1.]).unwrap()).unwrap();
+        let (brep_id, mesh_id) = (brep.id, mesh.id);
+        let mut document = om9_core::model::Document::with_template_tolerance("mixed source export");
+        document.entities.insert(brep_id, brep);
+        document.entities.insert(mesh_id, mesh);
+        let mut controller = Controller::new(document, limits).unwrap();
+        controller.select_objects(&[brep_id, mesh_id]).unwrap();
+        let reserved_before = controller.coordinator().external_reserved_bytes(om9_core::budget::memory::MemoryClass::Export);
+        let mut aborted = controller.capture_stl_selected().unwrap();
+        let cancel = StlCancellation::default();
+        cancel.cancel();
+        assert!(matches!(aborted.detach_authored_sources(&cancel), Err(Error::Canceled)));
+        drop(aborted);
+        assert_eq!(controller.coordinator().external_reserved_bytes(om9_core::budget::memory::MemoryClass::Export), reserved_before);
+        let mut captured = controller.capture_stl_selected().unwrap();
+        assert!(captured.document.is_some());
+        captured = std::thread::spawn(move || {
+            captured.detach_authored_sources(&StlCancellation::default()).unwrap();
+            captured
+        }).join().unwrap();
+        assert!(captured.document.is_none());
+        assert!(captured.brep_sources.iter().any(|entry| matches!(entry.source, StlCapturedSource::Mesh(_, _))));
+        assert!(captured.authored_mesh_array_lower_bound(&StlCancellation::default()).unwrap() > 0);
+        let old_document = Arc::downgrade(&controller.scene().unwrap().document);
+        let baseline = force_document_capture(&controller);
+        let profile = StlExportProfile { linear_tolerance_mm: 0.05, angular_tolerance_rad: 0.3 };
+        let expected = baseline.stl_soup(profile, &StlCancellation::default()).unwrap();
+        let target = std::env::temp_dir().join(format!("om9-mixed-source-{}.stl", uuid::Uuid::new_v4()));
+        let mib = 1024 * 1024;
+        let reservation = controller.coordinator().reserve_external_memory(
+            om9_core::budget::memory::MemoryClass::Export, 64 * mib, Some((1024 * mib, 1024 * mib))).unwrap();
+        let mut job = StlExportJob::start_with_sample(controller.capture_stl_selected().unwrap(), target.clone(), profile,
+            reservation, || Some((1024 * mib, 1024 * mib))).unwrap();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+        let receipt = loop {
+            if let Some(result) = job.try_result() { break result.unwrap(); }
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        };
+        assert_eq!(receipt.triangles, expected.0.triangles.len());
+        assert!(std::fs::metadata(&target).unwrap().len() > 84);
+        std::fs::remove_file(target).unwrap();
+        controller.delete_objects(&[brep_id, mesh_id]).unwrap();
+        let actual = captured.stl_soup(profile, &StlCancellation::default()).unwrap();
+        assert_eq!(actual.0.positions, expected.0.positions);
+        assert_eq!(actual.0.triangles, expected.0.triangles);
+        assert_eq!(actual.1, expected.1);
+        assert_eq!(actual.2, expected.2);
+        let options = StlOptions { strict: false, ..Default::default() };
+        let (mut a, mut b) = (Vec::new(), Vec::new());
+        write_binary_stl_to(&mut a, &actual.0, options, Some(0.005)).unwrap();
+        write_binary_stl_to(&mut b, &expected.0, options, Some(0.005)).unwrap();
+        assert_eq!(a, b);
+        drop(baseline);
+        drop(controller);
+        assert!(old_document.upgrade().is_none());
+        assert!(!display.is_alive());
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn instance_source_capture_matches_document_after_edit() {
+        use om9_core::model::Definition;
+        let limits = Limits::default();
+        let sphere = om9_kernel::brep::sphere_brep(3., 0.2, &limits).unwrap();
+        let weak_display = sphere.display_liveness();
+        let visible_leaf = Entity::new("visible sphere", Geometry::Brep(sphere.clone()), None);
+        let mut leaf = Entity::new("hidden sphere", Geometry::Brep(sphere), None);
+        leaf.attributes.hidden = true;
+        let definition = Definition::new("sphere", vec![visible_leaf, leaf]);
+        let definition_id = definition.id;
+        let mut document = om9_core::model::Document::with_template_tolerance("instances");
+        document.definitions.insert(definition_id, definition);
+        let mut a = Entity::new("a", Geometry::Instance(definition_id), None);
+        a.placement = Transform::translation([-10., 0., 0.]);
+        let mut b = Entity::new("b", Geometry::Instance(definition_id), None);
+        b.placement = Transform::translation([10., 0., 0.]).compose(Transform::scale([-1., 1., 1.]).unwrap()).unwrap();
+        let point = Entity::new("point", Geometry::Point([0., 0., 0.]), None);
+        let (a_id, b_id, p) = (a.id, b.id, point.id);
+        document.entities.insert(a_id, a);
+        document.entities.insert(b_id, b);
+        document.entities.insert(p, point);
+        let mut controller = Controller::new(document, limits).unwrap();
+        controller.select_objects(&[a_id, b_id]).unwrap();
+        let only = controller.capture_stl_selected().unwrap();
+        assert!(only.document.is_none());
+        assert_eq!(only.brep_sources.len(), 4);
+        let doc_weak = Arc::downgrade(&controller.scene().unwrap().document);
+        controller.select_objects(&[a_id, b_id, p]).unwrap();
+        let mixed = controller.capture_stl_selected().unwrap();
+        assert!(mixed.document.is_none());
+        let fallback = force_document_capture(&controller);
+        assert!(fallback.document.is_some());
+        controller.delete_objects(&[a_id, b_id]).unwrap();
+        let profile = StlExportProfile { linear_tolerance_mm: 0.05, angular_tolerance_rad: 0.3 };
+        let (a_soup, _, a_warnings, _) = only.stl_soup(profile, &StlCancellation::default()).unwrap();
+        let (b_soup, skipped, b_warnings, _) = fallback.stl_soup(profile, &StlCancellation::default()).unwrap();
+        let (mixed_soup, mixed_skipped, mixed_warnings, _) = mixed.stl_soup(profile, &StlCancellation::default()).unwrap();
+        assert_eq!(mixed_soup.positions, b_soup.positions);
+        assert_eq!(mixed_soup.triangles, b_soup.triangles);
+        assert_eq!(mixed_skipped, skipped);
+        assert_eq!(mixed_warnings, b_warnings);
+        assert_eq!(a_soup.positions, b_soup.positions);
+        assert_eq!(a_soup.triangles, b_soup.triangles);
+        assert_eq!(a_warnings, b_warnings);
+        assert_eq!(skipped.len(), 1);
+        let mut a_bytes = Vec::new();
+        let mut b_bytes = Vec::new();
+        let options = StlOptions { strict: false, ..Default::default() };
+        write_binary_stl_to(&mut a_bytes, &a_soup, options, Some(0.005)).unwrap();
+        write_binary_stl_to(&mut b_bytes, &b_soup, options, Some(0.005)).unwrap();
+        assert_eq!(a_bytes, b_bytes);
+        drop(fallback);
+        drop(controller);
+        assert!(doc_weak.upgrade().is_none());
+        assert!(!weak_display.is_alive());
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn source_only_capture_matches_document_capture_and_does_not_keep_display() {
+        let limits = Limits::default();
+        let sphere = om9_kernel::brep::sphere_brep(3., 0.2, &limits).unwrap();
+        let weak_display = sphere.display_liveness();
+        let first = Entity::new("first", Geometry::Brep(sphere.clone()), None);
+        let mut second = Entity::new("reflected", Geometry::Brep(sphere), None);
+        second.placement = Transform::scale([-1., 1., 1.]).unwrap();
+        let point = Entity::new("point", Geometry::Point([0., 0., 0.]), None);
+        let (a, b, p) = (first.id, second.id, point.id);
+        let mut document = om9_core::model::Document::with_template_tolerance("source-only export");
+        document.entities.insert(a, first);
+        document.entities.insert(b, second);
+        document.entities.insert(p, point);
+        let mut controller = Controller::new(document, limits).unwrap();
+        controller.select_objects(&[a, b]).unwrap();
+        let only = controller.capture_stl_selected().unwrap();
+        assert!(only.document.is_none());
+        assert_eq!(only.brep_sources.len(), 2);
+        let doc_weak = Arc::downgrade(&controller.scene().unwrap().document);
+        controller.select_objects(&[a, b, p]).unwrap();
+        let mixed = controller.capture_stl_selected().unwrap();
+        assert!(mixed.document.is_none());
+        let fallback = force_document_capture(&controller);
+        assert!(fallback.document.is_some());
+        controller.delete_objects(&[a, b]).unwrap();
+        assert!(!controller.document().entities.contains_key(&a));
+        assert!(!controller.document().entities.contains_key(&b));
+        let profile = StlExportProfile { linear_tolerance_mm: 0.05, angular_tolerance_rad: 0.3 };
+        let (source_soup, _, source_warnings, _) = only.stl_soup(profile, &StlCancellation::default()).unwrap();
+        let (document_soup, skipped, document_warnings, _) = fallback.stl_soup(profile, &StlCancellation::default()).unwrap();
+        let (mixed_soup, mixed_skipped, mixed_warnings, _) = mixed.stl_soup(profile, &StlCancellation::default()).unwrap();
+        assert_eq!(mixed_soup.positions, document_soup.positions);
+        assert_eq!(mixed_soup.triangles, document_soup.triangles);
+        assert_eq!(mixed_skipped, skipped);
+        assert_eq!(mixed_warnings, document_warnings);
+        assert_eq!(source_soup.positions, document_soup.positions);
+        assert_eq!(source_soup.triangles, document_soup.triangles);
+        let mut source_bytes = Vec::new();
+        let mut document_bytes = Vec::new();
+        let options = StlOptions { strict: false, ..Default::default() };
+        write_binary_stl_to(&mut source_bytes, &source_soup, options, Some(0.005)).unwrap();
+        write_binary_stl_to(&mut document_bytes, &document_soup, options, Some(0.005)).unwrap();
+        assert_eq!(source_bytes, document_bytes);
+        assert_eq!(source_warnings, document_warnings);
+        assert_eq!(skipped.len(), 1);
+        drop(fallback);
+        drop(controller);
+        assert!(doc_weak.upgrade().is_none(), "source capture must not retain the document");
+        assert!(!weak_display.is_alive(), "source capture must not retain the display");
+        let StlCapturedSource::Brep(om9_core::transaction::CapturedGeometrySource::Brep(source)) = &only.brep_sources[0].source else { panic!("BRep source") };
+        assert!(source.source().contains("CASCADE Topology"));
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn mixed_native_and_brep_capture_matches_document_and_releases_displays() {
+        let limits = Limits::default();
+        let sphere = om9_kernel::brep::sphere_brep(3., 0.2, &limits).unwrap();
+        let native = om9_kernel::brep::to_3dm(&sphere, 0.001, &limits).unwrap();
+        let weak_occt = sphere.display_liveness();
+        let weak_native = Arc::downgrade(&native.display);
+        let first = Entity::new("occt", Geometry::Brep(sphere), None);
+        let mut second = Entity::new("native", Geometry::NativeBrep(native), None);
+        second.placement = Transform::scale([-1., 1., 1.]).unwrap();
+        let point = Entity::new("point", Geometry::Point([0., 0., 0.]), None);
+        let (a, b, p) = (first.id, second.id, point.id);
+        let mut document = om9_core::model::Document::with_template_tolerance("mixed canonical sources");
+        let tolerance = document.effective_tolerance().unwrap().absolute_mm;
+        document.entities.insert(a, first);
+        document.entities.insert(b, second);
+        document.entities.insert(p, point);
+        let mut controller = Controller::new(document, limits).unwrap();
+        controller.select_objects(&[a, b]).unwrap();
+        let only = controller.capture_stl_selected().unwrap();
+        assert!(only.document.is_none());
+        assert_eq!(only.native_tolerance.as_ref().unwrap(), &tolerance);
+        controller.select_objects(&[a, b, p]).unwrap();
+        let mixed = controller.capture_stl_selected().unwrap();
+        assert!(mixed.document.is_none());
+        let fallback = force_document_capture(&controller);
+        assert!(fallback.document.is_some());
+        let profile = StlExportProfile { linear_tolerance_mm: 0.05, angular_tolerance_rad: 0.3 };
+        let (a_soup, _, a_warnings, a_tolerance) = only.stl_soup(profile, &StlCancellation::default()).unwrap();
+        let (b_soup, skipped, b_warnings, b_tolerance) = fallback.stl_soup(profile, &StlCancellation::default()).unwrap();
+        let (mixed_soup, mixed_skipped, mixed_warnings, mixed_tolerance) = mixed.stl_soup(profile, &StlCancellation::default()).unwrap();
+        assert_eq!(mixed_soup.positions, b_soup.positions);
+        assert_eq!(mixed_soup.triangles, b_soup.triangles);
+        assert_eq!(mixed_skipped, skipped);
+        assert_eq!(mixed_warnings, b_warnings);
+        assert_eq!(mixed_tolerance, b_tolerance);
+        assert_eq!(a_soup.positions, b_soup.positions);
+        assert_eq!(a_soup.triangles, b_soup.triangles);
+        assert_eq!(a_warnings, b_warnings);
+        assert_eq!(a_tolerance, b_tolerance);
+        assert_eq!(skipped.len(), 1);
+        let mut a_bytes = Vec::new(); let mut b_bytes = Vec::new();
+        let options = StlOptions { strict: false, ..Default::default() };
+        write_binary_stl_to(&mut a_bytes, &a_soup, options, Some(0.005)).unwrap();
+        write_binary_stl_to(&mut b_bytes, &b_soup, options, Some(0.005)).unwrap();
+        assert_eq!(a_bytes, b_bytes);
+        drop(fallback); drop(controller);
+        assert!(!weak_occt.is_alive());
+        assert!(weak_native.upgrade().is_none());
+        assert!(only.brep_sources.iter().any(|entry| matches!(entry.source, StlCapturedSource::Brep(om9_core::transaction::CapturedGeometrySource::NativeBrep(_)))));
+    }
 
     #[test]
     fn authored_mesh_preflight_checks_cancellation_during_face_scan() {
@@ -1664,7 +2574,7 @@ mod cancellation_tests {
         assert_eq!(observe().1, 0,
             "a detached source capture must not keep the controller selection alive");
         let capture = worker.join().unwrap();
-        assert_eq!(capture.document.entities.len(), ids.len());
+        assert_eq!(capture.document.as_ref().unwrap().entities.len(), ids.len());
         assert_eq!(capture.selection, vec![mesh_id]);
     }
 
@@ -1726,8 +2636,8 @@ mod cancellation_tests {
         controller.redo().unwrap();
         controller.select_objects(&[id]).unwrap();
         let second = controller.capture_stl_selected().unwrap();
-        assert_eq!(first.document.entities.len(), 1);
-        assert_eq!(second.document.entities.len(), 2);
+        assert_eq!(first.document.as_ref().unwrap().entities.len(), 1);
+        assert_eq!(second.document.as_ref().unwrap().entities.len(), 2);
         assert!(first.source_epoch() < second.source_epoch());
         let reference = controller.coordinator().memory_admission_peer().unwrap();
         let held = controller.scene_cache_usage().unwrap();
@@ -1735,7 +2645,7 @@ mod cancellation_tests {
         assert_eq!(first.admission_peer.retained_usage_with_held_usage(held).unwrap(), expected);
         assert_eq!(second.admission_peer.retained_usage_with_held_usage(held).unwrap(), expected);
         let source = controller.coordinator().capture_retained_document(controller.document().id).unwrap();
-        assert!(std::ptr::eq::<om9_core::model::Document>(&*second.document, &*source));
+        assert!(std::ptr::eq::<om9_core::model::Document>(&**second.document.as_ref().unwrap(), &*source));
         let target = std::env::temp_dir().join(format!("om9-stl-peer-history-{}.stl", uuid::Uuid::new_v4()));
         let receipt = first.export_with_profile(&target,
             StlExportProfile { linear_tolerance_mm: 0.001, angular_tolerance_rad: 0.3 }).unwrap();
@@ -2029,11 +2939,11 @@ mod cancellation_tests {
         document.entities.insert(root_id, root);
         let token = StlCancellation::default();
         let shallow = Limits { max_depth: 1, ..Limits::default() };
-        assert!(matches!(stl_occurrences(&document, [root_id].into_iter(), &shallow, &token, |_, _, _| Ok(())), Err(Error::Budget(_))));
+        assert!(matches!(stl_occurrences(&document, [root_id].into_iter(), &shallow, Some(&token), |_, _, _| Ok(())), Err(Error::Budget(_))));
         document.definitions.get_mut(&inner_id).unwrap().members[0].geometry = Geometry::Instance(outer_id);
-        assert!(matches!(stl_occurrences(&document, [root_id].into_iter(), &Limits::default(), &token, |_, _, _| Ok(())), Err(Error::Invalid(_))));
+        assert!(matches!(stl_occurrences(&document, [root_id].into_iter(), &Limits::default(), Some(&token), |_, _, _| Ok(())), Err(Error::Invalid(_))));
         assert!(token.cancel());
-        assert!(matches!(stl_occurrences(&document, [root_id].into_iter(), &Limits::default(), &token, |_, _, _| Ok(())), Err(Error::Canceled)));
+        assert!(matches!(stl_occurrences(&document, [root_id].into_iter(), &Limits::default(), Some(&token), |_, _, _| Ok(())), Err(Error::Canceled)));
     }
 
     #[test]
@@ -2049,7 +2959,7 @@ mod cancellation_tests {
         let root_id = root.id;
         document.entities.insert(root_id, root);
         let mut visibility = Vec::new();
-        stl_occurrences(&document, [root_id].into_iter(), &Limits::default(), &StlCancellation::default(), |_, _, visible| {
+        stl_occurrences(&document, [root_id].into_iter(), &Limits::default(), None, |_, _, visible| {
             visibility.push(visible);
             Ok(())
         }).unwrap();
@@ -2423,8 +3333,9 @@ mod cancellation_tests {
         controller.select_objects(&[id]).unwrap();
         let baseline = controller.coordinator().external_reserved_bytes(MemoryClass::Export);
         let capture = controller.capture_stl_selected().unwrap();
-        assert_eq!(controller.coordinator().external_pending_bytes(MemoryClass::Export), 0,
-            "the captured selection exists and must not remain a pending allocation");
+        assert_eq!(controller.coordinator().external_pending_bytes(MemoryClass::Export), capture._selection_reservation.pending_bytes(),
+            "pending bytes cover only source geometry not yet copied");
+        if cfg!(feature = "occt-brep") { assert!(capture._selection_reservation.pending_bytes() > 0); }
         let profile = StlExportProfile { linear_tolerance_mm: 0.001, angular_tolerance_rad: 0.3 };
         let target = std::env::temp_dir().join(format!("om9-stl-stages-{}.stl", uuid::Uuid::new_v4()));
         let second = target.with_extension("second.stl");

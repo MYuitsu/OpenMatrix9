@@ -223,7 +223,7 @@ fn reversed_surface_face_retains_parameter_geometry_and_normal_direction() {
     for axis in [SurfaceIso::U,SurfaceIso::V] {
         let surface=om9_core::surface_ops::reverse_surface(&original,axis,&limits).unwrap();assert!(surface.reversed);
         let face=om9_kernel::measurement::surface_to_face(&surface,Transform::identity(),DEFAULT_DEFLECTION_MM,&limits).unwrap();
-        let expected=om9_core::surface_kernel::normal(&surface,0.5,0.5,&limits).unwrap();let t=face.display.triangles[0];let p=face.display.points[t[0] as usize];let q=face.display.points[t[1] as usize];let r=face.display.points[t[2] as usize];let u=[q[0]-p[0],q[1]-p[1],q[2]-p[2]];let v=[r[0]-p[0],r[1]-p[1],r[2]-p[2]];let normal=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];assert!(normal.iter().zip(expected).map(|(a,b)|a*b).sum::<f64>()>0.);
+        let expected=om9_core::surface_kernel::normal(&surface,0.5,0.5,&limits).unwrap();let t=face.display().triangles[0];let p=face.display().points[t[0] as usize];let q=face.display().points[t[1] as usize];let r=face.display().points[t[2] as usize];let u=[q[0]-p[0],q[1]-p[1],q[2]-p[2]];let v=[r[0]-p[0],r[1]-p[1],r[2]-p[2]];let normal=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];assert!(normal.iter().zip(expected).map(|(a,b)|a*b).sum::<f64>()>0.);
     }
 }
 

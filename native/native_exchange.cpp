@@ -395,7 +395,7 @@ std::unique_ptr<ON_Geometry> geometry(const J& j,const ON_Xform& placement,const
     require(hatch.Create(plane,boundaries,pattern_index,0.0,1.0)&&hatch.IsValid(),"native hatch creation"); g=std::make_unique<ON_Hatch>(hatch);
   }
   else if(name=="NativeBrep") {
-    fields(v,{"display","payload","crc"}); (void)v["display"]; (void)v["crc"];
+    fields(v,{"payload","crc"}); (void)v["crc"];
     require(v["payload"].is_array()&&!v["payload"].empty(),"native BRep payload chunks");
     std::vector<unsigned char> bytes;
     for(const auto& chunk:v["payload"]) {
@@ -815,7 +815,7 @@ J expected_brep_fingerprints(const J& p) {
     require(e.is_object() && e.contains("id") && e.contains("geometry") && e.contains("placement"),"expected BRep entity");
     const auto& g=e["geometry"];if(!g.is_object() || !g.contains("NativeBrep"))return;
     const auto key=id_string(uuid(e["id"]));require(ids.insert(key).second,"expected BRep duplicate id");
-    const auto& input=g["NativeBrep"];fields(input,{"display","payload","crc"});
+    const auto& input=g["NativeBrep"];fields(input,{"payload","crc"});
     const auto& chunks=input["payload"];require(chunks.is_array()&&!chunks.empty(),"expected BRep chunks");
     std::vector<unsigned char> bytes;
     for(const auto& chunk:chunks) {

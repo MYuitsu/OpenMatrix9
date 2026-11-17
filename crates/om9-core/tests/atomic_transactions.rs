@@ -55,8 +55,8 @@ fn native_brep_payload_is_shared_across_move_undo_and_redo() {
     use std::sync::Arc;
     let limits = Limits::default();
     let native = NativeBrep {
-        display: Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]],
-            normals: vec![], colors: vec![], corner_uvs: vec![] },
+        display: std::sync::Arc::new(Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]],
+            normals: vec![], colors: vec![], corner_uvs: vec![] }),
         payload: vec![7; 1024 * 1024].into(), crc: 1,
     };
     let source = Arc::clone(&native.payload);
@@ -87,8 +87,8 @@ fn native_brep_undo_inventory_tracks_shared_payload_ownership() {
     use om9_core::geometry::{Mesh, NativeBrep};
     let limits = Limits::default();
     let native = NativeBrep {
-        display: Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]],
-            normals: vec![], colors: vec![], corner_uvs: vec![] },
+        display: std::sync::Arc::new(Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]],
+            normals: vec![], colors: vec![], corner_uvs: vec![] }),
         payload: vec![7; 1024 * 1024].into(), crc: 1,
     };
     let mut document = Document::new("native shared undo");
@@ -121,8 +121,8 @@ fn native_brep_document_inventory_deduplicates_only_shared_allocations() {
     use om9_core::geometry::{Mesh, NativeBrep};
     let limits = Limits::default();
     let native = NativeBrep {
-        display: Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]],
-            normals: vec![], colors: vec![], corner_uvs: vec![] },
+        display: std::sync::Arc::new(Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]],
+            normals: vec![], colors: vec![], corner_uvs: vec![] }),
         payload: vec![7; 1024 * 1024].into(), crc: 1,
     };
     let mut shared = Document::new("payload inventory");
@@ -355,15 +355,17 @@ fn malformed_brep_is_rejected_without_losing_existing_redo() {
             triangles: vec![[0, 1, 2, 0]],
             segments: vec![],
             vertices: vec![],
-            faces: vec![Uuid::from_u128(1)],
-            edges: vec![],
-            vertex_ids: vec![],
-            face_edges: vec![],
+            topology: om9_core::brep::BrepTopology {
+                faces: vec![Uuid::from_u128(1)],
+                edges: vec![],
+                vertex_ids: vec![],
+                face_edges: vec![],
+            }.into(),
         },
         &limits,
     )
     .unwrap();
-    std::sync::Arc::make_mut(&mut brep.display).points[0][0] = 2.;
+    brep.edit_display_for_validation(|display| display.points[0][0] = 2.);
     let (mut c, d, _) = seeded_redo();
     let before = c.snapshot();
     let invalid = Entity::new("tampered", Geometry::Brep(brep), None);

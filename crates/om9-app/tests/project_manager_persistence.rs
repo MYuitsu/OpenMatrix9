@@ -60,10 +60,7 @@ fn unchanged_embedded_ui_records_preserve_document_and_redo() {
     app.stage_project_state().unwrap();
     let state = app.controller.document_scene_state();
     assert_eq!(state.scene_epoch, Some(state.publication_epoch));
-    assert!(std::sync::Arc::ptr_eq(
-        &buffers,
-        &app.controller.scene().unwrap().objects[0].buffers
-    ));
+    assert!(buffers.ptr_eq(&app.controller.scene().unwrap().objects[0].buffers));
     add_point(&mut app, 1.);
     app.controller.undo().unwrap();
     let before = app.controller.coordinator().snapshot();
@@ -97,10 +94,7 @@ fn metadata_admission_failure_preserves_document_scene_and_redo() {
     ));
     assert_eq!(app.controller.coordinator().snapshot(), before);
     assert_eq!(app.controller.document_scene_state(), state);
-    assert!(std::sync::Arc::ptr_eq(
-        &buffers,
-        &app.controller.scene().unwrap().objects[0].buffers
-    ));
+    assert!(buffers.ptr_eq(&app.controller.scene().unwrap().objects[0].buffers));
     assert_eq!(app.controller.coordinator().redo_len(), 1);
     drop(pressure);
     app.controller.store_display_state(&bytes).unwrap();

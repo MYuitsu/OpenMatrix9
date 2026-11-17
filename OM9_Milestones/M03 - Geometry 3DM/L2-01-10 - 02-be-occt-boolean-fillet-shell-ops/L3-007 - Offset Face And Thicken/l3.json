@@ -413,6 +413,7 @@
     "rust_test_name": "m03_01_10_007"
   },
   "runtime_implementation": {
+    "shell_source_handoff_2026_11_14": "IN_PROGRESS_COMPILE_ONLY: Shell worker transfers its kernel-class source reservation into the staged geometry replacement; runtime behavior is unverified. Evidence: docs/validation/2026-11-14-canonical-representation-transfer.md#shell-worker-source-handoff",
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED",
     "target": "standalone Rust OM9, Windows x64",

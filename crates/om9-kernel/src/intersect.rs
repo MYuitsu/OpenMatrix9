@@ -284,7 +284,7 @@ fn curve_fractions(
 /// Exact curve/B-Rep intersection fractions in `[0, 1]`. Polycurves are evaluated
 /// segment-by-segment with the documented segment-uniform parameterisation.
 pub fn curve_brep_fractions(
-    brep: &Brep,
+    brep: &dyn om9_core::brep::BrepSourceAccess,
     curve: &Curve,
     tolerance: f64,
     limits: &Limits,
@@ -296,7 +296,7 @@ pub fn curve_brep_fractions(
 
 /// Exact curve/BRep intersections including intersections at curve endpoints.
 pub fn curve_brep_fractions_including_endpoints(
-    brep: &Brep,
+    brep: &dyn om9_core::brep::BrepSourceAccess,
     curve: &Curve,
     tolerance: f64,
     limits: &Limits,

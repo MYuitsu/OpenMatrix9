@@ -362,9 +362,11 @@ mod tests {
             &limits,
         )
         .unwrap();
+        let mut display = shape.display().clone();
+        display.source_sha256 = [0; 32];
         let corrupt = om9_core::brep::Brep::from_native(
             "CASCADE Topology invalid".to_owned(),
-            (*shape.display).clone(),
+            display,
             &limits,
         )
         .unwrap();

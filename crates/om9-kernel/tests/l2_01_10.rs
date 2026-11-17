@@ -26,6 +26,522 @@ fn close(actual: f64, expected: f64, tolerance: f64) -> bool {
 }
 
 #[test]
+#[ignore = "known nonuniform affine Boolean failure; run explicitly while investigating"]
+fn boolean_nonuniformly_scaled_box_matches_analytic_sphere_union() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let block = box_shape(2., 8., 8.);
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let block = om9_kernel::transform_ops::transform_brep(&block, &placement, 0.01, &limits).unwrap();
+    let result = editing::boolean(&sphere, &block, BooleanOp::Union, 0.01, &limits).unwrap();
+    let volume = measured(result.body().unwrap()).volume_mm3;
+    assert!((volume - (256. + 18. * PI)).abs() < 1e-5, "volume {volume}");
+}
+
+#[test]
+fn boolean_affine_local_frame_unchecked_reverse_and_intersection_match_volume() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let inverse = om9_kernel::transform_ops::inverse(&placement).unwrap();
+    let sphere = om9_kernel::transform_ops::transform_brep(&sphere, &inverse, 0.01, &limits).unwrap();
+    let block = box_shape(2., 8., 8.);
+    for profile in [0.5, 0.01] {
+        for (a, b, op, expected, bounds) in [(&block, &sphere, BooleanOp::Difference, 128. - 9. * PI, [0., 0., 0., 2., 8., 8.]), (&sphere, &block, BooleanOp::Intersection, 9. * PI, [0., 1., 1., 1.5, 7., 7.])] {
+            match editing::boolean_checked(a, b, op, profile, &limits) {
+                Ok(BooleanOutcome::Body(body)) => {
+                    let checked = measured(&body);
+                    assert!((checked.volume_mm3 - expected).abs() < 1e-5 && checked.closed && checked.solids == 1 && checked.naked_edges == 0);
+                    for (actual, expected) in checked.bounds_mm.into_iter().zip(bounds) { assert!((actual - expected).abs() < 1e-5); }
+                }
+                Err(error) => assert!(error.to_string().contains("self-interference check aborted"), "{error}"),
+                Ok(BooleanOutcome::Empty) => panic!("expected nonempty result"),
+            }
+            let body = editing::boolean(a, b, op, profile, &limits).unwrap();
+            let actual = measured(body.body().expect("nonempty"));
+            assert!((actual.volume_mm3 - expected).abs() < 1e-5 && actual.closed && actual.solids == 1 && actual.naked_edges == 0,
+                "{op:?} profile={profile}: volume={}, expected={expected}, closed={}, solids={}, naked={}", actual.volume_mm3, actual.closed, actual.solids, actual.naked_edges);
+            for (actual, expected) in actual.bounds_mm.into_iter().zip(bounds) {
+                assert!((actual - expected).abs() < 1e-5, "{op:?} profile {profile}: bound {actual} vs {expected}");
+            }
+        }
+    }
+}
+
+#[test]
+fn boolean_affine_local_frame_union_and_forward_difference_match_volume() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let inverse = om9_kernel::transform_ops::inverse(&placement).unwrap();
+    let sphere = om9_kernel::transform_ops::transform_brep(&sphere, &inverse, 0.01, &limits).unwrap();
+    let block = box_shape(2., 8., 8.);
+    for profile in [0.5, 0.01] {
+        for (a, b, op, expected, bounds, world_bounds) in [(&sphere, &block, BooleanOp::Union, 128. + 9. * PI, [-1.5, 0., 0., 2., 8., 8.], [-3., -4., -4., 4., 4., 4.]),
+            (&sphere, &block, BooleanOp::Difference, 9. * PI, [-1.5, 1., 1., 0., 7., 7.], [-3., -3., -3., 0., 3., 3.])] {
+            let result = editing::boolean_checked(a, b, op, profile, &limits).unwrap();
+            let actual = measured(result.body().expect("nonempty result"));
+            assert!((actual.volume_mm3 - expected).abs() < 1e-5, "{op:?} profile {profile}: {} vs {expected}", actual.volume_mm3);
+            for (actual, expected) in actual.bounds_mm.into_iter().zip(bounds) {
+                assert!((actual - expected).abs() < 1e-5, "{op:?} profile {profile}: bound {actual} vs {expected}");
+            }
+            let world = om9_kernel::brep::world_bounds(result.body().unwrap(), &placement, &limits).unwrap();
+            for (actual, expected) in world.into_iter().zip(world_bounds) {
+                assert!((actual - expected).abs() < 1e-5, "{op:?} profile {profile}: world bound {actual} vs {expected}");
+            }
+        }
+    }
+}
+
+#[test]
+fn boolean_checked_affine_sphere_intersection_is_correct_or_refused() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let block = om9_kernel::transform_ops::transform_brep(&box_shape(2., 8., 8.), &placement, 0.01, &limits).unwrap();
+    for profile in [0.5, 0.01] {
+        for (a, b) in [(&sphere, &block), (&block, &sphere)] {
+            match editing::boolean_checked(a, b, BooleanOp::Intersection, profile, &limits) {
+                Err(error) => assert!(error.to_string().contains("boolean result failed OCCT validity checks"), "{error}"),
+                Ok(BooleanOutcome::Body(body)) => {
+                    let volume = measured(&body).volume_mm3;
+                    assert!((volume - 18. * PI).abs() < 1e-5, "profile {profile}: volume {volume}");
+                }
+                Ok(BooleanOutcome::Empty) => panic!("profile {profile}: nonempty intersection returned as empty"),
+            }
+        }
+    }
+}
+
+#[test]
+fn boolean_checked_affine_offset_sphere_intersection_matches_analytic_volume() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let block = om9_kernel::transform_ops::transform_brep(&box_shape(2., 8., 8.), &placement, 0.01, &limits).unwrap();
+    for center in [-0.5_f64, 0.2, 0.5, 1.] {
+        let shifted = om9_kernel::transform_ops::transform_brep(&sphere, &Transform::translation([center, 0., 0.]), 0.01, &limits).unwrap();
+        let expected = PI * (3. + center).powi(2) * (6. - center) / 3.;
+        for profile in [0.5, 0.01] {
+            for (a, b) in [(&shifted, &block), (&block, &shifted)] {
+                let result = editing::boolean_checked(a, b, BooleanOp::Intersection, profile, &limits).unwrap();
+                let volume = measured(result.body().expect("nonempty intersection")).volume_mm3;
+                assert!((volume - expected).abs() < 1e-5, "center {center}, profile {profile}: volume {volume}, expected {expected}");
+            }
+        }
+    }
+}
+
+#[test]
+fn boolean_checked_near_centered_affine_intersection_never_returns_wrong_volume() {
+    use om9_core::geometry::Transform;
+    let limits=limits();
+    let sphere=creation::primitive(Primitive::Sphere {radius_mm:3.},0.01,&limits).unwrap();
+    let placement=Transform([[2.,0.,0.,0.],[0.,1.,0.,-4.],[0.,0.,1.,-4.],[0.,0.,0.,1.]]);
+    let block=om9_kernel::transform_ops::transform_brep(&box_shape(2.,8.,8.),&placement,0.01,&limits).unwrap();
+    let mut accepted=0; let mut refused=0;
+    for center in [-0.001_f64,-0.0001,-0.000001,0.000001,0.0001,0.001] {
+        let shifted=om9_kernel::transform_ops::transform_brep(&sphere,&Transform::translation([center,0.,0.]),0.01,&limits).unwrap();
+        let expected=PI*(3.+center).powi(2)*(6.-center)/3.;
+        for profile in [0.5,0.01] {for (a,b) in [(&shifted,&block),(&block,&shifted)] {
+            match editing::boolean_checked(a,b,BooleanOp::Intersection,profile,&limits) {
+                Ok(BooleanOutcome::Body(body)) => {
+                    let m=measured(&body);
+                    assert!((m.volume_mm3-expected).abs()<1e-5 && m.closed && m.solids==1 && m.naked_edges==0,
+                        "center={center}, profile={profile}, measured={m:?}, expected={expected}");
+                    accepted+=1;
+                }
+                Err(error) => {
+                    let text=error.to_string();
+                    println!("refused center={center} profile={profile} sphere_first={}: {text}", std::ptr::eq(a, &shifted));
+                    assert!(text.contains("boolean intersection returned empty despite an interior witness") ||
+                        text.contains("boolean result failed OCCT validity checks") ||
+                        text.contains("boolean intersection result misses an interior witness") ||
+                        text.contains("boolean intersection result extends outside an input solid"),"{text}");
+                    refused+=1;
+                },
+                Ok(BooleanOutcome::Empty)=>panic!("false Empty: center={center}, profile={profile}"),
+            }
+        }}
+    }
+    println!("near-centered: accepted={accepted} refused={refused}");
+    assert_eq!(accepted+refused,24); assert!(accepted>0);
+}
+
+#[test]
+#[ignore = "diagnostic: common rigid frames for near-centered sphere-box intersection"]
+fn near_centered_common_rigid_frame_diagnostic() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let block = om9_kernel::transform_ops::transform_brep(&box_shape(2.,8.,8.),
+        &Transform([[2.,0.,0.,0.],[0.,1.,0.,-4.],[0.,0.,1.,-4.],[0.,0.,0.,1.]]),0.01,&limits).unwrap();
+    let frames = [
+        ("identity", Transform::identity()),
+        ("x90", Transform([[1.,0.,0.,0.],[0.,0.,-1.,0.],[0.,1.,0.,0.],[0.,0.,0.,1.]])),
+        ("y90", Transform([[0.,0.,1.,0.],[0.,1.,0.,0.],[-1.,0.,0.,0.],[0.,0.,0.,1.]])),
+        ("z90", Transform([[0.,-1.,0.,0.],[1.,0.,0.,0.],[0.,0.,1.,0.],[0.,0.,0.,1.]])),
+    ];
+    for (name, frame) in frames {
+        let inverse = Transform([[frame.0[0][0],frame.0[1][0],frame.0[2][0],0.],
+            [frame.0[0][1],frame.0[1][1],frame.0[2][1],0.],
+            [frame.0[0][2],frame.0[1][2],frame.0[2][2],0.],[0.,0.,0.,1.]]);
+        let rotated_box = om9_kernel::transform_ops::transform_brep(&block, &frame, 0.01, &limits).unwrap();
+        for center in [-0.000001_f64, 0.000001] {
+            let shifted = om9_kernel::transform_ops::transform_brep(&sphere, &Transform::translation([center,0.,0.]),0.01,&limits).unwrap();
+            let rotated_sphere = om9_kernel::transform_ops::transform_brep(&shifted, &frame, 0.01, &limits).unwrap();
+            let expected = PI*(3.+center).powi(2)*(6.-center)/3.;
+            for (a,b) in [(&rotated_sphere,&rotated_box),(&rotated_box,&rotated_sphere)] {
+                match editing::boolean_checked(a,b,BooleanOp::Intersection,0.01,&limits) {
+                    Ok(BooleanOutcome::Body(body)) => {
+                        let restored = om9_kernel::transform_ops::transform_brep(&body,&inverse,0.01,&limits).unwrap();
+                        let m=measured(&restored);
+                        assert!((m.volume_mm3-expected).abs()<1e-5 && m.closed && m.solids==1 && m.naked_edges==0,
+                            "{name} center={center} expected={expected} actual={m:?}");
+                        for (actual,expected) in m.bounds_mm.into_iter().zip([0.,-3.,-3.,3.+center,3.,3.]) {
+                            assert!((actual-expected).abs()<1e-5,"{name} center={center}: {actual} vs {expected}");
+                        }
+                        println!("{name} center={center} sphere_first={} accepted",std::ptr::eq(a,&rotated_sphere));
+                    }
+                    Ok(BooleanOutcome::Empty) => panic!("{name} center={center}: false empty result"),
+                    Err(error) => {
+                        let text = error.to_string();
+                        assert!(text.contains("boolean intersection returned empty despite an interior witness")
+                            || text.contains("boolean result failed OCCT validity checks")
+                            || text.contains("boolean intersection result misses an interior witness")
+                            || text.contains("boolean intersection result extends outside an input solid"), "{text}");
+                        println!("{name} center={center} sphere_first={} {text}",std::ptr::eq(a,&rotated_sphere));
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn boolean_checked_disjoint_intersection_remains_empty() {
+    use om9_core::geometry::Transform;
+    let limits=limits();
+    let a=box_shape(2.,3.,4.); let b=box_at([10.,10.,10.],2.,3.,4.);
+    let sphere=creation::primitive(Primitive::Sphere {radius_mm:3.},0.01,&limits).unwrap();
+    // The two bounding boxes overlap, but their centers are farther apart than the sum of radii.
+    let shifted=om9_kernel::transform_ops::transform_brep(&sphere,&Transform::translation([4.5,4.5,0.]),0.01,&limits).unwrap();
+    for (a,b) in [(&a,&b),(&sphere,&shifted)] {for profile in [0.5,0.01] {for (left,right) in [(a,b),(b,a)] {
+        assert!(matches!(editing::boolean_checked(left,right,BooleanOp::Intersection,profile,&limits).unwrap(),BooleanOutcome::Empty));
+    }}}
+}
+
+#[test]
+fn boolean_checked_certified_box_intersection_excludes_outside_input() {
+    use om9_core::geometry::Transform;
+    let limits=limits();
+    let sphere=creation::primitive(Primitive::Sphere {radius_mm:3.},0.01,&limits).unwrap();
+    let mut rotation=om9_kernel::transform_ops::rotation([0.;3],[1.,0.,0.],std::f64::consts::FRAC_PI_4).unwrap();
+    rotation.0[0][3]=0.001;
+    let sphere=om9_kernel::transform_ops::transform_brep(&sphere,&rotation,0.01,&limits).unwrap();
+    let block=om9_kernel::transform_ops::transform_brep(&box_shape(2.,8.,8.),
+        &Transform([[2.,0.,0.,0.],[0.,1.,0.,-4.],[0.,0.,1.,-4.],[0.,0.,0.,1.]]),0.01,&limits).unwrap();
+    for profile in [0.5,0.01] {for (a,b) in [(&sphere,&block),(&block,&sphere)] {
+        let result=editing::boolean_checked(a,b,BooleanOp::Intersection,profile,&limits).unwrap();
+        let m=measured(result.body().expect("nonempty"));
+        let expected=PI*(3.001_f64).powi(2)*5.999/3.;
+        assert!((m.volume_mm3-expected).abs()<1e-5 && m.closed && m.solids==1 && m.naked_edges==0,"{m:?}");
+    }}
+}
+
+#[test]
+fn boolean_checked_certified_box_intersection_keeps_common_interior() {
+    use om9_core::geometry::Transform;
+    let limits=limits();
+    let sphere=creation::primitive(Primitive::Sphere {radius_mm:3.},0.01,&limits).unwrap();
+    let rotation=om9_kernel::transform_ops::rotation([0.;3],[1.,0.,0.],std::f64::consts::FRAC_PI_4).unwrap();
+    let sphere=om9_kernel::transform_ops::transform_brep(&sphere,&rotation,0.01,&limits).unwrap();
+    let block=om9_kernel::transform_ops::transform_brep(&box_shape(2.,8.,8.),
+        &Transform([[2.,0.,0.,0.],[0.,1.,0.,-4.],[0.,0.,1.,-4.],[0.,0.,0.,1.]]),0.01,&limits).unwrap();
+    for profile in [0.5,0.01] {for (a,b) in [(&sphere,&block),(&block,&sphere)] {
+        let result=editing::boolean_checked(a,b,BooleanOp::Intersection,profile,&limits).unwrap();
+        let m=measured(result.body().expect("nonempty"));
+        assert!((m.volume_mm3-18.*PI).abs()<1e-5 && m.closed && m.solids==1 && m.naked_edges==0,"{m:?}");
+    }}
+}
+
+#[test]
+#[ignore = "investigate rotated sphere in unscaled box local frame"]
+fn intersection_rotated_sphere_box_local_frame_diagnostic() {
+    use om9_core::geometry::Transform;
+    let limits=limits();
+    let sphere=creation::primitive(Primitive::Sphere {radius_mm:3.},0.01,&limits).unwrap();
+    let block=box_shape(2.,8.,8.);
+    let frame=Transform([[2.,0.,0.,0.],[0.,1.,0.,-4.],[0.,0.,1.,-4.],[0.,0.,0.,1.]]);
+    let inverse=om9_kernel::transform_ops::inverse(&frame).unwrap();
+    for center in [-0.001_f64,0.,0.001] {
+        let mut rotation=om9_kernel::transform_ops::rotation([0.;3],[1.,0.,0.],std::f64::consts::FRAC_PI_4).unwrap();
+        rotation.0[0][3]=center;
+        let world=om9_kernel::transform_ops::transform_brep(&sphere,&rotation,0.01,&limits).unwrap();
+        let local=om9_kernel::transform_ops::transform_brep(&world,&inverse,0.01,&limits).unwrap();
+        let expected=PI*(3.+center).powi(2)*(6.-center)/6.;
+        for profile in [0.5,0.01] {for (a,b) in [(&local,&block),(&block,&local)] {
+            match editing::boolean_checked(a,b,BooleanOp::Intersection,profile,&limits) {
+                Ok(BooleanOutcome::Body(body))=>{let m=measured(&body); println!("center={center} profile={profile} volume={} expected={expected}",m.volume_mm3);
+                    assert!((m.volume_mm3-expected).abs()<1e-5 && m.closed && m.solids==1 && m.naked_edges==0,"{m:?}");}
+                Ok(BooleanOutcome::Empty)=>panic!("nonempty became empty"),
+                Err(e)=>println!("center={center} profile={profile} refused={e}"),
+            }
+        }}
+    }
+}
+
+#[test]
+#[ignore = "investigate equivalent sphere parameterizations near affine intersection"]
+fn near_centered_intersection_rotated_sphere_diagnostic() {
+    use om9_core::geometry::Transform;
+    let limits=limits();
+    let sphere=creation::primitive(Primitive::Sphere {radius_mm:3.},0.01,&limits).unwrap();
+    let block=om9_kernel::transform_ops::transform_brep(&box_shape(2.,8.,8.),
+        &Transform([[2.,0.,0.,0.],[0.,1.,0.,-4.],[0.,0.,1.,-4.],[0.,0.,0.,1.]]),0.01,&limits).unwrap();
+    let mut incorrect=0;
+    for (name,axis,angle) in [("none",[1.,0.,0.],0.),("x90",[1.,0.,0.],std::f64::consts::FRAC_PI_2),
+        ("y90",[0.,1.,0.],std::f64::consts::FRAC_PI_2), ("z90",[0.,0.,1.],std::f64::consts::FRAC_PI_2),
+        ("x45",[1.,0.,0.],std::f64::consts::FRAC_PI_4)] {
+        for center in [-0.001_f64,-0.000001,0.,0.000001,0.001] {
+            let mut transform=om9_kernel::transform_ops::rotation([0.;3],axis,angle).unwrap();
+            transform.0[0][3]=center;
+            let shifted=om9_kernel::transform_ops::transform_brep(&sphere,&transform,0.01,&limits).unwrap();
+            if (name == "none" || name == "x45") && (center == -0.000001 || center == 0.000001) {
+                if let Some(dir) = std::env::var_os("OM9_INTERSECTION_CERTIFICATE_DIR") {
+                    use std::io::Write;
+                    let sign = if center < 0. { "negative" } else { "positive" };
+                    let path = std::path::Path::new(&dir).join(format!("sphere-{name}-{sign}.brep"));
+                    let mut file = std::fs::OpenOptions::new().write(true).create_new(true).open(path).unwrap();
+                    file.write_all(shifted.source().as_bytes()).unwrap();
+                    if name == "none" && center < 0. {
+                        let path = std::path::Path::new(&dir).join("box.brep");
+                        let mut file = std::fs::OpenOptions::new().write(true).create_new(true).open(path).unwrap();
+                        file.write_all(block.source().as_bytes()).unwrap();
+                    }
+                }
+            }
+            if name=="x45" && center==0. {
+                if let Some(path)=std::env::var_os("OM9_INTERSECTION_DIAGNOSTIC_SOURCE") {
+                    use std::io::Write;
+                    let raw=editing::boolean(&shifted,&block,BooleanOp::Intersection,0.5,&limits).unwrap();
+                    let mut file=std::fs::OpenOptions::new().write(true).create_new(true).open(path).unwrap();
+                    file.write_all(raw.body().expect("diagnostic result").source().as_bytes()).unwrap();
+                }
+                if let Some(dir)=std::env::var_os("OM9_INTERSECTION_DIAGNOSTIC_DIR") {
+                    use std::io::Write;
+                    for (name,body) in [("sphere.brep",&shifted),("box.brep",&block)] {
+                        let path=std::path::Path::new(&dir).join(name);
+                        let mut file=std::fs::OpenOptions::new().write(true).create_new(true).open(path).unwrap();
+                        file.write_all(body.source().as_bytes()).unwrap();
+                    }
+                }
+            }
+            let input=measured(&shifted);
+            assert!((input.volume_mm3-36.*PI).abs()<1e-5 && input.closed && input.solids==1,
+                "invalid diagnostic sphere: {name} {center}: {input:?}");
+            for (actual,expected) in input.bounds_mm.into_iter().zip([center-3.,-3.,-3.,center+3.,3.,3.]) {
+                assert!((actual-expected).abs()<1e-5,"unexpected sphere bounds: {name} {center}: {actual} vs {expected}");
+            }
+            let expected=PI*(3.+center).powi(2)*(6.-center)/3.;
+            for profile in [0.5,0.01] {
+                match editing::boolean_checked(&shifted,&block,BooleanOp::Intersection,profile,&limits) {
+                    Ok(BooleanOutcome::Body(body)) => {let m=measured(&body);
+                        if (m.volume_mm3-expected).abs()>=1e-5 || !m.closed || m.solids!=1 || m.naked_edges!=0 {
+                            incorrect+=1; println!("{name} center={center} profile={profile}: WRONG volume={} expected={expected}",m.volume_mm3);
+                        } else {println!("{name} center={center} profile={profile}: accepted correct volume");}}
+                    Ok(BooleanOutcome::Empty)=>{incorrect+=1; println!("{name} center={center} profile={profile}: WRONG empty");},
+                    Err(e)=>println!("{name} center={center} profile={profile}: {e}"),
+                }
+            }
+        }
+    }
+    assert_eq!(incorrect,0,"incorrect accepted intersection results");
+}
+
+#[test]
+fn boolean_checked_affine_sphere_difference_is_correct_or_refused() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let block = om9_kernel::transform_ops::transform_brep(&box_shape(2., 8., 8.), &placement, 0.01, &limits).unwrap();
+    for profile in [0.5, 0.01] {
+        match editing::boolean_checked(&sphere, &block, BooleanOp::Difference, profile, &limits) {
+            Err(error) => assert!(error.to_string().contains("boolean difference returned empty despite an interior witness"), "profile {profile}: {error}"),
+            Ok(BooleanOutcome::Body(body)) => {
+                let volume = measured(&body).volume_mm3;
+                assert!((volume - 18. * PI).abs() < 1e-5, "profile {profile}: volume {volume}");
+            }
+            Ok(BooleanOutcome::Empty) => panic!("profile {profile}: nonempty hemisphere returned as empty"),
+        }
+    }
+}
+
+#[test]
+fn multi_cut_affine_sphere_difference_is_correct_or_refused() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let block = om9_kernel::transform_ops::transform_brep(&box_shape(2., 8., 8.), &placement, 0.01, &limits).unwrap();
+    let far = box_at([20., 20., 20.], 1., 1., 1.);
+    for profile in [0.5, 0.01] {
+        match editing::cut_disjoint_tools(&sphere, &[block.clone(), far.clone()], profile, &limits) {
+            Err(error) => assert!(error.to_string().contains("boolean difference returned empty despite an interior witness"), "{error}"),
+            Ok(Some(BooleanOutcome::Body(body))) => {
+                let volume = measured(&body).volume_mm3;
+                assert!((volume - 18. * PI).abs() < 1e-5, "profile {profile}: volume {volume}");
+            }
+            Ok(Some(BooleanOutcome::Empty)) => panic!("profile {profile}: nonempty hemisphere returned as empty"),
+            Ok(None) => panic!("disjoint cutters must use the fast path"),
+        }
+    }
+}
+
+#[test]
+fn boolean_checked_empty_difference_accepts_fully_contained_solids() {
+    let limits = limits();
+    let target = box_shape(2., 2., 2.);
+    let covering = box_at([-1., -1., -1.], 4., 4., 4.);
+    let same = target.clone();
+    for tool in [&covering, &same] {
+        for profile in [0.5, 0.01] {
+            assert!(matches!(editing::boolean_checked(&target, tool, BooleanOp::Difference, profile, &limits).unwrap(), BooleanOutcome::Empty));
+        }
+    }
+    let distant = box_at([20., 20., 20.], 1., 1., 1.);
+    for profile in [0.5, 0.01] {
+        assert!(matches!(editing::cut_disjoint_tools(&target, &[covering.clone(), distant.clone()], profile, &limits).unwrap(), Some(BooleanOutcome::Empty)));
+    }
+}
+
+#[test]
+fn boolean_affine_sphere_union_is_rejected_in_both_operand_orders() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let block = om9_kernel::transform_ops::transform_brep(&box_shape(2., 8., 8.), &placement, 0.01, &limits).unwrap();
+    for profile in [0.5, 0.01] {
+        for (left, right) in [(&block, &sphere), (&sphere, &block)] {
+            let error = editing::boolean_checked(left, right, BooleanOp::Union, profile, &limits).unwrap_err();
+            assert!(error.to_string().contains("small edge detected"), "profile {profile}: {error}");
+        }
+    }
+}
+
+#[test]
+fn boolean_nonuniform_scaled_box_and_offset_sphere_union() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let sphere = om9_kernel::transform_ops::transform_brep(&sphere, &Transform::translation([0.2, 0., 0.]), 0.01, &limits).unwrap();
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let block = om9_kernel::transform_ops::transform_brep(&box_shape(2., 8., 8.), &placement, 0.01, &limits).unwrap();
+    let result = editing::boolean(&sphere, &block, BooleanOp::Union, 0.01, &limits).unwrap();
+    let volume = measured(result.body().unwrap()).volume_mm3;
+    let expected = 256. + PI * 2.8_f64.powi(2) * (3. - 2.8 / 3.);
+    assert!((volume - expected).abs() < 1e-5, "volume {volume}, expected {expected}");
+}
+
+#[test]
+fn boolean_nonuniform_scaled_box_and_rotated_sphere_union() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let rotation = Transform([[0., 0., 1., 0.], [0., 1., 0., 0.], [-1., 0., 0., 0.], [0., 0., 0., 1.]]);
+    let sphere = om9_kernel::transform_ops::transform_brep(&sphere, &rotation, 0.01, &limits).unwrap();
+    assert!((measured(&sphere).volume_mm3 - 36. * PI).abs() < 1e-5);
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let block = om9_kernel::transform_ops::transform_brep(&box_shape(2., 8., 8.), &placement, 0.01, &limits).unwrap();
+    let result = editing::boolean(&sphere, &block, BooleanOp::Union, 0.01, &limits).unwrap();
+    let volume = measured(result.body().unwrap()).volume_mm3;
+    assert!((volume - (256. + 18. * PI)).abs() < 1e-5, "volume {volume}");
+}
+
+#[test]
+fn boolean_union_preserves_a_small_valid_box_protrusion() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let block = box_shape(1., 1., 1.);
+    let extension = om9_kernel::transform_ops::transform_brep(
+        &box_shape(0.002, 0.2, 0.2), &Transform::translation([0.999, 0.4, 0.4]),
+        0.001, &limits).unwrap();
+    let result = editing::boolean_checked(&block, &extension, BooleanOp::Union, 0.001, &limits).unwrap();
+    let volume = measured(result.body().unwrap()).volume_mm3;
+    let expected = 1. + 0.001 * 0.2 * 0.2;
+    assert!((volume - expected).abs() < 1e-8, "volume {volume}, expected {expected}");
+}
+
+#[test]
+fn boolean_source_geometry_is_independent_of_output_display_deflection() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let block = box_shape(10., 10., 10.);
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 6. }, 0.1, &limits).unwrap();
+    let sphere = om9_kernel::transform_ops::transform_brep(
+        &sphere, &Transform::translation([5., 5., 5.]), 0.1, &limits).unwrap();
+    for operation in [BooleanOp::Union, BooleanOp::Difference, BooleanOp::Intersection] {
+        let coarse = editing::boolean(&block, &sphere, operation, 0.5, &limits).unwrap();
+        let fine = editing::boolean(&block, &sphere, operation, 0.005, &limits).unwrap();
+        let coarse = coarse.body().expect("nonempty Boolean");
+        let fine = fine.body().expect("nonempty Boolean");
+        assert_ne!(coarse.display().triangles.len(), fine.display().triangles.len(), "{operation:?}");
+        assert_eq!(coarse.source(), fine.source(), "native source differs for {operation:?}");
+        let (a, b) = (measured(coarse), measured(fine));
+        assert_eq!((a.faces, a.edges, a.vertices, a.solids, a.shells, a.naked_edges, a.closed),
+            (b.faces, b.edges, b.vertices, b.solids, b.shells, b.naked_edges, b.closed));
+        assert!((a.volume_mm3 - b.volume_mm3).abs() < 1e-9);
+        assert!((a.area_mm2 - b.area_mm2).abs() < 1e-9);
+        assert!(a.bounds_mm.iter().zip(b.bounds_mm).all(|(x, y)| (x - y).abs() < 1e-9));
+    }
+}
+
+#[test]
+fn checked_boolean_uses_valid_source_even_when_display_is_damaged() {
+    use om9_core::geometry::Transform;
+    let limits=limits();let mut left=box_shape(10.,10.,10.);
+    let mut right=om9_kernel::transform_ops::transform_brep(&left,&Transform::translation([5.,0.,0.]),0.1,&limits).unwrap();
+    left.edit_display_for_validation(|display|display.points[0][0]=f64::NAN);
+    right.edit_display_for_validation(|display|display.triangles.clear());
+    assert!(left.validate(&limits).is_err());assert!(right.validate(&limits).is_err());
+    left.validate_source(&limits).unwrap();right.validate_source(&limits).unwrap();
+    for (op,expected) in [(BooleanOp::Union,1500.),(BooleanOp::Difference,500.),(BooleanOp::Intersection,500.)] {
+        let result=editing::boolean_checked(&left,&right,op,0.1,&limits).unwrap();
+        let volume=measured(result.body().expect("nonempty result")).volume_mm3;
+        assert!((volume-expected).abs()<1e-6,"{op:?}: {volume} != {expected}");
+    }
+    let result=editing::boolean_checked_certified_union(&left,&right,0.1,&limits).unwrap();
+    assert!((measured(result.body().unwrap()).volume_mm3-1500.).abs()<1e-6);
+}
+
+#[test]
+fn boolean_accounts_for_both_live_input_displays() {
+    use om9_core::geometry::Transform;
+    let generous = limits();
+    let left = box_shape(10., 10., 10.);
+    let right = om9_kernel::transform_ops::transform_brep(
+        &left, &Transform::translation([5., 0., 0.]), 0.1, &generous,
+    ).unwrap();
+    let live = left.storage_usage(&generous).unwrap().bytes
+        + right.storage_usage(&generous).unwrap().bytes;
+    let mut constrained = generous;
+    constrained.max_bytes = live - 1;
+    assert!(left.validate_source(&constrained).is_ok());
+    assert!(right.validate_source(&constrained).is_ok());
+    assert!(matches!(editing::boolean_checked(&left, &right, BooleanOp::Intersection, 0.1, &constrained),
+        Err(om9_kernel::creation::CreationError::Budget(_))));
+    let result = editing::boolean_checked(&left, &right, BooleanOp::Intersection, 0.1, &generous).unwrap();
+    assert!((measured(result.body().unwrap()).volume_mm3 - 500.).abs() < 1e-6);
+}
+
+#[test]
 fn grouped_mesh_snapshot_binds_faces_to_their_source_solids() {
     use om9_core::geometry::Transform;
     let limits = limits();
@@ -56,7 +572,7 @@ fn grouped_mesh_snapshot_binds_faces_to_their_source_solids() {
     assert!(topology.may_weld(0, 0, Transform::identity(), 0.0).unwrap());
     let remap = topology.topology_remap(Transform::identity(), 1e-6).unwrap();
     let mut incidence = std::collections::BTreeMap::<(u32, u32), usize>::new();
-    for [a, b, c, _] in &snapshot.display.triangles {
+    for [a, b, c, _] in &snapshot.display().triangles {
         let tri = [remap[*a as usize], remap[*b as usize], remap[*c as usize]];
         assert!(tri[0] != tri[1] && tri[1] != tri[2] && tri[0] != tri[2]);
         for (a, b) in [(tri[0], tri[1]), (tri[1], tri[2]), (tri[2], tri[0])] {
@@ -64,10 +580,10 @@ fn grouped_mesh_snapshot_binds_faces_to_their_source_solids() {
         }
     }
     assert!(incidence.values().all(|count| *count == 2), "box source edges must close after identity remap");
-    assert_eq!(owners.len(), snapshot.display.faces.len());
+    assert_eq!(owners.len(), snapshot.display().faces.len());
     assert_eq!(owners.iter().copied().collect::<std::collections::BTreeSet<_>>(), [1, 2].into_iter().collect());
-    let mut point_faces = vec![std::collections::BTreeSet::new(); snapshot.display.points.len()];
-    for [a, b, c, face] in &snapshot.display.triangles {
+    let mut point_faces = vec![std::collections::BTreeSet::new(); snapshot.display().points.len()];
+    for [a, b, c, face] in &snapshot.display().triangles {
         for point in [a, b, c] { point_faces[*point as usize].insert(*face); }
     }
     let mut edge_faces = std::collections::BTreeMap::<u32, std::collections::BTreeSet<u32>>::new();
@@ -76,8 +592,8 @@ fn grouped_mesh_snapshot_binds_faces_to_their_source_solids() {
         edge_faces.entry(binding.edge).or_default().extend(&point_faces[binding.point as usize]);
         if let Some(vertex) = binding.vertex() {
             vertex_faces.entry(vertex).or_default().extend(&point_faces[binding.point as usize]);
-            let p = snapshot.display.points[binding.point as usize];
-            let v = snapshot.display.points[snapshot.display.vertices[vertex as usize] as usize];
+            let p = snapshot.display().points[binding.point as usize];
+            let v = snapshot.display().points[snapshot.display().vertices[vertex as usize] as usize];
             assert!((0..3).map(|axis| (p[axis] - v[axis]).powi(2)).sum::<f64>().sqrt() < 1e-6);
         }
     }
@@ -90,10 +606,10 @@ fn grouped_mesh_snapshot_binds_faces_to_their_source_solids() {
     assert_eq!(vertex_faces.len(), 16, "all corners of two boxes must bind canonical vertices");
     assert!(vertex_faces.values().all(|faces| faces.len() == 3), "each box vertex must bind three adjacent faces");
     let mut ranges = std::collections::BTreeMap::<u32, (f64, f64)>::new();
-    for [a, b, c, face] in &snapshot.display.triangles {
+    for [a, b, c, face] in &snapshot.display().triangles {
         let range = ranges.entry(owners[*face as usize]).or_insert((f64::INFINITY, f64::NEG_INFINITY));
         for point in [a, b, c] {
-            let x = snapshot.display.points[*point as usize][0];
+            let x = snapshot.display().points[*point as usize][0];
             range.0 = range.0.min(x);
             range.1 = range.1.max(x);
         }
@@ -115,12 +631,12 @@ fn sphere_snapshot_reports_edge_bindings_at_periodic_seams() {
     let (first, second) = bindings.iter().enumerate().find_map(|(i, a)| {
         bindings.iter().enumerate().skip(i + 1).find_map(|(j, b)| {
             (a.point != b.point && binding_set.same_source_site(i, j) == Some(true)
-                && snapshot.display.points[a.point as usize] == snapshot.display.points[b.point as usize]).then_some((i, j))
+                && snapshot.display().points[a.point as usize] == snapshot.display().points[b.point as usize]).then_some((i, j))
         })
     }).expect("sphere fixture must contain coincident nodes for one source site");
     assert!(topology.may_weld(first, second, om9_core::geometry::Transform::identity(), 0.).unwrap());
-    let mut node_edges = vec![std::collections::BTreeSet::<u32>::new(); snapshot.display.points.len()];
-    let mut node_parameters = vec![Vec::<(u32, f64)>::new(); snapshot.display.points.len()];
+    let mut node_edges = vec![std::collections::BTreeSet::<u32>::new(); snapshot.display().points.len()];
+    let mut node_parameters = vec![Vec::<(u32, f64)>::new(); snapshot.display().points.len()];
     let missing_parameters = bindings.iter().filter(|binding| binding.parameter().is_none()).count();
     let vertex_bindings = bindings.iter().filter(|binding| binding.vertex().is_some()).count();
     eprintln!("sphere edge bindings without parameters: {missing_parameters}/{}", bindings.len());
@@ -130,7 +646,7 @@ fn sphere_snapshot_reports_edge_bindings_at_periodic_seams() {
         if let Some(parameter) = binding.parameter() { node_parameters[binding.point as usize].push((binding.edge, parameter)); }
     }
     let mut used = std::collections::BTreeSet::new();
-    for [a, b, c, _] in &snapshot.display.triangles { used.extend([*a as usize, *b as usize, *c as usize]); }
+    for [a, b, c, _] in &snapshot.display().triangles { used.extend([*a as usize, *b as usize, *c as usize]); }
     let points = used.into_iter().collect::<Vec<_>>();
     let remap = topology.topology_remap(om9_core::geometry::Transform::identity(), 1e-6).unwrap();
     let remaining = points.iter().map(|point| remap[*point]).collect::<std::collections::BTreeSet<_>>().len();
@@ -141,7 +657,7 @@ fn sphere_snapshot_reports_edge_bindings_at_periodic_seams() {
     let mut no_same_parameter = 0;
     for (i, &a) in points.iter().enumerate() {
         for &b in &points[i + 1..] {
-            let p = snapshot.display.points[a]; let q = snapshot.display.points[b];
+            let p = snapshot.display().points[a]; let q = snapshot.display().points[b];
             if (0..3).map(|axis| (p[axis]-q[axis]).powi(2)).sum::<f64>().sqrt() < 1e-9 {
                 if node_edges[a].is_disjoint(&node_edges[b]) { unbound += 1; } else {
                     bound += 1;
@@ -435,8 +951,38 @@ fn boss_cylindrical_boundary_kernel_construction_uses_exact_carrier() {
     assert!(close(measured(&carrier).volume_mm3,300.*PI,1e-3));
     assert!(editing::boss_cylinder_carrier(&rect_face(4.,4.),deflection(),&limits()).is_err());
     let translated=om9_kernel::transform_ops::transform_brep(&boundary,&om9_core::geometry::Transform::translation([10.,20.,30.]),deflection(),&limits()).unwrap();
-    // Current general affine BRep transform converts the cylinder to a spline surface.
-    assert!(editing::boss_cylinder_carrier(&translated,deflection(),&limits()).is_err());
+    // Translation preserves the exact cylindrical surface and its carrier.
+    let (translated_carrier, translated_axis) = editing::boss_cylinder_carrier(&translated,deflection(),&limits()).unwrap();
+    assert!(close(translated_axis[6], 5., 1e-10));
+    assert!(close(measured(&translated_carrier).volume_mm3, measured(&carrier).volume_mm3, 1e-6));
+    let expected_bounds = om9_kernel::brep::world_bounds(&carrier, &om9_core::geometry::Transform::translation([10.,20.,30.]), &limits()).unwrap();
+    let actual_bounds = om9_kernel::brep::world_bounds(&translated_carrier, &om9_core::geometry::Transform::identity(), &limits()).unwrap();
+    for (actual, expected) in actual_bounds.into_iter().zip(expected_bounds) { assert!(close(actual, expected, 1e-6)); }
+    let rotation = om9_core::geometry::Transform([[0.,0.,1.,0.],[0.,1.,0.,0.],[-1.,0.,0.,0.],[0.,0.,0.,1.]]);
+    let rotated = om9_kernel::transform_ops::transform_brep(&boundary, &rotation, deflection(), &limits()).unwrap();
+    let (rotated_carrier, rotated_axis) = editing::boss_cylinder_carrier(&rotated,deflection(),&limits()).unwrap();
+    assert!(close(rotated_axis[6], 5., 1e-10));
+    assert!(close(measured(&rotated_carrier).volume_mm3, measured(&carrier).volume_mm3, 1e-6));
+    let expected_bounds = om9_kernel::brep::world_bounds(&carrier, &rotation, &limits()).unwrap();
+    let actual_bounds = om9_kernel::brep::world_bounds(&rotated_carrier, &om9_core::geometry::Transform::identity(), &limits()).unwrap();
+    for (actual, expected) in actual_bounds.into_iter().zip(expected_bounds) { assert!(close(actual, expected, 1e-6)); }
+    let computed_rotation = om9_kernel::transform_ops::rotation([0.; 3], [0., 1., 0.], std::f64::consts::FRAC_PI_2).unwrap();
+    let rotated = om9_kernel::transform_ops::transform_brep(&boundary, &computed_rotation, deflection(), &limits()).unwrap();
+    let (computed_carrier, computed_axis) = editing::boss_cylinder_carrier(&rotated,deflection(),&limits()).unwrap();
+    assert!(close(computed_axis[6], 5., 1e-10));
+    assert!(close(measured(&computed_carrier).volume_mm3, measured(&carrier).volume_mm3, 1e-6));
+    let rotation_45 = om9_kernel::transform_ops::rotation([0.; 3], [0., 1., 0.], std::f64::consts::FRAC_PI_4).unwrap();
+    let rotated_45 = om9_kernel::transform_ops::transform_brep(&boundary, &rotation_45, deflection(), &limits()).unwrap();
+    let (carrier_45, axis_45) = editing::boss_cylinder_carrier(&rotated_45,deflection(),&limits()).unwrap();
+    assert!(close(axis_45[6], 5., 1e-10));
+    let unit = std::f64::consts::FRAC_1_SQRT_2;
+    assert!(close(axis_45[3].abs(), unit, 1e-10) && close(axis_45[5].abs(), unit, 1e-10));
+    // The carrier is deliberately expanded from a world AABB, so its length
+    // can exceed that of the unrotated carrier for an oblique cylinder.
+    assert!(measured(&carrier_45).volume_mm3 >= measured(&carrier).volume_mm3);
+    let near_rigid_shear = om9_core::geometry::Transform([[1., 1e-13, 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]]);
+    let sheared = om9_kernel::transform_ops::transform_brep(&boundary, &near_rigid_shear, deflection(), &limits()).unwrap();
+    assert!(editing::boss_cylinder_carrier(&sheared,deflection(),&limits()).is_err(), "near-rigid shear must not be rounded into a rotation");
     let profile=Profile::new(vec![[-1.,0.,2.],[1.,0.,2.],[1.,0.,4.],[-1.,0.,4.]]).unwrap();
     let tool=creation::extrude(&profile,[0.,10.,0.],true,deflection(),&limits()).unwrap();
     let wall=creation::extrude(&profile,[0.,10.,0.],false,deflection(),&limits()).unwrap();
@@ -728,7 +1274,7 @@ fn boss_rational_ellipse_uses_exact_closed_curve() {
     let face = om9_kernel::extrusion::planar_face(&ellipse, deflection(), &limits()).unwrap();
     assert!(close(measured(&face).area_mm2, 6.0*PI, 1e-6));
     let wall = om9_kernel::extrusion::shell(&ellipse, [0.0,0.0,5.0], deflection(), &limits()).unwrap();
-    for p in &wall.display.points {
+    for p in &wall.display().points {
         let on_ellipse = ((p[0]-6.0)/2.0).powi(2) + ((p[1]-6.0)/3.0).powi(2);
         assert!((on_ellipse-1.0).abs() < 1e-7, "{p:?}");
     }
@@ -994,6 +1540,45 @@ fn solid_split_sets_applies_each_cutter_to_every_result() {
 }
 
 #[test]
+fn admitted_split_sets_partition_and_deduplicate_with_cancellation() {
+    use om9_core::{Error, transaction::Cancellation};
+    let a = box_shape(10., 10., 10.);
+    let b = box_at([5., 0., 0.], 10., 10., 10.);
+    let targets = [a.clone(), b.clone(), a.clone()];
+    let cutters = [b.clone()];
+    let mut max_live = 0;
+    let pieces = editing::split_solid_sets_cancellable_admitted(&targets, &cutters, deflection(), &limits(),
+        &Cancellation::default(), |live, pending| {
+            max_live = max_live.max(live.checked_add(pending).unwrap()); Ok(())
+        }).unwrap();
+    assert!(max_live > 0);
+    assert_eq!(pieces.len(), 3);
+    let mut starts: Vec<_> = pieces.iter().map(|piece| {
+        let m = measured(piece); assert!(m.closed && m.solids == 1 && close(m.volume_mm3, 500., 1e-6));
+        m.bounds_mm[0]
+    }).collect();
+    starts.sort_by(f64::total_cmp);
+    for (actual, expected) in starts.into_iter().zip([0., 5., 10.]) { assert!(close(actual, expected, 1e-6)); }
+    let mut capped = limits(); capped.max_outputs = 2;
+    assert!(matches!(editing::split_solid_sets_cancellable_admitted(&targets, &cutters, deflection(), &capped,
+        &Cancellation::default(), |_, _| Ok(())), Err(Error::Budget(_))));
+    let cancel = Cancellation::default(); let mut calls = 0;
+    assert!(matches!(editing::split_solid_sets_cancellable_admitted(&targets, &cutters, deflection(), &limits(),
+        &cancel, |_, _| { calls += 1; if calls == 5 { cancel.cancel(); Err(Error::Canceled) } else { Ok(()) } }), Err(Error::Canceled)));
+    assert_eq!(calls, 5);
+    assert!(matches!(editing::split_solid_sets_cancellable_admitted(&targets, &cutters, deflection(), &limits(),
+        &Cancellation::default(), |_, _| Err(Error::Budget("fixture"))), Err(Error::Budget(_))));
+    let face = rect_face(10., 10.);
+    assert!(matches!(editing::split_solid_sets_cancellable_admitted(&[face.clone()], &[face], deflection(), &limits(),
+        &Cancellation::default(), |_, _| Ok(())), Err(Error::Invalid(_))));
+    let tools = [box_at([2., 0., 0.], 2., 10., 10.), box_at([6., 0., 0.], 2., 10., 10.)];
+    let pieces = editing::split_solid_sets_cancellable_admitted(&[a], &tools, deflection(), &limits(),
+        &Cancellation::default(), |_, _| Ok(())).unwrap();
+    assert_eq!(pieces.len(), 5);
+    assert!(pieces.iter().all(|piece| close(measured(piece).volume_mm3, 200., 1e-6)));
+}
+
+#[test]
 fn create_solid_regions_from_intersecting_faces_and_reject_open_set() {
     let boxes = [
         box_shape(10.0, 10.0, 10.0),
@@ -1038,7 +1623,7 @@ fn measured(brep: &Brep) -> creation::Measures {
 }
 
 fn vertical_edge(brep: &Brep) -> usize {
-    for index in 0..brep.display.edges.len() {
+    for index in 0..brep.display().edges.len() {
         if let Ok((a, b)) = editing::edge_endpoints(brep, index) {
             let dx = (a[0] - b[0]).abs();
             let dy = (a[1] - b[1]).abs();
@@ -1058,12 +1643,12 @@ fn face_area(brep: &Brep, index: usize) -> f64 {
 
 fn face_min_z(brep: &Brep, index: usize) -> f64 {
     let mut min_z = f64::INFINITY;
-    for [a, b, c, face] in &brep.display.triangles {
+    for [a, b, c, face] in &brep.display().triangles {
         if *face as usize != index {
             continue;
         }
         for point in [a, b, c] {
-            min_z = min_z.min(brep.display.points[*point as usize][2]);
+            min_z = min_z.min(brep.display().points[*point as usize][2]);
         }
     }
     min_z
@@ -1071,12 +1656,12 @@ fn face_min_z(brep: &Brep, index: usize) -> f64 {
 
 fn face_max_z(brep: &Brep, index: usize) -> f64 {
     let mut max_z = f64::NEG_INFINITY;
-    for [a, b, c, face] in &brep.display.triangles {
+    for [a, b, c, face] in &brep.display().triangles {
         if *face as usize != index {
             continue;
         }
         for point in [a, b, c] {
-            max_z = max_z.max(brep.display.points[*point as usize][2]);
+            max_z = max_z.max(brep.display().points[*point as usize][2]);
         }
     }
     max_z
@@ -1084,12 +1669,12 @@ fn face_max_z(brep: &Brep, index: usize) -> f64 {
 
 fn top_face_index(brep: &Brep) -> usize {
     let mut global_max = f64::NEG_INFINITY;
-    for index in 0..brep.display.faces.len() {
+    for index in 0..brep.display().faces.len() {
         global_max = global_max.max(face_max_z(brep, index));
     }
     // The top face is the horizontal face whose every vertex is at the global maximum z; a side
     // face also reaches that z but its minimum z is lower.
-    for index in 0..brep.display.faces.len() {
+    for index in 0..brep.display().faces.len() {
         if close(face_max_z(brep, index), global_max, 1e-9)
             && close(face_min_z(brep, index), global_max, 1e-9)
         {
@@ -1194,6 +1779,27 @@ fn m03_01_10_002() {
         editing::boolean(&a, &tampered, BooleanOp::Difference, deflection(), &limits),
         Err(EditingError::Invalid(_))
     ));
+}
+
+#[test]
+fn multi_cut_baked_affine_target_is_correct_or_refused() {
+    use om9_core::geometry::Transform;
+    let limits = limits();
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let target = om9_kernel::transform_ops::transform_brep(&box_shape(2., 8., 8.), &placement, 0.01, &limits).unwrap();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let far_tool = box_at([20., 20., 20.], 1., 1., 1.);
+    for profile in [0.5, 0.01] {
+        match editing::cut_disjoint_tools(&target, &[sphere.clone(), far_tool.clone()], profile, &limits) {
+            Err(error) => assert!(error.to_string().contains("invalid BRep source shape"), "profile {profile}: {error}"),
+            Ok(Some(result)) => {
+                let volume = measured(result.body().expect("nonempty result")).volume_mm3;
+                let expected = 256. - 18. * PI;
+                assert!((volume - expected).abs() < 1e-5, "profile {profile}: {volume}, expected {expected}");
+            }
+            Ok(None) => panic!("disjoint tools should use the fast path"),
+        }
+    }
 }
 
 #[test]
@@ -1585,7 +2191,7 @@ fn cap_planar_multiple_loops_and_circular_boundary() {
     let boxed = box_shape(10.0, 10.0, 10.0);
     let open_top =
         editing::remove_face(&boxed, top_face_index(&boxed), deflection(), &limits).unwrap();
-    let bottom = (0..open_top.display.faces.len())
+    let bottom = (0..open_top.display().faces.len())
         .find(|&i| {
             close(face_min_z(&open_top, i), 0.0, 1e-9) && close(face_max_z(&open_top, i), 0.0, 1e-9)
         })
@@ -1699,24 +2305,24 @@ fn cap_planar_closes_planar_loop_on_partially_nonplanar_shell() {
     let mut open = body;
     for z in [10.0, 5.0] {
         loop {
-            let face = (0..open.display.faces.len()).find(|&i| {
+            let face = (0..open.display().faces.len()).find(|&i| {
                 close(face_min_z(&open, i), z, 1e-9) && close(face_max_z(&open, i), z, 1e-9)
             });
             let Some(face) = face else { break };
             open = editing::remove_face(&open, face, deflection(), &limits).unwrap();
         }
     }
-    let step = (0..open.display.faces.len())
+    let step = (0..open.display().faces.len())
         .find(|&i| {
             let vertices: Vec<_> = open
-                .display
+                .display()
                 .triangles
                 .iter()
                 .filter(|triangle| triangle[3] as usize == i)
                 .flat_map(|triangle| {
                     triangle[..3]
                         .iter()
-                        .map(|index| open.display.points[*index as usize])
+                        .map(|index| open.display().points[*index as usize])
                 })
                 .collect();
             !vertices.is_empty()
@@ -1727,7 +2333,7 @@ fn cap_planar_closes_planar_loop_on_partially_nonplanar_shell() {
         .expect("vertical step");
     open = editing::remove_face(&open, step, deflection(), &limits).unwrap();
     loop {
-        let face = (0..open.display.faces.len()).find(|&i| {
+        let face = (0..open.display().faces.len()).find(|&i| {
             close(face_min_z(&open, i), 0.0, 1e-9) && close(face_max_z(&open, i), 0.0, 1e-9)
         });
         let Some(face) = face else { break };
@@ -1793,7 +2399,7 @@ fn fillet_tangent_split_edge_fixture() {
     ]).unwrap();
     let body = creation::extrude(&profile, [0.0, 0.0, 10.0], true, deflection(), &limits()).unwrap();
     let mut split = Vec::new();
-    for index in 0..body.display.edges.len() {
+    for index in 0..body.display().edges.len() {
         if let Ok((a, b)) = editing::oriented_edge_endpoints(&body, index, &limits()) {
             if close(a[1], 0.0, 1e-6) && close(b[1], 0.0, 1e-6)
                 && close(a[2], 10.0, 1e-6) && close(b[2], 10.0, 1e-6)
@@ -1806,7 +2412,7 @@ fn fillet_tangent_split_edge_fixture() {
     let side = if close(split[0].1[0], 5.0, 1e-6) { 0 } else { 1 };
     let mask = editing::fillet_shared_endpoint(&body, split[0].0, side, split[1].0, &limits()).unwrap();
     assert_eq!(mask, if close(split[1].1[0], 5.0, 1e-6) { 1 } else { 2 });
-    let other = (0..body.display.edges.len()).find(|&i| {
+    let other = (0..body.display().edges.len()).find(|&i| {
         if i == split[0].0 || i == split[1].0 { return false; }
         let Ok((a, b)) = editing::oriented_edge_endpoints(&body, i, &limits()) else { return false; };
         let outer = if side == 0 { split[0].2 } else { split[0].1 };
@@ -1850,7 +2456,7 @@ fn fillet_tangent_split_edge_fixture() {
 #[test]
 fn fillet_independent_edges_use_distinct_radii() {
     let boxed = box_shape(10.0, 10.0, 10.0);
-    let vertical: Vec<_> = (0..boxed.display.edges.len())
+    let vertical: Vec<_> = (0..boxed.display().edges.len())
         .filter(|&index| {
             editing::edge_endpoints(&boxed, index).is_ok_and(|(a, b)| {
                 (a[0] - b[0]).abs() < 1e-6
@@ -1909,7 +2515,7 @@ fn fillet_open_joined_shell_internal_edge() {
         "{} != {expected_area}",
         after.area_mm2
     );
-    let boundary = (0..open.display.edges.len())
+    let boundary = (0..open.display().edges.len())
         .find(|&index| {
             editing::edge_endpoints(&open, index)
                 .is_ok_and(|(a, b)| close(a[2], 10.0, 1e-6) && close(b[2], 10.0, 1e-6))
@@ -1929,7 +2535,7 @@ fn fillet_endpoint_query_distinguishes_closed_edges_from_errors() {
     ).unwrap();
     let mut closed = Vec::new();
     let mut open = 0;
-    for index in 0..cylinder.display.edges.len() {
+    for index in 0..cylinder.display().edges.len() {
         match editing::oriented_edge_endpoints_or_closed(&cylinder, index, &limits()).unwrap() {
             Some((a, b)) => { assert_ne!(a, b); open += 1; }
             None => closed.push(index),
@@ -2095,7 +2701,7 @@ fn m03_01_10_006() {
 fn shell_removes_two_opposite_faces_with_inward_walls() {
     let solid = box_shape(10.0, 10.0, 10.0);
     let top = top_face_index(&solid);
-    let bottom = (0..solid.display.faces.len()).find(|&i|
+    let bottom = (0..solid.display().faces.len()).find(|&i|
         close(face_min_z(&solid, i), 0.0, 1e-9) && close(face_max_z(&solid, i), 0.0, 1e-9)
     ).unwrap();
     let result = editing::shell_faces(&solid, &[top, bottom], 1.0, deflection(), &limits()).unwrap();
@@ -2107,7 +2713,7 @@ fn shell_removes_two_opposite_faces_with_inward_walls() {
     assert!(editing::shell_faces(&solid, &[], 1.0, deflection(), &limits()).is_err());
     assert!(editing::shell_faces(&solid, &[top, top], 1.0, deflection(), &limits()).is_err());
     assert!(editing::shell_faces(&solid, &[usize::MAX], 1.0, deflection(), &limits()).is_err());
-    let all: Vec<_> = (0..solid.display.faces.len()).collect();
+    let all: Vec<_> = (0..solid.display().faces.len()).collect();
     assert!(editing::shell_faces(&solid, &all, 1.0, deflection(), &limits()).is_err());
     assert!(editing::shell_faces(&solid, &[top], 0.0, deflection(), &limits()).is_err());
     let open = editing::remove_face(&solid, top, deflection(), &limits()).unwrap();
@@ -2164,14 +2770,14 @@ fn m03_01_10_007() {
 fn straight_edge_endpoints_reject_curved_topology() {
     let limits = limits();
     let boxed = box_shape(10.0, 20.0, 30.0);
-    for index in 0..boxed.display.edges.len() {
+    for index in 0..boxed.display().edges.len() {
         let (a, b) = editing::straight_edge_endpoints(&boxed, index, &limits).unwrap();
         assert!(a != b);
     }
     let cylinder = creation::primitive(creation::Primitive::Cylinder { radius_mm: 3.0, height_mm: 5.0 }, deflection(), &limits).unwrap();
     let mut straight = 0;
     let mut curved = 0;
-    for index in 0..cylinder.display.edges.len() {
+    for index in 0..cylinder.display().edges.len() {
         if editing::straight_edge_endpoints(&cylinder, index, &limits).is_ok() { straight += 1; } else { curved += 1; }
     }
     assert!(straight > 0 && curved >= 2, "straight={straight}, curved={curved}");
@@ -2239,7 +2845,7 @@ fn m03_01_10_009() {
     assert_eq!(closed.naked_edges, 0);
     assert_eq!(closed.solids, 1);
     assert_eq!(closed.faces, 6);
-    assert_eq!(closed.source_sha256, boxed.display.source_sha256);
+    assert_eq!(closed.source_sha256, boxed.display().source_sha256);
     assert!(closed.is_solid());
 
     let top = top_face_index(&boxed);
