@@ -244,6 +244,14 @@ unsafe extern "C" {
         tolerance: f64, segment_tolerance: f64, max_nodes: usize, masks: *mut u8, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_circular_edge(source: *const u8, length: usize, edge: c_int,
         output: *mut f64, message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_circular_edge_centers(source: *const u8, length: usize, max_edges: usize, max_outputs: usize,
+        checkpoint: unsafe extern "C" fn(*mut c_void) -> c_int,
+        sink: unsafe extern "C" fn(*mut c_void, *const f64) -> c_int,
+        context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_source_vertices(source: *const u8, length: usize, max_nodes: usize, max_outputs: usize,
+        checkpoint: unsafe extern "C" fn(*mut c_void) -> c_int,
+        sink: unsafe extern "C" fn(*mut c_void, *const f64) -> c_int,
+        context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_fillet_project_edge(source: *const u8, length: usize, edge: c_int,
         point: *const f64, segment: *const f64, tolerance: f64, segment_tolerance: f64, max_nodes: usize,
         output: *mut f64, message: *mut c_char, capacity: c_int) -> c_int;
@@ -434,6 +442,89 @@ pub fn all_edges_from_source_admitted(source:&str, limits:&Limits,
     edge_curves_raw_admitted(source,None,&[],None,None,&mut [0.;3],None,1,None,limits,&mut admit)
 }
 
+/// Like all-edge extraction, but an empty nondegenerate edge set is valid for
+/// snapping because topological vertices are captured independently.
+pub fn snap_edges_from_source_admitted(source: &str, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Vec<om9_core::geometry::Curve>, EditingError> {
+    if source.is_empty() || source.len() as u64 > limits.max_bytes {
+        return Err(EditingError::Invalid("edge source".into()));
+    }
+    edge_curves_raw_admitted(source, None, &[], None, None, &mut [0.; 3], None, 5, None, limits, &mut admit)
+}
+
+/// Capture centers from analytic circular source edges. The caller admits the
+/// retained source, the returned vector and transient native work separately.
+pub fn circular_edge_centers_from_source_admitted(source: &str, limits: &Limits,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Vec<Point3>, EditingError> {
+    source_points_from_source_admitted(source, limits, true, admit)
+}
+
+/// Capture canonical topological vertices, including vertices on degenerate edges.
+pub fn vertices_from_source_admitted(source: &str, limits: &Limits,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Vec<Point3>, EditingError> {
+    source_points_from_source_admitted(source, limits, false, admit)
+}
+
+fn source_points_from_source_admitted(source: &str, limits: &Limits, circular: bool,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Vec<Point3>, EditingError> {
+    if source.is_empty() || source.len() as u64 > limits.max_bytes {
+        return Err(EditingError::Invalid("edge center source".into()));
+    }
+    struct Capture<'a> {
+        limits: &'a Limits,
+        centers: Vec<Point3>,
+        error: Option<EditingError>,
+        admit: &'a mut dyn FnMut(u64, u64) -> om9_core::Result<()>,
+    }
+    unsafe extern "C" fn checkpoint(context: *mut c_void) -> c_int {
+        let capture = unsafe { &mut *context.cast::<Capture<'_>>() };
+        let bytes = (capture.centers.capacity() as u64).saturating_mul(std::mem::size_of::<Point3>() as u64);
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| (capture.admit)(bytes, 0)))
+            .unwrap_or_else(|_| Err(om9_core::Error::Invalid("edge center checkpoint panic")));
+        match result { Ok(()) => 0, Err(error) => { capture.error = Some(EditingError::Budget(error.to_string())); 1 } }
+    }
+    unsafe extern "C" fn sink(context: *mut c_void, xyz: *const f64) -> c_int {
+        let capture = unsafe { &mut *context.cast::<Capture<'_>>() };
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<(), EditingError> {
+            if xyz.is_null() || capture.centers.len() as u64 >= capture.limits.max_outputs {
+                return Err(EditingError::Budget("edge center output".into()));
+            }
+            let values = unsafe { std::slice::from_raw_parts(xyz, 3) };
+            if values.iter().any(|value| !value.is_finite()) { return Err(EditingError::Invalid("edge center output".into())); }
+            let live = (capture.centers.capacity() as u64).saturating_mul(std::mem::size_of::<Point3>() as u64);
+            let pending = (capture.centers.len() as u64 + 1).checked_mul(2 * std::mem::size_of::<Point3>() as u64)
+                .ok_or_else(|| EditingError::Budget("edge center allocation".into()))?;
+            if live.checked_add(pending).is_none_or(|total| total > capture.limits.max_bytes) {
+                return Err(EditingError::Budget("edge center allocation".into()));
+            }
+            (capture.admit)(live, pending).map_err(|error| EditingError::Budget(error.to_string()))?;
+            capture.centers.try_reserve(1).map_err(|_| EditingError::Budget("edge center allocation".into()))?;
+            let actual = (capture.centers.capacity() as u64).saturating_mul(std::mem::size_of::<Point3>() as u64);
+            (capture.admit)(actual, 0).map_err(|error| EditingError::Budget(error.to_string()))?;
+            capture.centers.push([values[0], values[1], values[2]]);
+            Ok(())
+        })).unwrap_or_else(|_| Err(EditingError::Invalid("edge center callback panic".into())));
+        match result { Ok(()) => 0, Err(error) => { capture.error = Some(error); 1 } }
+    }
+    let mut capture = Capture { limits, centers: Vec::new(), error: None, admit: &mut admit };
+    let mut message = [0 as c_char; 512];
+    // SAFETY: callback context, source and all buffers remain valid until native work completes.
+    let status = unsafe {
+        let context = (&mut capture as *mut Capture<'_>).cast();
+        let nodes = usize::try_from(limits.max_nodes).unwrap_or(usize::MAX);
+        let outputs = usize::try_from(limits.max_outputs).unwrap_or(usize::MAX);
+        if circular { om9_occt_circular_edge_centers(source.as_ptr(), source.len(), nodes, outputs,
+            checkpoint, sink, context, message.as_mut_ptr(), 512) }
+        else { om9_occt_source_vertices(source.as_ptr(), source.len(), nodes, outputs,
+            checkpoint, sink, context, message.as_mut_ptr(), 512) }
+    };
+    if let Some(error) = capture.error { return Err(error); }
+    if status != 0 {
+        return Err(EditingError::Kernel(unsafe { std::ffi::CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned()));
+    }
+    Ok(capture.centers)
+}
+
 /// Extract edges belonging to exactly one source face without building a display mesh.
 pub fn boundary_edges_from_source_admitted(source:&str, limits:&Limits,
     mut admit:impl FnMut(u64,u64)->om9_core::Result<()>) -> Result<Vec<om9_core::geometry::Curve>,EditingError> {
@@ -490,6 +581,13 @@ pub fn ray_face_isocurve_hit_from_source(source:&str,origin:Point3,direction:Poi
 }
 
 pub fn ray_face_isocurve_hit_with_witness_from_source(source:&str,ray:IsocurveFaceRay,limits:&Limits)->Result<([[f64;2];2],Point3),EditingError> {
+    try_ray_face_isocurve_hit_with_witness_from_source(source, ray, limits)?
+        .ok_or_else(|| EditingError::Invalid("isocurve ray has no unambiguous matching face".into()))
+}
+
+/// Returns `None` only when there is no matching source face or ray hit.
+/// Ambiguity, mismatches, kernel, admission and invalid-input failures remain errors.
+pub fn try_ray_face_isocurve_hit_with_witness_from_source(source:&str,ray:IsocurveFaceRay,limits:&Limits)->Result<Option<([[f64;2];2],Point3)>,EditingError> {
     let IsocurveFaceRay {origin,direction,reference,tolerance,max_distance,witness}=ray;
     if source.is_empty() || source.len() as u64>limits.max_bytes ||
         !origin.iter().chain(direction.iter()).chain(reference.iter()).all(|v|v.is_finite()) ||
@@ -505,9 +603,10 @@ pub fn ray_face_isocurve_hit_with_witness_from_source(source:&str,ray:IsocurveFa
         usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),origin.as_ptr(),direction.as_ptr(),reference.as_ptr(),
         tolerance,max_distance,witness.as_ref().map_or(std::ptr::null(),|w|w.triangle.as_ptr().cast()),
         witness.map_or(0.,|w|w.deflection),witness.map_or(0.,|w|w.tolerance),bounds.as_mut_ptr(),resolved.as_mut_ptr(),message.as_mut_ptr(),message.len() as c_int)};
+    if status==3 {return Ok(None);}
     if status!=0 {return Err(EditingError::Kernel(unsafe {std::ffi::CStr::from_ptr(message.as_ptr())}.to_string_lossy().into_owned()));}
     if !resolved.iter().all(|v|v.is_finite()) {return Err(EditingError::Invalid("isocurve ray hit".into()));}
-    Ok(([[bounds[0],bounds[1]],[bounds[2],bounds[3]]],resolved))
+    Ok(Some(([[bounds[0],bounds[1]],[bounds[2],bounds[3]]],resolved)))
 }
 
 /// Clip an isoparametric curve against one source face, including its holes.
@@ -825,7 +924,7 @@ fn edge_curves_raw_admitted(source:&str, edge_count:Option<usize>, indices:&[usi
         checkpoint,prepare,receive,(&mut capture as *mut Capture<'_>).cast(),message.as_mut_ptr(),message.len() as c_int)
     } } else if source_mode != 0 { unsafe { om9_occt_all_edges_nurbs(source.as_ptr(), source.len(),
         usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
-        i32::from(source_mode == 2),
+        match source_mode { 2 => 1, 5 => 2, _ => 0 },
         usize::try_from(limits.max_points).unwrap_or(usize::MAX), usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
         usize::try_from(limits.max_bytes / 2).unwrap_or(usize::MAX), i32::try_from(limits.max_degree).unwrap_or(i32::MAX),
         prepare, receive, (&mut capture as *mut Capture<'_>).cast(), message.as_mut_ptr(), message.len() as c_int) }

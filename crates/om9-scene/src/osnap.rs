@@ -93,10 +93,12 @@ impl SnapKind {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SnapSettings {
     /// Bit set from [`SnapKind::bit`].
     pub enabled: u16,
+    /// Suspend persistent object snaps without changing the selected kinds.
+    pub master_enabled: bool,
     pub radius_px: f64,
     /// A one-shot kind restricts exactly the next pick; `accept` clears it.
     pub one_shot: Option<SnapKind>,
@@ -106,6 +108,7 @@ impl Default for SnapSettings {
     fn default() -> Self {
         Self {
             enabled: SnapKind::ALL.iter().fold(0, |bits, kind| bits | kind.bit()),
+            master_enabled: true,
             radius_px: 8.0,
             one_shot: None,
         }
@@ -123,6 +126,9 @@ impl SnapSettings {
     pub fn is_enabled(self, kind: SnapKind) -> bool {
         self.enabled & kind.bit() != 0
     }
+    pub fn is_effective(self, kind: SnapKind) -> bool {
+        self.one_shot.map_or(self.master_enabled && self.is_enabled(kind), |one_shot| one_shot == kind)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -134,9 +140,227 @@ pub struct SnapCandidate {
     pub distance_px: f64,
     pub normal: Option<Point3>,
     pub parameter: Option<f64>,
+    /// Source identity for a point/curve candidate, bound to one scene publication.
+    pub source: Option<SnapSource>,
+    /// Second source for an intersection; absent for a single-source candidate.
+    pub second_source: Option<SnapSource>,
     /// Source of a B-rep surface candidate. Its point and normal are display-mesh
     /// approximations until an owning kernel verifies the same source and face.
     pub surface_source: Option<SurfaceCandidateSource>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct SnapSource {
+    pub root: ObjectId,
+    pub path: Vec<ObjectId>,
+    pub leaf: ObjectId,
+    pub leaf_generation: u64,
+    pub leaf_geometry_revision: u64,
+    pub stamp: SourceStamp,
+    pub scene_epoch: u64,
+    pub scene_publication: uuid::Uuid,
+}
+
+impl SnapSource {
+    pub fn validate(&self, scene: &Scene) -> Result<()> {
+        if scene.epoch != self.scene_epoch || scene.publication_id() != self.scene_publication
+            || scene.document.resolve(&self.stamp).is_err() {
+            return Err(Error::Stale("snap source publication"));
+        }
+        if !scene.objects.iter().any(|object| object.root == self.root && object.path == self.path
+            && object.leaf == self.leaf && object.source == self.stamp
+            && object.leaf_generation == self.leaf_generation && object.leaf_geometry_revision == self.leaf_geometry_revision
+            && object.visible && (object.selectable || object.reference_snappable)) {
+            return Err(Error::Stale("snap source instance"));
+        }
+        Ok(())
+    }
+}
+
+fn snap_source(scene: &Scene, object: &crate::scene::SceneObject) -> SnapSource {
+    SnapSource { root: object.root, path: object.path.clone(), leaf: object.leaf,
+        leaf_generation: object.leaf_generation, leaf_geometry_revision: object.leaf_geometry_revision,
+        stamp: object.source, scene_epoch: scene.epoch, scene_publication: scene.publication_id() }
+}
+
+/// Bind a scene occurrence to source-curve work retained outside the scene.
+pub fn occurrence_source(scene: &Scene, index: usize) -> Result<SnapSource> {
+    let object = scene.objects.get(index).ok_or(Error::Invalid("snap occurrence index"))?;
+    let source = snap_source(scene, object);
+    source.validate(scene)?;
+    Ok(source)
+}
+
+pub fn contains_nurbs(curve: &Curve) -> bool {
+    match curve {
+        Curve::Nurbs(_) => true,
+        Curve::Polycurve { segments, .. } => segments.iter().any(contains_nurbs),
+        _ => false,
+    }
+}
+
+/// Whether a source contains a circular segment eligible for deferred midpoint work.
+pub fn contains_circle(curve: &Curve) -> bool {
+    match curve {
+        Curve::Circle { .. } => true,
+        Curve::Polycurve { segments, .. } => segments.iter().any(contains_circle),
+        _ => false,
+    }
+}
+
+/// Evaluate extracted source curves using the ordinary object-snap solver.
+/// The caller must validate `source` against the current scene before using the
+/// returned candidates. Intersections between sources are handled separately.
+#[allow(clippy::too_many_arguments)]
+pub fn source_curve_candidates(
+    curves: &[Curve], source: &SnapSource, transform: Transform, camera: &Camera,
+    viewport: Viewport, cursor: [f64; 2], mut settings: SnapSettings, from: Option<Point3>,
+    limits: &om9_core::budget::Limits, cplane: CPlane, tolerance: f64,
+    canceled: impl Fn() -> bool,
+) -> Result<Vec<SnapCandidate>> {
+    if !settings.radius_px.is_finite() || settings.radius_px < 0.
+        || !tolerance.is_finite() || tolerance <= 0. {
+        return Err(Error::Invalid("source curve snap parameters"));
+    }
+    if settings.one_shot == Some(SnapKind::Intersection) { return Ok(Vec::new()); }
+    settings.set(SnapKind::Intersection, false);
+    let mut out = Vec::new();
+    let mut segments = Vec::new();
+    let mut ellipses = Vec::new();
+    let mut work = 0usize;
+    for curve in curves {
+        if canceled() { return Err(Error::Canceled); }
+        let start = out.len();
+        if let Curve::Nurbs(nurbs) = curve
+            && let Some(&pole) = nurbs.poles.first()
+            && nurbs.poles.iter().all(|point| *point == pole) {
+            let point = transform.point(pole)?;
+            for kind in [SnapKind::End, SnapKind::Near] {
+                if settings.is_effective(kind) {
+                    push(kind, Some(source.root), point, None, None, camera, viewport, cursor, settings.radius_px, &mut out)?;
+                }
+            }
+        } else {
+            curve_snaps(curve, source.root, 0, transform, camera, viewport, cursor, settings, from,
+                limits, cplane, tolerance, &mut out, &mut segments, &mut ellipses, &mut work, &canceled, false)?;
+        }
+        if out.len() as u64 > limits.max_outputs {
+            return Err(Error::Budget("source curve snap candidates"));
+        }
+        for candidate in &mut out[start..] { candidate.source = Some(source.clone()); }
+    }
+    out.retain(|candidate| settings.is_effective(candidate.kind));
+    out.sort_by(snap_order);
+    out.dedup_by(|left, right| left.kind == right.kind && left.parameter == right.parameter
+        && distance(left.world, right.world) <= 1e-9);
+    Ok(out)
+}
+
+/// Turn source-local topological vertices or analytic edge centers into source-bound snaps.
+pub fn source_point_candidates(points: &[Point3], kind: SnapKind, source: &SnapSource, transform: Transform,
+    camera: &Camera, viewport: Viewport, cursor: [f64; 2], radius: f64,
+    max_candidates: u64, canceled: impl Fn() -> bool) -> Result<Vec<SnapCandidate>> {
+    if !matches!(kind, SnapKind::End | SnapKind::Center) { return Err(Error::Invalid("source point snap kind")); }
+    let mut out = Vec::new();
+    for &point in points {
+        if canceled() { return Err(Error::Canceled); }
+        let world = transform.point(point)?;
+        let Some(projected) = camera.project(world, viewport)? else { continue; };
+        let distance_px = (projected.screen[0] - cursor[0]).hypot(projected.screen[1] - cursor[1]);
+        if !distance_px.is_finite() || !(distance_px <= radius) { continue; }
+        if out.len() as u64 >= max_candidates { return Err(Error::Budget("source point snap candidates")); }
+        out.try_reserve(1).map_err(|_| Error::Budget("source point snap candidates"))?;
+        out.push(SnapCandidate { kind, root: Some(source.root), world, screen: projected.screen,
+            distance_px, normal: None, parameter: None, source: Some(source.clone()),
+            second_source: None, surface_source: None });
+    }
+    Ok(out)
+}
+
+/// Evaluate one pair of independently captured source curves in world space.
+/// Sampled fallback intersections are verified against both sources within the
+/// document tolerance, but the underlying solver does not certify completeness.
+#[allow(clippy::too_many_arguments)]
+pub fn source_curve_intersection_candidates(
+    first: &Curve, first_transform: Transform, first_source: &SnapSource,
+    second: &Curve, second_transform: Transform, second_source: &SnapSource,
+    camera: &Camera, viewport: Viewport, cursor: [f64; 2], radius: f64,
+    tolerance: f64, limits: &om9_core::budget::Limits, canceled: &dyn Fn() -> bool,
+) -> Result<Vec<SnapCandidate>> {
+    if canceled() { return Err(Error::Canceled); }
+    if !radius.is_finite() || radius < 0. || !tolerance.is_finite() || tolerance <= 0. {
+        return Err(Error::Invalid("source curve intersection parameters"));
+    }
+    for curve in [first, second] {
+        match curve {
+            Curve::Nurbs(nurbs) if nurbs.knots.len() > 383 => return Err(Error::Budget("intersection source spans")),
+            Curve::Polycurve { .. } => return Err(Error::Unsupported("intersection requires individual source segments")),
+            _ => {}
+        }
+        curve.validate(limits)?;
+    }
+    let first_baked = om9_core::top11::bake_curve(first, first_transform)?;
+    if canceled() { return Err(Error::Canceled); }
+    let second_baked = om9_core::top11::bake_curve(second, second_transform)?;
+    let hits = om9_core::curve_surface_ops::curve_curve_intersections_cancellable(
+        &first_baked, &second_baked, tolerance, limits, canceled)?;
+    let mut candidates = Vec::new();
+    for hit in hits {
+        if canceled() { return Err(Error::Canceled); }
+        let (first_point, parameter) = source_intersection_witness(first, first_transform, hit.first_fraction, hit.point, tolerance, limits)?;
+        let (second_point, _) = source_intersection_witness(second, second_transform, hit.second_fraction, hit.point, tolerance, limits)?;
+        let separation = distance(first_point, second_point);
+        if !separation.is_finite() || separation > tolerance {
+            return Err(Error::Unsupported("intersection source witness mismatch"));
+        }
+        let world = midpoint(first_point, second_point);
+        let before = candidates.len();
+        push(SnapKind::Intersection, Some(first_source.root), world, None, Some(parameter),
+            camera, viewport, cursor, radius, &mut candidates)?;
+        if candidates.len() > before {
+            let candidate = candidates.last_mut().expect("intersection candidate appended");
+            candidate.source = Some(first_source.clone());
+            candidate.second_source = Some(second_source.clone());
+        }
+    }
+    Ok(candidates)
+}
+
+/// Resolve a solver witness back onto the original placed source. A baked
+/// rational ellipse does not use the original circle's angular parameter.
+fn source_intersection_witness(curve: &Curve, transform: Transform, fraction: f64, witness: Point3,
+    tolerance: f64, limits: &om9_core::budget::Limits) -> Result<(Point3, f64)> {
+    let (point, parameter) = if let Curve::Circle { center, x, y, radius, domain, angle_domain } = curve {
+        let center = transform.point(*center)?;
+        let x = transform_vector(transform, *x)?; let y = transform_vector(transform, *y)?;
+        let delta = sub(witness, center);
+        let (xx, xy, yy) = (dot(x, x), dot(x, y), dot(y, y));
+        let determinant = xx * yy - xy * xy;
+        if !determinant.is_finite() || determinant <= f64::EPSILON * xx * yy {
+            return Err(Error::Unsupported("intersection ellipse source frame"));
+        }
+        let (dx, dy) = (dot(delta, x), dot(delta, y));
+        let mut angle = ((dy * xx - dx * xy) / determinant).atan2((dx * yy - dy * xy) / determinant);
+        let angles = angle_domain.unwrap_or(*domain);
+        if !angle_on_arc(angle, angles) {
+            let endpoint = |a: f64| add(center, add(mul(x, *radius * a.cos()), mul(y, *radius * a.sin())));
+            let first = distance(endpoint(angles[0]), witness);
+            let last = distance(endpoint(angles[1]), witness);
+            if first.min(last) > tolerance { return Err(Error::Unsupported("intersection outside source arc")); }
+            angle = if first <= last { angles[0] } else { angles[1] };
+        }
+        let point = add(center, add(mul(x, *radius * angle.cos()), mul(y, *radius * angle.sin())));
+        (point, angles[0] + (angle - angles[0]).rem_euclid(std::f64::consts::TAU))
+    } else {
+        let evaluator = om9_core::evaluation::CurveEvaluator::capture(curve, limits)?;
+        let point = evaluator.evaluate(om9_core::evaluation::Parameter::Fraction(fraction), 0, transform)?[0];
+        (point, fraction)
+    };
+    let separation = distance(point, witness);
+    if !parameter.is_finite() || !separation.is_finite() || separation > tolerance {
+        return Err(Error::Unsupported("intersection source parameterization"));
+    }
+    Ok((point, parameter))
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -158,6 +382,8 @@ pub struct SurfaceCandidateSource {
     /// Local-space triangle from the exact scene display and its deflection.
     pub face_witness: Option<([Point3; 3], f64)>,
     pub face_witness_triangle: Option<usize>,
+    /// Source-backed NativeBrep face count, filled only by exact refinement.
+    pub native_face_count: Option<usize>,
 }
 
 impl SnapCandidate {
@@ -204,6 +430,16 @@ impl SmartTrack {
     }
     /// Keep at most two reference anchors and rebuild their ephemeral alignment lines.
     pub fn push(&mut self, candidate: &SnapCandidate, plane: CPlane) -> Result<()> {
+        self.acquire(candidate, plane, 0.).map(|_| ())
+    }
+
+    /// Acquire a distinct source point without repeatedly replacing it on each hover frame.
+    pub fn acquire(&mut self, candidate: &SnapCandidate, plane: CPlane, tolerance: f64) -> Result<bool> {
+        if !tolerance.is_finite() || tolerance < 0. { return Err(Error::Invalid("SmartTrack tolerance")); }
+        if candidate.kind == SnapKind::SmartTrack || self.anchors.iter().any(|anchor|
+            anchor.kind == candidate.kind && distance(anchor.world, candidate.world) <= tolerance) {
+            return Ok(false);
+        }
         if self.anchors.len() == 2 {
             self.anchors.remove(0);
         }
@@ -223,15 +459,33 @@ impl SmartTrack {
                 });
             }
         }
-        Ok(())
+        Ok(true)
     }
-    /// The intersection of two inferred alignment lines nearest the cursor, if the cursor is
-    /// within the supplied world tolerance. The result is ephemeral and never a document point.
+    /// The nearest smart point, guide projection, or guide intersection within tolerance.
+    /// The result is ephemeral and never a document point.
     pub fn infer(&self, cursor: Point3, tolerance: f64) -> Option<SnapCandidate> {
-        if !tolerance.is_finite() || tolerance < 0. {
+        self.infer_with_source_tolerance(cursor, tolerance, 1e-6)
+    }
+    pub fn infer_with_source_tolerance(&self, cursor: Point3, tolerance: f64, source_tolerance: f64) -> Option<SnapCandidate> {
+        if !tolerance.is_finite() || tolerance < 0. || !source_tolerance.is_finite() || source_tolerance <= 0. {
             return None;
         }
         let mut best: Option<(f64, Point3)> = None;
+        let mut consider = |point: Point3| {
+            let separation = distance(point, cursor);
+            if separation <= tolerance && best.is_none_or(|(old, _)| separation < old) {
+                best = Some((separation, point));
+            }
+        };
+        for anchor in &self.anchors { consider(anchor.world); }
+        for guide in &self.guides {
+            let direction = sub(guide.end, guide.start);
+            let length_squared = dot(direction, direction);
+            if length_squared > 0. {
+                let t = dot(sub(cursor, guide.start), direction) / length_squared;
+                consider(add(guide.start, mul(direction, t)));
+            }
+        }
         for (index, left) in self.guides.iter().enumerate() {
             for right in &self.guides[index + 1..] {
                 if left.axis == right.axis {
@@ -242,13 +496,10 @@ impl SmartTrack {
                 else {
                     continue;
                 };
-                if separation > 1.0e-6 {
+                if separation > source_tolerance {
                     continue;
                 }
-                let distance = distance(point, cursor);
-                if distance <= tolerance && best.is_none_or(|(old, _)| distance < old) {
-                    best = Some((distance, point));
-                }
+                consider(point);
             }
         }
         best.map(|(_, world)| SnapCandidate {
@@ -259,13 +510,84 @@ impl SmartTrack {
             distance_px: 0.,
             normal: None,
             parameter: None,
+            source: None,
+            second_source: None,
             surface_source: None,
         })
+    }
+
+    /// Intersect tracking guides with source lines and circular/affine arcs.
+    /// Unsupported curve families are left for the source-curve worker.
+    pub fn infer_on_curves(&self, scene: &Scene, camera: &Camera, viewport: Viewport,
+        cursor: [f64; 2], radius_px: f64, tolerance: f64) -> Result<Option<SnapCandidate>> {
+        if !radius_px.is_finite() || radius_px < 0. || !tolerance.is_finite() || tolerance <= 0. {
+            return Err(Error::Invalid("SmartTrack curve query"));
+        }
+        let mut hits = Vec::new();
+        let mut work = 0usize;
+        for (index, object) in scene.objects.iter().enumerate() {
+            if !object.visible || !(object.selectable || object.reference_snappable) { continue; }
+            let entity = scene.entity_for(&scene.document, object)?;
+            let Geometry::Curve(curve) = &entity.geometry else { continue };
+            let start = hits.len();
+            for guide in &self.guides {
+                track_curve_hits(curve, object.root, index, object.display_transform()?, *guide,
+                    camera, viewport, cursor, radius_px, tolerance, &mut work, &mut hits)?;
+            }
+            if hits.len() > start {
+                let source = snap_source(scene, object);
+                for hit in &mut hits[start..] { hit.source = Some(source.clone()); }
+            }
+        }
+        Ok(choose(&hits))
     }
     pub fn clear(&mut self) {
         self.anchors.clear();
         self.guides.clear();
     }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn track_curve_hits(curve: &Curve, root: ObjectId, object_index: usize, transform: Transform,
+    guide: SnapGuide, camera: &Camera, viewport: Viewport, cursor: [f64; 2], radius_px: f64,
+    tolerance: f64, work: &mut usize, hits: &mut Vec<SnapCandidate>) -> Result<()> {
+    *work = work.checked_add(1).ok_or(Error::Overflow("SmartTrack curve work"))?;
+    // ponytail: cap synchronous analytic pairs; use a scene-revision worker for larger models.
+    if *work > 50_000 { return Err(Error::Budget("SmartTrack curve work")); }
+    match curve {
+        Curve::Line { start, end, .. } => {
+            let (a, b) = (transform.point(*start)?, transform.point(*end)?);
+            if let Some((point, separation)) = line_intersection(guide.start, guide.end, a, b)
+                && separation <= tolerance {
+                let (on_curve, _) = closest_on_segment(point, a, b);
+                if distance(point, on_curve) <= tolerance {
+                    push(SnapKind::SmartTrack, Some(root), on_curve, None, None, camera, viewport, cursor, radius_px, hits)?;
+                }
+            }
+        }
+        Curve::Circle { center, x, y, radius, domain, angle_domain } => {
+            let center = transform.point(*center)?;
+            let x = transform_vector(transform, *x)?;
+            let y = transform_vector(transform, *y)?;
+            let axis = sub(guide.end, guide.start);
+            let length = dot(axis, axis).sqrt();
+            if !length.is_finite() || length <= 0. { return Ok(()); }
+            let origin = midpoint(guide.start, guide.end);
+            let extent = distance(origin, center) + radius.abs() * (dot(x, x).sqrt() + dot(y, y).sqrt()) + tolerance;
+            if !extent.is_finite() || extent <= 0. { return Err(Error::Invalid("SmartTrack guide extent")); }
+            let delta = mul(axis, extent / length);
+            let segment = Segment { root, object_index, a: sub(origin, delta), b: add(origin, delta) };
+            let ellipse = Ellipse { object_index, center, x, y, radius: *radius, angles: angle_domain.unwrap_or(*domain) };
+            for point in segment_ellipse_intersections(segment, ellipse, tolerance) {
+                push(SnapKind::SmartTrack, Some(root), point, None, None, camera, viewport, cursor, radius_px, hits)?;
+            }
+        }
+        Curve::Polycurve { segments, .. } => for part in segments {
+            track_curve_hits(part, root, object_index, transform, guide, camera, viewport, cursor, radius_px, tolerance, work, hits)?;
+        },
+        Curve::Nurbs(_) => {},
+    }
+    Ok(())
 }
 
 #[derive(Debug, Clone, Default)]
@@ -356,6 +678,15 @@ fn visible_display_occludes_with_margin(
 }
 
 impl OcclusionSnapshot {
+    /// Conservative display occlusion strictly before a source point, using
+    /// retained display buffers without retaining the document.
+    pub fn visible_display_occludes_before(&self, camera: &Camera, viewport: Viewport,
+        cursor: [f64; 2], target: Point3, clearance: f64) -> Result<bool> {
+        if !clearance.is_finite() || clearance < 0. { return Err(Error::Invalid("occlusion clearance")); }
+        visible_display_occludes_in_scene(&self.0, camera, viewport, cursor, target, -clearance,
+            &[], None, &mut |_| false, &mut |_| Ok(true))
+    }
+
     /// Query captured display buffers without retaining a document. A fallback
     /// proof must itself use independently captured source data; returning
     /// false preserves the conservative occluder.
@@ -435,8 +766,19 @@ fn snap_order(left: &SnapCandidate, right: &SnapCandidate) -> std::cmp::Ordering
 #[derive(Debug, Clone, Copy)]
 struct Segment {
     root: ObjectId,
+    object_index: usize,
     a: Point3,
     b: Point3,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct Ellipse {
+    object_index: usize,
+    center: Point3,
+    x: Point3,
+    y: Point3,
+    radius: f64,
+    angles: [f64; 2],
 }
 
 pub fn candidates(
@@ -447,12 +789,43 @@ pub fn candidates(
     settings: SnapSettings,
     from: Option<Point3>,
 ) -> Result<Vec<SnapCandidate>> {
+    candidates_in_plane(scene, camera, viewport, cursor, settings, from, CPlane::world_xy())
+}
+
+pub fn candidates_in_plane(
+    scene: &Scene,
+    camera: &Camera,
+    viewport: Viewport,
+    cursor: [f64; 2],
+    settings: SnapSettings,
+    from: Option<Point3>,
+    cplane: CPlane,
+) -> Result<Vec<SnapCandidate>> {
+    candidates_in_plane_impl(scene, camera, viewport, cursor, settings, from, cplane, false)
+}
+
+/// The caller must merge the separately evaluated NURBS, circular Near/Mid and
+/// surface-boundary candidates before ranking or accepting a point.
+pub fn candidates_in_plane_deferred(
+    scene: &Scene, camera: &Camera, viewport: Viewport, cursor: [f64; 2],
+    settings: SnapSettings, from: Option<Point3>, cplane: CPlane,
+) -> Result<Vec<SnapCandidate>> {
+    candidates_in_plane_impl(scene, camera, viewport, cursor, settings, from, cplane, true)
+}
+
+fn candidates_in_plane_impl(
+    scene: &Scene, camera: &Camera, viewport: Viewport, cursor: [f64; 2],
+    settings: SnapSettings, from: Option<Point3>, cplane: CPlane, defer_nurbs: bool,
+) -> Result<Vec<SnapCandidate>> {
     if !settings.radius_px.is_finite() || settings.radius_px < 0. {
         return Err(Error::Invalid("snap radius"));
     }
     let mut out = Vec::new();
     let mut segments = Vec::new();
+    let mut ellipses = Vec::new();
+    let mut curve_work = 0usize;
     let mut surface_broad_phase = None;
+    let tolerance = scene.document.effective_tolerance()?.absolute_mm;
     for (object_index, object) in scene.objects.iter().enumerate() {
         if !object.visible || !(object.selectable || object.reference_snappable) {
             continue;
@@ -464,8 +837,52 @@ pub fn candidates(
         }
         let transform = object.display_transform()?;
         let entity = scene.entity_for(&scene.document, object)?;
+        if !defer_nurbs && let Geometry::Surface(surface) = &entity.geometry
+            && !entity.extensions.contains_key(om9_core::model::TRIM_SURFACE_EXTENSION_SLOT)
+            && ([SnapKind::End, SnapKind::Mid, SnapKind::Near, SnapKind::Quadrant]
+                .into_iter().any(|kind| settings.is_effective(kind))
+                || from.is_some() && (settings.is_effective(SnapKind::Tangent)
+                    || settings.is_effective(SnapKind::Perpendicular))) {
+            // An untrimmed NURBS surface owns its boundary isocurves. Evaluate
+            // those source curves rather than snapping to the display mesh.
+            // ponytail: move this bounded extraction to a revision-keyed worker/cache.
+            use om9_core::surface_kernel::SurfaceIso;
+            let start = out.len();
+            for (iso, fixed_axis) in [(SurfaceIso::U, 1usize), (SurfaceIso::V, 0usize)] {
+                for side in 0..if surface.periodic[fixed_axis] { 1 } else { 2 } {
+                    let degree = surface.degree[fixed_axis].checked_add(1).ok_or(Error::Overflow("surface edge snap work"))?;
+                    let cost = surface.size[0].checked_mul(surface.size[1])
+                        .and_then(|value| value.checked_mul(degree))
+                        .and_then(|value| value.checked_mul(degree))
+                        .ok_or(Error::Overflow("surface edge snap work"))?;
+                    curve_work = curve_work.checked_add(cost).ok_or(Error::Overflow("surface edge snap work"))?;
+                    if curve_work > 1_000_000 { return Err(Error::Budget("surface edge snap work")); }
+                    let boundary = om9_core::surface_kernel::isocurve(
+                        surface, iso, surface.domain[fixed_axis][side], &scene.limits)?;
+                    if let Some(&pole) = boundary.poles.first()
+                        && boundary.poles.iter().all(|point| *point == pole) {
+                        let point = transform.point(pole)?;
+                        for kind in [SnapKind::End, SnapKind::Near] {
+                            if settings.is_effective(kind) {
+                                push(kind, Some(object.root), point, None, None, camera, viewport,
+                                    cursor, settings.radius_px, &mut out)?;
+                            }
+                        }
+                        continue;
+                    }
+                    let edge = Curve::Nurbs(boundary);
+                    curve_snaps(&edge, object.root, object_index, transform, camera, viewport, cursor,
+                        settings, from, &scene.limits, cplane, tolerance, &mut out,
+                        &mut segments, &mut ellipses, &mut curve_work, &|| false, false)?;
+                }
+            }
+            if out.len() > start {
+                let source = snap_source(scene, object);
+                for candidate in &mut out[start..] { candidate.source = Some(source.clone()); }
+            }
+        }
         if matches!(entity.geometry, Geometry::Brep(_) | Geometry::NativeBrep(_) | Geometry::Surface(_)) {
-            if !settings.is_enabled(SnapKind::Surface) { continue; }
+            if !settings.is_effective(SnapKind::Surface) { continue; }
             if surface_broad_phase.is_none() {
                 let ray = camera.visible_ray(cursor, viewport)?;
                 let mut included = vec![false; scene.objects.len()];
@@ -478,6 +895,7 @@ pub fn candidates(
             }
             if !surface_broad_phase.as_ref().expect("initialized above").1[object_index] { continue; }
         }
+        let start = out.len();
         match &entity.geometry {
             Geometry::Point(point) => {
                 let world = transform.point(*point)?;
@@ -497,14 +915,22 @@ pub fn candidates(
             Geometry::Curve(curve) => curve_snaps(
                 curve,
                 object.root,
+                object_index,
                 transform,
                 camera,
                 viewport,
                 cursor,
                 settings,
                 from,
+                &scene.limits,
+                cplane,
+                tolerance,
                 &mut out,
                 &mut segments,
+                &mut ellipses,
+                &mut curve_work,
+                &|| false,
+                defer_nurbs,
             )?,
             Geometry::Brep(_) => {
                 let display = object.pick_brep_display(entity)?.ok_or(om9_core::Error::Stale("scene BRep snap display"))?;
@@ -541,29 +967,29 @@ pub fn candidates(
                             path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch, scene_publication: scene.publication_id(),
                             leaf_generation: object.leaf_generation, leaf_geometry_revision: object.leaf_geometry_revision,
                             brep_display_fingerprint: object.brep_display_fingerprint.clone(),
-                            placement: transform, camera: camera.clone(), viewport, cursor, face, face_witness: Some((witness, display.deflection_mm)), face_witness_triangle: Some(triangle_index),
+                            placement: transform, camera: camera.clone(), viewport, cursor, face, face_witness: Some((witness, display.deflection_mm)), face_witness_triangle: Some(triangle_index), native_face_count: None,
                         });
                     }
                 }
             }
             Geometry::NativeBrep(_) => {
                 let ray = surface_broad_phase.as_ref().expect("initialized for surfaces").0;
-                let mut best: Option<(f64, Point3, Point3)> = None;
+                let mut best: Option<(f64, Point3, Point3, [Point3; 3], usize)> = None;
                 // Use the same triangulation as the displayed image, including
                 // the fan diagonal chosen for quad faces.
                 let crate::scene::RenderBuffers::Mesh { vertices, triangles, .. } = object.buffers.as_ref() else { continue };
-                for (triangle, _) in triangles {
+                for (triangle_index, (triangle, _)) in triangles.iter().enumerate() {
                     let a = transform.point(vertices[triangle[0] as usize])?;
                     let b = transform.point(vertices[triangle[1] as usize])?;
                     let c = transform.point(vertices[triangle[2] as usize])?;
                     if let Some((point, normal)) = ray_triangle(ray, a, b, c) {
                         let distance = distance(camera.eye, point);
-                        if best.is_none_or(|(old, _, _)| distance < old) {
-                            best = Some((distance, point, normal));
+                        if best.is_none_or(|(old, _, _, _, _)| distance < old) {
+                            best = Some((distance, point, normal, [vertices[triangle[0] as usize], vertices[triangle[1] as usize], vertices[triangle[2] as usize]], triangle_index));
                         }
                     }
                 }
-                if let Some((_, point, normal)) = best {
+                if let Some((_, point, normal, witness, triangle_index)) = best {
                     let previous = out.len();
                     push(
                         SnapKind::Surface,
@@ -582,7 +1008,7 @@ pub fn candidates(
                             path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch, scene_publication: scene.publication_id(),
                             leaf_generation: object.leaf_generation, leaf_geometry_revision: object.leaf_geometry_revision,
                             brep_display_fingerprint: object.brep_display_fingerprint.clone(),
-                            placement: transform, camera: camera.clone(), viewport, cursor, face: None, face_witness: None, face_witness_triangle: None,
+                            placement: transform, camera: camera.clone(), viewport, cursor, face: None, face_witness: Some((witness, 0.)), face_witness_triangle: Some(triangle_index), native_face_count: None,
                         });
                     }
                 }
@@ -609,22 +1035,32 @@ pub fn candidates(
                             path: object.path.clone(), leaf: object.leaf, source: object.source, scene_epoch: scene.epoch, scene_publication: scene.publication_id(),
                             leaf_generation: object.leaf_generation, leaf_geometry_revision: object.leaf_geometry_revision,
                             brep_display_fingerprint: object.brep_display_fingerprint.clone(),
-                            placement: transform, camera: camera.clone(), viewport, cursor, face: None, face_witness: None, face_witness_triangle: None,
+                            placement: transform, camera: camera.clone(), viewport, cursor, face: None, face_witness: None, face_witness_triangle: None, native_face_count: None,
                         });
                     }
                 }
             }
             _ => {}
         }
+        if out.len() > start {
+            let source = snap_source(scene, object);
+            for candidate in &mut out[start..] { candidate.source = Some(source.clone()); }
+        }
     }
+    if settings.is_effective(SnapKind::Intersection) {
+    // ponytail: bound synchronous pair work; move exact queries to a revision-keyed worker for larger scenes.
+    let pair_count = (segments.len().saturating_mul(segments.len().saturating_sub(1)) / 2)
+        .saturating_add(segments.len().saturating_mul(ellipses.len()))
+        .saturating_add(ellipses.len().saturating_mul(ellipses.len().saturating_sub(1)) / 2);
+    if pair_count > 100_000 { return Err(om9_core::Error::Budget("intersection snap pairs")); }
     for (index, left) in segments.iter().enumerate() {
         for right in &segments[index + 1..] {
             if left.root == right.root {
                 continue;
             }
             if let Some((point, distance)) = segment_intersection(*left, *right) {
-                let scale = segment_length(*left).max(segment_length(*right)).max(1.0);
-                if distance <= 1.0e-9 * scale {
+                if distance <= tolerance {
+                    let previous = out.len();
                     push(
                         SnapKind::Intersection,
                         Some(left.root),
@@ -637,15 +1073,61 @@ pub fn candidates(
                         settings.radius_px,
                         &mut out,
                     )?;
+                    if out.len() > previous {
+                        let candidate = out.last_mut().expect("intersection candidate appended");
+                        candidate.source = Some(snap_source(scene, &scene.objects[left.object_index]));
+                        candidate.second_source = Some(snap_source(scene, &scene.objects[right.object_index]));
+                    }
                 }
             }
         }
     }
-    out.retain(|candidate| settings.is_enabled(candidate.kind));
+    for segment in &segments {
+        for ellipse in &ellipses {
+            for point in segment_ellipse_intersections(*segment, *ellipse, tolerance) {
+                let previous = out.len();
+                push(SnapKind::Intersection, Some(segment.root), point, None, None, camera,
+                    viewport, cursor, settings.radius_px, &mut out)?;
+                if out.len() > previous {
+                    let candidate = out.last_mut().expect("intersection candidate appended");
+                    candidate.source = Some(snap_source(scene, &scene.objects[segment.object_index]));
+                    candidate.second_source = Some(snap_source(scene, &scene.objects[ellipse.object_index]));
+                }
+            }
+        }
+    }
+    // Reuse the source solver's analytic circle/circle path only when both
+    // transformed curves remain circles in parallel planes. Other ellipse and
+    // non-coplanar pairs need the general asynchronous curve solver.
+    for (index, left) in ellipses.iter().enumerate() {
+        let Some(first) = ellipse_as_circle(*left) else { continue };
+        for right in &ellipses[index + 1..] {
+            let Some(second) = ellipse_as_circle(*right) else { continue };
+            let Curve::Circle { x: x1, y: y1, center: c1, .. } = &first else { unreachable!() };
+            let Curve::Circle { x: x2, y: y2, center: c2, .. } = &second else { unreachable!() };
+            let n1 = cross(*x1, *y1);
+            let n2 = cross(*x2, *y2);
+            if dot(cross(n1, n2), cross(n1, n2)).sqrt() > 8. * f64::EPSILON
+                || dot(sub(*c2, *c1), n1).abs() > tolerance { continue; }
+            for hit in om9_core::curve_surface_ops::curve_curve_intersections(&first, &second, tolerance, &scene.limits)? {
+                let previous = out.len();
+                push(SnapKind::Intersection, Some(scene.objects[left.object_index].root), hit.point, None,
+                    Some(hit.first_fraction), camera, viewport, cursor, settings.radius_px, &mut out)?;
+                if out.len() > previous {
+                    let candidate = out.last_mut().expect("intersection candidate appended");
+                    candidate.source = Some(snap_source(scene, &scene.objects[left.object_index]));
+                    candidate.second_source = Some(snap_source(scene, &scene.objects[right.object_index]));
+                }
+            }
+        }
+    }
+    }
+    out.retain(|candidate| settings.is_effective(candidate.kind));
     out.sort_by(snap_order);
     out.dedup_by(|left, right| {
         left.kind == right.kind
             && left.root == right.root
+            && left.source == right.source && left.second_source == right.second_source
             && left.parameter == right.parameter
             && (left.kind != SnapKind::Surface || left.surface_source == right.surface_source)
             && distance(left.world, right.world) <= 1.0e-9
@@ -653,24 +1135,45 @@ pub fn candidates(
     Ok(out)
 }
 
+fn ellipse_as_circle(ellipse: Ellipse) -> Option<Curve> {
+    let xx = dot(ellipse.x, ellipse.x);
+    let yy = dot(ellipse.y, ellipse.y);
+    let xy = dot(ellipse.x, ellipse.y);
+    if !xx.is_finite() || !yy.is_finite() || !xy.is_finite() || xx <= f64::MIN_POSITIVE || yy <= f64::MIN_POSITIVE
+        || (xx - yy).abs() > 8. * f64::EPSILON * xx.max(yy)
+        || (xy / xx.sqrt() / yy.sqrt()).abs() > 8. * f64::EPSILON { return None; }
+    let (sx, sy) = (xx.sqrt(), yy.sqrt());
+    Some(Curve::Circle { center: ellipse.center, x: mul(ellipse.x, 1. / sx), y: mul(ellipse.y, 1. / sy),
+        radius: ellipse.radius * sx, domain: ellipse.angles, angle_domain: Some(ellipse.angles) })
+}
+
 #[allow(clippy::too_many_arguments)]
 fn curve_snaps(
     curve: &Curve,
     root: ObjectId,
+    object_index: usize,
     transform: om9_core::geometry::Transform,
     camera: &Camera,
     viewport: Viewport,
     cursor: [f64; 2],
     settings: SnapSettings,
     from: Option<Point3>,
+    limits: &om9_core::budget::Limits,
+    cplane: CPlane,
+    tolerance: f64,
     out: &mut Vec<SnapCandidate>,
     segments: &mut Vec<Segment>,
+    ellipses: &mut Vec<Ellipse>,
+    curve_work: &mut usize,
+    canceled: &dyn Fn() -> bool,
+    defer_nurbs: bool,
 ) -> Result<()> {
+    if canceled() { return Err(Error::Canceled); }
     match curve {
         Curve::Line { start, end, .. } => {
             let a = transform.point(*start)?;
             let b = transform.point(*end)?;
-            segments.push(Segment { root, a, b });
+            if settings.is_effective(SnapKind::Intersection) { segments.push(Segment { root, object_index, a, b }); }
             push(
                 SnapKind::End,
                 Some(root),
@@ -707,9 +1210,8 @@ fn curve_snaps(
                 settings.radius_px,
                 out,
             )?;
-            let ray_point = screen_ray_point(camera, viewport, cursor)?;
-            let (nearest, t) = closest_on_segment(ray_point, a, b);
-            if (0.0..=1.0).contains(&t) {
+            if settings.is_effective(SnapKind::Near)
+                && let Some((nearest, t)) = closest_segment_on_screen(camera, viewport, cursor, a, b)? {
                 push(
                     SnapKind::Near,
                     Some(root),
@@ -746,13 +1248,17 @@ fn curve_snaps(
             x,
             y,
             radius,
-            ..
+            domain,
+            angle_domain,
         } => {
             let center = transform.point(*center)?;
             let x = transform_vector(transform, *x)?;
             let y = transform_vector(transform, *y)?;
+            if settings.is_effective(SnapKind::Intersection) {
+                ellipses.push(Ellipse { object_index, center, x, y, radius: *radius, angles: angle_domain.unwrap_or(*domain) });
+            }
             circle_snaps(
-                root, center, x, y, *radius, camera, viewport, cursor, settings, from, out,
+                root, center, x, y, *radius, angle_domain.unwrap_or(*domain), camera, viewport, cursor, settings, from, cplane, tolerance, out, curve_work, canceled, defer_nurbs,
             )?;
         }
         Curve::Polycurve {
@@ -760,17 +1266,362 @@ fn curve_snaps(
         } => {
             for part in parts {
                 curve_snaps(
-                    part, root, transform, camera, viewport, cursor, settings, from, out, segments,
+                    part, root, object_index, transform, camera, viewport, cursor, settings, from, limits, cplane, tolerance, out, segments, ellipses, curve_work, canceled, defer_nurbs,
                 )?;
             }
         }
-        Curve::Nurbs(_) => {
-            // The display samples are exact enough for an object snap; a native branch would
-            // introduce a second curve solver here.
-            let _ = from;
+        Curve::Nurbs(nurbs) => {
+            if defer_nurbs { return Ok(()); }
+            if settings.is_effective(SnapKind::End) || settings.is_effective(SnapKind::Near) || settings.is_effective(SnapKind::Mid) || settings.is_effective(SnapKind::Quadrant)
+                || from.is_some() && (settings.is_effective(SnapKind::Tangent) || settings.is_effective(SnapKind::Perpendicular)) {
+                // ponytail: bound synchronous source evaluation; use a revision-keyed worker/cache for larger scenes.
+                let degree = nurbs.degree.checked_add(1).ok_or(Error::Overflow("NURBS snap work"))?;
+                let evaluations = if settings.is_effective(SnapKind::Near) { 128usize } else { 2 };
+                let work = degree.checked_mul(degree).and_then(|value| value.checked_mul(evaluations))
+                    .and_then(|value| value.checked_add(nurbs.poles.len())).ok_or(Error::Overflow("NURBS snap work"))?;
+                *curve_work = curve_work.checked_add(work).ok_or(Error::Overflow("NURBS snap work"))?;
+                if *curve_work > 1_000_000 { return Err(Error::Budget("NURBS snap work")); }
+                let evaluator = om9_core::evaluation::CurveEvaluator::capture(curve, limits)?;
+                if settings.is_effective(SnapKind::End) {
+                    for fraction in [0., 1.] {
+                        let point = evaluator.evaluate(om9_core::evaluation::Parameter::Fraction(fraction), 0, transform)?[0];
+                        push(SnapKind::End, Some(root), point, None, Some(fraction), camera, viewport,
+                            cursor, settings.radius_px, out)?;
+                    }
+                }
+                if settings.is_effective(SnapKind::Near)
+                    && let Some((point, fraction)) = nurbs_near_screen(curve, &evaluator, transform, camera, viewport, cursor,
+                        settings.radius_px, degree, limits, curve_work, canceled)? {
+                    push(SnapKind::Near, Some(root), point, None, Some(fraction), camera, viewport,
+                        cursor, settings.radius_px, out)?;
+                }
+                if settings.is_effective(SnapKind::Mid) {
+                    let spans = nurbs.knots.windows(2).filter(|pair| pair[1] > pair[0]
+                        && pair[1] > nurbs.domain[0] && pair[0] < nurbs.domain[1]).count();
+                    let minimum_samples = spans.checked_mul(degree).and_then(|value| value.checked_mul(4))
+                        .ok_or(Error::Overflow("NURBS midpoint samples"))?;
+                    let (point, fraction) = nurbs_midpoint(curve, &evaluator, transform, degree, minimum_samples, tolerance, limits, curve_work, canceled)?;
+                    push(SnapKind::Mid, Some(root), point, None, Some(fraction), camera, viewport,
+                        cursor, settings.radius_px, out)?;
+                }
+                if settings.is_effective(SnapKind::Quadrant) {
+                    for (point, fraction) in nurbs_quadrants(curve, &evaluator, nurbs, transform, cplane, degree, tolerance, limits, curve_work, canceled)? {
+                        push(SnapKind::Quadrant, Some(root), point, None, Some(fraction), camera, viewport,
+                            cursor, settings.radius_px, out)?;
+                    }
+                }
+                if let Some(from) = from
+                    && (settings.is_effective(SnapKind::Tangent) || settings.is_effective(SnapKind::Perpendicular)) {
+                    for (kind, point, fraction) in nurbs_directional_hulls(curve, &evaluator, nurbs, transform, from,
+                        settings, degree, tolerance, limits, curve_work, canceled)? {
+                        push(kind, Some(root), point, None, Some(fraction), camera, viewport,
+                            cursor, settings.radius_px, out)?;
+                    }
+                }
+            }
         }
     }
     Ok(())
+}
+
+/// Subdivide Bézier spans and bound the homogeneous tangent equations. This
+/// retains intervals whose bounds contain zero, including even-multiplicity roots.
+#[allow(clippy::too_many_arguments)]
+fn nurbs_directional_hulls(curve: &Curve, evaluator: &om9_core::evaluation::CurveEvaluator<'_>,
+    nurbs: &om9_core::geometry::NurbsCurve, transform: Transform, from: Point3, settings: SnapSettings,
+    degree: usize, tolerance: f64, limits: &om9_core::budget::Limits, work: &mut usize,
+    canceled: &dyn Fn() -> bool) -> Result<Vec<(SnapKind, Point3, f64)>> {
+    type Range = [f64; 2];
+    fn widen(low: f64, high: f64) -> Range {
+        let margin = 64. * f64::EPSILON * low.abs().max(high.abs()).max(1.);
+        [low - margin, high + margin]
+    }
+    fn add(a: Range, b: Range) -> Range { widen(a[0] + b[0], a[1] + b[1]) }
+    fn subtract(a: Range, b: Range) -> Range { widen(a[0] - b[1], a[1] - b[0]) }
+    fn multiply(a: Range, b: Range) -> Range {
+        let values = [a[0] * b[0], a[0] * b[1], a[1] * b[0], a[1] * b[1]];
+        widen(values.iter().copied().fold(f64::INFINITY, f64::min),
+            values.iter().copied().fold(f64::NEG_INFINITY, f64::max))
+    }
+    fn contains_zero(range: Range) -> bool { range[0] <= 0. && range[1] >= 0. }
+    let cost = degree.checked_mul(degree).and_then(|n| n.checked_mul(nurbs.poles.len().saturating_mul(2).saturating_add(50)))
+        .ok_or(Error::Overflow("NURBS directional work"))?;
+    let breaks = nurbs_breakpoints(nurbs, 8, limits)?;
+    let mut stack = Vec::new();
+    stack.try_reserve_exact(breaks.len()).map_err(|_| Error::Budget("NURBS directional intervals"))?;
+    for pair in breaks.windows(2) { if pair[1] > pair[0] { stack.push((pair[0], pair[1])); } }
+    let mut results: Vec<(SnapKind, Point3, f64)> = Vec::new();
+    while let Some((low, high)) = stack.pop() {
+        if canceled() { return Err(Error::Canceled); }
+        *work = work.checked_add(cost).ok_or(Error::Overflow("NURBS directional work"))?;
+        if *work > 1_000_000 { return Err(Error::Budget("NURBS directional work")); }
+        let piece = om9_core::curve_ops::trim_curve_by_parameter(curve, low, high, limits)?;
+        let local_mid = om9_core::evaluation::CurveEvaluator::capture(&piece, limits)?
+            .evaluate(om9_core::evaluation::Parameter::Fraction(0.5), 0, transform)?[0];
+        let source_mid = evaluator.evaluate(om9_core::evaluation::Parameter::Fraction((low + high) * 0.5), 0, transform)?[0];
+        if distance(local_mid, source_mid) > tolerance * 0.0625 {
+            return Err(Error::Unsupported("NURBS directional subcurve parameterization"));
+        }
+        let Curve::Nurbs(piece) = &piece else { return Err(Error::Unsupported("NURBS directional subcurve")) };
+        let p = piece.degree;
+        if p == 0 || piece.poles.len() != p + 1 || piece.weights.len() != p + 1
+            || piece.knots[..=p].iter().any(|knot| *knot != piece.domain[0])
+            || piece.knots[piece.knots.len() - p - 1..].iter().any(|knot| *knot != piece.domain[1]) {
+            return Err(Error::Unsupported("NURBS directional Bézier span"));
+        }
+        let weight_scale = piece.weights.iter().copied().fold(0f64, f64::max);
+        if !weight_scale.is_finite() || weight_scale <= 0. || piece.weights.iter().any(|w| !w.is_finite() || *w <= 0.) {
+            return Err(Error::Unsupported("NURBS directional weights"));
+        }
+        let mut homogeneous = Vec::new();
+        homogeneous.try_reserve_exact(p + 1).map_err(|_| Error::Budget("NURBS directional controls"))?;
+        let mut low_point = [f64::INFINITY; 3];
+        let mut high_point = [f64::NEG_INFINITY; 3];
+        for (&pole, &weight) in piece.poles.iter().zip(&piece.weights) {
+            let point = transform.point(pole)?;
+            let w = weight / weight_scale;
+            let mut h = [0.; 4];
+            for axis in 0..3 {
+                low_point[axis] = low_point[axis].min(point[axis]); high_point[axis] = high_point[axis].max(point[axis]);
+                h[axis] = (point[axis] - from[axis]) * w;
+            }
+            h[3] = w;
+            if h.iter().any(|value| !value.is_finite()) { return Err(Error::Invalid("NURBS directional controls")); }
+            homogeneous.push(h);
+        }
+        let mut h = [[f64::INFINITY, f64::NEG_INFINITY]; 4];
+        let mut dh = [[f64::INFINITY, f64::NEG_INFINITY]; 4];
+        for control in &homogeneous { for axis in 0..4 {
+            h[axis][0] = h[axis][0].min(control[axis]); h[axis][1] = h[axis][1].max(control[axis]);
+        }}
+        for pair in homogeneous.windows(2) { for axis in 0..4 {
+            let value = p as f64 * (pair[1][axis] - pair[0][axis]);
+            dh[axis][0] = dh[axis][0].min(value); dh[axis][1] = dh[axis][1].max(value);
+        }}
+        for axis in 0..4 { h[axis] = widen(h[axis][0], h[axis][1]); dh[axis] = widen(dh[axis][0], dh[axis][1]); }
+        let tangent = std::array::from_fn::<_, 3, _>(|axis|
+            subtract(multiply(dh[axis], h[3]), multiply(h[axis], dh[3])));
+        let mut perpendicular = [0., 0.];
+        for axis in 0..3 { perpendicular = add(perpendicular, multiply(h[axis], tangent[axis])); }
+        let cross_bounds = [
+            subtract(multiply(h[1], tangent[2]), multiply(h[2], tangent[1])),
+            subtract(multiply(h[2], tangent[0]), multiply(h[0], tangent[2])),
+            subtract(multiply(h[0], tangent[1]), multiply(h[1], tangent[0])),
+        ];
+        if perpendicular.iter().chain(cross_bounds.iter().flatten()).any(|value| !value.is_finite()) {
+            return Err(Error::Unsupported("NURBS directional interval precision"));
+        }
+        let possible_perp = settings.is_effective(SnapKind::Perpendicular) && contains_zero(perpendicular);
+        let possible_tangent = settings.is_effective(SnapKind::Tangent) && cross_bounds.into_iter().all(contains_zero);
+        if !possible_perp && !possible_tangent { continue; }
+        let diameter = (high_point[0] - low_point[0]).hypot(high_point[1] - low_point[1]).hypot(high_point[2] - low_point[2]);
+        let middle = (low + high) * 0.5;
+        if middle == low || middle == high { return Err(Error::Unsupported("NURBS directional parameter precision")); }
+        if diameter.is_finite() && diameter <= tolerance * 0.25 {
+            let values = evaluator.evaluate(om9_core::evaluation::Parameter::Fraction(middle), 1, transform)?;
+            let (point, tangent) = (values[0], values[1]);
+            let delta = sub(point, from);
+            let length = tangent[0].hypot(tangent[1]).hypot(tangent[2]);
+            let from_distance = delta[0].hypot(delta[1]).hypot(delta[2]);
+            if length > f64::EPSILON && length.is_finite() && from_distance > tolerance && from_distance.is_finite() {
+                let cross = cross(delta, tangent);
+                let perp_error = dot(delta, tangent).abs() / length;
+                let tangent_error = cross[0].hypot(cross[1]).hypot(cross[2]) / length;
+                let mut unresolved = false;
+                for (kind, possible, error) in [(SnapKind::Perpendicular, possible_perp, perp_error),
+                    (SnapKind::Tangent, possible_tangent, tangent_error)] {
+                    if possible && error.is_finite() && error <= tolerance * 0.5 {
+                        if !results.iter().any(|(old_kind, old_point, _)| *old_kind == kind && distance(*old_point, point) <= tolerance) {
+                            if results.len() >= 256 || results.len() as u64 >= limits.max_outputs { return Err(Error::Budget("NURBS directional candidates")); }
+                            results.try_reserve(1).map_err(|_| Error::Budget("NURBS directional candidates"))?;
+                            results.push((kind, point, middle));
+                        }
+                    } else if possible { unresolved = true; }
+                }
+                if !unresolved { continue; }
+            }
+        }
+        if stack.len() + 2 > 2048 || ((stack.len() + 2) as u64).saturating_mul(16) > limits.max_bytes {
+            return Err(Error::Budget("NURBS directional intervals"));
+        }
+        stack.try_reserve(2).map_err(|_| Error::Budget("NURBS directional intervals"))?;
+        stack.push((low, middle)); stack.push((middle, high));
+    }
+    Ok(results)
+}
+
+fn nurbs_breakpoints(nurbs: &om9_core::geometry::NurbsCurve, samples: usize,
+    limits: &om9_core::budget::Limits) -> Result<Vec<f64>> {
+    const MAX_BREAKS: usize = 2048;
+    let mut breaks = Vec::new();
+    let capacity = samples.checked_add(1).and_then(|n| n.checked_add(nurbs.knots.len()))
+        .ok_or(Error::Overflow("NURBS snap breaks"))?;
+    if capacity > MAX_BREAKS || capacity as u64 > limits.max_points
+        || (capacity as u64).saturating_mul(std::mem::size_of::<f64>() as u64) > limits.max_bytes {
+        return Err(Error::Budget("NURBS snap breaks"));
+    }
+    breaks.try_reserve_exact(capacity).map_err(|_| Error::Budget("NURBS snap breaks"))?;
+    breaks.extend((0..=samples).map(|i| i as f64 / samples as f64));
+    let span = nurbs.domain[1] - nurbs.domain[0];
+    let origin = nurbs.seam.map(|s| (s - nurbs.domain[0]) / span);
+    for &knot in &nurbs.knots {
+        if knot <= nurbs.domain[0] || knot >= nurbs.domain[1] { continue; }
+        let raw = (knot - nurbs.domain[0]) / span;
+        let f = match origin {
+            Some(o) => if nurbs.reversed { (o - raw).rem_euclid(1.) } else { (raw - o).rem_euclid(1.) },
+            None => if nurbs.reversed { 1. - raw } else { raw },
+        };
+        breaks.push(f);
+    }
+    breaks.sort_by(f64::total_cmp);
+    breaks.dedup_by(|a, b| (*a - *b).abs() < 1e-14);
+    Ok(breaks)
+}
+
+/// Bound CPlane extrema by subdividing positive-weight source control hulls.
+/// Floating-point margins and source trimming still require numerical validation.
+fn nurbs_quadrants(curve: &Curve, evaluator: &om9_core::evaluation::CurveEvaluator<'_>,
+    nurbs: &om9_core::geometry::NurbsCurve, transform: Transform, cplane: CPlane,
+    degree: usize, tolerance: f64, limits: &om9_core::budget::Limits, work: &mut usize, canceled: &dyn Fn() -> bool) -> Result<Vec<(Point3, f64)>> {
+    use om9_core::evaluation::Parameter;
+    #[derive(Clone, Copy)]
+    struct Interval { from: f64, to: f64, bounds: [f64; 4] }
+    fn consider(extrema: &mut [(f64, Point3, f64); 4], point: Point3, fraction: f64, cplane: CPlane) {
+        for (axis_index, axis) in [cplane.x, cplane.y].into_iter().enumerate() {
+            let value = dot(sub(point, cplane.origin), axis);
+            for (offset, is_min) in [(0, true), (1, false)] {
+                let slot = &mut extrema[axis_index * 2 + offset];
+                if if is_min { value < slot.0 } else { value > slot.0 } {
+                    *slot = (value, point, fraction);
+                }
+            }
+        }
+    }
+    let cost = degree.checked_mul(degree).and_then(|n| n.checked_mul(nurbs.poles.len().saturating_mul(2).saturating_add(50)))
+        .ok_or(Error::Overflow("NURBS quadrant work"))?;
+    let mut bounds = |from: f64, to: f64| -> Result<[f64; 4]> {
+        if canceled() { return Err(Error::Canceled); }
+        *work = work.checked_add(cost).ok_or(Error::Overflow("NURBS quadrant work"))?;
+        if *work > 1_000_000 { return Err(Error::Budget("NURBS quadrant work")); }
+        let owned = if from == 0. && to == 1. { None }
+            else { Some(om9_core::curve_ops::trim_curve_by_parameter(curve, from, to, limits)?) };
+        let piece = owned.as_ref().unwrap_or(curve);
+        let Curve::Nurbs(piece_nurbs) = piece else { return Err(Error::Unsupported("NURBS quadrant subcurve")) };
+        if piece_nurbs.weights.iter().any(|weight| !weight.is_finite() || *weight <= 0.) {
+            return Err(Error::Unsupported("NURBS quadrant weights"));
+        }
+        if owned.is_some() {
+            let local = om9_core::evaluation::CurveEvaluator::capture(piece, limits)?
+                .evaluate(Parameter::Fraction(0.5), 0, transform)?[0];
+            let original = evaluator.evaluate(Parameter::Fraction((from + to) * 0.5), 0, transform)?[0];
+            if distance(local, original) > tolerance * 0.0625 {
+                return Err(Error::Unsupported("NURBS quadrant subcurve parameterization"));
+            }
+        }
+        let mut range = [f64::INFINITY, f64::NEG_INFINITY, f64::INFINITY, f64::NEG_INFINITY];
+        for &pole in &piece_nurbs.poles {
+            if canceled() { return Err(Error::Canceled); }
+            let point = transform.point(pole)?;
+            for (index, axis) in [cplane.x, cplane.y].into_iter().enumerate() {
+                let value = dot(sub(point, cplane.origin), axis);
+                if !value.is_finite() { return Err(Error::Invalid("NURBS quadrant bounds")); }
+                range[index * 2] = range[index * 2].min(value);
+                range[index * 2 + 1] = range[index * 2 + 1].max(value);
+            }
+        }
+        for axis in 0..2 {
+            let margin = 128. * f64::EPSILON * range[axis * 2].abs().max(range[axis * 2 + 1].abs()).max(1.);
+            range[axis * 2] -= margin; range[axis * 2 + 1] += margin;
+        }
+        Ok(range)
+    };
+    let first = evaluator.evaluate(Parameter::Fraction(0.), 0, transform)?[0];
+    let values = [dot(sub(first, cplane.origin), cplane.x), dot(sub(first, cplane.origin), cplane.y)];
+    let mut extrema = [(values[0], first, 0.), (values[0], first, 0.), (values[1], first, 0.), (values[1], first, 0.)];
+    for fraction in [0.5, 1.] {
+        if canceled() { return Err(Error::Canceled); }
+        let point = evaluator.evaluate(Parameter::Fraction(fraction), 0, transform)?[0];
+        consider(&mut extrema, point, fraction, cplane);
+    }
+    let mut intervals = vec![Interval { from: 0., to: 1., bounds: bounds(0., 1.)? }];
+    while let Some(interval) = intervals.pop() {
+        if canceled() { return Err(Error::Canceled); }
+        let may_improve = interval.bounds[0] < extrema[0].0 - tolerance * 0.5
+            || interval.bounds[1] > extrema[1].0 + tolerance * 0.5
+            || interval.bounds[2] < extrema[2].0 - tolerance * 0.5
+            || interval.bounds[3] > extrema[3].0 + tolerance * 0.5;
+        if !may_improve { continue; }
+        let middle = (interval.from + interval.to) * 0.5;
+        if middle == interval.from || middle == interval.to { return Err(Error::Unsupported("NURBS quadrant parameter precision")); }
+        for (from, to) in [(interval.from, middle), (middle, interval.to)] {
+            let fraction = (from + to) * 0.5;
+            let point = evaluator.evaluate(Parameter::Fraction(fraction), 0, transform)?[0];
+            consider(&mut extrema, point, fraction, cplane);
+            if intervals.len() >= 2048 || ((intervals.len() + 1) as u64)
+                .saturating_mul(std::mem::size_of::<Interval>() as u64) > limits.max_bytes {
+                return Err(Error::Budget("NURBS quadrant intervals"));
+            }
+            intervals.try_reserve(1).map_err(|_| Error::Budget("NURBS quadrant intervals"))?;
+            intervals.push(Interval { from, to, bounds: bounds(from, to)? });
+        }
+    }
+    let mut result = Vec::with_capacity(4);
+    for pair in extrema.chunks_exact(2) {
+        let (low, high) = (pair[0], pair[1]);
+        let scale = low.0.abs().max(high.0.abs()).max(1.);
+        if high.0 - low.0 > f64::EPSILON * 64. * scale {
+            result.extend([(low.1, low.2), (high.1, high.2)]);
+        }
+    }
+    Ok(result)
+}
+
+/// Approximate the world-space half-length angle for an affinely placed arc.
+/// Simpson refinement and bisection are bounded; lack of convergence is explicit.
+fn ellipse_mid_angle(x: Point3, y: Point3, radius: f64, angles: [f64; 2], tolerance: f64,
+    work: &mut usize, canceled: &dyn Fn() -> bool) -> Result<f64> {
+    let span = angles[1] - angles[0];
+    let max_speed = radius * span.abs() * (dot(x, x).sqrt() + dot(y, y).sqrt());
+    if !span.is_finite() || span <= 0. || !max_speed.is_finite() || max_speed <= 0.
+        || !tolerance.is_finite() || tolerance <= 0. { return Err(Error::Invalid("ellipse midpoint input")); }
+    let mut integrate = |end: f64| -> Result<f64> {
+        if end == 0. { return Ok(0.); }
+        let mut previous: Option<f64> = None;
+        let mut count = 16usize;
+        loop {
+            *work = work.checked_add(count + 1).ok_or(Error::Overflow("ellipse midpoint work"))?;
+            if *work > 1_000_000 { return Err(Error::Budget("ellipse midpoint work")); }
+            let step = end / count as f64;
+            let mut sum = 0.;
+            for index in 0..=count {
+                if index % 64 == 0 && canceled() { return Err(Error::Canceled); }
+                let angle = angles[0] + span * step * index as f64;
+                let velocity = add(mul(x, -angle.sin()), mul(y, angle.cos()));
+                let speed = radius * span * dot(velocity, velocity).sqrt();
+                if !speed.is_finite() { return Err(Error::Invalid("ellipse midpoint speed")); }
+                let weight = if index == 0 || index == count { 1. } else if index % 2 == 0 { 2. } else { 4. };
+                sum += weight * speed;
+            }
+            let value = sum * step / 3.;
+            if !value.is_finite() { return Err(Error::Invalid("ellipse midpoint length")); }
+            if let Some(old) = previous && (value - old).abs() <= tolerance / 32. { return Ok(value); }
+            if count >= 4096 { return Err(Error::Unsupported("ellipse midpoint integration did not converge")); }
+            previous = Some(value);
+            count *= 2;
+        }
+    };
+    let total = integrate(1.)?;
+    let (mut low, mut high) = (0., 1.);
+    for _ in 0..64 {
+        if canceled() { return Err(Error::Canceled); }
+        let middle = (low + high) * 0.5;
+        if middle == low || middle == high { break; }
+        if integrate(middle)? < total * 0.5 { low = middle; } else { high = middle; }
+        if max_speed * (high - low) <= tolerance * 0.25 {
+            return Ok(angles[0] + span * (low + high) * 0.5);
+        }
+    }
+    Err(Error::Unsupported("ellipse midpoint parameter did not converge"))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -780,15 +1631,38 @@ fn circle_snaps(
     x: Point3,
     y: Point3,
     radius: f64,
+    angles: [f64; 2],
     camera: &Camera,
     viewport: Viewport,
     cursor: [f64; 2],
     settings: SnapSettings,
     from: Option<Point3>,
+    cplane: CPlane,
+    tolerance: f64,
     out: &mut Vec<SnapCandidate>,
+    work: &mut usize,
+    canceled: &dyn Fn() -> bool,
+    defer_circle_eval: bool,
 ) -> Result<()> {
     if !radius.is_finite() || radius <= 0. {
         return Ok(());
+    }
+    let point_at = |angle: f64| add(center, add(mul(x, radius * angle.cos()), mul(y, radius * angle.sin())));
+    if settings.is_effective(SnapKind::End) {
+        for angle in angles {
+            push(SnapKind::End, Some(root), point_at(angle), Some(normal(x, y)), Some(angle), camera,
+                viewport, cursor, settings.radius_px, out)?;
+        }
+    }
+    let (xx, xy, yy) = (dot(x, x), dot(x, y), dot(y, y));
+    if settings.is_effective(SnapKind::Mid) && !defer_circle_eval {
+        let angle = if (xx - yy).abs() <= 1e-12 * xx.max(yy) && xy.abs() <= 1e-12 * xx.max(yy) {
+            0.5 * (angles[0] + angles[1])
+        } else {
+            ellipse_mid_angle(x, y, radius, angles, tolerance, work, canceled)?
+        };
+        push(SnapKind::Mid, Some(root), point_at(angle), Some(normal(x, y)), Some(angle), camera,
+            viewport, cursor, settings.radius_px, out)?;
     }
     push(
         SnapKind::Center,
@@ -802,58 +1676,55 @@ fn circle_snaps(
         settings.radius_px,
         out,
     )?;
-    for (index, direction) in [x, y, [-x[0], -x[1], -x[2]], [-y[0], -y[1], -y[2]]]
-        .into_iter()
-        .enumerate()
-    {
-        let point = add(center, mul(direction, radius));
-        push(
-            SnapKind::Quadrant,
-            Some(root),
-            point,
-            Some(normal(x, y)),
-            Some(index as f64),
-            camera,
-            viewport,
-            cursor,
-            settings.radius_px,
-            out,
-        )?;
+    if settings.is_effective(SnapKind::Quadrant) {
+        for axis in [cplane.x, cplane.y] {
+            let (a, b) = (dot(x, axis), dot(y, axis));
+            if a.hypot(b) <= f64::EPSILON { continue; }
+            let angle = b.atan2(a);
+            for angle in [angle, angle + std::f64::consts::PI] {
+                if !angle_on_arc(angle, angles) { continue; }
+                let point = add(center, add(mul(x, radius * angle.cos()), mul(y, radius * angle.sin())));
+                push(SnapKind::Quadrant, Some(root), point, Some(normal(x, y)), Some(angle), camera,
+                    viewport, cursor, settings.radius_px, out)?;
+            }
+        }
+        if (xx - yy).hypot(2. * xy) > 1e-12 * xx.max(yy) {
+            let principal = 0.5 * (2. * xy).atan2(xx - yy);
+            for index in 0..4 {
+                let angle = principal + index as f64 * std::f64::consts::FRAC_PI_2;
+                if !angle_on_arc(angle, angles) { continue; }
+                let point = add(center, add(mul(x, radius * angle.cos()), mul(y, radius * angle.sin())));
+                push(SnapKind::Quadrant, Some(root), point, Some(normal(x, y)), Some(angle), camera,
+                    viewport, cursor, settings.radius_px, out)?;
+            }
+        }
     }
-    // Near: project the cursor ray onto the circle plane and clamp to the radius.
-    let ray_point = screen_ray_point(camera, viewport, cursor)?;
-    let local_u = dot(sub(ray_point, center), x);
-    let local_v = dot(sub(ray_point, center), y);
-    let angle = local_v.atan2(local_u);
-    let near = add(
-        center,
-        add(mul(x, radius * angle.cos()), mul(y, radius * angle.sin())),
-    );
-    push(
-        SnapKind::Near,
-        Some(root),
-        near,
-        Some(normal(x, y)),
-        Some(angle),
-        camera,
-        viewport,
-        cursor,
-        settings.radius_px,
-        out,
-    )?;
+    if settings.is_effective(SnapKind::Near) && !defer_circle_eval
+        && let Some((near, angle)) = circle_near_screen(center, x, y, radius, angles, camera, viewport, cursor,
+            settings.radius_px, work, canceled)?
+    {
+        push(SnapKind::Near, Some(root), near, Some(normal(x, y)), Some(angle), camera,
+            viewport, cursor, settings.radius_px, out)?;
+    }
 
     let Some(from) = from else {
         return Ok(());
     };
     let delta = sub(from, center);
-    let u = dot(delta, x);
-    let v = dot(delta, y);
+    let (xx, xy, yy) = (dot(x, x), dot(x, y), dot(y, y));
+    let determinant = xx * yy - xy * xy;
+    if determinant <= f64::EPSILON * xx * yy { return Ok(()); }
+    let (dx, dy) = (dot(delta, x), dot(delta, y));
+    let u = (dx * yy - dy * xy) / determinant;
+    let v = (dy * xx - dx * xy) / determinant;
     let distance = u.hypot(v);
-    if distance > radius {
+    if settings.is_effective(SnapKind::Tangent) && distance >= radius
+        && dot(delta, normal(x, y)).abs() <= tolerance {
         let base = v.atan2(u);
         let offset = (radius / distance).acos();
         for sign in [-1.0, 1.0] {
             let angle = base + sign * offset;
+            if !angle_on_arc(angle, angles) { continue; }
             let point = add(
                 center,
                 add(mul(x, radius * angle.cos()), mul(y, radius * angle.sin())),
@@ -872,25 +1743,325 @@ fn circle_snaps(
             )?;
         }
     }
-    if distance > 0. {
-        let direction = add(mul(x, u / distance), mul(y, v / distance));
-        for sign in [-1.0, 1.0] {
-            let point = add(center, mul(direction, sign * radius));
-            push(
-                SnapKind::Perpendicular,
-                Some(root),
-                point,
-                Some(normal(x, y)),
-                None,
-                camera,
-                viewport,
-                cursor,
-                settings.radius_px,
-                out,
-            )?;
+    if settings.is_effective(SnapKind::Perpendicular) && !defer_circle_eval {
+        for (point, angle) in ellipse_perpendiculars(center, x, y, radius, angles, from, tolerance, work, canceled)? {
+            push(SnapKind::Perpendicular, Some(root), point, Some(normal(x, y)), Some(angle),
+                camera, viewport, cursor, settings.radius_px, out)?;
         }
     }
     Ok(())
+}
+
+/// Bound the trigonometric normal equation by a derivative Lipschitz bound,
+/// retaining even-multiplicity roots that do not cross zero.
+fn ellipse_perpendiculars(center: Point3, x: Point3, y: Point3, radius: f64, angles: [f64; 2],
+    from: Point3, tolerance: f64, work: &mut usize, canceled: &dyn Fn() -> bool) -> Result<Vec<(Point3, f64)>> {
+    let delta = sub(from, center);
+    let (a, b) = (dot(delta, x), dot(delta, y));
+    let (xx, xy, yy) = (dot(x, x), dot(x, y), dot(y, y));
+    let derivative_bound = a.abs() + b.abs() + radius * ((xx - yy).abs() + 2. * xy.abs());
+    let speed_bound = radius * (xx.sqrt() + yy.sqrt());
+    let span = (angles[1] - angles[0]).min(std::f64::consts::TAU);
+    if !derivative_bound.is_finite() || !speed_bound.is_finite() || speed_bound <= 0.
+        || !span.is_finite() || span <= 0. || !tolerance.is_finite() || tolerance <= 0. {
+        return Err(Error::Invalid("ellipse perpendicular input"));
+    }
+    // Every point is perpendicular in this degenerate case, so there is no
+    // discrete candidate; other snap kinds should still be available.
+    if derivative_bound == 0. { return Ok(Vec::new()); }
+    let residual = |angle: f64| {
+        -a * angle.sin() + b * angle.cos() + radius * (0.5 * (xx - yy) * (2. * angle).sin() - xy * (2. * angle).cos())
+    };
+    let mut stack = vec![(angles[0], angles[0] + span)];
+    let mut hits: Vec<(Point3, f64)> = Vec::new();
+    while let Some((low, high)) = stack.pop() {
+        if canceled() { return Err(Error::Canceled); }
+        *work = work.checked_add(1).ok_or(Error::Overflow("ellipse perpendicular work"))?;
+        if *work > 1_000_000 { return Err(Error::Budget("ellipse perpendicular work")); }
+        let middle = low * 0.5 + high * 0.5;
+        if middle == low || middle == high { return Err(Error::Unsupported("ellipse perpendicular precision")); }
+        let value = residual(middle);
+        let margin = 128. * f64::EPSILON * derivative_bound.max(value.abs()).max(1.);
+        if !value.is_finite() || !margin.is_finite() { return Err(Error::Invalid("ellipse perpendicular residual")); }
+        if value.abs() > derivative_bound * (high - low) * 0.5 + margin { continue; }
+        if speed_bound * (high - low) <= tolerance * 0.25 {
+            let (sin, cos) = middle.sin_cos();
+            let point = add(center, add(mul(x, radius * cos), mul(y, radius * sin)));
+            let derivative = add(mul(x, -radius * sin), mul(y, radius * cos));
+            let speed = dot(derivative, derivative).sqrt();
+            let error = dot(sub(from, point), derivative).abs() / speed;
+            if speed.is_finite() && speed > 0. && error.is_finite() && error <= tolerance {
+                if !hits.iter().any(|(old, _)| distance(*old, point) <= tolerance) {
+                    if hits.len() >= 256 { return Err(Error::Budget("ellipse perpendicular candidates")); }
+                    hits.try_reserve(1).map_err(|_| Error::Budget("ellipse perpendicular candidates"))?;
+                    hits.push((point, middle));
+                }
+                continue;
+            }
+        }
+        if stack.len() >= 2048 { return Err(Error::Budget("ellipse perpendicular intervals")); }
+        stack.try_reserve(2).map_err(|_| Error::Budget("ellipse perpendicular intervals"))?;
+        stack.push((middle, high)); stack.push((low, middle));
+    }
+    Ok(hits)
+}
+
+/// Bounded screen-space search, followed by source-parameter refinement. The returned
+/// point is evaluated on the transformed analytic curve, never on display tessellation.
+fn angle_on_arc(angle: f64, angles: [f64; 2]) -> bool {
+    let span = angles[1] - angles[0];
+    span.is_finite() && span > 0. && (span >= std::f64::consts::TAU
+        || (angle - angles[0]).rem_euclid(std::f64::consts::TAU) <= span + 1e-12)
+}
+
+/// Subdivide source intervals using projected positive-weight control hulls.
+/// The screen-distance tolerance is numerical, not a formal floating-point proof.
+fn nurbs_near_screen(curve: &Curve, evaluator: &om9_core::evaluation::CurveEvaluator<'_>, transform: Transform,
+    camera: &Camera, viewport: Viewport, cursor: [f64; 2], radius: f64, degree: usize,
+    limits: &om9_core::budget::Limits, work: &mut usize, canceled: &dyn Fn() -> bool) -> Result<Option<(Point3, f64)>> {
+    #[derive(Clone, Copy)]
+    struct Interval { from: f64, to: f64, lower: f64 }
+    let Curve::Nurbs(nurbs) = curve else { return Err(Error::Invalid("NURBS near source")) };
+    let cost = degree.checked_mul(degree).and_then(|n| n.checked_mul(nurbs.poles.len().saturating_mul(2).saturating_add(50)))
+        .ok_or(Error::Overflow("NURBS near work"))?;
+    let projector = camera.projector(viewport)?;
+    let sample = |fraction: f64| -> Result<(f64, Point3)> {
+        if canceled() { return Err(Error::Canceled); }
+        let point = evaluator.evaluate(om9_core::evaluation::Parameter::Fraction(fraction), 0, transform)?[0];
+        let score = projector.project(point)?.map_or(f64::INFINITY, |projected|
+            (projected.screen[0] - cursor[0]).hypot(projected.screen[1] - cursor[1]));
+        Ok((score, point))
+    };
+    let forward = sub(camera.target, camera.eye);
+    let magnitude = dot(forward, forward).sqrt();
+    if !magnitude.is_finite() || magnitude <= 0. { return Err(Error::Invalid("NURBS near camera")); }
+    let forward = mul(forward, 1. / magnitude);
+    let mut lower_bound = |from: f64, to: f64| -> Result<Option<f64>> {
+        if canceled() { return Err(Error::Canceled); }
+        *work = work.checked_add(cost).ok_or(Error::Overflow("NURBS near work"))?;
+        if *work > 1_000_000 { return Err(Error::Budget("NURBS near work")); }
+        let owned = if from == 0. && to == 1. { None }
+            else { Some(om9_core::curve_ops::trim_curve_by_parameter(curve, from, to, limits)?) };
+        let piece = owned.as_ref().unwrap_or(curve);
+        let Curve::Nurbs(piece) = piece else { return Err(Error::Unsupported("NURBS near subcurve")) };
+        if piece.weights.iter().any(|weight| !weight.is_finite() || *weight <= 0.) {
+            return Err(Error::Unsupported("NURBS near weights"));
+        }
+        let mut min_depth = f64::INFINITY;
+        let mut max_depth = f64::NEG_INFINITY;
+        let mut low = [f64::INFINITY; 2];
+        let mut high = [f64::NEG_INFINITY; 2];
+        let mut clipped = false;
+        for &pole in &piece.poles {
+            if canceled() { return Err(Error::Canceled); }
+            let point = transform.point(pole)?;
+            let depth = dot(sub(point, camera.eye), forward);
+            min_depth = min_depth.min(depth); max_depth = max_depth.max(depth);
+            if let Some(projected) = projector.project(point)? {
+                for axis in 0..2 { low[axis] = low[axis].min(projected.screen[axis]); high[axis] = high[axis].max(projected.screen[axis]); }
+            } else { clipped = true; }
+        }
+        if !min_depth.is_finite() || !max_depth.is_finite() { return Err(Error::Invalid("NURBS near hull")); }
+        if max_depth < camera.near_mm || min_depth > camera.far_mm { return Ok(None); }
+        if clipped { return Ok(Some(0.)); }
+        let scale = low.iter().chain(high.iter()).map(|value| value.abs()).fold(1f64, f64::max);
+        let margin = 128. * f64::EPSILON * scale;
+        let dx = (low[0] - margin - cursor[0]).max(0.).max(cursor[0] - high[0] - margin);
+        let dy = (low[1] - margin - cursor[1]).max(0.).max(cursor[1] - high[1] - margin);
+        Ok(Some(dx.hypot(dy)))
+    };
+    let mut best = (f64::INFINITY, 0., [0.; 3]);
+    for fraction in [0., 0.5, 1.] {
+        let (score, point) = sample(fraction)?;
+        if score < best.0 { best = (score, fraction, point); }
+    }
+    let mut intervals = Vec::new();
+    if let Some(lower) = lower_bound(0., 1.)? { intervals.push(Interval { from: 0., to: 1., lower }); }
+    while !intervals.is_empty() {
+        if canceled() { return Err(Error::Canceled); }
+        let index = intervals.iter().enumerate().min_by(|(_, a), (_, b)| a.lower.total_cmp(&b.lower))
+            .map(|(index, _)| index).expect("nonempty intervals");
+        let interval = intervals.swap_remove(index);
+        if interval.lower > radius && best.0 > radius { continue; }
+        if best.0.is_finite() && interval.lower >= (best.0 - 0.05).max(0.) { continue; }
+        let middle = (interval.from + interval.to) * 0.5;
+        if middle == interval.from || middle == interval.to { return Err(Error::Unsupported("NURBS near parameter precision")); }
+        for (from, to) in [(interval.from, middle), (middle, interval.to)] {
+            let fraction = (from + to) * 0.5;
+            let (score, point) = sample(fraction)?;
+            if score < best.0 { best = (score, fraction, point); }
+            if let Some(lower) = lower_bound(from, to)? {
+                if intervals.len() >= 2048 || ((intervals.len() + 1) as u64)
+                    .saturating_mul(std::mem::size_of::<Interval>() as u64) > limits.max_bytes {
+                    return Err(Error::Budget("NURBS near intervals"));
+                }
+                intervals.try_reserve(1).map_err(|_| Error::Budget("NURBS near intervals"))?;
+                intervals.push(Interval { from, to, lower });
+            }
+        }
+    }
+    Ok((best.0.is_finite() && best.0 <= radius).then_some((best.2, best.1)))
+}
+
+/// Bound half world-space arc length using the endpoint chord and the positive-
+/// weight control polygon of each source subcurve. Floating-point arithmetic and
+/// subcurve construction still require independent numerical validation.
+fn nurbs_midpoint(curve: &Curve, evaluator: &om9_core::evaluation::CurveEvaluator<'_>, transform: Transform,
+    degree: usize, minimum_samples: usize, tolerance: f64, limits: &om9_core::budget::Limits,
+    work: &mut usize, canceled: &dyn Fn() -> bool) -> Result<(Point3, f64)> {
+    fn polygon_length(curve: &Curve, transform: Transform) -> Result<f64> {
+        match curve {
+            Curve::Nurbs(nurbs) => {
+                if nurbs.weights.iter().any(|weight| !weight.is_finite() || *weight <= 0.) {
+                    return Err(Error::Unsupported("NURBS midpoint weights"));
+                }
+                let mut length = 0.;
+                for pair in nurbs.poles.windows(2) {
+                    length += distance(transform.point(pair[0])?, transform.point(pair[1])?);
+                }
+                Ok(length)
+            }
+            Curve::Line { start, end, .. } => Ok(distance(transform.point(*start)?, transform.point(*end)?)),
+            Curve::Polycurve { segments, .. } => segments.iter().try_fold(0., |sum, part| Ok(sum + polygon_length(part, transform)?)),
+            Curve::Circle { .. } => Err(Error::Unsupported("NURBS midpoint subcurve")),
+        }
+    }
+    let poles = match curve { Curve::Nurbs(nurbs) => nurbs.poles.len(), _ => return Err(Error::Invalid("NURBS midpoint source")) };
+    let cost = degree.checked_mul(degree).and_then(|n| n.checked_mul(poles.saturating_mul(2).saturating_add(50)))
+        .ok_or(Error::Overflow("NURBS midpoint work"))?;
+    for count in [8usize, 16, 32, 64, 128, 256, 512, 1024] {
+        if canceled() { return Err(Error::Canceled); }
+        if count < minimum_samples { continue; }
+        if (count as u64 + 1) > limits.max_points
+            || (count as u64 + 1).saturating_mul(std::mem::size_of::<Point3>() as u64) > limits.max_bytes {
+            return Err(Error::Budget("NURBS midpoint points"));
+        }
+        let step_work = count.checked_mul(cost).ok_or(Error::Overflow("NURBS midpoint work"))?;
+        *work = work.checked_add(step_work).ok_or(Error::Overflow("NURBS midpoint work"))?;
+        if *work > 1_000_000 { return Err(Error::Budget("NURBS midpoint work")); }
+        let mut lower = [0.; 1025];
+        let mut upper = [0.; 1025];
+        let mut previous = evaluator.evaluate(om9_core::evaluation::Parameter::Fraction(0.), 0, transform)?[0];
+        for index in 0..count {
+            if canceled() { return Err(Error::Canceled); }
+            let from = index as f64 / count as f64;
+            let to = (index + 1) as f64 / count as f64;
+            let next = evaluator.evaluate(om9_core::evaluation::Parameter::Fraction(to), 0, transform)?[0];
+            let subcurve = om9_core::curve_ops::trim_curve_by_parameter(curve, from, to, limits)?;
+            let local_mid = om9_core::evaluation::CurveEvaluator::capture(&subcurve, limits)?
+                .evaluate(om9_core::evaluation::Parameter::Fraction(0.5), 0, transform)?[0];
+            let source_mid = evaluator.evaluate(om9_core::evaluation::Parameter::Fraction((from + to) * 0.5), 0, transform)?[0];
+            if distance(local_mid, source_mid) > tolerance * 0.0625 {
+                return Err(Error::Unsupported("NURBS midpoint subcurve parameterization"));
+            }
+            let chord = distance(previous, next);
+            let polygon = polygon_length(&subcurve, transform)?;
+            let roundoff = f64::EPSILON * 128. * chord.max(polygon).max(1.);
+            lower[index + 1] = lower[index] + (chord - roundoff).max(0.);
+            upper[index + 1] = upper[index] + polygon.max(chord) + roundoff;
+            previous = next;
+        }
+        if !lower[count].is_finite() || !upper[count].is_finite() || upper[count] <= 0. {
+            return Err(Error::Invalid("NURBS midpoint length"));
+        }
+        let earliest = (1..=count).find(|&index| upper[index] >= lower[count] * 0.5).unwrap_or(count) - 1;
+        let latest = (1..=count).find(|&index| lower[index] >= upper[count] * 0.5).unwrap_or(count);
+        if upper[count] - lower[count] > tolerance * 0.5 { continue; }
+        let (mut left, mut right) = (earliest as f64 / count as f64, latest as f64 / count as f64);
+        for _ in 0..40 {
+            if canceled() { return Err(Error::Canceled); }
+            let fraction = (left + right) * 0.5;
+            let index = ((fraction * count as f64).floor() as usize).min(count - 1);
+            let start = index as f64 / count as f64;
+            let point = evaluator.evaluate(om9_core::evaluation::Parameter::Fraction(fraction), 0, transform)?[0];
+            let base = evaluator.evaluate(om9_core::evaluation::Parameter::Fraction(start), 0, transform)?[0];
+            let (mut partial_low, mut partial_high) = (0., 0.);
+            if fraction > start {
+                *work = work.checked_add(cost).ok_or(Error::Overflow("NURBS midpoint work"))?;
+                if *work > 1_000_000 { return Err(Error::Budget("NURBS midpoint work")); }
+                let partial = om9_core::curve_ops::trim_curve_by_parameter(curve, start, fraction, limits)?;
+                let chord = distance(base, point);
+                let polygon = polygon_length(&partial, transform)?;
+                let roundoff = f64::EPSILON * 128. * chord.max(polygon).max(1.);
+                partial_low = (chord - roundoff).max(0.);
+                partial_high = polygon.max(chord) + roundoff;
+            }
+            let (prefix_low, prefix_high) = (lower[index] + partial_low, upper[index] + partial_high);
+            let (target_low, target_high) = (lower[count] * 0.5, upper[count] * 0.5);
+            let worst = (prefix_low - target_high).abs().max((prefix_high - target_low).abs());
+            if worst <= tolerance * 0.5 { return Ok((point, fraction)); }
+            if prefix_high < target_low { left = fraction; }
+            else if prefix_low > target_high { right = fraction; }
+            else { break; } // Refine the length bounds before choosing a side.
+        }
+    }
+    Err(Error::Unsupported("NURBS midpoint bounds did not converge within budget"))
+}
+
+fn circle_near_screen(center: Point3, x: Point3, y: Point3, radius: f64, angles: [f64; 2], camera: &Camera,
+    viewport: Viewport, cursor: [f64; 2], radius_px: f64, work: &mut usize,
+    canceled: &dyn Fn() -> bool) -> Result<Option<(Point3, f64)>> {
+    let point_at = |angle: f64| add(center, add(mul(x, radius * angle.cos()), mul(y, radius * angle.sin())));
+    let span = (angles[1] - angles[0]).min(std::f64::consts::TAU);
+    if !span.is_finite() || span <= 0. { return Ok(None); }
+    let projector = camera.projector(viewport)?;
+    let forward = sub(camera.target, camera.eye);
+    let forward_length = dot(forward, forward).sqrt();
+    if !forward_length.is_finite() || forward_length <= 0. { return Err(Error::Invalid("arc near camera")); }
+    let forward = mul(forward, 1. / forward_length);
+    let mut best: Option<(f64, f64)> = None;
+    let consider = |angle: f64, best: &mut Option<(f64, f64)>| -> Result<()> {
+        if let Some(p) = projector.project(point_at(angle))? {
+            let score = (p.screen[0] - cursor[0]).hypot(p.screen[1] - cursor[1]);
+            if score.is_finite() && best.is_none_or(|(old, _)| score < old) { *best = Some((score, angle)); }
+        }
+        Ok(())
+    };
+    consider(angles[0], &mut best)?; consider(angles[0] + span, &mut best)?;
+    let mut stack = vec![(angles[0], angles[0] + span)];
+    while let Some((low, high)) = stack.pop() {
+        if canceled() { return Err(Error::Canceled); }
+        *work = work.checked_add(1).ok_or(Error::Overflow("arc near work"))?;
+        if *work > 1_000_000 { return Err(Error::Budget("arc near work")); }
+        let middle = low * 0.5 + high * 0.5;
+        if middle == low || middle == high { return Err(Error::Unsupported("arc near parameter precision")); }
+        consider(middle, &mut best)?;
+        let mut lower = [0.; 3]; let mut upper = [0.; 3];
+        for axis in 0..3 {
+            let a = radius * x[axis]; let b = radius * y[axis];
+            let value = |angle: f64| center[axis] + a * angle.cos() + b * angle.sin();
+            let (mut lo, mut hi) = (value(low).min(value(high)), value(low).max(value(high)));
+            let phase = b.atan2(a);
+            for critical in [phase, phase + std::f64::consts::PI] {
+                let turn = ((low - critical) / std::f64::consts::TAU).ceil();
+                let angle = critical + turn * std::f64::consts::TAU;
+                if angle >= low && angle <= high { let v = value(angle); lo = lo.min(v); hi = hi.max(v); }
+            }
+            let margin = 256. * f64::EPSILON * lo.abs().max(hi.abs()).max(1.);
+            lower[axis] = lo - margin; upper[axis] = hi + margin;
+        }
+        let corners: [Point3; 8] = std::array::from_fn(|index| std::array::from_fn(|axis|
+            if index & (1 << axis) == 0 { lower[axis] } else { upper[axis] }));
+        let depths = corners.map(|p| dot(sub(p, camera.eye), forward));
+        if depths.iter().all(|depth| *depth < camera.near_mm)
+            || depths.iter().all(|depth| *depth > camera.far_mm) { continue; }
+        let bounds = projector.project_box(corners)?;
+        if let Some(bounds) = bounds {
+            let dx = (bounds[0][0] - cursor[0]).max(0.).max(cursor[0] - bounds[1][0]);
+            let dy = (bounds[0][1] - cursor[1]).max(0.).max(cursor[1] - bounds[1][1]);
+            let lower_bound = dx.hypot(dy);
+            let threshold = best.map_or(radius_px, |(score, _)| score.min(radius_px));
+            if lower_bound > threshold + 1e-6 { continue; }
+            let diagonal = (bounds[1][0] - bounds[0][0]).hypot(bounds[1][1] - bounds[0][1]);
+            if diagonal <= 0.05 && best.is_some_and(|(score, _)| score <= radius_px && score <= lower_bound + 0.05) {
+                continue;
+            }
+        }
+        if stack.len() >= 2048 { return Err(Error::Budget("arc near intervals")); }
+        stack.try_reserve(2).map_err(|_| Error::Budget("arc near intervals"))?;
+        stack.push((middle, high)); stack.push((low, middle));
+    }
+    Ok(best.filter(|(score, _)| *score <= radius_px).map(|(_, angle)| (point_at(angle), angle)))
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -920,18 +2091,12 @@ fn push(
             distance_px: distance,
             normal,
             parameter,
+            source: None,
+            second_source: None,
             surface_source: None,
         });
     }
     Ok(())
-}
-
-fn screen_ray_point(camera: &Camera, viewport: Viewport, cursor: [f64; 2]) -> Result<Point3> {
-    let ray = camera.ray(cursor, viewport)?;
-    if let Ok(Some(point)) = ray.intersect_plane(CPlane::world_xy()) {
-        return Ok(point);
-    }
-    Ok(add(ray.origin, ray.direction))
 }
 
 fn transform_vector(transform: om9_core::geometry::Transform, vector: Point3) -> Result<Point3> {
@@ -962,6 +2127,28 @@ fn closest_on_segment(point: Point3, a: Point3, b: Point3) -> (Point3, f64) {
     }
     let t = (dot(sub(point, a), ab) / length).clamp(0., 1.);
     (add(a, mul(ab, t)), t)
+}
+
+fn closest_segment_on_screen(camera: &Camera, viewport: Viewport, cursor: [f64; 2], a: Point3, b: Point3)
+    -> Result<Option<(Point3, f64)>> {
+    let Some([start, end]) = camera.clip_segment(a, b)? else { return Ok(None) };
+    let (Some(first), Some(last)) = (camera.project(start, viewport)?, camera.project(end, viewport)?) else { return Ok(None) };
+    let delta = [last.screen[0] - first.screen[0], last.screen[1] - first.screen[1]];
+    let denominator = delta[0] * delta[0] + delta[1] * delta[1];
+    let s = if denominator > 0. {
+        (((cursor[0] - first.screen[0]) * delta[0] + (cursor[1] - first.screen[1]) * delta[1]) / denominator).clamp(0., 1.)
+    } else if first.depth <= last.depth { 0. } else { 1. };
+    let local = match camera.projection {
+        crate::camera::Projection::Orthographic { .. } => s,
+        crate::camera::Projection::Perspective { .. } => {
+            let divisor = last.depth * (1. - s) + first.depth * s;
+            if divisor <= 0. || !divisor.is_finite() { return Err(Error::Invalid("snap perspective interpolation")); }
+            s * first.depth / divisor
+        }
+    };
+    let point = add(start, mul(sub(end, start), local));
+    let (_, fraction) = closest_on_segment(point, a, b);
+    Ok(Some((point, fraction)))
 }
 
 fn line_intersection(a0: Point3, a1: Point3, b0: Point3, b1: Point3) -> Option<(Point3, f64)> {
@@ -1009,8 +2196,46 @@ fn segment_intersection(left: Segment, right: Segment) -> Option<(Point3, f64)> 
     ))
 }
 
-fn segment_length(segment: Segment) -> f64 {
-    distance(segment.a, segment.b)
+fn segment_ellipse_intersections(segment: Segment, ellipse: Ellipse, tolerance: f64) -> Vec<Point3> {
+    let (xx, xy, yy) = (dot(ellipse.x, ellipse.x), dot(ellipse.x, ellipse.y), dot(ellipse.y, ellipse.y));
+    let determinant = xx * yy - xy * xy;
+    if determinant <= f64::EPSILON * xx * yy || ellipse.radius <= 0. { return Vec::new(); }
+    let coordinates = |point: Point3| {
+        let dx = dot(point, ellipse.x);
+        let dy = dot(point, ellipse.y);
+        [(dx * yy - dy * xy) / determinant, (dy * xx - dx * xy) / determinant]
+    };
+    let offset = sub(segment.a, ellipse.center);
+    let direction = sub(segment.b, segment.a);
+    let n = normal(ellipse.x, ellipse.y);
+    let height = dot(offset, n);
+    let slope = dot(direction, n);
+    let mut parameters = [f64::NAN; 2];
+    if slope.abs() > 1e-12 * dot(direction, direction).sqrt() {
+        parameters[0] = -height / slope;
+    } else if height.abs() <= tolerance {
+        let [u, v] = coordinates(offset);
+        let [du, dv] = coordinates(direction);
+        let (a, b, c) = (du * du + dv * dv, 2. * (u * du + v * dv), u * u + v * v - ellipse.radius * ellipse.radius);
+        let discriminant = b * b - 4. * a * c;
+        if a > 0. && discriminant >= 0. {
+            let root = discriminant.sqrt();
+            parameters = [(-b - root) / (2. * a), (-b + root) / (2. * a)];
+        }
+    }
+    let mut points = Vec::new();
+    for t in parameters {
+        if !(0.0..=1.0).contains(&t) { continue; }
+        let on_line = add(segment.a, mul(direction, t));
+        let [u, v] = coordinates(sub(on_line, ellipse.center));
+        let angle = v.atan2(u);
+        if !angle_on_arc(angle, ellipse.angles) { continue; }
+        let on_ellipse = add(ellipse.center, add(mul(ellipse.x, ellipse.radius * angle.cos()), mul(ellipse.y, ellipse.radius * angle.sin())));
+        if distance(on_line, on_ellipse) <= tolerance && points.iter().all(|point| distance(*point, on_ellipse) > tolerance) {
+            points.push(on_ellipse);
+        }
+    }
+    points
 }
 
 fn ray_triangle(

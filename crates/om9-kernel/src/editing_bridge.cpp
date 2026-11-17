@@ -1081,6 +1081,11 @@ static void emit_edge_curves(const TopTools_IndexedMapOfShape& edges, const int*
   }
 }
 
+class FaceWitnessMiss : public std::invalid_argument {
+ public:
+  using std::invalid_argument::invalid_argument;
+};
+
 int resolve_source_face(const TopTools_IndexedMapOfShape& faces, const double* triangle,
                         double tolerance, double vertex_tolerance, size_t max_nodes);
 
@@ -1151,7 +1156,7 @@ static TopoDS_Face isocurve_ray_face(const char* source, size_t length, size_t m
    if (!std::isfinite(distance)) throw std::invalid_argument("isocurve ray: invalid distance");
    if (distance<best_distance) {best=i;best_distance=distance;}
   }
-  if (!best || best_distance>max_distance) throw std::invalid_argument("isocurve ray: no matching face");
+  if (!best || best_distance>max_distance) throw FaceWitnessMiss("isocurve ray: no matching face");
   if (witness_index>=0 && !intersections.Face(best).IsSame(faces(witness_index+1)))
    throw std::invalid_argument("isocurve ray: selected face mismatch");
   for (int i=1;i<=intersections.NbPnt();++i) if (i!=best) {
@@ -1174,6 +1179,7 @@ extern "C" int om9_occt_isocurve_ray_face_bounds(const char* source, size_t leng
   if (!std::isfinite(bounds[0]) || !std::isfinite(bounds[1]) || !std::isfinite(bounds[2]) || !std::isfinite(bounds[3]) ||
       bounds[0]>=bounds[1] || bounds[2]>=bounds[3]) throw std::invalid_argument("isocurve ray: invalid face bounds");
   return 0;
+ } catch (const FaceWitnessMiss& e) { if (message && capacity>0) std::snprintf(message,capacity,"%s",e.what()); return 3;
  } catch (const Standard_Failure& e) { if (message && capacity>0) std::snprintf(message,capacity,"%s",e.what()); return 2;
  } catch (const std::exception& e) { if (message && capacity>0) std::snprintf(message,capacity,"%s",e.what()); return 1;
  } catch (...) { if (message && capacity>0) std::snprintf(message,capacity,"Unknown isocurve ray failure"); return 2; }
@@ -1337,11 +1343,15 @@ extern "C" int om9_occt_all_edges_nurbs(const char* source, size_t length, size_
   TopTools_IndexedMapOfShape edges;
   TopExp::MapShapes(shape, TopAbs_EDGE, edges);
   const size_t total = size_t(edges.Extent());
-  if (!total || total > max_edges) throw std::length_error("edge curve: edge count budget");
+  if (total > max_edges) throw std::length_error("edge curve: edge count budget");
+  if (!total) {
+   if (boundary_only == 2) return 0;
+   throw std::length_error("edge curve: edge count budget");
+  }
   std::vector<int> indices;
   if (total > max_bytes / (2 * sizeof(int))) throw std::length_error("edge curve: index budget");
   indices.reserve(total);
-  if (boundary_only) {
+  if (boundary_only == 1) {
    std::vector<int> uses(total, 0);
    for (TopExp_Explorer faces(shape, TopAbs_FACE); faces.More(); faces.Next()) {
     for (TopExp_Explorer face_edges(faces.Current(), TopAbs_EDGE); face_edges.More(); face_edges.Next()) {
@@ -1366,7 +1376,10 @@ extern "C" int om9_occt_all_edges_nurbs(const char* source, size_t length, size_
    }
   }
   const size_t count = indices.size();
-  if (!count) throw std::invalid_argument(boundary_only ? "edge curve: no boundary edges" : "edge curve: no nondegenerate edges");
+  if (!count) {
+   if (boundary_only == 2) return 0;
+   throw std::invalid_argument(boundary_only == 1 ? "edge curve: no boundary edges" : "edge curve: no nondegenerate edges");
+  }
   if (prepare(context, count)) throw std::runtime_error("edge curve: output refused");
   emit_edge_curves(edges, indices.data(), count, max_points, max_nodes, max_bytes, max_degree, sink, context);
   return 0;
@@ -1611,6 +1624,67 @@ extern "C" int om9_occt_circular_edge(const char* source, size_t length, int ind
   if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what()); return 1;
  } catch (...) {
   if (message && capacity > 0) std::snprintf(message, capacity, "Unknown circular edge failure"); return 2;
+ }
+}
+
+// Emit source-local centers of analytically circular edges without promoting
+// the NURBS conversion to a circle or retaining native shape handles.
+extern "C" int om9_occt_circular_edge_centers(const char* source, size_t length,
+ size_t max_edges, size_t max_outputs, int (*checkpoint)(void*),
+ int (*sink)(void*, const double*), void* context, char* message, int capacity) {
+ try {
+  if (!source || !length || !checkpoint || !sink) throw std::invalid_argument("edge centers: missing input");
+  const TopoDS_Shape shape=read_shape(source,length,"edge centers");
+  TopTools_IndexedMapOfShape edges; TopExp::MapShapes(shape,TopAbs_EDGE,edges);
+  if (size_t(edges.Extent())>max_edges) throw std::length_error("edge centers: edge budget");
+  size_t count=0;
+  for (int i=1;i<=edges.Extent();++i) {
+   if (checkpoint(context)) throw std::runtime_error("edge centers: canceled or refused");
+   const TopoDS_Edge edge=TopoDS::Edge(edges(i));
+   if (BRep_Tool::Degenerated(edge)) continue;
+   const BRepAdaptor_Curve curve(edge);
+   if (curve.GetType()!=GeomAbs_Circle) continue;
+   if (++count>max_outputs) throw std::length_error("edge centers: output budget");
+   const gp_Pnt center=curve.Circle().Location();
+   const double xyz[3]={center.X(),center.Y(),center.Z()};
+   if (!std::all_of(xyz,xyz+3,[](double value){return std::isfinite(value);}))
+    throw std::runtime_error("edge centers: nonfinite center");
+   if (sink(context,xyz)) throw std::runtime_error("edge centers: output refused");
+  }
+  return 0;
+ } catch (const Standard_Failure& e) {
+  if (message && capacity>0) std::snprintf(message,capacity,"%s",e.what()); return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity>0) std::snprintf(message,capacity,"%s",e.what()); return 1;
+ } catch (...) {
+  if (message && capacity>0) std::snprintf(message,capacity,"Unknown edge centers failure"); return 2;
+ }
+}
+
+extern "C" int om9_occt_source_vertices(const char* source, size_t length,
+ size_t max_nodes, size_t max_outputs, int (*checkpoint)(void*),
+ int (*sink)(void*, const double*), void* context, char* message, int capacity) {
+ try {
+  if (!source || !length || !checkpoint || !sink) throw std::invalid_argument("source vertices: missing input");
+  const TopoDS_Shape shape=read_shape(source,length,"source vertices");
+  TopTools_IndexedMapOfShape vertices; TopExp::MapShapes(shape,TopAbs_VERTEX,vertices);
+  if (size_t(vertices.Extent())>max_nodes || size_t(vertices.Extent())>max_outputs)
+   throw std::length_error("source vertices: output budget");
+  for (int i=1;i<=vertices.Extent();++i) {
+   if (checkpoint(context)) throw std::runtime_error("source vertices: canceled or refused");
+   const gp_Pnt point=BRep_Tool::Pnt(TopoDS::Vertex(vertices(i)));
+   const double xyz[3]={point.X(),point.Y(),point.Z()};
+   if (!std::all_of(xyz,xyz+3,[](double value){return std::isfinite(value);}))
+    throw std::runtime_error("source vertices: nonfinite point");
+   if (sink(context,xyz)) throw std::runtime_error("source vertices: output refused");
+  }
+  return 0;
+ } catch (const Standard_Failure& e) {
+  if (message && capacity>0) std::snprintf(message,capacity,"%s",e.what()); return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity>0) std::snprintf(message,capacity,"%s",e.what()); return 1;
+ } catch (...) {
+  if (message && capacity>0) std::snprintf(message,capacity,"Unknown source vertices failure"); return 2;
  }
 }
 
@@ -1923,7 +1997,7 @@ int resolve_source_face(const TopTools_IndexedMapOfShape& faces, const double* t
   if (selected >= 0) throw std::invalid_argument("source face pick: ambiguous faces");
   selected = i - 1;
  }
- if (selected < 0) throw std::invalid_argument("source face pick: no matching face");
+ if (selected < 0) throw FaceWitnessMiss("source face pick: no matching face");
  return selected;
 }
 

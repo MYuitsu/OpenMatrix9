@@ -24,6 +24,12 @@ use super::{Controller, Error, Result};
 /// The panel's command-line grammar for one field, for the shared option formatter.
 pub const BUILDER_FIELDS: &[(&str, &str)] = &[
     ("Diameter", "diameter_mm"),
+    ("CenterX", "center_x_mm"),
+    ("CenterY", "center_y_mm"),
+    ("CenterZ", "center_z_mm"),
+    ("Center X", "center_x_mm"),
+    ("Center Y", "center_y_mm"),
+    ("Center Z", "center_z_mm"),
     ("Width", "width_mm"),
     ("Height", "height_mm"),
     ("Offset", "offset_mm"),
@@ -46,7 +52,7 @@ pub const BUILDER_FIELDS: &[(&str, &str)] = &[
 /// uses for the command-line route, so it opens the same ring rail session.
 pub fn builder_command(text: &str) -> Option<BuilderKind> {
     match text.trim().to_ascii_lowercase().as_str() {
-        "ringrail" | "ring rail" | "gvringrail" | "ringbuilder" | "ring builder" => {
+        "ringrail" | "ring rail" | "gvringrail" | "ringbuilder" | "ring builder" | "builderringrail" | "topiconringrail" | "ringrailtop" => {
             Some(BuilderKind::RingRail)
         }
         "railprofile" | "rail profile" | "gvrailprofile" | "profileplacer" => {
@@ -85,6 +91,12 @@ pub struct BuilderFieldView {
 }
 
 impl Controller {
+    pub fn builder_choice_label(&self, name: &str, value: &str) -> String {
+        if name == "standard" && self.builder.as_ref().is_some_and(|session| session.kind() == BuilderKind::RingRail) {
+            om9_core::ring_size::rail_system_label(value).into()
+        } else { value.into() }
+    }
+
     /// The panel's copy of the open builder fields. The panel never holds a second model.
     pub fn builder_field_views(&self) -> Vec<BuilderFieldView> {
         let Some(session) = self.builder.as_ref() else {
@@ -163,6 +175,7 @@ impl Controller {
     /// Start one builder from the current selection. The selected curves fill the command's
     /// roles in order; a wrong count or kind is refused before a panel appears.
     pub fn begin_builder(&mut self, kind: BuilderKind) -> Result<()> {
+        if self.ring_rail_history_pending() { return Err(Error::Busy); }
         if self.is_running() {
             return Err(Error::Busy);
         }
@@ -176,9 +189,8 @@ impl Controller {
     /// The selection entries one mode consumes, in command order. A ring rail has no input,
     /// so a selection left over from another tab is not an argument error there.
     fn builder_selection(&self, kind: BuilderKind) -> Vec<ObjectId> {
-        self.selection
-            .iter()
-            .copied()
+        self.selected_ordered()
+            .into_iter()
             .take(kind.input_roles().len())
             .collect()
     }
@@ -186,6 +198,7 @@ impl Controller {
     fn start_builder(&mut self, kind: BuilderKind, selection: &[ObjectId]) -> Result<()> {
         let document = &self.coordinator.world().documents[&self.document];
         let mut session = BuilderSession::new(kind, document, selection)?;
+        if kind == BuilderKind::RingRail { session.set_rail_shape(self.ring_rail_shape.clone(), self.coordinator.limits())?; }
         #[cfg(feature = "occt-brep")]
         let background = self.background_ring_preview_enabled && kind.ring_family().is_some();
         #[cfg(not(feature = "occt-brep"))]
@@ -215,6 +228,8 @@ impl Controller {
     /// A switch that cannot start the target restores the previous tab, so a failed switch
     /// never leaves the panel empty.
     pub fn switch_builder(&mut self, kind: BuilderKind) -> Result<()> {
+        if self.ring_rail_history_pending() { return Err(Error::Busy); }
+        if self.builder.as_ref().is_some_and(|session| session.kind() != kind) { self.ring_rail_replace = None; }
         if self
             .builder
             .as_ref()
@@ -447,6 +462,7 @@ impl Controller {
     /// Whether the open builder may edit anything: a locked layer or object makes the
     /// session read-only.
     pub fn builder_editable(&self) -> bool {
+        if self.ring_rail_history_pending() { return false; }
         let document = &self.coordinator.world().documents[&self.document];
         self.builder
             .as_ref()
@@ -489,6 +505,7 @@ impl Controller {
 
     /// Back to the values the builder opened with.
     pub fn builder_reset(&mut self) -> Result<()> {
+        if self.ring_rail_history_pending() { return Err(Error::Busy); }
         let selection: Vec<ObjectId> = self
             .builder
             .as_ref()
@@ -504,11 +521,16 @@ impl Controller {
                 .ok_or(Error::Missing("builder session"))?
                 .reset(document, &selection)?;
         }
+        if let Some(builder) = self.builder.as_ref().filter(|builder| builder.kind() == BuilderKind::RingRail) {
+            self.ring_rail_shape = builder.rail_shape().cloned();
+        }
         self.builder_refresh()
     }
 
     /// Escape: the preview is dropped and the document was never touched.
     pub fn builder_cancel(&mut self) -> bool {
+        if self.ring_rail_history_pending() { self.cancel_join_history_worker(); return true; }
+        if self.builder.as_ref().is_some_and(|session| session.kind() == BuilderKind::RingRail) { self.ring_rail_replace = None; }
         #[cfg(feature = "occt-brep")]
         self.cancel_ring_preview_candidate();
         let Some(session) = self.builder.take() else {
@@ -528,6 +550,12 @@ impl Controller {
     /// Commit the previewed feature in one transaction: insert, typed recipe and published
     /// result together, so one Undo removes the whole feature.
     pub fn builder_apply(&mut self) -> Result<()> {
+        if self.ring_rail_history_pending() { return Err(Error::Busy); }
+        if self.builder.as_ref().is_some_and(|session| session.kind() == BuilderKind::RingRail) {
+            if self.request_ring_rail_confirmation()? { return Ok(()); }
+            self.prepare_ring_rail_replacement()?;
+        }
+        self.builder_require_editable()?;
         #[cfg(feature = "occt-brep")]
         if self.background_ring_preview_enabled && self.background_ring_preview_pending() {
             self.ring_preview_apply_queued = true;
@@ -550,10 +578,12 @@ impl Controller {
         // Reopening a recorded feature adopts its identity, so Apply updates that object:
         // the published result must name the revision the Geometry mutation will produce.
         let editing = self.document().entities.contains_key(&plan.entity.id);
+        let replacing = kind == BuilderKind::RingRail && self.ring_rail_replacing();
+        let reset_placement = editing && replacing && self.document().entities[&plan.entity.id].placement != om9_core::geometry::Transform::identity();
         if editing {
-            let revision = self.document().entities[&plan.entity.id]
-                .geometry_revision
-                .wrapping_add(1);
+            let original = &self.document().entities[&plan.entity.id];
+            let revision = original.geometry_revision.checked_add(u64::from(original.geometry != plan.entity.geometry) + u64::from(reset_placement))
+                .ok_or(Error::Overflow("builder geometry revision"))?;
             plan.entity.geometry_revision = revision;
             plan.published.geometry_revision = revision;
         }
@@ -563,6 +593,18 @@ impl Controller {
         plan.recipe.policy.record = self.history_record;
         plan.recipe.policy.update = self.history_update;
         let record = self.history_record;
+        if editing && !reset_placement && self.document().entities[&plan.entity.id].geometry == plan.entity.geometry
+            && self.document().history.recipes.get(&plan.recipe.id) == Some(&plan.recipe)
+            && self.document().results.get(&plan.entity.id) == Some(&plan.published) {
+                self.builder = None;
+                self.ring_rail_replace = None;
+                self.builder_saved.clear();
+                self.applied_style = None;
+                if !self.addon_session.as_ref().is_some_and(|session| matches!(session.code.as_str(), "BuilderRingRail" | "TopIconRingRail")) {
+                    self.events.emit(crate::command_events::EventKind::Finished, kind.command(), "unchanged", None);
+                }
+                return Ok(());
+            }
         let old_scene = self.scene.as_ref().ok_or(Error::Missing("command scene"))?;
         if old_scene.epoch != self.coordinator.epoch() {
             return Err(Error::Stale("command scene"));
@@ -586,19 +628,21 @@ impl Controller {
             .get(&self.document)
             .ok_or(Error::Missing("document"))?
             .revision;
-        let mut mutations = if editing {
+        let mut mutations = if editing && self.document().entities[&plan.entity.id].geometry != plan.entity.geometry {
             vec![Mutation::Geometry {
                 source: self.document().stamp(plan.entity.id)?,
                 geometry: plan.entity.geometry.clone(),
             }]
-        } else {
+        } else if editing { Vec::new() } else {
             vec![Mutation::Insert {
                 document: self.document,
                 entity: plan.entity.clone(),
             }]
         };
-        if record || editing {
-            if editing {
+        if reset_placement { mutations.push(Mutation::Placement { source: self.document().stamp(plan.entity.id)?, placement: om9_core::geometry::Transform::identity() }); }
+        let existing_recipe = self.document().history.recipes.contains_key(&plan.recipe.id);
+        if record || (editing && existing_recipe) {
+            if existing_recipe {
                 mutations.push(Mutation::HistoryUpdate {
                     document: self.document,
                     expected_revision,
@@ -613,6 +657,13 @@ impl Controller {
                     published: vec![(plan.entity.id, plan.published.clone())],
                 });
             }
+        }
+        if kind == BuilderKind::RingRail { mutations.extend(self.ring_rail_current_mutations(plan.entity.id)?); }
+        if kind == BuilderKind::RingRail && editing && self.ring_rail_has_dependents(plan.entity.id)
+            && mutations.iter().any(|mutation| matches!(mutation, Mutation::Geometry { .. } | Mutation::Placement { .. })) {
+            self.request_ring_rail_history_worker(TransactionRequest::new(kind.title(), mutations))?;
+            self.events.emit(crate::command_events::EventKind::Progress, kind.command(), "updating dependent features", None);
+            return Ok(());
         }
         let mut prepared = self
             .coordinator
@@ -634,6 +685,7 @@ impl Controller {
             Err(error) => { self.reset_builder_preview_store_allowance()?; return Err(error); }
         };
         self.builder = None;
+        self.ring_rail_replace = None;
         self.builder_saved.clear();
         self.applied_style = None;
         if receipt.published || !record {
@@ -641,22 +693,26 @@ impl Controller {
             if record || editing {
                 self.sync_published(ChangeCause::Edit);
             }
-            self.events.emit(
-                crate::command_events::EventKind::Finished,
-                kind.command(),
-                "applied",
-                None,
-            );
+            if !(kind == BuilderKind::RingRail && self.addon_session.as_ref().is_some_and(|session|
+                matches!(session.code.as_str(), "BuilderRingRail" | "TopIconRingRail"))) {
+                self.events.emit(crate::command_events::EventKind::Finished, kind.command(), if replacing { "Ring Rail replaced" } else { "applied" }, None);
+            }
         }
         Ok(())
     }
 
     fn stage_builder_preview_representations(&self, prepared: &mut om9_core::transaction::PreparedTransaction,
         candidates: &mut [om9_core::brep::Brep], held: om9_core::budget::Usage) -> Result<()> {
+        Self::stage_builder_representations(&self.coordinator, prepared, candidates, held)
+    }
+
+    pub(super) fn stage_builder_representations(coordinator: &om9_core::transaction::TransactionCoordinator,
+        prepared: &mut om9_core::transaction::PreparedTransaction,
+        candidates: &mut [om9_core::brep::Brep], held: om9_core::budget::Usage) -> Result<()> {
         use om9_core::{brep::{BrepRepresentation, BrepRepresentationProfile, BrepSourceAccess, BrepSourceIdentity},
             budget::{Usage, memory::MemoryClass}};
         if candidates.is_empty() { return Ok(()); }
-        self.coordinator.begin_pending_brep_representations(prepared, candidates.len(), held)?;
+        coordinator.begin_pending_brep_representations(prepared, candidates.len(), held)?;
         for candidate in candidates {
             let source = candidate.to_canonical();
             if !prepared.candidate_world().documents.values().any(|document| document.entities.values()
@@ -676,23 +732,23 @@ impl Controller {
                 Some(owner) => owner,
                 None => {
                     let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
-                    let lease = self.coordinator.reserve_external_memory_with_allocated(MemoryClass::Kernel,
+                    let lease = coordinator.reserve_external_memory_with_allocated(MemoryClass::Kernel,
                         total, display, physical, held)?;
                     let owner = std::sync::Arc::new(std::sync::Mutex::new(lease));
                     owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(display + owner_bytes)?;
-                    candidate.bind_display_allocation_owner(owner.clone(), &self.coordinator.external_memory_account())?;
+                    candidate.bind_display_allocation_owner(owner.clone(), &coordinator.external_memory_account())?;
                     owner
                 }
             };
             {
                 let mut lease = owner.lock().unwrap_or_else(|e| e.into_inner());
-                if !lease.belongs_to(&self.coordinator.external_memory_account()) || lease.bytes() < total {
+                if !lease.belongs_to(&coordinator.external_memory_account()) || lease.bytes() < total {
                     return Err(Error::Invalid("builder BRep display owner"));
                 }
                 lease.set_allocated_bytes(display + owner_bytes)?;
             }
             let (source, representation) = candidate.clone().into_canonical_and_representation();
-            prepared.insert_pending_brep_representation(&source, representation, self.coordinator.limits(), &self.coordinator, held)?;
+            prepared.insert_pending_brep_representation(&source, representation, coordinator.limits(), coordinator, held)?;
             owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(total)?;
         }
         Ok(())
@@ -765,20 +821,22 @@ impl Controller {
         if let Some(rest) = lower.strip_prefix("preset=") {
             return Some(self.builder_set_preset(rest.trim()));
         }
-        if let Some(rest) = lower.strip_prefix("standard=") {
+        if let Some(rest) = lower.strip_prefix("standard=").or_else(|| lower.strip_prefix("sizesystem=")) {
             let id = match rest.trim() {
                 "us" => "US".to_string(),
-                "" | "explicit" => "explicit".to_string(),
+                "vnm" => "VNM".to_string(),
+                "" | "explicit" | "diameter" => "explicit".to_string(),
+                "circumference" => "iso".to_string(),
                 other => other.to_string(),
             };
             return Some(self.builder_set_field("standard", Value::Choice(id)));
         }
-        if let Some(rest) = lower.strip_prefix("size=") {
-            let size: u32 = match rest.trim().parse() {
+        if let Some(rest) = lower.strip_prefix("size=").or_else(|| lower.strip_prefix("ringsize=")) {
+            let size: f64 = match rest.trim().parse() {
                 Ok(size) => size,
                 Err(_) => return Some(Err(Error::Invalid("US ring size"))),
             };
-            return Some(self.builder_set_field("us_size", Value::count(size)));
+            return Some(Value::ratio(size).and_then(|value| self.builder_set_field("us_size", value)));
         }
         if let Some(rest) = lower.strip_prefix("roll=") {
             let angle = match rest.trim().parse::<f64>() {

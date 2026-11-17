@@ -178,11 +178,12 @@ fn generate() -> Generated {
             let builder = matches!(c.get("builder"), Some(Value::Bool(true)));
             page.push_str(&format!(
                 "- **Cách chạy:** {}\n",
-                match (interactive, builder) {
-                    (true, true) => "từng bước trên dòng lệnh, kèm bảng BUILDERS; Enter để tạo, Esc để huỷ",
-                    (true, false) => "từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ",
-                    (false, true) => "bảng BUILDERS và tuỳ chọn dòng lệnh; Enter để tạo",
-                    (false, false) => "chạy ngay với thông số đã lưu",
+                match (code, interactive, builder) {
+                    ("BuilderMetalWeights", _, _) => "mở bảng BUILDERS, chọn vật thể và nhấn Calculate",
+                    (_, true, true) => "từng bước trên dòng lệnh, kèm bảng BUILDERS; Enter để tạo, Esc để huỷ",
+                    (_, true, false) => "từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ",
+                    (_, false, true) => "bảng BUILDERS và tuỳ chọn dòng lệnh; Enter để tạo",
+                    (_, false, false) => "chạy ngay với thông số đã lưu",
                 }
             ));
             let steps = strs(c, "steps");
@@ -315,6 +316,34 @@ fn package_files_match_the_menu_crates() {
     let mut sorted = ids.clone();
     sorted.sort_unstable();
     assert_eq!(sorted, all);
+}
+
+#[test]
+fn metal_weights_manifest_and_help_match_the_source() {
+    let generated = generate();
+    let addon = Path::new(env!("CARGO_MANIFEST_DIR")).join("addon");
+    assert_eq!(fs::read_to_string(addon.join("om9_addon.toml")).unwrap(), generated.manifest);
+    let page = PathBuf::from("commands/Tools/BuilderMetalWeights.md");
+    assert_eq!(fs::read_to_string(addon.join(&page)).unwrap(), generated.pages[&page]);
+}
+
+#[test]
+fn tools_original_aliases_are_in_both_manifests_and_generated_help() {
+    let tools = fs::read_to_string(root().join("addons/tools/addon/om9_addon.toml")).unwrap();
+    let matrix_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("addon");
+    let matrix = fs::read_to_string(matrix_path.join("om9_addon.toml")).unwrap();
+    let generated = generate();
+    assert_eq!(matrix, generated.manifest);
+    for (code, alias) in [("BuilderOutsideRingRail", "gvOutsideRingRail"), ("BuilderImageTrace", "gvImageTrace")] {
+        for manifest in [&tools, &matrix] {
+            let commands = cmds_of(manifest);
+            let aliases = &commands.iter().find(|(id, _)| id == code).expect("command").1;
+            assert!(aliases.iter().any(|value| value == alias), "{code}: {alias}");
+            assert_eq!(commands.iter().filter(|(_, aliases)| aliases.iter().any(|value| value.eq_ignore_ascii_case(alias))).count(), 1);
+        }
+        let page = PathBuf::from(format!("commands/Tools/{code}.md"));
+        assert_eq!(fs::read_to_string(matrix_path.join(&page)).unwrap(), generated.pages[&page]);
+    }
 }
 
 /// `lang/vi.toml` parses, names every command and menu of the package, and the language

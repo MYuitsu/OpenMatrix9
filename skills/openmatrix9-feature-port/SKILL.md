@@ -24,6 +24,8 @@ Khi implement/port/sửa command, bắt buộc làm đồng bộ binding icon đ
 
 ## Nghiệp vụ đã duyệt cần đọc theo feature
 
+- Boolean Builder mesh preview: compute on a cancellable host worker, allow cutter selection while pending, and let Enter promote an in-flight valid result to one undoable commit. Verified headless scope and limits: `docs/validation/2026-11-17-boolean-preview-cache.md#host-worker-for-mesh-preview`. User approved recording on 2026-11-17.
+
 - Boolean Two Objects trong MatrixApp: năm chế độ preview tính trên worker; khi preview mới bị stale hoặc thiếu quota, preview cũ được giữ. Fixture hộp kiểm XOR, preview rỗng, commit và Undo/Redo; người dùng duyệt ghi phạm vi đã kiểm. Chưa suy rộng sang mọi topology hoặc desktop/GPU. Bằng chứng: `docs/validation/2026-11-14-boolean-two-ui-worker.md`.
 - `ExtractWireframe`: với một Box OCCT gốc đã chứng thực và remesh có isocurve trong scene, lệnh qua CMD hoặc menu tạo 12 cạnh nguồn và 12 isocurve nguồn; hai mức deflection và Undo/Redo đã được kiểm. Người dùng duyệt ghi phạm vi này; chưa suy rộng sang hình học khác, desktop hoặc GPU. Bằng chứng: `docs/validation/2026-11-13-extractwire-remesh-wires.md`.
 

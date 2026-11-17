@@ -171,6 +171,10 @@ impl Controller {
                 NumericEdit::Scale(axis, factor) => self.numeric_scale(axis, factor),
             };
             let moved = result?;
+            if self.join_history_worker_pending() {
+                self.events.emit(crate::command_events::EventKind::Progress, "Gumball", "updating History", None);
+                return Ok(());
+            }
             self.events.emit(
                 crate::command_events::EventKind::Finished,
                 "Gumball",

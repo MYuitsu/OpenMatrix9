@@ -8313,11 +8313,9 @@
       "semantic_source": "native operation or reference cue; see design note",
       "design_note": "Native UI / previously authored generic asset; retained existing blue/gold palette. No reference PNG exists.",
       "palette": [
-        "#2678c9",
-        "#FFFFFF",
         "#f5b400"
       ],
-      "sha256": "e3aa9efaa3e2159cbaa4caff7606e11b366882c68cafdd2a24542e4fa1d49000",
+      "sha256": "54c6c4159da615ece63754e80e8ab02283ef9fa7d2d89f00e1b414b696a33e14",
       "mapping": "authored-command-symbol"
     },
     "ProjectOut": {
@@ -8330,10 +8328,9 @@
       "design_note": "Native UI / previously authored generic asset; retained existing blue/gold palette. No reference PNG exists.",
       "palette": [
         "#2678c9",
-        "#FFFFFF",
         "#f5b400"
       ],
-      "sha256": "2dd95586c493717350894b611a52956def86db48278b7d4747eb8fd29b2f6024",
+      "sha256": "90b620c03819a48f1ade2e202cadaafa572f241d3af1c777fe3d10a81cff23ed",
       "mapping": "authored-command-symbol"
     },
     "ProjectIn": {
@@ -8376,11 +8373,9 @@
       "semantic_source": "native operation or reference cue; see design note",
       "design_note": "Native UI / previously authored generic asset; retained existing blue/gold palette. No reference PNG exists.",
       "palette": [
-        "#2678c9",
-        "#FFFFFF",
         "#e66352"
       ],
-      "sha256": "8366116e224d475f004985617b647cb2fb384f8a252d76e995f9f748aae8e045",
+      "sha256": "3e064b0185d48bd62e49a60f2dff184aea502f2fdff44a40c7fd6af271fa6d87",
       "mapping": "authored-command-symbol"
     },
     "ProjectManager": {

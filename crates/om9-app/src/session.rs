@@ -4820,6 +4820,8 @@ mod arc;
 mod arc_blend;
 mod blend;
 pub mod builder;
+pub mod ring_rail;
+mod ring_rail_library;
 #[cfg(feature = "occt-brep")]
 mod ring_preview_worker;
 mod circle;
@@ -4873,6 +4875,9 @@ mod isocurve;
 pub mod measure;
 mod mesh_curve;
 pub mod metal;
+pub mod metal_catalog;
+#[cfg(feature = "occt-brep")]
+mod metal_worker;
 mod offset;
 mod offset_normal;
 mod offset_on_surface;
@@ -4896,6 +4901,15 @@ mod spiral;
 pub mod stress;
 mod surface_snap;
 pub use surface_snap::{SurfaceSnapJob, SurfaceSnapReceipt, SurfaceSnapScheduler};
+pub(crate) use surface_snap::TypedSurfaceJob;
+#[cfg(feature = "occt-brep")]
+mod edge_snap;
+#[cfg(feature = "occt-brep")]
+pub(crate) use edge_snap::{EdgeBoundsCache, EdgeSnapSourceCache, EdgeSnapViewInput, EdgeSnapViewJob, EdgeSnapViewScheduler};
+#[cfg(feature = "occt-brep")]
+mod intersection_snap;
+#[cfg(feature = "occt-brep")]
+pub(crate) use intersection_snap::{IntersectionJob, IntersectionOccurrence, IntersectionScheduler};
 #[cfg(feature = "occt-brep")]
 mod topology_remesh;
 #[cfg(feature = "occt-brep")]
@@ -4916,6 +4930,7 @@ mod isocurve_worker;
 pub use subobjects::SelectedSubobject;
 mod addon_builder;
 mod addon_session;
+mod boolean_builder_worker;
 pub use addon_session::AddonSession;
 mod addon_command;
 pub use addon_command::IconTarget;
@@ -4923,7 +4938,14 @@ pub use addon_builder::{AddonBuilder, BuilderPreview, display_value};
 pub(crate) mod display_state;
 pub(crate) mod f6_state;
 mod files;
+#[cfg(feature = "occt-brep")]
+pub(crate) use files::shared_brep_archive_cache;
+#[cfg(feature = "occt-brep")]
+pub(crate) use files::PreparedNamedBrepOpen;
 mod clipboard;
+pub(crate) use clipboard::jobbag_selection_closure;
+#[cfg(feature = "occt-brep")]
+pub(crate) use clipboard::PreparedBrepJobbag;
 mod stl;
 pub(crate) use stl::InteractiveStlExport;
 pub use stl::{StlCancellation, StlExportCapture, StlExportJob, StlExportProfile};
@@ -4931,11 +4953,13 @@ pub use files::format_import_summary;
 pub mod gumball;
 pub use gumball::GumballAlignment;
 mod jobbag;
+mod join_history;
+mod join_history_worker;
 mod layer_dialogs;
 mod layers;
 pub(crate) mod pictureframe_state;
 mod plugins;
-mod project_state;
+pub(crate) mod project_state;
 mod properties;
 mod solid;
 mod selection_memory;
@@ -5002,10 +5026,11 @@ pub struct CommandContext {
 
 /// One read-only view of the active command input: owner, run generation,
 /// phase and the option snapshots derived from the same owner state.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct CommandInputSnapshot {
     pub owner: Option<&'static str>,
     pub run: u64,
+    pub input_revision: u64,
     pub phase: CmdPhase,
     pub options: Vec<crate::command_options::CommandOption>,
 }
@@ -5264,23 +5289,32 @@ pub struct Controller {
     viewport_detail_change: Option<topology_remesh::DetailChange>,
     coordinator: TransactionCoordinator,
     file_open_worker: Option<files::FileOpenWorker>,
+    #[cfg(feature = "occt-brep")]
+    file_save_worker: Option<files::FileSaveWorker>,
+    #[cfg(feature = "occt-brep")]
+    brep_archive_cache: Option<Arc<files::BrepArchiveCache>>,
     /// Invalidated when this document session is replaced; captured exports
     /// retain the old token until they finish or acknowledge cancellation.
     stl_session: stl::StlSessionOwner,
     /// Monotonic command-start generation used to reject stale option IDs.
     command_run: u64,
+    input_revision: u64,
     sphere_recovery_run: u64,
     box_recovery_run: u64,
     sphere_points_revision: u64,
     isocurve_recovery_run: u64,
     invoked_feature: Option<String>,
     plugins: Vec<std::rc::Rc<om9_plugin_host::LoadedPlugin>>,
+    #[cfg(feature = "occt-brep")]
+    sdk_snap_workers: std::cell::RefCell<plugins::PluginSnapWorkers>,
     /// The last accepted world point, for `@x,y` relative entry.
     last_point: Option<om9_core::coords::WorldPoint>,
     /// Cursor constraints applied to viewport picks, not to typed coordinates.
     ortho: bool,
     planar: bool,
     project: bool,
+    grid_snap: bool,
+    grid_snap_step_mm: f64,
     /// Gumball placement: an explicit origin (relocate) and the alignment of its axes.
     gumball_origin: Option<om9_core::geometry::Point3>,
     gumball_alignment: crate::session::gumball::GumballAlignment,
@@ -5342,6 +5376,7 @@ pub struct Controller {
     arc_pending: Option<self::arc::ArcPending>,
     rebuild_pending: Option<self::rebuild::RebuildPending>,
     builder: Option<om9_core::builder::BuilderSession>,
+    ring_rail_replace: Option<ring_rail::Confirmation>,
     #[cfg(feature = "occt-brep")]
     ring_preview_request: Option<ring_preview_worker::RingPreviewRequest>,
     #[cfg(feature = "occt-brep")]
@@ -5387,6 +5422,9 @@ pub struct Controller {
     /// Where user styles persist. `OM9_STYLE_LIBRARY` names the file; without it the user
     /// list lives for the session only.
     style_path: Option<std::path::PathBuf>,
+    ring_rail_library: om9_core::ring_rail_shape::RailShapeLibrary,
+    ring_rail_library_path: Option<std::path::PathBuf>,
+    ring_rail_shape: Option<om9_core::ring_rail_shape::RailShape>,
     /// The last style-load problem, shown once in the panel instead of being swallowed.
     style_error: Option<String>,
     /// The style the open session last applied, for the browser's selected state.
@@ -5470,6 +5508,30 @@ pub struct Controller {
     /// Metal material registry and the last valid Metal Weights report (`OM9-L2-04-19`).
     metal_registry: om9_core::metal_weight::MetalMaterialRegistry,
     last_metal_report: Option<self::metal::MetalWeightReport>,
+    last_metal_catalog_report: Option<self::metal::MetalCatalogReport>,
+    metal_panel_open: bool,
+    metal_panel_material: Option<String>,
+    metal_panel_object_materials: bool,
+    metal_request_generation: u64,
+    join_history_worker: Option<join_history_worker::JoinHistoryJob>,
+    boolean_builder_worker: Option<boolean_builder_worker::BooleanBuilderJob>,
+    boolean_builder_active: Arc<std::sync::atomic::AtomicBool>,
+    background_boolean_builder: bool,
+    join_history_worker_active: Arc<std::sync::atomic::AtomicBool>,
+    background_join_history: bool,
+    #[cfg(feature = "occt-brep")]
+    metal_worker: Option<metal_worker::MetalJob>,
+    #[cfg(feature = "occt-brep")]
+    metal_worker_active: std::sync::Arc<std::sync::atomic::AtomicBool>,
+    #[cfg(feature = "occt-brep")]
+    metal_report_owner: Option<om9_core::transaction::ExternalMemoryReservation>,
+    #[cfg(feature = "occt-brep")]
+    metal_catalog_owner: Option<om9_core::transaction::ExternalMemoryReservation>,
+    #[cfg(feature = "occt-brep")]
+    background_metal: bool,
+    metal_panel_reference: bool,
+    metal_panel_user: bool,
+    metal_material_bindings: std::collections::BTreeMap<(om9_core::identity::DocumentId, om9_core::identity::MaterialId), String>,
     /// Staged head/bezel command (`OM9-L2-04-14`).
     head_pending: Option<self::head_commands::HeadPending>,
     head_sequence: u64,
@@ -5672,6 +5734,21 @@ impl Controller {
             om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes)))?;
         Ok(controller)
     }
+    #[cfg(test)]
+    pub(crate) fn test_with_legacy_displays(document: Document, limits: Limits,
+        displays: om9_core::legacy_v4::LegacyDisplays) -> Result<Self> {
+        let controller = Self::new_with_held_and_setup(document, limits, Default::default(), |coordinator, held| {
+            let mut reservation = coordinator.reserve_external_memory_with_held(
+                om9_core::budget::memory::MemoryClass::CpuCache, 4 * 1024 * 1024, None, held)?;
+            coordinator.adopt_legacy_displays(displays, &mut reservation, held)?;
+            Ok(held)
+        })?;
+        let scene = controller.scene.as_ref().ok_or(Error::Missing("initial scene"))?;
+        if scene.shared_buffer_bytes() != 0 { controller.share_scene_buffer_owner(scene)?; }
+        scene.reserve_memory_allowance(&controller.coordinator, controller.auxiliary_usage()?,
+            om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes)))?;
+        Ok(controller)
+    }
     fn new_with_held(
         document: Document,
         limits: Limits,
@@ -5738,17 +5815,26 @@ impl Controller {
         Ok(Self {
             coordinator,
             file_open_worker: None,
+            #[cfg(feature = "occt-brep")]
+            file_save_worker: None,
+            #[cfg(feature = "occt-brep")]
+            brep_archive_cache: None,
             history_worker: None,
             command_run: 0,
+            input_revision: 0,
             sphere_recovery_run: 0,
             box_recovery_run: 0,
             sphere_points_revision: 0,
             isocurve_recovery_run: 0,
             invoked_feature: None,
             plugins: Vec::new(),
+            #[cfg(feature = "occt-brep")]
+            sdk_snap_workers: std::cell::RefCell::new(plugins::PluginSnapWorkers::default()),
             last_point: None,
             ortho: false,
             planar: false,
+            grid_snap: false,
+            grid_snap_step_mm: 0.5,
             project: false,
             gumball_origin: None,
             gumball_alignment: crate::session::gumball::GumballAlignment::World,
@@ -5808,6 +5894,7 @@ impl Controller {
             arc_pending: None,
             rebuild_pending: None,
             builder: None,
+            ring_rail_replace: None,
             #[cfg(feature = "occt-brep")]
             ring_preview_request: None,
             #[cfg(feature = "occt-brep")]
@@ -5839,6 +5926,9 @@ impl Controller {
                 library
             },
             style_path: std::env::var_os("OM9_STYLE_LIBRARY").map(std::path::PathBuf::from),
+            ring_rail_library: Default::default(),
+            ring_rail_library_path: None,
+            ring_rail_shape: None,
             style_error: None,
             applied_style: None,
             pave_style_library: {
@@ -5917,6 +6007,30 @@ impl Controller {
             last_measurement: None,
             metal_registry: om9_core::metal_weight::MetalMaterialRegistry::builtin(),
             last_metal_report: None,
+            last_metal_catalog_report: None,
+            metal_panel_open: false,
+            metal_panel_material: None,
+            metal_panel_object_materials: false,
+            metal_request_generation: 0,
+            join_history_worker: None,
+            boolean_builder_worker: None,
+            boolean_builder_active: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            background_boolean_builder: false,
+            join_history_worker_active: Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            background_join_history: false,
+            #[cfg(feature = "occt-brep")]
+            metal_worker: None,
+            #[cfg(feature = "occt-brep")]
+            metal_worker_active: std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
+            #[cfg(feature = "occt-brep")]
+            metal_report_owner: None,
+            #[cfg(feature = "occt-brep")]
+            metal_catalog_owner: None,
+            #[cfg(feature = "occt-brep")]
+            background_metal: false,
+            metal_panel_reference: true,
+            metal_panel_user: true,
+            metal_material_bindings: std::collections::BTreeMap::new(),
             head_pending: None,
             head_sequence: 0,
             settings_pending: None,
@@ -6204,6 +6318,7 @@ impl Controller {
             om9_kernel::creation::Primitive::Sphere { radius_mm: 3. }, om9_core::geometry::Transform::identity())
     }
     fn clear_scene(&mut self) {
+        self.cancel_boolean_builder_worker();
         #[cfg(feature = "occt-brep")]
         drop(self.wireframe_worker.take());
         #[cfg(feature = "occt-brep")]
@@ -6380,7 +6495,9 @@ impl Controller {
         &self.recent
     }
     pub fn is_running(&self) -> bool {
+        if self.boolean_builder_worker.is_some() { return true; }
         if self.history_worker.is_some() { return true; }
+        if self.join_history_worker.is_some() { return true; }
         #[cfg(feature="occt-brep")]
         if self.wireframe_worker.is_some() {return true;}
         #[cfg(feature="occt-brep")]
@@ -6499,6 +6616,7 @@ impl Controller {
         false
     }
     pub fn availability(feature: &str) -> Result<()> {
+        if matches!(feature, "OM9-TOOLS-001" | "OM9-TOP11-011") { return Ok(()); }
         if self::gem::handles(feature) {
             return Ok(());
         }
@@ -6724,6 +6842,7 @@ impl Controller {
         feature: &str,
         origin: InvocationOrigin,
     ) -> Result<DispatchOutcome> {
+        if !self::metal::handles_command(feature) { self.metal_panel_open = false; }
         #[cfg(feature = "occt-brep")]
         if self.viewport_detail_pending() { return Err(Error::Busy); }
         if self.history_worker.is_some() { return Err(Error::Busy); }
@@ -6752,7 +6871,8 @@ impl Controller {
         }
         // The Top 11 toolbar owns the same action ids: a published feature id
         // dispatches the action the icon click runs, not a second implementation.
-        if let Some(action) = om9_core::top11::Top11Action::from_feature(feature) {
+        if let Some(action) = if feature == "OM9-TOOLS-001" { Some(om9_core::top11::Top11Action::RingRail) }
+            else { om9_core::top11::Top11Action::from_feature(feature) } {
             if self.is_running() {
                 return Err(Error::Busy);
             }
@@ -6921,11 +7041,15 @@ impl Controller {
             .scene
             .as_ref()
             .ok_or(Error::Missing("navigation scene"))?;
+        Self::scene_world_bounds(scene, selected.then_some(&self.selection))
+    }
+
+    pub(crate) fn scene_world_bounds(scene: &Scene, selection: Option<&std::collections::BTreeSet<om9_core::identity::ObjectId>>) -> Result<(Point3, f64)> {
         let mut min = [f64::INFINITY; 3];
         let mut max = [f64::NEG_INFINITY; 3];
         let mut found = false;
         for object in &scene.objects {
-            if !object.visible || (selected && !self.selection.contains(&object.root)) {
+            if !object.visible || selection.is_some_and(|selected| !selected.contains(&object.root)) {
                 continue;
             }
             let transform = object.display_transform()?;
@@ -6976,6 +7100,12 @@ impl Controller {
     pub fn set_project(&mut self, enabled: bool) {
         self.project = enabled;
     }
+    pub fn grid_snap(&self) -> bool { self.grid_snap }
+    pub fn set_grid_snap(&mut self, enabled: bool) { self.grid_snap = enabled; }
+    pub fn grid_snap_step_mm(&self) -> f64 { self.grid_snap_step_mm }
+    pub fn set_grid_snap_step_mm(&mut self, step: f64) {
+        if [0.1, 0.25, 0.5, 1.0].contains(&step) { self.grid_snap_step_mm = step; }
+    }
     pub fn ortho(&self) -> bool {
         self.ortho
     }
@@ -6987,11 +7117,35 @@ impl Controller {
     }
     /// Previous accepted point in the active command, or the last accepted point.
     pub fn relative_base(&self) -> Option<om9_core::coords::WorldPoint> {
-        self.session
-            .as_ref()
-            .and_then(|session| session.start)
+        self.session.as_ref().and_then(|session| session.start)
             .and_then(|point| om9_core::coords::WorldPoint::try_new(point).ok())
             .or(self.last_point)
+    }
+    pub fn point_constraint_base(&self) -> Option<om9_core::coords::WorldPoint> {
+        if let Some(addon) = self.addon_session.as_ref() {
+            return addon.last_point.and_then(|point| om9_core::coords::WorldPoint::try_new(point).ok());
+        }
+        let pending_point = if let Some(pending) = self.polyline_pending.as_ref() {
+            Some(pending.points.last().copied())
+        } else if let Some(pending) = self.rect_pending.as_ref() {
+            Some(pending.points.last().copied())
+        } else if let Some(pending) = self.circle_pending.as_ref() {
+            Some(pending.points.last().copied())
+        } else if let Some(pending) = self.solid_pending.as_ref() {
+            Some(pending.points.last().copied())
+        } else if let Some(pending) = self.measure_pending.as_ref() {
+            Some(pending.points.last().copied())
+        } else if let Some(pending) = self.transform_pending.as_ref() {
+            Some(pending.points.last().copied())
+        } else { None };
+        if let Some(point) = pending_point {
+            return point.and_then(|point| om9_core::coords::WorldPoint::try_new(point).ok());
+        }
+        if let Some(session) = self.session.as_ref() {
+            return session.points.last().copied().or(session.start)
+                .and_then(|point| om9_core::coords::WorldPoint::try_new(point).ok());
+        }
+        self.last_point
     }
     /// Insert the world origin through the ordinary typed point path (Matrix F4).
     /// Refuses outside a point prompt, so a shortcut can never create geometry from idle.
@@ -7003,28 +7157,47 @@ impl Controller {
     }
     /// Apply the active Ortho/Planar cursor constraints to a world-space pick.
     pub fn constrain_point(&self, point: Point3) -> Result<Point3> {
+        self.constrain_point_with_shift(point, false)
+    }
+    /// Shift temporarily inverts Ortho for a pointer pick.
+    pub fn constrain_point_with_shift(&self, point: Point3, shift: bool) -> Result<Point3> {
+        self.constrain_point_with_base(point, shift, self.point_constraint_base())
+    }
+    pub fn constrain_point_with_base(&self, point: Point3, shift: bool, base: Option<om9_core::coords::WorldPoint>) -> Result<Point3> {
         finite(point)?;
         let plane = self.input_plane();
-        if !self.ortho && !self.planar && !self.project {
+        let ortho = self.ortho ^ shift;
+        if !ortho && !self.planar && !self.grid_snap {
             return Ok(point);
         }
         let world = om9_core::coords::WorldPoint::try_new(point)?;
         let local = <CPlane as om9_core::coords::LocalFrame>::to_local(&plane, world)?.xyz();
         let mut constrained = local;
-        if self.planar || self.project {
-            constrained[2] = 0.;
+        if self.grid_snap {
+            for coordinate in &mut constrained[..2] {
+                *coordinate = (*coordinate / self.grid_snap_step_mm).round() * self.grid_snap_step_mm;
+            }
         }
-        if self.ortho
-            && let Some(base) = self.relative_base()
+        if self.planar && let Some(base) = base {
+            constrained[2] = <CPlane as om9_core::coords::LocalFrame>::to_local(&plane, base)?.xyz()[2];
+        }
+        if ortho
+            && let Some(base) = base
         {
             let base = <CPlane as om9_core::coords::LocalFrame>::to_local(&plane, base)?.xyz();
-            let mut delta = [constrained[0] - base[0], constrained[1] - base[1], 0.];
-            if delta[0].abs() >= delta[1].abs() {
-                delta[1] = 0.;
-            } else {
-                delta[0] = 0.;
-            }
-            constrained = [base[0] + delta[0], base[1] + delta[1], 0.];
+            let dx = constrained[0] - base[0];
+            let dy = constrained[1] - base[1];
+            let octant = (dy.atan2(dx) / std::f64::consts::FRAC_PI_4).round() as i32;
+            let diagonal = std::f64::consts::FRAC_1_SQRT_2;
+            let (cos, sin) = match octant.rem_euclid(8) {
+                0 => (1., 0.), 1 => (diagonal, diagonal), 2 => (0., 1.),
+                3 => (-diagonal, diagonal), 4 => (-1., 0.), 5 => (-diagonal, -diagonal),
+                6 => (0., -1.), _ => (diagonal, -diagonal),
+            };
+            let distance = dx * cos + dy * sin;
+            constrained[0] = base[0] + distance * cos;
+            constrained[1] = base[1] + distance * sin;
+            constrained[2] = base[2];
         }
         plane.point(constrained)
     }
@@ -7038,7 +7211,13 @@ impl Controller {
         plane.point([local[0], local[1], 0.])
     }
     pub fn cancel(&mut self) {
-        if self.file_open_worker_pending() {
+        self.ring_rail_replace = None;
+        if self.boolean_builder_worker_pending() { self.cancel_boolean_builder_worker(); return; }
+        if self.join_history_worker_pending() { self.cancel_join_history_worker(); return; }
+        #[cfg(feature = "occt-brep")]
+        self.cancel_metal_worker();
+        self.metal_panel_open = false;
+        if self.file_open_worker_pending() || self.file_save_worker_pending() {
             if let Some(token) = self.file_operation().map(|operation| operation.token()) {
                 let _ = self.cancel_file_operation(token);
             }
@@ -7321,6 +7500,20 @@ impl Controller {
         self.submit_effect(text).map(|_| ())
     }
     pub fn submit_effect(&mut self, text: &str) -> Result<DispatchOutcome> {
+        self.input_revision = self.input_revision.wrapping_add(1);
+        if let Some(result) = self.submit_ring_rail_confirmation(text) { return result.map(|_| DispatchOutcome::Command); }
+        if let Some(result) = self.submit_ring_rail_shape(text) { return result.map(|_| DispatchOutcome::Command); }
+        if self.boolean_builder_worker_pending() {
+            if text.trim().is_empty() && self.boolean_builder_worker_preview() {
+                self.promote_boolean_builder_preview()?;
+                return Ok(DispatchOutcome::Command);
+            }
+            if text.trim().eq_ignore_ascii_case("cancel") || text.trim().eq_ignore_ascii_case("esc") {
+                self.cancel_boolean_builder_worker();
+                return Ok(DispatchOutcome::Command);
+            }
+            return Err(Error::Busy);
+        }
         #[cfg(feature = "occt-brep")]
         if self.viewport_detail_pending() {
             if text.trim().eq_ignore_ascii_case("cancel") || text.trim().eq_ignore_ascii_case("esc") {
@@ -7333,6 +7526,9 @@ impl Controller {
                 self.cancel(); return Ok(DispatchOutcome::Command);
             }
             return Err(Error::Busy);
+        }
+        if self.metal_panel_open && !self.is_running() && text.trim().eq_ignore_ascii_case("calculate") {
+            return self.calculate_metal_panel().map(|_| DispatchOutcome::Command);
         }
         #[cfg(feature="occt-brep")]
         if self.wireframe_worker.is_some() {
@@ -7419,6 +7615,26 @@ impl Controller {
             return self.run_addon_command(&code).map(|_| DispatchOutcome::Command);
         }
         if let Some(command) = self::metal::parse_command(text)? {
+            #[cfg(feature = "occt-brep")]
+            if self.background_metal && (command.all || command.material.is_some()) {
+                self.dispatch_metal_tool("MetalWeights")?;
+                self.set_metal_panel_object_materials(false);
+                if command.all {
+                    self.set_metal_panel_material(None)?;
+                    self.set_metal_panel_filters(true, true);
+                } else {
+                    self.set_metal_panel_material(command.material.as_deref())?;
+                }
+                return self.calculate_metal_panel().map(|_| DispatchOutcome::Command);
+            }
+            if command.all {
+                return self.calculate_metal_weights_catalog().map(|_| DispatchOutcome::Command);
+            }
+            if command.material.is_none() {
+                self.dispatch_metal_tool("MetalWeights")?;
+                if command.calculate { self.calculate_metal_panel()?; }
+                return Ok(DispatchOutcome::Command);
+            }
             return self
                 .calculate_metal_weights(command.material.as_deref())
                 .map(|_| DispatchOutcome::Command);
@@ -7697,7 +7913,7 @@ impl Controller {
         command: &str,
         inputs: Vec<SourceBinding>,
     ) -> Result<()> {
-        self.commit_entity_with_history_inner(feature, name, entity, command, inputs, None)
+        self.commit_entity_with_history_inner(feature, name, entity, command, inputs, None, Default::default(), self.history_record)
     }
     fn commit_brep_with_history(&mut self, feature: &'static str, name: &'static str,
         brep: om9_core::brep::Brep, command: &str, inputs: Vec<SourceBinding>) -> Result<()> {
@@ -7712,7 +7928,7 @@ impl Controller {
         reservation.set_allocated_bytes(bytes)?;
         let source = self.coordinator.register_reserved_brep_candidate(brep, &mut reservation, held)?;
         let entity = Entity::new(name, Geometry::Brep(source), self.document().current_layer);
-        let result = self.commit_entity_with_history_inner(feature, name, entity, command, inputs, Some(&mut reservation));
+        let result = self.commit_entity_with_history_inner(feature, name, entity, command, inputs, Some(&mut reservation), Default::default(), self.history_record);
         if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
         result
     }
@@ -7724,6 +7940,8 @@ impl Controller {
         command: &str,
         inputs: Vec<SourceBinding>,
         reservation: Option<&mut om9_core::transaction::ExternalMemoryReservation>,
+        parameters: om9_core::request::Options,
+        record: bool,
     ) -> Result<()> {
         if entity.attributes.layer.is_some() {
             entity.attributes.color = None;
@@ -7749,10 +7967,10 @@ impl Controller {
                 tolerance,
             },
         );
+        recipe.parameters = parameters;
         recipe.state = EvaluationState::Pending;
-        recipe.policy.record = self.history_record;
+        recipe.policy.record = record;
         recipe.policy.update = self.history_update;
-        let record = self.history_record;
         let old_scene = self.scene.as_ref().ok_or(Error::Missing("command scene"))?;
         if old_scene.epoch != self.coordinator.epoch() {
             return Err(Error::Stale("command scene"));
@@ -8155,7 +8373,11 @@ impl Controller {
                 placement: delta.compose(entity.placement)?,
             });
         }
-        self.commit_utility_mutations("CenterObject", mutations)
+        if self.source_mutations_update_join_history(&mutations) {
+            self.request_join_history_edit_worker(TransactionRequest::new("CenterObject", mutations))
+        } else {
+            self.commit_utility_mutations("CenterObject", mutations)
+        }
     }
 
     /// Group the current selection.
@@ -8672,6 +8894,17 @@ impl Controller {
         self.session
             .as_ref()
             .map_or_else(|| self.workspace.views[&self.workspace.active].cplane, |s| s.plane)
+    }
+    /// Plane used for free pointer intersection; Project applies to object snaps separately.
+    pub fn pointer_input_plane(&self) -> CPlane {
+        self.pointer_input_plane_with_base(self.point_constraint_base())
+    }
+    pub fn pointer_input_plane_with_base(&self, base: Option<om9_core::coords::WorldPoint>) -> CPlane {
+        let plane = self.input_plane();
+        if self.planar && let Some(base) = base {
+            return plane.with_origin(base.xyz()).unwrap_or(plane);
+        }
+        plane
     }
 }
 

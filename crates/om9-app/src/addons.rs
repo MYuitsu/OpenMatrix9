@@ -34,7 +34,6 @@ pub fn provided_names<'a>(host: &Host, features: &[FeatureName<'a>]) -> BTreeMap
         .iter()
         .map(|(code, _, _)| (code.to_ascii_lowercase(), code.clone()))
         .collect();
-    let codes: std::collections::BTreeSet<String> = map.keys().cloned().collect();
     for (code, _owner, _label) in &bound {
         if let Some(info) = host.command_info(code) {
             for alias in &info.command.aliases {
@@ -42,6 +41,10 @@ pub fn provided_names<'a>(host: &Host, features: &[FeatureName<'a>]) -> BTreeMap
                     .or_insert_with(|| code.clone());
             }
         }
+    }
+    // Explicit command IDs and manifest aliases outrank inferred feature names.
+    let reserved: std::collections::BTreeSet<String> = map.keys().cloned().collect();
+    for (code, _owner, _label) in &bound {
         if let Some(feature) = crate::icons::feature_for(code) {
             let mut names = vec![feature.to_ascii_lowercase()];
             for f in features {
@@ -53,7 +56,7 @@ pub fn provided_names<'a>(host: &Host, features: &[FeatureName<'a>]) -> BTreeMap
                 }
             }
             for name in names {
-                if !codes.contains(&name) {
+                if !reserved.contains(&name) {
                     map.insert(name, code.clone());
                 }
             }

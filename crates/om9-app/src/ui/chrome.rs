@@ -4,6 +4,7 @@
 use super::*;
 use egui::{Align2, FontId, RichText};
 
+#[cfg(test)]
 const GREEN: Color32 = Color32::from_rgb(130, 180, 140);
 pub(super) const PANEL_BG: Color32 = super::command::COMMAND_BG;
 const PANEL_ALT: Color32 = Color32::from_rgb(0, 81, 38);
@@ -42,6 +43,7 @@ const CATEGORIES: [&str; 12] = [
     "Cutters",
     "Render",
 ];
+#[cfg(test)]
 const TABS: [&str; 21] = [
     "Standard",
     "CPlanes",
@@ -522,8 +524,9 @@ impl MatrixApp {
         ui.horizontal_wrapped(|ui| match id {
             SectionId::Snaps => {
                 for name in ["GridSnap", "Ortho", "Planar", "Project"] {
-                    let enabled = matches!(name, "Ortho" | "Planar" | "Project");
+                    let enabled = matches!(name, "GridSnap" | "Ortho" | "Planar" | "Project");
                     let active = match name {
+                        "GridSnap" => self.controller.grid_snap(),
                         "Ortho" => self.controller.ortho(),
                         "Planar" => self.controller.planar(),
                         "Project" => self.controller.project(),
@@ -536,6 +539,11 @@ impl MatrixApp {
                     };
                     if enabled && response.clicked() {
                         match name {
+                            "GridSnap" => {
+                                let enabled = !self.controller.grid_snap();
+                                self.controller.set_grid_snap(enabled);
+                                self.status.info(if enabled { "Grid Snap on" } else { "Grid Snap off" });
+                            }
                             "Ortho" => {
                                 let enabled = !self.controller.ortho();
                                 self.controller.set_ortho(enabled);
@@ -599,6 +607,7 @@ impl MatrixApp {
         response
     }
 
+    #[cfg(test)]
     fn subd_flyout(&mut self, ui: &mut egui::Ui, name: &str) {
         let response = self.icon(ui, name, true, name);
         egui::Popup::menu(&response).width(260.).show(|ui| {
@@ -778,7 +787,12 @@ impl MatrixApp {
                     .and_then(|f| f.right_click.as_deref())
                     .filter(|command| Controller::availability(command).is_ok())
             };
-            if self.icon_slot(ui, name, enabled, &help, right).clicked() {
+            let response = self.icon_slot(ui, name, enabled, &help, right);
+            if let Some(kind) = name.strip_prefix("File").and_then(crate::file_lifecycle::FileKind::from_command) {
+                ui.ctx().memory_mut(|memory| memory.data.insert_temp(
+                    egui::Id::new(("file-sidebar", kind.feature_id())), response.rect));
+            }
+            if response.clicked() {
                 self.invoke(&actual, InvocationOrigin::Menu);
             }
         } else {
@@ -1112,204 +1126,6 @@ impl MatrixApp {
         }
     }
     /// PROJECTS: the Project Manager area of the left column.
-    fn projects_ui(&mut self, ui: &mut egui::Ui) {
-        self.project_row_rects.clear();
-        self.jobbag_slot_rects.clear();
-        self.project_action_rects.clear();
-        let active_id = self.project_manager.active().id;
-        let active_index = self.project_manager.active_index();
-        let rows: Vec<(crate::project_manager::ProjectId, String)> = self
-            .project_manager
-            .rows()
-            .iter()
-            .map(|row| (row.id, row.name.clone()))
-            .collect();
-        ui.horizontal_wrapped(|ui| {
-            for (index, (id, name)) in rows.into_iter().enumerate() {
-                let response = ui.selectable_label(index == active_index, &name);
-                self.project_row_rects.insert(id, response.rect);
-                if response.clicked()
-                    && let Err(error) = self.project_manager.select(id)
-                {
-                    self.feedback(Err(error));
-                }
-            }
-            let add = ui.small_button("+");
-            self.project_action_rects.insert("new-project", add.rect);
-            if add.on_hover_text("Create a project row").clicked() {
-                let name = format!("Project {}", self.project_manager.rows().len() + 1);
-                let revision = self.controller.document().revision;
-                let result = self
-                    .project_manager
-                    .create_project(&name, revision)
-                    .map(|_| ());
-                self.feedback(result);
-            }
-        });
-        let active = self.project_manager.active();
-        let mut name = active.name.clone();
-        let mut notes = active.notes.clone();
-        let mut customer = active.customer.clone();
-        ui.horizontal(|ui| {
-            ui.label("Name");
-            let response = ui.add(
-                egui::TextEdit::singleline(&mut name)
-                    .desired_width(104.)
-                    .id_salt("project-name"),
-            );
-            if response.changed()
-                && let Err(error) = self.project_manager.rename_project(active_id, &name)
-            {
-                self.feedback(Err(error));
-            }
-        });
-        ui.horizontal(|ui| {
-            ui.label("Customer");
-            let response = ui.add(
-                egui::TextEdit::singleline(&mut customer)
-                    .desired_width(104.)
-                    .id_salt("project-customer"),
-            );
-            if response.changed()
-                && let Err(error) = self.project_manager.set_customer(&customer)
-            {
-                self.feedback(Err(error));
-            }
-        });
-        let notes_response = ui.add(
-            egui::TextEdit::singleline(&mut notes)
-                .hint_text("Project notes")
-                .desired_width(ui.available_width().min(220.))
-                .id_salt("project-notes"),
-        );
-        if notes_response.changed()
-            && let Err(error) = self.project_manager.set_notes(&notes)
-        {
-            self.feedback(Err(error));
-        }
-        type SlotRow = (usize, Option<(String, usize, String, u64)>, bool);
-        let slots: Vec<SlotRow> = (0..3)
-            .map(|slot| {
-                let info = self
-                    .project_manager
-                    .active()
-                    .slot(slot)
-                    .and_then(|slot| slot.snapshot.as_ref())
-                    .map(|snapshot| {
-                        (
-                            snapshot.thumbnail.label.clone(),
-                            snapshot.thumbnail.count,
-                            snapshot.thumbnail.kind.clone(),
-                            snapshot.thumbnail.source_revision,
-                        )
-                    });
-                let available = self
-                    .project_manager
-                    .slot_available(slot, self.controller.document());
-                (slot, info, available)
-            })
-            .collect();
-        for (slot, info, available) in slots {
-            ui.horizontal(|ui| {
-                let (rect, response) = ui.allocate_exact_size(Vec2::new(76., 44.), Sense::click());
-                self.jobbag_slot_rects.insert(slot, rect);
-                let fill = if available {
-                    Color32::from_rgb(22, 58, 42)
-                } else {
-                    Color32::from_rgb(28, 34, 32)
-                };
-                ui.painter().rect_filled(rect, 4, fill);
-                bevel(ui.painter(), rect);
-                ui.painter().rect_stroke(
-                    rect.shrink(0.5),
-                    4,
-                    egui::Stroke::new(1., PANEL_EDGE),
-                    egui::StrokeKind::Inside,
-                );
-                if let Some((label, count, kind, revision)) = info.as_ref() {
-                    self.icons.paint(ui, rect.shrink(7.), "Project");
-                    ui.painter().text(
-                        rect.left_top() + Vec2::new(3., 2.),
-                        Align2::LEFT_TOP,
-                        format!("{count} {kind}"),
-                        FontId::proportional(9.),
-                        PANEL_INK,
-                    );
-                    ui.painter().text(
-                        rect.left_bottom() + Vec2::new(3., -2.),
-                        Align2::LEFT_BOTTOM,
-                        format!("{label} r{revision}"),
-                        FontId::proportional(9.),
-                        PANEL_TITLE,
-                    );
-                    response
-                        .clone()
-                        .on_hover_text("Jobbag slot; click Restore below");
-                } else {
-                    ui.painter().text(
-                        rect.center(),
-                        Align2::CENTER_CENTER,
-                        "Empty slot",
-                        FontId::proportional(9.),
-                        PANEL_TITLE,
-                    );
-                }
-                ui.vertical(|ui| {
-                    if ui.small_button(format!("Capture {}", slot + 1)).clicked() {
-                        let selected = self.controller.jobbag_selected_entities();
-                        let result = match selected {
-                            Ok(entities) => self
-                                .project_manager
-                                .capture(slot, entities, self.controller.document())
-                                .map(|_| ()),
-                            Err(error) => Err(error),
-                        };
-                        self.feedback(result);
-                    }
-                    if available && ui.small_button("Restore").clicked() {
-                        let result = (|| {
-                            let entities = self.project_manager.restore_entities(slot)?;
-                            self.controller.insert_jobbag_entities(entities)?;
-                            Ok(())
-                        })();
-                        self.feedback(result);
-                    }
-                });
-            });
-        }
-        ui.horizontal(|ui| {
-            let capture = ui.small_button("Capture Master");
-            self.project_action_rects
-                .insert("capture-master", capture.rect);
-            if capture.clicked() {
-                let result = self
-                    .project_manager
-                    .capture_master(self.controller.document())
-                    .map(|_| ());
-                self.feedback(result);
-            }
-            if let Some(master) = self.project_manager.master_document() {
-                ui.label(format!(
-                    "Master: {} objects, {} layers r{}",
-                    master.entities.len(),
-                    master.layer_order.len(),
-                    master.revision
-                ));
-            }
-        });
-        ui.horizontal(|ui| {
-            let restore = ui.add_enabled(
-                self.project_manager.master_document().is_some(),
-                egui::Button::new("Restore Master"),
-            );
-            self.project_action_rects
-                .insert("restore-master", restore.rect);
-            if restore.clicked() {
-                let result = self.restore_master_live();
-                self.feedback(result);
-            }
-        });
-    }
     /// BUILDERS: the builder panel in the space below the Project Manager. The tab row
     /// switches modes and each tab keeps its own parameters; the active tab paints its typed
     /// fields, the preview summary, Apply/Reset/Cancel, the profile library button and the
@@ -1363,6 +1179,9 @@ impl MatrixApp {
         if let Some(summary) = self.controller.builder_summary() {
             ui.label(summary);
         }
+        if self.controller.builder().is_some_and(|builder| builder.kind() == om9_core::builder::BuilderKind::RingRail) {
+            self.ring_rail_shape_ui(ui);
+        }
         if !self.controller.builder_editable() {
             ui.label(
                 egui::RichText::new("Read-only: the builder input is on a locked layer")
@@ -1377,13 +1196,13 @@ impl MatrixApp {
                 ui.horizontal_wrapped(|ui| {
                     ui.label(field.label);
                     let mut chosen = selected.clone();
-                    egui::ComboBox::from_id_salt(("builder-choice", field.name))
-                        .selected_text(chosen.clone())
+                    ui.add_enabled_ui(editable, |ui| { egui::ComboBox::from_id_salt(("builder-choice", field.name))
+                        .selected_text(self.controller.builder_choice_label(field.name, &chosen))
                         .show_ui(ui, |ui| {
                             for choice in &choices {
-                                ui.selectable_value(&mut chosen, choice.clone(), choice);
+                                ui.selectable_value(&mut chosen, choice.clone(), self.controller.builder_choice_label(field.name, choice));
                             }
-                        });
+                        }); });
                     if chosen != selected {
                         let result = self.controller.builder_set_field(
                             field.name,
@@ -1769,6 +1588,8 @@ impl MatrixApp {
         }
         self.builder_profile_window = open;
     }
+    /// Historical component fixtures; the workspace uses the left MAIN MENU.
+    #[cfg(test)]
     pub(super) fn toolbars_ui(&mut self, ui: &mut egui::Ui) {
         self.toolbar_icon_edge = (dock_layout::ICON_BASE_EDGE * self.screen_icon_scale)
             .clamp(dock_layout::ICON_MIN_EDGE, 32.)
@@ -2243,6 +2064,7 @@ impl MatrixApp {
 fn category_palette(category: &str) -> &'static [&'static str] {
     crate::menu_catalog::category(category).unwrap_or(&[])
 }
+#[cfg(test)]
 fn subd_flyout_items(name: &str) -> impl Iterator<Item = &'static &'static str> {
     let items: &'static [&'static str] = match name {
         "SubD Primitives" => &[
@@ -2315,6 +2137,7 @@ fn subd_flyout_items(name: &str) -> impl Iterator<Item = &'static &'static str> 
     };
     items.iter()
 }
+#[cfg(test)]
 fn subd_label(icon: &str) -> String {
     let name = icon
         .strip_prefix("ClayooPrimitives")
@@ -2744,9 +2567,7 @@ mod chrome_tests {
             geometry::{Geometry, Mesh, NativeBrep},
             model::Entity,
         };
-        let entity = Entity::new(
-            "native",
-            Geometry::NativeBrep(NativeBrep {
+        let (source, representation) = NativeBrep {
                 display: std::sync::Arc::new(Mesh {
                     vertices: vec![[0., 0., 0.], [2., 0., 0.], [0., 2., 0.]],
                     faces: vec![vec![0, 1, 2]],
@@ -2756,13 +2577,14 @@ mod chrome_tests {
                 }),
                 payload: vec![1, 2, 3].into(),
                 crc: 0,
-            }),
-            None,
-        );
+            }.into_source_and_representation();
+        let entity = Entity::new("native", Geometry::NativeBrep(source.clone()), None);
         let id = entity.id;
         let mut doc = Document::new("native toolbar");
         doc.entities.insert(id, entity);
-        let mut app = MatrixApp::new(doc).unwrap();
+        let displays = om9_core::legacy_v4::LegacyDisplays { occt: vec![], native: vec![(source, representation)] };
+        let controller = crate::session::Controller::test_with_legacy_displays(doc, om9_core::budget::Limits::default(), displays).unwrap();
+        let mut app = MatrixApp::from_controller(controller).unwrap();
         app.controller.select_objects(&[id]).unwrap();
         let context = egui::Context::default();
         let mut output = context.run_ui(

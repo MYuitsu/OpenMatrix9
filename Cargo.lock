@@ -1774,8 +1774,10 @@ version = "0.1.0"
 dependencies = [
  "om9-addon-abi",
  "om9-addon-geom",
+ "om9-core",
  "serde",
  "serde_json",
+ "sha2",
 ]
 
 [[package]]
@@ -1827,6 +1829,7 @@ version = "0.1.0"
 dependencies = [
  "om9-addon-abi",
  "om9-addon-geom",
+ "om9-core",
  "png 0.18.1",
  "serde",
  "serde_json",
@@ -1962,7 +1965,9 @@ name = "om9-kernel"
 version = "0.1.0"
 dependencies = [
  "cc",
+ "om9-archive",
  "om9-core",
+ "om9-native-owner",
  "serde_json",
  "sha2",
  "uuid",

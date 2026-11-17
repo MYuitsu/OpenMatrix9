@@ -734,6 +734,9 @@ const PALETTE: &[Icon] = &[
         "core-minimal/ProjectManager.svg"
     ),
     icon!("ProjectIn", "ProjectIn", "", "core-minimal/ProjectIn.svg"),
+    icon!("ProjectAdd", "ProjectAdd", "", "core-minimal/ProjectAdd.svg"),
+    icon!("ProjectOut", "ProjectOut", "", "core-minimal/ProjectOut.svg"),
+    icon!("ProjectDelete", "ProjectDelete", "", "core-minimal/ProjectDelete.svg"),
     icon!(
         "ProjectSave",
         "ProjectSave",

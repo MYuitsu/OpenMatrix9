@@ -4110,7 +4110,7 @@ label = "Outside Ring Rail"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["OutsideRingRail"]
+aliases = ["OutsideRingRail", "gvOutsideRingRail"]
 summary = "Tạo đường rail ngoài quanh ring rail theo độ dày đỉnh / bên / đáy (cho Sweep 2)."
 steps = ["Chọn ring rail (hoặc dùng cỡ).", "Chỉnh độ dày.", "Enter."]
 
@@ -4141,10 +4141,10 @@ id = "BuilderMetalWeights"
 label = "Metal Weights"
 handler = "om9_addon_session"
 interactive = true
-mesh_data = true
-aliases = ["MetalWeights"]
-summary = "Tính thể tích và trọng lượng kim loại (vàng, bạch kim, bạc …) và cara đá."
-steps = ["Chọn vật (và đá).", "Enter."]
+aliases = ["MetalWeights", "gvMetalWeights"]
+summary = "Tính thể tích và trọng lượng kim loại của vật thể BRep kín."
+steps = ["Mở Metal Weights và chọn vật thể BRep kín.", "Chọn vật liệu và nhấn Calculate để xem kết quả."]
+options = ["material=platinum_950: chọn vật liệu theo mã."]
 
 [[commands]]
 id = "BuilderResize"
@@ -4252,7 +4252,7 @@ label = "Image Trace"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ImageTrace"]
+aliases = ["ImageTrace", "gvImageTrace"]
 summary = "Dò ảnh (PNG, BMP, PGM) thành đường cong theo ngưỡng tối."
 steps = ["Chọn tệp ảnh trong bảng BUILDERS.", "Chỉnh rộng, ngưỡng.", "Bấm góc dưới trái."]
 
@@ -4397,9 +4397,9 @@ key = "rr_size_system"
 type = "enum"
 option = "SizeSystem"
 label = "Hệ cỡ nhẫn"
-choices = ["us", "iso", "diameter"]
-choice_labels = ["US / Canada", "ISO (chu vi mm)", "Đường kính mm"]
-default = "us"
+choices = ["vnm", "vnm_circumference", "us", "iso", "diameter", "diameter_inches", "circumference_inches"]
+choice_labels = ["VNM (Việt Nam) — đường kính mm", "VNM (Việt Nam) — chu vi mm", "US / Canada (Stuller)", "Chu vi mm", "Đường kính mm", "Đường kính inch", "Chu vi inch"]
+default = "vnm"
 commands = ["BuilderRingRail"]
 
 [[settings]]
@@ -4407,10 +4407,43 @@ key = "rr_ring_size"
 type = "float"
 option = "RingSize"
 label = "Cỡ nhẫn"
-default = 7.0
-min = 0.0
-max = 80.0
-step = 0.25
+default = 18.0
+min = 0.001
+max = 1000.0
+step = 0.001
+commands = ["BuilderRingRail"]
+
+[[settings]]
+key = "rr_center_x"
+type = "float"
+option = "CenterX"
+label = "Tâm X (mm)"
+default = 0.0
+min = -1000000.0
+max = 1000000.0
+step = 0.1
+commands = ["BuilderRingRail"]
+
+[[settings]]
+key = "rr_center_y"
+type = "float"
+option = "CenterY"
+label = "Tâm Y (mm)"
+default = 0.0
+min = -1000000.0
+max = 1000000.0
+step = 0.1
+commands = ["BuilderRingRail"]
+
+[[settings]]
+key = "rr_center_z"
+type = "float"
+option = "CenterZ"
+label = "Tâm Z (mm)"
+default = 0.0
+min = -1000000.0
+max = 1000000.0
+step = 0.1
 commands = ["BuilderRingRail"]
 
 [[settings]]

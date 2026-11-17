@@ -2120,6 +2120,30 @@ pub fn measure(brep: &dyn BrepSourceAccess, limits: &Limits) -> Result<Measures,
     measure_validated_source(brep.source())
 }
 
+/// Measure canonical source with admitted Rust-side validation scratch and
+/// cooperative cancellation before validation, during its admission callbacks,
+/// and after the native operation. OCCT's synchronous call itself is not
+/// interruptible and its internal allocations are not accounted by `admit`.
+pub fn measure_canonical_cancellable_admitted(
+    brep: &om9_core::brep::CanonicalBrep,
+    limits: &Limits,
+    cancel: &om9_core::transaction::Cancellation,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Measures> {
+    if cancel.is_canceled() { return Err(om9_core::Error::Canceled); }
+    brep.validate_source_admitted(limits, |live, pending| {
+        if cancel.is_canceled() { return Err(om9_core::Error::Canceled); }
+        admit(live, pending)?;
+        if cancel.is_canceled() { return Err(om9_core::Error::Canceled); }
+        Ok(())
+    })?;
+    if cancel.is_canceled() { return Err(om9_core::Error::Canceled); }
+    let measure = measure_validated_source(brep.source())
+        .map_err(|error| om9_core::Error::Io(format!("metal source measurement: {error}")))?;
+    if cancel.is_canceled() { return Err(om9_core::Error::Canceled); }
+    Ok(measure)
+}
+
 /// Caller must have validated and admitted the immutable source beforehand.
 pub(crate) fn measure_validated_source(source: &str) -> Result<Measures, CreationError> {
     let mut out = MeasuresOut {

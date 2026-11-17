@@ -27,8 +27,79 @@ const MAX_SELECTION: usize = 20_000;
 /// Most triangles sent with the selection to a `mesh_data` command per step.
 const MAX_SELECTION_TRIANGLES: usize = 2_000_000;
 
+pub(super) type BooleanDefinitions = std::collections::BTreeMap<om9_core::identity::DefinitionId, u64>;
+
+/// Resolve a direct mesh or a chain of single-member mesh instances in document space.
+pub(super) fn boolean_mesh_source<'a>(document: &'a om9_core::model::Document, root: &'a Entity, max_depth: usize)
+    -> Result<Option<(&'a Mesh, Transform, BooleanDefinitions)>> {
+    let mut entity = root;
+    let mut placement = Transform::identity();
+    let mut definitions = BooleanDefinitions::new();
+    loop {
+        placement = placement.compose(entity.placement)?;
+        match &entity.geometry {
+            Geometry::Mesh(mesh) => return Ok(Some((mesh, placement, definitions))),
+            Geometry::Instance(id) => {
+                if definitions.len() >= max_depth { return Err(Error::Budget("Boolean instance depth")); }
+                let definition = document.definitions.get(id).ok_or(Error::Missing("Boolean instance definition"))?;
+                if definitions.insert(*id, definition.revision).is_some() { return Err(Error::Invalid("Boolean instance cycle")); }
+                if definition.members.len() != 1 { return Err(Error::Unsupported("Boolean instance requires one mesh member")); }
+                entity = &definition.members[0];
+            }
+            _ if definitions.is_empty() => return Ok(None),
+            _ => return Err(Error::Unsupported("Boolean instance requires a mesh member")),
+        }
+    }
+}
+
+/// Build Boolean mesh input from document geometry, never from display buffers.
+/// Planar polygon faces use bounded source triangulation; invalid faces refuse.
+pub(super) fn boolean_source_mesh(mesh: &Mesh, placement: &Transform, k: f64, tolerance_mm: f64, cancel: Option<&om9_core::transaction::Cancellation>) -> Result<s::SelectedMesh> {
+    let check_cancel = || if cancel.is_some_and(om9_core::transaction::Cancellation::is_canceled) { Err(Error::Canceled) } else { Ok(()) };
+    check_cancel()?;
+    let count = mesh.faces.iter().enumerate().try_fold(0usize, |sum, (index, face)| {
+        if index & 255 == 0 { check_cancel()?; }
+        if face.len() < 3 { return Err(Error::Invalid("Boolean mesh face")); }
+        sum.checked_add(face.len().checked_sub(2).ok_or(Error::Invalid("Boolean mesh face"))?)
+            .ok_or(Error::Overflow("Boolean mesh triangles"))
+    })?;
+    if count > 25_000 { return Err(Error::Budget("Boolean mesh triangles")); }
+    let mut vertices = Vec::new();
+    vertices.try_reserve_exact(mesh.vertices.len()).map_err(|_| Error::Budget("Boolean mesh vertices"))?;
+    for (index, point) in mesh.vertices.iter().enumerate() {
+        if index & 255 == 0 { check_cancel()?; }
+        let world = mm(placement.point(*point)?, k);
+        if world.iter().any(|coordinate| !coordinate.is_finite()) { return Err(Error::Invalid("Boolean mesh world vertex")); }
+        vertices.push(world);
+    }
+    let mut triangles = Vec::new();
+    triangles.try_reserve_exact(count).map_err(|_| Error::Budget("Boolean mesh triangles"))?;
+    let mut triangulation_work = 0;
+    for face in &mesh.faces {
+        check_cancel()?;
+        if face.len() > 3 {
+            let result = if let Some(cancel) = cancel {
+                om9_core::mesh_triangulation::triangulate_face_cancellable(&vertices, face, tolerance_mm, &mut triangulation_work, 2_000_000, cancel)
+            } else {
+                om9_core::mesh_triangulation::triangulate_face(&vertices, face, tolerance_mm, &mut triangulation_work, 2_000_000)
+            }?;
+            triangles.extend(result);
+            continue;
+        }
+        let point = |index: u32| vertices.get(index as usize).copied().ok_or(Error::Invalid("Boolean mesh face index"));
+        let a = point(face[0])?;
+        let normal = s::cross(s::sub(point(face[1])?, a), s::sub(point(face[2])?, a));
+        let normal_len = s::norm(normal);
+        if !normal_len.is_finite() || normal_len == 0.0 { return Err(Error::Invalid("Boolean mesh degenerate face")); }
+        for i in 1..face.len() - 1 { triangles.push([face[0], face[i], face[i + 1]]); }
+    }
+    Ok(s::SelectedMesh { vertices, triangles })
+}
+
 #[derive(Debug, Clone)]
 pub struct AddonSession {
+    prompt_session: uuid::Uuid,
+    prompt_revision: u64,
     pub code: String,
     pub label: String,
     pub typed: Option<String>,
@@ -50,13 +121,25 @@ pub struct AddonSession {
     mesh_data: bool,
     /// Every object selected at some step: a command that asks for two groups (Boolean
     /// Difference: first the objects, then the cutters) may change all of them.
-    seen: std::collections::BTreeSet<om9_core::identity::ObjectId>,
+    pub(super) seen: std::collections::BTreeSet<om9_core::identity::ObjectId>,
+    /// Boolean Builder's accepted first group is retained by its add-on state.
+    pub(super) boolean_sources: std::collections::BTreeMap<om9_core::identity::ObjectId, om9_core::identity::SourceStamp>,
+    /// Selected inputs used for the last Boolean preview, including the current cutters.
+    pub(super) boolean_preview_sources: std::collections::BTreeMap<om9_core::identity::ObjectId, om9_core::identity::SourceStamp>,
+    pub(super) boolean_definitions: BooleanDefinitions,
+    pub(super) boolean_preview_definitions: BooleanDefinitions,
+    pub(super) boolean_source_tolerance: Option<f64>,
+    boolean_preview_tolerance: Option<f64>,
     /// Where the last selecting click landed (document units): Fillet, Extend, Match … read
     /// which part of a curve was picked.
     pick: Option<Point3>,
 }
 
 impl AddonSession {
+    /// Identity of the current advancing input state, excluding ordinary hover previews.
+    pub fn prompt_token(&self) -> (uuid::Uuid, u64) {
+        (self.prompt_session, self.prompt_revision)
+    }
     /// `Close=No`, `Length`, `Undo` … as shown above the command line, in the interface
     /// language (`Khép kín=Không` in Vietnamese). The first item stays the option's name.
     pub fn tokens(&self, tr: &om9_addons::i18n::Tr) -> Vec<(String, String)> {
@@ -630,13 +713,63 @@ impl Controller {
             .is_some_and(|s| matches!(s.reply.want, Want::Point | Want::Number))
     }
 
+    /// A coordinate prompt, as distinct from a numeric prompt that also accepts
+    /// viewport input. Nested point aids must not consume number-only input.
+    pub fn session_wants_coordinate(&self) -> bool {
+        self.addon_session.as_ref().is_some_and(|session| matches!(session.reply.want, Want::Point))
+    }
+
+    pub(super) fn boolean_definitions_current(&self, definitions: &BooleanDefinitions) -> bool {
+        definitions.iter().all(|(id, revision)| self.document().definitions.get(id).is_some_and(|definition| definition.revision == *revision))
+    }
+
+    pub(super) fn invalidate_boolean_preview(&mut self) {
+        if let Some(session) = self.addon_session.as_mut() {
+            session.lines.clear();
+            session.hover_lines.clear();
+            session.reply.preview.clear();
+            session.selection_seen = self.selection_revision.wrapping_sub(1);
+        }
+    }
+
+    pub(super) fn accept_boolean_worker_preview(&mut self, mut reply: Reply) -> Result<()> {
+        // Preview does not publish the retained exact results.
+        reply.replace = Vec::new();
+        reply.delete = Vec::new();
+        let k = self.document().page_unit.factor();
+        let mut lines = Vec::new();
+        lines.try_reserve_exact(reply.preview.len()).map_err(|_| Error::Budget("Boolean preview lines"))?;
+        for geometry in &reply.preview {
+            let Geo::Line { start, end } = geometry else { return Err(Error::Invalid("Boolean preview geometry")); };
+            lines.push([doc(*start, k), doc(*end, k)]);
+        }
+        let session = self.addon_session.as_mut().ok_or(Error::Stale("Boolean preview session"))?;
+        session.lines = lines;
+        session.hover_lines.clear();
+        session.reply.prompt = reply.prompt;
+        session.reply.preview = reply.preview;
+        session.reply.error = None;
+        Ok(())
+    }
+
+    fn boolean_selection_definitions(&self) -> Result<BooleanDefinitions> {
+        let mut all = BooleanDefinitions::new();
+        for id in &self.selection {
+            let entity = self.document().entities.get(id).ok_or(Error::Missing("Boolean source"))?;
+            if let Some((_, _, definitions)) = boolean_mesh_source(self.document(), entity, self.coordinator.limits().max_depth)? {
+                all.extend(definitions);
+            }
+        }
+        Ok(all)
+    }
+
     /// The selection as add-ons see it (world millimetres).
-    fn session_selection(&self, k: f64, mesh_data: bool) -> Vec<Selected> {
+    fn session_selection(&self, k: f64, mesh_data: bool, boolean_source: bool) -> Result<Vec<Selected>> {
         use om9_scene::scene::RenderBuffers;
         let mut out: Vec<Selected> = Vec::new();
         let mut triangles_sent = 0usize;
         let Some(scene) = self.scene.as_ref() else {
-            return out;
+            return Ok(out);
         };
         let mut index = std::collections::BTreeMap::new();
         for object in &scene.objects {
@@ -681,7 +814,7 @@ impl Controller {
                 RenderBuffers::Mesh { vertices, .. } => (vertices, false),
             };
             let sel = &mut out[slot];
-            if mesh_data
+            if mesh_data && !boolean_source
                 && let RenderBuffers::Mesh { triangles, .. } = object.buffers.as_ref()
                 && triangles_sent + triangles.len() <= MAX_SELECTION_TRIANGLES
             {
@@ -711,6 +844,23 @@ impl Controller {
                 }
             }
         }
+        if boolean_source {
+            for (id, slot) in &index {
+                let sel = &mut out[*slot];
+                let entity = self.document().entities.get(id).ok_or(Error::Missing("Boolean source"))?;
+                let Some((mesh, placement, _)) = boolean_mesh_source(self.document(), entity, self.coordinator.limits().max_depth)? else { continue };
+                let source = boolean_source_mesh(mesh, &placement, k, self.document().effective_tolerance()?.absolute_mm, None)?;
+                sel.kind = "mesh".into();
+                triangles_sent = triangles_sent.checked_add(source.triangles.len()).ok_or(Error::Overflow("Boolean selection triangles"))?;
+                if triangles_sent > MAX_SELECTION_TRIANGLES { return Err(Error::Budget("Boolean selection triangles")); }
+                sel.bbox = [[f64::INFINITY; 3], [f64::NEG_INFINITY; 3]];
+                for p in &source.vertices { for axis in 0..3 {
+                    sel.bbox[0][axis] = sel.bbox[0][axis].min(p[axis]);
+                    sel.bbox[1][axis] = sel.bbox[1][axis].max(p[axis]);
+                }}
+                sel.mesh = Some(source);
+            }
+        }
         for sel in &mut out {
             if sel.kind == "curve" && sel.points.len() > 2 {
                 let (a, b) = (sel.points[0], sel.points[sel.points.len() - 1]);
@@ -720,7 +870,7 @@ impl Controller {
                 }
             }
         }
-        out
+        Ok(out)
     }
 
     /// Lines (document units) of the selection under each transform, for Move/Rotate previews.
@@ -819,6 +969,8 @@ impl Controller {
             .is_some_and(|i| i.command.mesh_data);
         self.cancel();
         self.addon_session = Some(AddonSession {
+            prompt_session: uuid::Uuid::new_v4(),
+            prompt_revision: 0,
             code: code.to_owned(),
             label: label.to_owned(),
             typed: self.addon_typed.get(code).cloned(),
@@ -832,6 +984,12 @@ impl Controller {
             hover_at: None,
             mesh_data,
             seen: Default::default(),
+            boolean_sources: Default::default(),
+            boolean_preview_sources: Default::default(),
+            boolean_definitions: Default::default(),
+            boolean_preview_definitions: Default::default(),
+            boolean_source_tolerance: None,
+            boolean_preview_tolerance: None,
             pick: None,
         });
         self.events.emit(
@@ -849,13 +1007,33 @@ impl Controller {
 
     /// Send one input; adopt the reply (or, for `hover`, only its preview).
     pub(super) fn session_step(&mut self, input: Input) -> Result<()> {
+        if self.boolean_builder_worker_pending() { return Err(Error::Busy); }
+        if matches!(input, Input::Enter) && self.request_ring_rail_confirmation()? { return Ok(()); }
         let Some(session) = self.addon_session.as_ref() else {
             return Err(Error::Missing("interactive command"));
         };
+        if session.boolean_sources.values().any(|stamp| self.document().resolve(stamp).is_err())
+            || !self.boolean_definitions_current(&session.boolean_definitions)
+            || session.boolean_source_tolerance.is_some_and(|t| !self.document().effective_tolerance().is_ok_and(|current| current.absolute_mm == t)) {
+            if let Some(session) = self.addon_session.as_mut() {
+                session.lines.clear();
+                session.hover_lines.clear();
+            }
+            return Err(Error::Stale("Boolean Builder source; restart command"));
+        }
+        let capture_boolean_sources = session.code == "BuilderBooleanBuilder"
+            && session.boolean_sources.is_empty() && matches!(input, Input::Enter);
+        let boolean_tolerance = if session.code == "BuilderBooleanBuilder" {
+            Some(self.document().effective_tolerance()?.absolute_mm)
+        } else { None };
+        let candidate_sources = if capture_boolean_sources {
+            self.selection.iter().map(|id| self.document().stamp(*id).map(|stamp| (*id, stamp)))
+                .collect::<Result<Vec<_>>>()?
+        } else { Vec::new() };
         let k = self.document().page_unit.factor();
         let hover = matches!(input, Input::Hover { .. });
         let plane = self.input_plane();
-        let settings = self
+        let mut settings: std::collections::BTreeMap<String, Value> = self
             .addon_builder
             .as_ref()
             .filter(|b| b.code == session.code)
@@ -884,13 +1062,42 @@ impl Controller {
                 (key, json)
             })
             .collect();
+        if session.code == "BuilderBooleanBuilder" {
+            settings.insert("_om9_document_tolerance_mm".into(), Value::from(boolean_tolerance.expect("Boolean tolerance")));
+        }
+        if matches!(session.code.as_str(), "BuilderRingRail" | "TopIconRingRail")
+            && matches!(session.owner.as_str(), "om9_matrix" | "om9_tools" | "om9_top11")
+            && let Some(shape) = &self.ring_rail_shape {
+                settings.insert("_om9_ring_rail_shape".into(), serde_json::to_value(shape).map_err(|_| Error::Invalid("custom Ring Rail shape"))?);
+            }
         let current: Vec<_> = self.selection.iter().copied().collect();
+        let preview_definitions = if session.code == "BuilderBooleanBuilder" {
+            Some(self.boolean_selection_definitions()?)
+        } else { None };
+        let accepted_definitions = if capture_boolean_sources { preview_definitions.clone() } else { None };
+        let preview_sources = if session.code == "BuilderBooleanBuilder" {
+            Some(current.iter().map(|id| self.document().stamp(*id).map(|stamp| (*id, stamp)))
+                .collect::<Result<std::collections::BTreeMap<_, _>>>()?)
+        } else { None };
         if let Some(s) = self.addon_session.as_mut() {
             s.seen.extend(current);
+            if let Some(stamps) = preview_sources { s.boolean_preview_sources = stamps; }
+            if let Some(definitions) = preview_definitions { s.boolean_preview_definitions = definitions; }
+            s.boolean_preview_tolerance = boolean_tolerance;
         }
         let Some(session) = self.addon_session.as_ref() else {
             return Err(Error::Missing("interactive command"));
         };
+        let worker_roots: Vec<_> = if self.background_boolean_builder && matches!(input, Input::Enter | Input::Selection)
+            && matches!(session.owner.as_str(), "om9_matrix" | "om9_boolean_builder")
+            && session.code == "BuilderBooleanBuilder"
+            && session.reply.state.get("objects").and_then(Value::as_array).is_some_and(|objects| !objects.is_empty()) {
+                self.scene.as_ref().into_iter().flat_map(|scene| &scene.objects)
+                    .filter(|object| self.selection.contains(&object.root))
+                    .map(|object| object.root).collect::<std::collections::BTreeSet<_>>().into_iter().take(MAX_SELECTION).collect()
+            } else { Vec::new() };
+        let worker = session.reply.state.get("objects").and_then(Value::as_array).is_some_and(|objects|
+            worker_roots.iter().any(|id| !objects.iter().any(|object| object.get(0).and_then(Value::as_str) == Some(id.to_string().as_str()))));
         let event = Event {
             command: session.code.clone(),
             input,
@@ -900,10 +1107,14 @@ impl Controller {
                 x: plane.x,
                 y: plane.y,
             },
-            selection: self.session_selection(k, session.mesh_data),
+            selection: if worker { Vec::new() } else { self.session_selection(k, session.mesh_data, session.code == "BuilderBooleanBuilder")? },
             pick: session.pick.map(|p| mm(p, k)),
             settings,
         };
+        if worker {
+                let preview = matches!(event.input, Input::Selection);
+                return self.request_boolean_builder_worker(event, preview, worker_roots, k);
+            }
         let bytes = serde_json::to_vec(&event).map_err(|e| Error::Io(e.to_string()))?;
         let host = self
             .addons
@@ -923,6 +1134,21 @@ impl Controller {
                 return Err(Error::Io(e));
             }
         };
+        if event.settings.contains_key("_om9_ring_rail_shape") && reply.error.is_none()
+            && reply.state.get("_om9_ring_rail_curve").is_none() {
+                return Err(Error::Unsupported("update the Ring Rail add-on to use custom shapes"));
+            }
+        if capture_boolean_sources && reply.error.is_none() && !reply.done
+            && let Some(objects) = reply.state.get("objects").and_then(Value::as_array)
+            && let Some(session) = self.addon_session.as_mut() {
+                if let Some(definitions) = accepted_definitions { session.boolean_definitions = definitions; }
+                session.boolean_source_tolerance = boolean_tolerance;
+                for (id, stamp) in candidate_sources {
+                    if objects.iter().any(|entry| entry.get(0).and_then(Value::as_str) == Some(id.to_string().as_str())) {
+                        session.boolean_sources.insert(id, stamp);
+                    }
+                }
+            }
         let limits = *self.coordinator.limits();
         if hover {
             let mut lines: Vec<[Point3; 2]> = reply
@@ -937,6 +1163,9 @@ impl Controller {
                 session.rubber_from = rubber.or(session.rubber_from);
                 // A command that follows the pointer (Sketch) keeps what the move added.
                 if reply.track && reply.error.is_none() && !reply.done {
+                    if session.reply.state != reply.state {
+                        session.prompt_revision = session.prompt_revision.wrapping_add(1);
+                    }
                     session.reply.state = reply.state.clone();
                 }
             }
@@ -950,8 +1179,13 @@ impl Controller {
                 let s = self.addon_session.as_ref().expect("session");
                 (s.code.clone(), s.label.clone(), s.seen.clone())
             };
-            self.addon_session = None;
+            let canonical_ring = matches!(code.as_str(), "BuilderRingRail" | "TopIconRingRail")
+                && self.addon_session.as_ref().is_some_and(|session| matches!(session.owner.as_str(), "om9_matrix" | "om9_tools" | "om9_top11"));
+            let replacing_ring = canonical_ring && self.ring_rail_replacing();
+            let before_revision = self.document().revision;
+            if !canonical_ring { self.addon_session = None; }
             let created = self.commit_session_result(&code, &label, &reply, &seen)?;
+            self.addon_session = None;
             // The command's panel closes with it, however it was finished (Enter in the
             // command line, right-click, Accept); its values become the next defaults.
             if let Some(b) = self
@@ -960,12 +1194,16 @@ impl Controller {
             {
                 self.store_builder_values(&b);
             }
-            self.events.emit(
-                crate::command_events::EventKind::Finished,
-                &code,
-                &format!("created {created} objects"),
-                Some(crate::command_events::EventOutcome::Committed),
-            );
+            if self.join_history_worker_pending() {
+                self.events.emit(crate::command_events::EventKind::Progress, &code, "updating History", None);
+            } else {
+                self.events.emit(
+                    crate::command_events::EventKind::Finished,
+                    &code,
+                    &if replacing_ring { if before_revision == self.document().revision { "Ring Rail unchanged".into() } else { "Ring Rail replaced".into() } } else { format!("created {created} objects") },
+                    Some(crate::command_events::EventOutcome::Committed),
+                );
+            }
             return Ok(());
         }
         let mut lines: Vec<[Point3; 2]> = reply
@@ -976,6 +1214,7 @@ impl Controller {
         lines.extend(self.transformed_selection_lines(&reply.preview_transforms, k));
         let error = reply.error.clone();
         if let Some(session) = self.addon_session.as_mut() {
+            session.prompt_revision = session.prompt_revision.wrapping_add(1);
             session.rubber_from = reply.rubber_from.map(|p| doc(p, k));
             session.hover_lines.clear();
             session.lines = lines;
@@ -1027,15 +1266,34 @@ impl Controller {
 
     /// Called every frame: a session waiting for objects hears about selection changes.
     pub fn refresh_addon_session(&mut self) {
+        if self.boolean_builder_worker_pending() { return; }
         let Some(s) = self.addon_session.as_ref() else {
             return;
         };
-        if s.selection_seen != self.selection_revision {
+        if s.boolean_sources.values().any(|stamp| self.document().resolve(stamp).is_err())
+            || !self.boolean_definitions_current(&s.boolean_definitions)
+            || s.boolean_source_tolerance.is_some_and(|t| !self.document().effective_tolerance().is_ok_and(|current| current.absolute_mm == t)) {
+            if let Some(s) = self.addon_session.as_mut() {
+                s.lines.clear();
+                s.hover_lines.clear();
+            }
+            return;
+        }
+        let changed_source = s.boolean_preview_sources.values().any(|stamp| self.document().resolve(stamp).is_err())
+            || !self.boolean_definitions_current(&s.boolean_preview_definitions)
+            || s.boolean_preview_tolerance.is_some_and(|t| !self.document().effective_tolerance().is_ok_and(|current| current.absolute_mm == t));
+        if s.selection_seen != self.selection_revision || changed_source {
             let rev = self.selection_revision;
             if let Some(s) = self.addon_session.as_mut() {
                 s.selection_seen = rev;
+                if s.code == "BuilderBooleanBuilder" {
+                    s.lines.clear();
+                    s.hover_lines.clear();
+                }
             }
-            let _ = self.session_step(Input::Selection);
+            if matches!(self.session_step(Input::Selection), Err(Error::Busy)) && self.boolean_builder_worker_retiring() {
+                self.invalidate_boolean_preview();
+            }
         }
     }
 
@@ -1141,6 +1399,8 @@ impl Controller {
 
     /// Esc: close the session; nothing is created.
     pub fn cancel_addon_session(&mut self) -> bool {
+        if self.addon_session.as_ref().is_some_and(|session| matches!(session.code.as_str(), "BuilderRingRail" | "TopIconRingRail")) { self.ring_rail_replace = None; }
+        self.cancel_boolean_builder_worker();
         match self.addon_session.take() {
             Some(s) => {
                 self.events.emit(
@@ -1166,13 +1426,64 @@ impl Controller {
     }
 
     /// Create the geometry and apply the transform of a finished session, in one transaction.
-    fn commit_session_result(
+    /// Official Ring Rail add-ons adapt the canonical builder publication, including
+    /// its recipe. F6 can therefore edit either entry through the direct owner.
+    fn commit_addon_ring_rail(&mut self, code: &str, reply: &Reply) -> Result<usize> {
+        use om9_core::{builder::{BuilderKind, BuilderSession}, request::Value as Parameter, units::LengthMm};
+        use om9_addons::settings::SettingValue;
+        let custom = self.ring_rail_shape.clone();
+        if reply.create.len() != usize::from(custom.is_none()) || !reply.replace.is_empty() || !reply.delete.is_empty()
+            || !reply.records.is_empty() || reply.transform.is_some() { return Err(Error::Invalid("Ring Rail reply")); }
+        if custom.is_none() && !matches!(&reply.create[0], Geo::Circle { .. }) { return Err(Error::Invalid("Ring Rail circular source")); }
+        let (system, size, center) = {
+            let builder = self.addon_builder.as_ref().ok_or(Error::Missing("Ring Rail builder"))?;
+            let prefix = if code == "TopIconRingRail" { "t11" } else { "rr" };
+            let Some(SettingValue::Str(system)) = builder.value(&format!("{prefix}_size_system")) else { return Err(Error::Invalid("Ring Rail size system")) };
+            let Some(SettingValue::Float(size)) = builder.value(&format!("{prefix}_ring_size")) else { return Err(Error::Invalid("Ring Rail size")) };
+            let coordinate = |name| match builder.value(name) {
+                Some(SettingValue::Float(value)) => Ok(*value), None => Ok(0.), _ => Err(Error::Invalid("Ring Rail center")),
+            };
+            (system.clone(), *size, [coordinate("rr_center_x")?, coordinate("rr_center_y")?, coordinate("rr_center_z")?])
+        };
+        let diameter = om9_core::ring_size::rail_diameter_mm(&system, size)?;
+        let standard = match system.as_str() { "us" => "US", "vnm" => "VNM", "diameter" => "explicit", other => other };
+        let mut session = BuilderSession::new(BuilderKind::RingRail, self.document(), &[])?;
+        session.set_rail_shape(custom.clone(), self.coordinator.limits())?;
+        session.set_field("diameter_mm", Parameter::length(LengthMm::try_new(diameter)?))?;
+        session.set_field("standard", Parameter::Choice(standard.into()))?;
+        session.set_field("us_size", Parameter::ratio(size)?)?;
+        for (name, coordinate) in ["center_x_mm", "center_y_mm", "center_z_mm"].into_iter().zip(center) {
+            session.set_field(name, Parameter::length(LengthMm::try_new(coordinate)?))?;
+        }
+        session.refresh(self.document(), &self.builder_registry()?)?;
+        if let Some(shape) = custom {
+            let curve: Curve = serde_json::from_value(reply.state.get("_om9_ring_rail_curve").cloned()
+                .ok_or(Error::Missing("custom Ring Rail source"))?).map_err(|_| Error::Invalid("custom Ring Rail source"))?;
+            curve.validate(self.coordinator.limits())?;
+            if curve != shape.sized_curve(diameter, center, "front", 1., self.coordinator.limits())? {
+                return Err(Error::Invalid("custom Ring Rail source mismatch"));
+            }
+        } else {
+            let (geometry, _, _) = to_geometry(&reply.create[0], self.document().page_unit.factor())?;
+            if session.preview().is_none_or(|preview| preview.geometry != geometry) { return Err(Error::Invalid("Ring Rail source mismatch")); }
+        }
+        self.builder = Some(session);
+        let result = self.builder_apply();
+        if result.is_err() { self.builder = None; }
+        result.map(|_| 1)
+    }
+
+    pub(super) fn commit_session_result(
         &mut self,
         code: &str,
         label: &str,
         reply: &Reply,
         seen: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
     ) -> Result<usize> {
+        if matches!(code, "BuilderRingRail" | "TopIconRingRail")
+            && self.addon_session.as_ref().is_some_and(|session| matches!(session.owner.as_str(), "om9_matrix" | "om9_tools" | "om9_top11")) {
+            return self.commit_addon_ring_rail(code, reply);
+        }
         let k = self.document().page_unit.factor();
         let layer = self.document().current_layer;
         let mut mutations = Vec::new();
@@ -1328,8 +1639,22 @@ impl Controller {
         let scene = self.scene.as_ref().ok_or(Error::Missing("command scene"))?;
         if scene.epoch != self.coordinator.epoch() { return Err(Error::Stale("command scene")); }
         let count = mutations.len();
-        let held = self.scene_cache_usage()?;
         let undo_label = crate::icons::icon_name(code).unwrap_or(label).to_owned();
+        let touches_history = mutations.iter().any(|mutation| match mutation {
+            Mutation::Geometry { source, .. } | Mutation::Placement { source, .. } | Mutation::Delete { source } =>
+                self.source_edits_update_join_history(std::slice::from_ref(&source.object)),
+            _ => false,
+        });
+        if touches_history {
+            if !self.source_mutations_update_join_history(&mutations) {
+                return Err(Error::Unsupported("add-on History edit includes unsupported mutations"));
+            }
+            let (completion, owner) = self.reserve_addon_history_completion(code)?;
+            self.request_join_history_edit_worker(TransactionRequest::new(&undo_label, mutations))?;
+            self.mark_addon_history_completion(completion, owner);
+            return Ok(count);
+        }
+        let held = self.scene_cache_usage()?;
         let prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new(&undo_label, mutations), held)?;
