@@ -34,6 +34,28 @@ pub fn averaged_knots(params: &[f64], p: usize) -> Vec<f64> {
 /// Solve the interpolation matrix once and apply it to many right-hand sides (each a list of
 /// points): control points so that the curve passes through `rhs[r][k]` at `params[k]`.
 fn solve(params: &[f64], p: usize, knots: &[f64], rhs: &[Vec<Vec3>]) -> Vec<Vec<Vec3>> {
+    // The interpolation matrix is banded (p + 1 basis values per row): solved in O(n·p²)
+    // per right-hand side. The dense elimination below stays as the fallback for a matrix
+    // the band solver refuses (no pivoting, a vanishing pivot).
+    let n = params.len();
+    let rows: Vec<(usize, Vec<f64>)> = params
+        .iter()
+        .map(|&u| {
+            let span = find_span(n, p, u, knots);
+            (span - p, basis(span, u, p, knots))
+        })
+        .collect();
+    let banded: Option<Vec<Vec<Vec3>>> = rhs
+        .iter()
+        .map(|b| crate::solve_band(&rows, n, b.clone()))
+        .collect();
+    if let Some(x) = banded {
+        return x;
+    }
+    solve_dense(params, p, knots, rhs)
+}
+
+fn solve_dense(params: &[f64], p: usize, knots: &[f64], rhs: &[Vec<Vec3>]) -> Vec<Vec<Vec3>> {
     let n = params.len();
     let mut a = vec![vec![0.0; n]; n];
     for (k, &u) in params.iter().enumerate() {
@@ -255,5 +277,40 @@ mod tests {
         assert!(dist(s2.at_st(0.0, 0.0), rows[0][0]) < 1e-12);
         assert!(dist(s2.at_st(1.0, 1.0), rows[5][8]) < 1e-12);
         assert_eq!(grid_mesh(&rows).triangles.len(), 5 * 8 * 2);
+    }
+}
+
+#[cfg(test)]
+mod band_tests {
+    use super::*;
+
+    /// The banded solve gives the dense solve's surface, and a large grid fits quickly.
+    #[test]
+    fn banded_fit_matches_dense_and_is_fast() {
+        let grid = |n: usize| -> Vec<Vec<Vec3>> {
+            (0..n)
+                .map(|i| {
+                    (0..n)
+                        .map(|j| {
+                            let (u, v) = (i as f64 / (n - 1) as f64, j as f64 / (n - 1) as f64);
+                            [u * 10.0, v * 10.0, (u * 7.0).sin() * (v * 5.0).cos()]
+                        })
+                        .collect()
+                })
+                .collect()
+        };
+        let g = grid(40);
+        let tv: Vec<f64> = (0..40).map(|j| j as f64 / 39.0).collect();
+        let kv = averaged_knots(&tv, 3);
+        let a = solve(&tv, 3, &kv, &g);
+        let b = solve_dense(&tv, 3, &kv, &g);
+        for (ra, rb) in a.iter().zip(&b) {
+            for (pa, pb) in ra.iter().zip(rb) {
+                assert!(dist(*pa, *pb) < 1e-9);
+            }
+        }
+        let t = std::time::Instant::now();
+        assert!(surface_through(&grid(400), [3, 3]).is_some());
+        assert!(t.elapsed().as_secs_f64() < 2.0, "{:?}", t.elapsed());
     }
 }

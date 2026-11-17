@@ -21,3 +21,4 @@
 |---|---|---|---|
 | `Distance=` | Khoảng đùn | 2 | 0.01 … 500 |
 | `BothSides=` | Hai phía | No |  |
+| `Solid=` | Khối đặc | No |  |

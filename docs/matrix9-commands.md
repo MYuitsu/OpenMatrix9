@@ -166,49 +166,49 @@ Menu colour: Purple. OM9 built in: 0, OM9 Matrix add-on: 30, neither: 13 of 43.
 
 | Position | Code | Name | Icon | Runs |
 |---|---|---|---|---|
-| 1 | `SolidUnion` | Union | `solid-minimal/SolidUnion.svg` | add-on `om9_matrix` |
-| 2 | `SolidDifference` | Difference | `solid-minimal/SolidDifference.svg` | add-on `om9_matrix` |
-| 3 | `SolidIntersection` | Intersection | `solid-minimal/SolidIntersection.svg` | add-on `om9_matrix` |
+| 1 | `SolidUnion` | Boolean Union | `solid-minimal/SolidUnion.svg` | add-on `om9_matrix` |
+| 2 | `SolidDifference` | Boolean Difference | `solid-minimal/SolidDifference.svg` | add-on `om9_matrix` |
+| 3 | `SolidIntersection` | Boolean Intersection | `solid-minimal/SolidIntersection.svg` | add-on `om9_matrix` |
 | 4 | `SolidBooleanTwoObjects` | Boolean Two Objects | `solid-minimal/SolidBooleanTwoObjects.svg` | add-on `om9_matrix` |
-| 5 | `SolidBooleanSplit` | SolidBooleanSplit | `solid-minimal/SolidBooleanSplit.svg` | — |
-| 6 | `SolidCreateSolid` | SolidCreateSolid | `solid-minimal/SolidCreateSolid.svg` | — |
-| 7 | `SolidCapPlanarHoles` | Cap Planar | `solid-minimal/SolidCapPlanarHoles.svg` | add-on `om9_matrix` |
-| 8 | `SolidExtractSurface` | Extract Surface | `solid-minimal/SolidExtractSurface.svg` | add-on `om9_matrix` |
-| 9 | `SolidFilletEdgeFilletEdge` | Fillet Edge | `solid-minimal/SolidFilletEdgeFilletEdge.svg` | add-on `om9_matrix` |
-| 10 | `SolidText` | Text | `solid-minimal/SolidText.svg` | add-on `om9_matrix` |
-| 11 | `SolidExtrudePlanarCurveStraight` | SolidExtrudePlanarCurveStraight | `solid-minimal/SolidExtrudePlanarCurveStraight.svg` | add-on `om9_matrix` |
-| 12 | `SolidGVDAllExtrude` | SolidGVDAllExtrude | `solid-minimal/SolidGVDAllExtrude.svg` | add-on `om9_matrix` |
-| 13 | `SolidPipe` | Pipe | `solid-minimal/SolidPipe.svg` | add-on `om9_matrix` |
-| 14 | `SolidGVDMultiPipe` | SolidGVDMultiPipe | `solid-minimal/SolidGVDMultiPipe.svg` | — |
-| 15 | `SolidBoxCornertoCornerHeight` | Box | `solid-minimal/SolidBoxCornertoCornerHeight.svg` | add-on `om9_matrix` |
-| 16 | `SolidBoxDiagonal` | SolidBoxDiagonal | `solid-minimal/SolidBoxDiagonal.svg` | — |
-| 17 | `SolidBox3PointsHeight` | SolidBox3PointsHeight | `solid-minimal/SolidBox3PointsHeight.svg` | — |
-| 18 | `SolidBoxVerticalBase` | SolidBoxVerticalBase | `solid-minimal/SolidBoxVerticalBase.svg` | — |
-| 19 | `SolidBoxCenterofBaseCornerHeight` | SolidBoxCenterofBaseCornerHeight | `solid-minimal/SolidBoxCenterofBaseCornerHeight.svg` | — |
-| 20 | `SolidSphereCenterRadius` | Sphere | `solid-minimal/SolidSphereCenterRadius.svg` | add-on `om9_matrix` |
-| 21 | `SolidSphere2Points` | SolidSphere2Points | `solid-minimal/SolidSphere2Points.svg` | — |
-| 22 | `SolidSphere3Points` | SolidSphere3Points | `solid-minimal/SolidSphere3Points.svg` | — |
-| 23 | `SolidSphere4Points` | SolidSphere4Points | `solid-minimal/SolidSphere4Points.svg` | — |
-| 24 | `SolidSphereAroundCurve` | SolidSphereAroundCurve | `solid-minimal/SolidSphereAroundCurve.svg` | — |
-| 25 | `SolidSphereTangenttoCurves` | SolidSphereTangenttoCurves | `solid-minimal/SolidSphereTangenttoCurves.svg` | — |
-| 26 | `SolidSphereFitSpheretoPoints` | SolidSphereFitSpheretoPoints | `solid-minimal/SolidSphereFitSpheretoPoints.svg` | — |
-| 27 | `SolidEllipsoidFromCenter` | Ellipsoid | `solid-minimal/SolidEllipsoidFromCenter.svg` | add-on `om9_matrix` |
-| 28 | `SolidTorus` | Torus | `solid-minimal/SolidTorus.svg` | add-on `om9_matrix` |
-| 29 | `SolidCylinder` | Cylinder | `solid-minimal/SolidCylinder.svg` | add-on `om9_matrix` |
-| 30 | `SolidTube` | Tube | `solid-minimal/SolidTube.svg` | add-on `om9_matrix` |
-| 31 | `SolidPyramid` | Pyramid | `solid-minimal/SolidPyramid.svg` | add-on `om9_matrix` |
-| 32 | `SolidCone` | Cone | `solid-minimal/SolidCone.svg` | add-on `om9_matrix` |
-| 33 | `SolidTruncatedCone` | Truncated Cone | `solid-minimal/SolidTruncatedCone.svg` | add-on `om9_matrix` |
-| 34 | `SolidBoss` | Boss | `solid-minimal/SolidBoss.svg` | add-on `om9_matrix` |
-| 35 | `SolidRib` | Rib | `solid-minimal/SolidRib.svg` | add-on `om9_matrix` |
-| 36 | `SolidSlab` | Slab | `solid-minimal/SolidSlab.svg` | add-on `om9_matrix` |
-| 37 | `SolidSolidEditToolsHolesMakeHole` | Make Hole | `solid-minimal/SolidSolidEditToolsHolesMakeHole.svg` | add-on `om9_matrix` |
-| 38 | `SolidSolidEditToolsHolesArrayHole` | Array Hole | `solid-minimal/SolidSolidEditToolsHolesArrayHole.svg` | add-on `om9_matrix` |
-| 39 | `SolidSolidEditToolsHolesArrayHolePolar` | Array Hole Polar | `solid-minimal/SolidSolidEditToolsHolesArrayHolePolar.svg` | add-on `om9_matrix` |
-| 40 | `SolidSolidEditToolsHolesMoveHole` | Move Hole | `solid-minimal/SolidSolidEditToolsHolesMoveHole.svg` | add-on `om9_matrix` |
-| 41 | `SolidSolidEditToolsFacesMoveFace` | Move Face | `solid-minimal/SolidSolidEditToolsFacesMoveFace.svg` | add-on `om9_matrix` |
-| 42 | `SolidShell` | Shell | `solid-minimal/SolidShell.svg` | add-on `om9_matrix` |
-| 43 | `SolidPtOn` | SolidPtOn | `solid-minimal/SolidPtOn.svg` | add-on `om9_matrix` |
+| 5 | `SolidCapPlanarHoles` | Cap Planar | `solid-minimal/SolidCapPlanarHoles.svg` | add-on `om9_matrix` |
+| 6 | `SolidExtractSurface` | Extract Surface | `solid-minimal/SolidExtractSurface.svg` | add-on `om9_matrix` |
+| 7 | `SolidFilletEdgeFilletEdge` | Fillet Edge | `solid-minimal/SolidFilletEdgeFilletEdge.svg` | add-on `om9_matrix` |
+| 8 | `SolidText` | Text | `solid-minimal/SolidText.svg` | add-on `om9_matrix` |
+| 9 | `SolidExtrudePlanarCurveStraight` | Extrude Curve Straight | `solid-minimal/SolidExtrudePlanarCurveStraight.svg` | add-on `om9_matrix` |
+| 10 | `SolidGVDAllExtrude` | Solid Extrude All | `solid-minimal/SolidGVDAllExtrude.svg` | add-on `om9_matrix` |
+| 11 | `SolidPipe` | Pipe | `solid-minimal/SolidPipe.svg` | add-on `om9_matrix` |
+| 12 | `SolidBoxCornertoCornerHeight` | Box | `solid-minimal/SolidBoxCornertoCornerHeight.svg` | add-on `om9_matrix` |
+| 13 | `SolidSphereCenterRadius` | Sphere | `solid-minimal/SolidSphereCenterRadius.svg` | add-on `om9_matrix` |
+| 14 | `SolidEllipsoidFromCenter` | Ellipsoid | `solid-minimal/SolidEllipsoidFromCenter.svg` | add-on `om9_matrix` |
+| 15 | `SolidTorus` | Torus | `solid-minimal/SolidTorus.svg` | add-on `om9_matrix` |
+| 16 | `SolidCylinder` | Cylinder | `solid-minimal/SolidCylinder.svg` | add-on `om9_matrix` |
+| 17 | `SolidTube` | Tube | `solid-minimal/SolidTube.svg` | add-on `om9_matrix` |
+| 18 | `SolidPyramid` | Pyramid | `solid-minimal/SolidPyramid.svg` | add-on `om9_matrix` |
+| 19 | `SolidCone` | Cone | `solid-minimal/SolidCone.svg` | add-on `om9_matrix` |
+| 20 | `SolidTruncatedCone` | Truncated Cone | `solid-minimal/SolidTruncatedCone.svg` | add-on `om9_matrix` |
+| 21 | `SolidBoss` | Boss | `solid-minimal/SolidBoss.svg` | add-on `om9_matrix` |
+| 22 | `SolidRib` | Rib | `solid-minimal/SolidRib.svg` | add-on `om9_matrix` |
+| 23 | `SolidSlab` | Slab | `solid-minimal/SolidSlab.svg` | add-on `om9_matrix` |
+| 24 | `SolidSolidEditToolsHolesMakeHole` | Make Hole | `solid-minimal/SolidSolidEditToolsHolesMakeHole.svg` | add-on `om9_matrix` |
+| 25 | `SolidSolidEditToolsHolesArrayHole` | Array Hole | `solid-minimal/SolidSolidEditToolsHolesArrayHole.svg` | add-on `om9_matrix` |
+| 26 | `SolidSolidEditToolsHolesArrayHolePolar` | Array Hole Polar | `solid-minimal/SolidSolidEditToolsHolesArrayHolePolar.svg` | add-on `om9_matrix` |
+| 27 | `SolidSolidEditToolsHolesMoveHole` | Move Hole | `solid-minimal/SolidSolidEditToolsHolesMoveHole.svg` | add-on `om9_matrix` |
+| 28 | `SolidSolidEditToolsFacesMoveFace` | Move Face | `solid-minimal/SolidSolidEditToolsFacesMoveFace.svg` | add-on `om9_matrix` |
+| 29 | `SolidShell` | Shell | `solid-minimal/SolidShell.svg` | add-on `om9_matrix` |
+| 30 | `SolidPtOn` | Solid Points ON | `solid-minimal/SolidPtOn.svg` | add-on `om9_matrix` |
+| 31 | `SolidBooleanSplit` | SolidBooleanSplit | `solid-minimal/SolidBooleanSplit.svg` | — |
+| 32 | `SolidCreateSolid` | SolidCreateSolid | `solid-minimal/SolidCreateSolid.svg` | — |
+| 33 | `SolidGVDMultiPipe` | SolidGVDMultiPipe | `solid-minimal/SolidGVDMultiPipe.svg` | — |
+| 34 | `SolidBoxDiagonal` | SolidBoxDiagonal | `solid-minimal/SolidBoxDiagonal.svg` | — |
+| 35 | `SolidBox3PointsHeight` | SolidBox3PointsHeight | `solid-minimal/SolidBox3PointsHeight.svg` | — |
+| 36 | `SolidBoxVerticalBase` | SolidBoxVerticalBase | `solid-minimal/SolidBoxVerticalBase.svg` | — |
+| 37 | `SolidBoxCenterofBaseCornerHeight` | SolidBoxCenterofBaseCornerHeight | `solid-minimal/SolidBoxCenterofBaseCornerHeight.svg` | — |
+| 38 | `SolidSphere2Points` | SolidSphere2Points | `solid-minimal/SolidSphere2Points.svg` | — |
+| 39 | `SolidSphere3Points` | SolidSphere3Points | `solid-minimal/SolidSphere3Points.svg` | — |
+| 40 | `SolidSphere4Points` | SolidSphere4Points | `solid-minimal/SolidSphere4Points.svg` | — |
+| 41 | `SolidSphereAroundCurve` | SolidSphereAroundCurve | `solid-minimal/SolidSphereAroundCurve.svg` | — |
+| 42 | `SolidSphereTangenttoCurves` | SolidSphereTangenttoCurves | `solid-minimal/SolidSphereTangenttoCurves.svg` | — |
+| 43 | `SolidSphereFitSpheretoPoints` | SolidSphereFitSpheretoPoints | `solid-minimal/SolidSphereFitSpheretoPoints.svg` | — |
 
 ## Transform
 

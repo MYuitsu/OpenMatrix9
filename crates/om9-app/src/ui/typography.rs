@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 //! Load installed Windows UI fonts once, retaining egui's portable fallbacks.
 //! Font files remain OS resources; they are not copied or redistributed.
-#[cfg(windows)]
 use eframe::egui::FontData;
 use eframe::egui::{self, FontDefinitions, FontFamily, FontId};
-#[cfg(windows)]
 use std::sync::Arc;
 
 const SEMIBOLD: &str = "om9-ui-semibold";
@@ -43,6 +41,27 @@ pub(super) fn configure_fonts(ctx: &egui::Context) {
                     .unwrap()
                     .insert(0, name.into());
             }
+        }
+    }
+    // Elsewhere an installed sans font with Vietnamese letters is a fallback after egui's own
+    // (which has no `ọ`, `ữ` …), so Vietnamese labels never show as boxes.
+    #[cfg(not(windows))]
+    for path in [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/usr/share/fonts/TTF/DejaVuSans.ttf",
+        "/System/Library/Fonts/Supplemental/Arial.ttf",
+    ] {
+        if let Ok(bytes) = std::fs::read(path) {
+            fonts
+                .font_data
+                .insert("om9-vi-fallback".into(), Arc::new(FontData::from_owned(bytes)));
+            for family in [FontFamily::Proportional, FontFamily::Name(SEMIBOLD.into()), FontFamily::Monospace] {
+                if let Some(list) = fonts.families.get_mut(&family) {
+                    list.push("om9-vi-fallback".into());
+                }
+            }
+            break;
         }
     }
     ctx.set_fonts(fonts);

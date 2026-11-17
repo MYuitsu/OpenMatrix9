@@ -164,6 +164,26 @@ unsafe extern "C" {
         message: *mut c_char,
         capacity: c_int,
     ) -> c_int;
+    fn om9_occt_trimmed_face(
+        surface_shape: *const usize,
+        poles: *const f64,
+        weights: *const f64,
+        u_knots: *const f64,
+        v_knots: *const f64,
+        curve_count: usize,
+        curve_table: *const usize,
+        curve_poles: *const f64,
+        curve_weights: *const f64,
+        curve_knots: *const f64,
+        deflection: f64,
+        max_points: usize,
+        max_nodes: usize,
+        max_bytes: usize,
+        sink: NativeSink,
+        context: *mut c_void,
+        message: *mut c_char,
+        capacity: c_int,
+    ) -> c_int;
     fn om9_occt_loft(
         points: *const f64,
         count: usize,
@@ -1294,6 +1314,107 @@ pub fn planar(outer: &Profile, deflection_mm: f64, limits: &Limits) -> Result<Br
                 points.as_ptr(),
                 outer.points.len(),
                 plane_table.as_ptr(),
+                deflection,
+                budget.points,
+                budget.nodes,
+                budget.bytes,
+                sink,
+                context,
+                message,
+                capacity,
+            )
+        }
+    })
+    .map_err(CreationError::from)
+}
+
+/// A trimmed face: `surface` bounded by closed `loops` of NURBS curves lying on it (the
+/// first loop is the outer boundary, the others holes; each loop is curves end to end), as
+/// Rhino's PlanarSrf, Trim and Split leave a surface. No loops: the whole surface. OCCT
+/// projects the curves onto the surface (p-curves) and orients the wires.
+pub fn trimmed_face(
+    surface: &om9_core::geometry::NurbsSurface,
+    loops: &[Vec<om9_core::geometry::NurbsCurve>],
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<Brep, CreationError> {
+    let deflection = checked_deflection(deflection_mm)?;
+    let [du, dv] = surface.degree;
+    let [nu, nv] = surface.size;
+    let finite = |v: &[f64]| v.iter().all(|x| x.is_finite());
+    if surface.periodic != [false, false]
+        || du == 0
+        || dv == 0
+        || nu <= du
+        || nv <= dv
+        || surface.poles.len() != nu * nv
+        || surface.knots[0].len() != nu + du + 1
+        || surface.knots[1].len() != nv + dv + 1
+        || (!surface.weights.is_empty() && surface.weights.len() != nu * nv)
+        || !finite(&flatten(&surface.poles))
+        || !finite(&surface.knots[0])
+        || !finite(&surface.knots[1])
+    {
+        return Err(CreationError::Invalid("trimmed face surface".into()));
+    }
+    if nu * nv > MAX_PROFILE_POINTS * 16 {
+        return Err(CreationError::Budget("trimmed face surface poles".into()));
+    }
+    let weights = if surface.weights.is_empty() {
+        vec![1.0; nu * nv]
+    } else {
+        surface.weights.clone()
+    };
+    // Per curve: degree, pole count, loop index, reversed.
+    let mut table = Vec::new();
+    let (mut cp, mut cw, mut ck) = (Vec::new(), Vec::new(), Vec::new());
+    for (index, ring) in loops.iter().enumerate() {
+        if ring.is_empty() {
+            return Err(CreationError::Invalid("trimmed face loop is empty".into()));
+        }
+        for c in ring {
+            let n = c.poles.len();
+            if c.periodic
+                || c.degree == 0
+                || n <= c.degree
+                || c.knots.len() != n + c.degree + 1
+                || (!c.weights.is_empty() && c.weights.len() != n)
+                || !finite(&flatten(&c.poles))
+                || !finite(&c.knots)
+            {
+                return Err(CreationError::Invalid("trimmed face boundary curve".into()));
+            }
+            table.extend([c.degree, n, index, usize::from(c.reversed)]);
+            cp.extend(flatten(&c.poles));
+            if c.weights.is_empty() {
+                cw.extend(std::iter::repeat_n(1.0, n));
+            } else {
+                cw.extend_from_slice(&c.weights);
+            }
+            ck.extend_from_slice(&c.knots);
+        }
+    }
+    if table.len() / 4 > MAX_PROFILE_POINTS {
+        return Err(CreationError::Budget("trimmed face boundary curves".into()));
+    }
+    let shape = [du, dv, nu, nv];
+    let poles = flatten(&surface.poles);
+    let budget = snapshot_budget(limits);
+    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: all buffers and the callback context live through this synchronous call;
+        // the table gives every buffer's extent (validated above).
+        unsafe {
+            om9_occt_trimmed_face(
+                shape.as_ptr(),
+                poles.as_ptr(),
+                weights.as_ptr(),
+                surface.knots[0].as_ptr(),
+                surface.knots[1].as_ptr(),
+                table.len() / 4,
+                table.as_ptr(),
+                cp.as_ptr(),
+                cw.as_ptr(),
+                ck.as_ptr(),
                 deflection,
                 budget.points,
                 budget.nodes,

@@ -1,6 +1,6 @@
 # Split at Isocurve
 
-Cắt mặt thành hai theo đường đẳng tham số qua điểm bấm.
+Cắt mặt theo đường đẳng tham số như Rhino 5 Split (Isocurve): các mảnh chính xác.
 
 - **Mã lệnh:** `SurfaceSurfaceEditToolsSplitatIsocurve`
 - **Vị trí:** menu Surface, ô số 31
@@ -11,9 +11,8 @@ Cắt mặt thành hai theo đường đẳng tham số qua điểm bấm.
 ## Cách dùng
 
 1. Chọn mặt.
-2. Direction=U/V.
-3. Bấm điểm trên mặt.
+2. Bấm vị trí đường đẳng tham số (đường đi theo chuột).
 
 ## Tuỳ chọn (lệnh phụ)
 
-- Direction.
+- Direction: U / V / Both.

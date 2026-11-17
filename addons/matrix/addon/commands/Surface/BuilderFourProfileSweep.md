@@ -18,4 +18,4 @@ Quét bốn profile (đỉnh, hai bên, đáy) quanh ring rail.
 
 | Dòng lệnh | Ý nghĩa | Mặc định | Khoảng |
 |---|---|---|---|
-| `Stations=` | Số trạm dọc ray | 48 | 4 … 400 |
+| `SweepTolerance=` | Dung sai quét (mm) | 0.001 | 0 … 1 |

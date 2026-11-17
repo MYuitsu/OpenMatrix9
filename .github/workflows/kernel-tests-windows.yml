@@ -1,0 +1,81 @@
+name: Kernel tests (Windows, OCCT)
+
+# Runs om9-kernel integration tests against the pinned OCCT 8.0.1 SDK on demand. The release
+# workflow only builds the app, so native (C++) kernel changes are verified here.
+on:
+  push:
+    branches: ['codex/**']
+    paths: ['crates/om9-kernel/**', '.github/workflows/kernel-tests-windows.yml']
+  workflow_dispatch:
+    inputs:
+      test:
+        description: 'Integration test target (crates/om9-kernel/tests/<name>.rs)'
+        required: true
+        default: 'trimmed_face'
+
+permissions:
+  contents: read
+
+env:
+  CARGO_BUILD_JOBS: '2'
+
+jobs:
+  kernel:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Pin Rust toolchain
+        shell: pwsh
+        run: |
+          rustup toolchain install 1.98.1 --profile minimal
+          if($LASTEXITCODE -ne 0){throw 'Rust installation failed'}
+          rustup override set 1.98.1
+      - name: Run the kernel test against OCCT
+        shell: pwsh
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/om9-target
+          TEST_TARGET: ${{ inputs.test || 'trimmed_face' }}
+        run: |
+          if ($env:TEST_TARGET -notmatch '^[A-Za-z0-9_]+$') { throw 'Invalid test target' }
+          . ./tools/ci/msvc.ps1
+          Initialize-OM9Msvc
+          & python implementation/tools/fetch_occt.py --fetch
+          if ($LASTEXITCODE -ne 0) { throw 'OCCT pin verification/materialization failed' }
+          $sdk = Join-Path $PWD 'build/standalone-deps/occt-8.0.1-sdk'
+          $env:OM9_OCCT_SDK = $sdk
+          # OCCT's own DLLs and its third-party runtime (TBB, FreeType …) for the test binary.
+          $thirdparty = Join-Path $env:RUNNER_TEMP 'occt-3rdparty'
+          # The pinned download wraps the real package in inner ZIPs (as package_standalone.py's
+          # vendor_archive reads it): unpack up to three levels.
+          Expand-Archive -LiteralPath 'build/standalone-deps/occt-8.0.1-3rdparty-vc14-64.zip' -DestinationPath $thirdparty -Force
+          for ($depth = 0; $depth -lt 3; $depth++) {
+            if (Get-ChildItem $thirdparty -Recurse -Filter *.dll | Select-Object -First 1) { break }
+            Get-ChildItem $thirdparty -Recurse -Filter *.zip | ForEach-Object {
+              Expand-Archive -LiteralPath $_.FullName -DestinationPath (Join-Path $_.DirectoryName ($_.BaseName + '-x')) -Force
+              Remove-Item -LiteralPath $_.FullName
+            }
+          }
+          $dirs = @(Join-Path $sdk 'bin') + @(Get-ChildItem $thirdparty -Recurse -Filter *.dll | ForEach-Object { $_.DirectoryName } | Sort-Object -Unique)
+          $env:PATH = ($dirs -join ';') + ';' + $env:PATH
+          Write-Host "DLL dirs:"; $dirs | ForEach-Object { Write-Host "  $_ ($((Get-ChildItem $_ -Filter *.dll).Count) dll)" }
+          & cargo test --release -p om9-kernel --test $env:TEST_TARGET -j 2 --no-run
+          if ($LASTEXITCODE -ne 0) { throw 'Kernel test build failed' }
+          $exe = Get-ChildItem (Join-Path $env:CARGO_TARGET_DIR 'release/deps') -Filter "$($env:TEST_TARGET)-*.exe" | Sort-Object LastWriteTime | Select-Object -Last 1
+          # Name every DLL the test needs that is not on PATH (diagnostic for STATUS_DLL_NOT_FOUND).
+          $queue = [System.Collections.Generic.Queue[string]]::new(); $queue.Enqueue($exe.FullName)
+          $seen = @{}
+          while ($queue.Count -gt 0) {
+            $file = $queue.Dequeue()
+            foreach ($d in (& dumpbin /dependents $file | Where-Object { $_ -match '^\s+\S+\.dll$' } | ForEach-Object { $_.Trim() })) {
+              if ($seen.ContainsKey($d) -or $d -match '^(api|ext)-ms-') { continue }
+              $seen[$d] = $true
+              $hit = $dirs | ForEach-Object { Join-Path $_ $d } | Where-Object { Test-Path $_ } | Select-Object -First 1
+              if ($hit) { $queue.Enqueue($hit) }
+              elseif (-not (Test-Path (Join-Path $env:WINDIR "System32/$d"))) { Write-Host "MISSING $d (needed by $(Split-Path $file -Leaf))" }
+            }
+          }
+          & cargo test --release -p om9-kernel --test $env:TEST_TARGET -j 2 -- --nocapture
+          if ($LASTEXITCODE -ne 0) { throw 'Kernel tests failed' }

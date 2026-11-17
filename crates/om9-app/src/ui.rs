@@ -23,6 +23,7 @@ mod channel_cutters;
 mod addons_window;
 mod builder_panel;
 mod ring_rail_library;
+mod session_dialog;
 mod chrome;
 mod projects;
 mod clipboard;
@@ -449,7 +450,7 @@ pub struct MatrixApp {
     cmd_suggestions_rect: Option<Rect>,
     cmd_history_rect: Option<Rect>,
     /// Screen rectangles of the clickable command option tokens, for tests and hit reports.
-    cmd_token_rects: std::collections::BTreeMap<String, Rect>,
+    pub(crate) cmd_token_rects: std::collections::BTreeMap<String, Rect>,
     cmd_horizontal_offset: f32,
     cmd_ime_composing: bool,
     pub view_rects: BTreeMap<ViewId, Rect>,
@@ -508,6 +509,7 @@ pub struct MatrixApp {
     /// Tools › Add-ons… window and pending Install from Disk.
     addons_ui: addons_window::AddonsUi,
     builder_ui: builder_panel::BuilderUi,
+    pub(crate) session_dialog: session_dialog::SessionDialogUi,
     file_ime_composing: bool,
     file_f6_rects: BTreeMap<crate::file_lifecycle::FileKind, Rect>,
     /// Window title owned by this document's path/name and dirty marker.
@@ -600,7 +602,7 @@ pub struct MatrixApp {
     main_category_rects: BTreeMap<usize, Rect>,
     #[cfg(test)]
     toolbar_tab: usize,
-    style_ready: bool,
+    pub(crate) style_ready: bool,
     /// Live rectangles of the Matrix menu title bars, keyed by section key.
     pub section_rects: BTreeMap<&'static str, Rect>,
     /// The menu currently being dragged, with the last finite pointer position
@@ -643,7 +645,7 @@ pub struct MatrixApp {
     /// GPU viewport surface, created on first use from eframe's render state.
     /// One GPU target per viewport, so all four render their own camera instead of sharing pixels.
     gpu_viewports: std::collections::BTreeMap<ViewId, crate::gpu_viewport::GpuViewport>,
-    gpu_state: Option<eframe::egui_wgpu::RenderState>,
+    pub(crate) gpu_state: Option<eframe::egui_wgpu::RenderState>,
     /// One document scene shared by the four viewports; geometry is uploaded once, not once per view.
     shared_scene: crate::gpu_viewport::SharedResourcePool,
     /// Opt-in JSONL log of camera and gumball gestures (`OM9_INTERACTION_LOG`).
@@ -1184,6 +1186,7 @@ impl MatrixApp {
             os_audit: None,
             addons_ui: Default::default(),
             builder_ui: Default::default(),
+            session_dialog: Default::default(),
             file_ime_composing: false,
             file_f6_rects: BTreeMap::new(),
             window_title: String::new(),
@@ -3122,6 +3125,8 @@ impl MatrixApp {
             } else {
                 Err(Error::Stale("Boolean selection candidates"))
             }
+        } else if self.controller.addon_collects_objects() {
+            self.controller.select_root(Some(id), true)
         } else {
             self.controller.select_objects(&[id])
         };
@@ -4342,6 +4347,7 @@ impl MatrixApp {
         self.passes += 1;
         self.addons_frame(ui.ctx());
         self.builder_frame();
+        self.session_dialog_ui(ui.ctx());
         self.sync_pictureframe_textures(ui.ctx());
         if self
             .camera_audit
@@ -6448,6 +6454,18 @@ impl MatrixApp {
             // A later click supersedes any point waiting on source refinement.
             #[cfg(feature = "occt-brep")]
             if response.clicked() && self.line_surface_click.is_some() { self.cancel_line_surface(true); }
+            // Right-click with nothing running repeats the last add-on command (Rhino).
+            if response.secondary_clicked()
+                && !self.controller.is_running()
+                && self.controller.addon_repeatable().is_some()
+            {
+                let result = self.controller.repeat_addon_command().map(|_| ());
+                if result.is_ok() {
+                    self.append_running_prompt();
+                }
+                self.feedback(result);
+                return;
+            }
             if response.clicked() && !published_scene_current {
                 self.status.info("Viewport is updating; try selecting again");
             } else if response.clicked() && cfg!(feature = "occt-brep") && {
@@ -7440,7 +7458,14 @@ impl MatrixApp {
                         if let Some(hit) = hit {
                             let root = hit.root;
                             let subset = hit.subset.clone();
-                            if let Err(error) = self.controller.select_objects(&[root]) {
+                            // Inside an add-on command the picks add up (edges of several
+                            // objects, as Rhino collects them); otherwise the object alone.
+                            let picked = if self.controller.addon_session().is_some() {
+                                self.controller.select_root(Some(root), true)
+                            } else {
+                                self.controller.select_objects(&[root])
+                            };
+                            if let Err(error) = picked {
                                 self.feedback(Err(error));
                                 return;
                             }
@@ -7515,9 +7540,12 @@ impl MatrixApp {
                     }
                     self.controller.clear_subselection();
                     self.sub_object = None;
+                    let collecting = self.controller.addon_collects_objects();
                     let result = match (picked, ctrl) {
                         (Some(id), true) => self.controller.toggle_selection(id),
-                        _ => self.controller.select_root(picked, shift),
+                        // Inside an add-on command a click on empty space keeps the picks.
+                        (None, _) if collecting => Ok(()),
+                        _ => self.controller.select_root(picked, shift || collecting),
                     };
                     self.feedback(result);
                     self.focus_cmd = true;
@@ -7789,7 +7817,7 @@ impl MatrixApp {
                     }
                     let picked = self.objects_in_band(&view.camera, viewport, band, window);
 
-                    let result = if shift {
+                    let result = if shift || self.controller.addon_collects_objects() {
                         self.controller.add_objects(&picked)
                     } else if ctrl {
                         self.controller.remove_objects(&picked)
@@ -8256,13 +8284,20 @@ impl MatrixApp {
                 .input(|input| input.pointer.press_origin())
                 .map(|p| [f64::from(p.x), f64::from(p.y)])
                 .unwrap_or(pointer));
+            // A grip under the press takes it (picked and dragged, as in Rhino), not a gumball
+            // handle that happens to cross it on screen.
+            let on_grip = self.controller.top11_grip_mode().is_some()
+                && self.grip_at(view, viewport, start).is_some();
             let box_hit = views.iter().find_map(|group| {
                 group
                     .box_at(&view.camera, viewport, start, 8.0)
                     .ok()
                     .flatten()
             });
-            let hit = box_hit.or_else(|| {
+            let hit = box_hit.filter(|_| !on_grip).or_else(|| {
+                if on_grip {
+                    return None;
+                }
                 views
                     .iter()
                     .filter_map(|group| {

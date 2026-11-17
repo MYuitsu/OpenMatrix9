@@ -176,10 +176,12 @@ fn generate() -> Generated {
             ));
             let interactive = matches!(c.get("interactive"), Some(Value::Bool(true)));
             let builder = matches!(c.get("builder"), Some(Value::Bool(true)));
+            let builtin = matches!(c.get("builtin"), Some(Value::Bool(true)));
             page.push_str(&format!(
                 "- **Cách chạy:** {}\n",
                 match (code, interactive, builder) {
                     ("BuilderMetalWeights", _, _) => "mở bảng BUILDERS, chọn vật thể và nhấn Calculate",
+                    _ if builtin => "lệnh có sẵn của OM9 (khối chính xác bằng lõi B-Rep); bản không có lõi dùng lệnh của add-on",
                     (_, true, true) => "từng bước trên dòng lệnh, kèm bảng BUILDERS; Enter để tạo, Esc để huỷ",
                     (_, true, false) => "từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ",
                     (_, false, true) => "bảng BUILDERS và tuỳ chọn dòng lệnh; Enter để tạo",

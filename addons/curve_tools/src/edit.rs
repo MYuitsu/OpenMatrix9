@@ -13,6 +13,9 @@
 //!   MinimumLength=0 MaximumLength=0 )`, Enter.
 //! - TweenCurves: `Select start curve`, `Select end curve`, then `Number=1
 //!   MatchMethod=None|Refit|SamplePoints SampleNumber=10 Flip`, Enter.
+//! - MeanCrv: `Select first curve ( AdjustCurveDirections=Yes )`, `Select second curve`: the
+//!   curve halfway between them. Same structure: the mean of the control points (exact);
+//!   otherwise matched by length and fitted within 0.001 with as few points as it takes.
 use om9_addon_abi::session::{
     Event, Geo, Input, OptionToken, Replacement, Reply, Vec3, Want, add, dist, dot, fmt, scale, sub,
 };
@@ -177,6 +180,9 @@ pub(crate) fn rebuild(e: &Event) -> Reply {
     r.state = save(&w);
     if !r.done {
         r.options.push(om9_addon_abi::session::OptionToken::action("SelectMasterCurve"));
+        if w.master.is_some() {
+            r.notes.push(("SelectMasterCurve".into(), "✓".into()));
+        }
     }
     r
 }
@@ -187,7 +193,10 @@ fn rebuild_flow(e: &Event) -> Reply {
         .confirm("Rebuild. Press Enter when done")
         .num("PointCount", 10.0)
         .num("Degree", 3.0)
-        .toggle("DeleteInput", true);
+        .toggle("DeleteInput", true)
+        .toggle("CurrentLayer", false)
+        .toggle("PreserveTangents", false)
+        .toggle("Preview", true);
     let make = |c: &Collected| -> Result<(Vec<(String, Geo)>, f64), String> {
         let count = c.num(&flow, "PointCount").round() as usize;
         let degree = c.num(&flow, "Degree").round() as usize;
@@ -203,27 +212,74 @@ fn rebuild_flow(e: &Event) -> Reply {
         let mut worst: f64 = 0.0;
         let mut out = Vec::new();
         for cv in CurveRef::all(e) {
-            let g = rebuilt(&cv, count, degree, false)
+            let g = rebuilt(&cv, count, degree, c.yes(&flow, "PreserveTangents"))
                 .ok_or("Rebuild failed")?;
             worst = worst.max(deviation(&cv, &g));
             out.push((cv.id.clone(), g));
         }
         Ok((out, worst))
     };
-    flow.step(
+    // Rhino's dialog shows each value's current one, "Point count: (2) [5]", and the
+    // maximum deviation of the preview: here in the prompt above OK.
+    let worst_seen = std::cell::Cell::new(None::<f64>);
+    let mut r = flow.step(
         e,
-        &|c, _| Show {
-            geo: make(c)
-                .map(|m| m.0.into_iter().map(|x| x.1).collect())
-                .unwrap_or_default(),
-            ..Default::default()
+        &|c, _| {
+            let m = make(c);
+            worst_seen.set(m.as_ref().ok().map(|m| m.1));
+            Show { geo: m.map(|m| m.0.into_iter().map(|x| x.1).collect()).unwrap_or_default(), ..Default::default() }
         },
         &|c| {
             let (made, worst) = make(c)?;
             let note = format!("Rebuild: maximum deviation {}", crate::fmt_len(worst));
-            replace_or_add("Rebuild", c.yes(&flow, "DeleteInput"), made, note)
+            let delete = c.yes(&flow, "DeleteInput");
+            if delete && c.yes(&flow, "CurrentLayer") {
+                // Rhino "Create new object on current layer": the input goes, the new curve is
+                // made on the current layer (a replacement would keep the input's layer).
+                let mut r = Reply::finish(made.iter().map(|m| m.1.clone()).collect()).say(note);
+                r.delete = made.into_iter().map(|m| m.0).collect();
+                return Ok(r);
+            }
+            replace_or_add("Rebuild", delete, made, note)
         },
-    )
+    );
+    if !r.done && matches!(r.want, Want::Nothing) {
+        let now: Vec<(usize, usize)> = CurveRef::all(e)
+            .iter()
+            .map(|cv| match cv.geo() {
+                Geo::Nurbs { degree, points, .. } => (points.len(), degree),
+                Geo::Polyline { points, closed } => (points.len() + usize::from(closed), 1),
+                Geo::Line { .. } => (2, 1),
+                _ => (0, 0),
+            })
+            .collect();
+        // Rhino's dialog: "Point count: (2) [5]", the current value in brackets (a range for
+        // several curves), and the maximum deviation of the preview under the options.
+        let range = |v: Vec<usize>| -> String {
+            let (lo, hi) = (v.iter().copied().min().unwrap_or(0), v.iter().copied().max().unwrap_or(0));
+            if lo == hi { format!("({lo})") } else { format!("({lo}…{hi})") }
+        };
+        let known: Vec<(usize, usize)> = now.iter().copied().filter(|(n, _)| *n > 0).collect();
+        if !known.is_empty() {
+            r.notes.push(("PointCount".into(), range(known.iter().map(|x| x.0).collect())));
+            r.notes.push(("Degree".into(), range(known.iter().map(|x| x.1).collect())));
+        }
+        if let Some(w) = worst_seen.get() {
+            r.notes.push((String::new(), format!("Maximum deviation: {}", crate::fmt_len(w))));
+        }
+        // Rhino's order: the numbers, then the checkboxes, then Select Master Curve.
+        r.notes.push((
+            "@group".into(),
+            "|PointCount,Degree,DeleteInput,CurrentLayer,PreserveTangents,SelectMasterCurve".into(),
+        ));
+        let current = match now.as_slice() {
+            [(n, d)] if *n > 0 => format!("now ({n}) points, degree ({d})"),
+            many => format!("{} curves", many.len()),
+        };
+        let deviation = worst_seen.get().map_or(String::new(), |w| format!(". Maximum deviation: {}", crate::fmt_len(w)));
+        r.prompt = format!("Rebuild: {current}{deviation}. Press Enter when done");
+    }
+    r
 }
 
 pub(crate) fn fit_curve(e: &Event) -> Reply {
@@ -692,6 +748,107 @@ pub(crate) fn tween(e: &Event) -> Reply {
             let geo = make(c)?;
             let n = geo.len();
             Ok(Reply::finish(geo).say(format!("TweenCurves: {n} curves")))
+        },
+    )
+}
+
+// ---- MeanCrv ---------------------------------------------------------------------------------
+
+/// The curve halfway between `a` and `b` (Rhino MeanCrv), with the largest distance from the
+/// true middle.
+pub(crate) fn mean_of(a: &CurveRef, b: &CurveRef, adjust: bool) -> Result<(Geo, f64), String> {
+    if a.closed != b.closed {
+        return Err("Both curves must be open or both closed".into());
+    }
+    let mut b = b.clone();
+    if adjust {
+        let flip = if a.closed {
+            // Closed: the same way round (compare a point a little after the start).
+            let probe = a.at(0.05);
+            let (fwd, back) = (b.closest(probe).0, b.closest(a.at(0.0)).0);
+            let after = (fwd - back).rem_euclid(1.0);
+            after > 0.5
+        } else {
+            dist(a.at(0.0), b.at(0.0)) + dist(a.at(1.0), b.at(1.0))
+                > dist(a.at(0.0), b.at(1.0)) + dist(a.at(1.0), b.at(0.0))
+        };
+        if flip {
+            b.exact = om9_addon_geom::join::reverse(&b.geo());
+            b.pts.reverse();
+        }
+    }
+    // Same degree, points and knots: the mean of the control points is the exact middle.
+    if let (
+        Geo::Nurbs { degree: da, points: pa, weights: wa, knots: ka },
+        Geo::Nurbs { degree: db, points: pb, weights: wb, knots: kb },
+    ) = (a.geo(), b.geo())
+        && da == db
+        && pa.len() == pb.len()
+        && wa.iter().chain(&wb).all(|w| (w - 1.0).abs() < 1e-12)
+        && ka.len() == kb.len()
+    {
+        let span = |k: &[f64]| (k[da], k[k.len() - da - 1]);
+        let (sa, sb) = (span(&ka), span(&kb));
+        let norm_k = |k: &[f64], s: (f64, f64)| -> Vec<f64> { k.iter().map(|x| (x - s.0) / (s.1 - s.0)).collect() };
+        let (na, nb) = (norm_k(&ka, sa), norm_k(&kb, sb));
+        if na.iter().zip(&nb).all(|(x, y)| (x - y).abs() < 1e-9) {
+            let points = pa.iter().zip(&pb).map(|(p, q)| scale(add(*p, *q), 0.5)).collect();
+            return Ok((Geo::Nurbs { degree: da, points, weights: Vec::new(), knots: na }, 0.0));
+        }
+    }
+    // Otherwise: the middles of points at the same share of each length, fitted.
+    let n = 400;
+    let (pa, pb) = (even(a, n), even(&b, n));
+    let mid: Vec<Vec3> = pa.iter().zip(&pb).map(|(p, q)| scale(add(*p, *q), 0.5)).collect();
+    let target = CurveRef { exact: om9_addon_geom::interpolate(&mid, 3, a.closed), ..a.clone() };
+    let poles = |c: &CurveRef| match c.geo() {
+        Geo::Nurbs { points, .. } => points.len(),
+        Geo::Polyline { points, .. } => points.len(),
+        _ => 4,
+    };
+    let start = [poles(a), poles(&b), 4].into_iter().max().unwrap_or(4);
+    let mut count = start;
+    let mut best: Option<(Geo, f64)> = None;
+    while count <= 200 {
+        if let Some(g) = interp::fit(&mid, count, 3, a.closed) {
+            let dev = deviation(&target, &g);
+            let ok = dev <= 0.001;
+            best = Some((g, dev));
+            if ok {
+                break;
+            }
+        }
+        count += (count / 4).max(1);
+    }
+    best.ok_or_else(|| "MeanCrv failed".to_owned())
+}
+
+pub(crate) fn mean(e: &Event) -> Reply {
+    let flow = Flow::new("MeanCrv")
+        .curve("Select first curve")
+        .curve("Select second curve")
+        .toggle("AdjustCurveDirections", true);
+    let make = |c: &Collected| -> Result<(Geo, f64), String> {
+        let (a, _) = c.curve(0).ok_or("Select first curve")?;
+        let (b, _) = c.curve(1).ok_or("Select second curve")?;
+        if a.id == b.id {
+            return Err("Select two different curves".into());
+        }
+        mean_of(a, b, c.yes(&flow, "AdjustCurveDirections"))
+    };
+    flow.step(
+        e,
+        &|c, _| Show { geo: make(c).map(|m| vec![m.0]).unwrap_or_default(), ..Default::default() },
+        &|c| {
+            let (g, dev) = make(c)?;
+            let points = match &g {
+                Geo::Nurbs { points, .. } => points.len(),
+                _ => 0,
+            };
+            Ok(Reply::finish(vec![g]).say(format!(
+                "MeanCrv: {points} control points, within {} of the middle",
+                crate::fmt_len(dev)
+            )))
         },
     )
 }

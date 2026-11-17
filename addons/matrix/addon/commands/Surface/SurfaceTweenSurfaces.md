@@ -1,6 +1,6 @@
 # Tween Surfaces
 
-Các mặt trung gian giữa hai mặt.
+Các mặt trung gian giữa hai mặt như Rhino 5 TweenSurfaces: góc khớp, điểm điều khiển nối nhau (chính xác).
 
 - **Mã lệnh:** `SurfaceTweenSurfaces`
 - **Vị trí:** menu Surface, ô số 20

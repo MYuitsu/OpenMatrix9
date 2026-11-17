@@ -3,10 +3,10 @@
 Tạo khối nón cụt.
 
 - **Mã lệnh:** `SolidTruncatedCone`
-- **Vị trí:** menu Solid, ô số 33
+- **Vị trí:** menu Solid, ô số 20
 - **Icon:** `Resources/icons/solid-minimal/SolidTruncatedCone.svg`
 - **Gọi bằng dòng lệnh:** `SolidTruncatedCone`, `TCone`
-- **Cách chạy:** từng bước trên dòng lệnh; Enter để tạo, Esc để huỷ
+- **Cách chạy:** lệnh có sẵn của OM9 (khối chính xác bằng lõi B-Rep); bản không có lõi dùng lệnh của add-on
 
 ## Cách dùng
 

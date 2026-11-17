@@ -1154,3 +1154,35 @@ fn helix_normal_and_largest_cases_stay_within_tolerance_and_limits() {
     assert_eq!(r.last().unwrap().preview.len(), 1);
     assert!(t0.elapsed().as_secs_f64() < 20.0, "took {:?}", t0.elapsed());
 }
+
+#[test]
+fn helix_expected_points_are_checked_before_the_shape_is_made() {
+    // Radius 50 needs ~45 points per turn: 600 turns (Pitch 0.05 on 30 mm) is under the turn
+    // limit but over the point limit, so it is refused at once with what to change.
+    let t0 = std::time::Instant::now();
+    let pitch = vec![pt(0.0, 0.0), pt(30.0, 0.0), set("Pitch", "0.05")];
+    let mut hover = pitch.clone();
+    hover.push(Input::Hover { point: [0.0, 50.0, 0.0] });
+    assert!(run(HELIX, hover).last().unwrap().preview.is_empty());
+    let mut typed = pitch.clone();
+    typed.push(text("50"));
+    let last = run(HELIX, typed).pop().unwrap();
+    let why = last.error.unwrap_or_default();
+    assert!(!last.done && why.starts_with("Too many points for this curve"), "{why}");
+    assert!(why.contains("increase Pitch or reduce the axis length"), "{why}");
+    // With Turns typed, the advice is to reduce Turns.
+    let last = run(HELIX, vec![pt(0.0, 0.0), pt(30.0, 0.0), set("Turns", "600"), text("50")]).pop().unwrap();
+    assert!(last.error.unwrap_or_default().contains("reduce Turns"));
+    // Turns past 1000 from the pitch also say what to change.
+    let last = run(HELIX, vec![pt(0.0, 0.0), pt(30.0, 0.0), set("Pitch", "0.01"), text("1")]).pop().unwrap();
+    assert!(last.error.unwrap_or_default().contains("increase Pitch or reduce the axis length"));
+    assert!(t0.elapsed().as_secs_f64() < 2.0, "refusals took {:?}", t0.elapsed());
+    // Within the limits the same radius is made, inside the tolerance: 100 turns of radius 50.
+    let g = created(&run(HELIX, vec![pt(0.0, 0.0), pt(30.0, 0.0), set("Turns", "100"), text("50")]));
+    for p in g::nurbs::samples(&g, 40_000) {
+        assert!(((p[1] * p[1] + p[2] * p[2]).sqrt() - 50.0).abs() < 1e-3, "{p:?}");
+    }
+    // A spiral is checked against its larger radius.
+    let last = run(SPIRAL, vec![pt(0.0, 0.0), pt(30.0, 0.0), set("Turns", "600"), text("1"), text("50")]).pop().unwrap();
+    assert!(last.error.unwrap_or_default().starts_with("Too many points for this curve"));
+}

@@ -28,7 +28,15 @@ pub struct FeatureName<'a> {
 
 /// lowercase name (catalog code, feature id or typed command) → catalog code.
 pub fn provided_names<'a>(host: &Host, features: &[FeatureName<'a>]) -> BTreeMap<String, String> {
-    let bound = host.bound_commands();
+    // A command the add-on marks `builtin` is OM9's own: while OM9's command for its catalog
+    // code is available, the add-on does not take its names, so menus, icons and typed names
+    // run OM9's command (exact solids). Without it (a build without the kernel) the add-on's
+    // own handler stands in.
+    let bound: Vec<_> = host
+        .bound_commands()
+        .into_iter()
+        .filter(|(code, _, _)| !defers_to_builtin(host, code))
+        .collect();
     // A command's own code always names it, whatever feature or alias another command has.
     let mut map: BTreeMap<String, String> = bound
         .iter()
@@ -37,8 +45,8 @@ pub fn provided_names<'a>(host: &Host, features: &[FeatureName<'a>]) -> BTreeMap
     for (code, _owner, _label) in &bound {
         if let Some(info) = host.command_info(code) {
             for alias in &info.command.aliases {
-                map.entry(alias.to_ascii_lowercase())
-                    .or_insert_with(|| code.clone());
+                let alias = alias.to_ascii_lowercase();
+                map.entry(alias).or_insert_with(|| code.clone());
             }
         }
     }
@@ -63,6 +71,13 @@ pub fn provided_names<'a>(host: &Host, features: &[FeatureName<'a>]) -> BTreeMap
         }
     }
     map
+}
+
+/// Whether an add-on command hands over to OM9's own command of the same catalog code.
+pub fn defers_to_builtin(host: &Host, code: &str) -> bool {
+    host.command_info(code).is_some_and(|info| info.command.builtin)
+        && crate::icons::feature_for(code)
+            .is_some_and(|feature| crate::session::Controller::availability(feature).is_ok())
 }
 
 /// The OM9 command catalog shipped in the binary.

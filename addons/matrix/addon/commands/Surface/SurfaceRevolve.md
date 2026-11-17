@@ -19,5 +19,6 @@ Xoay profile quanh trục (mặt tròn xoay chính xác).
 
 | Dòng lệnh | Ý nghĩa | Mặc định | Khoảng |
 |---|---|---|---|
+| `SplitAtTangents=` | Tách mặt tại chỗ gãy (Revolve) | No |  |
 | `Angle=` | Góc xoay | 360 | 1 … 360 |
 | `Start=` | Góc bắt đầu | 0 | -360 … 360 |

@@ -126,6 +126,32 @@ impl<'a> Srf<'a> {
             knots: self.knots[other].to_vec(),
         }
     }
+    /// Normalized (s, t) nearest to `p`, searched locally from `(s0, t0)` (no sweep of the
+    /// whole surface): for points that move a little from one call to the next, such as a walk
+    /// across the surface or samples along a curve on it. Same refinement as [`Srf::closest_st`].
+    pub fn closest_st_near(&self, p: Vec3, s0: f64, t0: f64) -> (f64, f64) {
+        let (mut s, mut t) = (s0.clamp(0.0, 1.0), t0.clamp(0.0, 1.0));
+        let mut best = dist(self.at_st(s, t), p);
+        let mut h = 1.0 / 64.0;
+        for _ in 0..60 {
+            let mut moved = false;
+            for (ds, dt) in [(h, 0.0), (-h, 0.0), (0.0, h), (0.0, -h)] {
+                let (s2, t2) = ((s + ds).clamp(0.0, 1.0), (t + dt).clamp(0.0, 1.0));
+                let d = dist(self.at_st(s2, t2), p);
+                if d < best {
+                    (s, t, best) = (s2, t2, d);
+                    moved = true;
+                }
+            }
+            if !moved {
+                h *= 0.5;
+                if h < 1e-10 {
+                    break;
+                }
+            }
+        }
+        (s, t)
+    }
     /// Normalized (s, t) of the grid sample nearest to `p`, refined by a few local steps.
     pub fn closest_st(&self, p: Vec3) -> (f64, f64) {
         let n = 32;

@@ -12,7 +12,7 @@
 //! Objects from OM9's kernel (BRep) take part through their display mesh; the result is a
 //! mesh object.
 use om9_addon_abi::session::{
-    Event, Geo, Input, Interactive, Replacement, Reply, Selected, SelectedMesh, Vec3, Want, add,
+    Event, Geo, Input, Interactive, OptionToken, Replacement, Reply, Selected, SelectedMesh, Vec3, Want, add,
     dist, dot, fmt, scale, sub,
 };
 use om9_addon_geom::cmd::{Collected, Flow, Show, load, save};
@@ -104,8 +104,11 @@ impl Interactive for Solids {
             PIPE => pipe(e),
             BOX | SPHERE | ELLIPSOID | TORUS | CYLINDER | TUBE | PYRAMID | CONE
             | TRUNCATED_CONE => primitive(e),
-            BOSS | RIB | SLAB => boss_rib_slab(e),
-            MAKE_HOLE | ARRAY_HOLE | ARRAY_HOLE_POLAR | MOVE_HOLE => holes(e),
+            BOSS => boss_rib_slab(e),
+            SLAB => rhino_tools::slab(e),
+            RIB => rhino_tools::rib(e),
+            MAKE_HOLE => rhino_tools::make_hole(e),
+            ARRAY_HOLE | ARRAY_HOLE_POLAR | MOVE_HOLE => holes(e),
             MOVE_FACE => move_face(e),
             SHELL => shell(e),
             // The solid's points (mesh vertices, NURBS control points) in the point editor.
@@ -189,9 +192,51 @@ fn union(e: &Event) -> Reply {
     )
 }
 
+type Kept = (String, Vec<Vec3>, Vec<[u32; 3]>);
+
 #[derive(Default, Serialize, Deserialize)]
 struct Groups {
-    first: Vec<(String, Vec<Vec3>, Vec<[u32; 3]>)>,
+    first: Vec<Kept>,
+    /// Several solids were selected before the command: they are cut at once, the biggest
+    /// (or the one `Base` chose) being cut by the others.
+    #[serde(default)]
+    quick: Vec<Kept>,
+    #[serde(default)]
+    base: usize,
+    /// `DeleteInput=No` keeps the cutters (Matrix manual, Boolean Difference).
+    #[serde(default)]
+    keep_cutters: bool,
+    #[serde(default)]
+    started: bool,
+}
+
+fn kept(s: &Selected) -> Kept {
+    let m = s.mesh.as_ref().unwrap();
+    (s.id.clone(), m.vertices.clone(), m.triangles.clone())
+}
+
+fn kept_mesh(k: &Kept) -> Mesh {
+    Mesh {
+        vertices: k.1.clone(),
+        triangles: k.2.clone(),
+    }
+}
+
+/// Cut (or intersect) `base` with the union of `tools`; replace `base` and delete the tools
+/// unless they are kept.
+fn cut(label: &str, op: Op, base: &[&Kept], tools: &[&Kept], keep_tools: bool) -> Reply {
+    let cutter = csg::fold(&tools.iter().map(|k| kept_mesh(k)).collect::<Vec<_>>(), Op::Union).unwrap();
+    let mut r = Reply::finish(Vec::new()).say(format!("{label}: {} solids with {} cutters", base.len(), tools.len()));
+    for k in base {
+        r.replace.push(Replacement {
+            id: k.0.clone(),
+            geo: csg::boolean(&kept_mesh(k), &cutter, op).geo("Solid", None, None),
+        });
+    }
+    if !keep_tools {
+        r.delete = tools.iter().map(|k| k.0.clone()).collect();
+    }
+    r
 }
 
 fn two_groups(e: &Event, op: Op) -> Reply {
@@ -202,6 +247,61 @@ fn two_groups(e: &Event, op: Op) -> Reply {
     };
     let mut st: Groups = load(e);
     let objs = solids(e);
+    let delete_option = |st: &Groups| OptionToken::toggle("DeleteInput", !st.keep_cutters);
+    match &e.input {
+        Input::Option { name, value } if name.eq_ignore_ascii_case("DeleteInput") => {
+            st.keep_cutters = match value.as_deref() {
+                Some(v) => matches!(v.to_ascii_lowercase().as_str(), "no" | "n" | "false" | "0"),
+                None => !st.keep_cutters,
+            };
+        }
+        Input::Option { name, .. } if name.eq_ignore_ascii_case("Base") && !st.quick.is_empty() => {
+            st.base = (st.base + 1) % st.quick.len();
+        }
+        _ => {}
+    }
+    // Solids selected before the command: cut right away (a preview, Enter to accept).
+    if !st.started {
+        st.started = true;
+        if objs.len() >= 2 {
+            st.quick = objs.iter().map(|s| kept(s)).collect();
+            st.base = (0..objs.len())
+                .max_by(|&a, &b| {
+                    let v = |i: usize| objs[i].mesh.as_ref().map_or(0.0, |m| m.volume().abs());
+                    v(a).total_cmp(&v(b))
+                })
+                .unwrap_or(0);
+        } else if objs.len() == 1 {
+            // Rhino: one selected object is the object to cut into; now the cutters.
+            st.first = vec![kept(objs[0])];
+            return ask_objects(
+                format!(
+                    "{label}: now select the solids to {} with, Enter",
+                    if op == Op::Difference { "subtract" } else { "intersect" }
+                ),
+                save(&st),
+            )
+            .with_options(vec![delete_option(&st)]);
+        }
+    }
+    if !st.quick.is_empty() {
+        let base = &st.quick[st.base];
+        let tools: Vec<&Kept> = st.quick.iter().enumerate().filter(|(i, _)| *i != st.base).map(|(_, k)| k).collect();
+        if matches!(e.input, Input::Enter) {
+            return cut(label, op, &[base], &tools, st.keep_cutters);
+        }
+        let preview = cut(label, op, &[base], &tools, true).replace.into_iter().map(|r| r.geo).collect();
+        return Reply::ask(
+            format!(
+                "{label}: Enter to {} the biggest solid with the other {} (Base: cut another one)",
+                if op == Op::Difference { "cut" } else { "intersect" },
+                tools.len()
+            ),
+            save(&st),
+        )
+        .preview(preview)
+        .with_options(vec![OptionToken::action("Base"), delete_option(&st)]);
+    }
     if st.first.is_empty() {
         if !matches!(e.input, Input::Enter) {
             return ask_objects(
@@ -221,13 +321,7 @@ fn two_groups(e: &Event, op: Op) -> Reply {
             return ask_objects(format!("{label}: select solids first"), save(&st))
                 .refuse(format!("{label}: nothing selected"));
         }
-        st.first = objs
-            .iter()
-            .map(|s| {
-                let m = s.mesh.as_ref().unwrap();
-                (s.id.clone(), m.vertices.clone(), m.triangles.clone())
-            })
-            .collect();
+        st.first = objs.iter().map(|s| kept(s)).collect();
         return ask_objects(
             format!(
                 "{label}: now select the solids to {} with, Enter",
@@ -238,49 +332,29 @@ fn two_groups(e: &Event, op: Op) -> Reply {
                 }
             ),
             save(&st),
-        );
+        )
+        .with_options(vec![delete_option(&st)]);
     }
     let ids: Vec<&String> = st.first.iter().map(|f| &f.0).collect();
     let second: Vec<&Selected> = objs.into_iter().filter(|s| !ids.contains(&&s.id)).collect();
     if second.is_empty() || !matches!(e.input, Input::Enter) {
         let r = ask_objects(
             format!(
-                "{label}: {} solids in the second set. Enter to finish",
+                "{label}: select the solids to {} with ({} selected), Enter",
+                if op == Op::Difference { "subtract" } else { "intersect" },
                 second.len()
             ),
             save(&st),
-        );
+        )
+        .with_options(vec![delete_option(&st)]);
         return if matches!(e.input, Input::Enter) {
             r.refuse(format!("{label}: select the second set"))
         } else {
             r
         };
     }
-    let cutter = csg::fold(
-        &second
-            .iter()
-            .map(|s| to_mesh(s.mesh.as_ref().unwrap()))
-            .collect::<Vec<_>>(),
-        Op::Union,
-    )
-    .unwrap();
-    let mut r = Reply::finish(Vec::new()).say(format!(
-        "{label}: {} solids with {} cutters",
-        st.first.len(),
-        second.len()
-    ));
-    for (id, v, t) in &st.first {
-        let a = Mesh {
-            vertices: v.clone(),
-            triangles: t.clone(),
-        };
-        r.replace.push(Replacement {
-            id: id.clone(),
-            geo: csg::boolean(&a, &cutter, op).geo("Solid", None, None),
-        });
-    }
-    r.delete = second.iter().map(|s| s.id.clone()).collect();
-    r
+    let tools: Vec<Kept> = second.iter().map(|s| kept(s)).collect();
+    cut(label, op, &st.first.iter().collect::<Vec<_>>(), &tools.iter().collect::<Vec<_>>(), st.keep_cutters)
 }
 
 fn boolean_two(e: &Event) -> Reply {
@@ -511,16 +585,31 @@ fn shell(e: &Event) -> Reply {
     })
 }
 
+/// Rhino 5 MoveFace: Select face (a click on it), Point to move from, Point to move to;
+/// DirectionConstraint None (any way) / Normal (along the face normal only).
 fn move_face(e: &Event) -> Reply {
-    let flow = Flow::new("Move Face")
-        .point("Click on the face to move (seen from above the CPlane)")
-        .number("Distance along the face normal", 1.0);
+    // DirectionConstraint now (as set so far, or being set by this input).
+    let constraint = match &e.input {
+        Input::Option { name, value: Some(v) } if name.eq_ignore_ascii_case("DirectionConstraint") => v.clone(),
+        _ => load::<Collected>(e).options.get("DirectionConstraint").cloned().unwrap_or_else(|| "None".into()),
+    };
+    let to_boundary = constraint.eq_ignore_ascii_case("ToBoundary");
+    let mut flow = Flow::new("Move Face").point("Select face");
+    if !to_boundary {
+        flow = flow.point("Point to move from").point("Point to move to");
+    }
+    let flow = flow
+        .choice("DirectionConstraint", &["None", "Normal", "ToBoundary"], "None")
+        .toggle("DeleteBoundary", false);
     flow.step(e, &|_, _| Show::default(), &|c| {
         let objs = solids(e);
         let s = objs.first().ok_or("Move Face: select the solid")?;
         let m = s.mesh.as_ref().unwrap();
-        let seed = triangle_under(m, c.p(0).unwrap(), e.plane.normal())
-            .ok_or("Move Face: the point is not over the solid")?;
+        let click = c.p(0).unwrap();
+        // The triangle nearest the click (the face clicked on).
+        let seed = nearest_triangle(m, click)
+            .or_else(|| triangle_under(m, click, e.plane.normal()))
+            .ok_or("Move Face: click on the solid")?;
         let face = region(m, seed, 1.0);
         let tr = m.triangles[seed];
         let n = shapes::tri_normal(
@@ -528,16 +617,42 @@ fn move_face(e: &Event) -> Reply {
             m.vertices[tr[1] as usize],
             m.vertices[tr[2] as usize],
         );
-        let d = c.n(0).unwrap();
-        let moving: std::collections::HashSet<u32> =
-            face.iter().flat_map(|&t| m.triangles[t]).collect();
+        let moving: std::collections::HashSet<u32> = face.iter().flat_map(|&t| m.triangles[t]).collect();
+        if to_boundary {
+            // ToBoundary: each point of the face runs along the face normal (either way) to
+            // the boundary object; the face takes the boundary's shape there.
+            let bound = objs.get(1).ok_or("Move Face: select the boundary object too")?;
+            let bm = bound.mesh.as_ref().unwrap();
+            let mut vertices = m.vertices.clone();
+            for &i in &moving {
+                let p = m.vertices[i as usize];
+                let hit = [n, scale(n, -1.0)]
+                    .iter()
+                    .filter_map(|d| rhino_tools::cast_mesh(bm, p, *d).map(|t| add(p, scale(*d, t))))
+                    .min_by(|a, b| dist(*a, p).total_cmp(&dist(*b, p)))
+                    .ok_or("Move Face: the face does not reach the boundary")?;
+                vertices[i as usize] = hit;
+            }
+            let mut r = Reply::finish(Vec::new()).say(format!("Move Face: {} triangles moved to the boundary", face.len()));
+            r.replace.push(Replacement {
+                id: s.id.clone(),
+                geo: Geo::Mesh { name: s.name.clone(), vertices, triangles: m.triangles.clone(), meta: None, layer: None },
+            });
+            if c.yes(&flow, "DeleteBoundary") {
+                r.delete.push(bound.id.clone());
+            }
+            return Ok(r);
+        }
+        let mv = sub(c.p(2).unwrap(), c.p(1).unwrap());
+        let mv = if c.opt(&flow, "DirectionConstraint") == "Normal" { scale(n, dot(mv, n)) } else { mv };
+        let d = dot(mv, mv).sqrt();
         let vertices = m
             .vertices
             .iter()
             .enumerate()
             .map(|(i, &v)| {
                 if moving.contains(&(i as u32)) {
-                    add(v, scale(n, d))
+                    add(v, mv)
                 } else {
                     v
                 }
@@ -560,6 +675,40 @@ fn move_face(e: &Event) -> Reply {
         });
         Ok(r)
     })
+}
+
+/// The triangle nearest a point (within a hair of the surface: the click lies on it).
+fn nearest_triangle(m: &SelectedMesh, p: Vec3) -> Option<usize> {
+    let closest = |a: Vec3, b: Vec3, c: Vec3| -> f64 {
+        // Distance to the triangle: the plane foot if inside, else the nearest edge.
+        let n = om9_addon_abi::session::cross(sub(b, a), sub(c, a));
+        let l = dot(n, n).sqrt();
+        if l < 1e-300 {
+            return f64::MAX;
+        }
+        let n = scale(n, 1.0 / l);
+        let foot = sub(p, scale(n, dot(sub(p, a), n)));
+        let inside = [(a, b), (b, c), (c, a)].iter().all(|(x, y)| dot(om9_addon_abi::session::cross(sub(*y, *x), sub(foot, *x)), n) >= -1e-12);
+        if inside {
+            return dot(sub(p, a), n).abs();
+        }
+        [(a, b), (b, c), (c, a)]
+            .iter()
+            .map(|(x, y)| {
+                let ab = sub(*y, *x);
+                let t = (dot(sub(p, *x), ab) / dot(ab, ab).max(1e-300)).clamp(0.0, 1.0);
+                dist(p, add(*x, scale(ab, t)))
+            })
+            .fold(f64::MAX, f64::min)
+    };
+    let (i, d) = m
+        .triangles
+        .iter()
+        .enumerate()
+        .map(|(i, t)| (i, closest(m.vertices[t[0] as usize], m.vertices[t[1] as usize], m.vertices[t[2] as usize])))
+        .min_by(|a, b| a.1.total_cmp(&b.1))?;
+    let size = m.vertices.iter().fold(0.0f64, |s, v| s.max(v[0].abs()).max(v[1].abs()).max(v[2].abs()));
+    (d <= 1e-3 * size.max(1.0)).then_some(i)
 }
 
 // ---- primitives ------------------------------------------------------------------------------
@@ -920,51 +1069,52 @@ fn text(e: &Event) -> Reply {
     let flow = Flow::new("Text")
         .no_selection()
         .point("Start point of the text");
-    let words = e.text("text_string", "OM9").to_owned();
-    let height = e.number("text_height", 3.0).max(0.1);
-    let depth = e.number("text_depth", 0.5);
-    let stroke = e.number("text_stroke", 0.0);
-    let make = |p: Vec3| -> Option<Mesh> {
-        let f = Frame::new(p, e.plane.normal(), e.plane.x);
-        let w = if stroke > 0.0 { stroke } else { height * 0.14 };
-        let section = [
-            [w / 2.0, depth],
-            [-w / 2.0, depth],
-            [-w / 2.0, 0.0],
-            [w / 2.0, 0.0],
-        ];
-        let mut all = Mesh::default();
-        for s in shapes::text_strokes(&words, &f, height, 0.25) {
-            // Each stroke: a square bar laid on the CPlane, raised by the depth.
-            let mut dense = Vec::new();
-            for w2 in s.windows(2) {
-                dense.push(w2[0]);
-                dense.push(add(w2[0], scale(sub(w2[1], w2[0]), 0.5)));
-            }
-            dense.push(*s.last()?);
-            if let Some(m) = mesh::sweep(&dense, false, e.plane.normal(), &section) {
-                all.append(&m);
-            }
-            for &q in &[s[0], *s.last()?] {
-                all.append(&mesh::cylinder(w / 2.0, 0.0, depth, 16).placed(&Frame::new(
-                    q,
-                    e.plane.normal(),
-                    e.plane.x,
-                )));
-            }
-        }
-        (!all.triangles.is_empty()).then_some(all)
+    let font_other = e.text("text_font_other", "").trim().to_owned();
+    let spec = text::Spec {
+        text: e.text("text_string", "OM9").replace("\\n", "\n"),
+        font: if font_other.is_empty() { e.text("text_font", "Arial").to_owned() } else { font_other },
+        bold: e.flag("text_bold", false),
+        italic: e.flag("text_italic", false),
+        height: e.number("text_height", 3.0).max(0.01),
+        spacing: e.number("text_spacing", 0.0),
+        small_caps: e.flag("text_small_caps", false).then(|| (e.number("text_small_caps_size", 70.0) / 100.0).clamp(0.1, 1.0)),
     };
+    let create = e.text("text_create", "solids").to_owned();
+    let thickness = e.number("text_depth", 0.5);
+    // Rounded top edges: solids only (curves and surfaces have no edges to round).
+    let fillet = if create == "solids" { e.number("text_fillet", 0.0).max(0.0) } else { 0.0 };
+    let outlines = |p: Vec3| text::outlines(&spec, &Frame::new(p, e.plane.normal(), e.plane.x));
     flow.step(
         e,
         &|_, h| Show {
-            geo: h.and_then(make).map(|m| m.wire()).unwrap_or_default(),
+            // The outlines follow the pointer (the solids are made on the click).
+            geo: h.and_then(|p| outlines(p).ok()).map(|cs| cs.iter().map(|c| c.to_geo()).collect()).unwrap_or_default(),
             ..Default::default()
         },
         &|c| {
-            let m = make(c.p(0).unwrap()).ok_or("Text: no letters to make (A–Z, 0–9)")?;
-            Ok(Reply::finish(vec![solid_geo(m, &format!("Text {words}"))])
-                .say(format!("Text: \"{words}\" {} mm high", fmt(height))))
+            let at = c.p(0).ok_or("Text: pick the start point")?;
+            let made = if fillet > 0.0 {
+                let glyphs = text::layout(&spec)?;
+                let frame = Frame::new(at, e.plane.normal(), e.plane.x);
+                text::rounded(&glyphs, &frame, thickness, fillet, spec.height)
+                    .into_iter()
+                    .map(|m| solid_geo(m, "Text"))
+                    .collect()
+            } else {
+                text::build(&outlines(at)?, &create, thickness, e.plane.normal())
+            };
+            if made.is_empty() {
+                return Err("Text: this font gives no closed outlines (try Create=Curves)".into());
+            }
+            Ok(Reply::finish(made).say(format!(
+                "Text: \"{}\" in {}{}{}, {} mm high{}",
+                spec.text,
+                spec.font,
+                if spec.bold { " Bold" } else { "" },
+                if spec.italic { " Italic" } else { "" },
+                fmt(spec.height),
+                if fillet > 0.0 { format!(", edges rounded r = {}", fmt(fillet)) } else { String::new() }
+            )))
         },
     )
 }
@@ -1037,29 +1187,45 @@ fn drill(curve: &[Vec3], n: Vec3, depth: f64) -> Option<Mesh> {
 fn holes(e: &Event) -> Reply {
     let cmd = e.command.as_str();
     let n = e.plane.normal();
+    // Rhino 5: "Select a hole" — a click on the edge of a hole in the solid. A closed curve
+    // selected with the solid still names the hole the old way.
+    let by_curve = curves(e).iter().any(|c| c.closed);
     let flow = match cmd {
         MAKE_HOLE => Flow::new("Make Hole"),
+        // Rhino 5 ArrayHole: the numbers in the A and B directions, a base point, then the
+        // A direction and spacing (a point), the B direction and spacing (Rectangular: square
+        // to A in the CPlane; UseASpacing: the A spacing).
         ARRAY_HOLE => Flow::new("Array Hole")
-            .number("Number in the CPlane x direction", 3.0)
-            .number("Number in the CPlane y direction", 1.0)
-            .number("Spacing in x", 2.0)
-            .number("Spacing in y", 2.0),
+            .number("Number of holes in the A-direction", 3.0)
+            .number("Number of holes in the B-direction", 1.0)
+            .point("Base point")
+            .point("A-direction and distance")
+            .point("B-direction and distance")
+            .toggle("Rectangular", true)
+            .toggle("UseASpacing", false),
         ARRAY_HOLE_POLAR => Flow::new("Array Hole Polar")
             .point("Center of the polar array")
             .number("Number of holes", 6.0)
             .number("Angle to fill", 360.0),
         _ => Flow::new("Move Hole")
-            .point("Point to move the hole from")
-            .point("Point to move the hole to"),
+            .point("Point to move from")
+            .point("Point to move to")
+            .toggle("Copy", false),
     };
+    let flow = if by_curve { flow } else { flow.point_first("Select a hole") };
+    let off = usize::from(!by_curve);
     let compute = |c: &Collected| -> Result<(String, Mesh, String), String> {
         let objs = solids(e);
-        let s = objs.first().ok_or("select the solid and the hole curve")?;
+        let s = objs.first().ok_or("select the solid")?;
         let cs = curves(e);
-        let hole = cs
-            .iter()
-            .find(|c| c.closed)
-            .ok_or("select a closed curve for the hole")?;
+        let hole_pts: Vec<Vec3> = match cs.iter().find(|c| c.closed) {
+            Some(h) => h.points.clone(),
+            None => rhino_tools::pick_hole(s.mesh.as_ref().unwrap(), c.p(0).ok_or("select a hole")?)
+                .ok_or("no hole there: click on the edge of a hole in a flat face")?,
+        };
+        let hole = &HoleCurve { points: hole_pts };
+        // Point answers after the hole pick.
+        let c = &c.shifted(off);
         let depth = dist(s.bbox[0], s.bbox[1]) + 1.0;
         let base = to_mesh(s.mesh.as_ref().unwrap());
         let moved = |d: Vec3| -> Vec<Vec3> { hole.points.iter().map(|&p| add(p, d)).collect() };
@@ -1083,13 +1249,30 @@ fn holes(e: &Event) -> Reply {
                     c.n(0).unwrap().round().max(1.0) as usize,
                     c.n(1).unwrap().round().max(1.0) as usize,
                 );
-                let (dx, dy) = (c.n(2).unwrap(), c.n(3).unwrap());
+                let base = c.p(0).ok_or("pick the base point")?;
+                let flat = |v: Vec3| sub(v, scale(n, dot(v, n)));
+                let a = flat(sub(c.p(1).ok_or("pick the A direction")?, base));
+                let mut b = flat(sub(c.p(2).ok_or("pick the B direction")?, base));
+                let la = dot(a, a).sqrt();
+                if la < 1e-9 {
+                    return Err("the A direction has no length".into());
+                }
+                if c.yes(&flow, "Rectangular") {
+                    // Square to A, on B's side, keeping B's length.
+                    let side = om9_addon_abi::session::cross(n, scale(a, 1.0 / la));
+                    let lb = dot(b, b).sqrt();
+                    b = scale(side, if dot(b, side) < 0.0 { -lb } else { lb });
+                }
+                if c.yes(&flow, "UseASpacing") {
+                    let lb = dot(b, b).sqrt().max(1e-300);
+                    b = scale(b, la / lb);
+                }
+                if ny > 1 && dot(b, b) < 1e-18 {
+                    return Err("the B direction has no length".into());
+                }
                 for i in 0..nx {
                     for j in 0..ny {
-                        let d = add(
-                            scale(e.plane.x, i as f64 * dx),
-                            scale(e.plane.y, j as f64 * dy),
-                        );
+                        let d = add(scale(a, i as f64), scale(b, j as f64));
                         cutters.push(
                             drill(&moved(d), n, depth).ok_or("the hole curve is not planar")?,
                         );
@@ -1116,10 +1299,12 @@ fn holes(e: &Event) -> Reply {
                 msg = format!("Array Hole Polar: {count} holes");
             }
             _ => {
-                // Fill the hole where it was, cut it where it goes.
-                let plug = drill(&hole.points, n, depth).ok_or("the hole curve is not planar")?;
-                let plug = csg::boolean(&plug, &base_slab(&base), Op::Intersection);
-                result = csg::boolean(&result, &plug, Op::Union);
+                // Fill the hole where it was (unless Copy), cut it where it goes.
+                if !c.yes(&flow, "Copy") {
+                    let plug = drill(&hole.points, n, depth).ok_or("the hole curve is not planar")?;
+                    let plug = csg::boolean(&plug, &base_slab(&base), Op::Intersection);
+                    result = csg::boolean(&result, &plug, Op::Union);
+                }
                 let d = sub(c.p(1).unwrap(), c.p(0).unwrap());
                 cutters.push(drill(&moved(d), n, depth).ok_or("the hole curve is not planar")?);
                 msg = "Move Hole: hole moved".to_owned();
@@ -1152,11 +1337,19 @@ fn holes(e: &Event) -> Reply {
     })
 }
 
+/// A hole outline (picked on the solid or a selected closed curve).
+struct HoleCurve {
+    points: Vec<Vec3>,
+}
+
 /// The box of a mesh (used to keep a plug inside the solid it fills).
 fn base_slab(m: &Mesh) -> Mesh {
     let b = m.bbox();
     mesh::cuboid(b[0], b[1])
 }
+
+mod rhino_tools;
+pub mod text;
 
 #[cfg(test)]
 mod tests;

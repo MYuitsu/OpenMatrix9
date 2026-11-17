@@ -28,6 +28,18 @@ fn run(command: &str, selection: Vec<Selected>, inputs: Vec<Input>) -> Reply {
     r
 }
 
+fn run_with(command: &str, settings: Value, inputs: Vec<Input>) -> Reply {
+    let mut e = event(command, Input::Start, vec![], settings);
+    let mut r = Solids::step(&e).unwrap();
+    for i in inputs {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+        assert!(r.error.is_none(), "{command}: {:?} ({})", r.error, r.prompt);
+    }
+    r
+}
+
 fn pt(p: Vec3) -> Input {
     Input::Point { point: p }
 }
@@ -219,13 +231,8 @@ fn extrusions_with_holes_and_surfaces() {
 fn holes_shell_fillet_and_faces() {
     let plate = solid("p", mesh::cuboid([-5.0, -5.0, 0.0], [5.0, 5.0, 1.0]));
     let hole = closed_curve("h", square([0.0, 0.0, 1.0], 0.5));
-    let r = Solids::step(&event(
-        MAKE_HOLE,
-        Input::Enter,
-        vec![plate.clone(), hole.clone()],
-        json!({}),
-    ))
-    .unwrap();
+    // Rhino 5 MakeHole: the curves and the solid, Enter at the depth prompt: through.
+    let r = run(MAKE_HOLE, vec![plate.clone(), hole.clone()], vec![Input::Selection, Input::Enter]);
     assert!(
         (replaced(&r, 0).volume() - 99.0).abs() < 1e-6,
         "{}",
@@ -234,9 +241,30 @@ fn holes_shell_fillet_and_faces() {
     let r = run(
         ARRAY_HOLE,
         vec![plate.clone(), hole.clone()],
-        vec![Input::Selection, num(3.0), num(1.0), num(2.0), num(2.0)],
+        vec![Input::Selection, num(3.0), num(1.0), pt([0.0; 3]), pt([2.0, 0.0, 0.0]), pt([0.0, 2.0, 0.0])],
     );
     assert!((replaced(&r, 0).volume() - 97.0).abs() < 1e-6);
+    // Move Hole: the hole made above, moved 3 mm in x (volume stays 99); Copy=Yes keeps
+    // the old one too (98).
+    let holed = run(MAKE_HOLE, vec![plate.clone(), hole.clone()], vec![Input::Selection, Input::Enter]);
+    let holed = solid("p", replaced(&holed, 0));
+    let r = run(MOVE_HOLE, vec![holed.clone(), hole.clone()], vec![Input::Selection, pt([0.0; 3]), pt([3.0, 0.0, 0.0])]);
+    assert!((replaced(&r, 0).volume() - 99.0).abs() < 1e-6, "{}", replaced(&r, 0).volume());
+    let mut e = event(MOVE_HOLE, Input::Start, vec![holed, hole.clone()], json!({}));
+    let mut r = Solids::step(&e).unwrap();
+    for i in [Input::Selection, Input::Option { name: "Copy".into(), value: None }, pt([0.0; 3]), pt([3.0, 0.0, 0.0])] {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+    }
+    assert!((replaced(&r, 0).volume() - 98.0).abs() < 1e-6, "{}", replaced(&r, 0).volume());
+    // 2 × 2 with Rectangular (B forced square to A): 4 holes.
+    let r = run(
+        ARRAY_HOLE,
+        vec![plate.clone(), hole.clone()],
+        vec![Input::Selection, num(2.0), num(2.0), pt([0.0; 3]), pt([2.0, 0.0, 0.0]), pt([1.0, 2.5, 0.0])],
+    );
+    assert!((replaced(&r, 0).volume() - 96.0).abs() < 1e-6, "{}", replaced(&r, 0).volume());
     let r = run(
         ARRAY_HOLE_POLAR,
         vec![
@@ -250,13 +278,25 @@ fn holes_shell_fillet_and_faces() {
     let r = run(
         MOVE_FACE,
         vec![plate.clone()],
-        vec![Input::Selection, pt([0.0, 0.0, 0.0]), num(1.0)],
+        vec![Input::Selection, pt([0.0, 0.0, 1.0]), pt([0.0, 0.0, 1.0]), pt([0.0, 0.0, 2.0])],
     );
     assert!(
         (replaced(&r, 0).volume() - 200.0).abs() < 1e-6,
         "{}",
         replaced(&r, 0).volume()
     );
+    // DirectionConstraint=Normal: a slanted move (1 up, 3 sideways) moves the top only up.
+    let mut e = event(MOVE_FACE, Input::Start, vec![plate.clone()], json!({}));
+    let mut r = Solids::step(&e).unwrap();
+    for i in [Input::Selection, Input::Option { name: "DirectionConstraint".into(), value: Some("Normal".into()) }, pt([0.0, 0.0, 1.0]), pt([0.0, 0.0, 1.0]), pt([3.0, 0.0, 2.0])] {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+    }
+    assert!((replaced(&r, 0).volume() - 200.0).abs() < 1e-6, "{}", replaced(&r, 0).volume());
+    // A side face (x = 5) moved out 1: 11 × 10 × 1.
+    let r = run(MOVE_FACE, vec![plate.clone()], vec![Input::Selection, pt([5.0, 0.0, 0.5]), pt([5.0, 0.0, 0.5]), pt([6.0, 0.0, 0.5])]);
+    assert!((replaced(&r, 0).volume() - 110.0).abs() < 1e-6, "{}", replaced(&r, 0).volume());
     // Cap Planar Holes on an open box.
     let mut open = mesh::cuboid([0.0; 3], [1.0, 1.0, 1.0]);
     open.triangles.truncate(10);
@@ -271,20 +311,8 @@ fn holes_shell_fillet_and_faces() {
 }
 
 #[test]
-fn text_boss_and_pipe() {
-    let mut e = event(
-        TEXT,
-        Input::Start,
-        vec![],
-        json!({"text_string": "OM9", "text_height": 3.0, "text_depth": 0.5}),
-    );
-    let r = Solids::step(&e).unwrap();
-    e.state = r.state;
-    e.input = pt([0.0; 3]);
-    let r = Solids::step(&e).unwrap();
-    let m = created(&r);
-    let b = m.bbox();
-    assert!((b[1][2] - 0.5).abs() < 1e-9 && b[1][0] > 4.0, "{b:?}");
+fn boss_and_pipe() {
+    // Text: see `text_uses_installed_font_outlines`.
     let plate = solid("p", mesh::cuboid([-5.0, -5.0, -1.0], [5.0, 5.0, 0.0]));
     let r = run(
         BOSS,
@@ -316,4 +344,291 @@ fn solid_points_on_moves_a_corner() {
     assert!(m.vertices.contains(&[3.0, 3.0, 2.0]));
     assert!(!m.vertices.contains(&[2.0, 2.0, 2.0]));
     assert_eq!(m.vertices.len(), 8);
+}
+
+/// Rhino 5 Slab, MakeHole (depth, BothSides, Direction, DeleteInput) and Rib, checked by
+/// volume against the formulas (the meshes are polyhedral: volumes are exact).
+#[test]
+fn slab_make_hole_and_rib_follow_rhino5() {
+    // Slab: an open L-shaped polyline (6 + 4 mm) offset 1 mm to its inside, 2 mm high: the
+    // band's area is the L's (6·1 + 4·1 − 1·1 at the mitered corner) = 9 mm², volume 18.
+    let l = Selected { closed: false, ..closed_curve("l", vec![[0.0, 0.0, 0.0], [6.0, 0.0, 0.0], [6.0, 4.0, 0.0]]) };
+    let r = run(SLAB, vec![l.clone()], vec![Input::Selection, pt([5.0, 1.0, 0.0]), num(2.0)]);
+    assert!((created(&r).volume().abs() - 18.0).abs() < 1e-9, "{}", created(&r).volume());
+    // BothSides: 2 mm wide band → 6·2 + 4·2 = 20 mm² (the miters add and take back one square)... ×2 high = 40.
+    let mut e = event(SLAB, Input::Start, vec![l.clone()], json!({}));
+    let mut r = Solids::step(&e).unwrap();
+    for i in [Input::Selection, Input::Option { name: "BothSides".into(), value: None }, pt([5.0, 1.0, 0.0]), num(2.0)] {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+    }
+    assert!((created(&r).volume().abs() - 40.0).abs() < 1e-9, "{}", created(&r).volume());
+    // A closed square 4 × 4, offset 1 outward (mitered: 6 × 6), height 1: 36 − 16 = 20.
+    let sq = closed_curve("s", square([0.0, 0.0, 0.0], 2.0));
+    let r = run(SLAB, vec![sq.clone()], vec![Input::Selection, pt([3.0, 0.0, 0.0]), num(1.0)]);
+    assert!((created(&r).volume().abs() - 20.0).abs() < 1e-9, "{}", created(&r).volume());
+    // ThroughPoint: the side point 0.5 inside → 16 − 9 = 7.
+    let mut e = event(SLAB, Input::Start, vec![sq], json!({}));
+    let mut r = Solids::step(&e).unwrap();
+    for i in [Input::Selection, Input::Option { name: "ThroughPoint".into(), value: None }, pt([1.5, 0.0, 0.0]), num(1.0)] {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+    }
+    assert!((created(&r).volume().abs() - 7.0).abs() < 1e-9, "{}", created(&r).volume());
+
+    // MakeHole into a plate 10 × 10 × 2: a 1 × 1 square on top cut 0.5 deep (depth point);
+    // BothSides from the middle; DeleteInput removes the curve.
+    let plate = solid("p", mesh::cuboid([-5.0, -5.0, 0.0], [5.0, 5.0, 2.0]));
+    let top = closed_curve("h", square([0.0, 0.0, 2.0], 0.5));
+    let r = run(MAKE_HOLE, vec![plate.clone(), top.clone()], vec![Input::Selection, pt([0.0, 0.0, 1.5])]);
+    assert!((replaced(&r, 0).volume() - (200.0 - 0.5)).abs() < 1e-6, "{}", replaced(&r, 0).volume());
+    let mid = closed_curve("m", square([0.0, 0.0, 1.0], 0.5));
+    let mut e = event(MAKE_HOLE, Input::Start, vec![plate.clone(), mid], json!({}));
+    let mut r = Solids::step(&e).unwrap();
+    for i in [Input::Selection, Input::Option { name: "BothSides".into(), value: None }, Input::Option { name: "DeleteInput".into(), value: None }, num(0.25)] {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+    }
+    assert!((replaced(&r, 0).volume() - (200.0 - 0.5)).abs() < 1e-6, "{}", replaced(&r, 0).volume());
+    assert_eq!(r.delete, vec!["m".to_owned()]);
+    // Direction X: a square in the x = 5 side face, through: 10 mm long hole of 1 mm².
+    let side = closed_curve("x", vec![[5.0, -0.5, 0.5], [5.0, 0.5, 0.5], [5.0, 0.5, 1.5], [5.0, -0.5, 1.5]]);
+    let mut e = event(MAKE_HOLE, Input::Start, vec![plate.clone(), side], json!({}));
+    let mut r = Solids::step(&e).unwrap();
+    for i in [Input::Selection, Input::Option { name: "Direction".into(), value: Some("X".into()) }, Input::Enter] {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+    }
+    assert!((replaced(&r, 0).volume() - 190.0).abs() < 1e-6, "{}", replaced(&r, 0).volume());
+
+    // Rib: a straight line 4 mm long at z = 0 under a roof at z = 3 (the boundary), 1 mm
+    // thick: 4 × 1 × 3 = 12 (InCurvePlane, run up to the roof).
+    let roof = solid("roof", mesh::cuboid([-10.0, -10.0, 3.0], [10.0, 10.0, 4.0]));
+    let line = Selected { closed: false, ..closed_curve("r", vec![[0.0, 0.0, 0.0], [4.0, 0.0, 0.0]]) };
+    let mut e = event(RIB, Input::Start, vec![roof.clone(), line.clone()], json!({}));
+    let mut r = Solids::step(&e).unwrap();
+    // A line has no plane of its own: InCurvePlane takes the CPlane's (z up).
+    for i in [Input::Selection, Input::Enter] {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+    }
+    assert!(r.done, "{:?} {}", r.error, r.prompt);
+    assert!((created(&r).volume().abs() - 12.0).abs() < 1e-6, "{}", created(&r).volume());
+    // Tapered, DraftAngle 10°: the walls lean out by 3·tan 10° each → the section is a
+    // trapezoid 1 → 1 + 2·0.529 wide: 4 × 3 × (1 + 3·tan 10°) = 18.35.
+    let mut e = event(RIB, Input::Start, vec![roof.clone(), line.clone()], json!({}));
+    let mut r = Solids::step(&e).unwrap();
+    for i in [Input::Selection, Input::Option { name: "Mode".into(), value: Some("Tapered".into()) }, Input::Option { name: "DraftAngle".into(), value: Some("10".into()) }, Input::Enter] {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+    }
+    let want = 4.0 * 3.0 * (1.0 + 3.0 * 10f64.to_radians().tan());
+    assert!((created(&r).volume().abs() - want).abs() < 1e-6, "{} vs {want}", created(&r).volume());
+    // NormalToCurvePlane: an arc-free profile in the xz plane (z = 1 from x 0..4) runs down
+    // to a floor at z = 0, 1 mm thick across: 4 × 1 × 1 = 4.
+    let floor = solid("floor", mesh::cuboid([-10.0, -10.0, -1.0], [10.0, 10.0, 0.0]));
+    let profile = Selected { closed: false, ..closed_curve("q", vec![[0.0, 0.0, 1.0], [2.0, 0.0, 1.0], [4.0, 0.0, 1.0]]) };
+    let mut e = event(RIB, Input::Start, vec![floor, profile], json!({}));
+    let mut r = Solids::step(&e).unwrap();
+    for i in [Input::Selection, Input::Option { name: "Offset".into(), value: Some("NormalToCurvePlane".into()) }, Input::Enter] {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+    }
+    assert!(r.done, "{:?} {}", r.error, r.prompt);
+    assert!((created(&r).volume().abs() - 4.0).abs() < 1e-6, "{}", created(&r).volume());
+}
+
+/// Rhino 5 hole tools by "Select a hole": a click on the edge of a hole already in the solid
+/// (no curve) — ArrayHole, ArrayHolePolar, MoveHole; and MoveFace ToBoundary.
+#[test]
+fn hole_tools_pick_the_hole_and_move_face_to_boundary() {
+    let plate = solid("p", mesh::cuboid([-5.0, -5.0, 0.0], [5.0, 5.0, 1.0]));
+    let hole = closed_curve("h", square([0.0, 0.0, 1.0], 0.5));
+    let holed = run(MAKE_HOLE, vec![plate.clone(), hole], vec![Input::Selection, Input::Enter]);
+    let holed = solid("p", replaced(&holed, 0));
+    assert!((holed.mesh.as_ref().map(|m| to_mesh(m).volume()).unwrap() - 99.0).abs() < 1e-6);
+    // The hole is found from a click on its edge (on the top face).
+    let found = rhino_tools::pick_hole(holed.mesh.as_ref().unwrap(), [0.5, 0.1, 1.0]).expect("the hole");
+    assert_eq!(found.len(), 4, "{found:?}");
+    assert!(found.iter().all(|p| (p[2] - 1.0).abs() < 1e-9 && (p[0].abs() - 0.5).abs() < 1e-9 && (p[1].abs() - 0.5).abs() < 1e-9));
+    // A click on the outer edge is not a hole.
+    assert!(rhino_tools::pick_hole(holed.mesh.as_ref().unwrap(), [5.0, 0.0, 1.0]).is_none());
+    // ArrayHole from the picked hole: 3 × 1, 2 mm apart → two more holes (97).
+    let r = run(ARRAY_HOLE, vec![holed.clone()], vec![Input::Selection, pt([0.5, 0.1, 1.0]), num(3.0), num(1.0), pt([0.0; 3]), pt([2.0, 0.0, 0.0]), pt([0.0, 2.0, 0.0])]);
+    assert!((replaced(&r, 0).volume() - 97.0).abs() < 1e-6, "{}", replaced(&r, 0).volume());
+    // ArrayHolePolar round (0, 2): 4 holes, the first is the existing one → 96.
+    let r = run(ARRAY_HOLE_POLAR, vec![holed.clone()], vec![Input::Selection, pt([0.5, 0.1, 1.0]), pt([0.0, 2.0, 0.0]), num(4.0), num(360.0)]);
+    assert!((replaced(&r, 0).volume() - 96.0).abs() < 1e-6, "{}", replaced(&r, 0).volume());
+    // MoveHole: 3 mm in x → still 99, and the old place filled (a click there finds nothing).
+    let r = run(MOVE_HOLE, vec![holed.clone()], vec![Input::Selection, pt([0.5, 0.1, 1.0]), pt([0.0; 3]), pt([3.0, 0.0, 0.0])]);
+    let moved = replaced(&r, 0);
+    assert!((moved.volume() - 99.0).abs() < 1e-6, "{}", moved.volume());
+    let sm = solid("q", moved);
+    let again = rhino_tools::pick_hole(sm.mesh.as_ref().unwrap(), [3.5, 0.1, 1.0]).expect("the moved hole");
+    assert!(again.iter().all(|p| (p[0] - 3.0).abs() <= 0.5 + 1e-9));
+    // MoveFace ToBoundary: the top of a 10 × 10 × 1 plate up to a slab whose bottom is at z 4:
+    // 10 × 10 × 4 = 400.
+    let roof = solid("roof", mesh::cuboid([-20.0, -20.0, 4.0], [20.0, 20.0, 5.0]));
+    let mut e = event(MOVE_FACE, Input::Start, vec![plate.clone(), roof.clone()], json!({}));
+    let mut r = Solids::step(&e).unwrap();
+    for i in [Input::Selection, Input::Option { name: "DirectionConstraint".into(), value: Some("ToBoundary".into()) }, pt([0.0, 0.0, 1.0])] {
+        e.state = r.state.clone();
+        e.input = i;
+        r = Solids::step(&e).unwrap();
+        assert!(r.error.is_none(), "{:?} {}", r.error, r.prompt);
+    }
+    assert!(r.done, "{}", r.prompt);
+    assert!((replaced(&r, 0).volume() - 400.0).abs() < 1e-6, "{}", replaced(&r, 0).volume());
+}
+
+/// Two solids window-selected before Boolean Difference: the biggest is cut by the other at
+/// once (preview, Enter). `Base` cuts the other one instead; `DeleteInput=No` keeps the cutter.
+/// One selected solid is the object to cut into and the command asks for the cutters
+/// (Rhino 5 / Matrix manual, Boolean Difference).
+#[test]
+fn difference_of_preselected_solids_cuts_at_once() {
+    let big = solid("big", mesh::cuboid([0.0; 3], [4.0, 4.0, 4.0]));
+    let small = solid("small", mesh::cuboid([3.0, 3.0, 3.0], [5.0, 5.0, 5.0]));
+    // Window selection order says nothing: the cutter may come first.
+    let r = Solids::step(&event(DIFFERENCE, Input::Start, vec![small.clone(), big.clone()], json!({}))).unwrap();
+    assert!(!r.done && !r.preview.is_empty(), "{}", r.prompt);
+    let mut e = event(DIFFERENCE, Input::Enter, vec![small.clone(), big.clone()], json!({}));
+    e.state = r.state.clone();
+    let done = Solids::step(&e).unwrap();
+    assert!(done.done);
+    assert_eq!(done.replace[0].id, "big");
+    assert!((replaced(&done, 0).volume() - 63.0).abs() < 1e-6, "64 - 1 = {}", replaced(&done, 0).volume());
+    assert_eq!(done.delete, vec!["small".to_string()]);
+    // Base: the small one is cut by the big one; DeleteInput=No keeps the cutter.
+    e.input = Input::Option { name: "Base".into(), value: None };
+    let r2 = Solids::step(&e).unwrap();
+    e.state = r2.state;
+    e.input = Input::Option { name: "DeleteInput".into(), value: Some("No".into()) };
+    let r3 = Solids::step(&e).unwrap();
+    e.state = r3.state;
+    e.input = Input::Enter;
+    let done = Solids::step(&e).unwrap();
+    assert_eq!(done.replace[0].id, "small");
+    assert!((replaced(&done, 0).volume() - 7.0).abs() < 1e-6, "8 - 1 = {}", replaced(&done, 0).volume());
+    assert!(done.delete.is_empty());
+    // One preselected: asks for the cutters, then picks (each click alone in the selection).
+    let r = Solids::step(&event(DIFFERENCE, Input::Start, vec![big.clone()], json!({}))).unwrap();
+    assert!(r.prompt.contains("now select"), "{}", r.prompt);
+    let mut e = event(DIFFERENCE, Input::Selection, vec![small.clone()], json!({}));
+    e.state = r.state;
+    let r = Solids::step(&e).unwrap();
+    e.state = r.state;
+    e.input = Input::Enter;
+    let done = Solids::step(&e).unwrap();
+    assert!((replaced(&done, 0).volume() - 63.0).abs() < 1e-6);
+}
+
+/// Text from an installed font (Rhino 5 TextObject): "O" is two exact closed outlines; as a
+/// solid it is one extrusion with its hole; "H" stands as high as Height (the capitals).
+#[test]
+fn text_uses_installed_font_outlines() {
+    let font = ["DejaVu Sans", "Arial", "Liberation Sans", "FreeSans"].into_iter().find(|f| text::find(f, false, false).is_some());
+    let Some(font) = font else {
+        eprintln!("no test font installed; skipped");
+        return;
+    };
+    let set = |t: &str, create: &str| json!({"text_string": t, "text_font_other": font, "text_create": create, "text_height": 5.0, "text_depth": 1.0});
+    let r = run_with(TEXT, set("O", "curves"), vec![pt([0.0; 3])]);
+    assert_eq!(r.create.len(), 2, "outer and inner outline");
+    for g in &r.create {
+        let c = om9_addon_geom::exact::Nc::from_geo(g).unwrap();
+        assert!(c.closed(1e-9));
+    }
+    let r = run_with(TEXT, set("O", "solids"), vec![pt([0.0; 3])]);
+    assert_eq!(r.create.len(), 1);
+    match &r.create[0] {
+        Geo::Brep { faces, solid, .. } => {
+            assert!(*solid);
+            assert_eq!(faces.len(), 4, "outer wall, hole wall, two caps");
+        }
+        other => panic!("{other:?}"),
+    }
+    let r = run_with(TEXT, set("H", "curves"), vec![pt([10.0, 20.0, 0.0])]);
+    let c = om9_addon_geom::exact::Nc::from_geo(&r.create[0]).unwrap();
+    let ys: Vec<f64> = (0..=400).map(|k| c.eval(k as f64 / 400.0)[1]).collect();
+    let (lo, hi) = (ys.iter().cloned().fold(f64::MAX, f64::min), ys.iter().cloned().fold(f64::MIN, f64::max));
+    assert!((lo - 20.0).abs() < 0.01 && (hi - lo - 5.0).abs() < 0.05, "H from {lo} to {hi}");
+    let r = run_with(TEXT, set("HI", "surfaces"), vec![pt([0.0; 3])]);
+    assert_eq!(r.create.len(), 2, "one planar face per letter");
+    assert!(r.create.iter().all(|g| matches!(g, Geo::Trimmed { .. })));
+}
+
+/// Text with FilletRadius (solids only): each letter is one closed solid, flat underneath, with
+/// its top edges rounded. "I" is a rectangle w × h, so the volume is exact:
+/// w·h·t − (perimeter, corrected at the 4 corners) × (1 − π/4)·r².
+#[test]
+fn text_solids_get_rounded_top_edges() {
+    let font = ["DejaVu Sans", "Arial", "Liberation Sans", "FreeSans"].into_iter().find(|f| text::find(f, false, false).is_some());
+    let Some(font) = font else {
+        eprintln!("no test font installed; skipped");
+        return;
+    };
+    let (t, r) = (1.0, 0.3);
+    let set = |create: &str, fillet: f64| json!({"text_string": "I", "text_font_other": font, "text_create": create, "text_height": 20.0, "text_depth": t, "text_fillet": fillet});
+    // The I's rectangle, from its exact outline.
+    let c = run_with(TEXT, set("curves", 0.0), vec![pt([0.0; 3])]);
+    assert_eq!(c.create.len(), 1);
+    let nc = om9_addon_geom::exact::Nc::from_geo(&c.create[0]).unwrap();
+    let pts: Vec<Vec3> = (0..=800).map(|k| nc.eval(k as f64 / 800.0)).collect();
+    let (x0, x1) = (pts.iter().map(|p| p[0]).fold(f64::MAX, f64::min), pts.iter().map(|p| p[0]).fold(f64::MIN, f64::max));
+    let (y0, y1) = (pts.iter().map(|p| p[1]).fold(f64::MAX, f64::min), pts.iter().map(|p| p[1]).fold(f64::MIN, f64::max));
+    let (w, h) = (x1 - x0, y1 - y0);
+    let started = std::time::Instant::now();
+    let done = run_with(TEXT, set("solids", r), vec![pt([0.0; 3])]);
+    eprintln!("rounded I in {:?}: {}", started.elapsed(), done.messages.join(" | "));
+    assert_eq!(done.create.len(), 1, "one solid per letter");
+    let m = match &done.create[0] {
+        Geo::Mesh { vertices, triangles, .. } => Mesh { vertices: vertices.clone(), triangles: triangles.clone() },
+        other => panic!("{other:?}"),
+    };
+    assert!(m.is_closed(), "a closed solid");
+    let b = m.bbox();
+    assert!(b[0][2].abs() < 1e-6 && (b[1][2] - t).abs() < 0.02, "flat bottom at 0, top at t: {b:?}");
+    assert!((b[1][0] - b[0][0] - w).abs() < 0.03 && (b[1][1] - b[0][1] - h).abs() < 0.03, "same footprint");
+    // Rounded top edges: a quarter circle of radius r removes (1 − π/4)·r² along the top
+    // perimeter; the 4 corners take away a little more (a sphere octant instead of two
+    // overlapping strips).
+    let strip = (1.0 - std::f64::consts::PI / 4.0) * r * r;
+    let corners = 4.0 * (r * r * r - std::f64::consts::PI / 6.0 * r * r * r) - 4.0 * 2.0 * strip * r;
+    let expected = w * h * t - 2.0 * (w + h) * strip - corners;
+    let v = m.volume();
+    eprintln!("volume {v} vs {expected} (w {w}, h {h})");
+    assert!((v / expected - 1.0).abs() < 0.01, "{v} vs {expected}");
+    // The edges are round: at the top, the face is r in from the walls.
+    let top: Vec<&Vec3> = m.vertices.iter().filter(|p| (p[2] - t).abs() < 1e-6).collect();
+    assert!(!top.is_empty());
+    let inset = top.iter().map(|p| (p[0] - b[0][0]).min(b[1][0] - p[0])).fold(f64::MAX, f64::min);
+    assert!(inset > r * 0.85, "flat top starts {inset} in from the wall");
+    // Curves and surfaces ignore the radius.
+    let s = run_with(TEXT, set("surfaces", r), vec![pt([0.0; 3])]);
+    assert!(matches!(s.create[0], Geo::Trimmed { .. }));
+}
+
+/// Extrusion distance by a click (Rhino lets the distance be picked): with no earlier point,
+/// the click's height above the curve's plane is the distance.
+#[test]
+fn extrude_distance_from_a_click() {
+    let r = run(EXTRUDE, vec![closed_curve("c", square([0.0; 3], 1.0))], vec![pt([0.5, 0.0, 4.0])]);
+    assert!(r.done, "{:?} {:?}", r.prompt, r.error);
+    let v: f64 = r.create.iter().map(|g| match g {
+        Geo::Mesh { vertices, triangles, .. } => Mesh { vertices: vertices.clone(), triangles: triangles.clone() }.volume(),
+        Geo::Brep { display: Some(d), .. } => match &**d {
+            Geo::Mesh { vertices, triangles, .. } => Mesh { vertices: vertices.clone(), triangles: triangles.clone() }.volume(),
+            _ => 0.0,
+        },
+        _ => 0.0,
+    }).sum();
+    assert!((v.abs() - 16.0).abs() < 1e-6, "2 × 2 × 4: {v}");
 }

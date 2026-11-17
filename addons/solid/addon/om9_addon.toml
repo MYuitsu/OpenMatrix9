@@ -17,6 +17,7 @@ tags = ["Solid"]
 id = "SolidUnion"
 label = "Boolean Union"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 mesh_data = true
 aliases = ["BooleanUnion", "Union"]
@@ -27,6 +28,7 @@ steps = ["Chọn hai khối trở lên.", "Enter."]
 id = "SolidDifference"
 label = "Boolean Difference"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 mesh_data = true
 aliases = ["BooleanDifference", "Difference"]
@@ -37,6 +39,7 @@ steps = ["Chọn khối bị trừ, Enter.", "Chọn khối dùng để trừ, E
 id = "SolidIntersection"
 label = "Boolean Intersection"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 mesh_data = true
 aliases = ["BooleanIntersection"]
@@ -47,6 +50,7 @@ steps = ["Chọn nhóm thứ nhất, Enter.", "Chọn nhóm thứ hai, Enter."]
 id = "SolidBooleanTwoObjects"
 label = "Boolean Two Objects"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 mesh_data = true
 aliases = ["BooleanTwoObjects"]
@@ -58,6 +62,7 @@ options = ["Mode: kiểu boolean."]
 id = "SolidCapPlanarHoles"
 label = "Cap Planar Holes"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 mesh_data = true
 aliases = ["Cap"]
@@ -68,6 +73,7 @@ steps = ["Chọn khối hở.", "Enter."]
 id = "SolidExtractSurface"
 label = "Extract Surface"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 mesh_data = true
 aliases = ["ExtractSrf"]
@@ -78,6 +84,7 @@ steps = ["Chọn khối.", "Bấm lên mặt cần tách (nhìn từ trên CPlan
 id = "SolidFilletEdgeFilletEdge"
 label = "Fillet Edge"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 mesh_data = true
 aliases = ["FilletEdge"]
@@ -90,15 +97,16 @@ label = "Text"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["TextObject"]
-summary = "Tạo chữ nổi (khối) từ chuỗi chữ, cao và dày tuỳ chọn."
-steps = ["Gõ chữ ở bảng BUILDERS (Text=…), chỉnh Height, Depth.", "Bấm điểm bắt đầu."]
-options = ["Text: nội dung (A–Z, 0–9, - . & ♥).", "Height: cao chữ.", "Depth: dày (nổi).", "Stroke: nét chữ (0 = tự động)."]
+aliases = ["Text", "TextObject"]
+summary = "Tạo chữ từ phông TrueType/OpenType đã cài: đường viền, mặt phẳng hoặc khối (như TextObject của Rhino 5)."
+steps = ["Chọn tuỳ chọn ở bảng Text: chữ, phông (Bold/Italic), tạo Curves/Surfaces/Solids, cao, dày.", "Bấm điểm đặt chữ (xem trước chạy theo chuột)."]
+options = ["Text: nội dung.", "Font, FontName, Bold, Italic: phông chữ đã cài trong Windows.", "Create: Curves / Surfaces / Solids.", "Height: cao chữ hoa.", "SolidThickness: dày khối.", "FilletRadius: bo cạnh trên của khối chữ (chỉ khi Create=Solids; 0 = không bo).", "Spacing, SmallCaps: khoảng cách, chữ thường thành hoa nhỏ."]
 
 [[commands]]
 id = "SolidExtrudePlanarCurveStraight"
 label = "Extrude Planar Curve"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["ExtrudeCrv"]
 summary = "Đùn đường cong phẳng thành khối (kín) hoặc mặt (đường hở); đường nằm trong đường khác thành lỗ."
@@ -109,6 +117,7 @@ options = ["BothSides: đùn hai phía."]
 id = "SolidGVDAllExtrude"
 label = "Extrude All"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["ExtrudeAll"]
 summary = "Đùn tất cả đường cong đang chọn một lần (lỗ tự nhận)."
@@ -119,6 +128,7 @@ options = ["BothSides."]
 id = "SolidPipe"
 label = "Pipe"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["Pipe"]
 summary = "Tạo ống tròn theo đường cong."
@@ -128,6 +138,7 @@ steps = ["Chọn đường cong.", "Gõ bán kính."]
 id = "SolidBoxCornertoCornerHeight"
 label = "Box"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["Box"]
 summary = "Tạo hộp theo hai góc đáy và chiều cao."
@@ -137,6 +148,7 @@ steps = ["Bấm góc đáy thứ nhất.", "Bấm góc đối diện.", "Gõ/b�
 id = "SolidSphereCenterRadius"
 label = "Sphere"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["Sphere"]
 summary = "Tạo khối cầu."
@@ -146,6 +158,7 @@ steps = ["Bấm tâm.", "Gõ/bấm bán kính."]
 id = "SolidEllipsoidFromCenter"
 label = "Ellipsoid"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["Ellipsoid"]
 summary = "Tạo khối elip."
@@ -155,6 +168,7 @@ steps = ["Bấm tâm.", "Gõ ba bán kính."]
 id = "SolidTorus"
 label = "Torus"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["Torus"]
 summary = "Tạo xuyến (vòng)."
@@ -164,6 +178,7 @@ steps = ["Bấm tâm.", "Gõ bán kính tới tâm ống và bán kính ống."]
 id = "SolidCylinder"
 label = "Cylinder"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["Cylinder"]
 summary = "Tạo khối trụ."
@@ -173,6 +188,7 @@ steps = ["Bấm tâm đáy.", "Gõ bán kính và chiều cao."]
 id = "SolidTube"
 label = "Tube"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["Tube"]
 summary = "Tạo ống trụ rỗng."
@@ -182,6 +198,7 @@ steps = ["Bấm tâm đáy.", "Gõ bán kính ngoài, trong và chiều cao."]
 id = "SolidPyramid"
 label = "Pyramid"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["Pyramid"]
 summary = "Tạo khối chóp đều."
@@ -192,6 +209,7 @@ options = ["NumSides: số cạnh đáy."]
 id = "SolidCone"
 label = "Cone"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["Cone"]
 summary = "Tạo khối nón."
@@ -201,6 +219,7 @@ steps = ["Bấm tâm đáy.", "Gõ bán kính đáy và chiều cao."]
 id = "SolidTruncatedCone"
 label = "Truncated Cone"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 aliases = ["TCone"]
 summary = "Tạo khối nón cụt."
@@ -210,6 +229,7 @@ steps = ["Bấm tâm đáy.", "Gõ bán kính đáy, bán kính đỉnh và chi�
 id = "SolidBoss"
 label = "Boss"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 mesh_data = true
 aliases = ["Boss"]
@@ -223,8 +243,8 @@ handler = "om9_addon_session"
 interactive = true
 mesh_data = true
 aliases = ["Rib"]
-summary = "Tạo gân (vách) từ đường cong hở và gộp vào khối."
-steps = ["Chọn khối và đường cong.", "Gõ chiều cao và độ dày."]
+summary = "Như Rib Rhino 5: làm dày đường cong phẳng rồi kéo tới mặt biên (Offset InCurvePlane/NormalToCurvePlane, Distance, Mode Straight/Tapered, DraftAngle)."
+steps = ["Chọn đường cong phẳng và mặt biên (mặt hoặc khối).", "Đổi tuỳ chọn nếu cần, Enter."]
 
 [[commands]]
 id = "SolidSlab"
@@ -233,8 +253,8 @@ handler = "om9_addon_session"
 interactive = true
 mesh_data = true
 aliases = ["Slab"]
-summary = "Tạo tấm dày theo đường cong (kín hoặc hở)."
-steps = ["Chọn đường cong (và khối nếu muốn gộp).", "Gõ chiều cao và độ dày."]
+summary = "Như Slab Rhino 5: offset đường cong (góc vát) rồi đùn lên (Distance, ThroughPoint, BothSides)."
+steps = ["Chọn đường cong.", "Bấm phía offset.", "Chiều cao (gõ hoặc bấm)."]
 
 [[commands]]
 id = "SolidSolidEditToolsHolesMakeHole"
@@ -243,8 +263,8 @@ handler = "om9_addon_session"
 interactive = true
 mesh_data = true
 aliases = ["MakeHole"]
-summary = "Khoan lỗ xuyên khối theo đường cong kín."
-steps = ["Chọn khối và đường cong kín.", "Enter."]
+summary = "Như MakeHole Rhino 5: khoét lỗ theo đường cong kín, tới điểm sâu hoặc xuyên qua (Direction, BothSides, DeleteInput)."
+steps = ["Chọn các đường cong kín và khối.", "Bấm điểm độ sâu, gõ độ sâu, hoặc Enter để khoét xuyên."]
 
 [[commands]]
 id = "SolidSolidEditToolsHolesArrayHole"
@@ -253,8 +273,8 @@ handler = "om9_addon_session"
 interactive = true
 mesh_data = true
 aliases = ["ArrayHole"]
-summary = "Khoan mảng lỗ theo lưới."
-steps = ["Chọn khối và đường cong lỗ.", "Gõ số lỗ X, Y và khoảng cách X, Y."]
+summary = "Như ArrayHole Rhino 5: mảng lỗ theo hướng A, B (Rectangular, UseASpacing)."
+steps = ["Chọn khối (hoặc khối và đường cong lỗ).", "Bấm lên mép lỗ có sẵn (Select a hole).", "Gõ số lỗ hướng A, hướng B.", "Bấm điểm gốc, hướng-khoảng A, hướng-khoảng B."]
 
 [[commands]]
 id = "SolidSolidEditToolsHolesArrayHolePolar"
@@ -264,7 +284,7 @@ interactive = true
 mesh_data = true
 aliases = ["ArrayHolePolar"]
 summary = "Khoan mảng lỗ tròn quanh tâm."
-steps = ["Chọn khối và đường cong lỗ.", "Bấm tâm, gõ số lỗ và góc."]
+steps = ["Chọn khối (hoặc khối và đường cong lỗ).", "Bấm lên mép lỗ có sẵn.", "Bấm tâm, gõ số lỗ và góc."]
 
 [[commands]]
 id = "SolidSolidEditToolsHolesMoveHole"
@@ -273,8 +293,8 @@ handler = "om9_addon_session"
 interactive = true
 mesh_data = true
 aliases = ["MoveHole"]
-summary = "Dời lỗ: lấp chỗ cũ (theo đường cong lỗ) và khoan ở chỗ mới."
-steps = ["Chọn khối và đường cong của lỗ.", "Bấm điểm gốc và điểm đích."]
+summary = "Như MoveHole Rhino 5: dời lỗ (lấp chỗ cũ, khoét chỗ mới); Copy giữ lỗ cũ."
+steps = ["Chọn khối (hoặc khối và đường cong lỗ).", "Bấm lên mép lỗ có sẵn.", "Bấm điểm dời từ và điểm dời tới."]
 
 [[commands]]
 id = "SolidSolidEditToolsFacesMoveFace"
@@ -283,13 +303,14 @@ handler = "om9_addon_session"
 interactive = true
 mesh_data = true
 aliases = ["MoveFace"]
-summary = "Dời một mặt phẳng của khối theo pháp tuyến."
-steps = ["Chọn khối.", "Bấm lên mặt (nhìn từ trên CPlane).", "Gõ khoảng dời."]
+summary = "Như MoveFace Rhino 5: dời một mặt của khối (DirectionConstraint None/Normal/ToBoundary, DeleteBoundary)."
+steps = ["Chọn khối.", "Bấm lên mặt cần dời.", "Bấm điểm dời từ, điểm dời tới."]
 
 [[commands]]
 id = "SolidShell"
 label = "Shell"
 handler = "om9_addon_session"
+builtin = true
 interactive = true
 mesh_data = true
 aliases = ["Shell"]
@@ -310,39 +331,146 @@ steps = ["Chọn khối.", "Bấm điểm cần dời.", "Bấm (hoặc gõ) v�
 key = "text_string"
 type = "string"
 option = "Text"
-label = "Nội dung chữ"
+label = "Chữ cần tạo (\\n: xuống dòng)"
 default = "OM9"
+commands = ["SolidText"]
+
+[[settings]]
+key = "text_font"
+type = "enum"
+option = "Font"
+label = "Phông chữ (Font)"
+choices = ["Arial", "Arial Black", "Bahnschrift", "Calibri", "Cambria", "Candara", "Comic Sans MS", "Consolas", "Constantia", "Corbel", "Courier New", "Franklin Gothic Medium", "Gabriola", "Georgia", "Impact", "Lucida Console", "Palatino Linotype", "Segoe Print", "Segoe Script", "Segoe UI", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]
+choice_labels = ["Arial", "Arial Black", "Bahnschrift", "Calibri", "Cambria", "Candara", "Comic Sans MS", "Consolas", "Constantia", "Corbel", "Courier New", "Franklin Gothic Medium", "Gabriola", "Georgia", "Impact", "Lucida Console", "Palatino Linotype", "Segoe Print", "Segoe Script", "Segoe UI", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"]
+default = "Arial"
+commands = ["SolidText"]
+
+[[settings]]
+key = "text_font_other"
+type = "string"
+option = "FontName"
+label = "Phông khác đã cài (để trống: dùng ô trên)"
+default = ""
+commands = ["SolidText"]
+
+[[settings]]
+key = "text_bold"
+type = "bool"
+option = "Bold"
+label = "Đậm (Bold)"
+default = false
+commands = ["SolidText"]
+
+[[settings]]
+key = "text_italic"
+type = "bool"
+option = "Italic"
+label = "Nghiêng (Italic)"
+default = false
+commands = ["SolidText"]
+
+[[settings]]
+key = "text_create"
+type = "enum"
+option = "Create"
+label = "Tạo (Create)"
+choices = ["curves", "surfaces", "solids"]
+choice_labels = ["Đường cong (Curves)", "Mặt (Surfaces)", "Khối (Solids)"]
+default = "solids"
 commands = ["SolidText"]
 
 [[settings]]
 key = "text_height"
 type = "length"
 option = "Height"
-label = "Cao chữ"
+label = "Cao chữ (Height)"
 default = 3.0
-min = 0.2
-max = 50.0
+min = 0.1
+max = 500.0
 step = 0.1
 commands = ["SolidText"]
 
 [[settings]]
 key = "text_depth"
 type = "length"
-option = "Depth"
-label = "Dày chữ"
+option = "SolidThickness"
+label = "Độ dày khối (Solid thickness)"
 default = 0.5
-min = 0.05
-max = 20.0
+min = 0.01
+max = 100.0
 step = 0.05
 commands = ["SolidText"]
 
 [[settings]]
-key = "text_stroke"
+key = "text_fillet"
 type = "length"
-option = "Stroke"
-label = "Nét chữ (0 = tự động)"
+option = "FilletRadius"
+label = "Bo cạnh trên khối chữ (0 = không bo)"
+description = "Chỉ khi tạo Khối: cạnh trên mỗi chữ bo tròn theo bán kính này, mặt đáy giữ phẳng."
 default = 0.0
 min = 0.0
-max = 5.0
+max = 10.0
+step = 0.05
+enabled_when = "text_create=solids"
+commands = ["SolidText"]
+
+[[settings]]
+key = "text_spacing"
+type = "length"
+option = "Spacing"
+label = "Thêm khoảng cách chữ (Add spacing)"
+default = 0.0
+min = -10.0
+max = 50.0
 step = 0.05
 commands = ["SolidText"]
+
+[[settings]]
+key = "text_small_caps"
+type = "bool"
+option = "SmallCaps"
+label = "Chữ thường thành hoa nhỏ (Lower case as small caps)"
+default = false
+commands = ["SolidText"]
+
+[[settings]]
+key = "text_small_caps_size"
+type = "float"
+option = "SmallCapsSize"
+label = "Cỡ hoa nhỏ (%)"
+default = 70.0
+min = 10.0
+max = 100.0
+step = 5.0
+commands = ["SolidText"]
+
+[[settings]]
+key = "sl_distance"
+type = "length"
+option = "Distance"
+label = "Khoảng offset (Slab)"
+default = 1.0
+commands = ["SolidSlab"]
+
+[[settings]]
+key = "sl_height"
+type = "length"
+label = "Chiều cao (Slab)"
+default = 1.0
+commands = ["SolidSlab"]
+
+[[settings]]
+key = "rb_distance"
+type = "length"
+option = "Distance"
+label = "Độ dày gân (Rib)"
+default = 1.0
+commands = ["SolidRib"]
+
+[[settings]]
+key = "rb_draft_angle"
+type = "angle"
+option = "DraftAngle"
+label = "Góc vát (Rib, Tapered)"
+default = 0.0
+commands = ["SolidRib"]

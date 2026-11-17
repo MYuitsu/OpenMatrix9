@@ -380,6 +380,20 @@ unsafe extern "C" {
         message: *mut std::ffi::c_char,
         capacity: c_int,
     ) -> c_int;
+    fn om9_occt_sew_many(
+        sources: *const *const u8,
+        lengths: *const usize,
+        count: usize,
+        tolerance: f64,
+        deflection: f64,
+        max_points: usize,
+        max_nodes: usize,
+        max_bytes: usize,
+        sink: NativeSink,
+        context: *mut c_void,
+        message: *mut std::ffi::c_char,
+        capacity: c_int,
+    ) -> c_int;
     fn om9_occt_sew(
         source_a: *const u8,
         length_a: usize,
@@ -4217,6 +4231,88 @@ fn sew_with_orientation(
                 b.source().len(),
                 i32::from(reverse_b),
                 i32::from(preserve_surfaces),
+                tolerance_mm,
+                deflection,
+                budget.points,
+                budget.nodes,
+                budget.bytes,
+                sink,
+                context,
+                message,
+                capacity,
+            )
+        }
+    })
+    .map_err(EditingError::from)
+}
+
+/// Faces made by add-ons — each a NURBS surface with its trim loops, as for
+/// [`crate::creation::trimmed_face`] — sewn in one pass at `tolerance_mm` into one body: a closed shell
+/// becomes a solid. With `closed`, anything but exactly one closed solid of positive volume is
+/// refused (a Solid=Yes result never arrives half open).
+pub fn sew_faces(
+    faces: &[(om9_core::geometry::NurbsSurface, Vec<Vec<om9_core::geometry::NurbsCurve>>)],
+    closed: bool,
+    tolerance_mm: f64,
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<Brep, EditingError> {
+    positive(tolerance_mm, "sew tolerance")?;
+    if faces.is_empty() {
+        return Err(EditingError::Invalid("a body needs at least one face".into()));
+    }
+    let max = usize::try_from(limits.max_points).unwrap_or(usize::MAX);
+    if faces.len() > max {
+        return Err(EditingError::Budget("face count".into()));
+    }
+    let parts = faces
+        .iter()
+        .map(|(surface, loops)| crate::creation::trimmed_face(surface, loops, deflection_mm, limits))
+        .collect::<Result<Vec<_>, _>>()?;
+    let body = if parts.len() == 1 {
+        parts.into_iter().next().expect("one part")
+    } else {
+        sew_many(&parts, tolerance_mm, deflection_mm, limits)?
+    };
+    if closed {
+        let m = measure(&body, limits)?;
+        if m.solids != 1 || !m.closed || m.naked_edges != 0 || m.volume_mm3 <= 0.0 {
+            return Err(EditingError::Invalid(format!(
+                "the faces do not close into one solid ({} naked edges)",
+                m.naked_edges
+            )));
+        }
+    }
+    Ok(body)
+}
+
+/// Sew many parts in one pass: one native sewing over all of them and one snapshot (a closed
+/// shell becomes a solid). Unlike [`sew_all`], the time stays near linear in the part count.
+pub fn sew_many(
+    parts: &[Brep],
+    tolerance_mm: f64,
+    deflection_mm: f64,
+    limits: &Limits,
+) -> Result<Brep, EditingError> {
+    if parts.len() < 2 {
+        return Err(EditingError::Invalid("join needs at least two parts".into()));
+    }
+    let deflection = checked_deflection(deflection_mm)?;
+    positive(tolerance_mm, "sew tolerance")?;
+    for part in parts {
+        checked_brep(part, limits)?;
+    }
+    let sources: Vec<*const u8> = parts.iter().map(|p| p.source().as_ptr()).collect();
+    let lengths: Vec<usize> = parts.iter().map(|p| p.source().len()).collect();
+    let budget = snapshot_budget(limits);
+    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+        // SAFETY: the parts (and so their sources), both arrays and the callback context live
+        // through this call; the arrays hold `parts.len()` entries.
+        unsafe {
+            om9_occt_sew_many(
+                sources.as_ptr(),
+                lengths.as_ptr(),
+                parts.len(),
                 tolerance_mm,
                 deflection,
                 budget.points,

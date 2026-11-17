@@ -2534,6 +2534,47 @@ extern "C" int om9_occt_sew(const char* source_a, size_t length_a, const char* s
  }
 }
 
+// Sew many parts in one pass (one BRepBuilderAPI_Sewing over all of them, one snapshot). A
+// closed sewn shell becomes an exact solid; an open result stays a shell. Folding pairwise
+// re-reads, re-sews and re-tessellates the growing result at every step, which grows with the
+// square of the part count (70 faces: ~23 s pairwise, ~0.1 s in one pass).
+extern "C" int om9_occt_sew_many(const char* const* sources, const size_t* lengths, size_t count,
+                                 double tolerance, double deflection, size_t max_points,
+                                 size_t max_nodes, size_t max_bytes, Om9BrepSink sink,
+                                 void* context, char* message, int capacity) {
+ try {
+  if (!sources || !lengths || count < 2) throw std::invalid_argument("sew: at least two parts");
+  if (!std::isfinite(tolerance) || tolerance <= 0)
+   throw std::invalid_argument("sew: tolerance must be positive");
+  BRepBuilderAPI_Sewing sewing(tolerance);
+  for (size_t i = 0; i < count; ++i) sewing.Add(read_shape(sources[i], lengths[i], "sew part"));
+  sewing.Perform();
+  const TopoDS_Shape sewed = sewing.SewedShape();
+  if (sewed.IsNull()) throw std::runtime_error("sew produced no shape");
+  TopTools_IndexedMapOfShape shells;
+  TopExp::MapShapes(sewed, TopAbs_SHELL, shells);
+  TopTools_IndexedMapOfShape free_edges;
+  const bool closed = naked_edge_count(sewed, free_edges) == 0;
+  if (closed && shells.Extent() == 1) {
+   BRepBuilderAPI_MakeSolid solid(TopoDS::Shell(shells(1)));
+   if (!solid.IsDone()) throw std::runtime_error("sew: closed shell cannot become a solid");
+   return emit(solid.Solid(), deflection, max_points, max_nodes, max_bytes, sink, context, message,
+               capacity);
+  }
+  return emit(sewed, deflection, max_points, max_nodes, max_bytes, sink, context, message,
+              capacity);
+ } catch (const Standard_Failure& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 2;
+ } catch (const std::exception& e) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
+  return 1;
+ } catch (...) {
+  if (message && capacity > 0) std::snprintf(message, capacity, "Unknown sew failure");
+  return 2;
+ }
+}
+
 extern "C" int om9_occt_shell(const char* source, size_t length, const size_t* face_indices, size_t face_count,
                               const double* triangles, double vertex_tolerance, double witness_deflection, double thickness,
                               double deflection, size_t max_points, size_t max_nodes,

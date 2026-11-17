@@ -19,5 +19,5 @@ Quét qua ba ray trở lên: tiết diện đi qua mọi ray.
 
 | Dòng lệnh | Ý nghĩa | Mặc định | Khoảng |
 |---|---|---|---|
-| `Stations=` | Số trạm dọc ray | 48 | 4 … 400 |
+| `SweepTolerance=` | Dung sai quét (mm) | 0.001 | 0 … 1 |
 | `Closed=` | Tiết diện kín | Yes |  |

@@ -28,6 +28,7 @@ pub fn stone(id: &str, gem: &Gem, frame: &Frame) -> Selected {
         gem: Some(gem.record(frame, "test", "diamond")),
         mesh: None,
         exact: None,
+        sub: Vec::new(),
     }
 }
 
@@ -42,6 +43,7 @@ pub fn curve(id: &str, points: Vec<Vec3>, closed: bool) -> Selected {
         gem: None,
         mesh: None,
         exact: None,
+        sub: Vec::new(),
     }
 }
 

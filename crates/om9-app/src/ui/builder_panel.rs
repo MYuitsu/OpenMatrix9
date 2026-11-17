@@ -502,9 +502,15 @@ impl MatrixApp {
             .show(ui, |ui| {
                 for spec in &b.specs {
                     let value = b.value(&spec.key).unwrap_or(&spec.default).clone();
+                    // Greyed out while it means nothing (Fillet radius with Create=Curves).
+                    let enabled = spec.enabled(|k| {
+                        b.value(k)
+                            .cloned()
+                            .or_else(|| b.specs.iter().find(|s| s.key == k).map(|s| s.default.clone()))
+                    });
                     let selected = focus.as_deref() == Some(spec.key.as_str());
                     let label = ui
-                        .selectable_label(selected, RichText::new(&spec.label).small())
+                        .add_enabled(enabled, egui::Button::selectable(selected, RichText::new(&spec.label).small()))
                         .on_hover_text(format!(
                             "{}{}  ·  CMD: {}=…",
                             spec.label,
@@ -517,7 +523,7 @@ impl MatrixApp {
                     if label.clicked() && numeric_range(spec).is_some() {
                         self.builder_ui.focus = Some(spec.key.clone());
                     }
-                    if let Some(change) = param_widget(ui, &b, spec, &value) {
+                    if let Some(change) = ui.add_enabled_ui(enabled, |ui| param_widget(ui, &b, spec, &value)).inner {
                         if numeric_range(spec).is_some() {
                             self.builder_ui.focus = Some(spec.key.clone());
                         }

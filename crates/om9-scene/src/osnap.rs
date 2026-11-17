@@ -1272,6 +1272,29 @@ fn curve_snaps(
         }
         Curve::Nurbs(nurbs) => {
             if defer_nurbs { return Ok(()); }
+            // Degree-one, continuous NURBS spans are exact straight segments.
+            // Keep the source-aware solver below for curved and other snap kinds.
+            if nurbs.degree == 1 && !nurbs.periodic && nurbs.seam.is_none()
+                && nurbs.weights.iter().all(|weight| *weight > 0.)
+                && nurbs.knots.windows(2).all(|pair| pair[0] != pair[1]
+                    || pair[0] <= nurbs.domain[0] || pair[0] >= nurbs.domain[1]) {
+                let evaluator = om9_core::evaluation::CurveEvaluator::capture(curve, limits)?;
+                for knots in nurbs.knots.windows(2) {
+                    let a = knots[0].max(nurbs.domain[0]);
+                    let b = knots[1].min(nurbs.domain[1]);
+                    if b <= a { continue; }
+                    *curve_work = curve_work.checked_add(2).ok_or(Error::Overflow("NURBS snap work"))?;
+                    if *curve_work > 1_000_000 { return Err(Error::Budget("NURBS snap work")); }
+                    let a = evaluator.evaluate(om9_core::evaluation::Parameter::Native(a), 0, transform)?[0];
+                    let b = evaluator.evaluate(om9_core::evaluation::Parameter::Native(b), 0, transform)?[0];
+                    let first = out.len();
+                    curve_snaps(&Curve::Line { start: a, end: b, domain: [0., 1.] }, root, object_index,
+                        Transform::identity(), camera, viewport, cursor, settings, from, limits, cplane,
+                        tolerance, out, segments, ellipses, curve_work, canceled, false)?;
+                    // A linear segment fraction is not generally the rational NURBS parameter.
+                    for candidate in &mut out[first..] { candidate.parameter = None; }
+                }
+            }
             if settings.is_effective(SnapKind::End) || settings.is_effective(SnapKind::Near) || settings.is_effective(SnapKind::Mid) || settings.is_effective(SnapKind::Quadrant)
                 || from.is_some() && (settings.is_effective(SnapKind::Tangent) || settings.is_effective(SnapKind::Perpendicular)) {
                 // ponytail: bound synchronous source evaluation; use a revision-keyed worker/cache for larger scenes.

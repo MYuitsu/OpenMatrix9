@@ -1744,7 +1744,7 @@ dependencies = [
 
 [[package]]
 name = "om9-addon-matrix"
-version = "0.9.0"
+version = "0.9.5"
 dependencies = [
  "om9-addon-abi",
  "om9-addon-builders",
@@ -1796,9 +1796,11 @@ version = "0.1.0"
 dependencies = [
  "om9-addon-abi",
  "om9-addon-geom",
+ "om9-addon-surfaces",
  "om9-addon-top11",
  "serde",
  "serde_json",
+ "ttf-parser",
 ]
 
 [[package]]
@@ -1817,6 +1819,7 @@ name = "om9-addon-surfaces"
 version = "0.1.0"
 dependencies = [
  "om9-addon-abi",
+ "om9-addon-curves",
  "om9-addon-geom",
  "om9-addon-tools",
  "serde",
@@ -2840,6 +2843,12 @@ name = "tracing-core"
 version = "0.1.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "db97caf9d906fbde555dd62fa95ddba9eecfd14cb388e4f491a66d74cd5fb79a"
+
+[[package]]
+name = "ttf-parser"
+version = "0.25.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2df906b07856748fa3f6e0ad0cbaa047052d4a7dd609e231c4f72cee8c36f31"
 
 [[package]]
 name = "type-map"

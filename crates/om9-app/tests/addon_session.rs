@@ -2202,11 +2202,14 @@ fn surfaces_round_trip_through_the_document() {
     // Offset it 2 mm: the command reads the exact surface back.
     c.select_objects(&[plane]).unwrap();
     c.run_addon_command("SurfaceOffsetSurface").unwrap();
-    c.submit("Distance=2").unwrap();
-    c.submit("").unwrap();
+    // Rhino 5 OffsetSrf: the surface is already selected, so the next prompt is the distance.
+    c.submit("2").unwrap();
+    if c.addon_session().is_some() {
+        c.submit("").unwrap();
+    }
     assert!(c.addon_session().is_none(), "{}", c.prompt_text());
     assert_eq!(c.document().entities.len(), 2);
-    // Extrude Normal to Surface needs the plane's tessellation (mesh_data).
+    // Extrude Normal to Surface (Rhino 5 Fin) reads the exact plane.
     c.select_objects(&[]).unwrap();
     c.run_addon_command("CurvePolylinePolyline").unwrap();
     c.session_point([1.0, 1.0, 0.0]).unwrap();
@@ -2221,8 +2224,13 @@ fn surfaces_round_trip_through_the_document() {
     c.select_objects(&[curve, plane]).unwrap();
     c.run_addon_command("SurfaceExtrudeCurveNormalToSurface").unwrap();
     c.refresh_addon_session();
-    assert!(c.prompt_text().contains("1 ribbons"), "{}", c.prompt_text());
+    // Rhino 5 Fin: a place on the curve, its height, then Enter for a uniform height.
+    assert!(c.prompt_text().contains("Pick a location on the curve"), "{}", c.prompt_text());
+    c.session_point([2.0, 1.0, 0.0]).unwrap();
+    assert!(c.prompt_text().starts_with("Height"), "{}", c.prompt_text());
+    c.submit("1").unwrap();
     c.submit("").unwrap();
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
     assert_eq!(c.document().entities.len(), 4);
     fs::remove_dir_all(&tmp).unwrap();
 }
@@ -2478,4 +2486,980 @@ fn curves_are_picked_by_clicking_and_sketch_follows_the_pointer() {
     assert!(c.addon_session().is_none());
     assert_eq!(c.document().entities.len(), before + 1, "the stroke became a curve");
     fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// `brep_data`: a surface with Rhino trim loops reaches the add-on exactly (its surface and
+/// its loops run along it). Untrim with KeepTrimObjects gives the whole surface back without
+/// the trim record, and leaves the outer loop and the hole as curves on the surface.
+#[test]
+fn trimmed_surfaces_reach_brep_data_commands_exactly() {
+    use om9_core::model::{Entity, TRIM_SURFACE_EXTENSION_SLOT};
+    use om9_core::rhino_semantics::{TrimmedSurface, set_trimmed_surface, trimmed_surface_of};
+    let tmp = std::env::temp_dir().join(format!("om9-app-untrim-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats
+        .iter()
+        .map(|(id, c)| FeatureName {
+            id,
+            command: c.as_deref(),
+        })
+        .collect();
+    let limits = Limits::default();
+    let surface = om9_core::surface_kernel::plane([0., 0., 0.], [1., 0., 0.], [0., 1., 0.], 10., 10., &limits).unwrap();
+    let trim = TrimmedSurface {
+        underlying: surface.clone(),
+        outer: vec![[0.1, 0.1], [0.9, 0.1], [0.9, 0.9], [0.1, 0.9]],
+        inners: vec![vec![[0.4, 0.4], [0.6, 0.4], [0.6, 0.6], [0.4, 0.6]]],
+        reversed: false,
+    };
+    let mut doc = Document::new("untrim");
+    let mut patch = Entity::new("trimmed", Geometry::Surface(surface.clone()), doc.current_layer);
+    set_trimmed_surface(&mut patch, &trim, &limits).unwrap();
+    // A placement: the add-on works in world millimetres, the result goes back to the frame.
+    patch.placement = om9_core::geometry::Transform::translation([0.0, 0.0, 2.0]);
+    let id = patch.id;
+    doc.entities.insert(id, patch);
+    let mut c = Controller::new(doc, limits).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    c.select_objects(&[id]).unwrap();
+    c.run_addon_command("SurfaceSurfaceEditToolsUntrim").unwrap();
+    assert!(c.prompt_text().contains("1 surfaces"), "{}", c.prompt_text());
+    c.submit("KeepTrimObjects").unwrap();
+    c.submit("").unwrap();
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    let e = &c.document().entities[&id];
+    assert_eq!(e.geometry, Geometry::Surface(surface), "the whole surface, in its own frame");
+    assert!(!e.extensions.contains_key(TRIM_SURFACE_EXTENSION_SLOT), "no trims left");
+    assert!(trimmed_surface_of(e, &limits).unwrap().is_none());
+    // The two loops as closed curves at z 2: the outer square 1..9, the hole 4..6.
+    let mut spans: Vec<(f64, f64)> = c
+        .document()
+        .entities
+        .values()
+        .filter(|x| x.id != id)
+        .map(|x| {
+            let Geometry::Curve(curve) = &x.geometry else { panic!("{:?}", x.geometry) };
+            let pts: Vec<[f64; 3]> = match curve {
+                Curve::Nurbs(n) if n.degree == 1 => n.poles.iter().map(|p| x.placement.point(*p).unwrap()).collect(),
+                other => panic!("{other:?}"),
+            };
+            assert!(pts.iter().all(|p| (p[2] - 2.0).abs() < 1e-9), "{pts:?}");
+            let lo = pts.iter().map(|p| p[0].min(p[1])).fold(f64::MAX, f64::min);
+            let hi = pts.iter().map(|p| p[0].max(p[1])).fold(f64::MIN, f64::max);
+            (lo, hi)
+        })
+        .collect();
+    spans.sort_by(|a, b| a.0.total_cmp(&b.0));
+    assert_eq!(spans.len(), 2, "{spans:?}");
+    assert!((spans[0].0 - 1.0).abs() < 1e-9 && (spans[0].1 - 9.0).abs() < 1e-9, "{spans:?}");
+    assert!((spans[1].0 - 4.0).abs() < 1e-9 && (spans[1].1 - 6.0).abs() < 1e-9, "{spans:?}");
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// An add-on solid (`Geo::Brep`, here ExtrudeCrv Solid=Yes on a circle): with the B-Rep kernel
+/// its faces are sewn into one exact solid; a build without the kernel keeps the add-on's
+/// display mesh, a closed prism of the right volume.
+#[test]
+fn addon_solids_arrive_as_one_object() {
+    use om9_core::model::Entity;
+    let tmp = std::env::temp_dir().join(format!("om9-app-addon-solid-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats
+        .iter()
+        .map(|(id, c)| FeatureName {
+            id,
+            command: c.as_deref(),
+        })
+        .collect();
+    let mut doc = Document::new("solid");
+    let circle = Entity::new(
+        "circle",
+        Geometry::Curve(Curve::Circle {
+            center: [0.0; 3],
+            x: [1.0, 0.0, 0.0],
+            y: [0.0, 1.0, 0.0],
+            radius: 2.0,
+            domain: [0.0, std::f64::consts::TAU],
+            angle_domain: None,
+        }),
+        doc.current_layer,
+    );
+    let id = circle.id;
+    doc.entities.insert(id, circle);
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    c.select_objects(&[id]).unwrap();
+    c.run_addon_command("SurfaceGVDExtrudeAll").unwrap();
+    c.submit("Solid").unwrap();
+    c.submit("3").unwrap();
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    let made: Vec<&Geometry> = c.document().entities.values().filter(|e| e.id != id).map(|e| &e.geometry).collect();
+    assert_eq!(made.len(), 1, "one solid");
+    match made[0] {
+        #[cfg(feature = "occt-brep")]
+        Geometry::Brep(brep) => {
+            let m = om9_kernel::creation::measure(brep, &Limits::default()).unwrap();
+            assert_eq!(m.solids, 1);
+            assert!((m.volume_mm3 - std::f64::consts::PI * 12.0).abs() < 1e-6, "{}", m.volume_mm3);
+        }
+        Geometry::Mesh(mesh) => {
+            // Signed volume of the closed triangle mesh (divergence theorem).
+            // (Faces are fans: polygons split from their first corner.)
+            let v: f64 = mesh
+                .faces
+                .iter()
+                .flat_map(|f| (1..f.len() - 1).map(move |k| [f[0], f[k], f[k + 1]]))
+                .map(|t| {
+                    let [a, b, c] = t.map(|i| mesh.vertices[i as usize]);
+                    (a[0] * (b[1] * c[2] - b[2] * c[1]) - a[1] * (b[0] * c[2] - b[2] * c[0]) + a[2] * (b[0] * c[1] - b[1] * c[0])) / 6.0
+                })
+                .sum();
+            // The display samples the circle at 96 points: within 0.1 % of π r² h.
+            let exact = std::f64::consts::PI * 4.0 * 3.0;
+            assert!((v.abs() - exact).abs() < exact * 1e-3, "{v} vs {exact}");
+        }
+        other => panic!("{other:?}"),
+    }
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// What the user does in the viewport, through the controller: each click goes through the
+/// same selection call as the viewport (a plain click; inside an add-on object prompt the
+/// picks add up). Sweep 2 picked rail, rail, sections; Boolean Difference on two
+/// window-selected solids; right-click repeats the last add-on command.
+#[test]
+fn clicks_build_up_picks_and_right_click_repeats() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-clicks-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("clicks"), Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    let new_id = |c: &Controller, before: &[om9_core::identity::ObjectId]| {
+        *c.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    let polyline = |c: &mut Controller, pts: &[[f64; 3]]| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.run_addon_command("CurvePolylinePolyline").unwrap();
+        for p in pts {
+            c.session_point(*p).unwrap();
+        }
+        c.submit("").unwrap();
+        new_id(c, &before)
+    };
+    let click = |c: &mut Controller, id| {
+        let collecting = c.addon_collects_objects();
+        c.select_root(Some(id), collecting).unwrap();
+        c.refresh_addon_session();
+    };
+    let ra = polyline(&mut c, &[[-10.0, -20.0, 0.0], [-12.0, 0.0, 0.0], [-10.0, 20.0, 0.0]]);
+    let rb = polyline(&mut c, &[[10.0, -20.0, 0.0], [12.0, 0.0, 0.0], [10.0, 20.0, 0.0]]);
+    let p1 = polyline(&mut c, &[[-10.0, -20.0, 0.0], [0.0, -20.0, 5.0], [10.0, -20.0, 0.0]]);
+    let p2 = polyline(&mut c, &[[-10.0, 20.0, 0.0], [0.0, 20.0, 3.0], [10.0, 20.0, 0.0]]);
+    c.clear_selection();
+    c.run_addon_command("SurfaceSweepSweep2Rails").unwrap();
+    assert!(c.prompt_text().starts_with("Select first rail"), "{}", c.prompt_text());
+    click(&mut c, ra);
+    assert!(c.prompt_text().starts_with("Select second rail"), "{}", c.prompt_text());
+    click(&mut c, rb);
+    assert!(c.prompt_text().starts_with("Select cross section curves"), "{}", c.prompt_text());
+    click(&mut c, p1);
+    click(&mut c, p2);
+    assert!(c.prompt_text().contains("2 selected"), "{}", c.prompt_text());
+    c.submit("").unwrap();
+    let before: Vec<_> = c.document().entities.keys().copied().collect();
+    c.submit("").unwrap();
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    assert_eq!(c.document().entities.len(), before.len() + 1, "the sweep surface");
+    // Right-click with nothing running (and nothing selected): Sweep 2 again.
+    c.clear_selection();
+    assert!(c.repeat_addon_command().unwrap());
+    assert!(c.prompt_text().starts_with("Select first rail"), "{}", c.prompt_text());
+    assert!(c.cancel_addon_session());
+    // Two boxes, window-selected, then Difference: cut at once, Enter.
+    let boxed = |c: &mut Controller, a: [f64; 3], b: [f64; 3], h: &str| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.run_addon_command("SolidBoxCornertoCornerHeight").unwrap();
+        c.session_point(a).unwrap();
+        c.session_point(b).unwrap();
+        c.submit(h).unwrap();
+        assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+        new_id(c, &before)
+    };
+    let big = boxed(&mut c, [0.0, 0.0, 0.0], [4.0, 4.0, 0.0], "4");
+    let small = boxed(&mut c, [3.0, 3.0, 0.0], [5.0, 5.0, 0.0], "5");
+    c.select_objects(&[big, small]).unwrap();
+    let count = c.document().entities.len();
+    c.run_addon_command("SolidDifference").unwrap();
+    c.submit("").unwrap();
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    assert_eq!(c.document().entities.len(), count - 1, "the cutter is gone");
+    assert!(c.document().entities.contains_key(&big));
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// The user's case: smooth curves drawn with Curve, the two rails picked before Sweep 2 is
+/// typed or clicked, then the cross section; also `Sweep2` typed while Curve still waits.
+#[test]
+fn sweep2_from_drawn_curves_like_the_user() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-user-sweep2-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("user-sweep2"), Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    let new_id = |c: &Controller, before: &[om9_core::identity::ObjectId]| {
+        *c.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    let curve = |c: &mut Controller, pts: &[[f64; 3]]| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.submit("Curve").unwrap();
+        eprintln!("curve prompt: {}", c.prompt_text());
+        for p in pts {
+            c.session_point(*p).unwrap();
+        }
+        c.submit("").unwrap();
+        assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+        new_id(c, &before)
+    };
+    let ra = curve(&mut c, &[[-15.0, -20.0, 0.0], [-5.0, -5.0, 0.0], [-12.0, 8.0, 0.0], [-6.0, 20.0, 0.0]]);
+    let rb = curve(&mut c, &[[8.0, -22.0, 0.0], [18.0, -5.0, 0.0], [10.0, 8.0, 0.0], [16.0, 21.0, 0.0]]);
+    // The profile touches both rails at their starts.
+    let pa = c.document().entities[&ra].geometry.clone();
+    eprintln!("rail geometry: {:?}", std::mem::discriminant(&pa));
+    let p1 = curve(&mut c, &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
+    for how in ["typed", "icon"] {
+        c.clear_selection();
+        c.select_objects(&[ra, rb]).unwrap();
+        match how {
+            "typed" => c.submit("Sweep2").unwrap(),
+            _ => {
+                let t = c.icon_target("SurfaceSweepSweep2Rails", None).expect("icon target");
+                eprintln!("icon runs {} (addon {})", t.command, t.addon);
+                c.run_addon_command(&t.command).unwrap();
+            }
+        }
+        c.refresh_addon_session();
+        eprintln!("[{how}] after start: {}", c.prompt_text());
+        assert!(c.addon_session().is_some(), "{how}: no add-on session: {}", c.prompt_text());
+        c.select_root(Some(p1), c.addon_collects_objects()).unwrap();
+        c.refresh_addon_session();
+        eprintln!("[{how}] after profile: {}", c.prompt_text());
+        let before = c.document().entities.len();
+        for _ in 0..3 {
+            if c.addon_session().is_none() {
+                break;
+            }
+            c.submit("").unwrap();
+            eprintln!("[{how}] after enter: {}", c.prompt_text());
+        }
+        for m in c.take_addon_messages() {
+            eprintln!("[{how}] message: {m:?}");
+        }
+        assert!(c.addon_session().is_none(), "{how}: {}", c.prompt_text());
+        assert_eq!(c.document().entities.len(), before + 1, "{how}: the sweep surface");
+    }
+    // Sweep2 typed while Curve still waits for its first point: Curve closes, Sweep 2 runs.
+    c.clear_selection();
+    c.submit("Curve").unwrap();
+    c.submit("Sweep2").unwrap();
+    c.refresh_addon_session();
+    assert!(c.prompt_text().starts_with("Select first rail"), "{}", c.prompt_text());
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// The same through the real window code (`MatrixApp::show`): `Sweep2` typed on the command
+/// line with the rails picked, the cross section picked, then right-clicks in the viewport.
+#[test]
+fn sweep2_through_the_window_with_right_clicks() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-ui-sweep2-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut app = om9_app::ui::MatrixApp::new(Document::new("ui-sweep2")).unwrap();
+    app.controller.attach_addons(host(&tmp), &names);
+    let size = [1400.0f32, 900.0];
+    let run = |app: &mut om9_app::ui::MatrixApp, steps: serde_json::Value| -> serde_json::Value {
+        om9_app::ui_replay::replay_app(app, size, 1.0, steps.as_array().unwrap()).unwrap()
+    };
+    let r = run(&mut app, serde_json::json!([{"wait": 2}]));
+    let views = r["steps"][0]["views"].clone();
+    eprintln!("views: {views}");
+    let curve = |app: &mut om9_app::ui::MatrixApp, pts: &[[f64; 3]]| {
+        let before: Vec<_> = app.controller.document().entities.keys().copied().collect();
+        app.controller.clear_selection();
+        app.controller.submit("Curve").unwrap();
+        for p in pts {
+            app.controller.session_point(*p).unwrap();
+        }
+        app.controller.submit("").unwrap();
+        *app.controller.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    let ra = curve(&mut app, &[[-15.0, -20.0, 0.0], [-5.0, -5.0, 0.0], [-12.0, 8.0, 0.0], [-6.0, 20.0, 0.0]]);
+    let rb = curve(&mut app, &[[8.0, -22.0, 0.0], [18.0, -5.0, 0.0], [10.0, 8.0, 0.0], [16.0, 21.0, 0.0]]);
+    let p1 = curve(&mut app, &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
+    app.controller.clear_selection();
+    app.controller.select_objects(&[ra, rb]).unwrap();
+    let r = run(&mut app, serde_json::json!([{"text": "Sweep2"}, {"key": "Enter"}]));
+    for s in r["steps"].as_array().unwrap() {
+        eprintln!("step {}: prompt={} command={}", s["step"], s["prompt"], s["command"]);
+    }
+    eprintln!("history:\n{}", app.transcript.history());
+    assert!(app.controller.addon_session().is_some(), "Sweep2 did not start: {}", app.controller.prompt_text());
+    let collecting = app.controller.addon_collects_objects();
+    app.controller.select_root(Some(p1), collecting).unwrap();
+    app.controller.refresh_addon_session();
+    let persp = views.as_array().unwrap().iter().find(|v| v["view"] == "Perspective").unwrap()["rect"].clone();
+    // The bottom right of the view: the options window (top right) does not cover it.
+    let at = [persp[0].as_f64().unwrap() + persp[2].as_f64().unwrap() - 40.0, persp[1].as_f64().unwrap() + persp[3].as_f64().unwrap() - 40.0];
+    let before = app.controller.document().entities.len();
+    let r = run(&mut app, serde_json::json!([{"click": at, "button": "right"}, {"click": at, "button": "right"}]));
+    for s in r["steps"].as_array().unwrap() {
+        eprintln!("step {}: prompt={}", s["step"], s["prompt"]);
+    }
+    eprintln!("history:\n{}", app.transcript.history());
+    assert!(app.controller.addon_session().is_none(), "{}", app.controller.prompt_text());
+    assert_eq!(app.controller.document().entities.len(), before + 1, "the sweep surface");
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// Rhino 5 / Matrix 9: with the rails and a profile picked, Sweep 2 shows its options window
+/// (MaintainHeight, Simplify …); a checkbox changes the option and OK creates the surface.
+#[test]
+fn sweep2_options_window_ok_creates_the_surface() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-ui-dialog-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut app = om9_app::ui::MatrixApp::new(Document::new("ui-dialog")).unwrap();
+    // OM9_SHOT_LANG=vi: the same flow in Vietnamese (for the screenshot).
+    let lang = std::env::var("OM9_SHOT_LANG").unwrap_or_else(|_| "en".into());
+    app.controller.attach_addons(host_lang(&tmp, &lang), &names);
+    let size = [1400.0f32, 900.0];
+    let run = |app: &mut om9_app::ui::MatrixApp, steps: serde_json::Value| -> serde_json::Value {
+        om9_app::ui_replay::replay_app(app, size, 1.0, steps.as_array().unwrap()).unwrap()
+    };
+    let curve = |app: &mut om9_app::ui::MatrixApp, pts: &[[f64; 3]]| {
+        let before: Vec<_> = app.controller.document().entities.keys().copied().collect();
+        app.controller.clear_selection();
+        app.controller.submit("Curve").unwrap();
+        for p in pts {
+            app.controller.session_point(*p).unwrap();
+        }
+        app.controller.submit("").unwrap();
+        *app.controller.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    let ra = curve(&mut app, &[[-15.0, -20.0, 0.0], [-5.0, -5.0, 0.0], [-12.0, 8.0, 0.0], [-6.0, 20.0, 0.0]]);
+    let rb = curve(&mut app, &[[8.0, -22.0, 0.0], [18.0, -5.0, 0.0], [10.0, 8.0, 0.0], [16.0, 21.0, 0.0]]);
+    let p1 = curve(&mut app, &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
+    app.controller.clear_selection();
+    app.controller.select_objects(&[ra, rb]).unwrap();
+    let r = run(&mut app, serde_json::json!([{"text": "Sweep2"}, {"key": "Enter"}]));
+    // Picking the cross section: no window yet.
+    assert!(r["steps"][2]["dialog"].is_null(), "{}", r["steps"][2]);
+    let collecting = app.controller.addon_collects_objects();
+    app.controller.select_root(Some(p1), collecting).unwrap();
+    app.controller.refresh_addon_session();
+    // A right click (Enter) ends the selection: the options window opens with the preview.
+    let views = r["steps"][0]["views"].clone();
+    let persp = views.as_array().unwrap().iter().find(|v| v["view"] == "Perspective").unwrap()["rect"].clone();
+    let spot = [persp[0].as_f64().unwrap() + 40.0, persp[1].as_f64().unwrap() + persp[3].as_f64().unwrap() - 40.0];
+    let r = run(&mut app, serde_json::json!([{"click": spot, "button": "right"}, {"wait": 2}]));
+    let last = &r["steps"][2];
+    eprintln!("dialog: {}", last["dialog"]);
+    let title = if lang == "vi" { "Tuỳ chọn Quét 2 ray" } else { "Sweep 2 Rails Options" };
+    assert_eq!(last["dialog"]["title"], title, "{last}");
+    let rows = last["dialog"]["rows"].as_array().unwrap();
+    for name in ["MaintainHeight", "Simplify", "RebuildPoints", "RefitTolerance", "SweepTolerance"] {
+        assert!(rows.iter().any(|r| r["name"] == name), "{name} missing: {rows:?}");
+    }
+    let at = |r: &serde_json::Value, k: &str| r["controls"][k].clone();
+    // OM9_SHOT_DIR=<dir>: the whole window at this moment, for a look at the dialog.
+    if let Some(dir) = std::env::var_os("OM9_SHOT_DIR") {
+        let out = Path::new(&dir).join("sweep2-options.png");
+        om9_app::ui_replay::screenshot(&mut app, size, 1.0, 40, &out).unwrap();
+        eprintln!("screenshot: {}", out.display());
+    }
+    let check = at(last, "Dialog:MaintainHeight");
+    assert!(check.is_array(), "no checkbox: {}", last["controls"]);
+    let r = run(&mut app, serde_json::json!([{"click": check}, {"wait": 2}]));
+    let after = &r["steps"][2];
+    let row = after["dialog"]["rows"].as_array().unwrap().iter().find(|r| r["name"] == "MaintainHeight").unwrap().clone();
+    assert_eq!(row["value"], "Yes", "{after}");
+    let rebuild = at(after, "Dialog:Simplify=Rebuild");
+    let r = run(&mut app, serde_json::json!([{"click": rebuild}, {"wait": 2}]));
+    let after = &r["steps"][2];
+    let row = after["dialog"]["rows"].as_array().unwrap().iter().find(|r| r["name"] == "Simplify").unwrap().clone();
+    assert_eq!(row["value"], "Rebuild", "{after}");
+    let before = app.controller.document().entities.len();
+    let ok = at(after, "Dialog:OK");
+    let r = run(&mut app, serde_json::json!([{"click": ok}, {"wait": 2}]));
+    eprintln!("history:\n{}", app.transcript.history());
+    assert!(app.controller.addon_session().is_none(), "{}", app.controller.prompt_text());
+    assert!(r["steps"][2]["dialog"].is_null());
+    assert_eq!(app.controller.document().entities.len(), before + 1, "the sweep surface");
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// The surface commands that have options show their options window once they have
+/// something to make (Rhino 5: Surface From Curve Network, Patch Surface Options …).
+/// Rhino's Rebuild window: "Point count: (2) [10]", "Degree: (1) [3]", Delete input, Create on
+/// current layer, Preserve end tangents, Select Master Curve, the maximum deviation and a
+/// Preview button; and the Sweep 2 Rails window in Rhino's groups, with Add Slash.
+#[test]
+fn rebuild_and_sweep2_windows_follow_rhino() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-rebuild-window-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("rebuild-window"), Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    let add = |c: &mut Controller, cmd: &str, pts: &[[f64; 3]]| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.submit(cmd).unwrap();
+        for p in pts {
+            c.session_point(*p).unwrap();
+        }
+        c.submit("").unwrap();
+        *c.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    let line = add(&mut c, "Line", &[[0.0, 0.0, 0.0], [10.0, 0.0, 0.0]]);
+    c.select_objects(&[line]).unwrap();
+    c.submit("Rebuild").unwrap();
+    c.refresh_addon_session();
+    let d = c.addon_dialog().unwrap_or_else(|| panic!("no Rebuild window: {}", c.prompt_text()));
+    let rows: Vec<&str> = d.rows.iter().map(|r| r.name.as_str()).collect();
+    for name in ["PointCount", "Degree", "DeleteInput", "CurrentLayer", "PreserveTangents", "SelectMasterCurve", "Preview"] {
+        assert!(rows.contains(&name), "{name} missing from {rows:?}");
+    }
+    assert_eq!(d.notes.get("PointCount").map(String::as_str), Some("(2)"), "{:?}", d.notes);
+    assert_eq!(d.notes.get("Degree").map(String::as_str), Some("(1)"));
+    assert!(d.footer.iter().any(|f| f.starts_with("Maximum deviation")), "{:?}", d.footer);
+    // Preview off: nothing drawn until OK; on again: drawn.
+    c.set_addon_dialog_value("Preview", "No").unwrap();
+    assert!(c.addon_session().unwrap().reply.preview.is_empty());
+    c.set_addon_dialog_value("Preview", "Yes").unwrap();
+    assert!(!c.addon_session().unwrap().reply.preview.is_empty());
+    c.cancel();
+
+    // Sweep 2 Rails: two rails and two lines, all selected, then the command.
+    let ra = add(&mut c, "Curve", &[[0.0, 0.0, 0.0], [3.0, 0.0, 0.0], [6.0, 0.0, 0.0], [9.0, 0.0, 0.0], [12.0, 0.0, 0.0]]);
+    let rb = add(&mut c, "Curve", &[[0.0, 5.0, 0.0], [1.0, 5.0, 0.0], [2.0, 5.0, 0.0], [7.0, 5.0, 1.0], [12.0, 5.0, 0.0]]);
+    let s1 = add(&mut c, "Line", &[[0.0, 0.0, 0.0], [0.0, 5.0, 0.0]]);
+    let s2 = add(&mut c, "Line", &[[12.0, 0.0, 0.0], [12.0, 5.0, 0.0]]);
+    c.select_objects(&[ra, rb, s1, s2]).unwrap();
+    c.submit("Sweep2").unwrap();
+    c.refresh_addon_session();
+    let d = c.addon_dialog().unwrap_or_else(|| panic!("no Sweep2 window: {}", c.prompt_text()));
+    let titles: Vec<&str> = d.groups.iter().map(|g| g.0.as_str()).collect();
+    assert_eq!(titles, ["Rail curve options", "Cross-section curve options"]);
+    assert!(d.groups[1].1.contains(&"MaintainHeight".to_owned()));
+    assert!(!d.enabled("PreserveFirstShape"), "greyed until the sections are simplified");
+    c.set_addon_dialog_value("Simplify", "Rebuild").unwrap();
+    assert!(c.addon_dialog().unwrap().enabled("PreserveFirstShape"));
+    assert!(c.addon_dialog().unwrap().rows.iter().any(|r| r.name == "AddSlash"));
+    let before = c.document().entities.len();
+    c.submit("").unwrap();
+    assert_eq!(c.document().entities.len(), before + 1, "{}", c.prompt_text());
+}
+
+#[test]
+fn surface_commands_show_their_options_window() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-srf-dialogs-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("srf-dialogs"), Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    let curve = |c: &mut Controller, pts: &[[f64; 3]]| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.submit("Curve").unwrap();
+        for p in pts {
+            c.session_point(*p).unwrap();
+        }
+        c.submit("").unwrap();
+        *c.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    // A 2 × 2 network, slightly bent.
+    let u0 = curve(&mut c, &[[0.0, 0.0, 0.0], [5.0, 0.0, 1.0], [10.0, 0.0, 0.0]]);
+    let u1 = curve(&mut c, &[[0.0, 10.0, 0.0], [5.0, 10.0, 1.0], [10.0, 10.0, 0.0]]);
+    let v0 = curve(&mut c, &[[0.0, 0.0, 0.0], [0.0, 5.0, 1.0], [0.0, 10.0, 0.0]]);
+    let v1 = curve(&mut c, &[[10.0, 0.0, 0.0], [10.0, 5.0, 1.0], [10.0, 10.0, 0.0]]);
+    let mut report = Vec::new();
+    for (cmd, sel) in [("NetworkSrf", vec![u0, u1, v0, v1]), ("Patch", vec![u0, u1, v0, v1])] {
+        c.clear_selection();
+        c.select_objects(&sel).unwrap();
+        c.submit(cmd).unwrap();
+        c.refresh_addon_session();
+        let d = c.addon_dialog();
+        report.push(format!("{cmd}: {:?} {:?}", d.as_ref().map(|d| &d.title), d.as_ref().map(|d| d.rows.iter().map(|r| format!("{}={}", r.name, r.value)).collect::<Vec<_>>())));
+        let d = d.unwrap_or_else(|| panic!("{cmd}: no options window ({})", c.prompt_text()));
+        assert!(d.ready);
+        // A setting changed in the window is used at once and remembered.
+        if cmd == "NetworkSrf" {
+            c.set_addon_dialog_value("EdgeTolerance", "0.002").unwrap();
+            let d = c.addon_dialog().unwrap();
+            let row = d.rows.iter().find(|r| r.name == "EdgeTolerance").unwrap();
+            assert_eq!(row.value, "0.002");
+        }
+        let before = c.document().entities.len();
+        c.submit("").unwrap();
+        assert!(c.addon_session().is_none(), "{cmd}: {}", c.prompt_text());
+        assert!(c.addon_dialog().is_none());
+        assert!(c.document().entities.len() > before, "{cmd} made nothing");
+    }
+    // Curve Network the other way: the command first, then the curves one click at a time
+    // (each click replaces the selection, as in the viewport), Enter, the window, OK.
+    c.clear_selection();
+    c.submit("NetworkSrf").unwrap();
+    assert!(c.addon_dialog().is_none(), "no window before the curves");
+    for id in [u0, u1, v0, v1] {
+        let collecting = c.addon_collects_objects();
+        c.select_root(Some(id), collecting).unwrap();
+        c.refresh_addon_session();
+    }
+    let d = c.addon_dialog().unwrap_or_else(|| panic!("no window after picking: {}", c.prompt_text()));
+    report.push(format!("NetworkSrf one by one: {}", d.title));
+    let before = c.document().entities.len();
+    c.submit("").unwrap();
+    if c.addon_session().is_some() {
+        // Enter ended the picking; the second Enter is OK.
+        c.submit("").unwrap();
+    }
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    assert_eq!(c.document().entities.len(), before + 1, "network surface from picked curves");
+    eprintln!("{}", report.join("\n"));
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// Text with Create=Solids and FilletRadius through the real builder panel: the letters come
+/// out rounded on top. OM9_SHOT_DIR=<dir> also writes a picture of the window.
+#[test]
+fn text_rounded_solids_in_the_window() {
+    let font = if cfg!(windows) { "Arial" } else { "DejaVu Sans" };
+    if !cfg!(windows) && !Path::new("/usr/share/fonts/truetype/dejavu").exists() {
+        eprintln!("no test font installed; skipped");
+        return;
+    }
+    let tmp = std::env::temp_dir().join(format!("om9-app-text-round-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut app = om9_app::ui::MatrixApp::new(Document::new("text-round")).unwrap();
+    app.controller.attach_addons(host_lang(&tmp, "vi"), &names);
+    let size = [1400.0f32, 900.0];
+    // "Text" typed, as the menu names it, runs the add-on (Windows fonts, panel), not OM9's
+    // older built-in Text.
+    let r = om9_app::ui_replay::replay_app(&mut app, size, 1.0, &[serde_json::json!({"text": "Text"}), serde_json::json!({"key": "Enter"})]).unwrap();
+    eprintln!("after typing: {}", r["steps"][2]["command"]);
+    assert!(app.controller.addon_builder().is_some(), "the Text panel: {}", r["steps"][2]["prompt"]);
+    use om9_addons::settings::SettingValue as V;
+    for (k, v) in [
+        ("text_string", V::Str("OM9".into())),
+        ("text_font_other", V::Str(font.into())),
+        ("text_height", V::Float(5.0)),
+        ("text_depth", V::Float(1.5)),
+        ("text_fillet", V::Float(0.4)),
+    ] {
+        app.controller.set_builder_value(k, v).unwrap();
+    }
+    let before = app.controller.document().entities.len();
+    app.controller.session_point([0.0, 0.0, 0.0]).unwrap();
+    let after = app.controller.document().entities.len();
+    eprintln!("history:\n{}", app.transcript.history());
+    assert_eq!(after, before + 3, "three rounded letters");
+    if let Some(dir) = std::env::var_os("OM9_SHOT_DIR") {
+        app.controller.zoom_extents(1.5).unwrap();
+        let out = Path::new(&dir).join("text-rounded.png");
+        let tris: usize = app.controller.document().entities.values().map(|e| format!("{:?}", e.geometry).matches("],").count()).sum();
+        eprintln!("about {tris} triangles/points");
+        om9_app::ui_replay::screenshot(&mut app, size, 1.0, 200, &out).unwrap();
+        eprintln!("screenshot: {}", out.display());
+    }
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// The package as the user installs it: the built library loaded by the native runtime
+/// (`OM9_NATIVE_ADDON=<path to libom9_matrix.so>`), then the window flow of Sweep 2.
+#[test]
+#[ignore = "needs OM9_NATIVE_ADDON pointing at a built om9_matrix library"]
+fn sweep2_through_the_native_library() {
+    let Some(lib) = std::env::var_os("OM9_NATIVE_ADDON") else { return };
+    let tmp = std::env::temp_dir().join(format!("om9-app-native-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let catalog = om9_app::addons::catalog().unwrap();
+    let mut h = Host::new(HostConfig::new(om9_app::addons::om9_version(), catalog.clone(), tmp.join("config")));
+    h.register_runtime(RuntimeKind::Native, Box::new(om9_addons::native::NativeRuntime::new()));
+    h.startup(&Startup::default());
+    let stage = tmp.join("stage-native");
+    fs::create_dir_all(stage.join("icons")).unwrap();
+    let addon = repo().join("addons/matrix/addon");
+    let entry = Path::new(&lib).file_name().unwrap().to_str().unwrap().to_owned();
+    let manifest = fs::read_to_string(addon.join("om9_addon.toml")).unwrap().replace("@PLATFORM@", "linux-x64").replace("@ENTRY@", &entry);
+    fs::write(stage.join("om9_addon.toml"), manifest).unwrap();
+    fs::copy(&lib, stage.join(&entry)).unwrap();
+    for dir in ["icons", "lang"] {
+        fs::create_dir_all(stage.join(dir)).unwrap();
+        for e in fs::read_dir(addon.join(dir)).unwrap() {
+            let e = e.unwrap().path();
+            fs::copy(&e, stage.join(dir).join(e.file_name().unwrap())).unwrap();
+        }
+    }
+    let (_, zip) = build_package(&stage, Some(&catalog)).unwrap_or_else(|e| panic!("{e:?}"));
+    fs::write(tmp.join("m.zip"), zip).unwrap();
+    let r = h.install_zip(&tmp.join("m.zip"), &InstallOptions { enable: true, ..Default::default() }).unwrap_or_else(|e| panic!("{e:?}"));
+    assert!(r.enabled, "{:?}", r.warnings);
+    h.set_setting("om9_matrix", "language", "en").unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("native"), Limits::default()).unwrap();
+    c.attach_addons(Arc::new(Mutex::new(h)), &names);
+    let new_id = |c: &Controller, before: &[om9_core::identity::ObjectId]| *c.document().entities.keys().find(|k| !before.contains(k)).unwrap();
+    let curve = |c: &mut Controller, pts: &[[f64; 3]]| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.submit("Curve").unwrap();
+        for p in pts {
+            c.session_point(*p).unwrap();
+        }
+        c.submit("").unwrap();
+        new_id(c, &before)
+    };
+    let ra = curve(&mut c, &[[-15.0, -20.0, 0.0], [-5.0, -5.0, 0.0], [-12.0, 8.0, 0.0], [-6.0, 20.0, 0.0]]);
+    let rb = curve(&mut c, &[[8.0, -22.0, 0.0], [18.0, -5.0, 0.0], [10.0, 8.0, 0.0], [16.0, 21.0, 0.0]]);
+    let p1 = curve(&mut c, &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
+    c.clear_selection();
+    c.select_objects(&[ra, rb]).unwrap();
+    c.submit("Sweep2").unwrap();
+    eprintln!("native: {}", c.prompt_text());
+    c.select_root(Some(p1), c.addon_collects_objects()).unwrap();
+    c.refresh_addon_session();
+    let before = c.document().entities.len();
+    c.submit("").unwrap();
+    eprintln!("native: {}", c.prompt_text());
+    c.submit("").unwrap();
+    for m in c.take_addon_messages() {
+        eprintln!("native message: {m:?}");
+    }
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    assert_eq!(c.document().entities.len(), before + 1, "the sweep surface");
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+// ---- Surface and Solid menus end to end -----------------------------------------------
+
+struct Scene {
+    c: Controller,
+    named: std::collections::BTreeMap<&'static str, om9_core::identity::ObjectId>,
+    restore: bool,
+}
+
+impl Scene {
+    fn new_ids(&self, before: &[om9_core::identity::ObjectId]) -> Vec<om9_core::identity::ObjectId> {
+        self.c.document().entities.keys().copied().filter(|k| !before.contains(k)).collect()
+    }
+    fn keys(&self) -> Vec<om9_core::identity::ObjectId> {
+        self.c.document().entities.keys().copied().collect()
+    }
+    /// Runs a command with `select` preselected, feeding `points`, then Enter until done.
+    fn run(&mut self, cmd: &str, select: &[&str], points: &[[f64; 3]]) -> (String, usize, usize, Vec<String>) {
+        let before = self.keys();
+        let rev = self.c.document().revision;
+        self.c.cancel();
+        self.c.clear_selection();
+        // "name" is selected first; "@name:x,y,z" is a click on that object at that point
+        // when the command asks for objects (an edge or a face is found by where it lands).
+        let ids: Vec<om9_core::identity::ObjectId> = select.iter().filter(|n| !n.starts_with('@')).map(|n| self.named[n]).collect();
+        let mut picks = select.iter().filter_map(|n| n.strip_prefix('@')).map(|n| {
+            let (name, at) = n.split_once(':').unwrap();
+            let v: Vec<f64> = at.split(',').map(|x| x.parse().unwrap()).collect();
+            (self.named[name], [v[0], v[1], v[2]])
+        }).collect::<Vec<_>>().into_iter();
+        let mut trail = Vec::new();
+        for n in select {
+            let name = n.trim_start_matches('@').split(':').next().unwrap();
+            if !self.c.document().entities.contains_key(&self.named[name]) {
+                return (format!("scene object {name} is gone"), 0, 0, trail);
+            }
+        }
+        if !ids.is_empty()
+            && let Err(e) = self.c.select_objects(&ids)
+        {
+            return (format!("select error: {e}"), 0, 0, trail);
+        }
+        if let Err(e) = self.c.submit(cmd) {
+            return (format!("start error: {e}"), 0, 0, trail);
+        }
+        let mut pts = points.iter();
+        let mut saw_dialog = false;
+        let mut saw_builder = false;
+        for _ in 0..14 {
+            let Some(s) = self.c.addon_session() else { break };
+            let want = format!("{:?}", s.reply.want);
+            let prompt = s.reply.prompt.clone();
+            trail.push(format!("{want}:{prompt}"));
+            saw_dialog |= self.c.addon_dialog().is_some();
+            saw_builder |= self.c.addon_builder().is_some();
+            let step = match want.as_str() {
+                "Point" => match pts.next() {
+                    Some(p) => self.c.session_point(*p),
+                    // A click on an edge or a face asked as a point.
+                    None => match picks.next() {
+                        Some((_, p)) => self.c.session_point(p),
+                        None => self.c.submit(""),
+                    },
+                },
+                "Number" => self.c.submit("1"),
+                "Objects" => match picks.next() {
+                    Some((id, p)) => {
+                        self.c.note_session_pick(Some(p));
+                        let r = self.c.select_root(Some(id), true);
+                        self.c.refresh_addon_session();
+                        r
+                    }
+                    None => self.c.submit(""),
+                },
+                _ => self.c.submit(""),
+            };
+            if let Err(e) = step {
+                trail.push(format!("error: {e}"));
+                break;
+            }
+        }
+        if self.c.addon_builder().is_some() {
+            saw_builder = true;
+            let r = self.c.accept_addon_builder();
+            trail.push(format!("builder accept: {r:?}"));
+        }
+        let open = self.c.addon_session().map(|s| s.reply.prompt.clone());
+        let made = self.new_ids(&before).len();
+        let changed = (self.c.document().revision != rev) as usize;
+        let mut status = if let Some(p) = open { format!("STILL OPEN: {p}") } else { "done".into() };
+        if saw_dialog {
+            status.push_str(" [window]");
+        }
+        if saw_builder {
+            status.push_str(" [builder]");
+        }
+        self.c.cancel();
+        // Back to the scene for the next command (a Boolean consumes its inputs …).
+        if changed > 0 && self.restore {
+            let _ = self.c.undo();
+            if self.c.document().revision != rev && self.keys().len() != before.len() {
+                let _ = self.c.undo();
+            }
+        }
+        (status, made, changed, trail)
+    }
+    fn keep(&mut self, name: &'static str, cmd: &str, select: &[&str], points: &[[f64; 3]]) {
+        let before = self.keys();
+        let r = self.run(cmd, select, points);
+        let new = self.new_ids(&before);
+        // A command that changes its input in place (Make Hole) keeps the object's id.
+        let id = match new.first() {
+            Some(id) => *id,
+            None if r.2 > 0 => self.named[select.last().unwrap()],
+            None => panic!("scene {name} by {cmd}: {r:?}"),
+        };
+        self.named.insert(name, id);
+    }
+}
+
+#[test]
+fn surface_and_solid_menus_run_end_to_end() {
+    let tmp = std::env::temp_dir().join(format!("om9-menu-survey-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("survey"), Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    let mut s = Scene { c, named: Default::default(), restore: false };
+    // ---- the scene ---------------------------------------------------------------------
+    let curve = |s: &mut Scene, name: &'static str, pts: &[[f64; 3]]| s.keep(name, "Curve", &[], pts);
+    curve(&mut s, "ra", &[[-15.0, -20.0, 0.0], [-5.0, -5.0, 0.0], [-12.0, 8.0, 0.0], [-6.0, 20.0, 0.0]]);
+    curve(&mut s, "rb", &[[8.0, -22.0, 0.0], [18.0, -5.0, 0.0], [10.0, 8.0, 0.0], [16.0, 21.0, 0.0]]);
+    curve(&mut s, "p1", &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
+    curve(&mut s, "u0", &[[100.0, 0.0, 0.0], [105.0, 0.0, 1.0], [110.0, 0.0, 0.0]]);
+    curve(&mut s, "u1", &[[100.0, 10.0, 0.0], [105.0, 10.0, 1.0], [110.0, 10.0, 0.0]]);
+    curve(&mut s, "v0", &[[100.0, 0.0, 0.0], [100.0, 5.0, 1.0], [100.0, 10.0, 0.0]]);
+    curve(&mut s, "v1", &[[110.0, 0.0, 0.0], [110.0, 5.0, 1.0], [110.0, 10.0, 0.0]]);
+    curve(&mut s, "low", &[[200.0, 35.0, 0.0], [210.0, 35.0, 0.0]]);
+    curve(&mut s, "high", &[[200.0, 35.0, 10.0], [210.0, 35.0, 10.0]]);
+    s.keep("circ", "Circle", &[], &[[50.0, 50.0, 0.0], [55.0, 50.0, 0.0]]);
+    s.keep("hole", "Circle", &[], &[[80.0, 50.0, 0.0], [82.0, 50.0, 0.0]]);
+    s.keep("flat", "Plane", &[], &[[200.0, 30.0, 0.0], [210.0, 40.0, 0.0]]);
+    s.keep("flat2", "Plane", &[], &[[210.0, 30.0, 0.0], [220.0, 40.0, 0.0]]);
+    s.keep("ring", "Circle", &[], &[[50.0, 80.0, 0.0], [55.0, 80.0, 0.0]]);
+    s.keep("ringhole", "Circle", &[], &[[50.0, 80.0, 0.0], [52.0, 80.0, 0.0]]);
+    s.keep("wall", "Loft", &["low", "high"], &[]);
+    s.keep("net", "NetworkSrf", &["u0", "u1", "v0", "v1"], &[]);
+    s.keep("disc", "PlanarSrf", &["circ"], &[]);
+    s.keep("washer", "PlanarSrf", &["ring", "ringhole"], &[]);
+    s.keep("box1", "Box", &[], &[[300.0, 0.0, 0.0], [310.0, 10.0, 0.0], [310.0, 10.0, 10.0]]);
+    s.keep("box2", "Box", &[], &[[305.0, 5.0, 0.0], [315.0, 15.0, 0.0], [315.0, 15.0, 10.0]]);
+    s.keep("ball", "Sphere", &[], &[[400.0, 0.0, 0.0], [405.0, 0.0, 0.0]]);
+    // A ring rail (circle in XZ, as a ring) and four profiles across it.
+    s.keep("rr", "Circle", &[], &[[0.0, -150.0, 0.0], [8.0, -150.0, 0.0]]);
+    curve(&mut s, "q0", &[[7.0, -150.0, -1.0], [8.0, -150.0, 0.0], [9.0, -150.0, 1.0]]);
+    curve(&mut s, "q1", &[[0.0, -143.0, -1.0], [0.0, -142.0, 0.0], [0.0, -141.0, 1.0]]);
+    curve(&mut s, "q2", &[[-7.0, -150.0, -1.0], [-8.0, -150.0, 0.0], [-9.0, -150.0, 1.0]]);
+    curve(&mut s, "q3", &[[0.0, -157.0, -1.0], [0.0, -158.0, 0.0], [0.0, -159.0, 1.0]]);
+    s.keep("c0", "Circle", &[], &[[0.0, -80.0, 0.0], [3.0, -80.0, 0.0]]);
+    s.keep("c1", "Circle", &[], &[[0.0, -80.0, 10.0], [3.0, -80.0, 10.0]]);
+    s.keep("tube", "Loft", &["c0", "c1"], &[]);
+    s.keep("hc", "Circle", &[], &[[355.0, 5.0, 0.0], [356.0, 5.0, 0.0]]);
+    s.keep("hb", "Box", &[], &[[350.0, 0.0, 0.0], [360.0, 10.0, 0.0], [360.0, 10.0, 10.0]]);
+    s.keep("holed", "SolidSolidEditToolsHolesMakeHole", &["hc", "hb"], &[]);
+    // ---- the menus ---------------------------------------------------------------------
+    s.restore = true;
+    if !cfg!(windows) {
+        let host = s.c.addon_host().unwrap().clone();
+        host.lock().unwrap().set_setting("om9_matrix", "text_font_other", "DejaVu Sans").unwrap();
+    }
+    let axis = [[-15.0, -20.0, 0.0], [-15.0, 20.0, 0.0]];
+    let plan: Vec<(&str, &str, Vec<&str>, Vec<[f64; 3]>)> = vec![
+        ("Surface", "SurfaceSweepSweep1Rail", vec!["ra", "p1"], vec![]),
+        ("Surface", "SurfaceSweepSweep2Rails", vec!["ra", "rb", "p1"], vec![]),
+        ("Surface", "SurfaceSweepProfileSweep", vec!["ra", "p1"], vec![]),
+        ("Surface", "SurfacePlanarCurves", vec!["circ"], vec![]),
+        ("Surface", "SurfacePlaneCornertoCorner", vec![], vec![[0.0, 60.0, 0.0], [10.0, 70.0, 0.0]]),
+        ("Surface", "OthersSurfaceRebuild", vec!["net"], vec![]),
+        ("Surface", "SurfaceBlendSurface", vec!["@flat:205,40,0", "@wall:205,35,10"], vec![]),
+        ("Surface", "SurfaceVariableFilletBlendChamferVariableBlendSurfaces", vec!["@flat:205,40,0", "@wall:205,35,10"], vec![]),
+        ("Surface", "SurfaceLoft", vec!["u0", "u1"], vec![]),
+        ("Surface", "SurfaceCurveNetwork", vec!["u0", "u1", "v0", "v1"], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsShrinkTrimmedSurface", vec!["washer"], vec![]),
+        ("Surface", "SurfacePatch", vec!["u0", "u1", "v0", "v1"], vec![]),
+        ("Surface", "SurfaceEdgeCurves", vec!["u0", "u1", "v0", "v1"], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsUntrim", vec!["washer"], vec![]),
+        ("Surface", "SurfaceGVDExtrudeAll", vec!["circ"], vec![]),
+        ("Surface", "SurfaceRevolve", vec!["p1"], axis.to_vec()),
+        ("Surface", "SurfaceRailRevolve", vec!["p1", "ra"], vec![[-30.0, -20.0, 0.0], [-30.0, 20.0, 0.0]]),
+        ("Surface", "BuilderFourProfileSweep", vec!["rr", "q0", "q1", "q2", "q3"], vec![]),
+        ("Surface", "SurfaceSweepSweepMultiRail", vec!["ra", "rb", "p1"], vec![]),
+        ("Surface", "SurfaceTweenSurfaces", vec!["net", "wall"], vec![]),
+        ("Surface", "SurfaceFilletSurfaces", vec!["@flat:205,33,0", "@wall:205,35,5"], vec![]),
+        ("Surface", "SurfaceVariableFilletBlendChamferVariableFilletSurfaces", vec!["@flat:205,33,0", "@wall:205,35,5"], vec![]),
+        ("Surface", "SurfaceChamferSurfaces", vec!["@flat:205,33,0", "@wall:205,35,5"], vec![]),
+        ("Surface", "SurfaceVariableFilletBlendChamferVariableChamferSurfaces", vec!["@flat:205,33,0", "@wall:205,35,5"], vec![]),
+        ("Surface", "SurfaceOffsetSurface", vec!["net"], vec![]),
+        ("Surface", "SurfaceVariableOffsetSurface", vec!["net"], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsMerge", vec!["flat", "flat2"], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsMatch", vec!["@wall:205,35,10", "@flat:205,40,0"], vec![]),
+        ("Surface", "SurfaceDrape", vec!["net"], vec![[95.0, -5.0, 0.0], [115.0, 15.0, 0.0]]),
+        ("Surface", "SurfaceHeightfieldfromImage", vec![], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsSplitatIsocurve", vec!["net"], vec![[105.0, 5.0, 0.8]]),
+        ("Surface", "SurfaceExtendSurface", vec!["@flat:205,40,0"], vec![[205.0, 45.0, 0.0]]),
+        ("Surface", "SurfaceExtrudeCurveNormalToSurface", vec!["@u0:105,0,1", "@net:105,5,0.8"], vec![[105.0, 0.0, 3.0]]),
+        ("Surface", "SurfaceUnrollDevelopableSrf", vec!["wall"], vec![]),
+        ("Surface", "SurfaceSmash", vec!["net"], vec![]),
+        ("Surface", "SurfaceSurfaceEditToolsSoftEdit", vec!["net"], vec![[105.0, 5.0, 0.8], [105.0, 5.0, 3.0]]),
+        ("Surface", "SurfacePlaneCuttingPlane", vec!["box1"], vec![[295.0, 5.0, 0.0], [320.0, 5.0, 0.0]]),
+        ("Surface", "SurfaceSurfaceEditToolsAdjustClosedSurfaceSeam", vec!["@tube:0,-80,5"], vec![[3.0, -80.0, 5.0]]),
+        ("Surface", "SurfaceSurfaceEditToolsSetSurfaceTangent", vec!["@net:105,5,0.8"], vec![[105.0, 0.0, 1.0], [105.0, 0.0, 1.0], [105.0, -3.0, 2.0]]),
+        ("Surface", "SurfaceSurfaceEditToolsRefittoTolerance", vec!["net"], vec![]),
+        ("Solid", "SolidUnion", vec!["box1", "box2"], vec![]),
+        ("Solid", "SolidDifference", vec!["box1", "box2"], vec![]),
+        ("Solid", "SolidIntersection", vec!["box1", "box2"], vec![]),
+        ("Solid", "SolidBooleanTwoObjects", vec!["box1", "box2"], vec![]),
+        ("Solid", "SolidCapPlanarHoles", vec!["wall"], vec![]),
+        ("Solid", "SolidExtractSurface", vec!["box1"], vec![[305.0, 5.0, 10.0]]),
+        ("Solid", "SolidFilletEdgeFilletEdge", vec!["box1"], vec![]),
+        ("Solid", "SolidText", vec![], vec![[0.0, -60.0, 0.0]]),
+        ("Solid", "SolidExtrudePlanarCurveStraight", vec!["circ"], vec![]),
+        ("Solid", "SolidGVDAllExtrude", vec!["circ"], vec![]),
+        ("Solid", "SolidPipe", vec!["ra"], vec![]),
+        ("Solid", "SolidBoxCornertoCornerHeight", vec![], vec![[0.0, 100.0, 0.0], [5.0, 105.0, 0.0], [5.0, 105.0, 5.0]]),
+        ("Solid", "SolidSphereCenterRadius", vec![], vec![[20.0, 100.0, 0.0], [23.0, 100.0, 0.0]]),
+        ("Solid", "SolidEllipsoidFromCenter", vec![], vec![[40.0, 100.0, 0.0], [44.0, 100.0, 0.0], [40.0, 102.0, 0.0], [40.0, 100.0, 3.0]]),
+        ("Solid", "SolidTorus", vec![], vec![[60.0, 100.0, 0.0], [65.0, 100.0, 0.0], [66.0, 100.0, 0.0]]),
+        ("Solid", "SolidCylinder", vec![], vec![[80.0, 100.0, 0.0], [83.0, 100.0, 0.0], [80.0, 100.0, 6.0]]),
+        ("Solid", "SolidTube", vec![], vec![[100.0, 100.0, 0.0], [104.0, 100.0, 0.0], [103.0, 100.0, 0.0], [100.0, 100.0, 6.0]]),
+        ("Solid", "SolidPyramid", vec![], vec![[120.0, 100.0, 0.0], [124.0, 100.0, 0.0], [120.0, 100.0, 6.0]]),
+        ("Solid", "SolidCone", vec![], vec![[140.0, 100.0, 0.0], [143.0, 100.0, 0.0], [140.0, 100.0, 6.0]]),
+        ("Solid", "SolidTruncatedCone", vec![], vec![[160.0, 100.0, 0.0], [163.0, 100.0, 0.0], [160.0, 100.0, 6.0], [161.0, 100.0, 6.0]]),
+        ("Solid", "SolidBoss", vec!["hole", "box1"], vec![]),
+        ("Solid", "SolidRib", vec!["@high:205,35,10", "@flat:205,32,0"], vec![]),
+        ("Solid", "SolidSlab", vec!["circ"], vec![[50.0, 56.0, 0.0], [50.0, 56.0, 2.0]]),
+        ("Solid", "SolidSolidEditToolsHolesMakeHole", vec!["hole", "box1"], vec![]),
+        ("Solid", "SolidSolidEditToolsHolesArrayHole", vec!["hole", "box1"], vec![[302.0, 2.0, 10.0], [304.0, 2.0, 10.0], [302.0, 4.0, 10.0]]),
+        ("Solid", "SolidSolidEditToolsHolesArrayHolePolar", vec!["hole", "box1"], vec![[305.0, 5.0, 10.0]]),
+        ("Solid", "SolidSolidEditToolsHolesMoveHole", vec!["@holed:355,5,10"], vec![[356.0, 5.0, 10.0], [355.0, 5.0, 10.0], [357.0, 6.0, 10.0]]),
+        ("Solid", "SolidSolidEditToolsFacesMoveFace", vec!["box1"], vec![[305.0, 5.0, 10.0], [305.0, 5.0, 10.0], [305.0, 5.0, 12.0]]),
+        ("Solid", "SolidShell", vec!["box1"], vec![]),
+        ("Solid", "SolidPtOn", vec!["ball"], vec![]),
+    ];
+    let mut rows = vec!["| Menu | Lệnh | Kết quả | Mới | Đổi | Các bước |".to_string(), "|---|---|---|---|---|---|".to_string()];
+    let mut bad = Vec::new();
+    for (menu, cmd, sel, pts) in &plan {
+        let (status, made, changed, trail) = s.run(cmd, sel, pts);
+        let label = trail.first().cloned().unwrap_or_default();
+        let ok = status.starts_with("done") && (made > 0 || changed > 0);
+        if !ok {
+            bad.push(format!("{cmd}: {status} | {}", trail.join(" → ")));
+        }
+        rows.push(format!(
+            "| {menu} | {cmd} | {}{status} | {made} | {changed} | {} |",
+            if ok { "✅ " } else { "⚠️ " },
+            trail.join(" → ").replace('|', "/")
+        ));
+        let _ = label;
+    }
+    let table = rows.join("\n");
+    if let Some(out) = std::env::var_os("OM9_SURVEY") {
+        fs::write(PathBuf::from(out), &table).unwrap();
+    }
+    eprintln!("{} of {} commands need a look:\n{}", bad.len(), plan.len(), bad.join("\n"));
+    // Left out on purpose: Shrink/Untrim need a trimmed surface (stored exactly only with the
+    // B-Rep kernel), Heightfield an image file, and the typed 1 makes Shell and Tube too thin
+    // here (checked with real sizes elsewhere).
+    let expected = ["ShrinkTrimmedSurface", "Untrim", "HeightfieldfromImage", "SolidShell", "SolidTube"];
+    let surprising: Vec<&String> = bad.iter().filter(|b| !expected.iter().any(|x| b.contains(x))).collect();
+    assert!(surprising.is_empty(), "{surprising:#?}");
+    fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// OM9_SHOT_DIR=<dir> (and OM9_SHOT_LANG=vi): pictures of the Rebuild window with a polyline
+/// selected, for a look against Rhino's (Point count (2) [10], Degree (1) [3] …).
+#[test]
+fn rebuild_window_picture() {
+    let Some(dir) = std::env::var_os("OM9_SHOT_DIR") else { return };
+    let tmp = std::env::temp_dir().join(format!("om9-app-rebuild-shot-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut app = om9_app::ui::MatrixApp::new(Document::new("rebuild-shot")).unwrap();
+    let lang = std::env::var("OM9_SHOT_LANG").unwrap_or_else(|_| "en".into());
+    app.controller.attach_addons(host_lang(&tmp, &lang), &names);
+    let size = [1400.0f32, 900.0];
+    app.controller.submit("Polyline").unwrap();
+    for p in [[-10.0, -10.0, 0.0], [-2.0, 8.0, 0.0], [6.0, -4.0, 0.0], [12.0, 10.0, 0.0]] {
+        app.controller.session_point(p).unwrap();
+    }
+    app.controller.submit("").unwrap();
+    let id = *app.controller.document().entities.keys().last().unwrap();
+    app.controller.select_objects(&[id]).unwrap();
+    om9_app::ui_replay::replay_app(&mut app, size, 1.0, serde_json::json!([{"text": "Rebuild"}, {"key": "Enter"}, {"wait": 2}]).as_array().unwrap()).unwrap();
+    let out = Path::new(&dir).join(format!("rebuild-window-{lang}.png"));
+    om9_app::ui_replay::screenshot(&mut app, size, 1.0, 40, &out).unwrap();
+    eprintln!("screenshot: {} ({})", out.display(), app.controller.prompt_text());
 }

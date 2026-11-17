@@ -47,6 +47,8 @@ pub const CONTINUE_CURVE: &str = "CurveFreeFormContinueCurve";
 pub const DIVIDE: &str = "OthersCurveDivideCurve";
 pub const CURVE_BOOLEAN: &str = "CurveCurveEditToolsCurveBoolean";
 pub const TWEEN: &str = "CurveTweenCurves";
+/// Rhino MeanCrv (not in Matrix 9's menus).
+pub const MEAN: &str = "CurveMeanCurve";
 pub const DUP_EDGE: &str = "CurveCurveFromObjectsDuplicateEdge";
 pub const DUP_BORDER: &str = "CurveCurveFromObjectsDuplicateBorder";
 pub const CROSS_SECTION: &str = "CurveCrossSectionProfiles";
@@ -106,6 +108,7 @@ impl Interactive for CurveTools {
         DIVIDE,
         CURVE_BOOLEAN,
         TWEEN,
+        MEAN,
         DUP_EDGE,
         DUP_BORDER,
         CROSS_SECTION,
@@ -123,42 +126,12 @@ impl Interactive for CurveTools {
         ARC_BLEND,
     ];
     fn step(e: &Event) -> Result<Reply, String> {
-        Ok(match e.command.as_str() {
-            REBUILD => edit::rebuild(e),
-            REFIT => edit::fit_curve(e),
-            BLEND => blend::blend(e, false),
-            BLEND_ADJ => blend::blend(e, true),
-            ARC_BLEND => blend::arc_blend(e),
-            CRV2VIEW | CRV2VIEW_HISTORY => from_two_views(e),
-            PULLBACK | PROJECT => objects::project(e, e.command == PULLBACK),
-            INTERSECTION => intersection(e),
-            INTERSECT_TWO => intersect_two_sets(e),
-            OFFSET => offset::offset(e),
-            OFFSET_ON_SRF => objects::offset_on_surface(e),
-            OFFSET_NORMAL => objects::offset_normal(e),
-            ISOCURVE => objects::isocurve(e),
-            ANGLE_ISO => isocurve(e),
-            FILLET | CHAMFER => fillet::fillet(e, e.command == CHAMFER),
-            FILLET_CORNERS => fillet::fillet_corners(e),
-            UV_CREATE => uv_create(e),
-            UV_APPLY => uv_apply(e),
-            THROUGH_POINTS => through_points(e),
-            EXTEND => extend::extend(e),
-            MARK_START | MARK_END => mark(e),
-            SEAM => seam(e),
-            CONTINUE_INTERP | CONTINUE_CURVE => continue_curve(e),
-            DIVIDE => edit::divide(e),
-            CURVE_BOOLEAN => regions::curve_boolean(e),
-            TWEEN => edit::tween(e),
-            DUP_EDGE | DUP_BORDER | SILHOUETTE | WIREFRAME => from_objects(e),
-            CROSS_SECTION => sections::csec(e),
-            SKETCH | SKETCH_SRF | SKETCH_MESH | POLY_ON_SRF | INTERP_ON_SRF => draw_on(e),
-            TO_LINES => edit::convert(e),
-            SECTION => sections::section_cmd(e),
-            MATCH => blend::match_curve(e),
-            SOFT_EDIT => objects::soft_edit(e),
-            other => return Err(format!("unknown command {other}")),
-        })
+        // Pointer moves of commands whose preview does not follow the pointer reuse the
+        // previous move's reply when nothing else changed (see `om9_addon_geom::memo`).
+        if STEADY_PREVIEW.contains(&e.command.as_str()) {
+            return om9_addon_geom::memo::steady_hover(e, dispatch);
+        }
+        dispatch(e)
     }
 }
 
@@ -853,12 +826,8 @@ fn mark(e: &Event) -> Reply {
         let mut out = Vec::new();
         for s in curves(e) {
             let p = dense(s, 50);
-            let (a, b) = if end {
-                (p[p.len() - 1], p[p.len() - 2])
-            } else {
-                (p[0], p[1])
-            };
-            let _ = b;
+            // A closed curve ends where it starts, at its seam (Rhino CrvEnd).
+            let a = if end && !s.closed { p[p.len() - 1] } else { p[0] };
             out.push(Geo::Point { point: a });
         }
         if out.is_empty() {
@@ -879,31 +848,41 @@ fn seam(e: &Event) -> Reply {
             .iter()
             .filter(|s| s.closed)
             .filter_map(|s| {
-                let mut pts = match &s.exact {
-                    Some(Geo::Nurbs {
-                        degree: 1, points, ..
-                    }) => {
-                        let mut q = points.clone();
-                        q.pop();
-                        q
+                // A closed polyline: the seam goes on the segment nearest the click, every
+                // corner stays (the shape is unchanged).
+                let corners = match &s.exact {
+                    Some(Geo::Nurbs { degree: 1, points, .. }) => Some(points.clone()),
+                    Some(Geo::Polyline { points, .. }) => Some(points.clone()),
+                    None if !s.points.is_empty() => Some(s.points.clone()),
+                    _ => None,
+                };
+                if let Some(mut pts) = corners {
+                    if pts.len() > 2 && dist(pts[0], *pts.last()?) < 1e-9 {
+                        pts.pop();
                     }
-                    _ => resample(&dense(s, 300), true, 64),
-                };
-                let path = Path::new(&pts, true)?;
-                let s_at = path.closest(p);
-                let seam_pt = path.at(s_at);
-                let i = (0..pts.len())
-                    .min_by(|&a, &b| dist(pts[a], seam_pt).total_cmp(&dist(pts[b], seam_pt)))?;
-                pts.rotate_left(i);
-                if dist(pts[0], seam_pt) > 1e-9 {
-                    pts.insert(0, seam_pt);
+                    let n = pts.len();
+                    let foot = |a: Vec3, b: Vec3| {
+                        let d = om9_addon_abi::session::sub(b, a);
+                        let l2 = om9_addon_abi::session::dot(d, d).max(1e-300);
+                        let t = (om9_addon_abi::session::dot(om9_addon_abi::session::sub(p, a), d) / l2).clamp(0.0, 1.0);
+                        om9_addon_abi::session::add(a, om9_addon_abi::session::scale(d, t))
+                    };
+                    let k = (0..n).min_by(|&i, &j| {
+                        dist(foot(pts[i], pts[(i + 1) % n]), p).total_cmp(&dist(foot(pts[j], pts[(j + 1) % n]), p))
+                    })?;
+                    let seam_pt = foot(pts[k], pts[(k + 1) % n]);
+                    // From the seam: the corners after it, round to the segment's start.
+                    pts.rotate_left((k + 1) % n);
+                    if dist(*pts.last()?, seam_pt) > 1e-9 && dist(pts[0], seam_pt) > 1e-9 {
+                        pts.insert(0, seam_pt);
+                    } else if dist(*pts.last()?, seam_pt) <= 1e-9 {
+                        pts.rotate_right(1);
+                    }
+                    return Some((s.id.clone(), polyline(pts, true)));
                 }
-                let g = if matches!(&s.exact, Some(Geo::Nurbs { degree: 1, .. })) {
-                    polyline(pts, true)
-                } else {
-                    smooth(&pts, true)?
-                };
-                Some((s.id.clone(), g))
+                // A circle or NURBS curve: only where it starts changes (exact, same shape).
+                let nc = om9_addon_geom::exact::Nc::from_geo(s.exact.as_ref()?)?;
+                Some((s.id.clone(), nc.with_seam(nc.closest(p)).to_geo()))
             })
             .collect();
         replace("Adjust Closed Curve Seam", items)
@@ -1244,4 +1223,47 @@ mod tests;
 /// Helper for tests: a planar polygon offset keeps its distance.
 pub fn fmt_len(v: f64) -> String {
     fmt(v)
+}
+
+/// Commands whose reply to a pointer move never reads the pointer (Rebuild, Refit to tolerance).
+const STEADY_PREVIEW: &[&str] = &[REBUILD, REFIT];
+
+fn dispatch(e: &Event) -> Result<Reply, String> {
+    Ok(match e.command.as_str() {
+        REBUILD => edit::rebuild(e),
+        REFIT => edit::fit_curve(e),
+        BLEND => blend::blend(e, false),
+        BLEND_ADJ => blend::blend(e, true),
+        ARC_BLEND => blend::arc_blend(e),
+        CRV2VIEW | CRV2VIEW_HISTORY => from_two_views(e),
+        PULLBACK | PROJECT => objects::project(e, e.command == PULLBACK),
+        INTERSECTION => intersection(e),
+        INTERSECT_TWO => intersect_two_sets(e),
+        OFFSET => offset::offset(e),
+        OFFSET_ON_SRF => objects::offset_on_surface(e),
+        OFFSET_NORMAL => objects::offset_normal(e),
+        ISOCURVE => objects::isocurve(e),
+        ANGLE_ISO => isocurve(e),
+        FILLET | CHAMFER => fillet::fillet(e, e.command == CHAMFER),
+        FILLET_CORNERS => fillet::fillet_corners(e),
+        UV_CREATE => uv_create(e),
+        UV_APPLY => uv_apply(e),
+        THROUGH_POINTS => through_points(e),
+        EXTEND => extend::extend(e),
+        MARK_START | MARK_END => mark(e),
+        SEAM => seam(e),
+        CONTINUE_INTERP | CONTINUE_CURVE => continue_curve(e),
+        DIVIDE => edit::divide(e),
+        CURVE_BOOLEAN => regions::curve_boolean(e),
+        TWEEN => edit::tween(e),
+        MEAN => edit::mean(e),
+        DUP_EDGE | DUP_BORDER | SILHOUETTE | WIREFRAME => from_objects(e),
+        CROSS_SECTION => sections::csec(e),
+        SKETCH | SKETCH_SRF | SKETCH_MESH | POLY_ON_SRF | INTERP_ON_SRF => draw_on(e),
+        TO_LINES => edit::convert(e),
+        SECTION => sections::section_cmd(e),
+        MATCH => blend::match_curve(e),
+        SOFT_EDIT => objects::soft_edit(e),
+        other => return Err(format!("unknown command {other}")),
+    })
 }

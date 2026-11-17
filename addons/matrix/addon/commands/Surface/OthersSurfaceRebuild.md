@@ -19,6 +19,7 @@ Dựng lại mặt với số điểm U, V và bậc mới.
 
 | Dòng lệnh | Ý nghĩa | Mặc định | Khoảng |
 |---|---|---|---|
+| `DegreeV=` | Bậc V (Rebuild) | 3 | 1 … 7 |
 | `UPoints=` | Số điểm U | 10 | 2 … 200 |
 | `VPoints=` | Số điểm V | 10 | 2 … 200 |
-| `Degree=` | Bậc | 3 | 1 … 7 |
+| `DegreeU=` | Bậc U | 3 | 1 … 7 |

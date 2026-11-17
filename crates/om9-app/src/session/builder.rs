@@ -701,7 +701,7 @@ impl Controller {
         Ok(())
     }
 
-    fn stage_builder_preview_representations(&self, prepared: &mut om9_core::transaction::PreparedTransaction,
+    pub(super) fn stage_builder_preview_representations(&self, prepared: &mut om9_core::transaction::PreparedTransaction,
         candidates: &mut [om9_core::brep::Brep], held: om9_core::budget::Usage) -> Result<()> {
         Self::stage_builder_representations(&self.coordinator, prepared, candidates, held)
     }

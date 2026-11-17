@@ -105,9 +105,24 @@ pub struct SettingSpec {
     /// `scope = "addon"`: a setting of the whole add-on (its language …), shown only in
     /// Preferences › Add-ons, never in a command's panel or command line.
     pub addon_wide: bool,
+    /// `enabled_when = "text_create=solids"` (`|` between allowed values): the setting only
+    /// means something while another setting of the command has one of these values; the
+    /// panel greys it out otherwise.
+    pub enabled_when: Option<(String, Vec<String>)>,
 }
 
 impl SettingSpec {
+    /// Whether the setting applies with the other settings' current values.
+    pub fn enabled(&self, value_of: impl Fn(&str) -> Option<SettingValue>) -> bool {
+        let Some((key, allowed)) = &self.enabled_when else { return true };
+        match value_of(key) {
+            Some(SettingValue::Str(v)) => allowed.iter().any(|a| a == &v),
+            Some(SettingValue::Bool(b)) => allowed.iter().any(|a| a == if b { "true" } else { "false" }),
+            Some(other) => allowed.iter().any(|a| *a == other.display()),
+            None => true,
+        }
+    }
+
     /// Whether this setting is one of `command`'s parameters.
     pub fn applies_to(&self, command: &str) -> bool {
         !self.addon_wide && (self.commands.is_empty() || self.commands.iter().any(|c| c == command))
@@ -311,6 +326,23 @@ impl SettingSpec {
                 false
             }
         };
+        let enabled_when = match t.get("enabled_when") {
+            None => None,
+            Some(Value::Str(w)) => match w.split_once('=') {
+                Some((k, vals)) if !k.trim().is_empty() && !vals.trim().is_empty() => Some((
+                    k.trim().to_string(),
+                    vals.split('|').map(|v| v.trim().to_string()).collect(),
+                )),
+                _ => {
+                    errs.push(format!("{ctx}: enabled_when phải có dạng \"khoá=giá_trị|giá_trị\""));
+                    None
+                }
+            },
+            Some(_) => {
+                errs.push(format!("{ctx}: enabled_when phải là chuỗi"));
+                None
+            }
+        };
         if !choice_labels.is_empty()
             && !matches!(&kind, Kind::Enum { choices } if choices.len() == choice_labels.len())
         {
@@ -328,6 +360,7 @@ impl SettingSpec {
             choice_labels,
             commands,
             addon_wide,
+            enabled_when,
         };
         match t.get("default").and_then(SettingValue::from_toml) {
             None => errs.push(format!("{ctx}: thiếu default")),
@@ -510,6 +543,10 @@ mod tests {
         assert!(spec("key='a'\ntype='bool'\ndefault=true\noption='bad name'").is_err());
         let s = spec("key='layout'\ntype='enum'\nchoices=['fit','fixed_gap']\nchoice_labels=['Fit','Fixed']\ndefault='fit'").unwrap();
         assert_eq!(s.choice_labels, ["Fit", "Fixed"]);
+        let w = spec("key='r'\ntype='float'\ndefault=0.0\nenabled_when='text_create=solids|surfaces'").unwrap();
+        assert!(w.enabled(|_| Some(SettingValue::Str("solids".into()))));
+        assert!(!w.enabled(|_| Some(SettingValue::Str("curves".into()))));
+        assert!(spec("key='r'\ntype='float'\ndefault=0.0\nenabled_when='nothing'").is_err());
         assert!(spec("key='layout'\ntype='enum'\nchoices=['fit','fixed_gap']\nchoice_labels=['Fit']\ndefault='fit'").is_err());
         assert!(spec("key='n'\ntype='int'\ndefault=1\nchoice_labels=['x']").is_err());
     }

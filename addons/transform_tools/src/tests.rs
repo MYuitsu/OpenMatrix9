@@ -196,7 +196,8 @@ fn matrices() {
         vec![Input::Selection, num(1.0), num(2.0), num(3.0)],
     );
     assert!(close(apply(&first_matrix(&r), [0.0; 3]), [1.0, 2.0, 3.0]));
-    let mut e = event(SYMMETRY, Input::Selection, sel.clone());
+    // Preselected (Start): Enter takes the CPlane origin.
+    let mut e = event(SYMMETRY, Input::Start, sel.clone());
     let r = TransformTools::step(&e).unwrap();
     e.state = r.state;
     e.input = Input::Enter;
