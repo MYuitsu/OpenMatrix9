@@ -588,6 +588,15 @@ struct SweepState {
     /// replaces the selection or deselects it.
     #[serde(default)]
     kept: Vec<Selected>,
+    /// Rhino's Add Slash: point pairs (rail A, rail B) that face each other on the surface.
+    #[serde(default)]
+    slashes: Vec<(Vec3, Vec3)>,
+    /// Picking a slash: the points so far.
+    #[serde(default)]
+    slash_pick: Option<Vec<Vec3>>,
+    /// The slash's first point is on the first rail.
+    #[serde(default)]
+    slash_first_on_a: bool,
 }
 
 /// Sweep1 from a rail and sections (point sections first or last).
@@ -598,14 +607,17 @@ fn sweep1_surface(
     style: &str,
     closed: bool,
     global: bool,
-    simplify: (&str, usize, f64),
+    simplify: (&str, usize, f64, bool, bool),
 ) -> Result<(Geo, String), String> {
     let rail_nc = nc_of(rail).ok_or("the rail has no curve")?;
     let secs: Vec<Nc> = sections
         .iter()
-        .map(|c| {
+        .enumerate()
+        .map(|(i, c)| {
             let point = c.points.iter().all(|p| dist(exact::euclid(*p), exact::euclid(c.points[0])) < 1e-12);
-            if point { c.clone() } else { simplify_section(c.clone(), simplify.0, simplify.1, simplify.2) }
+            // Rhino "Preserve first / last shape": that section is not rebuilt or refitted.
+            let kept = (i == 0 && simplify.3) || (i + 1 == sections.len() && simplify.4);
+            if point || kept { c.clone() } else { simplify_section(c.clone(), simplify.0, simplify.1, simplify.2) }
         })
         .collect();
     let o = sweep::Options {
@@ -631,25 +643,33 @@ fn sweep2_surface(
     sections: &[Nc],
     closed: bool,
     maintain_height: bool,
-    simplify: (&str, usize, f64),
+    simplify: (&str, usize, f64, bool, bool),
+    rebuild_rails: Option<usize>,
+    slashes: &[(Vec3, Vec3)],
 ) -> Result<(Geo, String), String> {
     let ra = nc_of(rails[0]).ok_or("the rail has no curve")?;
     let rb = nc_of(rails[1]).ok_or("the rail has no curve")?;
     let secs: Vec<Nc> = sections
         .iter()
-        .map(|c| {
+        .enumerate()
+        .map(|(i, c)| {
             let point = c.points.iter().all(|p| dist(exact::euclid(*p), exact::euclid(c.points[0])) < 1e-12);
-            if point { c.clone() } else { simplify_section(c.clone(), simplify.0, simplify.1, simplify.2) }
+            // Rhino "Preserve first / last shape": that section is not rebuilt or refitted.
+            let kept = (i == 0 && simplify.3) || (i + 1 == sections.len() && simplify.4);
+            if point || kept { c.clone() } else { simplify_section(c.clone(), simplify.0, simplify.1, simplify.2) }
         })
         .collect();
     let o = sweep::Options2 {
         closed,
         maintain_height,
         tol: e.number("sw_tolerance", 0.001).max(1e-6),
+        rebuild_rails,
+        slashes: slashes.to_vec(),
         ..Default::default()
     };
     let s = sweep::sweep2(&ra, &rb, &secs, &o)?;
-    Ok((s.geo(), format!("within {} mm", fmt(o.tol))))
+    let size = format!("{} × {} control points", s.rows.len(), s.rows.first().map_or(0, Vec::len));
+    Ok((s.geo(), format!("{size}, within {} mm", fmt(o.tol))))
 }
 
 fn sweep1(e: &Event) -> Reply {
@@ -818,14 +838,91 @@ fn sweep_command(e: &Event, two: bool) -> Reply {
     if let Some(p) = st.point_end {
         picked.push(exact::point_curve(p));
     }
+    // Rhino's Add Slash: a point on the first rail, then one on the second, that the surface
+    // makes face each other (the isocurve runs from one to the other).
+    let mut refresh = false;
+    if two && st.stage == 2 {
+        const SLASH: [&str; 2] = ["Slash point on a rail", "Slash point on the other rail"];
+        if let Input::Option { name, .. } = &e.input
+            && name.eq_ignore_ascii_case("AddSlash")
+        {
+            st.slash_pick = Some(Vec::new());
+            return Reply::ask(SLASH[0], save(&st)).want(Want::Point);
+        }
+        if let Input::Option { name, .. } = &e.input
+            && name.eq_ignore_ascii_case("RemoveSlashes")
+        {
+            st.slashes.clear();
+            refresh = true;
+        }
+        if let Some(mut got) = st.slash_pick.clone() {
+            match &e.input {
+                Input::Point { point } => {
+                    // Each point goes onto the nearer rail (either rail first); the pair is
+                    // kept in the rails' order.
+                    let on: Vec<(f64, Vec3)> = rails
+                        .iter()
+                        .map(|r| nc_of(r).map_or((f64::MAX, *point), |c| {
+                            let q = c.eval(c.closest(*point));
+                            (dist(q, *point), q)
+                        }))
+                        .collect();
+                    let first_rail = on[0].0 <= on[1].0;
+                    let other_rail_wanted = got.len() == 1;
+                    let p = if other_rail_wanted {
+                        // The second point goes on the rail the first one is not on.
+                        let first_on_a = st.slash_first_on_a;
+                        if first_on_a { on[1].1 } else { on[0].1 }
+                    } else {
+                        st.slash_first_on_a = first_rail;
+                        if first_rail { on[0].1 } else { on[1].1 }
+                    };
+                    got.push(p);
+                    if got.len() == 2 {
+                        let pair = if st.slash_first_on_a { (got[0], got[1]) } else { (got[1], got[0]) };
+                        st.slashes.push(pair);
+                        st.slash_pick = None;
+                        refresh = true;
+                    } else {
+                        st.slash_pick = Some(got);
+                        return Reply::ask(SLASH[1], save(&st)).want(Want::Point).rubber(Some(p));
+                    }
+                }
+                Input::Enter => {
+                    st.slash_pick = None;
+                    refresh = true;
+                }
+                _ => {
+                    let r = Reply::ask(SLASH[got.len().min(1)], save(&st)).want(Want::Point);
+                    return match got.last() {
+                        Some(p) => r.rubber(Some(*p)),
+                        None => r,
+                    };
+                }
+            }
+        }
+    }
+    let slashes = st.slashes.clone();
     let rails_closed = rails.iter().all(|r| r.closed);
     let simplify_key = if two { "sw2" } else { "sw1" };
     let mut flow = Flow::new(label)
         .no_selection()
         .plain()
         .confirm("Press Enter to create the sweep, or change an option");
+    // Rhino users rebuild the rails (same point count, even spacing) so the isocurves run
+    // straight across: offered here, starting from the rail with more points.
+    let rail_points = rails
+        .iter()
+        .filter_map(nc_of)
+        .map(|c| c.points.len())
+        .max()
+        .unwrap_or(4)
+        .max(4);
     if two {
-        flow = flow.toggle("MaintainHeight", e.flag("sw2_maintain_height", false));
+        flow = flow
+            .toggle("MaintainHeight", e.flag("sw2_maintain_height", false))
+            .toggle("RebuildRails", false)
+            .num("RailPoints", rail_points as f64);
     } else {
         flow = flow.choice(
             "Style",
@@ -855,20 +952,30 @@ fn sweep_command(e: &Event, two: bool) -> Reply {
             },
         )
         .num("RebuildPoints", e.number(&format!("{simplify_key}_rebuild_points"), 10.0))
-        .num("RefitTolerance", e.number(&format!("{simplify_key}_refit_tolerance"), 0.01));
+        .num("RefitTolerance", e.number(&format!("{simplify_key}_refit_tolerance"), 0.01))
+        .toggle("PreserveFirstShape", false)
+        .toggle("PreserveLastShape", false)
+        .toggle("Preview", true);
     let make = |c: &Collected| -> Result<(Geo, String), String> {
         let simplify = c.opt(&flow, "Simplify").to_ascii_lowercase();
-        let simplify = (simplify.as_str(), c.num(&flow, "RebuildPoints").round().max(4.0) as usize, c.num(&flow, "RefitTolerance").max(1e-6));
+        let simplify = (
+            simplify.as_str(),
+            c.num(&flow, "RebuildPoints").round().max(4.0) as usize,
+            c.num(&flow, "RefitTolerance").max(1e-6),
+            c.yes(&flow, "PreserveFirstShape"),
+            c.yes(&flow, "PreserveLastShape"),
+        );
         let closed = rails_closed && picked.len() >= 2 && c.yes(&flow, "Closed");
         if two {
-            sweep2_surface(e, [&rails[0], &rails[1]], &picked, closed, c.yes(&flow, "MaintainHeight"), simplify)
+            let rebuild = c.yes(&flow, "RebuildRails").then(|| c.num(&flow, "RailPoints").round().max(4.0) as usize);
+            sweep2_surface(e, [&rails[0], &rails[1]], &picked, closed, c.yes(&flow, "MaintainHeight"), simplify, rebuild, &slashes)
         } else {
             sweep1_surface(e, &rails[0], &picked, c.opt(&flow, "Style"), closed, c.yes(&flow, "GlobalBlend"), simplify)
         }
     };
     let mut sub = e.clone();
     sub.state = st.flow.clone();
-    if entering || matches!(sub.input, Input::Selection) {
+    if entering || refresh || matches!(sub.input, Input::Selection) {
         sub.input = Input::Hover { point: [0.0; 3] };
     }
     let failed = std::cell::RefCell::new(None);
@@ -887,6 +994,36 @@ fn sweep_command(e: &Event, two: bool) -> Reply {
         },
     );
     if !r.done {
+        // The window's groups, as in Rhino's "Sweep 2 Rails Options" / "Sweep 1 Rail Options"
+        // (the rail group first here).
+        let groups: &[(&str, &str)] = if two {
+            &[
+                ("Rail curve options", "RebuildRails,RailPoints,Closed,AddSlash,RemoveSlashes"),
+                ("Cross-section curve options", "Simplify,PreserveFirstShape,PreserveLastShape,MaintainHeight"),
+            ]
+        } else {
+            &[
+                ("Sweep options", "Style,Closed,GlobalBlend"),
+                ("Cross-section curve options", "Simplify,PreserveFirstShape,PreserveLastShape"),
+            ]
+        };
+        for (title, names) in groups {
+            r.notes.push(("@group".into(), format!("{title}|{names}")));
+        }
+        // Greyed out as in Rhino: the shapes to preserve only when sections are simplified,
+        // the rail point count only when the rails are rebuilt.
+        r.notes.push(("@when".into(), "PreserveFirstShape|Simplify=Rebuild,Refit".into()));
+        r.notes.push(("@when".into(), "PreserveLastShape|Simplify=Rebuild,Refit".into()));
+        r.notes.push(("@when".into(), "RailPoints|RebuildRails=Yes".into()));
+        if two {
+            r.options.push(OptionToken::action("AddSlash"));
+            if !slashes.is_empty() {
+                r.options.push(OptionToken::action("RemoveSlashes"));
+                r.notes.push(("AddSlash".into(), format!("({})", slashes.len())));
+                // Show the slashes.
+                r.preview.extend(slashes.iter().map(|(a, b)| Geo::Line { start: *a, end: *b }));
+            }
+        }
         st.flow = r.state.clone();
         r.state = save(&st);
         let why = failed.borrow_mut().take();
@@ -920,7 +1057,7 @@ fn profile_sweep(e: &Event) -> Reply {
             e.text("sw1_style", "freeform"),
             rail.closed,
             e.flag("sw1_global_blend", false),
-            ("none", 10, 0.01),
+            ("none", 10, 0.01, false, false),
         )?;
         Ok((vec![g], format!("{} profiles along the rail, {what}", secs.len())))
     })

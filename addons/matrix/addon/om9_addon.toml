@@ -3,7 +3,7 @@
 # tools/ci/build-addons-windows.ps1 fills @ENTRY@/@PLATFORM@.
 schema_version = "1.0.0"
 id = "om9_matrix"
-version = "0.9.4"
+version = "0.9.5"
 name = "OM9 Matrix"
 tagline = "Lệnh kiểu Matrix 9 cho 11 menu: Curve, Surface, SubD, Gems …"
 maintainer = "OpenMatrix9 contributors"
@@ -574,6 +574,18 @@ steps = ["Select start curve.", "Select end curve.", "Chỉnh Number, MatchMetho
 options = ["Number=1: số đường trung gian.", "MatchMethod=None/Refit/SamplePoints.", "SampleNumber=10.", "Flip: đảo hướng đường cuối."]
 
 [[commands]]
+id = "CurveMeanCurve"
+label = "Mean Curve"
+handler = "om9_addon_session"
+interactive = true
+new = true
+group = "Curve"
+aliases = ["MeanCrv", "MeanCurve"]
+summary = "Tạo đường cong ở giữa hai đường cong (Rhino MeanCrv)."
+steps = ["Select first curve.", "Select second curve: đường giữa được tạo ngay (chọn sẵn hai đường rồi gọi lệnh cũng được)."]
+options = ["AdjustCurveDirections=Yes: tự đảo đường thứ hai cho cùng chiều với đường thứ nhất."]
+
+[[commands]]
 id = "CurveCurveFromObjectsDuplicateEdge"
 label = "Duplicate Edge"
 handler = "om9_addon_session"
@@ -735,7 +747,7 @@ brep_data = true
 aliases = ["Sweep2"]
 summary = "Quét mặt cắt giữa hai đường ray như Rhino 5; hai cạnh mặt nằm đúng trên hai ray."
 steps = ["Chọn ray thứ nhất.", "Chọn ray thứ hai.", "Chọn các mặt cắt theo thứ tự (Point: bắt đầu/kết thúc tại một điểm), Enter.", "Chỉnh tuỳ chọn khi xem trước, Enter để tạo."]
-options = ["MaintainHeight: mặt cắt co giãn theo bề ngang nhưng giữ chiều cao.", "Closed: quét kín quay về mặt cắt đầu (hai ray kín, từ hai mặt cắt).", "Simplify: None / Rebuild (số điểm) / Refit (dung sai) cho mặt cắt."]
+options = ["MaintainHeight: mặt cắt co giãn theo bề ngang nhưng giữ chiều cao.", "RebuildRails + RailPoints: dựng lại hai ray cùng số điểm, rải đều theo chiều dài, để lưới mặt chạy thẳng ngang từ ray này sang ray kia (như Rebuild ray trước Sweep2 trong Rhino).", "Closed: quét kín quay về mặt cắt đầu (hai ray kín, từ hai mặt cắt).", "Simplify: None / Rebuild (số điểm) / Refit (dung sai) cho mặt cắt.", "Mặt giữ đúng số điểm của ray (như Rhino), hai mép mặt trùng hai ray."]
 
 [[commands]]
 id = "SurfaceSweepProfileSweep"

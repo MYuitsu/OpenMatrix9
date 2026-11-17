@@ -54,6 +54,26 @@ pub struct AddonDialog {
     pub rows: Vec<DialogRow>,
     /// Enter would make the result (the command waits for nothing else).
     pub ready: bool,
+    /// Words beside an option (`PointCount` → `(2)`, Rhino's current value).
+    pub notes: std::collections::BTreeMap<String, String>,
+    /// Lines under the options (`Maximum deviation: 0.012`).
+    pub footer: Vec<String>,
+    /// Framed groups, in order: `(title, option names)` (Rhino's "Rail curve options" …).
+    pub groups: Vec<(String, Vec<String>)>,
+    /// An option enabled only while another has one of some values:
+    /// `PreserveFirstShape` → (`Simplify`, [`Rebuild`, `Refit`]).
+    pub when: std::collections::BTreeMap<String, (String, Vec<String>)>,
+}
+
+impl AddonDialog {
+    /// Whether the row named `name` can be changed now (see [`AddonDialog::when`]).
+    pub fn enabled(&self, name: &str) -> bool {
+        let Some((other, values)) = self.when.get(name) else { return true };
+        self.rows
+            .iter()
+            .find(|r| &r.name == other)
+            .is_none_or(|r| values.iter().any(|v| v.eq_ignore_ascii_case(&r.value)))
+    }
 }
 
 /// `MaintainHeight` → `Maintain height`, `SweepTolerance` → `Sweep tolerance`.
@@ -73,7 +93,19 @@ pub fn humanize(name: &str) -> String {
 /// An option's name in the interface language, or in plain English words.
 fn shown(tr: &om9_addons::i18n::Tr, name: &str) -> String {
     let t = tr.option(name);
-    if t == name { humanize(name) } else { t }
+    if t != name {
+        return t;
+    }
+    // Rhino's own words in its dialogs, where the option name is shorter.
+    match name {
+        "CurrentLayer" => "Create new object on current layer".into(),
+        "PreserveTangents" => "Preserve end tangent directions".into(),
+        "SelectMasterCurve" => "Select Master Curve".into(),
+        "AddSlash" => "Add Slash".into(),
+        "RemoveSlashes" => "Remove slashes".into(),
+        "Simplify" => "Simplify".into(),
+        _ => humanize(name),
+    }
 }
 
 fn setting_text(kind: &Kind, value: &SettingValue) -> String {
@@ -179,12 +211,43 @@ impl Controller {
             om9_addons::i18n::Lang::Vi => format!("Tuỳ chọn {name}"),
             om9_addons::i18n::Lang::En => format!("{name} Options"),
         };
+        let mut notes = std::collections::BTreeMap::new();
+        let mut footer = Vec::new();
+        let mut groups = Vec::new();
+        let mut when = std::collections::BTreeMap::new();
+        let list = |t: &str| -> Vec<String> { t.split(',').map(|x| x.trim().to_owned()).filter(|x| !x.is_empty()).collect() };
+        for (name, text) in &reply.notes {
+            match name.as_str() {
+                "" => footer.push(tr.text(text)),
+                // "Title|A,B,C": a framed group of options.
+                "@group" => {
+                    if let Some((title, names)) = text.split_once('|') {
+                        groups.push((tr.text(title), list(names)));
+                    }
+                }
+                // "Name|Other=v1,v2": Name only while Other is v1 or v2.
+                "@when" => {
+                    if let Some((target, rule)) = text.split_once('|')
+                        && let Some((other, values)) = rule.split_once('=')
+                    {
+                        when.insert(target.trim().to_owned(), (other.trim().to_owned(), list(values)));
+                    }
+                }
+                _ => {
+                    notes.insert(name.clone(), text.clone());
+                }
+            }
+        }
         Some(AddonDialog {
             code: session.code.clone(),
             title,
             prompt: tr.text(&reply.prompt),
             rows,
             ready: confirm || previewing,
+            notes,
+            footer,
+            groups,
+            when,
         })
     }
 

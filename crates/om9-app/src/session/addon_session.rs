@@ -990,9 +990,11 @@ impl Controller {
     ) -> Vec<&'a om9_scene::scene::SceneObject> {
         let key = (scene.epoch, scene.objects.as_ptr() as usize, scene.objects.len());
         let mut roots = self.scene_roots.lock().unwrap_or_else(|e| e.into_inner());
+        // In pick order (Rhino: sections, profiles, rails are used in the order picked).
+        let ordered = self.selected_ordered();
         let lookup = |roots: &SceneRoots| -> Option<Vec<usize>> {
             let mut at = Vec::new();
-            for id in &self.selection {
+            for id in &ordered {
                 for &i in roots.map.get(id).map_or(&[][..], |v| &v[..]) {
                     // A stale table (same key, other objects) is never trusted.
                     if scene.objects.get(i).is_none_or(|o| o.root != *id) {
@@ -1015,7 +1017,6 @@ impl Controller {
                 lookup(&roots).unwrap_or_default()
             }
         };
-        at.sort_unstable();
         at.into_iter().map(|i| &scene.objects[i]).collect()
     }
 

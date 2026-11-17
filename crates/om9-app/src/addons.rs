@@ -43,13 +43,19 @@ pub fn provided_names<'a>(host: &Host, features: &[FeatureName<'a>]) -> BTreeMap
         .map(|(code, _, _)| (code.to_ascii_lowercase(), code.clone()))
         .collect();
     let codes: std::collections::BTreeSet<String> = map.keys().cloned().collect();
+    // Aliases a command declares (Rhino's `Rebuild` for Rebuild Curve) win over the names of
+    // OM9 features another command shares (the surface Rebuild feature is typed `Rebuild` too).
+    let mut aliased = std::collections::BTreeSet::new();
     for (code, _owner, _label) in &bound {
         if let Some(info) = host.command_info(code) {
             for alias in &info.command.aliases {
-                map.entry(alias.to_ascii_lowercase())
-                    .or_insert_with(|| code.clone());
+                let alias = alias.to_ascii_lowercase();
+                aliased.insert(alias.clone());
+                map.entry(alias).or_insert_with(|| code.clone());
             }
         }
+    }
+    for (code, _owner, _label) in &bound {
         if let Some(feature) = crate::icons::feature_for(code) {
             let mut names = vec![feature.to_ascii_lowercase()];
             for f in features {
@@ -61,7 +67,8 @@ pub fn provided_names<'a>(host: &Host, features: &[FeatureName<'a>]) -> BTreeMap
                 }
             }
             for name in names {
-                if !codes.contains(&name) {
+                let alias_of_other = aliased.contains(&name) && map.get(&name) != Some(code);
+                if !codes.contains(&name) && !alias_of_other {
                     map.insert(name, code.clone());
                 }
             }

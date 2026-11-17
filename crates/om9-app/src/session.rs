@@ -4814,6 +4814,7 @@ mod incremental_scene_memory_tests {
     }
 }
 mod angle_isocurve;
+mod select_kind;
 pub mod annotation;
 mod apply_crv;
 mod arc;
@@ -7418,6 +7419,12 @@ impl Controller {
         }
         // Matrix History switches/report live on the same command line (`-006`).
         if let Some(result) = self.submit_history_text(text) {
+            return result.map(|_| DispatchOutcome::Command);
+        }
+        // Rhino's SelCrv, SelSrf, SelPolysrf, SelPt … (add objects of one type).
+        if !self.is_running()
+            && let Some(result) = self.select_kind_text(text)
+        {
             return result.map(|_| DispatchOutcome::Command);
         }
         // An installed, enabled add-on takes the command name over from OM9's own command

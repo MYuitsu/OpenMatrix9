@@ -1061,6 +1061,51 @@ fn sweep2_follows_rhino5_prompts_and_runs_on_the_rails() {
     assert!(r.done);
 }
 
+/// The user's Sweep2 (two few-point rails, a line at each end): the surface keeps the rails'
+/// points, the window shows Rhino's groups, and Add Slash makes two picked points face each
+/// other across the surface.
+#[test]
+fn sweep2_window_groups_few_points_and_add_slash() {
+    let cubic = |id: &str, pts: [Vec3; 5]| {
+        exact_sel(id, Geo::Nurbs { degree: 3, points: pts.to_vec(), weights: vec![], knots: vec![0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0] }, false)
+    };
+    let ra = || cubic("a", [[0.0, 0.0, 0.0], [3.0, 0.0, 0.0], [6.0, 0.0, 0.0], [9.0, 0.0, 0.0], [12.0, 0.0, 0.0]]);
+    let rb = || cubic("b", [[0.0, 5.0, 0.0], [1.0, 5.0, 0.0], [2.0, 5.0, 0.0], [7.0, 5.0, 1.0], [12.0, 5.0, 0.0]]);
+    let s1 = || exact_sel("s1", Geo::Line { start: [0.0, 0.0, 0.0], end: [0.0, 5.0, 0.0] }, false);
+    let s2 = || exact_sel("s2", Geo::Line { start: [12.0, 0.0, 0.0], end: [12.0, 5.0, 0.0] }, false);
+    let all = || vec![ra(), rb(), s1(), s2()];
+    let r = feed(SWEEP2, &Value::Null, Input::Start, all(), json!({}));
+    assert!(!r.done && !r.preview.is_empty(), "{:?} {}", r.error, r.prompt);
+    let groups: Vec<&String> = r.notes.iter().filter(|n| n.0 == "@group").map(|n| &n.1).collect();
+    assert!(groups.iter().any(|g| g.starts_with("Rail curve options|")), "{groups:?}");
+    assert!(groups.iter().any(|g| g.starts_with("Cross-section curve options|Simplify")), "{groups:?}");
+    for name in ["MaintainHeight", "RebuildRails", "RailPoints", "PreserveFirstShape", "PreserveLastShape", "Preview", "AddSlash"] {
+        assert!(r.options.iter().any(|o| o.name == name), "{name} missing");
+    }
+    // Few points along the rails (Rhino), not dozens of rows.
+    let made = run(SWEEP2, all(), json!({}), vec![Input::Enter]);
+    let Geo::Surface { size, .. } = &made.create[0] else { panic!("{:?}", made.create[0]) };
+    assert!(size[0] <= 5, "{size:?}: rows along the rails");
+    // Add Slash: x = 4 on rail A faces x = 8 on rail B.
+    let r = feed(SWEEP2, &r.state, opt("AddSlash", None), all(), json!({}));
+    assert_eq!(r.prompt, "Slash point on a rail");
+    let r = feed(SWEEP2, &r.state, pt([4.0, 0.3, 0.0]), all(), json!({}));
+    assert_eq!(r.prompt, "Slash point on the other rail");
+    let r = feed(SWEEP2, &r.state, pt([8.0, 5.0, 0.6]), all(), json!({}));
+    assert!(r.options.iter().any(|o| o.name == "RemoveSlashes"), "{}", r.prompt);
+    let r = feed(SWEEP2, &r.state, Input::Enter, all(), json!({}));
+    assert!(r.done, "{} {:?}", r.prompt, r.error);
+    let s = Srf::of(&r.create[0]).unwrap();
+    // The isocurve that starts at x = 4 on rail A ends near x = 8 on rail B.
+    let (s0, t0) = s.closest_st([4.0, 0.0, 0.0]);
+    // Across is whichever parameter leads to rail B (y = 5).
+    let end = [s.at_st(s0, 1.0 - t0.round()), s.at_st(1.0 - s0.round(), t0)]
+        .into_iter()
+        .find(|p| (p[1] - 5.0).abs() < 1e-3)
+        .expect("an edge on rail B");
+    assert!((end[0] - 8.0).abs() < 0.6, "slash: the isocurve ends at {end:?}");
+}
+
 /// Rhino 5 RailRevolve: profile, rail, axis start, axis end (ScaleHeight); exact.
 #[test]
 fn rail_revolve_follows_rhino5_and_is_exact() {

@@ -18,8 +18,10 @@ Quét mặt cắt giữa hai đường ray như Rhino 5; hai cạnh mặt nằm 
 ## Tuỳ chọn (lệnh phụ)
 
 - MaintainHeight: mặt cắt co giãn theo bề ngang nhưng giữ chiều cao.
+- RebuildRails + RailPoints: dựng lại hai ray cùng số điểm, rải đều theo chiều dài, để lưới mặt chạy thẳng ngang từ ray này sang ray kia (như Rebuild ray trước Sweep2 trong Rhino).
 - Closed: quét kín quay về mặt cắt đầu (hai ray kín, từ hai mặt cắt).
 - Simplify: None / Rebuild (số điểm) / Refit (dung sai) cho mặt cắt.
+- Mặt giữ đúng số điểm của ray (như Rhino), hai mép mặt trùng hai ray.
 
 | Dòng lệnh | Ý nghĩa | Mặc định | Khoảng |
 |---|---|---|---|

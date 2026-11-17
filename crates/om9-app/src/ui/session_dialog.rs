@@ -131,71 +131,43 @@ impl MatrixApp {
                 }
             }
         }
-        let number_row = |name: &str| dialog.rows.iter().find(|r| r.name == name);
-        // Checkboxes first, as in Rhino's dialogs.
-        for row in dialog.rows.iter().filter(|r| r.kind == DialogKind::Toggle) {
-            let mut on = row.value.eq_ignore_ascii_case("yes");
-            let check = ui.checkbox(&mut on, &row.label);
-            self.session_dialog.rects.insert(format!("Dialog:{}", row.name), check.rect);
-            if check.changed() {
-                acts.push(Act::Set(row.name.clone(), if on { "Yes" } else { "No" }.into()));
+        // Framed groups first (Rhino's "Rail curve options", "Cross-section curve options" …),
+        // each in the order the command gives.
+        let mut drawn: std::collections::BTreeSet<String> = beside.keys().cloned().collect();
+        drawn.insert("Preview".into());
+        for (title, names) in &dialog.groups {
+            let rows: Vec<&DialogRow> = names
+                .iter()
+                .filter_map(|n| dialog.rows.iter().find(|r| &r.name == n))
+                .filter(|r| !drawn.contains(&r.name))
+                .collect();
+            if rows.is_empty() {
+                continue;
             }
-        }
-        for row in &dialog.rows {
-            let DialogKind::Choice(choices) = &row.kind else { continue };
             ui.add_space(4.0);
-            if choices.len() <= 4 {
-                egui::Frame::group(ui.style()).show(ui, |ui| {
-                    ui.set_min_width(220.0);
-                    ui.label(RichText::new(&row.label).small().strong());
-                    for (value, shown) in choices {
-                        ui.horizontal(|ui| {
-                            let on = row.value.eq_ignore_ascii_case(value);
-                            let radio = ui.radio(on, shown);
-                            self.session_dialog.rects.insert(format!("Dialog:{}={}", row.name, value), radio.rect);
-                            if radio.clicked() && !on {
-                                acts.push(Act::Set(row.name.clone(), value.clone()));
-                            }
-                            // The number that goes with this choice.
-                            if let Some((n, _)) = beside
-                                .iter()
-                                .find(|(_, (owner, v))| *owner == row.name && v == value)
-                                && let Some(nr) = number_row(n)
-                            {
-                                ui.add_enabled_ui(on, |ui| {
-                                    self.number_field(ui, nr, acts);
-                                    ui.label(suffix(&nr.name, value, vi));
-                                });
-                            }
-                        });
-                    }
-                });
-            } else {
-                ui.horizontal(|ui| {
-                    ui.label(&row.label);
-                    let current = choices
-                        .iter()
-                        .find(|(v, _)| v.eq_ignore_ascii_case(&row.value))
-                        .map(|(_, s)| s.clone())
-                        .unwrap_or_else(|| row.value.clone());
-                    egui::ComboBox::from_id_salt(("om9-dialog-choice", &row.name))
-                        .selected_text(current)
-                        .show_ui(ui, |ui| {
-                            for (value, shown) in choices {
-                                let on = row.value.eq_ignore_ascii_case(value);
-                                if ui.selectable_label(on, shown).clicked() && !on {
-                                    acts.push(Act::Set(row.name.clone(), value.clone()));
-                                }
-                            }
-                        });
-                });
-            }
+            egui::Frame::group(ui.style()).show(ui, |ui| {
+                ui.set_min_width(240.0);
+                if !title.is_empty() {
+                    ui.label(RichText::new(title).small().strong());
+                }
+                for row in rows {
+                    drawn.insert(row.name.clone());
+                    self.dialog_row(ui, dialog, row, &beside, vi, acts, false);
+                }
+            });
         }
-        let numbers: Vec<&DialogRow> = dialog
-            .rows
-            .iter()
-            .filter(|r| r.kind == DialogKind::Number && !beside.contains_key(&r.name))
-            .collect();
+        // The rest: checkboxes, choices, numbers, then buttons (Rhino's usual order).
+        let rest = |kind: fn(&DialogKind) -> bool| -> Vec<&DialogRow> {
+            dialog.rows.iter().filter(|r| kind(&r.kind) && !drawn.contains(&r.name)).collect()
+        };
+        for row in rest(|k| *k == DialogKind::Toggle) {
+            self.dialog_row(ui, dialog, row, &beside, vi, acts, false);
+        }
+        for row in rest(|k| matches!(k, DialogKind::Choice(_))) {
+            ui.add_space(4.0);
+            self.dialog_row(ui, dialog, row, &beside, vi, acts, true);
+        }
+        let numbers = rest(|k| *k == DialogKind::Number);
         if !numbers.is_empty() {
             ui.add_space(4.0);
             egui::Grid::new(("om9-dialog-numbers", &dialog.code))
@@ -203,22 +175,25 @@ impl MatrixApp {
                 .spacing([8.0, 4.0])
                 .show(ui, |ui| {
                     for row in numbers {
-                        ui.label(&row.label);
-                        self.number_field(ui, row, acts);
+                        ui.add_enabled(dialog.enabled(&row.name), egui::Label::new(&row.label));
+                        ui.add_enabled_ui(dialog.enabled(&row.name), |ui| {
+                            ui.horizontal(|ui| self.number_with_note(ui, dialog, row, acts));
+                        });
                         ui.end_row();
                     }
                 });
         }
-        let actions: Vec<&DialogRow> = dialog.rows.iter().filter(|r| r.kind == DialogKind::Action).collect();
+        let actions = rest(|k| *k == DialogKind::Action);
         if !actions.is_empty() {
             ui.add_space(4.0);
             ui.horizontal_wrapped(|ui| {
                 for row in actions {
-                    if ui.button(&row.label).clicked() {
-                        acts.push(Act::Set(row.name.clone(), String::new()));
-                    }
+                    self.dialog_row(ui, dialog, row, &beside, vi, acts, false);
                 }
             });
+        }
+        for line in &dialog.footer {
+            ui.label(line);
         }
         ui.add_space(4.0);
         ui.label(RichText::new(&dialog.prompt).small().weak());
@@ -244,7 +219,125 @@ impl MatrixApp {
             if cancel.clicked() {
                 acts.push(Act::Cancel);
             }
+            // Rhino's Preview button, beside OK and Cancel: shows or hides the result.
+            if let Some(row) = dialog.rows.iter().find(|r| r.name == "Preview" && r.kind == DialogKind::Toggle) {
+                let on = row.value.eq_ignore_ascii_case("yes");
+                let preview = ui
+                    .add(egui::Button::selectable(on, row.label.clone()).min_size(egui::vec2(72.0, 0.0)))
+                    .on_hover_text(if vi { "Xem trước kết quả" } else { "Show the result before OK" });
+                self.session_dialog.rects.insert("Dialog:Preview".into(), preview.rect);
+                if preview.clicked() {
+                    acts.push(Act::Set(row.name.clone(), if on { "No" } else { "Yes" }.into()));
+                }
+            }
         });
+    }
+
+    /// One row of the window: a checkbox, radio buttons (or a list when `list` and there are
+    /// many choices) with their numbers beside, a labelled number field, or a button.
+    #[allow(clippy::too_many_arguments)]
+    fn dialog_row(
+        &mut self,
+        ui: &mut egui::Ui,
+        dialog: &AddonDialog,
+        row: &DialogRow,
+        beside: &BTreeMap<String, (String, String)>,
+        vi: bool,
+        acts: &mut Vec<Act>,
+        framed: bool,
+    ) {
+        let enabled = dialog.enabled(&row.name);
+        match &row.kind {
+            DialogKind::Toggle => {
+                let mut on = row.value.eq_ignore_ascii_case("yes");
+                let check = ui.add_enabled(enabled, egui::Checkbox::new(&mut on, &row.label));
+                self.session_dialog.rects.insert(format!("Dialog:{}", row.name), check.rect);
+                if check.changed() {
+                    acts.push(Act::Set(row.name.clone(), if on { "Yes" } else { "No" }.into()));
+                }
+            }
+            DialogKind::Choice(choices) if choices.len() <= 4 => {
+                let mut body = |ui: &mut egui::Ui| {
+                    ui.label(RichText::new(&row.label).small().strong());
+                    for (value, shown) in choices {
+                        ui.horizontal(|ui| {
+                            let on = row.value.eq_ignore_ascii_case(value);
+                            let radio = ui.add_enabled(enabled, egui::RadioButton::new(on, shown));
+                            self.session_dialog.rects.insert(format!("Dialog:{}={}", row.name, value), radio.rect);
+                            if radio.clicked() && !on {
+                                acts.push(Act::Set(row.name.clone(), value.clone()));
+                            }
+                            // The number that goes with this choice.
+                            if let Some((n, _)) = beside.iter().find(|(_, (owner, v))| *owner == row.name && v == value)
+                                && let Some(nr) = dialog.rows.iter().find(|r| &r.name == n)
+                            {
+                                ui.add_enabled_ui(on && enabled, |ui| {
+                                    self.number_field(ui, nr, acts);
+                                    ui.label(suffix(&nr.name, value, vi));
+                                });
+                            }
+                        });
+                    }
+                };
+                if framed {
+                    egui::Frame::group(ui.style()).show(ui, |ui| {
+                        ui.set_min_width(220.0);
+                        body(ui);
+                    });
+                } else {
+                    body(ui);
+                }
+            }
+            DialogKind::Choice(choices) => {
+                ui.horizontal(|ui| {
+                    ui.label(&row.label);
+                    let current = choices
+                        .iter()
+                        .find(|(v, _)| v.eq_ignore_ascii_case(&row.value))
+                        .map(|(_, s)| s.clone())
+                        .unwrap_or_else(|| row.value.clone());
+                    ui.add_enabled_ui(enabled, |ui| {
+                        egui::ComboBox::from_id_salt(("om9-dialog-choice", &row.name))
+                            .selected_text(current)
+                            .show_ui(ui, |ui| {
+                                for (value, shown) in choices {
+                                    let on = row.value.eq_ignore_ascii_case(value);
+                                    if ui.selectable_label(on, shown).clicked() && !on {
+                                        acts.push(Act::Set(row.name.clone(), value.clone()));
+                                    }
+                                }
+                            });
+                    });
+                });
+            }
+            DialogKind::Number => {
+                ui.add_enabled_ui(enabled, |ui| {
+                    ui.horizontal(|ui| {
+                        ui.label(&row.label);
+                        self.number_with_note(ui, dialog, row, acts);
+                    });
+                });
+            }
+            DialogKind::Action => {
+                let text = match dialog.notes.get(&row.name) {
+                    Some(note) => format!("{} {note}", row.label),
+                    None => row.label.clone(),
+                };
+                let button = ui.add_enabled(enabled, egui::Button::new(text).min_size(egui::vec2(220.0, 0.0)));
+                self.session_dialog.rects.insert(format!("Dialog:{}", row.name), button.rect);
+                if button.clicked() {
+                    acts.push(Act::Set(row.name.clone(), String::new()));
+                }
+            }
+        }
+    }
+
+    /// Rhino: "Point count: (2) [5]", the current value before the field.
+    fn number_with_note(&mut self, ui: &mut egui::Ui, dialog: &AddonDialog, row: &DialogRow, acts: &mut Vec<Act>) {
+        if let Some(note) = dialog.notes.get(&row.name) {
+            ui.label(RichText::new(note).weak());
+        }
+        self.number_field(ui, row, acts);
     }
 
     /// A number field: typed, then committed with Enter or by leaving the field.

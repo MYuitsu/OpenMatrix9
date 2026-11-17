@@ -641,7 +641,12 @@ impl Flow {
         if !c.answers.is_empty() {
             options.push(OptionToken::action("Undo"));
         }
-        let shown = show(&c, hover);
+        let mut shown = show(&c, hover);
+        // Rhino's Preview button: a `Preview` toggle turned off hides the result until OK.
+        if self.options.iter().any(|o| o.0 == "Preview") && !c.yes(self, "Preview") {
+            shown.geo.clear();
+            shown.transforms.clear();
+        }
         let text = if self.plain {
             prompt
         } else {

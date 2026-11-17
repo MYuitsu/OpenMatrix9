@@ -37,6 +37,10 @@ pub struct Options {
     pub tol: f64,
     /// Most stations along the rail.
     pub max_stations: usize,
+    /// Rhino's result: the surface keeps the rail's control points along it (knots added only
+    /// where the sweep needs them), so a few-point rail gives a few-point surface. Off, or
+    /// when that does not reach `tol`: stations fitted along the rail.
+    pub rail_structure: bool,
 }
 
 impl Default for Options {
@@ -47,8 +51,78 @@ impl Default for Options {
             global_blend: false,
             tol: 0.001,
             max_stations: 400,
+            rail_structure: true,
         }
     }
+}
+
+/// A sweep on the rail's own control net: row `i` is the section shape at the rail's
+/// Greville parameter, placed in that frame but at the rail's `i`-th control point (weighted
+/// by it). Translation along the rail is then exact; turning frames are checked against
+/// `placed` inside every knot span, and knots are added where the net strays more than
+/// `tol`. `None` when that would take far more rows than the rail has.
+#[allow(clippy::too_many_arguments)]
+fn rail_net(
+    rail: &Nc,
+    frame: &dyn Fn(f64) -> Frame,
+    shape: &dyn Fn(f64) -> Vec<H>,
+    placed: &dyn Fn(f64) -> Vec<H>,
+    p: usize,
+    sec_knots: &[f64],
+    tol: f64,
+) -> Option<Swept> {
+    let mut r = rail.clone();
+    let start = r.points.len();
+    for _ in 0..12 {
+        let (n, q) = (r.points.len(), r.degree);
+        if n > 3 * start + 24 {
+            return None;
+        }
+        let rows: Vec<Vec<H>> = (0..n)
+            .map(|i| {
+                let t: f64 = (1..=q).map(|k| r.knots[i + k]).sum::<f64>() / q as f64;
+                let mut f = frame(t);
+                f.o = euclid(r.points[i]);
+                let w = r.points[i][3];
+                shape(t)
+                    .iter()
+                    .map(|l| {
+                        let h = f.world(*l);
+                        [h[0] * w, h[1] * w, h[2] * w, h[3] * w]
+                    })
+                    .collect()
+            })
+            .collect();
+        let ku = r.knots.clone();
+        let width_samples = (4 * rows[0].len()).clamp(16, 96);
+        let mut worst = 0.0f64;
+        let mut bad = Vec::new();
+        for w in ku.windows(2).filter(|w| w[1] - w[0] > 1e-12) {
+            for k in 1..=4 {
+                let u = w[0] + (w[1] - w[0]) * k as f64 / 5.0;
+                let got = Nc { degree: p, points: iso(&rows, q, &ku, u), knots: sec_knots.to_vec() };
+                let want = Nc { degree: p, points: placed(u), knots: sec_knots.to_vec() };
+                let d = (0..=width_samples)
+                    .map(|i| {
+                        let v = i as f64 / width_samples as f64;
+                        dist(got.eval(v), want.eval(v))
+                    })
+                    .fold(0.0, f64::max);
+                worst = worst.max(d);
+                if d > tol {
+                    bad.push((w[0] + w[1]) / 2.0);
+                    break;
+                }
+            }
+        }
+        if bad.is_empty() {
+            return Some(Swept { stations: n, rows, degree: [q, p], knots: [ku, sec_knots.to_vec()], deviation: worst, exact: false });
+        }
+        for u in bad {
+            r.insert(u);
+        }
+    }
+    None
 }
 
 /// A swept surface: pole rows along the rail (u) by along the sections (v).
@@ -496,6 +570,16 @@ pub fn sweep1(rail: &Nc, sections: &[Nc], o: &Options) -> Result<Swept, String> 
         }
     }
 
+    // Rhino: the rail's own points along the surface, when the whole rail is swept.
+    let (k0, k1) = (rail.knots[rail.degree], rail.knots[rail.knots.len() - rail.degree - 1]);
+    if o.rail_structure
+        && (ua - k0).abs() < 1e-12
+        && (ub - k1).abs() < 1e-12
+        && (!rail_closed || wrap)
+        && let Some(s) = rail_net(&rail, &|u| frames.frame(u), &shape, &placed, p, &sec_knots, o.tol)
+    {
+        return Ok(s);
+    }
     // General case: stations refined until within tolerance.
     let mut initial: Vec<f64> = at.clone();
     initial.extend(rail.knots.iter().copied());
@@ -585,12 +669,35 @@ pub struct Options2 {
     pub maintain_height: bool,
     pub tol: f64,
     pub max_stations: usize,
+    /// Rhino's result: the surface keeps the rails' own control points along them (the rails
+    /// made compatible), so a few-point rail gives a few-point surface whose edges are the
+    /// rails. Off (or when the rails do not allow it): stations fitted to `tol`.
+    pub rail_structure: bool,
+    /// Rebuild both rails first with this many control points (degree 3, evenly along their
+    /// length), as Rhino users do with Rebuild before Sweep2: matching points on the two rails
+    /// face each other, so the isocurves run straight across from rail to rail.
+    pub rebuild_rails: Option<usize>,
+    /// Rhino's Add Slash: pairs of points (on rail A, on rail B) that must face each other
+    /// across the surface; the rails are rebuilt to match them (see `rebuild_rails`).
+    pub slashes: Vec<(Vec3, Vec3)>,
 }
 
 impl Default for Options2 {
     fn default() -> Self {
-        Options2 { closed: false, maintain_height: false, tol: 0.001, max_stations: 400 }
+        Options2 { closed: false, maintain_height: false, tol: 0.001, max_stations: 400, rail_structure: true, rebuild_rails: None, slashes: Vec::new() }
     }
+}
+
+/// A rail rebuilt with `count` control points, degree 3 (2 for 3 points), evenly by length.
+pub fn rebuild_rail(c: &Nc, count: usize) -> Option<Nc> {
+    let closed = c.closed(1e-6);
+    let arc = Arc::of(c);
+    let n = 400;
+    let samples: Vec<Vec3> = (0..=n).map(|i| c.eval(arc.u_of(i as f64 / n as f64))).collect();
+    let samples = if closed { samples[..n].to_vec() } else { samples };
+    let count = count.max(if closed { 4 } else { 2 });
+    let degree = 3.min(count - 1);
+    Nc::from_geo(&crate::interp::fit_even(&samples, count, degree, closed)?)
 }
 
 /// Arc length table of a curve: `(u, s)` with `s` normalised to `[0, 1]`.
@@ -720,6 +827,44 @@ pub fn sweep2(rail_a: &Nc, rail_b: &Nc, sections: &[Nc], o: &Options2) -> Result
         }
     }
     placed_on.sort_by(|x, y| x.0.total_cmp(&y.0));
+    // Rebuilt rails (and Rhino's slashes): both rails get the same number of points, placed so
+    // that matching points face each other: evenly by length between the places where the
+    // sections (and slashes) cross the rails. The isocurves then run straight across.
+    if o.rebuild_rails.is_some() || !o.slashes.is_empty() {
+        let poles = a.points.len().max(b.points.len()).max(4);
+        let mut anchors: Vec<(f64, f64)> = vec![(0.0, 0.0), (1.0, 1.0)];
+        anchors.extend(placed_on.iter().map(|p| (p.0, p.1)));
+        for (pa, pb) in &o.slashes {
+            anchors.push((arc_a.s_of(a.closest(*pa)), arc_b.s_of(b.closest(*pb))));
+        }
+        anchors.sort_by(|x, y| x.0.total_cmp(&y.0));
+        anchors.dedup_by(|x, y| (x.0 - y.0).abs() < 1e-6);
+        // Keep the map increasing (a slash that crosses another is dropped).
+        let mut kept: Vec<(f64, f64)> = Vec::new();
+        for p in anchors {
+            if kept.last().is_none_or(|l| p.1 > l.1 + 1e-6 || p.0 >= 1.0 - 1e-9) {
+                kept.push(p);
+            }
+        }
+        let xs: Vec<f64> = kept.iter().map(|p| p.0).collect();
+        let ys: Vec<f64> = kept.iter().map(|p| p.1).collect();
+        let n = 400;
+        let mut sa: Vec<Vec3> = (0..=n).map(|i| a.eval(arc_a.u_of(i as f64 / n as f64))).collect();
+        let mut sb: Vec<Vec3> = (0..=n).map(|i| b.eval(arc_b.u_of(lookup(&xs, &ys, i as f64 / n as f64)))).collect();
+        if closed_a {
+            sa.pop();
+            sb.pop();
+        }
+        // Slashes alone: enough points between the matched places to follow them.
+        let count = o.rebuild_rails.unwrap_or(poles.max(3 * kept.len() + 2));
+        let count = count.max(if closed_a { 4 } else { 2 });
+        let degree = 3.min(count - 1);
+        let fit = |pts: &[Vec3]| crate::interp::fit_even(pts, count, degree, closed_a).and_then(|g| Nc::from_geo(&g));
+        let na = fit(&sa).ok_or("the first rail cannot be rebuilt")?;
+        let nb = fit(&sb).ok_or("the second rail cannot be rebuilt")?;
+        let o2 = Options2 { rebuild_rails: None, slashes: Vec::new(), ..o.clone() };
+        return sweep2(&na, &nb, sections, &o2);
+    }
     for (k, p) in placed_on.iter().enumerate() {
         if is_point(&secs[p.2]) && k != 0 && k + 1 != placed_on.len() {
             return Err("a point can only start or end the sweep".into());
@@ -847,6 +992,96 @@ pub fn sweep2(rail_a: &Nc, rail_b: &Nc, sections: &[Nc], o: &Options2) -> Result
             })
             .collect()
     };
+    // Rhino: the rails' own structure along them. Open rails, or closed ones swept all the
+    // way round (a part of a closed rail would need cutting first).
+    if o.rail_structure && (!closed_a || wrap) {
+        let checks: Vec<&Nc> = secs.iter().filter(|c| !is_point(c)).collect();
+        let mut rails = [a.clone(), b.clone()];
+        exact::make_compatible(&mut rails);
+        let same_weights = rails[0].points.len() == rails[1].points.len()
+            && rails[0].points.iter().zip(&rails[1].points).all(|(x, y)| (x[3] - y[3]).abs() < 1e-9);
+        for _ in 0..8 {
+            if !same_weights {
+                break;
+            }
+            let [ra, rb] = &rails;
+            let (n, q) = (ra.points.len(), ra.degree);
+            let pa: Vec<Vec3> = ra.points.iter().map(|x| euclid(*x)).collect();
+            let pb: Vec<Vec3> = rb.points.iter().map(|x| euclid(*x)).collect();
+            let rows: Vec<Vec<H>> = (0..n)
+                .map(|i| {
+                    let t: f64 = (1..=q).map(|k| ra.knots[i + k]).sum::<f64>() / q as f64;
+                    let (im, ip) = match (wrap, i) {
+                        (true, 0) => (n - 2, 1),
+                        (true, i) if i == n - 1 => (n - 2, 1),
+                        _ => (i.saturating_sub(1), (i + 1).min(n - 1)),
+                    };
+                    let dir = |p: &[Vec3]| {
+                        let d = sub(p[ip], p[im]);
+                        if norm(d) > 1e-12 { unit(d) } else { [0.0; 3] }
+                    };
+                    let mut tan = add(dir(&pa), dir(&pb));
+                    if norm(tan) < 1e-12 {
+                        tan = add(tangent(&a, t), tangent(&b, t));
+                    }
+                    let tan = unit(tan);
+                    let chord = sub(pb[i], pa[i]);
+                    let w = norm(chord);
+                    let x = if w > 1e-12 { scale(chord, 1.0 / w) } else { perpendicular(tan) };
+                    let y0 = cross(tan, x);
+                    let y = if norm(y0) > 1e-12 { unit(y0) } else { perpendicular(x) };
+                    let f = Frame { o: pa[i], x, y, z: cross(x, y) };
+                    // Across: from pole to pole; height: the real gap between the rails there.
+                    let gap = dist(ra.eval(t), rb.eval(t));
+                    let sh = if o.maintain_height { 1.0 } else { gap };
+                    let weight = ra.points[i][3];
+                    shape(arc_a.s_of(t))
+                        .iter()
+                        .map(|l| {
+                            let q3 = euclid(*l);
+                            let wl = l[3] * weight;
+                            f.world([q3[0] * w * wl, q3[1] * sh * wl, q3[2] * sh * wl, wl])
+                        })
+                        .collect()
+                })
+                .collect();
+            let knots = [ra.knots.clone(), sec_knots.clone()];
+            let geo = exact::surface(&rows, [q, p], knots.clone());
+            let Some(srf) = crate::nurbs::Srf::of(&geo) else { break };
+            // Every section must lie on the surface.
+            let mut worst = 0.0f64;
+            let mut bad: Vec<f64> = Vec::new();
+            for c in &checks {
+                let mut dev = 0.0f64;
+                let mut near = (0.5, 0.5);
+                for k in 0..=24 {
+                    let pt = c.eval(k as f64 / 24.0);
+                    let (s0, t0) = if k == 0 { srf.closest_st(pt) } else { srf.closest_st_near(pt, near.0, near.1) };
+                    near = (s0, t0);
+                    dev = dev.max(dist(srf.at_st(s0, t0), pt));
+                }
+                worst = worst.max(dev);
+                if dev > o.tol {
+                    bad.push(touch(&a, c).0);
+                }
+            }
+            if bad.is_empty() {
+                return Ok(Swept { rows, degree: [q, p], knots, deviation: worst, stations: n, exact: false });
+            }
+            // Rhino adds knots where the sections are; here too, then measures again.
+            let before = rails[0].points.len();
+            for u in bad {
+                if u > 1e-6 && u < 1.0 - 1e-6 {
+                    for r in rails.iter_mut() {
+                        r.insert(u);
+                    }
+                }
+            }
+            if rails[0].points.len() == before {
+                break;
+            }
+        }
+    }
     let mut initial = at.clone();
     initial.extend(ta.iter().copied());
     for k in a.knots.iter() {
@@ -1035,6 +1270,44 @@ mod tests {
     }
 
     #[test]
+    fn sweep1_keeps_the_rails_points() {
+        // A 5-point cubic rail (the user's case: few points) and a shape across it: the
+        // surface keeps the rail's points along it (Rhino), plus knots only where turning
+        // frames need them, and stays within the tolerance of the true sweep.
+        let rail = Nc {
+            degree: 3,
+            points: [[0.0, 0.0, 0.0], [3.0, 2.0, 0.5], [6.0, 1.0, 1.0], [9.0, 3.0, 0.5], [12.0, 4.0, 0.0]]
+                .iter()
+                .map(|p| [p[0], p[1], p[2], 1.0])
+                .collect(),
+            knots: vec![0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0],
+        };
+        let o = rail.eval(0.0);
+        let t = tangent(&rail, 0.0);
+        let x = perpendicular(t);
+        let sec = circle(o, x, cross(t, x), 0.8);
+        let opts = Options::default();
+        let s = sweep1(&rail, &[sec.clone()], &opts).unwrap();
+        assert!(s.deviation <= opts.tol, "{}", s.deviation);
+        assert!(s.rows.len() <= 3 * 5 + 24, "{} rows for a 5-point rail", s.rows.len());
+        let dense = sweep1(&rail, &[sec], &Options { rail_structure: false, ..Default::default() }).unwrap();
+        assert!(s.rows.len() <= dense.rows.len(), "{} vs fitted {}", s.rows.len(), dense.rows.len());
+        for i in 0..=60 {
+            for j in 0..=16 {
+                let p = srf_eval(&s, i as f64 / 60.0, j as f64 / 16.0);
+                let d = dist(p, rail.eval(rail.closest(p)));
+                assert!((d - 0.8).abs() < 3.0 * opts.tol, "{d} at {i},{j}");
+            }
+        }
+        // A planar rail swept by translation only (Roadlike up): exactly the rail's 5 rows.
+        let flat = Nc { points: rail.points.iter().map(|p| [p[0], p[1], 0.0, 1.0]).collect(), ..rail.clone() };
+        let line = Nc::from_geo(&Geo::Line { start: [0.0, 0.0, 0.0], end: [0.0, 0.0, 2.0] }).unwrap();
+        let s = sweep1(&flat, &[line], &Options { style: Style::Roadlike([0.0, 0.0, 1.0]), ..Default::default() }).unwrap();
+        assert_eq!(s.rows.len(), 5, "translation: exactly the rail's points");
+        assert!(s.deviation < 1e-9, "{}", s.deviation);
+    }
+
+    #[test]
     fn a_free_curve_rail_keeps_the_section_shape_within_tolerance() {
         // A wavy 3-D rail, one r1 circle: every cross-section of the sweep must stay a unit
         // circle around the rail (Freeform keeps the angle to the rail).
@@ -1156,6 +1429,82 @@ mod tests {
                 assert!((top[2] - want).abs() < 2.0 * o.tol, "{keep}: {} vs {want}", top[2]);
             }
         }
+    }
+
+    #[test]
+    fn sweep2_keeps_the_rails_points() {
+        let length = |c: &Nc| (1..=400).map(|i| dist(c.eval(i as f64 / 400.0), c.eval((i - 1) as f64 / 400.0))).sum::<f64>();
+        // The user's case: two 5-point cubic rails and a line at each end (2 + 1 + 1 curves).
+        // Rhino gives a surface with the rails' 5 points along them, not dozens of rows.
+        let nc = |pts: &[Vec3]| Nc {
+            degree: 3,
+            points: pts.iter().map(|p| [p[0], p[1], p[2], 1.0]).collect(),
+            knots: vec![0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0],
+        };
+        let ra = nc(&[[0.0, 0.0, 0.0], [3.0, 2.0, 1.0], [6.0, 1.0, 2.0], [9.0, 4.0, 1.0], [12.0, 5.0, 0.0]]);
+        let rb = nc(&[[1.0, 6.0, 0.0], [4.0, 8.0, 2.0], [7.0, 9.0, 1.0], [10.0, 9.0, 3.0], [13.0, 11.0, 0.0]]);
+        let line = |a: Vec3, b: Vec3| Nc::from_geo(&Geo::Line { start: a, end: b }).unwrap();
+        let s1 = line(ra.start(), rb.start());
+        let s2 = line(ra.end(), rb.end());
+        let o = Options2::default();
+        let s = sweep2(&ra, &rb, &[s1.clone(), s2.clone()], &o).unwrap();
+        assert_eq!(s.rows.len(), 5, "rows follow the rails' 5 points");
+        assert_eq!(s.rows[0].len(), 2, "a line section: 2 points across");
+        for i in 0..=40 {
+            let u = i as f64 / 40.0;
+            assert!(dist(srf_eval(&s, u, 0.0), ra.eval(u)) < 1e-9, "edge = rail A");
+            assert!(dist(srf_eval(&s, u, 1.0), rb.eval(u)) < 1e-9, "edge = rail B");
+        }
+        assert!(s.deviation <= o.tol);
+        // Rebuild rails: 6 points each, evenly along them; still on the rails within 0.05.
+        let o = Options2 { rebuild_rails: Some(6), ..Default::default() };
+        let s = sweep2(&ra, &rb, &[s1, s2], &o).unwrap();
+        assert_eq!(s.rows.len(), 6);
+        let rebuilt = rebuild_rail(&ra, 6).unwrap();
+        let fit = (0..=40).map(|i| { let e = rebuilt.eval(i as f64 / 40.0); dist(e, ra.eval(ra.closest(e))) }).fold(0.0, f64::max);
+        for i in 0..=40 {
+            let e = srf_eval(&s, i as f64 / 40.0, 0.0);
+            assert!(dist(e, rebuilt.eval(rebuilt.closest(e))) < 1e-9, "edge = rebuilt rail A");
+        }
+        assert!(fit < 0.2, "rebuilt rail within {fit}");
+        // Rows across face each other: the isocurve at the middle joins the rails' middles
+        // (by length), so it is not skewed.
+        let rebuilt_b = rebuild_rail(&rb, 6).unwrap();
+        let (arc_a, arc_b) = (Arc::of(&rebuilt), Arc::of(&rebuilt_b));
+        let (len_a, len_b) = (length(&rebuilt), length(&rebuilt_b));
+        for k in 1..10 {
+            let u = k as f64 / 10.0;
+            // Along each edge the isocurve sits at the same share of the length (±2 %).
+            assert!((arc_a.s_of(u) - arc_b.s_of(u)).abs() * len_a.max(len_b) < 0.02 * len_a.max(len_b) + 1e-9,
+                "u = {u}: {} vs {}", arc_a.s_of(u), arc_b.s_of(u));
+        }
+    }
+
+    #[test]
+    fn sweep2_add_slash_makes_points_face_each_other() {
+        let nc = |pts: &[Vec3]| Nc {
+            degree: 3,
+            points: pts.iter().map(|p| [p[0], p[1], p[2], 1.0]).collect(),
+            knots: vec![0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0],
+        };
+        let ra = nc(&[[0.0, 0.0, 0.0], [3.0, 0.0, 0.0], [6.0, 0.0, 0.0], [9.0, 0.0, 0.0], [12.0, 0.0, 0.0]]);
+        let rb = nc(&[[0.0, 5.0, 0.0], [1.0, 5.0, 0.0], [2.0, 5.0, 0.0], [7.0, 5.0, 1.0], [12.0, 5.0, 0.0]]);
+        let line = |a: Vec3, b: Vec3| Nc::from_geo(&Geo::Line { start: a, end: b }).unwrap();
+        let secs = [line(ra.start(), rb.start()), line(ra.end(), rb.end())];
+        // The slash: x = 4 on rail A faces x = 8 on rail B.
+        let (pa, pb) = ([4.0, 0.0, 0.0], rb.eval(rb.closest([8.0, 5.0, 0.5])));
+        let o = Options2 { slashes: vec![(pa, pb)], rebuild_rails: Some(8), ..Default::default() };
+        let s = sweep2(&ra, &rb, &secs, &o).unwrap();
+        assert_eq!(s.rows.len(), 8);
+        let edge_a = Nc { degree: s.degree[0], points: s.rows.iter().map(|r| r[0]).collect(), knots: s.knots[0].clone() };
+        let u = edge_a.closest(pa);
+        assert!(dist(edge_a.eval(u), pa) < 0.02);
+        let across = srf_eval(&s, u, 1.0);
+        assert!(dist(across, pb) < 0.5, "the isocurve from the slash on A ends at {across:?}, not {pb:?}");
+        // Without the slash the same isocurve ends far from it (the rails' lengths match).
+        let plain = sweep2(&ra, &rb, &secs, &Options2 { rebuild_rails: Some(8), ..Default::default() }).unwrap();
+        let edge = Nc { degree: plain.degree[0], points: plain.rows.iter().map(|r| r[0]).collect(), knots: plain.knots[0].clone() };
+        assert!(dist(srf_eval(&plain, edge.closest(pa), 1.0), pb) > 2.0);
     }
 
     #[test]

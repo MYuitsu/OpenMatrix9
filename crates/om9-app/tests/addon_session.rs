@@ -1352,7 +1352,8 @@ fn sweep2_through_the_window_with_right_clicks() {
     app.controller.select_root(Some(p1), collecting).unwrap();
     app.controller.refresh_addon_session();
     let persp = views.as_array().unwrap().iter().find(|v| v["view"] == "Perspective").unwrap()["rect"].clone();
-    let at = [persp[0].as_f64().unwrap() + 40.0, persp[1].as_f64().unwrap() + persp[3].as_f64().unwrap() - 40.0];
+    // The bottom right of the view: the options window (top right) does not cover it.
+    let at = [persp[0].as_f64().unwrap() + persp[2].as_f64().unwrap() - 40.0, persp[1].as_f64().unwrap() + persp[3].as_f64().unwrap() - 40.0];
     let before = app.controller.document().entities.len();
     let r = run(&mut app, serde_json::json!([{"click": at, "button": "right"}, {"click": at, "button": "right"}]));
     for s in r["steps"].as_array().unwrap() {
@@ -1445,6 +1446,68 @@ fn sweep2_options_window_ok_creates_the_surface() {
 
 /// The surface commands that have options show their options window once they have
 /// something to make (Rhino 5: Surface From Curve Network, Patch Surface Options …).
+/// Rhino's Rebuild window: "Point count: (2) [10]", "Degree: (1) [3]", Delete input, Create on
+/// current layer, Preserve end tangents, Select Master Curve, the maximum deviation and a
+/// Preview button; and the Sweep 2 Rails window in Rhino's groups, with Add Slash.
+#[test]
+fn rebuild_and_sweep2_windows_follow_rhino() {
+    let tmp = std::env::temp_dir().join(format!("om9-app-rebuild-window-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut c = Controller::new(Document::new("rebuild-window"), Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    let add = |c: &mut Controller, cmd: &str, pts: &[[f64; 3]]| {
+        let before: Vec<_> = c.document().entities.keys().copied().collect();
+        c.clear_selection();
+        c.submit(cmd).unwrap();
+        for p in pts {
+            c.session_point(*p).unwrap();
+        }
+        c.submit("").unwrap();
+        *c.document().entities.keys().find(|k| !before.contains(k)).unwrap()
+    };
+    let line = add(&mut c, "Line", &[[0.0, 0.0, 0.0], [10.0, 0.0, 0.0]]);
+    c.select_objects(&[line]).unwrap();
+    c.submit("Rebuild").unwrap();
+    c.refresh_addon_session();
+    let d = c.addon_dialog().unwrap_or_else(|| panic!("no Rebuild window: {}", c.prompt_text()));
+    let rows: Vec<&str> = d.rows.iter().map(|r| r.name.as_str()).collect();
+    for name in ["PointCount", "Degree", "DeleteInput", "CurrentLayer", "PreserveTangents", "SelectMasterCurve", "Preview"] {
+        assert!(rows.contains(&name), "{name} missing from {rows:?}");
+    }
+    assert_eq!(d.notes.get("PointCount").map(String::as_str), Some("(2)"), "{:?}", d.notes);
+    assert_eq!(d.notes.get("Degree").map(String::as_str), Some("(1)"));
+    assert!(d.footer.iter().any(|f| f.starts_with("Maximum deviation")), "{:?}", d.footer);
+    // Preview off: nothing drawn until OK; on again: drawn.
+    c.set_addon_dialog_value("Preview", "No").unwrap();
+    assert!(c.addon_session().unwrap().reply.preview.is_empty());
+    c.set_addon_dialog_value("Preview", "Yes").unwrap();
+    assert!(!c.addon_session().unwrap().reply.preview.is_empty());
+    c.cancel();
+
+    // Sweep 2 Rails: two rails and two lines, all selected, then the command.
+    let ra = add(&mut c, "Curve", &[[0.0, 0.0, 0.0], [3.0, 0.0, 0.0], [6.0, 0.0, 0.0], [9.0, 0.0, 0.0], [12.0, 0.0, 0.0]]);
+    let rb = add(&mut c, "Curve", &[[0.0, 5.0, 0.0], [1.0, 5.0, 0.0], [2.0, 5.0, 0.0], [7.0, 5.0, 1.0], [12.0, 5.0, 0.0]]);
+    let s1 = add(&mut c, "Line", &[[0.0, 0.0, 0.0], [0.0, 5.0, 0.0]]);
+    let s2 = add(&mut c, "Line", &[[12.0, 0.0, 0.0], [12.0, 5.0, 0.0]]);
+    c.select_objects(&[ra, rb, s1, s2]).unwrap();
+    c.submit("Sweep2").unwrap();
+    c.refresh_addon_session();
+    let d = c.addon_dialog().unwrap_or_else(|| panic!("no Sweep2 window: {}", c.prompt_text()));
+    let titles: Vec<&str> = d.groups.iter().map(|g| g.0.as_str()).collect();
+    assert_eq!(titles, ["Rail curve options", "Cross-section curve options"]);
+    assert!(d.groups[1].1.contains(&"MaintainHeight".to_owned()));
+    assert!(!d.enabled("PreserveFirstShape"), "greyed until the sections are simplified");
+    c.set_addon_dialog_value("Simplify", "Rebuild").unwrap();
+    assert!(c.addon_dialog().unwrap().enabled("PreserveFirstShape"));
+    assert!(c.addon_dialog().unwrap().rows.iter().any(|r| r.name == "AddSlash"));
+    let before = c.document().entities.len();
+    c.submit("").unwrap();
+    assert_eq!(c.document().entities.len(), before + 1, "{}", c.prompt_text());
+}
+
 #[test]
 fn surface_commands_show_their_options_window() {
     let tmp = std::env::temp_dir().join(format!("om9-app-srf-dialogs-{}", std::process::id()));
@@ -1904,4 +1967,31 @@ fn surface_and_solid_menus_run_end_to_end() {
     let surprising: Vec<&String> = bad.iter().filter(|b| !expected.iter().any(|x| b.contains(x))).collect();
     assert!(surprising.is_empty(), "{surprising:#?}");
     fs::remove_dir_all(&tmp).unwrap();
+}
+
+/// OM9_SHOT_DIR=<dir> (and OM9_SHOT_LANG=vi): pictures of the Rebuild window with a polyline
+/// selected, for a look against Rhino's (Point count (2) [10], Degree (1) [3] …).
+#[test]
+fn rebuild_window_picture() {
+    let Some(dir) = std::env::var_os("OM9_SHOT_DIR") else { return };
+    let tmp = std::env::temp_dir().join(format!("om9-app-rebuild-shot-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut app = om9_app::ui::MatrixApp::new(Document::new("rebuild-shot")).unwrap();
+    let lang = std::env::var("OM9_SHOT_LANG").unwrap_or_else(|_| "en".into());
+    app.controller.attach_addons(host_lang(&tmp, &lang), &names);
+    let size = [1400.0f32, 900.0];
+    app.controller.submit("Polyline").unwrap();
+    for p in [[-10.0, -10.0, 0.0], [-2.0, 8.0, 0.0], [6.0, -4.0, 0.0], [12.0, 10.0, 0.0]] {
+        app.controller.session_point(p).unwrap();
+    }
+    app.controller.submit("").unwrap();
+    let id = *app.controller.document().entities.keys().last().unwrap();
+    app.controller.select_objects(&[id]).unwrap();
+    om9_app::ui_replay::replay_app(&mut app, size, 1.0, serde_json::json!([{"text": "Rebuild"}, {"key": "Enter"}, {"wait": 2}]).as_array().unwrap()).unwrap();
+    let out = Path::new(&dir).join(format!("rebuild-window-{lang}.png"));
+    om9_app::ui_replay::screenshot(&mut app, size, 1.0, 40, &out).unwrap();
+    eprintln!("screenshot: {} ({})", out.display(), app.controller.prompt_text());
 }
