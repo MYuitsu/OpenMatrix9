@@ -1434,6 +1434,13 @@ const MENU_PALETTE: &[Icon] = &[
         "OM9-CURVE-058",
         "curve-minimal/CurveCurveFromObjectsIntersectTwoSets.svg"
     ),
+    // Rhino MeanCrv: not a Matrix 9 command (an add-on command in the Curve group).
+    icon!(
+        "CurveMeanCurve",
+        "CurveMeanCurve",
+        "OM9-CURVE-059",
+        "curve-minimal/CurveMeanCurve.svg"
+    ),
     icon!(
         "SurfaceSweepSweep2Rails",
         "SurfaceSweepSweep2Rails",

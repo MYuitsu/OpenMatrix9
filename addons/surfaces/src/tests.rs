@@ -1061,6 +1061,51 @@ fn sweep2_follows_rhino5_prompts_and_runs_on_the_rails() {
     assert!(r.done);
 }
 
+/// The user's Sweep2 (two few-point rails, a line at each end): the surface keeps the rails'
+/// points, the window shows Rhino's groups, and Add Slash makes two picked points face each
+/// other across the surface.
+#[test]
+fn sweep2_window_groups_few_points_and_add_slash() {
+    let cubic = |id: &str, pts: [Vec3; 5]| {
+        exact_sel(id, Geo::Nurbs { degree: 3, points: pts.to_vec(), weights: vec![], knots: vec![0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0] }, false)
+    };
+    let ra = || cubic("a", [[0.0, 0.0, 0.0], [3.0, 0.0, 0.0], [6.0, 0.0, 0.0], [9.0, 0.0, 0.0], [12.0, 0.0, 0.0]]);
+    let rb = || cubic("b", [[0.0, 5.0, 0.0], [1.0, 5.0, 0.0], [2.0, 5.0, 0.0], [7.0, 5.0, 1.0], [12.0, 5.0, 0.0]]);
+    let s1 = || exact_sel("s1", Geo::Line { start: [0.0, 0.0, 0.0], end: [0.0, 5.0, 0.0] }, false);
+    let s2 = || exact_sel("s2", Geo::Line { start: [12.0, 0.0, 0.0], end: [12.0, 5.0, 0.0] }, false);
+    let all = || vec![ra(), rb(), s1(), s2()];
+    let r = feed(SWEEP2, &Value::Null, Input::Start, all(), json!({}));
+    assert!(!r.done && !r.preview.is_empty(), "{:?} {}", r.error, r.prompt);
+    let groups: Vec<&String> = r.notes.iter().filter(|n| n.0 == "@group").map(|n| &n.1).collect();
+    assert!(groups.iter().any(|g| g.starts_with("Rail curve options|")), "{groups:?}");
+    assert!(groups.iter().any(|g| g.starts_with("Cross-section curve options|Simplify")), "{groups:?}");
+    for name in ["MaintainHeight", "RebuildRails", "RailPoints", "PreserveFirstShape", "PreserveLastShape", "Preview", "AddSlash"] {
+        assert!(r.options.iter().any(|o| o.name == name), "{name} missing");
+    }
+    // Few points along the rails (Rhino), not dozens of rows.
+    let made = run(SWEEP2, all(), json!({}), vec![Input::Enter]);
+    let Geo::Surface { size, .. } = &made.create[0] else { panic!("{:?}", made.create[0]) };
+    assert!(size[0] <= 5, "{size:?}: rows along the rails");
+    // Add Slash: x = 4 on rail A faces x = 8 on rail B.
+    let r = feed(SWEEP2, &r.state, opt("AddSlash", None), all(), json!({}));
+    assert_eq!(r.prompt, "Slash point on a rail");
+    let r = feed(SWEEP2, &r.state, pt([4.0, 0.3, 0.0]), all(), json!({}));
+    assert_eq!(r.prompt, "Slash point on the other rail");
+    let r = feed(SWEEP2, &r.state, pt([8.0, 5.0, 0.6]), all(), json!({}));
+    assert!(r.options.iter().any(|o| o.name == "RemoveSlashes"), "{}", r.prompt);
+    let r = feed(SWEEP2, &r.state, Input::Enter, all(), json!({}));
+    assert!(r.done, "{} {:?}", r.prompt, r.error);
+    let s = Srf::of(&r.create[0]).unwrap();
+    // The isocurve that starts at x = 4 on rail A ends near x = 8 on rail B.
+    let (s0, t0) = s.closest_st([4.0, 0.0, 0.0]);
+    // Across is whichever parameter leads to rail B (y = 5).
+    let end = [s.at_st(s0, 1.0 - t0.round()), s.at_st(1.0 - s0.round(), t0)]
+        .into_iter()
+        .find(|p| (p[1] - 5.0).abs() < 1e-3)
+        .expect("an edge on rail B");
+    assert!((end[0] - 8.0).abs() < 0.6, "slash: the isocurve ends at {end:?}");
+}
+
 /// Rhino 5 RailRevolve: profile, rail, axis start, axis end (ScaleHeight); exact.
 #[test]
 fn rail_revolve_follows_rhino5_and_is_exact() {
@@ -2063,6 +2108,48 @@ fn picked_edges_of_a_polysurface_are_curves() {
         for j in 0..=4 {
             let p = s.at_st(i as f64 / 12.0, j as f64 / 4.0);
             assert!((p[0].hypot(p[1]) - 2.0).abs() < 1e-9 && p[2] > -1e-9 && p[2] < 5.0 + 1e-9, "{p:?}");
+        }
+    }
+}
+
+/// Picks made one click at a time, where each click replaces the selection (the host's plain
+/// click) or an empty click clears it: the rails and sections picked before still count, so
+/// Sweep 2 goes rail 1 → rail 2 → sections → options instead of starting over.
+#[test]
+fn sweep2_keeps_its_picks_when_each_click_replaces_the_selection() {
+    let s_curve = |id: &str, x0: f64| {
+        let pts: Vec<Vec3> = (0..=100).map(|k| { let t = k as f64 / 100.0; [x0 + 3.0 * (t * TAU).sin(), -20.0 + 40.0 * t, 0.0] }).collect();
+        curve(id, pts, false)
+    };
+    let arc = |id: &str, y: f64| exact_sel(id, Geo::Arc { center: [0.0, y, 0.0], x: [-1.0, 0.0, 0.0], y: [0.0, 0.0, 1.0], radius: 10.0, angle: PI }, false);
+    let (a, b, p1, p2) = (s_curve("a", -10.0), s_curve("b", 10.0), arc("p1", -20.0), arc("p2", 20.0));
+    for two_preselected in [false, true] {
+        let r = if two_preselected {
+            feed(SWEEP2, &Value::Null, Input::Start, vec![a.clone(), b.clone()], json!({}))
+        } else {
+            let r = feed(SWEEP2, &Value::Null, Input::Start, vec![], json!({}));
+            assert_eq!(r.prompt, "Select first rail");
+            let r = feed(SWEEP2, &r.state, Input::Selection, vec![a.clone()], json!({}));
+            assert_eq!(r.prompt, "Select second rail");
+            // A click on empty space clears the selection: still waiting for the second rail.
+            let r = feed(SWEEP2, &r.state, Input::Selection, vec![], json!({}));
+            assert_eq!(r.prompt, "Select second rail");
+            feed(SWEEP2, &r.state, Input::Selection, vec![b.clone()], json!({}))
+        };
+        assert!(r.prompt.starts_with("Select cross section curves"), "{}", r.prompt);
+        let r = feed(SWEEP2, &r.state, Input::Selection, vec![p1.clone()], json!({}));
+        let r = feed(SWEEP2, &r.state, Input::Selection, vec![p2.clone()], json!({}));
+        assert!(r.prompt.contains("2 selected"), "{}", r.prompt);
+        let r = feed(SWEEP2, &r.state, Input::Enter, vec![p2.clone()], json!({}));
+        assert!(r.error.is_none() && !r.preview.is_empty(), "{:?} {}", r.error, r.prompt);
+        let r = feed(SWEEP2, &r.state, Input::Enter, vec![], json!({}));
+        assert!(r.done && r.create.len() == 1, "{:?} {}", r.error, r.prompt);
+        // The surface runs along both rails: its corners are the rails' ends.
+        let srf = Srf::of(&r.create[0]).unwrap();
+        for (u, v) in [(0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0)] {
+            let p = srf.at(u, v);
+            let near = [a.points[0], *a.points.last().unwrap(), b.points[0], *b.points.last().unwrap()].iter().map(|q| dist(p, *q)).fold(f64::MAX, f64::min);
+            assert!(near < 1e-3, "corner {p:?} off the rails' ends by {near}");
         }
     }
 }

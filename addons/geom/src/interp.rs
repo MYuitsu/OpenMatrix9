@@ -262,27 +262,50 @@ fn periodic(q: &[Vec3], degree: usize, knots: Knots) -> Option<Geo> {
 /// uniform knots (Rhino Rebuild / FitCrv). Open curves keep their end points; closed curves
 /// come out smooth across the seam. Parameters follow chord length.
 pub fn fit(samples: &[Vec3], count: usize, degree: usize, closed: bool) -> Option<Geo> {
-    let q = dedup(samples);
+    fit_at(samples, None, count, degree, closed)
+}
+
+/// [`fit`] with the samples' parameters given (`even`: sample `k` of `m` at `k / m`, closed
+/// or `k / (m - 1)` open) instead of chord lengths, so two curves fitted this way match point
+/// for point at the same parameter (rails rebuilt to face each other).
+pub fn fit_even(samples: &[Vec3], count: usize, degree: usize, closed: bool) -> Option<Geo> {
+    let m = samples.len();
+    let t: Vec<f64> = if closed {
+        (0..=m).map(|k| k as f64 / m as f64).collect()
+    } else {
+        (0..m).map(|k| k as f64 / (m - 1).max(1) as f64).collect()
+    };
+    fit_at(samples, Some(t), count, degree, closed)
+}
+
+fn fit_at(samples: &[Vec3], params: Option<Vec<f64>>, count: usize, degree: usize, closed: bool) -> Option<Geo> {
+    let q = if params.is_some() { samples.to_vec() } else { dedup(samples) };
     let m = q.len();
     if m < 2 || count < 2 {
         return None;
     }
     let p = degree.clamp(1, count - 1);
     // Chord-length parameters in [0, 1] (closed: around the loop, last back to the start).
-    let mut t = vec![0.0];
-    for w in q.windows(2) {
-        t.push(t.last()? + dist(w[0], w[1]));
-    }
-    if closed {
-        t.push(t.last()? + dist(q[m - 1], q[0]));
-    }
-    let total = *t.last()?;
-    if total < 1e-12 {
-        return None;
-    }
-    for v in t.iter_mut() {
-        *v /= total;
-    }
+    let t = match params {
+        Some(t) => t,
+        None => {
+            let mut t = vec![0.0];
+            for w in q.windows(2) {
+                t.push(t.last()? + dist(w[0], w[1]));
+            }
+            if closed {
+                t.push(t.last()? + dist(q[m - 1], q[0]));
+            }
+            let total = *t.last()?;
+            if total < 1e-12 {
+                return None;
+            }
+            for v in t.iter_mut() {
+                *v /= total;
+            }
+            t
+        }
+    };
     let normal = |rows: &[(Vec<(usize, f64)>, Vec3)], n: usize| -> Option<Vec<Vec3>> {
         let mut a = vec![vec![0.0; n]; n];
         let mut b = vec![[0.0; 3]; n];

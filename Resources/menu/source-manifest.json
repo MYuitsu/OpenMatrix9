@@ -9681,6 +9681,18 @@
       ],
       "spec_id": "OM9-SOLID-014",
       "semantic_source": "local Solid spec"
+    },
+    "CurveMeanCurve": {
+      "symbol": "CurveMeanCurve",
+      "label": "Mean curve",
+      "meaning": "The curve halfway between two curves",
+      "style": "minimal-curve-v4-cyan",
+      "mapping": "authored-command-symbol",
+      "sha256": "d7b19e9bde87c873cab5cae5fbba26d4900b564f492ae1cc42e65386a8a09d51",
+      "palette": [
+        "#FFFF05",
+        "#FFFFFF"
+      ]
     }
   },
   "curve_icon_style": {

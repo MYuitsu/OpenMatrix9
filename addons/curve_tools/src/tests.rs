@@ -568,7 +568,32 @@ fn seam_moves_to_the_pick() {
     let a = circle("a", [0.0; 3], 2.0);
     let r = run(SEAM, vec![a], vec![pt([0.0, 3.0, 0.0])]);
     let p = nurbs::samples(&r.replace[0].geo, 10)[0];
-    assert!(dist(p, [0.0, 2.0, 0.0]) < 0.05, "{p:?}");
+    assert!(dist(p, [0.0, 2.0, 0.0]) < 1e-9, "{p:?}");
+    // Still the same circle (only the start moved).
+    for q in nurbs::samples(&r.replace[0].geo, 64) {
+        assert!((dist(q, [0.0; 3]) - 2.0).abs() < 1e-9, "{q:?}");
+    }
+    // A closed square: the seam on the picked side, every corner kept, same perimeter.
+    let sq = [[0.0, 0.0, 0.0], [10.0, 0.0, 0.0], [10.0, 10.0, 0.0], [0.0, 10.0, 0.0], [0.0, 0.0, 0.0]];
+    let square = curve("sq", Geo::Nurbs { degree: 1, points: sq.to_vec(), weights: vec![], knots: vec![0.0, 0.0, 0.25, 0.5, 0.75, 1.0, 1.0] }, true);
+    let r = run(SEAM, vec![square], vec![pt([3.0, -1.0, 0.0])]);
+    let Geo::Polyline { points, closed } = &r.replace[0].geo else { panic!("{:?}", r.replace) };
+    assert!(*closed);
+    assert!(dist(points[0], [3.0, 0.0, 0.0]) < 1e-9, "{points:?}");
+    let perimeter: f64 = (0..points.len()).map(|i| dist(points[i], points[(i + 1) % points.len()])).sum();
+    assert!((perimeter - 40.0).abs() < 1e-9, "{perimeter}: {points:?}");
+    for c in &sq[..4] {
+        assert!(points.iter().any(|p| dist(*p, *c) < 1e-9), "corner {c:?} kept");
+    }
+}
+
+#[test]
+fn mark_end_of_a_closed_curve_is_its_seam() {
+    let a = circle("a", [0.0; 3], 10.0);
+    let r = run(MARK_END, vec![a], vec![Input::Enter]);
+    let Geo::Point { point } = r.create[0] else { panic!() };
+    let start = nurbs::samples(&circle("b", [0.0; 3], 10.0).exact.unwrap(), 4)[0];
+    assert!(dist(point, start) < 1e-9, "{point:?} vs seam {start:?}");
 }
 
 #[test]
@@ -1191,4 +1216,48 @@ fn intersect_makes_points_for_curves_like_rhino5() {
     let b = circle("b", [5.0, 5.0, 0.0], 2.0);
     let r = run(INTERSECTION, vec![a, b], vec![Input::Enter]);
     assert_eq!(r.create.len(), 2, "a line through a circle crosses it twice");
+}
+
+/// Rhino MeanCrv: the curve halfway between two curves, made at once when both are picked
+/// (or preselected); AdjustCurveDirections pairs the ends that are nearer.
+#[test]
+fn mean_curve_is_halfway() {
+    use crate::MEAN;
+    let start = step_rec(&event(MEAN, Input::Start, vec![])).unwrap();
+    assert_eq!(start.prompt, "Select first curve");
+    // Two lines, the second drawn the other way: the middle line, not a cross.
+    let a = line("a", [0.0; 3], [10.0, 0.0, 0.0]);
+    let b = line("b", [10.0, 4.0, 0.0], [0.0, 4.0, 0.0]);
+    let r = run(MEAN, vec![a.clone(), b.clone()], vec![]);
+    assert!(r.done, "preselected: made at once ({:?})", r.error);
+    let g = &r.create[0];
+    for p in nurbs::samples(g, 20) {
+        assert!((p[1] - 2.0).abs() < 1e-9, "on y = 2: {p:?}");
+    }
+    // Same structure (two 5-point cubics): the mean of the control points, exact.
+    let cubic = |pts: &[Vec3]| Geo::Nurbs { degree: 3, points: pts.to_vec(), weights: vec![], knots: vec![0.0, 0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0, 1.0] };
+    let ca = curve("ca", cubic(&[[0.0; 3], [2.0, 3.0, 0.0], [5.0, 1.0, 0.0], [8.0, 4.0, 0.0], [10.0, 0.0, 0.0]]), false);
+    let cb = curve("cb", cubic(&[[0.0, 6.0, 0.0], [2.0, 9.0, 2.0], [5.0, 7.0, 0.0], [8.0, 10.0, 0.0], [10.0, 6.0, 0.0]]), false);
+    let r = run(MEAN, vec![ca, cb], vec![]);
+    let Geo::Nurbs { points, .. } = &r.create[0] else { panic!("{:?}", r.create) };
+    assert_eq!(points.len(), 5, "same structure: 5 points");
+    assert!(dist(points[1], [2.0, 6.0, 1.0]) < 1e-12);
+    // Different structure (a line and a wavy curve): the middles by length, few points.
+    let wave = curve("w", cubic(&[[0.0, 6.0, 0.0], [2.0, 9.0, 0.0], [5.0, 3.0, 0.0], [8.0, 9.0, 0.0], [10.0, 6.0, 0.0]]), false);
+    let r = run(MEAN, vec![a, wave.clone()], vec![]);
+    let g = &r.create[0];
+    let Geo::Nurbs { points, .. } = g else { panic!() };
+    assert!(points.len() <= 40, "{} points", points.len());
+    let ends = (nurbs::samples(g, 1)[0], nurbs::samples(g, 1)[1]);
+    assert!(dist(ends.0, [0.0, 3.0, 0.0]) < 1e-6 && dist(ends.1, [10.0, 3.0, 0.0]) < 1e-6, "{ends:?}");
+    assert!(r.messages.iter().any(|m| m.contains("MeanCrv")), "{:?}", r.messages);
+    // Picked one by one.
+    let mut e = event(MEAN, Input::Start, vec![]);
+    let r1 = step_rec(&e).unwrap();
+    e.state = r1.state; e.input = Input::Selection; e.selection = vec![line("a", [0.0; 3], [10.0, 0.0, 0.0])];
+    let r2 = step_rec(&e).unwrap();
+    assert_eq!(r2.prompt, "Select second curve", "{:?}", r2.error);
+    e.state = r2.state; e.selection = vec![line("b", [0.0, 2.0, 0.0], [10.0, 2.0, 0.0])];
+    let r3 = step_rec(&e).unwrap();
+    assert!(r3.done && r3.create.len() == 1, "{:?} {:?}", r3.prompt, r3.error);
 }

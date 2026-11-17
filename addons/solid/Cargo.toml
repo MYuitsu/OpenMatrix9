@@ -14,5 +14,8 @@ name = "om9_solid"
 om9-addon-abi = { path = "../../crates/om9-addon-abi", features = ["session"] }
 om9-addon-geom = { path = "../geom" }
 om9-addon-top11 = { path = "../top11" }
+om9-addon-surfaces = { path = "../surfaces" }
+# Glyph outlines of installed TrueType/OpenType fonts (Text).
+ttf-parser = "=0.25.1"
 serde = { workspace = true }
 serde_json = { workspace = true }

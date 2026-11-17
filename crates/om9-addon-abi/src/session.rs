@@ -450,6 +450,11 @@ pub struct Reply {
     /// With `done`: new `om9.gem` records (world frame) for selected objects, e.g. a material.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub records: Vec<RecordUpdate>,
+    /// Words for the options window: `(option name, text)` shown beside that option (Rhino's
+    /// "Point count: (2) [5]" shows the current count), or with an empty name a line under the
+    /// options ("Maximum deviation: 0.012").
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub notes: Vec<(String, String)>,
 }
 
 /// New geometry for one selected object.

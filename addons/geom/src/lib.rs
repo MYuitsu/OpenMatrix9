@@ -219,8 +219,27 @@ pub(crate) fn solve_band(rows: &[(usize, Vec<f64>)], n: usize, mut b: Vec<Vec3>)
 }
 
 /// A degree-`p` curve through every point (global interpolation, chord-length parameters).
-/// `closed` repeats the first point at the end. Duplicate consecutive points are dropped.
+/// `closed`: closed smoothly through the first point again (periodic, no kink at the seam),
+/// as Rhino closes a curve; past 600 points (a dense solve) or below three, the first point is
+/// repeated at the end instead. Duplicate consecutive points are dropped.
 pub fn interpolate(points: &[Vec3], degree: usize, closed: bool) -> Option<Geo> {
+    // Odd degree: the periodic knots sit at the points, so the curve starts at the first one.
+    if closed && degree >= 3 && degree % 2 == 1 && points.len() <= 600 {
+        let mut distinct: Vec<Vec3> = Vec::new();
+        for p in points {
+            if distinct.last().is_none_or(|l| dist(*l, *p) > 1e-9) {
+                distinct.push(*p);
+            }
+        }
+        if distinct.len() > 2 && dist(distinct[0], distinct[distinct.len() - 1]) <= 1e-9 {
+            distinct.pop();
+        }
+        if distinct.len() > degree
+            && let Some(g) = interp::interpolate(points, degree, interp::Knots::Chord, None, None, interp::Closing::Smooth)
+        {
+            return Some(g);
+        }
+    }
     let mut q: Vec<Vec3> = Vec::new();
     for p in points {
         if q.last().is_none_or(|l| dist(*l, *p) > EPS) {
@@ -575,14 +594,18 @@ mod tests {
             let q = eval(degree, &points, &weights, &knots, u.min(1.0));
             assert!(close(q, *p, 1e-9), "{i}: {q:?} vs {p:?}");
         }
-        let Some(Geo::Nurbs { points: cp, .. }) = interpolate(&pts[..3], 3, true) else {
+        let Some(Geo::Nurbs { points: cp, weights: cw, knots: ck, degree: cd }) = interpolate(&pts, 3, true) else {
             panic!()
         };
-        assert_eq!(cp.first(), Some(&pts[0]));
-        assert!(
-            close(*cp.last().unwrap(), pts[0], 1e-12),
-            "closed ends at the start"
-        );
+        // Closed: starts and ends at the first point, smoothly (periodic, no kink).
+        let (a, b) = (ck[cd], ck[ck.len() - cd - 1]);
+        assert!(close(eval(cd, &cp, &cw, &ck, a), pts[0], 1e-9), "starts at the first point");
+        assert!(close(eval(cd, &cp, &cw, &ck, b), pts[0], 1e-9), "closed ends at the start");
+        let h = 1e-6 * (b - a);
+        let d0 = sub(eval(cd, &cp, &cw, &ck, a + h), eval(cd, &cp, &cw, &ck, a));
+        let d1 = sub(eval(cd, &cp, &cw, &ck, b), eval(cd, &cp, &cw, &ck, b - h));
+        let cos = dot(d0, d1) / (norm(d0) * norm(d1));
+        assert!(cos > 0.999_999, "no kink at the seam: cos {cos}");
         assert!(matches!(
             interpolate(&pts[..2], 3, false),
             Some(Geo::Polyline { .. })

@@ -320,6 +320,18 @@ steps = ["Select start curve.", "Select end curve.", "Chỉnh Number, MatchMetho
 options = ["Number=1: số đường trung gian.", "MatchMethod=None/Refit/SamplePoints.", "SampleNumber=10.", "Flip: đảo hướng đường cuối."]
 
 [[commands]]
+id = "CurveMeanCurve"
+label = "Mean Curve"
+handler = "om9_addon_session"
+interactive = true
+new = true
+group = "Curve"
+aliases = ["MeanCrv", "MeanCurve"]
+summary = "Tạo đường cong ở giữa hai đường cong (Rhino MeanCrv)."
+steps = ["Select first curve.", "Select second curve: đường giữa được tạo ngay (chọn sẵn hai đường rồi gọi lệnh cũng được)."]
+options = ["AdjustCurveDirections=Yes: tự đảo đường thứ hai cho cùng chiều với đường thứ nhất."]
+
+[[commands]]
 id = "CurveCurveFromObjectsDuplicateEdge"
 label = "Duplicate Edge"
 handler = "om9_addon_session"

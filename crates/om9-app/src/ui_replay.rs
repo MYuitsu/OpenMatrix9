@@ -19,20 +19,29 @@ pub fn replay(document: Document, size: [f32; 2], dpi: f32, steps: &[Value]) -> 
         return Err(Error::Invalid("ui replay size"));
     }
     let mut app = MatrixApp::new(document)?;
+    replay_app(&mut app, size, dpi, steps)
+}
+
+/// [`replay`] on an existing application (add-ons attached, objects already selected …).
+pub fn replay_app(app: &mut MatrixApp, size: [f32; 2], dpi: f32, steps: &[Value]) -> Result<Value> {
+    if !(size[0] > 0. && size[1] > 0.) {
+        return Err(Error::Invalid("ui replay size"));
+    }
+    let app = &mut *app;
     let context = Context::default();
     context.set_pixels_per_point(dpi.clamp(0.5, 4.0));
     let extent = Vec2::new(size[0], size[1]);
     let mut time = 0.0;
     // Two settling frames: the first builds panels, the second lets focus follow them.
-    frame(&mut app, &context, extent, &mut time, Vec::new());
-    frame(&mut app, &context, extent, &mut time, Vec::new());
-    let mut receipts = vec![receipt(&app, &context, 0)];
+    frame(app, &context, extent, &mut time, Vec::new());
+    frame(app, &context, extent, &mut time, Vec::new());
+    let mut receipts = vec![receipt(app, &context, 0)];
     for (index, step) in steps.iter().enumerate() {
-        apply(&mut app, &context, extent, &mut time, step)?;
+        apply(app, &context, extent, &mut time, step)?;
         for _ in 0..4 {
-            frame(&mut app, &context, extent, &mut time, Vec::new());
+            frame(app, &context, extent, &mut time, Vec::new());
         }
-        receipts.push(receipt(&app, &context, index + 1));
+        receipts.push(receipt(app, &context, index + 1));
     }
     Ok(json!({"size": size, "dpi": dpi, "steps": receipts}))
 }
@@ -301,5 +310,170 @@ fn receipt(app: &MatrixApp, context: &Context, step: usize) -> Value {
         "panels": panels,
         "navigation": app.navigation_probe(),
         "command": app.transcript.text(),
+        "dialog": app.controller.addon_dialog().map(|d| json!({
+            "title": d.title,
+            "ready": d.ready,
+            "rows": d.rows.iter().map(|r| json!({"name": r.name, "label": r.label, "value": r.value})).collect::<Vec<_>>(),
+        })),
+        "controls": app
+            .cmd_token_rects
+            .iter()
+            .chain(app.session_dialog.rects.iter())
+            .map(|(name, rect)| (name.clone(), json!([rect.center().x, rect.center().y])))
+            .collect::<serde_json::Map<String, Value>>(),
     })
+}
+
+fn block_on<F: std::future::Future>(future: F) -> F::Output {
+    let mut future = std::pin::pin!(future);
+    let mut context = std::task::Context::from_waker(std::task::Waker::noop());
+    loop {
+        match future.as_mut().poll(&mut context) {
+            std::task::Poll::Ready(value) => return value,
+            std::task::Poll::Pending => std::thread::yield_now(),
+        }
+    }
+}
+
+/// An offscreen GPU (any adapter, the software one included) for [`screenshot`].
+fn offscreen_gpu() -> Result<eframe::egui_wgpu::RenderState> {
+    use eframe::{egui_wgpu, wgpu};
+    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+        backends: wgpu::Backends::all(),
+        flags: Default::default(),
+        memory_budget_thresholds: Default::default(),
+        backend_options: Default::default(),
+        display: Default::default(),
+    });
+    let adapter = block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+        power_preference: wgpu::PowerPreference::HighPerformance,
+        force_fallback_adapter: false,
+        compatible_surface: None,
+        apply_limit_buckets: false,
+    }))
+    .map_err(|e| Error::Io(format!("screenshot: no GPU adapter: {e}")))?;
+    let (device, queue) = block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+        required_features: wgpu::Features::empty(),
+        required_limits: adapter.limits(),
+        ..Default::default()
+    }))
+    .map_err(|e| Error::Io(format!("screenshot: GPU device: {e}")))?;
+    let format = wgpu::TextureFormat::Rgba8Unorm;
+    let renderer = egui_wgpu::Renderer::new(&device, format, Default::default());
+    Ok(egui_wgpu::RenderState {
+        adapter: adapter.clone(),
+        available_adapters: vec![adapter],
+        instance,
+        device,
+        queue,
+        target_format: format,
+        renderer: std::sync::Arc::new(eframe::egui::mutex::RwLock::new(renderer)),
+        surface_config: egui_wgpu::SurfaceConfig::LOW_LATENCY,
+    })
+}
+
+/// The whole window as the user sees it (menus, viewports, dialogs) after `frames` frames,
+/// written as a PNG. Uses the application's GPU state, or an offscreen one.
+pub fn screenshot(app: &mut MatrixApp, size: [f32; 2], dpi: f32, frames: usize, out: &std::path::Path) -> Result<()> {
+    use eframe::{egui_wgpu, wgpu};
+    if app.gpu_state.is_none() {
+        app.gpu_state = Some(offscreen_gpu()?);
+    }
+    let state = app.gpu_state.clone().expect("gpu state");
+    let ppp = dpi.clamp(0.5, 4.0);
+    let context = Context::default();
+    // A new context: the application sets its fonts and style on it again.
+    app.style_ready = false;
+    context.set_pixels_per_point(ppp);
+    let extent = Vec2::new(size[0], size[1]);
+    let mut last = None;
+    for _ in 0..frames.max(2) {
+        std::thread::sleep(std::time::Duration::from_millis(30));
+        let raw = RawInput {
+            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, extent)),
+            ..Default::default()
+        };
+        let mut output = context.run_ui(raw, |ui| app.show(ui));
+        {
+            let mut r = state.renderer.write();
+            for (id, deltas) in &output.textures_delta.set {
+                for delta in deltas.iter() {
+                    r.update_texture(&state.device, &state.queue, *id, delta);
+                }
+            }
+        }
+        output.textures_delta.clear();
+        let _ = state.device.poll(wgpu::PollType::wait_indefinitely());
+        last = Some(output);
+    }
+    let output = last.expect("a frame");
+    let prims = context.tessellate(output.shapes, ppp);
+    let (w, h) = ((size[0] * ppp).round() as u32, (size[1] * ppp).round() as u32);
+    let texture = state.device.create_texture(&wgpu::TextureDescriptor {
+        label: Some("om9 screenshot"),
+        size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format: state.target_format,
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::COPY_SRC,
+        view_formats: &[],
+    });
+    let view = texture.create_view(&Default::default());
+    let desc = egui_wgpu::ScreenDescriptor { size_in_pixels: [w, h], pixels_per_point: ppp };
+    let mut encoder = state.device.create_command_encoder(&Default::default());
+    let extra = state
+        .renderer
+        .write()
+        .update_buffers(&state.device, &state.queue, &mut encoder, &prims, &desc);
+    {
+        let pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            label: Some("om9 screenshot"),
+            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                view: &view,
+                depth_slice: None,
+                resolve_target: None,
+                ops: wgpu::Operations { load: wgpu::LoadOp::Clear(wgpu::Color::BLACK), store: wgpu::StoreOp::Store },
+            })],
+            ..Default::default()
+        });
+        let mut pass = pass.forget_lifetime();
+        state.renderer.read().render(&mut pass, &prims, &desc);
+    }
+    let row = w * 4;
+    let padded = row.div_ceil(256) * 256;
+    let buffer = state.device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some("om9 screenshot readback"),
+        size: u64::from(padded) * u64::from(h),
+        usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+        mapped_at_creation: false,
+    });
+    encoder.copy_texture_to_buffer(
+        texture.as_image_copy(),
+        wgpu::TexelCopyBufferInfo {
+            buffer: &buffer,
+            layout: wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(padded), rows_per_image: Some(h) },
+        },
+        wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+    );
+    state.queue.submit(extra.into_iter().chain([encoder.finish()]));
+    let (tx, rx) = std::sync::mpsc::channel();
+    buffer.slice(..).map_async(wgpu::MapMode::Read, move |r| {
+        let _ = tx.send(r);
+    });
+    let _ = state.device.poll(wgpu::PollType::wait_indefinitely());
+    rx.recv()
+        .map_err(|e| Error::Io(e.to_string()))?
+        .map_err(|e| Error::Io(e.to_string()))?;
+    let mapped = buffer
+        .slice(..)
+        .get_mapped_range()
+        .map_err(|e| Error::Io(format!("{e:?}")))?;
+    let mut pixels = Vec::with_capacity((row * h) as usize);
+    for line in mapped.chunks_exact(padded as usize) {
+        pixels.extend_from_slice(&line[..row as usize]);
+    }
+    drop(mapped);
+    buffer.unmap();
+    image::save_buffer(out, &pixels, w, h, image::ColorType::Rgba8).map_err(|e| Error::Io(e.to_string()))
 }

@@ -7,7 +7,7 @@ gọi được từ icon trên menu, từ dòng lệnh (tên lệnh hoặc tên 
 
 Mỗi lệnh có một trang trong `commands/<Menu>/`.
 
-Tổng cộng: 337 lệnh.
+Tổng cộng: 338 lệnh.
 
 ## Builder (16 lệnh)
 
@@ -30,7 +30,7 @@ Tổng cộng: 337 lệnh.
 | `BuilderMillArea` | [Mill Area](commands/Builder/BuilderMillArea.md) | Builder #15 |
 | `BuilderMillWorkC` | [Mill Work Across](commands/Builder/BuilderMillWorkC.md) | Builder #16 |
 
-## Curve (58 lệnh)
+## Curve (59 lệnh)
 
 | Mã lệnh | Lệnh | Vị trí menu |
 |---|---|---|
@@ -78,6 +78,7 @@ Tổng cộng: 337 lệnh.
 | `OthersCurveDivideCurve` | [Divide Curve](commands/Curve/OthersCurveDivideCurve.md) | Curve #36 |
 | `CurveCurveEditToolsCurveBoolean` | [Curve Boolean](commands/Curve/CurveCurveEditToolsCurveBoolean.md) | Curve #37 |
 | `CurveTweenCurves` | [Tween Curves](commands/Curve/CurveTweenCurves.md) | Curve #38 |
+| `CurveMeanCurve` | [Mean Curve](commands/Curve/CurveMeanCurve.md) | — |
 | `CurveCurveFromObjectsDuplicateEdge` | [Duplicate Edge](commands/Curve/CurveCurveFromObjectsDuplicateEdge.md) | Curve #39 |
 | `CurveCurveFromObjectsDuplicateBorder` | [Duplicate Border](commands/Curve/CurveCurveFromObjectsDuplicateBorder.md) | Curve #40 |
 | `CurveCrossSectionProfiles` | [Cross Section Profiles](commands/Curve/CurveCrossSectionProfiles.md) | Curve #44 |
