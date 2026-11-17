@@ -31,6 +31,25 @@ const POINT_MEMBER: Point3 = [4., 12., 0.];
 const SECOND_PLACEMENT: Point3 = [0., -15., 0.];
 
 #[test]
+fn old_instance_buffer_cannot_resolve_against_changed_member() {
+    let mut document = Document::new("instance revision");
+    let member = Entity::new("member", Geometry::Point([0., 0., 0.]), None);
+    let definition = Definition::new("shared", vec![member]);
+    let definition_id = definition.id;
+    document.definitions.insert(definition_id, definition);
+    let instance = Entity::new("instance", Geometry::Instance(definition_id), None);
+    document.entities.insert(instance.id, instance);
+    let old = Scene::capture(std::sync::Arc::new(document.clone()), 1, &Limits::default()).unwrap();
+    let changed = &mut document.definitions.get_mut(&definition_id).unwrap().members[0];
+    changed.geometry = Geometry::Point([1., 0., 0.]);
+    changed.geometry_revision += 1;
+    let new = Scene::capture(std::sync::Arc::new(document), 2, &Limits::default()).unwrap();
+    assert_eq!(old.objects[0].source, new.objects[0].source);
+    assert!(matches!(new.entity_for(&new.document, &old.objects[0]), Err(om9_core::Error::Stale("scene leaf revision"))));
+    assert!(new.entity_for(&new.document, &new.objects[0]).is_ok());
+}
+
+#[test]
 fn shared_local_bounds_keep_each_instance_transform_and_preview() {
     let member = Entity::new("line", Geometry::Curve(Curve::Line {
         start: [-2., -1., 0.], end: [3., 4., 1.], domain: [0., 1.],
@@ -50,7 +69,7 @@ fn shared_local_bounds_keep_each_instance_transform_and_preview() {
     }
     let mut scene = Scene::capture(std::sync::Arc::new(document), 1, &Limits::default()).unwrap();
     assert_eq!(scene.objects.len(), 3);
-    assert!(std::sync::Arc::ptr_eq(&scene.objects[0].buffers, &scene.objects[1].buffers));
+    assert!(scene.objects[0].buffers.ptr_eq(&scene.objects[1].buffers));
     scene.objects[1].preview = Transform::translation([0., 0., 9.]);
     let cached = scene.object_spheres().unwrap();
     for (object, actual) in scene.objects.iter().zip(cached.iter()) {

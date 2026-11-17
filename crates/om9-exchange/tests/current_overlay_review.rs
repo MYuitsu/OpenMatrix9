@@ -17,6 +17,43 @@ use om9_core::{
 use om9_exchange::{ExportCapture, RecordAction};
 use uuid::Uuid;
 
+#[test]
+fn shared_definition_overlay_ignores_member_display_change_after_snapshot() {
+    use om9_core::brep::{Brep, BrepDisplay, BrepTopology};
+    let (coordinator, document_id, definition_id, _, _) = fixture(ImportMode::Preserve, false);
+    let mut document = coordinator.world().documents[&document_id].as_ref().clone();
+    let namespace = *document.import_namespaces.keys().next().unwrap();
+    let shape = Brep::from_native("CASCADE Topology authored member".into(), BrepDisplay {
+        source_sha256: [0; 32], deflection_mm: 0.1, points: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+        triangles: vec![[0, 1, 2, 0]], segments: vec![], vertices: vec![],
+        topology: BrepTopology { faces: vec![Uuid::from_u128(42)], edges: vec![], vertex_ids: vec![], face_edges: vec![] }.into(),
+    }, &Limits::default()).unwrap();
+    document.definitions.get_mut(&definition_id).unwrap().members[0].geometry = Geometry::Brep(shape);
+    let definition = &document.definitions[&definition_id];
+    let records = &mut document.import_namespaces.get_mut(&namespace).unwrap().records;
+    let mut definition_record = SourceRecord::bound_definition(records[0].key, "ON_InstanceDefinition", definition).unwrap();
+    definition_record.relations = vec![NativeRelation { role: "definition_member".into(), target: records[1].key }];
+    records[0] = definition_record;
+    records[1] = SourceRecord::bound_entity(records[1].key, "ON_Brep", HostRef::DefinitionMember {
+        definition: definition_id, object: definition.members[0].id,
+    }, &definition.members[0]).unwrap();
+    records.remove(2);
+    document.validate(&Limits::default()).unwrap();
+    let Geometry::Brep(shape) = &mut document.definitions.get_mut(&definition_id).unwrap().members[0].geometry else { panic!() };
+    let mut display = shape.display().clone();
+    display.points[1][0] = 2.;
+    display.deflection_mm = 0.02;
+    *shape = Brep::from_native(shape.source().to_owned(), display, &Limits::default()).unwrap();
+    document.reconcile_derived_export_bindings(&Limits::default()).unwrap();
+    let snapshot = om9_archive::DocumentSnapshot::capture(&document, &Limits::default()).unwrap();
+    let restored = snapshot.restore(&Limits::default()).unwrap();
+    let coordinator = TransactionCoordinator::new(World::new(vec![restored], &Limits::default()).unwrap(), Limits::default()).unwrap();
+    let capture = ExportCapture::all(&coordinator, document_id).unwrap();
+    let overlay = capture.current_overlay(&coordinator, &Cancellation::default()).unwrap();
+    assert_eq!(overlay.namespaces[0].records[0].action, RecordAction::Retain);
+    assert_eq!(overlay.namespaces[0].records[1].action, RecordAction::Retain);
+}
+
 fn key(kind: NativeRecordKind, n: u128) -> NativeRecordKey {
     NativeRecordKey {
         kind,

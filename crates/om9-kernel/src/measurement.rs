@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 //! Read-only canonical measurements. Rust validates/budgets immutable operands;
 //! OCCT owns only the synchronous geometric solver, never the document.
+use om9_core::brep::BrepSourceAccess;
 use crate::KernelError;
 use om9_core::{
     brep::Brep,
@@ -41,6 +42,12 @@ unsafe extern "C" {
         sink: unsafe extern "C" fn(*mut std::ffi::c_void, *const u8, usize) -> c_int,
         context: *mut std::ffi::c_void, message: *mut c_char, capacity: c_int,
     ) -> c_int;
+    fn om9_occt_trimmed_surface_face_source(
+        source: *const Part, periodic_axes: c_int, uv: *const [f64;2], point_count: usize,
+        offsets: *const usize, loop_count: usize, seam_axis: c_int, max_bytes: usize,
+        sink: unsafe extern "C" fn(*mut std::ffi::c_void, *const u8, usize) -> c_int,
+        context: *mut std::ffi::c_void, message: *mut c_char, capacity: c_int,
+    ) -> c_int;
     fn om9_occt_measure_distance(
         a: *const Part,
         ac: usize,
@@ -56,6 +63,15 @@ unsafe extern "C" {
         length: usize,
         index: c_int,
         matrix: *const f64,
+        points: *const Point3,
+        point_count: usize,
+        segments: *const [u32; 3],
+        segment_count: usize,
+        display_edge: u32,
+        pick_tolerance: f64,
+        segment_tolerance: f64,
+        max_points: usize,
+        max_nodes: usize,
         value: *mut f64,
         message: *mut c_char,
         capacity: c_int,
@@ -84,13 +100,19 @@ unsafe extern "C" {
         target: *const Part, origin: *const f64, direction: *const f64, reference: *const f64,
         tolerance: f64, output: *mut f64, message: *mut c_char, capacity: c_int,
     ) -> c_int;
+    fn om9_occt_surface_ray_hits_uv(
+        target: *const Part, origin: *const f64, direction: *const f64, tolerance: f64,
+        output: *mut f64, capacity: usize, count: *mut usize, message: *mut c_char, message_capacity: c_int,
+    ) -> c_int;
     fn om9_occt_brep_face_ray_hit(
         target: *const Part, face_index: c_int, origin: *const f64, direction: *const f64,
-        reference: *const f64, tolerance: f64, output: *mut f64, message: *mut c_char, capacity: c_int,
+        reference: *const f64, tolerance: f64, triangle: *const f64, deflection: f64, max_nodes: usize,
+        output: *mut f64, message: *mut c_char, capacity: c_int,
     ) -> c_int;
     fn om9_occt_brep_face_ray_hits(
         target: *const Part, face_indices: *const c_int, count: usize,
-        origin: *const f64, direction: *const f64, tolerance: f64,
+        origin: *const f64, direction: *const f64, tolerance: f64, triangles: *const f64,
+        deflections: *const f64, max_nodes: usize,
         output: *mut f64, message: *mut c_char, capacity: c_int,
     ) -> c_int;
     fn om9_occt_shrink_face(
@@ -175,6 +197,100 @@ pub fn surface_to_face_source_admitted(surface: &om9_core::geometry::NurbsSurfac
     if status != 0 { return Err(error(status, &message)); }
     if context.bytes.is_empty() { return Err(KernelError::InvalidInput("surface face source missing".into())); }
     String::from_utf8(context.bytes).map_err(|_| KernelError::InvalidInput("surface face source encoding".into()))
+}
+
+/// Construct a temporary OCCT face from validated UV polygon trims. Native
+/// transient allocations remain outside the Rust callback's accounting.
+pub fn trimmed_surface_to_face_source_admitted(trim: &om9_core::rhino_semantics::TrimmedSurface, limits: &Limits,
+    mut admit_memory: impl FnMut(u64,u64)->om9_core::Result<()>) -> Result<String,KernelError> {
+    use om9_core::budget::Usage;
+    admit(trim.validate(limits))?;
+    admit(om9_core::rhino_semantics::validate_trim_loop_topology_for_display(trim))?;
+    let surface=&trim.underlying;
+    if trim.reversed {return Err(KernelError::InvalidInput("reversed trim export unsupported".into()));}
+    if surface.periodic.iter().any(|p|*p) {admit(surface.certify_repeated_periodic_basis(limits))?;}
+    let mut seam_axis=None;
+    let mut closed_axis_touched=false;
+    for axis in 0..2 {
+        let degree=surface.degree[axis];let count=surface.size[axis];let knots=&surface.knots[axis];
+        let closed=surface.periodic[axis] || (surface.domain[axis]==[knots[degree],knots[count]]
+            && knots[..=degree].iter().all(|k|*k==knots[degree]) && knots[count..].iter().all(|k|*k==knots[count])
+            && (0..surface.size[1-axis]).all(|j| {
+                let (a,b)=if axis==0 {(j,(count-1)*surface.size[1]+j)} else {(j*surface.size[1],j*surface.size[1]+count-1)};
+                surface.poles[a]==surface.poles[b] && surface.weights[a]==surface.weights[b]
+            }));
+        if closed && std::iter::once(&trim.outer).chain(&trim.inners).flatten().any(|p|p[axis]==surface.domain[axis][0] || p[axis]==surface.domain[axis][1]) {
+            let ends=surface.domain[axis];let other=1-axis;
+            let start=trim.outer.iter().map(|p|p[axis]).fold(f64::INFINITY,f64::min);
+            let end=trim.outer.iter().map(|p|p[axis]).fold(f64::NEG_INFINITY,f64::max);
+            let low=trim.outer.iter().map(|p|p[other]).fold(f64::INFINITY,f64::min);
+            let high=trim.outer.iter().map(|p|p[other]).fold(f64::NEG_INFINITY,f64::max);
+            let rectangle=trim.outer.len()==4 && start<end && low<high && trim.outer.iter().enumerate().all(|(i,p)| {
+                let q=trim.outer[(i+1)%4];(p[axis]==start||p[axis]==end) && (p[other]==low||p[other]==high)
+                    && ((p[axis]==q[axis])!=(p[other]==q[other]))
+            });
+            let scale=ends.into_iter().chain([low,high]).map(f64::abs).fold(1_f64,f64::max);
+            let guard=128.*f64::EPSILON*scale;
+            let holes_clear=guard.is_finite() && trim.inners.iter().flatten().all(|p|p[axis]>ends[0]+guard&&p[axis]<ends[1]-guard);
+            let full_domain=surface.domain[axis]==[knots[degree],knots[count]];
+            let touches_start=start==ends[0];let touches_end=end==ends[1];
+            if !rectangle || !holes_clear || !full_domain || closed_axis_touched || !(touches_start||touches_end) {
+                return Err(KernelError::InvalidInput("trimmed face seam unsupported".into()));
+            }
+            closed_axis_touched=true;
+            if touches_start && touches_end {seam_axis=Some(axis);}
+        }
+    }
+    let count=std::iter::once(&trim.outer).chain(&trim.inners).try_fold(0usize,|n,p|n.checked_add(p.len()))
+        .ok_or_else(||KernelError::InvalidInput("trim edge overflow".into()))?;
+    if count>om9_core::rhino_semantics::TRIM_DISPLAY_MAX_EDGES {return Err(KernelError::InvalidInput("trimmed face exceeds edge limit".into()));}
+    let loops=trim.inners.len().checked_add(1).ok_or_else(||KernelError::InvalidInput("trim loop overflow".into()))?;
+    let mut scratch=Usage::array::<[f64;2]>(count).and_then(|a|Ok(a.bytes.checked_add(Usage::array::<usize>(loops+1)?.bytes)
+        .ok_or(om9_core::Error::Overflow("trim face scratch"))?)).map_err(|e|KernelError::InvalidInput(e.to_string()))?;
+    admit(admit_memory(0,scratch))?;
+    let mut points=Vec::new();points.try_reserve_exact(count).map_err(|_|KernelError::Failure("trim face allocation".into()))?;
+    let mut offsets=Vec::new();offsets.try_reserve_exact(loops+1).map_err(|_|KernelError::Failure("trim face allocation".into()))?;
+    let actual=Usage::array::<[f64;2]>(points.capacity()).and_then(|a|Ok(a.bytes.checked_add(Usage::array::<usize>(offsets.capacity())?.bytes)
+        .ok_or(om9_core::Error::Overflow("trim face scratch"))?)).map_err(|e|KernelError::InvalidInput(e.to_string()))?;
+    if actual>scratch {admit(admit_memory(0,actual))?;scratch=actual;}
+    offsets.push(0);
+    for (index,polygon) in std::iter::once(&trim.outer).chain(&trim.inners).enumerate() {
+        let origin=polygon[0];let mut area=0.;let mut magnitude=0.;
+        for i in 0..polygon.len() {
+            let a=polygon[i];let b=polygon[(i+1)%polygon.len()];
+            let x=(a[0]-origin[0])*(b[1]-origin[1]);let y=(a[1]-origin[1])*(b[0]-origin[0]);
+            area+=x-y;magnitude+=x.abs()+y.abs();
+        }
+        if !area.is_finite() || !magnitude.is_finite() || area.abs()<=128.*f64::EPSILON*magnitude {
+            return Err(KernelError::InvalidInput("trim loop orientation uncertain".into()));
+        }
+        if (area>0.)==(index==0) {points.extend(polygon.iter().copied());}
+        else {points.extend(polygon.iter().rev().copied());}
+        offsets.push(points.len());
+    }
+    // For the newly supported large trims, reserve an estimated native
+    // working allowance before entering OCCT. This is a headroom heuristic,
+    // not a measured upper bound on native or process allocations.
+    let native_headroom=if count>128 {
+        u64::try_from(count).map_err(|_|KernelError::InvalidInput("trim face headroom overflow".into()))?
+            .checked_mul(64*1024).and_then(|n|n.checked_add(4*1024*1024))
+            .ok_or_else(||KernelError::InvalidInput("trim face headroom overflow".into()))?
+    } else {0};
+    if native_headroom>0 {admit(admit_memory(scratch,native_headroom))?;}
+    let guarded_scratch=scratch.checked_add(native_headroom)
+        .ok_or_else(||KernelError::InvalidInput("trim face headroom overflow".into()))?;
+    let mut part=surface_part(surface,Transform::identity())?;part.periodic=0;
+    let mut admission=|live:u64,pending:u64|admit_memory(live.checked_add(guarded_scratch).ok_or(om9_core::Error::Overflow("trim face scratch"))?,pending);
+    let mut context=crate::brep::AdmittedBytesContext::new(crate::brep::byte_bound(limits),&mut admission);
+    let mut message=[0i8;512];
+    // SAFETY: all input arrays and the callback context remain live for this synchronous call.
+    let status=unsafe {om9_occt_trimmed_surface_face_source(&part,
+        i32::from(surface.periodic[0]) | (i32::from(surface.periodic[1])<<1),points.as_ptr(),points.len(),offsets.as_ptr(),loops,seam_axis.map_or(-1,|axis|axis as c_int),
+        crate::brep::byte_bound(limits),crate::brep::receive_admitted_bytes,(&mut context as *mut crate::brep::AdmittedBytesContext<'_>).cast(),message.as_mut_ptr(),512)};
+    if let Some(error)=context.error {return Err(KernelError::InvalidInput(error.to_string()));}
+    if status!=0 {return Err(error(status,&message));}
+    if context.bytes.is_empty() {return Err(KernelError::InvalidInput("trimmed face source missing".into()));}
+    String::from_utf8(context.bytes).map_err(|_|KernelError::InvalidInput("trimmed face source encoding".into()))
 }
 fn error(status: c_int, message: &[c_char]) -> KernelError {
     // SAFETY: the adapter NUL-terminates the fixed buffer on every error.
@@ -418,6 +534,43 @@ pub fn split_face_isocurve(
 }
 
 /// Intersect a forward world-space ray with one exact face, choosing the hit nearest a display reference.
+#[derive(Debug, Clone, Copy)]
+pub struct SurfaceRayUvHit {
+    pub point: Point3,
+    pub uv: [f64; 2],
+    pub distance: f64,
+}
+
+/// Bounded, unordered forward ray intersections. The caller must classify UV
+/// against trim and handle coincident or ambiguous hits before accepting one.
+pub fn surface_ray_hits_uv(
+    target: &Geometry, placement: Transform, origin: Point3, direction: Point3,
+    tolerance: f64, limits: &Limits,
+) -> Result<Vec<SurfaceRayUvHit>, KernelError> {
+    const MAX_HITS: usize = 32;
+    if !matches!(target, Geometry::Surface(_))
+        || !origin.iter().chain(direction.iter()).all(|v|v.is_finite())
+        || !tolerance.is_finite() || tolerance<=0. {
+        return Err(KernelError::InvalidInput("invalid surface UV ray input".into()));
+    }
+    let mut owned=Vec::new();
+    let target_parts=parts(target,placement,limits,&mut owned)?;
+    if target_parts.len()!=1 {return Err(KernelError::InvalidInput("surface UV ray needs one face".into()));}
+    let mut raw=[[0_f64;6];MAX_HITS];let mut count=0usize;let mut message=[0 as c_char;512];
+    // SAFETY: the operand and fixed output buffers remain valid for the synchronous call.
+    let status=unsafe {om9_occt_surface_ray_hits_uv(target_parts.as_ptr(),origin.as_ptr(),direction.as_ptr(),tolerance,
+        raw.as_mut_ptr().cast(),MAX_HITS,&mut count,message.as_mut_ptr(),message.len() as c_int)};
+    if status!=0 {return Err(error(status,&message));}
+    if count>MAX_HITS || count as u64>limits.max_outputs {return Err(KernelError::InvalidInput("surface UV ray hit limit".into()));}
+    let mut hits=Vec::new();hits.try_reserve_exact(count).map_err(|_|KernelError::Failure("surface UV ray allocation".into()))?;
+    for h in &raw[..count] {
+        if !h.iter().all(|v|v.is_finite()) || h[5]<0. {return Err(KernelError::Failure("invalid surface UV ray hit".into()));}
+        hits.push(SurfaceRayUvHit {point:[h[0],h[1],h[2]],uv:[h[3],h[4]],distance:h[5]});
+    }
+    Ok(hits)
+}
+
+/// Intersect a forward world-space ray with one exact face, choosing the hit nearest a display reference.
 pub fn surface_ray_hit(
     target: &Geometry, placement: Transform, origin: Point3, direction: Point3,
     reference: Point3, tolerance: f64, limits: &Limits,
@@ -457,7 +610,7 @@ pub fn try_surface_ray_hit(
 /// `reference` is retained for adapter compatibility and validated, but does not
 /// choose which intersection is visible.
 pub fn brep_face_ray_hit(
-    brep: &Brep, face: uuid::Uuid, placement: Transform, origin: Point3, direction: Point3,
+    brep: &dyn BrepSourceAccess, face: uuid::Uuid, placement: Transform, origin: Point3, direction: Point3,
     reference: Point3, tolerance: f64, limits: &Limits,
 ) -> Result<Point3, KernelError> {
     try_brep_face_ray_hit(brep, face, placement, origin, direction, reference, tolerance, limits)?
@@ -466,8 +619,24 @@ pub fn brep_face_ray_hit(
 
 /// A geometric miss is distinct from invalid input or a native failure.
 pub fn try_brep_face_ray_hit(
-    brep: &Brep, face: uuid::Uuid, placement: Transform, origin: Point3, direction: Point3,
+    brep: &dyn BrepSourceAccess, face: uuid::Uuid, placement: Transform, origin: Point3, direction: Point3,
     reference: Point3, tolerance: f64, limits: &Limits,
+) -> Result<Option<Point3>, KernelError> {
+    try_brep_face_ray_hit_inner(brep, face, placement, origin, direction, reference, tolerance, None, limits)
+}
+
+pub type FaceWitness = ([Point3; 3], f64);
+
+pub fn try_verified_brep_face_ray_hit(
+    brep: &dyn BrepSourceAccess, face: uuid::Uuid, placement: Transform, origin: Point3, direction: Point3,
+    reference: Point3, tolerance: f64, witness: FaceWitness, limits: &Limits,
+) -> Result<Option<Point3>, KernelError> {
+    try_brep_face_ray_hit_inner(brep, face, placement, origin, direction, reference, tolerance, Some(witness), limits)
+}
+
+fn try_brep_face_ray_hit_inner(
+    brep: &dyn BrepSourceAccess, face: uuid::Uuid, placement: Transform, origin: Point3, direction: Point3,
+    reference: Point3, tolerance: f64, witness: Option<FaceWitness>, limits: &Limits,
 ) -> Result<Option<Point3>, KernelError> {
     admit(brep.validate(limits))?;
     admit(placement.validate())?;
@@ -475,7 +644,12 @@ pub fn try_brep_face_ray_hit(
         || !tolerance.is_finite() || tolerance <= 0. {
         return Err(KernelError::InvalidInput("invalid BRep face ray input".into()));
     }
-    let face_index = brep.display.faces.iter().position(|id| *id == face)
+    if let Some((triangle, deflection)) = &witness {
+        if !deflection.is_finite() || *deflection <= 0.0 || triangle.iter().flatten().any(|v| !v.is_finite()) {
+            return Err(KernelError::InvalidInput("invalid BRep face witness".into()));
+        }
+    }
+    let face_index = brep.topology().faces.iter().position(|id| *id == face)
         .ok_or_else(|| KernelError::InvalidInput("BRep face ID is not in source snapshot".into()))?;
     let face_index = c_int::try_from(face_index)
         .map_err(|_| KernelError::InvalidInput("BRep face index out of range".into()))?;
@@ -486,7 +660,9 @@ pub fn try_brep_face_ray_hit(
     let mut message = [0 as c_char; 512];
     // SAFETY: immutable source, part, ray and output buffers outlive the synchronous adapter.
     let status = unsafe { om9_occt_brep_face_ray_hit(&part, face_index, origin.as_ptr(), direction.as_ptr(),
-        reference.as_ptr(), tolerance, output.as_mut_ptr(), message.as_mut_ptr(), message.len() as c_int) };
+        reference.as_ptr(), tolerance, witness.as_ref().map_or(std::ptr::null(), |(t, _)| t.as_ptr().cast()),
+        witness.as_ref().map_or(0.0, |(_, d)| *d), usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
+        output.as_mut_ptr(), message.as_mut_ptr(), message.len() as c_int) };
     if status == 3 { return Ok(None); }
     if status != 0 { return Err(error(status, &message)); }
     if !output.iter().all(|v| v.is_finite()) { return Err(KernelError::Failure("invalid BRep face ray output".into())); }
@@ -498,7 +674,7 @@ pub fn try_brep_face_ray_hit(
 /// Failure on any face rejects the group; callers must check cancellation
 /// between groups and revalidate their own source and view context.
 pub fn brep_face_ray_hits(
-    brep: &Brep, faces: &[uuid::Uuid], placement: Transform, origin: Point3,
+    brep: &dyn BrepSourceAccess, faces: &[uuid::Uuid], placement: Transform, origin: Point3,
     direction: Point3, tolerance: f64, limits: &Limits,
 ) -> Result<Vec<Point3>, KernelError> {
     Ok(brep_face_ray_hits_fixed(brep, faces, placement, origin, direction, tolerance, limits)?.as_slice().to_vec())
@@ -515,7 +691,7 @@ impl BrepFaceRayHits {
 
 /// The fixed-storage form of [`brep_face_ray_hits`], with identical validation.
 pub fn brep_face_ray_hits_fixed(
-    brep: &Brep, faces: &[uuid::Uuid], placement: Transform, origin: Point3,
+    brep: &dyn BrepSourceAccess, faces: &[uuid::Uuid], placement: Transform, origin: Point3,
     direction: Point3, tolerance: f64, limits: &Limits,
 ) -> Result<BrepFaceRayHits, KernelError> {
     try_brep_face_ray_hits_fixed(brep, faces, placement, origin, direction, tolerance, limits)?
@@ -524,10 +700,39 @@ pub fn brep_face_ray_hits_fixed(
 
 /// Return None if any face misses; callers can then refine individually.
 pub fn try_brep_face_ray_hits_fixed(
-    brep: &Brep, faces: &[uuid::Uuid], placement: Transform, origin: Point3,
+    brep: &dyn BrepSourceAccess, faces: &[uuid::Uuid], placement: Transform, origin: Point3,
     direction: Point3, tolerance: f64, limits: &Limits,
 ) -> Result<Option<BrepFaceRayHits>, KernelError> {
     admit(brep.validate(limits))?;
+    try_brep_face_rays_from_source(brep.source(), brep.topology(), faces, placement, origin, direction, tolerance, None, limits.max_nodes)
+}
+
+pub fn try_verified_brep_face_ray_hits_fixed(brep: &dyn BrepSourceAccess, faces: &[uuid::Uuid], witnesses: &[FaceWitness],
+    placement: Transform, origin: Point3, direction: Point3, tolerance: f64, limits: &Limits)
+    -> Result<Option<BrepFaceRayHits>, KernelError> {
+    admit(brep.validate(limits))?;
+    try_brep_face_rays_from_source(brep.source(), brep.topology(), faces, placement, origin, direction, tolerance, Some(witnesses), limits.max_nodes)
+}
+
+/// Exact face rays from a tracked immutable source lease. The coordinator
+/// owns memory admission and the lease proves lifetime, not a remesh mapping.
+pub fn try_captured_brep_face_ray_hits_fixed(
+    source: &om9_core::transaction::CapturedBrepSource, faces: &[uuid::Uuid], placement: Transform,
+    origin: Point3, direction: Point3, tolerance: f64,
+) -> Result<Option<BrepFaceRayHits>, KernelError> {
+    try_brep_face_rays_from_source(source.source(), source.topology(), faces, placement, origin, direction, tolerance, None, u64::MAX)
+}
+
+pub fn try_verified_captured_brep_face_ray_hits_fixed(source: &om9_core::transaction::CapturedBrepSource,
+    faces: &[uuid::Uuid], witnesses: &[FaceWitness], placement: Transform, origin: Point3, direction: Point3,
+    tolerance: f64, max_nodes: u64) -> Result<Option<BrepFaceRayHits>, KernelError> {
+    try_brep_face_rays_from_source(source.source(), source.topology(), faces, placement, origin, direction, tolerance, Some(witnesses), max_nodes)
+}
+
+fn try_brep_face_rays_from_source(
+    source: &str, topology: &om9_core::brep::BrepTopology, faces: &[uuid::Uuid], placement: Transform,
+    origin: Point3, direction: Point3, tolerance: f64, witnesses: Option<&[FaceWitness]>, max_nodes: u64,
+) -> Result<Option<BrepFaceRayHits>, KernelError> {
     admit(placement.validate())?;
     if faces.is_empty() || faces.len() > 8
         || !origin.iter().chain(direction.iter()).all(|v| v.is_finite())
@@ -535,21 +740,35 @@ pub fn try_brep_face_ray_hits_fixed(
         return Err(KernelError::InvalidInput("invalid BRep face rays input".into()));
     }
     let mut indices = [0 as c_int; 8];
+    let mut triangles = [[[0.; 3]; 3]; 8];
+    let mut deflections = [0.; 8];
+    if let Some(witnesses) = witnesses {
+        if witnesses.len() != faces.len() { return Err(KernelError::InvalidInput("BRep face witness count".into())); }
+        for (i, (triangle, deflection)) in witnesses.iter().enumerate() {
+            if !deflection.is_finite() || *deflection <= 0.0 || triangle.iter().flatten().any(|v| !v.is_finite()) {
+                return Err(KernelError::InvalidInput("invalid BRep face witness".into()));
+            }
+            triangles[i] = *triangle; deflections[i] = *deflection;
+        }
+    }
     for (index, face) in faces.iter().enumerate() {
-        let face_index = brep.display.faces.iter().position(|id| id == face)
+        let face_index = topology.faces.iter().position(|id| id == face)
             .ok_or_else(|| KernelError::InvalidInput("BRep face ID is not in source snapshot".into()))?;
         indices[index] = c_int::try_from(face_index)
             .map_err(|_| KernelError::InvalidInput("BRep face index out of range".into()))?;
     }
     let mut part = Part::new(placement);
-    part.source = brep.source().as_ptr();
-    part.source_len = brep.source().len();
+    part.source = source.as_ptr();
+    part.source_len = source.len();
     let mut output = [[0_f64; 3]; 8];
     let mut message = [0 as c_char; 512];
     // SAFETY: fixed arrays, source and output remain alive for this synchronous call;
     // the adapter is bounded to faces.len() <= 8 and retains no native handle.
     let status = unsafe { om9_occt_brep_face_ray_hits(&part, indices.as_ptr(), faces.len(),
-        origin.as_ptr(), direction.as_ptr(), tolerance, output.as_mut_ptr().cast(),
+        origin.as_ptr(), direction.as_ptr(), tolerance,
+        witnesses.map_or(std::ptr::null(), |_| triangles.as_ptr().cast()),
+        witnesses.map_or(std::ptr::null(), |_| deflections.as_ptr()), usize::try_from(max_nodes).unwrap_or(usize::MAX),
+        output.as_mut_ptr().cast(),
         message.as_mut_ptr(), message.len() as c_int) };
     if status == 3 { return Ok(None); }
     if status != 0 { return Err(error(status, &message)); }
@@ -560,7 +779,7 @@ pub fn try_brep_face_ray_hits_fixed(
 }
 
 /// Restrict the exact underlying surfaces of a nonperiodic open BRep shell.
-pub fn shrink_face(face: &Brep, deflection_mm: f64, limits: &Limits) -> Result<Brep, KernelError> {
+pub fn shrink_face(face: &dyn BrepSourceAccess, deflection_mm: f64, limits: &Limits) -> Result<Brep, KernelError> {
     face.validate(limits).map_err(|e| KernelError::InvalidInput(e.to_string()))?;
     let budget = crate::brep::snapshot_budget(limits);
     crate::brep::snapshot_via(deflection_mm, limits, |sink, context, message, capacity| {
@@ -571,7 +790,7 @@ pub fn shrink_face(face: &Brep, deflection_mm: f64, limits: &Limits) -> Result<B
 }
 
 /// Bounds of the underlying surface (not the trimmed face) of a single BRep face.
-pub fn face_underlying_bounds(face: &Brep, limits: &Limits) -> Result<[f64; 4], KernelError> {
+pub fn face_underlying_bounds(face: &dyn BrepSourceAccess, limits: &Limits) -> Result<[f64; 4], KernelError> {
     face.validate(limits).map_err(|e| KernelError::InvalidInput(e.to_string()))?;
     let mut bounds = [0.; 4]; let mut message = [0 as c_char; 512];
     // SAFETY: source and fixed-size output buffers remain live during the synchronous call.
@@ -582,7 +801,7 @@ pub fn face_underlying_bounds(face: &Brep, limits: &Limits) -> Result<[f64; 4], 
 }
 
 /// Return the periodic axes of the underlying surface of a single face.
-pub fn face_periodicity(face: &Brep, limits: &Limits) -> Result<[bool; 2], KernelError> {
+pub fn face_periodicity(face: &dyn BrepSourceAccess, limits: &Limits) -> Result<[bool; 2], KernelError> {
     face.validate(limits).map_err(|e| KernelError::InvalidInput(e.to_string()))?;
     let mut axes = [0; 2]; let mut message = [0 as c_char; 512];
     // SAFETY: input and output buffers remain live through the synchronous call.
@@ -593,7 +812,7 @@ pub fn face_periodicity(face: &Brep, limits: &Limits) -> Result<[bool; 2], Kerne
 }
 
 /// Whether every face's underlying surface is eligible for the nonperiodic shrink adapter.
-pub fn face_shrink_supported(face: &Brep, limits: &Limits) -> Result<bool, KernelError> {
+pub fn face_shrink_supported(face: &dyn BrepSourceAccess, limits: &Limits) -> Result<bool, KernelError> {
     face.validate(limits).map_err(|e| KernelError::InvalidInput(e.to_string()))?;
     let mut supported = 0; let mut message = [0 as c_char; 512];
     // SAFETY: the immutable input and output buffers remain live through the synchronous call.
@@ -662,9 +881,38 @@ pub fn distance(
     bt: Transform,
     limits: &Limits,
 ) -> Result<Distance, KernelError> {
+    distance_with_native_sources(a, at, None, b, bt, None, limits)
+}
+
+/// Measure against exact converted native sources without constructing or
+/// retaining viewport geometry. Each override must come from the corresponding
+/// native operand. Callers must convert the matching payload and own and admit
+/// both source strings through the call; this API does not attest that binding.
+pub fn distance_with_native_sources(
+    a: &Geometry, at: Transform, a_source: Option<&str>,
+    b: &Geometry, bt: Transform, b_source: Option<&str>, limits: &Limits,
+) -> Result<Distance, KernelError> {
+    fn operand(geometry: &Geometry, transform: Transform, source: Option<&str>, limits: &Limits,
+        owned: &mut Vec<Vec<Point3>>) -> Result<Vec<Part>, KernelError> {
+        match (geometry, source) {
+            (Geometry::NativeBrep(_), Some(source)) => {
+                admit(geometry.validate(limits))?;
+                admit(transform.validate())?;
+                if source.is_empty() || source.len() as u64 > limits.max_bytes || !source.contains("CASCADE Topology") {
+                    return Err(KernelError::InvalidInput("native BRep distance source".into()));
+                }
+                let mut part = Part::new(transform);
+                part.source = source.as_ptr();
+                part.source_len = source.len();
+                Ok(vec![part])
+            }
+            (_, None) => parts(geometry, transform, limits, owned),
+            _ => Err(KernelError::InvalidInput("native BRep distance source mismatch".into())),
+        }
+    }
     let mut owned = Vec::new();
-    let first = parts(a, at, limits, &mut owned)?;
-    let second = parts(b, bt, limits, &mut owned)?;
+    let first = operand(a, at, a_source, limits, &mut owned)?;
+    let second = operand(b, bt, b_source, limits, &mut owned)?;
     let mut value = 0.;
     let mut points = [[0.; 3]; 2];
     let mut message = [0; 512];
@@ -690,15 +938,32 @@ pub fn distance(
     })
 }
 pub fn edge_length(
-    brep: &Brep,
+    brep: &dyn BrepSourceAccess,
     index: Option<usize>,
     transform: Transform,
     limits: &Limits,
 ) -> Result<f64, KernelError> {
+    edge_length_inner(brep, index, transform, None, limits)
+}
+
+pub fn verified_edge_length(brep: &dyn BrepSourceAccess, transform: Transform, segment: [Point3; 2],
+    pick_tolerance: f64, segment_tolerance: f64, limits: &Limits) -> Result<f64, KernelError> {
+    verified_display_edge_length(brep, transform, &segment, &[[0, 1, 0]], 0,
+        pick_tolerance, segment_tolerance, limits)
+}
+
+pub fn verified_display_edge_length(brep: &dyn BrepSourceAccess, transform: Transform, points: &[Point3],
+    segments: &[[u32; 3]], display_edge: u32,
+    pick_tolerance: f64, segment_tolerance: f64, limits: &Limits) -> Result<f64, KernelError> {
+    edge_length_inner(brep, None, transform, Some((points, segments, display_edge, pick_tolerance, segment_tolerance)), limits)
+}
+
+fn edge_length_inner(brep: &dyn BrepSourceAccess, index: Option<usize>, transform: Transform,
+    witness: Option<(&[Point3], &[[u32; 3]], u32, f64, f64)>, limits: &Limits) -> Result<f64, KernelError> {
     admit(brep.validate(limits))?;
     admit(transform.validate())?;
     let index = match index {
-        Some(i) if i < brep.display.edges.len() => {
+        Some(i) if i < brep.topology().edges.len() => {
             c_int::try_from(i).map_err(|_| KernelError::InvalidInput("edge index".into()))?
         }
         Some(_) => return Err(KernelError::InvalidInput("edge index".into())),
@@ -713,6 +978,15 @@ pub fn edge_length(
             brep.source().len(),
             index,
             transform.0.as_ptr().cast(),
+            witness.as_ref().map_or(std::ptr::null(), |w| w.0.as_ptr()),
+            witness.as_ref().map_or(0, |w| w.0.len()),
+            witness.as_ref().map_or(std::ptr::null(), |w| w.1.as_ptr()),
+            witness.as_ref().map_or(0, |w| w.1.len()),
+            witness.as_ref().map_or(0, |w| w.2),
+            witness.as_ref().map_or(0., |w| w.3),
+            witness.as_ref().map_or(0., |w| w.4),
+            usize::try_from(limits.max_points).unwrap_or(usize::MAX),
+            usize::try_from(limits.max_nodes).unwrap_or(usize::MAX),
             &mut value,
             message.as_mut_ptr(),
             512,

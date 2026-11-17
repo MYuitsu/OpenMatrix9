@@ -1,0 +1,21 @@
+# DupEdge: two edges of a public Rhino 5 B-rep
+
+Batch `external-v5-native-dupedge-two-edges`, package 3: six executions on one public V5 fixture, two passed and four test executions failed during development. Two failures incorrectly assumed temporary NativeBrep picks appear in ordinary subselection. In two others the original camera produced `invalid ambiguous edges` for the second pick and only AB was committed; the diagnostic did not independently prove which projected candidates overlapped. A changed camera provided two unambiguous picks. The final successful execution added checks for interpolated sample positions.
+
+The [public V5 file](https://github.com/mcneel/opennurbs/blob/eb92af3ba1806b0a34a99aba0d3bda83e3d46083/example_files/V5/v5_my_brep.3dm) was imported as NativeBrep, saved and reopened. Synthetic viewport clicks selected AB and BF and a single command created two curves; five evaluated points per curve and endpoints match the line definitions in the independent [openNURBS example](https://github.com/mcneel/opennurbs/blob/eb92af3ba1806b0a34a99aba0d3bda83e3d46083/example_brep/example_brep.cpp). Full document snapshots matched after Undo and Redo. The fixture and exchange executable fingerprints and original single-edge results are in [the prior record](2026-11-13-dupedge-external-v5.md).
+
+The check uses egui synthetic clicks and a deliberately selected camera, not a physical desktop or general visibility test. It covers two straight edges in one B-rep, not all its edges, curved geometry or arbitrary third-party files. The ambiguous-camera runs did not assert document/Redo invariants at the time of refusal. Physical RAM exhaustion and native peak are also unverified. No product behavior changed.
+
+One prepared batch remains: `modeling-public-rhino5-generated-exchange` (four fixtures, seven objects), awaiting independent Rhino 5. Packages 2–8 remain open; the total number of future batches is unknown. Next: continue Plan A and obtain broader input and desktop evidence; the separate high-zoom improvement remains pending user decision. B1–B3 remain deferred.
+
+## Overlapping projection follow-up
+
+Batch `external-v5-ambiguous-projection`, package 3: three test executions on the same fixture, all passed (one focused ambiguity run and a combined run of the two-edge and ambiguity tests). At the original orthographic camera, the picker returns exactly two source-view edge candidates. Their world points are `[10, 0, 6]` and `[10, 48/7, -6/7]`; both project to the clicked point within 1e-6 pixel while their depths differ by more than 9 mm. Thus the ambiguity is a real projection overlap in this fixture, not evidence of duplicate candidate IDs. The synthetic click reports ambiguity and the document and pre-existing Redo are unchanged. The test does not establish which edge a user intends, real desktop behavior, or correct handling of every overlapping pair; it does not change product behavior.
+
+One prepared batch remains: `modeling-public-rhino5-generated-exchange` (four fixtures, seven objects), awaiting independent Rhino 5. Packages 2–8 remain open; the total number of future batches is unknown. Next: broader independent and desktop evidence; the separate high-zoom decision remains pending.
+
+## Continue after ambiguity
+
+Batch `external-v5-ambiguity-continue`, package 3: one execution on the same public fixture passed. In the same active DupEdge command, the test selected AB, clicked the ambiguous projection, verified the original document and Redo, changed the camera programmatically and selected BF. It then verified both source edge endpoints and complete document snapshots across one Undo/Redo. Thus the earlier selected temporary edge survived the refusal and camera change in this case. This is an egui synthetic-click test; changing the camera was not a mouse drag, and no physical desktop was exercised. Other files, camera interactions, actual OOM and native peak remain unverified.
+
+One prepared batch remains: `modeling-public-rhino5-generated-exchange` (four fixtures, seven objects), awaiting independent Rhino 5. Packages 2–8 remain open; the total number of future batches is unknown. Next: broader independent and desktop evidence; the separate high-zoom decision remains pending.

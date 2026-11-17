@@ -213,5 +213,34 @@
     "api": "implementation/design/M01/OM9-L3-01-06-007/api.md",
     "evidence": "implementation/evidence/M01/OM9-L3-01-06-007/",
     "manual_pending": "the highlight must be visible against the shaded colour at a glance"
+  },
+  "runtime_implementation": {
+    "selection_frame_projection_2026_11_15": {
+      "status": "SCOPED_SELECTION_FRAME_PROJECTION_64_128_VERIFIED",
+      "scope": "Prepared immutable camera/viewport basis per selection-frame rebuild; every selected vertex, transform/projection arithmetic, finite/clip checks, margin and cache behavior preserved. Exact CAD source unchanged.",
+      "measurement": "35 distinct focused integration tests and 16/16 same-binary native-window release runs passed. 64 high selection 116.4→28.5 ms, transition 140.0→57.6 ms, active max 140.2→91.5 ms; 64 light selection 30.7→5.9 ms, transition 42.5→16.5 ms, active max 80.8→84.0 ms; 128 high selection 217.0→33.7 ms, transition 253.8→65.9 ms, active max 257.3→232.4 ms; 128 light selection 55.6→8.8 ms, transition 80.2→29.8 ms, active max 206.8→211.7 ms. Identical native result SHA, display density and projected-vertex coverage; both paths remain near 30 steady encoded FPS.",
+      "evidence": "docs/validation/2026-11-15-selection-frame-projection.md",
+      "data": "docs/validation/2026-11-15-selection-frame-projection.json",
+      "remaining": "Creation/fitting, other UI, worker admission and publication pauses remain; general scenes, client FPS, full migration/persistence and manual UI sign-off unproved. Existing selection_overlay ignored hover fixtures have two canonical-BRep compile errors and are not counted passing.",
+      "next_document": "crates/om9-app/src/session/solid.rs",
+      "next_action": "Profile foreground Sphere creation/scene-fitting and remaining UI/admission pauses separately, retaining exact sources and selection visuals."
+    },
+    "smooth_normals_selection_cache_20261115": {
+      "status": "implemented_focused_validation_native_matrix_pending",
+      "scope": "GPU-only smooth CAD-face normals with crease boundaries; immutable shared display bounds and conservative clipped selection-frame projection. Exact source authority and picking/snapping/Boolean remain unchanged.",
+      "evidence": "docs/validation/2026-11-15-smooth-normals-selection-cache.md",
+      "checks": [
+        "17 app integration tests passed including exact source equality, Boolean and Undo/Redo",
+        "3 smooth-normal math tests passed",
+        "GPU flat/smooth readback passed with identical silhouette",
+        "2 bounds/projection tests passed",
+        "15 scene renderer tests passed in saved sequential retry; 4 ignored measurement cases"
+      ],
+      "requires_manual_test": true,
+      "manual_acceptance": false,
+      "native_performance": "512/768 Light/High pending: current Windows session 1 is disconnected; no new native FPS/freeze/RAM claim",
+      "binary_receipt": "build/standalone-validation/ui-artifacts/viewport-normals-selection-20261115/frozen-binary.json",
+      "data": "docs/validation/2026-11-15-smooth-normals-selection-cache.json"
+    }
   }
 }

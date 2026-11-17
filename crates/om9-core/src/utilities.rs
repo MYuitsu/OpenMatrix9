@@ -100,8 +100,10 @@ pub fn bounds(geometry: &Geometry) -> Option<Bounds> {
         Geometry::Surface(surface) => add_points(&mut result, &surface.poles),
         Geometry::Mesh(mesh) => add_points(&mut result, &mesh.vertices),
         Geometry::Cloud(cloud) => add_points(&mut result, &cloud.points),
-        Geometry::Brep(brep) => add_points(&mut result, &brep.display.points),
-        Geometry::NativeBrep(brep) => add_points(&mut result, &brep.display.vertices),
+        // Canonical B-reps require the geometry adapter's source bounds. A
+        // disposable viewport mesh cannot supply this source query.
+        Geometry::Brep(_) => return None,
+        Geometry::NativeBrep(_) => return None,
         Geometry::Hatch(hatch) => add_points(&mut result, &hatch.display.vertices),
         Geometry::Light(light) => add_points(&mut result, &[light.display]),
         Geometry::Instance(_) => {}

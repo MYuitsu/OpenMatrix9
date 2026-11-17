@@ -919,11 +919,6 @@ impl Controller {
             curves.push(curve.clone());
         }
         let brep = self.build_sweep4(&curves)?;
-        let entity = Entity::new(
-            surface_edit::label(feature),
-            Geometry::Brep(brep),
-            self.document().current_layer,
-        );
         let mut inputs = Vec::with_capacity(ordered.len());
         for (index, id) in ordered.iter().enumerate() {
             inputs.push(SourceBinding {
@@ -938,10 +933,10 @@ impl Controller {
             "four rail sweep",
             None,
         );
-        self.commit_entity_with_history(
+        self.commit_brep_with_history(
             feature,
             surface_edit::label(feature),
-            entity,
+            brep,
             "Sweep4",
             inputs,
         )

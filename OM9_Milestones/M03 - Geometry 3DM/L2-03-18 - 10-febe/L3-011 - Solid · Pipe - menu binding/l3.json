@@ -785,6 +785,7 @@
     "date": "2026-10-23",
     "status": "PARTIAL_PIPE_BENT_ENDPOINT_POINTS_AUTOMATED_CHECKS_PASSED",
     "feature": "OM9-SOLID-011",
+    "document_units_2026_11_12": "Centimetre numeric and mixed point radii verified for direct/menu, diameter, stations, thick, round caps, Multiple and Chain fixtures with volume and Undo/Redo; source/output save/open on single-rail routes. See docs/validation/2026-11-12-pipe-document-units.md.",
     "command": "Pipe 1",
     "evidence": [
       "implementation/evidence/M03/OM9-L3-03-18-011/OM9-L4-03-18-011-01.focused.log",
@@ -961,6 +962,25 @@
       "evidence": "docs/validation/2026-10-28-solid-pipe-source-map.md",
       "tests": "30 workflows, 32 viewport, 6 Pipe option, 56 Solid input passed; 1 native UI fixture ignored. CMD and viewport end-point radii, volume, Undo; near-equal viewport input corrected; straight Global chain small taper preserved.",
       "limitations": "Projection and tolerance are OM9 interpretations, not original proof; Diameter points, other planes/orientations, bent stations and desktop unverified."
+    },
+    "reopened_chain_edge_2026_11_11": {
+      "status": "SCOPED_CONTROLLER_VIEWPORT_TESTS_PASSED",
+      "evidence": "docs/validation/2026-11-11-pipechain-reopened-edge.md",
+      "scope": "Verify selected straight B-rep edge against source before PipeChain; reopened topology permutation and refusal fixtures.",
+      "limitations": "Native peak, desktop, all imported edges and non-rigid placements not established; unmatched display is refused."
+    },
+    "pipechain_mixed_display_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "SCOPED_AUTOMATED_REGRESSION_PASSED",
+      "scope": "PipeChain rejects a reopened Box edge whose selected display ID contains segments from different source edges, preserving document, pending chain and Redo.",
+      "tests": "Solid input group 100 passed, including three focused PipeChain tests; five simulated viewport PipeChain tests passed; debug build and public audit passed.",
+      "limitations": [
+        "Additional synchronous source read; native peak and latency unmeasured.",
+        "Desktop click, other source topologies, memory pressure and general affine placement unverified."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-11-pipechain-reopened-edge.md#mixed-displayed-edge-after-reopen--2026-11-12"
+      ]
     }
   }
 }

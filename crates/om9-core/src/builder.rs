@@ -15,11 +15,11 @@
 //! [`BuilderSession::plan`] produces the records a transaction inserts.
 use crate::{
     Error, Result,
-    associative::{FeaturePort, PublishedSubshapes, RebuildRequest, Subshape},
-    budget::Limits,
+    associative::{FeaturePort, ProducedFeature, PublishedSubshapes, RebuildRequest, Subshape},
+    budget::{Limits, Usage},
     geometry::{Curve, Geometry, GeometryKind, Point3, Transform, Unit},
     history::{EvaluationState, Recipe, ReplayEnvironment, Tolerance},
-    identity::{HistoryId, ObjectId},
+    identity::{DocumentId, HistoryId, ObjectId, SessionId},
     model::{Document, Entity},
     producers::{
         OUTSIDE_RAIL_COMMAND, ProducerRegistry, ProfilePreset, RAIL_PROFILE_COMMAND,
@@ -315,9 +315,60 @@ pub struct BuilderHandle {
 #[derive(Debug, Clone, PartialEq)]
 pub struct BuilderPreview {
     pub geometry: Geometry,
+    /// Transient operation results for a preview that has not yet handed its
+    /// representations to the host. Never inserted into the document.
+    pub brep_candidates: Vec<crate::brep::Brep>,
     pub subshapes: Vec<Subshape>,
     pub handles: Vec<BuilderHandle>,
     pub summary: String,
+}
+
+/// A prepared refresh owns the producer request and its publication token. The
+/// caller can move it to a worker without retaining the document or the old preview.
+#[derive(Debug)]
+pub struct PreparedBuilderRefresh {
+    request: RebuildRequest,
+    revision: u64,
+    document: DocumentId,
+    owner_session: SessionId,
+    epoch: u64,
+    session_generation: u64,
+    document_revision: u64,
+    context_revision: u64,
+}
+
+impl PreparedBuilderRefresh {
+    pub fn request(&self) -> &RebuildRequest {
+        &self.request
+    }
+
+    /// Validate a completed request against the current builder and document.
+    pub fn matches(&self, session: &BuilderSession, document: &Document) -> bool {
+        session.revision == self.revision && session.recipe == self.request.recipe
+            && self.request.outputs.as_slice() == [session.output]
+            && document.id == self.document && document.owner_session == self.owner_session
+            && document.epoch == self.epoch && document.session_generation == self.session_generation
+            && document.revision == self.document_revision && document.context_revision == self.context_revision
+    }
+
+    /// Account a request with no input snapshots, such as the ring family.
+    /// Input-bearing requests require separate source ownership accounting.
+    pub fn inputless_storage_usage(&self, limits: &Limits) -> Result<Usage> {
+        if !self.request.inputs.is_empty() {
+            return Err(Error::Invalid("input-bearing builder request"));
+        }
+        let mut usage = Usage::btree::<String, Value>(self.request.parameters.len())?;
+        usage.add(Usage::array::<ObjectId>(self.request.outputs.capacity())?, limits)?;
+        let mut strings = self.request.command.capacity() as u64;
+        for (key, value) in &self.request.parameters {
+            strings = strings.checked_add(key.capacity() as u64).ok_or(Error::Overflow("builder request"))?;
+            if let Value::Choice(value) | Value::Text(value) = value {
+                strings = strings.checked_add(value.capacity() as u64).ok_or(Error::Overflow("builder request"))?;
+            }
+        }
+        usage.add(Usage { bytes: strings, ..Usage::default() }, limits)?;
+        Ok(usage)
+    }
 }
 
 /// The records one Apply inserts, in one transaction.
@@ -338,6 +389,7 @@ pub struct BuilderSession {
     inputs: Vec<(String, ObjectId)>,
     fields: Vec<BuilderField>,
     preview: Option<BuilderPreview>,
+    preview_document: Option<PreviewDocument>,
     /// Presets the user removed from this session's library. A preview that still selects
     /// one refuses instead of silently falling back to another shape.
     removed_presets: BTreeSet<&'static str>,
@@ -345,6 +397,23 @@ pub struct BuilderSession {
     /// back with the edit, so a panel event that raced a viewport drag is refused instead
     /// of overwriting the newer value (`OM9-L3-03-11-006`).
     revision: u64,
+}
+
+#[derive(Debug, Clone, Copy)]
+struct PreviewDocument {
+    document: DocumentId,
+    owner_session: SessionId,
+    epoch: u64,
+    session_generation: u64,
+    revision: u64,
+    context_revision: u64,
+}
+impl PreviewDocument {
+    fn matches(&self, document: &Document) -> bool {
+        self.document == document.id && self.owner_session == document.owner_session
+            && self.epoch == document.epoch && self.session_generation == document.session_generation
+            && self.revision == document.revision && self.context_revision == document.context_revision
+    }
 }
 
 impl BuilderSession {
@@ -479,6 +548,7 @@ impl BuilderSession {
             inputs,
             fields,
             preview: None,
+            preview_document: None,
             removed_presets: BTreeSet::new(),
             revision: 0,
         };
@@ -513,11 +583,28 @@ impl BuilderSession {
     pub fn adopt_history(&mut self, output: ObjectId, recipe: HistoryId) {
         self.output = output;
         self.recipe = recipe;
+        self.preview = None;
+        self.preview_document = None;
+        self.revision = self.revision.wrapping_add(1);
     }
     pub fn recipe(&self) -> HistoryId {
         self.recipe
     }
     pub fn preview(&self) -> Option<&BuilderPreview> {
+        self.preview.as_ref()
+    }
+    pub fn take_preview_brep_candidates(&mut self) -> Result<Vec<crate::brep::Brep>> {
+        Ok(std::mem::take(&mut self.preview.as_mut().ok_or(Error::Missing("builder preview"))?.brep_candidates))
+    }
+    pub fn restore_preview_brep_candidates(&mut self, candidates: Vec<crate::brep::Brep>) -> Result<()> {
+        let preview = self.preview.as_mut().ok_or(Error::Missing("builder preview"))?;
+        if !preview.brep_candidates.is_empty() { return Err(Error::Invalid("builder preview candidates")); }
+        preview.brep_candidates = candidates;
+        Ok(())
+    }
+    /// A preview is visible only while its source document and context still match.
+    pub fn preview_for_document(&self, document: &Document) -> Option<&BuilderPreview> {
+        self.preview_document.filter(|stamp| stamp.matches(document))?;
         self.preview.as_ref()
     }
 
@@ -566,6 +653,9 @@ impl BuilderSession {
     pub fn remove_preset(&mut self, name: &str) -> Result<bool> {
         let preset = ProfilePreset::from_name(name).ok_or(Error::Invalid("profile preset"))?;
         let removed = self.removed_presets.insert(preset.name());
+        if removed {
+            self.revision = self.revision.wrapping_add(1);
+        }
         if removed && self.selected_preset() == Some(preset) {
             self.preview = None;
         }
@@ -575,6 +665,18 @@ impl BuilderSession {
     /// Apply one typed field value. The domain decides the range and the unit; a value of the
     /// wrong dimension is refused with the same rule the command line uses.
     pub fn set_field(&mut self, name: &str, value: Value) -> Result<()> {
+        // Validate first: a rejected edit must not change another field while leaving
+        // the revision (and any in-flight preview token) unchanged.
+        self.field(name)
+            .ok_or(Error::Missing("builder field"))?
+            .domain
+            .check(&value, &Limits::default())?;
+        let switches_standard = name == "diameter_mm" && self.field("standard")
+            .and_then(BuilderField::selected_choice)
+            .is_some_and(|standard| standard.eq_ignore_ascii_case("US"));
+        if !switches_standard && self.field(name).is_some_and(|field| field.value == value) {
+            return Ok(());
+        }
         // An explicit diameter always wins over a standard: editing the diameter switches the
         // mode back to explicit so the next refresh cannot silently replace the value.
         if name == "diameter_mm"
@@ -594,7 +696,6 @@ impl BuilderSession {
             .iter_mut()
             .find(|field| field.name == name)
             .ok_or(Error::Missing("builder field"))?;
-        field.domain.check(&value, &Limits::default())?;
         field.value = value;
         self.preview = None;
         self.revision = self.revision.wrapping_add(1);
@@ -804,9 +905,9 @@ impl BuilderSession {
         })
     }
 
-    /// Recompute the preview through the registry. A producer failure is returned as the
-    /// builder's own error; the document is untouched.
-    pub fn refresh(&mut self, document: &Document, registry: &ProducerRegistry) -> Result<()> {
+    /// Prepare a request and publication token. Callers running asynchronously must keep
+    /// their own admission lease for the request, producer output and retained preview.
+    pub fn prepare_refresh(&mut self, document: &Document) -> Result<PreparedBuilderRefresh> {
         if self.kind == BuilderKind::RingRail {
             self.sync_standard_diameter()?;
         }
@@ -815,16 +916,41 @@ impl BuilderSession {
         {
             return Err(Error::Missing("profile preset"));
         }
-        let request = self.request(document)?;
-        let produced = registry.produce(&request)?;
-        let Some(output) = produced.outputs.first() else {
-            return Err(Error::Invalid("builder producer output"));
-        };
+        Ok(PreparedBuilderRefresh {
+            request: self.request(document)?,
+            revision: self.revision,
+            document: document.id,
+            owner_session: document.owner_session,
+            epoch: document.epoch,
+            session_generation: document.session_generation,
+            document_revision: document.revision,
+            context_revision: document.context_revision,
+        })
+    }
+
+    /// Drop an obsolete preview before launching asynchronous work so Apply cannot use it.
+    pub fn clear_preview(&mut self) {
+        self.preview = None;
+    }
+
+    /// Publish a completed producer result only while its builder and document are current.
+    pub fn finish_refresh(&mut self, document: &Document, prepared: PreparedBuilderRefresh, produced: ProducedFeature) -> Result<()> {
+        if !prepared.matches(self, document) {
+            return Err(Error::Stale("builder preview"));
+        }
+        let mut outputs = produced.outputs.into_iter();
+        let output = outputs.next().ok_or(Error::Invalid("builder producer output"))?;
+        if outputs.next().is_some() {
+            return Err(Error::Invalid("builder producer output count"));
+        }
+        if output.object != self.output {
+            return Err(Error::Stale("builder producer output"));
+        }
         let subshapes = produced
             .subshapes
-            .iter()
+            .into_iter()
             .find(|set| set.output == output.object)
-            .map(|set| set.subshapes.clone())
+            .map(|set| set.subshapes)
             .unwrap_or_default();
         // A read-only input (locked layer or locked object) paints no handle: the builder
         // must not offer a drag that the document would refuse (`OM9-L3-03-11-005`).
@@ -835,24 +961,56 @@ impl BuilderSession {
         };
         let summary = self.summary(&output.geometry);
         self.preview = Some(BuilderPreview {
-            geometry: output.geometry.clone(),
+            geometry: output.geometry,
+            brep_candidates: produced.brep_candidates,
             subshapes,
             handles,
             summary,
         });
+        self.preview_document = Some(PreviewDocument { document: prepared.document,
+            owner_session: prepared.owner_session, epoch: prepared.epoch,
+            session_generation: prepared.session_generation, revision: prepared.document_revision,
+            context_revision: prepared.context_revision });
         Ok(())
+    }
+
+    /// Recompute the preview through the registry. A producer failure is returned as the
+    /// builder's own error; the document is untouched.
+    pub fn refresh(&mut self, document: &Document, registry: &ProducerRegistry) -> Result<()> {
+        let prepared = self.prepare_refresh(document)?;
+        let produced = registry.produce(prepared.request())?;
+        self.finish_refresh(document, prepared, produced)
     }
 
     /// The records one Apply inserts. The geometry must come from the current preview; a
     /// caller cannot commit a preview from another field value.
     pub fn plan(&self, document: &Document) -> Result<BuilderPlan> {
+        self.plan_internal(document, false)
+    }
+
+    /// Only the coordinator may stage an unleased alias while borrowing the preview owner.
+    pub(crate) fn plan_for_transaction(&self, document: &Document) -> Result<BuilderPlan> {
+        self.plan_internal(document, true)
+    }
+
+    fn plan_internal(&self, document: &Document, coordinated: bool) -> Result<BuilderPlan> {
         let preview = self
             .preview
             .as_ref()
             .ok_or(Error::Missing("builder preview"))?;
+        if !self.preview_document.is_some_and(|stamp| stamp.matches(document)) {
+            return Err(Error::Stale("builder preview document"));
+        }
+        if !coordinated && matches!(&preview.geometry, Geometry::Brep(brep) if brep.has_allocation_owner()) {
+            return Err(Error::Unsupported("leased builder preview publication"));
+        }
+        let geometry = match &preview.geometry {
+            Geometry::Brep(brep) if coordinated && brep.has_allocation_owner() => Geometry::Brep(brep.clone_for_document_staging()),
+            geometry => geometry.clone(),
+        };
         let mut entity = Entity::new(
             self.label.clone(),
-            preview.geometry.clone(),
+            geometry.clone(),
             document.current_layer,
         );
         entity.id = self.output;
@@ -900,7 +1058,7 @@ impl BuilderSession {
         let published = PublishedResult {
             operation: self.kind.command().into(),
             geometry_revision: entity.geometry_revision,
-            geometry_snapshot: preview.geometry.clone(),
+            geometry_snapshot: geometry,
             source_stamps: bindings.iter().map(|binding| binding.source).collect(),
             conversion: ConversionReport::identity(preview.geometry.kind()),
             recipe: Some(recipe.id),
@@ -1006,11 +1164,11 @@ impl BuilderSession {
                 match kind.ring_family() {
                     Some(crate::ring_builder::RingBuilderKind::Eternity) => format!(
                         "⌀{diameter:.2} mm B-Rep, {stones:.0} stone frames, {} faces",
-                        brep.display.faces.len()
+                        brep.topology().faces.len()
                     ),
                     _ => format!(
                         "⌀{diameter:.2} mm B-Rep, {} faces",
-                        brep.display.faces.len()
+                        brep.topology().faces.len()
                     ),
                 }
             }

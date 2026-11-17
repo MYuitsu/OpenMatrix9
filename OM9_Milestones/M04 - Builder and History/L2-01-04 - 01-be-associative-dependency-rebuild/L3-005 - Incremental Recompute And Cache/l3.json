@@ -224,6 +224,15 @@
     "source_pin": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
     "special_manual_flags": []
   },
+  "runtime_implementation": {
+    "source_display_handoff_2026_11_14": "Partial, compile-only: registered rebuild retains native display candidates through candidate scene preparation, and stages its recompute cache until publication. Producer admission and runtime behavior remain open. Evidence: docs/validation/2026-11-14-canonical-representation-transfer.md#builder-and-registered-history-handoff-in-progress",
+    "history_canonical_hash_2026_11_14": {
+      "status": "SCOPED_CHECKSUM_TESTS_PASSED",
+      "scope": "Output checksum excludes separate B-rep display, includes canonical OCCT source/topology or native payload/CRC, invalidates old hash-version cache entries, and checks output generation and geometry revision; authored mesh remains source.",
+      "limitations": "This does not separate Document or Undo ownership and does not establish topology identity, native payload display absence, cold restore or v5.",
+      "evidence": "docs/validation/2026-11-14-history-canonical-hash.md"
+    }
+  },
   "task_ids": [
     "OM9-L4-01-04-005-01",
     "OM9-L4-01-04-005-02",

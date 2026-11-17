@@ -1,5 +1,394 @@
 # OpenMatrix9
 
+[Current source/viewport review and flow (2026-11-16)](docs/validation/2026-11-16-source-viewport-current-status.md): OCCT and native BRep model values now hold source separately from viewport representations. Sphere runtime checks passed in the recorded scope; full cache lifecycle and consumer coverage remain open. The `.om9` v5 encoder/reader currently refuses BRep migration, so source-only BRep persistence is not complete.
+
+CAD command checks follow the approved [source/viewport/early-preview skill contract](skills/openmatrix9-workflow/references/source-and-viewport-contract.md): reuse working paths, fill missing parts within the requested command and update the [single command checklist](docs/validation/command-source-viewport-checklist.md). [Skill validation](docs/validation/2026-11-16-command-separation-skill-policy.md) records policy only; it does not mark commands complete.
+
+Cache/Undo M1-R (2026-11-16): [implementation evidence](docs/validation/2026-11-16-m1r-storage-receipts.md) records immutable storage receipts, shared admitted retained-owner projection caches/reclamation, owner lookup improvements and bounded Undo-attribution deferral. All ten final 16/64/128/512/768 Light/High console configurations passed source/history/publication checks, with ordinary full Undo and an explicit 4M-point test allowance. Orbit is near 30 FPS, but creation UI work reaches 729/821 ms at 768 Light/High and High has an initial selected-publication delay. The [latency gates](implementation/design/M01/viewport-export-separation-20261102/PLAN_MEMORY.md#m1-r--giảm-chi-phí-cacheundo-trên-đường-tương-tác) and complete incremental owner registry remain open; product default limits are unchanged. [Rhino 5 capacity research](docs/validation/2026-11-16-rhino5-mesh-capacity.md) does not establish a universal practical scene ceiling.
+
+The earlier physical-console baseline reproduced a creation UI stall around 480 spheres: the Sphere command took 6.07 s at 480 and 7.87 s at 512, dominated by repeated retained-owner admission checks. That profiled diagnostic was stopped after reported unresponsiveness and whole-window enlargement; it lacks a final 512 source/Undo pass and is not a controlled A/B speedup comparator for the later M1-R batch. The maximize/resize issue remains unresolved. [Historical baseline metrics](docs/validation/2026-11-16-console-sphere-metrics.md).
+
+Progressive viewport publication now drains append-only source snapshots instead of canceling every unfinished image. Thirty GPU bridge tests and an exact-source test passed; native 16-sphere Light/High tests confirm each sphere appears before the next replayed command, with 16 Undo and approximately 30 published FPS. The 512/768 matrix remains incomplete after RDP disconnected at 409 spheres. [Evidence and increasing creation cost](docs/validation/2026-11-16-progressive-render-publish.md).
+
+The separated viewport now supports smooth CAD-face normals and cached bounds for the selection frame, keeping exact BRep data unchanged. Source/Boolean/Undo integration and GPU shading readback passed; the new native 512/768 Light/High FPS/freeze/RAM matrix is pending an active RDP desktop. [Implementation and validation](docs/validation/2026-11-15-smooth-normals-selection-cache.md).
+
+BooleanUnion publishes a disposable viewport preview while its exact source-only fold runs. Five native profiles passed (64/128 Light/High and 512 Light); 512 High published a preview but its exact worker failed before commit. At 512, preview Light/High is 3.83/5.36 s and waiting encoded FPS 29.32/27.75; Light retains 513 Undo, failed High retains its original 512 spheres/Undo. Creation still has long image holds. [512 results and failure](docs/validation/2026-11-15-speculative-boolean-512-comparison.md).
+
+The 512-sphere Light UI stall was reduced: largest active callback gap 133.725→6.703 s, final receive/commit poll 70393.0→1514.7 ms. Exact native source bytes, display density and 513 Undo remain. The run uses the same test-only object cap 200000 as its baseline; two stricter-cap 64-sphere Light/High runs and 25 focused checks passed. Remaining pauses and scope are documented in the [measurements](docs/validation/2026-11-15-512-light-freeze-fix.md).
+
+The 512-sphere resource benchmark completed Light with 513 retained Undo; High reached 512 spheres but Boolean was refused by its snapshot point budget, retaining 512 Undo. Both attempts used an explicit test-only object cap after the default cap stopped at sphere 447. RAM, FPS, severe remaining UI pauses and the failed High outcome are recorded in the [measurements and limits](docs/validation/2026-11-15-512-spheres-memory-undo.md).
+
+The earlier selection-frame optimization prepared the immutable camera once per pane while retaining every selected vertex. Its thirty-five focused tests and sixteen native-window 64/128-sphere runs remain historical evidence; the new cached-bounds implementation above supersedes that projection path. [Earlier measurements and limits](docs/validation/2026-11-15-selection-frame-projection.md).
+
+Boolean request preparation now admits exact source leases in one batch. Twenty focused tests and sixteen same-binary native-window 64/128-sphere runs verify Light/High behavior and request/freeze timings with identical native source bytes. [Measurements and remaining pauses](docs/validation/2026-11-15-boolean-request-source-batch.md).
+
+A same-binary coupled-document versus separated-source/display benchmark passed 16 release runs with identical native source bytes and display density. Separation reduced final UI receive/commit time by 75%/69% for High and 40%/27% for Light at 64/128 spheres; both architectures stayed near 30 encoded FPS. Worst request-time pauses remain. [Isolated architecture measurements and limits](docs/validation/2026-11-15-coupled-source-display-ab.md).
+
+Remote Desktop viewport pacing now uses a session-aware surface mode. Ten same-binary 64/128-sphere release runs verified roughly 30 encoded viewport FPS versus 10.6 with VSync; exact source data remains unchanged. Creation/Boolean pauses remain. [Measurements and limits](docs/validation/2026-11-15-rdp-viewport-pacing.md).
+
+Committed Boolean results now prepare source-wire/render buffers on the worker and install them through checked fresh-root receipts before atomic publication. At 64 spheres, final UI polls fell from about 2.1 s to 57 ms High / 42 ms Light; 128-sphere samples fell from about 5.1 s to 158 / 94 ms. Exact source checks and 16 focused tests passed; request-time pauses and variable FPS remain. [Measurements and limits](docs/validation/2026-11-15-boolean-publication-worker-buffers.md).
+
+The larger Sphere/Union benchmark completed eight release runs at 64 and 128 spheres. Light cut observed Boolean wait by about 55–56%; both presets still encoded about 30 FPS and retained publication stalls of roughly 2.1 s (64 spheres) and 5.1 s (128). [Measurements, source checks and limits](docs/validation/2026-11-15-many-sphere-light-high.md).
+
+Light navigation now uses a smaller transient render target and restores full resolution/4× MSAA on release. In the six-run native-window Sphere/Boolean comparison, moving GPU time fell from 0.641 to 0.139 ms; both sides remained near the configured 30 encoded frames/s. [Evidence and reproduction](docs/validation/2026-11-14-light-navigation-smoothness.md).
+
+DISPLAY now offers **Light** (default) and **High detail** for the tested Sphere → Sphere → Boolean Two Objects Union slice. Light reduced the fixture's preview wait from about 247 to 123 ms; both profiles rendered about 30 encoded frames/s in this Windows session. [Implementation, measurements and limits](docs/validation/2026-11-14-viewport-detail-sphere-boolean.md). Reproduce with `python tools/benchmark_sphere_viewport.py --output build/standalone-validation/ui-artifacts/<new-run>` after a default-feature release build in the existing external target.
+
+MatrixApp Boolean Two Objects now prepares all five preview modes on a worker while retaining the previous preview until replacement. [Evidence and limits](docs/validation/2026-11-14-boolean-two-ui-worker.md).
+
+MatrixApp Boolean Split now uses admitted source workers for multiple input sets and publishes all pieces in one guarded transaction. [Evidence and limits](docs/validation/2026-11-14-boolean-split-ui-worker.md).
+
+Boolean Union, Difference and Intersection in the MatrixApp menu and CMD run source and placement preparation on a worker, with stale-context checks and one transaction. Other Boolean routes and full source/display separation remain open. [Evidence](docs/validation/2026-11-14-boolean-binary-ui-worker.md).
+
+Synchronous Boolean accounts retained input displays while using canonical geometry. [Evidence](docs/validation/2026-11-14-boolean-captured-source.md#live-input-memory-for-synchronous-boolean).
+
+A captured-source Boolean worker foundation releases document/display ownership and accounts retained results; product Boolean menu/CMD remains synchronous. [Evidence and limits](docs/validation/2026-11-14-boolean-captured-source.md).
+
+A transient ring-builder candidate now has independently accounted source, shared topology and display owners; source-only and display-only readers release the unrelated charge. [Evidence and limits](docs/validation/2026-11-14-builder-split-candidate-owners.md#independent-shared-topology-owner).
+
+Background hover prepares admitted exact curve copies on a worker, then releases the captured document before picking; stale scene results are rejected. [Evidence and limits](docs/validation/2026-11-14-detached-hover-source.md#source-copy-preparation-on-the-worker).
+
+A verified remesh representation can be reused after a placement edit, Undo or Redo when its attested canonical source is unchanged. [Evidence and limits](docs/validation/2026-11-14-remesh-cache-source-rebind.md).
+
+
+Source/display work has a [completion plan through M09](implementation/design/M01/viewport-export-separation-20261102/PLAN_SOURCE_DISPLAY_COMPLETION_M01_M09.md) and [M01–M09 L4 retest index](docs/validation/2026-11-13-source-viewport-m01-m09-l4-index.md). These are planning/traceability artifacts; runtime completion and gate signoff are not implied.
+
+Background hover uses a detached picking snapshot and a separately tracked document; active scene ownership and cold restore remain open. [Evidence](docs/validation/2026-11-14-scene-explicit-document.md#detached-hover-snapshot).
+
+A pinned openNURBS box probe characterizes mesh-free archive flags; the product adapter and v5 migration remain unchanged. [Evidence](docs/validation/2026-11-14-opennurbs-source-archive-probe.md).
+
+Snap workers retain NURBS source copies and OCCT B-rep source leases and revalidate retained results. Line viewport Surface Snap uses the scheduler with a deferred click guarded against changed input and display mode; other commands, Gumball and parts of occlusion remain synchronous. [Evidence and limits](docs/validation/2026-11-14-surface-snap-source-worker.md#deferred-click-display-mode-guard).
+
+A detached occlusion snapshot lets the Line Surface Snap worker check display buffers and captured trim fallback sources without retaining a document; admission failure refuses the point rather than running the proof on the UI thread. [Evidence and limits](docs/validation/2026-11-14-detached-occlusion-snapshot.md#refuse-line-occlusion-when-admission-fails).
+
+Selected-root B-rep Isocurve verification and source UV-bounds query use a worker at any mesh size. Tested drilled blocks preserve their holes; the synchronous kernel verifier still fails its existing hole test. [Evidence and limits](docs/validation/2026-11-14-brep-hole-chord.md#selected-b-rep-isocurve-bounds-on-the-face-worker).
+
+MatrixApp resolves Isocurve bounds and constructs curves on workers for selected editable OCCT B-reps and NativeBrep payloads, including root-only single-face sources and viewport-ray picks, with context checks and asynchronous memory recovery. [Evidence and limits](docs/validation/2026-11-14-captured-isocurve-source.md#root-only-command-start-on-a-worker).
+
+OCCT B-rep History and Ring preview publish source-derived topology signatures under new names; old display-derived references need migration. [Evidence and limits](docs/validation/2026-11-14-history-source-signatures.md).
+
+Source History references refuse a second same-kind candidate within tolerance; durable topology naming and legacy migration remain open. [Evidence and limits](docs/validation/2026-11-14-history-source-signatures.md#ambiguous-source-references).
+
+History output checksums exclude separate B-rep display meshes while retaining source, topology and authored mesh changes; old cache entries miss. [Evidence and limits](docs/validation/2026-11-14-history-canonical-hash.md).
+
+New retained B-rep entity and directly owning definition baselines distinguish source from separate display; legacy and native-export compatibility remain scoped. [Evidence and limits](docs/validation/2026-11-14-retained-source-baselines.md).
+
+Undo/Redo have a reserved candidate/publication boundary and remain document-backed. [Evidence and limits](docs/validation/2026-11-13-prepared-history-scene.md).
+
+UI Undo/Redo validate the candidate and prepare its scene on a guarded worker; candidate capture and document-backed/cold-restore limits remain. [Evidence and limits](docs/validation/2026-11-13-background-history-validation.md).
+
+The transitional remesh cache can retain several proven root/profile representations with pin-aware reclamation; source-only document and cold restore remain open. [Evidence and limits](docs/validation/2026-11-13-multi-root-remesh-cache.md).
+
+Extract Surface now reads its output profile through the scene boundary; initial scene construction remains document-backed. [Evidence and limits](docs/validation/2026-11-13-extract-scene-output-profile.md).
+
+OCCT remesh can rebind a previously attested canonical source without trusting a replacement display; document-backed ownership and cold restore remain open. [Evidence and limits](docs/validation/2026-11-13-attested-source-remesh-rebind.md).
+
+Remesh avoids a repeat source scan after a document-only change when the attested immutable source and topology allocations are shared. [Evidence and limits](docs/validation/2026-11-13-shared-source-remesh-rebind.md).
+
+Independently allocated canonical sources are compared and validated on the remesh worker before their proof is rebound. [Evidence and limits](docs/validation/2026-11-13-background-independent-source-rebind.md).
+
+The OCCT ring-family gate uses the sewn source shape's validated volume rather than viewport triangles. [Evidence](docs/validation/2026-11-13-sewed-ring-volume-receipt.md).
+
+In MatrixApp, ring-family preview creation and updates run on a cancellable worker, with a boundary overlay and queued Apply. Scene preparation on Apply remains synchronous and source/display ownership is not yet separated. [Evidence and limits](docs/validation/2026-11-13-ring-background-ui.md).
+
+Viewport grip collision, small-motion and parallel-ray regressions have scoped egui coverage. [Evidence and limits](docs/validation/2026-11-13-viewport-grip-regressions.md).
+
+Background face verification, Shell and Extract Surface construction can retain source and display without retaining the document in the tested OCCT root paths. [Verification evidence](docs/validation/2026-11-13-source-only-face-verification.md), [Shell evidence](docs/validation/2026-11-13-source-only-shell-worker.md), [Extract evidence and limits](docs/validation/2026-11-13-source-only-extract-worker.md).
+
+Their ordinary root display pins now use tracked allocation accounting shared with document and source owners. [Evidence and limits](docs/validation/2026-11-13-tracked-brep-display-lease.md).
+
+Accounted application scenes pin ordinary OCCT root/member displays independently before publication, using batched admission; source-only document and history are still open. [Evidence and limits](docs/validation/2026-11-13-scene-display-batch-admission.md).
+
+An explicit attested root remesh can reuse one previous display profile through an optional cache. Its display topology no longer exposes a clonable shared Arc; source-only document and history remain open. [Cache evidence](docs/validation/2026-11-13-remesh-representation-cache.md), [topology lease follow-up](docs/validation/2026-11-13-display-topology-lease.md).
+
+Candidate source/topology transfer now uses an opaque owner without a display; the shape-set restore path uses that owner and requires the caller's reservation. [Evidence and limits](docs/validation/2026-11-13-owned-brep-source-transfer.md).
+
+DupEdge's temporary source view now uses the same source-derived face-wire preparation as remesh for tested OCCT and NativeBrep boxes. [Evidence and limits](docs/validation/2026-11-13-dupedge-source-view-face-wires.md).
+
+For an OCCT sphere remeshed at a different profile, DupEdge's temporary source view uses the published scene profile. [Evidence and limits](docs/validation/2026-11-13-dupedge-current-scene-profile.md).
+
+Attested preselected root DupEdge now matches and extracts through a registered source lease in the tested Box paths. [Evidence and limits](docs/validation/2026-11-13-dupedge-registered-source.md).
+
+For tested mixed B-rep and authored-mesh selections, the STL worker makes admitted mesh-source copies in the background and then releases its document capture; repeated mesh occurrences share a copy. [Evidence and limits](docs/validation/2026-11-13-stl-shared-mesh-source.md).
+
+The same STL handoff now carries NURBS surface source and trim metadata together; a planar face with a hole was checked against an independent area. [Evidence and limits](docs/validation/2026-11-13-stl-surface-source-worker.md).
+
+B-rep selection overlays now use the published scene occurrence, including tested NativeBrep temporary source views. [Evidence and limits](docs/validation/2026-11-13-scene-occurrence-selection-overlay.md).
+
+Fillet now verifies a selected edge using the active scene display profile; a remeshed cylinder was checked through direct and picked-edge paths at two profiles. [Evidence and limits](docs/validation/2026-11-13-fillet-scene-witness-profile.md).
+
+For one selected root OCCT B-rep, ExtractWireframe menu and CMD invocation now use the source-only worker, with scoped egui, recovery and Undo/Redo checks. Other source paths and the broader source/display migration remain open. [Evidence and remaining work](docs/validation/2026-11-13-background-wireframe-ui.md).
+
+Checked Union can use a strictly certified temporary analytic box in the tested reopened sphere–box fixture. Untrimmed NURBS surface display and ExtractWireframe share default-density interior wires in tested plane and cylinder cases. [Evidence and limits](docs/validation/2026-11-13-union-surface-wire-default.md).
+
+Sphere FitPoints direct-point input now admits buffer growth and respects the configured point limit; simulated-pressure recovery retains typed and viewport inputs. [Evidence](docs/validation/2026-11-13-sphere-fit-selection-memory.md#direct-fitpoints-input-and-point-limit).
+
+The debug executable reopened an authored NativeBrep selection, ran Sphere FitPoints through its command interface, and saved the analytic result after Undo/Redo. [Evidence](docs/validation/2026-11-06-sphere-fit-source-vertices.md#actual-executable-with-reopened-nativebrep).
+
+FitPoints now includes retained session buffers in collection-time memory admission, verified for one AroundCurve-to-FitPoints pressure fixture. [Evidence](docs/validation/2026-11-13-sphere-fit-selection-memory.md#retained-session-data-while-collecting).
+
+Sphere FitPoints admits selected Point, Curve, Mesh and B-rep buffers during collection in tested simulated-pressure cases; unsupported internal allocations and physical OOM remain unverified. [Evidence](docs/validation/2026-11-13-sphere-fit-selection-memory.md#admission-during-source-collection).
+
+Sphere FitPoints now admits memory before appending a selected point batch to existing pending points, with simulated-pressure recovery preserving earlier points and Redo. [Evidence](docs/validation/2026-11-13-sphere-fit-selection-memory.md#appending-a-selection-to-existing-fit-points).
+
+Sphere FitPoints now reads NativeBrep source vertices in the tested saved/reopened mixed selection, preserving placement and Undo/Redo; invalid input and simulated memory pressure are refused safely in separate fixtures. [Evidence](docs/validation/2026-11-06-sphere-fit-source-vertices.md#nativebrep-source-vertices-implemented-2026-11-13).
+
+An authored drilled-block fixture separately verifies Surface Snap on material and rejects a candidate whose cursor is moved into the hole. The existing conservative whole-display verification regression remains failing. [Evidence](docs/validation/2026-11-13-small-trim-hole-witness.md#surface-snap-product-path-distinction).
+
+One canceled ExtractIsocurve worker fixture now waits for the worker-active flag and managed kernel reservation to return to baseline and verifies that a later UI frame does not publish the stale result. [Evidence](docs/validation/2026-11-13-recovery-selection-revision.md#worker-follow-up).
+
+An ExtractIsocurve worker-recovery fixture now also checks that changing the root selection away and back cancels the pending verification without changing the document or Undo/Redo. [Evidence](docs/validation/2026-11-13-recovery-selection-revision.md#worker-follow-up).
+
+ExtractWireframe and ExtractIsocurve-start memory recovery now detect a root selection changed away and back before retrying or deleting Undo in scoped simulated fixtures. [Evidence](docs/validation/2026-11-13-recovery-selection-revision.md).
+
+After the source-ray bridge change, the existing public Rhino 5 NativeBrep Isocurve fixture again passed import/reopen, sampled boundary checks and Undo/Redo. [Evidence](docs/validation/2026-11-13-isocurve-external-v5.md#source-ray-bridge-regression).
+
+Sphere and Box viewport-point memory recovery now checks for an edited command draft before retrying or deleting Undo; simulated fixtures preserve the document and history on this stale input. [Evidence](docs/validation/2026-11-13-viewport-point-recovery-draft.md).
+
+An ExtractIsocurve memory retry now stops before deleting Undo if the command draft was edited while the offer was pending; the tested session and edited draft remain available. [Evidence](docs/validation/2026-11-13-isocurve-recovery-changed-draft.md).
+
+For a tested reopened B-rep with a circular hole, ExtractIsocurve can resolve a viewport pick against the selected source face and extract two correctly clipped curves; a hit inside a small hole or a mismatched face witness is refused. Selections without a stored viewport hit remain on the conservative path. [Evidence](docs/validation/2026-11-13-circular-hole-source-ray.md).
+
+The shared ExtractWireframe/DupBorder memory-retry target now checks that the command draft is unchanged before retrying or dropping old Undo history; a simulated ExtractWireframe fixture exercises the stale-draft guard. [Evidence](docs/validation/2026-11-13-wire-recovery-changed-draft.md).
+
+One planar small-hole fixture now rejects a displayed triangle covering the hole using an additional source-face witness; a valid display remains usable. This does not certify arbitrary holes or curved faces, and an existing face-picking regression remains open. [Evidence](docs/validation/2026-11-13-small-trim-hole-witness.md).
+
+For one public Rhino 5 fixture, a previously picked edge survives an ambiguous pick and a programmatic camera change; the user can then pick the other edge and commit both with one Undo/Redo in simulated UI. [Evidence](docs/validation/2026-11-13-dupedge-external-v5-two-edges.md#continue-after-ambiguity).
+
+For one public Rhino 5 fixture, two distinct edges project to the same clicked point at the original camera; DupEdge refuses the ambiguity and retains the document and Redo in simulated UI. [Evidence](docs/validation/2026-11-13-dupedge-external-v5-two-edges.md#overlapping-projection-follow-up).
+
+One public Rhino 5 B-rep fixture now has simulated viewport evidence for selecting two straight edges after import and reopen, with sampled source coordinates and one Undo/Redo. An earlier camera produced an ambiguous-edge refusal; desktop and broader input remain unverified. [Evidence](docs/validation/2026-11-13-dupedge-external-v5-two-edges.md).
+
+DupBorder now uses managed scratch admission for a single untrimmed surface as well as multiple surfaces. Scoped planar fixtures cover consent-based retry, placement and Undo/Redo under simulated pressure; real exhaustion and desktop remain unverified. [Evidence](docs/validation/2026-11-13-dupborder-single-surface-memory.md).
+
+ExtractIsocurve has scoped evidence on one face of a public external Rhino 5 B-rep after import and reopen, including sampled boundary checks and Undo/Redo. [Evidence](docs/validation/2026-11-13-isocurve-external-v5.md).
+
+DupEdge also has one public external Rhino 5 B-rep fixture: an imported, reopened NativeBrep edge matched independently published source coordinates and Undo/Redo in simulated UI. Other external geometry and physical desktop remain unverified. [Evidence](docs/validation/2026-11-13-dupedge-external-v5.md).
+
+DupEdge checks the resolved source point against the captured viewport for tested rigid and affine cases, refreshing a coarse source view or refusing an unresolved temporary view. [Evidence and limits](docs/validation/2026-11-13-dupedge-rigid-screen-verification.md).
+
+DupEdge selects tested reopened NativeBrep box and cylinder edges through a source-derived temporary view, including two edges in one Undo/Redo and one authored 3DM trimmed arc with checked endpoint order. Tested memory refusals offer consent-based retry. Independent imported files and physical desktop remain unverified. [Evidence](docs/validation/2026-11-13-dupedge-native-gap.md).
+
+DupBorder extracts the two source boundaries of a tested reopened NativeBrep cylindrical shell, including placement and Undo/Redo; a mixed surface selection and failure atomicity also have fixture coverage. Broader imports and physical desktop remain unverified. [Evidence](docs/validation/2026-11-13-dupborder-native-brep.md).
+
+ExtractWireframe and DupBorder support tested polygonal trim loops on a certified affine plane and U/V-aligned trim edges on a tested cylinder. ExtractIsocurve clips tested planar and cylindrical isocurves to outer loops and holes. Other trimmed representations remain unsupported or unverified. [Evidence](docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#curved-trimmed-surface-isocurves).
+
+For one tested planar B-rep with a hole, face verification refuses a malformed display triangle spanning the hole; the valid control retains Undo/Redo. This is not a general guarantee for curved or all trimmed faces, and performance for larger faces remains open. [Evidence](docs/validation/2026-11-13-large-trim-boundary-commands.md#bounded-planar-hole-display-check).
+
+A strict rectangular outer-boundary certificate reduces verification work for the tested planar-hole case; non-rectangular or unverified boundaries keep the prior check. [Evidence and timing limits](docs/validation/2026-11-13-large-trim-boundary-commands.md#rectangle-certified-narrow-overlap-optimization).
+
+Source-ray face bounds for NativeBrep have kernel-level fixture coverage. [Evidence](docs/validation/2026-11-13-large-trim-boundary-commands.md#nativebrep-source-ray-face-bounds-foundation).
+
+ExtractIsocurve supports viewport-selected faces in the tested reopened NativeBrep box and cylinder fixtures, with placement and Undo/Redo. Broader input, performance and physical desktop coverage remain open. [Evidence](docs/validation/2026-11-13-native-picked-isocurve.md).
+
+Mesh validation aggregates face budget accounting while retaining per-face geometry checks; a large NativeBrep fixture still has synchronous completion latency. [Evidence](docs/validation/2026-11-13-native-picked-isocurve.md#aggregate-face-capacities-before-byte-conversion).
+
+For a tested full-seam cylindrical trim, DupBorder omits internal seams, ExtractWireframe retains one displayed seam, and ExtractIsocurve clips through the hole. [Evidence](docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#certified-full-seam-rectangular-trim).
+
+DupBorder and ExtractWireframe also extract tested diagonal trim boundaries on a warped rational bilinear surface as quadratic NURBS; numerically uncertain cases are refused. [Evidence](docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#diagonal-trim-on-a-bilinear-surface).
+
+Standalone trimmed surfaces use trim-aware scene meshes in the tested planar case; a cylindrical mesh was checked separately. Unsupported trims fall back to the underlying surface, with a status warning verified in a headless UI fixture. [Evidence and limits](docs/validation/2026-11-12-trimmed-surface-scene-gap.md#scoped-scene-implementation).
+
+For a tested reopened trimmed cylinder, Surface Snap skips a front hole and resolves the valid rear hit. [Evidence and limits](docs/validation/2026-11-12-trimmed-surface-scene-gap.md#trim-aware-surface-snap-source-refinement).
+
+Surface Snap also accepts the verified full seam in a reopened cylinder fixture. [Evidence and limits](docs/validation/2026-11-12-trimmed-surface-scene-gap.md#surface-snap-at-a-certified-closed-seam).
+
+Surface Snap skips unverified trim display candidates. For the tested affine planar fallback, Shaded can also reach a rear surface when the source ray is verified outside the outer trim bound; uncertain cases remain occluded. [Evidence](docs/validation/2026-11-12-trimmed-surface-scene-gap.md#shaded-fallback-outside-a-verified-planar-outer-bound).
+
+Many-edge trim display avoids worst-case temporary quad allocation; full-scene admission uses counted crossings with headroom. A 129-edge clipboard fixture also passes bounded-memory paste and Undo/Redo; incremental addition remains conservative. [Evidence](docs/validation/2026-11-12-trimmed-surface-scene-gap.md#full-scene-admission-for-many-edge-trim).
+
+Tested Surface and Endpoint snaps remain available in a side view parallel to the input plane. [Evidence and limits](docs/validation/2026-11-12-parallel-view-osnap.md).
+
+STL export uses source UV trim loops for the tested standalone NURBS fixtures, including full-seam and one-seam-side cylindrical patches; reversed trims and unverified seams are refused. [Evidence and limits](docs/validation/2026-11-12-trimmed-surface-stl-gap.md#rectangular-patch-touching-one-seam-side). A 129-edge planar trim displays and picks in the tested scene; unsupported trim fallback refuses point/crossing selection but allows an enclosing window. [Evidence](docs/validation/2026-11-12-trimmed-surface-scene-gap.md#unsupported-trim-fallback-can-select-outside-the-source-boundary).
+
+3DM export now supports tested standalone trimmed planes and cylinders through an admitted native B-rep projection; source boundaries and holes survive file export and reimport, including the tested block and a file with an editable solid. Other trims may be refused. The existing debug native adapter rejects the current packet schema; desktop packaging and Rhino interoperability remain unverified. [Evidence](docs/validation/2026-11-13-trimmed-surface-3dm-export.md#mixed-trimmed-surface-and-editable-solid--2026-11-13).
+
+Trim metadata has a separate default 128 KiB limit. A tested 28×28 trimmed surface with a hole survives save/reopen, display and picking, boundary/isocurve extraction, STL and 3DM export. Older builds may reject files with trim metadata over 16 KiB; broad geometry and desktop acceptance remain open. [Evidence](docs/validation/2026-11-13-large-trim-support.md).
+
+ExtractIsocurve now admits its pending surface snapshot before copying it and retains the charge until the pending owners are released. [Evidence](docs/validation/2026-11-13-isocurve-pending-admission.md).
+
+If ExtractIsocurve cannot start because memory is limited, its tested menu and command paths offer the existing consent-based retry that removes oldest Undo steps only as needed. [Evidence](docs/validation/2026-11-13-isocurve-start-memory-recovery.md).
+
+ExtractWireframe supports tested reopened `NativeBrep` sources, including a box mixed with mesh and two authored openNURBS 3DM cylinder fixtures; third-party 3DM input and general topology remain open. [Evidence](docs/validation/2026-11-13-extractwire-native-brep.md).
+
+ExtractWireframe also supports tested nested block occurrences with composed placements and one Undo/Redo; unsupported or inaccessible members refuse the whole operation. [Evidence and limits](docs/validation/2026-11-13-extractwire-nested-block.md).
+
+A nested `.om9` block containing copied geometry from an authored 3DM NativeBrep also passed sampled edge and placement checks. [Evidence](docs/validation/2026-11-13-extractwire-nested-block.md#nested-nativebrep-follow-up).
+
+An authored 3DM block imported through both editable and opaque B-rep routes also produced the expected eight boundaries of a trimmed face with a hole. [Evidence](docs/validation/2026-11-13-extractwire-nested-block.md#authored-3dm-block-import).
+
+An authored two-level 3DM block with two box instances passed both import modes, `.om9` save/reopen, 24 edge endpoint checks and Undo/Redo. [Evidence](docs/validation/2026-11-13-extractwire-nested-block.md#nested-3dm-block-import).
+
+An authored nested 3DM quarter-cylinder block also passed both import modes and sampled arc/line, endpoint, save/reopen and Undo/Redo checks. [Evidence](docs/validation/2026-11-13-extractwire-nested-block.md#curved-nested-3dm-block).
+
+The old debug 3DM adapter failed packet preflight on that fixture; a rebuilt current-source adapter passed it and the eight-test trimmed-surface batch. The running desktop layout has not yet been updated. [Evidence](docs/validation/2026-11-13-exchange-adapter-rebuild.md).
+
+Trim-display vector allocation failures now use the existing memory-refusal classification; impossible vector layouts remain separate. [Evidence and limits](docs/validation/2026-11-13-trim-display-allocation.md).
+
+A tested valid trim with adjacent floating-point vertices on the same vertical boundary now displays and can be point-selected after save/reopen. [Evidence and limits](docs/validation/2026-11-13-trim-collinear-display.md).
+
+A tested real notch between adjacent UV levels is also retained and selectable; the display builder no longer needs a representable midpoint between those levels. [Evidence](docs/validation/2026-11-13-trim-adjacent-levels.md).
+
+Tested 501–707-edge planar trim fixtures can now be displayed under the existing pair-comparison bound; one 501-edge fixture is selectable after save/reopen. [Evidence and limits](docs/validation/2026-11-13-large-trim-selection.md).
+
+ExtractWireframe and DupBorder also handle tested 505- and 707-boundary planar trims within the same topology bound. [Evidence and limits](docs/validation/2026-11-13-large-trim-boundary-commands.md).
+
+One 501-boundary cylindrical trim also passed source-curve and history checks in both boundary commands. [Evidence](docs/validation/2026-11-13-large-trim-boundary-commands.md#curved-boundary-follow-up).
+
+ExtractIsocurve also clips a tested 505-edge planar trim around its hole after save/reopen. [Evidence](docs/validation/2026-11-13-large-trim-boundary-commands.md#many-edge-extractisocurve).
+
+For a tested 708-edge planar convex trim whose display falls back, ordinary object clicks can now select the verified source; the fallback warning remains. [Evidence and limits](docs/validation/2026-11-13-fallback-source-selection.md).
+
+The source-verified fallback selection also handles the tested case with a convex hole, while rejecting overlapping or ambiguous holes. [Evidence](docs/validation/2026-11-13-fallback-source-selection.md#convex-holes-follow-up).
+
+The tested synchronous source-pick helper now reuses its coordinate and edge bounds; debug microbenchmark samples and limits are recorded separately. [Evidence](docs/validation/2026-11-13-fallback-source-selection.md#synchronous-source-pick-timing).
+
+NativeBrep source-copy and edge-output Rust allocation failures now remain distinguishable from structural limits in the tested ExtractWireframe path. [Evidence](docs/validation/2026-11-13-extractwire-native-brep.md#native-source-and-edge-allocation-failures).
+
+Document validation now rejects trim metadata that refers to a different underlying surface; a tested synchronized surface-and-trim edit retains Undo/Redo. [Evidence](docs/validation/2026-11-13-trim-source-consistency.md).
+
+Document validation and transaction planning now include a conservative extension-parsing scratch estimate before validating metadata; tighter budgets can refuse earlier. [Evidence](docs/validation/2026-11-13-extension-validation-admission.md).
+
+The tested planar trim commands also accept straight boundary segments subdivided by intermediate vertices, while refusing the tested doubled-back edge. [Evidence](docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#subdivided-straight-trim-boundaries).
+
+ExtractWireframe omits a mathematically collapsed clamped boundary on the tested reopened conical surface while retaining a small nonzero boundary in the mixed-surface fixture. [Evidence and limits](docs/validation/2026-11-12-extractwire-closed-surfaces.md#certified-collapsed-surface-boundary).
+
+DupBorder similarly omits the exactly collapsed apex boundary on a tested reopened cone and retains a small nonzero top. [Evidence](docs/validation/2026-11-12-dupborder-closed-surface.md#collapsed-conical-boundary).
+
+Trim-loop area validation handles a tested large parameter offset without cancellation; ExtractWireframe and DupBorder extract the tested reopened plane's boundaries. [Evidence](docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#large-trim-parameter-offsets).
+
+DupBorder supports tested combinations of standalone surfaces and open B-reps in one Undo/Redo; unsupported objects are refused. ExtractIsocurve requires one selected surface. [Evidence](docs/validation/2026-11-12-surface-curve-multiple-selection.md#dupborder-with-b-reps-and-surfaces).
+
+For the tested multi-object DupBorder results, boundaries survive save/reopen and can be measured; a circular boundary also extrudes to the expected closed solid. [Evidence](docs/validation/2026-11-12-surface-curve-multiple-selection.md#reopened-output-and-downstream-use).
+
+For tested two-surface DupBorder cases, recognized memory pressure offers consent-based retry and removes oldest Undo steps only as needed. [Evidence and limits](docs/validation/2026-11-12-memory-recovery-choice.md#dupborder-with-two-standalone-surfaces).
+
+DupBorder also retains tested managed-admission errors during B-rep boundary extraction so they can use that recovery flow. [Evidence and limits](docs/validation/2026-11-12-memory-recovery-choice.md#dupborder-b-rep-admission-recovery).
+
+ExtractWireframe also retains tested managed-admission errors during B-rep edge extraction for the consent-based recovery flow. [Evidence and limits](docs/validation/2026-11-12-memory-recovery-choice.md#extractwireframe-b-rep-admission-recovery).
+
+Complete-circle display segments use a bounded chord check to reduce repeated source-edge verification in tested fixtures; trimmed arcs retain the existing verifier. [Evidence and limits](docs/validation/2026-11-12-length-mixed-display-segments.md#complete-circle-chord-bound).
+
+Sphere AroundCurve refuses a tested reopened Box display edge containing segments from different source edges, preserving the drawing and Redo. [Evidence and limits](docs/validation/2026-11-11-sphere-aroundcurve-reopened-regression.md#mixed-displayed-edge-after-reopen--2026-11-12).
+
+Fillet Edge rejects a tested reopened Box edge that mixes display segments from distinct source edges, preserving the drawing and Redo. [Evidence and limits](docs/validation/2026-11-11-fillet-reopened-edge-regression.md#mixed-displayed-edge-after-reopen--2026-11-12).
+
+PipeChain now refuses a tested reopened Box edge whose display ID contains segments from two different source edges, preserving the drawing and Redo. [Evidence and limits](docs/validation/2026-11-11-pipechain-reopened-edge.md#mixed-displayed-edge-after-reopen--2026-11-12).
+
+Selected B-rep edge Length now refuses a tested mixed-display edge unless its segments identify the same source edge, preserving the document and Redo. [Evidence and limits](docs/validation/2026-11-12-length-mixed-display-segments.md).
+
+An Undo accounting fixture confirms that a duplicate-inclusive memory estimate can select the slower allocation-free path even when shared retained display data fits. No performance fix is claimed. [Evidence](docs/validation/2026-11-12-undo-shared-display-admission.md).
+
+**Boolean Intersection checks 2026-11-12.** A strictly certified axis-aligned spline box can now be represented temporarily as an analytic box for checked solid Intersection; reopened rotated sphere–box fixtures produced accurate results with Undo/Redo. Unsupported sources retain the prior path and its numerical guards. Eight of 24 near-centered combinations were safely refused, and sampling is not an exhaustive proof. [Evidence and limits](docs/validation/2026-11-12-intersection-certified-box.md).
+
+Rotating both near-centered inputs into four tested common rigid frames did not resolve those refusals. No common-frame fallback was added. [Diagnostic](docs/validation/2026-11-12-intersection-certified-box.md#common-rigid-frame-diagnostic).
+
+An approved sphere-reparameterization experiment produced correct volumes in a small native probe but its strict source certificate is not yet reliable for translated sources; no sphere substitution was integrated. [Evidence and counterexamples](docs/validation/2026-11-12-intersection-certified-box.md#experimental-sphere-reconstruction--not-integrated).
+
+ExtrudeCrv and ExtrudeAll now interpret bare heights in document units in tested command and menu routes, including Undo/Redo. Explicit suffixes and desktop interaction remain unverified. [Evidence](docs/validation/2026-11-12-extrude-curve-placement.md#document-units).
+
+Direct Ellipsoid, Torus, Cylinder, Tube, Pyramid, Cone and TCone numeric dimensions now use the document unit in tested CMD and menu-dispatch routes, including saved/reopened documents and Undo/Redo. [Evidence and limits](docs/validation/2026-11-12-solid-direct-document-units.md).
+
+Shell thickness now follows the document unit in tested numeric and picked-face routes, including the background worker and Undo/Redo. [Evidence and limits](docs/validation/2026-11-12-shell-document-units.md).
+
+Fillet Edge numeric radii follow the document unit in tested direct and handle-editing routes, with saved/reopened geometry and Undo/Redo. [Evidence and limits](docs/validation/2026-11-12-fillet-document-units.md).
+
+Pipe numeric radii and diameters now follow document units in tested direct, staged, mixed point, station, Multiple and Chain routes. [Evidence and limits](docs/validation/2026-11-12-pipe-document-units.md).
+
+Solid Text numeric height now follows document units in tested CMD and staged menu routes. [Evidence and limits](docs/validation/2026-11-12-solid-text-document-units.md).
+
+The debug executable also passed a saved sphere–box Intersection and Undo/Redo through its command interface and a scoped desktop fixture. [Executable evidence and limits](docs/validation/2026-11-12-intersection-certified-box.md#actual-executable-saved-input).
+
+For tested reopened standalone surfaces, ExtractWireframe now produces four exact open-surface boundaries, and ExtractIsocurve preserves its pending input on a failed attempt. The overlapping-object chooser was also fixed for a reproduced GPU click issue. [Surface evidence](docs/validation/2026-11-12-extractwire-standalone-surface-gap.md), [retry evidence](docs/validation/2026-11-12-extract-isocurve-placement.md), and [picker evidence](docs/validation/2026-11-12-overlapping-pick-popup.md).
+
+ExtractIsocurve also accepts lowercase `u=` and `v=` in the tested command-line fixtures, with Undo/Redo. [Evidence](docs/validation/2026-11-12-extract-isocurve-placement.md).
+
+ExtractWireframe can extract source face edges from a single selected mesh in the tested reopened triangle/quad fixture, in one Undo/Redo transaction. [Evidence and limits](docs/validation/2026-11-12-extractwire-mesh-edges.md).
+
+In tested ExtractWireframe, ExtractIsocurve, and several Sphere scenarios, a memory warning offers automatic retry after explicit consent to discard oldest Undo steps. [Evidence and limits](docs/validation/2026-11-12-memory-recovery-choice.md).
+
+The same recovery is available for tested Box corner, Cube, Center, 3Point and Vertical completion inputs. [Evidence](docs/validation/2026-11-12-memory-recovery-choice.md).
+
+Recovery proceeds one retry per UI frame and can be stopped; Undo steps already removed are permanent. [Evidence](docs/validation/2026-11-12-memory-recovery-choice.md).
+
+Tested Sphere recovery includes selected `Radius=` and `Diameter=` inputs, with a changed draft rejected before Undo removal. [Evidence](docs/validation/2026-11-12-memory-recovery-choice.md).
+
+Tested Sphere recovery also retains final point input in `x,y,z` form. [Evidence and limits](docs/validation/2026-11-12-memory-recovery-choice.md).
+
+On a tested reopened planar surface with a trimmed parameter domain, ExtractIsocurve's default now lies in that domain and produces the expected curve with Undo/Redo. [Evidence](docs/validation/2026-11-12-extract-isocurve-placement.md).
+
+**ExtractIsocurve placement 2026-11-12.** Reopened planar surfaces in the tested translation and scale/shear fixtures produce curves at the source placement with Undo/Redo. Curved surfaces and desktop remain unverified. [Evidence](docs/validation/2026-11-12-extract-isocurve-placement.md).
+
+**DupBorder closed surface 2026-11-12.** Tested closed cylinder and certified periodic surface fixtures omit internal seams while retaining their true boundaries; broader closure representations and desktop remain unverified. [Evidence](docs/validation/2026-11-12-dupborder-closed-surface.md).
+
+**DupBorder surface placement 2026-11-12.** Tested reopened standalone NURBS plane boundaries now retain their source placement and one Undo/Redo; broader surfaces and desktop remain unverified. [Evidence](docs/validation/2026-11-12-dupborder-surface-placement.md).
+
+**DupEdge affine placement 2026-11-12.** Tested reopened Box and cylinder edges can be duplicated with scale/shear while retaining placement, with guarded source and viewport matching. Desktop and broader geometry remain unverified. [Evidence](docs/validation/2026-11-12-dupedge-affine-placement.md).
+
+**Extract Wire Frame source slice 2026-11-12.** Selected OCCT B-rep roots, including tested v4 files reopened without an in-session topology proof, yield source curves in one transaction. Tested affine placements are retained on extracted curves; spheres retain their meridian seam while omitting degenerate pole edges. Wider inputs and desktop validation remain open. [Evidence and limits](docs/validation/2026-11-12-extractwire-affine-placement.md).
+
+**DupBorder v4 source boundary 2026-11-11.** A reopened cylinder fixture with reordered persisted topology now produces its two source boundaries instead of a seam; wider topology and desktop validation remain open. [Evidence and limits](docs/validation/2026-11-11-dupborder-source-boundary.md).
+
+**PipeChain source edge 2026-11-11.** Selected straight B-rep edges are checked against the current source before use, including a reopened reordered-topology fixture; unverified edges are refused. [Evidence and limits](docs/validation/2026-11-11-pipechain-reopened-edge.md).
+
+**Sphere AroundCurve source edge 2026-11-11.** Tested reopened straight and circular B-rep edges are verified against source through center selection; ambiguous or mismatched display edges are refused. [Evidence and limits](docs/validation/2026-11-11-sphere-aroundcurve-reopened-regression.md).
+
+**FilletEdge source selection 2026-11-11.** Tested reopened B-rep edge selections are verified on the native shape used for fillet and radius controls; unmatched display segments are refused. [Evidence and limits](docs/validation/2026-11-11-fillet-reopened-edge-regression.md).
+
+**ExtractWireframe mixed selection 2026-11-12.** A tested reopened Box, triangle mesh and open NURBS surface can be extracted together in one Undo/Redo transaction; invalid source and simulated memory refusal keep the drawing and Redo. A separate actual-executable roundtrip also checked a Box, mesh and closed cylinder. Other geometry, physical memory exhaustion and desktop interaction remain open. [Evidence](docs/validation/2026-11-12-extractwire-mixed-sources.md).
+
+A separate mixed-selection fixture checks source placements with scale, shear and reflection, and verifies Length on one saved/reopened extracted edge from each source. [Scope and limits](docs/validation/2026-11-12-extractwire-mixed-sources.md#mixed-affine-placement-and-downstream-length).
+
+ExtractWireframe's edge/output allocations distinguish impossible capacities from allocator memory refusal; the latter can reach the existing consent-based retry flow. Other failure paths and native error conversions remain open. [Evidence](docs/validation/2026-11-12-memory-recovery-choice.md).
+
+Surface basis and isocurve buffers, including copied knots, now use fallible allocation. Tested allocation-layout overflow and allocator refusal are distinguished; actual end-to-end desktop exhaustion and other native allocations remain unverified. [Evidence](docs/validation/2026-11-12-memory-recovery-choice.md).
+
+**ExtractWireframe closed surfaces 2026-11-12.** Tested closed cylinder and certified periodic surface fixtures retain the displayed seam once as well as their end curves. A doubly periodic fixture produced two seams and one survived save/reopen and extrusion. The tested conical fixture now omits a certified collapsed apex curve. General closed surfaces and desktop interaction remain open. [Evidence](docs/validation/2026-11-12-extractwire-closed-surfaces.md).
+
+**Extract Surface source selection 2026-11-11.** Tested reopened face selections are checked against a unique source face before extraction and removal; unmatched or ambiguous witnesses are refused. [Evidence and limits](docs/validation/2026-11-11-extractsurface-reopened-face.md).
+
+**Large Extract Surface publication 2026-11-12.** For tested single-document batches of 20 or more inserts, a validated immutable candidate may reuse its stricter validation while memory and Undo checks remain active. Two 22-source release fixture runs reduced the longest synchronous poll from 807 ms to 669/644 ms; desktop responsiveness and smaller batches remain unverified. [Evidence and limits](docs/validation/2026-11-11-extractsurface-reopened-face.md#reuse-of-validated-candidate).
+
+**Shell source selection 2026-11-11.** Tested reopened face selections are verified on the native shape used to construct the Shell; unmatched or ambiguous witnesses are refused. [Evidence and limits](docs/validation/2026-11-11-shell-reopened-face.md).
+
+**DupEdge scoped validation.** Reopened-v4 and authored 3DM Box/curve fixtures produce source curves in one transaction. In the tested old-v4 display-mismatch case, a background source view enables edge reselection; ambiguous or unverifiable picks are refused. Offscreen tests cover menu and CMD handlers; one native desktop fixture checks reselection and Undo/Redo, and the user confirmed seeing its result. A later feedback fix has not been retested on desktop; broader UI signoff, native peak and other inputs remain open. [Evidence and limits](docs/validation/2026-11-10-dupedge-source-first-slice.md).
+
+**Undo inventory scratch 2026-11-06.** The coordinator admits temporary identity indexes before allocation, including per-document B-rep ownership; tight-memory owner validation retains its nonallocating fallback. Synthetic timing and correctness scope: [evidence](docs/validation/2026-11-06-undo-inventory-scaling.md).
+
+**Unattested v4 Sphere 2026-11-06.** A headless v4 fallback fixture retains the existing display and face identity when remesh has no native topology proof. Production source/display eviction remains open. [Evidence](docs/validation/2026-11-06-v4-unattested-sphere-fallback.md).
+
+**Remesh buffer lifetime 2026-11-06.** After sequential replacement of all scene roots, the last old snapshot controls release of the original buffer lease; partially shared scenes retain the aggregate lease. Product Sphere/document/Undo display eviction remains open. [Evidence](docs/validation/2026-11-06-remesh-buffer-lease-lifetime.md).
+
+**Remesh proof and placement 2026-11-06.** The experimental proof cache may retain a candidate through a placement edit, but fully revalidates before use. A Sphere move/Undo/Redo fixture passes; production source/display ownership remains open. [Evidence](docs/validation/2026-11-06-remesh-proof-placement-undo.md).
+
+**Gumball remesh cache 2026-11-06.** The Gumball pivot cache now follows the scene publication as well as document epoch. A test-only Sphere remesh regression passes; production display eviction and desktop remain open. [Evidence](docs/validation/2026-11-06-remesh-gumball-scene-identity.md).
+
+**Translated Sphere bounds 2026-11-06.** Pure translations now preserve the OCCT analytic source while calculating B-rep bounds. A production Sphere/Gumball/Undo fixture also checks CPU picking, snap and fixed-profile STL bytes; desktop, cache eviction and general bounds guarantees remain open. [Evidence](docs/validation/2026-11-06-sphere-translated-source-bounds.md).
+
+**B-rep source integrity 2026-11-06.** The source owner retains an integrity digest for source and topology IDs; altered associations are refused. It is not a native topology attestation, and display eviction remains open. [Evidence](docs/validation/2026-11-06-brep-source-integrity.md).
+
+**B-rep source ownership 2026-11-06.** Production B-reps now contain the existing source/topology owner directly; v4 bytes and shared accounting were checked. Display eviction and native topology binding remain open. [Evidence](docs/validation/2026-11-06-brep-embedded-source-owner.md).
+
+**Topology cache pressure 2026-11-06.** An experimental proof cache can reclaim its own idle entries during insertion; pinned and concurrent cases are tested. Production source/display/Undo integration remains open. [Evidence](docs/validation/2026-11-06-topology-cache-insert-pressure.md).
+
+**Sphere memory refusal 2026-11-06.** Sphere retains its pending input after a refused snapshot commit so tested modes can retry; native peak and source/display/Undo separation remain open. [Evidence](docs/validation/2026-11-06-sphere-admission-retry.md).
+
+**Sphere snapshot admission 2026-11-06.** Interactive and direct numeric Sphere now reserve managed Rust snapshot storage before copying and transfer it into the transaction. Pressure, command and simulated viewport checks passed; native peak and source/display/Undo separation remain open. [Evidence](docs/validation/2026-11-06-sphere-snapshot-admission.md).
+
+**ShapeSet source identity 2026-11-06.** Experimental restore now retains the original B-rep bytes after checking topology references; sphere and negative fixtures passed. Document and Undo integration remains open. [Evidence](docs/validation/2026-11-06-shapeset-source-identity.md).
+
+**Cache admission 2026-11-06.** Shared memory admission can reclaim multiple idle entries from one cache owner before refusing; targeted core, scene and app pressure tests passed. [Scope and limits](docs/validation/2026-11-06-multi-entry-cache-admission.md).
+
+**Background STL export 2026-11-05.** Export Selected uses a single background job with cancel, captured geometry and live memory admission. Release and 183 focused tests passed. The desktop destination picker check remains open. [M01 validation](docs/validation/2026-11-05-stl-background-ui.md)
+
+**B-rep DupBorder 2026-11-06.** Boundary curves are extracted from the OCCT source rather than display segments. Fixture coverage and remaining limitations: [validation](docs/validation/2026-11-06-dupborder-source-edges.md).
+
+**B-rep world bounds 2026-11-06.** BoundingBox and CenterObject use source-based OCCT bounds for B-reps; [fixture coverage and limitations](docs/validation/2026-11-06-brep-source-world-bounds.md).
+
+**Sphere FitPoints 2026-11-06.** Selected B-rep vertices come from OCCT source and selected points use entity placement; [fixture coverage and limitations](docs/validation/2026-11-06-sphere-fit-source-vertices.md).
+
+**Curve performance 2026-11-05:** a release headless comparison of built-in and add-on Line/Circle is recorded in [benchmark evidence](docs/validation/2026-11-05-curve-addon-performance.md); desktop and large-document performance remain unmeasured.
+
 **Add-on integration 2026-11-05:** PR #3 integrated with the `hieu-nang-2` foundations; targeted tests and remaining desktop verification are recorded in [integration evidence](docs/validation/2026-11-05-pr3-hieu-nang-2-integration.md).
 
 **Regression fixes 2026-11-05:** all 21 recorded Rust failures now pass; affected validation 669 passed/0 failed/1 ignored and release build passed. [Fixes and evidence](docs/validation/2026-11-05-fix21-regressions.md). Full-workspace rerun and desktop/WPR acceptance are not claimed.
@@ -181,6 +570,18 @@ STL export keeps weld keys separate for selected objects; [coverage and remainin
 STL export corrects triangle winding after reflected placement; [test coverage and open accuracy work](docs/validation/2026-11-03-stl-reflection-winding.md).
 
 Undo supports a minimum step count and a soft memory budget through Options: defaults of 1 step and 1024 MB, a configurable ceiling of 50% physical RAM, and full tracked-memory reconciliation every 100 MB of accounted growth. Retaining the minimum can exceed the soft quota; Undo shares the overall managed 60% ceiling. [Validation and limits](docs/validation/2026-11-02-undo-ram-cap-and-inventory.md). The [viewport/export plan](implementation/design/M01/viewport-export-separation-20261102/PLAN.md) removes verified work from the remaining checklist, including [FileState/Open regressions](docs/validation/2026-11-05-live-file-state-memory.md). It groups export-path RAM/native work and UI background export into one functional delivery, with focused tests during edits and a combined integration batch at the milestone boundary. Wider audits remain separate; implementation stays paused. This documentation update does not close the remaining implementation or accuracy gates.
+
+Cap Planar has a scoped reopened-cylinder check at two display profiles, including analytic volume and Undo/Redo; [evidence and remaining limits](docs/validation/2026-11-12-cap-planar-source-profiles.md).
+
+Extrude Curve Straight respects the source placement in the tested reopened rectangle fixtures; [evidence and remaining limits](docs/validation/2026-11-12-extrude-curve-placement.md).
+
+Pure B-rep translation and tested rotations whose rigid matrices round-trip without coefficient changes preserve analytic geometry in the tested fixtures. Boolean Union, Boolean Two, Difference, Intersection and Split can operate in a shared local frame when the relative rigid placements reconstruct exactly; otherwise the temporary non-rigid placement restriction remains. The regular Boolean path also checks nonempty results before publication and refuses a tested erroneous baked-affine Union; the disjoint-tool fast path and internal kernel calls lack that check, which may reject valid results and does not fix the underlying geometry. [Evidence and remaining limits](docs/validation/2026-11-12-boolean-two-placed-source.md); [shared placement](docs/validation/2026-11-12-boolean-common-affine-union.md) and [relative rotation fixtures](docs/validation/2026-11-12-boolean-common-affine-relative-rotation.md).
+
+The world-space Boolean placement gate shares the transform adapter's exact OCCT coefficient check; some floating-point rotation matrices may also be refused. Shared-placement exceptions are described above. [Fixture and limitations](docs/validation/2026-11-12-boolean-two-placed-source.md#consistent-placement-classification).
+
+Checked solid Difference, including the disjoint multi-tool path within the tested count limit, now rejects a tested false-empty result when OCCT classifies a sampled point inside the argument and outside the tools. Sampling is inconclusive when it finds no witness and does not fix the underlying Boolean failure. [Evidence and limits](docs/validation/2026-11-12-boolean-false-empty-witness.md).
+
+Transforming the tested two-solid B-rep compound now preserves both bodies, including when used by Boolean Union after save/reopen; [evidence and limits](docs/validation/2026-11-12-transform-compound-preservation.md).
 
 Codex can attach through `--mcp-live` to one running interactive OM9 window, with the same document and Undo; [setup, validation and limits](docs/validation/2026-11-02-mcp-live-window.md).
 
@@ -501,6 +902,8 @@ Selected 3DM export foundation (2026-11-01): the exchange host can capture selec
 Windows clipboard (2026-11-01): Ctrl+C copies selected OM9 objects, Ctrl+Shift+C copies Rhino 3DM, and Ctrl+V chooses a supported clipboard format; Edit and the Standard toolbar use the same actions. Self-contained gem, UV, trimmed-surface and extrusion data, four-rail profiles with all rails selected, and matching 3DM layer sidecars are supported. Automatic transfer of dependent metadata, differing 3DM layer sidecars and real Rhino interoperability remain open. [Evidence](docs/validation/2026-11-01-clipboard-metadata.md).
 
 Polyline Command options (2026-10-25): `M` and clicking `Mode` now toggle Line/Arc through one Rust session; `P`/`H` toggle their displayed values. Arc segments remain analytic curves in a mixed Polycurve, with preview, Direction/Center input and one Enter/Undo transaction. Command input keeps nonempty drafts, paste and IME. Helpers tracking, continuously closed PersistentClose preview and full M03-UI acceptance remain open. [Validation and limits](docs/validation/2026-10-25-command-polyline-shortcuts/README.md).
+
+Selected B-rep edge Length (2026-11-11): the tested reordered v4 Box now resolves the displayed edge against the source before native measurement; invalid display is refused. This is fixture-scoped, with desktop and native resource costs unverified. [Evidence](docs/validation/2026-11-11-length-reopened-edge.md).
 
 Polyline parameter interface (2026-10-25): all eight Polyline parameters now share typed descriptors for names, keys, kinds, current values and activation. Keyboard, pointer and typed-name input use the same session parser; accepted Length/Direction/Center values update the prompt. A 24-scenario route/parameter matrix and 216 app tests pass. [Interface evidence](docs/validation/2026-10-25-polyline-parameter-interface/README.md).
 
@@ -871,6 +1274,8 @@ Top11 transform hover across viewports uses the pointed viewport's CPlane; [egui
 
 Top11 Mirror normalizes plane directions before crossing, avoiding rejection caused by small plane-defining edges; [geometry evidence and limits](docs/validation/2026-10-31-top11-mirror-plane-scale.md).
 
+Ordinary scene objects borrow validated B-rep display for picking and snap instead of retaining an extra display owner; document/Undo display eviction remains open. [Evidence and limits](docs/validation/2026-11-10-ordinary-scene-brep-display-owner.md).
+
 Top11 Copy and Rotate handle tested small and large direction vectors without a fixed displacement-length cutoff; [evidence and limits](docs/validation/2026-10-31-top11-copy-rotate-direction-scale.md).
 
 Top11 disables unavailable topology edits on retained native BReps while keeping supported placement transforms; [availability evidence and limits](docs/validation/2026-10-31-top11-native-brep-availability.md).
@@ -1026,3 +1431,39 @@ On-demand memory diagnostics (2026-11-05): `om9_memory` reads known managed stor
 External RAM refusal provenance (2026-11-05): `om9_memory.last_external_refusal` retains one final external-reservation/grow refusal with historical operands/headroom, caller authority/epoch and age. Successful eviction retries do not create a new event; the cheap getter does no storage walk/probes. Final checks: 440 distinct passes including GPU 29, plus headless binary/9 replies with unchanged Point state. Other admission/recheck/codec/native/job provenance and full R1/P1-P5 remain open; this does not mean an entire CAD command failed. [Evidence](docs/validation/2026-11-05-external-memory-refusal-provenance.md).
 
 Presentation Weak allocation (2026-11-05): Scene storage is boxed and remains under its existing lease; the small presentation allocation/guard is charged through cache Weak and strong-reader lifetimes. Expired entries retire before admitting successors. One reproduced undercharge is fixed; 176 distinct selected checks pass/1 opt-in measurement ignored, including GPU 29 and picking/Gumball. Cache-container/auxiliary/peer ownership, native/RSS and desktop gates remain open. Incremental buffer-chain leakage was not reproduced and is not claimed fixed. [Evidence](docs/validation/2026-11-05-presentation-weak-allocation-lifetime.md).
+
+DupEdge memory recovery for the tested selected-edge and preselection flows uses explicit consent and retries after removing oldest Undo entries only when needed; [validation and limits](docs/validation/2026-11-12-memory-recovery-choice.md#dupedge-selected-edge-memory-recovery).
+
+An authored trimmed plane with a hole also roundtrips through the actual debug executable's 3DM commands using the current sibling adapter; [evidence and limits](docs/validation/2026-11-13-exchange-adapter-rebuild.md#actual-executable-trimmed-face-roundtrip).
+
+Curved trim fallback point selection supports tested reopened cylinder fixtures, including rear hits, selected affine placements and one overlap chooser case; general curved sources and affine placements remain open. [Evidence and limits](docs/validation/2026-11-13-fallback-source-selection.md#overlap-chooser-and-unsupported-source-admission).
+
+Surface Snap can reach a rear plane through the verified excluded region or hole of a tested trimmed-cylinder fallback; a Line continuation and Undo/Redo passed in simulated UI. [Evidence and limits](docs/validation/2026-11-13-fallback-source-selection.md#viewport-line-through-the-curved-hole).
+
+Trimmed display supports tested 712–1,024-edge plane fixtures; 712-edge plane and cylinder holes also passed sampled offscreen GPU checks. [Evidence and limits](docs/validation/2026-11-13-large-trim-support.md#offscreen-gpu-plane-and-cylinder).
+
+Surface Snap now reaches the material of tested reopened plane and cylinder trims up to 1,024 edges; [evidence and limits](docs/validation/2026-11-13-large-trim-support.md#surface-snap-on-1024-edge-trim-material).
+
+ExtractWireframe and DupBorder handle tested reopened trimmed boundaries up to 1,024 edges, with one Undo/Redo; [evidence and limits](docs/validation/2026-11-13-large-trim-boundary-commands.md#boundary-commands-up-to-1024-edges).
+
+A tested 1,024-edge authored 3DM roundtrip remains usable by both boundary commands after OM9 save/reopen; [evidence and limits](docs/validation/2026-11-13-large-trim-boundary-commands.md#reuse-of-a-1024-edge-3dm-roundtrip).
+
+An authored 1,024-edge cylindrical trim also survives 3DM and OM9 roundtrips and both boundary commands, with source checks and Undo/Redo; [evidence and limits](docs/validation/2026-11-13-large-trim-boundary-commands.md#reuse-of-a-1024-edge-cylindrical-3dm-roundtrip).
+
+ExtractIsocurve accepts tested single-face B-rep and NativeBrep sources with holes and one preselected face of a multi-face B-rep; nested and NativeBrep face selection remain unsupported. [Evidence and limits](docs/validation/2026-11-13-large-trim-boundary-commands.md#single-face-b-rep-isocurve-after-3dm).
+
+Picked large B-rep faces use a cancellable Isocurve verification worker; final curve creation remains synchronous. [Evidence and limits](docs/validation/2026-11-13-large-trim-boundary-commands.md#selected-face-verification-worker-for-isocurve).
+
+Insert-only transactions can reuse a tightly validated candidate in large retained models; a sampled Isocurve completion improved while synchronous work remains. [Evidence and limits](docs/validation/2026-11-13-large-trim-boundary-commands.md#large-retained-model-insertion-validation-reuse).
+
+Transaction clone admission can reuse a current immutable-owner validation proof; sampled Isocurve completion improved further, with limits and history checked. [Evidence](docs/validation/2026-11-13-large-trim-boundary-commands.md#reuse-validated-owner-for-clone-admission).
+
+A reopened concave planar B-rep with two holes also passed Isocurve checks through material, coincident boundaries and notch vertices; [evidence and limits](docs/validation/2026-11-13-large-trim-boundary-commands.md#concave-single-face-b-rep-and-coincident-boundaries).
+
+ExtractIsocurve also clips tested reopened plane and cylinder trims with holes at 1,024 edges; [evidence and limits](docs/validation/2026-11-13-large-trim-boundary-commands.md#extractisocurve-up-to-1024-edges).
+
+Tested 1,024-edge trimmed plane/cylinder sources export STL, and the plane roundtrips 3DM; two isolated process-memory samples are available, while OCCT-only peak remains unmeasured. [Evidence and limits](docs/validation/2026-11-12-trimmed-surface-stl-gap.md#process-memory-for-the-1024-edge-fixtures).
+
+Large trimmed-face export requests estimated native headroom before conversion; the estimate is not a hard native-memory bound. [Evidence](docs/validation/2026-11-12-trimmed-surface-stl-gap.md#estimated-native-headroom-for-large-trim-export).
+
+In a tested offscreen recovery fixture, a root selection change while the source-view worker is pending now rejects its stale view and preserves drawing and Redo; [evidence and limits](docs/validation/2026-11-12-memory-recovery-choice.md#root-selection-change-during-source-view-worker).

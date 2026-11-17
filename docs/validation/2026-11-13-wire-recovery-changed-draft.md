@@ -1,0 +1,5 @@
+# Wire recovery when the command draft changes
+
+The recovery target shared by ExtractWireframe and DupBorder tracked document authority, epoch and object selection, but did not track the command draft. A focused test prepared a retry, changed the draft, and applied simulated managed-memory pressure. Before this fix the retry did not report the changed draft as stale, so it could proceed to the history-reclamation path despite the change. This was a simulated UI/controller condition, not an observed desktop incident.
+
+The recovery target now captures the draft when the prompt is offered and compares it before each retry or Undo removal. In the focused ExtractWireframe mesh fixture, changing the draft now stops recovery before removing Undo and preserves the document and edited draft. The focused test failed before and passed after; all 74 `ui::undo_settings::tests` passed after the fix. DupBorder shares the same target/check; this focused fixture does not independently exercise its UI. Physical RAM exhaustion and desktop interaction were not tested.

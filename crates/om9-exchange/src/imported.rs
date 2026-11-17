@@ -63,10 +63,28 @@ pub trait BrepBridge {
         deflection_mm: f64,
         limits: &Limits,
     ) -> Result<Brep>;
+    /// Import while admitting Rust-owned conversion allocations. Backends
+    /// without this capability must not bypass the import reservation.
+    fn import_admitted(&self, _payload: &[u8], _tolerance_mm: f64, _deflection_mm: f64,
+        _limits: &Limits, _admit: &mut dyn FnMut(u64, u64) -> Result<()>) -> Result<Brep> {
+        Err(Error::Unsupported("admitted 3DM BRep import"))
+    }
 }
 /// Complete OCCT -> 3DM payload operation used only for an export copy.
 pub trait BrepExport {
-    fn export(&self, brep: &Brep, tolerance_mm: f64, limits: &Limits) -> Result<om9_core::geometry::NativeBrep>;
+    fn export(&self, brep: &dyn om9_core::brep::BrepSourceAccess, tolerance_mm: f64, limits: &Limits) -> Result<om9_core::geometry::NativeBrep>;
+    /// Export within a shared projection reservation; implementations that
+    /// cannot account for their allocations must refuse rather than bypass it.
+    fn export_admitted(&self, _brep: &dyn om9_core::brep::BrepSourceAccess, _tolerance_mm: f64, _limits: &Limits,
+        _admit: &mut dyn FnMut(u64, u64) -> Result<()>) -> Result<om9_core::geometry::NativeBrep> {
+        Err(Error::Unsupported("admitted 3DM BRep export"))
+    }
+    /// Optional export-only conversion of a trimmed surface. The callback
+    /// admits owned Rust live and pending bytes before allocation.
+    fn export_trimmed_surface(&self, _entity:&om9_core::model::Entity, _tolerance_mm:f64, _limits:&Limits,
+        _admit:&mut dyn FnMut(u64,u64)->Result<()>) -> Result<om9_core::geometry::NativeBrep> {
+        Err(Error::Unsupported("3DM export of trimmed standalone surfaces"))
+    }
 }
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct UnitResolution {
@@ -163,6 +181,8 @@ pub struct PreparedNativeImport {
     capture: ImportCapture,
     bundle: ImportBundle,
     receipt: ImportReceipt,
+    representations: Vec<(om9_core::brep::CanonicalBrep, om9_core::brep::BrepRepresentation)>,
+    native_representations: Vec<(om9_core::geometry::NativeBrepSource, om9_core::geometry::NativeBrepRepresentation)>,
     cancel: Cancellation,
     // Carries known source/bundle allocations across the handoff to the
     // transaction; it is released only after the candidate is registered.
@@ -249,11 +269,62 @@ impl PreparedNativeImport {
     ) -> Result<(PreparedTransaction, ImportReceipt)> {
         let combined = self.cancel.either(cancel)?;
         check(&combined)?;
+        c.prune_orphaned_native_representations();
         let held = self.receipt.usage(c.limits())?;
         let target = self.capture.document().id;
         let mut p = self
             .capture
             .prepare_with_held_usage(c, self.bundle, &combined, held)?;
+        // The import reservation covers these displays until ownership moves
+        // to independent cache leases. Keep the charge continuous while the
+        // candidate scene is prepared and the transaction is still private.
+        let representation_count = self.representations.len().checked_add(self.native_representations.len())
+            .ok_or(Error::Overflow("import BRep representation count"))?;
+        if representation_count != 0 {
+            c.begin_pending_brep_representations(&mut p, representation_count, held)?;
+        }
+        for (source, mut display) in self.representations.drain(..) {
+            check(&combined)?;
+            let display_bytes = display.display_allocation_bytes()?;
+            let owner_overhead = (std::mem::size_of::<std::sync::Mutex<om9_core::transaction::ExternalMemoryReservation>>()
+                + 2 * std::mem::size_of::<usize>()) as u64;
+            let store_overhead = Usage::btree::<(om9_core::brep::BrepSourceIdentity, om9_core::brep::BrepRepresentationProfile), om9_core::brep::BrepRepresentation>(1)?.bytes
+                .checked_add(Usage::btree::<om9_core::brep::BrepSourceIdentity, om9_core::brep::BrepRepresentationProfile>(1)?.bytes)
+                .and_then(|n| n.checked_add(om9_core::brep::BrepRepresentation::source_receipt_bytes()))
+                .ok_or(Error::Overflow("3DM BRep store metadata"))?;
+            let overhead = owner_overhead.checked_add(store_overhead).ok_or(Error::Overflow("3DM BRep display owner"))?;
+            let bytes = display_bytes.checked_add(overhead).ok_or(Error::Overflow("3DM BRep display owner"))?.max(1);
+            let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+            c.grow_external_memory_with_held(&mut self._reservation, overhead, physical, held)?;
+            let mut lease = self._reservation.split_off(bytes)?;
+            lease.set_allocated_bytes(display_bytes)?;
+            let owner = std::sync::Arc::new(std::sync::Mutex::new(lease));
+            owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(display_bytes + owner_overhead)?;
+            display.bind_display_owner(&source, owner.clone(), &c.external_memory_account(), c.limits())?;
+            p.insert_pending_brep_representation(&source, display, c.limits(), c, held)?;
+            owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(bytes)?;
+        }
+        for (source, mut display) in self.native_representations.drain(..) {
+            check(&combined)?;
+            let display_bytes = display.display_bytes()?;
+            let owner_bytes = (std::mem::size_of::<std::sync::Mutex<om9_core::transaction::ExternalMemoryReservation>>()
+                + 2 * std::mem::size_of::<usize>()) as u64;
+            let store_bytes = Usage::btree::<om9_core::geometry::NativeBrepSourceIdentity,
+                om9_core::geometry::NativeBrepRepresentation>(1)?.bytes
+                .checked_add((std::mem::size_of::<Vec<u8>>() + 2 * std::mem::size_of::<usize>()) as u64)
+                .ok_or(Error::Overflow("native BRep weak source receipt"))?;
+            let bytes = display_bytes.checked_add(owner_bytes).and_then(|n| n.checked_add(store_bytes))
+                .ok_or(Error::Overflow("native BRep display owner"))?.max(1);
+            let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+            c.grow_external_memory_with_held(&mut self._reservation, owner_bytes + store_bytes, physical, held)?;
+            let mut lease = self._reservation.split_off(bytes)?;
+            lease.set_allocated_bytes(display_bytes)?;
+            let owner = std::sync::Arc::new(std::sync::Mutex::new(lease));
+            owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(display_bytes + owner_bytes)?;
+            display.bind_owner(&source, owner.clone(), &c.external_memory_account(), c.limits())?;
+            p.insert_pending_native_brep_representation(&source, display, c.limits())?;
+            owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(bytes)?;
+        }
         // Validate display preparation while the document is still private. Old
         // documents/Undo, the candidate, and receipt remain charged together.
         let mut peak = c.retained_usage_with_held_usage(held)?;
@@ -263,10 +334,11 @@ impl PreparedNativeImport {
             .documents
             .get(&target)
             .ok_or(Error::Missing("import scene target"))?;
-        let scene = om9_scene::scene::Scene::capture(
+        let scene = om9_scene::scene::Scene::capture_with_representations(
             document.clone(),
             c.epoch(),
             &c.limits().remaining_after(peak)?,
+            c.representation_store(),
         )?;
         let scene_diagnostics = scene.diagnostics;
         drop(scene.objects);
@@ -643,7 +715,7 @@ impl NativeExchange {
         }
         let conversion_base = held.bytes;
         let mut conversion_reserved = 0u64;
-        let (bundle, mut receipt) = convert(
+        let (bundle, mut receipt, representations, native_representations) = convert(
             inventory,
             &snapshot,
             options,
@@ -664,6 +736,14 @@ impl NativeExchange {
         receipt.native = output.stats;
         let mut retained = bundle.storage_usage(c.limits())?;
         retained.add(receipt.usage(c.limits())?, c.limits())?;
+        retained.add(Usage::array::<(om9_core::brep::CanonicalBrep, om9_core::brep::BrepRepresentation)>(representations.capacity())?, c.limits())?;
+        for (_, display) in &representations {
+            retained.add(Usage { bytes: display.display_allocation_bytes()?, ..Usage::default() }, c.limits())?;
+        }
+        retained.add(Usage::array::<(om9_core::geometry::NativeBrepSource, om9_core::geometry::NativeBrepRepresentation)>(native_representations.capacity())?, c.limits())?;
+        for (_, display) in &native_representations {
+            retained.add(Usage { bytes: display.display_bytes()?, ..Usage::default() }, c.limits())?;
+        }
         retained.add(Usage::array::<PreparedNativeImport>(1)?, c.limits())?;
         if retained.bytes > conversion_reserved {
             let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
@@ -681,6 +761,8 @@ impl NativeExchange {
             capture,
             bundle,
             receipt,
+            representations,
+            native_representations,
             cancel: cancel.clone(),
             _reservation: native_reservation,
         })
@@ -807,6 +889,18 @@ impl Catalog {
         r.disposition = bound.disposition;
         Ok(())
     }
+    fn bind_definition(&mut self, key: NativeRecordKey, definition: &Definition) -> Result<()> {
+        let slot = *self.slots.get(&key).ok_or(Error::Missing("source record"))?;
+        let original = &self.records[slot];
+        if original.host.is_some() { return Err(Error::Invalid("native source record bound twice")); }
+        let bound = SourceRecord::bound_definition(key, &original.family, definition)?;
+        let record = &mut self.records[slot];
+        record.host = bound.host;
+        record.baseline_sha256 = bound.baseline_sha256;
+        record.definition_hash_version = bound.definition_hash_version;
+        record.disposition = bound.disposition;
+        Ok(())
+    }
     fn one(
         &self,
         relations: &[dto::Relation],
@@ -892,12 +986,12 @@ fn eligible_object(o: &dto::Object, mode: ImportMode, layers: &BTreeMap<Uuid, La
         && o.userdata.len() == 1
         && o.unsupported_fields.len() == 1
         && o.unsupported_fields[0] == "Geometry.userdata"
-        && matches!(&o.geometry, Some(Geometry::Curve(Curve::Nurbs(n))) if n.periodic && n.seam.is_none());
+        && matches!(o.geometry.as_ref().map(|g| &g.geometry), Some(Geometry::Curve(Curve::Nurbs(n))) if n.periodic && n.seam.is_none());
     let owned_short_line = o.owned_short_line_userdata_only
         && o.userdata.len() == 1
         && o.unsupported_fields.len() == 1
         && o.unsupported_fields[0] == "Geometry.userdata"
-        && matches!(&o.geometry, Some(Geometry::Curve(Curve::Line { .. })));
+        && matches!(o.geometry.as_ref().map(|g| &g.geometry), Some(Geometry::Curve(Curve::Line { .. })));
     o.admission_required
         && (o.preservation.admission_required || page_space)
         && o.native_component_type == 12
@@ -920,8 +1014,8 @@ struct BrepCounters {
     displayable: usize,
     display_unavailable: usize,
 }
-fn native_display_available(native: &om9_core::geometry::NativeBrep) -> bool {
-    !native.display.vertices.is_empty() && !native.display.faces.is_empty()
+fn native_display_available(native: &dto::ProjectedGeometry) -> bool {
+    native.native_display.as_ref().is_some_and(|display| !display.display().vertices.is_empty() && !display.display().faces.is_empty())
 }
 #[allow(clippy::too_many_arguments)]
 fn entity(
@@ -937,9 +1031,15 @@ fn entity(
     limits: &Limits,
     counters: &mut BrepCounters,
     diagnostics: &mut Vec<String>,
+    representations: &mut Vec<(om9_core::brep::CanonicalBrep, om9_core::brep::BrepRepresentation)>,
+    native_representations: &mut Vec<(om9_core::geometry::NativeBrepSource, om9_core::geometry::NativeBrepRepresentation)>,
+    conversion_base: u64,
+    retained_breps: &mut u64,
+    reserve_conversion: &mut dyn FnMut(u64) -> Result<()>,
+    cancel: &Cancellation,
 ) -> Result<Entity> {
     if brep_mode.editable() {
-        let conversion = if let Some(Geometry::NativeBrep(native)) = &object.geometry {
+        let conversion = if let Some(Geometry::NativeBrep(native)) = object.geometry.as_ref().map(|g| &g.geometry) {
             let payload = native.payload.clone();
             Some((payload, object.id))
         } else {
@@ -947,9 +1047,20 @@ fn entity(
         };
         if let Some((payload, id)) = conversion {
             if let Some(bridge) = bridge {
-                match bridge.import(&payload, tolerance_mm, deflection_mm, limits) {
+                match bridge.import_admitted(&payload, tolerance_mm, deflection_mm, limits, &mut |live, pending| {
+                    check(cancel)?;
+                    let peak = conversion_base.checked_add(*retained_breps).and_then(|n| n.checked_add(live))
+                        .and_then(|n| n.checked_add(pending)).ok_or(Error::Overflow("3DM BRep import admission"))?;
+                    reserve_conversion(peak)
+                }) {
                     Ok(brep) => {
-                        object.geometry = Some(Geometry::Brep(brep));
+                        *retained_breps = retained_breps.checked_add(brep.storage_usage(limits)?.bytes)
+                            .ok_or(Error::Overflow("3DM BRep import retained"))?;
+                        reserve_conversion(conversion_base.checked_add(*retained_breps)
+                            .ok_or(Error::Overflow("3DM BRep import retained"))?)?;
+                        let (source, display) = brep.into_canonical_and_representation();
+                        object.geometry = Some(dto::ProjectedGeometry { geometry: Geometry::Brep(source.clone()), native_display: None });
+                        representations.push((source, display));
                         counters.editable = counters
                             .editable
                             .checked_add(1)
@@ -959,6 +1070,7 @@ fn entity(
                             .checked_add(1)
                             .ok_or(Error::Overflow("displayable BRep count"))?;
                     }
+                    Err(error @ (Error::Canceled | Error::Budget(_) | Error::Overflow(_))) => return Err(error),
                     Err(error) if brep_mode.strict() => {
                         return Err(Error::Io(format!("3DM BRep {id}: {error}")));
                     }
@@ -967,7 +1079,7 @@ fn entity(
                             .opaque
                             .checked_add(1)
                             .ok_or(Error::Overflow("opaque BRep count"))?;
-                        if let Some(Geometry::NativeBrep(native)) = &object.geometry
+                        if let Some(native) = &object.geometry
                             && native_display_available(native)
                         {
                             counters.displayable = counters
@@ -990,7 +1102,7 @@ fn entity(
                     .opaque
                     .checked_add(1)
                     .ok_or(Error::Overflow("opaque BRep count"))?;
-                if let Some(Geometry::NativeBrep(native)) = &object.geometry
+                if let Some(native) = &object.geometry
                     && native_display_available(native)
                 {
                     counters.displayable = counters
@@ -1008,7 +1120,8 @@ fn entity(
                 ));
             }
         }
-    } else if let Some(Geometry::NativeBrep(native)) = &object.geometry {
+    } else if let Some(native) = &object.geometry
+        && matches!(native.geometry, Geometry::NativeBrep(_)) {
         counters.opaque = counters
             .opaque
             .checked_add(1)
@@ -1029,10 +1142,20 @@ fn entity(
             ));
         }
     }
-    let mut geometry = object
+    let projection = object
         .geometry
         .take()
         .ok_or(Error::Missing("native projected geometry"))?;
+    let mut geometry = projection.geometry;
+    if let Geometry::NativeBrep(source) = &geometry {
+        let display = projection.native_display.ok_or(Error::Missing("native BRep import display"))?;
+        if display.display().vertices.is_empty() || display.display().faces.is_empty() {
+            return Err(Error::Unsupported("opaque native BRep has no display or verified rebuild"));
+        }
+        native_representations.push((source.clone(), display));
+    } else if projection.native_display.is_some() {
+        return Err(Error::Invalid("unexpected native BRep display"));
+    }
     if let Geometry::Instance(id) = &mut geometry {
         *id = *defs
             .get(&id.0)
@@ -1087,7 +1210,8 @@ fn convert(
     l: &Limits,
     cancel: &Cancellation,
     reserve_conversion: &mut impl FnMut(u64) -> Result<()>,
-) -> Result<(ImportBundle, ImportReceipt)> {
+) -> Result<(ImportBundle, ImportReceipt, Vec<(om9_core::brep::CanonicalBrep, om9_core::brep::BrepRepresentation)>,
+    Vec<(om9_core::geometry::NativeBrepSource, om9_core::geometry::NativeBrepRepresentation)>)> {
     let count = d
         .components
         .len()
@@ -1209,6 +1333,9 @@ fn convert(
             l,
         )?;
     }
+    let representation_count = if options.brep.editable() { d.objects.len() } else { 0 };
+    held.add(Usage::array::<(om9_core::brep::CanonicalBrep, om9_core::brep::BrepRepresentation)>(representation_count)?, l)?;
+    held.add(Usage::array::<(om9_core::geometry::NativeBrepSource, om9_core::geometry::NativeBrepRepresentation)>(d.objects.len())?, l)?;
     // All maps and buffers estimated above must be visible to other jobs
     // before creating the first owned conversion structures.
     reserve_conversion(held.bytes)?;
@@ -1229,6 +1356,17 @@ fn convert(
         (source_units.model.absolute_tolerance * source_units.model.millimeters_per_unit).max(1e-7);
     let brep_deflection_mm = 0.02_f64.max(brep_tolerance_mm * 2.);
     let mut brep_counters = BrepCounters::default();
+    let mut representations = Vec::new();
+    representations.try_reserve_exact(representation_count).map_err(|_| Error::Budget("3DM BRep representations"))?;
+    let extra = representations.capacity().checked_sub(representation_count).ok_or(Error::Overflow("3DM BRep representations"))?;
+    held.add(Usage::array::<(om9_core::brep::CanonicalBrep, om9_core::brep::BrepRepresentation)>(extra)?, l)?;
+    reserve_conversion(held.bytes)?;
+    let mut native_representations = Vec::new();
+    native_representations.try_reserve_exact(d.objects.len()).map_err(|_| Error::Budget("native BRep import representations"))?;
+    let native_extra = native_representations.capacity().checked_sub(d.objects.len()).ok_or(Error::Overflow("native BRep import representations"))?;
+    held.add(Usage::array::<(om9_core::geometry::NativeBrepSource, om9_core::geometry::NativeBrepRepresentation)>(native_extra)?, l)?;
+    reserve_conversion(held.bytes)?;
+    let mut retained_breps = 0u64;
     if options.brep.strict() && bridge.is_none() {
         return Err(Error::Missing("BRep conversion backend"));
     }
@@ -1558,7 +1696,7 @@ fn convert(
                     } else {
                         "resolved_model_units_to_canonical_mm"
                     })
-                || match geometry {
+                || match &geometry.geometry {
                     Geometry::Instance(id) => target.map(|r| r.id) != Some(id.0),
                     _ => target.is_some(),
                 }
@@ -1612,7 +1750,7 @@ fn convert(
         let ok = def.members.iter().all(|m| {
             let o = &d.objects[object_indices[m]];
             eligible_object(o, options.mode, &layer_ids)
-                && match &o.geometry {
+                && match o.geometry.as_ref().map(|geometry| &geometry.geometry) {
                     Some(Geometry::Instance(i)) => admitted.contains(&i.0),
                     _ => true,
                 }
@@ -1625,7 +1763,7 @@ fn convert(
     for o in &d.objects {
         if !o.is_definition_member
             && eligible_object(o, options.mode, &layer_ids)
-            && let Some(Geometry::Instance(i)) = &o.geometry
+            && let Some(Geometry::Instance(i)) = o.geometry.as_ref().map(|geometry| &geometry.geometry)
             && admitted.contains(&i.0)
         {
             used.insert(i.0);
@@ -1680,6 +1818,12 @@ fn convert(
                 l,
                 &mut brep_counters,
                 &mut diagnostics,
+                &mut representations,
+                &mut native_representations,
+                held.bytes,
+                &mut retained_breps,
+                reserve_conversion,
+                cancel,
             )?;
             catalog.bind_entity(
                 key,
@@ -1693,11 +1837,7 @@ fn convert(
         }
         let mut h = Definition::new(&def.label, members);
         h.id = def_ids[id];
-        catalog.bind(
-            catalog.key(11, *id)?,
-            HostRef::Definition(h.id),
-            fingerprint(&h)?,
-        )?;
+        catalog.bind_definition(catalog.key(11, *id)?, &h)?;
         host_defs.push(h);
         if options.mode == ImportMode::Geometry {
             loss(&mut diagnostics, *id, "definition", &def.preservation, &[]);
@@ -1991,7 +2131,7 @@ fn convert(
         check(cancel)?;
         if o.is_definition_member
             || !eligible_object(&o, options.mode, &layer_ids)
-            || matches!(&o.geometry,Some(Geometry::Instance(i)) if !def_ids.contains_key(&i.0))
+            || matches!(o.geometry.as_ref().map(|geometry| &geometry.geometry),Some(Geometry::Instance(i)) if !def_ids.contains_key(&i.0))
         {
             continue;
         }
@@ -2024,6 +2164,12 @@ fn convert(
             l,
             &mut brep_counters,
             &mut diagnostics,
+            &mut representations,
+            &mut native_representations,
+            held.bytes,
+            &mut retained_breps,
+            reserve_conversion,
+            cancel,
         )?;
         catalog.bind_entity(key, HostRef::Object(e.id), &e)?;
         if page_space {
@@ -2116,5 +2262,7 @@ fn convert(
             exchange,
         },
         receipt,
+        representations,
+        native_representations,
     ))
 }

@@ -6,7 +6,7 @@ use om9_core::{
     budget::{Limits, Usage},
     identity::{DocumentId, ObjectId, SourceStamp},
     model::Document,
-    transaction::{OperationContext, TransactionCoordinator},
+    transaction::{Cancellation, OperationContext, TransactionCoordinator},
 };
 use serde::Serialize;
 use std::{
@@ -129,10 +129,20 @@ fn convert_brep_geometry(
     };
     let tolerance = tolerance.ok_or(Error::Missing("document tolerance"))?;
     tolerance.validate()?;
-    *geometry = om9_core::geometry::Geometry::NativeBrep(bridge.export(brep, tolerance.absolute_mm, limits)?);
+    *geometry = om9_core::geometry::Geometry::NativeBrep(bridge.export(brep, tolerance.absolute_mm, limits)?.into_source_and_display().0);
     Ok(true)
 }
 impl ExportCapture {
+    /// The native geometry-only packet cannot represent standalone surface
+    /// trim extensions. Refuse instead of exporting the untrimmed support.
+    pub(crate) fn validate_3dm_geometry(&self) -> Result<()> {
+        let document=self.document();
+        if document.entities.values().chain(document.definitions.values().flat_map(|d|&d.members))
+            .any(|entity|entity.extensions.contains_key(om9_core::model::TRIM_SURFACE_EXTENSION_SLOT)) {
+            return Err(Error::Unsupported("3DM export of trimmed standalone surfaces"));
+        }
+        Ok(())
+    }
     pub fn all(coordinator: &TransactionCoordinator, id: DocumentId) -> Result<Self> {
         let (context, world) = coordinator.capture_context(None)?;
         let document = world
@@ -294,7 +304,8 @@ impl ExportCapture {
     fn reserve_brep_projection(&mut self, coordinator: &TransactionCoordinator) -> Result<()> {
         if self.converted.is_some() || !self.document.entities.values()
             .chain(self.document.definitions.values().flat_map(|definition| &definition.members))
-            .any(|entity| matches!(entity.geometry, om9_core::geometry::Geometry::Brep(_)))
+            .any(|entity| matches!(entity.geometry, om9_core::geometry::Geometry::Brep(_))
+                || entity.extensions.contains_key(om9_core::model::TRIM_SURFACE_EXTENSION_SLOT))
         {
             return Ok(());
         }
@@ -305,6 +316,64 @@ impl ExportCapture {
             Usage::array::<SourceStamp>(self.sources.capacity())?,
         )?;
         self.projection_reservation = Some(reservation);
+        Ok(())
+    }
+
+    /// Convert trim sources only in a private projection. Every owned output
+    /// and temporary copy shares the coordinator's export reservation.
+    fn convert_trimmed_surfaces(&mut self,coordinator:&TransactionCoordinator,
+        bridge:Option<&dyn crate::BrepExport>,cancel:&Cancellation) -> Result<()> {
+        use om9_core::model::TRIM_SURFACE_EXTENSION_SLOT;
+        if !self.document().entities.values().chain(self.document().definitions.values().flat_map(|d|&d.members))
+            .any(|e|e.extensions.contains_key(TRIM_SURFACE_EXTENSION_SLOT)) {return Ok(());}
+        let bridge=bridge.ok_or(Error::Unsupported("3DM export of trimmed standalone surfaces"))?;
+        let limits=coordinator.limits();
+        let tolerance=self.document().tolerance().ok_or(Error::Missing("document tolerance"))?.absolute_mm;
+        let mut reservation=self.projection_reservation.take().ok_or(Error::Missing("3DM trim projection reservation"))?;
+        let base=reservation.bytes();
+        let mut document=match self.converted.take() {
+            Some(document)=>Arc::try_unwrap(document).map_err(|_|Error::Invalid("shared export projection"))?,
+            None=>(*self.document).clone(),
+        };
+        let mut retained=0u64;
+        let held=Usage::array::<SourceStamp>(self.sources.capacity())?;
+        for entity in document.entities.values_mut().chain(document.definitions.values_mut().flat_map(|d|&mut d.members)) {
+            if cancel.is_canceled() {return Err(Error::Canceled);}
+            let is_trim=entity.extensions.contains_key(TRIM_SURFACE_EXTENSION_SLOT);
+            if !is_trim && !matches!(entity.geometry,om9_core::geometry::Geometry::Brep(_)) {continue;}
+            let mut admit=|live:u64,pending:u64| -> Result<()> {
+                if cancel.is_canceled() {return Err(Error::Canceled);}
+                let allocated=base.checked_add(retained).and_then(|n|n.checked_add(live)).ok_or(Error::Overflow("3DM trim reservation"))?;
+                let needed=allocated.checked_add(pending).ok_or(Error::Overflow("3DM trim reservation"))?;
+                if needed>reservation.bytes() {
+                    let additional=needed-reservation.bytes();
+                    coordinator.grow_external_memory_with_held(&mut reservation,additional,
+                        om9_native_owner::physical_memory().map(|s|(s.total_bytes,s.available_bytes)),held)?;
+                }
+                // Keep the entire estimate pending: it includes conservative
+                // scratch/clone bounds, not just verified materialized bytes.
+                reservation.recheck_pending()
+            };
+            let native=if is_trim {bridge.export_trimmed_surface(entity,tolerance,limits,&mut admit)?}
+                else if let om9_core::geometry::Geometry::Brep(brep)=&entity.geometry {
+                    bridge.export_admitted(brep,tolerance,limits,&mut admit)?
+                } else {unreachable!()};
+            retained=retained.checked_add(native.validate(limits)?.bytes).ok_or(Error::Overflow("3DM trim retained"))?;
+            entity.geometry=om9_core::geometry::Geometry::NativeBrep(native.into_source_and_display().0);
+            entity.extensions.remove(TRIM_SURFACE_EXTENSION_SLOT);
+        }
+        if cancel.is_canceled() {return Err(Error::Canceled);}
+        let retained_total=base.checked_add(retained).and_then(|n|n.checked_add(256)).ok_or(Error::Overflow("3DM trim retained"))?;
+        let needed=retained_total.checked_add(document.validation_scratch_usage(limits)?.bytes).ok_or(Error::Overflow("3DM trim validation"))?;
+        if needed>reservation.bytes() {
+            let additional=needed-reservation.bytes();
+            coordinator.grow_external_memory_with_held(&mut reservation,additional,
+                om9_native_owner::physical_memory().map(|s|(s.total_bytes,s.available_bytes)),held)?;
+        }
+        reservation.recheck_pending()?;
+        document.reconcile_derived_export_bindings(limits)?;
+        reservation.shrink_to(retained_total)?;
+        self.converted=Some(Arc::new(document));self.projection_reservation=Some(reservation);
         Ok(())
     }
 
@@ -390,6 +459,7 @@ impl ExportCapture {
         self.encode_up_to(limit)
     }
     fn packet(&self) -> Result<Packet<'_>> {
+        self.validate_3dm_geometry()?;
         let d = self.document();
         if let Some(tolerance) = d.tolerance() {
             tolerance.validate()?;
@@ -441,8 +511,86 @@ mod brep_export_tolerance_tests {
     impl BrepExport for RecordingBridge {
         fn export(&self, _: &Brep, tolerance_mm: f64, _: &Limits) -> Result<NativeBrep> {
             self.0.set(Some(tolerance_mm));
-            Ok(NativeBrep { display: Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }, payload: vec![1].into(), crc: 0 })
+            Ok(NativeBrep { display: std::sync::Arc::new(Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }), payload: vec![1].into(), crc: 0 })
         }
+    }
+
+    #[test]
+    fn trim_projection_releases_admission_after_late_budget_or_cancel() {
+        use om9_core::{budget::memory::MemoryClass, rhino_semantics::{set_trimmed_surface, TrimmedSurface}};
+        struct LateFailure<'a> { calls: Cell<usize>, cancel: &'a Cancellation, cancel_on_second: bool }
+        impl BrepExport for LateFailure<'_> {
+            fn export(&self, _: &Brep, _: f64, _: &Limits) -> Result<NativeBrep> {
+                unreachable!("fixture contains no editable BRep")
+            }
+            fn export_trimmed_surface(&self, _: &Entity, _: f64, _: &Limits,
+                admit: &mut dyn FnMut(u64, u64) -> Result<()>) -> Result<NativeBrep> {
+                let call = self.calls.get() + 1;
+                self.calls.set(call);
+                if call == 2 {
+                    if self.cancel_on_second { self.cancel.cancel(); }
+                    admit(0, 64 * 1024 * 1024)?;
+                    unreachable!("late admission must fail");
+                }
+                admit(0, 1024)?;
+                Ok(NativeBrep { display: Arc::new(Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }), payload: vec![1].into(), crc: 0 })
+            }
+        }
+        for cancel_on_second in [false, true] {
+            let limits = Limits { max_bytes: 8 * 1024 * 1024, ..Limits::default() };
+            let surface = om9_core::surface_kernel::plane([0., 0., 0.], [1., 0., 0.], [0., 1., 0.], 10., 10., &limits).unwrap();
+            let trim = TrimmedSurface { underlying: surface.clone(), outer: vec![[0.1,0.1],[0.9,0.1],[0.9,0.9],[0.1,0.9]], inners: vec![], reversed: false };
+            let mut document = Document::with_template_tolerance("late trim admission");
+            for id in [1, 2] {
+                let mut entity = Entity::new("trim", Geometry::Surface(surface.clone()), None);
+                set_trimmed_surface(&mut entity, &trim, &limits).unwrap();
+                entity.id = om9_core::identity::ObjectId(uuid::Uuid::from_u128(id));
+                document.entities.insert(entity.id, entity);
+            }
+            let id = document.id;
+            let coordinator = TransactionCoordinator::new(World::new(vec![document.clone()], &limits).unwrap(), limits).unwrap();
+            let cancellation = Cancellation::default();
+            let bridge = LateFailure { calls: Cell::new(0), cancel: &cancellation, cancel_on_second };
+            let mut capture = ExportCapture::all(&coordinator, id).unwrap();
+            capture.reserve_brep_projection(&coordinator).unwrap();
+            let error = capture.convert_trimmed_surfaces(&coordinator, Some(&bridge), &cancellation).unwrap_err();
+            if cancel_on_second { assert!(matches!(error, Error::Canceled)); }
+            else { assert!(matches!(error, Error::Budget(_))); }
+            assert_eq!(bridge.calls.get(), 2);
+            assert_eq!(*coordinator.world().documents[&id], document);
+            assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+            assert!(capture.converted.is_none());
+        }
+    }
+
+    #[test]
+    fn mixed_projection_refuses_late_brep_admission_without_partial_output() {
+        use om9_core::{budget::memory::MemoryClass, rhino_semantics::{set_trimmed_surface, TrimmedSurface}};
+        struct Bridge(Cell<usize>);
+        impl BrepExport for Bridge {
+            fn export(&self, _: &Brep, _: f64, _: &Limits) -> Result<NativeBrep> { unreachable!() }
+            fn export_trimmed_surface(&self, _: &Entity, _: f64, _: &Limits, admit: &mut dyn FnMut(u64,u64)->Result<()>) -> Result<NativeBrep> {
+                self.0.set(self.0.get()+1); admit(0,1024)?;
+                Ok(NativeBrep { display: Arc::new(Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }), payload: vec![1].into(), crc: 0 })
+            }
+            fn export_admitted(&self, _: &Brep, _: f64, _: &Limits, admit: &mut dyn FnMut(u64,u64)->Result<()>) -> Result<NativeBrep> {
+                assert_eq!(self.0.get(),1); self.0.set(2); admit(0,64*1024*1024)?; unreachable!()
+            }
+        }
+        let limits=Limits {max_bytes:8*1024*1024,..Limits::default()};
+        let surface=om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+        let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.1,0.1],[0.9,0.1],[0.9,0.9],[0.1,0.9]],inners:vec![],reversed:false};
+        let mut face=Entity::new("trim",Geometry::Surface(surface),None);set_trimmed_surface(&mut face,&trim,&limits).unwrap();
+        face.id=om9_core::identity::ObjectId(uuid::Uuid::from_u128(1));
+        let mut solid=Entity::new("solid",Geometry::Brep(fixture()),None);solid.id=om9_core::identity::ObjectId(uuid::Uuid::from_u128(2));
+        let mut document=Document::with_template_tolerance("mixed late admission");document.entities.insert(face.id,face);document.entities.insert(solid.id,solid);
+        let id=document.id;let coordinator=TransactionCoordinator::new(World::new(vec![document.clone()],&limits).unwrap(),limits).unwrap();
+        let mut capture=ExportCapture::all(&coordinator,id).unwrap();capture.reserve_brep_projection(&coordinator).unwrap();
+        let bridge=Bridge(Cell::new(0));
+        assert!(matches!(capture.convert_trimmed_surfaces(&coordinator,Some(&bridge),&Cancellation::default()),Err(Error::Budget(_))));
+        assert_eq!(bridge.0.get(),2);assert!(capture.converted.is_none());
+        assert_eq!(*coordinator.world().documents[&id],document);
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache),0);
     }
 
     fn fixture() -> Brep {
@@ -450,7 +598,12 @@ mod brep_export_tolerance_tests {
             source_sha256: [0; 32], deflection_mm: 0.1,
             points: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]],
             triangles: vec![[0,1,2,0]], segments: vec![], vertices: vec![],
-            faces: vec![uuid::Uuid::new_v4()], edges: vec![], vertex_ids: vec![], face_edges: vec![],
+            topology: om9_core::brep::BrepTopology {
+                faces: vec![uuid::Uuid::new_v4()],
+                edges: vec![],
+                vertex_ids: vec![],
+                face_edges: vec![],
+            }.into(),
         }, &Limits::default()).unwrap()
     }
 
@@ -475,7 +628,7 @@ mod brep_export_tolerance_tests {
         impl BrepExport for CheckingBridge<'_> {
             fn export(&self, _: &Brep, _: f64, _: &Limits) -> Result<NativeBrep> {
                 assert!(self.0.external_reserved_bytes(MemoryClass::CpuCache) >= 1_000_000);
-                Ok(NativeBrep { display: Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }, payload: vec![1].into(), crc: 0 })
+                Ok(NativeBrep { display: std::sync::Arc::new(Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }), payload: vec![1].into(), crc: 0 })
             }
         }
         let limits = Limits { max_bytes: 8 * 1024 * 1024, ..Limits::default() };

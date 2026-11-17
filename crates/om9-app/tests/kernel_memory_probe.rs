@@ -7,6 +7,7 @@ use om9_kernel::{brep, creation::{self, Primitive, Profile}, editing::{self, Boo
 
 enum Fixture {
     Boolean(Brep, Brep, BooleanOp),
+    CheckedIntersection(Brep, Brep),
     Fillet(Brep, Vec<usize>),
     Loft(Vec<Profile>),
 }
@@ -14,7 +15,7 @@ enum Fixture {
 #[test]
 #[ignore = "isolated release kernel memory diagnostic"]
 fn kernel_memory_probe() {
-    let case = std::env::var("OM9_KERNEL_MEMORY_CASE").expect("choose boolean, boolean_drilled, fillet, fillet_all, loft, loft32 or loft32_wave");
+    let case = std::env::var("OM9_KERNEL_MEMORY_CASE").expect("choose boolean, boolean_drilled, certified_intersection, fillet, fillet_all, loft, loft32 or loft32_wave");
     let limits = Limits::default();
     let deflection = 0.01;
     let fixture = match case.as_str() {
@@ -33,10 +34,19 @@ fn kernel_memory_probe() {
             }}
             Fixture::Boolean(body, cutter, BooleanOp::Difference)
         }
+        "certified_intersection" => {
+            let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, deflection, &limits).unwrap();
+            let rotation = transform_ops::rotation([0.; 3], [1., 0., 0.], std::f64::consts::FRAC_PI_4).unwrap();
+            let sphere = transform_ops::transform_brep(&sphere, &rotation, deflection, &limits).unwrap();
+            let block = creation::primitive(Primitive::Box { x_mm: 2., y_mm: 8., z_mm: 8. }, deflection, &limits).unwrap();
+            let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+            let block = transform_ops::transform_brep(&block, &placement, deflection, &limits).unwrap();
+            Fixture::CheckedIntersection(sphere, block)
+        }
         "fillet" => Fixture::Fillet(brep::box_brep([10.; 3], deflection, &limits).unwrap(), vec![0]),
         "fillet_all" => {
             let body = brep::box_brep([10.; 3], deflection, &limits).unwrap();
-            assert_eq!(body.display.edges.len(), 12);
+            assert_eq!(body.display().edges.len(), 12);
             Fixture::Fillet(body, (0..12).collect())
         }
         "loft" => Fixture::Loft([0., 5., 10.].into_iter().map(|z| Profile::new(vec![
@@ -60,6 +70,10 @@ fn kernel_memory_probe() {
             BooleanOutcome::Body(body) => body,
             BooleanOutcome::Empty => panic!("overlapping boxes must produce a body"),
         },
+        Fixture::CheckedIntersection(a, b) => match editing::boolean_checked(a, b, BooleanOp::Intersection, deflection, &limits).unwrap() {
+            BooleanOutcome::Body(body) => body,
+            BooleanOutcome::Empty => panic!("intersection must produce a body"),
+        },
         Fixture::Fillet(body, edges) => editing::fillet(body, edges, 1., deflection, &limits).unwrap(),
         Fixture::Loft(sections) => creation::loft(sections, true, false, deflection, &limits).unwrap(),
     };
@@ -69,6 +83,7 @@ fn kernel_memory_probe() {
     let expected = match case.as_str() {
         "boolean" => 1500.,
         "boolean_drilled" => 4000. - 17. * std::f64::consts::PI * 0.7f64.powi(2) * 10.,
+        "certified_intersection" => 18. * std::f64::consts::PI,
         "fillet" => 1000. - (1. - std::f64::consts::PI / 4.) * 10.,
         "fillet_all" => 8f64.powi(3) + 6. * 8f64.powi(2) + 3. * std::f64::consts::PI * 8. + 4. * std::f64::consts::PI / 3.,
         "loft" | "loft32" | "loft32_wave" => 1000.,
@@ -78,8 +93,8 @@ fn kernel_memory_probe() {
     assert!(measures.closed);
     assert_eq!(measures.naked_edges, 0);
     if case == "loft32_wave" {
-        let min_x = result.display.points.iter().map(|p| p[0]).fold(f64::INFINITY, f64::min);
-        let max_x = result.display.points.iter().map(|p| p[0]).fold(f64::NEG_INFINITY, f64::max);
+        let min_x = result.display().points.iter().map(|p| p[0]).fold(f64::INFINITY, f64::min);
+        let max_x = result.display().points.iter().map(|p| p[0]).fold(f64::NEG_INFINITY, f64::max);
         assert!(min_x < -1.9 && max_x > 11.9, "loft should follow the curved centreline");
     }
     println!("KERNEL_MEMORY case={case} deflection_mm={deflection} volume_mm3={} faces={} elapsed_ms={:.3} before_working={} before_peak_working={} before_private={} before_peak_pagefile={} after_working={} after_peak_working={} after_private={} after_peak_pagefile={}",

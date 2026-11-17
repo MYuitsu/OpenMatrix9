@@ -1384,6 +1384,35 @@ fn variable_blend_waits_for_tangent_scales() {
 }
 
 #[test]
+fn reopened_trim_scene_survives_untrim_undo_redo_and_save() {
+    use om9_scene::scene::RenderBuffers;
+    let limits=Limits::default();
+    let surface=surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.2,0.2],[0.8,0.2],[0.8,0.8],[0.2,0.8]],
+        inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("trimmed",Geometry::Surface(surface),None);
+    set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut document=Document::new("trim history");document.entities.insert(id,entity);
+    let source=Controller::new(document,limits).unwrap();
+    let path=std::env::temp_dir().join(format!("om9-trim-scene-{}.om9",uuid::Uuid::new_v4()));
+    let save=|c:&Controller|om9_archive::Archive::save(&path,c.document(),&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    save(&source);let mut controller=Controller::from_file(&path,limits).unwrap();
+    let check_source=|c:&Controller| {
+        let scene=c.scene().unwrap();let object=scene.objects.iter().find(|o|o.root==id).unwrap();
+        let RenderBuffers::Mesh {vertices,..}=object.buffers.as_ref() else {panic!("surface mesh")};
+        assert!(vertices.iter().all(|p|(2.-1e-9..=8.+1e-9).contains(&p[0])&&(2.-1e-9..=8.+1e-9).contains(&p[1])));
+    };
+    check_source(&controller);
+    controller.select_objects(&[id]).unwrap();controller.dispatch("OM9-SURFACE-017",InvocationOrigin::Menu).unwrap();
+    assert_eq!(controller.scene().unwrap().objects.len(),2);check_source(&controller);
+    controller.undo().unwrap();assert_eq!(controller.scene().unwrap().objects.len(),1);check_source(&controller);
+    controller.redo().unwrap();assert_eq!(controller.scene().unwrap().objects.len(),2);check_source(&controller);
+    save(&controller);let reopened=Controller::from_file(&path,limits).unwrap();
+    assert_eq!(reopened.scene().unwrap().objects.len(),2);check_source(&reopened);
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
 fn untrim_removes_a_trim_extension_and_refuses_an_untrimmed_surface() {
     let limits = Limits::default();
     let surface = surface_kernel::plane(

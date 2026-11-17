@@ -408,9 +408,12 @@ fn point_in_polygon(point: [f64; 2], polygon: &[[f64; 2]]) -> bool {
 
 fn polygon_area(polygon: &[[f64; 2]]) -> f64 {
     let mut twice = 0.0;
+    let origin = polygon[0];
     let mut j = polygon.len() - 1;
     for i in 0..polygon.len() {
-        twice += polygon[j][0] * polygon[i][1] - polygon[i][0] * polygon[j][1];
+        let a = [polygon[j][0] - origin[0], polygon[j][1] - origin[1]];
+        let b = [polygon[i][0] - origin[0], polygon[i][1] - origin[1]];
+        twice += a[0] * b[1] - b[0] * a[1];
         j = i;
     }
     twice / 2.0
@@ -458,6 +461,131 @@ pub struct TrimmedSurface {
     pub reversed: bool,
 }
 
+/// Largest edge count whose unordered pairs fit the 250,000-pair work limit.
+pub const TRIM_TOPOLOGY_MAX_EDGES: usize = 707;
+pub const TRIM_DISPLAY_MAX_EDGES: usize = 1024;
+pub const TRIM_SOURCE_PICK_MAX_EDGES: usize = 1536;
+
+// Source metadata validates individual vertices, but not loop topology.
+// Refuse crossings, touching and nested holes before deriving visible curves.
+pub fn validate_trim_loop_topology(trim: &TrimmedSurface) -> Result<()> {
+    validate_trim_topology_bounded(trim,TRIM_TOPOLOGY_MAX_EDGES,250_000)
+}
+
+pub fn validate_trim_loop_topology_for_display(trim: &TrimmedSurface) -> Result<()> {
+    validate_trim_topology_bounded(trim,TRIM_DISPLAY_MAX_EDGES,523_776)
+}
+
+/// Additional bounded verification for an interactive source pick. This does
+/// not raise the topology limit of display, editing or export operations.
+pub fn validate_trim_loop_topology_for_source_pick(trim: &TrimmedSurface) -> Result<()> {
+    validate_trim_topology_bounded(trim,TRIM_SOURCE_PICK_MAX_EDGES,1_178_880)
+}
+
+fn validate_trim_topology_bounded(trim:&TrimmedSurface,max_edges:usize,max_pairs:usize) -> Result<()> {
+    let loops = std::iter::once(&trim.outer).chain(&trim.inners);
+    if loops.clone().any(|polygon| polygon.len()<3 || polygon.iter().flatten().any(|v|!v.is_finite())) {
+        return Err(Error::Invalid("trim loop"));
+    }
+    let edges = loops.clone().try_fold(0usize, |n, polygon| n.checked_add(polygon.len()))
+        .ok_or(Error::Overflow("trim topology"))?;
+    if edges > max_edges || edges.checked_mul(edges.saturating_sub(1))
+        .is_none_or(|n| n / 2 > max_pairs) {
+        return Err(Error::Unsupported("trim topology exceeds verification limit"));
+    }
+    let orient = |a: [f64; 2], b: [f64; 2], c: [f64; 2]| -> Option<i8> {
+        let x = (b[0] - a[0]) * (c[1] - a[1]);
+        let y = (b[1] - a[1]) * (c[0] - a[0]);
+        let value = x - y;
+        let scale = a.into_iter().chain(b).chain(c).map(f64::abs).fold(1_f64, f64::max);
+        let delta = (b[0]-a[0]).abs() + (b[1]-a[1]).abs() + (c[0]-a[0]).abs() + (c[1]-a[1]).abs();
+        let bound = 64. * f64::EPSILON * (x.abs() + y.abs() + scale * delta);
+        if !value.is_finite() || !bound.is_finite() || value.abs() <= bound { None }
+        else { Some(if value > 0. { 1 } else { -1 }) }
+    };
+    for (li, polygon) in loops.clone().enumerate() {
+        for (lj, other) in loops.clone().enumerate().skip(li) {
+            for i in 0..polygon.len() {
+                let a = polygon[i]; let b = polygon[(i + 1) % polygon.len()];
+                for j in 0..other.len() {
+                    if li == lj && j <= i { continue; }
+                    let c = other[j]; let d = other[(j + 1) % other.len()];
+                    if li == lj && ((i + 1) % polygon.len() == j || (j + 1) % polygon.len() == i) {
+                        let (p, shared, q) = if (i + 1) % polygon.len() == j { (a, b, d) } else { (c, d, b) };
+                        // Strict separation on either coordinate proves the two
+                        // adjacent segments meet only at the shared endpoint,
+                        // including collinear subdivisions of a straight edge.
+                        let separated = (0..2).any(|axis| (p[axis] < shared[axis] && shared[axis] < q[axis])
+                            || (q[axis] < shared[axis] && shared[axis] < p[axis]));
+                        if !separated && orient(p, shared, q).is_none() {
+                            return Err(Error::Unsupported("ambiguous adjacent trim edges"));
+                        }
+                        continue;
+                    }
+                    if (0..2).any(|axis| a[axis].max(b[axis]) < c[axis].min(d[axis])
+                        || c[axis].max(d[axis]) < a[axis].min(b[axis])) { continue; }
+                    let (Some(o1), Some(o2), Some(o3), Some(o4)) =
+                        (orient(a,b,c), orient(a,b,d), orient(c,d,a), orient(c,d,b)) else {
+                            return Err(Error::Unsupported("ambiguous trim edge contact"));
+                        };
+                    if o1 != o2 && o3 != o4 { return Err(Error::Invalid("intersecting trim loops")); }
+                }
+            }
+        }
+    }
+    let contains = |point: [f64; 2], polygon: &[[f64; 2]]| -> Result<bool> {
+        let mut inside = false;
+        for i in 0..polygon.len() {
+            let a = polygon[i]; let b = polygon[(i + 1) % polygon.len()];
+            if (a[1] > point[1]) != (b[1] > point[1]) {
+                let side = orient(a, b, point).ok_or(Error::Unsupported("ambiguous trim containment"))?;
+                if (side > 0) == (b[1] > a[1]) { inside = !inside; }
+            }
+        }
+        Ok(inside)
+    };
+    for (i, hole) in trim.inners.iter().enumerate() {
+        for other in trim.inners.iter().skip(i + 1) {
+            if contains(hole[0], other)? || contains(other[0], hole)? {
+                return Err(Error::Invalid("nested trim holes"));
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Classify a UV point against already validated, noncrossing trim loops.
+/// `None` means numerical proximity to a boundary prevents a reliable answer.
+pub fn classify_trim_uv(trim: &TrimmedSurface, point: [f64;2]) -> Result<Option<bool>> {
+    match classify_trim_loop_uv(&trim.outer,point)? {None=>return Ok(None),Some(false)=>return Ok(Some(false)),Some(true)=>{}}
+    for hole in &trim.inners {match classify_trim_loop_uv(hole,point)? {None=>return Ok(None),Some(true)=>return Ok(Some(false)),Some(false)=>{}}}
+    Ok(Some(true))
+}
+
+/// Classify against one polygon; boundary ambiguity is not a positive result.
+pub fn classify_trim_loop_uv(polygon:&[[f64;2]],point:[f64;2]) -> Result<Option<bool>> {
+    if !point.iter().all(|v|v.is_finite()) {return Err(Error::Invalid("trim UV point"));}
+    if polygon.len()<3 {return Err(Error::Invalid("trim loop"));}
+    let mut inside=false;
+    for i in 0..polygon.len() {
+        let a=polygon[i];let b=polygon[(i+1)%polygon.len()];
+        let x=(b[0]-a[0])*(point[1]-a[1]);let y=(b[1]-a[1])*(point[0]-a[0]);
+        let cross=x-y;
+        let scale=a.into_iter().chain(b).chain(point).map(f64::abs).fold(1_f64,f64::max);
+        let delta=(b[0]-a[0]).abs()+(b[1]-a[1]).abs()+(point[0]-a[0]).abs()+(point[1]-a[1]).abs();
+        let error=128.*f64::EPSILON*(x.abs()+y.abs()+scale*delta);
+        let edge_epsilon=128.*f64::EPSILON*scale;
+        if !cross.is_finite() || !error.is_finite() || !edge_epsilon.is_finite() {return Ok(None);}
+        if cross.abs()<=error && (0..2).all(|axis|point[axis]>=a[axis].min(b[axis])-edge_epsilon
+            && point[axis]<=a[axis].max(b[axis])+edge_epsilon) {return Ok(None);}
+        if (a[1]>point[1])!=(b[1]>point[1]) {
+            if cross.abs()<=error {return Ok(None);}
+            if (cross>0.)==(b[1]>a[1]) {inside=!inside;}
+        }
+    }
+    Ok(Some(inside))
+}
+
 impl TrimmedSurface {
     pub fn validate(&self, limits: &Limits) -> Result<()> {
         self.underlying.validate(limits)?;
@@ -495,6 +623,35 @@ impl TrimmedSurface {
             1,
             serde_json::to_string(self).map_err(|error| Error::Io(error.to_string()))?,
         )
+    }
+
+    fn to_bounded_extension(&self, limits: &Limits) -> Result<Extension> {
+        use std::io::{self, Write};
+        struct Writer { bytes: Vec<u8>, limit: usize, refused: bool }
+        impl Write for Writer {
+            fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+                let Some(needed) = self.bytes.len().checked_add(bytes.len()) else {
+                    self.refused = true; return Err(io::Error::other("trim payload limit"));
+                };
+                if needed > self.limit { self.refused = true; return Err(io::Error::other("trim payload limit")); }
+                if needed > self.bytes.capacity() {
+                    let target=self.bytes.capacity().saturating_mul(2).max(needed).max(256).min(self.limit);
+                    if self.bytes.try_reserve_exact(target-self.bytes.len()).is_err() || self.bytes.capacity()>self.limit {
+                        self.refused=true; return Err(io::Error::other("trim payload allocation"));
+                    }
+                }
+                self.bytes.extend_from_slice(bytes); Ok(bytes.len())
+            }
+            fn flush(&mut self) -> io::Result<()> { Ok(()) }
+        }
+        let mut writer=Writer {bytes:Vec::new(),limit:crate::model::trim_surface_payload_limit(limits),refused:false};
+        if let Err(error)=serde_json::to_writer(&mut writer,self) {
+            return if writer.refused {Err(Error::Budget("extension payload"))} else {Err(Error::Io(error.to_string()))};
+        }
+        let payload=String::from_utf8(writer.bytes).map_err(|_|Error::Invalid("trim payload encoding"))?;
+        let extension=Extension {version:1,payload};
+        extension.validate_for_slot(TRIM_SURFACE_EXTENSION_SLOT,limits)?;
+        Ok(extension)
     }
 
     pub fn from_extension(extension: &Extension, limits: &Limits) -> Result<Self> {
@@ -604,10 +761,10 @@ pub fn set_trimmed_surface(
         Geometry::Surface(_) => return Err(Error::Invalid("trimmed surface underlying mismatch")),
         _ => return Err(Error::Invalid("trimmed surface requires surface geometry")),
     }
-    entity.extensions.insert(
-        TRIM_SURFACE_EXTENSION_SLOT.to_string(),
-        trimmed.to_extension()?,
-    );
+    let extension = trimmed.to_bounded_extension(limits)?;
+    // Refuse before replacing an existing trim: an extension accepted here
+    // must also pass the same configured payload limit as the document.
+    entity.extensions.insert(TRIM_SURFACE_EXTENSION_SLOT.to_string(), extension);
     Ok(())
 }
 

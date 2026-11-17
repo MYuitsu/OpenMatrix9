@@ -43,8 +43,8 @@ fn preview_picking_repeated_brep_timing() {
     use om9_core::model::Definition;
     let limits = Limits::default();
     let brep = om9_kernel::brep::sphere_brep(3., 0.005, &limits).unwrap();
-    let points = brep.display.points.len();
-    let triangles = brep.display.triangles.len();
+    let points = brep.display().points.len();
+    let triangles = brep.display().triangles.len();
     let definition = Definition::new("shared sphere", vec![Entity::new("member", Geometry::Brep(brep), None)]);
     let definition_id = definition.id;
     let mut document = Document::with_template_tolerance("repeated brep preview timing");
@@ -65,7 +65,7 @@ fn preview_picking_repeated_brep_timing() {
     let mut spheres = scene.objects.iter().filter(|object| !object.path.is_empty());
     let first = spheres.next().unwrap();
     let second = spheres.next().unwrap();
-    let shared = std::sync::Arc::ptr_eq(&first.buffers, &second.buffers);
+    let shared = first.buffers.ptr_eq(&second.buffers);
     assert!(shared, "fixture must measure shared scene geometry");
     let camera = Camera::orthographic([0., 0., 100.], [0., 0., 0.], [0., 1., 0.], 40.).unwrap();
     let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
@@ -92,7 +92,7 @@ fn dispersed_surface_candidate_timing() {
     use om9_scene::osnap::{self, SnapKind, SnapSettings};
     let limits = Limits::default();
     let brep = om9_kernel::brep::sphere_brep(3., 0.05, &limits).unwrap();
-    let triangles = brep.display.triangles.len();
+    let triangles = brep.display().triangles.len();
     let definition = Definition::new("shared sphere", vec![Entity::new("member", Geometry::Brep(brep), None)]);
     let definition_id = definition.id;
     let mut document = Document::with_template_tolerance("dispersed surface timing");
@@ -131,8 +131,8 @@ fn overlapping_surface_refinement_timing() {
     use om9_scene::osnap::{self, SnapKind, SnapSettings};
     let limits = Limits::default();
     let brep = om9_kernel::brep::sphere_brep(3., 0.05, &limits).unwrap();
-    let points = brep.display.points.len();
-    let triangles = brep.display.triangles.len();
+    let points = brep.display().points.len();
+    let triangles = brep.display().triangles.len();
     let source_bytes = brep.source().len();
     let definition = Definition::new("shared sphere", vec![Entity::new("member", Geometry::Brep(brep), None)]);
     let definition_id = definition.id;

@@ -136,7 +136,7 @@ impl Controller {
     pub fn builder_summary(&self) -> Option<String> {
         self.builder
             .as_ref()
-            .and_then(om9_core::builder::BuilderSession::preview)
+            .and_then(|session| session.preview_for_document(self.document()))
             .map(|preview| preview.summary.clone())
     }
     pub fn builder_is_open(&self) -> bool {
@@ -166,6 +166,8 @@ impl Controller {
         if self.is_running() {
             return Err(Error::Busy);
         }
+        #[cfg(feature = "occt-brep")]
+        self.cancel_ring_preview_candidate();
         self.builder_saved.clear();
         let selection = self.builder_selection(kind);
         self.start_builder(kind, &selection)
@@ -184,9 +186,21 @@ impl Controller {
     fn start_builder(&mut self, kind: BuilderKind, selection: &[ObjectId]) -> Result<()> {
         let document = &self.coordinator.world().documents[&self.document];
         let mut session = BuilderSession::new(kind, document, selection)?;
-        let registry = self.builder_registry()?;
-        session.refresh(document, &registry)?;
-        self.builder = Some(session);
+        #[cfg(feature = "occt-brep")]
+        let background = self.background_ring_preview_enabled && kind.ring_family().is_some();
+        #[cfg(not(feature = "occt-brep"))]
+        let background = false;
+        if background {
+            #[cfg(feature = "occt-brep")]
+            {
+                self.builder = Some(session);
+                if let Err(error) = self.queue_background_ring_preview() { self.builder = None; return Err(error); }
+            }
+        } else {
+            let registry = self.builder_registry()?;
+            session.refresh(document, &registry)?;
+            self.builder = Some(session);
+        }
         self.events.emit(
             crate::command_events::EventKind::Started,
             kind.command(),
@@ -208,12 +222,33 @@ impl Controller {
         {
             return Ok(());
         }
+        #[cfg(feature = "occt-brep")]
+        self.cancel_ring_preview_candidate();
         let previous = self.builder.take();
         let previous_kind = previous.as_ref().map(BuilderSession::kind);
         if let Some(previous) = previous {
             self.builder_saved.insert(previous.kind(), previous);
         }
         let result = if let Some(mut session) = self.builder_saved.remove(&kind) {
+            #[cfg(feature = "occt-brep")]
+            let background = self.background_ring_preview_enabled && kind.ring_family().is_some();
+            #[cfg(not(feature = "occt-brep"))]
+            let background = false;
+            if background {
+                #[cfg(feature = "occt-brep")]
+                {
+                    self.builder = Some(session);
+                    match self.queue_background_ring_preview() {
+                        Ok(()) => Ok(()),
+                        Err(error) => {
+                            if let Some(session) = self.builder.take() { self.builder_saved.insert(kind, session); }
+                            Err(error)
+                        }
+                    }
+                }
+                #[cfg(not(feature = "occt-brep"))]
+                unreachable!()
+            } else {
             let registry = self.builder_registry()?;
             let document = &self.coordinator.world().documents[&self.document];
             match session.refresh(document, &registry) {
@@ -231,6 +266,7 @@ impl Controller {
                     self.builder_saved.insert(kind, session);
                     Err(error)
                 }
+            }
             }
         } else {
             let selection = self.builder_selection(kind);
@@ -315,7 +351,7 @@ impl Controller {
         }
         self.builder
             .as_ref()
-            .and_then(BuilderSession::preview)
+            .and_then(|session| session.preview_for_document(self.document()))
             .map(|preview| preview.handles.clone())
             .unwrap_or_default()
     }
@@ -324,7 +360,7 @@ impl Controller {
     pub fn builder_prompt(&self) -> Option<String> {
         let session = self.builder.as_ref()?;
         let summary = session
-            .preview()
+            .preview_for_document(self.document())
             .map(|preview| preview.summary.clone())
             .unwrap_or_else(|| "no preview".into());
         Some(format!("{}: {summary}", session.title()))
@@ -333,14 +369,16 @@ impl Controller {
     /// Apply one typed value from the panel or the command line.
     pub fn builder_set_field(&mut self, name: &str, value: Value) -> Result<()> {
         self.builder_require_editable()?;
-        {
+        let changed = {
             let session = self
                 .builder
                 .as_mut()
                 .ok_or(Error::Missing("builder session"))?;
+            let before = session.revision();
             session.set_field(name, value)?;
-        }
-        self.builder_refresh()
+            session.revision() != before
+        };
+        if changed { self.builder_refresh() } else { Ok(()) }
     }
 
     /// Drag a viewport handle or move a slider by `delta` millimetres. A locked input is
@@ -351,42 +389,54 @@ impl Controller {
             return self.gem_pave_adjust_handle(name, delta);
         }
         self.builder_require_editable()?;
-        {
+        let changed = {
             let session = self
                 .builder
                 .as_mut()
                 .ok_or(Error::Missing("builder session"))?;
+            let before = session.revision();
             session.adjust_field(name, delta)?;
-        }
-        self.builder_refresh()
+            session.revision() != before
+        };
+        if changed { self.builder_refresh() } else { Ok(()) }
     }
 
     /// Set a slider position (`0.0..=1.0`); the field's own range and step decide the
     /// value, so the display, the model and the preview agree (`OM9-L3-03-11-003`).
     pub fn builder_set_slider(&mut self, name: &str, ratio: f64) -> Result<()> {
         self.builder_require_editable()?;
-        {
+        let changed = {
             let session = self
                 .builder
                 .as_mut()
                 .ok_or(Error::Missing("builder session"))?;
+            if let Some(field) = session.field(name)
+                && let (Some(current), Some(next)) = (field.numeric(), field.from_slider_ratio(ratio))
+                && (current - next).abs() <= 1.0e-10_f64.max(current.abs() * 1.0e-12)
+            {
+                return Ok(());
+            }
+            let before = session.revision();
             session.set_slider(name, ratio)?;
-        }
-        self.builder_refresh()
+            session.revision() != before
+        };
+        if changed { self.builder_refresh() } else { Ok(()) }
     }
 
     /// Apply a panel edit that was captured at `revision`. A queued event older than the
     /// latest handle drag is refused instead of overwriting it (`OM9-L3-03-11-006`).
     pub fn builder_set_field_at(&mut self, name: &str, value: Value, revision: u64) -> Result<()> {
         self.builder_require_editable()?;
-        {
+        let changed = {
             let session = self
                 .builder
                 .as_mut()
                 .ok_or(Error::Missing("builder session"))?;
+            let before = session.revision();
             session.set_field_at(name, value, revision)?;
-        }
-        self.builder_refresh()
+            session.revision() != before
+        };
+        if changed { self.builder_refresh() } else { Ok(()) }
     }
 
     /// The edit counter the panel captured when it painted its widgets.
@@ -412,6 +462,12 @@ impl Controller {
 
     /// Recompute the preview after an edit. The document is read, never written.
     pub fn builder_refresh(&mut self) -> Result<()> {
+        #[cfg(feature = "occt-brep")]
+        if self.background_ring_preview_enabled && self.builder.as_ref().is_some_and(|session| session.kind().ring_family().is_some()) {
+            return self.queue_background_ring_preview();
+        }
+        #[cfg(feature = "occt-brep")]
+        self.cancel_ring_preview_candidate();
         let registry = self.builder_registry()?;
         let document = &self.coordinator.world().documents[&self.document];
         let session = self
@@ -453,6 +509,8 @@ impl Controller {
 
     /// Escape: the preview is dropped and the document was never touched.
     pub fn builder_cancel(&mut self) -> bool {
+        #[cfg(feature = "occt-brep")]
+        self.cancel_ring_preview_candidate();
         let Some(session) = self.builder.take() else {
             return false;
         };
@@ -470,6 +528,18 @@ impl Controller {
     /// Commit the previewed feature in one transaction: insert, typed recipe and published
     /// result together, so one Undo removes the whole feature.
     pub fn builder_apply(&mut self) -> Result<()> {
+        #[cfg(feature = "occt-brep")]
+        if self.background_ring_preview_enabled && self.background_ring_preview_pending() {
+            self.ring_preview_apply_queued = true;
+            return Ok(());
+        }
+        #[cfg(feature = "occt-brep")]
+        self.cancel_ring_preview_candidate();
+        #[cfg(feature = "occt-brep")]
+        if self.builder.as_ref().and_then(BuilderSession::preview).is_some_and(|preview|
+            matches!(&preview.geometry, om9_core::geometry::Geometry::Brep(brep) if brep.has_allocation_owner())) {
+            return self.builder_apply_leased();
+        }
         let session = self
             .builder
             .as_ref()
@@ -498,10 +568,17 @@ impl Controller {
             return Err(Error::Stale("command scene"));
         }
         let mut held = self.scene_cache_usage()?;
-        held.add(
-            old_scene.update_held_usage(Some(&plan.entity))?,
-            self.coordinator.limits(),
-        )?;
+        let preview_candidate = match &plan.entity.geometry {
+            om9_core::geometry::Geometry::Brep(source) => {
+                use om9_core::brep::BrepSourceAccess;
+                session.preview().and_then(|preview| preview.brep_candidates.iter()
+                    .find(|candidate| candidate.to_canonical().identity() == source.identity()))
+            }
+            _ => None,
+        };
+        let mut scene_points = old_scene.cache_usage()?.points;
+        held.add(old_scene.update_held_usage_counted_with_candidate(Some(&plan.entity), preview_candidate, &mut scene_points)?,
+            self.coordinator.limits())?;
         let expected_revision = self
             .coordinator
             .world()
@@ -537,11 +614,25 @@ impl Controller {
                 });
             }
         }
-        let prepared = self
+        let mut prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new(kind.title(), mutations), held)?;
-        let before = self.coordinator.capture_retained_document(self.document)?;
-        let receipt = self.commit_with_candidate_scene(prepared, held)?;
+        let mut candidates = self.builder.as_mut().ok_or(Error::Missing("builder session"))?.take_preview_brep_candidates()?;
+        let stage = self.stage_builder_preview_representations(&mut prepared, &mut candidates, held);
+        self.builder.as_mut().ok_or(Error::Missing("builder session"))?.restore_preview_brep_candidates(candidates)?;
+        if let Err(error) = stage {
+            drop(prepared);
+            self.reset_builder_preview_store_allowance()?;
+            return Err(error);
+        }
+        let before = match self.coordinator.capture_retained_document(self.document) {
+            Ok(before) => before,
+            Err(error) => { drop(prepared); self.reset_builder_preview_store_allowance()?; return Err(error); }
+        };
+        let receipt = match self.commit_with_candidate_scene(prepared, held) {
+            Ok(receipt) => receipt,
+            Err(error) => { self.reset_builder_preview_store_allowance()?; return Err(error); }
+        };
         self.builder = None;
         self.builder_saved.clear();
         self.applied_style = None;
@@ -556,6 +647,94 @@ impl Controller {
                 "applied",
                 None,
             );
+        }
+        Ok(())
+    }
+
+    pub(super) fn stage_builder_preview_representations(&self, prepared: &mut om9_core::transaction::PreparedTransaction,
+        candidates: &mut [om9_core::brep::Brep], held: om9_core::budget::Usage) -> Result<()> {
+        use om9_core::{brep::{BrepRepresentation, BrepRepresentationProfile, BrepSourceAccess, BrepSourceIdentity},
+            budget::{Usage, memory::MemoryClass}};
+        if candidates.is_empty() { return Ok(()); }
+        self.coordinator.begin_pending_brep_representations(prepared, candidates.len(), held)?;
+        for candidate in candidates {
+            let source = candidate.to_canonical();
+            if !prepared.candidate_world().documents.values().any(|document| document.entities.values()
+                .any(|entity| matches!(&entity.geometry, om9_core::geometry::Geometry::Brep(brep) if brep.identity() == source.identity()))) {
+                return Err(Error::Stale("builder BRep candidate"));
+            }
+            let display = candidate.display_allocation_bytes()?;
+            let owner_bytes = (std::mem::size_of::<std::sync::Mutex<om9_core::transaction::ExternalMemoryReservation>>()
+                + 2 * std::mem::size_of::<usize>()) as u64;
+            let store_bytes = Usage::btree::<(BrepSourceIdentity, BrepRepresentationProfile), BrepRepresentation>(1)?.bytes
+                .checked_add(Usage::btree::<BrepSourceIdentity, BrepRepresentationProfile>(1)?.bytes)
+                .and_then(|n| n.checked_add(BrepRepresentation::source_receipt_bytes()))
+                .ok_or(Error::Overflow("builder BRep cache metadata"))?;
+            let total = display.checked_add(owner_bytes).and_then(|n| n.checked_add(store_bytes))
+                .ok_or(Error::Overflow("builder BRep display"))?.max(1);
+            let owner = match candidate.display_owner_reservation() {
+                Some(owner) => owner,
+                None => {
+                    let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+                    let lease = self.coordinator.reserve_external_memory_with_allocated(MemoryClass::Kernel,
+                        total, display, physical, held)?;
+                    let owner = std::sync::Arc::new(std::sync::Mutex::new(lease));
+                    owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(display + owner_bytes)?;
+                    candidate.bind_display_allocation_owner(owner.clone(), &self.coordinator.external_memory_account())?;
+                    owner
+                }
+            };
+            {
+                let mut lease = owner.lock().unwrap_or_else(|e| e.into_inner());
+                if !lease.belongs_to(&self.coordinator.external_memory_account()) || lease.bytes() < total {
+                    return Err(Error::Invalid("builder BRep display owner"));
+                }
+                lease.set_allocated_bytes(display + owner_bytes)?;
+            }
+            let (source, representation) = candidate.clone().into_canonical_and_representation();
+            prepared.insert_pending_brep_representation(&source, representation, self.coordinator.limits(), &self.coordinator, held)?;
+            owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(total)?;
+        }
+        Ok(())
+    }
+
+    fn reset_builder_preview_store_allowance(&self) -> Result<()> {
+        let Some(preview) = self.builder.as_ref().and_then(BuilderSession::preview) else { return Ok(()); };
+        let overhead = (std::mem::size_of::<std::sync::Mutex<om9_core::transaction::ExternalMemoryReservation>>()
+            + 2 * std::mem::size_of::<usize>()) as u64;
+        for candidate in &preview.brep_candidates {
+            if let Some(owner) = candidate.display_owner_reservation() {
+                let bytes = candidate.display_allocation_bytes()?.checked_add(overhead)
+                    .ok_or(Error::Overflow("builder BRep display owner"))?;
+                owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(bytes)?;
+            }
+        }
+        Ok(())
+    }
+
+    #[cfg(feature = "occt-brep")]
+    fn builder_apply_leased(&mut self) -> Result<()> {
+        let session = self.builder.as_ref().ok_or(Error::Missing("builder session"))?;
+        let preview = session.preview().ok_or(Error::Missing("builder preview"))?;
+        let kind = session.kind();
+        let editing = self.document().entities.contains_key(&session.output());
+        let old_scene = self.scene.as_ref().ok_or(Error::Missing("command scene"))?;
+        if old_scene.epoch != self.coordinator.epoch() { return Err(Error::Stale("command scene")); }
+        let estimate = om9_core::model::Entity::new("builder preview", preview.geometry.clone(), self.document().current_layer);
+        let mut held = self.scene_cache_usage()?;
+        held.add(old_scene.update_held_usage(Some(&estimate))?, self.coordinator.limits())?;
+        drop(estimate);
+        let prepared = self.coordinator.prepare_leased_builder(self.document, session,
+            self.history_record, self.history_update, held)?;
+        let before = self.coordinator.capture_retained_document(self.document)?;
+        let receipt = self.commit_with_candidate_scene(prepared, held)?;
+        self.builder = None;
+        self.builder_saved.clear();
+        self.applied_style = None;
+        if receipt.published || !self.history_record {
+            self.record_history_change(&before, ChangeCause::Edit);
+            if self.history_record || editing { self.sync_published(ChangeCause::Edit); }
+            self.events.emit(crate::command_events::EventKind::Finished, kind.command(), "applied", None);
         }
         Ok(())
     }
@@ -851,11 +1030,14 @@ impl Controller {
             om9_core::history_ops::refresh_inputs(&base, &mut draft.history, id)?;
         }
         let registry = self.builder_registry()?;
-        let outcome = om9_core::producers::recompute_registered(
+        let mut candidates = Vec::new();
+        let mut staged_cache = self.history_cache.clone();
+        let outcome = om9_core::producers::recompute_registered_with_candidates(
             &mut draft,
-            &mut self.history_cache,
+            &mut staged_cache,
             id,
             &registry,
+            &mut candidates,
         )?;
         if matches!(
             outcome,
@@ -897,8 +1079,14 @@ impl Controller {
             if let Mutation::Geometry { source, .. } = mutation
                 && let Some(entity) = draft.entities.get(&source.object)
             {
+                use om9_core::brep::BrepSourceAccess;
+                let candidate = match &entity.geometry {
+                    om9_core::geometry::Geometry::Brep(brep) => candidates.iter()
+                        .find(|candidate| candidate.to_canonical().identity() == brep.identity()),
+                    _ => None,
+                };
                 held.add(
-                    old_scene.update_held_usage_counted(Some(entity), &mut scene_points)?,
+                    old_scene.update_held_usage_counted_with_candidate(Some(entity), candidate, &mut scene_points)?,
                     self.coordinator.limits(),
                 )?;
             }
@@ -909,13 +1097,68 @@ impl Controller {
             recipes,
             published,
         });
-        let prepared = self.coordinator.prepare_with_held_usage(
+        // Candidates share their canonical allocations with the private draft
+        // and published-result snapshots. Keep those allocations charged while
+        // transaction staging registers the new document owner.
+        use om9_core::{budget::{Usage, memory::MemoryClass}, transaction::ExternalMemoryReservation};
+        let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let mut guards = Vec::new();
+        let _guard_storage = if candidates.is_empty() { None } else {
+            let guard_bytes = Usage::array::<ExternalMemoryReservation>(candidates.len())?.bytes.max(1);
+            let mut storage = self.coordinator.reserve_external_memory_with_held(
+                MemoryClass::CpuCache, guard_bytes, physical, held)?;
+            guards.try_reserve_exact(candidates.len()).map_err(|_| Error::Budget("history BRep guards"))?;
+            let actual = Usage::array::<ExternalMemoryReservation>(guards.capacity())?.bytes.max(1);
+            if actual > storage.bytes() {
+                self.coordinator.grow_external_memory_with_held(&mut storage, actual - guard_bytes, physical, held)?;
+            }
+            storage.set_allocated_bytes(actual)?;
+            Some(storage)
+        };
+        for candidate in &candidates {
+            let bytes = candidate.storage_usage(self.coordinator.limits())?.bytes;
+            let mut guard = self.coordinator.reserve_external_memory_with_held(MemoryClass::Kernel, bytes, physical, held)?;
+            guard.set_allocated_bytes(bytes)?;
+            guards.push(guard);
+        }
+        let mut prepared = self.coordinator.prepare_with_held_usage(
             TransactionRequest::new("Recompute History", mutations),
             held,
         )?;
+        if !candidates.is_empty() {
+            use om9_core::brep::{BrepRepresentation, BrepRepresentationProfile, BrepSourceAccess, BrepSourceIdentity};
+            self.coordinator.begin_pending_brep_representations(&mut prepared, candidates.len(), held)?;
+            for (mut candidate, mut source_guard) in candidates.into_iter().zip(guards) {
+                let source = candidate.to_canonical();
+                let belongs = prepared.candidate_world().documents.values().any(|document|
+                    document.entities.values().chain(document.definitions.values().flat_map(|d| d.members.iter()))
+                        .any(|entity| matches!(&entity.geometry, om9_core::geometry::Geometry::Brep(brep) if brep.identity() == source.identity())));
+                if !belongs { return Err(Error::Stale("history BRep candidate")); }
+                let display = candidate.display_allocation_bytes()?;
+                let owner = (std::mem::size_of::<std::sync::Mutex<om9_core::transaction::ExternalMemoryReservation>>()
+                    + 2 * std::mem::size_of::<usize>()) as u64;
+                let store = Usage::btree::<(BrepSourceIdentity, BrepRepresentationProfile), BrepRepresentation>(1)?.bytes
+                    .checked_add(Usage::btree::<BrepSourceIdentity, BrepRepresentationProfile>(1)?.bytes)
+                    .and_then(|n| n.checked_add(BrepRepresentation::source_receipt_bytes()))
+                    .ok_or(Error::Overflow("history BRep cache metadata"))?;
+                let bytes = display.checked_add(owner).and_then(|n| n.checked_add(store))
+                    .ok_or(Error::Overflow("history BRep display"))?.max(1);
+                let overhead = owner.checked_add(store).ok_or(Error::Overflow("history BRep display"))?;
+                self.coordinator.grow_external_memory_with_held(&mut source_guard, overhead, physical, held)?;
+                let mut lease = source_guard.split_off(bytes)?;
+                lease.set_allocated_bytes(display)?;
+                let lease = std::sync::Arc::new(std::sync::Mutex::new(lease));
+                lease.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(display + owner)?;
+                candidate.bind_display_allocation_owner(lease.clone(), &self.coordinator.external_memory_account())?;
+                let (source, representation) = candidate.into_canonical_and_representation();
+                prepared.insert_pending_brep_representation(&source, representation, self.coordinator.limits(), &self.coordinator, held)?;
+                lease.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(bytes)?;
+            }
+        }
         let before = self.coordinator.capture_retained_document(self.document)?;
         let receipt = self.commit_with_candidate_scene(prepared, held)?;
         if receipt.published {
+            self.history_cache = staged_cache;
             self.record_history_change(&before, ChangeCause::Edit);
             self.sync_published(ChangeCause::Edit);
         }

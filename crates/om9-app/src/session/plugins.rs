@@ -296,7 +296,7 @@ impl Controller {
         // Keep the construction reservation alive through validation and
         // publication, so concurrent jobs see this scene while it is built.
         let candidate_scene = self.prepare_candidate_scene_guard(
-            &mut prepared, old_usage,
+            &mut prepared, old_usage, None,
             || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes)),
             |_| Ok(()),
         )?;

@@ -1,0 +1,13 @@
+# Surface Snap on a reopened reordered B-rep: scoped fix
+
+The Box v4 fixture permutes front/back display and topology face order, saves and reopens the document. Before the fix, the controller refined a front candidate at `[2, 2.5, 6]` to `[2, 2.5, 0]` on the back face. The regression is now enabled and passes: single, grouped and leased-worker paths return the front point; an altered witness is rejected. This does not certify every historical file.
+
+The scene candidate carries a local-space display triangle, its deflection and its index in the specific published scene display. The controller verifies the triangle, face ID, scene publication, source and placement before refinement. The index is only a lookup into that display, never an OCCT face identity. Native code resolves the witness against a unique trimmed face of the same source shape/map used for ray intersection, and preserves the first forward hit. Missing, altered or ambiguous binding is refused; there is no fallback to the stored face index in these Surface Snap paths. Native matching is numerical and sampled, not a proof for all trimmed or imported faces.
+
+Validation on 2026-11-11, target `L:/om9-target`, `-j 2`:
+
+- `cargo test -p om9-app --lib surface_snap`: 6 passed.
+- `cargo test -p om9-app --test brep_picking_precision -- --test-threads=1`: 20 passed, including existing sphere, trim, clipping, instances and worker tests. A test that fabricated a mismatched face ID now checks refusal. A subsequent targeted rerun also passed with a real side-face triangle as a synthetic broad-phase false positive: the exact ray misses that valid face and the leased worker still returns the other valid front hit. This synthetic candidate does not demonstrate how often such misses occur in interactive use.
+- `cargo test -p om9-scene --test osnap`: 13 passed. `cargo check -p om9-app --no-default-features` and `cargo build -p om9-app --bin om9` passed with existing warnings. Public source audit reported zero errors.
+
+The old cache test expected a candidate from a replaced scene to remain valid; it now checks rejection and regenerates the candidate before comparing the world point. Face witness checking uses direct display-triangle lookup, though native source-face resolution and the broader broad phase may still cost significant time. No benchmark, native peak-memory measurement, complete occlusion/pressure matrix, general placement/import coverage, or desktop Surface Snap verification is claimed. Legacy index-based kernel APIs remain available to other callers and are not certified by this fix. Plan B remains deferred.

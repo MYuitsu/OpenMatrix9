@@ -242,6 +242,11 @@
         "implementation/evidence/M02/OM9-L3-02-03-001/OM9-L4-02-03-001-06-acceptance.md"
       ],
       "acceptance": "A 0-10 line yields END (10,0) and MID (5,0); a circle at (5,5) radius 2 yields QUAD (7,5); candidates outside the radius are omitted."
+    },
+    "parallel_view_snap_2026_11_12": {
+      "status": "SCOPED_PARALLEL_VIEW_SNAP_PASSED",
+      "evidence": "docs/validation/2026-11-12-parallel-view-osnap.md",
+      "limitations": "Headless Surface and Endpoint fixtures only; other commands, cameras and desktop unverified."
     }
   }
 }

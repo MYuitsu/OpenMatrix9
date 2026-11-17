@@ -191,6 +191,8 @@
     }
   ],
   "runtime_implementation": {
+    "opaque_native_representation_2026_11_14": "Partial, compile-only: opaque imported native displays can be staged and pinned separately; document/Undo still retain the same display and accounting overlaps. Evidence: docs/validation/2026-11-14-canonical-representation-transfer.md#opaque-native-representation-in-progress",
+    "native_source_owner_2026_11_14": "Partial, compile-only: native source leases use a payload-and-CRC-only value. Document NativeBrep still owns display; rebuild disposition, scene handoff and runtime validation remain open. Evidence: docs/validation/2026-11-14-canonical-representation-transfer.md#native-source-ownership-in-progress",
     "plugin_sdk_v1_attributes": {
       "date": "2026-10-21",
       "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",

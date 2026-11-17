@@ -43,6 +43,23 @@ fn bounds_center_group_and_ungroup_are_undoable() {
     assert_eq!(controller.document().groups.len(), 0);
 }
 
+#[cfg(feature = "occt-brep")]
+#[test]
+fn center_brep_uses_source_bounds_and_existing_placement() {
+    let limits = Limits::default();
+    let brep = om9_kernel::brep::sphere_brep(5., 0.4, &limits).unwrap();
+    let mut entity = Entity::new("sphere", Geometry::Brep(brep), None);
+    entity.placement = om9_core::geometry::Transform::translation([10., -3., 7.]);
+    let id = entity.id;
+    let mut controller = controller(vec![entity]);
+    controller.select_objects(&[id]).unwrap();
+    controller.center_selected().unwrap();
+    let placement = controller.document().entities[&id].placement;
+    for row in 0..3 { assert!(placement.0[row][3].abs() < 1e-7, "{placement:?}"); }
+    controller.undo().unwrap();
+    assert_eq!(controller.document().entities[&id].placement.0[0][3], 10.);
+}
+
 #[test]
 fn mesh_from_nurbs_and_reduce_basic() {
     let limits = Limits::default();

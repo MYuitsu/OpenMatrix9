@@ -139,6 +139,19 @@ fn running_curve_menu_commands_retain_their_actual_feature() {
             controller
                 .select_objects(&selection.iter().map(|&i| ids[i]).collect::<Vec<_>>())
                 .unwrap();
+            if binding.feature == "OM9-CURVE-040" {
+                // DupEdge consumes explicit subedges with native provenance,
+                // not every display edge of an arbitrary legacy BRep fixture.
+                controller.submit("Box 4 5 6").unwrap();
+                let entity = controller.document().entities.values().find(|e| e.label == "Box").unwrap();
+                let Geometry::Brep(shape) = &entity.geometry else { panic!("box"); };
+                controller.select_subobject(entity.id, om9_scene::scene::Subelement::BrepEdge(shape.topology().edges[0])).unwrap();
+            }
+            if binding.feature == "OM9-CURVE-054" {
+                controller.submit("Box 4 5 6").unwrap();
+                let id = controller.document().entities.values().find(|e| e.label == "Box").unwrap().id;
+                controller.select_objects(&[id]).unwrap();
+            }
             if controller
                 .dispatch(binding.feature, InvocationOrigin::Menu)
                 .is_ok()

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 //! Complete native snapshot operations; all returned state is owned by Rust.
+use om9_core::brep::BrepSourceAccess;
 use crate::KernelError;
 use om9_core::{
     brep::{Brep, BrepDisplay},
@@ -12,6 +13,17 @@ use std::{
     panic::{AssertUnwindSafe, catch_unwind},
 };
 use uuid::Uuid;
+
+/// Bump whenever the OCCT display adapter changes its profile semantics or
+/// generated representation in a way that makes cached entries incompatible.
+pub const OCCT_REPRESENTATION_ADAPTER_VERSION: u32 = 1;
+
+mod topology_capture;
+mod source_signatures;
+pub(crate) mod intermediate;
+pub use source_signatures::{SourceSignature, source_signatures};
+pub use topology_capture::{BoundSourceSignature, CapturedTopologySnapshot, NamedTopologySnapshot, NamedTopologySource, PendingSourceRebind, RegisteredTopologyProof, RegisteredTopologySource, SharedTopologyProof, TopologyAttestation, ValidatedSourceRebind, capture_source_topology, capture_source_with_shape_set, attested_source_signatures};
+pub(crate) use topology_capture::capture_via_topology;
 
 #[repr(C)]
 pub(crate) struct Snapshot {
@@ -29,9 +41,27 @@ pub(crate) struct Snapshot {
     face_edges_len: usize,
     faces_count: usize,
     edges_count: usize,
+    topology_handle: *const c_void,
 }
 unsafe extern "C" {
+    fn om9_occt_visit_snapshot_topology(handle: *const c_void, max_nodes: usize, max_bytes: usize,
+        sink: unsafe extern "C" fn(*mut c_void, c_int, c_int, u32, u32, c_int, *const u8, usize) -> c_int,
+        context: *mut c_void) -> c_int;
+    fn om9_occt_write_snapshot_shape_set(handle: *const c_void, max_nodes: usize, max_bytes: usize,
+        sink: unsafe extern "C" fn(*mut c_void, c_int, c_int, u32, u32, c_int, *const u8, usize) -> c_int,
+        context: *mut c_void) -> c_int;
+    fn om9_occt_read_snapshot_shape_set(bytes: *const u8, length: usize, deflection: f64, angular: f64,
+        max_points: usize, max_nodes: usize, max_bytes: usize,
+        mapping_sink: unsafe extern "C" fn(*mut c_void, c_int, c_int, u32, u32, c_int, *const u8, usize) -> c_int,
+        mapping_context: *mut c_void, snapshot_sink: unsafe extern "C" fn(*mut c_void, *const Snapshot) -> c_int,
+        snapshot_context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_brep_volume(source: *const u8, length: usize, volume: *mut f64) -> c_int;
+    fn om9_occt_brep_vertices(source: *const u8, length: usize, points: *mut f64,
+        expected: usize, message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_brep_world_bounds(source: *const u8, length: usize, matrix: *const f64,
+        bounds: *mut f64, message: *mut c_char, capacity: c_int) -> c_int;
+    fn om9_occt_brep_inspect_source(source: *const u8, length: usize, counts: *mut u64,
+        message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_brep_from_3dm_snapshot(
         payload: *const u8,
         length: usize,
@@ -101,6 +131,47 @@ unsafe extern "C" {
         capacity: c_int,
     ) -> c_int;
 }
+
+/// Validate a canonical OCCT source without generating a display mesh. Counts
+/// describe this parse only: neither counts nor OCCT validity prove persistent
+/// UUID mapping, geometric error bounds, or STL watertightness. Native OCCT
+/// parse/check allocations are not capped by `limits` or reported here.
+pub fn inspect_source(source: &str, limits: &Limits) -> Result<[u64; 3], KernelError> {
+    if source.is_empty() || source.len() as u64 > limits.max_bytes {
+        return Err(KernelError::InvalidInput("BRep source budget".into()));
+    }
+    let mut counts = [0u64; 3];
+    let mut message = [0 as c_char; 512];
+    // SAFETY: input and fixed output buffers remain live for the synchronous call.
+    let result = unsafe { om9_occt_brep_inspect_source(source.as_ptr(), source.len(), counts.as_mut_ptr(),
+        message.as_mut_ptr(), message.len() as c_int) };
+    if result != 0 {
+        // SAFETY: message is zero-initialized and native snprintf terminates it.
+        let detail = unsafe { CStr::from_ptr(message.as_ptr()) }.to_string_lossy();
+        let message = format!("OCCT source inspection: {detail}");
+        return Err(if result == 1 { KernelError::InvalidInput(message) } else { KernelError::Failure(message) });
+    }
+    let nodes = counts.into_iter().try_fold(0u64, |sum, count| sum.checked_add(count))
+        .ok_or_else(|| KernelError::InvalidInput("BRep topology count overflow".into()))?;
+    if nodes > limits.max_nodes { return Err(KernelError::InvalidInput("BRep topology node budget".into())); }
+    Ok(counts)
+}
+
+/// Portable record validation followed by an OCCT source check and a topology
+/// count comparison. The caller retains the record reservation and must admit
+/// validation scratch; native OCCT allocations remain outside this callback.
+/// Matching counts do not establish UUID-to-subshape correspondence.
+pub fn inspect_canonical_record(record: &om9_core::brep::CanonicalBrepRecord, limits: &Limits,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<[u64; 3], KernelError> {
+    record.validate_admitted(limits, admit).map_err(|error| KernelError::InvalidInput(error.to_string()))?;
+    let counts = inspect_source(record.source(), limits)?;
+    let topology = record.topology();
+    let expected = [topology.faces.len() as u64, topology.edges.len() as u64, topology.vertex_ids.len() as u64];
+    if counts != expected {
+        return Err(KernelError::InvalidInput("BRep source/topology count mismatch".into()));
+    }
+    Ok(counts)
+}
 struct Context<'a, 'callback> {
     limits: &'a Limits,
     deflection: f64,
@@ -159,6 +230,8 @@ fn admit_snapshot_copy(s: &Snapshot, limits: &Limits) -> om9_core::Result<om9_co
         Usage::array::<u32>(s.vertices_len)?,
         Usage::array::<[u32; 2]>(s.face_edges_len)?,
         Usage::array::<Uuid>(identities)?,
+        Usage::array::<om9_core::brep::BrepTopology>(1)?,
+        Usage::array::<usize>(2)?,
         Usage::array::<usize>(2)?,
         Usage::array::<String>(1)?,
     ] {
@@ -183,6 +256,35 @@ fn admit_group_copy(count: usize, edge_count: usize, other: u64, limit: u64) -> 
 #[cfg(test)]
 mod snapshot_copy_admission_tests {
     use super::*;
+    #[test]
+    fn primitive_copy_refusal_happens_before_rust_snapshot_is_returned() {
+        let mut calls = 0;
+        let result = crate::creation::primitive_admitted(
+            crate::creation::Primitive::Sphere { radius_mm: 5. }, 0.1, &Limits::default(), |live, pending| {
+                calls += 1;
+                assert_eq!(live, 0);
+                assert!(pending > 0);
+                Err(om9_core::Error::Budget("test admission"))
+            });
+        assert!(result.is_err());
+        assert_eq!(calls, 1);
+    }
+    #[test]
+    fn source_inspection_checks_occt_without_a_display_mesh() {
+        use crate::creation::{primitive, Primitive, DEFAULT_DEFLECTION_MM};
+        let limits = Limits::default();
+        for kind in [Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, Primitive::Sphere { radius_mm: 3. }] {
+            let shape = primitive(kind, DEFAULT_DEFLECTION_MM, &limits).unwrap();
+            let source = shape.source().to_owned();
+            let expected = [shape.topology().faces.len() as u64, shape.topology().edges.len() as u64,
+                shape.topology().vertex_ids.len() as u64];
+            drop(shape);
+            assert_eq!(inspect_source(&source, &limits).unwrap(), expected);
+            let tight = Limits { max_nodes: 0, ..limits };
+            assert!(inspect_source(&source, &tight).is_err());
+        }
+        assert!(inspect_source("CASCADE Topology invalid", &limits).is_err());
+    }
     fn lengths_only() -> Snapshot {
         Snapshot {
             source: std::ptr::null(), source_len: 1,
@@ -191,7 +293,7 @@ mod snapshot_copy_admission_tests {
             segments: std::ptr::null(), segments_len: 0,
             vertices: std::ptr::null(), vertices_len: 0,
             face_edges: std::ptr::null(), face_edges_len: 0,
-            faces_count: 1, edges_count: 0,
+            faces_count: 1, edges_count: 0, topology_handle: std::ptr::null(),
         }
     }
 
@@ -200,6 +302,8 @@ mod snapshot_copy_admission_tests {
         let snapshot = lengths_only();
         let required = 1 + 2 * std::mem::size_of::<[f64; 3]>()
             + 2 * std::mem::size_of::<[u32; 4]>() + std::mem::size_of::<Uuid>()
+            + std::mem::size_of::<om9_core::brep::BrepTopology>()
+            + 2 * std::mem::size_of::<usize>()
             + 2 * std::mem::size_of::<usize>() + std::mem::size_of::<String>();
         let limits = Limits { max_bytes: required as u64 - 1, ..Limits::default() };
         assert!(admit_snapshot_copy(&snapshot, &limits).is_err());
@@ -224,6 +328,8 @@ mod snapshot_copy_admission_tests {
         let snapshot = lengths_only();
         let required = (1 + 2 * std::mem::size_of::<[f64; 3]>()
             + 2 * std::mem::size_of::<[u32; 4]>() + std::mem::size_of::<Uuid>()
+            + std::mem::size_of::<om9_core::brep::BrepTopology>()
+            + 2 * std::mem::size_of::<usize>()
             + 2 * std::mem::size_of::<usize>() + std::mem::size_of::<String>()) as u64;
         let limits = Limits { max_bytes: required + 3, ..Limits::default() };
         let account = Cell::new(4);
@@ -240,7 +346,7 @@ mod snapshot_copy_admission_tests {
     fn successful_snapshot_adds_actual_storage_to_existing_group_charge() {
         let limits = Limits::default();
         let body = box_brep([10.; 3], 0.1, &limits).unwrap();
-        let d = &body.display;
+        let d = &body.display();
         let snapshot = Snapshot {
             source: body.source().as_ptr(), source_len: body.source().len(),
             points: d.points.as_ptr(), points_len: d.points.len(),
@@ -248,7 +354,7 @@ mod snapshot_copy_admission_tests {
             segments: d.segments.as_ptr(), segments_len: d.segments.len(),
             vertices: d.vertices.as_ptr(), vertices_len: d.vertices.len(),
             face_edges: d.face_edges.as_ptr(), face_edges_len: d.face_edges.len(),
-            faces_count: d.faces.len(), edges_count: d.edges.len(),
+            faces_count: d.faces.len(), edges_count: d.edges.len(), topology_handle: std::ptr::null(),
         };
         let account = Cell::new(32);
         let mut context = Context { limits: &limits, deflection: 0.1, result: None, grouped_bytes: Some(&account), admission: None };
@@ -256,8 +362,8 @@ mod snapshot_copy_admission_tests {
         assert_eq!(status, 0);
         let copied = context.result.unwrap().unwrap();
         assert_eq!(account.get(), 32 + copied.storage_usage(&limits).unwrap().bytes);
-        assert_eq!(copied.display.points, body.display.points);
-        assert_eq!(copied.display.triangles, body.display.triangles);
+        assert_eq!(copied.display().points, body.display().points);
+        assert_eq!(copied.display().triangles, body.display().triangles);
         let failed_after_callback = snapshot_via_optional(0.1, &limits, |sink, context, _, _| {
             assert_eq!(unsafe { sink(context, &snapshot) }, 0);
             2
@@ -303,10 +409,12 @@ unsafe extern "C" fn receive(context: *mut c_void, snapshot: *const Snapshot) ->
             triangles: unsafe { copy_array(s.triangles, s.triangles_len, l.max_bytes)? },
             segments: unsafe { copy_array(s.segments, s.segments_len, l.max_bytes)? },
             vertices: unsafe { copy_array(s.vertices, s.vertices_len, l.max_bytes)? },
-            face_edges: unsafe { copy_array(s.face_edges, s.face_edges_len, l.max_bytes)? },
-            faces: ids(s.faces_count)?,
-            edges: ids(s.edges_count)?,
-            vertex_ids: ids(s.vertices_len)?,
+            topology: om9_core::brep::BrepTopology {
+                face_edges: unsafe { copy_array(s.face_edges, s.face_edges_len, l.max_bytes)? },
+                faces: ids(s.faces_count)?,
+                edges: ids(s.edges_count)?,
+                vertex_ids: ids(s.vertices_len)?,
+            }.into(),
         };
         let brep = Brep::from_native(source, display, l)?;
         if let Some(account) = context.grouped_bytes {
@@ -397,10 +505,78 @@ pub(crate) fn snapshot_via(
         c_int,
     ) -> c_int,
 ) -> Result<Brep, KernelError> {
-    match snapshot_via_optional(deflection, limits, invoke)? {
+    snapshot_via_with_admission(deflection, limits, None, invoke)
+}
+
+pub(crate) fn snapshot_via_with_admission(
+    deflection: f64,
+    limits: &Limits,
+    admission: Option<&mut dyn FnMut(u64, u64) -> om9_core::Result<()>>,
+    invoke: impl FnOnce(
+        unsafe extern "C" fn(*mut c_void, *const Snapshot) -> c_int,
+        *mut c_void, *mut c_char, c_int,
+    ) -> c_int,
+) -> Result<Brep, KernelError> {
+    let admission = admission.map(RefCell::new);
+    match snapshot_via_optional_accounted(deflection, limits, None, admission.as_ref(), invoke)? {
         Some(brep) => Ok(brep),
         None => Err(KernelError::InvalidInput("BRep snapshot missing".into())),
     }
+}
+
+struct SignatureSnapshot<'a, 'callback> {
+    limits: &'a Limits,
+    deflection: f64,
+    admission: &'a SnapshotAdmission<'callback>,
+    canceled: &'a dyn Fn() -> bool,
+    result: Option<om9_core::Result<(Brep, Vec<SourceSignature>)>>,
+}
+
+unsafe extern "C" fn receive_signature_snapshot(context: *mut c_void, snapshot: *const Snapshot) -> c_int {
+    let state = unsafe { &mut *context.cast::<SignatureSnapshot<'_, '_>>() };
+    let result = catch_unwind(AssertUnwindSafe(|| -> om9_core::Result<(Brep, Vec<SourceSignature>)> {
+        if snapshot.is_null() || state.result.is_some() { return Err(om9_core::Error::Invalid("signature snapshot")); }
+        let snapshot_ref = unsafe { &*snapshot };
+        let values = unsafe { source_signatures::snapshot_signatures(snapshot_ref.topology_handle, state.limits,
+            &mut |live, pending| (state.admission.borrow_mut())(live, pending), state.canceled) }?;
+        let expected = snapshot_ref.faces_count.checked_add(snapshot_ref.edges_count)
+            .and_then(|v| v.checked_add(snapshot_ref.vertices_len)).ok_or(om9_core::Error::Overflow("signature snapshot count"))?;
+        if values.len() != expected { return Err(om9_core::Error::Invalid("signature snapshot count")); }
+        let groups = [(0, snapshot_ref.faces_count, om9_core::associative::SubshapeKind::Face),
+            (snapshot_ref.faces_count, snapshot_ref.edges_count, om9_core::associative::SubshapeKind::Edge),
+            (snapshot_ref.faces_count + snapshot_ref.edges_count, snapshot_ref.vertices_len, om9_core::associative::SubshapeKind::Vertex)];
+        for (offset, count, kind) in groups {
+            for (index, value) in values[offset..offset + count].iter().enumerate() {
+                if value.kind != kind || value.source_index != index { return Err(om9_core::Error::Invalid("signature snapshot order")); }
+            }
+        }
+        let account = Cell::new(om9_core::budget::Usage::array::<SourceSignature>(values.capacity())?.bytes);
+        let mut base = Context { limits: state.limits, deflection: state.deflection, result: None,
+            grouped_bytes: Some(&account), admission: Some(state.admission) };
+        let status = unsafe { receive((&mut base as *mut Context<'_, '_>).cast(), snapshot) };
+        if status != 0 { return Err(base.result.and_then(Result::err).unwrap_or(om9_core::Error::Invalid("signature snapshot copy"))); }
+        let brep = base.result.ok_or(om9_core::Error::Invalid("signature snapshot missing"))??;
+        if (state.canceled)() { return Err(om9_core::Error::Canceled); }
+        Ok((brep, values))
+    })).unwrap_or(Err(om9_core::Error::Invalid("signature snapshot panic")));
+    state.result = Some(result);
+    i32::from(state.result.as_ref().is_none_or(|value| value.is_err()))
+}
+
+pub(crate) fn snapshot_via_signatures(
+    deflection: f64, limits: &Limits, mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+    canceled: &dyn Fn() -> bool,
+    invoke: impl FnOnce(unsafe extern "C" fn(*mut c_void, *const Snapshot) -> c_int,
+        *mut c_void, *mut c_char, c_int) -> c_int,
+) -> Result<(Brep, Vec<SourceSignature>), KernelError> {
+    let admission = RefCell::new(&mut admit as &mut dyn FnMut(u64, u64) -> om9_core::Result<()>);
+    let mut state = SignatureSnapshot { limits, deflection, admission: &admission, canceled, result: None };
+    let mut message = [0i8; 512];
+    let status = invoke(receive_signature_snapshot, (&mut state as *mut SignatureSnapshot<'_, '_>).cast(), message.as_mut_ptr(), 512);
+    if let Some(Err(error)) = state.result.as_ref() { return Err(KernelError::InvalidInput(error.to_string())); }
+    if status != 0 { return Err(KernelError::Failure(unsafe { std::ffi::CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned())); }
+    state.result.ok_or_else(|| KernelError::InvalidInput("signature snapshot missing".into()))?
+        .map_err(|error| KernelError::InvalidInput(error.to_string()))
 }
 
 /// The typed "valid but empty" native status: a boolean whose result has no face. An empty result
@@ -419,6 +595,14 @@ pub(crate) fn snapshot_via_optional(
     ) -> c_int,
 ) -> Result<Option<Brep>, KernelError> {
     snapshot_via_optional_accounted(deflection, limits, None, None, invoke)
+}
+
+pub(crate) fn snapshot_via_optional_with_admission(
+    deflection:f64,limits:&Limits,admit:&mut dyn FnMut(u64,u64)->om9_core::Result<()>,
+    invoke:impl FnOnce(unsafe extern "C" fn(*mut c_void,*const Snapshot)->c_int,*mut c_void,*mut c_char,c_int)->c_int,
+)->Result<Option<Brep>,KernelError> {
+    let admission=RefCell::new(admit);
+    snapshot_via_optional_accounted(deflection,limits,None,Some(&admission),invoke)
 }
 
 fn snapshot_via_optional_accounted(
@@ -481,6 +665,125 @@ pub fn sphere_brep(
 ) -> Result<Brep, KernelError> {
     snapshot("", 1, [radius_mm, 0., 0.], deflection_mm, limits)
 }
+/// Native topological vertices in source coordinates, independent of display mesh.
+/// OCCT parsing/validation allocations are not covered by Rust limits.
+pub fn source_vertices(shape: &dyn BrepSourceAccess, limits: &Limits) -> Result<Vec<[f64; 3]>, KernelError> {
+    let held = shape.validate_source(limits).map_err(|e| KernelError::InvalidInput(e.to_string()))?;
+    let count = shape.topology().vertex_ids.len();
+    let mut usage = held;
+    usage.add(om9_core::budget::Usage::array::<[f64; 3]>(count)
+        .map_err(|e| KernelError::InvalidInput(e.to_string()))?, limits)
+        .map_err(|e| KernelError::InvalidInput(e.to_string()))?;
+    if count as u64 > limits.max_points { return Err(KernelError::InvalidInput("BRep vertex budget".into())); }
+    let mut points: Vec<[f64; 3]> = Vec::new();
+    points.try_reserve_exact(count).map_err(|_| KernelError::InvalidInput("BRep vertex allocation".into()))?;
+    if points.capacity() > count {
+        usage.add(om9_core::budget::Usage::array::<[f64; 3]>(points.capacity() - count)
+            .map_err(|e| KernelError::InvalidInput(e.to_string()))?, limits)
+            .map_err(|e| KernelError::InvalidInput(e.to_string()))?;
+    }
+    points.resize(count, [0.; 3]);
+    let mut message = [0 as c_char; 512];
+    let status = unsafe { om9_occt_brep_vertices(shape.source().as_ptr(), shape.source().len(),
+        points.as_mut_ptr().cast::<f64>(), count, message.as_mut_ptr(), message.len() as c_int) };
+    if status != 0 { return Err(KernelError::Failure(unsafe { CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned())); }
+    if points.iter().flatten().any(|value| !value.is_finite()) { return Err(KernelError::Failure("non-finite BRep vertex".into())); }
+    Ok(points)
+}
+
+/// Read vertices from canonical source without creating a display mesh. The caller
+/// retains and accounts for `source`; OCCT's internal allocations are not bounded.
+pub fn source_vertices_from_source_admitted(
+    source: &str,
+    limits: &Limits,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Vec<[f64; 3]>> {
+    use om9_core::Error;
+    let counts = inspect_source(source, limits)
+        .map_err(|error| Error::Io(format!("BRep vertex source: {error}")))?;
+    let count = usize::try_from(counts[2]).map_err(|_| Error::Overflow("BRep vertices"))?;
+    source_vertices_with_count_admitted(source, count, limits, admit)
+}
+
+/// Read vertices while retaining the same source and topology checks as
+/// `source_vertices`, with admission for the temporary output buffer.
+pub fn source_vertices_admitted(
+    shape: &dyn BrepSourceAccess,
+    limits: &Limits,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Vec<[f64; 3]>> {
+    let held = shape.validate_source(limits)?;
+    let count = shape.topology().vertex_ids.len();
+    let mut requested = held;
+    requested.add(om9_core::budget::Usage::array::<[f64; 3]>(count)?, limits)?;
+    let points = source_vertices_with_count_admitted(shape.source(), count, limits, admit)?;
+    let mut actual = held;
+    actual.add(om9_core::budget::Usage::array::<[f64; 3]>(points.capacity())?, limits)?;
+    Ok(points)
+}
+
+fn source_vertices_with_count_admitted(
+    source: &str,
+    count: usize,
+    limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> om9_core::Result<Vec<[f64; 3]>> {
+    use om9_core::{budget::Usage, Error};
+    if count as u64 > limits.max_points { return Err(Error::Budget("BRep vertices")); }
+    let requested = Usage::array::<[f64; 3]>(count)?.bytes;
+    let source_bytes = u64::try_from(source.len()).map_err(|_| Error::Overflow("BRep vertices"))?;
+    if source_bytes.checked_add(requested).ok_or(Error::Overflow("BRep vertices"))? > limits.max_bytes {
+        return Err(Error::Budget("BRep vertices"));
+    }
+    admit(0, requested)?;
+    let mut points: Vec<[f64; 3]> = Vec::new();
+    points.try_reserve_exact(count).map_err(|_| Error::Budget("bytes"))?;
+    let allocated = Usage::array::<[f64; 3]>(points.capacity())?.bytes;
+    if source_bytes.checked_add(allocated).ok_or(Error::Overflow("BRep vertices"))? > limits.max_bytes {
+        return Err(Error::Budget("BRep vertices"));
+    }
+    admit(allocated, 0)?;
+    points.resize(count, [0.; 3]);
+    let mut message = [0 as c_char; 512];
+    // SAFETY: source and the count-sized output buffer live through the call.
+    let status = unsafe { om9_occt_brep_vertices(source.as_ptr(), source.len(),
+        points.as_mut_ptr().cast::<f64>(), count, message.as_mut_ptr(), message.len() as c_int) };
+    if status != 0 {
+        let detail = unsafe { CStr::from_ptr(message.as_ptr()) }.to_string_lossy();
+        return Err(Error::Io(format!("BRep vertices: {detail}")));
+    }
+    if points.iter().flatten().any(|value| !value.is_finite()) {
+        return Err(Error::Invalid("non-finite BRep vertex"));
+    }
+    Ok(points)
+}
+
+/// Source-based world bounds. No display tessellation is generated; OCCT's
+/// parsing, transformation and bounding allocations are not Rust-budgeted.
+pub fn world_bounds(shape: &dyn BrepSourceAccess, placement: &om9_core::geometry::Transform,
+    limits: &Limits) -> Result<[f64; 6], KernelError> {
+    shape.validate_source(limits).map_err(|e| KernelError::InvalidInput(e.to_string()))?;
+    world_bounds_source(shape.source(), placement, limits)
+}
+
+/// Compute bounds from canonical OCCT source without a display snapshot.
+pub fn world_bounds_source(source: &str, placement: &om9_core::geometry::Transform,
+    limits: &Limits) -> Result<[f64; 6], KernelError> {
+    if source.is_empty() || source.len() as u64 > limits.max_bytes {
+        return Err(KernelError::InvalidInput("BRep source bounds budget".into()));
+    }
+    placement.validate().map_err(|e| KernelError::InvalidInput(e.to_string()))?;
+    let mut output = [0.; 6];
+    let mut message = [0 as c_char; 512];
+    let status = unsafe { om9_occt_brep_world_bounds(source.as_ptr(), source.len(),
+        placement.0.as_ptr().cast::<f64>(), output.as_mut_ptr(), message.as_mut_ptr(), message.len() as c_int) };
+    if status != 0 { return Err(KernelError::Failure(unsafe { CStr::from_ptr(message.as_ptr()) }.to_string_lossy().into_owned())); }
+    if !(0..3).all(|i| output[i].is_finite() && output[i + 3].is_finite() && output[i] <= output[i + 3]) {
+        return Err(KernelError::Failure("invalid BRep bounds".into()));
+    }
+    Ok(output)
+}
+
 /// Rebuild from canonical OCCT source. New topology UUIDs require a new geometry publication.
 pub fn read_brep(source: &str, deflection_mm: f64, limits: &Limits) -> Result<Brep, KernelError> {
     read_brep_with_angle(source, deflection_mm, 0.3, limits)
@@ -493,6 +796,7 @@ pub fn read_brep_with_angle(source: &str, deflection_mm: f64, angular_deflection
     }
     snapshot_with_angle(source, 0, [0.; 3], deflection_mm, angular_deflection, limits)
 }
+
 
 /// Export-only, snapshot-local face-to-shell ownership from the same OCCT shape as the mesh.
 /// Group zero denotes a face not owned by a shell; IDs are not persistent topology identities.
@@ -544,7 +848,7 @@ impl EdgeTopologySnapshot {
     /// returned transient display owns its buffers; bindings are discarded.
     /// Refuse a shared display instead of allocating an unreserved clone.
     pub fn into_display(self) -> om9_core::Result<om9_core::brep::BrepDisplay> {
-        std::sync::Arc::try_unwrap(self.brep.display).map_err(|_| om9_core::Error::Busy)
+        self.brep.try_into_display()
     }
     pub fn shell_groups(&self) -> &[u32] { &self.shell_groups }
     pub fn bindings(&self) -> &EdgeBindingSet { &self.bindings }
@@ -568,8 +872,8 @@ impl EdgeTopologySnapshot {
         placement.validate()?;
         let a = self.bindings.0.get(first).ok_or(om9_core::Error::Invalid("BRep binding index"))?;
         let b = self.bindings.0.get(second).ok_or(om9_core::Error::Invalid("BRep binding index"))?;
-        let p = *self.brep.display.points.get(a.point as usize).ok_or(om9_core::Error::Invalid("BRep binding point"))?;
-        let q = *self.brep.display.points.get(b.point as usize).ok_or(om9_core::Error::Invalid("BRep binding point"))?;
+        let p = *self.brep.display().points.get(a.point as usize).ok_or(om9_core::Error::Invalid("BRep binding point"))?;
+        let q = *self.brep.display().points.get(b.point as usize).ok_or(om9_core::Error::Invalid("BRep binding point"))?;
         weld_candidate(a, b, placement, p, q, max_distance)
     }
 
@@ -583,7 +887,7 @@ impl EdgeTopologySnapshot {
     /// maps, allocator over-allocation and caller-owned data are not included.
     pub fn topology_remap_minimum_usage(&self) -> om9_core::Result<om9_core::budget::Usage> {
         use om9_core::budget::Usage;
-        let count = self.brep.display.points.len();
+        let count = self.brep.display().points.len();
         let limits = Limits { max_bytes: u64::MAX, ..Limits::default() };
         let mut usage = Usage::array::<u32>(count)?;
         usage.add(Usage::array::<f64>(count)?, &limits)?;
@@ -631,7 +935,7 @@ impl EdgeTopologySnapshot {
         check()?;
         if !max_distance.is_finite() || max_distance < 0.0 { return Err(Error::Invalid("STL weld distance")); }
         placement.validate()?;
-        let count = self.brep.display.points.len();
+        let count = self.brep.display().points.len();
         let mut parent = Vec::new();
         parent.try_reserve_exact(count).map_err(|_| Error::Budget("STL topology remap"))?;
         for i in 0..count { parent.push(u32::try_from(i).map_err(|_| Error::Overflow("STL topology points"))?); }
@@ -641,7 +945,7 @@ impl EdgeTopologySnapshot {
         let mut shell = Vec::new();
         shell.try_reserve_exact(count).map_err(|_| Error::Budget("STL topology remap"))?;
         shell.resize(count, u32::MAX);
-        for (index, [a, b, c, face]) in self.brep.display.triangles.iter().enumerate() {
+        for (index, [a, b, c, face]) in self.brep.display().triangles.iter().enumerate() {
             if index % 1024 == 0 { check()?; }
             let group = *self.shell_groups.get(*face as usize).ok_or(Error::Invalid("STL shell face"))?;
             for point in [a, b, c] {
@@ -678,7 +982,7 @@ impl EdgeTopologySnapshot {
                 let b = root(&mut parent, point);
                 if a != b {
                     let (a, b) = if a < b { (a, b) } else { (b, a) };
-                    let distance = world_separation(placement, self.brep.display.points[a as usize], self.brep.display.points[b as usize])?;
+                    let distance = world_separation(placement, self.brep.display().points[a as usize], self.brep.display().points[b as usize])?;
                     let bound = radius[b as usize] + distance;
                     if !bound.is_finite() || bound > max_distance { return Err(Error::Invalid("STL topology weld exceeds distance")); }
                     parent[b as usize] = a;
@@ -712,8 +1016,166 @@ fn world_separation(placement: om9_core::geometry::Transform, a: [f64; 3], b: [f
 }
 
 #[cfg(test)]
+mod topology_native_tests {
+    use super::*;
+    use sha2::{Digest, Sha256};
+    use om9_core::brep::topology_mapping::{Descriptor, Incidence, Manifest, match_manifests};
+
+    #[derive(Default)]
+    struct Visited {
+        faces: Vec<Descriptor>, edges: Vec<Descriptor>, vertices: Vec<Descriptor>,
+        face_edges: Vec<Incidence>, edge_vertices: Vec<Incidence>, hash: Option<Sha256>,
+    }
+    unsafe extern "C" fn visit(context: *mut c_void, event: c_int, kind: c_int, index: u32,
+        child: u32, orientation: c_int, data: *const u8, len: usize) -> c_int {
+        let result = catch_unwind(AssertUnwindSafe(|| -> Option<()> {
+            let state = unsafe { &mut *context.cast::<Visited>() };
+            match event {
+                0 => {
+                    if !(0..=2).contains(&kind) || !(0..=3).contains(&orientation) || state.hash.is_some() { return None; }
+                    let mut hash = Sha256::new();
+                    hash.update([kind as u8, orientation as u8]);
+                    state.hash = Some(hash);
+                }
+                1 => {
+                    if data.is_null() && len != 0 { return None; }
+                    let bytes = if len == 0 { &[] } else { unsafe { std::slice::from_raw_parts(data, len) } };
+                    state.hash.as_mut()?.update(bytes);
+                }
+                2 => {
+                    let value: Descriptor = state.hash.take()?.finalize().into();
+                    let target = match kind { 0 => &mut state.faces, 1 => &mut state.edges, 2 => &mut state.vertices, _ => return None };
+                    if target.len() != index as usize { return None; }
+                    target.push(value);
+                }
+                3 => {
+                    if !(0..=3).contains(&orientation) { return None; }
+                    let value = Incidence { parent: index, child, orientation: orientation as u8 };
+                    match kind { 0 => state.face_edges.push(value), 1 => state.edge_vertices.push(value), _ => return None }
+                }
+                _ => return None,
+            }
+            Some(())
+        }));
+        i32::from(!matches!(result, Ok(Some(()))))
+    }
+    struct Capture<'a> { base: Context<'a, 'a>, visited: Visited }
+    unsafe extern "C" fn capture(context: *mut c_void, snapshot: *const Snapshot) -> c_int {
+        let capture = unsafe { &mut *context.cast::<Capture<'_>>() };
+        let shape = unsafe { (*snapshot).topology_handle };
+        let mut refused = Visited::default();
+        if unsafe { om9_occt_visit_snapshot_topology(shape, 0, bound(capture.base.limits.max_bytes),
+            visit, (&mut refused as *mut Visited).cast()) } == 0 || !refused.faces.is_empty() { return 1; }
+        let mut refused = Visited::default();
+        if unsafe { om9_occt_visit_snapshot_topology(shape, bound(capture.base.limits.max_nodes), 0,
+            visit, (&mut refused as *mut Visited).cast()) } == 0 { return 1; }
+        if unsafe { om9_occt_visit_snapshot_topology(shape, bound(capture.base.limits.max_nodes),
+            bound(capture.base.limits.max_bytes), visit, (&mut capture.visited as *mut Visited).cast()) } != 0 { return 1; }
+        unsafe { receive((&mut capture.base as *mut Context<'_, '_>).cast(), snapshot) }
+    }
+    fn make(source: &str, kind: i32) -> (Brep, Visited) {
+        let limits = Limits::default();
+        let mut state = Capture { base: Context { limits: &limits, deflection: 0.1, result: None, grouped_bytes: None, admission: None }, visited: Visited::default() };
+        let mut message = [0i8; 512];
+        let dims = [5., 7., 9.];
+        let status = unsafe { om9_occt_brep_snapshot(source.as_ptr(), source.len(), kind, dims.as_ptr(), 0.1, 0.3,
+            bound(limits.max_points), bound(limits.max_nodes), bound(limits.max_bytes), capture,
+            (&mut state as *mut Capture<'_>).cast(), message.as_mut_ptr(), 512) };
+        assert_eq!(status, 0, "{}", unsafe { CStr::from_ptr(message.as_ptr()) }.to_string_lossy());
+        (state.base.result.unwrap().unwrap(), state.visited)
+    }
+    fn manifest(v: &Visited, source_sha256: [u8; 32]) -> Manifest<'_> {
+        Manifest { source_sha256, kernel: "test-only-occt-build", faces: &v.faces,
+            edges: &v.edges, vertices: &v.vertices, face_edges: &v.face_edges, edge_vertices: &v.edge_vertices }
+    }
+    #[test]
+    fn native_snapshot_descriptors_match_fresh_source_for_box_and_sphere() {
+        for kind in [0, 1] {
+            let (original, a) = make("", kind);
+            let (reread, b) = make(original.source(), kind);
+            let source_sha256 = Sha256::digest(original.source().as_bytes()).into();
+            let mapping = match_manifests(&manifest(&a, source_sha256), &manifest(&b, source_sha256), &Limits::default()).unwrap();
+            let topology = mapping.reorder_topology(original.topology(), &reread.topology().face_edges, &Limits::default()).unwrap();
+            assert_eq!(topology.faces, original.topology().faces);
+            assert_eq!(topology.edges, original.topology().edges);
+            assert_eq!(topology.vertex_ids, original.topology().vertex_ids);
+        }
+    }
+}
+
+#[cfg(test)]
 mod edge_site_tests {
     use super::{EdgeNodeBinding, world_separation, weld_candidate};
+
+    #[test]
+    fn created_display_uses_the_same_source_topology_as_a_fresh_read() {
+        let limits = om9_core::budget::Limits::default();
+        for created in [
+            super::box_brep([10., 7., 3.], 0.1, &limits).unwrap(),
+            super::sphere_brep(5., 0.1, &limits).unwrap(),
+        ] {
+            let reread = super::read_brep(created.source(), 0.1, &limits).unwrap();
+            assert_eq!(created.display().points, reread.display().points);
+            assert_eq!(created.display().triangles, reread.display().triangles);
+            assert_eq!(created.display().segments, reread.display().segments);
+            assert_eq!(created.display().vertices, reread.display().vertices);
+            assert_eq!(created.topology().face_edges, reread.topology().face_edges);
+            assert_eq!(created.topology().faces.len(), reread.topology().faces.len());
+            assert_eq!(created.topology().edges.len(), reread.topology().edges.len());
+            assert_eq!(created.topology().vertex_ids.len(), reread.topology().vertex_ids.len());
+        }
+    }
+
+    #[test]
+    fn concurrent_display_and_export_snapshots_match_separate_runs() {
+        use om9_core::budget::Limits;
+
+        let limits = Limits::default();
+        let sources = [
+            super::box_brep([10., 7., 3.], 0.1, &limits).unwrap(),
+            super::sphere_brep(5., 0.1, &limits).unwrap(),
+        ];
+        for original in sources {
+            let source = original.source().to_owned();
+            let display_baseline = super::read_brep(&source, 0.1, &limits).unwrap();
+            let export_baseline = super::read_brep_with_shell_groups_and_edges(&source, 0.01, 0.3, &limits).unwrap();
+            let (display, export) = std::thread::scope(|scope| {
+                let display = scope.spawn(|| super::read_brep(&source, 0.1, &limits).unwrap());
+                let export = scope.spawn(|| super::read_brep_with_shell_groups_and_edges(&source, 0.01, 0.3, &limits).unwrap());
+                (display.join().unwrap(), export.join().unwrap())
+            });
+            assert_eq!(original.source(), source);
+            assert_eq!(display.source(), display_baseline.source());
+            assert_eq!(display.display().points, display_baseline.display().points);
+            assert_eq!(display.display().triangles, display_baseline.display().triangles);
+            assert_eq!(export.brep.source(), export_baseline.brep.source());
+            assert_eq!(export.brep.display().points, export_baseline.brep.display().points);
+            assert_eq!(export.brep.display().triangles, export_baseline.brep.display().triangles);
+            assert!(!display.display_identity().same(&export.brep.display_identity()));
+        }
+    }
+
+    #[test]
+    fn source_reads_preserve_exact_input_for_display_and_export() {
+        use om9_core::budget::Limits;
+        let limits = Limits::default();
+        for source in [
+            super::box_brep([10., 7., 3.], 0.1, &limits).unwrap(),
+            super::sphere_brep(5., 0.1, &limits).unwrap(),
+        ] {
+            let original = source.source();
+            let display = super::read_brep(original, 0.05, &limits).unwrap();
+            let export = super::read_brep_with_shell_groups_and_edges(original, 0.01, 0.3, &limits).unwrap();
+            assert_eq!(display.source().as_bytes(), original.as_bytes());
+            assert_eq!(export.brep.source().as_bytes(), original.as_bytes());
+            assert_eq!(display.display().source_sha256, export.brep.display().source_sha256);
+            assert!(!display.display().triangles.is_empty());
+            assert!(!export.brep.display().triangles.is_empty());
+            let with_trailing_whitespace = format!("{original}\n");
+            let reread = super::read_brep(&with_trailing_whitespace, 0.05, &limits).unwrap();
+            assert_eq!(reread.source().as_bytes(), with_trailing_whitespace.as_bytes());
+        }
+    }
     fn binding(edge: u32, vertex: Option<u32>, parameter: Option<f64>) -> EdgeNodeBinding {
         EdgeNodeBinding { point: 0, edge, vertex: vertex.unwrap_or(u32::MAX), reserved: 0, parameter: parameter.unwrap_or(f64::NAN) }
     }
@@ -725,15 +1187,15 @@ mod edge_site_tests {
         let (display, owners) = super::read_brep_with_shell_groups(body.source(), 0.1, 0.3, &limits).unwrap();
         let export = super::read_brep_with_shell_groups_and_edges(body.source(), 0.1, 0.3, &limits).unwrap();
         println!("snapshot_counts display_points={} export_points={} display_segments={} export_segments={} triangles={}",
-            display.display.points.len(), export.brep.display.points.len(), display.display.segments.len(),
-            export.brep.display.segments.len(), export.brep.display.triangles.len());
-        assert!(!display.display.segments.is_empty());
-        assert!(export.brep.display.segments.is_empty());
-        assert!(export.brep.display.points.len() < display.display.points.len());
-        assert_eq!(export.brep.display.triangles, display.display.triangles);
-        let mesh_points = export.brep.display.triangles.iter().flat_map(|triangle| triangle[..3].iter())
+            display.display().points.len(), export.brep.display().points.len(), display.display().segments.len(),
+            export.brep.display().segments.len(), export.brep.display().triangles.len());
+        assert!(!display.display().segments.is_empty());
+        assert!(export.brep.display().segments.is_empty());
+        assert!(export.brep.display().points.len() < display.display().points.len());
+        assert_eq!(export.brep.display().triangles, display.display().triangles);
+        let mesh_points = export.brep.display().triangles.iter().flat_map(|triangle| triangle[..3].iter())
             .copied().max().unwrap() as usize + 1;
-        assert_eq!(&export.brep.display.points[..mesh_points], &display.display.points[..mesh_points]);
+        assert_eq!(&export.brep.display().points[..mesh_points], &display.display().points[..mesh_points]);
         assert_eq!(export.shell_groups(), owners);
         assert!(!export.bindings().bindings().is_empty());
         assert!(export.bindings().bindings().iter().all(|binding| (binding.point as usize) < mesh_points));
@@ -744,15 +1206,15 @@ mod edge_site_tests {
         let limits = Limits::default();
         let body = super::box_brep([1., 1., 1.], 0.1, &limits).unwrap();
         let snapshot = super::read_brep_with_shell_groups_and_edges(body.source(), 0.1, 0.3, &limits).unwrap();
-        let original_points = snapshot.brep.display.points.as_ptr();
+        let original_points = snapshot.brep.display().points.as_ptr();
         let display = snapshot.into_display().unwrap();
         assert_eq!(display.points.as_ptr(), original_points, "unique buffer must be moved");
         let shared = super::read_brep_with_shell_groups_and_edges(body.source(), 0.1, 0.3, &limits).unwrap();
-        let alias = shared.brep.display.clone();
-        let original_points = alias.points.as_ptr();
+        let alias = shared.brep.pin_display(std::sync::Arc::new(()));
+        let original_points = alias.display().points.as_ptr();
         assert!(matches!(shared.into_display(), Err(Error::Busy)));
-        assert_eq!(alias.points.as_ptr(), original_points);
-        assert!(!alias.triangles.is_empty());
+        assert_eq!(alias.display().points.as_ptr(), original_points);
+        assert!(!alias.display().triangles.is_empty());
     }
     #[test]
     fn remap_rejects_when_snapshot_and_minimum_arrays_do_not_fit_together() {
@@ -762,7 +1224,7 @@ mod edge_site_tests {
         let snapshot = super::read_brep_with_shell_groups_and_edges(body.source(), 0.1, 0.3, &limits).unwrap();
         let retained = snapshot.retained_usage(&limits).unwrap();
         let arrays = snapshot.topology_remap_minimum_usage().unwrap();
-        assert_eq!(arrays.bytes, snapshot.brep.display.points.len() as u64 * 16);
+        assert_eq!(arrays.bytes, snapshot.brep.display().points.len() as u64 * 16);
         let estimate = snapshot.topology_remap_estimated_usage().unwrap();
         assert!(estimate.bytes > arrays.bytes, "fixture must contain lookup entries");
         let arrays_only = Limits { max_bytes: retained.bytes + arrays.bytes, ..limits };
@@ -807,12 +1269,12 @@ mod edge_site_tests {
         let body = super::box_brep([1., 1., 1.], 0.1, &limits).unwrap();
         let mut snapshot = super::read_brep_with_shell_groups_and_edges(body.source(), 0.1, 0.3, &limits).unwrap();
         let before = snapshot.retained_usage(&limits).unwrap();
-        let capacities = (snapshot.brep.display.points.capacity(), snapshot.shell_groups.capacity(), snapshot.bindings.0.capacity());
-        std::sync::Arc::make_mut(&mut snapshot.brep.display).points.reserve(1000);
+        let capacities = (snapshot.brep.display().points.capacity(), snapshot.shell_groups.capacity(), snapshot.bindings.0.capacity());
+        snapshot.brep.edit_display_for_validation(|display| display.points.reserve(1000));
         snapshot.shell_groups.reserve(1000);
         snapshot.bindings.0.reserve(1000);
         let after = snapshot.retained_usage(&limits).unwrap();
-        let delta = (snapshot.brep.display.points.capacity() - capacities.0) * std::mem::size_of::<[f64; 3]>()
+        let delta = (snapshot.brep.display().points.capacity() - capacities.0) * std::mem::size_of::<[f64; 3]>()
             + (snapshot.shell_groups.capacity() - capacities.1) * std::mem::size_of::<u32>()
             + (snapshot.bindings.0.capacity() - capacities.2) * std::mem::size_of::<EdgeNodeBinding>();
         assert!(delta > 0);
@@ -858,7 +1320,7 @@ mod edge_site_tests {
             .map(|binding| binding.point).collect::<std::collections::BTreeSet<_>>().into_iter().collect();
         assert!(points.len() >= 3, "box vertex must be represented on three faces");
         for (point, x) in points.iter().zip([0., 0.9e-6, 1.8e-6]) {
-            std::sync::Arc::make_mut(&mut snapshot.brep.display).points[*point as usize] = [x, 0., 0.];
+            snapshot.brep.edit_display_for_validation(|display| display.points[*point as usize] = [x, 0., 0.]);
         }
         assert!(matches!(snapshot.topology_remap(Transform::identity(), 1e-6), Err(om9_core::Error::Invalid("STL topology weld exceeds distance"))));
     }
@@ -940,10 +1402,10 @@ fn read_brep_grouped(source: &str, deflection_mm: f64, angular_deflection: f64, 
     })?.ok_or_else(|| KernelError::InvalidInput("BRep snapshot missing".into()))?;
     let (owners, edge_bindings, tolerance) = groups.result.ok_or_else(|| KernelError::InvalidInput("BRep shell groups missing".into()))?
         .map_err(|error| KernelError::InvalidInput(error.to_string()))?;
-    if owners.len() != brep.display.faces.len() {
+    if owners.len() != brep.display().faces.len() {
         return Err(KernelError::InvalidInput("BRep shell group count".into()));
     }
-    if edge_bindings.iter().any(|binding| binding.point as usize >= brep.display.points.len() || binding.edge as usize >= brep.display.edges.len() || binding.vertex().is_some_and(|vertex| vertex as usize >= brep.display.vertices.len()) || binding.reserved != 0 || binding.parameter.is_infinite()) {
+    if edge_bindings.iter().any(|binding| binding.point as usize >= brep.display().points.len() || binding.edge as usize >= brep.display().edges.len() || binding.vertex().is_some_and(|vertex| vertex as usize >= brep.display().vertices.len()) || binding.reserved != 0 || binding.parameter.is_infinite()) {
         return Err(KernelError::InvalidInput("BRep edge binding index".into()));
     }
     Ok((brep, owners, edge_bindings, tolerance))
@@ -1023,7 +1485,7 @@ pub fn from_mesh(mesh: &Mesh, deflection_mm: f64, limits: &Limits) -> Result<Bre
 }
 
 /// Measures canonical source, never deriving volume from the display mesh or its bounding box.
-pub fn source_volume(shape: &Brep, limits: &Limits) -> Result<f64, KernelError> {
+pub fn source_volume(shape: &dyn BrepSourceAccess, limits: &Limits) -> Result<f64, KernelError> {
     shape
         .validate(limits)
         .map_err(|e| KernelError::InvalidInput(e.to_string()))?;
@@ -1063,10 +1525,12 @@ pub(crate) unsafe extern "C" fn receive_admitted_bytes(context: *mut c_void, byt
     if context.error.is_some() { return 1; }
     let result = catch_unwind(AssertUnwindSafe(|| -> om9_core::Result<()> {
         let needed = context.bytes.len().checked_add(length).ok_or(om9_core::Error::Overflow("native source copy"))?;
-        if needed > context.limit || (length != 0 && bytes.is_null()) { return Err(om9_core::Error::Budget("native source copy")); }
+        if needed > context.limit { return Err(om9_core::Error::Budget("native source copy")); }
+        if length != 0 && bytes.is_null() { return Err(om9_core::Error::Invalid("native source pointer")); }
+        std::alloc::Layout::array::<u8>(needed).map_err(|_|om9_core::Error::Overflow("native source copy"))?;
         let pending = if needed > context.bytes.capacity() { needed as u64 } else { 0 };
         (context.admit)(context.bytes.capacity() as u64, pending)?;
-        context.bytes.try_reserve_exact(length).map_err(|_| om9_core::Error::Budget("native source copy"))?;
+        context.bytes.try_reserve_exact(length).map_err(|_| om9_core::Error::Budget("bytes"))?;
         if context.bytes.capacity() > context.limit { return Err(om9_core::Error::Budget("native source copy")); }
         (context.admit)(context.bytes.capacity() as u64, 0)?;
         if length != 0 { context.bytes.extend_from_slice(unsafe { std::slice::from_raw_parts(bytes, length) }); }
@@ -1106,8 +1570,8 @@ mod staged_source_admission_tests {
             Ok(())
         }).unwrap();
         assert!(planned && allocated);
-        assert_eq!(snapshot.brep().display.points, reference.brep().display.points);
-        assert_eq!(snapshot.brep().display.triangles, reference.brep().display.triangles);
+        assert_eq!(snapshot.brep().display().points, reference.brep().display().points);
+        assert_eq!(snapshot.brep().display().triangles, reference.brep().display().triangles);
         assert_eq!(snapshot.shell_groups(), reference.shell_groups());
         let mut seen = 0;
         let refused = read_brep_with_shell_groups_and_edges_admitted(body.source(), 0.05, 0.3, &limits, |_, pending| {
@@ -1170,19 +1634,28 @@ pub fn from_3dm_source(payload: &[u8], tolerance_mm: f64, limits: &Limits) -> Re
     from_3dm_source_admitted(payload, tolerance_mm, limits, |_, _| Ok(()))
 }
 pub fn from_3dm_source_admitted(payload: &[u8], tolerance_mm: f64, limits: &Limits,
-    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<String, KernelError> {
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<String, KernelError> {
+    from_3dm_source_typed_admitted(payload,tolerance_mm,limits,admit)
+        .map_err(|error|KernelError::InvalidInput(error.to_string()))
+}
+
+/// Same source conversion with typed admission/allocation errors for callers
+/// that offer memory recovery. The native parser's internal memory remains
+/// outside the callback reservation.
+pub fn from_3dm_source_typed_admitted(payload:&[u8],tolerance_mm:f64,limits:&Limits,
+    mut admit:impl FnMut(u64,u64)->om9_core::Result<()>) -> om9_core::Result<String> {
     if payload.is_empty() || payload.len() as u64 > limits.max_bytes || !tolerance_mm.is_finite() || tolerance_mm <= 0. {
-        return Err(KernelError::InvalidInput("3DM BRep input budget".into()));
+        return Err(om9_core::Error::Invalid("3DM BRep source input"));
     }
     let mut context = AdmittedBytesContext::new(byte_bound(limits), &mut admit);
     let mut message = [0i8; 512];
     // SAFETY: native invokes the callback synchronously while both input and context are alive.
     let status = unsafe { om9_occt_brep_from_3dm(payload.as_ptr(), payload.len(), tolerance_mm,
         byte_bound(limits), receive_admitted_bytes, (&mut context as *mut AdmittedBytesContext<'_>).cast(), message.as_mut_ptr(), 512) };
-    if let Some(error) = context.error { return Err(KernelError::InvalidInput(error.to_string())); }
-    if status != 0 { return Err(KernelError::InvalidInput(native_message(&message))); }
-    if context.bytes.is_empty() { return Err(KernelError::InvalidInput("3DM BRep source missing".into())); }
-    String::from_utf8(context.bytes).map_err(|_| KernelError::InvalidInput("3DM BRep source encoding".into()))
+    if let Some(error) = context.error { return Err(error); }
+    if status != 0 { return Err(om9_core::Error::Io(native_message(&message))); }
+    if context.bytes.is_empty() { return Err(om9_core::Error::Invalid("3DM BRep source missing")); }
+    String::from_utf8(context.bytes).map_err(|_| om9_core::Error::Invalid("3DM BRep source encoding"))
 }
 
 /// Convert a retained 3DM BRep using an explicit angular deflection in radians.
@@ -1236,10 +1709,51 @@ pub fn from_3dm_with_angle(
     result.map_err(|error| KernelError::InvalidInput(error.to_string()))
 }
 
+/// Reconstruct an OCCT snapshot from a retained native payload while admitting
+/// Rust-owned snapshot allocations. The native parser and mesher themselves
+/// remain outside this callback's accounting.
+pub fn from_3dm_with_angle_admitted(
+    payload: &[u8], tolerance_mm: f64, deflection_mm: f64, angular_deflection: f64,
+    limits: &Limits, mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> Result<Brep, KernelError> {
+    if payload.is_empty() || payload.len() as u64 > limits.max_bytes
+        || !tolerance_mm.is_finite() || tolerance_mm <= 0.
+        || !deflection_mm.is_finite() || deflection_mm <= 0.
+        || !angular_deflection.is_finite() || angular_deflection <= 0.
+        || angular_deflection > std::f64::consts::PI {
+        return Err(KernelError::InvalidInput("3DM BRep input budget".into()));
+    }
+    let admission = RefCell::new(&mut admit as &mut dyn FnMut(u64, u64) -> om9_core::Result<()>);
+    snapshot_via_optional_accounted(deflection_mm, limits, None, Some(&admission), |sink, context, message, capacity| unsafe {
+        om9_occt_brep_from_3dm_snapshot(payload.as_ptr(), payload.len(), tolerance_mm, deflection_mm,
+            angular_deflection, usize::try_from(limits.max_points).unwrap_or(usize::MAX),
+            usize::try_from(limits.max_nodes).unwrap_or(usize::MAX), byte_bound(limits), sink, context, message, capacity)
+    })?.ok_or_else(|| KernelError::InvalidInput("3DM BRep snapshot missing".into()))
+}
+
+/// Export-only conversion of canonical OCCT source to an openNURBS payload.
+/// Owned Rust output is admitted before allocation; native transient memory
+/// is outside the callback accounting. No viewport mesh is constructed.
+pub fn source_to_3dm_payload_admitted(source:&str,tolerance_mm:f64,limits:&Limits,
+    mut admit:impl FnMut(u64,u64)->om9_core::Result<()>) -> Result<(Vec<u8>,u32),KernelError> {
+    if source.is_empty() || source.len() as u64>limits.max_bytes || !tolerance_mm.is_finite() || tolerance_mm<=0. {
+        return Err(KernelError::InvalidInput("BRep source export input".into()));
+    }
+    let mut context=AdmittedBytesContext::new(byte_bound(limits),&mut admit);
+    let mut crc=0u32;let mut message=[0i8;512];
+    // SAFETY: source, output and callback context outlive the synchronous call.
+    let status=unsafe {om9_occt_brep_to_3dm(source.as_ptr(),source.len(),tolerance_mm,byte_bound(limits),
+        &mut crc,receive_admitted_bytes,(&mut context as *mut AdmittedBytesContext<'_>).cast(),message.as_mut_ptr(),512)};
+    if let Some(error)=context.error {return Err(KernelError::InvalidInput(error.to_string()));}
+    if status!=0 {return Err(KernelError::InvalidInput(native_message(&message)));}
+    if context.bytes.is_empty() {return Err(KernelError::Failure("empty ON_Brep payload".into()));}
+    Ok((context.bytes,crc))
+}
+
 /// Convert an editable OCCT `Brep` into a 3DM `NativeBrep` payload. The display
 /// mesh is derived from the already admitted Brep display, never from native
 /// export bytes.
-pub fn to_3dm(brep: &Brep, tolerance_mm: f64, limits: &Limits) -> Result<NativeBrep, KernelError> {
+pub fn to_3dm(brep: &dyn BrepSourceAccess, tolerance_mm: f64, limits: &Limits) -> Result<NativeBrep, KernelError> {
     brep.validate(limits)
         .map_err(|error| KernelError::InvalidInput(error.to_string()))?;
     if !tolerance_mm.is_finite() || tolerance_mm <= 0. {
@@ -1271,21 +1785,9 @@ pub fn to_3dm(brep: &Brep, tolerance_mm: f64, limits: &Limits) -> Result<NativeB
     if context.bytes.is_empty() {
         return Err(KernelError::Failure("empty ON_Brep payload".into()));
     }
-    let faces = brep
-        .display
-        .triangles
-        .iter()
-        .map(|triangle| vec![triangle[0], triangle[1], triangle[2]])
-        .collect();
-    let display = Mesh {
-        vertices: brep.display.points.clone(),
-        faces,
-        normals: Vec::new(),
-        colors: Vec::new(),
-        corner_uvs: Vec::new(),
-    };
+    let display = Mesh {vertices:Vec::new(),faces:Vec::new(),normals:Vec::new(),colors:Vec::new(),corner_uvs:Vec::new()};
     Ok(NativeBrep {
-        display,
+        display: std::sync::Arc::new(display),
         payload: context.bytes.into(),
         crc,
     })

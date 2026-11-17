@@ -1333,17 +1333,17 @@ pub fn duplicate_isocurve(
     )?))
 }
 
-/// Boundary edges: edges referenced by exactly one display face.
+/// Boundary edges: edges referenced by exactly one topological face.
 pub fn boundary_edges(brep: &Brep, limits: &Limits) -> Result<Vec<Uuid>> {
-    brep.validate(limits)?;
-    let mut counts: Vec<usize> = vec![0; brep.display.edges.len()];
-    for [_, edge] in &brep.display.face_edges {
+    brep.validate_source(limits)?;
+    let mut counts: Vec<usize> = vec![0; brep.topology().edges.len()];
+    for [_, edge] in &brep.topology().face_edges {
         if let Some(slot) = counts.get_mut(*edge as usize) {
             *slot += 1;
         }
     }
     Ok(brep
-        .display
+        .topology()
         .edges
         .iter()
         .zip(counts)
@@ -1360,13 +1360,13 @@ pub fn boundary_edges(brep: &Brep, limits: &Limits) -> Result<Vec<Uuid>> {
 pub fn duplicate_brep_edge(brep: &Brep, edge: Uuid, limits: &Limits) -> Result<Curve> {
     brep.validate(limits)?;
     let index = brep
-        .display
+        .display()
         .edges
         .iter()
         .position(|id| *id == edge)
         .ok_or(Error::Missing("B-Rep edge"))?;
     let segments: Vec<[u32; 2]> = brep
-        .display
+        .display()
         .segments
         .iter()
         .filter(|[_, _, edge_index]| *edge_index as usize == index)
@@ -1376,7 +1376,7 @@ pub fn duplicate_brep_edge(brep: &Brep, edge: Uuid, limits: &Limits) -> Result<C
         return Err(Error::Missing("B-Rep edge segments"));
     }
     let point = |offset: u32| -> Result<Point3> {
-        brep.display
+        brep.display()
             .points
             .get(offset as usize)
             .copied()

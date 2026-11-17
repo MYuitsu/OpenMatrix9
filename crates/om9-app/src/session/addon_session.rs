@@ -349,6 +349,22 @@ fn face_parts(g: &Geo, k: f64) -> Result<(om9_core::geometry::NurbsSurface, Vec<
     Ok((srf, rings))
 }
 
+#[cfg(feature = "occt-brep")]
+thread_local! {
+    /// B-Reps made for the objects being committed: their display meshes are staged with the
+    /// transaction (the document keeps only the canonical source).
+    static NEW_BREPS: std::cell::RefCell<Vec<om9_core::brep::Brep>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// The document geometry of a B-Rep made by the kernel; the B-Rep waits in [`NEW_BREPS`].
+#[cfg(feature = "occt-brep")]
+fn new_brep(brep: om9_core::brep::Brep) -> om9_core::brep::CanonicalBrep {
+    use om9_core::brep::BrepSourceAccess;
+    let source = brep.to_canonical();
+    NEW_BREPS.with(|c| c.borrow_mut().push(brep));
+    source
+}
+
 /// A trimmed surface from an add-on: an exact face made by the B-Rep kernel (the loops'
 /// curves are NURBS lying on the surface). A build without the kernel keeps the add-on's
 /// display mesh (or the untrimmed surface).
@@ -373,7 +389,7 @@ fn trimmed_geometry(
             &limits,
         )
         .map_err(|e| Error::Io(format!("trimmed surface: {e}")))?;
-        Ok((Geometry::Brep(brep), None, "Surface".into()))
+        Ok((Geometry::Brep(new_brep(brep)), None, "Surface".into()))
     }
     #[cfg(not(feature = "occt-brep"))]
     {
@@ -409,7 +425,7 @@ fn brep_geometry(
             &limits,
         )
         .map_err(|e| Error::Io(format!("{}: {e}", if solid { "solid" } else { "polysurface" })))?;
-        Ok((Geometry::Brep(brep), None, if solid { "Solid" } else { "Polysurface" }.into()))
+        Ok((Geometry::Brep(new_brep(brep)), None, if solid { "Solid" } else { "Polysurface" }.into()))
     }
     #[cfg(not(feature = "occt-brep"))]
     {
@@ -732,7 +748,7 @@ fn trimmed_in_world(entity: &Entity, k: f64) -> Option<Geo> {
     // The display already counts the faces, so a body too large to send is never converted.
     #[cfg(feature = "occt-brep")]
     if let Geometry::Brep(brep) = &entity.geometry
-        && (1..=MAX_SENT_FACES).contains(&brep.display.faces.len())
+        && (1..=MAX_SENT_FACES).contains(&brep.topology().faces.len())
     {
         let read = read_brep(brep)?;
         let face = |f: &om9_kernel::face_nurbs::FaceNurbs| face_geo(f, &p);
@@ -748,9 +764,9 @@ fn trimmed_in_world(entity: &Entity, k: f64) -> Option<Geo> {
 /// A B-Rep's faces as exact NURBS and whether it is one closed solid, read once per shape
 /// (cached by its source hash).
 #[cfg(feature = "occt-brep")]
-fn read_brep(brep: &om9_core::brep::Brep) -> Option<ReadBrep> {
+fn read_brep(brep: &om9_core::brep::CanonicalBrep) -> Option<ReadBrep> {
     let limits = om9_core::budget::Limits::default();
-    let key = brep.display.source_sha256;
+    let key = brep.canonical_fingerprints().0;
     FACES.with(|c| c.borrow().iter().find(|(h, _)| *h == key).map(|(_, f)| f.clone())).or_else(|| {
         let faces = om9_kernel::face_nurbs::face_nurbs(brep, &limits).ok()?;
         let solid = faces.len() > 1 && om9_kernel::creation::measure(brep, &limits).is_ok_and(|m| m.solids == 1 && m.closed);
@@ -808,7 +824,7 @@ thread_local! {
 fn sub_picks(entity: &Entity, picks: &[&om9_scene::scene::Subelement], k: f64) -> Vec<SubPick> {
     use om9_scene::scene::Subelement;
     let Geometry::Brep(brep) = &entity.geometry else { return Vec::new() };
-    let d = &brep.display;
+    let d = brep.topology();
     #[cfg(feature = "occt-brep")]
     let p = |q: Point3| entity.placement.point(q).ok().map(|w| mm(w, k));
     #[cfg(not(feature = "occt-brep"))]
@@ -831,7 +847,7 @@ fn sub_picks(entity: &Entity, picks: &[&om9_scene::scene::Subelement], k: f64) -
                 let i = d.edges.iter().position(|e| e == key)?;
                 #[cfg(feature = "occt-brep")]
                 let exact = {
-                    let hash = d.source_sha256;
+                    let hash = brep.canonical_fingerprints().0;
                     let edges = EDGES.with(|c| c.borrow().iter().find(|(h, _)| *h == hash).map(|(_, e)| e.clone())).or_else(|| {
                         let e = std::sync::Arc::new(om9_kernel::face_nurbs::edge_nurbs(brep, &om9_core::budget::Limits::default()).ok()?);
                         EDGES.with(|c| {
@@ -1612,6 +1628,8 @@ impl Controller {
     ) -> Result<usize> {
         let k = self.document().page_unit.factor();
         let layer = self.document().current_layer;
+        #[cfg(feature = "occt-brep")]
+        NEW_BREPS.with(|c| c.borrow_mut().clear());
         let mut mutations = Vec::new();
         let mut created_ids = Vec::new();
         for g in &reply.create {
@@ -1784,7 +1802,11 @@ impl Controller {
         let undo_label = crate::icons::icon_name(code).unwrap_or(label).to_owned();
         // One new object (Line, Circle …): add it to the scene incrementally, as OM9's own
         // commands do, instead of rebuilding the scene of the whole document.
-        if let [Mutation::Insert { entity, .. }] = mutations.as_slice() {
+        #[cfg(feature = "occt-brep")]
+        let mut breps: Vec<om9_core::brep::Brep> = NEW_BREPS.with(|c| std::mem::take(&mut *c.borrow_mut()));
+        #[cfg(not(feature = "occt-brep"))]
+        let breps: Vec<()> = Vec::new();
+        if let ([Mutation::Insert { entity, .. }], true) = (mutations.as_slice(), breps.is_empty()) {
             let increment = scene.update_held_usage(Some(entity))?;
             held.add(increment, self.coordinator.limits())?;
             let added = entity.id;
@@ -1797,9 +1819,15 @@ impl Controller {
             }
             return Ok(count);
         }
-        let prepared = self
+        #[allow(unused_mut)]
+        let mut prepared = self
             .coordinator
             .prepare_with_held_usage(TransactionRequest::new(&undo_label, mutations), held)?;
+        // The kernel's B-Reps bring their display meshes with the transaction.
+        #[cfg(feature = "occt-brep")]
+        if !breps.is_empty() {
+            self.stage_builder_preview_representations(&mut prepared, &mut breps, held)?;
+        }
         let receipt = self.commit_with_candidate_scene(prepared, held)?;
         if receipt.published {
             self.sync_published(om9_core::changes::ChangeCause::Edit);

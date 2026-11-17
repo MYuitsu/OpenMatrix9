@@ -16,6 +16,7 @@ fn tetra() -> Mesh {
         faces: vec![vec![0, 2, 1], vec![0, 1, 3], vec![1, 2, 3], vec![2, 0, 3]],
         normals: Vec::new(),
         colors: Vec::new(),
+        corner_uvs: Vec::new(),
     }
 }
 

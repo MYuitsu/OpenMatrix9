@@ -72,6 +72,40 @@ fn plane_mm(width: f64, height: f64) -> NurbsSurface {
 /* ------------------------- 001 matrices ------------------------- */
 
 #[test]
+fn exact_occt_rigid_gate_matches_tested_rotations_and_rejects_shear() {
+    for angle in [FRAC_PI_2, std::f64::consts::FRAC_PI_4] {
+        let rotation = transform_ops::rotation([0., 0., 0.], [0., 1., 0.], angle).unwrap();
+        assert!(transform_ops::is_exact_occt_rigid(&rotation).unwrap(), "rotation {angle}");
+    }
+    let shear = Transform([[1., 1e-13, 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]]);
+    let scale = Transform([[1. + 4e-11, 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]]);
+    assert!(!transform_ops::is_exact_occt_rigid(&shear).unwrap());
+    assert!(!transform_ops::is_exact_occt_rigid(&scale).unwrap());
+}
+
+#[test]
+fn transform_disjoint_compound_preserves_all_solids() {
+    use om9_kernel::editing::{self, BooleanOp};
+    let limits = limits();
+    let first = box_shape(1., 1., 1.);
+    let second = transform_ops::transform_brep(&first, &Transform::translation([3., 0., 0.]), deflection(), &limits).unwrap();
+    let compound = editing::boolean(&first, &second, BooleanOp::Union, deflection(), &limits).unwrap().body().unwrap().clone();
+    assert_eq!(measured(&compound).solids, 2);
+    for (transform, expected_volume, xmin, xmax) in [
+        (Transform::translation([5., 0., 0.]), 2., 5., 9.),
+        (Transform([[2., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]]), 4., 0., 8.),
+        (Transform([[-1., 0., 0., 0.], [0., 1., 0., 0.], [0., 0., 1., 0.], [0., 0., 0., 1.]]), 2., -4., 0.),
+    ] {
+        let output = transform_ops::transform_brep(&compound, &transform, deflection(), &limits).unwrap();
+        let actual = measured(&output);
+        assert_eq!(actual.solids, 2, "transform {transform:?}");
+        assert!(close(actual.volume_mm3, expected_volume, 1e-6), "volume {}", actual.volume_mm3);
+        assert!(close(actual.bounds_mm[0], xmin, 1e-6) && close(actual.bounds_mm[3], xmax, 1e-6), "bounds {:?}", actual.bounds_mm);
+    }
+    assert_eq!(measured(&compound).solids, 2);
+}
+
+#[test]
 fn m03_01_11_001() {
     let limits = limits();
     // translate (1,2,3) by (4,-1,2) -> (5,1,5)
