@@ -5,9 +5,13 @@ description: Design, run, or assess precise headless tests for OpenMatrix9 egui 
 
 # OpenMatrix9 headless testing
 
-Use for OM9 testing without opening its desktop window. Start with `openmatrix9-workflow` and `openmatrix9-build-validation`, root AGENTS.md, the relevant milestone/contract and current code. Select tests for the requested behavior, not a generic full suite. Do not start implementation or change business rules merely because a test workflow is requested.
+Use for OM9 testing without opening its desktop window. Start with `openmatrix9-workflow` and `openmatrix9-build-validation`, root AGENTS.md, the relevant milestone/contract and current code. Select tests for the requested behavior, not a generic full suite. For a CAD-command check, follow the user's 2026-11-16 per-command source/viewport contract, including filling missing implementation in that command's scope. An explicit test-only/read-only request remains limited to testing and reporting gaps; do not change unrelated business rules.
 
 ## Choose independent evidence
+
+For CAD command changes, apply the [source and viewport contract](../openmatrix9-workflow/references/source-and-viewport-contract.md). Cover source geometry and the affected preview/scene/picking path in the same delivery, with independent geometric expectations and source-binding checks; explain any unaffected side. Compare two display profiles when relevant without treating source sampling as an exactness proof. Headless evidence must not be reported as physical desktop validation.
+
+Read its per-command review section and update `docs/validation/command-source-viewport-checklist.md` in the checkout. Distinguish source/display separation, early disposable preview, exact result, and guarded final publication/Undo; an existing exact worker alone does not satisfy early-preview coverage. Reuse verified implementations and keep unrun GPU/desktop checks explicit.
 
 1. **CAD behavior:** Rust/controller tests or `om9 --mcp` can verify typed geometry, prompt/options, selection, layers, transaction atomicity, Undo/Redo and persistence. Specify independently expected values and tolerances. For native geometry exercise the actual configured adapter, check errors and ownership as relevant, and measure geometric/topological properties, not only object counts or screenshots.
 2. **egui interactions:** `crates/om9-app/src/ui_replay.rs` runs `MatrixApp::show` with `egui::Context` and synthetic pointer/keyboard events, returning per-step receipts. Prefer existing real widget paths and assert the state change, not just that a widget opened. For menus/CMD test both entry paths to the same command and actual result where applicable. Check layout rectangles across relevant resolutions and DPI. Existing examples: `tests/ui_replay.rs`, `tests/window_minimum.rs`, `tests/workbench_regions_sizes.rs`.

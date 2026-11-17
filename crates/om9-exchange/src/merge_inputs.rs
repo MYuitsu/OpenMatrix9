@@ -145,6 +145,7 @@ impl NativeExchange {
     ) -> Result<PreparedMergeInputs<'a>> {
         canceled(cancel)?;
         capture.revalidate(coordinator)?;
+        capture.validate_3dm_geometry()?;
         let l = coordinator.limits();
         if staging_parent.as_os_str().len() > 8192 {
             return Err(Error::Budget("merge staging path bytes"));

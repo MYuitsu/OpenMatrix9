@@ -1,0 +1,7 @@
+# Ring producer admission and preview transfer
+
+2026-11-13. `RingFamilyBrepProducer::produce_admitted` now accepts caller limits and an admission/cancellation callback across the fixed section tables, sewing tables and snapshot. It reports retained B-Rep bytes after dropping the section tables. The existing registry path delegates to it with default limits and a no-op callback. Builder preview transfers the produced geometry and subshapes instead of cloning them.
+
+Using `L:\om9-target`, `-j 2`, and the OCCT 8.0.1 runtime, the kernel `ring_family_brep` integration suite with `3dm-brep` passed 7 tests. The added producer fixture exercises admission before section allocation, live-plus-pending checkpoints, final retained B-Rep bytes, cancellation and a tight limit. The app `ring_family_panel` suite passed 5 tests; the build emitted two existing warnings. Public source audit passed with no errors. Artifact pruning retained 169 cited older runs and removed none.
+
+This is worker preparation, not a background Builder. The normal producer still uses default limits and no coordinator reservation; output envelopes, topology/subshape generation and retained preview ownership are not covered by this callback. OCCT internal allocations and cancellation during a native call remain outside the hook. No process peak, responsiveness, or end-to-end cold restore was measured. Document and Undo still own display data; source-bound associative topology, canonical source-only storage, eviction and v5 remain open.

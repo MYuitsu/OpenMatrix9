@@ -736,7 +736,25 @@ pub fn resolve_semantic_reference(
     ) {
         return Err(Error::Stale("semantic reference moved"));
     }
+    reject_indistinguishable_source_role(reference, candidate, &published.subshapes)?;
     Ok(candidate.clone())
+}
+
+// Source roles currently contain native ordinals, not durable semantic IDs.
+// A second source element inside the reference's tolerance makes the ordinal
+// insufficient evidence that a rebuild preserved the intended element.
+fn reject_indistinguishable_source_role(reference: &SemanticReference, candidate: &Subshape,
+    subshapes: &[Subshape]) -> Result<()> {
+    if reference.role.starts_with("source:") {
+        for other in subshapes.iter().filter(|other| other.name != candidate.name
+            && other.name.starts_with("source:") && other.kind == candidate.kind) {
+            other.signature.validate()?;
+            if within_tolerance(other.signature.deviation_from(&reference.fingerprint), 0., reference.tolerance_mm) {
+                return Err(Error::Invalid("ambiguous source subshape signature"));
+            }
+        }
+    }
+    Ok(())
 }
 
 /// Accept a user-approved move of a reference (explicit relink). This is the only way a
@@ -771,16 +789,24 @@ pub fn drop_references_of(graph: &mut HistoryGraph, recipe: HistoryId) -> usize 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct CacheEntry {
+    /// Zero identifies entries written before source-only B-rep hashing.
+    #[serde(default)]
+    pub hash_version: u8,
     pub recipe: HistoryId,
     pub revision: u64,
     pub parameters: Options,
     pub inputs: Vec<SourceStamp>,
     pub outputs: Vec<ObjectId>,
+    /// Generation and geometry revision of each output, in output order.
+    #[serde(default)]
+    pub output_revisions: Vec<(u64, u64)>,
     pub sha256: [u8; 32],
 }
 
-/// Content hash of a feature's outputs. Only geometry is hashed, in output order, so two
-/// rebuilds that produce the same shapes agree and an unchanged output keeps its hash.
+const OUTPUT_HASH_VERSION: u8 = 1;
+
+/// Content hash of feature geometry in output order. B-rep display is derived;
+/// authored mesh geometry remains part of its own source hash.
 pub fn output_hash(document: &Document, outputs: &[ObjectId]) -> Result<[u8; 32]> {
     let mut hasher = Sha256::new();
     for id in outputs {
@@ -788,10 +814,30 @@ pub fn output_hash(document: &Document, outputs: &[ObjectId]) -> Result<[u8; 32]
             .entities
             .get(id)
             .ok_or(Error::Missing("cache output"))?;
-        let bytes = serde_json::to_vec(&entity.geometry)
-            .map_err(|_| Error::Invalid("cache geometry encoding"))?;
-        hasher.update((bytes.len() as u64).to_le_bytes());
-        hasher.update(&bytes);
+        match &entity.geometry {
+            crate::geometry::Geometry::Brep(brep) => {
+                let (source, topology) = brep.canonical_fingerprints();
+                let tag = b"OM9-CANONICAL-BREP-1";
+                hasher.update(((tag.len() + source.len() + topology.len()) as u64).to_le_bytes());
+                hasher.update(tag);
+                hasher.update(source);
+                hasher.update(topology);
+            }
+            crate::geometry::Geometry::NativeBrep(brep) => {
+                let tag = b"OM9-CANONICAL-NATIVE-BREP-1";
+                let length = u64::try_from(brep.payload.len()).map_err(|_| Error::Overflow("cache native payload"))?
+                    .checked_add(tag.len() as u64 + 4).ok_or(Error::Overflow("cache native payload"))?;
+                hasher.update(length.to_le_bytes());
+                hasher.update(tag);
+                hasher.update(brep.crc.to_le_bytes());
+                hasher.update(brep.payload.as_slice());
+            }
+            geometry => {
+                let bytes = serde_json::to_vec(geometry).map_err(|_| Error::Invalid("cache geometry encoding"))?;
+                hasher.update((bytes.len() as u64).to_le_bytes());
+                hasher.update(&bytes);
+            }
+        }
     }
     let digest = hasher.finalize();
     let mut out = [0u8; 32];
@@ -814,10 +860,11 @@ impl RecomputeCache {
         let Some(entry) = self.entries.get(&recipe.id) else {
             return false;
         };
-        if recipe.state != EvaluationState::Clean
+        if entry.hash_version != OUTPUT_HASH_VERSION || recipe.state != EvaluationState::Clean
             || entry.revision != recipe.revision
             || entry.parameters != recipe.parameters
             || entry.outputs != recipe.outputs
+            || entry.output_revisions.len() != entry.outputs.len()
         {
             return false;
         }
@@ -834,7 +881,9 @@ impl RecomputeCache {
             && entry
                 .outputs
                 .iter()
-                .all(|id| document.entities.contains_key(id))
+                .zip(&entry.output_revisions)
+                .all(|(id, &(generation, revision))| document.entities.get(id)
+                    .is_some_and(|entity| entity.generation == generation && entity.geometry_revision == revision))
     }
     /// Record a successful build. Fails when an output disappeared, so the cache can never
     /// claim a result the document does not hold.
@@ -843,14 +892,20 @@ impl RecomputeCache {
             return Err(Error::Invalid("cache record of a dirty feature"));
         }
         let sha256 = output_hash(document, &recipe.outputs)?;
+        let output_revisions = recipe.outputs.iter().map(|id| {
+            let entity = document.entities.get(id).ok_or(Error::Missing("cache output"))?;
+            Ok((entity.generation, entity.geometry_revision))
+        }).collect::<Result<Vec<_>>>()?;
         self.entries.insert(
             recipe.id,
             CacheEntry {
+                hash_version: OUTPUT_HASH_VERSION,
                 recipe: recipe.id,
                 revision: recipe.revision,
                 parameters: recipe.parameters.clone(),
                 inputs: recipe.inputs.iter().map(|input| input.source).collect(),
                 outputs: recipe.outputs.clone(),
+                output_revisions,
                 sha256,
             },
         );
@@ -1086,6 +1141,8 @@ pub struct ProducedSubshapes {
 /// semantic reference may resolve against.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ProducedFeature {
+    /// Runtime native results awaiting representation-store handoff. Never persisted with geometry.
+    pub brep_candidates: Vec<crate::brep::Brep>,
     pub outputs: Vec<RebuiltOutput>,
     pub subshapes: Vec<ProducedSubshapes>,
 }
@@ -1186,8 +1243,9 @@ pub fn recompute_feature(
     id: HistoryId,
     producer: impl FnOnce(&RebuildRequest) -> Result<Vec<RebuiltOutput>>,
 ) -> Result<RecomputeOutcome> {
-    recompute_with(document, cache, id, |request| {
+    recompute_with(document, cache, id, None, |request| {
         Ok(ProducedFeature {
+            brep_candidates: Vec::new(),
             outputs: producer(request)?,
             subshapes: vec![],
         })
@@ -1203,6 +1261,7 @@ pub(crate) fn recompute_with(
     document: &mut Document,
     cache: &mut RecomputeCache,
     id: HistoryId,
+    candidates_out: Option<&mut Vec<crate::brep::Brep>>,
     producer: impl FnOnce(&RebuildRequest) -> Result<ProducedFeature>,
 ) -> Result<RecomputeOutcome> {
     let recipe = document
@@ -1240,9 +1299,14 @@ pub(crate) fn recompute_with(
         }
     };
     let ProducedFeature {
+        brep_candidates: runtime_candidates,
         outputs: built,
         subshapes: produced_subshapes,
     } = produced;
+    if candidates_out.is_none() && !runtime_candidates.is_empty() {
+        snapshot.restore(document);
+        return Err(Error::Unsupported("BRep rebuild requires representation handoff"));
+    }
     // The output set is part of the feature record: a producer that returns different
     // objects, or geometry of the wrong kind, is a failed rebuild, not a new feature.
     let shape_error = if built.len() != recipe.outputs.len()
@@ -1359,12 +1423,10 @@ pub(crate) fn recompute_with(
         cache.record(document, &document.history.recipes[&id])
     })();
     match applied {
-        Ok(sha256) => Ok(RecomputeOutcome::Rebuilt {
-            recipe: id,
-            outputs: recipe.outputs,
-            sha256,
-            subshapes: published,
-        }),
+        Ok(sha256) => {
+            if let Some(out) = candidates_out { *out = runtime_candidates; }
+            Ok(RecomputeOutcome::Rebuilt { recipe: id, outputs: recipe.outputs, sha256, subshapes: published })
+        },
         Err(error) => {
             snapshot.restore(document);
             crate::history_ops::mark_failed(&mut document.history, id, error.to_string())?;
@@ -1411,6 +1473,7 @@ fn validate_rebuilt_references(
         ) {
             return Err(Error::Stale("semantic reference moved"));
         }
+        reject_indistinguishable_source_role(reference, candidate, &set.subshapes)?;
     }
     Ok(())
 }

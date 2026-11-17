@@ -3,6 +3,8 @@
 
 # OM9-SOLID-014 — Sphere
 
+Sphere FitPoints reads NativeBrep source vertices for the tested saved/reopened translated box and mixed points, with analytic geometry and Undo/Redo. Invalid source and simulated memory pressure safely retain the session and Redo in separate fixtures. [Evidence](../validation/2026-11-06-sphere-fit-source-vertices.md#nativebrep-source-vertices-implemented-2026-11-13). Other source types and desktop remain scoped separately.
+
 <!-- common-command-mnemonics-20261012:start -->
 2026-10-12: quy tắc gạch chân một ký tự áp dụng qua engine Rust chung cho toàn
 bộ schema Command Options hiện có: Line/Polyline, InterpCrv, Rectangle, Circle,

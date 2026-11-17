@@ -775,6 +775,7 @@
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "feature": "OM9-SOLID-008",
+    "document_units_2026_11_12": "Centimetre and inch numeric height verified through CMD/menu against equivalent mm output, independent extrusion depth, save/open and Undo/Redo; physical desktop and general glyph coverage remain unverified. See docs/validation/2026-11-12-solid-text-document-units.md.",
     "command": "Text A 5",
     "evidence": [
       "implementation/evidence/M03/OM9-L3-03-18-008/OM9-L4-03-18-008-01.focused.log",

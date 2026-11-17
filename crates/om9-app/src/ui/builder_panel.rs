@@ -126,6 +126,21 @@ impl MatrixApp {
         camera: &Camera,
         viewport: Viewport,
     ) {
+        if let Some(preview) = self.controller.builder()
+            .and_then(|session| session.preview_for_document(self.controller.document()))
+            && let om9_core::geometry::Geometry::Brep(brep) = &preview.geometry {
+            use om9_core::brep::BrepSourceAccess;
+            let stored = self.controller.coordinator().brep_representation(brep).ok();
+            let candidate = preview.brep_candidates.iter().find(|candidate| candidate.to_canonical().identity() == brep.identity());
+            let display = stored.as_ref().map(|entry| entry.display()).or_else(|| candidate.map(|entry| entry.display()));
+            if let Some(display) = display {
+                for [a, b, _] in &display.segments {
+                    if let (Some(a), Some(b)) = (display.points.get(*a as usize), display.points.get(*b as usize)) {
+                        super::paint_line(painter, camera, viewport, *a, *b, PREVIEW, 1.0);
+                    }
+                }
+            }
+        }
         if let Some(session) = self.controller.addon_session() {
             for [a, c] in session.lines.iter().chain(&session.hover_lines) {
                 super::paint_line(painter, camera, viewport, *a, *c, PREVIEW, 1.2);

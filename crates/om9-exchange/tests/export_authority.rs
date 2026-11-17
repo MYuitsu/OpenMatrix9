@@ -127,7 +127,7 @@ fn selected_projection_does_not_reserve_shared_resource_payload_twice() {
 fn selected_projection_does_not_reserve_shared_native_brep_payload_twice() {
     use om9_core::{budget::memory::MemoryClass, geometry::{Geometry, Mesh, NativeBrep}, model::Entity};
     let mut document = Document::new("shared native B-rep");
-    let native = NativeBrep { display: Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] },
+    let native = NativeBrep { display: std::sync::Arc::new(Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }),
         payload: vec![7; 4 * 1024 * 1024].into(), crc: 1 };
     let entity = Entity::new("native", Geometry::NativeBrep(native), None);
     let object = entity.id;
@@ -149,8 +149,13 @@ fn selected_projection_does_not_reserve_shared_brep_source_twice() {
     source.push_str(&"x".repeat(2 * 1024 * 1024));
     let brep = Brep::from_native(source, BrepDisplay {
         source_sha256: [0; 32], deflection_mm: 0.1, points: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]],
-        triangles: vec![[0,1,2,0]], segments: vec![], vertices: vec![], faces: vec![uuid::Uuid::new_v4()],
-        edges: vec![], vertex_ids: vec![], face_edges: vec![],
+        triangles: vec![[0,1,2,0]], segments: vec![], vertices: vec![],
+        topology: om9_core::brep::BrepTopology {
+            faces: vec![uuid::Uuid::new_v4()],
+            edges: vec![],
+            vertex_ids: vec![],
+            face_edges: vec![],
+        }.into(),
     }, &Limits::default()).unwrap();
     let mut document = Document::new("shared B-rep source");
     let entity = Entity::new("first", Geometry::Brep(brep.clone()), None);

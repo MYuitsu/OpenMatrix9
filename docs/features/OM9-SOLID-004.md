@@ -51,3 +51,10 @@ other geometry categories are still open.
 The subsequent transient-visibility checkpoint in the audit adds GPU source
 masking during preview and restoration without document visibility edits.
 Real desktop and human UI acceptance remain open.
+
+A reopened sphere/box fixture exposed incorrect Boolean results after a pure
+translation converted the box through the general affine native adapter. The
+translation path now retains exact OCCT geometry; five previews at two display
+profiles and Undo/Redo passed for the fixture. [Evidence and limits](../validation/2026-11-12-boolean-two-placed-source.md).
+
+Non-rigid B-rep object placements are temporarily refused by the product Boolean paths after a non-uniform scale fixture produced an incorrect result. This guard does not certify previously baked affine B-rep sources or direct kernel calls; see the same evidence for scope.

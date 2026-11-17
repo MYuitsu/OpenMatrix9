@@ -15,25 +15,73 @@ use om9_scene::workspace::DisplayMode;
 
 type HiddenSources = Option<[om9_core::identity::ObjectId; 2]>;
 
+fn temporary_boolean(controller: &crate::session::Controller) -> Option<(&om9_scene::scene::SceneBuffers, &[om9_core::identity::SourceStamp], uuid::Uuid)> {
+    #[cfg(feature = "occt-brep")]
+    { controller.boolean_mesh_preview() }
+    #[cfg(not(feature = "occt-brep"))]
+    { let _ = controller; None }
+}
+
 struct TrackedPresentationSnapshot {
-    // Scene has its own allocation/lease; an expired Weak retains only this
-    // small presentation block, not the Scene body.
-    scene: Box<om9_scene::scene::Scene>,
-    _document: om9_core::transaction::CapturedDocument,
+    key: PresentationKey,
+    scene: PresentationScene,
     _buffers: std::sync::Arc<crate::session::SceneBufferLease>,
+    // Dropped after the scene data; a cached Weak retains only _allocation.
+    _metadata: om9_core::transaction::ExternalMemoryReservation,
     _allocation: PresentationAllocation,
 }
-type PresentationKey = (om9_core::identity::DocumentId, usize, u64, HiddenSources);
+struct PresentationScene {
+    document: om9_core::identity::DocumentId,
+    epoch: u64,
+    publication: uuid::Uuid,
+    objects: Vec<PresentationObject>,
+}
+struct PresentationObject {
+    source: om9_core::identity::SourceStamp,
+    leaf_generation: u64,
+    leaf_geometry_revision: u64,
+    root: om9_core::identity::ObjectId,
+    leaf: om9_core::identity::ObjectId,
+    transform: om9_core::geometry::Transform,
+    color: [u8; 4],
+    visible: bool,
+    buffers: om9_scene::scene::SceneBuffers,
+}
+struct PresentationCohort {
+    snapshot: std::sync::Arc<TrackedPresentationSnapshot>,
+    selection: u64,
+    preview: u64,
+    hidden: HiddenSources,
+    published: std::collections::BTreeSet<u64>,
+}
+impl PresentationCohort {
+    // Only append-only source changes may finish an older frame. Edits, Undo,
+    // remesh, visibility and placement changes retain strict invalidation.
+    fn extends(&self, scene: &om9_scene::scene::Scene) -> bool {
+        let old = &self.snapshot.scene;
+        old.document == scene.document.id && scene.objects.len() > old.objects.len()
+            && scene.objects.iter().all(|o| o.preview == om9_core::geometry::Transform::identity())
+            && old.objects.iter().all(|a| scene.objects.iter().any(|b|
+                a.source == b.source && a.root == b.root && a.leaf == b.leaf
+                && a.leaf_generation == b.leaf_generation && a.leaf_geometry_revision == b.leaf_geometry_revision
+                && a.transform == b.transform && a.color == b.color && a.visible == b.visible
+                && a.buffers.ptr_eq(&b.buffers)))
+    }
+}
+type PresentationKey = (om9_core::identity::DocumentId, usize, u64, HiddenSources, uuid::Uuid, Option<uuid::Uuid>);
 type PresentationAllocation = std::sync::Arc<om9_core::transaction::ExternalMemoryReservation>;
 // Weak must drop before its shared allocation owner when an entry retires.
 type PresentationCache = std::sync::Arc<std::sync::Mutex<Option<(PresentationKey, std::sync::Weak<TrackedPresentationSnapshot>, PresentationAllocation)>>>;
 
 fn presentation_snapshot_overhead() -> u64 {
-    // Scene storage is independent. The presentation allocation and the Arc
-    // owning its allowance stay charged through the last cached Weak.
+    // The object vector is independent. The presentation allocation and the
+    // Arc owning its allowance stay charged through the last cached Weak.
     (std::mem::size_of::<TrackedPresentationSnapshot>()
+        + std::mem::size_of::<PresentationCohort>()
         + std::mem::size_of::<om9_core::transaction::ExternalMemoryReservation>()
         + 8 * std::mem::size_of::<usize>()) as u64
+        + om9_core::budget::Usage::btree::<u64,u64>(4).expect("four viewport clients").bytes
+        + om9_core::budget::Usage::btree::<u64,()>(4).expect("four viewport acknowledgements").bytes
 }
 
 fn presentation_snapshot(
@@ -47,7 +95,8 @@ fn presentation_snapshot(
         .is_some_and(|document| std::sync::Arc::ptr_eq(document, &scene.document)) {
         return Err(om9_core::Error::Stale("viewport scene document"));
     }
-    let key = (scene.document.id, std::sync::Arc::as_ptr(&scene.document) as usize, scene.epoch, hidden);
+    let temporary = temporary_boolean(controller);
+    let key = (scene.document.id, std::sync::Arc::as_ptr(&scene.document) as usize, scene.epoch, hidden, scene.publication_id(), temporary.map(|p|p.2));
     let mut cached = cache.lock().unwrap_or_else(|e| e.into_inner());
     if cached.as_ref().is_some_and(|(_, weak, _)| weak.strong_count() == 0) {
         // Retire the actual expired allocation before admitting its successor.
@@ -55,36 +104,27 @@ fn presentation_snapshot(
     }
     if let Some((previous, weak, _)) = &*cached
         && *previous == key
-        && let Some(snapshot) = weak.upgrade()
-        && snapshot._document.matches_weak(&std::sync::Arc::downgrade(&scene.document)) {
+        && let Some(snapshot) = weak.upgrade() {
         return Ok(snapshot);
     }
     let coordinator = controller.coordinator();
-    let capture = coordinator.capture_tracked_document(scene.document.id)?;
-    if !capture.matches_weak(&std::sync::Arc::downgrade(&scene.document)) {
-        return Err(om9_core::Error::Stale("viewport scene document"));
-    }
     // The live scene and its snapshots share one lease for render buffers.
     // Snapshot metadata is independent and has its own lease.
     let buffers = controller.share_scene_buffer_owner(scene)?;
     let overhead = presentation_snapshot_overhead();
-    let arena = scene.picking_arena_bytes()?;
-    let metadata_bytes = scene.render_snapshot_metadata_estimate()?.bytes.checked_add(overhead).and_then(|bytes| bytes.checked_add(arena))
+    let visible = |object: &&om9_scene::scene::SceneObject| !hidden.is_some_and(|ids| ids.contains(&object.root))
+        && !temporary.is_some_and(|(_,stamps,_)| stamps.iter().any(|s|s.object==object.root));
+    let count = scene.objects.iter().filter(visible).count() + usize::from(temporary.is_some());
+    let metadata_bytes = (count as u64).checked_mul(std::mem::size_of::<PresentationObject>() as u64).and_then(|bytes| bytes.checked_add(overhead))
         .ok_or(om9_core::Error::Overflow("viewport snapshot accounting"))?;
     let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
     let mut reservation = coordinator.reserve_external_memory_with_held(
         om9_core::budget::memory::MemoryClass::CpuCache, metadata_bytes.max(1),
         physical, controller.scene_cache_usage()?,
     )?;
-    let mut snapshot = Box::new(scene.try_render_snapshot()?);
-    // GPU preparation builds the untransformed scene. The live preview is
-    // applied separately at draw time and must not create a second snapshot.
-    for object in &mut snapshot.objects { object.preview = om9_core::geometry::Transform::identity(); }
-    if let Some(hidden) = hidden {
-        snapshot.objects.retain(|object| !hidden.contains(&object.root));
-    }
-    let arena = snapshot.picking_arena_bytes()?;
-    let actual = snapshot.metadata_storage_usage()?.bytes.checked_add(overhead).and_then(|bytes| bytes.checked_add(arena))
+    let mut objects = Vec::new();
+    objects.try_reserve_exact(count).map_err(|_| om9_core::Error::Budget("viewport snapshot objects"))?;
+    let actual = (objects.capacity() as u64).checked_mul(std::mem::size_of::<PresentationObject>() as u64).and_then(|bytes| bytes.checked_add(overhead))
         .ok_or(om9_core::Error::Overflow("viewport snapshot accounting"))?;
     if actual > reservation.bytes() {
         let additional = actual - reservation.bytes();
@@ -92,9 +132,22 @@ fn presentation_snapshot(
         coordinator.grow_external_memory_with_held(&mut reservation, additional, physical, controller.scene_cache_usage()?)?;
     }
     reservation.shrink_to(actual.max(1))?;
-    snapshot.transfer_memory_allowance(&mut reservation, coordinator, controller.scene_cache_usage()?)?;
-    let allocation = std::sync::Arc::new(reservation);
-    let mut snapshot = std::sync::Arc::new(TrackedPresentationSnapshot { scene: snapshot, _document: capture, _buffers: buffers, _allocation: allocation });
+    for object in scene.objects.iter().filter(visible) {
+        objects.push(PresentationObject { source: object.source, leaf_generation: object.leaf_generation,
+            leaf_geometry_revision: object.leaf_geometry_revision, root: object.root, leaf: object.leaf, transform: object.transform,
+            color: object.color, visible: object.visible, buffers: object.buffers.clone() });
+    }
+    if let Some((buffers, stamps, _)) = temporary {
+        let root = stamps[0].object;
+        objects.push(PresentationObject { source: stamps[0], leaf_generation: 0, leaf_geometry_revision: 0,
+            root, leaf: root, transform: om9_core::geometry::Transform::identity(),
+            color: [40, 200, 150, 255], visible: true, buffers: buffers.clone() });
+    }
+    let scene = PresentationScene { document: scene.document.id, epoch: scene.epoch,
+        publication: scene.publication_id(), objects };
+    let allocation = std::sync::Arc::new(reservation.split_off(overhead)?);
+    reservation.mark_allocated(reservation.pending_bytes())?;
+    let mut snapshot = std::sync::Arc::new(TrackedPresentationSnapshot { key, scene, _buffers: buffers, _metadata: reservation, _allocation: allocation });
     let allocation = &mut std::sync::Arc::get_mut(&mut snapshot).expect("new presentation snapshot")._allocation;
     let reservation = std::sync::Arc::get_mut(allocation).expect("new presentation allocation");
     reservation.mark_allocated(reservation.pending_bytes())?;
@@ -104,6 +157,8 @@ fn presentation_snapshot(
 
 /// One viewport's GPU target and its registration in egui.
 pub struct GpuViewport {
+    client_id: u64,
+    published_stats: Option<om9_render::scene::FrameStats>,
     diagnostics: Option<ViewportDiagnostics>,
     #[cfg(test)]
     target_ceiling_override: Option<u64>,
@@ -129,6 +184,7 @@ pub struct GpuViewport {
     /// Scene epoch and CPlane revision of the last rendered frame: new geometry must repaint even when the
     /// camera did not move.
     last_epoch: Option<u64>,
+    last_scene_publication: Option<uuid::Uuid>,
     last_cplane: Option<u64>,
     /// Selection revision of the last render: the highlight is part of the GPU image.
     last_selection: Option<u64>,
@@ -185,6 +241,9 @@ pub struct GpuViewport {
 /// Per-viewport counters, enabled only for an explicit diagnostic session.
 #[derive(Clone, Copy, Debug, Default, serde::Serialize)]
 pub struct ViewportDiagnostics {
+    pub target_width: u32,
+    pub target_height: u32,
+    pub target_samples: u32,
     pub target_rebuilds: u64,
     pub scene_preparations: u64,
     pub overlay_preparations: u64,
@@ -254,6 +313,7 @@ struct FrameSubmission {
 pub struct RefinementKey {
     document: om9_core::identity::DocumentId,
     scene: u64,
+    scene_publication: uuid::Uuid,
     camera: u64,
     selection: u64,
     cplane: u64,
@@ -266,13 +326,13 @@ pub struct RefinementKey {
 
 impl RefinementKey {
     fn same_content(self, other: Self) -> bool {
-        self.document == other.document && self.scene == other.scene
+        self.document == other.document && self.scene == other.scene && self.scene_publication == other.scene_publication
             && self.selection == other.selection && self.cplane == other.cplane
             && self.preview == other.preview && self.hidden_sources == other.hidden_sources
             && self.size == other.size && self.mode == other.mode
     }
     pub(crate) fn same_input_basis(self, other: Self) -> bool {
-        self.document == other.document && self.scene == other.scene && self.camera == other.camera
+        self.document == other.document && self.scene == other.scene && self.scene_publication == other.scene_publication && self.camera == other.camera
             && self.selection == other.selection && self.cplane == other.cplane
             && self.preview == other.preview && self.hidden_sources == other.hidden_sources
             && self.size == other.size && self.mode == other.mode
@@ -444,8 +504,10 @@ pub fn window_overlay_diagnostics<'a>(
 pub struct ResourcePool {
     encoder: Option<wgpu::CommandEncoder>,
     budget: Option<UploadBudget>,
-    signature: Option<(om9_core::identity::DocumentId, u64, u64, HiddenSources)>,
+    signature: Option<(om9_core::identity::DocumentId, u64, u64, HiddenSources, uuid::Uuid, Option<uuid::Uuid>)>,
     presentation: PresentationCache,
+    cohort: Option<PresentationCohort>,
+    clients: std::collections::BTreeMap<u64, u64>,
     entries: std::collections::BTreeMap<u32, ResourceEntry>,
     world_lines: std::collections::BTreeMap<u32, WorldLinesEntry>,
     encoded_instances: Vec<wgpu::Buffer>,
@@ -652,7 +714,7 @@ impl Default for ViewportRenderRequest {
         }
     }
 }
-type OverlayKey = (om9_core::identity::DocumentId, u64, u64, u64, u32, u64, HiddenSources);
+type OverlayKey = (om9_core::identity::DocumentId, u64, u64, u64, u32, u64, HiddenSources, uuid::Uuid, Option<uuid::Uuid>);
 
 #[cfg(test)]
 mod presentation_snapshot_tests {
@@ -661,7 +723,10 @@ mod presentation_snapshot_tests {
 
     #[test]
     fn expired_presentation_weak_keeps_its_allocation_charged_until_cache_prunes_it() {
-        let controller = crate::session::Controller::new(Document::with_template_tolerance("expired frame body"),
+        let mut document = Document::with_template_tolerance("expired frame body");
+        let point = om9_core::model::Entity::new("point", om9_core::geometry::Geometry::Point([1., 2., 3.]), None);
+        document.entities.insert(point.id, point);
+        let controller = crate::session::Controller::new(document,
             Limits { max_bytes: 64 * 1024 * 1024, ..Limits::default() }).unwrap();
         let cache = PresentationCache::default();
         controller.share_scene_buffer_owner(controller.scene().unwrap()).unwrap();
@@ -689,7 +754,7 @@ mod presentation_snapshot_tests {
         let live = controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache);
         drop(cache);
         assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache), live);
-        assert_eq!(snapshot.scene.document.id, controller.document().id);
+        assert_eq!(snapshot.scene.epoch, controller.scene().unwrap().epoch);
         drop(snapshot);
         assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache), baseline);
     }
@@ -730,6 +795,7 @@ mod presentation_snapshot_tests {
             Limits { max_bytes: 64 * 1024 * 1024, ..Limits::default() }).unwrap();
         let cache = PresentationCache::default();
         let scene = controller.scene().unwrap();
+        let old_scene = scene.try_render_snapshot().unwrap();
         let first = presentation_snapshot(&cache, &controller, scene, 1, None).unwrap();
         let charged = controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache);
         assert!(charged > 0);
@@ -743,7 +809,7 @@ mod presentation_snapshot_tests {
         controller.submit("Point").unwrap();
         controller.submit("1,2,3").unwrap();
         assert!(controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache) >= charged);
-        assert!(matches!(presentation_snapshot(&cache, &controller, &first.scene, 1, None), Err(om9_core::Error::Stale(_))));
+        assert!(matches!(presentation_snapshot(&cache, &controller, &old_scene, 1, None), Err(om9_core::Error::Stale(_))));
         drop(first);
         assert!(controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache) >= charged);
         drop(second);
@@ -760,7 +826,8 @@ mod presentation_snapshot_tests {
         let baseline = controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache);
         let pressure = controller.coordinator().reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, held).unwrap();
         assert!(presentation_snapshot(&cache, &controller, controller.scene().unwrap(), 0, None).is_err());
-        assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache), baseline);
+        assert!(controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache) <= baseline,
+            "refused admission may evict cache but must not retain a new lease");
         drop(pressure);
         let snapshot = presentation_snapshot(&cache, &controller, controller.scene().unwrap(), 0, None).unwrap();
         drop(snapshot);
@@ -786,9 +853,8 @@ mod presentation_snapshot_tests {
         let before = controller.scene_cache_usage().unwrap().bytes;
         let initial_charge = controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache);
         assert!(initial_charge >= buffer_bytes, "startup must register buffers before viewport work");
-        let metadata = controller.scene().unwrap().render_snapshot_metadata_estimate().unwrap().bytes + presentation_snapshot_overhead()
-            + controller.scene().unwrap().picking_arena_bytes().unwrap();
         let snapshot = presentation_snapshot(&cache, &controller, controller.scene().unwrap(), 0, None).unwrap();
+        let metadata = snapshot._metadata.bytes() + presentation_snapshot_overhead();
         assert_eq!(controller.scene_cache_usage().unwrap().bytes, before);
         let with_snapshot = controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache);
         assert_eq!(with_snapshot, initial_charge + metadata.max(1));
@@ -802,15 +868,15 @@ mod presentation_snapshot_tests {
         let after_edit = controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache);
         let new_scene = controller.scene().unwrap();
         let added_buffer_bytes = new_scene.shared_buffer_bytes() - buffer_bytes;
-        let new_metadata = new_scene.render_snapshot_metadata_estimate().unwrap().bytes + presentation_snapshot_overhead() + new_scene.picking_arena_bytes().unwrap();
         let next = presentation_snapshot(&cache, &controller, new_scene, 0, None).unwrap();
+        let new_metadata = next._metadata.bytes() + presentation_snapshot_overhead();
         let with_next = controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache);
         // The edit already registered the new buffer; the next worker adds metadata only.
         assert!(after_edit > with_snapshot + added_buffer_bytes);
         assert!(after_edit < with_snapshot + added_buffer_bytes + 1024);
         assert_eq!(with_next, after_edit + new_metadata.max(1));
         assert_eq!(controller.coordinator().external_pending_bytes(MemoryClass::CpuCache),
-            controller.scene().unwrap().picking_arena_bytes().unwrap() + snapshot.scene.picking_arena_bytes().unwrap() + next.scene.picking_arena_bytes().unwrap());
+            controller.scene().unwrap().picking_arena_bytes().unwrap());
         drop(next);
         drop(snapshot);
         assert!(controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache) >= buffer_bytes + added_buffer_bytes);
@@ -835,6 +901,45 @@ mod presentation_snapshot_tests {
         assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache), controller.scene().unwrap().memory_allowance_bytes() + presentation_snapshot_overhead());
         drop(cache.lock().unwrap().take());
         assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::CpuCache), controller.scene().unwrap().memory_allowance_bytes());
+    }
+
+    #[test]
+    fn presentation_worker_does_not_keep_replaced_document_alive() {
+        use om9_core::{geometry::Geometry, model::Entity};
+        let mut document = Document::with_template_tolerance("render-only owner");
+        let point = Entity::new("point", Geometry::Point([1., 2., 3.]), None);
+        document.entities.insert(point.id, point);
+        let mut controller = crate::session::Controller::new(document,
+            Limits { max_bytes: 64 * 1024 * 1024, ..Limits::default() }).unwrap();
+        let old_document = std::sync::Arc::downgrade(&controller.scene().unwrap().document);
+        let cache = PresentationCache::default();
+        let snapshot = presentation_snapshot(&cache, &controller, controller.scene().unwrap(), 0, None).unwrap();
+        controller.begin_file_operation(crate::file_lifecycle::FileKind::New).unwrap();
+        assert!(old_document.upgrade().is_none(), "GPU preparation must not retain the replaced document");
+        assert!(matches!(snapshot.scene.objects[0].buffers.as_ref(),
+            om9_scene::scene::RenderBuffers::Points { points, .. } if points == &vec![[1., 2., 3.]]));
+        assert!(snapshot._metadata.bytes() > 0);
+    }
+
+    #[cfg(feature = "occt-brep")]
+    #[test]
+    fn presentation_worker_does_not_keep_sphere_display_after_new() {
+        use om9_core::geometry::Geometry;
+        let mut controller = crate::session::Controller::new(Document::with_template_tolerance("sphere render owner"), Limits::default()).unwrap();
+        controller.solid_sphere_points([0., 0., 0.], 5.).unwrap();
+        let Geometry::Brep(brep) = &controller.document().entities.values().next().unwrap().geometry else { panic!("expected BRep") };
+        let display = brep.display_liveness();
+        let old_document = std::sync::Arc::downgrade(&controller.scene().unwrap().document);
+        let cache = PresentationCache::default();
+        let snapshot = presentation_snapshot(&cache, &controller, controller.scene().unwrap(), 0, None).unwrap();
+        controller.begin_file_operation(crate::file_lifecycle::FileKind::New).unwrap();
+        let token = controller.file_operation().unwrap().token();
+        controller.decide_unsaved(token, crate::file_lifecycle::UnsavedDecision::Discard).unwrap();
+        assert!(controller.document().entities.is_empty());
+        assert!(old_document.upgrade().is_none());
+        assert!(!display.is_alive());
+        assert!(matches!(snapshot.scene.objects[0].buffers.as_ref(),
+            om9_scene::scene::RenderBuffers::Mesh { triangles, .. } if !triangles.is_empty()));
     }
 
     #[test]
@@ -983,8 +1088,7 @@ mod presentation_snapshot_tests {
         let actual = presentation_snapshot_overhead();
         assert_eq!(snapshot._allocation.bytes(), actual);
         assert_eq!(snapshot._allocation.pending_bytes(), 0);
-        assert_eq!(snapshot.scene.cache_usage().unwrap().bytes,
-            snapshot.scene.metadata_storage_usage().unwrap().bytes + snapshot.scene.shared_buffer_bytes());
+        assert!(snapshot._metadata.bytes() >= std::mem::size_of_val(snapshot.scene.objects.as_slice()) as u64);
         let retained = snapshot.clone();
         controller.begin_file_operation(crate::file_lifecycle::FileKind::New).unwrap();
         assert!(controller.document().entities.is_empty());
@@ -1003,7 +1107,7 @@ mod presentation_snapshot_tests {
 fn overlay_matches(actual: OverlayKey, wanted: OverlayKey, moving: bool) -> bool {
     actual == wanted || (moving
         && actual.0 == wanted.0 && actual.1 == wanted.1 && actual.2 == wanted.2
-        && actual.3 == wanted.3 && actual.4 == wanted.4 && actual.6 == wanted.6)
+        && actual.3 == wanted.3 && actual.4 == wanted.4 && actual.6 == wanted.6 && actual.7 == wanted.7 && actual.8 == wanted.8)
 }
 #[cfg(test)]
 mod overlay_cache_tests {
@@ -1012,13 +1116,16 @@ mod overlay_cache_tests {
 
     #[test]
     fn moving_overlay_can_reuse_point_scale_but_never_stale_hidden_sources() {
-        let key = (DocumentId::new(), 1, 2, 3, 4, 5, None);
+        let key = (DocumentId::new(), 1, 2, 3, 4, 5, None, uuid::Uuid::new_v4(), None);
         let mut zoomed = key;
         zoomed.5 += 1;
         assert!(overlay_matches(key, zoomed, true));
         assert!(!overlay_matches(key, zoomed, false));
         zoomed.6 = Some([ObjectId::new(), ObjectId::new()]);
         assert!(!overlay_matches(key, zoomed, true));
+        let mut replacement = key;
+        replacement.7 = uuid::Uuid::new_v4();
+        assert!(!overlay_matches(key, replacement, true));
     }
 }
 struct ViewOverlays {
@@ -1151,6 +1258,7 @@ pub struct GpuScene {
     batch: om9_render::scene::SceneBatch,
     mesh_objects: std::sync::Arc<Vec<(om9_core::identity::ObjectId, usize)>>,
     epoch: u64,
+    scene_publication: Option<uuid::Uuid>,
     cplane: u64,
     selection: u64,
     /// Batch object indices of the selected meshes. A drag preview only rewrites
@@ -1171,6 +1279,7 @@ impl GpuViewport {
     /// batch of N boxes through the shared-arena scene renderer, which is the architecture chosen for
     /// 1000-2000 objects (`implementation/design/M01/VIEWPORT-PERFORMANCE.md`).
     pub fn new(state: &RenderState, pool: SharedResourcePool) -> Self {
+        static NEXT_CLIENT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         let shared_scene = std::sync::Arc::new(std::sync::Mutex::new(None));
         let stress = std::env::var("OM9_GPU_STRESS")
             .ok()
@@ -1258,6 +1367,8 @@ impl GpuViewport {
             batch = Some(scene);
         }
         Self {
+            client_id: NEXT_CLIENT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+            published_stats: None,
             diagnostics: std::env::var_os("OM9_INTERACTION_LOG").map(|_| ViewportDiagnostics::default()),
             #[cfg(test)]
             target_ceiling_override: None,
@@ -1280,6 +1391,7 @@ impl GpuViewport {
             last_mode: None,
             last_camera: None,
             last_epoch: None,
+            last_scene_publication: None,
             last_cplane: None,
             last_selection: None,
             last_preview: None,
@@ -1492,6 +1604,7 @@ impl GpuViewport {
         self.last_profile = Some((samples, self.request.moving));
         self.last_revision = None;
         self.last_epoch = None;
+        self.last_scene_publication = None;
         self.last_cplane = None;
         self.last_selection = None;
         self.last_preview = None;
@@ -1560,6 +1673,9 @@ impl GpuViewport {
 
     pub fn diagnostics(&self) -> Option<ViewportDiagnostics> {
         let mut result = self.diagnostics?;
+        result.target_width = self.size.0;
+        result.target_height = self.size.1;
+        result.target_samples = self.last_profile.map_or(0, |profile|profile.0);
         let textures = [self.colour.as_ref(), self.depth.as_ref(), self.msaa_colour.as_ref(), self.msaa_depth.as_ref(), self.published_colour.as_ref(), self.spare_colour.as_ref().map(|(_, texture)| texture), self.pending_publication.as_ref().map(|p| &p.colour)];
         for (i, texture) in textures.iter().enumerate() {
             let Some(texture) = texture else { continue };
@@ -1661,8 +1777,8 @@ impl GpuViewport {
     fn refresh_scene(
         state: &RenderState,
         slot: &mut Option<GpuScene>,
-        camera: &om9_scene::camera::Camera,
-        scene: Option<&om9_scene::scene::Scene>,
+        _camera: &om9_scene::camera::Camera,
+        scene: Option<&PresentationScene>,
         cplane: om9_scene::camera::CPlane,
         _viewport: om9_scene::camera::Viewport,
         selected: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
@@ -1672,13 +1788,14 @@ impl GpuViewport {
         _close: bool,
     ) {
         let epoch = scene.map(|scene| scene.epoch).unwrap_or(0);
+        let publication = scene.map(|scene| scene.publication);
         let cplane_revision = cplane.revision;
         // A fixed close-range focus: rebuilding the batch every time the orbit radius changes costs
         // hundreds of ms. Three millimetres around the target is the visible prong/stone region.
         let close = false; // Full-frustum geometry is retained; no 3mm focus omission.
-        let focus = 0.0;
         if let Some(current) = &*slot
             && current.epoch == epoch
+            && current.scene_publication == publication
             && current.cplane == cplane_revision
             && current.close == close
         {
@@ -1806,25 +1923,10 @@ impl GpuViewport {
             LocalDisplayMesh,
         > = std::collections::BTreeMap::new();
         if let Some(scene) = scene {
-            let spheres = if close { scene.cached_object_spheres() } else { None };
-            let focus_radius = if close { focus } else { f64::INFINITY };
-            for (object_index, object) in scene.objects.iter().enumerate() {
+            for object in &scene.objects {
                 if !object.visible {
                     continue;
                 }
-                if close
-                    && !selected.contains(&object.root)
-                    && let Some((centre, radius)) = spheres.as_ref().and_then(|s| s.get(object_index))
-                {
-                    let distance = ((centre[0] - camera.target[0]).powi(2)
-                        + (centre[1] - camera.target[1]).powi(2)
-                        + (centre[2] - camera.target[2]).powi(2))
-                    .sqrt();
-                    if distance - radius > focus_radius {
-                        continue;
-                    }
-                }
-
                 let colour = [
                     object.color[0] as f32 / 255.0,
                     object.color[1] as f32 / 255.0,
@@ -1849,7 +1951,7 @@ impl GpuViewport {
                             std::sync::Arc::new(local_display_mesh(vertices, triangles, target))
                         })
                         .clone();
-                    if local.0.is_empty() || local.1.is_empty() {
+                    if local.positions.is_empty() || local.indices.is_empty() {
                         continue;
                     }
                     let model = preview_model(&object.transform);
@@ -1859,8 +1961,7 @@ impl GpuViewport {
                             .add_instance(source, model, colour)
                             .expect("registered geometry")
                     } else {
-                        let mesh = om9_render::MeshData::new(local.0.clone(), local.1.clone());
-                        let index = batch.add_mesh(&mesh, model, colour);
+                        let index = batch.add_mesh(&local, model, colour);
                         geometry_instances.insert(key, index);
                         index
                     };
@@ -1876,6 +1977,7 @@ impl GpuViewport {
             batch,
             mesh_objects: std::sync::Arc::new(mesh_objects),
             epoch,
+            scene_publication: publication,
             cplane: cplane_revision,
             selection: selection_revision,
             selected_objects: selected_indices,
@@ -1967,6 +2069,7 @@ impl GpuViewport {
     pub fn displayed_camera(&self) -> Option<&om9_scene::camera::Camera> {
         self.displayed_camera.as_ref()
     }
+    pub fn published_frame_stats(&self) -> Option<om9_render::scene::FrameStats> { self.published_stats }
     #[cfg(test)]
     pub(crate) fn published_texture(&self) -> Option<&wgpu::Texture> {
         self.published_colour.as_ref()
@@ -1979,6 +2082,7 @@ impl GpuViewport {
     }
     pub fn displays_scene(&self, scene: &om9_scene::scene::Scene) -> bool {
         self.displayed_scene_stamp() == Some((scene.document.id, scene.epoch))
+            && self.displayed_key().is_some_and(|key| key.scene_publication == scene.publication_id())
     }
     pub(crate) fn displayed_key(&self) -> Option<RefinementKey> {
         self.published_id.and(self.displayed_key)
@@ -1989,7 +2093,7 @@ impl GpuViewport {
     pub(crate) fn displays_content(&self, scene: &om9_scene::scene::Scene, selection: u64, preview: u64,
         cplane: u64, hidden_sources: HiddenSources, mode: DisplayMode) -> bool {
         self.displayed_key().is_some_and(|key| {
-            key.document == scene.document.id && key.scene == scene.epoch
+            key.document == scene.document.id && key.scene == scene.epoch && key.scene_publication == scene.publication_id()
                 && key.selection == selection && key.preview == preview
                 && key.cplane == cplane && key.hidden_sources == hidden_sources && key.size == self.size
                 && key.mode == mode
@@ -2050,25 +2154,43 @@ impl GpuViewport {
             false
         }
     }
+    fn draw_snapshot(&self, controller: &crate::session::Controller, scene: &om9_scene::scene::Scene,
+        selection: u64, preview: u64, hidden: HiddenSources,
+    ) -> om9_core::Result<std::sync::Arc<TrackedPresentationSnapshot>> {
+        let mut pool = self.pool.lock().unwrap_or_else(|e|e.into_inner());
+        pool.clients.insert(self.client_id, self.request.frame_id);
+        pool.clients.retain(|_,frame| frame.saturating_add(1) >= self.request.frame_id);
+        if let Some(cohort) = &pool.cohort {
+            let same_options = cohort.selection == selection && cohort.preview == preview && cohort.hidden == hidden;
+            let same_scene = cohort.snapshot.scene.document == scene.document.id
+                && cohort.snapshot.scene.publication == scene.publication_id();
+            let still_presenting = !pool.clients.keys().all(|id|cohort.published.contains(id));
+            if same_options && (same_scene || (still_presenting && hidden.is_none()
+                && temporary_boolean(controller).is_none() && cohort.extends(scene))) {
+                return Ok(cohort.snapshot.clone());
+            }
+        }
+        let snapshot = presentation_snapshot(&pool.presentation,controller,scene,preview,hidden)?;
+        pool.cohort = Some(PresentationCohort {snapshot:snapshot.clone(),selection,preview,hidden,published:Default::default()});
+        Ok(snapshot)
+    }
     #[allow(clippy::too_many_arguments)]
     fn resources_ready(
         &mut self,
         state: &RenderState,
-        controller: &crate::session::Controller,
-        scene: Option<&om9_scene::scene::Scene>,
+        snapshot: &std::sync::Arc<TrackedPresentationSnapshot>,
         camera: &om9_scene::camera::Camera,
         cplane: om9_scene::camera::CPlane,
         viewport: om9_scene::camera::Viewport,
         selected: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
         selection: u64,
-        preview: u64,
+        _preview: u64,
         hidden_sources: HiddenSources,
         samples: u32,
     ) -> bool {
-        let Some(scene) = scene else {
-            return false;
-        };
-        let snapshot_key = (scene.document.id, std::sync::Arc::as_ptr(&scene.document) as usize, scene.epoch, hidden_sources);
+        let scene = &snapshot.scene;
+        let temporary = snapshot.key.5;
+        let snapshot_key = snapshot.key;
         if let Some((key, deadline)) = self.snapshot_retry {
             if key == snapshot_key && std::time::Instant::now() < deadline {
                 return false;
@@ -2078,11 +2200,10 @@ impl GpuViewport {
         if let Some(counters) = self.diagnostics.as_mut() {
             counters.readiness_checks += 1;
         }
-        let signature = (scene.document.id, scene.epoch, selection, hidden_sources);
+        let signature = (scene.document, scene.epoch, selection, hidden_sources, scene.publication, temporary);
         let share_world = self.share_world_lines();
         let mut pool = self.pool.lock().unwrap_or_else(|e| e.into_inner());
         let preparations = pool.preparations.clone();
-        let presentation = pool.presentation.clone();
         if pool.signature != Some(signature) {
             // A viewport may still own an old scene while the replacement is
             // preparing. Drop its optional cache without assuming in-flight
@@ -2143,15 +2264,7 @@ impl GpuViewport {
             if let Some(counters) = self.diagnostics.as_mut() {
                 counters.scene_preparations += 1;
             }
-            let snapshot = match presentation_snapshot(&presentation, controller, scene, preview, hidden_sources) {
-                Ok(snapshot) => snapshot,
-                Err(error) => {
-                    if matches!(error, om9_core::Error::Budget(_)) {
-                        self.snapshot_retry = Some((snapshot_key, std::time::Instant::now() + std::time::Duration::from_millis(250)));
-                    }
-                    self.preparation_error = Some(error.to_string()); return false;
-                }
-            };
+            let snapshot = snapshot.clone();
             let state = state.clone();
             let camera = camera.clone();
             let selected = selected.clone();
@@ -2200,15 +2313,7 @@ impl GpuViewport {
         }
         let world = pool.world_lines.entry(samples).or_default();
         if world.batch.is_none() && world.job.is_none() && !world.failed {
-            let snapshot = match presentation_snapshot(&presentation, controller, scene, preview, hidden_sources) {
-                Ok(snapshot) => snapshot,
-                Err(error) => {
-                    if matches!(error, om9_core::Error::Budget(_)) {
-                        self.snapshot_retry = Some((snapshot_key, std::time::Instant::now() + std::time::Duration::from_millis(250)));
-                    }
-                    self.preparation_error = Some(error.to_string()); return false;
-                }
-            };
+            let snapshot = snapshot.clone();
             let state = state.clone();
             let selected = selected.clone();
             world.job = prepare_task(&preparations, move || {
@@ -2241,13 +2346,15 @@ impl GpuViewport {
             0.
         };
         let key = (
-            scene.document.id,
+            scene.document,
             scene.epoch,
             selection,
             cplane.revision,
             samples,
             point_size.to_bits(),
             hidden_sources,
+            scene.publication,
+            temporary,
         );
         // Orbit/pan preserve point size; moving zoom reuses its last point markers until settling.
         let overlay_valid = self.overlays.as_ref().is_some_and(|o| overlay_matches(o.key, key, self.moving));
@@ -2266,6 +2373,8 @@ impl GpuViewport {
                         && o.key.3 == key.3
                         && o.key.5 == key.5
                         && o.key.6 == key.6
+                        && o.key.7 == key.7
+                        && o.key.8 == key.8
                         && o.fixed.pending_upload_bytes() == 0
                         && o.moving.pending_upload_bytes() == 0
                         && o.ghost.pending_upload_bytes() == 0
@@ -2285,15 +2394,7 @@ impl GpuViewport {
                     })
                     .map(|rx| (key, rx));
                 } else {
-                    let snapshot = match presentation_snapshot(&presentation, controller, scene, preview, hidden_sources) {
-                        Ok(snapshot) => snapshot,
-                        Err(error) => {
-                            if matches!(error, om9_core::Error::Budget(_)) {
-                                self.snapshot_retry = Some((snapshot_key, std::time::Instant::now() + std::time::Duration::from_millis(250)));
-                            }
-                            self.preparation_error = Some(error.to_string()); return false;
-                        }
-                    };
+                    let snapshot = snapshot.clone();
                     let state = state.clone();
                     let selected = selected.clone();
                     self.overlay_job = prepare_task(&preparations, move || {
@@ -2492,6 +2593,7 @@ impl GpuViewport {
         // The camera revision is the identity of the rendered frame: while it and the target size are
         // unchanged, redrawing would produce the same pixels, so the cached texture is reused.
         let epoch = scene.map(|scene| scene.epoch).unwrap_or(0);
+        let publication = scene.map(|scene| scene.publication_id());
         let document_id = scene.map(|s| s.document.id);
         if self.last_document != document_id {
             // An old document's image cannot serve as the new document's placeholder.
@@ -2507,6 +2609,7 @@ impl GpuViewport {
             self.rendered_final = false;
             self.last_document = document_id;
             self.render_stats = None;
+            self.published_stats = None;
             self.last_revision = None;
             self.refinement = None;
             self.pending_publication = None;
@@ -2517,12 +2620,37 @@ impl GpuViewport {
             && self.last_camera.as_ref() == Some(document_camera)
             && self.size == (width, height)
             && self.last_epoch == Some(epoch)
+            && self.last_scene_publication == publication
             && self.last_cplane == Some(cplane.revision)
             && self.last_selection == Some(selection_revision)
             && self.last_preview == Some(preview_revision)
             && self.last_hidden_sources == Some(hidden_sources);
         let document = self.batch.is_none() && self.cluster.is_none();
         if document {
+            let Some(scene) = scene else { return self.paint_published(ui,rect); };
+            let requested_snapshot_key = (scene.document.id,std::sync::Arc::as_ptr(&scene.document) as usize,
+                scene.epoch,hidden_sources,scene.publication_id(),temporary_boolean(controller).map(|p|p.2));
+            if self.snapshot_retry.is_some_and(|(key,deadline)|key==requested_snapshot_key && std::time::Instant::now()<deadline) {
+                ui.ctx().request_repaint_after(std::time::Duration::from_millis(33));
+                return self.paint_published(ui,rect);
+            }
+            let snapshot = match self.draw_snapshot(controller,scene,selection_revision,preview_revision,hidden_sources) {
+                Ok(snapshot) => snapshot,
+                Err(error) => {
+                    if matches!(error,om9_core::Error::Budget(_)) {
+                        self.snapshot_retry=Some((requested_snapshot_key,std::time::Instant::now()+std::time::Duration::from_millis(250)));
+                    }
+                    self.preparation_error=Some(error.to_string());
+                    self.rendered_final=false;
+                    self.preparing=true;
+                    ui.ctx().request_repaint_after(std::time::Duration::from_millis(250));
+                    return self.paint_published(ui,rect);
+                }
+            };
+            let render_current = snapshot.scene.publication == publication.expect("scene publication");
+            let epoch = snapshot.scene.epoch;
+            let publication = Some(snapshot.scene.publication);
+            let unchanged = unchanged && render_current;
             self.preparing = false;
             if !unchanged || self.request.moving {
                 self.rendered_final = false;
@@ -2538,6 +2666,7 @@ impl GpuViewport {
             let key = document_id.map(|document| RefinementKey {
                 document,
                 scene: epoch,
+                scene_publication: publication.expect("document key has scene"),
                 camera: revision,
                 selection: selection_revision,
                 cplane: cplane.revision,
@@ -2565,7 +2694,7 @@ impl GpuViewport {
             if let Some(pending) = self.pending_publication.take()
                 && key.is_some_and(|current| {
                     if self.request.moving { pending.key.same_content(current) }
-                    else { pending.key == current && pending.camera == *document_camera }
+                    else { (pending.key == current || (!render_current && pending.key.same_content(current))) && pending.camera == *document_camera }
                 }) {
                 if pending.done.load(std::sync::atomic::Ordering::Acquire) {
                     let current_camera = pending.camera == *document_camera;
@@ -2573,8 +2702,14 @@ impl GpuViewport {
                     self.displayed_camera = Some(pending.camera);
                     self.displayed_scene = Some((pending.key.document, pending.key.scene));
                     self.displayed_key = Some(pending.key);
-                    self.rendered_final = !self.request.moving;
+                    self.rendered_final = !self.request.moving && render_current;
                     self.published_frame = Some(pending.frame_id);
+                    self.published_stats = self.render_stats;
+                    if let Some(cohort)=self.pool.lock().unwrap_or_else(|e|e.into_inner()).cohort.as_mut()
+                        && cohort.snapshot.scene.publication == pending.key.scene_publication {
+                        cohort.published.insert(self.client_id);
+                    }
+                    if !render_current { ui.ctx().request_repaint_after(std::time::Duration::from_millis(2)); }
                     if let Some((_, started)) = self.refinement.take() {
                         self.refinement_ms = Some(started.elapsed().as_secs_f64() * 1000.);
                     }
@@ -2612,8 +2747,7 @@ impl GpuViewport {
             let prepare_started = std::time::Instant::now();
             if !self.resources_ready(
                 state,
-                controller,
-                scene,
+                &snapshot,
                 document_camera,
                 cplane,
                 viewport,
@@ -2682,7 +2816,7 @@ impl GpuViewport {
                 let Some(gpu) = slot.as_mut() else {
                     return false;
                 };
-                let delta = scene
+                let delta = Some(scene)
                     .and_then(|s| {
                         s.objects
                             .iter()
@@ -2880,6 +3014,7 @@ impl GpuViewport {
                 self.last_mode = Some(self.display_mode);
                 self.last_camera = Some(document_camera.clone());
                 self.last_epoch = Some(epoch);
+                self.last_scene_publication = publication;
                 self.last_cplane = Some(cplane.revision);
                 self.last_selection = Some(selection_revision);
                 self.last_preview = Some(preview_revision);
@@ -2930,6 +3065,7 @@ impl GpuViewport {
         self.last_mode = Some(self.display_mode);
         self.last_camera = Some(document_camera.clone());
         self.last_epoch = Some(epoch);
+        self.last_scene_publication = publication;
         self.last_cplane = Some(cplane.revision);
         self.last_selection = Some(selection_revision);
         self.last_preview = Some(preview_revision);
@@ -3020,14 +3156,14 @@ fn display_lod_target(
 }
 
 /// Local display mesh shared by every occurrence of one source entity (positions, triangle indices).
-type LocalDisplayMesh = std::sync::Arc<(Vec<[f32; 3]>, Vec<u32>)>;
+type LocalDisplayMesh = std::sync::Arc<om9_render::MeshData>;
 
 /// Local display positions and indices for one source mesh, optionally decimated once by `OM9_VIEWPORT_LOD`.
 fn local_display_mesh(
     vertices: &[[f64; 3]],
     triangles: &[([u32; 3], u32)],
     lod_target: Option<usize>,
-) -> (Vec<[f32; 3]>, Vec<u32>) {
+) -> om9_render::MeshData {
     let positions: Vec<[f32; 3]> = vertices
         .iter()
         .map(|point| [point[0] as f32, point[1] as f32, point[2] as f32])
@@ -3048,9 +3184,11 @@ fn local_display_mesh(
         let locked = om9_render::qem::feature_locks(&mesh, sharp_degrees);
         let (simplified, _) =
             om9_render::qem::simplify_with_error_locked(&mesh, target, Some(&locked));
-        return (simplified.positions, simplified.indices);
+        let faces: Vec<_> = simplified.indices.chunks_exact(3)
+            .map(|t|([t[0],t[1],t[2]],0)).collect();
+        return om9_render::normals::smooth_faces(simplified.positions, &faces);
     }
-    (positions, indices)
+    om9_render::normals::smooth_faces(positions, triangles)
 }
 
 /// World units per screen pixel for the document camera.
@@ -3170,7 +3308,7 @@ fn sphere_guides(vertices: &[[f64; 3]], triangles: &[([u32; 3], u32)]) -> Option
 
 fn build_selected_shape_lines(
     state: &RenderState,
-    scene: &om9_scene::scene::Scene,
+    scene: &PresentationScene,
     selected: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
     samples: u32,
 ) -> om9_render::overlay::OverlayBatch {
@@ -3205,7 +3343,7 @@ fn empty_world_lines(state: &RenderState, samples: u32) -> WorldLines {
 /// World-space mesh and curve lines do not depend on viewport camera or CPlane.
 fn build_shared_world_lines(
     state: &RenderState,
-    scene: &om9_scene::scene::Scene,
+    scene: &PresentationScene,
     selected: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
     samples: u32,
 ) -> WorldLines {
@@ -3258,7 +3396,7 @@ fn build_shared_world_lines(
 /// One object's triangles in world space, or `None` when it has no mesh or no transform.
 fn build_lines(
     state: &RenderState,
-    scene: Option<&om9_scene::scene::Scene>,
+    scene: Option<&PresentationScene>,
     cplane: om9_scene::camera::CPlane,
     selected: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
     point_size: f64,
@@ -3361,20 +3499,20 @@ fn build_lines(
 #[cfg(test)]
 fn world_mesh(object: &om9_scene::scene::SceneObject) -> Option<om9_render::MeshData> {
     let transform = object.display_transform().ok()?;
-    world_mesh_at(object, transform)
+    world_mesh_at(&object.buffers, transform)
 }
 
 /// The same mesh under an explicit transform. The drag ghost uses `object.transform`, the placement without
 /// the preview, so it stays where the object was when the gesture started.
 fn world_mesh_at(
-    object: &om9_scene::scene::SceneObject,
+    buffers: &om9_scene::scene::SceneBuffers,
     transform: om9_core::geometry::Transform,
 ) -> Option<om9_render::MeshData> {
     let om9_scene::scene::RenderBuffers::Mesh {
         vertices,
         triangles,
         ..
-    } = object.buffers.as_ref()
+    } = buffers.as_ref()
     else {
         return None;
     };
@@ -3386,11 +3524,7 @@ fn world_mesh_at(
     if positions.is_empty() || triangles.is_empty() {
         return None;
     }
-    let mut indices = Vec::with_capacity(triangles.len() * 3);
-    for (corners, _) in triangles {
-        indices.extend_from_slice(corners);
-    }
-    Some(om9_render::MeshData::new(positions, indices))
+    Some(om9_render::normals::smooth_faces(positions, triangles))
 }
 
 /// The grey copy left where the objects were when a drag started.
@@ -3400,7 +3534,7 @@ fn world_mesh_at(
 fn build_ghost(
     device: &wgpu::Device,
     queue: &wgpu::Queue,
-    scene: Option<&om9_scene::scene::Scene>,
+    scene: Option<&PresentationScene>,
     selected: &std::collections::BTreeSet<om9_core::identity::ObjectId>,
     samples: u32,
 ) -> om9_render::scene::SceneBatch {
@@ -3413,7 +3547,7 @@ fn build_ghost(
         if !selected.contains(&object.root) {
             continue;
         }
-        if let Some(mesh) = world_mesh_at(object, object.transform) {
+        if let Some(mesh) = world_mesh_at(&object.buffers, object.transform) {
             // Grey and translucent: readable as "the old position", never mistaken for geometry.
             ghost.add_mesh(&mesh, identity_model(), [0.45, 0.45, 0.45, 0.55]);
         }
@@ -3449,6 +3583,7 @@ impl GpuScene {
         let ghost = self.ghost.as_ref().map(|g| g.fork_samples_task(samples));
         let mesh_objects = self.mesh_objects.clone();
         let epoch = self.epoch;
+        let scene_publication = self.scene_publication;
         let cplane = self.cplane;
         let selection = self.selection;
         let selected_objects = self.selected_objects.clone();
@@ -3460,6 +3595,7 @@ impl GpuScene {
             ghost: ghost.map(|task| task()),
             mesh_objects,
             epoch,
+            scene_publication,
             cplane,
             selection,
             selected_objects,
@@ -3675,7 +3811,7 @@ mod ghost_tests {
         let object = scene.objects.first_mut().expect("object");
         object.preview = Transform::translation([5.0, 0.0, 0.0]);
 
-        let ghost = world_mesh_at(object, object.transform).expect("ghost mesh");
+        let ghost = world_mesh_at(&object.buffers, object.transform).expect("ghost mesh");
         let live = world_mesh(object).expect("live mesh");
         // Placement puts the cube at x = 2, the preview adds 5 on top of it for the drawn object.
         assert!(
@@ -3713,7 +3849,8 @@ mod display_lod_tests {
             .collect();
         let full = triangles.len();
 
-        let (positions, indices) = local_display_mesh(&vertices, &triangles, Some(64));
+        let mesh = local_display_mesh(&vertices, &triangles, Some(64));
+        let (positions, indices) = (&mesh.positions, &mesh.indices);
         assert!(!positions.is_empty());
         assert!(
             indices.len() / 3 < full,
@@ -3726,7 +3863,7 @@ mod display_lod_tests {
             indices.len() / 3
         );
 
-        let (_, untouched) = local_display_mesh(&vertices, &triangles, None);
+        let untouched = local_display_mesh(&vertices, &triangles, None).indices;
         assert_eq!(
             untouched.len(),
             full * 3,
@@ -3818,41 +3955,41 @@ mod box_guide_tests {
     fn rectangular_brep_gets_two_midlines_per_face_without_tessellation_diagonals() {
         use om9_kernel::creation::{primitive, Primitive, DEFAULT_DEFLECTION_MM};
         let b = primitive(Primitive::Box { x_mm: 4., y_mm: 6., z_mm: 8. }, DEFAULT_DEFLECTION_MM, &om9_core::budget::Limits::default()).unwrap();
-        let triangles: Vec<_> = b.display.triangles.iter().map(|[a,b,c,f]| ([*a,*b,*c],*f)).collect();
-        let guides = super::box_face_guides(&b.display.points, &triangles).expect("six rectangular faces");
+        let triangles: Vec<_> = b.display().triangles.iter().map(|[a,b,c,f]| ([*a,*b,*c],*f)).collect();
+        let guides = super::box_face_guides(&b.display().points, &triangles).expect("six rectangular faces");
         assert_eq!(guides.len(), 12);
         for [a,b] in guides {
             assert_eq!((0..3).filter(|&i| (a[i]-b[i]).abs() > 1e-9).count(),1);
         }
-        assert!(super::box_face_guides(&b.display.points, &triangles[..10]).is_none());
+        assert!(super::box_face_guides(&b.display().points, &triangles[..10]).is_none());
     }
 
     #[test]
     fn sphere_gets_three_great_circles_and_ellipsoid_is_not_misidentified() {
         use om9_kernel::creation::{primitive, Primitive, DEFAULT_DEFLECTION_MM};
         let b=primitive(Primitive::Sphere {radius_mm: 5.},DEFAULT_DEFLECTION_MM,&om9_core::budget::Limits::default()).unwrap();
-        let triangles:Vec<_>=b.display.triangles.iter().map(|[a,b,c,f]| ([*a,*b,*c],*f)).collect();
-        let guides=super::sphere_guides(&b.display.points,&triangles).expect("full sphere");
+        let triangles:Vec<_>=b.display().triangles.iter().map(|[a,b,c,f]| ([*a,*b,*c],*f)).collect();
+        let guides=super::sphere_guides(&b.display().points,&triangles).expect("full sphere");
         assert_eq!(guides.len(),288);
         for axis in 0..3 { assert!(guides[axis*96..(axis+1)*96].iter().flatten().all(|p|p[axis].abs()<1e-8)); }
         for [a,b] in &guides { for p in [a,b] {assert!((p.iter().map(|v|v*v).sum::<f64>().sqrt()-5.).abs()<1e-8);} }
-        let ellipsoid:Vec<_>=b.display.points.iter().map(|p|[p[0]*2.,p[1],p[2]]).collect();
+        let ellipsoid:Vec<_>=b.display().points.iter().map(|p|[p[0]*2.,p[1],p[2]]).collect();
         assert!(super::sphere_guides(&ellipsoid,&triangles).is_none());
-        let translated:Vec<_>=b.display.points.iter().map(|p|[p[0]+12.,p[1]-7.,p[2]+3.]).collect();
+        let translated:Vec<_>=b.display().points.iter().map(|p|[p[0]+12.,p[1]-7.,p[2]+3.]).collect();
         let moved=super::sphere_guides(&translated,&triangles).expect("translated sphere");
         assert!(moved.iter().flatten().all(|p| ((p[0]-12.).powi(2)+(p[1]+7.).powi(2)+(p[2]-3.).powi(2)-25.).abs()<1e-7));
-        assert!(super::sphere_guides(&b.display.points,&triangles[..triangles.len()-10]).is_none());
-        assert!(super::sphere_guides(&b.display.points,&[]).is_none());
+        assert!(super::sphere_guides(&b.display().points,&triangles[..triangles.len()-10]).is_none());
+        assert!(super::sphere_guides(&b.display().points,&[]).is_none());
     }
 
     #[test]
     fn spherical_mesh_missing_a_small_triangle_has_no_full_sphere_guides() {
         use om9_kernel::creation::{primitive, Primitive};
         let b = primitive(Primitive::Sphere { radius_mm: 5. }, 0.1, &om9_core::budget::Limits::default()).unwrap();
-        let mut points = b.display.points.clone();
-        let mut triangles: Vec<_> = b.display.triangles.iter().map(|[a,b,c,f]| ([*a,*b,*c],*f)).collect();
+        let mut points = b.display().points.clone();
+        let mut triangles: Vec<_> = b.display().triangles.iter().map(|[a,b,c,f]| ([*a,*b,*c],*f)).collect();
         let area = |indices: [u32; 3]| {
-            let [a,b,c] = indices.map(|i| b.display.points[i as usize]);
+            let [a,b,c] = indices.map(|i| b.display().points[i as usize]);
             let u = std::array::from_fn::<_, 3, _>(|i| b[i]-a[i]);
             let v = std::array::from_fn::<_, 3, _>(|i| c[i]-a[i]);
             let cross = [u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]];

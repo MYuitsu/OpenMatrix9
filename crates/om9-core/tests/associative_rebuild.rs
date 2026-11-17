@@ -660,6 +660,57 @@ fn a_semantic_reference_survives_an_allowed_edit_and_refuses_ambiguity() {
 }
 
 #[test]
+fn ambiguous_source_signatures_refuse_resolution_and_rebuild() {
+    use om9_core::producers::{FeatureProducer, ProducerRegistry, TopologyProvider, recompute_registered};
+    let anchor = edge_anchor([0., 0., 0.], [10., 0., 0.]);
+    let duplicate = |name: &str| Subshape { name: name.into(), kind: SubshapeKind::Edge, signature: anchor.fingerprint };
+    let mut chain = rail_chain();
+    let id = bind_reference(&mut chain.document.history, &limits(), chain.rail, chain.out_rail,
+        "source:edge:0", anchor).unwrap();
+    let published = PublishedSubshapes { recipe: chain.rail, output: chain.out_rail,
+        revision: chain.document.history.recipes[&chain.rail].revision,
+        subshapes: vec![duplicate("source:edge:0"), duplicate("source:edge:1")] };
+    assert!(matches!(resolve_semantic_reference(&chain.document.history, &chain.document, &limits(), id, &published),
+        Err(Error::Invalid("ambiguous source subshape signature"))));
+    let mut near = published.clone();
+    near.subshapes[1].signature.start[1] = 0.01;
+    assert!(matches!(resolve_semantic_reference(&chain.document.history, &chain.document, &limits(), id, &near),
+        Err(Error::Invalid("ambiguous source subshape signature"))));
+    let mut distinct = published.clone();
+    distinct.subshapes[1].signature.start[1] = 1.;
+    assert!(resolve_semantic_reference(&chain.document.history, &chain.document, &limits(), id, &distinct).is_ok());
+    distinct.subshapes[1] = duplicate("source:face:1");
+    distinct.subshapes[1].kind = SubshapeKind::Face;
+    assert!(resolve_semantic_reference(&chain.document.history, &chain.document, &limits(), id, &distinct).is_ok());
+
+    struct Producer;
+    impl FeatureProducer for Producer {
+        fn produce(&self, request: &RebuildRequest) -> Result<Vec<RebuiltOutput>> { sweep_producer(request) }
+    }
+    struct Ambiguous;
+    impl TopologyProvider for Ambiguous {
+        fn subshapes(&self, _: &Geometry, _: &Limits) -> Result<Vec<Subshape>> {
+            let signature = signature([0., 0., 0.], [10., 0., 0.]);
+            let mut nearby = signature;
+            nearby.start[1] = 0.01;
+            Ok(vec![Subshape { name: "source:edge:0".into(), kind: SubshapeKind::Edge, signature },
+                Subshape { name: "source:edge:1".into(), kind: SubshapeKind::Edge, signature: nearby }])
+        }
+    }
+    let mut fixture = single();
+    let mut registry = ProducerRegistry::with_topology(Ambiguous);
+    registry.register("RailSweep", Producer).unwrap();
+    bind_reference(&mut fixture.document.history, &limits(), fixture.recipe, fixture.output,
+        "source:edge:0", anchor).unwrap();
+    let before = fixture.document.entities[&fixture.output].clone();
+    let references = fixture.document.history.references.clone();
+    let outcome = recompute_registered(&mut fixture.document, &mut RecomputeCache::default(), fixture.recipe, &registry).unwrap();
+    assert!(matches!(outcome, RecomputeOutcome::Failed { previous_retained: true, .. }));
+    assert_eq!(fixture.document.entities[&fixture.output], before);
+    assert_eq!(fixture.document.history.references, references);
+}
+
+#[test]
 fn a_detached_feature_cannot_keep_a_semantic_reference() {
     let mut chain = rail_chain();
     let limits = limits();
@@ -1051,12 +1102,25 @@ fn a_successful_rebuild_updates_geometry_published_result_and_cache() {
         &fixture.document,
         &fixture.document.history.recipes[&fixture.recipe]
     ));
+    let mut legacy = serde_json::to_value(&cache).unwrap();
+    legacy["entries"][fixture.recipe.to_string()].as_object_mut().unwrap().remove("hash_version");
+    let legacy: RecomputeCache = serde_json::from_value(legacy).unwrap();
+    assert!(!legacy.is_valid(&fixture.document, &fixture.document.history.recipes[&fixture.recipe]));
+    let mut missing_output_revisions = serde_json::to_value(&cache).unwrap();
+    missing_output_revisions["entries"][fixture.recipe.to_string()].as_object_mut().unwrap().remove("output_revisions");
+    let missing_output_revisions: RecomputeCache = serde_json::from_value(missing_output_revisions).unwrap();
+    assert!(!missing_output_revisions.is_valid(&fixture.document, &fixture.document.history.recipes[&fixture.recipe]));
     // A cached recompute does not call the producer at all.
     let cached = recompute_feature(&mut fixture.document, &mut cache, fixture.recipe, |_| {
         panic!("cache hit must not rebuild")
     })
     .unwrap();
     assert!(matches!(cached, RecomputeOutcome::Cached { sha256: hit, .. } if hit == sha256));
+    fixture.document.entities.get_mut(&fixture.output).unwrap().geometry_revision += 1;
+    assert!(!cache.is_valid(&fixture.document, &fixture.document.history.recipes[&fixture.recipe]));
+    fixture.document.entities.get_mut(&fixture.output).unwrap().geometry_revision -= 1;
+    fixture.document.entities.get_mut(&fixture.output).unwrap().generation += 1;
+    assert!(!cache.is_valid(&fixture.document, &fixture.document.history.recipes[&fixture.recipe]));
 }
 
 #[test]

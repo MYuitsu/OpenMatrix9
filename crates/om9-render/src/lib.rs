@@ -5,8 +5,8 @@
 //! returns pixels, so the loop itself is tested automatically; the look of the window stays a manual
 //! check (all nine L3 of this module declare `requires_manual_test = true`).
 //!
-//! Shading is computed in the fragment shader from the world-space derivatives of the position, so the
-//! renderer needs no normal attribute and still shades curved faces correctly.
+//! The live batched viewport interpolates cached display normals within CAD faces.
+//! The single-object/headless and cluster paths retain derivative flat shading.
 
 use std::collections::{HashMap, HashSet};
 pub mod cluster;
@@ -18,6 +18,7 @@ pub mod pyramid;
 pub mod qem;
 pub mod scene;
 pub mod shapes;
+pub mod normals;
 pub mod streaming;
 pub mod tests_support;
 pub mod timing;
@@ -29,11 +30,13 @@ use wgpu::util::DeviceExt;
 pub struct MeshData {
     pub positions: Vec<[f32; 3]>,
     pub indices: Vec<u32>,
+    /// Derived display normals only. Empty retains flat shading for authored meshes.
+    pub normals: Vec<[f32; 3]>,
 }
 
 impl MeshData {
     pub fn new(positions: Vec<[f32; 3]>, indices: Vec<u32>) -> Self {
-        Self { positions, indices }
+        Self { positions, indices, normals: Vec::new() }
     }
 }
 

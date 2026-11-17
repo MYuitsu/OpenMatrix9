@@ -2,6 +2,7 @@
 // Authored native-only inventory fixtures. Run through om9-native-runner.
 #include <opennurbs.h>
 #include <filesystem>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -323,12 +324,53 @@ void short_line_userdata_oracle(const std::filesystem::path& path) {
   check(!has_own||own==L"1","short line own string changed");check(!has_other||other==L"preserve external string","short line foreign string changed");
   std::cout<<"{\"own\":"<<(has_own?"true":"false")<<",\"other\":"<<(has_other?"true":"false")<<"}\n";
 }
+// Characterize the pinned SDK writer; this does not alter the product importer.
+void brep_source_archive_oracle() {
+  const ON_3dPoint corners[8] = {ON_3dPoint(0,0,0),ON_3dPoint(2,0,0),ON_3dPoint(2,3,0),ON_3dPoint(0,3,0),
+      ON_3dPoint(0,0,4),ON_3dPoint(2,0,4),ON_3dPoint(2,3,4),ON_3dPoint(0,3,4)};
+  std::unique_ptr<ON_Brep> brep(ON_BrepBox(corners));
+  check(brep && brep->IsValid() && brep->m_F.Count()==6,"archive oracle box");
+  check(brep->SetUserString(L"fixture.source",L"preserve source metadata"),"archive oracle user string");
+  check(brep->AttachUserData(new AuthoredOpaqueData()),"archive oracle opaque userdata");
+  auto mesh=std::make_unique<ON_Mesh>();
+  mesh->m_V.Append(ON_3fPoint(0,0,0));mesh->m_V.Append(ON_3fPoint(2,0,0));mesh->m_V.Append(ON_3fPoint(2,3,0));
+  ON_MeshFace face;face.vi[0]=0;face.vi[1]=1;face.vi[2]=2;face.vi[3]=2;mesh->m_F.Append(face);
+  check(brep->m_F[0].SetMesh(ON::render_mesh,new ON_Mesh(*mesh)),"archive oracle render mesh");
+  check(brep->m_F[0].SetMesh(ON::analysis_mesh,new ON_Mesh(*mesh)),"archive oracle analysis mesh");
+  ON_Write3dmBufferArchive full(0,2*1024*1024,50,ON::Version()), filtered(0,2*1024*1024,50,ON::Version());
+  filtered.EnableSave3dmRenderMeshes(ON::brep_object,false);
+  filtered.EnableSave3dmAnalysisMeshes(ON::brep_object,false);
+  check(full.WriteObject(brep.get())&&filtered.WriteObject(brep.get()),"archive oracle write");
+  check(full.SizeOfArchive()>filtered.SizeOfArchive(),"archive flags did not remove cached meshes");
+  ON_Read3dmBufferArchive full_reader(full.SizeOfArchive(),full.Buffer(),true,50,ON::Version());
+  ON_Object* full_raw=nullptr;check(full_reader.ReadObject(&full_raw)==1&&full_raw,"archive oracle full read");
+  std::unique_ptr<ON_Object> full_result(full_raw);const auto* full_brep=ON_Brep::Cast(full_raw);
+  check(full_brep&&full_brep->m_F[0].Mesh(ON::render_mesh)&&full_brep->m_F[0].Mesh(ON::analysis_mesh),
+      "archive oracle full meshes missing");
+  ON_Read3dmBufferArchive reader(filtered.SizeOfArchive(),filtered.Buffer(),true,50,ON::Version());
+  ON_Object* raw=nullptr;check(reader.ReadObject(&raw)==1&&raw,"archive oracle read");std::unique_ptr<ON_Object> result(raw);
+  const auto* restored=ON_Brep::Cast(raw);check(restored&&restored->IsValid(),"archive oracle restored BRep");
+  check(restored->m_V.Count()==8&&restored->m_E.Count()==12&&restored->m_F.Count()==6&&restored->m_L.Count()==6,
+      "archive oracle topology");
+  for(int i=0;i<8;++i)check(restored->m_V[i].point.DistanceTo(corners[i])<1e-12,"archive oracle vertex");
+  check(!restored->m_F[0].Mesh(ON::render_mesh)&&!restored->m_F[0].Mesh(ON::analysis_mesh),"archive oracle mesh remains");
+  ON_wString value;check(restored->GetUserString(L"fixture.source",value)&&value==L"preserve source metadata","archive oracle user string lost");
+  check(restored->GetUserData(id(1001))!=nullptr,"archive oracle opaque userdata lost");
+  brep->DestroyMesh(ON::any_mesh);
+  ON_Write3dmBufferArchive removed(0,2*1024*1024,50,ON::Version());
+  check(removed.WriteObject(brep.get()),"archive oracle stripped write");
+  check(removed.SizeOfArchive()==filtered.SizeOfArchive()&&0==std::memcmp(removed.Buffer(),filtered.Buffer(),filtered.SizeOfArchive()),
+      "archive flags differ from mesh-free source");
+  std::cout<<"{\"status\":\"ok\",\"fixture\":\"box-render-analysis-userdata\",\"full_bytes\":"<<full.SizeOfArchive()
+      <<",\"filtered_bytes\":"<<filtered.SizeOfArchive()<<"}\n";
+}
 }
 int wmain(int argc,wchar_t** argv) {
   try {
     check(argc==3||argc==4,"fixture arguments: mode private.3dm | --oracle-circle authored.3dm object_number"); ON::Begin();
     if(argc==4 && (std::wstring(argv[1])==L"--short-line-bad"||std::wstring(argv[1])==L"--short-line-no-metadata"||std::wstring(argv[1])==L"--short-line-extra"))mutate_short_line_metadata(argv[1],std::filesystem::path(argv[2]),std::filesystem::path(argv[3]));
     else if(argc==4) { check(std::wstring(argv[1])==L"--oracle-circle","oracle arguments"); const auto n=std::stoul(argv[3]); check(n<=65535,"oracle object id"); circle_oracle(std::filesystem::path(argv[2]),static_cast<unsigned>(n)); }
+    else if(std::wstring(argv[1])==L"--oracle-brep-source-archive")brep_source_archive_oracle();
     else if(std::wstring(argv[1])==L"--oracle-polycurve")polycurve_oracle(std::filesystem::path(argv[2]));
     else if(std::wstring(argv[1])==L"--oracle-periodic-userdata")periodic_userdata_oracle(std::filesystem::path(argv[2]));
     else if(std::wstring(argv[1])==L"--oracle-layer-normalization")layer_normalization_oracle(std::filesystem::path(argv[2]));

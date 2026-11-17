@@ -881,7 +881,7 @@ fn fillet_add_handle_option_uses_shared_routes() {
         let shape = om9_kernel::creation::primitive(
             om9_kernel::creation::Primitive::Box { x_mm: 10.0, y_mm: 10.0, z_mm: 10.0 }, 0.01, &limits,
         ).unwrap();
-        let edge = shape.display.edges[0];
+        let edge = shape.display().edges[0];
         let mut doc = Document::new("AddHandle option");
         let entity = om9_core::model::Entity::new("box", Geometry::Brep(shape), None);
         let id = entity.id;
@@ -952,7 +952,7 @@ fn fillet_set_all_keyboard_pointer_and_typed_assignment_update_preview() {
             om9_kernel::creation::Primitive::Box { x_mm: 10.0, y_mm: 10.0, z_mm: 10.0 },
             0.01, &limits,
         ).unwrap();
-        let edges = [shape.display.edges[0], shape.display.edges[2]];
+        let edges = [shape.display().edges[0], shape.display().edges[2]];
         let mut doc = Document::new("SetAll routes");
         let entity = om9_core::model::Entity::new("box", Geometry::Brep(shape), None);
         let id = entity.id;
@@ -1029,7 +1029,7 @@ fn fillet_select_edges_routes_preserve_edits_and_allow_more_edges() {
             om9_kernel::creation::Primitive::Box { x_mm: 10.0, y_mm: 10.0, z_mm: 10.0 },
             0.01, &limits,
         ).unwrap();
-        let edges = [shape.display.edges[0], shape.display.edges[2]];
+        let edges = [shape.display().edges[0], shape.display().edges[2]];
         let mut doc = Document::new("SelectEdges routes");
         let entity = om9_core::model::Entity::new("box", Geometry::Brep(shape), None);
         let id = entity.id;

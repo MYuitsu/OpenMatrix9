@@ -14,6 +14,37 @@ use om9_scene::{
 };
 
 #[test]
+fn existing_v4_brep_face_ids_resolve_to_their_original_surfaces() {
+    let archive = include_bytes!("../../../implementation/evidence/M03/solid-ui-followup-2026-10-23/review-fixtures/Boolean2-D-after.om9");
+    let limits = Limits::default();
+    let document = om9_archive::Archive::decode(archive, &limits).unwrap();
+    let mut checked = 0;
+    for entity in document.entities.values() {
+        let Geometry::Brep(brep) = &entity.geometry else { continue };
+        for (index, face) in brep.topology().faces.iter().enumerate() {
+            let triangle = brep.display().triangles.iter().find(|triangle| triangle[3] as usize == index)
+                .expect("each fixture face has a display triangle");
+            let [a, b, c] = [triangle[0], triangle[1], triangle[2]].map(|i| brep.display().points[i as usize]);
+            let u = std::array::from_fn::<_, 3, _>(|i| b[i] - a[i]);
+            let v = std::array::from_fn::<_, 3, _>(|i| c[i] - a[i]);
+            let normal = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+            let length = normal[0].hypot(normal[1]).hypot(normal[2]);
+            assert!(length > 0.);
+            let direction = normal.map(|value| -value / length);
+            let center = std::array::from_fn(|i| (a[i] + b[i] + c[i]) / 3.);
+            let origin = std::array::from_fn(|i| center[i] - direction[i]);
+            let hit = om9_kernel::measurement::brep_face_ray_hit(
+                brep, *face, Transform::identity(), origin, direction, center, 1e-6, &limits,
+            ).unwrap();
+            let distance = (0..3).map(|i| (hit[i] - center[i]).powi(2)).sum::<f64>().sqrt();
+            assert!(distance <= brep.display().deflection_mm + 1e-6, "face {index}: {distance}");
+            checked += 1;
+        }
+    }
+    assert!(checked > 1, "fixture must cover multiple B-rep faces");
+}
+
+#[test]
 fn brep_display_is_an_occluder_even_without_reference_permission() {
     let limits = Limits::default();
     let sphere = om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap();
@@ -197,6 +228,20 @@ fn coarse_sphere_face_hit_needs_kernel_refinement_for_world_coordinates() {
                 .refine_surface_snap(&bad_face, &camera, viewport)
                 .is_err()
         );
+        let mut old_leaf = surface.clone();
+        old_leaf.surface_source.as_mut().unwrap().leaf_geometry_revision += 1;
+        assert!(
+            controller
+                .refine_surface_snap(&old_leaf, &camera, viewport)
+                .is_err()
+        );
+        let mut old_display = surface.clone();
+        old_display.surface_source.as_mut().unwrap().brep_display_fingerprint = Some(om9_scene::scene::BrepDisplayReceipt::Occt([0; 32]));
+        assert!(
+            controller
+                .refine_surface_snap(&old_display, &camera, viewport)
+                .is_err()
+        );
         let mut bad_path = surface.clone();
         bad_path.surface_source.as_mut().unwrap().path.push(id);
         assert!(
@@ -302,7 +347,9 @@ fn surface_scheduler_coalesces_input_and_rejects_stale_pending_work() {
     for x in [1., 1.1, 1.2] {
         let (cursor, candidates) = input(&controller, x);
         let guard = controller.coordinator().reserve_external_memory(MemoryClass::Kernel, 1024 * 1024, None).unwrap();
-        scheduler.submit(&controller, candidates, camera.clone(), viewport, cursor, guard).unwrap();
+        scheduler.submit(&controller, candidates.clone(), camera.clone(), viewport, cursor, guard).unwrap();
+        assert!(scheduler.matches_request(&controller, &candidates, &camera, viewport, cursor));
+        assert!(!scheduler.matches_request(&controller, &candidates, &camera, viewport, [cursor[0]+1.,cursor[1]]));
         assert!(scheduler.poll(&controller).is_none());
         assert!(scheduler.is_busy());
         assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::Kernel), 1024 * 1024);
@@ -359,7 +406,10 @@ fn surface_scheduler_coalesces_input_and_rejects_stale_pending_work() {
     let guard = controller.coordinator().reserve_external_memory(MemoryClass::Kernel, 1024 * 1024, None).unwrap();
     scheduler.submit(&controller, candidates.clone(), camera.clone(), viewport, cursor, guard).unwrap();
     let guard = same_ids.coordinator().reserve_external_memory(MemoryClass::Kernel, 1024 * 1024, None).unwrap();
-    scheduler.submit(&same_ids, candidates.clone(), camera.clone(), viewport, cursor, guard).unwrap();
+    assert!(matches!(scheduler.submit(&same_ids, candidates, camera.clone(), viewport, cursor, guard), Err(om9_core::Error::Stale(_))));
+    let (cursor, candidates) = input(&same_ids, 1.2);
+    let guard = same_ids.coordinator().reserve_external_memory(MemoryClass::Kernel, 1024 * 1024, None).unwrap();
+    scheduler.submit(&same_ids, candidates, camera.clone(), viewport, cursor, guard).unwrap();
     let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
     let receipt = loop {
         if let Some(result) = scheduler.poll(&same_ids) { break result.unwrap(); }
@@ -450,8 +500,11 @@ fn surface_worker_and_stl_export_use_the_same_immutable_source() {
     let candidate = om9_scene::osnap::candidates(controller.scene().unwrap(), &camera, viewport, cursor, Default::default(), None).unwrap()
         .into_iter().find(|candidate| candidate.kind == om9_scene::osnap::SnapKind::Surface && candidate.root == Some(id)).unwrap();
     let guard = controller.coordinator().reserve_external_memory(MemoryClass::Kernel, 8 * 1024 * 1024, None).unwrap();
+    let document_owners = std::sync::Arc::strong_count(&controller.scene().unwrap().document);
     let mut snap = SurfaceSnapJob::start(&controller, vec![candidate; 256], camera.clone(), viewport, cursor, guard).unwrap();
     assert!(snap.try_result().is_none(), "fixture must begin while the snap worker is active");
+    assert_eq!(std::sync::Arc::strong_count(&controller.scene().unwrap().document), document_owners,
+        "source-only B-rep worker must not retain another document/display owner");
     let target = std::env::temp_dir().join(format!("om9-surface-export-{id:?}.stl"));
     let result = capture.export_with_profile(&target, StlExportProfile { linear_tolerance_mm: 0.01, angular_tolerance_rad: 0.3 }).unwrap();
     let completed_at_export_return = snap.try_result();
@@ -481,6 +534,8 @@ fn surface_worker_and_stl_export_use_the_same_immutable_source() {
     }
     let Geometry::Brep(current) = &controller.document().entities[&id].geometry else { panic!("source changed type") };
     assert_eq!(current.source(), original_source);
+    assert!(controller.coordinator().external_reserved_bytes(MemoryClass::Kernel) > 0);
+    drop(snap);
     assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::Kernel), 0);
 }
 
@@ -527,7 +582,8 @@ fn surface_worker_receipt_rejects_stale_cursor_camera_and_document() {
         }
     };
     let receipt = get_receipt(&controller);
-    assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::Kernel), 1024 * 1024);
+    let retained = controller.coordinator().external_reserved_bytes(MemoryClass::Kernel);
+    assert!(retained > 0 && retained < 1024 * 1024, "receipt must keep its own charge but release worker scratch");
     let hit = receipt.accept(&controller, &camera, viewport, cursor).unwrap().unwrap();
     assert!((hit.world[2] - 20_f64.sqrt()).abs() < 1e-6);
     assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::Kernel), 0);
@@ -554,6 +610,7 @@ fn surface_worker_receipt_rejects_stale_cursor_camera_and_document() {
     };
     job.cancel();
     assert!(matches!(receipt.accept(&controller, &camera, viewport, cursor), Err(om9_core::Error::Canceled)));
+    drop(job);
     assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::Kernel), 0);
     let guard = controller.coordinator().reserve_external_memory(MemoryClass::Kernel, 1024 * 1024, None).unwrap();
     let mut cancelled = om9_app::session::SurfaceSnapJob::start(&controller, candidates.clone(), camera.clone(), viewport, cursor, guard).unwrap();
@@ -571,6 +628,7 @@ fn surface_worker_receipt_rejects_stale_cursor_camera_and_document() {
         assert!(std::time::Instant::now() < deadline);
         std::thread::yield_now();
     }
+    drop(cancelled);
     assert_eq!(controller.coordinator().external_reserved_bytes(MemoryClass::Kernel), 0);
     let guard = controller.coordinator().reserve_external_memory(MemoryClass::Kernel, 1024 * 1024, None).unwrap();
     let dropped = om9_app::session::SurfaceSnapJob::start(&controller, vec![candidates[0].clone(); 20], camera.clone(), viewport, cursor, guard).unwrap();
@@ -603,20 +661,20 @@ fn surface_worker_receipt_rejects_stale_cursor_camera_and_document() {
 fn face_refinement_chooses_the_first_forward_sphere_intersection() {
     let limits = Limits::default();
     let sphere = om9_kernel::brep::sphere_brep(5., 0.5, &limits).unwrap();
-    assert_eq!(sphere.display.faces.len(), 1);
+    assert_eq!(sphere.display().faces.len(), 1);
     let z = (25_f64 - 1. - 0.25).sqrt();
     let hit = om9_kernel::measurement::brep_face_ray_hit(
-        &sphere, sphere.display.faces[0], Transform::identity(),
+        &sphere, sphere.display().faces[0], Transform::identity(),
         [1., 0.5, 20.], [0., 0., -1.], [1., 0.5, -z], 0.001, &limits,
     ).unwrap();
     assert!((hit[2] - z).abs() < 1e-7, "the back-side display reference must not select the rear hit: {hit:?}");
     let inside = om9_kernel::measurement::brep_face_ray_hit(
-        &sphere, sphere.display.faces[0], Transform::identity(),
+        &sphere, sphere.display().faces[0], Transform::identity(),
         [1., 0.5, 0.], [0., 0., 1.], [1., 0.5, -z], 0.001, &limits,
     ).unwrap();
     assert!((inside[2] - z).abs() < 1e-7, "an inside-origin ray must use its forward exit");
     assert!(om9_kernel::measurement::brep_face_ray_hit(
-        &sphere, sphere.display.faces[0], Transform::identity(),
+        &sphere, sphere.display().faces[0], Transform::identity(),
         [1., 0.5, 20.], [0., 0., 1.], [1., 0.5, z], 0.001, &limits,
     ).is_err(), "a backwards-facing ray must not select behind its origin");
 }
@@ -663,6 +721,34 @@ fn a_single_box_exposes_each_intersected_face_for_canonical_depth_comparison() {
     };
     let front = receipt.accept(&controller, &camera, viewport, cursor).unwrap().unwrap();
     assert!((front.world[2] - 10.).abs() < 1e-7);
+    let missed_face = brep.topology().faces.iter().copied().find(|face| {
+        om9_kernel::measurement::try_brep_face_ray_hit(brep, *face, Transform::identity(), ray.origin,
+            ray.direction, surfaces[0].world, 0.001, &limits).unwrap().is_none()
+    }).expect("a box side misses the vertical ray");
+    let mut missed = surfaces[0].clone();
+    missed.surface_source.as_mut().unwrap().face = Some(missed_face);
+    let guard = controller.coordinator().reserve_external_memory(om9_core::budget::memory::MemoryClass::Kernel, 1024 * 1024, None).unwrap();
+    assert!(om9_app::session::SurfaceSnapJob::start(&controller, vec![surfaces[0].clone(), missed.clone()], camera.clone(), viewport, cursor, guard).is_err(),
+        "a face ID changed without a matching display witness must be rejected");
+    // Bind the missed face to its real display triangle. This synthetic broad-phase
+    // false positive exercises a valid face whose exact ray misses, not a forged ID.
+    let display = brep.display();
+    let face_index = brep.topology().faces.iter().position(|face| *face == missed_face).unwrap();
+    let (triangle_index, triangle) = display.triangles.iter().enumerate()
+        .find(|(_, triangle)| triangle[3] as usize == face_index).unwrap();
+    let source = missed.surface_source.as_mut().unwrap();
+    source.face_witness = Some((std::array::from_fn(|i| display.points[triangle[i] as usize]), display.deflection_mm));
+    source.face_witness_triangle = Some(triangle_index);
+    let guard = controller.coordinator().reserve_external_memory(om9_core::budget::memory::MemoryClass::Kernel, 1024 * 1024, None).unwrap();
+    let mut partial = om9_app::session::SurfaceSnapJob::start(&controller, vec![surfaces[0].clone(), missed], camera.clone(), viewport, cursor, guard).unwrap();
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    let partial_receipt = loop {
+        if let Some(result) = partial.try_result() { break result.unwrap(); }
+        assert!(std::time::Instant::now() < deadline);
+        std::thread::yield_now();
+    };
+    assert_eq!(partial_receipt.accept(&controller, &camera, viewport, cursor).unwrap().unwrap(), front,
+        "a valid face missed by the exact ray must not discard another valid face");
     let mut z: Vec<_> = single.iter().map(|point| point[2]).collect();
     z.sort_by(f64::total_cmp);
     assert!((z[0] - 0.).abs() < 1e-7 && (z[1] - 10.).abs() < 1e-7);
@@ -1039,6 +1125,89 @@ fn surface_candidate_resolves_the_correct_shared_instance_and_rejects_stale_cont
 }
 
 #[test]
+fn hole_face_source_remesh_reconstructs_display_probe() {
+    use om9_kernel::{creation::{self, Primitive, Profile}, editing::{self, BooleanOp, BooleanOutcome}};
+    let limits = Limits::default();
+    let profile = Profile::new(vec![[-5.,-5.,0.],[5.,-5.,0.],[5.,5.,0.],[-5.,5.,0.]]).unwrap();
+    for deflection in [0.2,0.1] {
+        let block = creation::extrude(&profile, [0.,0.,10.], true, deflection, &limits).unwrap();
+        let cutter = creation::primitive(Primitive::Cylinder { radius_mm: 2., height_mm: 10. }, deflection, &limits).unwrap();
+        let BooleanOutcome::Body(body) = editing::boolean(&block,&cutter,BooleanOp::Difference,deflection,&limits).unwrap() else { panic!("cut") };
+        let mut document = Document::with_template_tolerance("hole source remesh");
+        let entity = Entity::new("body",Geometry::Brep(body.clone()),None);let id=entity.id;
+        document.entities.insert(id,entity);
+        let path=std::env::temp_dir().join(format!("om9-hole-remesh-{}.om9",uuid::Uuid::new_v4()));
+        struct Cleanup(std::path::PathBuf);impl Drop for Cleanup {fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}
+        let _cleanup=Cleanup(path.clone());
+        om9_archive::Archive::save(&path,&document,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+        let reopened=om9_archive::Archive::open(&path,&limits).unwrap();
+        let Geometry::Brep(reopened_body)=&reopened.entities[&id].geometry else {panic!("reopened B-rep")};
+        assert_eq!(body.source(),reopened_body.source());
+        assert_eq!(body.display().points,reopened_body.display().points);
+        assert_eq!(body.display().triangles,reopened_body.display().triangles);
+        let captured = om9_kernel::brep::capture_source_topology(reopened_body.source(),deflection,0.3,&limits,|_,_| Ok(())).unwrap();
+        let actual=reopened_body.display();let fresh=captured.brep().display();
+        assert_eq!(actual.points,fresh.points,"same-source mesh vertices at deflection {deflection}");
+        assert_eq!(actual.triangles,fresh.triangles,"same-source face triangles at deflection {deflection}");
+        assert_eq!(actual.topology.face_edges,fresh.topology.face_edges,"same-source face/edge incidence");
+        let top=*actual.triangles.iter().find(|tri|tri[..3].iter().all(|index|(actual.points[*index as usize][2]-10.).abs()<1e-7)).unwrap();
+        let mut forged_points=actual.points.clone();let start=forged_points.len() as u32;
+        for angle in [0.,std::f64::consts::TAU/3.,2.*std::f64::consts::TAU/3.] {
+            forged_points.push([2.*angle.cos(),2.*angle.sin(),10.]);
+        }
+        let mut forged=actual.triangles.clone();forged.push([start,start+1,start+2,top[3]]);
+        assert!(forged_points!=fresh.points && forged!=fresh.triangles,
+            "a triangle spanning the hole cannot match the fresh source mesh");
+        let mut relabeled=actual.triangles.clone();
+        relabeled[0][3]=(relabeled[0][3]+1) % actual.topology.faces.len() as u32;
+        assert_ne!(relabeled,fresh.triangles,"changing a face association cannot match the fresh source mesh");
+        let mut controller=om9_app::session::Controller::new(reopened,limits).unwrap();
+        let stamp=controller.document().stamp(id).unwrap();
+        let lease=controller.coordinator().capture_brep_source(&stamp).unwrap();
+        let Geometry::Brep(reopened_body)=&controller.document().entities[&id].geometry else {panic!("reopened B-rep")};
+        let display=reopened_body.display();
+        let triangle=*display.triangles.iter().find(|tri|tri[..3].iter().all(|index|(display.points[*index as usize][2]-10.).abs()<1e-7)).unwrap();
+        let witness=std::array::from_fn(|index|display.points[triangle[index] as usize]);
+        let cancel=om9_core::transaction::Cancellation::default();
+        editing::verify_captured_face_display_cancellable(&lease,display,triangle[3] as usize,witness,1e-6,&limits,&cancel,|_,_|Ok(())).unwrap();
+        let center=std::array::from_fn(|axis|(witness[0][axis]+witness[1][axis]+witness[2][axis])/3.);
+        assert!(editing::verify_captured_face_display_cancellable(&lease,display,triangle[3] as usize,
+            [witness[0],witness[1],center],1e-6,&limits,&cancel,|_,_|Ok(())).is_err(),"witness must belong to the selected display face");
+        let mut corrupted=display.clone();
+        corrupted.points=forged_points;corrupted.triangles=forged;
+        assert!(editing::verify_captured_face_display_cancellable(&lease,&corrupted,triangle[3] as usize,witness,1e-6,&limits,&cancel,|_,_|Ok(())).is_err());
+        let mut corrupted=display.clone();corrupted.triangles=relabeled;
+        assert!(editing::verify_captured_face_display_cancellable(&lease,&corrupted,triangle[3] as usize,witness,1e-6,&limits,&cancel,|_,_|Ok(())).is_err());
+        let canceled=om9_core::transaction::Cancellation::default();canceled.cancel();
+        assert!(matches!(editing::verify_captured_face_display_cancellable(&lease,display,triangle[3] as usize,witness,1e-6,&limits,&canceled,|_,_|Ok(())),Err(om9_core::Error::Canceled)));
+        assert!(matches!(editing::verify_captured_face_display_cancellable(&lease,display,triangle[3] as usize,witness,1e-6,&limits,&cancel,|_,_|Err(om9_core::Error::Budget("fixture"))),Err(om9_core::Error::Budget(_))));
+        let mut validation_calls=0;
+        lease.validate_canonical_admitted(&limits,|_,_|{validation_calls+=1;Ok(())}).unwrap();
+        let mut calls=0;
+        assert!(matches!(editing::verify_captured_face_display_cancellable(&lease,display,triangle[3] as usize,witness,1e-6,&limits,&cancel,|_,_|{
+            calls+=1;if calls>validation_calls {Err(om9_core::Error::Budget("remesh fixture"))} else {Ok(())}
+        }),Err(om9_core::Error::Budget("remesh fixture"))));
+        assert!(calls>validation_calls,"the refusal must occur during remesh admission");
+        let mid_cancel=om9_core::transaction::Cancellation::default();let mut calls=0;
+        assert!(matches!(editing::verify_captured_face_display_cancellable(&lease,display,triangle[3] as usize,witness,1e-6,&limits,&mid_cancel,|_,_|{
+            calls+=1;if calls>validation_calls {mid_cancel.cancel();Err(om9_core::Error::Canceled)} else {Ok(())}
+        }),Err(om9_core::Error::Canceled)));
+        let key=display.topology.faces[triangle[3] as usize];
+        drop(lease);
+        controller.select_objects(&[id]).unwrap();
+        controller.select_subobject(id,om9_scene::scene::Subelement::BrepFace(key)).unwrap();
+        let reservation=controller.coordinator().reserve_external_memory(om9_core::budget::memory::MemoryClass::Kernel,16*1024*1024,None).unwrap();
+        let mut job=om9_app::session::face_verification::FaceVerificationJob::start(&controller,controller.subselection()[0].clone(),reservation).unwrap();
+        let deadline=std::time::Instant::now()+std::time::Duration::from_secs(20);
+        let receipt=loop { if let Some(result)=job.try_result() {break result.unwrap()}
+            assert!(std::time::Instant::now()<deadline);std::thread::sleep(std::time::Duration::from_millis(2)); };
+        assert!(receipt.accept(&controller).is_ok());
+        controller.clear_subselection();
+        assert!(receipt.accept(&controller).is_err());
+    }
+}
+
+#[test]
 fn indexed_face_refinement_respects_a_trimmed_through_hole() {
     use om9_kernel::{creation::{self, Primitive, Profile}, editing::{self, BooleanOp, BooleanOutcome}};
     let limits = Limits::default();
@@ -1046,6 +1215,18 @@ fn indexed_face_refinement_respects_a_trimmed_through_hole() {
     let block = creation::extrude(&profile, [0., 0., 10.], true, 0.2, &limits).unwrap();
     let cutter = creation::primitive(Primitive::Cylinder { radius_mm: 2., height_mm: 10. }, 0.2, &limits).unwrap();
     let BooleanOutcome::Body(body) = editing::boolean(&block, &cutter, BooleanOp::Difference, 0.2, &limits).unwrap() else { panic!("cut must retain a solid") };
+    let display = body.display();
+    let top = *display.triangles.iter().find(|tri| tri[..3].iter().all(|i| (display.points[*i as usize][2] - 10.).abs() < 1e-7)).unwrap();
+    let witness = std::array::from_fn(|i| display.points[top[i] as usize]);
+    editing::verify_face_display(&body, display, top[3] as usize, witness, 1e-6, &limits).unwrap();
+    let mut through_trim = display.clone();
+    let start = through_trim.points.len() as u32;
+    for angle in [0., std::f64::consts::TAU / 3., 2. * std::f64::consts::TAU / 3.] {
+        through_trim.points.push([2. * angle.cos(), 2. * angle.sin(), 10.]);
+    }
+    through_trim.triangles.push([start, start+1, start+2, top[3]]);
+    assert!(editing::verify_face_display(&body, &through_trim, top[3] as usize, witness, 1e-6, &limits).is_err(),
+        "triangle spanning a trimmed hole must fail even though its vertices lie on the boundary");
     let mut document = Document::with_template_tolerance("trimmed hole snap");
     let entity = Entity::new("drilled block", Geometry::Brep(body), None);
     let id = entity.id;
@@ -1067,6 +1248,82 @@ fn indexed_face_refinement_respects_a_trimmed_through_hole() {
     let face = through_hole.surface_source.as_ref().unwrap().face.unwrap();
     assert!(om9_kernel::measurement::brep_face_ray_hits(body, &[face, face], Transform::identity(), ray.origin, ray.direction, 0.001, &limits).is_err(),
         "grouped refinement must also reject a ray through a trimmed hole");
+}
+
+#[test]
+fn displayed_hole_chord_does_not_authorize_a_source_surface_hit() {
+    use om9_kernel::{creation::{self, Primitive, Profile}, editing::{self, BooleanOp, BooleanOutcome}};
+    let limits = Limits::default();
+    let profile = Profile::new(vec![[-5.,-5.,0.], [5.,-5.,0.], [5.,5.,0.], [-5.,5.,0.]]).unwrap();
+    let block = creation::extrude(&profile, [0.,0.,10.], true, 0.2, &limits).unwrap();
+    let cutter = creation::primitive(Primitive::Cylinder { radius_mm: 2., height_mm: 10. }, 0.2, &limits).unwrap();
+    let BooleanOutcome::Body(body) = editing::boolean(&block, &cutter, BooleanOp::Difference, 0.2, &limits).unwrap() else { panic!("cut") };
+    let display = body.display();
+    let top = display.triangles.iter().find(|tri| tri[..3].iter().all(|i| (display.points[*i as usize][2]-10.).abs()<1e-7)).unwrap();
+    let face_id = display.topology.faces[top[3] as usize];
+    let mut closest = (f64::INFINITY, [0.; 3]);
+    for tri in display.triangles.iter().filter(|tri| tri[3] == top[3]) {
+        for j in 0..3 {
+            let a = display.points[tri[j] as usize];
+            let b = display.points[tri[(j+1)%3] as usize];
+            let c = display.points[tri[(j+2)%3] as usize];
+            let dx=b[0]-a[0]; let dy=b[1]-a[1];
+            let length_squared=dx*dx+dy*dy;
+            if length_squared == 0. { continue; }
+            let t=(-(a[0]*dx+a[1]*dy)/length_squared).clamp(0.,1.);
+            let edge=[a[0]+t*dx,a[1]+t*dy,10.];
+            let point=[edge[0]*0.9999+c[0]*0.0001,edge[1]*0.9999+c[1]*0.0001,10.];
+            let radius=point[0].hypot(point[1]);
+            if radius < closest.0 { closest=(radius,point); }
+        }
+    }
+    assert!(closest.0 < 2.-1e-4, "fixture must exercise a displayed chord inside the exact hole");
+    let mut document=Document::with_template_tolerance("hole chord");
+    let entity=Entity::new("drilled",Geometry::Brep(body),None); let id=entity.id; document.entities.insert(id,entity);
+    let controller=om9_app::session::Controller::new(document,limits).unwrap();
+    let camera=Camera::orthographic([0.,0.,30.],[0.,0.,0.],[0.,1.,0.],14.).unwrap();
+    let viewport=Viewport {origin:[0.,0.],size:[700.,700.]};
+    let cursor=camera.project(closest.1,viewport).unwrap().unwrap().screen;
+    let candidates=om9_scene::osnap::candidates(controller.scene().unwrap(),&camera,viewport,cursor,Default::default(),None).unwrap();
+    let candidate=candidates.iter().find(|candidate| candidate.root==Some(id) && candidate.kind==om9_scene::osnap::SnapKind::Surface
+        && candidate.surface_source.as_ref().is_some_and(|source| source.face==Some(face_id))).expect("display triangle covers the chord");
+    assert!(matches!(controller.refine_surface_snap(candidate,&camera,viewport),
+        Err(om9_core::Error::Missing("visible exact surface snap intersection"))),
+        "display coverage must not produce a point inside the exact hole");
+    let reservation = controller.coordinator().reserve_external_memory(
+        om9_core::budget::memory::MemoryClass::Kernel, 1024*1024, None).unwrap();
+    let mut job = om9_app::session::SurfaceSnapJob::start(&controller, vec![candidate.clone()], camera.clone(), viewport, cursor, reservation).unwrap();
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+    let receipt = loop {
+        if let Some(result) = job.try_result() { break result.unwrap(); }
+        assert!(std::time::Instant::now() < deadline);
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    };
+    assert!(receipt.accept(&controller, &camera, viewport, cursor).unwrap().is_none(),
+        "background refinement must not publish a point inside the exact hole");
+}
+
+#[test]
+fn surface_snap_on_drilled_block_checks_source_through_hole() {
+    use om9_kernel::{creation::{self,Primitive,Profile},editing::{self,BooleanOp,BooleanOutcome}};
+    let limits=Limits::default();
+    let profile=Profile::new(vec![[-5.,-5.,0.],[5.,-5.,0.],[5.,5.,0.],[-5.,5.,0.]]).unwrap();
+    let block=creation::extrude(&profile,[0.,0.,10.],true,0.2,&limits).unwrap();
+    let cutter=creation::primitive(Primitive::Cylinder {radius_mm:2.,height_mm:10.},0.2,&limits).unwrap();
+    let BooleanOutcome::Body(body)=editing::boolean(&block,&cutter,BooleanOp::Difference,0.2,&limits).unwrap() else {panic!("cut")};
+    let mut doc=Document::with_template_tolerance("drilled block surface snap");
+    let entity=Entity::new("drilled block",Geometry::Brep(body),None);let id=entity.id;doc.entities.insert(id,entity);
+    let c=om9_app::session::Controller::new(doc,limits).unwrap();
+    let camera=Camera::orthographic([0.,0.,30.],[0.,0.,0.],[0.,1.,0.],14.).unwrap();
+    let viewport=Viewport {origin:[0.,0.],size:[700.,700.]};
+    let cursor=camera.project([3.,1.,10.],viewport).unwrap().unwrap().screen;
+    let snaps=om9_scene::osnap::candidates(c.scene().unwrap(),&camera,viewport,cursor,Default::default(),None).unwrap();
+    let candidate=snaps.iter().find(|s|s.kind==om9_scene::osnap::SnapKind::Surface&&s.root==Some(id)).unwrap();
+    let point=c.refine_surface_snap(candidate,&camera,viewport).unwrap().world;
+    assert!((0..3).all(|i|(point[i]-[3.,1.,10.][i]).abs()<1e-6),"{point:?}");
+    let mut in_hole=candidate.clone();
+    in_hole.surface_source.as_mut().unwrap().cursor=camera.project([0.,0.,10.],viewport).unwrap().unwrap().screen;
+    assert!(c.refine_surface_snap(&in_hole,&camera,viewport).is_err());
 }
 
 #[test]

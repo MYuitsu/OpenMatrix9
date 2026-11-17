@@ -973,6 +973,36 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "registered_source_2026_11_13": {
+      "status": "SCOPED_C1_CONSUMER_CHECKS_PASSED",
+      "scope": "Attested preselected root DupEdge matches topology and extracts source edges using an independently registered source. Box fixture checks two scene profiles and Undo/Redo.",
+      "limitations": "Document is still captured; proof rebind validates document display and this path remains synchronous. Canonical document/history and cold restore remain open.",
+      "evidence": "docs/validation/2026-11-13-dupedge-registered-source.md"
+    },
+    "external_v5_native_edge_2026_11_13": "A public openNURBS V5 B-rep imported as NativeBrep and reopened yielded one selected edge matching the published geometry and Undo/Redo in simulated UI; other external geometry and desktop remain unverified. Evidence: docs/validation/2026-11-13-dupedge-external-v5.md",
+    "rigid_screen_source_guard_2026_11_13": "A tested coarse rigid cylinder source point outside the click radius now requests a fresh view; the reopened trimmed arc completes after reselection. An excessively coarse temporary NativeBrep view refuses without a refresh loop. Evidence: docs/validation/2026-11-13-dupedge-rigid-screen-verification.md",
+    "native_brep_two_edges_2026_11_13": "One reopened NativeBrep box fixture selected, toggled and duplicated two correct edges in one Undo/Redo through simulated UI. Other topology and desktop remain unverified. Evidence: docs/validation/2026-11-13-dupedge-native-gap.md#multiple-selected-native-edges",
+    "native_brep_authored_3dm_arc_2026_11_13": "One authored openNURBS quarter-cylinder 3DM imported as NativeBrep and reopened in OM9 yielded its selected trimmed arc with sampled geometry and Undo/Redo through simulated UI. Independent files, orientation parity and desktop remain unverified. Evidence: docs/validation/2026-11-13-dupedge-native-gap.md#authored-3dm-trimmed-arc-import",
+    "native_brep_box_pick_gap_2026_11_13": "The earlier NativeBrep pick refusal is resolved for a tested reopened affine box and one cylinder edge through a source-derived temporary view. Simulated CMD/menu, Undo/Redo and consent-based memory recovery passed in scoped fixtures. External imports and desktop remain unverified. Evidence: docs/validation/2026-11-13-dupedge-native-gap.md",
+    "desktop_fixture_2026_11_11": {
+      "status": "SCOPED_DESKTOP_AUTOMATION_HUMAN_UI_PENDING",
+      "scope": "On a synthetic old-v4 cylinder, native desktop automation selected the old chord, reselected a regenerated source edge, completed DupEdge, used Undo and the Redo toolbar button, and saved a result verified as one B-rep and one radius-2-mm curve at Z=5 mm.",
+      "user_confirmation": "On 2026-11-11 the user said the desktop check was okay and they saw the object drawn in this fixture interaction. This is confirmation of that observed result, not a blanket M03 UI signoff.",
+      "evidence": "docs/validation/2026-11-10-dupedge-source-first-slice.md",
+      "limitations": "One fixture and automated pointer/keyboard input only. A later recovery-feedback fix passed offscreen tests but was not retested on desktop. Manual UI signoff and general geometry remain open."
+    },
+    "source_view_update_2026_11_11": {
+      "status": "SCOPED_AUTOMATED_VALIDATION_MANUAL_UI_PENDING",
+      "scope": "For tested old-v4 display mismatches that resolve to no source edge in tolerance, a background source view is published for DupEdge and the user reselects; reopened synthetic cylinder and NURBS fixtures check source curves and Undo/Redo. Offscreen tests exercise the application menu and command handlers and viewport clicks. Simulated pressure, stale selection, cancellation and scene isolation have scoped tests.",
+      "evidence": "docs/validation/2026-11-10-dupedge-source-first-slice.md",
+      "limitations": "The tested menu handler is not a physical menu click. Desktop interaction on the current build, general historical files and topology, native OCCT peak and worker-start budget refusal remain unverified. Other source verification errors do not automatically trigger this recovery."
+    },
+    "source_curve_update_2026_11_10": {
+      "status": "SCOPED_AUTOMATED_VALIDATION_MANUAL_UI_PENDING",
+      "scope": "Source curves from one root OCCT B-rep with rigid placement and one transaction; tested preselection and command-first selection after reopening scoped v4 and authored 3DM fixtures, including menu/CMD, Undo/Redo and simulated viewport input. Shaded viewport checks displayed occlusion for tested cases. Adaptive numerical source-distance checks refuse tested mismatches and exhausted verification budgets.",
+      "evidence": "docs/validation/2026-11-10-dupedge-source-first-slice.md",
+      "limitations": "Desktop signoff, native peak, general imported topology, arbitrary display integrity, full shaded occlusion and other input modes remain unverified or unsupported."
+    },
     "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
@@ -1019,6 +1049,56 @@
       "documented_script": "DupEdge",
       "binding_state": "Implemented",
       "same_id_menu_and_commandline": true
+    },
+    "affine_placement_update_2026_11_12": {
+      "status": "SCOPED_REOPEN_AUTOMATED_FIXTURES_PASSED",
+      "scope": "Tested reopened box and cylinder source picks retain non-rigid placement and Undo/Redo; egui viewport and temporary source-view fixtures pass.",
+      "evidence": "docs/validation/2026-11-12-dupedge-affine-placement.md",
+      "limitations": "General affine/topology, desktop, native peak and near-singular precision are not established; conservative verification can refuse coarse-display picks."
+    },
+    "coarse_affine_recovery_update_2026_11_12": {
+      "status": "SCOPED_HEADLESS_RESELECTION_PASSED",
+      "scope": "Coarse scale/shear cylinder viewport mismatch triggers a finer temporary source view and reselection; busy/cancel preserve document and Redo.",
+      "evidence": "docs/validation/2026-11-12-dupedge-affine-placement.md#coarse-affine-view-recovery",
+      "limitations": "Desktop, native peak, arbitrary zoom or placement and all source topologies are unverified."
+    },
+    "memory_retry_2026_11_13": {
+      "status": "SCOPED_AUTOMATED_PASS",
+      "scope": "Pending edge and preselected menu/CMD DupEdge offer consent-based memory retry in tested fixtures; context changes abort before history removal.",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md#dupedge-selected-edge-memory-recovery",
+      "limitations": "Simulated managed pressure; physical OOM, real desktop, all edges and all native allocations unverified.",
+      "followup": "Existing command ID and synthetic temporary-edge recovery passed; real reopened source-view with Undo reclamation and desktop remain unverified.",
+      "reopened_worker_followup": "Reopened Box and requested real source-view worker retained a temporary edge under simulated pressure; consent reclaimed one history entry and retried, output contained the picked midpoint, Undo/Redo passed. The history mesh was inserted into the reopened in-memory fixture.",
+      "automatic_old_view_followup": "Reopened coarse-chord cylinder automatically rebuilt source view through simulated GPU viewport input; consent reclaimed one Undo and retried a verified circular output with Undo/Redo. History mesh was inserted into reopened snapshot; physical desktop and OOM remain unverified.",
+      "view_worker_followup": "Recognized worker-start and publication memory refusals support consent-based retry; stale worker errors cannot retry a changed selection. Offscreen GPU reopened cylinder fixtures covered active/preselected startup and publication; fixed worker limits remain distinct.",
+      "single_consent_async_followup": "One consent persists through tested asynchronous worker memory retries; cancellation, changed context, fixed limits and exhaustion stop safely. GPU fixture uses simulated pressure and injected worker errors.",
+      "zero_discard_worker_followup": "After pressure was released before consent, reopened coarse-chord preselection via command ID completed source-view retry without dropping either Undo; source-edge result and Undo/Redo verified offscreen.",
+      "worker_release_followup": "A failed source-view worker is retried once after releasing its reservations before another Undo is removed; injected repeat/exhaustion tests and a no-extra-removal GPU fixture passed.",
+      "root_selection_followup": "A changed root selection rejects a pending stale source view in tested offscreen recovery and ordinary worker cases; drawing and Redo remain, with no further Undo removal. Physical desktop and OOM unverified. Evidence: docs/validation/2026-11-12-memory-recovery-choice.md#root-selection-change-during-source-view-worker"
+    },
+    "external_v5_two_edges_2026_11_13": {
+      "status": "SCOPED_SIMULATED_UI_PASSED",
+      "scope": "One external V5 B-rep, two straight edges after import and reopen; independently sampled points and one Undo/Redo passed.",
+      "remaining": "Original camera reported ambiguous second edge; desktop and broader files remain unverified.",
+      "evidence": "docs/validation/2026-11-13-dupedge-external-v5-two-edges.md"
+    },
+    "external_v5_overlap_2026_11_13": {
+      "status": "SCOPED_SIMULATED_UI_PASSED",
+      "scope": "One public V5 B-rep has two distinct edges overlapping at the pointer in one orthographic camera; the command refuses with document and Redo unchanged.",
+      "remaining": "Physical desktop and other overlapping configurations unverified.",
+      "evidence": "docs/validation/2026-11-13-dupedge-external-v5-two-edges.md#overlapping-projection-follow-up"
+    },
+    "external_v5_ambiguity_continue_2026_11_13": {
+      "status": "ONE_FIXTURE_SIMULATED_UI_PASSED",
+      "scope": "An earlier selected edge survives an ambiguous click and programmatic camera change; a second edge can be selected and both committed in one Undo/Redo.",
+      "remaining": "Mouse camera interaction, physical desktop and other inputs unverified.",
+      "evidence": "docs/validation/2026-11-13-dupedge-external-v5-two-edges.md#continue-after-ambiguity"
+    },
+    "reopened_box_desktop_2026_11_13": {
+      "status": "ONE_DESKTOP_FIXTURE_PASSED",
+      "scope": "Reopened Box, physical viewport edge click and Enter, Ctrl+Z and onscreen Redo; menu-origin command invoked through live controller.",
+      "remaining": "One straight edge; later small-hole changes not in running executable.",
+      "evidence": "docs/validation/2026-11-13-dupedge-desktop-preparation.md#desktop-box-selection-after-reopening"
     }
   }
 }

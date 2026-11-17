@@ -134,6 +134,11 @@ impl Scene {
             if !object.visible || !object.selectable || !object.has_pick_geometry() {
                 continue;
             }
+            // A crossing of the fallback surface need not cross the trim.
+            // An enclosing window can still select the complete object.
+            if !window && object.buffers.is_trim_display_fallback() {
+                continue;
+            }
             let transform = object.display_transform()?;
             let points = match object.buffers.as_ref() {
                 RenderBuffers::Points { points, .. } | RenderBuffers::Curve { points, .. } => {

@@ -8,6 +8,53 @@ use om9_core::{
 use om9_scene::{camera::{Camera, Viewport}, osnap::{self, SnapKind, SnapSettings}, scene::Scene};
 
 #[test]
+fn fallback_display_still_occludes_targets_outside_its_trim() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::plane([-2.,-2.,0.],[1.,0.,0.],[0.,1.,0.],4.,4.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.2,0.2],[0.8,0.2],[0.8,0.8],[0.2,0.8]],
+        inners:vec![vec![[0.3,0.3],[0.7,0.3],[0.7,0.7],[0.3,0.7]],vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("unverified trim",Geometry::Surface(surface),None);
+    set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut document=Document::new("trim fallback occlusion");document.entities.insert(id,entity);
+    let scene=Scene::capture(Arc::new(document),0,&limits).unwrap();
+    assert!(scene.objects[0].buffers.is_trim_display_fallback());
+    let viewport=Viewport {origin:[0.,0.],size:[400.,400.]};
+    let camera=Camera::orthographic([0.,0.,10.],[0.,0.,0.],[0.,1.,0.],4.).unwrap();
+    let cursor=camera.project([1.5,0.,0.],viewport).unwrap().unwrap().screen;
+    // Outside the outer UV boundary, but the displayed fallback covers it.
+    assert!(osnap::visible_display_occludes(&scene,&camera,viewport,cursor,[1.5,0.,-1.],0.,&[],None).unwrap());
+    assert!(!osnap::visible_display_occludes_with_fallback_proof(&scene,&camera,viewport,cursor,[1.5,0.,-1.],0.,&[],None,|_|true).unwrap());
+    let mut document=scene.document.as_ref().clone();
+    let mesh=om9_core::geometry::Mesh {vertices:vec![[1.,-1.,-0.5],[2.,-1.,-0.5],[1.,1.,-0.5]],
+        faces:vec![vec![0,1,2]],normals:vec![],colors:vec![],corner_uvs:vec![]};
+    let occluder=Entity::new("real occluder",Geometry::Mesh(mesh),None);document.entities.insert(occluder.id,occluder);
+    let scene=Scene::capture(Arc::new(document),1,&limits).unwrap();
+    assert!(osnap::visible_display_occludes_with_fallback_proof(&scene,&camera,viewport,cursor,[1.5,0.,-1.],0.,&[],None,|_|true).unwrap());
+}
+
+#[test]
+fn fallback_surface_does_not_hide_the_snap_candidate_behind_it() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::plane([-2.,-2.,0.],[1.,0.,0.],[0.,1.,0.],4.,4.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.2,0.2],[0.8,0.2],[0.8,0.8],[0.2,0.8]],
+        inners:vec![vec![[0.3,0.3],[0.7,0.3],[0.7,0.7],[0.3,0.7]],vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut front=Entity::new("unverified",Geometry::Surface(surface.clone()),None);
+    set_trimmed_surface(&mut front,&trim,&limits).unwrap();let front_id=front.id;
+    let mut behind=Entity::new("valid behind",Geometry::Surface(surface),None);
+    behind.placement=Transform::translation([0.,0.,-1.]);let behind_id=behind.id;
+    let mut document=Document::new("fallback snap candidates");document.entities.insert(front_id,front);document.entities.insert(behind_id,behind);
+    let scene=Scene::capture(Arc::new(document),0,&limits).unwrap();
+    let viewport=Viewport {origin:[0.,0.],size:[400.,400.]};
+    let camera=Camera::orthographic([0.,0.,10.],[0.,0.,0.],[0.,1.,0.],4.).unwrap();
+    let cursor=camera.project([1.5,0.,0.],viewport).unwrap().unwrap().screen;
+    let candidates=osnap::candidates(&scene,&camera,viewport,cursor,SnapSettings::default(),None).unwrap();
+    assert!(!candidates.iter().any(|c|c.root==Some(front_id)));
+    assert!(candidates.iter().any(|c|c.kind==SnapKind::Surface && c.root==Some(behind_id)));
+}
+
+#[test]
 fn visible_small_surface_triangles_remain_snap_candidates() {
     let limits = Limits::default();
     let surface = om9_core::surface_kernel::plane([0., 0., 0.], [1., 0., 0.], [0., 1., 0.], 2., 2., &limits).unwrap();
@@ -63,10 +110,10 @@ fn native_brep_display_blocks_surface_behind_even_if_not_a_snap_reference() {
     use om9_core::geometry::{Mesh, NativeBrep};
     let limits = Limits::default();
     let native = NativeBrep {
-        display: Mesh {
+        display: std::sync::Arc::new(Mesh {
             vertices: vec![[-2., -2., 0.], [2., -2., 0.], [2., 2., 0.], [-2., 2., 0.]],
             faces: vec![vec![0, 1, 2, 3]], normals: vec![], colors: vec![], corner_uvs: vec![],
-        },
+        }),
         payload: vec![1].into(), crc: 0,
     };
     let mut document = Document::new("native brep display occlusion");

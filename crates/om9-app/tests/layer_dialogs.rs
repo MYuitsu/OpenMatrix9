@@ -7,7 +7,6 @@ use om9_core::{
     layers::PresetSlot,
     model::{Document, Entity, Layer},
 };
-use std::sync::Arc;
 fn slot(n: u8) -> PresetSlot {
     PresetSlot::new(n).unwrap()
 }
@@ -78,10 +77,7 @@ fn color_confirmation_refreshes_by_layer_scene_and_preserves_alpha_identity_and_
     assert_eq!(c.document().current_layer, Some(id));
     assert_eq!(c.document().entities, before);
     assert_eq!(c.scene().unwrap().objects[0].color, [21, 43, 65, 90]);
-    assert!(Arc::ptr_eq(
-        &buffers,
-        &c.scene().unwrap().objects[0].buffers
-    ));
+    assert!(buffers.ptr_eq(&c.scene().unwrap().objects[0].buffers));
     c.undo().unwrap();
     assert_eq!(c.document().layers[&id].color, [10, 20, 30, 90]);
     c.redo().unwrap();

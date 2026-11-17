@@ -204,5 +204,13 @@
       "id": "OM9-L4-01-01-007-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-01 - Febe Application Shell Docking/L3-007 - Global Status And Error Surface/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "trim_display_warning_2026_11_12": {
+      "status": "TRIM_DISPLAY_WARNING_HEADLESS_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#visible-fallback-warning",
+      "scope": "Status bar warns when a surface falls back to full-source display due to unsupported trim; existing warnings/errors take priority, warning returns after error acknowledgment. One headless egui fixture and all 11 shell docking tests passed; debug build and public source audit passed.",
+      "limitations": "Fallback still renders full source. Desktop and narrow-window visibility, accessibility, trim seam/curvature and edit Undo/Redo remain unverified. Plan A remains open; B deferred."
+    }
+  }
 }

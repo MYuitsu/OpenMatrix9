@@ -12,7 +12,7 @@ pub trait OptionalMemoryCache: Send + Sync {
 }
 pub(super) struct OptionalCacheEntry {
     sequence: u64,
-    owner: Weak<dyn OptionalMemoryCache>,
+    pub(super) owner: Weak<dyn OptionalMemoryCache>,
 }
 fn reclaimable(error: &Error) -> bool {
     matches!(error, Error::Budget("bytes" | "managed RAM" | "available physical RAM" | "available system commit" | "external memory headroom"))
@@ -52,23 +52,50 @@ impl TransactionCoordinator {
     /// Empty admission peer sharing existing owner/policy registries. No new
     /// document, journal or identity allocation is made by this constructor.
     pub fn memory_admission_peer(&self) -> Result<Self> {
+        self.memory_admission_peer_with_held(Usage::default())
+    }
+    /// Keep caller-private materialized bytes in the account while peer/cache
+    /// metadata is allocated. The caller retains its usual lifetime obligation
+    /// for those bytes after this startup operation completes.
+    pub fn memory_admission_peer_with_held(&self, held: Usage) -> Result<Self> {
         self.available()?;
+        let _startup = if held.bytes != 0 {
+            Some(self.reserve_external_memory_with_allocated(crate::budget::memory::MemoryClass::CpuCache,
+                held.bytes, held.bytes, None, Usage { bytes: 0, ..held })?)
+        } else {
+            if held != Usage::default() { self.retained_usage_with_held_usage(held)?; }
+            None
+        };
         if !self.memory_peer_initialized.load(Ordering::Acquire) {
             self.register_retained_documents()?;
             self.memory_peer_initialized.store(true, Ordering::Release);
         }
         let identities = self.external_reservations.lock().unwrap_or_else(|e| e.into_inner()).empty_peer_identities.clone();
-        Ok(Self {
+        let mut peer = Self {
             world: World { documents: BTreeMap::new() }, limits: self.limits,
             physical_memory_sampler: self.physical_memory_sampler, authority: self.authority, epoch: 1,
-            scope_generation: 0, undo: Vec::new(), redo: Vec::new(), scope: None, barrier: false,
+            scope_generation: 0, undo: Vec::new(), redo: Vec::new(), scope: None, barrier: false, history_pending: None,
             benchmark_no_undo: false, undo_policy: UndoPolicy::default(), undo_ram_limit_mb: None,
-            undo_memory_stats: UndoMemoryStats::default(), undo_capture_generation: 0, shared_peer_identities: Some(identities.clone()), identities,
+            undo_memory_stats: UndoMemoryStats::default(), undo_capture_generation: 0,
+            undo_evidence_upper: 0, undo_evidence_count: 0,
+            overflow_evidence: DeferredUndoEvidence { entries: Vec::new(), _reservation: None },
+            shared_peer_identities: Some(identities.clone()), identities,
             current_validation_cache: Mutex::new(None), external_documents: self.external_documents.clone(),
+            current_storage_cache: Mutex::new([None, None]),
+            retained_projection: None,
+            projection_reclaimer: None,
+            projection_validation: Mutex::new(()),
+            storage_cache_hits: AtomicU64::new(0), storage_cache_misses: AtomicU64::new(0),
+            representations: self.representations.clone(),
             external_reservations: self.external_reservations.clone(), capture_generation: self.capture_generation.clone(),
             external_export_active: self.external_export_active.clone(),
             memory_peer_initialized: AtomicBool::new(true),
-        })
+        };
+        if let Some((root, owner)) = Self::make_projection_root(self, Usage::default()) {
+            peer.retained_projection = Some(root);
+            peer.projection_reclaimer = Some(owner);
+        }
+        Ok(peer)
     }
     /// Register a weak callback. The index Vec capacity belongs to the account
     /// and is charged by accounted_classes, including old/new growth overlap.
@@ -158,17 +185,98 @@ impl TransactionCoordinator {
             .ok_or(Error::Overflow("optional index released"))
     }
     pub(super) fn with_optional_cache_reclamation<T>(&self, _requested: u64, mut operation: impl FnMut() -> Result<T>) -> Result<T> {
-        let maximum = self.external_reservations.lock().unwrap_or_else(|e| e.into_inner()).optional_caches.len().saturating_add(1);
-        // Retry after each indivisible cache, stopping as soon as admission
-        // succeeds. Never flush every cache to satisfy a one-byte shortage.
-        for _ in 0..maximum {
+        enum Orphan {
+            Occt(crate::brep::BrepRepresentation),
+            Native(crate::geometry::NativeBrepRepresentation),
+        }
+        let mut orphan_budget = self.representations.try_lock().map_or(0, |store| store.entry_count());
+        let maximum = {
+            let account = self.external_reservations.lock().unwrap_or_else(|e| e.into_inner());
+            let index = Usage::array::<OptionalCacheEntry>(account.optional_caches.capacity())?.bytes;
+            account.by_class.iter().fold(u128::from(index) + u128::from(account.projection_cache_bytes.load(Ordering::Acquire)), |sum, bytes| sum + u128::from(*bytes))
+        };
+        let mut released = 0u128;
+        // Retry after each indivisible entry, stopping as soon as admission
+        // succeeds. Bound concurrent cache churn by the initially held bytes.
+        loop {
             match operation() {
                 Err(error) if reclaimable(&error) => {
-                    if self.reclaim_optional_memory(1)? == 0 { return Err(error); }
+                    // Source-dead entries require no reconstruction proof. Pull
+                    // one out under the store lock, then release its owners
+                    // after unlocking before rechecking admission.
+                    if orphan_budget != 0 {
+                        let retired = match self.representations.try_lock() {
+                            Ok(mut store) => store.take_orphaned().map(Orphan::Occt)
+                                .or_else(|| store.take_orphaned_native().map(Orphan::Native)),
+                            Err(std::sync::TryLockError::Poisoned(error)) => {
+                                let mut store = error.into_inner();
+                                store.take_orphaned().map(Orphan::Occt)
+                                    .or_else(|| store.take_orphaned_native().map(Orphan::Native))
+                            }
+                            Err(std::sync::TryLockError::WouldBlock) => None,
+                        };
+                        if let Some(retired) = retired {
+                            orphan_budget -= 1;
+                            match retired { Orphan::Occt(value) => drop(value), Orphan::Native(value) => drop(value) }
+                            continue;
+                        }
+                        orphan_budget = 0;
+                    }
+                    if released >= maximum { return Err(error); }
+                    let bytes = self.reclaim_optional_memory(1)?;
+                    if bytes == 0 { return Err(error); }
+                    released += u128::from(bytes);
                 }
                 result => return result,
             }
         }
-        operation()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::budget::memory::MemoryClass;
+
+    struct SegmentedCache(Mutex<Vec<ExternalMemoryReservation>>);
+    impl OptionalMemoryCache for SegmentedCache {
+        fn reclaim_optional_memory(&self, _: u64) -> Result<u64> {
+            let entry = self.0.lock().unwrap().pop();
+            let bytes = entry.as_ref().map_or(0, ExternalMemoryReservation::bytes);
+            drop(entry);
+            Ok(bytes)
+        }
+    }
+
+    #[test]
+    fn admission_reclaims_multiple_entries_from_one_owner() {
+        const MIB: u64 = 1024 * 1024;
+        let limits = Limits { max_bytes: 6 * MIB, ..Limits::default() };
+        let coordinator = TransactionCoordinator::new(World::new(vec![], &limits).unwrap(), limits).unwrap();
+        let entries = (0..4).map(|_| coordinator.reserve_external_memory(MemoryClass::CpuCache, MIB, None).unwrap()).collect();
+        let cache = Arc::new(SegmentedCache(Mutex::new(entries)));
+        let owner: Arc<dyn OptionalMemoryCache> = cache.clone();
+        coordinator.register_optional_memory_cache(&owner, Usage::default()).unwrap();
+
+        let allocation = coordinator.reserve_external_memory(MemoryClass::Kernel, 4 * MIB, None).unwrap();
+        assert_eq!(cache.0.lock().unwrap().len(), 1, "stop after enough entries are released");
+        assert_eq!(allocation.bytes(), 4 * MIB);
+    }
+
+    #[test]
+    fn exhausted_cache_refuses_without_losing_an_existing_reservation() {
+        const MIB: u64 = 1024 * 1024;
+        let limits = Limits { max_bytes: 6 * MIB, ..Limits::default() };
+        let coordinator = TransactionCoordinator::new(World::new(vec![], &limits).unwrap(), limits).unwrap();
+        let retained = coordinator.reserve_external_memory(MemoryClass::Export, MIB, None).unwrap();
+        let entries = (0..3).map(|_| coordinator.reserve_external_memory(MemoryClass::CpuCache, MIB, None).unwrap()).collect();
+        let cache = Arc::new(SegmentedCache(Mutex::new(entries)));
+        let owner: Arc<dyn OptionalMemoryCache> = cache.clone();
+        coordinator.register_optional_memory_cache(&owner, Usage::default()).unwrap();
+
+        assert!(matches!(coordinator.reserve_external_memory(MemoryClass::Kernel, 6 * MIB, None), Err(Error::Budget("bytes"))));
+        assert!(cache.0.lock().unwrap().is_empty());
+        assert_eq!(retained.bytes(), MIB);
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::Export), MIB);
     }
 }

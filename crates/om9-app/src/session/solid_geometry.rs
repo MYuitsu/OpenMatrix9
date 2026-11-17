@@ -952,7 +952,7 @@ pub(super) fn sphere_curve_source(
     if let Geometry::Brep(brep) = &entity.geometry {
         let index = match edge {
             Some(index) => index,
-            None if brep.display.edges.len() == 1 => 0,
+            None if brep.topology().edges.len() == 1 => 0,
             None => return Err(Error::Invalid("B-Rep path requires EdgeN")),
         };
         result.geometry = Geometry::Curve(
@@ -972,6 +972,76 @@ pub(super) fn sphere_curve_source(
         ));
     }
     Ok(result)
+}
+
+#[cfg(feature = "occt-brep")]
+pub(super) struct VerifiedSphereSource {
+    entity: om9_core::model::Entity,
+    _reservation: Option<om9_core::transaction::ExternalMemoryReservation>,
+}
+
+#[cfg(feature = "occt-brep")]
+impl std::ops::Deref for VerifiedSphereSource {
+    type Target = om9_core::model::Entity;
+    fn deref(&self) -> &Self::Target { &self.entity }
+}
+
+#[cfg(feature = "occt-brep")]
+impl super::Controller {
+    /// Resolve an edge from the current display against one unique source edge.
+    /// Keep the reservation alive with the returned curve during center calculation.
+    pub(super) fn sphere_verified_curve_source(&self, entity: &om9_core::model::Entity, edge: Option<usize>)
+        -> Result<VerifiedSphereSource> {
+        use om9_core::budget::memory::MemoryClass;
+        let Geometry::Brep(body) = &entity.geometry else {
+            return Ok(VerifiedSphereSource { entity: sphere_curve_source(entity, edge, self.coordinator.limits())?, _reservation: None });
+        };
+        let index = match edge {
+            Some(index) => index,
+            None if body.topology().edges.len() == 1 => 0,
+            None => return Err(Error::Invalid("B-Rep path requires EdgeN")),
+        };
+        let scene = self.scene.as_ref().ok_or(Error::Missing("Sphere scene"))?;
+        if scene.epoch != self.coordinator.epoch() { return Err(Error::Stale("Sphere scene")); }
+        let stamp = self.document().stamp(entity.id)?;
+        let display = scene.root_brep_pick_display(&stamp)?;
+        let key = *body.topology().edges.get(index).ok_or(Error::Stale("Sphere edge"))?;
+        let display_index = display.topology.edges.iter().position(|id| *id == key).ok_or(Error::Stale("Sphere display edge"))?;
+        let segment = display.segments.iter().find(|segment| segment[2] as usize == display_index)
+            .ok_or(Error::Stale("Sphere display edge"))?;
+        let a = *display.points.get(segment[0] as usize).ok_or(Error::Stale("Sphere display edge"))?;
+        let b = *display.points.get(segment[1] as usize).ok_or(Error::Stale("Sphere display edge"))?;
+        let midpoint = std::array::from_fn(|i| (a[i] + b[i]) * 0.5);
+        let tolerance = self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6));
+        let source_tolerance = display.deflection_mm + tolerance;
+        if !source_tolerance.is_finite() { return Err(Error::Invalid("Sphere edge tolerance")); }
+        let limits = *self.coordinator.limits();
+        let _tracked = self.coordinator.capture_tracked_document(self.document)?;
+        let held = self.scene_cache_usage()?;
+        let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(MemoryClass::Kernel, 1, physical(), held)?;
+        reservation.recheck_pending()?;
+        om9_kernel::measurement::verified_display_edge_length(
+            body, om9_core::geometry::Transform::identity(), &display.points, &display.segments,
+            u32::try_from(display_index).map_err(|_| Error::Overflow("Sphere display edge"))?,
+            source_tolerance, tolerance, &limits,
+        ).map_err(|e| Error::Io(format!("Sphere cannot verify the selected edge against the source: {e}")))?;
+        let mut admit = |live: u64, pending: u64| -> Result<()> {
+            let needed = live.checked_add(pending).ok_or(Error::Overflow("Sphere edge scratch"))?.max(1);
+            if needed > reservation.bytes() {
+                let extra = needed - reservation.bytes();
+                self.coordinator.grow_external_memory_with_held(&mut reservation, extra, physical(), held)?;
+            }
+            reservation.set_allocated_bytes(live)?;
+            reservation.recheck_pending()
+        };
+        let (curve, _) = editing::source_edge_analytic_at_segment_admitted(body, midpoint, source_tolerance, [a,b], tolerance, &limits, &mut admit)
+            .map_err(|e| Error::Io(format!("Sphere cannot verify the selected edge against the source: {e}")))?;
+        drop(admit);
+        let mut result = entity.clone();
+        result.geometry = Geometry::Curve(curve);
+        Ok(VerifiedSphereSource { entity: result, _reservation: Some(reservation) })
+    }
 }
 
 #[cfg(feature = "occt-brep")]

@@ -22,7 +22,7 @@ fn jewellery_lod_keeps_surface_area() {
         let Geometry::Brep(brep) = &entity.geometry else {
             continue;
         };
-        let display = &brep.display;
+        let display = &brep.display();
         if display.triangles.len() < 40 {
             continue;
         }
@@ -84,7 +84,7 @@ fn jewellery_lod_matches_the_full_detail_image() {
         let Geometry::Brep(brep) = &entity.geometry else {
             continue;
         };
-        let display = &brep.display;
+        let display = &brep.display();
         if display.triangles.len() < 400 {
             continue;
         }

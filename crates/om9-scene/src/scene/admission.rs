@@ -7,16 +7,37 @@ pub(super) fn planning_scratch(document: &Document) -> Result<Usage> {
     let members = document.definitions.values().try_fold(document.entities.len(), |n, definition| {
         n.checked_add(definition.members.len()).ok_or(Error::Overflow("scene unique sources"))
     })?;
-    Usage::btree::<Key, ()>(members)
+    let mut usage=Usage::btree::<Key, ()>(members)?;
+    let max_payload=document.entities.values().chain(document.definitions.values().flat_map(|d|d.members.iter()))
+        .filter_map(|e|e.extensions.get(om9_core::model::TRIM_SURFACE_EXTENSION_SLOT))
+        .map(|e|e.payload.len()).max().unwrap_or(0);
+    if max_payload>0 {
+        let extra=u64::try_from(max_payload).map_err(|_|Error::Overflow("trim planning scratch"))?
+            .checked_mul(64).and_then(|n|n.checked_add(4096)).ok_or(Error::Overflow("trim planning scratch"))?;
+        usage.bytes=usage.bytes.checked_add(extra)
+            .ok_or(Error::Overflow("trim planning scratch"))?;
+    }
+    Ok(usage)
+}
+pub(super) fn planning_scratch_reusing(document: &Document, previous: Option<&Scene>) -> Result<Usage> {
+    let mut usage = planning_scratch(document)?;
+    if let Some(previous) = previous {
+        usage.bytes = usage.bytes.checked_add(Usage::btree::<usize, ()>(previous.objects.len())?.bytes)
+            .ok_or(Error::Overflow("reused scene planning scratch"))?;
+        usage.bytes = usage.bytes.checked_add(Usage::array::<usize>(previous.objects.len())?.bytes)
+            .ok_or(Error::Overflow("reused scene index scratch"))?;
+    }
+    Ok(usage)
 }
 pub(super) struct AllocationPlan {
     pub objects: usize,
     pub diagnostics: usize,
     pub peak_bytes: u64,
 }
-fn buffer_bound(geometry: &Geometry, limits: &Limits) -> Result<Option<Usage>> {
+fn buffer_bound(entity: &Entity, limits: &Limits, representations: &BrepRepresentationStore) -> Result<Option<Usage>> {
+    let geometry=&entity.geometry;
     let mut usage = Usage {
-        bytes: std::mem::size_of::<RenderBuffers>() as u64 + 16,
+        bytes: std::mem::size_of::<super::BufferPayload>() as u64 + 16,
         ..Usage::default()
     };
     match geometry {
@@ -97,8 +118,23 @@ fn buffer_bound(geometry: &Geometry, limits: &Limits) -> Result<Option<Usage>> {
             usage.add(Usage::array::<f64>(count)?, limits)?;
             usage.points = count as u64;
         }
+        Geometry::Surface(surface) => {
+            match super::trim_decomposition::decode(entity,limits) {
+                Ok(Some(trim)) => {
+                    let bytes=entity.extensions[om9_core::model::TRIM_SURFACE_EXTENSION_SLOT].payload.len();
+                    match super::trim_decomposition::bound(&trim,bytes,limits) {
+                        Ok(bound)=>usage.add(bound,limits)?,
+                        Err(Error::Invalid(_) | Error::Unsupported(_))=>super::surface_buffer_usage(&mut usage,limits)?,
+                        Err(error)=>return Err(error),
+                    }
+                }
+                Ok(None) => { super::surface_buffer_usage_for(surface, true, &mut usage, limits)?; },
+                Err(Error::Invalid(_) | Error::Unsupported(_))=>super::surface_buffer_usage(&mut usage,limits)?,
+                Err(error)=>return Err(error),
+            }
+        }
         Geometry::Brep(shape) => {
-            let d = &shape.display;
+            let d = representations.display_for(shape)?;
             usage.add(Usage::array::<Point3>(d.points.len())?, limits)?;
             usage.add(Usage::array::<([u32; 3], u32)>(d.triangles.len())?, limits)?;
             usage.add(Usage::array::<[u32; 2]>(d.segments.len())?, limits)?;
@@ -121,7 +157,7 @@ fn buffer_bound(geometry: &Geometry, limits: &Limits) -> Result<Option<Usage>> {
             usage.points = mesh.vertices.len() as u64;
         }
         Geometry::NativeBrep(brep) => {
-            let mesh = &brep.display;
+            let mesh = representations.get_native(brep)?.display();
             let mut triangles = 0usize;
             let mut edges = 0usize;
             for face in &mesh.faces {
@@ -143,18 +179,38 @@ fn buffer_bound(geometry: &Geometry, limits: &Limits) -> Result<Option<Usage>> {
     Ok(Some(usage))
 }
 struct Planner<'a> {
+    representations: &'a BrepRepresentationStore,
     document: &'a Document,
     limits: &'a Limits,
     usage: Usage,
     seen: BTreeSet<Key>,
+    seen_reused: BTreeSet<usize>,
     objects: usize,
     diagnostics: usize,
     paths: usize,
     max_degree: usize,
     max_depth: usize,
+    max_surface_basis: usize,
+    previous: Option<&'a Scene>,
+    previous_index: Vec<usize>,
+}
+struct PlannedPath<'a> {
+    parent: Option<&'a PlannedPath<'a>>,
+    member: ObjectId,
+}
+impl PlannedPath<'_> {
+    fn matches(&self, path: &[ObjectId]) -> bool {
+        let mut current = Some(self);
+        let mut indices = path.iter().rev();
+        while let Some(node) = current {
+            if indices.next() != Some(&node.member) { return false; }
+            current = node.parent;
+        }
+        indices.next().is_none()
+    }
 }
 impl Planner<'_> {
-    fn entity(&mut self, entity: &Entity, depth: usize) -> Result<()> {
+    fn entity(&mut self, entity: &Entity, root: ObjectId, path: Option<&PlannedPath<'_>>, depth: usize) -> Result<()> {
         if depth > self.limits.max_depth {
             return Err(Error::Budget("scene instance depth"));
         }
@@ -175,21 +231,34 @@ impl Planner<'_> {
                 .get(&id)
                 .ok_or(Error::Missing("scene definition"))?;
             for member in &definition.members {
-                self.entity(member, depth + 1)?;
+                let child = PlannedPath { parent: path, member: member.id };
+                self.entity(member, root, Some(&child), depth + 1)?;
             }
             return Ok(());
         }
         let key = (entity.id, entity.generation, entity.geometry_revision);
-        let binding = if self.seen.contains(&key) {
+        let reused = match self.previous {
+            Some(previous) => reusable_brep_wire_matching(previous, &self.previous_index, root, entity, self.representations,
+                |candidate| match path { Some(path) => path.matches(candidate), None => candidate.is_empty() })?,
+            None => None,
+        };
+        let binding = if let Some(old) = reused {
+            Some(Usage { points: buffer_usage(old.buffers.as_ref())?.points, ..Usage::default() })
+        } else if self.seen.contains(&key) {
             Some(Usage::default())
         } else {
-            buffer_bound(&entity.geometry, self.limits)?
+            match buffer_bound(entity, self.limits, self.representations) {
+                Err(Error::Unsupported(_)) => None,
+                other => other?,
+            }
         };
         if let Some(buffer) = binding {
-            if self
-                .seen
-                .insert((entity.id, entity.generation, entity.geometry_revision))
-            {
+            let first = if let Some(old) = reused {
+                self.seen_reused.insert(Arc::as_ptr(&old.buffers.inner) as usize)
+            } else {
+                self.seen.insert((entity.id, entity.generation, entity.geometry_revision))
+            };
+            if first {
                 self.usage.add(buffer, self.limits)?;
             }
             self.objects = self
@@ -210,6 +279,14 @@ impl Planner<'_> {
                 .ok_or(Error::Overflow("scene paths"))?;
             if let Geometry::Curve(Curve::Nurbs(n)) = &entity.geometry {
                 self.max_degree = self.max_degree.max(n.degree);
+            }
+            if let Geometry::Surface(surface) = &entity.geometry {
+                let basis = surface.size[0].checked_add(surface.size[1])
+                    .ok_or(Error::Overflow("surface evaluator basis"))?;
+                self.max_surface_basis = self.max_surface_basis.max(basis);
+                if entity.extensions.contains_key(om9_core::model::TRIM_SURFACE_EXTENSION_SLOT) {
+                    self.diagnostics=self.diagnostics.checked_add(1).ok_or(Error::Overflow("scene diagnostics"))?;
+                }
             }
             if matches!(
                 &entity.geometry,
@@ -232,7 +309,11 @@ impl Planner<'_> {
         Ok(())
     }
 }
-pub(super) fn admit(document: &Document, limits: &Limits, held: Usage) -> Result<AllocationPlan> {
+pub(super) fn admit(document: &Document, limits: &Limits, held: Usage, representations: &BrepRepresentationStore) -> Result<AllocationPlan> {
+    admit_reusing(document, limits, held, representations, None)
+}
+pub(super) fn admit_reusing(document: &Document, limits: &Limits, held: Usage,
+    representations: &BrepRepresentationStore, previous: Option<&Scene>) -> Result<AllocationPlan> {
     let members = document
         .definitions
         .values()
@@ -246,22 +327,27 @@ pub(super) fn admit(document: &Document, limits: &Limits, held: Usage) -> Result
     usage.points = 0;
     // The preflight seen set and actual capture's shared cache map have
     // separately admitted lifetimes; conservatively reserve both here.
-    usage.add(planning_scratch(document)?, limits)?;
-    usage.add(Usage::btree::<Key, Arc<RenderBuffers>>(members)?, limits)?;
+    usage.add(planning_scratch_reusing(document, previous)?, limits)?;
+    usage.add(Usage::btree::<Key, SharedBuffer>(members)?, limits)?;
     usage.add(Usage::btree::<LayerId, ()>(document.layers.len())?, limits)?;
     let mut planner = Planner {
+        representations,
         document,
         limits,
         usage,
         seen: BTreeSet::new(),
+        seen_reused: BTreeSet::new(),
         objects: 0,
         diagnostics: 0,
         paths: 0,
         max_degree: 0,
         max_depth: 0,
+        max_surface_basis: 0,
+        previous,
+        previous_index: previous_occurrence_index(previous)?,
     };
     for entity in document.entities.values() {
-        planner.entity(entity, 0)?;
+        planner.entity(entity, entity.id, None, 0)?;
     }
     let mut usage = planner.usage;
     let path_scratch = planner
@@ -291,6 +377,7 @@ pub(super) fn admit(document: &Document, limits: &Limits, held: Usage) -> Result
                 .ok_or(Error::Overflow("scene evaluator degree"))?,
         )?,
         Usage::array::<Point3>(8)?,
+        Usage::array::<f64>(planner.max_surface_basis)?,
     ] {
         usage.add(allocation, limits)?;
     }

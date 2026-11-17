@@ -6,6 +6,104 @@
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "scope": "Adapter OCCT, BRep, NURBS evaluation, tolerances, memory ownership/FFI safety.",
   "runtime_implementation": {
+    "boolean_two_ui_worker_2026_11_14": "MatrixApp Boolean Two Objects prepares all preview modes from captured sources on admitted workers, retaining old preview until replacement; scoped headless tests pass. Evidence: docs/validation/2026-11-14-boolean-two-ui-worker.md",
+    "boolean_split_ui_worker_2026_11_14": "MatrixApp Boolean Split runs captured source and multi-set partition on admitted workers with guarded publication in scoped headless tests. Evidence: docs/validation/2026-11-14-boolean-split-ui-worker.md",
+    "split_captured_source_2026_11_14": "Source-only split and admitted piece extraction have scoped detached worker and kernel fixtures; product multi-set Split is not yet integrated. Evidence: docs/validation/2026-11-14-split-captured-source.md",
+    "boolean_binary_ui_worker_2026_11_14": "MatrixApp Difference and Intersection source groups use admitted workers and guarded publication in scoped headless tests; Split and Two Objects remain synchronous. Evidence: docs/validation/2026-11-14-boolean-binary-ui-worker.md",
+    "boolean_union_ui_worker_2026_11_14": "MatrixApp Boolean Union menu/CMD runs captured sources and placements on an admitted worker; context and transaction checks pass in scoped headless fixtures. Other Boolean routes and C1-C5 remain open. Evidence: docs/validation/2026-11-14-boolean-union-ui-worker.md",
+    "captured_boolean_placement_2026_11_14": "Captured-source transformation and placed two-input Boolean have scoped worker, admission and placement checks; product Boolean commands are not integrated. Evidence: docs/validation/2026-11-14-boolean-captured-source.md#captured-placement-preparation",
+    "boolean_live_inputs_2026_11_14": "Checked Boolean accounts both retained input allocations before canonical validation and output admission; product worker integration remains open. Evidence: docs/validation/2026-11-14-boolean-captured-source.md#live-input-memory-for-synchronous-boolean",
+    "captured_boolean_source_2026_11_14": "Captured-source Boolean worker foundation passes scoped source/display lifetime and admission tests; product menu/CMD remains synchronous. Evidence: docs/validation/2026-11-14-boolean-captured-source.md",
+    "background_independent_source_rebind_2026_11_13": {
+      "status": "SCOPED_BACKGROUND_SOURCE_REBIND_CHECKS_PASSED",
+      "scope": "Remesh compares and validates independent canonical source on a worker, then rechecks lifecycle and scene before proof binding; Box stale/cancel/budget tests passed.",
+      "limitations": "Capture/admission and final scene preparation remain on caller; Document/Undo retain display. Cold restore, NativeBrep disposition, v5 and acceptance remain open.",
+      "evidence": "docs/validation/2026-11-13-background-independent-source-rebind.md"
+    },
+    "shared_source_remesh_rebind_2026_11_13": {
+      "status": "SCOPED_SHARED_SOURCE_FAST_PATH_CHECKS_PASSED",
+      "scope": "Attested immutable shared source/topology can rebind after placement without a repeated source scan or validation scratch; worker, busy, independent-owner fallback and history fixtures passed.",
+      "limitations": "Independent source validation still runs on caller; Document/Undo retain display. Cold restore, v5, physical peak and desktop acceptance remain open.",
+      "evidence": "docs/validation/2026-11-13-shared-source-remesh-rebind.md"
+    },
+    "attested_source_remesh_rebind_2026_11_13": {
+      "status": "SCOPED_PRODUCT_SOURCE_REBIND_CHECKS_PASSED",
+      "scope": "OCCT remesh rebinds previously native-attested canonical source and topology independently of a replacement display; it rejects changed topology, budget refusal and stale publication.",
+      "limitations": "Lookup and source validation remain on caller; Document/Undo retain display. Arbitrary v4 and NativeBrep disposition, cold restore, v5 and desktop acceptance remain open.",
+      "evidence": "docs/validation/2026-11-13-attested-source-remesh-rebind.md"
+    },
+    "proof_canonical_source_lease_2026_11_13": {
+      "status": "SCOPED_SOURCE_LEASE_CHECKS_PASSED",
+      "scope": "Topology proof keeps an independently accounted immutable canonical source/topology lease; worker reuse and exact content matching are checked in product fixtures.",
+      "limitations": "Existing proof lookup/rebind still verifies document display; Document/Undo, source-only rebind, cold restore and v5 remain open.",
+      "evidence": "docs/validation/2026-11-13-proof-canonical-source-lease.md"
+    },
+    "current_remesh_profile_hit_2026_11_10": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Explicit remesh requests can reuse a matching current scene display after source, document, proof and profile checks, preserving the poll contract.",
+      "evidence": "docs/validation/2026-11-10-current-remesh-profile-hit.md",
+      "limitations": "Current-scene only; no document/Undo display eviction, multi-profile recovery, large-model timing, native/process peak or desktop evidence."
+    },
+    "topology_proof_retired_branch_2026_11_06": {
+      "status": "WITHDRAWN",
+      "scope": "Original-document-only pruning was withdrawn because equivalent history documents can still retain the proof's source.",
+      "evidence": "docs/validation/2026-11-06-topology-proof-retired-branch.md",
+      "limitations": "Proof retention is conservative and optional; source-only document/Undo, display eviction, native peak and desktop remain open."
+    },
+    "remesh_independent_leases_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Remeshed pick display and render buffers retain independently admitted owners across scene snapshots.",
+      "evidence": "docs/validation/2026-11-06-remesh-buffer-display-leases.md",
+      "limitations": "Document/Undo display eviction, native/process peak and desktop remain open."
+    },
+    "remesh_scene_display_owner_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Published remesh scenes retain accounted display/topology without keeping the candidate's duplicate source or descriptors.",
+      "evidence": "docs/validation/2026-11-06-remesh-scene-display-owner.md",
+      "limitations": "Original document/Undo display eviction, v4 attestation, native/process peaks and desktop remain open."
+    },
+    "remesh_retained_reservation_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Remesh worker releases unused kernel construction allowance while its candidate receipt remains charged through scene lifetime.",
+      "evidence": "docs/validation/2026-11-06-remesh-retained-reservation.md",
+      "limitations": "Envelope accounting is conservative; native/channel/process peaks, desktop and document/Undo display eviction remain open."
+    },
+    "topology_proof_versions_undo_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "The reclaimable in-process proof cache distinguishes multiple geometry snapshots of one object and selects the current version after Undo/Redo.",
+      "evidence": "docs/validation/2026-11-06-topology-proof-versions-undo.md",
+      "limitations": "Proofs remain evictable and lookup is linear; document/Undo display eviction, long-history latency, native peak and desktop remain open."
+    },
+    "sphere_production_topology_proof_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Production Sphere attempts admitted native topology capture and transfers an optional proof to the shared reclaimable cache; opt-in controller remesh can use a surviving proof through Undo/Redo.",
+      "evidence": "docs/validation/2026-11-06-sphere-production-topology-proof.md",
+      "limitations": "No automatic remesh or document/Undo display eviction; proof may be lost, legacy v4 remains unattested, and native peak, desktop and production latency are unmeasured."
+    },
+    "topology_source_binding_2026_11_06": {
+      "status": "EXPERIMENTAL_TARGETED_TESTS_PASSED",
+      "scope": "In-process remesh attestation checks a source/topology digest when capturing and consuming a source-only lease.",
+      "evidence": "docs/validation/2026-11-06-topology-source-attestation-binding.md",
+      "limitations": "This integrity binding is not native mapping attestation for legacy data; production Sphere, document/Undo display eviction, large-topology timing, native peak and desktop remain open."
+    },
+    "topology_cache_insert_pressure_2026_11_06": {
+      "status": "EXPERIMENTAL_TARGETED_TESTS_PASSED",
+      "scope": "An existing topology-proof cache releases its mutex during shared-memory admission and rechecks slots after concurrent reclamation or insertion.",
+      "evidence": "docs/validation/2026-11-06-topology-cache-insert-pressure.md",
+      "limitations": "Experimental in-process cache only; production Sphere, document/Undo source-only ownership, native peak and desktop remain open."
+    },
+    "sphere_snapshot_admission_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Sphere's production primitive snapshot copy uses shared Rust memory admission and reserved transaction transfer.",
+      "evidence": "docs/validation/2026-11-06-sphere-snapshot-admission.md",
+      "limitations": "Native OCCT allocations and process peak are not bounded; source/display/Undo separation remains open."
+    },
+    "shapeset_source_identity_2026_11_06": {
+      "status": "EXPERIMENTAL_TARGETED_TESTS_PASSED",
+      "scope": "Internally paired ShapeSet restore rereads and retains canonical source bytes while matching packet topology references before rebinding IDs.",
+      "evidence": "docs/validation/2026-11-06-shapeset-source-identity.md",
+      "limitations": "Fixture-scoped in-process path only; unsupported normalization is refused, and document/Undo ownership, native peak and desktop remain open."
+    },
     "staged_stl_shared_admission_2026_11_05": {
       "status": "PARTIAL_CHECKS_PASSED",
       "scope": "Replace whole-headroom captured/Controller and detached STL leases with shared phase admission; add Rust native-source/snapshot copy hooks, preserve typed refusal and selection allocation phases",

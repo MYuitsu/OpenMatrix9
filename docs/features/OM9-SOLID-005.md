@@ -20,3 +20,8 @@ memory, F6, SDK/History integration, actual desktop interaction and the M03
 human UI gate remain unverified. See
 `docs/validation/2026-10-28-solid-audit.md` and
 `docs/validation/2026-10-28-solid-cap-source-map.md` for evidence.
+
+For the P1 source/display separation slice, a reopened open-cylinder fixture
+at two different display deflections passed analytic volume, placement and
+Undo/Redo through the menu dispatcher and CMD. See
+`docs/validation/2026-11-12-cap-planar-source-profiles.md` for scope and limits.
