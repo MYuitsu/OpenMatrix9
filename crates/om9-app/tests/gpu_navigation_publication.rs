@@ -966,15 +966,12 @@ fn box_commit_publication_timing_smoke() {
 #[cfg(feature = "occt-brep")]
 #[test]
 fn spherical_brep_selection_rebuilds_viewport_without_mutating_document() {
-    use om9_kernel::creation::{primitive, Primitive, DEFAULT_DEFLECTION_MM};
     let Some(mut h) = Harness::new() else { eprintln!("SKIP: no GPU adapter"); return };
-    let mut document = Document::new("sphere selection display");
-    let sphere = primitive(Primitive::Sphere {radius_mm: 5.}, DEFAULT_DEFLECTION_MM, &Limits::default()).unwrap();
-    let object = Entity::new("sphere", Geometry::Brep(sphere.clone()), None);
-    let mut other = Entity::new("other sphere", Geometry::Brep(sphere), None);
-    other.placement = Transform::translation([12., 0., 0.]);
-    let id = object.id; document.entities.insert(id, object); document.entities.insert(other.id, other);
-    let scene = TestScene::new(document.clone());
+    let mut scene = TestScene::new(Document::with_template_tolerance("sphere selection display"));
+    scene.controller.solid_sphere_points([0.;3],5.).unwrap();
+    scene.controller.solid_sphere_points([12.,0.,0.],5.).unwrap();
+    let document=scene.controller.document().clone();
+    let id=*document.entities.keys().next().unwrap();
     let camera = Camera::perspective([16., -28., 18.], [6., 0., 0.], [0., 0., 1.], 0.8).unwrap();
     h.finish(&scene, &camera, 0); let before = h.port.encoded_frame;
     h.selected.insert(id); h.finish(&scene, &camera, 0);
@@ -987,13 +984,11 @@ fn spherical_brep_selection_rebuilds_viewport_without_mutating_document() {
 #[cfg(feature = "occt-brep")]
 #[test]
 fn rectangular_brep_selection_rebuilds_viewport_without_mutating_document() {
-    use om9_kernel::creation::{primitive, Primitive, DEFAULT_DEFLECTION_MM};
     let Some(mut h) = Harness::new() else { eprintln!("SKIP: no GPU adapter"); return };
-    let mut document = Document::new("box selection display");
-    let box_brep = primitive(Primitive::Box {x_mm: 4., y_mm: 6., z_mm: 8.}, DEFAULT_DEFLECTION_MM, &Limits::default()).unwrap();
-    let object = Entity::new("box", Geometry::Brep(box_brep), None);
-    let id = object.id; document.entities.insert(id, object);
-    let scene = TestScene::new(document.clone());
+    let mut scene = TestScene::new(Document::with_template_tolerance("box selection display"));
+    for input in ["Box","0,0,0","4,6,0","8"] {scene.controller.submit(input).unwrap();}
+    let document=scene.controller.document().clone();
+    let id=*document.entities.keys().next().unwrap();
     let camera = Camera::perspective([14., -16., 14.], [2., 3., 4.], [0., 0., 1.], 0.6).unwrap();
     h.finish(&scene, &camera, 0); let before = h.port.encoded_frame;
     h.selected.insert(id); h.finish(&scene, &camera, 0);
@@ -1058,6 +1053,39 @@ fn preview_visibility_rebuilds_gpu_resources_and_restores_source_objects() {
 }
 fn rect() -> egui::Rect {
     egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(320., 240.))
+}
+#[cfg(feature="occt-brep")]
+#[test]
+fn continuous_sphere_appends_publish_progress_and_undo_keeps_exact_source() {
+    let Some(mut h)=Harness::new() else {panic!("GPU required for progressive publication");};
+    let mut scene=TestScene::new(Document::with_template_tolerance("progressive sphere publication"));
+    let camera=Camera::perspective([20.,-40.,25.],[5.,0.,0.],[0.,0.,1.],0.8).unwrap();
+    h.finish(&scene,&camera,0);
+    let mut shown=Vec::new();
+    let mut originals=Vec::new();
+    for index in 0..32 {
+        scene.controller.solid_sphere_points([(index%8) as f64*2.,(index/8) as f64*2.,0.],0.8).unwrap();
+        let id=*scene.controller.document().entities.keys().find(|id|!originals.iter().any(|(old,_)|old==*id)).unwrap();
+        let Geometry::Brep(body)=&scene.controller.document().entities[&id].geometry else {panic!("exact sphere");};
+        originals.push((id,body.canonical_fingerprints()));
+        h.frame(&scene,&camera,index,rect());
+        h.state.device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
+        if let Some(stats)=h.port.published_frame_stats() {shown.push(stats.objects);}
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    assert!(shown.iter().any(|n|*n>0 && *n<32),"creation starved every nonempty GPU publication: {shown:?}");
+    h.finish(&scene,&camera,33);
+    assert_eq!(h.port.published_frame_stats().unwrap().objects,32);
+    assert_eq!(scene.controller.coordinator().undo_len(),32);
+    for (id,fingerprint) in originals {
+        let Geometry::Brep(body)=&scene.controller.document().entities[&id].geometry else {panic!("exact sphere");};
+        assert_eq!(body.canonical_fingerprints(),fingerprint);
+    }
+    scene.controller.undo().unwrap();h.finish(&scene,&camera,34);
+    assert_eq!(h.port.published_frame_stats().unwrap().objects,31);
+    assert!(h.port.displays_scene(&scene));
+    scene.controller.redo().unwrap();h.finish(&scene,&camera,35);
+    assert_eq!(h.port.published_frame_stats().unwrap().objects,32);
 }
 #[test]
 fn publication_rejects_old_generation_and_same_revision_pose_and_recovers_from_oversize() {

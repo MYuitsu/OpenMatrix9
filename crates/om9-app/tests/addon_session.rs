@@ -113,6 +113,63 @@ fn stage_zip(tmp: &Path, catalog: &om9_addons::catalog::Catalog) -> PathBuf {
     path
 }
 
+/// Release-mode, headless command comparison. Run explicitly with `--ignored --nocapture`.
+#[test]
+#[ignore]
+fn benchmark_builtin_vs_addon_curve_commands() {
+    use std::time::Instant;
+
+    let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
+    let tmp = std::env::temp_dir().join(format!("om9-curve-benchmark-{}-{stamp}", std::process::id()));
+    fs::create_dir_all(&tmp).unwrap();
+    let host = host(&tmp);
+    let feats = features();
+    let names: Vec<FeatureName> = feats.iter().map(|(id, c)| FeatureName { id, command: c.as_deref() }).collect();
+    let mut timings = vec![Vec::<u128>::new(); 4];
+
+    // Alternate which implementation runs first to reduce systematic ordering bias.
+    for iteration in 0..45 {
+        for (case, addon) in (0..4).map(|x| (x / 2, (x % 2 == 1) ^ (iteration % 2 == 1))) {
+            let mut c = Controller::new(Document::with_template_tolerance("curve-perf"), Limits::default()).unwrap();
+            if addon { c.attach_addons(host.clone(), &names); }
+            let started = Instant::now();
+            if addon {
+                c.run_addon_command(if case == 0 { "CurveLineSingleLine" } else { "CurveCircleCenterRadius" }).unwrap();
+            } else {
+                c.submit(if case == 0 { "OM9-CURVE-002" } else { "OM9-CURVE-005" }).unwrap();
+            }
+            if case == 0 {
+                c.submit("0,0,0").unwrap();
+                c.submit("10,0,0").unwrap();
+            } else {
+                if addon { c.session_point([0.0, 0.0, 0.0]).unwrap(); }
+                else { c.accept_circle_point([0.0, 0.0, 0.0]).unwrap(); }
+                c.submit("5").unwrap();
+            }
+            let elapsed = started.elapsed().as_nanos();
+            assert_eq!(c.document().entities.len(), 1);
+            assert_eq!(c.coordinator().undo_len(), 1);
+            let Geometry::Curve(curve) = &c.document().entities.values().next().unwrap().geometry else { panic!("expected curve"); };
+            if case == 0 {
+                let p = om9_core::curve_ops::sample_curve(curve, 2, &Limits::default()).unwrap();
+                assert_eq!(p.first().unwrap(), &[0.0, 0.0, 0.0]);
+                assert_eq!(p.last().unwrap(), &[10.0, 0.0, 0.0]);
+            } else {
+                let Curve::Circle { center, radius, .. } = curve else { panic!("expected circle: {curve:?}") };
+                assert_eq!(*center, [0.0, 0.0, 0.0]);
+                assert!((*radius - 5.0).abs() < 1e-9);
+            }
+            if iteration >= 5 { timings[case * 2 + usize::from(addon)].push(elapsed); }
+        }
+    }
+    for (i, samples) in timings.iter_mut().enumerate() {
+        samples.sort_unstable();
+        println!("PERF case={} impl={} n={} median_ns={} p95_ns={} min_ns={} max_ns={}",
+            if i < 2 { "line" } else { "circle" }, if i % 2 == 0 { "builtin" } else { "addon" },
+            samples.len(), (samples[19] + samples[20]) / 2, samples[37], samples[0], samples[39]);
+    }
+}
+
 #[test]
 fn curve_commands_run_interactively() {
     assert_eq!(

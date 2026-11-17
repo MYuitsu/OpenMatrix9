@@ -891,20 +891,7 @@ impl Controller {
                 } else {
                     &pending.values[..]
                 };
-                let mut args: Vec<String> =
-                    input_values.iter().map(|value| value.to_string()).collect();
-                args.push(
-                    if pending.pipe_round {
-                        "Cap=Round"
-                    } else if pending.pipe_capped {
-                        "Cap=Flat"
-                    } else {
-                        "Cap=None"
-                    }
-                    .to_owned(),
-                );
-                let refs: Vec<&str> = args.iter().map(String::as_str).collect();
-                let result = self.dispatch_solid_args(pending.feature, &refs);
+                let result = self.solid_pipe_radii_mm(pending.feature, input_values, pending.pipe_capped, pending.pipe_round);
                 if result.is_err() {
                     self.solid_pending = Some(pending);
                 }
@@ -922,6 +909,11 @@ impl Controller {
                 .map(|v| if pending.pipe_diameter { v / 2.0 } else { v })
                 .filter(|v| v.is_finite() && *v > 0.0);
             if let Some(value) = value {
+                let value = match self.document().page_unit.length_to_mm(value) {
+                    Ok(value) if value > 0. => value,
+                    Ok(_) => { self.solid_pending = Some(pending); return Some(Err(Error::Invalid("Pipe radius must be positive"))); }
+                    Err(error) => { self.solid_pending = Some(pending); return Some(Err(error)); }
+                };
                 if let Some(fraction) = pending.pipe_station_position {
                     if pending.pipe_stations.len() as u64 >= self.coordinator.limits().max_points {
                         self.solid_pending = Some(pending);
@@ -1110,6 +1102,11 @@ impl Controller {
                         },
                     )));
                 };
+                let radius = match self.document().page_unit.length_to_mm(radius) {
+                    Ok(value) if value > 0. => value,
+                    Ok(_) => { self.solid_pending = Some(pending); return Some(Err(Error::Invalid("fillet radius"))); }
+                    Err(error) => { self.solid_pending = Some(pending); return Some(Err(error)); }
+                };
                 let Some(old_preview) = &pending.fillet_preview else {
                     self.solid_pending = Some(pending);
                     return Some(Err(Error::Missing("fillet preview")));
@@ -1154,7 +1151,7 @@ impl Controller {
                     return Some(Err(error));
                 }
                 let checked = self.scene_cache_usage().and_then(|mut held| {
-                    held.add(old_preview.usage, self.coordinator.limits())?;
+                    if !old_preview.body.has_allocation_owner() { held.add(old_preview.usage, self.coordinator.limits())?; }
                     held.add(backup_usage, self.coordinator.limits())?;
                     self.coordinator.retained_usage_with_held_usage(held)?;
                     Ok(())
@@ -1192,9 +1189,9 @@ impl Controller {
                     .solid_fillet_build_preview(&pending.fillet_edges, &pending.fillet_controls)
                     .and_then(|preview| {
                         let mut held = self.scene_cache_usage()?;
-                        held.add(old_preview.usage, self.coordinator.limits())?;
+                        if !old_preview.body.has_allocation_owner() { held.add(old_preview.usage, self.coordinator.limits())?; }
                         held.add(backup_usage, self.coordinator.limits())?;
-                        held.add(preview.usage, self.coordinator.limits())?;
+                        if !preview.body.has_allocation_owner() { held.add(preview.usage, self.coordinator.limits())?; }
                         self.coordinator.retained_usage_with_held_usage(held)?;
                         Ok(preview)
                     });
@@ -1249,6 +1246,11 @@ impl Controller {
                         self.solid_pending = Some(pending);
                         return Some(Err(Error::Invalid("CurrentRadius must be positive")));
                     };
+                    let radius = match self.document().page_unit.length_to_mm(radius) {
+                        Ok(value) if value > 0. => value,
+                        Ok(_) => { self.solid_pending = Some(pending); return Some(Err(Error::Invalid("fillet radius"))); }
+                        Err(error) => { self.solid_pending = Some(pending); return Some(Err(error)); }
+                    };
                     pending.fillet_add_radius = Some(radius);
                     self.solid_pending = Some(pending);
                     return Some(Ok(()));
@@ -1264,6 +1266,11 @@ impl Controller {
                 else {
                     self.solid_pending = Some(pending);
                     return Some(Err(Error::Invalid("CurrentRadius must be positive")));
+                };
+                let radius = match self.document().page_unit.length_to_mm(radius) {
+                    Ok(value) if value > 0. => value,
+                    Ok(_) => { self.solid_pending = Some(pending); return Some(Err(Error::Invalid("fillet radius"))); }
+                    Err(error) => { self.solid_pending = Some(pending); return Some(Err(error)); }
                 };
                 let Some(old_preview) = &pending.fillet_preview else {
                     self.solid_pending = Some(pending);
@@ -1298,8 +1305,8 @@ impl Controller {
                         .solid_fillet_build_preview(&pending.fillet_edges, &pending.fillet_controls)
                         .and_then(|preview| {
                             let mut held = self.scene_cache_usage()?;
-                            held.add(old_preview.usage, self.coordinator.limits())?;
-                            held.add(preview.usage, self.coordinator.limits())?;
+                            if !old_preview.body.has_allocation_owner() { held.add(old_preview.usage, self.coordinator.limits())?; }
+                            if !preview.body.has_allocation_owner() { held.add(preview.usage, self.coordinator.limits())?; }
                             self.coordinator.retained_usage_with_held_usage(held)?;
                             Ok(preview)
                         });
@@ -1317,7 +1324,7 @@ impl Controller {
                     }
                 }
                 let anticipated = self.scene_cache_usage().and_then(|mut held| {
-                    held.add(old_preview.usage, self.coordinator.limits())?;
+                    if !old_preview.body.has_allocation_owner() { held.add(old_preview.usage, self.coordinator.limits())?; }
                     held.add(
                         om9_core::budget::Usage::array::<u8>(pending.fillet_edges.len())?,
                         self.coordinator.limits(),
@@ -1362,7 +1369,7 @@ impl Controller {
                     }
                 };
                 let checked = self.scene_cache_usage().and_then(|mut held| {
-                    held.add(old_preview.usage, self.coordinator.limits())?;
+                    if !old_preview.body.has_allocation_owner() { held.add(old_preview.usage, self.coordinator.limits())?; }
                     held.add(backup_usage, self.coordinator.limits())?;
                     held.add(mask_usage, self.coordinator.limits())?;
                     self.coordinator.retained_usage_with_held_usage(held)?;
@@ -1393,10 +1400,10 @@ impl Controller {
                     .solid_fillet_build_preview(&pending.fillet_edges, &pending.fillet_controls)
                     .and_then(|preview| {
                         let mut held = self.scene_cache_usage()?;
-                        held.add(old_preview.usage, self.coordinator.limits())?;
+                        if !old_preview.body.has_allocation_owner() { held.add(old_preview.usage, self.coordinator.limits())?; }
                         held.add(backup_usage, self.coordinator.limits())?;
                         held.add(mask_usage, self.coordinator.limits())?;
-                        held.add(preview.usage, self.coordinator.limits())?;
+                        if !preview.body.has_allocation_owner() { held.add(preview.usage, self.coordinator.limits())?; }
                         self.coordinator.retained_usage_with_held_usage(held)?;
                         Ok(preview)
                     });
@@ -1424,6 +1431,11 @@ impl Controller {
                 let Some(radius) = parsed else {
                     self.solid_pending = Some(pending);
                     return Some(Err(Error::Invalid("NextRadius must be positive")));
+                };
+                let radius = match self.document().page_unit.length_to_mm(radius) {
+                    Ok(value) if value > 0. => value,
+                    Ok(_) => { self.solid_pending = Some(pending); return Some(Err(Error::Invalid("fillet radius"))); }
+                    Err(error) => { self.solid_pending = Some(pending); return Some(Err(error)); }
                 };
                 if pending.fillet_preview.is_some() {
                     self.solid_pending = Some(pending);
@@ -1531,6 +1543,28 @@ impl Controller {
         }
         let words: Vec<_> = input.split_whitespace().collect();
         if words.len() == 2 && pending.extract_face_picks.is_empty() {
+            #[cfg(feature = "occt-brep")]
+            if self.face_verification_receipt.is_none() && self.selection.len() == 1 {
+                if let (Ok(value), Ok(thickness)) = (words[0].parse::<f64>(), words[1].parse::<f64>()) {
+                    if value.is_finite() && value >= 0. && value.fract() == 0. && thickness.is_finite() && thickness > 0. {
+                        let id = *self.selection.iter().next().expect("one selected root");
+                        if let Ok(brep) = self.solid_brep(id) {
+                            if let Some(&key) = brep.topology().faces.get(value as usize) {
+                                if let (Ok(source), Some(scene)) = (self.document().stamp(id), self.scene.as_ref()) {
+                                    if scene.root_brep_pick_display(&source).is_ok_and(|display| display.triangles.len() > 512) {
+                                        let reference = super::SelectedSubobject { root: id, path: vec![], subset: om9_scene::scene::Subelement::BrepFace(key),
+                                            source, world_epoch: scene.epoch };
+                                        let converted = self.document().page_unit.length_to_mm(thickness);
+                                        let result = converted.and_then(|thickness_mm| self.request_face_verification(std::slice::from_ref(&reference), input, false, pending.feature, Some(thickness_mm), None));
+                                        self.solid_pending = Some(pending);
+                                        return Some(result);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             let revision = self.document().revision;
             let result = self.dispatch_solid_args(pending.feature, &words);
             if result.is_err() && self.document().revision == revision {
@@ -1571,10 +1605,16 @@ impl Controller {
             self.solid_pending = Some(pending);
             return Some(Err(Error::Missing("select a B-Rep face")));
         }
+        #[cfg(feature = "occt-brep")]
+        let selection_was_done = pending.shell_select_done;
         pending.shell_select_done = true;
         let Some(thickness) = pending.shell_thickness else {
             self.solid_pending = Some(pending);
             return Some(Ok(()));
+        };
+        let thickness_mm = match self.document().page_unit.length_to_mm(thickness) {
+            Ok(value) => value,
+            Err(error) => { self.solid_pending = Some(pending); return Some(Err(error)); }
         };
         for reference in &pending.extract_face_picks {
             if let Err(error) = self.select_subobject_ref(reference.clone()) {
@@ -1582,8 +1622,20 @@ impl Controller {
                 return Some(Err(error));
             }
         }
+        #[cfg(feature = "occt-brep")]
+        if self.face_verification_receipt.is_none() {
+            let large = pending.extract_face_picks.iter().any(|reference|
+                self.scene.as_ref().and_then(|scene| scene.root_brep_pick_display(&reference.source).ok())
+                    .is_some_and(|display| display.triangles.len() > 512));
+            if large {
+                let result = self.request_face_verification(&pending.extract_face_picks, "", true, pending.feature, Some(thickness_mm), None);
+                if result.is_err() { pending.shell_select_done = selection_was_done; }
+                self.solid_pending = Some(pending);
+                return Some(result);
+            }
+        }
         let revision = self.document().revision;
-        let result = self.solid_shell_picks(&pending.extract_face_picks, thickness);
+        let result = self.solid_shell_picks(&pending.extract_face_picks, thickness_mm);
         if result.is_err() && self.document().revision == revision {
             self.solid_pending = Some(pending);
         } else if result.is_ok() {
@@ -1648,6 +1700,45 @@ impl Controller {
                         if !self.selection.contains(&reference.root) {
                             self.solid_pending = Some(pending);
                             return Some(Err(Error::Stale("extract selection")));
+                        }
+                    }
+                    // Large face validations can take seconds. Preserve the
+                    // prompt and complete only after the entire batch verifies.
+                    #[cfg(feature = "occt-brep")]
+                    if self.face_verification_receipt.is_none() {
+                        let large = pending.extract_face_picks.iter().any(|reference|
+                            self.scene.as_ref().and_then(|scene| scene.root_brep_pick_display(&reference.source).ok())
+                                .is_some_and(|display| display.triangles.len() > 512));
+                        if large {
+                            let options = super::face_verification::ExtractOptions { copy: pending.extract_copy, input_layer: pending.extract_input_layer, current_layer: self.document().current_layer };
+                            let result = self.request_face_verification(&pending.extract_face_picks, "", true, pending.feature, None, Some(options));
+                            self.solid_pending = Some(pending);
+                            return Some(result);
+                        }
+                    }
+                }
+                #[cfg(feature = "occt-brep")]
+                if !input.is_empty() && self.face_verification_receipt.is_none() && self.selection.len() == 1 {
+                    if let Ok(value) = input.parse::<f64>() {
+                        if value.is_finite() && value >= 0. && value.fract() == 0. {
+                            let id = *self.selection.iter().next().expect("one selected root");
+                            if let Ok(brep) = self.solid_brep(id) {
+                                if let Some(&key) = brep.topology().faces.get(value as usize) {
+                                    let source = self.document().stamp(id);
+                                    if let (Ok(source), Some(scene)) = (source, self.scene.as_ref()) {
+                                        let large = scene.root_brep_pick_display(&source).is_ok_and(|display| display.triangles.len() > 512);
+                                        if large {
+                                            let reference = super::SelectedSubobject { root: id, path: vec![], subset: om9_scene::scene::Subelement::BrepFace(key),
+                                                source, world_epoch: scene.epoch };
+                                            let normalized_index = (value as usize).to_string();
+                                            let options = super::face_verification::ExtractOptions { copy: pending.extract_copy, input_layer: pending.extract_input_layer, current_layer: self.document().current_layer };
+                                            let result = self.request_face_verification(std::slice::from_ref(&reference), &normalized_index, false, pending.feature, None, Some(options));
+                                            self.solid_pending = Some(pending);
+                                            return Some(result);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -1769,6 +1860,12 @@ impl Controller {
             return Some(result);
         }
         if pending.feature == "OM9-SOLID-003" {
+            #[cfg(feature = "occt-brep")]
+            if self.background_boolean_union_enabled {
+                let result = self.request_boolean_union_worker(pending.difference_delete_input);
+                self.solid_pending = Some(pending);
+                return Some(result);
+            }
             let revision = self.document().revision;
             let result = self.solid_union_selected(pending.difference_delete_input);
             if result.is_err() && self.document().revision == revision {
@@ -1797,6 +1894,20 @@ impl Controller {
             }
         }
         let revision = self.document().revision;
+        #[cfg(feature = "occt-brep")]
+        if self.background_boolean_union_enabled && pending.feature == "SolidBooleanSplit" {
+            let result = self.request_boolean_split_worker(pending.difference_targets.as_deref().expect("target stage"),
+                pending.difference_delete_input);
+            self.solid_pending = Some(pending);
+            return Some(result);
+        }
+        #[cfg(feature = "occt-brep")]
+        if self.background_boolean_union_enabled && matches!(pending.feature, "OM9-SOLID-001" | "OM9-SOLID-002") {
+            let result = self.request_boolean_binary_worker(pending.feature,
+                pending.difference_targets.as_deref().expect("target stage"), pending.difference_delete_input);
+            self.solid_pending = Some(pending);
+            return Some(result);
+        }
         let result = if pending.feature == "SolidBooleanSplit" {
             self.solid_split_groups(
                 pending.difference_targets.as_deref().expect("target stage"),
@@ -2195,6 +2306,8 @@ impl Controller {
         text: &str,
     ) -> Option<Result<()>> {
         let operation = text.trim().to_ascii_lowercase();
+        #[cfg(feature = "occt-brep")]
+        if self.boolean_union_worker_pending() { self.cancel_boolean_union_worker(); }
         if matches!(operation.as_str(), "cancel" | "esc") {
             self.cancel();
             return Some(Ok(()));
@@ -2268,11 +2381,17 @@ impl Controller {
                 return Some(Err(Error::Stale("Boolean input")));
             }
         }
+        #[cfg(feature = "occt-brep")]
+        if self.background_boolean_union_enabled {
+            let result = self.request_boolean_two_preview_worker(mode, &pending);
+            self.solid_pending = Some(pending);
+            return Some(result);
+        }
         let result = self.boolean_two_build_preview(mode).and_then(|preview| {
             if let Some(old) = &pending.boolean_two_preview {
                 let mut held = self.scene_cache_usage()?;
-                held.add(old.usage, self.coordinator.limits())?;
-                held.add(preview.usage, self.coordinator.limits())?;
+                if !old.is_accounted() { held.add(old.usage, self.coordinator.limits())?; }
+                if !preview.is_accounted() { held.add(preview.usage, self.coordinator.limits())?; }
                 self.coordinator.retained_usage_with_held_usage(held)?;
             }
             Ok(preview)
@@ -2317,7 +2436,8 @@ impl Controller {
         if !text
             .trim()
             .parse::<f64>()
-            .is_ok_and(|v| v.is_finite() && v > 0.0 && v <= f32::MAX as f64)
+            .is_ok_and(|v| v.is_finite() && v > 0.0 && self.document().page_unit.length_to_mm(v)
+                .is_ok_and(|mm| mm > 0.0 && mm <= f32::MAX as f64))
         {
             self.solid_pending = Some(pending);
             return Some(Err(Error::Invalid(
@@ -2345,14 +2465,65 @@ impl Controller {
             && (text.trim().eq_ignore_ascii_case("selection")
                 || (text.trim().is_empty() && pending.points.is_empty()))
         {
-            let points = self.solid_fit_selection_points();
+            let pending_bytes = match pending.usage() {
+                Ok(usage) => usage.bytes,
+                Err(error) => { self.solid_pending = Some(pending); return Some(Err(error)); }
+            };
+            let points = match self.solid_fit_selection_points_with_pending(pending_bytes) {
+                Ok(points) => points,
+                Err(error) => { self.solid_pending = Some(pending); return Some(Err(error)); }
+            };
             if points.is_empty() {
                 self.solid_pending = Some(pending);
                 return Some(Err(Error::Missing(
                     "select points, curves or meshes to fit",
                 )));
             }
-            pending.points.extend(points);
+            let Some(total) = pending.points.len().checked_add(points.len()) else {
+                self.solid_pending = Some(pending);
+                return Some(Err(Error::Overflow("Sphere FitPoints")));
+            };
+            if total as u64 > self.coordinator.limits().max_points {
+                self.solid_pending = Some(pending);
+                return Some(Err(Error::Budget("Sphere FitPoints")));
+            }
+            if pending.points.is_empty() {
+                // The collected buffer already contains the complete selection.
+                pending.points = points;
+            } else {
+                let append = (|| -> Result<()> {
+                    use om9_core::budget::{memory::MemoryClass, Usage};
+                    let existing_points = Usage::array::<[f64; 3]>(pending.points.capacity())?.bytes;
+                    let other_pending = pending_bytes.checked_sub(existing_points).ok_or(Error::Invalid("Sphere pending accounting"))?;
+                    let existing = pending_bytes;
+                    let incoming = Usage::array::<[f64; 3]>(points.capacity())?.bytes;
+                    let additional = if total > pending.points.capacity() {
+                        Usage::array::<[f64; 3]>(total)?.bytes
+                    } else { 0 };
+                    let needed = existing.checked_add(incoming).and_then(|n| n.checked_add(additional))
+                        .ok_or(Error::Overflow("Sphere FitPoints"))?.max(1);
+                    let held = self.scene_cache_usage()?;
+                    let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+                    let mut reservation = self.coordinator.reserve_external_memory_with_held(MemoryClass::Kernel, needed, physical(), held)?;
+                    pending.points.try_reserve_exact(points.len()).map_err(|_| Error::Budget("bytes"))?;
+                    let actual = Usage::array::<[f64; 3]>(pending.points.capacity())?.bytes
+                        .checked_add(other_pending).and_then(|n| n.checked_add(incoming))
+                        .ok_or(Error::Overflow("Sphere FitPoints"))?;
+                    if actual > reservation.bytes() {
+                        let extra = actual - reservation.bytes();
+                        self.coordinator.grow_external_memory_with_held(&mut reservation, extra, physical(), held)?;
+                    }
+                    reservation.set_allocated_bytes(actual)?;
+                    reservation.recheck_pending()?;
+                    pending.points.extend(points);
+                    Ok(())
+                })();
+                if let Err(error) = append {
+                    self.solid_pending = Some(pending);
+                    return Some(Err(error));
+                }
+            }
+            self.sphere_points_revision = self.sphere_points_revision.wrapping_add(1);
             self.solid_pending = Some(pending);
             return Some(Ok(()));
         }
@@ -2571,6 +2742,7 @@ impl Controller {
                 return Some(Ok(()));
             }
             if option == "undo" || option == "u" {
+                if pending.sphere_kind == "FitPoints" { self.sphere_points_revision = self.sphere_points_revision.wrapping_add(1); }
                 if pending.sphere_kind == "AroundCurve"
                     && pending.sphere_center.is_none()
                     && !pending.sphere_curve.is_empty()
@@ -2677,19 +2849,15 @@ impl Controller {
                     self.solid_pending = Some(pending);
                     return Some(Err(Error::Invalid("OnCurve must be within 0..1")));
                 };
-                let Some(entity) = pending
-                    .sphere_sources
-                    .first()
-                    .and_then(|stamp| self.document().entities.get(&stamp.object))
-                else {
+                let Some(stamp) = pending.sphere_sources.first() else {
                     self.solid_pending = Some(pending);
                     return Some(Err(Error::Invalid("AroundCurve has no source curve")));
                 };
-                let source = match sphere_curve_source(
-                    entity,
-                    pending.sphere_edge,
-                    self.coordinator.limits(),
-                ) {
+                let entity = match self.document().resolve(stamp) {
+                    Ok(entity) => entity,
+                    Err(error) => { self.solid_pending = Some(pending); return Some(Err(error)); }
+                };
+                let source = match self.sphere_verified_curve_source(entity, pending.sphere_edge) {
                     Ok(source) => source,
                     Err(error) => {
                         self.solid_pending = Some(pending);
@@ -2734,8 +2902,7 @@ impl Controller {
                 let first = pending.points[0];
                 let x = pending.sphere_plane.unwrap_or_else(|| self.input_plane()).x;
                 let center = std::array::from_fn(|i| first[i] + x[i] * diameter * 0.5);
-                self.solid_pending = None;
-                return Some(self.solid_sphere_points(center, diameter * 0.5));
+                return Some(self.finish_pending_sphere(pending, center, diameter * 0.5));
             }
             let raw_lower = text.trim().to_ascii_lowercase();
             if matches!(pending.sphere_kind, "AroundCurve" | "Tangent")
@@ -2798,7 +2965,7 @@ impl Controller {
                     self.solid_pending = Some(pending);
                     return Some(Err(Error::Invalid("curve has only Edge1")));
                 }
-                let source = match sphere_curve_source(entity, edge, self.coordinator.limits()) {
+                let source = match self.sphere_verified_curve_source(entity, edge) {
                     Ok(source) => source,
                     Err(error) => {
                         self.solid_pending = Some(pending);
@@ -2890,8 +3057,7 @@ impl Controller {
                     point[1] + normal[1] * radius * sign,
                     point[2] + normal[2] * radius * sign,
                 ];
-                self.solid_pending = None;
-                return Some(self.solid_sphere_points(center, radius));
+                return Some(self.finish_pending_sphere(pending, center, radius));
             }
             if pending.sphere_kind == "Tangent2Point" {
                 if pending.points.is_empty() {
@@ -2919,8 +3085,7 @@ impl Controller {
                     + (center[1] - pending.points[0][1]).powi(2)
                     + (center[2] - pending.points[0][2]).powi(2))
                 .sqrt();
-                self.solid_pending = None;
-                return Some(self.solid_sphere_points(center, radius));
+                return Some(self.finish_pending_sphere(pending, center, radius));
             }
             if pending.sphere_kind == "Tangent3" {
                 let radius = sphere_radius_input(text);
@@ -2947,8 +3112,7 @@ impl Controller {
                         return Some(Err(error));
                     }
                 };
-                self.solid_pending = None;
-                return Some(self.solid_sphere_points(center, radius));
+                return Some(self.finish_pending_sphere(pending, center, radius));
             }
             if pending.sphere_kind == "Tangent2" {
                 let radius = sphere_radius_input(text);
@@ -2974,8 +3138,7 @@ impl Controller {
                         return Some(Err(error));
                     }
                 };
-                self.solid_pending = None;
-                return Some(self.solid_sphere_points(center, radius));
+                return Some(self.finish_pending_sphere(pending, center, radius));
             }
             if pending.sphere_kind == "TangentCurvePoint" {
                 if pending.points.len() >= 2 {
@@ -3000,8 +3163,7 @@ impl Controller {
                         + (center[1] - pending.points[0][1]).powi(2)
                         + (center[2] - pending.points[0][2]).powi(2))
                     .sqrt();
-                    self.solid_pending = None;
-                    return Some(self.solid_sphere_points(center, radius));
+                    return Some(self.finish_pending_sphere(pending, center, radius));
                 }
                 if pending.points.is_empty() {
                     self.solid_pending = Some(pending);
@@ -3030,8 +3192,7 @@ impl Controller {
                         return Some(Err(error));
                     }
                 };
-                self.solid_pending = None;
-                return Some(self.solid_sphere_points(center, radius));
+                return Some(self.finish_pending_sphere(pending, center, radius));
             }
             if pending.sphere_kind == "TangentPoint" {
                 if pending.points.len() < 2 {
@@ -3073,8 +3234,7 @@ impl Controller {
                     1.0
                 };
                 let center = [mid[0], mid[1] + offset * sign, mid[2]];
-                self.solid_pending = None;
-                return Some(self.solid_sphere_points(center, radius));
+                return Some(self.finish_pending_sphere(pending, center, radius));
             }
             if let Some((key, value)) = text.split_once('=') {
                 let key = match key.trim().to_ascii_lowercase().as_str() {
@@ -3116,8 +3276,7 @@ impl Controller {
                         point[1] + normal[1] * value * sign,
                         point[2] + normal[2] * value * sign,
                     ];
-                    self.solid_pending = None;
-                    return Some(self.solid_sphere_points(center, value));
+                    return Some(self.finish_pending_sphere(pending, center, value));
                 }
                 let Some(center) = pending.sphere_center else {
                     self.solid_pending = Some(pending);
@@ -3131,8 +3290,7 @@ impl Controller {
                         return Some(Err(Error::Invalid("Sphere accepts Radius= or Diameter=")));
                     }
                 };
-                self.solid_pending = None;
-                return Some(self.solid_sphere_points(center, radius));
+                return Some(self.finish_pending_sphere(pending, center, radius));
             }
             let numbers: Vec<f64> = text
                 .split([',', ' ', '\t'])
@@ -3158,8 +3316,7 @@ impl Controller {
                     tangent_point[1] + normal[1] * radius,
                     tangent_point[2] + normal[2] * radius,
                 ];
-                self.solid_pending = None;
-                return Some(self.solid_sphere_points(center, radius));
+                return Some(self.finish_pending_sphere(pending, center, radius));
             }
             if pending.sphere_kind == "FitPoints" {
                 if !text.trim().is_empty() {
@@ -3172,9 +3329,9 @@ impl Controller {
                     self.solid_pending = Some(pending);
                     return Some(Err(Error::Invalid("fit sphere needs at least four points")));
                 }
-                let points = std::mem::take(&mut pending.points);
-                self.solid_pending = None;
-                return Some(self.fit_sphere_points(&points));
+                let result = self.fit_sphere_points(&pending.points);
+                if result.is_err() { self.solid_pending = Some(pending); }
+                return Some(result);
             }
             if pending.sphere_center.is_none() {
                 if numbers.len() != 3 {

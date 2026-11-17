@@ -274,8 +274,7 @@ impl MatrixApp {
                             )
                             .clicked()
                         {
-                            let r = self.controller.undo();
-                            self.feedback(r);
+                            self.request_history_ui(ui.ctx(), false);
                             ui.close();
                         }
                         if ui
@@ -286,8 +285,7 @@ impl MatrixApp {
                             )
                             .clicked()
                         {
-                            let r = self.controller.redo();
-                            self.feedback(r);
+                            self.request_history_ui(ui.ctx(), true);
                             ui.close();
                         }
                         // The property editor (OM9-L3-03-14-007): the six editable
@@ -866,8 +864,7 @@ impl MatrixApp {
                         )
                         .clicked()
                     {
-                        let r = self.controller.undo();
-                        self.feedback(r);
+                        self.request_history_ui(ui.ctx(), false);
                     }
                     if self
                         .icon(
@@ -879,8 +876,7 @@ impl MatrixApp {
                         )
                         .clicked()
                     {
-                        let r = self.controller.redo();
-                        self.feedback(r);
+                        self.request_history_ui(ui.ctx(), true);
                     }
                 });
             }
@@ -1351,6 +1347,8 @@ impl MatrixApp {
                         }
                         _ => "Ring builder mode",
                     });
+                #[cfg(test)]
+                ui.ctx().memory_mut(|memory| memory.data.insert_temp(egui::Id::new(("builder-tab-test", kind.tag())), response.rect));
                 if response.clicked() && !active {
                     let result = self.controller.switch_builder(kind);
                     self.feedback(result);
@@ -1462,7 +1460,12 @@ impl MatrixApp {
             }
         }
         ui.horizontal_wrapped(|ui| {
-            let apply = ui.add_enabled(editable, egui::Button::new("Apply"));
+            #[cfg(feature = "occt-brep")]
+            let ready = self.controller.background_ring_preview_pending()
+                || self.controller.builder().is_some_and(|session| session.preview_for_document(self.controller.document()).is_some());
+            #[cfg(not(feature = "occt-brep"))]
+            let ready = true;
+            let apply = ui.add_enabled(editable && ready, egui::Button::new("Apply"));
             #[cfg(test)]
             ui.ctx().memory_mut(|memory| {
                 memory
@@ -1487,6 +1490,10 @@ impl MatrixApp {
                 self.builder_style_window = true;
             }
         });
+        #[cfg(feature = "occt-brep")]
+        if self.controller.background_ring_preview_pending() {
+            ui.label(if self.controller.background_ring_apply_queued() { "Updating preview; Apply queued…" } else { "Updating preview…" });
+        }
         if let Some(applied) = self.controller.builder_applied_style() {
             ui.label(format!("style: {applied}"));
         }
@@ -1869,12 +1876,7 @@ impl MatrixApp {
                                         self.controller.coordinator().redo_len() > 0
                                     };
                                 if self.icon(ui, name, available, name).clicked() {
-                                    let result = if undo {
-                                        self.controller.undo()
-                                    } else {
-                                        self.controller.redo()
-                                    };
-                                    self.feedback(result);
+                                    self.request_history_ui(ui.ctx(), !undo);
                                 }
                             }
                             "Line" | "Point" if tab == "Standard" || tab == "Curve Tools" => {
@@ -2149,7 +2151,7 @@ impl MatrixApp {
     /// Always-visible status/error line. It shows the current state, keeps an
     /// unacknowledged failure on screen and never consumes Escape.
     pub(super) fn status_bar_ui(&mut self, ui: &mut egui::Ui) {
-        let (kind, message) = (self.status.kind(), self.status.message().to_owned());
+        let (kind, message) = self.presented_status();
         let color = match kind {
             StatusKind::Ready => Color32::from_rgb(206, 228, 206),
             StatusKind::Info => Color32::WHITE,
@@ -2698,6 +2700,44 @@ mod chrome_tests {
         output.textures_delta.clear();
     }
 
+    fn settle_history(app: &mut MatrixApp, context: &egui::Context, size: Vec2) {
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+        while app.controller.history_worker_pending() {
+            window_frame(app, context, size, vec![]);
+            assert!(std::time::Instant::now() < deadline, "history worker timed out");
+            std::thread::sleep(std::time::Duration::from_millis(2));
+        }
+    }
+
+    #[test]
+    fn history_shortcut_runs_in_background_and_escape_cancels() {
+        let mut app = MatrixApp::new(Document::with_template_tolerance("history UI")).unwrap();
+        app.controller.submit("Point").unwrap();
+        app.controller.submit("1,2,3").unwrap();
+        let context = egui::Context::default();
+        let size = Vec2::new(1280., 720.);
+        for _ in 0..3 { window_frame(&mut app, &context, size, vec![]); }
+        app.band_start = Some(egui::pos2(10., 10.));
+        assert!(!app.request_history_ui(&context, false));
+        assert!(!app.controller.history_worker_pending());
+        app.band_start = None;
+        let modifiers = Modifiers { ctrl: true, command: true, ..Modifiers::NONE };
+        window_frame(&mut app, &context, size, vec![egui::Event::ModifiersChanged(modifiers), egui::Event::Key {
+            key: Key::Z, physical_key: None, pressed: true, repeat: false, modifiers,
+        }]);
+        assert!(app.controller.history_worker_pending());
+        assert_eq!(app.controller.document().entities.len(), 1);
+        settle_history(&mut app, &context, size);
+        assert!(app.controller.document().entities.is_empty());
+        assert!(app.request_history_ui(&context, true));
+        window_frame(&mut app, &context, size, vec![egui::Event::ModifiersChanged(Modifiers::NONE), egui::Event::Key {
+            key: Key::Escape, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::NONE,
+        }]);
+        settle_history(&mut app, &context, size);
+        assert!(app.controller.document().entities.is_empty());
+        assert_eq!(app.controller.coordinator().redo_len(), 1);
+    }
+
     #[test]
     fn native_brep_top11_buttons_are_visible_but_not_clickable() {
         use om9_core::{
@@ -2707,13 +2747,13 @@ mod chrome_tests {
         let entity = Entity::new(
             "native",
             Geometry::NativeBrep(NativeBrep {
-                display: Mesh {
+                display: std::sync::Arc::new(Mesh {
                     vertices: vec![[0., 0., 0.], [2., 0., 0.], [0., 2., 0.]],
                     faces: vec![vec![0, 1, 2]],
                     normals: vec![],
                     colors: vec![],
                     corner_uvs: vec![],
-                },
+                }),
                 payload: vec![1, 2, 3].into(),
                 crc: 0,
             }),
@@ -3073,6 +3113,7 @@ mod chrome_tests {
             .cplane = CPlane::preset(CPlanePreset::Top);
         app.controller.top11_invoke(Top11Action::Move).unwrap();
         app.controller.accept_world_point([0.; 3]).unwrap();
+        app.snap_state.settings.enabled = 0;
         let before = app.controller.document().clone();
         let context = egui::Context::default();
         let size = Vec2::new(1400., 900.);
@@ -3088,7 +3129,7 @@ mod chrome_tests {
             size,
             vec![egui::Event::PointerMoved(cursor)],
         );
-        assert!(app.hover.is_none());
+        assert!(app.hover.is_none(), "hover={:?} snap={:?} view={:?}", app.hover, app.snap, app.hover_view);
         window_frame(&mut app, &context, size, pointer(cursor, true));
         window_frame(&mut app, &context, size, pointer(cursor, false));
         assert_eq!(app.controller.document(), &before);
@@ -5416,6 +5457,8 @@ mod chrome_tests {
             vec![egui::Event::Text("Undo".into())],
         );
         window_frame(&mut app, &context, size, vec![enter()]);
+        assert!(app.controller.history_worker_pending());
+        settle_history(&mut app, &context, size);
         assert_eq!(
             app.controller.document().entities.len(),
             3,
@@ -5434,6 +5477,8 @@ mod chrome_tests {
             vec![egui::Event::Text("Redo".into())],
         );
         window_frame(&mut app, &context, size, vec![enter()]);
+        assert!(app.controller.history_worker_pending());
+        settle_history(&mut app, &context, size);
         assert_eq!(
             app.controller.document().entities.len(),
             5,
@@ -5453,6 +5498,9 @@ mod chrome_tests {
         let undo = undo.center();
         window_frame(&mut app, &context, size, pointer(undo, true));
         window_frame(&mut app, &context, size, pointer(undo, false));
+        assert!(app.controller.history_worker_pending());
+        assert_eq!(app.controller.document().entities.len(), 5);
+        settle_history(&mut app, &context, size);
         assert_eq!(app.controller.document().entities.len(), 3, "toolbar Undo");
         assert_eq!(app.controller.coordinator().redo_len(), 1);
         let redo: Rect = context.memory(|m| {
@@ -5463,6 +5511,8 @@ mod chrome_tests {
         let redo = redo.center();
         window_frame(&mut app, &context, size, pointer(redo, true));
         window_frame(&mut app, &context, size, pointer(redo, false));
+        assert!(app.controller.history_worker_pending());
+        settle_history(&mut app, &context, size);
         assert_eq!(app.controller.document().entities.len(), 5, "toolbar Redo");
         assert_eq!(app.controller.coordinator().redo_len(), 0);
     }

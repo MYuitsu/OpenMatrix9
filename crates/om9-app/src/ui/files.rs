@@ -22,6 +22,217 @@ mod tests {
             .push(egui::ViewportEvent::Close);
         raw
     }
+
+    #[cfg(feature = "occt-brep")]
+    fn stl_job_fixture() -> (MatrixApp, om9_core::identity::ObjectId) {
+        let limits = om9_core::budget::Limits::default();
+        let sphere = om9_kernel::brep::sphere_brep(5., 0.1, &limits).unwrap();
+        let mut document = Document::with_template_tolerance("STL background fixture");
+        let object = om9_core::model::Entity::new("sphere", om9_core::geometry::Geometry::Brep(sphere), None);
+        let id = object.id;
+        document.entities.insert(id, object);
+        let mut app = MatrixApp::new(document).unwrap();
+        app.controller.select_objects(&[id]).unwrap();
+        (app, id)
+    }
+
+    #[cfg(feature = "occt-brep")]
+    const STL_PROFILE: crate::session::StlExportProfile = crate::session::StlExportProfile {
+        linear_tolerance_mm: 0.01,
+        angular_tolerance_rad: 0.3,
+    };
+
+    #[cfg(feature = "occt-brep")]
+    struct StlOutput(PathBuf);
+
+    #[cfg(feature = "occt-brep")]
+    impl StlOutput {
+        fn new() -> Self {
+            Self(std::env::temp_dir().join(format!("om9-ui-stl-{}.stl", uuid::Uuid::new_v4())))
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    impl Drop for StlOutput {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_file(&self.0);
+        }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    fn drain_stl_job(app: &mut MatrixApp, ctx: &egui::Context) {
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        while app.stl_job.is_some() {
+            assert!(std::time::Instant::now() < deadline, "STL worker timed out");
+            app.service_stl_export(ctx);
+            std::thread::sleep(std::time::Duration::from_millis(1));
+        }
+    }
+
+    #[test]
+    #[cfg(feature = "occt-brep")]
+    fn stl_background_menu_preserves_bytes_during_edit_undo_and_redo() {
+        let (mut app, source) = stl_job_fixture();
+        let baseline = StlOutput::new();
+        let target = StlOutput::new();
+        let ctx = egui::Context::default();
+        let receipt = app.controller.export_stl_selected_with_profile(&baseline.0, STL_PROFILE).unwrap();
+        assert!(receipt.watertight());
+        app.invoke("OM9-FILE-001", crate::session::InvocationOrigin::Menu);
+        let capture = app.stl_capture.take().unwrap();
+        app.cancel_stl_export_options();
+        app.launch_stl_export(&ctx, capture, target.0.clone(), STL_PROFILE).unwrap();
+        app.begin_stl_export_options();
+        assert!(app.stl_capture.is_none());
+        assert_eq!(app.status.message(), "STL export is already in progress");
+        assert!(!target.0.exists(), "worker waits for admission while UI remains usable");
+
+        app.controller.delete_objects(&[source]).unwrap();
+        app.controller.undo().unwrap();
+        assert!(app.controller.document().entities.contains_key(&source));
+        app.controller.redo().unwrap();
+        assert!(!app.controller.document().entities.contains_key(&source));
+        let before_completion = app.controller.coordinator().snapshot();
+        drain_stl_job(&mut app, &ctx);
+        assert!(std::fs::read(&target.0).unwrap() == std::fs::read(&baseline.0).unwrap(), "the same captured sphere and profile must produce identical STL bytes");
+        assert!(app.transcript.history().contains("Exported STL:"));
+        assert_eq!(app.controller.coordinator().snapshot(), before_completion);
+        assert_eq!(app.controller.coordinator().external_reserved_bytes(om9_core::budget::memory::MemoryClass::Export), 0);
+    }
+
+    #[test]
+    #[cfg(feature = "occt-brep")]
+    fn stl_background_admission_sees_pressure_added_after_capture() {
+        use om9_core::budget::memory::MemoryClass;
+        let (mut app, _) = stl_job_fixture();
+        let target = StlOutput::new();
+        std::fs::write(&target.0, b"previous STL").unwrap();
+        let ctx = egui::Context::default();
+        let capture = app.controller.capture_stl_selected().unwrap();
+        app.launch_stl_export(&ctx, capture, target.0.clone(), STL_PROFILE).unwrap();
+        let pressure = app.controller.coordinator().reserve_remaining_external_memory_with_held(
+            MemoryClass::Kernel, None, app.controller.scene_cache_usage().unwrap(),
+        ).unwrap();
+        let before = app.controller.coordinator().snapshot();
+        drain_stl_job(&mut app, &ctx);
+        assert!(app.status.kind().is_failure());
+        assert!(app.status.message().contains("budget"), "{}", app.status_line());
+        assert_eq!(std::fs::read(&target.0).unwrap(), b"previous STL");
+        assert_eq!(app.controller.coordinator().snapshot(), before);
+        assert_eq!(app.controller.coordinator().external_reserved_bytes(MemoryClass::Export), 0);
+        drop(pressure);
+        app.status.acknowledge();
+        let capture = app.controller.capture_stl_selected().unwrap();
+        app.launch_stl_export(&ctx, capture, target.0.clone(), STL_PROFILE).unwrap();
+        drain_stl_job(&mut app, &ctx);
+        assert_ne!(std::fs::read(&target.0).unwrap(), b"previous STL");
+    }
+
+    #[test]
+    #[cfg(feature = "occt-brep")]
+    fn stl_background_close_discards_old_completion_and_releases_busy_slot() {
+        let (mut app, source) = stl_job_fixture();
+        app.controller.submit("Point").unwrap();
+        app.controller.submit("2,3,4").unwrap();
+        app.controller.select_objects(&[source]).unwrap();
+        let target = StlOutput::new();
+        std::fs::write(&target.0, b"previous STL").unwrap();
+        let ctx = egui::Context::default();
+        let capture = app.controller.capture_stl_selected().unwrap();
+        app.launch_stl_export(&ctx, capture, target.0.clone(), STL_PROFILE).unwrap();
+        let _ = ctx.run_logic(&raw_close(), |ctx| { app.service_window_close(ctx); });
+        assert!(app.stl_job.as_ref().unwrap().canceling());
+        let history = app.transcript.history().to_owned();
+        drain_stl_job(&mut app, &ctx);
+        assert_eq!(app.transcript.history(), history);
+        assert_eq!(std::fs::read(&target.0).unwrap(), b"previous STL");
+        let token = app.controller.file_operation().unwrap().token();
+        app.controller.cancel_file_operation(token).unwrap();
+        let capture = app.controller.capture_stl_selected().unwrap();
+        app.launch_stl_export(&ctx, capture, target.0.clone(), STL_PROFILE).unwrap();
+        drain_stl_job(&mut app, &ctx);
+        assert_ne!(std::fs::read(&target.0).unwrap(), b"previous STL");
+    }
+
+    #[test]
+    #[cfg(feature = "occt-brep")]
+    fn stl_background_clean_close_waits_for_worker_cleanup() {
+        let (mut app, _) = stl_job_fixture();
+        assert!(!app.controller.is_dirty().unwrap());
+        let target = StlOutput::new();
+        std::fs::write(&target.0, b"previous STL").unwrap();
+        let ctx = egui::Context::default();
+        let capture = app.controller.capture_stl_selected().unwrap();
+        app.launch_stl_export(&ctx, capture, target.0.clone(), STL_PROFILE).unwrap();
+        let _ = ctx.run_logic(&raw_close(), |ctx| {
+            assert!(!app.service_window_close(ctx));
+        });
+        assert_eq!(app.controller.file_operation().unwrap().phase(), FilePhase::CloseReady);
+        assert!(app.stl_job.as_ref().unwrap().canceling());
+        drain_stl_job(&mut app, &ctx);
+        assert_eq!(std::fs::read(&target.0).unwrap(), b"previous STL");
+        let _ = ctx.run_logic(&egui::RawInput::default(), |ctx| {
+            assert!(app.service_window_close(ctx));
+        });
+    }
+
+    #[test]
+    #[cfg(feature = "occt-brep")]
+    fn stl_background_same_uuid_open_suppresses_old_completion() {
+        let (mut app, _) = stl_job_fixture();
+        let project = StlOutput(StlOutput::new().0.with_extension("om9"));
+        let target = StlOutput::new();
+        std::fs::write(&target.0, b"previous STL").unwrap();
+        app.controller.begin_file_operation(FileKind::SaveAs).unwrap();
+        let token = app.controller.file_operation().unwrap().token();
+        assert_eq!(app.controller.accept_file_path(token, &project.0).unwrap(), FileOutcome::Saved);
+        let document_id = app.controller.document().id;
+        let owner = app.controller.document().owner_session;
+        let ctx = egui::Context::default();
+        let capture = app.controller.capture_stl_selected().unwrap();
+        app.launch_stl_export(&ctx, capture, target.0.clone(), STL_PROFILE).unwrap();
+        app.controller.begin_file_operation(FileKind::Open).unwrap();
+        let token = app.controller.file_operation().unwrap().token();
+        assert_eq!(app.controller.accept_file_path(token, &project.0).unwrap(), FileOutcome::Replaced);
+        assert_eq!(app.controller.document().id, document_id);
+        assert_ne!(app.controller.document().owner_session, owner);
+        let before = app.controller.coordinator().snapshot();
+        let history = app.transcript.history().to_owned();
+        drain_stl_job(&mut app, &ctx);
+        assert_eq!(app.transcript.history(), history);
+        assert_eq!(app.controller.coordinator().snapshot(), before);
+        assert_eq!(std::fs::read(&target.0).unwrap(), b"previous STL");
+    }
+
+    #[test]
+    #[cfg(feature = "occt-brep")]
+    fn stl_background_cancel_button_preserves_destination() {
+        let (mut app, _) = stl_job_fixture();
+        let target = StlOutput::new();
+        std::fs::write(&target.0, b"previous STL").unwrap();
+        let ctx = egui::Context::default();
+        let capture = app.controller.capture_stl_selected().unwrap();
+        app.launch_stl_export(&ctx, capture, target.0.clone(), STL_PROFILE).unwrap();
+        let frame = |app: &mut MatrixApp, events| {
+            let mut output = ctx.run_ui(egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(900., 600.))),
+                focused: true, events, ..Default::default()
+            }, |ui| app.stl_progress_ui(ui.ctx()));
+            output.textures_delta.clear();
+        };
+        for _ in 0..3 { frame(&mut app, vec![]); }
+        let pos = ctx.data(|data| data.get_temp::<egui::Rect>(egui::Id::new("stl-worker-cancel-rect"))).unwrap().center();
+        for pressed in [true, false] {
+            frame(&mut app, vec![egui::Event::PointerMoved(pos), egui::Event::PointerButton {
+                pos, button: egui::PointerButton::Primary, pressed, modifiers: egui::Modifiers::NONE,
+            }]);
+        }
+        assert!(app.stl_job.as_ref().unwrap().canceling());
+        drain_stl_job(&mut app, &ctx);
+        assert_eq!(app.status.message(), "STL export cancelled");
+        assert_eq!(std::fs::read(&target.0).unwrap(), b"previous STL");
+    }
+
     #[test]
     #[cfg(feature = "occt-brep")]
     fn close_request_discards_pending_stl_capture() {
@@ -162,7 +373,7 @@ impl MatrixApp {
     pub(super) fn service_window_close(&mut self, ctx: &egui::Context) -> bool {
         let requested = ctx.input(|input| input.viewport().close_requested());
         if requested {
-            self.cancel_stl_export_options();
+            self.cancel_stl_export();
             self.controller.invalidate_stl_session_for_close();
         }
         let approved = self.controller.file_operation().is_some_and(|operation| {
@@ -173,6 +384,17 @@ impl MatrixApp {
                     .is_ok()
         });
         if approved {
+            if let Some(job) = &self.stl_job {
+                // Let the canceled worker remove staging output before the
+                // process exits. Completion wakes the normal close logic.
+                if !job.canceling() {
+                    job.cancel();
+                }
+                if requested {
+                    ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                }
+                return false;
+            }
             if !requested {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
@@ -185,7 +407,7 @@ impl MatrixApp {
             let result = self.controller.begin_window_close();
             let clean_close = matches!(result, Ok(FileOutcome::CloseReady));
             let _ = self.file_feedback(ctx, result);
-            if clean_close {
+            if clean_close && self.stl_job.is_none() {
                 return true;
             }
         }
@@ -197,7 +419,11 @@ impl MatrixApp {
     // Only explicit audit runs own throwaway documents. Teardown still uses
     // the same captured Close intent and explicit Discard decision.
     pub(super) fn audit_window_close(&mut self, ctx: &egui::Context) {
-        if self.audit.is_none() {
+        #[cfg(feature = "occt-brep")]
+        let sphere_audit = self.sphere_boolean_audit.as_ref().is_some_and(|audit| audit.can_discard());
+        #[cfg(not(feature = "occt-brep"))]
+        let sphere_audit = false;
+        if self.audit.is_none() && !sphere_audit {
             return;
         }
         if let Some(token) = self
@@ -341,7 +567,11 @@ impl MatrixApp {
         };
         // Save invocation stages UI metadata before capturing this token.
         // A picker response must not mutate the captured document/context.
-        let result = self.controller.accept_file_path(token, &path);
+        let result = if self.controller.file_operation().is_some_and(|op| op.phase() == FilePhase::OpenPath) {
+            self.controller.request_file_open_worker(token, &path)
+        } else {
+            self.controller.accept_file_path(token, &path)
+        };
         self.file_feedback(ctx, result)
     }
     pub(super) fn file_ui(&mut self, ctx: &egui::Context) {
@@ -357,6 +587,7 @@ impl MatrixApp {
             self.service_window_close(ctx);
             return;
         }
+        if phase == FilePhase::OpenPreparing { return; }
         let initial = self.file_prompt_token != Some(token);
         let mut painted = false;
         let affirmable = !initial
@@ -395,7 +626,7 @@ impl MatrixApp {
                     FilePhase::Overwrite => "Replace existing file?",
                     FilePhase::OpenPath => "Open document",
                     FilePhase::SavePath => "Save document",
-                    FilePhase::CloseReady => unreachable!("handled before modal"),
+                    FilePhase::CloseReady | FilePhase::OpenPreparing => unreachable!("handled before modal"),
                 });
                 ui.separator();
                 match phase {
@@ -417,7 +648,7 @@ impl MatrixApp {
                         ui.label("Native OM9 document (*.om9)");
                         ui.weak("For Rhino archives use File > Import 3DM… / Export 3DM….");
                     }
-                    FilePhase::CloseReady => unreachable!("handled before modal"),
+                    FilePhase::CloseReady | FilePhase::OpenPreparing => unreachable!("handled before modal"),
                 }
                 if !self.file_error.is_empty() {
                     ui.colored_label(Color32::DARK_RED, &self.file_error);
@@ -554,6 +785,10 @@ impl MatrixApp {
     }
 
     pub(super) fn begin_stl_export_options(&mut self) {
+        if self.stl_job.is_some() {
+            self.status.info("STL export is already in progress");
+            return;
+        }
         if self.stl_capture.is_some() {
             self.status.error("STL export is already in progress");
             return;
@@ -579,6 +814,60 @@ impl MatrixApp {
         self.stl_selected_profile = None;
         self.stl_request = false;
         self.stl_capture = None;
+    }
+
+    pub(super) fn cancel_stl_export(&mut self) {
+        self.cancel_stl_export_options();
+        if let Some(job) = &self.stl_job {
+            job.cancel();
+        }
+    }
+
+    pub(super) fn stl_progress_ui(&mut self, ctx: &egui::Context) {
+        let Some(job) = &self.stl_job else { return };
+        egui::Window::new("STL Export Progress")
+            .id(egui::Id::new("stl-export-progress"))
+            .anchor(egui::Align2::RIGHT_BOTTOM, [-12., -48.])
+            .collapsible(false)
+            .resizable(false)
+            .show(ctx, |ui| {
+                ui.horizontal(|ui| {
+                    ui.spinner();
+                    let canceling = job.canceling();
+                    ui.label(if canceling { "Cancelling STL…" } else { "Exporting STL…" });
+                    let cancel = ui.add_enabled(!canceling, egui::Button::new("Cancel"));
+                    #[cfg(test)]
+                    ctx.data_mut(|data| data.insert_temp(egui::Id::new("stl-worker-cancel-rect"), cancel.rect));
+                    if cancel.clicked() {
+                        job.cancel();
+                    }
+                });
+            });
+    }
+
+    pub(super) fn service_stl_export(&mut self, ctx: &egui::Context) {
+        let Some(job) = &mut self.stl_job else { return };
+        let current = job.belongs_to(&self.controller);
+        let Some(result) = job.poll(&self.controller) else { return };
+        // Keep the receipt's lease alive through transcript formatting.
+        let _finished = self.stl_job.take();
+        if current {
+            match result {
+                Ok(receipt) => {
+                    self.transcript.append_history(&receipt.message());
+                    self.status.complete_success();
+                }
+                Err(Error::Canceled) => {
+                    self.status.info("STL export cancelled");
+                }
+                Err(error) => {
+                    let message = crate::transcript::redact_paths(&error.to_string());
+                    self.transcript.append_history(&message);
+                    self.status.error(&message);
+                }
+            }
+        }
+        ctx.request_repaint();
     }
 
     pub(super) fn stl_profile_ui(&mut self, ctx: &egui::Context) {
@@ -651,18 +940,13 @@ impl MatrixApp {
             .active_file_path()
             .map(std::path::Path::to_path_buf);
         match crate::native_picker::pick_stl(frame, current.as_deref()) {
-            Ok(Some(path)) => match self.controller.export_captured_stl(capture, &path, profile) {
-                Ok(receipt) => {
-                    let message = receipt.message();
-                    self.transcript.append_history(&message);
-                    self.status.complete_success();
-                }
-                Err(error) => {
+            Ok(Some(path)) => {
+                if let Err(error) = self.launch_stl_export(ctx, capture, path, profile) {
                     let message = crate::transcript::redact_paths(&format!("{error}"));
                     self.transcript.append_history(&message);
                     self.status.error(&message);
                 }
-            },
+            }
             Ok(None) => {}
             Err(error) => {
                 let message = crate::transcript::redact_paths(&format!("{error}"));
@@ -672,6 +956,23 @@ impl MatrixApp {
         }
         self.focus_cmd = true;
         ctx.request_repaint();
+    }
+
+    fn launch_stl_export(
+        &mut self,
+        ctx: &egui::Context,
+        capture: crate::session::StlExportCapture,
+        path: PathBuf,
+        profile: crate::session::StlExportProfile,
+    ) -> Result<()> {
+        if self.stl_job.is_some() {
+            return Err(Error::Busy);
+        }
+        let wake = ctx.clone();
+        self.stl_job = Some(self.controller.start_interactive_stl(capture, path, profile, move || wake.request_repaint())?);
+        self.status.info("Exporting STL…");
+        ctx.request_repaint();
+        Ok(())
     }
 
     /// Load application-scoped Gumball preferences. A missing file is defaults;

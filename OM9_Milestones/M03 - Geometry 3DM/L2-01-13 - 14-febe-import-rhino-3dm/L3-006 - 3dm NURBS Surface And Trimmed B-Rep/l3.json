@@ -432,6 +432,104 @@
   "readiness_state": "RUNTIME_VERIFIED_AUTOMATED_GATE",
   "acceptance_category": "THREEDM",
   "runtime_implementation": {
+    "retained_definition_source_baselines_2026_11_14": {
+      "status": "SCOPED_AUTHORED_DEFINITION_CHECKS_PASSED",
+      "scope": "New definition baselines directly owning B-rep members exclude separate display while preserving member order and source metadata; authored shared-block overlay and snapshot tests pass.",
+      "limitations": "Old definition baselines remain display-sensitive; older-binary compatibility and actual native displayed-member export remain unverified.",
+      "evidence": "docs/validation/2026-11-14-retained-source-baselines.md#definition-member-follow-up"
+    },
+    "retained_source_baselines_2026_11_14": {
+      "status": "SCOPED_AUTHORED_BASELINE_CHECKS_PASSED",
+      "scope": "New versioned B-rep entity baselines exclude separate display, with authored cold snapshot and export-overlay checks; old baselines retain old semantics.",
+      "limitations": "Native fixture import passed but its B-rep was retained-only; real 3DM remesh/export, nested definition fingerprints, older-binary forward compatibility and v5 remain unverified.",
+      "evidence": "docs/validation/2026-11-14-retained-source-baselines.md"
+    },
+    "trim_native_headroom_2026_11_13": "Conversion of tested large trim requests estimated native headroom before OCCT; constrained-memory 1024-edge host fixture preserves destination/document/Redo and retries. Estimate does not bound native allocations. Evidence: docs/validation/2026-11-12-trimmed-surface-stl-gap.md#estimated-native-headroom-for-large-trim-export",
+    "trim_3dm_1024_2026_11_13": "Tested reopened plane with hole and 1024 trim edges roundtrips through admitted 3DM host and actual debug executable; material/hole/exterior rays checked. Independent Rhino, arbitrary geometry and native peak unverified. Evidence: docs/validation/2026-11-12-trimmed-surface-stl-gap.md#export-up-to-1024-polygon-edges",
+    "large_trim_support_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "LARGE_TRIM_28X28_SCOPED_PASS",
+      "scope": "A 28x28 planar trimmed surface with a hole and metadata over 16 KiB now fits the separate default 128 KiB trim limit. Tested insertion and Undo/Redo, OM9 save/open, scene picking and incremental update, ExtractWireframe and isocurve after reopen, STL and real 3DM export/reimport. Other names and extension limits remain separate; managed-pressure refusal preserves document/Redo in the wireframe fixture.",
+      "remaining": "Older builds can reject files with trim metadata over 16 KiB. Arbitrary trim topology, physical OOM, native peak, independent Rhino and desktop remain open. The debug native adapter still rejects the packet schema; Plan A remains open.",
+      "evidence": "docs/validation/2026-11-13-large-trim-support.md",
+      "next_document": "docs/validation/2026-11-13-large-trim-support.md",
+      "next_action": "Reconcile the debug native adapter without disrupting active user sessions, then verify the scoped workflow on desktop; continue Plan A remaining gates."
+    },
+    "trim_source_consistency_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "TRIM_SOURCE_CONSISTENCY_SCOPED_PASS",
+      "scope": "Document validation now rejects a trim extension whose underlying geometry differs from the entity surface. The root-entity transaction fixture checks refusal preserves snapshot and Redo, and a synchronized geometry/trim edit succeeds with Undo/Redo; archive save refuses the invalid document without overwriting its destination. Core, archive, isocurve, wireframe and seven native 3DM fixtures pass.",
+      "remaining": "The rule also reaches definition members via shared validation but those paths were not exercised. Desktop, legacy malformed-file recovery, all geometry-edit commands, native peak and large trim metadata remain open; Plan A remains open.",
+      "evidence": "docs/validation/2026-11-13-trim-source-consistency.md",
+      "next_document": "crates/om9-archive/src/json_admission.rs",
+      "next_action": "Design bounded large-trim representation and save/load admission; reconcile the debug adapter without disrupting active sessions."
+    },
+    "trim_bounded_writer_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "TRIM_BOUNDED_SERIALIZATION_SCOPED_PASS",
+      "scope": "The trim setter now serializes through a buffer bounded by the existing extension limit and stops before serializing an oversized payload. Exact-limit output matches the prior format; one-byte-short refusal preserves the prior entity. Four archive persistence tests, 14 semantic tests and seven native 3DM fixtures passed.",
+      "remaining": "The default 16 KiB limit still excludes larger trim sources. This bounds the setter serialization buffer, not native peak or all direct callers of to_extension. Desktop debug adapter mismatch, independent Rhino and large-trim save/load remain open; Plan A open and B deferred.",
+      "evidence": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md#large-trim-metadata-investigation--2026-11-13",
+      "next_document": "crates/om9-archive/src/json_admission.rs",
+      "next_action": "Design trim-specific representation and admitted archive/scene/transaction handling; separately reconcile the debug adapter without disturbing active sessions."
+    },
+    "trim_atomic_limit_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "TRIM_LIMIT_ATOMIC_REFUSAL_SCOPED_PASS",
+      "scope": "A 28x28 trimmed surface exceeded the default 16 KiB extension limit during controller/document validation before native export. Previously the setter could install an oversized extension and report success. It now checks the limit before replacing metadata; a default-limit large-source fixture and an existing-metadata preservation fixture pass. Oversized extension validation checks size before parsing.",
+      "remaining": "Larger trim data remains unsupported at default limits. Scoped admission and compatible save/load must be designed; debug adapter mismatch, independent Rhino and native peak remain open. Plan A remains open; B deferred.",
+      "evidence": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md#large-trim-metadata-investigation--2026-11-13",
+      "next_document": "crates/om9-archive/src/json_admission.rs",
+      "next_action": "Design a trim-specific bound and account for archive, transaction and decoding peaks before supporting larger metadata; separately reconcile the debug adapter."
+    },
+    "large_trim_metadata_limit_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "LARGE_TRIM_DEFAULT_LIMIT_CONFIRMED",
+      "scope": "A 28x28 trimmed plane with a hole failed controller/document validation after set_trimmed_surface returned success: the extension duplicates surface data and default max_name_bytes limits the payload to 16 KiB. The test did not reach the native adapter or export. The temporary failing test was removed after recording the result.",
+      "remaining": "Large trim metadata requires a separately budgeted representation or scoped limit and save/load compatibility; removing the export-only guard alone cannot solve the default workflow. Desktop debug adapter mismatch, independent Rhino, native transient peak and arbitrary trims remain open; Plan A open and B deferred.",
+      "evidence": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md#large-trim-metadata-investigation--2026-11-13",
+      "next_document": "crates/om9-core/src/model.rs",
+      "next_action": "Design a bounded trim representation with save/load compatibility; separately reconcile the debug adapter without disrupting active sessions."
+    },
+    "multiple_trim_solid_3dm_export_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "MULTIPLE_TRIM_AND_SOLID_EXPORT_SCOPED_PASS",
+      "scope": "Two separately placed planar trimmed surfaces with holes and a translated box passed real 3DM export/reimport; six source rays, solid source volume and world bounds checked geometry. Document and Redo stayed unchanged. The seven-fixture file batch passed.",
+      "remaining": "The current debug adapter rejects the packet schema; desktop, independent Rhino, arbitrary trim geometry and native temporary peak remain open. Plan A remains open; B deferred.",
+      "evidence": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md#multiple-trimmed-surfaces-and-solid--2026-11-13",
+      "next_document": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md",
+      "next_action": "Reconcile the debug adapter and verify desktop export when the active sessions can be left undisturbed."
+    },
+    "mixed_trim_brep_3dm_export_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_MIXED_EXPORT_PASSED_DESKTOP_OPEN",
+      "evidence": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md#mixed-trimmed-surface-and-editable-solid--2026-11-13",
+      "scope": "Six file fixtures passed: five exports/reimports including a trimmed plane with a translated editable box, and one safe refusal. The mixed fixture checks hole rays, solid source volume and source-based world bounds; the document and Redo are preserved. Mock late admission and cancellation leave the document intact and release reserved memory.",
+      "remaining": "The running debug layout uses an adapter that rejects the current packet schema. Desktop and independent Rhino acceptance, native temporary peak and arbitrary trim topologies remain open; Plan A remains open and B deferred.",
+      "next_document": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md",
+      "next_action": "Reconcile the debug adapter and verify desktop export when that can be done without disrupting the active sessions."
+    },
+    "trimmed_surface_3dm_file_export_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_NATIVE_3DM_EXPORT_PASSED_DESKTOP_OPEN",
+      "evidence": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md#scoped-admitted-3dm-export--2026-11-13",
+      "scope": "Six final native file cases passed: four trimmed plane/cylinder/block exports and reimports with hole ray checks, and two safe refusal cases. Simulated pressure and pre-cancellation preserve the target, document and Redo in the exercised cases.",
+      "remaining": "Debug exchange adapter rejects the current packet schema; desktop and independent Rhino acceptance, native temporary peak, general trim topologies and mixed editable B-reps remain open. Plan A remains open; B remains deferred.",
+      "next_document": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md",
+      "next_action": "Reconcile the native adapter used by the debug app and verify desktop export without disturbing active user work."
+    },
+    "trimmed_surface_3dm_bridge_probe_2026_11_13": {
+      "status": "SCOPED_BRIDGE_PROBE_PASSED_EXPORT_STILL_GUARDED",
+      "evidence": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md#native-brep-bridge-probe",
+      "scope": "Planar and cylindrical source-trimmed faces with holes roundtripped through the existing native B-rep bridge; material, hole and outside rays passed for both.",
+      "remaining": "No exported 3DM file or user workflow was exercised. Admitted projection, actual output, atomic failure, placement, desktop and native peak remain open."
+    },
+    "trimmed_surface_3dm_export_guard_2026_11_13": {
+      "status": "TRIMMED_SURFACE_3DM_EXPORT_GUARDED",
+      "evidence": "docs/validation/2026-11-13-trimmed-surface-3dm-export.md",
+      "scope": "Geometry-only packet had omitted standalone trim metadata; root and block cases now refuse before export, while an unrelated selected object remains encodable. A native-adapter refusal fixture preserves destination, document and Redo; exchange suite passes.",
+      "remaining": "Correct trimmed standalone surface 3DM export is not implemented; native re-import geometry, desktop and peak resource evidence remain open."
+    },
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED",
     "target": "standalone Rust OM9, Windows x64",
@@ -483,6 +581,15 @@
     "manual_gate": "AUTO_ONLY",
     "remaining": [
       "Strict editable mode aborts the whole import on the first unconvertible B-Rep; best-effort UI wiring is not exposed."
-    ]
+    ],
+    "exchange_adapter_current_source_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "CURRENT_SOURCE_PASSED_DEBUG_LAYOUT_STALE",
+      "scope": "Old debug native binary refused a 3DM block packet; the current-source Release rebuild passed the same fixture and all eight trimmed 3DM tests, seven export/reimport and one safe refusal.",
+      "remaining": "Old debug layout remains alongside running application; exact historical schema difference, desktop, third-party files and native peak remain unverified. Plan A remains open; B1-B3 remain deferred.",
+      "evidence": "docs/validation/2026-11-13-exchange-adapter-rebuild.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "After user saves and closes active windows, update the executable and digest together in the existing debug layout and verify actual desktop."
+    }
   }
 }

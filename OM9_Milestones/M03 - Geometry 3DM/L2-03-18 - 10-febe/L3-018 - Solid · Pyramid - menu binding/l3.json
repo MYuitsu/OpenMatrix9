@@ -815,6 +815,7 @@
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "feature": "OM9-SOLID-018",
+    "document_unit_direct_2026_11_12": "Centimetre CMD/menu direct lengths and unscaled side count, volume, saved input/output and Undo/Redo verified. See docs/validation/2026-11-12-solid-direct-document-units.md.",
     "command": "Pyramid 4 5 10",
     "evidence": [
       "implementation/evidence/M03/OM9-L3-03-18-018/OM9-L4-03-18-018-01.focused.log",

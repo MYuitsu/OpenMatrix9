@@ -5,6 +5,7 @@ mod atomic_file;
 mod container;
 mod json_admission;
 mod restore;
+pub mod canonical_brep;
 pub mod snapshot;
 pub use restore::{ReplayKey, RestoredDocument};
 pub use snapshot::DocumentSnapshot;
@@ -50,6 +51,15 @@ impl Archive {
     pub fn decode(bytes: &[u8], limits: &Limits) -> Result<Document> {
         container::decode(bytes, limits)
     }
+    /// Decode a v4 archive for an explicit migration while retaining every old
+    /// display. The caller owns the admission and must keep the returned
+    /// displays until they have a separately charged scene/cache disposition.
+    /// This does not publish a document or attest native topology.
+    pub fn decode_v4_migration_candidate(bytes: &[u8], limits: &Limits,
+        mut admit: impl FnMut(u64) -> Result<()>)
+        -> Result<(Document, om9_core::legacy_v4::LegacyDisplays)> {
+        container::decode_v4_with_displays(bytes, limits, &mut admit)
+    }
     /// Explicit schema-1 upgrade. This establishes empty resource ownership,
     /// never invented source provenance; durable document/object IDs stay put.
     pub fn migrate_from_v1(bytes: &[u8], limits: &Limits) -> Result<Migration> {
@@ -81,12 +91,12 @@ impl Archive {
             .ok_or(om9_core::Error::Budget("migration input retention"))?;
         Ok(Migration {
             from_version,
-            to_version: 4,
+            to_version: container::VERSION,
             bytes: container::encode(&document, &encoding)?,
         })
     }
     /// Explicit developer migration command; the original path is replaced
-    /// only after schema-4 save/verification accepts it. Failure preserves it.
+    /// only after current-schema save/verification accepts it. Failure preserves it.
     pub fn upgrade_v1_in_place(
         path: &Path,
         limits: &Limits,
@@ -287,5 +297,60 @@ impl Archive {
             });
         drop(bytes);
         restored.map(|document| (reservation, document))
+    }
+
+    /// Read and restore a v4 migration candidate while retaining both its
+    /// reservation and legacy displays for the subsequent scene handoff.
+    pub fn open_restored_v4_retaining_displays<T>(
+        path: &Path,
+        limits: &Limits,
+        available: &std::collections::BTreeSet<ReplayKey>,
+        reserve: impl FnOnce(u64) -> Result<T>,
+        before_restore: impl FnOnce(&mut T, u64) -> Result<()>,
+        admit_document: impl FnMut(&mut T, u64) -> Result<()>,
+    ) -> Result<(T, RestoredDocument, om9_core::legacy_v4::LegacyDisplays)> {
+        Self::open_restored_candidate(path, limits, available, reserve, before_restore, admit_document, true)
+    }
+
+    /// Open the current schema or migrate v4 in a private candidate. Legacy
+    /// displays stay owned until the caller accounts and publishes the scene.
+    pub fn open_restored_retaining_displays<T>(
+        path: &Path,
+        limits: &Limits,
+        available: &std::collections::BTreeSet<ReplayKey>,
+        reserve: impl FnOnce(u64) -> Result<T>,
+        before_restore: impl FnOnce(&mut T, u64) -> Result<()>,
+        admit_document: impl FnMut(&mut T, u64) -> Result<()>,
+    ) -> Result<(T, RestoredDocument, om9_core::legacy_v4::LegacyDisplays)> {
+        Self::open_restored_candidate(path, limits, available, reserve, before_restore, admit_document, false)
+    }
+
+    fn open_restored_candidate<T>(
+        path: &Path, limits: &Limits, available: &std::collections::BTreeSet<ReplayKey>,
+        reserve: impl FnOnce(u64) -> Result<T>,
+        before_restore: impl FnOnce(&mut T, u64) -> Result<()>,
+        mut admit_document: impl FnMut(&mut T, u64) -> Result<()>,
+        v4_only: bool,
+    ) -> Result<(T, RestoredDocument, om9_core::legacy_v4::LegacyDisplays)> {
+        let (bytes, mut reservation) = atomic_file::read_bounded_reserved(path, limits, reserve)?;
+        before_restore(&mut reservation, bytes.len() as u64)?;
+        let mut admit = |estimated| admit_document(&mut reservation, estimated);
+        let (document, displays) = if v4_only {
+            container::decode_v4_with_displays(&bytes, limits, &mut admit)?
+        } else {
+            container::decode_open_candidate(&bytes, limits, &mut admit)?
+        };
+        let retained = (bytes.len() as u64).checked_add(displays.retained_display_bytes()?)
+            .ok_or(om9_core::Error::Overflow("legacy display restore"))?;
+        let remaining = limits.remaining_after(om9_core::budget::Usage {
+            bytes: retained, ..om9_core::budget::Usage::default()
+        })?;
+        let restored = restore::restore_with_admission(document, &remaining, available, &mut |estimated| {
+            let total = estimated.checked_add(retained)
+                .ok_or(om9_core::Error::Overflow("legacy display restore admission"))?;
+            admit_document(&mut reservation, total)
+        })?;
+        drop(bytes);
+        Ok((reservation, restored, displays))
     }
 }

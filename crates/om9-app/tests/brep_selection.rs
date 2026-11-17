@@ -49,11 +49,11 @@ fn placement_undo_and_redo_share_immutable_brep_source() {
     let document_id = controller.document().id;
     let Geometry::Brep(original_shape) = &original.world.documents[&document_id].entities[&id].geometry else { panic!("B-rep required") };
     let source = original_shape.source().as_ptr();
-    let face_ids = original_shape.display.faces.clone();
+    let face_ids = original_shape.topology().faces.clone();
     controller.numeric_move([5., 0., 0.]).unwrap();
     let Geometry::Brep(moved) = &controller.document().entities[&id].geometry else { panic!("B-rep required") };
     assert_eq!(moved.source().as_ptr(), source);
-    assert_eq!(moved.display.faces, face_ids);
+    assert_eq!(moved.topology().faces, face_ids);
     assert!((source_volume(moved, &limits).unwrap() - 24.).abs() < 1e-9);
     controller.undo().unwrap();
     let Geometry::Brep(undone) = &controller.document().entities[&id].geometry else { panic!("B-rep required") };
@@ -70,9 +70,9 @@ fn actual_box_faces_edges_and_vertices_use_topology_ids_not_mesh_offsets() {
     let shape = box_brep([2.; 3], 0.01, &l).unwrap();
     assert_eq!(
         (
-            shape.display.faces.len(),
-            shape.display.edges.len(),
-            shape.display.vertices.len()
+            shape.topology().faces.len(),
+            shape.topology().edges.len(),
+            shape.display().vertices.len()
         ),
         (6, 12, 8)
     );
@@ -86,9 +86,9 @@ fn actual_box_faces_edges_and_vertices_use_topology_ids_not_mesh_offsets() {
         let hit = pick(&c, point, kind).unwrap();
         assert_eq!(hit.root, id);
         assert!(match hit.subset {
-            Subelement::BrepFace(key) => shape.display.faces.contains(&key),
-            Subelement::BrepEdge(key) => shape.display.edges.contains(&key),
-            Subelement::BrepVertex(key) => shape.display.vertex_ids.contains(&key),
+            Subelement::BrepFace(key) => shape.topology().faces.contains(&key),
+            Subelement::BrepEdge(key) => shape.topology().edges.contains(&key),
+            Subelement::BrepVertex(key) => shape.topology().vertex_ids.contains(&key),
             _ => false,
         });
         c.select_subobject_ref(SelectedSubobject::from_hit(&hit))
@@ -109,12 +109,12 @@ fn actual_box_faces_edges_and_vertices_use_topology_ids_not_mesh_offsets() {
 fn curved_surface_tessellation_resolves_one_real_face_and_excludes_fake_vertices() {
     let l = Limits::default();
     let shape = sphere_brep(2., 0.03, &l).unwrap();
-    assert_eq!(shape.display.faces.len(), 1);
-    assert!(shape.display.triangles.len() > 20);
+    assert_eq!(shape.topology().faces.len(), 1);
+    assert!(shape.display().triangles.len() > 20);
     assert!(
         (source_volume(&shape, &l).unwrap() - 4. / 3. * std::f64::consts::PI * 8.).abs() < 1e-8
     );
-    let key = shape.display.faces[0];
+    let key = shape.topology().faces[0];
     let (c, _) = controller(Geometry::Brep(shape));
     for point in [[0.3, 0.4, 1.], [0.7, -0.4, 1.], [-0.4, 0.8, 1.]] {
         assert_eq!(
@@ -175,7 +175,7 @@ fn source_and_topology_survive_cold_archive_and_transform_undo_without_reviving_
     let rebuilt = read_brep(loaded.source(), 0.02, &l).unwrap();
     assert!((source_volume(&rebuilt, &l).unwrap() - 6000.).abs() < 1e-8);
     assert_ne!(
-        rebuilt.display.faces, loaded.display.faces,
+        rebuilt.topology().faces, loaded.topology().faces,
         "retessellation needs a new publication/identity, never guessed native offsets"
     );
     std::fs::remove_file(path).unwrap();
@@ -194,10 +194,10 @@ fn source_binding_corrupt_cache_invalid_native_source_and_budgets_are_rejected()
             .is_err()
     );
     let mut changed = shape.clone();
-    changed.display.points[0][0] += 1.;
+    changed.edit_display_for_validation(|display| display.points[0][0] += 1.);
     assert!(changed.validate(&l).is_err());
     let mut changed = shape.clone();
-    changed.display.faces[0] = Uuid::nil();
+    changed.edit_display_for_validation(|display| display.topology.faces[0] = Uuid::nil());
     assert!(changed.validate(&l).is_err());
     let tight = Limits { max_points: 2, ..l };
     assert!(box_brep([2.; 3], 0.01, &tight).is_err());

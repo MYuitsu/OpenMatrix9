@@ -455,6 +455,28 @@ fn snapshot_topology_names_curves_surfaces_and_points() {
 }
 
 #[test]
+fn admitted_brep_topology_preserves_order_and_measures_without_segment_copy() {
+    use om9_core::brep::{BrepDisplay, BrepTopology};
+    let display = BrepDisplay {
+        source_sha256: [0; 32], deflection_mm: 0.1,
+        points: vec![[0., 0., 0.], [3., 0., 0.], [3., 4., 0.]],
+        triangles: vec![[0, 1, 2, 0]], segments: vec![[0, 1, 0], [1, 2, 0]],
+        vertices: vec![0, 2],
+        topology: BrepTopology { faces: vec![uuid::Uuid::new_v4()],
+            edges: vec![uuid::Uuid::new_v4(), uuid::Uuid::new_v4()],
+            vertex_ids: vec![uuid::Uuid::new_v4(), uuid::Uuid::new_v4()], face_edges: vec![] }.into(),
+    };
+    let result = SnapshotTopology.brep_subshapes_admitted(&display, &limits(), &mut |_, _| Ok(())).unwrap();
+    assert_eq!(result.iter().map(|shape| shape.name.as_str()).collect::<Vec<_>>(),
+        ["edge:0", "face:0", "vertex:0", "vertex:1"]);
+    assert_eq!(result[0].signature.start, [0., 0., 0.]);
+    assert_eq!(result[0].signature.end, [3., 4., 0.]);
+    assert_eq!(result[0].signature.measure_mm, 7.);
+    assert_eq!(result[1].signature.measure_mm, 6.);
+    assert_eq!(result[3].signature.start, [3., 4., 0.]);
+}
+
+#[test]
 fn a_geometry_only_producer_still_works_but_cannot_serve_references() {
     // `recompute_feature` remains the closure API; a feature without references rebuilds
     // through it, which keeps the old callers (and the L3-007 tests) valid.

@@ -105,10 +105,10 @@ fn native_brep_surface_candidates_follow_display_quad_triangulation() {
     use om9_core::geometry::NativeBrep;
     let mut document = Document::new("native quad");
     let entity = Entity::new("quad", Geometry::NativeBrep(NativeBrep {
-        display: Mesh {
+        display: std::sync::Arc::new(Mesh {
             vertices: vec![[-5., -5., 0.], [5., -5., 0.], [5., 5., 0.], [-5., 5., 4.]],
             faces: vec![vec![0, 1, 2, 3]], normals: vec![], colors: vec![], corner_uvs: vec![],
-        },
+        }),
         payload: vec![1].into(), crc: 0,
     }), None);
     let id = entity.id;

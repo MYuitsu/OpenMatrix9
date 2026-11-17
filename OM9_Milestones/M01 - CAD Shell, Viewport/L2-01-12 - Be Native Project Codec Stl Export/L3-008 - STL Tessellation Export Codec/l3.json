@@ -97,6 +97,48 @@
     "execution_status": "SPEC_ONLY; NOT READY TO CODE UNTIL M00 AND TASK L4 AUDIT"
   },
   "runtime_implementation": {
+    "surface_source_worker_2026_11_13": "STL worker copies NURBS surface source and optional trim extension together, releases document after handoff, and shares repeated source occurrences. Mixed B-rep/planar-hole and standalone surface fixtures passed; arbitrary trims and native peak remain unverified. Evidence: docs/validation/2026-11-13-stl-surface-source-worker.md",
+    "shared_authored_mesh_worker_2026_11_13": "Repeated authored-mesh occurrences share one admitted worker snapshot and one pending allowance; two placed instances including reflection match retained-document STL soup. Surface selections and source-only Document/Undo remain open. Evidence: docs/validation/2026-11-13-stl-shared-mesh-source.md",
+    "mixed_brep_authored_mesh_worker_2026_11_13": "Tested mixed OCCT B-rep and authored mesh selections copy admitted mesh source on the export worker, then release the captured document; soup and binary match document capture and an STL worker export completed. Document remains pinned during copying; repeated mesh occurrences duplicate source and surfaces still use document capture. Evidence: docs/validation/2026-11-13-stl-brep-authored-mesh-worker.md",
+    "trim_native_headroom_2026_11_13": "Conversions of tested 129–1024-edge trims request estimated native headroom before OCCT; constrained managed-memory fixtures preserve destination/document/Redo and retry. The allowance is heuristic, not a native-memory bound. Evidence: docs/validation/2026-11-12-trimmed-surface-stl-gap.md#estimated-native-headroom-for-large-trim-export",
+    "trim_stl_process_memory_2026_11_13": "Two isolated debug process samples for reopened 1024-edge plane/cylinder STL show peak commit 79,695,872/106,307,584 bytes respectively. Whole-process lifetime counters; OCCT-only peak and worst case unverified. Evidence: docs/validation/2026-11-12-trimmed-surface-stl-gap.md#process-memory-for-the-1024-edge-fixtures",
+    "trim_stl_1024_2026_11_13": "Tested reopened plane and cylinder trims with up to 1024 edges export source-derived STL at two profiles; pressure and 1025-edge refusal preserve destination/document/Redo. Native transient peak, desktop and broad geometry unverified. Evidence: docs/validation/2026-11-12-trimmed-surface-stl-gap.md#export-up-to-1024-polygon-edges",
+    "occt_created_source_index_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Newly created OCCT shapes are serialized and then read from that source before producing the initial mesh and topology indices.",
+      "evidence": [
+        "implementation/design/M01/viewport-export-separation-20261102/PLAN.md"
+      ],
+      "verification": "Box and sphere initial display arrays and adjacency match a fresh read at the same profile. Nineteen kernel, twenty B-rep precision picking, sixty STL and eighty-six Top11 B-rep tests passed; solid workflows passed with the native UI fixture ignored.",
+      "remaining": "This does not establish durable topology identity across remesh, version changes or legacy files. Large-model native allocation peak and release/desktop behavior have not been measured."
+    },
+    "stl_instance_source_capture_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Expand instances whose leaves are all OCCT or native B-reps into source-only captures with composed placement and visibility; other selections retain the document.",
+      "evidence": [
+        "implementation/design/M01/viewport-export-separation-20261102/PLAN.md"
+      ],
+      "verification": "Instance fixture with shared source, reflection and hidden leaf matched document capture and STL bytes after edit; duplicate source accounting and invalid batch rejection passed. STL library 66, STL integration 60 and core transaction 130 existing tests passed, plus two new targeted tests.",
+      "remaining": "Large-definition lookup cost and release/desktop behavior are unmeasured; cache eviction, source topology mapping, v5 and global accuracy gates remain open."
+    },
+    "stl_mixed_source_capture_2026_11_06": {
+      "status": "PARTIAL_TARGETED_TESTS_PASSED",
+      "scope": "Root OCCT B-rep and NativeBrep selections capture tracked canonical source leases instead of retaining document display meshes; mixed types and native document tolerance are captured at invocation.",
+      "evidence": [
+        "docs/validation/2026-11-06-stl-mixed-source-capture.md"
+      ],
+      "verification": "130 transaction, 66 STL library and 60 STL integration tests passed; mixed OCCT/native reflected fixture matched document capture and binary bytes after deleting live objects.",
+      "remaining": "Instance and other-geometry selections still retain the document; release/desktop retest, global geometric and topology accuracy, source mapping, cache eviction and v5 remain open."
+    },
+    "stl_background_ui_2026_11_05": {
+      "status": "UI_WORKER_TARGETED_TESTS_AND_DESKTOP_PASSED",
+      "scope": "Export Selected reuses staged tessellation and writing on a worker. Live memory admission, atomic cancellation, stale completion guards and final receipt lifetime cover the interactive route.",
+      "evidence": [
+        "docs/validation/2026-11-05-stl-background-ui.md"
+      ],
+      "verification": "STL lib 77 and STL integration 60 passed, including background byte parity and the stream-copy admission test. File/widget/persistence and four release memory fixtures also passed.",
+      "remaining": "Desktop evidence covers the earlier release; the later source-only path needs its own retest. Pre-copy OCCT internal allocation controls and separate P3a topology and error-budget gates remain open."
+    },
     "stl_shared_admission_peer_2026_11_05": {
       "status": "PARTIAL_CHECKS_PASSED",
       "scope": "R1a peer portion: reuse the existing shared-account admission peer for STL capture, preserving cache quota at the tested managed ceiling and source authority without a temporary identity/account adoption",
@@ -350,7 +392,31 @@
     "human_approval": null,
     "remaining": [
       "M07 owns tessellation and the document STL export command."
-    ]
+    ],
+    "one_seam_trim_stl_2026_11_12": {
+      "status": "SCOPED_ONE_SEAM_TRIM_STL_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-stl-gap.md#rectangular-patch-touching-one-seam-side",
+      "scope": "Both sides of a rectangular trimmed cylinder touching one seam end preserve source area and hole rays; reopened translated STL fixtures retain hole, sampled material and Redo at two profiles. STL 66, source-face 7 and native surface 14 tests passed; debug build and audit passed.",
+      "limitations": "Other seam topology, multiple closed axes, reversed trims, periodic variants, global mesh error, desktop and native peak remain unverified."
+    },
+    "trimmed_surface_stl_guard_2026_11_12": {
+      "status": "TRIMMED_STL_INCORRECT_EXPORT_GUARDED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-stl-gap.md",
+      "scope": "Reopened planar trimmed surface exported 100 mm² instead of 32 mm² because trim was omitted. The path now temporarily refuses trimmed standalone NURBS, preserving existing destination, document and Redo in the tested fixture. STL batch 61 passed and the intended correct-export regression is ignored; debug build and source audit passed.",
+      "limitations": "Correct source-trimmed STL export is not implemented. Preserve independent output profile and atomic semantics while supporting holes, curved geometry, seam and placement. Desktop and native peak remain unverified. Plan A open; B deferred."
+    },
+    "source_trimmed_stl_2026_11_12": {
+      "status": "SCOPED_SOURCE_TRIMMED_STL_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-stl-gap.md#scoped-source-trimmed-export",
+      "scope": "Validated polygon UV trims construct a temporary OCCT face and export using the requested STL profile. Reopened planar hole exports area 32 not 100; a mixed affine/mesh case keeps hole and Redo at two profiles; a cylindrical patch with hole passes analytic area. Full STL 64, native surface 14 and trimmed face 4 tests pass; no-default check, debug build and audit pass.",
+      "limitations": "Reversed trim, closed-axis seam touches, over-128 edges and oversized metadata are refused; general geometry, extreme scales, desktop and native peak unverified. OCCT 3D edge construction requests 1e-7 source-unit tolerance; no global mesh deviation claim. Plan A open; B deferred."
+    },
+    "full_seam_trim_stl_2026_11_12": {
+      "status": "SCOPED_FULL_SEAM_TRIM_STL_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-stl-gap.md#certified-full-seam-stl-export",
+      "scope": "Certified single-axis full rectangular seam uses natural OCCT boundary plus validated UV hole wires. Reopened translated cylinder retains hole and analytic area at two STL profiles and preserves Redo. Nonrectangular seam mixed selection is refused atomically; sampled periodic-source kernel fixture passes. STL batch 65 passed before final native input-count guard; focused STL and native suites 6 and 14 passed after; debug build and audit pass.",
+      "limitations": "Other seam topology, multiple closed axes, reversed trim, extreme placement, complete mesh error, physical desktop and native peak unverified. Plan A open; B deferred."
+    }
   },
   "children_l4": [],
   "sdk_export_plan": {

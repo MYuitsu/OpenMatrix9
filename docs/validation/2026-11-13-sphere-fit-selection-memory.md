@@ -1,0 +1,44 @@
+# Sphere FitPoints selection memory recovery — 2026-11-13
+
+Previously the Sphere recovery offer covered final FitPoints completion but not loading selected NativeBrep vertices via Selection or empty input at an empty FitPoints prompt. These selection inputs now capture the Sphere session and point revision, document authority/epoch, root-selection revision and draft. On a recognized memory refusal the existing consent flow can retry and discard oldest Undo only as needed; changes to selection, even away and back, or to the draft make the recovery stale before another discard. Allocation failures at the new source-vertex output and point-append sites map to the existing bytes memory classification; point-count and explicit resource limits remain separate refusals.
+
+A simulated managed-pressure UI fixture tests both Selection and empty input on an authored NativeBrep box: one old mesh Undo is removed, eight source points load, and later Sphere completion has exact document Undo/Redo. Separate stale fixtures change selection away and back or change the draft; neither removes Undo. Another UI frame test checks that a successful recovery clears the submitted draft, says selection loaded and leaves Sphere running; it manually starts recovery rather than clicking the dialog. The 80-test recovery UI group and six source-selection tests passed; no-default check and existing debug build succeeded. These fixtures do not establish physical RAM exhaustion, physical desktop interaction, native parser peak, or behavior for every input. A later strengthened run retained one pre-existing Redo while one old Undo was reclaimed and selection points loaded for both inputs. A separate exhausted-history case retained the document, empty pending point list and one Redo when retry still failed. The strengthened focused test passed; these are simulated managed-pressure fixtures, not physical OOM.
+
+
+## Reuse of existing point capacity
+
+When loading NativeBrep vertices after already collected points, the temporary admission previously reserved a complete new point buffer even if the existing vector capacity was sufficient. The admission now requests a replacement buffer only if capacity must actually grow, and still reserves the old and new buffers together during growth. A managed-pressure controller fixture selects 17 points followed by an authored NativeBrep box. The focused comparison, in 128-byte steps, found minimum successful headroom of 11,520 bytes before and 10,880 bytes after; the single-box control was 10,368 bytes. The regression failed before and passed after the change; all eight source tests and the focused selection-recovery UI test passed. This measures managed reservation thresholds for one fixture, not real process peak or proof of actual Undo removal in the pre-fix UI. No desktop or physical OOM was tested.
+
+
+### User-flow confirmation with existing Undo and Redo
+
+An additional egui command-handler fixture selected 17 authored points and one NativeBrep with an older Undo and one existing Redo. At an admission budget calibrated against a single-source control, the pre-fix handler displayed the memory-recovery offer; it did not automatically delete Undo. With the fixed admission the same command loaded all 25 points without offering recovery and retained both history counts and the document. The focused test failed before and passed after the fix, and the existing debug target was rebuilt after restoring the final source. The fixture uses simulated managed pressure, not physical OOM or a desktop click.
+
+
+## Appending a selection to existing fit points
+
+The selection handler previously grew the pending-point vector without a coordinator reservation while both the existing and collected buffers were live. When the pending list is empty it now moves the collected vector instead of allocating a second one; otherwise it admits both live capacities and any required replacement buffer before appending. On admission or allocation failure it restores the pending session, reports a typed memory refusal and leaves its existing points intact. A controller fixture with one existing point and a selected point refused under simulated managed pressure, retained the point, document and Redo, and succeeded after pressure was released. A separate UI fixture confirmed consent-driven retry, removal of one old Undo, retention of the original point and Redo, and loading the selected point. The focused regression was not separately run on the old code; the previous missing admission is established by source inspection. Nine selection-source tests and 82 memory-recovery UI tests passed, as did no-default check and the existing debug build. At that stage, collection of authored Point/Curve/Mesh data before the final append had not yet been admitted; the later section records the subsequent change. Native parser allocations, physical OOM and desktop remain outside this evidence.
+
+
+## Admission during source collection
+
+FitPoints now holds one managed reservation while collecting selected points: Point and Mesh output growth, the 16 Curve samples and output growth, OCCT B-rep source vertices, and NativeBrep source conversion and vertices are admitted with the existing pending points. B-rep source validation retains the original topology-count checks. A controller test separately applies simulated pressure to authored Point, line Curve, triangle Mesh and B-rep selections; each refuses without adding points or changing document and Redo, then loads the expected points after pressure release. The already-tested NativeBrep and point UI recovery paths still pass; this test did not independently click consent or reclaim Undo for each source kind. Ten source tests and 82 recovery UI tests passed, and no-default check and the existing debug build succeeded. These reservations cover the stated buffers, not every allocation inside curve evaluation, OCCT parsing, the live pending session or the process. Physical OOM, desktop and native peak remain unverified.
+
+
+## Retained session data while collecting
+
+SolidPending usage is included in scene-held accounting while the pending value is attached to the controller. During text submission the value is temporarily taken out of the controller, so it is absent from that scene-held usage. The collection and append paths previously compensated only for its point-vector capacity, omitting other still-live pending buffers. They now pass the full SolidPending usage and, when appending, include its non-point portion alongside the old and new point buffers.
+
+An authored line-curve fixture enters AroundCurve, switches to FitPoints while its curve data remain allocated, and selects a point under calibrated simulated managed pressure. With point capacity alone counted, Selection succeeded despite the still-live curve data; with the full pending usage counted it refused and kept the document and point list unchanged, then succeeded after pressure was released. The focused regression failed before and passed after; all 11 source-selection and 82 recovery UI tests passed, plus no-default check and the existing debug build. This is one controller fixture: it does not independently measure actual process peak, a physical OOM, desktop consent, or every pending allocation lifetime.
+
+
+## Sphere integration regression
+
+After the selection-collection and retained-session admission changes, the Sphere-filtered solid integration suite passed 56 tests with none ignored. It covers the suite named cases for Sphere construction and curve modes; this is automated integration evidence, not a physical desktop, real OOM or proof of every geometry.
+
+
+## Direct FitPoints input and point limit
+
+Direct FitPoints points previously used Vec push without checking max_points or admitting a growing buffer. They now check the configured point limit and, only when capacity must grow, admit the live pending session and replacement point buffer before fallible allocation. The temporary reservation is held until the pending session is restored. A point beyond max_points is a separate hard-limit refusal and does not offer to discard Undo.
+
+Under simulated managed pressure, UI-handler fixtures for both a typed comma-separated coordinate and a viewport point retained the input, existing Redo and document, reclaimed one old Undo after the user-consent path was initiated, and retried the point. A spare-capacity fixture accepted another point under pressure without offering Undo removal. Separate controller and UI fixtures enforced a four-point limit while preserving the session, document and Undo; the UI did not offer pruning. The 12 source tests, 85 recovery UI tests and 56 Sphere integration tests passed, plus no-default check and debug build. The UI fixtures simulate the consent path rather than physically clicking the dialog; real OOM, desktop, allocator-specific oversizing and process/native peak remain unverified.

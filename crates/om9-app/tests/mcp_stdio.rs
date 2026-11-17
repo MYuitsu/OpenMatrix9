@@ -48,6 +48,246 @@ fn id_of(reply: &Value) -> u64 {
 }
 
 #[test]
+fn executable_reopens_box_extracts_source_wireframe_and_undoes_as_one_step() {
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+    let path=std::env::temp_dir().join(format!("om9-executable-wireframe-{}.om9",uuid::Uuid::new_v4()));
+    let mut child=Command::new(env!("CARGO_BIN_EXE_om9"))
+        .arg("--mcp").stdin(Stdio::piped()).stdout(Stdio::piped()).spawn().unwrap();
+    let input=tool(1,"om9_new",json!({"name":"reopened box"}))
+        + &tool(2,"om9_command",json!({"text":"Box 4 5 6"}))
+        + &tool(3,"om9_save",json!({"path":path}))
+        + &tool(4,"om9_open",json!({"path":path}))
+        + &tool(5,"om9_select",json!({"all":true}))
+        + &tool(6,"om9_command",json!({"text":"ExtractWireframe"}))
+        + &tool(7,"om9_undo",json!({})) + &tool(8,"om9_redo",json!({}));
+    child.stdin.take().unwrap().write_all(input.as_bytes()).unwrap();
+    let output=child.wait_with_output().unwrap();
+    std::fs::remove_file(path).unwrap();
+    assert!(output.status.success());
+    let replies:Vec<Value>=std::str::from_utf8(&output.stdout).unwrap().lines()
+        .map(|line|serde_json::from_str(line).unwrap()).collect();
+    assert_eq!(replies.len(),8);
+    for reply in &replies {ok(reply);}
+    let state=ok(&replies[5]);
+    assert_eq!(state["state"]["document"]["objects"],13);
+    let objects=state["state"]["objects"].as_array().unwrap();
+    let mut edges=std::collections::BTreeSet::new();
+    for object in objects.iter().filter(|o|o["kind"]=="Curve") {
+        let geometry:om9_core::geometry::Geometry=serde_json::from_value(object["geometry"]["value"].clone()).unwrap();
+        let om9_core::geometry::Geometry::Curve(curve)=geometry else {panic!("expected curve")};
+        let evaluate=|t|om9_core::evaluation::evaluate_curve(&curve,om9_core::evaluation::Parameter::Fraction(t),0,
+            om9_core::geometry::Transform::identity(),&om9_core::budget::Limits::default()).unwrap()[0];
+        let (a,b)=(evaluate(0.),evaluate(1.));
+        for p in [a,b] {assert!(p.iter().zip([4.,5.,6.]).all(|(v,d)|v.abs()<1e-8||(*v-d).abs()<1e-8));}
+        let corner=|p:[f64;3]|[p[0]>2.,p[1]>2.5,p[2]>3.]; let (a,b)=(corner(a),corner(b));
+        assert_eq!((0..3).filter(|i|a[*i]!=b[*i]).count(),1);
+        assert!(edges.insert(if a<b {(a,b)} else {(b,a)}));
+    }
+    assert_eq!(edges.len(),12);
+    assert_eq!(ok(&replies[6])["state"]["document"]["objects"],1);
+    assert_eq!(ok(&replies[7])["state"]["document"]["objects"],13);
+}
+
+#[test]
+fn executable_reopens_mixed_wire_sources_and_saves_one_undo_transaction() {
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+    use om9_core::{budget::Limits, evaluation::{evaluate_curve, Parameter}, geometry::{Curve, Geometry, Mesh, Transform}, model::{Document, Entity}, transaction::Cancellation};
+    use om9_kernel::creation::{self, Primitive};
+    let limits = Limits::default();
+    let box_entity = Entity::new("box", Geometry::Brep(creation::primitive(
+        Primitive::Box { x_mm:4., y_mm:5., z_mm:6. },0.1,&limits).unwrap()), None);
+    let mut mesh = Entity::new("mesh", Geometry::Mesh(Mesh { vertices: vec![[0.,0.,0.],[2.,0.,0.],[0.,2.,0.]],
+        faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] }), None);
+    mesh.placement = Transform::translation([20.,0.,0.]);
+    let mut cylinder = Entity::new("closed surface", Geometry::Surface(om9_core::surface_kernel::cylinder(
+        [0.,0.,0.],[1.,0.,0.],[0.,1.,0.],2.,5.,&limits).unwrap()), None);
+    cylinder.placement = Transform::translation([40.,0.,0.]);
+    let mut document = Document::new("mixed wire executable");
+    for entity in [box_entity,mesh,cylinder] { document.entities.insert(entity.id,entity); }
+    let base = std::env::temp_dir().join(format!("om9-mixed-wire-executable-{}",uuid::Uuid::new_v4()));
+    let input_path = base.with_extension("om9"); let output_path = base.with_extension("result.om9");
+    om9_archive::Archive::save(&input_path,&document,&limits,&Cancellation::default()).unwrap();
+    let mut child = Command::new(env!("CARGO_BIN_EXE_om9")).arg("--mcp")
+        .stdin(Stdio::piped()).stdout(Stdio::piped()).spawn().unwrap();
+    let input = tool(1,"om9_open",json!({"path":input_path}))
+        + &tool(2,"om9_select",json!({"all":true}))
+        + &tool(3,"om9_command",json!({"text":"ExtractWireframe"}))
+        + &tool(4,"om9_undo",json!({})) + &tool(5,"om9_redo",json!({}))
+        + &tool(6,"om9_save",json!({"path":output_path}));
+    child.stdin.take().unwrap().write_all(input.as_bytes()).unwrap();
+    let output = child.wait_with_output().unwrap(); assert!(output.status.success());
+    let replies:Vec<Value> = std::str::from_utf8(&output.stdout).unwrap().lines().map(|line|serde_json::from_str(line).unwrap()).collect();
+    assert_eq!(replies.len(),6);
+    for reply in &replies { assert_eq!(ok(reply)["result"]["ok"].as_bool().unwrap_or(true),true,"{reply}"); }
+    assert_eq!(ok(&replies[2])["state"]["document"]["objects"],21);
+    assert_eq!(ok(&replies[3])["state"]["document"]["objects"],3);
+    assert_eq!(ok(&replies[4])["state"]["document"]["objects"],21);
+    let saved=om9_archive::Archive::open(&output_path,&limits).unwrap();
+    for (id,source) in &document.entities { assert_eq!(saved.entities.get(id),Some(source)); }
+    let mut counts=[0,0,0]; let mut cylinder_types=[0,0,0];
+    let mut midpoint_sets:[Vec<[f64;3]>;3]=Default::default();
+    for entity in saved.entities.values().filter(|e| !document.entities.contains_key(&e.id)) {
+        let Geometry::Curve(curve)=&entity.geometry else { panic!("expected curve") };
+        let group=if entity.placement==Transform::translation([20.,0.,0.]) {1}
+            else if entity.placement==Transform::translation([40.,0.,0.]) {2} else {0};
+        let sample=|t|evaluate_curve(curve,Parameter::Fraction(t),0,entity.placement,&limits).unwrap()[0];
+        let point=sample(0.5);
+        assert!(!midpoint_sets[group].iter().any(|q| (0..3).all(|i| (point[i]-q[i]).abs()<1e-7)),"duplicate curve");
+        midpoint_sets[group].push(point); counts[group]+=1;
+        match group {
+            0 => {
+                let x=(point[0]-2.).abs()<1e-7 && [0.,5.].iter().any(|v|(point[1]-v).abs()<1e-7) && [0.,6.].iter().any(|v|(point[2]-v).abs()<1e-7);
+                let y=(point[1]-2.5).abs()<1e-7 && [0.,4.].iter().any(|v|(point[0]-v).abs()<1e-7) && [0.,6.].iter().any(|v|(point[2]-v).abs()<1e-7);
+                let z=(point[2]-3.).abs()<1e-7 && [0.,4.].iter().any(|v|(point[0]-v).abs()<1e-7) && [0.,5.].iter().any(|v|(point[1]-v).abs()<1e-7);
+                assert!(x||y||z,"unexpected box edge {point:?}");
+            }
+            1 => { assert!(matches!(curve,Curve::Line { .. })); assert!([[21.,0.,0.],[21.,1.,0.],[20.,1.,0.]].iter().any(|q|(0..3).all(|i|(point[i]-q[i]).abs()<1e-7))); }
+            _ => {
+                let first=sample(0.); let last=sample(1.);
+                let kind=if first[2].abs()<1e-7 && last[2].abs()<1e-7 {0}
+                    else if (first[2]-5.).abs()<1e-7 && (last[2]-5.).abs()<1e-7 {1} else {2};
+                cylinder_types[kind]+=1;
+                for t in [0.,0.25,0.5,0.75,1.] {
+                    let p=sample(t); assert!(((p[0]-40.).hypot(p[1])-2.).abs()<1e-7 && p[2]>=-1e-7 && p[2]<=5.+1e-7,"{p:?}");
+                    if kind==2 { assert!((p[0]-first[0]).abs()<1e-7 && (p[1]-first[1]).abs()<1e-7); }
+                }
+            }
+        }
+    }
+    assert_eq!(counts,[12,3,3]); assert_eq!(cylinder_types,[1,1,1]);
+    std::fs::remove_file(input_path).unwrap(); std::fs::remove_file(output_path).unwrap();
+}
+
+#[test]
+#[cfg(feature = "occt-brep")]
+fn executable_reopens_native_fit_selection_and_undoes() {
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+    use om9_core::{budget::Limits, geometry::{Geometry, Transform}, model::{Document, Entity}, transaction::Cancellation};
+    let limits = Limits::default();
+    let source = om9_kernel::brep::box_brep([4., 5., 6.], 0.1, &limits).unwrap();
+    let native = om9_kernel::brep::to_3dm(&source, 0.001, &limits).unwrap();
+    let mut shape = Entity::new("native box", Geometry::NativeBrep(native), None);
+    shape.placement = Transform::translation([10., -3., 7.]);
+    let mut document = Document::with_template_tolerance("native fit executable");
+    document.entities.insert(shape.id, shape);
+    let radius = 19.25_f64.sqrt();
+    for point in [[12.+radius,-0.5,10.], [12.-radius,-0.5,10.], [12.,-0.5+radius,10.], [12.,-0.5,10.+radius]] {
+        let entity = Entity::new("point", Geometry::Point(point), None);
+        document.entities.insert(entity.id, entity);
+    }
+    let base = std::env::temp_dir().join(format!("om9-mcp-native-fit-{}", uuid::Uuid::new_v4()));
+    let input_path = base.with_extension("om9");
+    let output_path = base.with_extension("result.om9");
+    om9_archive::Archive::save(&input_path, &document, &limits, &Cancellation::default()).unwrap();
+    let mut child = Command::new(env!("CARGO_BIN_EXE_om9")).arg("--mcp")
+        .stdin(Stdio::piped()).stdout(Stdio::piped()).spawn().unwrap();
+    let input = tool(1, "om9_open", json!({"path": input_path}))
+        + &tool(2, "om9_select", json!({"all": true}))
+        + &tool(3, "om9_command", json!({"text": "Sphere"}))
+        + &tool(4, "om9_command", json!({"text": "FitPoints"}))
+        + &tool(5, "om9_command", json!({"text": "Selection"}))
+        + &tool(6, "om9_command", json!({"text": ""}))
+        + &tool(7, "om9_undo", json!({}))
+        + &tool(8, "om9_redo", json!({}))
+        + &tool(9, "om9_save", json!({"path": output_path}));
+    child.stdin.take().unwrap().write_all(input.as_bytes()).unwrap();
+    let output = child.wait_with_output().unwrap();
+    assert!(output.status.success());
+    let replies: Vec<Value> = std::str::from_utf8(&output.stdout).unwrap().lines()
+        .map(|line| serde_json::from_str(line).unwrap()).collect();
+    assert_eq!(replies.len(), 9);
+    for reply in &replies { assert_eq!(ok(reply)["result"]["ok"].as_bool().unwrap_or(true), true, "{reply}"); }
+    assert_eq!(ok(&replies[5])["state"]["document"]["objects"], 6);
+    assert_eq!(ok(&replies[6])["state"]["document"]["objects"], 5);
+    assert_eq!(ok(&replies[7])["state"]["document"]["objects"], 6);
+    let saved = om9_archive::Archive::open(&output_path, &limits).unwrap();
+    for (id, source) in &document.entities { assert_eq!(saved.entities.get(id), Some(source)); }
+    let result = saved.entities.values().find(|entity| !document.entities.contains_key(&entity.id)).unwrap();
+    let center = result.placement.point([0.,0.,0.]).unwrap();
+    for (actual, expected) in center.into_iter().zip([12., -0.5, 10.]) {
+        assert!((actual - expected).abs() < 1e-7, "center {center:?}");
+    }
+    let Geometry::Brep(sphere) = &result.geometry else { panic!("expected sphere") };
+    let bounds = om9_kernel::brep::world_bounds(sphere, &Transform::identity(), &limits).unwrap();
+    assert!((bounds[3] - radius).abs() < 1e-7, "radius bounds {bounds:?}");
+    std::fs::remove_file(input_path).unwrap();
+    std::fs::remove_file(output_path).unwrap();
+}
+
+#[test]
+fn executable_reopens_certified_box_intersection_and_undoes() {
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+    use om9_core::{budget::Limits, geometry::{Geometry, Transform}, model::{Document, Entity}, transaction::Cancellation};
+    use om9_kernel::{creation::{self, Primitive}, transform_ops};
+    let limits = Limits::default();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let rotation = transform_ops::rotation([0.; 3], [1., 0., 0.], std::f64::consts::FRAC_PI_4).unwrap();
+    let sphere = transform_ops::transform_brep(&sphere, &rotation, 0.01, &limits).unwrap();
+    let block = creation::primitive(Primitive::Box { x_mm: 2., y_mm: 8., z_mm: 8. }, 0.01, &limits).unwrap();
+    let placement = Transform([[2., 0., 0., 0.], [0., 1., 0., -4.], [0., 0., 1., -4.], [0., 0., 0., 1.]]);
+    let block = transform_ops::transform_brep(&block, &placement, 0.01, &limits).unwrap();
+    let mut doc = Document::new("certified intersection");
+    for (name, body) in [("sphere", sphere), ("box", block)] {
+        let entity = Entity::new(name, Geometry::Brep(body), None);
+        doc.entities.insert(entity.id, entity);
+    }
+    let base = std::env::temp_dir().join(format!("om9-mcp-intersection-{}", uuid::Uuid::new_v4()));
+    let input_path = base.with_extension("om9");
+    let output_path = base.with_extension("result.om9");
+    om9_archive::Archive::save(&input_path, &doc, &limits, &Cancellation::default()).unwrap();
+    if let Some(path) = std::env::var_os("OM9_CERTIFIED_INTERSECTION_DESKTOP_FIXTURE") {
+        assert!(!std::path::Path::new(&path).exists());
+        om9_archive::Archive::save(std::path::Path::new(&path), &doc, &limits, &Cancellation::default()).unwrap();
+    }
+    let mut child = Command::new(env!("CARGO_BIN_EXE_om9")).arg("--mcp")
+        .stdin(Stdio::piped()).stdout(Stdio::piped()).spawn().unwrap();
+    let input = tool(1, "om9_open", json!({"path": input_path}))
+        + &tool(2, "om9_select", json!({"all": true}))
+        + &tool(3, "om9_command", json!({"text": "Boolean2Objects"}))
+        + &tool(4, "om9_command", json!({"text": "Intersection"}))
+        + &tool(5, "om9_command", json!({"text": ""}))
+        + &tool(6, "om9_undo", json!({}))
+        + &tool(7, "om9_redo", json!({}))
+        + &tool(8, "om9_save", json!({"path": output_path}));
+    child.stdin.take().unwrap().write_all(input.as_bytes()).unwrap();
+    let output = child.wait_with_output().unwrap();
+    assert!(output.status.success());
+    let replies: Vec<Value> = std::str::from_utf8(&output.stdout).unwrap().lines()
+        .map(|line| serde_json::from_str(line).unwrap()).collect();
+    assert_eq!(replies.len(), 8);
+    for reply in &replies { assert_eq!(ok(reply)["result"]["ok"].as_bool().unwrap_or(true), true, "{reply}"); }
+    assert_eq!(ok(&replies[4])["state"]["document"]["objects"], 3);
+    assert_eq!(ok(&replies[5])["state"]["document"]["objects"], 2);
+    assert_eq!(ok(&replies[6])["state"]["document"]["objects"], 3);
+    let saved = om9_archive::Archive::open(&output_path, &limits).unwrap();
+    for (id, source) in &doc.entities { assert_eq!(saved.entities.get(id), Some(source)); }
+    let result = saved.entities.values().find(|entity| !doc.entities.contains_key(&entity.id)).unwrap();
+    let Geometry::Brep(body) = &result.geometry else { panic!("expected B-rep") };
+    let m = creation::measure(body, &limits).unwrap();
+    assert!((m.volume_mm3 - 18. * std::f64::consts::PI).abs() < 1e-5 && m.closed && m.naked_edges == 0, "{m:?}");
+    std::fs::remove_file(input_path).unwrap();
+    std::fs::remove_file(output_path).unwrap();
+}
+
+#[test]
+#[ignore = "inspect the result saved by an isolated desktop session"]
+fn inspect_certified_intersection_desktop_result() {
+    use om9_core::{budget::Limits, geometry::Geometry};
+    let path = std::env::var_os("OM9_CERTIFIED_INTERSECTION_DESKTOP_RESULT").expect("desktop result path");
+    let limits = Limits::default();
+    let doc = om9_archive::Archive::open(std::path::Path::new(&path), &limits).unwrap();
+    assert_eq!(doc.entities.len(), 1);
+    let Geometry::Brep(body) = &doc.entities.values().next().unwrap().geometry else { panic!("expected B-rep") };
+    let m = om9_kernel::creation::measure(body, &limits).unwrap();
+    assert!((m.volume_mm3 - 18. * std::f64::consts::PI).abs() < 1e-5 && m.closed && m.solids == 1 && m.naked_edges == 0, "{m:?}");
+    println!("saved desktop result volume_mm3={:.12}", m.volume_mm3);
+}
+
+#[test]
 fn memory_tool_is_opt_in_compact_and_does_not_change_document_or_history() {
     let input = request(1, "tools/list", json!({}))
         + &tool(2, "om9_memory", json!({}))

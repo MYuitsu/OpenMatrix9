@@ -1932,15 +1932,11 @@ fn captured_hull(
                     }
                     points_hull(&s.poles, t, &|| w.inputs().check_cancel(cancel))
                 }
-                Geometry::NativeBrep(b) => {
-                    points_hull(&b.display.vertices, t, &|| w.inputs().check_cancel(cancel))
-                }
+                Geometry::NativeBrep(_) => Err(Error::Unsupported("cold native BRep hull requires exact-source evaluator")),
                 Geometry::Mesh(m) => {
                     points_hull(&m.vertices, t, &|| w.inputs().check_cancel(cancel))
                 }
-                Geometry::Brep(b) => {
-                    points_hull(&b.display.points, t, &|| w.inputs().check_cancel(cancel))
-                }
+                Geometry::Brep(_) => Err(Error::Unsupported("cold BRep hull requires exact-source evaluator")),
                 Geometry::Cloud(c) => {
                     points_hull(&c.points, t, &|| w.inputs().check_cancel(cancel))
                 }

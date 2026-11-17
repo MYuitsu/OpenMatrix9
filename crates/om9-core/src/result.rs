@@ -120,6 +120,38 @@ pub struct PublishedResult {
     pub recipe: Option<HistoryId>,
     pub status: ResultStatus,
 }
+#[cfg(test)]
+mod display_binding_tests {
+    use super::*;
+    use crate::brep::{Brep, BrepDisplay, BrepTopology};
+
+    #[test]
+    fn unproved_display_is_not_accepted_as_a_published_result() {
+        let limits = Limits::default();
+        let display = BrepDisplay {
+            source_sha256: [0; 32], deflection_mm: 0.1,
+            points: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+            triangles: vec![[0, 1, 2, 0]], segments: vec![], vertices: vec![],
+            topology: BrepTopology { faces: vec![uuid::Uuid::from_u128(1)],
+                edges: vec![], vertex_ids: vec![], face_edges: vec![] }.into(),
+        };
+        let source = "CASCADE Topology result fixture";
+        let original = Brep::from_native(source.into(), display.clone(), &limits).unwrap();
+        let mut different = display;
+        different.points[0][0] = 42.;
+        let replacement = Brep::from_native(source.into(), different, &limits).unwrap();
+        assert_eq!(original.source(), replacement.source());
+        assert_eq!(original.topology(), replacement.topology());
+        let mut document = Document::new("result display binding");
+        let entity = Entity::new("body", Geometry::Brep(replacement), None);
+        let id = entity.id;
+        document.entities.insert(id, entity);
+        let result = PublishedResult { operation: "fixture".into(), geometry_revision: 1,
+            geometry_snapshot: Geometry::Brep(original), source_stamps: vec![],
+            conversion: ConversionReport::identity(GeometryKind::Brep), recipe: None, status: ResultStatus::Current };
+        assert!(matches!(result.validate(id, &document, &limits), Err(Error::Stale(_))));
+    }
+}
 impl PublishedResult {
     pub fn validate(&self, id: ObjectId, d: &Document, l: &Limits) -> Result<Usage> {
         name(&self.operation, l)?;

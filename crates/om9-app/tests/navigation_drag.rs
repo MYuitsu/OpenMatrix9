@@ -185,7 +185,7 @@ fn orbit_keeps_the_published_brep_display_buffers() {
     h.drag(ViewId::Perspective, Vec2::new(100., 20.), false);
     let after = h.app.controller.scene().unwrap();
     assert_eq!(after.epoch, epoch);
-    assert!(std::sync::Arc::ptr_eq(&buffers, &after.objects[0].buffers));
+    assert!(buffers.ptr_eq(&after.objects[0].buffers));
 }
 
 #[test]

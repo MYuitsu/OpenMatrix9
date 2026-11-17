@@ -1152,13 +1152,13 @@ mod tests {
             angle_degrees: 90.0,
         };
         let geometry = Geometry::NativeBrep(crate::geometry::NativeBrep {
-            display: Mesh {
+            display: std::sync::Arc::new(Mesh {
                 vertices: vec![[0.0; 3], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]],
                 faces: vec![vec![0, 1, 2]],
                 normals: Vec::new(),
                 colors: Vec::new(),
                 corner_uvs: Vec::new(),
-            },
+            }),
             payload: vec![0].into(),
             crc: 0,
         });

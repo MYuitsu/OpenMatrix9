@@ -49,6 +49,7 @@ struct Snapshot {
   size_t face_edges_len;
   size_t faces_count;
   size_t edges_count;
+  const void* topology_handle;
 };
 using SnapshotSink = int (*)(void*, const Snapshot*);
 

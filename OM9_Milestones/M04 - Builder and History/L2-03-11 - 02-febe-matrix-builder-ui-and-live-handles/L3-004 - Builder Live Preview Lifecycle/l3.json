@@ -218,6 +218,57 @@
     "source_pin": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
     "special_manual_flags": []
   },
+  "runtime_implementation": {
+    "source_display_handoff_2026_11_14": "Partial, compile-only: synchronous OCCT Builder preview retains its transient B-rep candidate and stages its display on Apply. Native production admission and preview lifetime accounting remain incomplete; no runtime acceptance is claimed. Evidence: docs/validation/2026-11-14-canonical-representation-transfer.md#builder-and-registered-history-handoff-in-progress",
+    "history_source_signatures_2026_11_14": {
+      "status": "SCOPED_SOURCE_AND_WORKER_CHECKS_PASSED",
+      "scope": "OCCT B-rep History and background Ring preview use source-derived topology signatures under a distinct namespace; Signet and Sweep checks cover remesh, while simulated UI and worker regressions pass.",
+      "limitations": "Old display-derived references need migration and cannot be safely auto-rebound; NativeBrep, cross-edit identity, native resource bounds, desktop and source-only ownership remain open.",
+      "evidence": "docs/validation/2026-11-14-history-source-signatures.md"
+    },
+    "source_topology_signatures_2026_11_14": {
+      "status": "SCOPED_ADAPTER_ONLY",
+      "scope": "Source-derived OCCT topology measurements use explicit private shape-set references to preserve IDs in scoped Box and Sphere checks without retaining display.",
+      "limitations": "Direct descriptor matching rejects a postmesh Box proof; the shape-set route is in-process and not integrated into History. Legacy references, native allocation and cancellation remain open.",
+      "evidence": "docs/validation/2026-11-14-source-topology-signatures.md"
+    },
+    "ring_background_ui_2026_11_13": {
+      "status": "SCOPED_BACKGROUND_UI_CHECKS_PASSED",
+      "scope": "OCCT MatrixApp ring-family previews use a cancellable worker, latest-edit queue and boundary overlay; headless fixtures cover Signet CMD, queued Apply and a Raised Band tab click.",
+      "limitations": "Desktop performance, toolbar menu route, other ring modes, shaded preview, source-only ownership and full lifecycle acceptance remain open.",
+      "evidence": "docs/validation/2026-11-13-ring-background-ui.md"
+    },
+    "ring_preview_apply_transfer_2026_11_13": {
+      "status": "SCOPED_APPLY_TRANSFER_CHECKS_PASSED",
+      "scope": "Explicit lease-backed ring preview can Apply through coordinator-registered staging; fixtures cover Undo/Redo, an external clone, History Record off and reopened Signet update.",
+      "limitations": "The actual UI remains synchronous and does not poll or render the worker result; pressure, responsiveness and full lifecycle acceptance remain open.",
+      "evidence": "docs/validation/2026-11-13-ring-preview-apply-transfer.md"
+    },
+    "ring_preview_lease_publication_2026_11_13": {
+      "status": "SCOPED_TRANSIENT_PREVIEW_CHECKS_PASSED",
+      "scope": "An explicit controller call publishes a candidate as a lease-backed Builder preview; BRep clones, source owners and display pins retain the lease. Eleven worker fixtures and five BRep tests passed.",
+      "limitations": "Apply and Document insertion of the transient BRep are refused pending safe ownership transfer; UI routing, rendering, Undo and full lifecycle acceptance remain open.",
+      "evidence": "docs/validation/2026-11-13-ring-preview-lease-publication.md"
+    },
+    "ring_candidate_controller_2026_11_13": {
+      "status": "SCOPED_CONTROLLER_CANDIDATE_CHECKS_PASSED",
+      "scope": "Controller explicitly starts and polls a reserved ring candidate and rejects stale scene, document and Builder contexts; nine fixtures passed.",
+      "limitations": "Candidate remains private and is not installed or painted; UI polling, Apply/Undo and saved-tab preview ownership remain open.",
+      "evidence": "docs/validation/2026-11-13-ring-candidate-controller.md"
+    },
+    "ring_worker_staging_2026_11_13": {
+      "status": "SCOPED_WORKER_STAGING_CHECKS_PASSED",
+      "scope": "Internal ring job uses cancellable coordinator reservation growth and retains its result lease; six worker fixtures passed.",
+      "limitations": "The job is not connected to Builder or UI; publication freshness, preview lease transfer, saved tabs and Apply/Undo remain unverified.",
+      "evidence": "docs/validation/2026-11-13-ring-preview-worker-staging.md"
+    },
+    "prepared_preview_publication_2026_11_13": {
+      "status": "SCOPED_PREVIEW_PUBLICATION_CHECKS_PASSED",
+      "scope": "Prepared requests carry builder and document freshness tokens; fixtures cover stale results and off-thread production with owner-thread publication.",
+      "limitations": "Production Builder remains synchronous; worker cancellation, job and scene freshness, admission and retained-preview lifetime are not yet connected. Full lifecycle acceptance is not established.",
+      "evidence": "docs/validation/2026-11-13-builder-preview-publication.md"
+    }
+  },
   "task_ids": [
     "OM9-L4-03-11-004-01",
     "OM9-L4-03-11-004-02",

@@ -221,6 +221,26 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
+    "surface_snap_trim_1024_2026_11_13": "Tested reopened plane and cylinder trims through 1024 edges snap to material rather than holes; simulated Line/Undo/Redo passed. Arbitrary trim and actual desktop unverified. Evidence: docs/validation/2026-11-13-large-trim-support.md#surface-snap-on-1024-edge-trim-material",
+    "curved_fallback_occlusion_2026_11_13": "Tested reopened affine cylinder allows Surface Snap to a rear plane through an excluded front region or hole, then Line and Undo/Redo, in simulated Wireframe/Shaded; front material and near-hole-edge cases block. Numerical/geometry scope, desktop and native peak remain open. Evidence: docs/validation/2026-11-13-fallback-source-selection.md#viewport-line-through-the-curved-hole",
+    "planar_fallback_grazing_ray_guard_2026_11_13": {
+      "status": "SCOPED_GRAZING_RAY_GUARDED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#grazing-ray-guard",
+      "scope": "A nearly parallel ray no longer clears fallback occlusion in the tested identity and scale/shear fixtures; ordinary, near-boundary and simulated pressure checks and 26 osnap UI tests pass.",
+      "remaining": "Global floating-point accuracy, other geometry, desktop, latency and native peak remain open."
+    },
+    "planar_fallback_shaded_snap_2026_11_13": {
+      "status": "SCOPED_PLANAR_FALLBACK_OCCLUSION_REFINED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#shaded-fallback-outside-a-verified-planar-outer-bound",
+      "scope": "A verified affine plane can clear fallback occlusion when its source ray is well outside its outer UV bound; near/inside and memory-denied cases remain blocked. Egui document/Redo, identity and scale/shear proof, other occluder, 26 osnap UI, seven broad-phase and scene suite passed.",
+      "remaining": "Curved and periodic fallback, global numerical proof, desktop, latency and native peak remain open."
+    },
+    "surface_snap_behind_fallback_2026_11_12": {
+      "status": "SCOPED_WIREFRAME_SNAP_BEHIND_FALLBACK_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#surface-snap-candidates-behind-fallback",
+      "scope": "Unverified fallback is skipped as a snap candidate; egui fixture reaches a valid rear surface in Wireframe, retains conservative Shaded occlusion and preserves document and Redo. osnap_ui 26, broad-phase 7 and full scene suite passed.",
+      "remaining": "Source-aware Shaded occlusion, broader topology and desktop remain open."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
@@ -256,6 +276,29 @@
         "implementation/evidence/M02/OM9-L3-02-03-004/OM9-L4-02-03-004-06-acceptance.md"
       ],
       "acceptance": "A ray through a planar box face returns an on-face point and the face normal; a ray outside the trimmed face produces no surface snap."
+    },
+    "trim_aware_surface_snap_2026_11_12": {
+      "status": "SCOPED_TRIM_AWARE_SURFACE_SNAP_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#trim-aware-surface-snap-source-refinement",
+      "scope": "Source ray UV hits are ordered and classified against validated trim with source evaluation, boundary ambiguity refusal and managed scratch admission. Reopened cylinder skips front hole and snaps to rear; simulated pressure and worker retry pass. UI 22, BRep 1, Surface Snap lib 7, kernel surface 14 and core UV 1 tests pass; no-default check, debug build and source audit pass.",
+      "limitations": "Boundary floating-point screen is not an interval proof, native memory peak not bounded, other seam, placement, topology, desktop and physical RAM remain unverified. Fallback display still shows full source but snap is refused. Plan A open; B deferred."
+    },
+    "trim_closed_seam_snap_2026_11_12": {
+      "status": "SCOPED_CLOSED_SEAM_SNAP_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-scene-gap.md#surface-snap-at-a-certified-closed-seam",
+      "scope": "Certified full-seam trimmed cylinder snaps at the exact seam after save/reopen for identity and translation; true outer boundary, near-but-not-exact seam and holes close to seam are not certified by the helper. Surface Snap lib 8, UI 23, BRep snap 1 passed; debug build and source audit passed.",
+      "limitations": "Other periodic seam topologies, near-degenerate cases, general placement, physical desktop and native peak remain unverified. Plan A open; B deferred."
+    },
+    "parallel_view_snap_2026_11_12": {
+      "status": "SCOPED_PARALLEL_VIEW_SNAP_PASSED",
+      "evidence": "docs/validation/2026-11-12-parallel-view-osnap.md",
+      "limitations": "Headless Surface and Endpoint fixtures only; other commands, cameras and desktop unverified."
+    },
+    "circular_hole_product_path_2026_11_13": {
+      "status": "ONE_CONTROLLER_FIXTURE_PASSED",
+      "scope": "Authored drilled block refines one material point and refuses a candidate with a manipulated hole cursor.",
+      "remaining": "Actual desktop, arbitrary holes and whole-display verification remain open.",
+      "evidence": "docs/validation/2026-11-13-small-trim-hole-witness.md#surface-snap-product-path-distinction"
     }
   }
 }

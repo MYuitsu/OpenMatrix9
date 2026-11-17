@@ -480,6 +480,32 @@
     "rust_test_name": "m03_01_10_001"
   },
   "runtime_implementation": {
+    "boolean_publication_worker_buffers_2026_11_15": {
+      "status": "SCOPED_PUBLICATION_STALL_REDUCTION_VERIFIED",
+      "scope": "Worker-prepared source isocurves/render buffers for committed single-body results; source-bound fresh-root installation precedes the unchanged atomic transaction publication. Exact source measures, snap, wires, Undo/Redo, stale/cancel, managed refusal and wrong-source buffer rejection tested.",
+      "measurement": "16 focused tests passed. Eight optimized 64/128 release runs and two same-binary former-path 64 runs passed geometry/restoration/drop checks. Final UI polls reduced approximately 97-98 percent; source measures and profile triangles unchanged.",
+      "evidence": "docs/validation/2026-11-15-boolean-publication-worker-buffers.md",
+      "remaining": "Request-time pauses, source registration cost, frame-pacing variability and broad migration/persistence remain open. Split/multiple-output and Boolean Two preview paths retain prior handling."
+    },
+    "many_sphere_profile_timing_2026_11_15": {
+      "status": "SCOPED_LARGER_SCENE_TIMING_VERIFIED_PUBLICATION_STALL_REMAINS",
+      "scope": "64 spheres with three runs per preset and 128 spheres with one per preset: eight native-window release Union runs passed analytic volume, bounds, closedness, expected solid counts, display/restoration and zero-drop checks. Eleven focused integration tests passed. CAD behavior unchanged.",
+      "measurement": "64 Boolean median High 52.653 s vs Light 23.600 s; 128 single runs 199.627 vs 87.238 s. Final UI poll still blocks approximately 2.1/5.1 s at the two loads; steady encoded FPS remains approximately 30 in both profiles.",
+      "evidence": "docs/validation/2026-11-15-many-sphere-light-high.md",
+      "next_action": "Profile source validation, transaction and scene preparation inside final publication before choosing an optimization. This does not close full migration, persistence or general Boolean acceptance."
+    },
+    "viewport_detail_sphere_union_2026_11_14": {
+      "status": "SCOPED_SPHERE_BOOLEAN_PROFILES_VERIFIED",
+      "scope": "Manual Light/High viewport profiles, default Light; canonical Sphere and Boolean Two Union sources with separate display representations. Nine scoped integration tests and eight native-window release runs passed.",
+      "measurement": "Light preview observed ready median 122.624 ms vs High 247.005 ms; both approximately 30 encoded Perspective frames/s. No measured callback gap above 100 ms after first command. Not RDP displayed FPS.",
+      "remaining": "Full core separation, all producers/consumers, opaque NativeBrep, durable topology and BRep v5 save/reopen remain open. Library unit-test target has 319 compile errors from canonical migration.",
+      "evidence": "docs/validation/2026-11-14-viewport-detail-sphere-boolean.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_SOURCE_DISPLAY_COMPLETION_M01_M09.md",
+      "next_action": "Continue broader canonical/source-display migration; use the reproducible paired audit for this slice, without claiming general FPS improvement."
+    },
+    "boolean_source_handoff_2026_11_14": "IN_PROGRESS_COMPILE_ONLY: Boolean worker result source reservations use the batch transaction handoff; no runtime validation of this change. Evidence: docs/validation/2026-11-14-canonical-representation-transfer.md#boolean-worker-batch-source-handoff",
+    "boolean_union_ui_worker_2026_11_14": "MatrixApp Boolean Union menu/CMD runs captured sources and placements on an admitted worker; scoped headless fixtures check multi-box result, Undo/Redo, cancel, stale selection/draft and budget refusal. Evidence: docs/validation/2026-11-14-boolean-union-ui-worker.md",
+    "captured_boolean_source_2026_11_14": "Captured-source Boolean worker foundation passes scoped source/display lifetime and admission tests; product menu/CMD remains synchronous. Evidence: docs/validation/2026-11-14-boolean-captured-source.md",
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED",
     "target": "standalone Rust OM9, Windows x64",
@@ -535,6 +561,60 @@
       "OM9-L4-01-10-001-04": "1/1",
       "OM9-L4-01-10-001-05": "1/1",
       "OM9-L4-01-10-001-06": "1/1"
+    },
+    "boolean_request_source_batch_2026_11_15": {
+      "status": "SCOPED_BOOLEAN_REQUEST_BATCH_64_128_VERIFIED",
+      "scope": "Existing atomic source batch admission replaces per-operand retained-owner scans in shared Boolean request constructor. Exact source, stamps/placement, quotas, guards, native mathematics, display density and publication policies retained.",
+      "measurement": "20 focused integration tests and 16/16 same-binary native-window release runs passed. 64 high request 47.5→2.5 ms (94.7% less), worst active 182.3→138.7 ms; 64 light request 46.2→3.4 ms (92.7% less), worst active 86.6→86.5 ms; 128 high request 365.8→8.9 ms (97.6% less), worst active 626.5→266.1 ms; 128 light request 365.0→8.7 ms (97.6% less), worst active 447.3→210.2 ms. Exact native result source SHA and per-profile mesh counts matched. Both paths remain near 30 steady encoded FPS.",
+      "evidence": "docs/validation/2026-11-15-boolean-request-source-batch.md",
+      "data": "docs/validation/2026-11-15-boolean-request-source-batch.json",
+      "remaining": "Foreground selection/redraw, creation/fitting, worker admission and publication pauses remain. Large-scene Union fixtures only; full migration/persistence, arbitrary geometry and client-presented FPS remain open. Optional debug probe was interrupted and not counted as a passed test.",
+      "next_document": "crates/om9-app/src/ui.rs",
+      "next_action": "Profile selection_frame projection and associated redraw separately from the now-short Boolean request, preserving geometry and exact selection visuals."
+    },
+    "selection_frame_projection_2026_11_15": {
+      "status": "SCOPED_SELECTION_FRAME_PROJECTION_64_128_VERIFIED",
+      "scope": "Prepared immutable camera/viewport basis per selection-frame rebuild; every selected vertex, transform/projection arithmetic, finite/clip checks, margin and cache behavior preserved. Exact CAD source unchanged.",
+      "measurement": "35 distinct focused integration tests and 16/16 same-binary native-window release runs passed. 64 high selection 116.4→28.5 ms, transition 140.0→57.6 ms, active max 140.2→91.5 ms; 64 light selection 30.7→5.9 ms, transition 42.5→16.5 ms, active max 80.8→84.0 ms; 128 high selection 217.0→33.7 ms, transition 253.8→65.9 ms, active max 257.3→232.4 ms; 128 light selection 55.6→8.8 ms, transition 80.2→29.8 ms, active max 206.8→211.7 ms. Identical native result SHA, display density and projected-vertex coverage; both paths remain near 30 steady encoded FPS.",
+      "evidence": "docs/validation/2026-11-15-selection-frame-projection.md",
+      "data": "docs/validation/2026-11-15-selection-frame-projection.json",
+      "remaining": "Creation/fitting, other UI, worker admission and publication pauses remain; general scenes, client FPS, full migration/persistence and manual UI sign-off unproved. Existing selection_overlay ignored hover fixtures have two canonical-BRep compile errors and are not counted passing.",
+      "next_document": "crates/om9-app/src/session/solid.rs",
+      "next_action": "Profile foreground Sphere creation/scene-fitting and remaining UI/admission pauses separately, retaining exact sources and selection visuals."
+    },
+    "sphere_512_memory_undo_2026_11_15": {
+      "status": "SCOPED_512_LIGHT_COMPLETED_HIGH_SNAPSHOT_POINT_REFUSAL",
+      "scope": "512 spheres as 256 intersecting pairs, then Union. Current separated Light/High with process-only object cap 200000; point/RAM/Undo limits unchanged. One completed Light, one refused High; default-cap attempt stopped at 446.",
+      "measurement": "12 focused tests, release build and 2/2 eight-sphere resource smoke passed. light: performance_end, peak resident 616.4 MiB, retained Undo 513/Redo 0, pre-Boolean encoded FPS 30.008, max active gap 133725.2 ms; high: failure, peak resident 943.6 MiB, retained Undo 512/Redo 0, pre-Boolean encoded FPS 29.995, max active gap 20384.1 ms",
+      "evidence": "docs/validation/2026-11-15-512-spheres-memory-undo.md",
+      "data": "docs/validation/2026-11-15-512-spheres-memory-undo.json",
+      "remaining": "High refused BRep snapshot point ceiling before commit, retaining 512 objects/Undo. No High output or cross-profile source equality. Light result FPS lacks uninterrupted samples after a 32-second stall. Single samples; all-Undo replay, client video FPS and general geometry remain unproved.",
+      "next_document": "crates/om9-kernel/src/editing.rs",
+      "next_action": "Profile intermediate captured-group Union snapshot/tessellation and point accounting; preserve exact sources and admission while preparing a final-only display path. Separately profile retained-version creation/inventory stalls."
+    },
+    "retained_owner_freeze_2026_11_15": {
+      "stage": "build-validation",
+      "feature_ids": [
+        "OM9-L3-01-02-006",
+        "OM9-L3-01-10-001"
+      ],
+      "status": "SCOPED_512_LIGHT_STALL_REDUCED_SOURCE_AND_UNDO_VERIFIED",
+      "scope": "One release run/profile at 64 with stricter object cap 3000, one Light 512 at cap 200000 matching the prior fixture. Byte/point/Undo/tolerance and exact kernel remain unchanged; default-cap 512 acceptance is not claimed.",
+      "measurement": "25 focused checks and 3/3 native release runs passed. Light 512 largest active gap 133725.2→6703.2 ms; final UI poll 70393.0→1514.7 ms. Exact native source SHA and density match; retained Undo 513 / Redo 0.",
+      "evidence": "docs/validation/2026-11-15-512-light-freeze-fix.md",
+      "data": "docs/validation/2026-11-15-512-light-freeze-fix.json",
+      "uncertainties": "Individual samples; remaining creation and worker pauses, RDP client video FPS, all-overlap/general geometry, replay of every Undo and High 512 snapshot-point refusal remain outside closure.",
+      "next_document": "crates/om9-core/src/transaction.rs",
+      "next_action": "Profile the measured remaining foreground creation/admission gaps separately from kernel wall wait; preserve exact source and loaded Undo policy."
+    },
+    "speculative_union_20261115": {
+      "status": "IMPLEMENTED_NATIVE_64_128_512_LIGHT_VERIFIED_HIGH_512_FAILED",
+      "scope": "BooleanUnion disposable mesh preview concurrent with exact source-only fold; final-only display/topology capture and existing atomic source/scene commit. CAD tolerances, checks and Undo policy retained.",
+      "evidence": "docs/validation/2026-11-15-speculative-boolean.md",
+      "limitations": "512 Light completed with identical exact source and 513 Undo; High preview passed but exact worker failed after 884.358 s, retaining 512 inputs/Undo. No High final result/source equality or post-commit FPS. Long creation image holds remain. Error text, manual/client video, repeated/general geometry and full Undo/persistence acceptance remain open.",
+      "manual_gate_promoted": false,
+      "kernel_512": "Kernel source/final Light/High captures passed independently. Native Light passed, native High worker failed before commit; kernel proof does not close the full native path.",
+      "comparison_report": "docs/validation/2026-11-15-speculative-boolean-512-comparison.md"
     }
   }
 }

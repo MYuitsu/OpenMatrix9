@@ -872,6 +872,110 @@ fn l3_009_a_malformed_extension_payload_is_refused() {
 }
 
 #[test]
+fn oversized_extension_is_rejected_before_parsing() {
+    let limits=Limits {max_name_bytes:4,..Limits::default()};
+    let extension=Extension {version:1,payload:"xxxxx".into()};
+    assert!(matches!(extension.validate(&limits),Err(Error::Budget("extension payload"))));
+}
+
+#[test]
+fn document_admits_extension_validation_scratch_before_parsing() {
+    let limits=Limits::default();
+    let mut entity=Entity::new("point",Geometry::Point([0.,0.,0.]),None);
+    // Deliberately malformed so an early parse would return Invalid instead of
+    // the expected preflight Budget error.
+    entity.extensions.insert("vendor.test".into(),Extension {version:1,payload:"x".repeat(8000)});
+    let mut document=Document::new("extension scratch");document.entities.insert(entity.id,entity);
+    let peak=document.validation_peak_estimate(&limits,true).unwrap();
+    let scratch=document.validation_scratch_usage(&limits).unwrap();
+    assert!(scratch.bytes>=8000*64+4096);
+    let tight=Limits {max_bytes:peak.bytes-1,..limits};
+    assert!(matches!(document.validate(&tight),Err(Error::Budget(_))));
+    assert!(matches!(document.validate(&limits),Err(Error::Invalid("extension payload"))));
+}
+
+#[test]
+fn malformed_extension_transaction_still_refuses_without_losing_redo() {
+    let mut document=Document::new("extension transaction");
+    let entity=Entity::new("point",Geometry::Point([0.,0.,0.]),None);let id=entity.id;document.entities.insert(id,entity);
+    let (mut coordinator,document_id)=coordinator(document);
+    let temporary=Entity::new("temporary",Geometry::Point([1.,1.,1.]),None);
+    let prepared=coordinator.prepare(TransactionRequest::new("temporary",vec![Mutation::Insert {document:document_id,entity:temporary}])).unwrap();
+    coordinator.commit(prepared).unwrap();coordinator.undo().unwrap();
+    let before=coordinator.snapshot();assert_eq!(coordinator.redo_len(),1);
+    let source=coordinator.world().documents[&document_id].stamp(id).unwrap();
+    let request=TransactionRequest::new("bad extension",vec![Mutation::Extension {source,slot:"vendor.test".into(),extension:Some(Extension {version:1,payload:"{".into()})}]);
+    let result=match coordinator.prepare(request) {Ok(prepared)=>coordinator.commit(prepared),Err(error)=>Err(error)};
+    assert!(matches!(result,Err(Error::Invalid("extension payload"))));
+    assert_eq!(coordinator.snapshot(),before);assert_eq!(coordinator.redo_len(),1);
+}
+
+#[test]
+fn request_extension_scratch_is_admitted_before_parsing_and_keeps_redo() {
+    use om9_core::budget::memory::MemoryClass;
+    let mut document=Document::new("request extension scratch");
+    let entity=Entity::new("point",Geometry::Point([0.,0.,0.]),None);let id=entity.id;document.entities.insert(id,entity);
+    let (mut coordinator,document_id)=coordinator(document);
+    let temporary=Entity::new("temporary",Geometry::Point([1.,1.,1.]),None);
+    let prepared=coordinator.prepare(TransactionRequest::new("temporary",vec![Mutation::Insert {document:document_id,entity:temporary}])).unwrap();
+    coordinator.commit(prepared).unwrap();coordinator.undo().unwrap();
+    let before=coordinator.snapshot();let source=coordinator.world().documents[&document_id].stamp(id).unwrap();
+    let request=||TransactionRequest::new("bad extension",vec![Mutation::Extension {source,slot:"vendor.test".into(),extension:Some(Extension {version:1,payload:"x".repeat(8000)})}]);
+    let remaining=coordinator.limits().max_bytes-coordinator.retained_usage().unwrap().bytes;
+    let reservation=coordinator.reserve_external_memory(MemoryClass::Export,remaining-128*1024,None).unwrap();
+    assert!(matches!(coordinator.prepare(request()),Err(Error::Budget(_))));
+    assert_eq!(coordinator.snapshot(),before);assert_eq!(coordinator.redo_len(),1);
+    drop(reservation);
+    assert!(matches!(coordinator.prepare(request()),Err(Error::Invalid("extension payload"))));
+    assert_eq!(coordinator.snapshot(),before);assert_eq!(coordinator.redo_len(),1);
+}
+
+#[test]
+fn document_refuses_trim_whose_underlying_surface_no_longer_matches() {
+    use om9_core::rhino_semantics::{set_trimmed_surface, TrimmedSurface};
+    let limits=Limits::default();let surface=plane_surface();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.1,0.1],[0.9,0.1],[0.9,0.9],[0.1,0.9]],inners:vec![],reversed:false};
+    let mut entity=Entity::new("trimmed",Geometry::Surface(surface.clone()),None);
+    set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    let mut document=Document::new("trim consistency");let id=entity.id;document.entities.insert(id,entity);
+    assert!(document.validate(&limits).is_ok());
+    let mut changed=surface;changed.poles[3][2]=1.;
+    document.entities.get_mut(&id).unwrap().geometry=Geometry::Surface(changed);
+    assert!(matches!(document.validate(&limits),Err(Error::Invalid("trimmed surface underlying mismatch"))));
+    document.entities.get_mut(&id).unwrap().geometry=Geometry::Point([0.,0.,0.]);
+    assert!(matches!(document.validate(&limits),Err(Error::Invalid("trimmed surface requires surface geometry"))));
+}
+
+#[test]
+fn stale_trim_geometry_edit_preserves_document_and_redo() {
+    use om9_core::rhino_semantics::{set_trimmed_surface, TrimmedSurface};
+    let limits=Limits::default();let surface=plane_surface();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.1,0.1],[0.9,0.1],[0.9,0.9],[0.1,0.9]],inners:vec![],reversed:false};
+    let mut entity=Entity::new("trimmed",Geometry::Surface(surface.clone()),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    let id=entity.id;let mut document=Document::new("trim edit");document.entities.insert(id,entity);
+    let (mut coordinator,document_id)=coordinator(document);
+    let point=Entity::new("temporary",Geometry::Point([2.,2.,2.]),None);
+    let prepared=coordinator.prepare(TransactionRequest::new("temporary",vec![Mutation::Insert {document:document_id,entity:point}])).unwrap();
+    coordinator.commit(prepared).unwrap();coordinator.undo().unwrap();
+    let before=coordinator.snapshot();assert_eq!(coordinator.redo_len(),1);
+    let source=coordinator.world().documents[&document_id].stamp(id).unwrap();
+    let mut changed=surface;changed.poles[3][2]=1.;
+    let request=TransactionRequest::new("stale trim edit",vec![Mutation::Geometry {source,geometry:Geometry::Surface(changed)}]);
+    let result=match coordinator.prepare(request) {Ok(prepared)=>coordinator.commit(prepared),Err(error)=>Err(error)};
+    assert!(matches!(result,Err(Error::Invalid("trimmed surface underlying mismatch"))));
+    assert_eq!(coordinator.snapshot(),before);assert_eq!(coordinator.redo_len(),1);
+    let mut updated=trim;updated.underlying.poles[3][2]=1.;
+    let request=TransactionRequest::new("update trim and surface",vec![
+        Mutation::Geometry {source,geometry:Geometry::Surface(updated.underlying.clone())},
+        Mutation::Extension {source,slot:om9_core::model::TRIM_SURFACE_EXTENSION_SLOT.to_string(),extension:Some(updated.to_extension().unwrap())},
+    ]);
+    let prepared=coordinator.prepare(request).unwrap();coordinator.commit(prepared).unwrap();
+    assert_eq!(coordinator.redo_len(),0);
+    coordinator.undo().unwrap();assert_eq!(coordinator.world().documents[&document_id],before.world.documents[&document_id]);
+    coordinator.redo().unwrap();assert!(coordinator.world().documents[&document_id].validate(&limits).is_ok());
+}
+
+#[test]
 fn l3_009_a_bare_slot_name_is_not_a_slot() {
     let (c, d, a, _b) = grouped_coordinator();
     let before = c.snapshot();

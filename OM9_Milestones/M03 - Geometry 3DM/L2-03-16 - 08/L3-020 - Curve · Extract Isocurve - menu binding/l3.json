@@ -1,4 +1,39 @@
 {
+  "mesh_face_capacity_aggregation_2026_11_13": {
+    "status": "SCOPED_PERFORMANCE",
+    "evidence": "docs/validation/2026-11-13-native-picked-isocurve.md#aggregate-face-capacities-before-byte-conversion",
+    "limits": "One NativeBrep sphere, uncontrolled debug timing; operation remains synchronous and native peak/desktop remain open."
+  },
+  "native_large_mesh_validation_2026_11_13": {
+    "status": "SCOPED_PERFORMANCE",
+    "evidence": "docs/validation/2026-11-13-native-picked-isocurve.md#large-nativebrep-mesh-validation",
+    "limits": "One NativeBrep sphere, uncontrolled debug timing; synchronous latency, native peak and desktop remain open."
+  },
+  "native_selected_face_isocurve_2026_11_13": {
+    "status": "SCOPED_PRODUCT_FIXTURE",
+    "evidence": "docs/validation/2026-11-13-native-picked-isocurve.md",
+    "limits": "Tested reopened NativeBrep box and cylinder, not general import, near faces, native peak, responsiveness or physical desktop."
+  },
+  "native_source_ray_extraction_2026_11_13": {
+    "status": "KERNEL_FOUNDATION_ONLY",
+    "evidence": "docs/validation/2026-11-13-large-trim-boundary-commands.md#source-ray-isocurve-extraction-foundation",
+    "limits": "No product selection or session binding; placement, stale/history, worker, native peak and desktop remain open."
+  },
+  "native_source_ray_bounds_2026_11_13": {
+    "status": "KERNEL_FOUNDATION_ONLY",
+    "evidence": "docs/validation/2026-11-13-large-trim-boundary-commands.md#nativebrep-source-ray-face-bounds-foundation",
+    "limits": "No product selection or extraction binding, stale/history/worker verification, native peak or desktop evidence."
+  },
+  "rectangle_hole_verification_optimization_2026_11_13": {
+    "status": "SCOPED_OPTIMIZATION",
+    "evidence": "docs/validation/2026-11-13-large-trim-boundary-commands.md#rectangle-certified-narrow-overlap-optimization",
+    "limits": "Strict axis-aligned rectangle certificate and area tolerance; general geometry, native peak, release and physical desktop remain open."
+  },
+  "planar_hole_verification_2026_11_13": {
+    "status": "SCOPED_FIX",
+    "evidence": "docs/validation/2026-11-13-large-trim-boundary-commands.md#bounded-planar-hole-display-check",
+    "limits": "One malformed reopened planar-hole fixture is refused; general trim, curved faces, native peak, UI latency and desktop remain open."
+  },
   "level": "L3",
   "id": "OM9-L3-03-16-020",
   "milestone": "M03",
@@ -973,6 +1008,91 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "source_only_face_verification_2026_11_13": {
+      "status": "SCOPED_BACKGROUND_CONSUMER_CHECKS_PASSED",
+      "scope": "Single root OCCT face verification, including large-face Isocurve, uses source and display leases without holding a document; releases them after verification. Lifetime, simulated pressure, stale/cancel and Isocurve integration checks passed.",
+      "limitations": "Ordinary display pin is conservatively double-accounted while the document owns it; NativeBrep, instances, desktop and full source-only document/history remain open.",
+      "evidence": "docs/validation/2026-11-13-source-only-face-verification.md"
+    },
+    "external_v5_native_face_2026_11_13": "A public openNURBS V5 B-rep imported as NativeBrep and reopened yielded a selected face isocurve with samples inside the independently specified quadrilateral, boundary endpoints and Undo/Redo. Full curve equivalence and desktop remain unverified. Evidence: docs/validation/2026-11-13-isocurve-external-v5.md",
+    "clone_admission_validation_reuse_2026_11_13": "Transaction clone admission reuses exact immutable-owner validation proof under current limits. Three debug Isocurve samples 218.30–230.67 ms vs 285.90–292.03 ms; limits/COW/history regressions passed. Desktop, real OOM and concurrent timing unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#reuse-validated-owner-for-clone-admission",
+    "large_retained_insert_validation_reuse_2026_11_13": "Insert-only candidate validation proof now also reuses evidence at 10000 retained points; sampled debug sphere Isocurve completion 285.90–292.03 ms versus 359.01–364.34 ms. Limits, COW, invalid input and history tests pass; desktop and native peak unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#large-retained-model-insertion-validation-reuse",
+    "isocurve_face_verification_worker_2026_11_13": "Selected B-rep display above 512 triangles uses cancellable worker with source/scene/selection revalidation and asynchronous one-consent recovery. Three debug sphere starts 2.24–2.67 ms vs 495.59–498.70 ms; final creation remains synchronous at 359.01–364.34 ms. Desktop and arbitrary geometry unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#selected-face-verification-worker-for-isocurve",
+    "picked_curved_face_isocurve_timing_2026_11_13": "Reopened permuted affine cylinder side and 30016-triangle sphere selected faces passed source geometry and Undo/Redo. Three debug controller timings: dispatch 495.59–498.70 ms, completion 361.43–365.92 ms; desktop and release responsiveness unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#picked-curved-faces-and-synchronous-timing",
+    "picked_brep_face_isocurve_2026_11_13": "One preselected root B-rep face uses full display/source verification and source witness resolution. Reopened permuted box CMD/menu and simulated viewport selection passed; stale/mixed/pressure cases preserve document/history. Curved topology and desktop remain unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#picked-face-of-a-multi-face-b-rep",
+    "native_brep_isocurve_2026_11_13": "Authored reopened planar/cylindrical single-face NativeBrep with holes produces source-clipped Isocurves, translation and Undo/Redo; malformed, multi-face, stale and simulated budget cases rejected safely. External Rhino, general topology and desktop remain unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#single-face-nativebrep-isocurve",
+    "single_face_brep_concave_coincident_2026_11_13": "An authored reopened concave planar B-rep with two holes yielded exact nonoverlapping material spans including coincident boundary and notch vertex cases, Undo/Redo, and safe out-of-range retry. General topology and curved coincident cases remain unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#concave-single-face-b-rep-and-coincident-boundaries",
+    "single_face_brep_isocurve_2026_11_13": "Tested plane and 3DM-reopened cylinder B-rep faces with holes yield clipped source curves, translation and Undo/Redo; simulated pressure and stale source preserve state. Multi-face and NativeBrep unimplemented; general topology and desktop unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#single-face-b-rep-isocurve-after-3dm",
+    "isocurve_brep_unsupported_message_2026_11_13": "B-rep face selection reports unsupported rather than a generic selection error; authored reopened 3DM cylinder retains document and Redo. B-rep isocurve extraction remains unimplemented. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#isocurve-limitation-on-a-reopened-3dm-cylindrical-face",
+    "trim_isocurve_1024_2026_11_13": "Reopened affine plane and cylinder fixtures with holes and 1024 trim edges produce source-checked isocurves with Undo/Redo; 1025-edge refusal retains session/document/Redo. General trim, desktop and native peak unverified. Evidence: docs/validation/2026-11-13-large-trim-boundary-commands.md#extractisocurve-up-to-1024-edges",
+    "isocurve_start_memory_recovery_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "ISOCURVE_START_MEMORY_RECOVERY_SCOPED_PASS",
+      "scope": "The menu and typed ExtractIsocurve paths now offer consent-based memory recovery if initial pending-surface admission fails. Five focused headless UI tests exercise confirmation, retries, reclaiming the oldest Undo when needed, stale selection/draft refusal and exhaustion preserving document/Redo. The shared 59-test undo-settings UI suite passed.",
+      "remaining": "Physical OOM, all source types and actual desktop interactions remain unverified. Plan A remains open; debug 3DM adapter still needs reconciliation.",
+      "evidence": "docs/validation/2026-11-13-isocurve-start-memory-recovery.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue Plan A remaining gates and reconcile the desktop debug adapter without disturbing active user sessions."
+    },
+    "isocurve_pending_admission_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "ISOCURVE_PENDING_ADMISSION_SCOPED_PASS",
+      "scope": "ExtractIsocurve now reserves managed memory before copying its pending surface with fallible vector allocation; cloned pending sessions share both the surface and the reservation. The 28x28 reopened trim fixture rejects managed pressure at startup with document and Redo intact, releases reservation on cancel or completion, and preserves output and Undo/Redo. All 26 isocurve, two command-option and two no-OCCT fixture tests pass.",
+      "remaining": "Fixed-size Arc allocation, physical OOM, native peak, desktop and arbitrary surface types remain unverified. Plan A remains open.",
+      "evidence": "docs/validation/2026-11-13-isocurve-pending-admission.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue remaining Plan A gates and reconcile the desktop debug adapter without disturbing active sessions."
+    },
+    "certified_full_seam_trim_2026_11_12": {
+      "status": "SCOPED_FULL_SEAM_TRIM_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#certified-full-seam-rectangular-trim",
+      "limitations": "Reopened cylinder fixture with certified rectangular full-seam trim; arbitrary seam topology, desktop and physical RAM unverified."
+    },
+    "curved_trim_isocurve_2026_11_12": {
+      "status": "SCOPED_CURVED_TRIM_ISOCURVE_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#curved-trimmed-surface-isocurves",
+      "limitations": "Cylindrical fixtures and numeric screening; arbitrary surfaces, complete seams, numerical proof and desktop remain unverified or unsupported."
+    },
+    "ambiguous_selection_2026_11_12": {
+      "status": "SCOPED_AMBIGUOUS_MULTISELECTION_REFUSED",
+      "evidence": "docs/validation/2026-11-12-surface-curve-multiple-selection.md",
+      "limitations": "Two selected surfaces or a surface plus point; multi-surface operation, other source types and desktop unverified."
+    },
+    "subdivided_trim_boundary_2026_11_12": {
+      "status": "SCOPED_SUBDIVIDED_TRIM_BOUNDARY_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#subdivided-straight-trim-boundaries",
+      "limitations": "One reopened planar fixture with subdivided straight edges; arbitrary topology, output reopen in this fixture and desktop remain unverified."
+    },
+    "trim_loop_topology_2026_11_12": {
+      "status": "SCOPED_AMBIGUOUS_TRIM_LOOPS_REFUSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#ambiguous-loop-topology",
+      "limitations": "Three invalid topology fixtures; conservative floating-point check with bounded work, desktop and arbitrary loops unverified."
+    },
+    "nonunit_trimmed_affine_plane_2026_11_12": {
+      "status": "SCOPED_REOPENED_INPUT_MENU_CMD_UNDO_REDO_PASSED",
+      "evidence": "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#non-unit-restricted-parameter-domains",
+      "limitations": "One restricted non-unit parameter fixture on an exact unit-weight affine 2x2 plane; arbitrary topology, numerical cases, curved trims and desktop remain unverified or unsupported."
+    },
+    "memory_recovery_2026_11_12": {
+      "status": "SCOPED_PENDING_PARAMETER_AND_MANAGED_RECLAMATION_PASSED",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "limitations": "CMD Enter, planar fixture and simulated pressure only; other input routes, arbitrary sources, desktop and physical RAM remain unverified."
+    },
+    "trimmed_domain_default_2026_11_12": {
+      "status": "REOPENED_TRIMMED_PLANE_AND_UNDO_REDO_PASSED",
+      "evidence": "docs/validation/2026-11-12-extract-isocurve-placement.md",
+      "limitations": "One planar trimmed domain; arbitrary surface domains and desktop remain unverified."
+    },
+    "lowercase_options_2026_11_12": {
+      "status": "PLANE_FIXTURE_U_V_AND_UNDO_REDO_PASSED",
+      "evidence": "docs/validation/2026-11-12-extract-isocurve-placement.md",
+      "limitations": "Desktop keyboard input and other surfaces remain unverified for this change."
+    },
+    "retry_on_failure_2026_11_12": {
+      "status": "SCOPED_PARAMETER_PRESSURE_CANCEL_AND_STALE_SOURCE_PASSED",
+      "evidence": "docs/validation/2026-11-12-extract-isocurve-placement.md",
+      "limitations": "The pressure fixture does not isolate the exact failed allocation; arbitrary changes and desktop interaction remain unverified."
+    },
     "date": "2026-10-26",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",
@@ -1009,8 +1129,13 @@
     "human_approval": null,
     "manual_gate": "M03-UI",
     "remaining": [
-      "Human M03-UI click/preview review is unsigned."
+      "Human M03-UI click/preview review is unsigned.",
+      "Curved and trimmed surfaces, B-rep input, arbitrary placement and pending-command failure/retry are not certified by the planar placement fixture."
     ],
+    "placement_fixture_2026_11_12": {
+      "scope": "CMD ExtractIsocurve on a reopened planar standalone surface with translation or scale/shear retains placement and Undo/Redo",
+      "evidence": "docs/validation/2026-11-12-extract-isocurve-placement.md"
+    },
     "menu_binding": {
       "date": "2026-10-26",
       "feature": "OM9-CURVE-019",
@@ -1019,6 +1144,98 @@
       "documented_script": "ExtractIsocurve",
       "binding_state": "Implemented",
       "same_id_menu_and_commandline": true
+    },
+    "surface_buffer_allocation_2026_11_12": {
+      "date": "2026-11-12",
+      "status": "SURFACE_ISOCURVE_BUFFERS_FALLIBLE",
+      "evidence": "docs/validation/2026-11-12-memory-recovery-choice.md",
+      "scope": "Basis rows, isocurve poles, weights and knot copy use fallible allocation; impossible layout reports overflow and allocator refusal reports bytes. Core 377 passed 1 ignored; curve_surface_ops 31; Wireframe 55 passed 5 ignored, Isocurve 11, DupBorder 17, Curve menu 6, UI recovery 46.",
+      "skill_update": "User approved recording the ExtractWireframe scope. No ExtractIsocurve skill update per prior user choice.",
+      "remaining": "No end-to-end allocator-failure injection in desktop, physical RAM exhaustion, all native allocations, or complete Plan A. B1-B3 deferred."
+    },
+    "trimmed_surface_refusal_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "TRIMMED_SURFACE_SAFE_REFUSAL_TESTED",
+      "scope": "Standalone surfaces with trim metadata are refused to avoid emitting untrimmed domain geometry; reopened plane with an outer loop and hole preserves document and Redo. ExtractWireframe CMD/menu and mixed-root paths verified.",
+      "limitations": [
+        "Trim boundaries and clipped isocurves are not yet implemented.",
+        "Desktop and arbitrary surface/source cases unverified."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md"
+      ],
+      "command": "ExtractIsocurve"
+    },
+    "affine_trimmed_isocurve_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "SCOPED_AUTOMATED_FIXTURE_PASSED",
+      "scope": "On certified affine 2x2 planes, split U/V isocurve intervals at polygonal trim loops. Saved/reopened fixture with hole checks two outputs, placement, CMD/menu, output roundtrip and one Undo/Redo. Simulated pressure preserves the prompt and Redo; UI retry can reclaim the oldest history mesh.",
+      "tests": "Curve menu 6, DupBorder 17, Isocurve 17, Wireframe 65 with five ignored; two UI memory recovery tests, no-default check, debug build and source audit passed.",
+      "limitations": [
+        "Trim vertex/edge coincidences and numerically uncertain crossings are refused; curved surfaces and trim metadata above 16 KiB unsupported.",
+        "Floating-point guards are not interval-certified. Actual desktop, physical memory pressure and arbitrary trim loops unverified."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#extractisocurve-on-an-affine-trimmed-plane"
+      ]
+    },
+    "transverse_trim_vertices_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "SCOPED_AUTOMATED_FIXTURE_PASSED",
+      "scope": "On a certified affine trimmed plane, transverse crossings exactly at polygon vertices are counted once; U and V fixtures for a diamond hole with both loop directions produce two correct intervals and Undo/Redo. Tangency, near-vertex, and coincident edges remain refused while retaining the session.",
+      "tests": "Curve menu 6, DupBorder 17, Isocurve 19, Wireframe 65 with 5 ignored; Isocurve library 10; no-default check, debug build and audit passed.",
+      "limitations": [
+        "Only certified affine planes and tested polygon inputs; numerical geometry is not interval-certified.",
+        "Tangent/near-vertex/coincident-edge and curved trim cases remain unsupported; desktop not checked."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-12-trimmed-surface-curve-refusal.md#transverse-trim-vertices"
+      ]
+    },
+    "many_edge_trim_isocurve_2026_11_13": {
+      "date": "2026-11-13",
+      "status": "SCOPED_MANY_EDGE_ISOCURVE_PASSED",
+      "scope": "An authored reopened planar trim with a 501-edge outer loop and four-edge hole passed CMD/menu ExtractIsocurve, two expected clipped spans under affine placement, managed pressure refusal and retry with document/Redo intact, and one Undo/Redo. The isocurve group passed 27 tests.",
+      "remaining": "Other many-edge geometry, curved trims, physical RAM exhaustion and desktop are unverified. Plan A remains open; B1-B3 deferred.",
+      "evidence": "docs/validation/2026-11-13-large-trim-boundary-commands.md#many-edge-extractisocurve",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_CORE_CURVE_SOLID.md",
+      "next_action": "Continue source-accurate handling for unsupported trim and verify desktop once active windows are saved and closed."
+    },
+    "small_trim_hole_witness_2026_11_13": {
+      "status": "SCOPED_FIXTURE_PASSED",
+      "scope": "A source-face point witness detects one small planar hole covered by invalid display; valid display and Undo/Redo pass.",
+      "remaining": "Other hole topology and curved surfaces are not certified. An existing face-picking regression fails with and without the new witness.",
+      "evidence": "docs/validation/2026-11-13-small-trim-hole-witness.md"
+    },
+    "circular_hole_source_ray_2026_11_13": {
+      "status": "SCOPED_VIEWPORT_FACE_PASS",
+      "scope": "One reopened drilled-block fixture selected via simulated viewport extracts source-clipped isocurves with checked endpoints and Undo/Redo; hole or mismatched source face is refused.",
+      "remaining": "Conservative point-free and numeric route remains unresolved; arbitrary geometry, physical desktop and native peak unverified.",
+      "evidence": "docs/validation/2026-11-13-circular-hole-source-ray.md"
+    },
+    "recovery_draft_guard_2026_11_13": {
+      "status": "SCOPED_SIMULATED_PRESSURE_PASS",
+      "scope": "A changed Isocurve draft stops retry before Undo removal, retaining document and pending state in a planar fixture.",
+      "remaining": "Actual RAM exhaustion and desktop dialog not tested.",
+      "evidence": "docs/validation/2026-11-13-isocurve-recovery-changed-draft.md"
+    },
+    "external_v5_ray_bridge_regression_2026_11_13": {
+      "status": "ONE_EXISTING_EXTERNAL_FIXTURE_PASSED",
+      "scope": "Existing public V5 NativeBrep fixture passed import/reopen, one simulated source-ray pick, sampled boundary checks and Undo/Redo after bridge change.",
+      "remaining": "Other inputs and physical desktop not certified.",
+      "evidence": "docs/validation/2026-11-13-isocurve-external-v5.md#source-ray-bridge-regression"
+    },
+    "recovery_selection_revision_2026_11_13": {
+      "status": "SCOPED_SIMULATED_PRESSURE_PASS",
+      "scope": "Changed-and-restored root selection is refused before Undo pruning for tested ExtractWireframe and Isocurve-start paths.",
+      "remaining": "Worker-specific case, desktop and physical OOM not tested.",
+      "evidence": "docs/validation/2026-11-13-recovery-selection-revision.md"
+    },
+    "recovery_selection_revision_worker_2026_11_13": {
+      "status": "SCOPED_WORKER_UI_PASS",
+      "scope": "A 30016-triangle worker active at cancellation stopped, its managed kernel reservation returned to at most baseline, and a later UI frame preserved document and Undo/Redo.",
+      "remaining": "Native allocations/peak, actual OOM and desktop not measured.",
+      "evidence": "docs/validation/2026-11-13-recovery-selection-revision.md#worker-follow-up"
     }
   }
 }

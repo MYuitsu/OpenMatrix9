@@ -31,6 +31,25 @@ struct RetainedValidationProof {
 #[derive(Debug, Default)]
 struct RetainedValidationCache(Mutex<[Option<RetainedValidationProof>; 2]>);
 
+/// Bounded receipts live inside an entry that owns the immutable Arc. No heap
+/// index, source payload copy or additional strong/weak owner is introduced.
+#[derive(Debug, Clone, Copy)]
+struct RetainedStorageReceipt { address: usize, limits: Limits, usage: Usage }
+#[derive(Debug, Default)]
+struct RetainedStorageCache(Mutex<[Option<RetainedStorageReceipt>; 2]>);
+impl Clone for RetainedStorageCache {
+    fn clone(&self) -> Self { Self::default() }
+}
+impl PartialEq for RetainedStorageCache {
+    fn eq(&self, _: &Self) -> bool { true }
+}
+fn storage_limits_cover(proved: &Limits, requested: &Limits) -> bool {
+    // Aggregate counters are checked against the cached exact Usage on every
+    // hit; changes to pending reservations do not invalidate structural proof.
+    requested.max_depth >= proved.max_depth && requested.max_degree >= proved.max_degree
+        && requested.max_name_bytes >= proved.max_name_bytes
+}
+
 impl Clone for RetainedValidationCache {
     fn clone(&self) -> Self {
         let slots = *self.0.lock().unwrap_or_else(|error| error.into_inner());
@@ -123,11 +142,11 @@ impl World {
                 }
             }
             for (index, brep) in retained_breps(d).enumerate() {
-                let key = brep.display_allocation_key();
-                if retained_breps(d).take(index).any(|other| other.display_allocation_key() == key) { continue; }
-                if self.documents.range(..*id).any(|(_, prior)| retained_breps(prior).any(|other| other.display_allocation_key() == key)) {
-                    document_usage.bytes = document_usage.bytes.checked_sub(brep.display_allocation_bytes()?)
-                        .ok_or(Error::Overflow("shared world BRep display accounting"))?;
+                let key = brep.topology_allocation_key();
+                if retained_breps(d).take(index).any(|other| other.topology_allocation_key() == key) { continue; }
+                if self.documents.range(..*id).any(|(_, prior)| retained_breps(prior).any(|other| other.topology_allocation_key() == key)) {
+                    document_usage.bytes = document_usage.bytes.checked_sub(brep.topology_allocation_bytes()?)
+                        .ok_or(Error::Overflow("shared world BRep topology accounting"))?;
                 }
             }
             add_retained_document_usage(&mut total, document_usage, l)?;
@@ -206,14 +225,16 @@ fn add_retained_document_usage(total: &mut Usage, mut document: Usage, limits: &
     Ok(())
 }
 
-fn retained_breps(document: &Document) -> impl Iterator<Item = &crate::brep::Brep> {
+fn retained_breps(document: &Document) -> impl Iterator<Item = &crate::brep::CanonicalBrep> {
     document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
-        .filter_map(|entity| match &entity.geometry { Geometry::Brep(brep) => Some(brep), _ => None })
+        .map(|entity| &entity.geometry).chain(document.results.values().map(|result| &result.geometry_snapshot))
+        .filter_map(|geometry| match geometry { Geometry::Brep(brep) => Some(brep), _ => None })
 }
 
-fn retained_native_breps(document: &Document) -> impl Iterator<Item = &crate::geometry::NativeBrep> {
+fn retained_native_breps(document: &Document) -> impl Iterator<Item = &crate::geometry::NativeBrepSource> {
     document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
-        .filter_map(|entity| match &entity.geometry { Geometry::NativeBrep(brep) => Some(brep), _ => None })
+        .map(|entity| &entity.geometry).chain(document.results.values().map(|result| &result.geometry_snapshot))
+        .filter_map(|geometry| match geometry { Geometry::NativeBrep(brep) => Some(brep), _ => None })
 }
 
 #[derive(Debug, Clone, Default)]
@@ -504,9 +525,19 @@ impl TransactionRequest {
                             },
                             l,
                         )?;
-                        value.add(extension.validate(l)?, l)?;
+                        value.add(extension.storage_usage_for_slot(slot, l)?, l)?;
                     }
-                    value.add(entity.geometry.validate(l)?, l)?;
+                    let geometry = match &entity.geometry {
+                        Geometry::Brep(brep) => {
+                            // Inventory first; the mutation check validates this BRep
+                            // before any candidate document is cloned or published.
+                            let mut usage = Usage { bytes: std::mem::size_of::<Geometry>() as u64, ..Usage::default() };
+                            usage.add(brep.storage_usage(l)?, l)?;
+                            usage
+                        }
+                        geometry => geometry.validate(l)?,
+                    };
+                    value.add(geometry, l)?;
                     value.add(
                         Usage {
                             bytes: entity.label.capacity() as u64,
@@ -531,7 +562,7 @@ impl TransactionRequest {
                             },
                             l,
                         )?;
-                        value.add(extension.validate(l)?, l)?;
+                        value.add(extension.storage_usage_for_slot(slot, l)?, l)?;
                     }
                 }
                 Mutation::Geometry { geometry, .. } => value = geometry.validate(l)?,
@@ -594,7 +625,7 @@ impl TransactionRequest {
                         l,
                     )?;
                     if let Some(extension) = extension {
-                        value.add(extension.validate(l)?, l)?;
+                        value.add(extension.storage_usage_for_slot(slot, l)?, l)?;
                     }
                 }
                 Mutation::HistoryUpdate {
@@ -680,6 +711,58 @@ impl TransactionRequest {
     }
 }
 
+/// Already-accounted adapter evidence. This owner only extends lifetime; it
+/// does not attest a topology mapping to the portable transaction layer.
+#[derive(Clone)]
+struct UndoEvidence {
+    owner: Arc<dyn std::any::Any + Send + Sync>,
+    bytes: u64,
+    source: Option<CapturedBrepSource>,
+    source_upper: u64,
+    document: DocumentId,
+    object: ObjectId,
+    generation: u64,
+    owner_session: SessionId,
+    session_generation: u64,
+    source_key: usize,
+    topology_key: usize,
+}
+impl std::fmt::Debug for UndoEvidence {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("UndoEvidence").field("bytes", &self.bytes).finish_non_exhaustive()
+    }
+}
+impl PartialEq for UndoEvidence {
+    fn eq(&self, other: &Self) -> bool {
+        self.bytes == other.bytes && self.document == other.document && self.object == other.object
+            && self.generation == other.generation && self.owner_session == other.owner_session
+            && self.session_generation == other.session_generation && self.source_key == other.source_key
+            && self.topology_key == other.topology_key && Arc::ptr_eq(&self.owner, &other.owner)
+            && self.source_upper == other.source_upper
+            && match (&self.source, &other.source) { (Some(a), Some(b)) => Arc::ptr_eq(&a.0, &b.0), (None, None) => true, _ => false }
+    }
+}
+
+/// Elements drop before the reservation. This must itself be dropped only
+/// after releasing the shared account lock, because an evidence owner may
+/// release another reservation in its destructor.
+struct DeferredUndoEvidence {
+    entries: Vec<UndoEvidence>,
+    _reservation: Option<ExternalMemoryReservation>,
+}
+impl DeferredUndoEvidence {
+    fn take_item(&mut self, evidence: UndoEvidence, upper: &mut u64, count: &mut usize) {
+        assert!(self.entries.len() < self.entries.capacity(), "deferred Undo evidence capacity");
+        let bytes = evidence.bytes.checked_add(evidence.source_upper).expect("Undo evidence upper bound");
+        self.entries.push(evidence);
+        *upper = upper.checked_sub(bytes).expect("Undo evidence byte count");
+        *count = count.checked_sub(1).expect("Undo evidence owner count");
+    }
+    fn take(&mut self, entry: &mut UndoEntry, upper: &mut u64, count: &mut usize) {
+        if let Some(evidence) = entry.evidence.take() { self.take_item(evidence, upper, count); }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 struct UndoEntry {
     id: TransactionId,
@@ -687,6 +770,8 @@ struct UndoEntry {
     before: BTreeMap<DocumentId, Arc<Document>>,
     after: BTreeMap<DocumentId, Arc<Document>>,
     validation_cache: RetainedValidationCache,
+    storage_cache: RetainedStorageCache,
+    evidence: Option<UndoEvidence>,
 }
 impl UndoEntry {
     fn storage_usage(&self, limits: &Limits) -> Result<Usage> {
@@ -727,6 +812,8 @@ impl UndoEntry {
                 .filter_map(|id| after.documents.get(id).map(|d| (*id, d.clone())))
                 .collect(),
             validation_cache: RetainedValidationCache::default(),
+            storage_cache: RetainedStorageCache::default(),
+            evidence: None,
         }
     }
     fn empty(&self) -> bool {
@@ -749,6 +836,154 @@ pub struct PreparedTransaction {
     held: Usage,
     reservation: Usage,
     identities: IdentityLedger,
+    pending_brep_representations: Option<PendingBrepRepresentations>,
+}
+
+/// Private cache entries created for a staged transaction. Dropping a failed
+/// preparation or commit removes only the exact entries that it inserted.
+struct PendingBrepRepresentations {
+    store: Arc<Mutex<crate::brep::BrepRepresentationStore>>,
+    account: ExternalMemoryAccount,
+    entries: Vec<PendingRepresentationKey>,
+    _reservation: ExternalMemoryReservation,
+    published: bool,
+}
+#[derive(Clone, Copy)]
+enum PendingRepresentationKey {
+    Occt(crate::brep::BrepSourceIdentity, crate::brep::BrepRepresentationProfile, crate::brep::BrepDisplayIdentity),
+    Native(crate::geometry::NativeBrepSourceIdentity, crate::geometry::NativeBrepRepresentationIdentity),
+}
+impl std::fmt::Debug for PendingBrepRepresentations {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("PendingBrepRepresentations").field("count", &self.entries.len()).finish()
+    }
+}
+impl Drop for PendingBrepRepresentations {
+    fn drop(&mut self) {
+        if self.published { return; }
+        for entry in &self.entries {
+            match *entry {
+                PendingRepresentationKey::Occt(source, profile, display) => {
+                    let removed = self.store.lock().unwrap_or_else(|e| e.into_inner()).remove_exact(source, profile, display);
+                    drop(removed);
+                }
+                PendingRepresentationKey::Native(source, display) => {
+                    let removed = self.store.lock().unwrap_or_else(|e| e.into_inner()).remove_native_exact(source, display);
+                    drop(removed);
+                }
+            }
+        }
+    }
+}
+impl PendingBrepRepresentations {
+    fn insert(&mut self, source: &crate::brep::CanonicalBrep,
+        display: crate::brep::BrepRepresentation, limits: &Limits,
+        coordinator: &TransactionCoordinator, held: Usage) -> Result<()> {
+        if self.entries.len() == self.entries.capacity() { return Err(Error::Budget("pending BRep batch")); }
+        if !self._reservation.belongs_to(&coordinator.external_memory_account())
+            || !Arc::ptr_eq(&self.store, &coordinator.representations) {
+            return Err(Error::Invalid("pending BRep coordinator"));
+        }
+        if !display.display_owned_by(&self.account) { return Err(Error::Invalid("pending BRep display account")); }
+        let key = (source.identity(), display.profile(), display.display_identity());
+        coordinator.validate_brep_representation_admitted(source, &display, limits, held)?;
+        let mut display = Some(display);
+        let result = {
+            let mut store = self.store.lock().unwrap_or_else(|e| e.into_inner());
+            if store.contains_profile(key.0, key.1) { Err(Error::Invalid("duplicate pending BRep representation")) }
+            else { store.insert_pending_prevalidated(source, display.take().expect("pending display")) }
+        };
+        drop(display);
+        result?;
+        self.entries.push(PendingRepresentationKey::Occt(key.0, key.1, key.2));
+        Ok(())
+    }
+    fn insert_native(&mut self, source: &crate::geometry::NativeBrepSource,
+        display: crate::geometry::NativeBrepRepresentation, limits: &Limits) -> Result<()> {
+        if self.entries.len() == self.entries.capacity() { return Err(Error::Budget("pending BRep batch")); }
+        if !display.display_owned_by(&self.account) { return Err(Error::Invalid("pending native BRep display account")); }
+        let key = (source.identity(), display.identity());
+        display.validate_binding(source, limits)?;
+        let mut display = Some(display);
+        let result = {
+            let mut store = self.store.lock().unwrap_or_else(|e| e.into_inner());
+            if store.contains_native(key.0) { Err(Error::Invalid("duplicate pending native BRep representation")) }
+            else { store.insert_native_prevalidated(source, display.take().expect("pending native display")) }
+        };
+        drop(display);
+        result?;
+        self.entries.push(PendingRepresentationKey::Native(key.0, key.1));
+        Ok(())
+    }
+}
+
+/// A private history candidate. The candidate documents are registered in the
+/// shared account and the staging map remains charged until this value drops.
+/// Publication requires the original coordinator and a fresh history head.
+pub struct PreparedHistory {
+    staged: World,
+    context: OperationContext,
+    entry: TransactionId,
+    redo: bool,
+    next_epoch: u64,
+    validated: bool,
+    retained_counters: Usage,
+    _map_reservation: ExternalMemoryReservation,
+    pending_brep_representations: Option<PendingBrepRepresentations>,
+}
+impl PreparedHistory {
+    pub fn candidate_world(&self) -> &World { &self.staged }
+    pub fn candidate_epoch(&self) -> u64 { self.next_epoch }
+    pub fn insert_pending_brep_representation(&mut self, source: &crate::brep::CanonicalBrep,
+        display: crate::brep::BrepRepresentation, limits: &Limits,
+        coordinator: &TransactionCoordinator, held: Usage) -> Result<()> {
+        self.pending_brep_representations.as_mut().ok_or(Error::Missing("pending BRep batch"))?
+            .insert(source, display, limits, coordinator, held)
+    }
+    pub fn insert_pending_native_brep_representation(&mut self, source: &crate::geometry::NativeBrepSource,
+        display: crate::geometry::NativeBrepRepresentation, limits: &Limits) -> Result<()> {
+        self.pending_brep_representations.as_mut().ok_or(Error::Missing("pending BRep batch"))?
+            .insert_native(source, display, limits)
+    }
+
+    /// Validate an immutable candidate on its shared-account peer. Scratch is
+    /// admitted separately from the source owners and remains reserved until
+    /// validation finishes; only this success authorizes publication.
+    pub fn validate_on(&mut self, coordinator: &TransactionCoordinator, held: Usage,
+        physical: Option<(u64, u64)>) -> Result<()> {
+        self.validated = false;
+        if !self._map_reservation.belongs_to(&coordinator.external_memory_account()) {
+            return Err(Error::Stale("history candidate account"));
+        }
+        let (mut usage, limits) = coordinator.retained_usage_and_limits_with_held(held)?;
+        // External document registrations carry bytes on the peer; structural
+        // quotas belong to the primary coordinator's retained owners.
+        usage.objects = usage.objects.max(self.retained_counters.objects);
+        usage.history = usage.history.max(self.retained_counters.history);
+        usage.outputs = usage.outputs.max(self.retained_counters.outputs);
+        let storage = self.staged.storage_usage(&limits)?;
+        let validation = validation_limits(&limits, usage, storage)?;
+        let mut scratch = Usage::default();
+        for document in self.staged.documents.values() {
+            let mut document_scratch = document.validation_scratch_usage(&validation)?;
+            // Document validation may also allocate geometry-local scratch.
+            // Keep an additional allowance alongside the document's explicit
+            // validation scratch for geometry-local temporary allocations.
+            document_scratch.add(document.storage_usage(&validation)?, &validation)?;
+            scratch.bytes = scratch.bytes.max(document_scratch.bytes);
+        }
+        let identities = allocated_identities(&self.staged).try_fold(0usize, |count, _|
+            count.checked_add(1).ok_or(Error::Overflow("world identity count")))?;
+        scratch.bytes = scratch.bytes.max(Usage::btree::<AllocatedIdentity, ()>(identities)?.bytes);
+        let reservation = coordinator.reserve_external_memory_with_held(crate::budget::memory::MemoryClass::CpuCache,
+            scratch.bytes.max(1), physical, held)?;
+        reservation.recheck_pending()?;
+        self.staged.validate(&validation)?;
+        reservation.recheck_pending()?;
+        drop(reservation);
+        self.validated = true;
+        Ok(())
+    }
 }
 
 /// Comparable runtime origin and caller lifecycle, without mutation privilege.
@@ -778,6 +1013,19 @@ impl PreparedTransaction {
     pub fn belongs_to(&self, token: &ScopeToken) -> bool {
         self.owner.as_ref() == Some(token)
     }
+    /// Store an already admitted representation as part of this private batch.
+    /// A failed or abandoned transaction removes precisely this entry.
+    pub fn insert_pending_brep_representation(&mut self, source: &crate::brep::CanonicalBrep,
+        display: crate::brep::BrepRepresentation, limits: &Limits,
+        coordinator: &TransactionCoordinator, held: Usage) -> Result<()> {
+        self.pending_brep_representations.as_mut().ok_or(Error::Missing("pending BRep batch"))?
+            .insert(source, display, limits, coordinator, held)
+    }
+    pub fn insert_pending_native_brep_representation(&mut self, source: &crate::geometry::NativeBrepSource,
+        display: crate::geometry::NativeBrepRepresentation, limits: &Limits) -> Result<()> {
+        self.pending_brep_representations.as_mut().ok_or(Error::Missing("pending BRep batch"))?
+            .insert_native(source, display, limits)
+    }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CommitReceipt {
@@ -795,6 +1043,7 @@ pub struct CoordinatorSnapshot {
     scope_generation: u64,
     undo: Vec<UndoEntry>,
     redo: Vec<UndoEntry>,
+    overflow_evidence: Vec<UndoEvidence>,
     scope: Option<Scope>,
     identities: IdentityLedger,
 }
@@ -809,17 +1058,30 @@ pub struct TransactionCoordinator {
     redo: Vec<UndoEntry>,
     scope: Option<Scope>,
     barrier: bool,
+    history_pending: Option<uuid::Uuid>,
     benchmark_no_undo: bool,
     undo_policy: UndoPolicy,
     undo_ram_limit_mb: Option<u64>,
     undo_memory_stats: UndoMemoryStats,
     undo_capture_generation: u64,
+    // Conservative sum (not deduplicated) used only to decide when to refresh
+    // the exact Undo inventory if an external proof reader drops.
+    undo_evidence_upper: u64,
+    undo_evidence_count: usize,
+    overflow_evidence: DeferredUndoEvidence,
     identities: IdentityLedger,
     current_validation_cache: Mutex<Option<(Weak<Document>, Limits)>>,
+    current_storage_cache: Mutex<[Option<(Weak<Document>, RetainedStorageReceipt)>; 2]>,
+    retained_projection: Option<Arc<retained_projection_cache::ProjectionRoot>>,
+    projection_reclaimer: Option<Arc<retained_projection_cache::ProjectionReclaimer>>,
+    projection_validation: Mutex<()>,
+    storage_cache_hits: AtomicU64,
+    storage_cache_misses: AtomicU64,
     /// Weak references to immutable documents held by external captures. They
     /// do not keep documents alive but allow the coordinator to charge them
     /// when Undo and the current world no longer own the same allocation.
     external_documents: Arc<Mutex<Vec<Weak<Document>>>>,
+    representations: Arc<Mutex<crate::brep::BrepRepresentationStore>>,
     external_reservations: Arc<Mutex<ExternalReservations>>,
     capture_generation: Arc<AtomicU64>,
     external_export_active: Arc<std::sync::atomic::AtomicBool>,
@@ -838,6 +1100,7 @@ pub struct ExternalMemoryReservation {
     physical_total: Option<u64>,
     commit_sampled: bool,
     admission_ceiling: Option<u64>,
+    brep_source: Option<crate::brep::BrepSourceIdentity>,
 }
 #[derive(Default)]
 struct ExternalReservations {
@@ -851,8 +1114,11 @@ struct ExternalReservations {
     /// Weak lease handles distinguish actual tracked captures from a document
     /// kept alive solely by the world or journal.
     capture_leases: Vec<Weak<CapturedDocumentInner>>,
+    brep_source_leases: Vec<Weak<CapturedBrepSourceInner>>,
+    brep_display_leases: Vec<Weak<CapturedBrepDisplayInner>>,
     capture_generation: Arc<AtomicU64>,
     /// Tightest 60%-of-total-RAM ceiling learned from a valid physical sample.
+    projection_cache_bytes: Arc<AtomicU64>,
     managed_ceiling: Option<u64>,
     optional_caches: Vec<OptionalCacheEntry>,
     optional_cache_sequence: u64,
@@ -865,6 +1131,7 @@ pub use cache_pressure::OptionalMemoryCache;
 use cache_pressure::OptionalCacheEntry;
 pub mod memory_diagnostics;
 pub mod memory_refusal;
+mod retained_projection_cache;
 
 #[derive(Debug)]
 struct CapturedDocumentInner {
@@ -882,6 +1149,157 @@ fn bump_capture_generation(generation: &AtomicU64) {
 /// expires only when the last capture handle is dropped.
 #[derive(Debug, Clone)]
 pub struct CapturedDocument(Arc<CapturedDocumentInner>);
+/// One already planned scene occurrence. `slot` is returned unchanged so the
+/// caller can install its pin without exposing a display allocation owner.
+pub struct BrepDisplayRequest<'a> {
+    pub slot: usize,
+    pub stamp: SourceStamp,
+    pub path: &'a [ObjectId],
+}
+/// Returned pin-vector storage remains covered by the caller's exclusive
+/// scratch reservation until the batch is dropped.
+///
+/// ```compile_fail
+/// use std::sync::Arc;
+/// use om9_core::{budget::Usage, model::Document,
+///     transaction::{BrepDisplayRequest, ExternalMemoryReservation, TransactionCoordinator}};
+/// fn early_release(coordinator: &TransactionCoordinator, document: &Arc<Document>,
+///     requests: &[BrepDisplayRequest<'_>], mut scratch: ExternalMemoryReservation) {
+///     let batch = coordinator.capture_retained_brep_displays(document, requests, &mut scratch, Usage::default(), None).unwrap();
+///     drop(scratch);
+///     drop(batch);
+/// }
+/// ```
+pub struct BrepDisplayBatch<'a> {
+    pins: Vec<(usize, crate::brep::BrepDisplayPin)>,
+    _scratch: &'a mut ExternalMemoryReservation,
+}
+impl BrepDisplayBatch<'_> {
+    pub fn drain(&mut self) -> std::vec::Drain<'_, (usize, crate::brep::BrepDisplayPin)> { self.pins.drain(..) }
+}
+struct BrepDisplayBatchItem {
+    slot: usize,
+    brep: crate::brep::Brep,
+    key: usize,
+    topology_key: usize,
+    display_bytes: u64,
+    topology_bytes: u64,
+}
+#[derive(Debug)]
+struct CapturedBrepSourceInner {
+    source: CapturedBrepSourceData,
+    generation: Arc<AtomicU64>,
+}
+#[derive(Debug)]
+struct CapturedBrepDisplayInner {
+    _display: Arc<crate::brep::BrepDisplay>,
+    display_key: usize,
+    topology_key: usize,
+    display_bytes: u64,
+    topology_bytes: u64,
+    generation: Arc<AtomicU64>,
+}
+impl Drop for CapturedBrepDisplayInner {
+    fn drop(&mut self) { bump_capture_generation(&self.generation); }
+}
+#[derive(Debug)]
+enum CapturedBrepSourceData {
+    Occt(crate::brep::BrepSource),
+    Native(crate::geometry::NativeBrepSource),
+}
+enum ExpectedBrepLeaf<'a> {
+    Occt { handle: crate::model::GeometryHandle, fingerprint: [u8; 32] },
+    Native { handle: crate::model::GeometryHandle, payload: &'a Weak<Vec<u8>>,
+        display: &'a Weak<crate::geometry::Mesh>, crc: u32 },
+}
+impl Drop for CapturedBrepSourceInner {
+    fn drop(&mut self) { bump_capture_generation(&self.generation); }
+}
+/// Tracked immutable B-rep source and topology without the display mesh.
+/// Cloned handles share one lease and do not expose an untracked owner.
+#[derive(Debug)]
+pub struct CapturedBrepSource(Arc<CapturedBrepSourceInner>);
+impl Clone for CapturedBrepSource {
+    fn clone(&self) -> Self {
+        let source = Arc::clone(&self.0);
+        bump_capture_generation(&source.generation);
+        Self(source)
+    }
+}
+impl Drop for CapturedBrepSource {
+    fn drop(&mut self) { bump_capture_generation(&self.0.generation); }
+}
+impl CapturedBrepSource {
+    fn data(&self) -> &crate::brep::BrepSource {
+        let CapturedBrepSourceData::Occt(source) = &self.0.source else { unreachable!("typed OCCT lease") };
+        source
+    }
+    pub fn source(&self) -> &str { self.data().source() }
+    /// Process-local identity and liveness of the retained canonical owner.
+    pub fn source_identity(&self) -> crate::brep::BrepSourceIdentity { self.data().identity() }
+    pub fn source_strong_count(&self) -> usize { self.data().source_strong_count() }
+    pub fn topology(&self) -> &crate::brep::BrepTopology { self.data().topology() }
+    pub fn source_fingerprint(&self) -> [u8; 32] { self.data().fingerprint() }
+    pub fn canonical_storage_bytes(&self) -> Result<u64> {
+        self.data().source_bytes()?.checked_add(self.data().topology_bytes()?)
+            .ok_or(Error::Overflow("BRep source storage"))
+    }
+    #[doc(hidden)]
+    pub fn belongs_to(&self, coordinator: &TransactionCoordinator) -> bool {
+        Arc::ptr_eq(&self.0.generation, &coordinator.capture_generation)
+    }
+    #[doc(hidden)]
+    pub fn same_lease(&self, other: &Self) -> bool { Arc::ptr_eq(&self.0, &other.0) }
+    /// Shared immutable allocations are exact equality for this borrowed
+    /// traversal; independently allocated sources still require comparison.
+    #[doc(hidden)]
+    pub fn same_canonical_allocations(&self, other: &Self) -> bool {
+        self.data().source_key() == other.data().source_key()
+            && self.data().topology_key() == other.data().topology_key()
+    }
+    #[doc(hidden)]
+    pub fn shares_brep_canonical_allocations(&self, brep: &dyn crate::brep::BrepSourceAccess) -> bool {
+        (self.data().source_key(), self.data().topology_key()) == brep.canonical_owner_keys()
+    }
+    /// Source/topology-only wire view tied to this tracked lease's lifetime.
+    pub fn canonical_record(&self) -> crate::brep::CanonicalBrepRef<'_> { self.data().canonical_record() }
+    /// Validate only the tracked canonical source/topology. The callback
+    /// accounts this already-owned source and any transient validation scratch.
+    pub fn validate_canonical_admitted(&self, limits: &Limits,
+        mut admit: impl FnMut(u64, u64) -> Result<()>) -> Result<Usage> {
+        self.data().validate_admitted(limits, &mut admit)
+    }
+}
+/// Tracked immutable native B-rep payload without its display mesh.
+#[derive(Debug, Clone)]
+pub struct CapturedNativeBrepSource(Arc<CapturedBrepSourceInner>);
+impl CapturedNativeBrepSource {
+    pub fn payload(&self) -> &[u8] {
+        let CapturedBrepSourceData::Native(source) = &self.0.source else { unreachable!("typed native lease") };
+        source.payload()
+    }
+    pub fn crc(&self) -> u32 {
+        let CapturedBrepSourceData::Native(source) = &self.0.source else { unreachable!("typed native lease") };
+        source.crc()
+    }
+    /// The lease keeps the payload allocation alive, so this process-local
+    /// identity cannot be recycled while the comparison is in use.
+    pub fn matches_source(&self, other: &crate::geometry::NativeBrepSource) -> bool {
+        let CapturedBrepSourceData::Native(source) = &self.0.source else { unreachable!("typed native lease") };
+        source.identity() == other.identity()
+    }
+    #[doc(hidden)]
+    pub fn belongs_to(&self, coordinator: &TransactionCoordinator) -> bool {
+        Arc::ptr_eq(&self.0.generation, &coordinator.capture_generation)
+    }
+}
+/// Canonical source captured without a display mesh, retaining its source type.
+#[derive(Debug, Clone)]
+pub enum CapturedGeometrySource {
+    Brep(CapturedBrepSource),
+    NativeBrep(CapturedNativeBrepSource),
+}
+
 impl std::ops::Deref for CapturedDocument {
     type Target = Document;
     fn deref(&self) -> &Self::Target { &self.0.document }
@@ -892,6 +1310,23 @@ impl CapturedDocument {
         Arc::downgrade(&self.0.document).ptr_eq(other)
     }
 }
+struct AccountedClasses<'a> {
+    bytes: [u64; 6],
+    brep_sources: &'a [Weak<CapturedBrepSourceInner>],
+    brep_displays: &'a [Weak<CapturedBrepDisplayInner>],
+    cache_bytes: &'a Arc<AtomicU64>,
+    cache_snapshot: u64,
+    pending: u64,
+    physical_sampler: Option<fn() -> Option<(u64, u64)>>,
+    commit_sampler: Option<fn() -> Option<crate::budget::memory::CommitMemory>>,
+}
+impl std::ops::Deref for AccountedClasses<'_> {
+    type Target = [u64; 6];
+    fn deref(&self) -> &Self::Target { &self.bytes }
+}
+impl std::ops::DerefMut for AccountedClasses<'_> {
+    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.bytes }
+}
 impl ExternalReservations {
     /// Fixed allocations shared by the account, including Arc bodies as well
     /// as counters. Dynamic Vec capacity is added separately below.
@@ -901,6 +1336,7 @@ impl ExternalReservations {
             std::mem::size_of::<Mutex<Vec<Weak<Document>>>>(),
             std::mem::size_of::<AtomicBool>(),
             std::mem::size_of::<AtomicU64>(),
+            std::mem::size_of::<AtomicU64>() + 2 * std::mem::size_of::<usize>(),
             std::mem::size_of::<Vec<AllocatedIdentity>>(),
             // Preserve the conservative four-word Arc allowance used by the
             // existing generation/lease inventory; the ledger uses two.
@@ -940,7 +1376,7 @@ impl ExternalReservations {
     /// Conservative managed bytes for the lease registry's retained Vec
     /// capacity and Arc control blocks, including expired weak entries until
     /// the registry prunes them. Allocator overhead is not included.
-    fn accounted_classes(&self, additional_leases: usize) -> Result<[u64; 6]> {
+    fn accounted_classes(&self, additional_leases: usize) -> Result<AccountedClasses<'_>> {
         let count = self.capture_leases.len().checked_add(additional_leases)
             .ok_or(Error::Overflow("external capture leases"))?;
         let registry = Usage::array::<Weak<CapturedDocumentInner>>(self.capture_leases.capacity())?.bytes;
@@ -950,16 +1386,33 @@ impl ExternalReservations {
             .checked_add(4 * std::mem::size_of::<usize>())
             .ok_or(Error::Overflow("external capture lease bytes"))?;
         let blocks = count.checked_mul(per_lease).ok_or(Error::Overflow("external capture lease bytes"))?;
+        let source_registry = Usage::array::<Weak<CapturedBrepSourceInner>>(self.brep_source_leases.capacity())?.bytes;
+        let source_blocks = self.brep_source_leases.len().checked_mul(
+            std::mem::size_of::<CapturedBrepSourceInner>() + 4 * std::mem::size_of::<usize>())
+            .ok_or(Error::Overflow("BRep source lease bytes"))? as u64;
+        let display_registry = Usage::array::<Weak<CapturedBrepDisplayInner>>(self.brep_display_leases.capacity())?.bytes;
+        let display_blocks = self.brep_display_leases.len().checked_mul(
+            std::mem::size_of::<CapturedBrepDisplayInner>() + 4 * std::mem::size_of::<usize>())
+            .ok_or(Error::Overflow("BRep display lease bytes"))? as u64;
         let cache_index = Usage::array::<OptionalCacheEntry>(self.optional_caches.capacity())?.bytes;
         let fixed = Self::fixed_metadata_bytes()?;
         let metadata = registry.checked_add(u64::try_from(blocks).map_err(|_| Error::Overflow("external capture lease bytes"))?)
             .and_then(|bytes| bytes.checked_add(fixed))
             .and_then(|bytes| bytes.checked_add(cache_index))
+            .and_then(|bytes| bytes.checked_add(source_registry))
+            .and_then(|bytes| bytes.checked_add(source_blocks))
+            .and_then(|bytes| bytes.checked_add(display_registry))
+            .and_then(|bytes| bytes.checked_add(display_blocks))
             .ok_or(Error::Overflow("external capture lease bytes"))?;
         let mut classes = self.by_class;
         let document = crate::budget::memory::MemoryClass::Document.index();
         classes[document] = classes[document].checked_add(metadata).ok_or(Error::Overflow("external capture lease bytes"))?;
-        Ok(classes)
+        let cache_snapshot = self.projection_cache_bytes.load(Ordering::Acquire);
+        let cpu = crate::budget::memory::MemoryClass::CpuCache.index();
+        classes[cpu] = classes[cpu].checked_add(cache_snapshot).ok_or(Error::Overflow("projection cache owners"))?;
+        Ok(AccountedClasses { bytes: classes, brep_sources: &self.brep_source_leases, brep_displays: &self.brep_display_leases,
+            cache_bytes: &self.projection_cache_bytes, cache_snapshot, pending: self.pending_bytes()?,
+            physical_sampler: self.physical_sampler, commit_sampler: self.commit_sampler })
     }
 }
 #[derive(Clone)]
@@ -1003,7 +1456,7 @@ impl CandidateReservationTransfer<'_, '_> {
         self.guard.reservations.by_class[retired_index] += self.retired_bytes;
         let mut retired = ExternalMemoryReservation {
             registry: Arc::clone(&self.guard.owner.reservations), class: MemoryClass::CpuCache,
-            bytes: self.retired_bytes, pending_bytes: 0, physical_total: None, commit_sampled: false, admission_ceiling: None,
+            bytes: self.retired_bytes, pending_bytes: 0, physical_total: None, commit_sampled: false, admission_ceiling: None, brep_source: None,
         };
         if let Err(panic) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(publish)) {
             self.guard.reservations.by_class[retired_index] -= retired.bytes;
@@ -1162,10 +1615,13 @@ impl ExternalMemoryReservation {
     pub fn physical_sampled(&self) -> bool { self.physical_total.is_some() }
     pub fn commit_sampled(&self) -> bool { self.commit_sampled }
     pub fn belongs_to(&self, account: &ExternalMemoryAccount) -> bool { Arc::ptr_eq(&self.registry, &account.0) }
+    pub(crate) fn shares_account_and_class(&self, other:&Self)->bool {
+        self.class==other.class && Arc::ptr_eq(&self.registry,&other.registry)
+    }
     /// Divide an existing reservation without changing the account total.
     /// Both returned guards keep their portions charged until dropped.
     pub fn split_off(&mut self, bytes: u64) -> Result<Self> {
-        if bytes == 0 || bytes > self.bytes {
+        if self.brep_source.is_some() || bytes == 0 || bytes > self.bytes {
             return Err(Error::Invalid("reservation split"));
         }
         self.bytes -= bytes;
@@ -1175,14 +1631,15 @@ impl ExternalMemoryReservation {
         self.pending_bytes -= pending_bytes;
         Ok(Self { registry: Arc::clone(&self.registry), class: self.class, bytes,
             pending_bytes,
-            physical_total: self.physical_total, commit_sampled: self.commit_sampled, admission_ceiling: self.admission_ceiling })
+            physical_total: self.physical_total, commit_sampled: self.commit_sampled, admission_ceiling: self.admission_ceiling, brep_source: None })
     }
     /// Move ownership of existing materialized bytes between guards without
     /// releasing or re-admitting them. No allocation, account total or pending
     /// request changes; the receiver's existing pending/probe metadata is unchanged.
     /// The caller must keep data covered by one guard throughout publication.
     pub fn transfer_allocated_from(&mut self, source: &mut Self, bytes: u64) -> Result<()> {
-        if self.class != source.class || !Arc::ptr_eq(&self.registry, &source.registry) {
+        if self.brep_source.is_some() || source.brep_source.is_some()
+            || self.class != source.class || !Arc::ptr_eq(&self.registry, &source.registry) {
             return Err(Error::Invalid("allocated transfer account or class"));
         }
         let allocated = source.bytes.checked_sub(source.pending_bytes)
@@ -1191,6 +1648,28 @@ impl ExternalMemoryReservation {
         let total = self.bytes.checked_add(bytes).ok_or(Error::Overflow("allocated transfer"))?;
         source.bytes -= bytes;
         self.bytes = total;
+        Ok(())
+    }
+    /// Join an independently admitted, wholly pending allowance to this guard.
+    /// Both guards must use the same account and class; account totals do not
+    /// change, and no live allocation becomes unaccounted during transfer.
+    pub fn merge_pending_from(&mut self, source: &mut Self) -> Result<()> {
+        if self.brep_source.is_some() || source.brep_source.is_some()
+            || self.class != source.class || !Arc::ptr_eq(&self.registry, &source.registry) {
+            return Err(Error::Invalid("pending transfer account or class"));
+        }
+        if source.bytes == 0 || source.pending_bytes != source.bytes {
+            return Err(Error::Invalid("pending transfer requires unallocated allowance"));
+        }
+        let bytes = self.bytes.checked_add(source.bytes).ok_or(Error::Overflow("pending transfer"))?;
+        let pending = self.pending_bytes.checked_add(source.pending_bytes).ok_or(Error::Overflow("pending transfer"))?;
+        self.bytes = bytes;
+        self.pending_bytes = pending;
+        self.physical_total = source.physical_total;
+        self.commit_sampled = source.commit_sampled;
+        self.admission_ceiling = source.admission_ceiling;
+        source.bytes = 0;
+        source.pending_bytes = 0;
         Ok(())
     }
     /// Atomically release a no-longer-needed portion without opening a gap for
@@ -1366,6 +1845,300 @@ fn bump(n: u64, field: &'static str) -> Result<u64> {
     n.checked_add(1).ok_or(Error::Overflow(field))
 }
 impl TransactionCoordinator {
+    /// Reserve rollback metadata before publishing any representation needed by
+    /// a private, unscoped transaction. No document or history state is changed.
+    pub fn begin_pending_brep_representations(&self, prepared: &mut PreparedTransaction,
+        count: usize, held: Usage) -> Result<()> {
+        self.available()?;
+        self.verify(prepared)?;
+        if prepared.owner.is_some() || prepared.pending_brep_representations.is_some() {
+            return Err(Error::Invalid("pending BRep transaction"));
+        }
+        prepared.pending_brep_representations = Some(self.allocate_pending_brep_representations(count, held)?);
+        Ok(())
+    }
+    /// A history worker uses a shared-account peer; the primary coordinator
+    /// independently rechecks the history head at final publication.
+    pub fn begin_pending_history_brep_representations(&self, prepared: &mut PreparedHistory,
+        count: usize, held: Usage) -> Result<()> {
+        self.available()?;
+        if !prepared.validated || prepared.context.authority != self.authority
+            || !prepared._map_reservation.belongs_to(&self.external_memory_account())
+            || prepared.pending_brep_representations.is_some() {
+            return Err(Error::Stale("pending history BRep batch"));
+        }
+        prepared.pending_brep_representations = Some(self.allocate_pending_brep_representations(count, held)?);
+        Ok(())
+    }
+    fn allocate_pending_brep_representations(&self, count: usize, held: Usage) -> Result<PendingBrepRepresentations> {
+        type Key = PendingRepresentationKey;
+        let overhead = std::mem::size_of::<PendingBrepRepresentations>() as u64;
+        let bytes = overhead.checked_add(Usage::array::<Key>(count)?.bytes)
+            .ok_or(Error::Overflow("pending BRep batch"))?.max(1);
+        let physical = self.physical_memory_sample()?;
+        let mut reservation = self.reserve_external_memory_with_held(
+            crate::budget::memory::MemoryClass::CpuCache, bytes, physical, held)?;
+        let mut entries = Vec::new();
+        entries.try_reserve_exact(count).map_err(|_| Error::Budget("pending BRep batch"))?;
+        let actual = overhead.checked_add(Usage::array::<Key>(entries.capacity())?.bytes)
+            .ok_or(Error::Overflow("pending BRep batch"))?.max(1);
+        if actual > reservation.bytes() {
+            self.grow_external_memory_with_held(&mut reservation, actual - bytes, physical, held)?;
+        }
+        reservation.set_allocated_bytes(actual)?;
+        Ok(PendingBrepRepresentations {
+            store: self.representations.clone(), account: self.external_memory_account(), entries, _reservation: reservation, published: false,
+        })
+    }
+    /// Transfer a prepared candidate's display into runtime storage before
+    /// staging only its canonical geometry in a document transaction.
+    pub fn register_brep_candidate(&self, candidate: crate::brep::Brep) -> Result<crate::brep::CanonicalBrep> {
+        self.prune_orphaned_brep_representations();
+        if !candidate.allocation_owners_belong_to(&self.external_memory_account()) {
+            return Err(Error::Invalid("BRep candidate allocation account"));
+        }
+        if candidate.can_adopt_unowned_storage() {
+            // The producer already constructed this candidate. Account the
+            // complete live pair before splitting its independent display
+            // lease; this does not claim pre-admission of native allocations.
+            let bytes = candidate.storage_usage(&self.limits)?.bytes;
+            let mut reservation = self.reserve_external_memory_with_held(
+                crate::budget::memory::MemoryClass::CpuCache, bytes, self.physical_memory_sample()?, Usage::default())?;
+            reservation.set_allocated_bytes(bytes)?;
+            return self.register_reserved_brep_candidate(candidate, &mut reservation, Usage::default());
+        }
+        if self.representations.lock().unwrap_or_else(|e| e.into_inner()).coupled_diagnostic_enabled() {
+            return Err(Error::Unsupported("coupled diagnostic requires fresh admitted BRep candidates"));
+        }
+        // A shared display cannot acquire a lease retroactively: another
+        // unguarded clone could outlive the registered representation.
+        if !candidate.display_allocation_covered_by(&self.external_memory_account())? {
+            return Err(Error::Invalid("shared BRep candidate display owner"));
+        }
+        let (source, representation) = candidate.into_canonical_and_representation();
+        self.validate_brep_representation_admitted(&source, &representation, &self.limits, Usage::default())?;
+        let mut representation = Some(representation);
+        let result = {
+            let mut store = self.representations.lock().unwrap_or_else(|e| e.into_inner());
+            match store.existing_registration(&source, representation.as_ref().expect("candidate representation")) {
+                Some(true) => Ok(()),
+                Some(false) => Err(Error::Invalid("conflicting BRep representation profile")),
+                None => store.insert_prevalidated(&source, representation.take().expect("candidate representation")),
+            }
+        };
+        // A rejected or redundant owner must release outside the store lock.
+        drop(representation);
+        result?;
+        // A preview may still own the source allocation. Documents cannot
+        // contain transient leases; the stored representation retains those
+        // leases while this owner-free handle shares the exact source data.
+        // This remains conservatively charged alongside the staged document.
+        if source.has_allocation_owner() {
+            Ok(source.clone_for_document_staging())
+        } else {
+            Ok(source)
+        }
+    }
+    /// Split an already admitted, exclusive kernel candidate into a source
+    /// reservation and a separately owned display before transaction staging.
+    pub fn register_reserved_brep_candidate(&self, candidate: crate::brep::Brep,
+        reservation: &mut ExternalMemoryReservation, held: Usage) -> Result<crate::brep::CanonicalBrep> {
+        use crate::budget::memory::MemoryClass;
+        let candidate_bytes = candidate.storage_usage(&self.limits)?.bytes;
+        if !candidate.can_adopt_unowned_storage() || reservation.brep_source.is_some()
+            || !matches!(reservation.class(), MemoryClass::CpuCache | MemoryClass::Kernel)
+            || !reservation.belongs_to(&self.external_memory_account())
+            || reservation.bytes() != candidate_bytes || reservation.pending_bytes() != 0 {
+            return Err(Error::Invalid("reserved BRep candidate owner"));
+        }
+        let coupled = self.representations.lock().unwrap_or_else(|e| e.into_inner()).coupled_diagnostic_enabled();
+        let (mut source, mut display) = candidate.into_canonical_and_representation();
+        let display_bytes = display.display_allocation_bytes()?;
+        let owner_bytes = (std::mem::size_of::<Mutex<ExternalMemoryReservation>>() + 2 * std::mem::size_of::<usize>()) as u64;
+        let store_bytes = Usage::btree::<(crate::brep::BrepSourceIdentity, crate::brep::BrepRepresentationProfile), crate::brep::BrepRepresentation>(1)?.bytes
+            .checked_add(Usage::btree::<crate::brep::BrepSourceIdentity, crate::brep::BrepRepresentationProfile>(1)?.bytes)
+            .and_then(|bytes| bytes.checked_add(crate::brep::BrepRepresentation::source_receipt_bytes()))
+            .ok_or(Error::Overflow("reserved BRep store"))?;
+        let attached_bytes = if coupled { crate::brep::CanonicalBrep::coupled_diagnostic_bytes() } else { 0 };
+        let overhead = owner_bytes.checked_add(store_bytes).and_then(|n|n.checked_add(attached_bytes))
+            .ok_or(Error::Overflow("reserved BRep owner"))?;
+        let total = display_bytes.checked_add(overhead).ok_or(Error::Overflow("reserved BRep owner"))?;
+        self.grow_external_memory_with_held(reservation, overhead, self.physical_memory_sample()?, held)?;
+        let mut lease = reservation.split_off(total)?;
+        lease.set_allocated_bytes(display_bytes)?;
+        let owner = Arc::new(Mutex::new(lease));
+        owner.lock().unwrap_or_else(|error| error.into_inner()).set_allocated_bytes(display_bytes + owner_bytes)?;
+        display.bind_display_owner(&source, owner.clone(), &self.external_memory_account(), &self.limits)?;
+        self.validate_brep_representation_admitted(&source, &display, &self.limits, held)?;
+        if coupled {
+            owner.lock().unwrap_or_else(|error| error.into_inner()).set_allocated_bytes(display_bytes + owner_bytes + attached_bytes)?;
+            source.attach_coupled_diagnostic(&display)?;
+        }
+        let key = (source.identity(), display.profile(), display.display_identity());
+        {
+            let mut store = self.representations.lock().unwrap_or_else(|error| error.into_inner());
+            if store.contains_profile(key.0, key.1) { return Err(Error::Invalid("duplicate reserved BRep display")); }
+            store.insert_prevalidated(&source, display)?;
+        }
+        let marked = owner.lock().unwrap_or_else(|error| error.into_inner()).set_allocated_bytes(total);
+        if let Err(error) = marked {
+            let removed = self.representations.lock().unwrap_or_else(|poison| poison.into_inner()).remove_exact(key.0, key.1, key.2);
+            drop(removed);
+            return Err(error);
+        }
+        reservation.brep_source = Some(source.identity());
+        Ok(source)
+    }
+    /// Admit topology-validation scratch separately from the source and
+    /// display allocations that the caller already accounts for.
+    fn validate_brep_representation_admitted(&self, source: &crate::brep::CanonicalBrep,
+        display: &crate::brep::BrepRepresentation, limits: &Limits, held: Usage) -> Result<crate::brep::Brep> {
+        use crate::budget::memory::MemoryClass;
+        let baseline = source.storage_usage(limits)?.bytes.checked_add(display.display_allocation_bytes()?)
+            .ok_or(Error::Overflow("reserved BRep validation"))?;
+        let mut scratch = self.reserve_external_memory_with_held(MemoryClass::CpuCache, 1, self.physical_memory_sample()?, held)?;
+        let checked = display.materialize_admitted(&source, limits, &mut |live, pending| {
+            let allocated = live.checked_sub(baseline).ok_or(Error::Invalid("reserved BRep validation accounting"))?;
+            let needed = allocated.checked_add(pending).ok_or(Error::Overflow("reserved BRep validation"))?.max(1);
+            if needed > scratch.bytes() {
+                let extra = needed - scratch.bytes();
+                self.grow_external_memory_with_held(&mut scratch, extra, self.physical_memory_sample()?, held)?;
+            }
+            scratch.set_allocated_bytes(allocated)?;
+            scratch.recheck_pending()
+        })?;
+        Ok(checked)
+    }
+    pub fn representation_store(&self) -> Arc<std::sync::Mutex<crate::brep::BrepRepresentationStore>> {
+        self.representations.clone()
+    }
+    /// Retire native cache entries after their source is gone. Display pins
+    /// retain their own mesh and owner. Drop entries outside the cache lock;
+    /// this does not evict a live opaque source or assert it can be rebuilt.
+    pub fn prune_orphaned_native_representations(&self) {
+        loop {
+            let removed = self.representations.lock().unwrap_or_else(|e| e.into_inner()).take_orphaned_native();
+            match removed { Some(entry) => drop(entry), None => break }
+        }
+    }
+    /// Retire source-dead OCCT entries; display pins retain their own owners.
+    pub fn prune_orphaned_brep_representations(&self) {
+        loop {
+            let removed = self.representations.lock().unwrap_or_else(|e| e.into_inner()).take_orphaned();
+            match removed { Some(entry) => drop(entry), None => break }
+        }
+    }
+    /// Populate a private replacement coordinator from a validated v4
+    /// migration candidate. The coordinator must already share the file
+    /// reservation's account; failure requires discarding the candidate.
+    /// This preserves legacy displays and does not attest native topology or
+    /// make any of these entries eligible for source-only eviction.
+    pub fn adopt_legacy_displays(&mut self, displays: crate::legacy_v4::LegacyDisplays,
+        reservation: &mut ExternalMemoryReservation, held: Usage) -> Result<()> {
+        use crate::budget::memory::MemoryClass;
+        if reservation.class() != MemoryClass::CpuCache || !reservation.belongs_to(&self.external_memory_account())
+            || Arc::strong_count(&self.representations) != 1
+            || !self.representations.lock().unwrap_or_else(|e| e.into_inner()).is_empty() {
+            return Err(Error::Invalid("legacy display replacement account"));
+        }
+        let geometries = || self.world.documents.values().flat_map(|document| {
+            document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
+                .map(|entity| &entity.geometry).chain(document.results.values().map(|result| &result.geometry_snapshot))
+        });
+        // Build one bounded index at a time so each display does not rescan
+        // the entire document. These are temporary identities, not proofs.
+        let occt_count = if displays.occt.is_empty() { 0 } else {
+            geometries().filter(|geometry| matches!(geometry, Geometry::Brep(_))).count()
+        };
+        let native_count = if displays.native.is_empty() { 0 } else {
+            geometries().filter(|geometry| matches!(geometry, Geometry::NativeBrep(_))).count()
+        };
+        let occt_scratch = if displays.occt.is_empty() { 0 } else {
+            Usage::btree::<crate::brep::BrepSourceIdentity, ()>(occt_count)?.bytes
+        };
+        let native_scratch = if displays.native.is_empty() { 0 } else {
+            Usage::btree::<crate::geometry::NativeBrepSourceIdentity, ()>(native_count)?.bytes
+        };
+        let scratch_bytes = occt_scratch.max(native_scratch);
+        if scratch_bytes != 0 {
+            let mut scratch = self.reserve_external_memory_with_held(MemoryClass::CpuCache, scratch_bytes,
+                self.physical_memory_sample()?, held)?;
+            scratch.set_allocated_bytes(scratch_bytes)?;
+            if !displays.occt.is_empty() {
+                let sources: std::collections::BTreeSet<_> = geometries().filter_map(|geometry| match geometry {
+                    Geometry::Brep(source) => Some(source.identity()), _ => None,
+                }).collect();
+                if displays.occt.iter().any(|(source, _)| !sources.contains(&source.identity())) {
+                    return Err(Error::Stale("legacy BRep source owner"));
+                }
+            }
+            if !displays.native.is_empty() {
+                let sources: std::collections::BTreeSet<_> = geometries().filter_map(|geometry| match geometry {
+                    Geometry::NativeBrep(source) => Some(source.identity()), _ => None,
+                }).collect();
+                if displays.native.iter().any(|(source, _)| !sources.contains(&source.identity())) {
+                    return Err(Error::Stale("legacy native BRep source owner"));
+                }
+            }
+        } else if !displays.occt.is_empty() || !displays.native.is_empty() {
+            return Err(Error::Stale("legacy BRep source owner"));
+        }
+        let mut store = crate::brep::BrepRepresentationStore::default();
+        let owner_bytes = (std::mem::size_of::<Mutex<ExternalMemoryReservation>>() + 2 * std::mem::size_of::<usize>()) as u64;
+        for (source, mut display) in displays.occt {
+            if store.contains_profile(source.identity(), display.profile()) { return Err(Error::Invalid("duplicate legacy BRep display")); }
+            let display_bytes = display.display_allocation_bytes()?;
+            let store_bytes = Usage::btree::<(crate::brep::BrepSourceIdentity, crate::brep::BrepRepresentationProfile), crate::brep::BrepRepresentation>(1)?.bytes
+                .checked_add(Usage::btree::<crate::brep::BrepSourceIdentity, crate::brep::BrepRepresentationProfile>(1)?.bytes)
+                .and_then(|n| n.checked_add(crate::brep::BrepRepresentation::source_receipt_bytes()))
+                .ok_or(Error::Overflow("legacy BRep store metadata"))?;
+            let overhead = owner_bytes.checked_add(store_bytes).ok_or(Error::Overflow("legacy BRep owner"))?;
+            let total = display_bytes.checked_add(overhead).ok_or(Error::Overflow("legacy BRep owner"))?.max(1);
+            self.grow_external_memory_with_held(reservation, overhead, self.physical_memory_sample()?, held)?;
+            let mut lease = reservation.split_off(total)?;
+            lease.set_allocated_bytes(display_bytes)?;
+            let owner = Arc::new(Mutex::new(lease));
+            owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(display_bytes + owner_bytes)?;
+            display.bind_display_owner(&source, owner.clone(), &self.external_memory_account(), &self.limits)?;
+            self.validate_brep_representation_admitted(&source, &display, &self.limits, held)?;
+            store.insert_prevalidated(&source, display)?;
+            owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(total)?;
+        }
+        for (source, mut display) in displays.native {
+            if store.contains_native(source.identity()) { return Err(Error::Invalid("duplicate legacy native BRep display")); }
+            if display.display().vertices.is_empty() || display.display().faces.is_empty() {
+                return Err(Error::Unsupported("legacy native BRep has no display or verified rebuild"));
+            }
+            let display_bytes = display.display_bytes()?;
+            let store_bytes = Usage::btree::<crate::geometry::NativeBrepSourceIdentity, crate::geometry::NativeBrepRepresentation>(1)?.bytes
+                .checked_add((std::mem::size_of::<Vec<u8>>() + 2 * std::mem::size_of::<usize>()) as u64)
+                .ok_or(Error::Overflow("legacy native BRep store metadata"))?;
+            let overhead = owner_bytes.checked_add(store_bytes).ok_or(Error::Overflow("legacy native BRep owner"))?;
+            let total = display_bytes.checked_add(overhead).ok_or(Error::Overflow("legacy native BRep owner"))?.max(1);
+            self.grow_external_memory_with_held(reservation, overhead, self.physical_memory_sample()?, held)?;
+            let mut lease = reservation.split_off(total)?;
+            lease.set_allocated_bytes(display_bytes)?;
+            let owner = Arc::new(Mutex::new(lease));
+            owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(display_bytes + owner_bytes)?;
+            display.bind_owner(&source, owner.clone(), &self.external_memory_account(), &self.limits)?;
+            store.insert_native(&source, display, &self.limits)?;
+            owner.lock().unwrap_or_else(|e| e.into_inner()).set_allocated_bytes(total)?;
+        }
+        *self.representations.lock().unwrap_or_else(|e| e.into_inner()) = store;
+        Ok(())
+    }
+    pub fn brep_representation(&self, source: &crate::brep::CanonicalBrep) -> Result<crate::brep::BrepRepresentation> {
+        self.representations.lock().unwrap_or_else(|e| e.into_inner()).get(source).cloned()
+    }
+    pub fn materialize_brep(&self, source: &crate::brep::CanonicalBrep) -> Result<crate::brep::Brep> {
+        self.materialize_brep_with_held(source, Usage::default())
+    }
+    /// Materialize a source-bound runtime representation while separately
+    /// admitting validation scratch and caller-owned memory not in the account.
+    pub fn materialize_brep_with_held(&self, source: &crate::brep::CanonicalBrep, held: Usage) -> Result<crate::brep::Brep> {
+        let representation = self.brep_representation(source)?;
+        self.validate_brep_representation_admitted(source, &representation, &self.limits, held)
+    }
     /// Reserve external owners during private startup validation/identity capture.
     /// The accepted coordinator retains the original configured limits.
     pub fn new_with_held(world: World, limits: Limits, held: Usage) -> Result<Self> {
@@ -1387,7 +2160,7 @@ impl TransactionCoordinator {
         let identities = initial.extend(&world, &limits, &mut usage)?;
         let external_reservations = Arc::new(Mutex::new(ExternalReservations::default()));
         let capture_generation = Arc::clone(&external_reservations.lock().unwrap_or_else(|e| e.into_inner()).capture_generation);
-        Ok(Self {
+        let mut coordinator = Self {
             world,
             limits,
             physical_memory_sampler: None,
@@ -1398,20 +2171,36 @@ impl TransactionCoordinator {
             redo: vec![],
             scope: None,
             barrier: false,
+            history_pending: None,
             benchmark_no_undo: false,
             undo_policy: UndoPolicy::default(),
             undo_ram_limit_mb: None,
             undo_memory_stats: UndoMemoryStats::default(),
             undo_capture_generation: 0,
+            undo_evidence_upper: 0,
+            undo_evidence_count: 0,
+            overflow_evidence: DeferredUndoEvidence { entries: Vec::new(), _reservation: None },
             identities,
             current_validation_cache: Mutex::new(None),
+            current_storage_cache: Mutex::new([None, None]),
+            retained_projection: None,
+            projection_reclaimer: None,
+            projection_validation: Mutex::new(()),
+            storage_cache_hits: AtomicU64::new(0),
+            storage_cache_misses: AtomicU64::new(0),
             external_documents: Arc::new(Mutex::new(Vec::new())),
+            representations: Arc::new(Mutex::new(crate::brep::BrepRepresentationStore::default())),
             external_reservations,
             capture_generation,
             external_export_active: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             shared_peer_identities: None,
             memory_peer_initialized: AtomicBool::new(false),
-        })
+        };
+        if let Some((root, owner)) = Self::make_projection_root(&coordinator, held) {
+            coordinator.retained_projection = Some(root);
+            coordinator.projection_reclaimer = Some(owner);
+        }
+        Ok(coordinator)
     }
     pub fn world(&self) -> &World {
         &self.world
@@ -1485,6 +2274,13 @@ impl TransactionCoordinator {
     pub fn owns_retained_document(&self, document: &Arc<Document>) -> bool {
         self.retained_documents(None).any(|owned| Arc::ptr_eq(owned, document))
     }
+    /// A shared-account peer can use an immutable, already registered owner.
+    /// The caller must retain its Arc and any operation-specific reservation.
+    pub fn owns_or_has_registered_document(&self, document: &Arc<Document>) -> bool {
+        if self.owns_retained_document(document) { return true; }
+        let external = self.external_documents.lock().unwrap_or_else(|e| e.into_inner());
+        external.iter().any(|weak| weak.ptr_eq(&Arc::downgrade(document)))
+    }
     /// Register weak references to every currently retained document version.
     /// Existing world/history owners keep them alive; no history is copied.
     pub fn register_retained_documents(&self) -> Result<()> {
@@ -1546,6 +2342,447 @@ impl TransactionCoordinator {
     /// lifetime. The existing untracked Arc-returning API remains available.
     pub fn capture_tracked_document(&self, id: DocumentId) -> Result<CapturedDocument> {
         self.capture_tracked_document_with_guard(id, || {})
+    }
+
+    /// Track a current root B-rep's canonical source without retaining its
+    /// display. Registration and capacity admission share the same locks as
+    /// transaction publication; the lease remains visible to peer accounts.
+    pub fn capture_brep_source(&self, stamp: &SourceStamp) -> Result<CapturedBrepSource> {
+        self.capture_brep_source_inner(stamp, &[], None, false).map(CapturedBrepSource)
+    }
+
+    /// Pin the current root display without pinning its document. The account
+    /// counts shared display/topology allocations once across documents and
+    /// tracked leases; the pin cannot expose an independently cloned Arc.
+    pub fn capture_brep_display(&self, stamp: &SourceStamp, held: Usage,
+        physical: Option<(u64, u64)>) -> Result<crate::brep::BrepDisplayPin> {
+        let document = self.world.documents.get(&stamp.document).ok_or(Error::Missing("capture display document"))?;
+        self.capture_retained_brep_display(document, stamp, &[], held, physical)
+    }
+    /// Pin a root or definition member in an already registered immutable
+    /// document, including a candidate prepared for atomic scene publication.
+    pub fn capture_retained_brep_display(&self, document: &Arc<Document>, stamp: &SourceStamp, path: &[ObjectId],
+        held: Usage, physical: Option<(u64, u64)>) -> Result<crate::brep::BrepDisplayPin> {
+        self.with_optional_cache_reclamation(1, || self.try_capture_brep_display(document, stamp, path, held, physical))
+    }
+    /// Temporary vectors needed for a scene's display-pin batch. The caller
+    /// keeps this reservation alive until it has installed all returned pins.
+    pub fn brep_display_batch_scratch(count: usize) -> Result<u64> {
+        Usage::array::<BrepDisplayRequest<'_>>(count)?.bytes
+            .checked_add(Usage::array::<BrepDisplayBatchItem>(count)?.bytes)
+            .and_then(|n| n.checked_add(Usage::array::<(usize, crate::brep::BrepDisplayPin)>(count).ok()?.bytes))
+            .and_then(|n| n.checked_add(Usage::array::<Option<Arc<CapturedBrepDisplayInner>>>(count).ok()?.bytes))
+            .ok_or(Error::Overflow("BRep display batch scratch"))
+    }
+    pub fn capture_retained_brep_displays<'a>(&self, document: &Arc<Document>, requests: &[BrepDisplayRequest<'_>],
+        scratch: &'a mut ExternalMemoryReservation, held: Usage, physical: Option<(u64, u64)>)
+        -> Result<BrepDisplayBatch<'a>> {
+        if scratch.class() != crate::budget::memory::MemoryClass::CpuCache
+            || !scratch.belongs_to(&self.external_memory_account()) || scratch.pending_bytes() != scratch.bytes()
+            || Self::brep_display_batch_scratch(requests.len())? > scratch.bytes() {
+            return Err(Error::Invalid("BRep display batch scratch"));
+        }
+        let pins = self.with_optional_cache_reclamation(1, || self.try_capture_retained_brep_displays(document, requests, scratch, held, physical))?;
+        Ok(BrepDisplayBatch { pins, _scratch: scratch })
+    }
+    fn try_capture_retained_brep_displays(&self, document: &Arc<Document>, requests: &[BrepDisplayRequest<'_>],
+        scratch: &ExternalMemoryReservation, held: Usage, physical: Option<(u64, u64)>)
+        -> Result<Vec<(usize, crate::brep::BrepDisplayPin)>> {
+        self.available()?;
+        if requests.len() as u64 > self.limits.max_nodes { return Err(Error::Budget("BRep display batch")); }
+        scratch.recheck_pending()?;
+        let mut items = Vec::new();
+        items.try_reserve_exact(requests.len()).map_err(|_| Error::Budget("BRep display batch"))?;
+        let mut pins = Vec::new();
+        pins.try_reserve_exact(requests.len()).map_err(|_| Error::Budget("BRep display batch"))?;
+        let mut owners = Vec::new();
+        owners.try_reserve_exact(requests.len()).map_err(|_| Error::Budget("BRep display batch"))?;
+        let actual = Usage::array::<BrepDisplayRequest<'_>>(requests.len())?.bytes
+            .checked_add(Usage::array::<BrepDisplayBatchItem>(items.capacity())?.bytes)
+            .and_then(|n| n.checked_add(Usage::array::<(usize, crate::brep::BrepDisplayPin)>(pins.capacity()).ok()?.bytes))
+            .and_then(|n| n.checked_add(Usage::array::<Option<Arc<CapturedBrepDisplayInner>>>(owners.capacity()).ok()?.bytes))
+            .ok_or(Error::Overflow("BRep display batch scratch"))?;
+        if actual > scratch.bytes() { return Err(Error::Budget("BRep display batch scratch")); }
+        for request in requests {
+            if request.path.len() > self.limits.max_depth { return Err(Error::Budget("BRep member path depth")); }
+            let mut entity = document.resolve(&request.stamp)?;
+            for id in request.path {
+                let Geometry::Instance(definition) = entity.geometry else { return Err(Error::Stale("BRep member path")); };
+                entity = document.definitions.get(&definition).ok_or(Error::Stale("BRep member definition"))?
+                    .members.iter().find(|member| member.id == *id).ok_or(Error::Stale("BRep member"))?;
+            }
+            let Geometry::Brep(brep) = &entity.geometry else { return Err(Error::Invalid("capture BRep display")); };
+            let brep = self.materialize_brep(brep)?;
+            brep.display_storage_bytes()?;
+            items.push(BrepDisplayBatchItem { slot: request.slot, key: brep.display_allocation_key(),
+                topology_key: brep.topology_allocation_key(), display_bytes: brep.display_allocation_bytes()?,
+                topology_bytes: brep.topology_allocation_bytes()?, brep });
+        }
+        items.sort_unstable_by_key(|item| item.key);
+        let external = self.external_documents.lock().unwrap_or_else(|e| e.into_inner());
+        if !self.owns_retained_document(document) && !external.iter().any(|weak| weak.ptr_eq(&Arc::downgrade(document))) {
+            return Err(Error::Invalid("unregistered display document"));
+        }
+        let mut reservations = self.external_reservations.lock().unwrap_or_else(|e| e.into_inner());
+        if reservations.retired { return Err(Error::Invalid("retired memory account")); }
+        reservations.brep_display_leases.retain(|weak| weak.strong_count() != 0);
+        let mut new_count = 0usize;
+        let mut last = None;
+        for item in &items {
+            if last == Some(item.key) { continue; }
+            last = Some(item.key);
+            let existing = reservations.brep_display_leases.iter().filter_map(Weak::upgrade)
+                .find(|lease| lease.display_key == item.key && lease.topology_key == item.topology_key);
+            if existing.is_none() {
+                new_count = new_count.checked_add(1).ok_or(Error::Overflow("BRep display batch"))?;
+            }
+            owners.push(existing);
+        }
+        let needed = reservations.brep_display_leases.len().checked_add(new_count).ok_or(Error::Overflow("BRep display leases"))?;
+        let grow = needed > reservations.brep_display_leases.capacity();
+        let requested = if grow { needed.max(reservations.brep_display_leases.capacity().checked_mul(2).ok_or(Error::Overflow("BRep display leases"))?) } else { 0 };
+        let physical = reservations.refresh_physical(physical)?;
+        if let Some((total, _)) = physical {
+            let ceiling = (u128::from(total) * 3 / 5) as u64;
+            reservations.managed_ceiling = Some(reservations.managed_ceiling.map_or(ceiling, |old| old.min(ceiling)));
+        }
+        let limits = reservations.constrain(self.limits).remaining_after(held)?;
+        let block = std::mem::size_of::<CapturedBrepDisplayInner>() + 4 * std::mem::size_of::<usize>();
+        let blocks = Usage::array::<u8>(block.checked_mul(new_count).ok_or(Error::Overflow("BRep display batch"))?)?.bytes;
+        let validate = |capacity: usize| -> Result<()> {
+            let allocation = blocks.checked_add(Usage::array::<Weak<CapturedBrepDisplayInner>>(capacity)?.bytes)
+                .ok_or(Error::Overflow("BRep display batch"))?;
+            let pending = reservations.pending_bytes()?;
+            if let Some((total, available)) = physical
+                && allocation > crate::budget::memory::available_for_pending(total, available, pending)? {
+                return Err(Error::Budget("available physical RAM"));
+            }
+            if reservations.commit_available(pending)?.is_some_and(|available| allocation > available) {
+                return Err(Error::Budget("available system commit"));
+            }
+            let mut classes = reservations.accounted_classes(0)?;
+            let index = crate::budget::memory::MemoryClass::Document.index();
+            classes[index] = classes[index].checked_add(allocation).ok_or(Error::Overflow("BRep display batch"))?;
+            self.validate_retained_owners_with_external(&self.identities, None, false, &limits, &external, &classes)?;
+            Ok(())
+        };
+        if new_count != 0 { validate(requested)?; }
+        if grow {
+            let mut next = Vec::new();
+            next.try_reserve_exact(requested).map_err(|_| Error::Budget("BRep display leases"))?;
+            next.extend(reservations.brep_display_leases.iter().cloned());
+            validate(next.capacity())?;
+            reservations.brep_display_leases = next;
+        }
+        let mut current: Option<(usize, Arc<CapturedBrepDisplayInner>)> = None;
+        let mut owner_index = 0usize;
+        for item in items {
+            if current.as_ref().is_none_or(|(key, _)| *key != item.key) {
+                let existing = owners[owner_index].take();
+                owner_index += 1;
+                let lease = existing.unwrap_or_else(|| {
+                    let lease = Arc::new(CapturedBrepDisplayInner { _display: item.brep.tracked_display_snapshot(),
+                        display_key: item.key, topology_key: item.topology_key, display_bytes: item.display_bytes,
+                        topology_bytes: item.topology_bytes, generation: Arc::clone(&reservations.capture_generation) });
+                    reservations.brep_display_leases.push(Arc::downgrade(&lease));
+                    lease
+                });
+                current = Some((item.key, lease));
+            }
+            let owner: Arc<dyn std::any::Any + Send + Sync> = current.as_ref().expect("display batch item").1.clone();
+            pins.push((item.slot, item.brep.pin_display(owner)));
+        }
+        if new_count != 0 { bump_capture_generation(&reservations.capture_generation); }
+        Ok(pins)
+    }
+    fn try_capture_brep_display(&self, document: &Arc<Document>, stamp: &SourceStamp, path: &[ObjectId], held: Usage,
+        physical: Option<(u64, u64)>) -> Result<crate::brep::BrepDisplayPin> {
+        self.available()?;
+        if path.len() > self.limits.max_depth { return Err(Error::Budget("BRep member path depth")); }
+        let mut entity = document.resolve(stamp)?;
+        for id in path {
+            let Geometry::Instance(definition) = entity.geometry else { return Err(Error::Stale("BRep member path")); };
+            entity = document.definitions.get(&definition).ok_or(Error::Stale("BRep member definition"))?
+                .members.iter().find(|member| member.id == *id).ok_or(Error::Stale("BRep member"))?;
+        }
+        let Geometry::Brep(brep) = &entity.geometry else { return Err(Error::Invalid("capture BRep display")); };
+        let brep = self.materialize_brep(brep)?;
+        brep.display_storage_bytes()?;
+        let external = self.external_documents.lock().unwrap_or_else(|e| e.into_inner());
+        if !self.owns_retained_document(document) && !external.iter().any(|weak| weak.ptr_eq(&Arc::downgrade(document))) {
+            return Err(Error::Invalid("unregistered display document"));
+        }
+        let mut reservations = self.external_reservations.lock().unwrap_or_else(|e| e.into_inner());
+        if reservations.retired { return Err(Error::Invalid("retired memory account")); }
+        reservations.brep_display_leases.retain(|weak| weak.strong_count() != 0);
+        if let Some(lease) = reservations.brep_display_leases.iter().filter_map(Weak::upgrade)
+            .find(|lease| lease.display_key == brep.display_allocation_key() && lease.topology_key == brep.topology_allocation_key()) {
+            let owner: Arc<dyn std::any::Any + Send + Sync> = lease;
+            return Ok(brep.pin_display(owner));
+        }
+        let physical = reservations.refresh_physical(physical)?;
+        if let Some((total, _)) = physical {
+            let ceiling = (u128::from(total) * 3 / 5) as u64;
+            reservations.managed_ceiling = Some(reservations.managed_ceiling.map_or(ceiling, |old| old.min(ceiling)));
+        }
+        let limits = reservations.constrain(self.limits).remaining_after(held)?;
+        let grow = reservations.brep_display_leases.len() == reservations.brep_display_leases.capacity();
+        let requested = if grow {
+            reservations.brep_display_leases.len().checked_add(1).ok_or(Error::Overflow("BRep display leases"))?
+                .max(reservations.brep_display_leases.capacity().checked_mul(2).ok_or(Error::Overflow("BRep display leases"))?)
+        } else { 0 };
+        let block = (std::mem::size_of::<CapturedBrepDisplayInner>() + 4 * std::mem::size_of::<usize>()) as u64;
+        let validate = |additional_capacity: usize| -> Result<()> {
+            let pending = reservations.pending_bytes()?;
+            let allocation = block.checked_add(Usage::array::<Weak<CapturedBrepDisplayInner>>(additional_capacity)?.bytes)
+                .ok_or(Error::Overflow("BRep display lease admission"))?;
+            if let Some((total, available)) = physical
+                && allocation > crate::budget::memory::available_for_pending(total, available, pending)? {
+                return Err(Error::Budget("available physical RAM"));
+            }
+            if reservations.commit_available(pending)?.is_some_and(|available| allocation > available) {
+                return Err(Error::Budget("available system commit"));
+            }
+            let mut classes = reservations.accounted_classes(0)?;
+            let index = crate::budget::memory::MemoryClass::Document.index();
+            classes[index] = classes[index].checked_add(allocation)
+                .ok_or(Error::Overflow("BRep display lease admission"))?;
+            self.validate_retained_owners_with_external(&self.identities, None, false, &limits, &external, &classes)?;
+            Ok(())
+        };
+        validate(requested)?;
+        let mut replacement = None;
+        if grow {
+            let mut next = Vec::new();
+            next.try_reserve_exact(requested).map_err(|_| Error::Budget("BRep display leases"))?;
+            next.extend(reservations.brep_display_leases.iter().cloned());
+            validate(next.capacity())?;
+            replacement = Some(next);
+        }
+        let lease = Arc::new(CapturedBrepDisplayInner {
+            _display: brep.tracked_display_snapshot(), display_key: brep.display_allocation_key(),
+            topology_key: brep.topology_allocation_key(), display_bytes: brep.display_allocation_bytes()?,
+            topology_bytes: brep.topology_allocation_bytes()?, generation: Arc::clone(&reservations.capture_generation),
+        });
+        if let Some(mut next) = replacement { next.push(Arc::downgrade(&lease)); reservations.brep_display_leases = next; }
+        else { reservations.brep_display_leases.push(Arc::downgrade(&lease)); }
+        bump_capture_generation(&reservations.capture_generation);
+        let owner: Arc<dyn std::any::Any + Send + Sync> = lease;
+        Ok(brep.pin_display(owner))
+    }
+
+    /// Atomically capture root B-rep sources from one immutable document.
+    /// `out` must be empty and its capacity must already be reserved by the
+    /// caller's memory account. Failure leaves the output and live leases intact;
+    /// expired weak entries may be pruned.
+    pub fn capture_brep_sources_into(&self, document_id: DocumentId, ids: &[ObjectId],
+        out: &mut Vec<CapturedBrepSource>) -> Result<()> {
+        self.capture_source_batch(document_id, ids, out, false, None, CapturedBrepSource)
+    }
+
+    /// Capture a mixed list of root OCCT and native B-rep sources atomically.
+    /// The caller must reserve the empty output vector's capacity beforehand.
+    pub fn capture_geometry_sources_into(&self, document_id: DocumentId, ids: &[ObjectId],
+        out: &mut Vec<CapturedGeometrySource>) -> Result<()> {
+        self.capture_source_batch(document_id, ids, out, true, None, |inner| {
+            if matches!(&inner.source, CapturedBrepSourceData::Occt(_)) {
+                CapturedGeometrySource::Brep(CapturedBrepSource(inner))
+            } else {
+                CapturedGeometrySource::NativeBrep(CapturedNativeBrepSource(inner))
+            }
+        })
+    }
+
+    /// Capture sources for already-expanded occurrences. IDs may name root
+    /// objects or definition members and must be sorted and unique.
+    /// This captures sources only; callers must validate occurrence paths and
+    /// placements independently before using them for rendering or picking.
+    /// Output and lookup scratch capacity must be admitted by the caller.
+    pub fn capture_geometry_occurrence_sources_into<'a>(&'a self, document_id: DocumentId, ids: &[ObjectId],
+        out: &mut Vec<CapturedGeometrySource>, scratch: &mut Vec<Option<&'a Entity>>) -> Result<()> {
+        self.available()?;
+        if !scratch.is_empty() || scratch.capacity() < ids.len() || ids.windows(2).any(|pair| pair[0] >= pair[1]) {
+            return Err(Error::Invalid("BRep occurrence lookup"));
+        }
+        if ids.len() as u64 > self.limits.max_nodes { return Err(Error::Budget("BRep source count")); }
+        let document = self.world.documents.get(&document_id).ok_or(Error::Missing("capture document"))?;
+        scratch.resize(ids.len(), None);
+        for (index, id) in ids.iter().enumerate() { scratch[index] = document.entities.get(id); }
+        let mut missing = scratch.iter().filter(|entity| entity.is_none()).count();
+        if missing != 0 {
+            for member in document.definitions.values().flat_map(|definition| &definition.members) {
+                if let Ok(index) = ids.binary_search(&member.id) && scratch[index].is_none() {
+                    scratch[index] = Some(member);
+                    missing -= 1;
+                    if missing == 0 { break; }
+                }
+            }
+        }
+        self.capture_source_batch(document_id, ids, out, true, Some(scratch), |inner| {
+            if matches!(&inner.source, CapturedBrepSourceData::Occt(_)) {
+                CapturedGeometrySource::Brep(CapturedBrepSource(inner))
+            } else {
+                CapturedGeometrySource::NativeBrep(CapturedNativeBrepSource(inner))
+            }
+        })
+    }
+
+    fn capture_source_batch<T>(&self, document_id: DocumentId, ids: &[ObjectId],
+        out: &mut Vec<T>, allow_native: bool, resolved: Option<&[Option<&Entity>]>, wrap: impl Fn(Arc<CapturedBrepSourceInner>) -> T) -> Result<()> {
+        self.available()?;
+        if !out.is_empty() || out.capacity() < ids.len() { return Err(Error::Invalid("BRep source output capacity")); }
+        let max_count = if resolved.is_some() { self.limits.max_nodes } else { self.limits.max_outputs };
+        if ids.len() as u64 > max_count { return Err(Error::Budget("BRep source count")); }
+        let document = self.world.documents.get(&document_id).ok_or(Error::Missing("capture document"))?;
+        let find_entity = |index: usize, id: &ObjectId| match resolved {
+            Some(entities) => entities.get(index).copied().flatten(),
+            None => document.entities.get(id),
+        };
+        for (index, id) in ids.iter().enumerate() {
+            match find_entity(index, id).map(|entity| &entity.geometry) {
+                Some(Geometry::Brep(_)) => {}
+                Some(Geometry::NativeBrep(_)) if allow_native => {}
+                _ => return Err(Error::Invalid("capture BRep source")),
+            }
+        }
+        if ids.is_empty() { return Ok(()); }
+        let external = self.external_documents.lock().unwrap_or_else(|e| e.into_inner());
+        let mut reservations = self.external_reservations.lock().unwrap_or_else(|e| e.into_inner());
+        if reservations.retired { return Err(Error::Invalid("retired memory account")); }
+        reservations.brep_source_leases.retain(|weak| weak.strong_count() != 0);
+        let limits = reservations.constrain(self.limits);
+        let needed = reservations.brep_source_leases.len().checked_add(ids.len()).ok_or(Error::Overflow("BRep source leases"))?;
+        let grow = needed > reservations.brep_source_leases.capacity();
+        let requested = if grow { needed.max(reservations.brep_source_leases.capacity().checked_mul(2).ok_or(Error::Overflow("BRep source leases"))?) } else { 0 };
+        let block = std::mem::size_of::<CapturedBrepSourceInner>() + 4 * std::mem::size_of::<usize>();
+        let blocks = Usage::array::<u8>(block.checked_mul(ids.len()).ok_or(Error::Overflow("BRep source leases"))?)?.bytes;
+        let validate = |additional_capacity: usize| -> Result<()> {
+            let mut classes = reservations.accounted_classes(0)?;
+            let index = crate::budget::memory::MemoryClass::Document.index();
+            classes[index] = classes[index].checked_add(blocks)
+                .and_then(|n| n.checked_add(Usage::array::<Weak<CapturedBrepSourceInner>>(additional_capacity).ok()?.bytes))
+                .ok_or(Error::Overflow("BRep source lease admission"))?;
+            self.validate_retained_owners_with_external(&self.identities, None, false, &limits, &external, &classes)?;
+            Ok(())
+        };
+        validate(requested)?;
+        let mut replacement = None;
+        if grow {
+            let mut next = Vec::new();
+            next.try_reserve_exact(requested).map_err(|_| Error::Budget("BRep source leases"))?;
+            next.extend(reservations.brep_source_leases.iter().cloned());
+            validate(next.capacity())?;
+            replacement = Some(next);
+        }
+        for (index, id) in ids.iter().enumerate() {
+            // The immutable document was checked above and cannot change while
+            // borrowed through this coordinator.
+            let entity = find_entity(index, id).expect("validated BRep occurrence");
+            let source = match &entity.geometry {
+                Geometry::Brep(brep) => CapturedBrepSourceData::Occt(brep.tracked_source_snapshot()),
+                Geometry::NativeBrep(brep) if allow_native => CapturedBrepSourceData::Native(brep.canonical_source()),
+                _ => unreachable!("validated BRep selection"),
+            };
+            let inner = Arc::new(CapturedBrepSourceInner {
+                source,
+                generation: Arc::clone(&reservations.capture_generation),
+            });
+            if let Some(next) = &mut replacement { next.push(Arc::downgrade(&inner)); }
+            else { reservations.brep_source_leases.push(Arc::downgrade(&inner)); }
+            out.push(wrap(inner));
+        }
+        if let Some(next) = replacement { reservations.brep_source_leases = next; }
+        bump_capture_generation(&reservations.capture_generation);
+        Ok(())
+    }
+
+    /// Track a native B-rep's immutable source payload without its display.
+    pub fn capture_native_brep_source(&self, stamp: &SourceStamp) -> Result<CapturedNativeBrepSource> {
+        self.capture_brep_source_inner(stamp, &[], None, true).map(CapturedNativeBrepSource)
+    }
+
+    /// Capture a B-rep root or member of a nested instance. The caller supplies
+    /// the leaf revision and validated display fingerprint from its snapshot,
+    /// so an unchanged root stamp cannot authorize a changed source.
+    pub fn capture_brep_occurrence_source(&self, stamp: &SourceStamp, path: &[ObjectId],
+        leaf: crate::model::GeometryHandle, display_fingerprint: [u8; 32]) -> Result<CapturedBrepSource> {
+        let expected = ExpectedBrepLeaf::Occt { handle: leaf, fingerprint: display_fingerprint };
+        self.capture_brep_source_inner(stamp, path, Some(expected), false).map(CapturedBrepSource)
+    }
+
+    /// Capture a native B-rep occurrence only while its weak payload/display
+    /// identities and leaf revision still match the published scene.
+    pub fn capture_native_brep_occurrence_source(&self, stamp: &SourceStamp, path: &[ObjectId],
+        leaf: crate::model::GeometryHandle, payload: &Weak<Vec<u8>>,
+        display: &Weak<crate::geometry::Mesh>, crc: u32) -> Result<CapturedNativeBrepSource> {
+        let expected = ExpectedBrepLeaf::Native { handle: leaf, payload, display, crc };
+        self.capture_brep_source_inner(stamp, path, Some(expected), true).map(CapturedNativeBrepSource)
+    }
+
+    fn capture_brep_source_inner(&self, stamp: &SourceStamp, path: &[ObjectId],
+        leaf: Option<ExpectedBrepLeaf<'_>>, native: bool) -> Result<Arc<CapturedBrepSourceInner>> {
+        self.available()?;
+        if path.len() > self.limits.max_depth { return Err(Error::Budget("BRep member path depth")); }
+        let document = self.world.documents.get(&stamp.document).ok_or(Error::Missing("capture document"))?;
+        let mut entity = document.resolve(stamp)?;
+        for id in path {
+            let Geometry::Instance(definition) = entity.geometry else { return Err(Error::Stale("BRep member path")); };
+            entity = document.definitions.get(&definition).ok_or(Error::Stale("BRep member definition"))?
+                .members.iter().find(|member| member.id == *id).ok_or(Error::Stale("BRep member"))?;
+        }
+        if let Some(expected) = leaf {
+            let matches = match (expected, &entity.geometry) {
+                (ExpectedBrepLeaf::Occt { handle, fingerprint }, Geometry::Brep(brep)) =>
+                    entity.geometry_handle() == handle && self.brep_representation(brep).is_ok_and(|representation| representation.display_fingerprint() == fingerprint),
+                (ExpectedBrepLeaf::Native { handle, payload, display, crc }, Geometry::NativeBrep(brep)) =>
+                    entity.geometry_handle() == handle && payload.ptr_eq(&Arc::downgrade(&brep.payload))
+                        && crc == brep.crc && self.representations.lock().unwrap_or_else(|e| e.into_inner())
+                            .get_native(brep).is_ok_and(|representation| display.ptr_eq(&representation.display_weak())),
+                _ => false,
+            };
+            if !matches { return Err(Error::Stale("BRep member source")); }
+        }
+        let source = match (&entity.geometry, native) {
+            (Geometry::Brep(brep), false) => CapturedBrepSourceData::Occt(brep.tracked_source_snapshot()),
+            (Geometry::NativeBrep(brep), true) => CapturedBrepSourceData::Native(brep.canonical_source()),
+            _ => return Err(Error::Invalid("capture BRep source")),
+        };
+        let external = self.external_documents.lock().unwrap_or_else(|e| e.into_inner());
+        let mut reservations = self.external_reservations.lock().unwrap_or_else(|e| e.into_inner());
+        if reservations.retired { return Err(Error::Invalid("retired memory account")); }
+        reservations.brep_source_leases.retain(|weak| weak.strong_count() != 0);
+        let limits = reservations.constrain(self.limits);
+        let grow = reservations.brep_source_leases.len() == reservations.brep_source_leases.capacity();
+        let requested = if grow {
+            reservations.brep_source_leases.len().checked_add(1).ok_or(Error::Overflow("BRep source leases"))?
+                .max(reservations.brep_source_leases.capacity().checked_mul(2).ok_or(Error::Overflow("BRep source leases"))?)
+        } else { 0 };
+        let block = (std::mem::size_of::<CapturedBrepSourceInner>() + 4 * std::mem::size_of::<usize>()) as u64;
+        let validate = |additional_capacity: usize| -> Result<()> {
+            let mut classes = reservations.accounted_classes(0)?;
+            let index = crate::budget::memory::MemoryClass::Document.index();
+            classes[index] = classes[index].checked_add(block)
+                .and_then(|n| n.checked_add(Usage::array::<Weak<CapturedBrepSourceInner>>(additional_capacity).ok()?.bytes))
+                .ok_or(Error::Overflow("BRep source lease admission"))?;
+            self.validate_retained_owners_with_external(&self.identities, None, false, &limits, &external, &classes)?;
+            Ok(())
+        };
+        validate(requested)?;
+        let mut replacement = None;
+        if grow {
+            let mut next = Vec::new();
+            next.try_reserve_exact(requested).map_err(|_| Error::Budget("BRep source leases"))?;
+            next.extend(reservations.brep_source_leases.iter().cloned());
+            validate(next.capacity())?;
+            replacement = Some(next);
+        }
+        let lease = Arc::new(CapturedBrepSourceInner { source, generation: Arc::clone(&reservations.capture_generation) });
+        if let Some(mut next) = replacement {
+            next.push(Arc::downgrade(&lease));
+            reservations.brep_source_leases = next;
+        } else { reservations.brep_source_leases.push(Arc::downgrade(&lease)); }
+        bump_capture_generation(&reservations.capture_generation);
+        Ok(lease)
     }
 
     fn capture_tracked_document_with_guard(&self, id: DocumentId, guard: impl FnOnce()) -> Result<CapturedDocument> {
@@ -1715,7 +2952,7 @@ impl TransactionCoordinator {
             pending_bytes,
             physical_total: physical.map(|(total, _)| total),
             commit_sampled: commit_available.is_some(),
-            admission_ceiling: physical.and(reservations.managed_ceiling) })
+            admission_ceiling: physical.and(reservations.managed_ceiling), brep_source: None })
         })();
         *refusal = result.as_ref().err().and_then(|error| attempt.finish(error, &reservations, self.limits));
         result
@@ -1738,7 +2975,6 @@ impl TransactionCoordinator {
         let external = self.external_documents.lock().unwrap_or_else(|e| e.into_inner());
         let mut reservations = self.external_reservations.lock().unwrap_or_else(|e| e.into_inner());
         let physical = reservations.refresh_physical(physical)?;
-        let classes = reservations.accounted_classes(0)?;
         let existing = reservations.pending_bytes()?;
         let physical_available = if let Some((total, available)) = physical {
             if total == 0 || available > total { return Err(Error::Invalid("physical RAM sample")); }
@@ -1748,6 +2984,7 @@ impl TransactionCoordinator {
         } else { None };
         let commit_available = reservations.commit_available(existing)?;
         let remaining = reservations.constrain(self.limits).remaining_after(held)?;
+        let classes = reservations.accounted_classes(0)?;
         let used = self.validate_retained_owners_with_external(&self.identities, None, false, &remaining, &external, &classes)?;
         let bytes = remaining.max_bytes.saturating_sub(used.bytes)
             .min(physical_available.unwrap_or(u64::MAX)).min(commit_available.unwrap_or(u64::MAX));
@@ -1758,7 +2995,7 @@ impl TransactionCoordinator {
         Ok(ExternalMemoryReservation { registry: Arc::clone(&self.external_reservations), class, bytes,
             pending_bytes: bytes,
             physical_total: physical.map(|(total, _)| total), commit_sampled: commit_available.is_some(),
-            admission_ceiling: physical.and(reservations.managed_ceiling) })
+            admission_ceiling: physical.and(reservations.managed_ceiling), brep_source: None })
     }
 
     /// Grow a reservation without ever releasing its existing bytes. The
@@ -1798,13 +3035,19 @@ impl TransactionCoordinator {
         if Arc::ptr_eq(&self.external_reservations, &previous.external_reservations) {
             return Err(Error::Invalid("replacement already shares memory account"));
         }
+        // Retire optional owners before checking that this private account has
+        // no external reservations, and recreate them only after the switch.
+        self.retained_projection = None;
+        self.projection_reclaimer = None;
         if !self.external_documents.lock().unwrap_or_else(|e| e.into_inner()).is_empty() {
             return Err(Error::Invalid("replacement external capture inventory"));
         }
         let replacement_ceiling = {
             let reservations = self.external_reservations.lock().unwrap_or_else(|e| e.into_inner());
             if reservations.by_class.iter().any(|bytes| *bytes != 0) || reservations.surface_snap_active
-                || reservations.capture_leases.iter().any(|lease| lease.strong_count() != 0) {
+                || reservations.capture_leases.iter().any(|lease| lease.strong_count() != 0)
+                || reservations.brep_source_leases.iter().any(|lease| lease.strong_count() != 0)
+                || reservations.brep_display_leases.iter().any(|lease| lease.strong_count() != 0) {
                 return Err(Error::Invalid("replacement external reservations"));
             }
             reservations.managed_ceiling
@@ -1825,6 +3068,8 @@ impl TransactionCoordinator {
         let mut retired = retired_account.lock().unwrap_or_else(|e| e.into_inner());
         if retired.by_class.iter().any(|bytes| *bytes != 0) || retired.surface_snap_active
             || retired.capture_leases.iter().any(|lease| lease.strong_count() != 0)
+            || retired.brep_source_leases.iter().any(|lease| lease.strong_count() != 0)
+            || retired.brep_display_leases.iter().any(|lease| lease.strong_count() != 0)
             || self.external_export_active.load(std::sync::atomic::Ordering::Acquire) {
             return Err(Error::Invalid("replacement external reservations"));
         }
@@ -1856,6 +3101,11 @@ impl TransactionCoordinator {
             // Even equal numeric generations belong to different accounts.
             self.undo_capture_generation = u64::MAX;
         }
+        drop(retired);
+        if let Some((root, owner)) = Self::make_projection_root(self, Usage::default()) {
+            self.retained_projection = Some(root);
+            self.projection_reclaimer = Some(owner);
+        }
         Ok(())
     }
     /// Capture the actual public or active caller view. Existing ownership and
@@ -1882,6 +3132,16 @@ impl TransactionCoordinator {
     /// still account for the distinct retained allocations.
     pub fn retained_usage(&self) -> Result<Usage> {
         self.retained_usage_with_limits(&self.limits)
+    }
+    /// Storage owned by this coordinator alone, excluding shared-account
+    /// external owners and reservations already charged separately.
+    pub fn local_retained_usage(&self) -> Result<Usage> {
+        self.validate_internal_retained_owners(&self.identities, None, false, &self.limits)
+    }
+    /// Conservative primary-coordinator metadata not owned by an empty peer.
+    /// A worker using such a peer must keep this charge while the primary lives.
+    pub fn peer_unshared_metadata_bytes(&self) -> Result<u64> {
+        Ok(self.retained_metadata_usage(&self.identities, None, false, &self.limits)?.bytes)
     }
     /// External owners stay live during validation scratch allocation.
     pub fn retained_usage_with_held_usage(&self, held: Usage) -> Result<Usage> {
@@ -1922,6 +3182,220 @@ impl TransactionCoordinator {
     pub fn redo_len(&self) -> usize {
         self.redo.len()
     }
+    fn prepare_deferred_undo_evidence(&self, count: usize, held: Usage) -> Result<DeferredUndoEvidence> {
+        if count == 0 { return Ok(DeferredUndoEvidence { entries: Vec::new(), _reservation: None }); }
+        let requested = Usage::array::<UndoEvidence>(count)?.bytes.max(1);
+        let physical = self.physical_memory_sampler.and_then(|sample| sample());
+        let mut reservation = self.reserve_external_memory_with_held(
+            crate::budget::memory::MemoryClass::CpuCache, requested, physical, held)?;
+        let mut entries = Vec::new();
+        entries.try_reserve_exact(count).map_err(|_| Error::Budget("deferred Undo evidence"))?;
+        let actual = Usage::array::<UndoEvidence>(entries.capacity())?.bytes.max(1);
+        if actual > reservation.bytes() {
+            let additional = actual - reservation.bytes();
+            self.grow_external_memory_with_held(&mut reservation, additional, physical, held)?;
+        }
+        reservation.shrink_to(actual)?;
+        reservation.mark_allocated(actual)?;
+        Ok(DeferredUndoEvidence { entries, _reservation: Some(reservation) })
+    }
+
+    fn ensure_history_evidence_capacity(&mut self, count: usize, held: Usage) -> Result<()> {
+        if self.overflow_evidence.entries.capacity() >= count { return Ok(()); }
+        let requested = count.max(self.overflow_evidence.entries.capacity().saturating_mul(2));
+        let mut replacement = self.prepare_deferred_undo_evidence(requested, held)?;
+        replacement.entries.append(&mut self.overflow_evidence.entries);
+        self.overflow_evidence = replacement;
+        self.undo_capture_generation = u64::MAX;
+        Ok(())
+    }
+
+    fn release_empty_history_evidence_capacity(&mut self) {
+        if self.undo_evidence_count == 0 {
+            debug_assert!(self.overflow_evidence.entries.is_empty());
+            if self.overflow_evidence.entries.capacity() != 0 { self.undo_capture_generation = u64::MAX; }
+            self.overflow_evidence = DeferredUndoEvidence { entries: Vec::new(), _reservation: None };
+        }
+    }
+
+    /// Keep already-accounted adapter evidence with the latest insertion.
+    /// This only retains lifetime; consumers must verify provenance separately.
+    /// The caller must ensure `owner` and its `bytes` are already charged to
+    /// this coordinator's shared account for their full lifetime.
+    #[doc(hidden)]
+    pub fn retain_insert_evidence(&mut self, stamp: &SourceStamp,
+        owner: Arc<dyn std::any::Any + Send + Sync>, bytes: u64, held: Usage) -> Result<()> {
+        let profile=std::env::var_os("OM9_COMMIT_PROFILE").map(|_|std::time::Instant::now());
+        self.available()?;
+        if self.scope.is_some() { return Err(Error::WrongOwner); }
+        if bytes == 0 { return Err(Error::Invalid("history evidence bytes")); }
+        let document = self.world.documents.get(&stamp.document).ok_or(Error::Missing("history evidence document"))?;
+        let Geometry::Brep(brep) = &document.resolve(stamp)?.geometry else { return Err(Error::Invalid("history evidence geometry")); };
+        let source_key = brep.source_allocation_key();
+        let topology_key = brep.topology_allocation_key();
+        let entry = self.undo.last().ok_or(Error::Missing("history evidence entry"))?;
+        if !entry.after.get(&stamp.document).is_some_and(|after| Arc::ptr_eq(after, document))
+            || entry.before.get(&stamp.document).is_some_and(|before| before.entities.contains_key(&stamp.object)) {
+            return Err(Error::Stale("history evidence insert"));
+        }
+        if entry.evidence.is_some() { return Err(Error::Invalid("history evidence already attached")); }
+        let upper = self.undo_evidence_upper.checked_add(bytes).ok_or(Error::Overflow("history evidence"))?;
+        let count = self.undo_evidence_count.checked_add(1).ok_or(Error::Overflow("history evidence count"))?;
+        self.ensure_history_evidence_capacity(count, held)?;
+        let entry = self.undo.last_mut().expect("validated history entry");
+        entry.evidence = Some(UndoEvidence { owner, bytes, source: None, source_upper: 0, document: stamp.document, object: stamp.object,
+            generation: stamp.generation, owner_session: stamp.owner_session, session_generation: stamp.session_generation,
+            source_key, topology_key });
+        self.undo_evidence_upper = upper;
+        self.undo_evidence_count = count;
+        let attach_ms=profile.map(|start|start.elapsed().as_secs_f64()*1000.);
+        self.trim_undo_memory_with_held(held);
+        if let Some(start)=profile {let total=start.elapsed().as_secs_f64()*1000.;eprintln!("OM9_COMMIT_PROFILE evidence_attach_ms={:.3} evidence_trim_ms={:.3} evidence_total_ms={total:.3} undo={} thread={:?}",attach_ms.unwrap_or(0.),total-attach_ms.unwrap_or(0.),self.undo.len(),std::thread::current().id());}
+        Ok(())
+    }
+    /// Retain an already-accounted, caller-verified owner for a current source.
+    /// This can retry an optional insertion attachment without changing history.
+    #[doc(hidden)]
+    pub fn retain_current_evidence(&mut self, stamp: &SourceStamp,
+        owner: Arc<dyn std::any::Any + Send + Sync>, bytes: u64, held: Usage) -> Result<()> {
+        self.available()?;
+        if self.scope.is_some() { return Err(Error::WrongOwner); }
+        if bytes == 0 { return Err(Error::Invalid("history evidence bytes")); }
+        let document = self.world.documents.get(&stamp.document).ok_or(Error::Missing("history evidence document"))?;
+        let Geometry::Brep(brep) = &document.resolve(stamp)?.geometry else { return Err(Error::Invalid("history evidence geometry")); };
+        let source_key = brep.source_allocation_key();
+        let topology_key = brep.topology_allocation_key();
+        if self.undo.iter().chain(&self.redo).filter_map(|entry| entry.evidence.as_ref())
+            .chain(self.overflow_evidence.entries.iter()).any(|item|
+                item.document == stamp.document && item.object == stamp.object && item.generation == stamp.generation
+                && item.owner_session == stamp.owner_session && item.session_generation == stamp.session_generation
+                && item.source_key == source_key && item.topology_key == topology_key && Arc::ptr_eq(&item.owner, &owner)) {
+            return Ok(());
+        }
+        let upper = self.undo_evidence_upper.checked_add(bytes).ok_or(Error::Overflow("history evidence"))?;
+        let count = self.undo_evidence_count.checked_add(1).ok_or(Error::Overflow("history evidence count"))?;
+        self.ensure_history_evidence_capacity(count, held)?;
+        self.overflow_evidence.entries.push(UndoEvidence { owner, bytes, source: None, source_upper: 0, document: stamp.document, object: stamp.object,
+            generation: stamp.generation, owner_session: stamp.owner_session, session_generation: stamp.session_generation,
+            source_key, topology_key });
+        self.undo_evidence_upper = upper;
+        self.undo_evidence_count = count;
+        self.undo_capture_generation = u64::MAX;
+        Ok(())
+    }
+    /// Attach a separately tracked source lease to an existing, caller-verified
+    /// proof owner. The lease remains classified as history until a reader
+    /// clones it; the caller remains responsible for native attestation.
+    #[doc(hidden)]
+    pub fn retain_source_with_evidence(&mut self, stamp: &SourceStamp,
+        owner: &Arc<dyn std::any::Any + Send + Sync>, source: CapturedBrepSource) -> Result<()> {
+        self.available()?;
+        if self.scope.is_some() { return Err(Error::WrongOwner); }
+        if !Arc::ptr_eq(&source.0.generation, &self.capture_generation) { return Err(Error::Invalid("history source account")); }
+        let document = self.world.documents.get(&stamp.document).ok_or(Error::Missing("history evidence document"))?;
+        let Geometry::Brep(brep) = &document.resolve(stamp)?.geometry else { return Err(Error::Invalid("history evidence geometry")); };
+        if source.data().source_key() != brep.source_allocation_key() || source.data().topology_key() != brep.topology_allocation_key() {
+            return Err(Error::Stale("history evidence source"));
+        }
+        let source_upper = source.data().source_bytes()?.checked_add(source.data().topology_bytes()?)
+            .ok_or(Error::Overflow("history source bytes"))?;
+        let entry = self.undo.iter_mut().chain(&mut self.redo).filter_map(|entry| entry.evidence.as_mut())
+            .chain(self.overflow_evidence.entries.iter_mut()).find(|item|
+                item.document == stamp.document && item.object == stamp.object && item.generation == stamp.generation
+                && item.owner_session == stamp.owner_session && item.session_generation == stamp.session_generation
+                && item.source_key == brep.source_allocation_key() && item.topology_key == brep.topology_allocation_key()
+                && Arc::ptr_eq(&item.owner, owner)).ok_or(Error::Missing("history evidence owner"))?;
+        if entry.source.is_some() { return Ok(()); }
+        let upper = self.undo_evidence_upper.checked_add(source_upper).ok_or(Error::Overflow("history evidence"))?;
+        entry.source = Some(source);
+        entry.source_upper = source_upper;
+        self.undo_evidence_upper = upper;
+        self.undo_capture_generation = u64::MAX;
+        Ok(())
+    }
+    /// A returned clone is an external reader and is accounted accordingly.
+    #[doc(hidden)]
+    pub fn current_evidence_source(&self, stamp: &SourceStamp) -> Option<CapturedBrepSource> {
+        let document = self.world.documents.get(&stamp.document)?;
+        let Geometry::Brep(brep) = &document.resolve(stamp).ok()?.geometry else { return None; };
+        self.undo.iter().chain(&self.redo).rev().filter_map(|entry| entry.evidence.as_ref())
+            .chain(self.overflow_evidence.entries.iter()).find(|item|
+                item.document == stamp.document && item.object == stamp.object && item.generation == stamp.generation
+                && item.owner_session == stamp.owner_session && item.session_generation == stamp.session_generation
+                && item.source_key == brep.source_allocation_key() && item.topology_key == brep.topology_allocation_key()
+                && item.source.is_some()).and_then(|item| item.source.clone())
+    }
+    /// Find evidence retained by history for the current immutable source.
+    /// Type and allocation identity are filters, not native attestation; the
+    /// caller must still verify the returned evidence before using it.
+    #[doc(hidden)]
+    pub fn history_evidence_for<T: std::any::Any + Send + Sync>(&self, stamp: &SourceStamp) -> Option<Arc<T>> {
+        let document = self.world.documents.get(&stamp.document)?;
+        let Geometry::Brep(brep) = &document.resolve(stamp).ok()?.geometry else { return None; };
+        self.undo.iter().chain(&self.redo).rev().filter_map(|entry| entry.evidence.as_ref()).chain(self.overflow_evidence.entries.iter())
+            .filter(|item| item.document == stamp.document && item.object == stamp.object
+                && item.generation == stamp.generation && item.owner_session == stamp.owner_session
+                && item.session_generation == stamp.session_generation && item.source_key == brep.source_allocation_key()
+                && item.topology_key == brep.topology_allocation_key())
+            .find_map(|item| Arc::downcast::<T>(Arc::clone(&item.owner)).ok())
+    }
+    /// Locate retained evidence against a private history candidate without
+    /// publishing it. Allocation identity is only a filter; the consumer must
+    /// validate the evidence and recheck the history head before publication.
+    pub fn history_candidate_evidence_for<T: std::any::Any + Send + Sync>(
+        &self, candidate: &PreparedHistory, stamp: &SourceStamp,
+    ) -> Option<Arc<T>> {
+        if self.capture_context(None).ok()?.0 != candidate.context { return None; }
+        let document = candidate.staged.documents.get(&stamp.document)?;
+        let Geometry::Brep(brep) = &document.resolve(stamp).ok()?.geometry else { return None; };
+        self.undo.iter().chain(&self.redo).rev().filter_map(|entry| entry.evidence.as_ref())
+            .chain(self.overflow_evidence.entries.iter())
+            .filter(|item| item.document == stamp.document && item.object == stamp.object
+                && item.generation == stamp.generation && item.owner_session == stamp.owner_session
+                && item.session_generation == stamp.session_generation && item.source_key == brep.source_allocation_key()
+                && item.topology_key == brep.topology_allocation_key())
+            .find_map(|item| Arc::downcast::<T>(Arc::clone(&item.owner)).ok())
+    }
+    /// Find history evidence for an exact canonical allocation used anywhere
+    /// in a candidate document, including definition members. The consumer
+    /// must validate the returned proof and its original session binding.
+    pub fn history_candidate_shared_evidence_for<T: std::any::Any + Send + Sync>(
+        &self, candidate: &PreparedHistory, document_id: DocumentId, source: &crate::brep::CanonicalBrep,
+    ) -> Option<Arc<T>> {
+        if self.capture_context(None).ok()?.0 != candidate.context { return None; }
+        let document = candidate.staged.documents.get(&document_id)?;
+        let present = document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
+            .any(|entity| matches!(&entity.geometry, Geometry::Brep(value) if value.identity() == source.identity()));
+        if !present { return None; }
+        self.undo.iter().chain(&self.redo).rev().filter_map(|entry| entry.evidence.as_ref())
+            .chain(self.overflow_evidence.entries.iter())
+            .filter(|item| item.document == document.id && item.owner_session == document.owner_session
+                && item.session_generation == document.session_generation
+                && item.source_key == source.source_allocation_key() && item.topology_key == source.topology_allocation_key())
+            .find_map(|item| Arc::downcast::<T>(Arc::clone(&item.owner)).ok())
+    }
+    /// Find the lowest current object accepted by the caller in one pass over
+    /// evidence. As with the single-object lookup, the caller must attest use.
+    #[doc(hidden)]
+    pub fn first_current_evidence<T: std::any::Any + Send + Sync>(
+        &self, document_id: DocumentId, mut accept: impl FnMut(ObjectId, &T, &crate::brep::CanonicalBrep) -> bool,
+    ) -> Option<Arc<T>> {
+        let document = self.world.documents.get(&document_id)?;
+        let mut best: Option<&UndoEvidence> = None;
+        for item in self.undo.iter().chain(&self.redo).rev().filter_map(|entry| entry.evidence.as_ref())
+            .chain(self.overflow_evidence.entries.iter()) {
+            if item.document != document_id || best.is_some_and(|old| old.object <= item.object) { continue; }
+            let Ok(stamp) = document.stamp(item.object) else { continue; };
+            if stamp.generation != item.generation || stamp.owner_session != item.owner_session
+                || stamp.session_generation != item.session_generation { continue; }
+            let Ok(entity) = document.resolve(&stamp) else { continue; };
+            let Geometry::Brep(brep) = &entity.geometry else { continue; };
+            if item.source_key != brep.source_allocation_key() || item.topology_key != brep.topology_allocation_key() { continue; }
+            let Some(owner) = item.owner.downcast_ref::<T>() else { continue; };
+            if accept(item.object, owner, brep) { best = Some(item); }
+        }
+        Arc::downcast::<T>(Arc::clone(&best?.owner)).ok()
+    }
     pub fn snapshot(&self) -> CoordinatorSnapshot {
         CoordinatorSnapshot {
             world: self.world.clone(),
@@ -1930,12 +3404,13 @@ impl TransactionCoordinator {
             scope_generation: self.scope_generation,
             undo: self.undo.clone(),
             redo: self.redo.clone(),
+            overflow_evidence: self.overflow_evidence.entries.clone(),
             scope: self.scope.clone(),
             identities: self.identities.clone(),
         }
     }
     fn available(&self) -> Result<()> {
-        if self.barrier {
+        if self.barrier || self.history_pending.is_some() {
             Err(Error::Busy)
         } else {
             Ok(())
@@ -2128,6 +3603,7 @@ impl TransactionCoordinator {
         }
         guard()?;
         let published = !entry.empty();
+        let mut deferred = self.prepare_deferred_undo_evidence(if published { self.undo_evidence_count } else { 0 }, held)?;
         // Recheck all retained owners and the finish scratch under the shared
         // account locks and keep the reservation lock through publication.
         let external_registry = Arc::clone(&self.external_documents);
@@ -2139,17 +3615,19 @@ impl TransactionCoordinator {
             self.validate_retained_owners_with_external(&self.identities, Some(&entry), recording,
                 &limits, &external, &reservations.accounted_classes(0)?)?;
         }
-        drop(external);
         self.barrier = true;
         // The finished scope no longer owns its baseline or savepoints.
         // Remove it before Undo inventory so retained history is not mistaken
         // for data still required by an active scope.
         self.scope = None;
         if published {
-            self.publish(staged, entry, recording, next, &reservations);
+            self.publish(staged, entry, recording, next, &external, &reservations, &mut deferred, held);
         }
         self.barrier = false;
         drop(reservations);
+        drop(external);
+        drop(deferred);
+        self.release_empty_history_evidence_capacity();
         Ok(CommitReceipt {
             transaction: token.id,
             epoch: self.epoch,
@@ -2236,10 +3714,24 @@ impl TransactionCoordinator {
         // Explicit close cancels caller staging; it cannot resurrect closed owners.
         self.scope = None;
         self.world.documents.remove(&id);
-        self.undo
-            .retain(|e| !e.before.contains_key(&id) && !e.after.contains_key(&id));
-        self.redo
-            .retain(|e| !e.before.contains_key(&id) && !e.after.contains_key(&id));
+        for redo in [false, true] {
+            let stack = if redo { &mut self.redo } else { &mut self.undo };
+            let overflow = &mut self.overflow_evidence.entries;
+            stack.retain_mut(|entry| {
+                if entry.before.contains_key(&id) || entry.after.contains_key(&id) {
+                    if let Some(evidence) = entry.evidence.take() {
+                        assert!(overflow.len() < overflow.capacity(), "history evidence capacity");
+                        overflow.push(evidence);
+                    }
+                    false
+                } else {
+                    true
+                }
+            });
+        }
+        self.prune_overflow_evidence_unlocked();
+        self.undo_capture_generation = u64::MAX;
+        self.release_empty_history_evidence_capacity();
         self.epoch = next;
         Ok(())
     }
@@ -2269,7 +3761,7 @@ impl TransactionCoordinator {
         self.validate_retained_owners(identities, Some(entry), recording, limits)?;
         Ok(())
     }
-    fn saved_worlds(&self) -> impl Iterator<Item = &World> {
+    fn saved_worlds(&self) -> impl DoubleEndedIterator<Item = &World> {
         std::iter::once(&self.world).chain(self.scope.iter().flat_map(|scope| {
             std::iter::once(&scope.baseline)
                 .chain(std::iter::once(&scope.staged))
@@ -2279,7 +3771,7 @@ impl TransactionCoordinator {
     fn retained_documents<'a>(
         &'a self,
         entry: Option<&'a UndoEntry>,
-    ) -> impl Iterator<Item = &'a Arc<Document>> {
+    ) -> impl DoubleEndedIterator<Item = &'a Arc<Document>> {
         self.saved_worlds()
             .flat_map(|world| world.documents.values())
             .chain(
@@ -2320,6 +3812,11 @@ impl TransactionCoordinator {
             if !shared(&self.identities) { usage.add(self.identities.usage()?, limits)?; }
         }
         usage.add(Usage::array::<Self>(1)?, limits)?;
+        // Two weak-only receipt slots can retain an otherwise dropped Arc's
+        // control block and inline Document, never its heap payload. Charge the
+        // fixed upper bound even when slots are empty; no admission allocation.
+        usage.add(Usage { bytes: 2 * (std::mem::size_of::<Document>() + 2 * std::mem::size_of::<usize>()) as u64,
+            ..Usage::default() }, limits)?;
         usage.add(Usage::array::<UndoEntry>(self.undo.capacity())?, limits)?;
         usage.add(Usage::array::<UndoEntry>(self.redo.capacity())?, limits)?;
         if entry.is_some() && recording {
@@ -2397,13 +3894,60 @@ impl TransactionCoordinator {
     /// If a single document aliases the same payload through multiple resource IDs,
     /// retain the largest per-document multiplicity so its full validation remains
     /// conservatively admitted. This allocation-free pass also works near the limit.
+    fn retained_storage_receipt(
+        &self, document: &Arc<Document>, entry: Option<&UndoEntry>, limits: &Limits,
+        compute: impl FnOnce() -> Result<Usage>,
+    ) -> Result<Usage> {
+        let address = Arc::as_ptr(document) as usize;
+        let owner = self.undo.iter().chain(&self.redo).chain(entry).find(|owner|
+            owner.before.values().chain(owner.after.values()).any(|d| Arc::ptr_eq(d, document)));
+        let Some(owner) = owner else {
+            {
+                let cache = self.current_storage_cache.lock().unwrap_or_else(|e| e.into_inner());
+                if let Some((_, receipt)) = cache.iter().flatten().find(|(weak, r)|
+                    weak.as_ptr() == Arc::as_ptr(document) && storage_limits_cover(&r.limits, limits)) {
+                    receipt.usage.check(limits)?;
+                    // Debug/test oracle executes the original storage walk;
+                    // release hits do not revisit geometry or payloads.
+                    debug_assert_eq!(compute()?, receipt.usage);
+                    self.storage_cache_hits.fetch_add(1, Ordering::Relaxed);
+                    return Ok(receipt.usage);
+                }
+            }
+            self.storage_cache_misses.fetch_add(1, Ordering::Relaxed);
+            let usage = compute()?;
+            let mut cache = self.current_storage_cache.lock().unwrap_or_else(|e| e.into_inner());
+            cache.swap(0, 1);
+            cache[0] = Some((Arc::downgrade(document), RetainedStorageReceipt { address, limits: *limits, usage }));
+            return Ok(usage);
+        };
+        {
+            let cache = owner.storage_cache.0.lock().unwrap_or_else(|e| e.into_inner());
+            if let Some(receipt) = cache.iter().flatten().find(|r|
+                r.address == address && storage_limits_cover(&r.limits, limits)) {
+                receipt.usage.check(limits)?;
+                debug_assert_eq!(compute()?, receipt.usage);
+                self.storage_cache_hits.fetch_add(1, Ordering::Relaxed);
+                return Ok(receipt.usage);
+            }
+        }
+        // Never cache a failed computation or weaken the limits used by it.
+        self.storage_cache_misses.fetch_add(1, Ordering::Relaxed);
+        let usage = compute()?;
+        let mut cache = owner.storage_cache.0.lock().unwrap_or_else(|e| e.into_inner());
+        let slot = cache.iter().position(|r| r.is_some_and(|r| r.address == address))
+            .or_else(|| cache.iter().position(Option::is_none)).unwrap_or(0);
+        cache[slot] = Some(RetainedStorageReceipt { address, limits: *limits, usage });
+        Ok(usage)
+    }
+
     fn retained_document_storage(
         &self,
         document: &Arc<Document>,
         entry: Option<&UndoEntry>,
         limits: &Limits,
     ) -> Result<Usage> {
-        let mut usage = document.storage_usage(limits)?;
+        let mut usage = self.retained_storage_receipt(document, entry, limits, || document.storage_usage(limits))?;
         for (index, resource) in document.resources.values().enumerate() {
             let payload = resource.payload()?;
             let same = |other: &crate::resource::Resource| {
@@ -2442,26 +3986,32 @@ impl TransactionCoordinator {
             }
         }
         for (index, brep) in retained_breps(document).enumerate() {
-            let key = brep.display_allocation_key();
-            if retained_breps(document).take(index).any(|other| other.display_allocation_key() == key) { continue; }
+            let key = brep.topology_allocation_key();
+            if retained_breps(document).take(index).any(|other| other.topology_allocation_key() == key) { continue; }
             if self.retained_documents(entry).take_while(|prior| !Arc::ptr_eq(prior, document))
-                .any(|prior| retained_breps(prior).any(|other| other.display_allocation_key() == key)) {
-                usage.bytes = usage.bytes.checked_sub(brep.display_allocation_bytes()?)
-                    .ok_or(Error::Overflow("shared BRep display accounting"))?;
+                .any(|prior| retained_breps(prior).any(|other| other.topology_allocation_key() == key)) {
+                usage.bytes = usage.bytes.checked_sub(brep.topology_allocation_bytes()?)
+                    .ok_or(Error::Overflow("shared BRep topology accounting"))?;
             }
         }
         Ok(usage)
     }
 
     fn indexed_retained_document_storage(
+        &self,
         document: &Arc<Document>,
+        entry: Option<&UndoEntry>,
         limits: &Limits,
         seen: &mut BTreeMap<(usize, usize), usize>,
-        brep_seen: &mut BTreeSet<usize>,
-        display_seen: &mut BTreeSet<usize>,
-        native_seen: &mut BTreeSet<usize>,
+        brep_seen: &mut BTreeMap<usize, Option<usize>>,
+        _display_seen: &mut BTreeMap<usize, Option<usize>>,
+        topology_seen: &mut BTreeMap<usize, Option<usize>>,
+        native_seen: &mut BTreeMap<usize, Option<usize>>,
+        _native_display_seen: &mut BTreeMap<usize, Option<usize>>,
+        local: &mut crate::model::BrepStorageIndex,
     ) -> Result<Usage> {
-        let mut usage = document.storage_usage(limits)?;
+        let mut usage = self.retained_storage_receipt(document, entry, limits, || document.storage_usage_indexed(limits, local))?;
+        let document_key = Arc::as_ptr(document) as usize;
         for (index, resource) in document.resources.values().enumerate() {
             let payload = resource.payload()?;
             let key = (payload.as_ptr() as usize, payload.len());
@@ -2475,28 +4025,25 @@ impl TransactionCoordinator {
                 *maximum = rank;
             }
         }
-        for (index, brep) in retained_breps(document).enumerate() {
+        for brep in retained_breps(document) {
             let key = brep.source_allocation_key();
-            if retained_breps(document).take(index).any(|other| other.source_allocation_key() == key) { continue; }
-            if !brep_seen.insert(key) {
+            if undo_memory::retained_before_document(brep_seen, key, document_key) {
                 usage.bytes = usage.bytes.checked_sub(brep.source_allocation_bytes()?)
                     .ok_or(Error::Overflow("shared BRep source accounting"))?;
             }
         }
-        for (index, brep) in retained_native_breps(document).enumerate() {
+        for brep in retained_native_breps(document) {
             let key = brep.payload_allocation_key();
-            if retained_native_breps(document).take(index).any(|other| other.payload_allocation_key() == key) { continue; }
-            if !native_seen.insert(key) {
+            if undo_memory::retained_before_document(native_seen, key, document_key) {
                 usage.bytes = usage.bytes.checked_sub(brep.payload_allocation_bytes()?)
                     .ok_or(Error::Overflow("shared native BRep payload accounting"))?;
             }
         }
-        for (index, brep) in retained_breps(document).enumerate() {
-            let key = brep.display_allocation_key();
-            if retained_breps(document).take(index).any(|other| other.display_allocation_key() == key) { continue; }
-            if !display_seen.insert(key) {
-                usage.bytes = usage.bytes.checked_sub(brep.display_allocation_bytes()?)
-                    .ok_or(Error::Overflow("shared BRep display accounting"))?;
+        for brep in retained_breps(document) {
+            let key = brep.topology_allocation_key();
+            if undo_memory::retained_before_document(topology_seen, key, document_key) {
+                usage.bytes = usage.bytes.checked_sub(brep.topology_allocation_bytes()?)
+                    .ok_or(Error::Overflow("shared BRep topology accounting"))?;
             }
         }
         Ok(usage)
@@ -2615,7 +4162,7 @@ impl TransactionCoordinator {
         recording: bool,
         limits: &Limits,
         external: &Vec<Weak<Document>>,
-        reservations: &[u64; 6],
+        reservations: &AccountedClasses<'_>,
     ) -> Result<Usage> {
         self.validate_retained_owners_with_external_except(identities, entry, recording, limits, external, reservations, None)
     }
@@ -2628,31 +4175,83 @@ impl TransactionCoordinator {
         recording: bool,
         limits: &Limits,
         external: &Vec<Weak<Document>>,
-        reservations: &[u64; 6],
+        reservations: &AccountedClasses<'_>,
         excluded: Option<&Arc<Document>>,
     ) -> Result<Usage> {
-        let held = self.external_storage_usage(entry, limits, external, reservations, excluded)?;
+        let profile = std::env::var_os("OM9_COMMIT_PROFILE").map(|_| std::time::Instant::now());
+        // Serialize optional cache retirement/admission/install, including
+        // read-only callers; two queries cannot allocate uncharged cache copies.
+        let _projection_guard = self.projection_validation.lock().unwrap_or_else(|e| e.into_inner());
+        #[cfg(debug_assertions)]
+        let projection_generation = self.capture_generation.load(Ordering::Acquire);
+        #[cfg(debug_assertions)]
+        let projection_account_bytes = reservations.cache_bytes.load(Ordering::Acquire);
+        if let Some(usage) = self.cached_retained_projection(identities, entry, recording, limits, external, reservations, excluded)? {
+            #[cfg(debug_assertions)]
+            if external.iter().all(|w| w.strong_count() != 0) {
+                let (slow_held, _, _) = self.external_storage_usage(entry, limits, external, reservations, excluded)?;
+                let mut slow = self.validate_internal_retained_owners(identities, entry, recording, &limits.remaining_after(slow_held)?)?;
+                slow.add(slow_held, limits)?;
+                if self.capture_generation.load(Ordering::Acquire) == projection_generation
+                    && reservations.cache_bytes.load(Ordering::Acquire) == projection_account_bytes
+                    && external.iter().all(|w| w.strong_count() != 0) {
+                    debug_assert_eq!(slow, usage, "retained projection differs from independent inventory");
+                }
+            }
+            if let Some(start) = profile {
+                let ms = start.elapsed().as_secs_f64() * 1000.;
+                eprintln!("OM9_COMMIT_PROFILE retained_total_ms={ms:.3} external_ms=0 internal_ms={ms:.3} projection_hit=true");
+            }
+            return Ok(usage);
+        }
+        let generation = self.capture_generation.load(Ordering::Acquire);
+        let (mut held, external_maxima, held_reserved) = self.external_storage_usage(entry, limits, external, reservations, excluded)?;
+        let external_base = held.bytes.checked_sub(held_reserved).ok_or(Error::Overflow("projection external base"))?;
+        let external_ms = profile.map(|start| start.elapsed().as_secs_f64() * 1000.);
         {
             let mut proof = self.current_validation_cache.lock().unwrap_or_else(|e| e.into_inner());
             if proof.as_ref().is_some_and(|(weak, _)| weak.strong_count() == 0) {
                 *proof = None;
             }
         }
-        let reduced = limits.remaining_after(held)?;
-        let mut usage = self.validate_internal_retained_owners(identities, entry, recording, &reduced)?;
+        let mut reduced = limits.remaining_after(held)?;
+        let mut usage = if let Some(cached) = self.cached_internal_projection(identities, entry, recording, &reduced)? {
+            #[cfg(debug_assertions)]
+            debug_assert_eq!(self.validate_internal_retained_owners(identities, entry, recording, &reduced)?, cached);
+            cached
+        } else {
+            held.bytes = held.bytes.checked_sub(self.retire_projection(reservations.cache_bytes).bytes)
+                .ok_or(Error::Overflow("retired projection account"))?;
+            reduced = limits.remaining_after(held)?;
+            self.validate_internal_retained_owners(identities, entry, recording, &reduced)?
+        };
+        // The optional index belongs to the shared account. Remove its old
+        // charge from that snapshot only after its memory has been released.
+        held.bytes = held.bytes.checked_sub(self.retire_projection(reservations.cache_bytes).bytes)
+            .ok_or(Error::Overflow("retired projection accounting"))?;
+        let internal = usage;
         usage.add(held, limits)?;
+        self.remember_retained_projection(identities, entry, recording, limits, external, reservations, excluded, external_base, internal, &mut usage, generation, external_maxima)?;
+        if let Some(start) = profile {
+            let total_ms = start.elapsed().as_secs_f64() * 1000.;
+            {
+                eprintln!("OM9_COMMIT_PROFILE retained_total_ms={total_ms:.3} external_ms={:.3} internal_ms={:.3} documents={} sources={} displays={} max_objects={} thread={:?} storage_hits={} storage_misses={}",
+                    external_ms.unwrap_or(0.), total_ms-external_ms.unwrap_or(0.),
+                    self.retained_documents(entry).count(), reservations.brep_sources.len(), reservations.brep_displays.len(), limits.max_objects,std::thread::current().id(), self.storage_cache_hits.load(Ordering::Relaxed), self.storage_cache_misses.load(Ordering::Relaxed));
+            }
+        }
         Ok(usage)
     }
     /// Storage projection only: no validation, proof updates or reclamation.
     fn external_storage_usage(
         &self, entry: Option<&UndoEntry>, limits: &Limits,
-        external: &Vec<Weak<Document>>, reservations: &[u64; 6],
+        external: &Vec<Weak<Document>>, reservations: &AccountedClasses<'_>,
         excluded: Option<&Arc<Document>>,
-    ) -> Result<Usage> {
+    ) -> Result<(Usage, Usage, u64)> {
         let mut held = Usage::array::<Weak<Document>>(external.capacity())?;
-        for bytes in reservations {
-            held.add(Usage { bytes: *bytes, ..Usage::default() }, limits)?;
-        }
+        let mut maxima = Usage::default();
+        let reserved = retained_projection_cache::reserved_bytes(reservations)?;
+        held.add(Usage { bytes: reserved, ..Usage::default() }, limits)?;
         let weak_block = Usage { bytes: (std::mem::size_of::<Document>() + 2 * std::mem::size_of::<usize>()) as u64,
             ..Usage::default() };
         // A Weak keeps the entire Arc allocation (but not Document's dropped
@@ -2665,19 +4264,22 @@ impl TransactionCoordinator {
                 continue;
             };
             if excluded.is_some_and(|candidate| Arc::ptr_eq(candidate, &document)) { continue; }
-            if !self.retained_documents(entry).any(|owned| Arc::ptr_eq(owned, &document)) {
+            if !self.retained_documents(entry).rev().any(|owned| Arc::ptr_eq(owned, &document)) {
                 // This is an already-validated immutable document version. Its
                 // bytes remain live, while structural point limits are per document.
-                let mut storage = document.storage_usage(limits)?;
+                let mut storage = self.retained_storage_receipt(&document, entry, limits, || document.storage_usage(limits))?;
+                maxima = Usage { bytes: maxima.bytes.max(storage.bytes), objects: maxima.objects.max(storage.objects),
+                    nodes: maxima.nodes.max(storage.nodes), points: maxima.points.max(storage.points),
+                    history: maxima.history.max(storage.history), outputs: maxima.outputs.max(storage.outputs) };
                 for (resource_index, resource) in document.resources.values().enumerate() {
                     let payload = resource.payload()?;
                     let same = |other: &Resource| other.payload().is_ok_and(|bytes| std::ptr::eq(bytes, payload));
                     let rank = document.resources.values().take(resource_index + 1).filter(|item| same(item)).count();
-                    let internal_max = self.retained_documents(entry)
-                        .map(|prior| prior.resources.values().filter(|item| same(item)).count()).max().unwrap_or(0);
-                    let external_max = external.iter().take(external_index).filter_map(Weak::upgrade)
-                        .map(|prior| prior.resources.values().filter(|item| same(item)).count()).max().unwrap_or(0);
-                    if rank <= internal_max.max(external_max) {
+                    let internal_has = self.retained_documents(entry).rev()
+                        .any(|prior| prior.resources.values().filter(|item| same(item)).take(rank).count() == rank);
+                    let external_has = !internal_has && external.iter().take(external_index).rev().filter_map(Weak::upgrade)
+                        .any(|prior| prior.resources.values().filter(|item| same(item)).take(rank).count() == rank);
+                    if internal_has || external_has {
                         storage.bytes = storage.bytes.checked_sub(payload.len() as u64)
                             .ok_or(Error::Overflow("shared external resource accounting"))?;
                     }
@@ -2685,9 +4287,9 @@ impl TransactionCoordinator {
                 for (brep_index, brep) in retained_breps(&document).enumerate() {
                     let key = brep.source_allocation_key();
                     if retained_breps(&document).take(brep_index).any(|other| other.source_allocation_key() == key) { continue; }
-                    let internal_has = self.retained_documents(entry)
+                    let internal_has = self.retained_documents(entry).rev()
                         .any(|prior| retained_breps(prior).any(|other| other.source_allocation_key() == key));
-                    let external_has = external.iter().take(external_index).filter_map(Weak::upgrade)
+                    let external_has = !internal_has && external.iter().take(external_index).rev().filter_map(Weak::upgrade)
                         .any(|prior| retained_breps(&prior).any(|other| other.source_allocation_key() == key));
                     if internal_has || external_has {
                         storage.bytes = storage.bytes.checked_sub(brep.source_allocation_bytes()?)
@@ -2697,8 +4299,8 @@ impl TransactionCoordinator {
                 for (index, brep) in retained_native_breps(&document).enumerate() {
                     let key = brep.payload_allocation_key();
                     if retained_native_breps(&document).take(index).any(|other| other.payload_allocation_key() == key) { continue; }
-                    let internal_has = self.retained_documents(entry).any(|prior| retained_native_breps(prior).any(|other| other.payload_allocation_key() == key));
-                    let external_has = external.iter().take(external_index).filter_map(Weak::upgrade)
+                    let internal_has = self.retained_documents(entry).rev().any(|prior| retained_native_breps(prior).any(|other| other.payload_allocation_key() == key));
+                    let external_has = !internal_has && external.iter().take(external_index).rev().filter_map(Weak::upgrade)
                         .any(|prior| retained_native_breps(&prior).any(|other| other.payload_allocation_key() == key));
                     if internal_has || external_has {
                         storage.bytes = storage.bytes.checked_sub(brep.payload_allocation_bytes()?)
@@ -2706,21 +4308,84 @@ impl TransactionCoordinator {
                     }
                 }
                 for (index, brep) in retained_breps(&document).enumerate() {
-                    let key = brep.display_allocation_key();
-                    if retained_breps(&document).take(index).any(|other| other.display_allocation_key() == key) { continue; }
-                    let internal_has = self.retained_documents(entry).any(|prior| retained_breps(prior).any(|other| other.display_allocation_key() == key));
-                    let external_has = external.iter().take(external_index).filter_map(Weak::upgrade)
-                        .any(|prior| retained_breps(&prior).any(|other| other.display_allocation_key() == key));
+                    let key = brep.topology_allocation_key();
+                    if retained_breps(&document).take(index).any(|other| other.topology_allocation_key() == key) { continue; }
+                    let internal_has = self.retained_documents(entry).rev().any(|prior| retained_breps(prior).any(|other| other.topology_allocation_key() == key));
+                    let external_has = !internal_has && external.iter().take(external_index).rev().filter_map(Weak::upgrade)
+                        .any(|prior| retained_breps(&prior).any(|other| other.topology_allocation_key() == key));
                     if internal_has || external_has {
-                        storage.bytes = storage.bytes.checked_sub(brep.display_allocation_bytes()?)
-                            .ok_or(Error::Overflow("shared external BRep display accounting"))?;
+                        storage.bytes = storage.bytes.checked_sub(brep.topology_allocation_bytes()?)
+                            .ok_or(Error::Overflow("shared external BRep topology accounting"))?;
                     }
                 }
                 held.add(Usage { bytes: storage.bytes, ..Usage::default() }, limits)?;
                 held.add(Usage::array::<usize>(2)?, limits)?;
             }
         }
-        Ok(held)
+        // Document inventories already account for shared source/topology.
+        // Detached source leases add only allocations not retained by any
+        // internal document, registered external document, or earlier lease.
+        for (index, weak) in reservations.brep_sources.iter().enumerate() {
+            let Some(lease) = weak.upgrade() else { continue };
+            let CapturedBrepSourceData::Occt(source) = &lease.source else {
+                let CapturedBrepSourceData::Native(source) = &lease.source else { unreachable!() };
+                let key = source.allocation_key();
+                let previous = reservations.brep_sources.iter().take(index).rev().filter_map(Weak::upgrade)
+                    .any(|other| matches!(&other.source, CapturedBrepSourceData::Native(source) if source.allocation_key() == key));
+                let in_documents = self.retained_documents(entry).rev()
+                    .any(|doc| retained_native_breps(doc).any(|other| other.payload_allocation_key() == key))
+                    || external.iter().rev().filter_map(Weak::upgrade)
+                        .any(|doc| retained_native_breps(&doc).any(|other| other.payload_allocation_key() == key));
+                if !previous && !in_documents {
+                    let bytes = source.storage_bytes()?;
+                    held.add(Usage { bytes, ..Usage::default() }, limits)?;
+                }
+                continue;
+            };
+            let source_key = source.source_key();
+            let topology_key = source.topology_key();
+            let in_documents = |predicate: &dyn Fn(&crate::brep::CanonicalBrep) -> bool| {
+                // The newest before/after snapshot usually owns all inputs
+                // after a many-input edit. Search it first; membership and
+                // allocation identity checks are unchanged, with no cache.
+                self.retained_documents(entry).rev().any(|doc| retained_breps(doc).any(predicate))
+                    || external.iter().rev().filter_map(Weak::upgrade)
+                        .any(|doc| retained_breps(&doc).any(predicate))
+            };
+            let previous_source = reservations.brep_sources.iter().take(index).rev().filter_map(Weak::upgrade)
+                .any(|other| matches!(&other.source, CapturedBrepSourceData::Occt(source) if source.source_key() == source_key));
+            if !previous_source && !in_documents(&|other| other.source_allocation_key() == source_key) {
+                held.add(Usage { bytes: source.source_bytes()?, ..Usage::default() }, limits)?;
+            }
+            let previous_topology = reservations.brep_sources.iter().take(index).rev().filter_map(Weak::upgrade)
+                .any(|other| matches!(&other.source, CapturedBrepSourceData::Occt(source) if source.topology_key() == topology_key));
+            if !previous_topology && !in_documents(&|other| other.topology_allocation_key() == topology_key) {
+                held.add(Usage { bytes: source.topology_bytes()?, ..Usage::default() }, limits)?;
+            }
+        }
+        // A display lease can outlive the document and source lease. Count
+        // its allocations once, including topology shared with source leases.
+        for (index, weak) in reservations.brep_displays.iter().enumerate() {
+            let Some(lease) = weak.upgrade() else { continue };
+            let in_documents = |predicate: &dyn Fn(&crate::brep::CanonicalBrep) -> bool| {
+                self.retained_documents(entry).rev().any(|doc| retained_breps(doc).any(predicate))
+                    || external.iter().rev().filter_map(Weak::upgrade)
+                        .any(|doc| retained_breps(&doc).any(predicate))
+            };
+            let previous_display = reservations.brep_displays.iter().take(index).rev().filter_map(Weak::upgrade)
+                .any(|other| other.display_key == lease.display_key);
+            if !previous_display {
+                held.add(Usage { bytes: lease.display_bytes, ..Usage::default() }, limits)?;
+            }
+            let previous_topology = reservations.brep_displays.iter().take(index).rev().filter_map(Weak::upgrade)
+                .any(|other| other.topology_key == lease.topology_key)
+                || reservations.brep_sources.iter().filter_map(Weak::upgrade)
+                    .any(|other| matches!(&other.source, CapturedBrepSourceData::Occt(source) if source.topology_key() == lease.topology_key));
+            if !previous_topology && !in_documents(&|other| other.topology_allocation_key() == lease.topology_key) {
+                held.add(Usage { bytes: lease.topology_bytes, ..Usage::default() }, limits)?;
+            }
+        }
+        Ok((held, maxima, reserved))
     }
 
     fn validate_internal_retained_owners(
@@ -2744,14 +4409,21 @@ impl TransactionCoordinator {
             n.checked_add(retained_breps(document).count()).ok_or(Error::Overflow("retained BRep source owners"))
         })?;
         let brep_index = if brep_slots == 0 { Usage::default() }
-            else { Usage::btree::<usize, ()>(brep_slots)? };
+            else { Usage::btree::<usize, Option<usize>>(brep_slots)? };
         let display_index = if brep_slots == 0 { Usage::default() }
-            else { Usage::btree::<usize, ()>(brep_slots)? };
+            else { Usage::btree::<usize, Option<usize>>(brep_slots)? };
+        let topology_index = if brep_slots == 0 { Usage::default() }
+            else { Usage::btree::<usize, Option<usize>>(brep_slots)? };
         let native_slots = self.retained_documents(entry).try_fold(0usize, |n, document| {
             n.checked_add(retained_native_breps(document).count()).ok_or(Error::Overflow("retained native BRep payload owners"))
         })?;
         let native_index = if native_slots == 0 { Usage::default() }
-            else { Usage::btree::<usize, ()>(native_slots)? };
+            else { Usage::btree::<usize, Option<usize>>(native_slots)? };
+        let native_display_index = native_index;
+        let max_breps = self.retained_documents(entry).map(|document| retained_breps(document).count()).max().unwrap_or(0);
+        let max_native = self.retained_documents(entry).map(|document| retained_native_breps(document).count()).max().unwrap_or(0);
+        let local_index = crate::model::BrepStorageIndex::scratch_usage(max_breps, max_native,
+            &Limits { max_bytes: u64::MAX, ..*limits })?;
         let metadata = self.retained_metadata_usage(identities, entry, recording, limits)?;
         let conservative = (|| -> Result<()> {
             let mut upper = metadata;
@@ -2759,11 +4431,19 @@ impl TransactionCoordinator {
             upper.add(resource_index, limits)?;
             upper.add(brep_index, limits)?;
             upper.add(display_index, limits)?;
+            upper.add(topology_index, limits)?;
             upper.add(native_index, limits)?;
+            upper.add(native_display_index, limits)?;
+            upper.add(local_index, limits)?;
             // A duplicate-inclusive bound is nonallocating and dominates the
             // exact live owner inventory. Only then may the dedup index grow.
             for document in self.retained_documents(entry) {
-                add_retained_document_usage(&mut upper, document.storage_usage(limits)?, limits)?;
+                let mut storage = self.retained_storage_receipt(document, entry, limits, || document.storage_usage(limits))?;
+                // This duplicate-inclusive pass admits the index's allocation,
+                // not model objects. Before/after Arcs may name the same document;
+                // charge its real object count in the indexed pass below.
+                storage.objects = 0;
+                add_retained_document_usage(&mut upper, storage, limits)?;
                 upper.add(Usage::array::<usize>(2)?, limits)?;
             }
             Ok(())
@@ -2772,21 +4452,24 @@ impl TransactionCoordinator {
             Ok(()) => {
                 let mut shared = BTreeSet::new();
                 let mut shared_payloads = BTreeMap::new();
-                let mut shared_breps = BTreeSet::new();
-                let mut shared_displays = BTreeSet::new();
-                let mut shared_native = BTreeSet::new();
+                let mut shared_breps = BTreeMap::new();
+                let mut shared_displays = BTreeMap::new();
+                let mut shared_topologies = BTreeMap::new();
+                let mut shared_native = BTreeMap::new();
+                let mut shared_native_displays = BTreeMap::new();
+                let mut local = crate::model::BrepStorageIndex::default();
                 let mut usage = metadata;
                 for document in self.retained_documents(entry) {
                     if shared.insert(Arc::as_ptr(document) as usize) {
-                        add_retained_document_usage(&mut usage, Self::indexed_retained_document_storage(document, limits, &mut shared_payloads, &mut shared_breps, &mut shared_displays, &mut shared_native)?, limits)?;
+                        add_retained_document_usage(&mut usage, self.indexed_retained_document_storage(document, entry, limits, &mut shared_payloads, &mut shared_breps, &mut shared_displays, &mut shared_topologies, &mut shared_native, &mut shared_native_displays, &mut local)?, limits)?;
                         usage.add(Usage::array::<usize>(2)?, limits)?;
                     }
                 }
-                let indexed_limits = limits.remaining_after(index)?.remaining_after(resource_index)?.remaining_after(brep_index)?.remaining_after(display_index)?.remaining_after(native_index)?;
+                let indexed_limits = limits.remaining_after(index)?.remaining_after(resource_index)?.remaining_after(brep_index)?.remaining_after(display_index)?.remaining_after(topology_index)?.remaining_after(native_index)?.remaining_after(native_display_index)?.remaining_after(local_index)?;
                 let attempt = (|| -> Result<()> {
                     for document in self.retained_documents(entry) {
                         if shared.remove(&(Arc::as_ptr(document) as usize)) {
-                            let storage = document.storage_usage(limits)?;
+                            let storage = self.retained_storage_receipt(document, entry, limits, || document.storage_usage_indexed(limits, &mut local))?;
                             let remaining = validation_limits(&indexed_limits, usage, storage)?;
                             let validated = self.validate_retained_document(
                                 document, entry, storage, &remaining,
@@ -2810,7 +4493,7 @@ impl TransactionCoordinator {
         // or order-dependent subtraction of only previously visited owners.
         let usage = self.retained_storage_usage(identities, entry, recording, limits)?;
         for document in self.unique_retained_documents(entry) {
-            let storage = document.storage_usage(limits)?;
+            let storage = self.retained_storage_receipt(document, entry, limits, || document.storage_usage(limits))?;
             let remaining = validation_limits(limits, usage, storage)?;
             let validated =
                 self.validate_retained_document(document, entry, storage, &remaining)?;
@@ -2887,7 +4570,76 @@ impl TransactionCoordinator {
         request: TransactionRequest,
         held: Usage,
     ) -> Result<PreparedTransaction> {
-        self.prepare_with_held_usage_and_guard(request, held, || Ok(()))
+        let result = self.prepare_with_held_usage_and_guard(request, held, || Ok(()));
+        if result.is_err() {
+            self.prune_orphaned_brep_representations();
+            self.prune_orphaned_native_representations();
+        }
+        result
+    }
+    /// Prepare a Builder's transient BRep without placing its external lease in
+    /// Document/Undo. The borrowed session keeps the original owner alive while
+    /// staging is registered in this coordinator's external-document account.
+    pub fn prepare_leased_builder(&self, document_id: DocumentId, session: &crate::builder::BuilderSession,
+        record: bool, update: bool, held: Usage) -> Result<PreparedTransaction> {
+        let document = self.world.documents.get(&document_id).ok_or(Error::Missing("document"))?;
+        let preview = session.preview().ok_or(Error::Missing("builder preview"))?;
+        let Geometry::Brep(brep) = &preview.geometry else { return Err(Error::Invalid("leased builder BRep")); };
+        let bytes = brep.storage_usage(&self.limits)?.bytes;
+        if !brep.allocation_covered_by(&self.external_memory_account(), bytes) {
+            return Err(Error::Invalid("leased builder account"));
+        }
+        let mut plan = session.plan_for_transaction(document)?;
+        let editing = document.entities.contains_key(&plan.entity.id);
+        if editing {
+            let revision = document.entities[&plan.entity.id].geometry_revision.wrapping_add(1);
+            plan.entity.geometry_revision = revision;
+            plan.published.geometry_revision = revision;
+        }
+        plan.recipe.policy.record = record;
+        plan.recipe.policy.update = update;
+        let mut mutations = if editing {
+            vec![Mutation::Geometry { source: document.stamp(plan.entity.id)?, geometry: plan.entity.geometry.clone() }]
+        } else {
+            vec![Mutation::Insert { document: document_id, entity: plan.entity.clone() }]
+        };
+        if record || editing {
+            if editing {
+                mutations.push(Mutation::HistoryUpdate { document: document_id, expected_revision: document.revision,
+                    recipes: vec![Box::new(plan.recipe)], published: vec![(plan.entity.id, plan.published)] });
+            } else {
+                mutations.push(Mutation::History { document: document_id, expected_revision: document.revision,
+                    recipe: Box::new(plan.recipe), published: vec![(plan.entity.id, plan.published)] });
+            }
+        }
+        self.prepare_with_held_usage(TransactionRequest::new(session.kind().title(), mutations), held)
+    }
+    /// Prepare one B-rep insertion while its exclusive input allocations are
+    /// already covered by `reservation`. The reservation remains visible to
+    /// peers until the staged document is registered under the account locks.
+    /// On failure it stays intact; on success it is atomically transferred and
+    /// emptied. The caller must have reserved these exact allocations before
+    /// constructing them, and retain no untracked owner.
+    pub fn prepare_with_reserved_brep_insert(&self, request: TransactionRequest, held: Usage,
+        reservation: &mut ExternalMemoryReservation) -> Result<PreparedTransaction> {
+        let result = self.prepare_with_held_usage_and_guards(request, held, Some(reservation), || Ok(()), || Ok(()));
+        if result.is_err() { self.prune_orphaned_brep_representations(); }
+        result
+    }
+    /// Transfer source-bound reservations in mutation order. Other inserted or
+    /// replaced geometry remains in ordinary request accounting; deletes,
+    /// group replacements and history records without published results carry
+    /// no BRep source guard. On refusal all guards remain charged.
+    pub fn prepare_with_reserved_brep_mutations(&self, request: TransactionRequest, held: Usage,
+        reservations: &mut [ExternalMemoryReservation]) -> Result<PreparedTransaction> {
+        if reservations.is_empty() || reservations.iter().any(|guard| guard.brep_source.is_none()) {
+            drop(request);
+            self.prune_orphaned_brep_representations();
+            return Err(Error::Invalid("reserved BRep insert request"));
+        }
+        let result = self.prepare_with_held_usage_and_guard_batch(request, held, Some(reservations), || Ok(()), || Ok(()));
+        if result.is_err() { self.prune_orphaned_brep_representations(); }
+        result
     }
     fn prepare_with_held_usage_and_guard(
         &self,
@@ -2895,12 +4647,24 @@ impl TransactionCoordinator {
         held: Usage,
         before_clone: impl FnOnce() -> Result<()>,
     ) -> Result<PreparedTransaction> {
-        self.prepare_with_held_usage_and_guards(request, held, || Ok(()), before_clone)
+        self.prepare_with_held_usage_and_guards(request, held, None, || Ok(()), before_clone)
     }
     fn prepare_with_held_usage_and_guards(
         &self,
         request: TransactionRequest,
         held: Usage,
+        input_reservation: Option<&mut ExternalMemoryReservation>,
+        before_planning: impl FnOnce() -> Result<()>,
+        before_clone: impl FnOnce() -> Result<()>,
+    ) -> Result<PreparedTransaction> {
+        self.prepare_with_held_usage_and_guard_batch(request, held,
+            input_reservation.map(std::slice::from_mut), before_planning, before_clone)
+    }
+    fn prepare_with_held_usage_and_guard_batch(
+        &self,
+        request: TransactionRequest,
+        held: Usage,
+        mut input_reservations: Option<&mut [ExternalMemoryReservation]>,
         before_planning: impl FnOnce() -> Result<()>,
         before_clone: impl FnOnce() -> Result<()>,
     ) -> Result<PreparedTransaction> {
@@ -2909,9 +4673,49 @@ impl TransactionCoordinator {
         let limits = self.admission_limits().remaining_after(held)?;
         name(&request.label, &limits)?;
         let (base, scope_version) = self.request_world(request.owner.as_ref())?;
-        let request_storage = request.storage_usage(&limits)?;
+        // Insertions into a large retained model can reuse a sufficiently tight
+        // validation proof just like a large batch, without weakening limits.
+        let insert_only = !request.mutations.is_empty() && request.mutations.iter().all(|m| matches!(m, Mutation::Insert { .. }));
+        let mut request_storage = request.storage_usage(&limits)?;
+        if let Some(reservations) = input_reservations.as_ref() {
+            let mut guards = reservations.iter().peekable();
+            let mut account_geometry = |geometry: &Geometry| -> Result<()> {
+            let Geometry::Brep(brep) = geometry else { return Ok(()); };
+            if guards.peek().is_none_or(|guard| guard.brep_source.is_some_and(|id| id != brep.identity())) { return Ok(()); }
+            let reservation = guards.next().expect("matching BRep guard");
+            let bytes = brep.storage_usage(&limits)?.bytes;
+            let exclusive = brep.has_exclusive_storage() || (brep.has_exclusive_storage_with_one_receipt()
+                && self.representations.lock().unwrap_or_else(|error| error.into_inner())
+                    .has_single_accounted_receipt(brep, &self.external_memory_account()));
+            if !exclusive || !matches!(reservation.class, crate::budget::memory::MemoryClass::CpuCache | crate::budget::memory::MemoryClass::Kernel)
+                || !Arc::ptr_eq(&reservation.registry, &self.external_reservations)
+                || reservation.brep_source.is_some_and(|identity| identity != brep.identity())
+                || reservation.bytes != bytes || reservation.pending_bytes != 0 {
+                return Err(Error::Invalid("reserved BRep input owner"));
+            }
+            request_storage.bytes = request_storage.bytes.checked_sub(bytes).ok_or(Error::Invalid("reserved BRep input accounting"))?;
+            Ok(())
+            };
+            for mutation in &request.mutations {
+                match mutation {
+                    Mutation::Insert { entity, .. } => account_geometry(&entity.geometry)?,
+                    Mutation::Geometry { geometry, .. } => account_geometry(geometry)?,
+                    Mutation::DefinitionInsert { definition, instances, .. } => {
+                        for entity in definition.members.iter().chain(instances) { account_geometry(&entity.geometry)?; }
+                    }
+                    Mutation::Delete { .. } | Mutation::Placement { .. } | Mutation::Attributes { .. }
+                    | Mutation::Extensions { .. } | Mutation::Label { .. } | Mutation::GroupReplace { .. } => {},
+                    Mutation::History { published, .. } if published.is_empty() => {},
+                    _ => return Err(Error::Invalid("reserved BRep insert request")),
+                }
+            }
+            drop(account_geometry);
+            if guards.next().is_some() { return Err(Error::Invalid("reserved BRep insert request")); }
+        }
         let mut peak =
             self.retained_usage_with_limits(&limits.remaining_after(request_storage)?)?;
+        // 10,000 retained points is a measured-workload heuristic, not a latency guarantee.
+        let reuse_candidate_validation = insert_only && (request.mutations.len() >= 20 || peak.points >= 10_000);
         peak.add(request_storage, &limits)?;
         // Admit temporary ownership maps and the eventual private Undo entry
         // before their first insert or any candidate document clone. Import
@@ -3034,6 +4838,35 @@ impl TransactionCoordinator {
             Usage::btree::<AllocatedIdentity, ()>(object_slots)?,
             Usage::btree::<(DocumentId, GroupId), ()>(count)?,
         ] { planning.add(storage, &planning_limits)?; }
+        // Request-owned extension JSON is parsed during planning, before a
+        // candidate document exists to report its validation scratch. Admit
+        // the largest such payload separately before entering that loop.
+        let mut max_extension_payload = None::<usize>;
+        let mut observe = |extension: &Extension| {
+            max_extension_payload = Some(max_extension_payload.unwrap_or(0).max(extension.payload.len()));
+        };
+        for mutation in &request.mutations {
+            match mutation {
+                Mutation::Insert { entity, .. } => entity.extensions.values().for_each(&mut observe),
+                Mutation::Extensions { extensions, .. } => extensions.values().for_each(&mut observe),
+                Mutation::Extension { extension: Some(extension), .. } => observe(extension),
+                Mutation::DefinitionInsert { definition, instances, .. } => {
+                    for entity in definition.members.iter().chain(instances) {
+                        entity.extensions.values().for_each(&mut observe);
+                    }
+                }
+                Mutation::Publish(result) => {
+                    for output in &result.outputs { output.entity.extensions.values().for_each(&mut observe); }
+                }
+                _ => {}
+            }
+        }
+        if let Some(bytes) = max_extension_payload {
+            let bytes = u64::try_from(bytes).map_err(|_| Error::Overflow("extension validation scratch"))?
+                .checked_mul(64).and_then(|n| n.checked_add(4096))
+                .ok_or(Error::Overflow("extension validation scratch"))?;
+            planning.add(Usage { bytes, ..Usage::default() }, &planning_limits)?;
+        }
         let planning_reservation = if count == 0 { None } else {
             let mut live = held;
             live.add(request_storage, &self.admission_limits())?;
@@ -3253,7 +5086,7 @@ impl TransactionCoordinator {
                         if !crate::model::slot_name_valid(slot) {
                             return Err(Error::Invalid("extension slot"));
                         }
-                        extension.validate(&limits)?;
+                        extension.validate_for_slot(slot, &limits)?;
                     }
                     // A layer created earlier in this request has no captured state; its
                     // proposed record and parent chain decide whether it can receive output.
@@ -3453,7 +5286,7 @@ impl TransactionCoordinator {
                         {
                             return Err(Error::Invalid("extension slot"));
                         }
-                        peak.add(extension.validate(&limits)?, &limits)?;
+                        peak.add(extension.validate_for_slot(slot, &limits)?, &limits)?;
                         peak.add(
                             Usage {
                                 bytes: slot.capacity() as u64,
@@ -3772,7 +5605,7 @@ impl TransactionCoordinator {
                         return Err(Error::Invalid("extension slot"));
                     }
                     if let Some(extension) = extension {
-                        extension.validate(&limits)?;
+                        extension.validate_for_slot(slot, &limits)?;
                     }
                     peak.add(
                         Usage {
@@ -3983,7 +5816,10 @@ impl TransactionCoordinator {
         // This covers the known document-copy estimate, not all planning,
         // request, scene, allocator or native temporaries.
         let clone_bytes = participants.iter().try_fold(0u64, |total, id| {
-            let bytes = base.document(*id)?.clone_owned_bytes_estimate(&limits)?;
+            let document=base.documents.get(id).ok_or(Error::Missing("document"))?;
+            let storage=document.storage_usage(&limits)?;
+            let validated=self.validate_retained_document(document,None,storage,&limits)?;
+            let bytes=document.clone_owned_bytes_estimate_from_validated(validated)?;
             total.checked_add(bytes).and_then(|n| n.checked_add(2 * std::mem::size_of::<usize>() as u64))
                 .ok_or(Error::Overflow("transaction document clone reservation"))
         })?;
@@ -4270,25 +6106,68 @@ impl TransactionCoordinator {
         }
         drop(planning_reservation);
         let staged_storage = staged.storage_usage(&limits)?;
-        staged.validate(&validation_limits(&limits, peak, staged_storage)?)?;
+        let staged_limits = validation_limits(&limits, peak, staged_storage)?;
+        let proved_limits = if reuse_candidate_validation && staged.documents.len() == 1 {
+            let halfway = |max: u64, used: u64| used.min(max) + max.saturating_sub(used) / 2;
+            let tighter = Limits {
+                max_bytes: halfway(staged_limits.max_bytes, staged_storage.bytes),
+                max_objects: halfway(staged_limits.max_objects, staged_storage.objects),
+                max_nodes: halfway(staged_limits.max_nodes, staged_storage.nodes),
+                max_points: halfway(staged_limits.max_points, staged_storage.points),
+                max_history: halfway(staged_limits.max_history, staged_storage.history),
+                max_outputs: halfway(staged_limits.max_outputs, staged_storage.outputs),
+                ..staged_limits
+            };
+            if staged.validate(&tighter).is_ok() { tighter } else {
+                staged.validate(&staged_limits)?;
+                staged_limits
+            }
+        } else {
+            staged.validate(&staged_limits)?;
+            staged_limits
+        };
         let identities = self.identities.extend(&staged, &limits, &mut peak)?;
         request.cancel.check()?;
         let id = TransactionId::new();
         let entry = UndoEntry::between(id, request.label, base, &staged);
+        if reuse_candidate_validation && staged.documents.len() == 1 && entry.after.len() == 1 {
+            let document = entry.after.values().next().expect("single changed document");
+            let storage = document.storage_usage(&proved_limits)?;
+            let mut proved = validation_limits(&proved_limits, staged_storage, storage)?;
+            proved.max_points = proved_limits.max_points;
+            proved.max_nodes = proved_limits.max_nodes;
+            entry.validation_cache.0.lock().unwrap_or_else(|e| e.into_inner())[0] = Some(
+                RetainedValidationProof { address: Arc::as_ptr(document) as usize, limits: proved },
+            );
+        }
         // Convert the clone reservation to registered candidates under both
         // account locks, so peers never see an uncharged handoff or both charges.
         let mut external = self.external_documents.lock().unwrap_or_else(|e| e.into_inner());
         external.retain(|item| item.strong_count() != 0);
         let mut reservations = self.external_reservations.lock().unwrap_or_else(|e| e.into_inner());
-        let reserved = clone_reservation.as_ref().map_or(0, |guard| guard.bytes);
-        let pending = clone_reservation.as_ref().map_or(0, |guard| guard.pending_bytes);
+        let clone_reserved = clone_reservation.as_ref().map_or(0, |guard| guard.bytes);
+        let mut reserved = [0u64; 6];
+        let mut pending = [0u64; 6];
         let class = crate::budget::memory::MemoryClass::CpuCache.index();
-        let remaining_reserved = reservations.by_class[class].checked_sub(reserved)
-            .ok_or(Error::Invalid("transaction clone reservation accounting"))?;
-        let remaining_pending = reservations.pending_by_class[class].checked_sub(pending)
-            .ok_or(Error::Invalid("transaction clone pending accounting"))?;
-        reservations.by_class[class] = remaining_reserved;
-        reservations.pending_by_class[class] = remaining_pending;
+        reserved[class] = clone_reserved;
+        pending[class] = clone_reservation.as_ref().map_or(0, |guard| guard.pending_bytes);
+        if let Some(guards) = input_reservations.as_ref() {
+            for guard in guards.iter() {
+                let class = guard.class.index();
+                reserved[class] = reserved[class].checked_add(guard.bytes).ok_or(Error::Overflow("transaction input reservations"))?;
+                pending[class] = pending[class].checked_add(guard.pending_bytes).ok_or(Error::Overflow("transaction input pending"))?;
+            }
+        }
+        let mut remaining_reserved = reservations.by_class;
+        let mut remaining_pending = reservations.pending_by_class;
+        for class in 0..reserved.len() {
+            remaining_reserved[class] = remaining_reserved[class].checked_sub(reserved[class])
+                .ok_or(Error::Invalid("transaction clone reservation accounting"))?;
+            remaining_pending[class] = remaining_pending[class].checked_sub(pending[class])
+                .ok_or(Error::Invalid("transaction clone pending accounting"))?;
+        }
+        reservations.by_class = remaining_reserved;
+        reservations.pending_by_class = remaining_pending;
         let admission = catch_unwind(AssertUnwindSafe(|| -> Result<()> {
             for (id, candidate) in &staged.documents {
                 if base.documents.get(id).is_none_or(|previous| !Arc::ptr_eq(previous, candidate)) {
@@ -4302,11 +6181,15 @@ impl TransactionCoordinator {
             Ok(())
         }));
         if !matches!(admission, Ok(Ok(()))) {
-            reservations.by_class[class] += reserved;
-            reservations.pending_by_class[class] += pending;
-        } else if let Some(guard) = &mut clone_reservation {
-            guard.bytes = 0;
-            guard.pending_bytes = 0;
+            for class in 0..reserved.len() {
+                reservations.by_class[class] += reserved[class];
+                reservations.pending_by_class[class] += pending[class];
+            }
+        } else {
+            if let Some(guard) = &mut clone_reservation { guard.bytes = 0; guard.pending_bytes = 0; }
+            if let Some(guards) = &mut input_reservations { for guard in guards.iter_mut() {
+                guard.bytes = 0; guard.pending_bytes = 0; guard.brep_source = None;
+            } }
         }
         drop(reservations);
         drop(external);
@@ -4328,6 +6211,7 @@ impl TransactionCoordinator {
             held,
             reservation: peak,
             identities,
+            pending_brep_representations: None,
         })
     }
     fn verify(&self, p: &PreparedTransaction) -> Result<()> {
@@ -4347,25 +6231,41 @@ impl TransactionCoordinator {
         }
         Ok(())
     }
-    fn publish(&mut self, staged: World, entry: UndoEntry, recording: bool, epoch: u64, reservations: &ExternalReservations) {
+    fn publish(&mut self, staged: World, entry: UndoEntry, recording: bool, epoch: u64,
+        external: &Vec<Weak<Document>>, reservations: &ExternalReservations, deferred: &mut DeferredUndoEvidence, held: Usage) {
+        let profile=std::env::var_os("OM9_COMMIT_PROFILE").map(|_|std::time::Instant::now());
         self.world = staged;
         self.epoch = epoch;
-        self.redo.clear();
         if recording {
             self.undo.push(entry);
             self.note_undo_memory_growth();
+            while let Some(mut old) = self.redo.pop() {
+                self.rehome_history_evidence(&mut old);
+                deferred.take(&mut old, &mut self.undo_evidence_upper, &mut self.undo_evidence_count);
+            }
         } else {
-            self.undo.clear();
-            let _ = self.refresh_undo_memory_inventory_with_reservations(reservations);
+            while let Some(mut old) = self.redo.pop() {
+                self.rehome_current_evidence(&mut old);
+                deferred.take(&mut old, &mut self.undo_evidence_upper, &mut self.undo_evidence_count);
+            }
+            while let Some(mut old) = self.undo.pop() {
+                self.rehome_current_evidence(&mut old);
+                deferred.take(&mut old, &mut self.undo_evidence_upper, &mut self.undo_evidence_count);
+            }
+            let _ = self.refresh_undo_memory_inventory_with_reservations(external, reservations, held);
         }
-        self.trim_undo_memory_with_reservations(reservations);
+        let growth_ms=profile.map(|start|start.elapsed().as_secs_f64()*1000.);
+        self.prune_overflow_evidence(deferred);
+        let prune_ms=profile.map(|start|start.elapsed().as_secs_f64()*1000.);
+        self.trim_undo_memory_with_reservations(external, reservations, deferred, held);
+        if let Some(start)=profile {let total=start.elapsed().as_secs_f64()*1000.;eprintln!("OM9_COMMIT_PROFILE publish_growth_ms={:.3} publish_prune_ms={:.3} publish_trim_ms={:.3} publish_total_ms={total:.3} undo={} thread={:?}",growth_ms.unwrap_or(0.),prune_ms.unwrap_or(0.)-growth_ms.unwrap_or(0.),total-prune_ms.unwrap_or(0.),self.undo.len(),std::thread::current().id());}
     }
     pub fn commit(&mut self, p: PreparedTransaction) -> Result<CommitReceipt> {
         self.commit_with_guard(p, |_| Ok(()))
     }
     pub fn commit_with_guard<F>(
         &mut self,
-        p: PreparedTransaction,
+        mut p: PreparedTransaction,
         guard: F,
     ) -> Result<CommitReceipt>
     where
@@ -4408,6 +6308,7 @@ impl TransactionCoordinator {
                 self.register_external_document(candidate)?;
             }
         }
+        let mut deferred = self.prepare_deferred_undo_evidence(if p.owner.is_none() { self.undo_evidence_count } else { 0 }, p.held)?;
         // Other coordinators sharing the external account can tighten RAM
         // policy or reserve memory during the guard. Check again under the
         // shared locks, and hold the reservation lock through publication.
@@ -4420,12 +6321,11 @@ impl TransactionCoordinator {
         p.reservation.check(&limits)?;
         self.validate_retained_owners_with_external(&p.identities, Some(&p.entry), p.recording, &limits, &external, &reservations.accounted_classes(0)?)?;
         self.verify(&p)?;
-        drop(external);
         self.barrier = true;
         let published = p.owner.is_none();
         self.identities = p.identities;
         if published {
-            self.publish(p.staged, p.entry, p.recording, next, &reservations);
+            self.publish(p.staged, p.entry, p.recording, next, &external, &reservations, &mut deferred, p.held);
         } else {
             let s = self.scope.as_mut().expect("verified scope");
             s.staged = p.staged;
@@ -4433,6 +6333,10 @@ impl TransactionCoordinator {
         }
         self.barrier = false;
         drop(reservations);
+        drop(external);
+        drop(deferred);
+        if let Some(pending) = p.pending_brep_representations.as_mut() { pending.published = true; }
+        self.release_empty_history_evidence_capacity();
         Ok(CommitReceipt {
             transaction: p.id,
             epoch: self.epoch,
@@ -4461,7 +6365,13 @@ impl TransactionCoordinator {
         }
         Ok(receipt)
     }
-    fn restored(&self, e: &UndoEntry, redo: bool) -> Result<World> {
+    fn history_world_slots(&self, e: &UndoEntry, redo: bool) -> Result<usize> {
+        let restored = if redo { &e.after } else { &e.before };
+        self.world.documents.len().checked_add(restored.keys()
+            .filter(|id| !self.world.documents.contains_key(id)).count())
+            .ok_or(Error::Overflow("Undo world allocation"))
+    }
+    fn restored(&self, e: &UndoEntry, redo: bool, map_reserved: bool, validate: bool) -> Result<(World, Usage)> {
         let (expected, restored) = if redo {
             (&e.before, &e.after)
         } else {
@@ -4477,17 +6387,7 @@ impl TransactionCoordinator {
                 return Err(Error::Stale("Undo participant"));
             }
         }
-        let slots = self
-            .world
-            .documents
-            .len()
-            .checked_add(
-                restored
-                    .keys()
-                    .filter(|id| !self.world.documents.contains_key(id))
-                    .count(),
-            )
-            .ok_or(Error::Overflow("Undo world allocation"))?;
+        let slots = self.history_world_slots(e, redo)?;
         let receiving = if redo {
             self.undo.len()
         } else {
@@ -4498,7 +6398,7 @@ impl TransactionCoordinator {
             .and_then(|n| n.checked_mul(2))
             .ok_or(Error::Overflow("Undo/Redo allocation"))?
             .max(4);
-        let mut held = Usage::btree::<DocumentId, Arc<Document>>(slots)?;
+        let mut held = if map_reserved { Usage::default() } else { Usage::btree::<DocumentId, Arc<Document>>(slots)? };
         held.add(Usage::array::<UndoEntry>(next)?, &self.limits)?;
         let usage = self.retained_usage_with_held_usage(held)?;
         let mut staged = self.world.clone();
@@ -4512,61 +6412,139 @@ impl TransactionCoordinator {
                 }
             }
         }
-        let staged_storage = staged.storage_usage(&self.limits)?;
-        staged.validate(&validation_limits(&self.limits, usage, staged_storage)?)?;
-        Ok(staged)
+        if validate {
+            let staged_storage = staged.storage_usage(&self.limits)?;
+            staged.validate(&validation_limits(&self.limits, usage, staged_storage)?)?;
+        }
+        Ok((staged, usage))
+    }
+
+    /// Capture a history candidate without changing the public world or stacks.
+    /// A caller may prepare dependent state elsewhere, then publish only if the
+    /// coordinator context and history head are still current.
+    pub fn prepare_history(&mut self, redo: bool) -> Result<PreparedHistory> {
+        self.prepare_history_inner(redo, true)
+    }
+
+    /// Prepare the immutable candidate for validation by an admission peer.
+    /// Publication refuses it until `PreparedHistory::validate_on` succeeds.
+    pub fn prepare_history_for_worker(&mut self, redo: bool) -> Result<PreparedHistory> {
+        self.prepare_history_inner(redo, false)
+    }
+
+    fn prepare_history_inner(&mut self, redo: bool, validate: bool) -> Result<PreparedHistory> {
+        self.available()?;
+        if self.scope.is_some() { return Err(Error::WrongOwner); }
+        let entry = if redo { self.redo.last() } else { self.undo.last() }
+            .ok_or(Error::Missing(if redo { "Redo entry" } else { "Undo entry" }))?;
+        let entry_id = entry.id;
+        let slots = self.history_world_slots(entry, redo)?;
+        for document in self.world.documents.values().chain(entry.before.values()).chain(entry.after.values()) {
+            self.register_external_document(document)?;
+        }
+        let bytes = Usage::btree::<DocumentId, Arc<Document>>(slots)?.bytes.max(1);
+        let physical = self.physical_memory_sampler.and_then(|sample| sample());
+        let mut map = self.reserve_external_memory_with_held(crate::budget::memory::MemoryClass::CpuCache,
+            bytes, physical, Usage::default())?;
+        let (staged, retained_counters) = self.restored(entry, redo, true, validate)?;
+        map.set_allocated_bytes(bytes)?;
+        let next_epoch = bump(self.epoch, "publication epoch")?;
+        if redo { self.undo.try_reserve(1).map_err(|_| Error::Budget("Undo allocation"))?; }
+        else { self.redo.try_reserve(1).map_err(|_| Error::Budget("Redo allocation"))?; }
+        let (context, _) = self.capture_context(None)?;
+        Ok(PreparedHistory { staged, context, entry: entry_id, redo, next_epoch, validated: validate, retained_counters,
+            _map_reservation: map, pending_brep_representations: None })
+    }
+
+    /// Hold document and history mutations while a peer prepares this exact
+    /// candidate. Finish only after the worker has stopped using shared state.
+    pub fn begin_history_worker(&mut self, prepared: &PreparedHistory) -> Result<uuid::Uuid> {
+        self.available()?;
+        let (context, _) = self.capture_context(None)?;
+        let head = if prepared.redo { self.redo.last() } else { self.undo.last() };
+        if self.scope.is_some() || context != prepared.context || head.is_none_or(|entry| entry.id != prepared.entry)
+            || !prepared._map_reservation.belongs_to(&self.external_memory_account()) {
+            return Err(Error::Stale("history candidate"));
+        }
+        let token = uuid::Uuid::new_v4();
+        self.history_pending = Some(token);
+        Ok(token)
+    }
+
+    pub fn finish_history_worker(&mut self, token: uuid::Uuid) -> Result<()> {
+        if self.history_pending != Some(token) { return Err(Error::Stale("history worker")); }
+        self.history_pending = None;
+        Ok(())
+    }
+
+    /// Publish only the exact prepared history head. On failure, candidate and
+    /// dependent state remain private and the current world/stacks are intact.
+    pub fn publish_history(&mut self, prepared: PreparedHistory) -> Result<()> {
+        self.available()?;
+        if self.scope.is_some() { return Err(Error::WrongOwner); }
+        let (context, _) = self.capture_context(None)?;
+        let head = if prepared.redo { self.redo.last() } else { self.undo.last() };
+        if !prepared.validated || context != prepared.context || head.is_none_or(|entry| entry.id != prepared.entry)
+            || !prepared._map_reservation.belongs_to(&self.external_memory_account()) {
+            return Err(Error::Stale("history candidate"));
+        }
+        self.retained_usage()?;
+        prepared._map_reservation.recheck_pending()?;
+        if prepared.redo { self.undo.try_reserve(1).map_err(|_| Error::Budget("Undo allocation"))?; }
+        else { self.redo.try_reserve(1).map_err(|_| Error::Budget("Redo allocation"))?; }
+        let documents = Arc::clone(&self.external_documents);
+        let account = Arc::clone(&self.external_reservations);
+        let external = documents.lock().unwrap_or_else(|e| e.into_inner());
+        let reservations = account.lock().unwrap_or_else(|e| e.into_inner());
+        if reservations.retired { return Err(Error::Invalid("retired memory account")); }
+        let limits = reservations.constrain(self.limits);
+        self.validate_retained_owners_with_external(&self.identities, None, false, &limits,
+            &external, &reservations.accounted_classes(0)?)?;
+        let PreparedHistory { staged, redo, next_epoch, _map_reservation, mut pending_brep_representations, .. } = prepared;
+        self.barrier = true;
+        let entry = if redo { self.redo.pop() } else { self.undo.pop() }.expect("checked history head");
+        self.world = staged;
+        self.epoch = next_epoch;
+        if redo { self.undo.push(entry); } else { self.redo.push(entry); }
+        drop(reservations);
+        drop(external);
+        drop(_map_reservation);
+        if let Some(pending) = pending_brep_representations.as_mut() { pending.published = true; }
+        drop(pending_brep_representations);
+        let _ = self.refresh_undo_memory_inventory();
+        self.barrier = false;
+        Ok(())
     }
     pub fn undo(&mut self) -> Result<()> {
         self.undo_with(|_, _, _, _| Ok(()))
     }
     /// Prepare dependent state before publishing an Undo. A failed callback
-    /// leaves the world and both history stacks unchanged.
+    /// leaves the world and both history stacks unchanged. The final callback
+    /// argument is unreserved staged usage; the map is already reserved, so it
+    /// is zero and must not be charged a second time.
     pub fn undo_with<T>(&mut self, prepare: impl FnOnce(&Self, &World, u64, Usage) -> Result<T>) -> Result<T> {
         self.available()?;
         if self.scope.is_some() {
             return Err(Error::WrongOwner);
         }
-        let e = self.undo.last().ok_or(Error::Missing("Undo entry"))?;
-        let staged = self.restored(e, false)?;
-        let next = bump(self.epoch, "publication epoch")?;
-        self.redo
-            .try_reserve(1)
-            .map_err(|_| Error::Budget("Redo allocation"))?;
-        let staged_map = Usage::btree::<DocumentId, Arc<Document>>(staged.documents.len())?;
-        let dependent = prepare(self, &staged, next, staged_map)?;
-        self.barrier = true;
-        let e = self.undo.pop().expect("checked Undo");
-        self.world = staged;
-        self.epoch = next;
-        self.redo.push(e);
-        let _ = self.refresh_undo_memory_inventory();
-        self.barrier = false;
+        let candidate = self.prepare_history(false)?;
+        let dependent = prepare(self, candidate.candidate_world(), candidate.candidate_epoch(), Usage::default())?;
+        self.publish_history(candidate)?;
         Ok(dependent)
     }
     pub fn redo(&mut self) -> Result<()> {
         self.redo_with(|_, _, _, _| Ok(()))
     }
-    /// Prepare dependent state before publishing a Redo.
+    /// Prepare dependent state before publishing a Redo; as with Undo, staged
+    /// map storage is already reserved and the final callback argument is zero.
     pub fn redo_with<T>(&mut self, prepare: impl FnOnce(&Self, &World, u64, Usage) -> Result<T>) -> Result<T> {
         self.available()?;
         if self.scope.is_some() {
             return Err(Error::WrongOwner);
         }
-        let e = self.redo.last().ok_or(Error::Missing("Redo entry"))?;
-        let staged = self.restored(e, true)?;
-        let next = bump(self.epoch, "publication epoch")?;
-        self.undo
-            .try_reserve(1)
-            .map_err(|_| Error::Budget("Undo allocation"))?;
-        let staged_map = Usage::btree::<DocumentId, Arc<Document>>(staged.documents.len())?;
-        let dependent = prepare(self, &staged, next, staged_map)?;
-        self.barrier = true;
-        let e = self.redo.pop().expect("checked Redo");
-        self.world = staged;
-        self.epoch = next;
-        self.undo.push(e);
-        let _ = self.refresh_undo_memory_inventory();
-        self.barrier = false;
+        let candidate = self.prepare_history(true)?;
+        let dependent = prepare(self, candidate.candidate_world(), candidate.candidate_epoch(), Usage::default())?;
+        self.publish_history(candidate)?;
         Ok(dependent)
     }
 }
@@ -4677,13 +6655,1420 @@ mod retained_validation_tests {
         coordinator.redo().unwrap();
     }
 
+    #[test]
+    fn prepared_history_rejects_changed_world_and_releases_its_map() {
+        use crate::budget::memory::MemoryClass;
+        let limits = Limits::default();
+        let mut document = Document::new("prepared history");
+        let point = Entity::new("point", Geometry::Point([0., 0., 0.]), None);
+        let id = point.id; let doc = document.id;
+        document.entities.insert(id, point);
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let source = coordinator.world.documents[&doc].stamp(id).unwrap();
+        let edit = coordinator.prepare(TransactionRequest::new("move", vec![Mutation::Placement {
+            source, placement: Transform::translation([1., 0., 0.]),
+        }])).unwrap();
+        coordinator.commit(edit).unwrap();
+        let original = coordinator.snapshot();
+        let baseline = coordinator.external_reserved_bytes(MemoryClass::CpuCache);
+        let candidate = coordinator.prepare_history(false).unwrap();
+        assert_eq!(coordinator.snapshot(), original);
+        assert!(coordinator.external_reserved_bytes(MemoryClass::CpuCache) > baseline);
+        assert_eq!(candidate.candidate_world().documents[&doc].entities[&id].placement, Transform::identity());
+        drop(candidate);
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), baseline);
+        let candidate = coordinator.prepare_history(false).unwrap();
+        let source = coordinator.world.documents[&doc].stamp(id).unwrap();
+        let edit = coordinator.prepare(TransactionRequest::new("new edit", vec![Mutation::Placement {
+            source, placement: Transform::translation([2., 0., 0.]),
+        }])).unwrap();
+        coordinator.commit(edit).unwrap();
+        let after_edit = coordinator.snapshot();
+        assert!(matches!(coordinator.publish_history(candidate), Err(Error::Stale("history candidate"))));
+        assert_eq!(coordinator.snapshot(), after_edit);
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), baseline);
+        let candidate = coordinator.prepare_history(false).unwrap();
+        coordinator.publish_history(candidate).unwrap();
+        assert_eq!(coordinator.world.documents[&doc].entities[&id].placement, Transform::translation([1., 0., 0.]));
+        let candidate = coordinator.prepare_history(true).unwrap();
+        coordinator.publish_history(candidate).unwrap();
+        assert_eq!(coordinator.world.documents[&doc].entities[&id].placement, Transform::translation([2., 0., 0.]));
+        let candidate = coordinator.prepare_history(false).unwrap();
+        let before_refusal = coordinator.snapshot();
+        coordinator.external_reservations.lock().unwrap().managed_ceiling = Some(1);
+        assert!(matches!(coordinator.publish_history(candidate), Err(Error::Budget(_))));
+        coordinator.external_reservations.lock().unwrap().managed_ceiling = None;
+        assert_eq!(coordinator.snapshot(), before_refusal);
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), baseline);
+        let candidate = coordinator.prepare_history(false).unwrap();
+        let token = coordinator.begin_history_worker(&candidate).unwrap();
+        assert!(matches!(coordinator.prepare(TransactionRequest::new("blocked", vec![])), Err(Error::Busy)));
+        assert!(matches!(coordinator.finish_history_worker(uuid::Uuid::new_v4()), Err(Error::Stale("history worker"))));
+        assert!(matches!(coordinator.discard_oldest_undo(), Err(Error::Busy)));
+        coordinator.finish_history_worker(token).unwrap();
+        coordinator.publish_history(candidate).unwrap();
+    }
+
+    #[test]
+    fn worker_history_requires_validation_on_the_same_account() {
+        let limits = Limits::default();
+        let document = Document::new("worker history validation");
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let entity = Entity::new("point", Geometry::Point([1., 2., 3.]), None);
+        let edit = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: doc, entity }])).unwrap();
+        coordinator.commit(edit).unwrap();
+        let before = coordinator.snapshot();
+        let candidate = coordinator.prepare_history_for_worker(false).unwrap();
+        assert!(matches!(coordinator.publish_history(candidate), Err(Error::Stale("history candidate"))));
+        assert_eq!(coordinator.snapshot(), before);
+        let mut candidate = coordinator.prepare_history_for_worker(false).unwrap();
+        let foreign = TransactionCoordinator::new(World::new(vec![], &limits).unwrap(), limits).unwrap();
+        assert!(matches!(candidate.validate_on(&foreign, Usage::default(), None), Err(Error::Stale("history candidate account"))));
+        let peer = coordinator.memory_admission_peer().unwrap();
+        assert!(candidate.validate_on(&peer, Usage::default(), Some((8 * 1024 * 1024 * 1024, 0))).is_err());
+        assert!(!candidate.validated);
+        assert_eq!(coordinator.snapshot(), before);
+        let candidate = std::thread::spawn(move || {
+            candidate.validate_on(&peer, Usage::default(), None).unwrap();
+            candidate
+        }).join().unwrap();
+        coordinator.publish_history(candidate).unwrap();
+        assert!(coordinator.world.documents[&doc].entities.is_empty());
+    }
+
+    #[test]
+    fn history_evidence_is_counted_once_and_released_outside_account_lock() {
+        use crate::budget::memory::MemoryClass;
+        struct Owner { reservation: ExternalMemoryReservation }
+        let limits = Limits::default();
+        let document = Document::new("history evidence");
+        let document_id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: document_id, entity }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let stamp = coordinator.world.documents[&document_id].stamp(object).unwrap();
+        let bytes = (std::mem::size_of::<Owner>() + 2 * std::mem::size_of::<usize>()) as u64;
+        let reservation = coordinator.reserve_external_memory(MemoryClass::CpuCache, bytes, None).unwrap();
+        let mut owner = Arc::new(Owner { reservation });
+        Arc::get_mut(&mut owner).unwrap().reservation.mark_allocated(bytes).unwrap();
+        let weak = Arc::downgrade(&owner);
+        let before = coordinator.undo_memory_bytes().unwrap();
+        coordinator.retain_insert_evidence(&stamp, owner.clone(), bytes, Usage::default()).unwrap();
+        let before = before + Usage::array::<UndoEvidence>(coordinator.overflow_evidence.entries.capacity()).unwrap().bytes;
+        assert_eq!(coordinator.undo_memory_bytes().unwrap(), before, "a shared external owner is excluded from Undo quota");
+        drop(owner);
+        assert_eq!(coordinator.undo_memory_bytes().unwrap(), before, "current source keeps its evidence outside Undo quota");
+        let snapshot = coordinator.snapshot();
+        assert_eq!(coordinator.undo_memory_bytes().unwrap(), before, "snapshot ownership is external to history");
+        drop(snapshot);
+        assert_eq!(coordinator.undo_memory_bytes().unwrap(), before);
+        assert!(coordinator.undo_memory_stats().capture_change_pending);
+        coordinator.undo().unwrap();
+        let external = weak.upgrade().unwrap();
+        let undo_shared = coordinator.undo_memory_bytes().unwrap();
+        drop(external);
+        assert_eq!(coordinator.undo_memory_bytes().unwrap(), undo_shared + bytes, "history-only evidence is counted once");
+        coordinator.redo().unwrap();
+        coordinator.undo().unwrap();
+        let point = Entity::new("new branch", Geometry::Point([1., 2., 3.]), None);
+        let transaction = coordinator.prepare(TransactionRequest::new("branch", vec![Mutation::Insert { document: document_id, entity: point }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        assert_eq!(coordinator.redo_len(), 0);
+        assert!(weak.upgrade().is_none(), "discarding Redo releases its evidence");
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    }
+
+    #[test]
+    fn close_document_releases_history_evidence_and_resets_inventory() {
+        let limits = Limits::default();
+        let document = Document::new("close evidence");
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: id, entity }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let owner = Arc::new(42u64);
+        let weak = Arc::downgrade(&owner);
+        coordinator.retain_insert_evidence(&stamp, owner, 8, Usage::default()).unwrap();
+        coordinator.close_document(id).unwrap();
+        assert!(weak.upgrade().is_none());
+        assert_eq!(coordinator.undo_evidence_count, 0);
+        assert_eq!(coordinator.undo_evidence_upper, 0);
+        coordinator.undo_memory_bytes().unwrap();
+    }
+
+    #[test]
+    fn closing_one_document_preserves_other_document_proof_from_shared_history() {
+        use crate::budget::memory::MemoryClass;
+        struct Owner { reservation: ExternalMemoryReservation }
+        let limits = Limits::default();
+        let first = Document::new("closed participant");
+        let first_id = first.id;
+        let second = Document::new("remaining participant");
+        let second_id = second.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![first, second], &limits).unwrap(), limits).unwrap();
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        let point = Entity::new("point", Geometry::Point([1., 2., 3.]), None);
+        let transaction = coordinator.prepare(TransactionRequest::new("two documents", vec![
+            Mutation::Insert { document: first_id, entity: point },
+            Mutation::Insert { document: second_id, entity },
+        ])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let stamp = coordinator.world.documents[&second_id].stamp(object).unwrap();
+        let bytes = (std::mem::size_of::<Owner>() + 2 * std::mem::size_of::<usize>()) as u64;
+        let reservation = coordinator.reserve_external_memory(MemoryClass::CpuCache, bytes, None).unwrap();
+        let mut owner = Arc::new(Owner { reservation });
+        Arc::get_mut(&mut owner).unwrap().reservation.mark_allocated(bytes).unwrap();
+        let weak = Arc::downgrade(&owner);
+        coordinator.retain_insert_evidence(&stamp, owner, bytes, Usage::default()).unwrap();
+        coordinator.close_document(first_id).unwrap();
+        assert_eq!(coordinator.undo_len(), 0, "the shared entry is removed");
+        assert!(coordinator.history_evidence_for::<Owner>(&stamp).is_some(), "the current source in the other document keeps its proof");
+        coordinator.close_document(second_id).unwrap();
+        assert!(weak.upgrade().is_none());
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    }
+
+    #[test]
+    fn explicit_oldest_undo_discard_keeps_recoverable_evidence_then_releases_it() {
+        use crate::budget::memory::MemoryClass;
+        struct Owner { reservation: ExternalMemoryReservation }
+        let limits = Limits::default();
+        let document = Document::new("explicit history discard"); let document_id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None); let object = entity.id;
+        let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: document_id, entity }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let stamp = coordinator.world.documents[&document_id].stamp(object).unwrap();
+        let bytes = (std::mem::size_of::<Owner>() + 2 * std::mem::size_of::<usize>()) as u64;
+        let reservation = coordinator.reserve_external_memory(MemoryClass::CpuCache, bytes, None).unwrap();
+        let mut owner = Arc::new(Owner { reservation });
+        Arc::get_mut(&mut owner).unwrap().reservation.mark_allocated(bytes).unwrap();
+        let weak = Arc::downgrade(&owner);
+        coordinator.retain_insert_evidence(&stamp, owner.clone(), bytes, Usage::default()).unwrap(); drop(owner);
+        let transaction = coordinator.prepare(TransactionRequest::new("delete", vec![Mutation::Delete { source: stamp }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        assert!(coordinator.discard_oldest_undo().unwrap());
+        assert!(weak.upgrade().is_some());
+        coordinator.undo().unwrap();
+        let restored = coordinator.world.documents[&document_id].stamp(object).unwrap();
+        assert!(coordinator.history_evidence_for::<Owner>(&restored).is_some());
+        coordinator.redo().unwrap();
+        assert!(coordinator.discard_oldest_undo().unwrap());
+        assert!(weak.upgrade().is_none());
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+        assert_eq!(coordinator.undo_evidence_count, 0);
+    }
+
+    #[test]
+    fn history_evidence_moves_to_recoverable_version_when_old_entry_is_trimmed() {
+        use crate::budget::memory::MemoryClass;
+        struct Owner { reservation: ExternalMemoryReservation }
+        let limits = Limits::default();
+        let document = Document::new("trim history evidence");
+        let document_id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        coordinator.set_undo_policy(UndoPolicy { minimum_steps: 1, max_memory_mb: 1 }).unwrap();
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: document_id, entity }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let stamp = coordinator.world.documents[&document_id].stamp(object).unwrap();
+        let bytes = (std::mem::size_of::<Owner>() + 2 * std::mem::size_of::<usize>()) as u64;
+        let reservation = coordinator.reserve_external_memory(MemoryClass::CpuCache, bytes, None).unwrap();
+        let mut owner = Arc::new(Owner { reservation });
+        Arc::get_mut(&mut owner).unwrap().reservation.mark_allocated(bytes).unwrap();
+        let weak = Arc::downgrade(&owner);
+        coordinator.retain_insert_evidence(&stamp, owner.clone(), bytes, Usage::default()).unwrap();
+        drop(owner);
+        let transaction = coordinator.prepare(TransactionRequest::new("delete", vec![Mutation::Delete { source: stamp }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        assert_eq!(coordinator.undo_len(), 1, "soft quota trims the oldest insertion");
+        assert!(weak.upgrade().is_some(), "delete history can still restore the source");
+        coordinator.undo().unwrap();
+        let restored = coordinator.world.documents[&document_id].stamp(object).unwrap();
+        assert!(coordinator.history_evidence_for::<Owner>(&restored).is_some());
+        coordinator.redo().unwrap();
+        let point = Entity::new("new point", Geometry::Point([1., 2., 3.]), None);
+        let transaction = coordinator.prepare(TransactionRequest::new("insert point", vec![Mutation::Insert { document: document_id, entity: point }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        assert!(weak.upgrade().is_none(), "trimming the last recoverable version releases evidence after unlock");
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    }
+
+    #[test]
+    fn history_evidence_is_not_transferred_to_a_different_source_version() {
+        let limits = Limits::default();
+        let document = Document::new("different history source");
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        coordinator.set_undo_policy(UndoPolicy { minimum_steps: 1, max_memory_mb: 1 }).unwrap();
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: id, entity }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let owner = Arc::new(42u64);
+        let weak = Arc::downgrade(&owner);
+        coordinator.retain_insert_evidence(&stamp, owner, 8, Usage::default()).unwrap();
+        for name in ["replace once", "replace twice"] {
+            let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+            let transaction = coordinator.prepare(TransactionRequest::new(name, vec![Mutation::Geometry {
+                source: stamp, geometry: Geometry::Brep(source_fixture()),
+            }])).unwrap();
+            coordinator.commit(transaction).unwrap();
+            if name == "replace once" { assert!(weak.upgrade().is_some()); }
+        }
+        assert!(weak.upgrade().is_none(), "different source versions must not inherit old evidence");
+        coordinator.undo().unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        assert!(coordinator.history_evidence_for::<u64>(&stamp).is_none());
+    }
+
+    #[test]
+    fn multiple_history_evidence_owners_survive_trim_branch_and_close() {
+        use crate::budget::memory::MemoryClass;
+        use crate::resource::{Resource, ResourceKind};
+        struct Owner { reservation: ExternalMemoryReservation }
+        let limits = Limits::default();
+        let resource = Resource::from_bytes("pressure", ResourceKind::OpaqueBinary, &vec![1; 2 * 1024 * 1024], &limits).unwrap();
+        let resource_id = resource.id;
+        let mut document = Document::new("multiple history owners");
+        document.resources.insert(resource_id, resource);
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let mut weak = Vec::new();
+        let mut objects = Vec::new();
+        for _ in 0..2 {
+            let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+            let object = entity.id;
+            let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: id, entity }])).unwrap();
+            coordinator.commit(transaction).unwrap();
+            let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+            let bytes = (std::mem::size_of::<Owner>() + 2 * std::mem::size_of::<usize>()) as u64;
+            let reservation = coordinator.reserve_external_memory(MemoryClass::CpuCache, bytes, None).unwrap();
+            let mut owner = Arc::new(Owner { reservation });
+            Arc::get_mut(&mut owner).unwrap().reservation.mark_allocated(bytes).unwrap();
+            weak.push(Arc::downgrade(&owner));
+            coordinator.retain_insert_evidence(&stamp, owner, bytes, Usage::default()).unwrap();
+            objects.push(object);
+        }
+        let revision = coordinator.world.documents[&id].revision;
+        let transaction = coordinator.prepare(TransactionRequest::new("delete resource", vec![Mutation::ResourceDelete {
+            document: id, expected_revision: revision, resource: resource_id,
+        }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        coordinator.set_undo_policy(UndoPolicy { minimum_steps: 1, max_memory_mb: 1 }).unwrap();
+        assert_eq!(coordinator.undo_len(), 1);
+        assert_eq!(coordinator.overflow_evidence.entries.len(), 1);
+        assert_eq!(coordinator.undo_evidence_count, 2);
+        let smallest = if objects[0] < objects[1] { 0 } else { 1 };
+        let chosen = coordinator.first_current_evidence::<Owner>(id, |_, _, _| true).unwrap();
+        assert!(Arc::ptr_eq(&chosen, &weak[smallest].upgrade().unwrap()));
+        drop(chosen);
+        let chosen = coordinator.first_current_evidence::<Owner>(id, |object, _, _| object != objects[smallest]).unwrap();
+        assert!(Arc::ptr_eq(&chosen, &weak[1 - smallest].upgrade().unwrap()));
+        drop(chosen);
+        let snapshot = coordinator.snapshot();
+        coordinator.undo_memory_bytes().unwrap();
+        drop(snapshot);
+        coordinator.undo().unwrap();
+        let point = Entity::new("branch", Geometry::Point([1., 2., 3.]), None);
+        let transaction = coordinator.prepare(TransactionRequest::new("branch", vec![Mutation::Insert { document: id, entity: point }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        for object in objects {
+            let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+            assert!(coordinator.history_evidence_for::<Owner>(&stamp).is_some());
+        }
+        coordinator.close_document(id).unwrap();
+        assert!(weak.iter().all(|owner| owner.upgrade().is_none()));
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    }
+
+    #[test]
+    fn history_evidence_storage_refusal_keeps_document_and_history() {
+        use crate::budget::memory::MemoryClass;
+        let limits = Limits { max_bytes: 64 * 1024 * 1024, ..Limits::default() };
+        let document = Document::new("history evidence storage refusal");
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: id, entity }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let before = coordinator.snapshot();
+        let pressure = coordinator.reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, Usage::default()).unwrap();
+        assert!(coordinator.retain_insert_evidence(&stamp, Arc::new(42u64), 8, Usage::default()).is_err());
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.undo_evidence_count, 0);
+        assert_eq!(coordinator.overflow_evidence.entries.capacity(), 0);
+        drop(pressure);
+    }
+
+    #[test]
+    fn current_source_evidence_survives_history_clear_and_releases_on_delete() {
+        use crate::budget::memory::MemoryClass;
+        struct Owner { reservation: ExternalMemoryReservation }
+        let limits = Limits::default();
+        let document = Document::new("current source evidence");
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: id, entity }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let bytes = (std::mem::size_of::<Owner>() + 2 * std::mem::size_of::<usize>()) as u64;
+        let reservation = coordinator.reserve_external_memory(MemoryClass::CpuCache, bytes, None).unwrap();
+        let mut owner = Arc::new(Owner { reservation });
+        Arc::get_mut(&mut owner).unwrap().reservation.mark_allocated(bytes).unwrap();
+        let weak = Arc::downgrade(&owner);
+        coordinator.retain_insert_evidence(&stamp, owner, bytes, Usage::default()).unwrap();
+        let point = Entity::new("point", Geometry::Point([1., 2., 3.]), None);
+        let mut request = TransactionRequest::new("unrecorded point", vec![Mutation::Insert { document: id, entity: point }]);
+        request.recording = false;
+        coordinator.commit(coordinator.prepare(request).unwrap()).unwrap();
+        assert_eq!((coordinator.undo_len(), coordinator.redo_len()), (0, 0));
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        assert!(coordinator.history_evidence_for::<Owner>(&stamp).is_some());
+        let without_external = coordinator.undo_memory_bytes().unwrap();
+        let external = weak.upgrade().unwrap();
+        assert_eq!(coordinator.undo_memory_bytes().unwrap(), without_external, "current proof is not charged as Undo-only");
+        drop(external);
+        let mut request = TransactionRequest::new("unrecorded delete", vec![Mutation::Delete { source: stamp }]);
+        request.recording = false;
+        coordinator.commit(coordinator.prepare(request).unwrap()).unwrap();
+        assert!(weak.upgrade().is_none());
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    }
+
+    #[test]
+    fn current_evidence_retry_is_atomic_idempotent_and_released() {
+        use crate::budget::memory::MemoryClass;
+        struct Owner { reservation: ExternalMemoryReservation }
+        let limits = Limits { max_bytes: 64 * 1024 * 1024, ..Limits::default() };
+        let mut document = Document::new("current evidence retry");
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        document.entities.insert(object, entity);
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let bytes = (std::mem::size_of::<Owner>() + 2 * std::mem::size_of::<usize>()) as u64;
+        let reservation = coordinator.reserve_external_memory(MemoryClass::CpuCache, bytes, None).unwrap();
+        let mut owner = Arc::new(Owner { reservation });
+        Arc::get_mut(&mut owner).unwrap().reservation.mark_allocated(bytes).unwrap();
+        let weak = Arc::downgrade(&owner);
+        let before = coordinator.snapshot();
+        let pressure = coordinator.reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, Usage::default()).unwrap();
+        assert!(coordinator.retain_current_evidence(&stamp, owner.clone(), bytes, Usage::default()).is_err());
+        assert_eq!(coordinator.snapshot(), before);
+        drop(pressure);
+        coordinator.retain_current_evidence(&stamp, owner.clone(), bytes, Usage::default()).unwrap();
+        coordinator.retain_current_evidence(&stamp, owner.clone(), bytes, Usage::default()).unwrap();
+        assert_eq!(coordinator.undo_evidence_count, 1);
+        assert_eq!(coordinator.undo_len(), 0);
+        drop(owner);
+        let mut request = TransactionRequest::new("delete", vec![Mutation::Delete { source: stamp }]);
+        request.recording = false;
+        coordinator.commit(coordinator.prepare(request).unwrap()).unwrap();
+        assert!(weak.upgrade().is_none());
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    }
+
+    #[test]
+    fn undo_refuses_unattested_display_replacement_despite_matching_source_and_topology() {
+        let limits = Limits::default();
+        let mut document = Document::new("unattested history display");
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        document.entities.insert(object, entity);
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let point = Entity::new("point", Geometry::Point([1., 2., 3.]), None);
+        let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: id, entity: point }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let Geometry::Brep(original) = &coordinator.world.documents[&id].entities[&object].geometry else { panic!("BRep") };
+        let mut changed_display = original.display().clone();
+        changed_display.deflection_mm *= 2.;
+        let replacement = crate::brep::Brep::from_native(original.source().to_owned(), changed_display, &limits).unwrap();
+        assert_eq!(replacement.source(), original.source());
+        assert_eq!(replacement.topology(), original.topology());
+        assert_ne!(replacement.display_fingerprint(), original.display_fingerprint());
+        let document = Arc::make_mut(coordinator.world.documents.get_mut(&id).unwrap());
+        document.entities.get_mut(&object).unwrap().geometry = Geometry::Brep(replacement);
+        let before = coordinator.snapshot();
+        assert!(matches!(coordinator.undo(), Err(Error::Stale("Undo participant"))));
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!((coordinator.undo_len(), coordinator.redo_len()), (1, 0));
+    }
+
+    #[test]
+    fn deferred_history_evidence_refusal_preserves_redo_and_world() {
+        use crate::budget::memory::MemoryClass;
+        struct Owner { reservation: ExternalMemoryReservation }
+        let limits = Limits { max_bytes: 64 * 1024 * 1024, ..Limits::default() };
+        let document = Document::new("history evidence pressure");
+        let document_id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: document_id, entity }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let stamp = coordinator.world.documents[&document_id].stamp(object).unwrap();
+        let bytes = (std::mem::size_of::<Owner>() + 2 * std::mem::size_of::<usize>()) as u64;
+        let reservation = coordinator.reserve_external_memory(MemoryClass::CpuCache, bytes, None).unwrap();
+        let mut owner = Arc::new(Owner { reservation });
+        Arc::get_mut(&mut owner).unwrap().reservation.mark_allocated(bytes).unwrap();
+        let weak = Arc::downgrade(&owner);
+        coordinator.retain_insert_evidence(&stamp, owner.clone(), bytes, Usage::default()).unwrap();
+        drop(owner);
+        coordinator.undo().unwrap();
+        let point = Entity::new("new branch", Geometry::Point([1., 2., 3.]), None);
+        let transaction = coordinator.prepare(TransactionRequest::new("branch", vec![Mutation::Insert { document: document_id, entity: point }])).unwrap();
+        let before = coordinator.snapshot();
+        let pressure = coordinator.reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, transaction.held_usage()).unwrap();
+        assert!(coordinator.prepare_deferred_undo_evidence(coordinator.undo_evidence_count, transaction.held_usage()).is_err());
+        assert!(coordinator.commit(transaction).is_err());
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), 1);
+        assert!(weak.upgrade().is_some());
+        drop(pressure);
+    }
+
+    #[test]
+    fn scoped_publication_releases_redo_evidence_after_account_unlock() {
+        use crate::budget::memory::MemoryClass;
+        struct Owner { reservation: ExternalMemoryReservation }
+        let limits = Limits::default();
+        let document = Document::new("scoped history evidence");
+        let document_id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        let transaction = coordinator.prepare(TransactionRequest::new("insert", vec![Mutation::Insert { document: document_id, entity }])).unwrap();
+        coordinator.commit(transaction).unwrap();
+        let stamp = coordinator.world.documents[&document_id].stamp(object).unwrap();
+        let bytes = (std::mem::size_of::<Owner>() + 2 * std::mem::size_of::<usize>()) as u64;
+        let reservation = coordinator.reserve_external_memory(MemoryClass::CpuCache, bytes, None).unwrap();
+        let mut owner = Arc::new(Owner { reservation });
+        Arc::get_mut(&mut owner).unwrap().reservation.mark_allocated(bytes).unwrap();
+        let weak = Arc::downgrade(&owner);
+        coordinator.retain_insert_evidence(&stamp, owner.clone(), bytes, Usage::default()).unwrap();
+        drop(owner);
+        coordinator.undo().unwrap();
+        let token = coordinator.book("scoped branch", true).unwrap();
+        coordinator.begin(&token).unwrap();
+        let point = Entity::new("point", Geometry::Point([1., 2., 3.]), None);
+        let mut request = TransactionRequest::new("scoped insert", vec![Mutation::Insert { document: document_id, entity: point }]);
+        request.owner = Some(token.clone());
+        let transaction = coordinator.prepare(request).unwrap();
+        coordinator.commit(transaction).unwrap();
+        coordinator.finish(&token).unwrap();
+        assert_eq!(coordinator.redo_len(), 0);
+        assert!(weak.upgrade().is_none());
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    }
+
     fn source_fixture() -> crate::brep::Brep {
         use crate::brep::{Brep, BrepDisplay};
         Brep::from_native(format!("CASCADE Topology {}", "x".repeat(1024 * 1024)), BrepDisplay {
             source_sha256: [0; 32], deflection_mm: 0.1, points: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]],
-            triangles: vec![[0,1,2,0]], segments: vec![], vertices: vec![], faces: vec![uuid::Uuid::new_v4()],
-            edges: vec![], vertex_ids: vec![], face_edges: vec![],
+            triangles: vec![[0,1,2,0]], segments: vec![], vertices: vec![],
+            topology: crate::brep::BrepTopology {
+                faces: vec![uuid::Uuid::new_v4()],
+                edges: vec![],
+                vertex_ids: vec![],
+                face_edges: vec![],
+            }.into(),
         }, &Limits::default()).unwrap()
+    }
+
+    #[test]
+    fn tracked_display_shares_document_and_source_accounting_until_last_pin() {
+        let limits = Limits::default();
+        let seed = source_fixture();
+        let mut display = seed.display().clone();
+        display.points.resize(12_000, [0., 0., 0.]);
+        let shape = crate::brep::Brep::from_native(seed.source().to_owned(), display, &limits).unwrap();
+        let live = shape.display_liveness();
+        let source_bytes = shape.source_allocation_bytes().unwrap();
+        let display_bytes = shape.display_allocation_bytes().unwrap();
+        let topology_bytes = shape.topology_allocation_bytes().unwrap();
+        let mut document = Document::new("tracked display");
+        let entity = Entity::new("shape", Geometry::Brep(shape), None);
+        let object = entity.id; document.entities.insert(object, entity);
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let before = coordinator.retained_usage().unwrap().bytes;
+        let source = coordinator.capture_brep_source(&stamp).unwrap();
+        let first = coordinator.capture_brep_display(&stamp, Usage::default(), None).unwrap();
+        let second = coordinator.capture_brep_display(&stamp, Usage::default(), None).unwrap();
+        let clone = first.clone();
+        assert!(coordinator.retained_usage().unwrap().bytes - before < display_bytes / 2);
+        let peer = coordinator.memory_admission_peer().unwrap();
+        coordinator.close_document(id).unwrap();
+        assert!(live.is_alive());
+        let held = coordinator.retained_usage().unwrap().bytes;
+        let peer_held = peer.retained_usage().unwrap().bytes;
+        drop(source);
+        let without_source = coordinator.retained_usage().unwrap().bytes;
+        assert_eq!(held - without_source, source_bytes);
+        let peer_without_source = peer.retained_usage().unwrap().bytes;
+        assert_eq!(peer_held - peer_without_source, source_bytes);
+        drop(first); drop(second);
+        assert_eq!(coordinator.retained_usage().unwrap().bytes, without_source);
+        drop(clone);
+        assert!(!live.is_alive());
+        assert_eq!(without_source - coordinator.retained_usage().unwrap().bytes, display_bytes + topology_bytes);
+        assert_eq!(peer_without_source - peer.retained_usage().unwrap().bytes, display_bytes + topology_bytes);
+    }
+
+    #[test]
+    fn display_lease_refusal_and_stale_stamp_leave_registry_unchanged() {
+        let limits = Limits::default();
+        let mut document = Document::new("display lease refusal");
+        let entity = Entity::new("shape", Geometry::Brep(source_fixture()), None);
+        let object = entity.id; document.entities.insert(object, entity);
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let mut stale = stamp; stale.geometry_revision += 1;
+        assert!(matches!(coordinator.capture_brep_display(&stale, Usage::default(), None), Err(Error::Stale(_))));
+        assert!(matches!(coordinator.capture_brep_display(&stamp, Usage::default(), Some((1024 * 1024 * 1024, 0))),
+            Err(Error::Budget("available physical RAM"))));
+        coordinator.limits.max_bytes = coordinator.retained_usage().unwrap().bytes;
+        assert!(matches!(coordinator.capture_brep_display(&stamp, Usage::default(), None), Err(Error::Budget(_))));
+        let account = coordinator.external_reservations.lock().unwrap();
+        assert_eq!((account.brep_display_leases.len(), account.brep_display_leases.capacity()), (0, 0));
+    }
+
+    #[test]
+    fn display_lease_transfers_undo_quota_after_last_pin() {
+        let limits = Limits::default();
+        let shape = source_fixture();
+        let display_bytes = shape.display_allocation_bytes().unwrap();
+        let topology_bytes = shape.topology_allocation_bytes().unwrap();
+        let mut document = Document::new("display history ownership");
+        let entity = Entity::new("shape", Geometry::Brep(shape), None);
+        let object = entity.id; document.entities.insert(object, entity);
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let pin = coordinator.capture_brep_display(&stamp, Usage::default(), None).unwrap();
+        let clone = pin.clone();
+        let request = TransactionRequest::new("delete", vec![Mutation::Delete { source: stamp }]);
+        coordinator.commit(coordinator.prepare(request).unwrap()).unwrap();
+        let external = coordinator.undo_memory_bytes().unwrap();
+        drop(pin);
+        assert_eq!(coordinator.undo_memory_bytes().unwrap(), external);
+        drop(clone);
+        assert_eq!(coordinator.undo_memory_bytes().unwrap() - external, display_bytes + topology_bytes);
+        coordinator.undo().unwrap(); coordinator.redo().unwrap();
+    }
+
+    #[test]
+    fn retained_display_lease_validates_document_and_shares_instance_source() {
+        let limits = Limits::default();
+        let member = Entity::new("member", Geometry::Brep(source_fixture()), None);
+        let member_id = member.id;
+        let definition = crate::model::Definition::new("shared", vec![member]);
+        let definition_id = definition.id;
+        let mut document = Document::new("display instance");
+        document.definitions.insert(definition_id, definition);
+        let first = Entity::new("first", Geometry::Instance(definition_id), None);
+        let second = Entity::new("second", Geometry::Instance(definition_id), None);
+        let (a, b) = (first.id, second.id);
+        document.entities.insert(a, first); document.entities.insert(b, second);
+        let id = document.id;
+        let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let document = &coordinator.world.documents[&id];
+        let first = coordinator.capture_retained_brep_display(document, &document.stamp(a).unwrap(), &[member_id], Usage::default(), None).unwrap();
+        let second = coordinator.capture_retained_brep_display(document, &document.stamp(b).unwrap(), &[member_id], Usage::default(), None).unwrap();
+        assert!(std::ptr::eq(first.owner::<CapturedBrepDisplayInner>().unwrap(), second.owner::<CapturedBrepDisplayInner>().unwrap()));
+        assert_eq!(coordinator.external_reservations.lock().unwrap().brep_display_leases.len(), 1);
+        let foreign = Arc::new((**document).clone());
+        assert!(matches!(coordinator.capture_retained_brep_display(&foreign, &foreign.stamp(a).unwrap(), &[member_id], Usage::default(), None),
+            Err(Error::Invalid("unregistered display document"))));
+        coordinator.register_external_candidate(&foreign).unwrap();
+        assert!(coordinator.capture_retained_brep_display(&foreign, &foreign.stamp(a).unwrap(), &[member_id], Usage::default(), None).is_ok());
+        assert!(matches!(coordinator.capture_retained_brep_display(document, &document.stamp(a).unwrap(), &[ObjectId::new()], Usage::default(), None), Err(Error::Stale(_))));
+    }
+
+    #[test]
+    fn display_batch_is_atomic_and_shares_instance_lease() {
+        let limits = Limits::default();
+        let member = Entity::new("member", Geometry::Brep(source_fixture()), None);
+        let member_id = member.id;
+        let definition = crate::model::Definition::new("shared", vec![member]);
+        let definition_id = definition.id;
+        let mut document = Document::new("display batch");
+        document.definitions.insert(definition_id, definition);
+        let a = Entity::new("a", Geometry::Instance(definition_id), None);
+        let b = Entity::new("b", Geometry::Instance(definition_id), None);
+        let (a_id, b_id) = (a.id, b.id); document.entities.insert(a_id, a); document.entities.insert(b_id, b);
+        let id = document.id;
+        let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let document = &coordinator.world.documents[&id];
+        let path = [member_id];
+        let invalid_path = [ObjectId::new()];
+        let requests = [BrepDisplayRequest { slot: 7, stamp: document.stamp(a_id).unwrap(), path: &path },
+            BrepDisplayRequest { slot: 9, stamp: document.stamp(b_id).unwrap(), path: &invalid_path }];
+        let bytes = TransactionCoordinator::brep_display_batch_scratch(requests.len()).unwrap().max(1);
+        let mut scratch = coordinator.reserve_external_memory(crate::budget::memory::MemoryClass::CpuCache, bytes, None).unwrap();
+        assert!(matches!(coordinator.capture_retained_brep_displays(document, &requests, &mut scratch, Usage::default(), None), Err(Error::Stale(_))));
+        assert!(coordinator.external_reservations.lock().unwrap().brep_display_leases.is_empty());
+        let requests = [BrepDisplayRequest { slot: 7, stamp: document.stamp(a_id).unwrap(), path: &path },
+            BrepDisplayRequest { slot: 9, stamp: document.stamp(b_id).unwrap(), path: &path }];
+        assert!(matches!(coordinator.capture_retained_brep_displays(document, &requests, &mut scratch, Usage::default(), Some((1024 * 1024 * 1024, 0))),
+            Err(Error::Budget("available physical RAM"))));
+        assert!(coordinator.external_reservations.lock().unwrap().brep_display_leases.is_empty());
+        let pins = coordinator.capture_retained_brep_displays(document, &requests, &mut scratch, Usage::default(), None).unwrap();
+        assert_eq!(pins.pins.len(), 2);
+        assert!(pins.pins.iter().any(|(slot, _)| *slot == 7) && pins.pins.iter().any(|(slot, _)| *slot == 9));
+        assert!(std::ptr::eq(pins.pins[0].1.owner::<CapturedBrepDisplayInner>().unwrap(), pins.pins[1].1.owner::<CapturedBrepDisplayInner>().unwrap()));
+        assert_eq!(coordinator.external_reservations.lock().unwrap().brep_display_leases.len(), 1);
+    }
+
+    #[test]
+    fn tracked_brep_source_outlives_document_without_retaining_display_or_double_charge() {
+        let limits = Limits::default();
+        let shape = source_fixture();
+        let display = shape.display_liveness();
+        let source_bytes = shape.source_allocation_bytes().unwrap() + shape.topology_allocation_bytes().unwrap();
+        let mut document = Document::new("source lease");
+        let entity = Entity::new("shape", Geometry::Brep(shape), None);
+        let id = entity.id;
+        document.entities.insert(id, entity);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let before = coordinator.retained_usage().unwrap().bytes;
+        let stamp = coordinator.world.documents[&doc].stamp(id).unwrap();
+        let first = coordinator.capture_brep_source(&stamp).unwrap();
+        let second = coordinator.capture_brep_source(&stamp).unwrap();
+        assert!(coordinator.retained_usage().unwrap().bytes - before < source_bytes / 2);
+        let peer = coordinator.memory_admission_peer().unwrap();
+        coordinator.close_document(doc).unwrap();
+        assert!(!display.is_alive(), "source lease must not retain display");
+        assert!(first.source().starts_with("CASCADE Topology"));
+        assert_eq!(first.topology().faces.len(), 1);
+        let encoded = serde_json::to_vec(&first.canonical_record()).unwrap();
+        let record: crate::brep::CanonicalBrepRecord = serde_json::from_slice(&encoded).unwrap();
+        assert_eq!(record.source(), first.source());
+        assert_eq!(record.topology(), first.topology());
+        record.validate_admitted(&limits, |_, _| Ok(())).unwrap();
+        drop(record); drop(encoded);
+        let with_two = coordinator.retained_usage().unwrap().bytes;
+        let peer_with_two = peer.retained_usage().unwrap().bytes;
+        drop(first);
+        assert_eq!(coordinator.retained_usage().unwrap().bytes, with_two);
+        drop(second);
+        assert_eq!(with_two - coordinator.retained_usage().unwrap().bytes, source_bytes);
+        assert_eq!(peer_with_two - peer.retained_usage().unwrap().bytes, source_bytes);
+    }
+
+    #[test]
+    fn source_lease_resolves_nested_shared_members_and_rejects_stale_leaf() {
+        use crate::model::Definition;
+        let limits = Limits::default();
+        let shape = source_fixture();
+        let display = shape.display_liveness();
+        let retained_bytes = shape.source_allocation_bytes().unwrap() + shape.topology_allocation_bytes().unwrap();
+        let fingerprint = shape.display_fingerprint();
+        let leaf = Entity::new("leaf", Geometry::Brep(shape), None);
+        let leaf_id = leaf.id;
+        let handle = leaf.geometry_handle();
+        let inner = Definition::new("inner", vec![leaf]);
+        let middle = Entity::new("middle", Geometry::Instance(inner.id), None);
+        let middle_id = middle.id;
+        let outer = Definition::new("outer", vec![middle]);
+        let root_a = Entity::new("root A", Geometry::Instance(outer.id), None);
+        let root_b = Entity::new("root B", Geometry::Instance(outer.id), None);
+        let (a, b) = (root_a.id, root_b.id);
+        let mut document = Document::new("nested source leases");
+        document.definitions.insert(inner.id, inner);
+        document.definitions.insert(outer.id, outer);
+        document.entities.insert(a, root_a);
+        document.entities.insert(b, root_b);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp_a = coordinator.world.documents[&doc].stamp(a).unwrap();
+        let stamp_b = coordinator.world.documents[&doc].stamp(b).unwrap();
+        let path = [middle_id, leaf_id];
+        let mut stale_handle = handle;
+        stale_handle.geometry_revision += 1;
+        assert!(matches!(coordinator.capture_brep_occurrence_source(&stamp_a, &path, stale_handle, fingerprint), Err(Error::Stale(_))));
+        assert!(matches!(coordinator.capture_brep_occurrence_source(&stamp_a, &path, handle, [0; 32]), Err(Error::Stale(_))));
+        assert!(matches!(coordinator.capture_brep_occurrence_source(&stamp_a, &[leaf_id], handle, fingerprint), Err(Error::Stale(_))));
+        assert!(matches!(coordinator.capture_brep_occurrence_source(&stamp_a, &[], handle, fingerprint), Err(Error::Stale(_))));
+        let before = coordinator.retained_usage().unwrap().bytes;
+        let first = coordinator.capture_brep_occurrence_source(&stamp_a, &path, handle, fingerprint).unwrap();
+        let second = coordinator.capture_brep_occurrence_source(&stamp_b, &path, handle, fingerprint).unwrap();
+        assert!(coordinator.retained_usage().unwrap().bytes - before < retained_bytes / 2);
+        coordinator.close_document(doc).unwrap();
+        assert!(!display.is_alive());
+        let both = coordinator.retained_usage().unwrap().bytes;
+        drop(first);
+        assert_eq!(both, coordinator.retained_usage().unwrap().bytes);
+        drop(second);
+        assert_eq!(both - coordinator.retained_usage().unwrap().bytes, retained_bytes);
+    }
+
+    #[test]
+    fn native_source_lease_resolves_instance_and_refuses_changed_owner() {
+        use crate::model::Definition;
+        let limits = Limits::default();
+        let native = crate::geometry::NativeBrep {
+            display: Arc::new(crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]],
+                faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
+            payload: vec![7; 1024 * 1024].into(), crc: 23,
+        };
+        let payload = Arc::downgrade(&native.payload);
+        let display = Arc::downgrade(&native.display);
+        let payload_bytes = native.payload_allocation_bytes().unwrap();
+        let leaf = Entity::new("native leaf", Geometry::NativeBrep(native), None);
+        let handle = leaf.geometry_handle();
+        let leaf_id = leaf.id;
+        let definition = Definition::new("native definition", vec![leaf]);
+        let root = Entity::new("root", Geometry::Instance(definition.id), None);
+        let root_id = root.id;
+        let mut document = Document::new("native occurrence lease");
+        document.definitions.insert(definition.id, definition);
+        document.entities.insert(root_id, root);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&doc].stamp(root_id).unwrap();
+        let wrong_payload = Arc::new(vec![7; 1024 * 1024]);
+        assert!(matches!(coordinator.capture_native_brep_occurrence_source(&stamp, &[leaf_id], handle,
+            &Arc::downgrade(&wrong_payload), &display, 23), Err(Error::Stale(_))));
+        let lease = coordinator.capture_native_brep_occurrence_source(&stamp, &[leaf_id], handle, &payload, &display, 23).unwrap();
+        coordinator.close_document(doc).unwrap();
+        assert!(display.upgrade().is_none());
+        let held = coordinator.retained_usage().unwrap().bytes;
+        assert_eq!(lease.crc(), 23);
+        drop(lease);
+        assert_eq!(held - coordinator.retained_usage().unwrap().bytes, payload_bytes);
+    }
+
+    #[test]
+    fn source_lease_is_excluded_from_undo_until_last_handle_drops() {
+        let limits = Limits::default();
+        let mut document = Document::new("source undo lease");
+        let entity = Entity::new("shape", Geometry::Brep(source_fixture()), None);
+        let id = entity.id;
+        document.entities.insert(id, entity);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&doc].stamp(id).unwrap();
+        let source = coordinator.capture_brep_source(&stamp).unwrap();
+        let prepared = coordinator.prepare(TransactionRequest::new("delete", vec![Mutation::Delete { source: stamp }])).unwrap();
+        coordinator.commit(prepared).unwrap();
+        let held = coordinator.undo_memory_bytes().unwrap();
+        drop(source);
+        let released = coordinator.undo_memory_bytes().unwrap();
+        assert!(released >= held + 1024 * 1024, "source now belongs solely to Undo: {held} -> {released}");
+        coordinator.undo().unwrap();
+        coordinator.redo().unwrap();
+    }
+
+    #[test]
+    fn history_source_lease_counts_for_undo_only_after_external_readers_drop() {
+        let limits = Limits::default();
+        let mut document = Document::new("history source ownership");
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        document.entities.insert(object, entity);
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let owner: Arc<dyn std::any::Any + Send + Sync> = Arc::new(42u64);
+        coordinator.retain_current_evidence(&stamp, owner.clone(), 8, Usage::default()).unwrap();
+        let source = coordinator.capture_brep_source(&stamp).unwrap();
+        let source_bytes = source.data().source_bytes().unwrap() + source.data().topology_bytes().unwrap();
+        let second_source = source.clone();
+        coordinator.retain_source_with_evidence(&stamp, &owner, source).unwrap();
+        let second_owner: Arc<dyn std::any::Any + Send + Sync> = Arc::new(43u64);
+        coordinator.retain_current_evidence(&stamp, second_owner.clone(), 8, Usage::default()).unwrap();
+        coordinator.retain_source_with_evidence(&stamp, &second_owner, second_source).unwrap();
+        drop(owner);
+        drop(second_owner);
+        let reader = coordinator.current_evidence_source(&stamp).unwrap();
+        let request = TransactionRequest::new("delete", vec![Mutation::Delete { source: stamp }]);
+        coordinator.commit(coordinator.prepare(request).unwrap()).unwrap();
+        let external_bytes = coordinator.undo_memory_bytes().unwrap();
+        drop(reader);
+        let history_bytes = coordinator.undo_memory_bytes().unwrap();
+        assert_eq!(history_bytes - external_bytes, source_bytes, "shared history source must be counted once after the last external reader drops");
+        let snapshot = coordinator.snapshot();
+        assert!(coordinator.undo_memory_bytes().unwrap() + 1024 * 1024 <= history_bytes, "snapshot owns a separate source reader");
+        drop(snapshot);
+        assert_eq!(coordinator.undo_memory_bytes().unwrap(), history_bytes);
+        coordinator.undo().unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let reader = coordinator.current_evidence_source(&stamp).unwrap();
+        let external_registry = coordinator.external_documents.clone();
+        let registry = coordinator.external_reservations.clone();
+        let external = external_registry.lock().unwrap();
+        let reservations = registry.lock().unwrap();
+        let result = coordinator.undo_memory_bytes_with_guard(&external, &reservations, || {
+            let transient = reader.clone();
+            drop(transient);
+        });
+        assert!(matches!(result, Err(Error::Busy)), "a clone/drop ABA must invalidate inventory");
+        drop(reservations); drop(external);
+        let external = external_registry.lock().unwrap();
+        let reservations = registry.lock().unwrap();
+        let result = coordinator.undo_memory_bytes_with_guard(&external, &reservations, || drop(reader));
+        assert!(matches!(result, Err(Error::Busy)), "concurrent reader release invalidates inventory");
+        drop(reservations); drop(external);
+        coordinator.close_document(id).unwrap();
+    }
+
+    #[test]
+    fn history_source_lease_is_counted_without_a_document_brep_owner() {
+        let limits = Limits::default();
+        let mut document = Document::new("source only inventory");
+        let entity = Entity::new("body", Geometry::Brep(source_fixture()), None);
+        let object = entity.id;
+        document.entities.insert(object, entity);
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(object).unwrap();
+        let owner: Arc<dyn std::any::Any + Send + Sync> = Arc::new(42u64);
+        coordinator.retain_current_evidence(&stamp, owner.clone(), 8, Usage::default()).unwrap();
+        let source = coordinator.capture_brep_source(&stamp).unwrap();
+        coordinator.retain_source_with_evidence(&stamp, &owner, source).unwrap();
+        drop(owner);
+        let request = TransactionRequest::new("delete", vec![Mutation::Delete { source: stamp }]);
+        coordinator.commit(coordinator.prepare(request).unwrap()).unwrap();
+        // Inventory-only synthetic state: no full document owns the BRep.
+        // This is not a restorable or published source-only document.
+        let before = coordinator.undo.last_mut().unwrap().before.get_mut(&id).unwrap();
+        Arc::make_mut(before).entities.remove(&object);
+        let bytes = coordinator.undo_memory_bytes().unwrap();
+        assert!(bytes >= 1024 * 1024, "history-only source lease must remain charged: {bytes}");
+        let external_source = coordinator.overflow_evidence.entries[0].source.as_ref().unwrap().clone();
+        let with_external_reader = coordinator.undo_memory_bytes().unwrap();
+        assert!(bytes >= with_external_reader + 1024 * 1024);
+        drop(external_source);
+        assert_eq!(coordinator.undo_memory_bytes().unwrap(), bytes);
+    }
+
+    #[test]
+    fn history_source_attachment_rejects_foreign_account_and_different_source() {
+        let limits = Limits::default();
+        let mut document = Document::new("history source checks");
+        let first = Entity::new("first", Geometry::Brep(source_fixture()), None);
+        let second = Entity::new("second", Geometry::Brep(source_fixture()), None);
+        let (first_id, second_id) = (first.id, second.id);
+        document.entities.insert(first_id, first);
+        document.entities.insert(second_id, second);
+        let id = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document.clone()], &limits).unwrap(), limits).unwrap();
+        let foreign = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&id].stamp(first_id).unwrap();
+        let second_stamp = coordinator.world.documents[&id].stamp(second_id).unwrap();
+        let owner: Arc<dyn std::any::Any + Send + Sync> = Arc::new(42u64);
+        coordinator.retain_current_evidence(&stamp, owner.clone(), 8, Usage::default()).unwrap();
+        let foreign_stamp = foreign.world.documents[&id].stamp(first_id).unwrap();
+        let foreign_source = foreign.capture_brep_source(&foreign_stamp).unwrap();
+        let before = coordinator.snapshot();
+        assert!(matches!(coordinator.retain_source_with_evidence(&stamp, &owner, foreign_source), Err(Error::Invalid("history source account"))));
+        let different = coordinator.capture_brep_source(&second_stamp).unwrap();
+        assert!(matches!(coordinator.retain_source_with_evidence(&stamp, &owner, different), Err(Error::Stale("history evidence source"))));
+        assert_eq!(coordinator.snapshot(), before);
+        assert!(coordinator.current_evidence_source(&stamp).is_none());
+    }
+
+    #[test]
+    fn native_source_lease_tracks_payload_without_retaining_display() {
+        let limits = Limits::default();
+        let shape = crate::geometry::NativeBrep {
+            display: Arc::new(crate::geometry::Mesh { vertices: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]],
+                faces: vec![vec![0, 1, 2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
+            payload: vec![17; 1024 * 1024].into(), crc: 42,
+        };
+        let display = Arc::downgrade(&shape.display);
+        let payload_bytes = shape.payload_allocation_bytes().unwrap();
+        let mut document = Document::new("native source lease");
+        let entity = Entity::new("shape", Geometry::NativeBrep(shape), None);
+        let id = entity.id;
+        document.entities.insert(id, entity);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let before = coordinator.retained_usage().unwrap().bytes;
+        let stamp = coordinator.world.documents[&doc].stamp(id).unwrap();
+        assert!(matches!(coordinator.capture_brep_source(&stamp), Err(Error::Invalid(_))));
+        let first = coordinator.capture_native_brep_source(&stamp).unwrap();
+        let second = coordinator.capture_native_brep_source(&stamp).unwrap();
+        assert_eq!(first.crc(), 42);
+        assert_eq!(first.payload().len(), 1024 * 1024);
+        assert!(coordinator.retained_usage().unwrap().bytes - before < payload_bytes / 2);
+        let prepared = coordinator.prepare(TransactionRequest::new("delete", vec![Mutation::Delete { source: stamp }])).unwrap();
+        coordinator.commit(prepared).unwrap();
+        let undo_held = coordinator.undo_memory_bytes().unwrap();
+        coordinator.close_document(doc).unwrap();
+        assert!(display.upgrade().is_none());
+        let held = coordinator.retained_usage().unwrap().bytes;
+        drop(first);
+        assert_eq!(coordinator.retained_usage().unwrap().bytes, held);
+        drop(second);
+        assert_eq!(held - coordinator.retained_usage().unwrap().bytes, payload_bytes);
+        assert!(undo_held < payload_bytes / 2, "source retained outside Undo must not be charged to its quota");
+    }
+
+    #[test]
+    fn native_source_lease_releases_undo_ownership_on_last_drop() {
+        let limits = Limits::default();
+        let shape = crate::geometry::NativeBrep {
+            display: Arc::new(crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]],
+                faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
+            payload: vec![7; 1024 * 1024].into(), crc: 1,
+        };
+        let mut document = Document::new("native source undo lease");
+        let entity = Entity::new("shape", Geometry::NativeBrep(shape), None);
+        let id = entity.id;
+        document.entities.insert(id, entity);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&doc].stamp(id).unwrap();
+        let source = coordinator.capture_native_brep_source(&stamp).unwrap();
+        let prepared = coordinator.prepare(TransactionRequest::new("delete", vec![Mutation::Delete { source: stamp }])).unwrap();
+        coordinator.commit(prepared).unwrap();
+        let held = coordinator.undo_memory_bytes().unwrap();
+        drop(source);
+        let released = coordinator.undo_memory_bytes().unwrap();
+        assert!(released >= held + 1024 * 1024);
+        coordinator.undo().unwrap();
+        coordinator.redo().unwrap();
+    }
+
+    #[test]
+    fn source_lease_refusal_does_not_grow_registry() {
+        let limits = Limits::default();
+        let mut document = Document::new("tight source lease");
+        let entity = Entity::new("shape", Geometry::Brep(source_fixture()), None);
+        let id = entity.id;
+        document.entities.insert(id, entity);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&doc].stamp(id).unwrap();
+        let mut stale = stamp;
+        stale.geometry_revision += 1;
+        assert!(matches!(coordinator.capture_brep_source(&stale), Err(Error::Stale(_))));
+        coordinator.limits.max_bytes = coordinator.retained_usage().unwrap().bytes;
+        assert!(matches!(coordinator.capture_brep_source(&stamp), Err(Error::Budget(_))));
+        let account = coordinator.external_reservations.lock().unwrap();
+        assert_eq!((account.brep_source_leases.len(), account.brep_source_leases.capacity()), (0, 0));
+    }
+
+    #[test]
+    fn batch_brep_source_capture_is_atomic_and_deduplicates_shared_owners() {
+        let limits = Limits::default();
+        let shape = source_fixture();
+        let retained = shape.source_allocation_bytes().unwrap() + shape.topology_allocation_bytes().unwrap();
+        let mut document = Document::new("batch source leases");
+        let first = Entity::new("first", Geometry::Brep(shape.clone()), None);
+        let second = Entity::new("second", Geometry::Brep(shape), None);
+        let (a, b) = (first.id, second.id);
+        document.entities.insert(a, first);
+        document.entities.insert(b, second);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let mut out = Vec::with_capacity(2);
+        assert!(coordinator.capture_brep_sources_into(doc, &[a, ObjectId::new()], &mut out).is_err());
+        assert!(out.is_empty());
+        assert!(coordinator.external_reservations.lock().unwrap().brep_source_leases.is_empty());
+        let baseline = coordinator.retained_usage().unwrap().bytes;
+        coordinator.limits.max_bytes = baseline;
+        assert!(matches!(coordinator.capture_brep_sources_into(doc, &[a, b], &mut out), Err(Error::Budget(_))));
+        assert!(out.is_empty());
+        assert!(coordinator.external_reservations.lock().unwrap().brep_source_leases.is_empty());
+        coordinator.limits = limits;
+        coordinator.capture_brep_sources_into(doc, &[a, b], &mut out).unwrap();
+        assert_eq!(out.len(), 2);
+        assert!(coordinator.retained_usage().unwrap().bytes - baseline < retained / 2);
+        coordinator.close_document(doc).unwrap();
+        let held = coordinator.retained_usage().unwrap().bytes;
+        drop(out.pop());
+        assert_eq!(held, coordinator.retained_usage().unwrap().bytes);
+        drop(out.pop());
+        assert_eq!(held - coordinator.retained_usage().unwrap().bytes, retained);
+    }
+
+    #[test]
+    fn insert_brep_inventory_matches_validation_and_damaged_input_preserves_redo() {
+        let limits = Limits::default();
+        let mut document = Document::new("insert validation");
+        let seed = Entity::new("seed", Geometry::Point([0., 0., 0.]), None);
+        let seed_id = seed.id;
+        let doc = document.id;
+        document.entities.insert(seed_id, seed);
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&doc].stamp(seed_id).unwrap();
+        let edit = coordinator.prepare(TransactionRequest::new("move", vec![Mutation::Placement {
+            source: stamp, placement: Transform::translation([1., 0., 0.]),
+        }])).unwrap();
+        coordinator.commit(edit).unwrap();
+        coordinator.undo().unwrap();
+        let before = coordinator.snapshot();
+        let redo = coordinator.redo_len();
+        assert!(redo > 0);
+        let mut body = source_fixture();
+        let validated = Geometry::Brep(body.clone()).validate(&limits).unwrap();
+        let mut inventoried = Usage { bytes: std::mem::size_of::<Geometry>() as u64, ..Usage::default() };
+        inventoried.add(body.storage_usage(&limits).unwrap(), &limits).unwrap();
+        assert_eq!(inventoried, validated);
+        body.edit_display_for_validation(|display| display.points[0][0] = f64::NAN);
+        let request = TransactionRequest::new("bad insert", vec![Mutation::Insert {
+            document: doc, entity: Entity::new("bad", Geometry::Brep(body), None),
+        }]);
+        assert!(request.storage_usage(&limits).is_ok());
+        assert!(coordinator.prepare(request).is_err());
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+    }
+
+    #[test]
+    fn characterization_preallocated_insert_is_counted_twice_during_prepare() {
+        // This documents a current limitation, not the desired transfer
+        // contract: no reservation may be dropped in production to bypass it.
+        let limits = Limits::default();
+        let mut document = Document::new("input reservation characterization");
+        let seed = Entity::new("seed", Geometry::Point([0., 0., 0.]), None);
+        let seed_id = seed.id;
+        let doc = document.id;
+        document.entities.insert(seed_id, seed);
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&doc].stamp(seed_id).unwrap();
+        let edit = coordinator.prepare(TransactionRequest::new("move", vec![Mutation::Placement {
+            source: stamp, placement: Transform::translation([1., 0., 0.]),
+        }])).unwrap();
+        coordinator.commit(edit).unwrap();
+        coordinator.undo().unwrap();
+        let before = coordinator.snapshot();
+        let redo = coordinator.redo_len();
+        assert!(redo > 0);
+        let body = source_fixture();
+        let input_bytes = body.storage_usage(&limits).unwrap().bytes;
+        let entity = Entity::new("reserved body", Geometry::Brep(body), None);
+        let request = || TransactionRequest::new("insert", vec![Mutation::Insert { document: doc, entity: entity.clone() }]);
+        let mut low = 0u64;
+        let mut high = 32 * 1024 * 1024u64;
+        coordinator.limits.max_bytes = high;
+        assert!(coordinator.prepare(request()).is_ok());
+        while low + 1 < high {
+            let mid = low + (high - low) / 2;
+            coordinator.limits.max_bytes = mid;
+            if coordinator.prepare(request()).is_ok() { high = mid; } else { low = mid; }
+        }
+        coordinator.limits = limits;
+        let reservation = coordinator.reserve_external_memory_with_allocated(
+            crate::budget::memory::MemoryClass::CpuCache, input_bytes, input_bytes, None, Usage::default()).unwrap();
+        coordinator.limits.max_bytes = high;
+        assert!(matches!(coordinator.prepare(request()), Err(Error::Budget(_))));
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+        drop(reservation);
+        assert!(coordinator.prepare(request()).is_ok());
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+        drop(entity);
+        coordinator.limits = limits;
+        let body = source_fixture();
+        let input_bytes = body.storage_usage(&limits).unwrap().bytes;
+        let mut reservation = coordinator.reserve_external_memory_with_allocated(
+            crate::budget::memory::MemoryClass::CpuCache, input_bytes, input_bytes, None, Usage::default()).unwrap();
+        coordinator.limits.max_bytes = high;
+        let request = TransactionRequest::new("insert", vec![Mutation::Insert {
+            document: doc, entity: Entity::new("reserved body", Geometry::Brep(body), None),
+        }]);
+        let prepared = coordinator.prepare_with_reserved_brep_insert(request, Usage::default(), &mut reservation).unwrap();
+        assert_eq!(reservation.bytes(), 0);
+        drop(prepared);
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+    }
+
+    #[test]
+    fn reserved_brep_insert_transfers_atomically_and_preserves_redo_on_failure() {
+        use crate::budget::memory::MemoryClass;
+        let limits = Limits::default();
+        let mut document = Document::new("reserved BRep transfer");
+        let seed = Entity::new("seed", Geometry::Point([0., 0., 0.]), None);
+        let seed_id = seed.id;
+        let doc = document.id;
+        document.entities.insert(seed_id, seed);
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&doc].stamp(seed_id).unwrap();
+        let change = coordinator.prepare(TransactionRequest::new("move", vec![Mutation::Placement {
+            source: stamp, placement: Transform::translation([1., 0., 0.]),
+        }])).unwrap();
+        coordinator.commit(change).unwrap();
+        coordinator.undo().unwrap();
+        let before = coordinator.snapshot();
+        let redo = coordinator.redo_len();
+        let body = source_fixture();
+        let bytes = body.storage_usage(&limits).unwrap().bytes;
+        let mut reservation = coordinator.reserve_external_memory_with_allocated(MemoryClass::CpuCache, bytes, bytes, None, Usage::default()).unwrap();
+        let peer = coordinator.memory_admission_peer().unwrap();
+        assert!(peer.retained_usage().unwrap().bytes >= bytes);
+        let request = TransactionRequest::new("insert", vec![Mutation::Insert {
+            document: doc, entity: Entity::new("body", Geometry::Brep(body), None),
+        }]);
+        let failed = coordinator.prepare_with_held_usage_and_guards(request, Usage::default(), Some(&mut reservation),
+            || Ok(()), || Err(Error::Canceled));
+        assert!(matches!(failed, Err(Error::Canceled)));
+        assert_eq!(reservation.bytes(), bytes);
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+        drop(reservation);
+        let body = source_fixture();
+        let bytes = body.storage_usage(&limits).unwrap().bytes;
+        let mut reservation = coordinator.reserve_external_memory_with_allocated(MemoryClass::CpuCache, bytes, bytes, None, Usage::default()).unwrap();
+        let request = TransactionRequest::new("insert", vec![Mutation::Insert {
+            document: doc, entity: Entity::new("body", Geometry::Brep(body), None),
+        }]);
+        let staged = coordinator.prepare_with_reserved_brep_insert(request, Usage::default(), &mut reservation).unwrap();
+        assert_eq!(reservation.bytes(), 0, "candidate registration takes over the charge");
+        assert!(coordinator.retained_usage().unwrap().bytes >= bytes);
+        assert!(peer.retained_usage().unwrap().bytes >= bytes, "peer must see candidate after transfer");
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+        drop(staged);
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+        let body = source_fixture();
+        let bytes = body.storage_usage(&limits).unwrap().bytes;
+        let mut reservation = coordinator.reserve_external_memory_with_allocated(MemoryClass::CpuCache, bytes, bytes, None, Usage::default()).unwrap();
+        let account = Arc::clone(&coordinator.external_reservations);
+        let request = TransactionRequest::new("insert", vec![Mutation::Insert {
+            document: doc, entity: Entity::new("body", Geometry::Brep(body), None),
+        }]);
+        let refused = coordinator.prepare_with_held_usage_and_guards(request, Usage::default(), Some(&mut reservation),
+            || Ok(()), || { account.lock().unwrap().managed_ceiling = Some(1); Ok(()) });
+        account.lock().unwrap().managed_ceiling = None;
+        assert!(matches!(refused, Err(Error::Budget(_))));
+        assert_eq!(reservation.bytes(), bytes, "failed locked handoff restores reservation");
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+    }
+
+    #[test]
+    fn reserved_insert_rejects_shared_pending_and_foreign_owners() {
+        use crate::budget::memory::MemoryClass;
+        let limits = Limits::default();
+        let document = Document::new("reserved owner checks");
+        let doc = document.id;
+        let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let before = coordinator.snapshot();
+        let body = source_fixture();
+        let bytes = body.storage_usage(&limits).unwrap().bytes;
+        let shared = body.clone();
+        let mut reservation = coordinator.reserve_external_memory_with_allocated(MemoryClass::CpuCache, bytes, bytes, None, Usage::default()).unwrap();
+        let request = TransactionRequest::new("shared", vec![Mutation::Insert { document: doc,
+            entity: Entity::new("body", Geometry::Brep(body), None) }]);
+        assert!(matches!(coordinator.prepare_with_reserved_brep_insert(request, Usage::default(), &mut reservation), Err(Error::Invalid(_))));
+        assert_eq!(reservation.bytes(), bytes);
+        drop(shared); drop(reservation);
+        let body = source_fixture();
+        let mut pending = coordinator.reserve_external_memory(MemoryClass::CpuCache, bytes, None).unwrap();
+        let request = TransactionRequest::new("pending", vec![Mutation::Insert { document: doc,
+            entity: Entity::new("body", Geometry::Brep(body), None) }]);
+        assert!(matches!(coordinator.prepare_with_reserved_brep_insert(request, Usage::default(), &mut pending), Err(Error::Invalid(_))));
+        assert_eq!(pending.bytes(), bytes);
+        drop(pending);
+        let other = TransactionCoordinator::new(World::new(vec![Document::new("foreign")], &limits).unwrap(), limits).unwrap();
+        let body = source_fixture();
+        let mut foreign = other.reserve_external_memory_with_allocated(MemoryClass::CpuCache, bytes, bytes, None, Usage::default()).unwrap();
+        let request = TransactionRequest::new("foreign", vec![Mutation::Insert { document: doc,
+            entity: Entity::new("body", Geometry::Brep(body), None) }]);
+        assert!(matches!(coordinator.prepare_with_reserved_brep_insert(request, Usage::default(), &mut foreign), Err(Error::Invalid(_))));
+        assert_eq!(foreign.bytes(), bytes);
+        assert_eq!(coordinator.snapshot(), before);
+    }
+
+    #[test]
+    fn batch_mixed_brep_sources_rejects_invalid_selection_atomically() {
+        let limits = Limits::default();
+        let occt = source_fixture();
+        let native = crate::geometry::NativeBrep {
+            display: Arc::new(crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]],
+                faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
+            payload: vec![9; 1024 * 1024].into(), crc: 17,
+        };
+        let bytes = occt.source_allocation_bytes().unwrap() + occt.topology_allocation_bytes().unwrap() + native.payload_allocation_bytes().unwrap();
+        let mut document = Document::new("mixed source batch");
+        let a = Entity::new("occt", Geometry::Brep(occt), None);
+        let b = Entity::new("native", Geometry::NativeBrep(native), None);
+        let c = Entity::new("point", Geometry::Point([0., 0., 0.]), None);
+        let (a_id, b_id, c_id) = (a.id, b.id, c.id);
+        document.entities.insert(a_id, a); document.entities.insert(b_id, b); document.entities.insert(c_id, c);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let mut out = Vec::with_capacity(3);
+        assert!(coordinator.capture_geometry_sources_into(doc, &[a_id, b_id, c_id], &mut out).is_err());
+        assert!(out.is_empty());
+        assert!(coordinator.external_reservations.lock().unwrap().brep_source_leases.is_empty());
+        coordinator.capture_geometry_sources_into(doc, &[a_id, b_id], &mut out).unwrap();
+        assert!(matches!(&out[0], CapturedGeometrySource::Brep(_)));
+        assert!(matches!(&out[1], CapturedGeometrySource::NativeBrep(_)));
+        coordinator.close_document(doc).unwrap();
+        let held = coordinator.retained_usage().unwrap().bytes;
+        out.clear();
+        assert_eq!(held - coordinator.retained_usage().unwrap().bytes, bytes);
+    }
+
+    #[test]
+    fn occurrence_source_batch_is_atomic_and_counts_repeated_sources_once() {
+        let limits = Limits::default();
+        let shape = source_fixture();
+        let bytes = shape.source_allocation_bytes().unwrap() + shape.topology_allocation_bytes().unwrap();
+        let leaf = Entity::new("leaf", Geometry::Brep(shape), None);
+        let leaf_id = leaf.id;
+        let definition = crate::model::Definition::new("definition", vec![leaf]);
+        let mut document = Document::new("occurrences");
+        document.definitions.insert(definition.id, definition);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let mut out = Vec::with_capacity(2);
+        let mut scratch = Vec::with_capacity(2);
+        let mut invalid = [leaf_id, ObjectId::new()];
+        invalid.sort_unstable();
+        assert!(coordinator.capture_geometry_occurrence_sources_into(doc, &invalid, &mut out, &mut scratch).is_err());
+        assert!(out.is_empty());
+        assert!(coordinator.external_reservations.lock().unwrap().brep_source_leases.is_empty());
+        scratch.clear();
+        coordinator.capture_geometry_occurrence_sources_into(doc, &[leaf_id], &mut out, &mut scratch).unwrap();
+        out.push(out[0].clone());
+        assert_eq!(out.len(), 2);
+        drop(scratch);
+        coordinator.close_document(doc).unwrap();
+        let held = coordinator.retained_usage().unwrap().bytes;
+        drop(out.pop());
+        assert_eq!(held, coordinator.retained_usage().unwrap().bytes);
+        drop(out.pop());
+        assert_eq!(held - coordinator.retained_usage().unwrap().bytes, bytes);
+    }
+
+    #[test]
+    fn occurrence_batch_resolves_sorted_mixed_definition_members() {
+        let limits = Limits::default();
+        let occt = Entity::new("occt", Geometry::Brep(source_fixture()), None);
+        let native = Entity::new("native", Geometry::NativeBrep(crate::geometry::NativeBrep {
+            display: Arc::new(crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]],
+                faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
+            payload: vec![9; 1024].into(), crc: 17,
+        }), None);
+        let (occt_id, native_id) = (occt.id, native.id);
+        let definition = crate::model::Definition::new("mixed", vec![native, occt]);
+        let mut document = Document::new("mixed occurrences");
+        document.definitions.insert(definition.id, definition);
+        let doc = document.id;
+        let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let mut ids = [occt_id, native_id];
+        ids.sort_unstable();
+        let mut out = Vec::with_capacity(2);
+        let mut scratch = Vec::with_capacity(2);
+        coordinator.capture_geometry_occurrence_sources_into(doc, &ids, &mut out, &mut scratch).unwrap();
+        for (id, source) in ids.iter().zip(&out) {
+            assert_eq!(*id == occt_id, matches!(source, CapturedGeometrySource::Brep(_)));
+        }
+    }
+
+    #[test]
+    fn independent_equal_brep_source_allocations_remain_distinct() {
+        let limits = Limits::default();
+        let first = source_fixture();
+        let source_bytes = first.source_allocation_bytes().unwrap();
+        let topology_bytes = first.topology_allocation_bytes().unwrap();
+        let second = crate::brep::Brep::from_native(first.source().to_owned(), first.display().clone(), &limits).unwrap();
+        assert_eq!(first.source(), second.source());
+        let mut document = Document::new("independent sources");
+        let one = Entity::new("one", Geometry::Brep(first), None);
+        let two = Entity::new("two", Geometry::Brep(second), None);
+        let (one_id, two_id) = (one.id, two.id);
+        document.entities.insert(one_id, one);
+        document.entities.insert(two_id, two);
+        let doc = document.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let one = coordinator.capture_brep_source(&coordinator.world.documents[&doc].stamp(one_id).unwrap()).unwrap();
+        let two = coordinator.capture_brep_source(&coordinator.world.documents[&doc].stamp(two_id).unwrap()).unwrap();
+        coordinator.close_document(doc).unwrap();
+        let both = coordinator.retained_usage().unwrap().bytes;
+        drop(two);
+        assert_eq!(both - coordinator.retained_usage().unwrap().bytes, source_bytes + topology_bytes);
+        assert!(one.source().starts_with("CASCADE Topology"));
+    }
+
+    #[test]
+    fn distinct_display_snapshots_share_topology_accounting() {
+        use crate::brep::Brep;
+
+        let limits = Limits::default();
+        let seed = source_fixture();
+        let mut first_display = seed.display().clone();
+        first_display.topology.faces = (1..=4096)
+            .map(uuid::Uuid::from_u128)
+            .collect();
+        let first = Brep::from_native(seed.source().to_owned(), first_display, &limits).unwrap();
+        let mut second_display = first.display().clone();
+        second_display.points[1][0] = 2.;
+        let mut shared_display = second_display.clone();
+        shared_display.topology = crate::brep::BrepDisplayTopology(first.display().topology.0.clone());
+        let shared = Brep::from_native(first.source().to_owned(), shared_display, &limits).unwrap();
+        second_display.topology = (*second_display.topology).clone().into();
+        let independent = Brep::from_native(first.source().to_owned(), second_display, &limits).unwrap();
+        assert!(Arc::ptr_eq(&first.display().topology.0, &shared.display().topology.0));
+        assert!(!Arc::ptr_eq(&first.display().topology.0, &independent.display().topology.0));
+        let mut document = Document::new("topology ownership");
+        let first_entity = Entity::new("first", Geometry::Brep(first.clone()), None);
+        let second_entity = Entity::new("second", Geometry::Brep(shared.clone()), None);
+        let second_id = second_entity.id;
+        document.entities.insert(first_entity.id, first_entity);
+        document.entities.insert(second_id, second_entity);
+        let shared_bytes = document.storage_usage(&limits).unwrap().bytes;
+        assert_eq!(document.validate(&limits).unwrap().bytes, shared_bytes);
+        document.entities.get_mut(&second_id).unwrap().geometry = Geometry::Brep(independent.clone());
+        let independent_bytes = document.storage_usage(&limits).unwrap().bytes;
+        assert_eq!(document.validate(&limits).unwrap().bytes, independent_bytes);
+        assert_eq!(independent_bytes - shared_bytes, first.topology_allocation_bytes().unwrap());
+
+        let mut left = Document::new("topology world left");
+        let entity = Entity::new("left", Geometry::Brep(first.clone()), None);
+        left.entities.insert(entity.id, entity);
+        let mut right = Document::new("topology world right");
+        let entity = Entity::new("right", Geometry::Brep(shared), None);
+        let entity_id = entity.id;
+        right.entities.insert(entity_id, entity);
+        let shared_world = World::new(vec![left.clone(), right.clone()], &limits).unwrap();
+        let world_shared_bytes = shared_world.storage_usage(&limits).unwrap().bytes;
+        let mut coordinator = TransactionCoordinator::new(shared_world, limits).unwrap();
+        let capture = coordinator.capture_retained_document(right.id).unwrap();
+        let stamp = coordinator.world.documents[&right.id].stamp(entity_id).unwrap();
+        let change = coordinator.prepare(TransactionRequest::new("move", vec![Mutation::Placement {
+            source: stamp, placement: Transform::translation([1., 0., 0.]),
+        }])).unwrap();
+        coordinator.commit(change).unwrap();
+        let fallback = coordinator.retained_storage_usage(&coordinator.identities, None, false, &limits).unwrap();
+        let indexed = coordinator.validate_internal_retained_owners(&coordinator.identities, None, false, &limits).unwrap();
+        assert_eq!(fallback, indexed);
+        assert!(coordinator.undo_memory_bytes().unwrap() < first.topology_allocation_bytes().unwrap());
+        coordinator.undo().unwrap();
+        coordinator.redo().unwrap();
+        drop(capture);
+        right.entities.get_mut(&entity_id).unwrap().geometry = Geometry::Brep(independent);
+        let independent_world = World::new(vec![left, right], &limits).unwrap();
+        let world_independent_bytes = independent_world.storage_usage(&limits).unwrap().bytes;
+        assert_eq!(world_independent_bytes - world_shared_bytes, first.topology_allocation_bytes().unwrap());
     }
 
     #[test]
@@ -4696,9 +8081,14 @@ mod retained_validation_tests {
         let shape = Brep::from_native("CASCADE Topology fixture".into(), BrepDisplay {
             source_sha256: [0; 32], deflection_mm: 0.1, points,
             triangles: vec![[0, 1, 2, 0]], segments: vec![], vertices: vec![],
-            faces: vec![uuid::Uuid::new_v4()], edges: vec![], vertex_ids: vec![], face_edges: vec![],
+            topology: crate::brep::BrepTopology {
+                faces: vec![uuid::Uuid::new_v4()],
+                edges: vec![],
+                vertex_ids: vec![],
+                face_edges: vec![],
+            }.into(),
         }, &limits).unwrap();
-        let display = shape.display.clone();
+        let display = shape.display_identity();
         let mut document = Document::new("shared display");
         let entity = Entity::new("shape", Geometry::Brep(shape.clone()), None);
         let entity_id = entity.id;
@@ -4711,7 +8101,7 @@ mod retained_validation_tests {
         assert!(aliased.bytes - one < 512 * 1024, "shared display duplicated within document");
         assert_eq!(aliased, document.validate(&limits).unwrap());
         document.entities.remove(&alias_id);
-        let independent = Brep::from_native(shape.source().to_owned(), (*shape.display).clone(), &limits).unwrap();
+        let independent = Brep::from_native(shape.source().to_owned(), shape.display().clone(), &limits).unwrap();
         let other = Entity::new("independent", Geometry::Brep(independent), None);
         let other_id = other.id;
         document.entities.insert(other_id, other);
@@ -4728,7 +8118,7 @@ mod retained_validation_tests {
         }])).unwrap();
         coordinator.commit(prepared).unwrap();
         let Geometry::Brep(current) = &coordinator.world.documents[&document_id].entities[&entity_id].geometry else { panic!("B-rep") };
-        assert!(Arc::ptr_eq(&display, &current.display));
+        assert!(display.same(&current.display_identity()));
         let after = coordinator.retained_usage().unwrap().bytes;
         assert!(after - before < 512 * 1024, "shared display charged twice: {before} -> {after}");
         let fallback = coordinator.retained_storage_usage(&coordinator.identities, None, false, &limits).unwrap();
@@ -4820,7 +8210,7 @@ mod retained_validation_tests {
         use crate::budget::memory::MemoryClass;
         let limits = Limits::default();
         let coordinator = TransactionCoordinator::new(World::new(vec![], &limits).unwrap(), limits).unwrap();
-        let before = coordinator.external_reservations.lock().unwrap().accounted_classes(0).unwrap();
+        let before = coordinator.external_reservations.lock().unwrap().accounted_classes(0).unwrap().bytes;
         let minimum = std::mem::size_of::<Mutex<ExternalReservations>>()
             + std::mem::size_of::<Mutex<Vec<Weak<Document>>>>()
             + std::mem::size_of::<AtomicBool>() + std::mem::size_of::<AtomicU64>()
@@ -4829,10 +8219,10 @@ mod retained_validation_tests {
             "account, document index, export gate, generation and empty peer ledger allocations all remain live");
         let peer = coordinator.memory_admission_peer().unwrap();
         let account = peer.external_memory_account();
-        assert_eq!(peer.external_reservations.lock().unwrap().accounted_classes(0).unwrap(), before);
+        assert_eq!(peer.external_reservations.lock().unwrap().accounted_classes(0).unwrap().bytes, before);
         drop(account);
         drop(peer);
-        assert_eq!(coordinator.external_reservations.lock().unwrap().accounted_classes(0).unwrap(), before);
+        assert_eq!(coordinator.external_reservations.lock().unwrap().accounted_classes(0).unwrap().bytes, before);
     }
 
     #[test]
@@ -5211,14 +8601,67 @@ mod retained_validation_tests {
         let id = document.id;
         let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
         let capture = coordinator.capture_tracked_document(id).unwrap();
+        let external = coordinator.external_documents.lock().unwrap();
         let registry = Arc::clone(&coordinator.external_reservations);
         let reservations = registry.lock().unwrap();
-        let result = coordinator.undo_memory_bytes_with_guard(&reservations, || {
+        let result = coordinator.undo_memory_bytes_with_guard(&external, &reservations, || {
             std::thread::spawn(move || drop(capture)).join().unwrap();
         });
         assert!(matches!(result, Err(Error::Busy)));
         drop(reservations);
+        drop(external);
         assert!(coordinator.undo_memory_bytes().is_ok());
+    }
+
+    #[test]
+    fn source_lease_dropped_during_undo_inventory_invalidates_the_result() {
+        let limits = Limits::default();
+        let mut document = Document::new("source lease inventory race");
+        let entity = Entity::new("shape", Geometry::Brep(source_fixture()), None);
+        let id = entity.id;
+        document.entities.insert(id, entity);
+        let doc = document.id;
+        let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let stamp = coordinator.world.documents[&doc].stamp(id).unwrap();
+        let source = coordinator.capture_brep_source(&stamp).unwrap();
+        let external = coordinator.external_documents.lock().unwrap();
+        let registry = Arc::clone(&coordinator.external_reservations);
+        let reservations = registry.lock().unwrap();
+        let result = coordinator.undo_memory_bytes_with_guard(&external, &reservations, || {
+            std::thread::spawn(move || drop(source)).join().unwrap();
+        });
+        assert!(matches!(result, Err(Error::Busy)));
+        drop(reservations);
+        drop(external);
+        assert!(coordinator.undo_memory_bytes().is_ok());
+    }
+
+    #[test]
+    fn undo_inventory_serializes_peer_admission_until_scratch_is_dropped() {
+        use crate::budget::memory::MemoryClass;
+        let limits = Limits::default();
+        let document = Document::new("inventory account lock");
+        let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let peer = coordinator.memory_admission_peer().unwrap();
+        let external = coordinator.external_documents.lock().unwrap();
+        let registry = Arc::clone(&coordinator.external_reservations);
+        let reservations = registry.lock().unwrap();
+        let (started_tx, started_rx) = std::sync::mpsc::channel();
+        let (done_tx, done_rx) = std::sync::mpsc::channel();
+        let mut worker = None;
+        coordinator.undo_memory_bytes_with_guard(&external, &reservations, || {
+            worker = Some(std::thread::spawn(move || {
+                started_tx.send(()).unwrap();
+                let reservation = peer.reserve_external_memory(MemoryClass::CpuCache, 1024, None);
+                done_tx.send(reservation.is_ok()).unwrap();
+            }));
+            started_rx.recv_timeout(std::time::Duration::from_secs(5)).unwrap();
+            assert!(matches!(done_rx.try_recv(), Err(std::sync::mpsc::TryRecvError::Empty)));
+        }).unwrap();
+        drop(reservations);
+        drop(external);
+        assert!(done_rx.recv_timeout(std::time::Duration::from_secs(5)).unwrap());
+        worker.unwrap().join().unwrap();
     }
 
     #[test]
@@ -5251,10 +8694,35 @@ mod retained_validation_tests {
     }
 
     #[test]
+    fn indexed_document_storage_matches_nonallocating_path_for_mixed_aliases() {
+        let limits = Limits::default();
+        let first = source_fixture();
+        let independent = source_fixture();
+        let native = crate::geometry::NativeBrep {
+            display: Arc::new(crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]],
+                faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
+            payload: vec![7; 1024].into(), crc: 1,
+        };
+        let mut document = Document::new("mixed storage aliases");
+        for geometry in [Geometry::Brep(first.clone()), Geometry::Brep(first), Geometry::Brep(independent),
+            Geometry::NativeBrep(native.clone()), Geometry::NativeBrep(native)] {
+            let entity = Entity::new("shape", geometry, None);
+            document.entities.insert(entity.id, entity);
+        }
+        let expected = document.storage_usage(&limits).unwrap();
+        let mut index = crate::model::BrepStorageIndex::default();
+        assert_eq!(document.storage_usage_indexed(&limits, &mut index).unwrap(), expected);
+        assert!(document.storage_usage_upper(&limits).unwrap().bytes >= expected.bytes);
+        let empty = Document::new("reuse empty index");
+        assert_eq!(empty.storage_usage_indexed(&limits, &mut index).unwrap(), empty.storage_usage(&limits).unwrap());
+        assert_eq!(document.storage_usage_indexed(&limits, &mut index).unwrap(), expected);
+    }
+
+    #[test]
     fn world_counts_shared_native_payload_once_across_documents() {
         let limits = Limits::default();
         let native = crate::geometry::NativeBrep {
-            display: crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] },
+            display: std::sync::Arc::new(crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
             payload: vec![7; 1024 * 1024].into(), crc: 1,
         };
         let mut first = Document::new("first");
@@ -5271,10 +8739,61 @@ mod retained_validation_tests {
     }
 
     #[test]
+    fn native_display_sharing_is_accounted_across_world_capture_and_history() {
+        let limits = Limits::default();
+        let mut vertices = vec![[0., 0., 0.]; 50_000];
+        vertices[1] = [1., 0., 0.];
+        vertices[2] = [0., 1., 0.];
+        let native = crate::geometry::NativeBrep {
+            display: Arc::new(crate::geometry::Mesh { vertices, faces: vec![vec![0, 1, 2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
+            payload: vec![7; 32].into(), crc: 1,
+        };
+        let display_bytes = native.display_allocation_bytes().unwrap();
+        let mut first = Document::new("first native display");
+        let entity = Entity::new("shape", Geometry::NativeBrep(native.clone()), None);
+        let id = entity.id;
+        first.entities.insert(id, entity);
+        let doc = first.id;
+        let mut second = Document::new("second native display");
+        let other = Entity::new("shape", Geometry::NativeBrep(native), None);
+        second.entities.insert(other.id, other);
+        let world = World::new(vec![first, second], &limits).unwrap();
+        let shared_usage = world.validate(&limits).unwrap();
+        let mut independent = world.clone();
+        let second_doc = independent.documents.iter_mut().find(|(key, _)| **key != doc).unwrap().1;
+        let entity = Arc::make_mut(second_doc).entities.values_mut().next().unwrap();
+        let Geometry::NativeBrep(brep) = &mut entity.geometry else { panic!("native BRep") };
+        brep.display = Arc::new((*brep.display).clone());
+        assert_eq!(independent.validate(&limits).unwrap().bytes - shared_usage.bytes, display_bytes);
+        let mut coordinator = TransactionCoordinator::new(world, limits).unwrap();
+        let original = coordinator.retained_usage().unwrap().bytes;
+        let capture = coordinator.capture_retained_document(doc).unwrap();
+        let source = coordinator.world.documents[&doc].stamp(id).unwrap();
+        let prepared = coordinator.prepare(TransactionRequest::new("move", vec![Mutation::Placement { source, placement: Transform::translation([1., 0., 0.]) }])).unwrap();
+        coordinator.commit(prepared).unwrap();
+        assert!(coordinator.retained_usage().unwrap().bytes - original < display_bytes / 2);
+        let fallback = coordinator.retained_storage_usage(&coordinator.identities, None, false, &limits).unwrap();
+        let indexed = coordinator.validate_internal_retained_owners(&coordinator.identities, None, false, &limits).unwrap();
+        assert_eq!(fallback, indexed);
+        let tight = Limits { max_bytes: fallback.bytes + 64 * 1024, ..limits };
+        // Shared displays can make the duplicate-inclusive preflight exceed
+        // the budget even though the exact retained inventory fits.
+        let mut upper = coordinator.retained_metadata_usage(&coordinator.identities, None, false, &tight).unwrap();
+        let duplicate_upper = coordinator.retained_documents(None).try_for_each(|document| {
+            add_retained_document_usage(&mut upper, document.storage_usage_upper(&tight)?, &tight)
+        });
+        assert!(matches!(duplicate_upper, Err(Error::Budget(_))));
+        assert_eq!(coordinator.validate_internal_retained_owners(&coordinator.identities, None, false, &tight).unwrap(), fallback);
+        drop(capture);
+        coordinator.undo().unwrap();
+        coordinator.redo().unwrap();
+    }
+
+    #[test]
     fn native_payload_external_versions_distinguish_shared_and_independent_storage() {
         let limits = Limits::default();
         let native = crate::geometry::NativeBrep {
-            display: crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] },
+            display: std::sync::Arc::new(crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
             payload: vec![7; 1024 * 1024].into(), crc: 1,
         };
         let mut document = Document::new("external native payload");
@@ -5302,7 +8821,7 @@ mod retained_validation_tests {
     fn shared_native_payload_is_counted_once_across_capture_and_undo() {
         let limits = Limits::default();
         let native = crate::geometry::NativeBrep {
-            display: crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] },
+            display: std::sync::Arc::new(crate::geometry::Mesh { vertices: vec![[0.,0.,0.], [1.,0.,0.], [0.,1.,0.]], faces: vec![vec![0,1,2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
             payload: vec![7; 1024 * 1024].into(), crc: 1,
         };
         let mut document = Document::new("shared native payload");
@@ -5419,7 +8938,7 @@ mod retained_validation_tests {
         let capture = coordinator.capture_retained_document(document_id).unwrap();
         let current = Arc::make_mut(coordinator.world.documents.get_mut(&document_id).unwrap());
         let Geometry::Brep(old) = &current.entities[&id].geometry else { panic!("B-rep") };
-        let independent = crate::brep::Brep::from_native(old.source().to_string(), (*old.display).clone(), &limits).unwrap();
+        let independent = crate::brep::Brep::from_native(old.source().to_string(), old.display().clone(), &limits).unwrap();
         current.entities.get_mut(&id).unwrap().geometry = Geometry::Brep(independent);
         let with_both = coordinator.retained_usage().unwrap().bytes;
         drop(capture);
@@ -5482,7 +9001,7 @@ mod retained_validation_tests {
         let entity = Entity::new("valid", Geometry::Brep(source.clone()), None);
         first.entities.insert(entity.id, entity);
         let mut invalid = source;
-        Arc::make_mut(&mut invalid.display).points[0][0] = f64::NAN;
+        invalid.edit_display_for_validation(|display| display.points[0][0] = f64::NAN);
         let mut second = Document::new("second document");
         let entity = Entity::new("invalid", Geometry::Brep(invalid), None);
         second.entities.insert(entity.id, entity);
@@ -6209,6 +9728,57 @@ mod retained_validation_tests {
     }
 
     #[test]
+    fn undo_inventory_refuses_unavailable_scratch_without_changing_redo() {
+        const MIB: u64 = 1024 * 1024;
+        let limits = Limits::default();
+        let mut document = Document::new("undo inventory scratch");
+        let entity = Entity::new("point", Geometry::Point([0., 0., 0.]), None);
+        let id = entity.id;
+        let doc = document.id;
+        document.entities.insert(id, entity);
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+        let source = coordinator.world.documents[&doc].stamp(id).unwrap();
+        let prepared = coordinator.prepare(TransactionRequest::new("move", vec![Mutation::Placement {
+            source, placement: Transform::translation([1., 0., 0.]),
+        }])).unwrap();
+        coordinator.commit(prepared).unwrap();
+        coordinator.undo().unwrap();
+        let before = coordinator.snapshot();
+        let redo = coordinator.redo_len();
+        let retained = coordinator.retained_usage().unwrap().bytes;
+        coordinator.external_reservations.lock().unwrap().managed_ceiling = Some(retained);
+        assert!(matches!(coordinator.undo_memory_bytes(), Err(Error::Budget(_))));
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+        coordinator.external_reservations.lock().unwrap().managed_ceiling = None;
+        coordinator.set_physical_memory_sampler(|| Some((1024 * MIB, 256 * MIB)));
+        assert!(matches!(coordinator.undo_memory_bytes(), Err(Error::Budget("available physical RAM"))));
+        let previous_policy = coordinator.undo_policy();
+        let mut proposed_policy = previous_policy;
+        proposed_policy.max_memory_mb = 512;
+        assert!(matches!(coordinator.set_undo_policy(proposed_policy), Err(Error::Budget("available physical RAM"))));
+        assert_eq!(coordinator.undo_policy(), previous_policy);
+        assert!(coordinator.undo_memory_stats().capture_change_pending, "failed refresh must mark the estimate stale");
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+        coordinator.set_physical_memory_sampler(|| Some((1024 * MIB, 768 * MIB)));
+        assert!(coordinator.undo_memory_bytes().is_ok());
+        coordinator.set_commit_memory_sampler(|| Some(crate::budget::memory::CommitMemory {
+            limit_bytes: 1024 * MIB, used_bytes: 768 * MIB,
+        }));
+        assert!(matches!(coordinator.undo_memory_bytes(), Err(Error::Budget("available system commit"))));
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), redo);
+        coordinator.set_commit_memory_sampler(|| Some(crate::budget::memory::CommitMemory {
+            limit_bytes: 1024 * MIB, used_bytes: 256 * MIB,
+        }));
+        assert!(coordinator.undo_memory_bytes().is_ok());
+        coordinator.refresh_undo_memory_inventory().unwrap();
+        assert!(!coordinator.undo_memory_stats().capture_change_pending);
+        coordinator.redo().unwrap();
+    }
+
+    #[test]
     fn transaction_planning_indexes_are_reserved_before_build_and_released_on_cancel() {
         use crate::budget::memory::MemoryClass;
         let limits = Limits::default();
@@ -6226,7 +9796,7 @@ mod retained_validation_tests {
         let source = coordinator.world.documents[&doc].stamp(id).unwrap();
         let result = coordinator.prepare_with_held_usage_and_guards(TransactionRequest::new("move", vec![Mutation::Placement {
             source, placement: Transform::translation([1., 0., 0.]),
-        }]), Usage::default(), || {
+        }]), Usage::default(), None, || {
             let reserved = coordinator.external_reserved_bytes(MemoryClass::CpuCache);
             assert!(reserved > 0);
             assert!(peer.retained_usage().unwrap().bytes >= peer_before + reserved);
@@ -6465,6 +10035,38 @@ mod retained_validation_tests {
         assert_eq!(coordinator.snapshot(), original);
         drop(guard);
         assert_eq!(coordinator.external_reserved_bytes(MemoryClass::CpuCache), 0);
+    }
+
+    #[test]
+    fn pending_reservation_merge_keeps_account_charged_and_rejects_wrong_owners() {
+        use crate::budget::memory::MemoryClass;
+        const MIB: u64 = 1024 * 1024;
+        let limits = Limits { max_bytes: 64 * MIB, ..Limits::default() };
+        let coordinator = TransactionCoordinator::new(World::new(vec![Document::new("merge")], &limits).unwrap(), limits).unwrap();
+        let foreign = TransactionCoordinator::new(World::new(vec![Document::new("foreign")], &limits).unwrap(), limits).unwrap();
+        let mut worker = coordinator.reserve_external_memory(MemoryClass::Kernel, 4 * MIB, None).unwrap();
+        worker.mark_allocated(3 * MIB).unwrap();
+        let mut foreign_guard = foreign.reserve_external_memory(MemoryClass::Kernel, MIB, None).unwrap();
+        assert!(matches!(worker.merge_pending_from(&mut foreign_guard), Err(Error::Invalid(_))));
+        let mut wrong_class = coordinator.reserve_external_memory(MemoryClass::Export, MIB, None).unwrap();
+        assert!(matches!(worker.merge_pending_from(&mut wrong_class), Err(Error::Invalid(_))));
+        let mut allocated = coordinator.reserve_external_memory(MemoryClass::Kernel, MIB, None).unwrap();
+        allocated.mark_allocated(1).unwrap();
+        assert!(matches!(worker.merge_pending_from(&mut allocated), Err(Error::Invalid(_))));
+        drop(allocated); drop(wrong_class); drop(foreign_guard);
+        let mut extra = coordinator.reserve_external_memory(MemoryClass::Kernel, 5 * MIB, None).unwrap();
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::Kernel), 9 * MIB);
+        assert_eq!(coordinator.external_pending_bytes(MemoryClass::Kernel), 6 * MIB);
+        worker.merge_pending_from(&mut extra).unwrap();
+        assert_eq!((worker.bytes(), worker.pending_bytes()), (9 * MIB, 6 * MIB));
+        assert_eq!((extra.bytes(), extra.pending_bytes()), (0, 0));
+        drop(extra);
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::Kernel), 9 * MIB);
+        worker.set_allocated_bytes(7 * MIB).unwrap();
+        assert_eq!(coordinator.external_pending_bytes(MemoryClass::Kernel), 2 * MIB);
+        drop(worker);
+        assert_eq!(coordinator.external_reserved_bytes(MemoryClass::Kernel), 0);
+        assert_eq!(coordinator.external_pending_bytes(MemoryClass::Kernel), 0);
     }
 
     #[test]
@@ -7128,6 +10730,36 @@ mod retained_validation_tests {
     }
 
     #[test]
+    fn single_insert_in_large_model_reuses_only_valid_immutable_candidate() {
+        let limits=Limits::default();let mut doc=Document::new("large retained model");let id=doc.id;
+        let vertices:Vec<_>=(0..10_001).map(|i|[i as f64,(i%2) as f64,0.]).collect();
+        let mesh=crate::geometry::Mesh {vertices,faces:vec![vec![0,1,2]],normals:Vec::new(),colors:Vec::new(),corner_uvs:Vec::new()};
+        let existing=Entity::new("mesh",Geometry::Mesh(mesh),None);doc.entities.insert(existing.id,existing);
+        let mut coordinator=TransactionCoordinator::new(World::new(vec![doc],&limits).unwrap(),limits).unwrap();
+        let other=Entity::new("redo",Geometry::Point([1.,2.,3.]),None);
+        let step=coordinator.prepare(TransactionRequest::new("point",vec![Mutation::Insert {document:id,entity:other}])).unwrap();
+        coordinator.commit(step).unwrap();coordinator.undo().unwrap();let before=coordinator.snapshot();
+        let current=&coordinator.world.documents[&id];let storage=current.storage_usage(&limits).unwrap();
+        let validated=coordinator.validate_retained_document(current,None,storage,&limits).unwrap();
+        assert_eq!(current.clone_owned_bytes_estimate_from_validated(validated).unwrap(),current.clone_owned_bytes_estimate(&limits).unwrap());
+        let insert=|point| TransactionRequest::new("one curve",vec![Mutation::Insert {document:id,
+            entity:Entity::new("point",Geometry::Point(point),None)}]);
+        assert!(coordinator.prepare(insert([f64::NAN,0.,0.])).is_err());assert_eq!(coordinator.snapshot(),before);assert_eq!(coordinator.redo_len(),1);
+        let ceiling=coordinator.limits.max_bytes;coordinator.limits.max_bytes=coordinator.retained_usage().unwrap().bytes;
+        assert!(matches!(coordinator.prepare(insert([4.,5.,6.])),Err(Error::Budget(_))));
+        assert_eq!(coordinator.snapshot(),before);assert_eq!(coordinator.redo_len(),1);coordinator.limits.max_bytes=ceiling;
+        let prepared=coordinator.prepare(insert([4.,5.,6.])).unwrap();let candidate=&prepared.entry.after[&id];
+        assert!(prepared.entry.validation_cache.0.lock().unwrap().iter().flatten().any(|proof|proof.address==Arc::as_ptr(candidate) as usize));
+        let storage=candidate.storage_usage(&limits).unwrap();let tight=Limits {max_name_bytes:0,..limits};
+        assert!(coordinator.validate_retained_document(candidate,Some(&prepared.entry),storage,&tight).is_err());
+        let mut changed=candidate.clone();Arc::make_mut(&mut changed).name="bad\0name".into();
+        let changed_storage=changed.storage_usage(&limits).unwrap();
+        assert!(coordinator.validate_retained_document(&changed,Some(&prepared.entry),changed_storage,&limits).is_err());
+        coordinator.commit(prepared).unwrap();coordinator.undo().unwrap();assert_eq!(coordinator.snapshot().world,before.world);
+        coordinator.redo().unwrap();assert_eq!(coordinator.world.documents[&id].entities.len(),2);
+    }
+
+    #[test]
     fn current_owner_proof_rechecks_tight_limits_and_copy_on_write() {
         let limits = Limits::default();
         let doc = Document::new("current owner");
@@ -7146,6 +10778,48 @@ mod retained_validation_tests {
         let changed_storage = changed.storage_usage(&limits).unwrap();
         assert!(!Arc::ptr_eq(original, &changed));
         assert!(coordinator.validate_retained_document(&changed, None, changed_storage, &limits).is_err());
+    }
+
+    #[test]
+    fn batch_insert_validation_proof_preserves_redo_and_checks_tight_limits() {
+        let limits = Limits::default();
+        let doc = Document::new("bulk candidate");
+        let id = doc.id;
+        let mut coordinator = TransactionCoordinator::new(World::new(vec![doc], &limits).unwrap(), limits).unwrap();
+        let initial = Entity::new("initial", Geometry::Point([0., 0., 0.]), None);
+        let first = coordinator.prepare(TransactionRequest::new("initial", vec![Mutation::Insert { document: id, entity: initial }])).unwrap();
+        coordinator.commit(first).unwrap();
+        coordinator.undo().unwrap();
+        let before = coordinator.snapshot();
+        let batch = |bad: bool| (0..20).map(|index| Mutation::Insert {
+            document: id,
+            entity: Entity::new("point", Geometry::Point([if bad && index == 19 { f64::NAN } else { index as f64 }, 0., 0.]), None),
+        }).collect();
+        assert!(coordinator.prepare(TransactionRequest::new("invalid batch", batch(true))).is_err());
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), 1);
+        let ceiling = coordinator.limits.max_bytes;
+        coordinator.limits.max_bytes = coordinator.retained_usage().unwrap().bytes;
+        assert!(matches!(coordinator.prepare(TransactionRequest::new("budget batch", batch(false))), Err(Error::Budget(_))));
+        assert_eq!(coordinator.snapshot(), before);
+        assert_eq!(coordinator.redo_len(), 1);
+        coordinator.limits.max_bytes = ceiling;
+        let prepared = coordinator.prepare(TransactionRequest::new("valid batch", batch(false))).unwrap();
+        let candidate = &prepared.entry.after[&id];
+        assert!(prepared.entry.validation_cache.0.lock().unwrap().iter().flatten()
+            .any(|proof| proof.address == Arc::as_ptr(candidate) as usize));
+        let storage = candidate.storage_usage(&limits).unwrap();
+        let tight = Limits { max_name_bytes: 0, ..limits };
+        assert!(coordinator.validate_retained_document(candidate, Some(&prepared.entry), storage, &tight).is_err());
+        let mut changed = candidate.clone();
+        Arc::make_mut(&mut changed).name = "bad\0name".into();
+        let changed_storage = changed.storage_usage(&limits).unwrap();
+        assert!(coordinator.validate_retained_document(&changed, Some(&prepared.entry), changed_storage, &limits).is_err());
+        coordinator.commit(prepared).unwrap();
+        coordinator.undo().unwrap();
+        assert_eq!(coordinator.snapshot().world, before.world);
+        coordinator.redo().unwrap();
+        assert_eq!(coordinator.world.documents[&id].entities.len(), 20);
     }
 
     #[test]

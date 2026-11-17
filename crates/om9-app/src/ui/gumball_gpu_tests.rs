@@ -54,6 +54,11 @@ fn frame_with_size(app: &mut MatrixApp, ctx: &egui::Context, events: Vec<egui::E
     app.gpu_state.as_ref().unwrap().device.poll(wgpu::PollType::wait_indefinitely()).unwrap();
 }
 
+fn frame_with_modifiers(app: &mut MatrixApp, ctx: &egui::Context, mut events: Vec<egui::Event>, size: egui::Vec2, modifiers: egui::Modifiers) {
+    events.insert(0, egui::Event::ModifiersChanged(modifiers));
+    frame_with_size(app, ctx, events, size);
+}
+
 fn settle(app: &mut MatrixApp, ctx: &egui::Context) {
     let deadline = Instant::now() + Duration::from_secs(10);
     loop {
@@ -61,6 +66,686 @@ fn settle(app: &mut MatrixApp, ctx: &egui::Context) {
         if app.gpu_viewports.get(&ViewId::Perspective).is_some_and(|p| p.final_complete() && p.displayed_camera().is_some()) { return; }
         assert!(Instant::now() < deadline, "Perspective GPU image never completed");
         std::thread::sleep(Duration::from_millis(2));
+    }
+}
+
+#[test]
+fn pending_history_keeps_published_gpu_image_until_pointer_release() {
+    let state = gpu().expect("GPU adapter required for this validation");
+    let mut app = MatrixApp::new(Document::with_template_tolerance("history GPU")).unwrap();
+    app.controller.submit("Point").unwrap(); app.controller.submit("1,2,3").unwrap();
+    app.gpu_state = Some(state);
+    let ctx = egui::Context::default(); settle(&mut app, &ctx);
+    let original = app.controller.scene().unwrap().publication_id();
+    let old_pixels = texture_rgba(&app, app.gpu_viewports[&ViewId::Perspective].published_texture().unwrap());
+    app.controller.request_history_worker(false).unwrap();
+    let pos = app.view_rects[&ViewId::Perspective].center();
+    frame(&mut app, &ctx, vec![egui::Event::PointerMoved(pos), egui::Event::PointerButton {
+        pos, button: egui::PointerButton::Primary, pressed: true, modifiers: egui::Modifiers::NONE,
+    }]);
+    assert!(app.controller.history_worker_pending());
+    assert_eq!(app.controller.scene().unwrap().publication_id(), original);
+    assert_eq!(app.controller.document().entities.len(), 1);
+    assert_eq!(texture_rgba(&app, app.gpu_viewports[&ViewId::Perspective].published_texture().unwrap()), old_pixels);
+    frame(&mut app, &ctx, vec![egui::Event::PointerButton {
+        pos, button: egui::PointerButton::Primary, pressed: false, modifiers: egui::Modifiers::NONE,
+    }]);
+    let deadline = Instant::now() + Duration::from_secs(30);
+    while app.controller.history_worker_pending() {
+        frame(&mut app, &ctx, vec![]);
+        assert!(Instant::now() < deadline, "history worker did not finish");
+    }
+    assert!(app.controller.document().entities.is_empty());
+    assert_ne!(app.controller.scene().unwrap().publication_id(), original);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+#[ignore = "explicitly inspect a saved desktop DupEdge result"]
+fn dupedge_saved_desktop_result_has_expected_circle() {
+    let path = std::env::var_os("OM9_DUPEDGE_DESKTOP_RESULT").expect("desktop result path");
+    let limits = om9_core::budget::Limits::default();
+    let document = om9_archive::Archive::open(std::path::Path::new(&path), &limits).unwrap();
+    let breps = document.entities.values().filter(|e| matches!(e.geometry, Geometry::Brep(_))).count();
+    let curves: Vec<_> = document.entities.values().filter_map(|e| match &e.geometry {
+        Geometry::Curve(curve) if e.label == "DupEdge" => Some(curve), _ => None,
+    }).collect();
+    assert_eq!((document.entities.len(), breps, curves.len()), (2, 1, 1));
+    for fraction in [0., 0.25, 0.5, 0.75] {
+        let p = om9_core::evaluation::evaluate_curve(curves[0], om9_core::evaluation::Parameter::Fraction(fraction),
+            0, Transform::identity(), &limits).unwrap()[0];
+        assert!((p[0].hypot(p[1]) - 2.).abs() < 1e-7 && (p[2] - 5.).abs() < 1e-7, "{p:?}");
+    }
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_reopens_old_display_and_reselects_in_viewport() {
+    dupedge_old_display_viewport(false,0);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_preselection_reopens_old_display_in_viewport() {
+    dupedge_old_display_viewport(true,0);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_reopened_old_view_reselects_and_recovers_memory() {
+    dupedge_old_display_viewport(false,1);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_reopened_old_view_worker_start_recovers_memory() {
+    dupedge_old_display_viewport(false,2);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_preselected_old_view_worker_start_recovers_memory() {
+    dupedge_old_display_viewport(true,2);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_old_view_worker_publication_recovers_memory() {
+    dupedge_old_display_viewport(false,3);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_worker_retries_repeated_memory_failures_after_one_consent() {
+    dupedge_old_display_viewport(false,4);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_worker_recovery_can_be_cancelled_while_waiting() {
+    dupedge_old_display_viewport(false,5);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_worker_recovery_stops_if_draft_changes_while_waiting() {
+    dupedge_old_display_viewport(false,6);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_worker_recovery_stops_if_selection_changes_while_waiting() {
+    dupedge_old_display_viewport(false,7);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_worker_recovery_does_not_discard_for_fixed_limit() {
+    dupedge_old_display_viewport(false,8);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_worker_recovery_exhaustion_preserves_drawing_and_redo() {
+    dupedge_old_display_viewport(false,9);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_preselected_worker_retry_without_unneeded_undo_removal() {
+    dupedge_old_display_viewport(true,10);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_worker_failure_retries_after_release_before_discarding_more() {
+    dupedge_old_display_viewport(false,11);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_worker_recovery_stops_if_root_selection_changes() {
+    dupedge_old_display_viewport(false,12);
+}
+
+#[cfg(feature = "occt-brep")]
+fn dupedge_old_display_viewport(preselected: bool, recovery_stage: u8) {
+    use om9_scene::workspace::DisplayMode;
+    let Some(state) = gpu() else { eprintln!("SKIP: no GPU adapter"); return };
+    let limits = om9_core::budget::Limits::default();
+    let shape = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Cylinder { radius_mm: 2., height_mm: 5. }, 0.01, &limits).unwrap();
+    let mut display = shape.display().clone();
+    let edge = display.segments.iter().find(|s| {
+        let a = display.points[s[0] as usize]; let b = display.points[s[1] as usize];
+        (a[2] - 5.).abs() < 1e-8 && (b[2] - 5.).abs() < 1e-8
+    }).unwrap()[2];
+    display.segments.retain(|s| s[2] != edge);
+    let first = display.points.len() as u32;
+    display.points.extend([[2., 0., 5.], [0., 2., 5.]]);
+    display.segments.push([first, first + 1, edge]);
+    let shape = om9_core::brep::Brep::from_native(shape.source().to_owned(), display, &limits).unwrap();
+    let mut document = Document::with_template_tolerance("DupEdge old display viewport");
+    let entity = Entity::new("cylinder", Geometry::Brep(shape), document.current_layer);
+    let id = entity.id;
+    document.entities.insert(id, entity);
+    let desktop_fixture = std::env::var_os("OM9_DUPEDGE_DESKTOP_FIXTURE").map(std::path::PathBuf::from);
+    let path = desktop_fixture.clone().unwrap_or_else(||
+        std::env::temp_dir().join(format!("om9-dupedge-old-ui-{}.om9", uuid::Uuid::new_v4())));
+    if desktop_fixture.is_some() { assert!(!path.exists(), "desktop fixture destination already exists"); }
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    if desktop_fixture.is_none() { std::fs::remove_file(path).unwrap(); }
+    if recovery_stage != 0 {
+        use om9_core::{budget::Limits,geometry::Mesh};
+        let mut resumed=app.controller.document().clone();
+        let old=Entity::new("history mesh",Geometry::Mesh(Mesh {vertices:vec![[1.,1.,1.];400000],faces:vec![],normals:vec![],colors:vec![],corner_uvs:vec![]}),None);
+        let old_id=old.id;resumed.entities.insert(old_id,old);
+        let extra=if recovery_stage>=4 {let entity=Entity::new("second history mesh",Geometry::Mesh(Mesh {
+            vertices:vec![[2.,2.,2.];3],faces:vec![],normals:vec![],colors:vec![],corner_uvs:vec![]}),None);
+            let id=entity.id;resumed.entities.insert(id,entity);Some(id)}else{None};
+        let memory_limits=Limits {max_bytes:64*1024*1024,..Limits::default()};
+        app.controller=crate::session::Controller::new(resumed,memory_limits).unwrap();
+        app.controller.delete_objects(&[old_id]).unwrap();if let Some(id)=extra {app.controller.delete_objects(&[id]).unwrap();}
+        app.controller.submit("Point").unwrap();
+        app.controller.submit("100,100,100").unwrap();app.controller.undo().unwrap();
+    }
+    app.gpu_state = Some(state);
+    app.controller.workspace.active = ViewId::Perspective;
+    let view = app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap();
+    view.camera = Camera::orthographic([8., -10., 20.], [0., 0., 2.5], [0., 0., 1.], 10.).unwrap();
+    view.mode = DisplayMode::Wireframe;
+    let ctx = egui::Context::default();
+    settle(&mut app, &ctx);
+    if !preselected {
+        app.transcript.set_draft("DupEdge");
+        app.submit_draft();
+        assert!(app.controller.dupedge_needs_pick());
+        settle(&mut app, &ctx);
+    }
+    app.sub_object_kind = om9_scene::scene::PickKind::Edge;
+    let click = |app: &mut MatrixApp, point: [f64; 3], modifiers: egui::Modifiers| {
+        let rect = app.view_rects[&ViewId::Perspective];
+        let viewport = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+        let camera = app.gpu_viewports[&ViewId::Perspective].displayed_camera().unwrap();
+        let screen = camera.project(point, viewport).unwrap().unwrap().screen;
+        let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+        let button = |pressed| egui::Event::PointerButton { pos, button: egui::PointerButton::Primary, pressed, modifiers };
+        frame_with_modifiers(app, &ctx, vec![egui::Event::PointerMoved(pos), button(true)], egui::vec2(1280., 720.), modifiers);
+        frame_with_modifiers(app, &ctx, vec![button(false)], egui::vec2(1280., 720.), modifiers);
+    };
+    let modifiers = if preselected { egui::Modifiers { ctrl: true, shift: true, ..Default::default() } } else { egui::Modifiers::NONE };
+    click(&mut app, [1., 1., 5.], modifiers);
+    assert_eq!(app.controller.subselection().len(), 1, "old display chord must be picked");
+    let mut startup_pressure=if recovery_stage==2 || recovery_stage>=4 {
+        let mut pressure=app.controller.coordinator().reserve_remaining_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel,None,app.controller.scene_cache_usage().unwrap()).unwrap();
+        pressure.shrink_to(pressure.bytes()-1024*1024).unwrap();Some(pressure)
+    } else {None};
+    if recovery_stage==2 || recovery_stage>=4 {
+        let (result,refresh)=app.controller.probe_dupedge_source_picks_for_test();
+        assert!(result.is_err() && refresh,"the old chord must reach the source-view request, not fail admission first");
+        if !preselected {
+            assert!(matches!(app.controller.request_dupedge_source_view(id),Err(Error::Budget(_))),"worker reservation must fail under pressure");
+        }
+    }
+    if preselected && recovery_stage==10 {app.transcript.set_draft("OM9-CURVE-040");app.submit_draft();}
+    else if preselected { app.invoke("OM9-CURVE-040", InvocationOrigin::Menu); }
+    else { app.transcript.set_draft(""); app.submit_draft(); }
+    if recovery_stage==2 || recovery_stage>=4 {
+        assert!(app.memory_recovery_open,"{}",app.status_line());assert!(!app.controller.dupedge_source_view_pending());
+        assert_eq!(app.controller.coordinator().redo_len(),1);assert_eq!(app.controller.subselection().len(),1);
+        for _ in 0..3 {frame(&mut app,&ctx,vec![]);}assert_eq!(app.controller.coordinator().undo_len(),if recovery_stage>=4 {2}else{1});
+        if recovery_stage==10 {drop(startup_pressure.take());}
+        let pos=ctx.data(|d|d.get_temp::<Rect>(egui::Id::new("memory-recovery-remove"))).unwrap().center();
+        for pressed in [true,false] {frame(&mut app,&ctx,vec![egui::Event::PointerMoved(pos),egui::Event::PointerButton {
+            pos,button:egui::PointerButton::Primary,pressed,modifiers:egui::Modifiers::NONE}]);}
+        if (4..=9).contains(&recovery_stage) || recovery_stage==11 || recovery_stage==12 {
+            assert!(app.memory_recovery_open && app.memory_recovery_running);assert_eq!(app.memory_recovery_removed,1);
+            let deadline=Instant::now()+Duration::from_secs(15);
+            while !app.controller.dupedge_source_view_pending() {
+                assert!(Instant::now()<deadline && app.memory_recovery_open && app.memory_recovery_removed==1,"{}",app.status_line());
+                frame(&mut app,&ctx,vec![]);
+            }
+            if recovery_stage==4 || recovery_stage==9 || recovery_stage==11 {
+                while app.controller.dupedge_source_view_worker_active() {assert!(Instant::now()<deadline);std::thread::yield_now();}
+                if recovery_stage==11 {drop(startup_pressure.take());}
+                app.controller.inject_dupedge_source_view_error_for_test(Error::Budget("bytes")).unwrap();
+                frame(&mut app,&ctx,vec![]);
+                assert!(app.memory_recovery_open && app.memory_recovery_running,"recovery must not ask for consent again");
+                assert_eq!(app.memory_recovery_removed,1,"the first worker failure must retry before deleting more history");
+                if recovery_stage!=11 {
+                    while !app.controller.dupedge_source_view_pending() {assert!(Instant::now()<deadline && app.memory_recovery_open);frame(&mut app,&ctx,vec![]);}
+                    while app.controller.dupedge_source_view_worker_active() {assert!(Instant::now()<deadline);std::thread::yield_now();}
+                    app.controller.inject_dupedge_source_view_error_for_test(Error::Budget("bytes")).unwrap();frame(&mut app,&ctx,vec![]);
+                    assert_eq!(app.memory_recovery_removed,2,"only a failed retry may remove the next old Undo");
+                }
+                if recovery_stage==9 {
+                    let before=app.controller.document().clone();
+                    for _ in 0..2 {
+                        while !app.controller.dupedge_source_view_pending() {assert!(Instant::now()<deadline && app.memory_recovery_open);frame(&mut app,&ctx,vec![]);}
+                        while app.controller.dupedge_source_view_worker_active() {assert!(Instant::now()<deadline);std::thread::yield_now();}
+                        app.controller.inject_dupedge_source_view_error_for_test(Error::Budget("bytes")).unwrap();frame(&mut app,&ctx,vec![]);
+                    }
+                    assert!(!app.memory_recovery_open);assert!(!app.controller.dupedge_source_view_pending());
+                    assert_eq!(app.controller.document(),&before);assert_eq!(app.controller.coordinator().undo_len(),0);
+                    assert_eq!(app.controller.coordinator().redo_len(),1);assert!(app.controller.dupedge_needs_pick());
+                    assert!(app.status_line().contains("did not complete"),"{}",app.status_line());
+                    drop(startup_pressure);return;
+                }
+            } else {
+                let before=app.controller.document().clone();
+                if recovery_stage==5 {
+                    let cancel=ctx.data(|d|d.get_temp::<Rect>(egui::Id::new("memory-recovery-cancel"))).unwrap().center();
+                    frame(&mut app,&ctx,vec![egui::Event::PointerMoved(cancel),egui::Event::PointerButton {
+                        pos:cancel,button:egui::PointerButton::Primary,pressed:true,modifiers:egui::Modifiers::NONE}]);
+                } else if recovery_stage==6 {app.transcript.set_draft("changed");frame(&mut app,&ctx,vec![]);}
+                else if recovery_stage==7 {app.controller.clear_subselection();frame(&mut app,&ctx,vec![]);}
+                else if recovery_stage==12 {
+                    while app.controller.dupedge_source_view_worker_active() {assert!(Instant::now()<deadline);std::thread::yield_now();}
+                    drop(startup_pressure.take());
+                    let ids=if app.controller.selected().contains(&id) {vec![]}else{vec![id]};
+                    app.controller.select_objects(&ids).unwrap();frame(&mut app,&ctx,vec![]);
+                    assert!(app.status_line().contains("stale"),"{}",app.status_line());
+                }
+                else {
+                    while app.controller.dupedge_source_view_worker_active() {assert!(Instant::now()<deadline);std::thread::yield_now();}
+                    app.controller.inject_dupedge_source_view_error_for_test(Error::Budget("DupEdge source-view budget")).unwrap();
+                    frame(&mut app,&ctx,vec![]);
+                }
+                assert!(!app.memory_recovery_open);assert!(!app.controller.dupedge_source_view_pending());
+                assert_eq!(app.controller.document(),&before);assert_eq!(app.controller.coordinator().undo_len(),1);
+                assert_eq!(app.controller.coordinator().redo_len(),1);assert!(app.controller.dupedge_needs_pick());
+                if recovery_stage==6 {assert_eq!(app.transcript.draft(),"changed");}
+                drop(startup_pressure);return;
+            }
+        }
+        let deadline=Instant::now()+Duration::from_secs(15);
+        while app.memory_recovery_open {assert!(Instant::now()<deadline,"recovery timeout");frame(&mut app,&ctx,vec![]);}
+        assert!(!app.memory_recovery_open,"{}",app.status_line());
+        assert_eq!(app.memory_recovery_removed,if recovery_stage==4 {2}else if recovery_stage==10 {0}else{1},"{}",app.status_line());
+        if recovery_stage==10 {assert_eq!(app.controller.coordinator().undo_len(),2);assert_eq!(app.controller.coordinator().redo_len(),1);assert_eq!(app.transcript.draft(),"");}
+        assert!(app.status.tail().iter().any(|message|message.contains("source view started")),"{} | {}",app.status_line(),app.transcript.history());
+    }
+    if recovery_stage==3 {
+        assert!(app.controller.dupedge_source_view_pending());
+        let deadline=Instant::now()+Duration::from_secs(20);
+        while app.controller.dupedge_source_view_worker_active() {assert!(Instant::now()<deadline);std::thread::yield_now();}
+        let mut pressure=app.controller.coordinator().reserve_remaining_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel,None,app.controller.scene_cache_usage().unwrap()).unwrap();
+        pressure.shrink_to(pressure.bytes()-1024).unwrap();
+        frame(&mut app,&ctx,vec![]);
+        assert!(app.memory_recovery_open,"{}",app.status_line());assert!(!app.controller.dupedge_source_view_pending());
+        assert_eq!(app.controller.coordinator().redo_len(),1);assert_eq!(app.controller.subselection().len(),1);
+        let mut released=app.controller.coordinator().reserve_remaining_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel,None,app.controller.scene_cache_usage().unwrap()).unwrap();
+        released.shrink_to(released.bytes()-1024).unwrap();
+        for _ in 0..3 {frame(&mut app,&ctx,vec![]);}assert_eq!(app.controller.coordinator().undo_len(),1);
+        let pos=ctx.data(|d|d.get_temp::<Rect>(egui::Id::new("memory-recovery-remove"))).unwrap().center();
+        for pressed in [true,false] {frame(&mut app,&ctx,vec![egui::Event::PointerMoved(pos),egui::Event::PointerButton {
+            pos,button:egui::PointerButton::Primary,pressed,modifiers:egui::Modifiers::NONE}]);}
+        let deadline=Instant::now()+Duration::from_secs(15);
+        while app.memory_recovery_open {assert!(Instant::now()<deadline,"recovery timeout");frame(&mut app,&ctx,vec![]);}
+        assert!(!app.memory_recovery_open,"{}",app.status_line());assert_eq!(app.memory_recovery_removed,1,"{}",app.status_line());
+        assert!(app.status.tail().iter().any(|message|message.contains("source view started")),"{}",app.status_line());
+        drop(released);drop(pressure);
+    }
+    drop(startup_pressure);
+    if recovery_stage<2 {assert!(app.controller.dupedge_source_view_pending());}
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while app.controller.dupedge_source_view_pending() {
+        assert!(Instant::now() < deadline);
+        frame(&mut app, &ctx, vec![]);
+    }
+    assert!(app.status.tail().iter().any(|message| message.contains("source view ready")),
+        "recovery must report readiness: {}", app.status_line());
+    assert!(app.transcript.history().contains("source view ready; select the edge again"));
+    assert!(!app.status_line().starts_with("Error:"), "recovery must not leave a stale error: {}", app.status_line());
+    settle(&mut app, &ctx);
+    let stamp = app.controller.document().stamp(id).unwrap();
+    let view = app.controller.scene().unwrap().root_brep_pick_display(&stamp).unwrap();
+    let segment = view.segments.iter().find(|s| {
+        let a = view.points[s[0] as usize]; let b = view.points[s[1] as usize];
+        (a[2] - 5.).abs() < 1e-8 && (b[2] - 5.).abs() < 1e-8
+            && a[0] > 0.5 && a[1] > 0.5 && b[0] > 0.5 && b[1] > 0.5
+    }).expect("regenerated circular edge");
+    let a = view.points[segment[0] as usize]; let b = view.points[segment[1] as usize];
+    let point = std::array::from_fn(|i| (a[i] + b[i]) * 0.5);
+    click(&mut app, point, egui::Modifiers::NONE);
+    assert_eq!(app.controller.dupedge_temporary_picks().count(), 1, "refreshed edge must be picked: {}", app.status_line());
+    let before=app.controller.document().clone();
+    let pressure=if recovery_stage==1 {
+        let mut pressure=app.controller.coordinator().reserve_remaining_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel,None,app.controller.scene_cache_usage().unwrap()).unwrap();
+        pressure.shrink_to(pressure.bytes()-1024).unwrap();Some(pressure)
+    } else {None};
+    app.transcript.set_draft("");
+    app.submit_draft();
+    if recovery_stage==1 {
+        assert!(app.memory_recovery_open,"{}",app.status_line());assert_eq!(app.controller.document(),&before);
+        assert_eq!(app.controller.coordinator().redo_len(),1);assert_eq!(app.controller.dupedge_temporary_picks().count(),1);
+        for _ in 0..3 {frame(&mut app,&ctx,vec![]);}assert_eq!(app.controller.coordinator().undo_len(),1);
+        let pos=ctx.data(|d|d.get_temp::<Rect>(egui::Id::new("memory-recovery-remove"))).unwrap().center();
+        for pressed in [true,false] {frame(&mut app,&ctx,vec![egui::Event::PointerMoved(pos),egui::Event::PointerButton {
+            pos,button:egui::PointerButton::Primary,pressed,modifiers:egui::Modifiers::NONE}]);}
+        for _ in 0..5 {if app.memory_recovery_open {frame(&mut app,&ctx,vec![]);}}
+        assert!(!app.memory_recovery_open,"{}",app.status_line());assert_eq!(app.memory_recovery_removed,1,"{}",app.status_line());
+    }
+    drop(pressure);
+    assert!(!app.controller.dupedge_needs_pick(), "DupEdge should finish: {}", app.status_line());
+    let output = app.controller.document().entities.values().find(|entity| entity.id != id).unwrap();
+    let Geometry::Curve(curve) = &output.geometry else { panic!("expected curve") };
+    for fraction in [0., 0.25, 0.5, 0.75] {
+        let p = om9_core::evaluation::evaluate_curve(curve, om9_core::evaluation::Parameter::Fraction(fraction),
+            0, Transform::identity(), &limits).unwrap()[0];
+        assert!((p[0].hypot(p[1]) - 2.).abs() < 1e-7 && (p[2] - 5.).abs() < 1e-7);
+    }
+    app.controller.undo().unwrap(); assert_eq!(app.controller.document().entities.len(), 1);
+    app.controller.redo().unwrap(); assert_eq!(app.controller.document().entities.len(), 2);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn overlapping_brep_popup_row_selects_once_on_gpu_viewport() {
+    for row in [0, 1] { overlapping_brep_popup_choice(row); }
+}
+
+#[cfg(feature = "occt-brep")]
+fn overlapping_brep_popup_choice(row: usize) {
+    let gpu = gpu().expect("GPU adapter required");
+    let limits = om9_core::budget::Limits::default();
+    let body = om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Sphere {radius_mm: 3.},0.01,&limits).unwrap();
+    let mut document = Document::new("overlapping B-reps");
+    for name in ["sphere", "Boolean Union"] {
+        let entity = Entity::new(name, Geometry::Brep(body.clone()), None);
+        document.entities.insert(entity.id, entity);
+    }
+    let mut app = MatrixApp::new(document).unwrap();
+    app.controller.submit("Point").unwrap(); app.controller.submit("20,20,20").unwrap(); app.controller.undo().unwrap();
+    let before=app.controller.document().clone(); assert_eq!(app.controller.coordinator().redo_len(),1);
+    app.gpu_state = Some(gpu);
+    app.controller.workspace.active = ViewId::Perspective;
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera =
+        Camera::orthographic([0.,0.,20.],[0.,0.,0.],[0.,1.,0.],12.).unwrap();
+    let ctx = egui::Context::default(); settle(&mut app, &ctx);
+    let rect=app.view_rects[&ViewId::Perspective];
+    let viewport=Viewport {origin:[rect.min.x as f64,rect.min.y as f64],size:[rect.width() as f64,rect.height() as f64]};
+    let point=app.gpu_viewports[&ViewId::Perspective].displayed_camera().unwrap().project([3.,0.,0.],viewport).unwrap().unwrap().screen;
+    let position=egui::pos2(point[0] as f32,point[1] as f32);
+    let click=|app: &mut MatrixApp, position: egui::Pos2| {
+        frame(app,&ctx,vec![egui::Event::PointerMoved(position)]);
+        for pressed in [true,false] { frame(app,&ctx,vec![egui::Event::PointerButton {
+            pos:position,button:egui::PointerButton::Primary,pressed,modifiers:egui::Modifiers::NONE}]);
+        }
+    };
+    click(&mut app,position); assert_eq!(app.ambiguous_candidates().len(),2,"overlapping solids must offer two rows");
+    for _ in 0..3 {frame(&mut app,&ctx,vec![]);}
+    let chosen=app.ambiguous_candidates()[row];
+    let popup=ctx.memory(|m|m.area_rect(egui::Id::new("om9-pick-popup"))).expect("popup area");
+    click(&mut app,popup.min+egui::vec2(55.,35.+19.*row as f32));
+    for _ in 0..3 {frame(&mut app,&ctx,vec![]);}
+    assert!(app.ambiguous_candidates().is_empty(),"popup reopened after selecting a B-rep");
+    assert!(app.controller.selected().contains(&chosen),"clicked candidate was not selected: {:?}", app.controller.selected());
+    assert_eq!(app.controller.document(),&before); assert_eq!(app.controller.coordinator().redo_len(),1);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn reopened_trimmed_surface_hole_is_visible_in_gpu_viewport() {
+    use om9_core::{budget::Limits,rhino_semantics::{set_trimmed_surface,TrimmedSurface},surface_kernel};
+    use om9_scene::workspace::DisplayMode;
+    let state=gpu().expect("GPU adapter required for this validation");let limits=Limits::default();
+    let surface=surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.1,0.1],[0.9,0.1],[0.9,0.9],[0.1,0.9]],
+        inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("trimmed",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut doc=Document::new("trim GPU");doc.entities.insert(id,entity);
+    let path=std::env::temp_dir().join(format!("om9-trim-gpu-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app=MatrixApp::from_file(&path).unwrap();std::fs::remove_file(path).unwrap();
+    app.gpu_state=Some(state);app.controller.workspace.active=ViewId::Perspective;
+    let view=app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap();
+    view.camera=Camera::orthographic([5.,5.,20.],[5.,5.,0.],[0.,1.,0.],12.).unwrap();view.mode=DisplayMode::Shaded;
+    let ctx=egui::Context::default();settle(&mut app,&ctx);
+    let port=&app.gpu_viewports[&ViewId::Perspective];let texture=port.published_texture().unwrap();
+    let (width,height)=(texture.width() as usize,texture.height() as usize);let rect=app.view_rects[&ViewId::Perspective];
+    let viewport=Viewport {origin:[rect.min.x as f64,rect.min.y as f64],size:[rect.width() as f64,rect.height() as f64]};
+    let project=|point| {let p=port.displayed_camera().unwrap().project(point,viewport).unwrap().unwrap().screen;
+        (((p[0]-viewport.origin[0])*width as f64/viewport.size[0]).floor() as usize,
+         ((p[1]-viewport.origin[1])*height as f64/viewport.size[1]).floor() as usize)};
+    let material=project([2.5,2.5,0.]);let hole=project([5.,5.,0.]);let outside=project([9.5,9.5,0.]);
+    let with_surface=texture_rgba(&app,texture);
+    app.controller.delete_objects(&[id]).unwrap();for _ in 0..15 {frame(&mut app,&ctx,vec![]);}settle(&mut app,&ctx);
+    let without=texture_rgba(&app,app.gpu_viewports[&ViewId::Perspective].published_texture().unwrap());
+    let pixel=|image:&[u8],(x,y):(usize,usize)| -> [u8;4] {let i=(y*width+x)*4;image[i..i+4].try_into().unwrap()};
+    assert_ne!(pixel(&with_surface,material),pixel(&without,material),"retained surface must be visible");
+    assert_eq!(pixel(&with_surface,hole),pixel(&without,hole),"trim hole must remain empty");
+    assert_eq!(pixel(&with_surface,outside),pixel(&without,outside),"outside trim must remain empty");
+    app.controller.undo().unwrap();for _ in 0..15 {frame(&mut app,&ctx,vec![]);}settle(&mut app,&ctx);
+    let restored=texture_rgba(&app,app.gpu_viewports[&ViewId::Perspective].published_texture().unwrap());
+    for sample in [material,hole,outside] {assert_eq!(pixel(&with_surface,sample),pixel(&restored,sample),"Undo must restore the published trim display");}
+    app.controller.redo().unwrap();for _ in 0..15 {frame(&mut app,&ctx,vec![]);}settle(&mut app,&ctx);
+    let removed_again=texture_rgba(&app,app.gpu_viewports[&ViewId::Perspective].published_texture().unwrap());
+    for sample in [material,hole,outside] {assert_eq!(pixel(&without,sample),pixel(&removed_again,sample),"Redo must restore the removed display");}
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn certified_intersection_reopened_result_renders_and_undoes_in_gpu_viewport() {
+    use om9_scene::workspace::DisplayMode;
+    use om9_kernel::{creation::{self, Primitive}, transform_ops};
+    let state = gpu().expect("GPU adapter required for this validation");
+    let limits = om9_core::budget::Limits::default();
+    let sphere = creation::primitive(Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let rotation = transform_ops::rotation([0.; 3], [1., 0., 0.], std::f64::consts::FRAC_PI_4).unwrap();
+    let sphere = transform_ops::transform_brep(&sphere, &rotation, 0.01, &limits).unwrap();
+    let block = creation::primitive(Primitive::Box { x_mm: 2., y_mm: 8., z_mm: 8. }, 0.01, &limits).unwrap();
+    let placement = Transform([[2.,0.,0.,0.],[0.,1.,0.,-4.],[0.,0.,1.,-4.],[0.,0.,0.,1.]]);
+    let block = transform_ops::transform_brep(&block, &placement, 0.01, &limits).unwrap();
+    let mut doc = Document::new("certified Intersection GPU");
+    let a = Entity::new("sphere", Geometry::Brep(sphere), None);
+    let b = Entity::new("box", Geometry::Brep(block), None);
+    let ids = [a.id, b.id]; doc.entities.insert(a.id, a); doc.entities.insert(b.id, b);
+    let path = std::env::temp_dir().join(format!("om9-intersection-gpu-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &doc, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap(); std::fs::remove_file(path).unwrap();
+    app.gpu_state = Some(state); app.controller.workspace.active = ViewId::Perspective;
+    let view = app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap();
+    view.camera = Camera::orthographic([12., -15., 20.], [0., 0., 0.], [0., 0., 1.], 12.).unwrap();
+    view.mode = DisplayMode::Shaded;
+    let ctx = egui::Context::default(); settle(&mut app, &ctx);
+    app.controller.select_objects(&ids).unwrap();
+    let before = app.controller.document().clone();
+    app.invoke("OM9-SOLID-004", InvocationOrigin::Menu);
+    for command in ["DeleteInput=Yes", "Intersection", ""] {
+        app.transcript.set_draft(command); app.submit_draft();
+        assert!(!app.status_line().starts_with("Error:"), "{}", app.status_line());
+    }
+    let after = app.controller.document().clone();
+    assert_eq!(after.entities.len(), 1);
+    let (id, entity) = after.entities.iter().next().unwrap();
+    let Geometry::Brep(body) = &entity.geometry else { panic!("B-rep result") };
+    let m = creation::measure(body, &limits).unwrap();
+    assert!((m.volume_mm3 - 18. * std::f64::consts::PI).abs() < 1e-5 && m.closed && m.naked_edges == 0);
+    app.controller.undo().unwrap(); assert_eq!(app.controller.document(), &before);
+    app.controller.redo().unwrap(); assert_eq!(app.controller.document(), &after);
+    for _ in 0..15 { frame(&mut app, &ctx, vec![]); } settle(&mut app, &ctx);
+    let port = &app.gpu_viewports[&ViewId::Perspective];
+    let texture = port.published_texture().unwrap();
+    let (width, height) = (texture.width() as usize, texture.height() as usize);
+    let rect = app.view_rects[&ViewId::Perspective];
+    let viewport = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+    let scale = 3. / (12f64 * 12. + 15. * 15. + 20. * 20.).sqrt();
+    let screen = port.displayed_camera().unwrap().project([12. * scale, -15. * scale, 20. * scale], viewport).unwrap().unwrap().screen;
+    let with_result = texture_rgba(&app, texture);
+    app.controller.delete_objects(&[*id]).unwrap();
+    for _ in 0..15 { frame(&mut app, &ctx, vec![]); } settle(&mut app, &ctx);
+    let without_result = texture_rgba(&app, app.gpu_viewports[&ViewId::Perspective].published_texture().unwrap());
+    let changed = with_result.chunks_exact(4).zip(without_result.chunks_exact(4)).filter(|(a,b)| a != b).count();
+    assert!(changed > 100, "result did not visibly change enough pixels: {changed}");
+    let x = ((screen[0] - viewport.origin[0]) * width as f64 / viewport.size[0]).floor() as isize;
+    let y = ((screen[1] - viewport.origin[1]) * height as f64 / viewport.size[1]).floor() as isize;
+    let mut near_sphere = false;
+    for dy in -3..=3 { for dx in -3..=3 {
+        let (px, py) = (x + dx, y + dy);
+        if px >= 0 && py >= 0 && (px as usize) < width && (py as usize) < height {
+            let i = (py as usize * width + px as usize) * 4;
+            near_sphere |= with_result[i..i+4] != without_result[i..i+4];
+        }
+    }}
+    assert!(near_sphere, "no result pixels near the expected sphere surface");
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn extract_wireframe_reopened_box_uses_published_gpu_viewport_and_one_undo() {
+    use om9_scene::workspace::DisplayMode;
+    let state=gpu().expect("GPU adapter required for this validation");
+    let limits=om9_core::budget::Limits::default();
+    let shape=om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Box {x_mm:4.,y_mm:5.,z_mm:6.},0.01,&limits).unwrap();
+    let mut doc=Document::new("ExtractWireframe GPU");
+    let entity=Entity::new("box",Geometry::Brep(shape),None); let id=entity.id; doc.entities.insert(id,entity);
+    let path=std::env::temp_dir().join(format!("om9-wireframe-gpu-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app=MatrixApp::from_file(&path).unwrap(); std::fs::remove_file(path).unwrap();
+    app.gpu_state=Some(state); app.controller.workspace.active=ViewId::Perspective;
+    let view=app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap();
+    view.camera=Camera::orthographic([12.,-15.,20.],[2.,2.5,3.],[0.,0.,1.],12.).unwrap();
+    view.mode=DisplayMode::Wireframe;
+    let ctx=egui::Context::default(); settle(&mut app,&ctx);
+    let rect=app.view_rects[&ViewId::Perspective];
+    let viewport=Viewport {origin:[rect.min.x as f64,rect.min.y as f64],size:[rect.width() as f64,rect.height() as f64]};
+    let camera=app.gpu_viewports[&ViewId::Perspective].displayed_camera().unwrap();
+    let screen=camera.project([2.,0.,6.],viewport).unwrap().unwrap().screen;
+    let pos=egui::pos2(screen[0] as f32,screen[1] as f32);
+    for pressed in [true,false] {frame(&mut app,&ctx,vec![egui::Event::PointerMoved(pos),egui::Event::PointerButton {
+        pos,button:egui::PointerButton::Primary,pressed,modifiers:egui::Modifiers::NONE}]);}
+    assert!(app.selected_objects().contains(&id),"box must be selected on the published image");
+    let before=app.controller.document().clone();
+    app.invoke("OM9-CURVE-054",InvocationOrigin::Menu);
+    let deadline=std::time::Instant::now()+std::time::Duration::from_secs(30);
+    while app.controller.brep_wireframe_worker_pending() {
+        frame(&mut app,&ctx,vec![]);
+        assert!(std::time::Instant::now()<deadline,"ExtractWireframe worker timed out");
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
+    let curves:Vec<_>=app.controller.document().entities.values().filter(|e|e.label=="ExtractWire").collect();
+    assert_eq!(curves.len(),12,"{}",app.status_line());
+    let mut edges=std::collections::BTreeSet::new(); let mut midpoints=Vec::new(); let mut curve_ids=Vec::new();
+    for entity in curves {
+        curve_ids.push(entity.id);
+        let Geometry::Curve(curve)=&entity.geometry else {panic!("curve")};
+        let eval=|t|om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(t),0,entity.placement,&limits).unwrap()[0];
+        let (a,b)=(eval(0.),eval(1.)); midpoints.push(eval(0.5));
+        for p in [a,b] {assert!(p.iter().zip([4.,5.,6.]).all(|(v,d)|v.abs()<1e-8||(*v-d).abs()<1e-8));}
+        let corner=|p:[f64;3]|[p[0]>2.,p[1]>2.5,p[2]>3.]; let (a,b)=(corner(a),corner(b));
+        assert_eq!((0..3).filter(|i|a[*i]!=b[*i]).count(),1);
+        assert!(edges.insert(if a<b {(a,b)} else {(b,a)}));
+    }
+    assert_eq!(edges.len(),12); let after=app.controller.document().clone();
+    settle(&mut app,&ctx); assert!(app.gpu_viewports[&ViewId::Perspective].published_texture().is_some());
+    app.controller.undo().unwrap(); assert_eq!(app.controller.document(),&before);
+    app.controller.redo().unwrap(); assert_eq!(app.controller.document(),&after);
+    app.controller.delete_objects(&[id]).unwrap();
+    for _ in 0..15 {frame(&mut app,&ctx,vec![]);} settle(&mut app,&ctx);
+    let port=&app.gpu_viewports[&ViewId::Perspective]; let texture=port.published_texture().unwrap();
+    let (width,height)=(texture.width() as usize,texture.height() as usize);
+    let with_curves=texture_rgba(&app,texture);
+    let rect=app.view_rects[&ViewId::Perspective];
+    let viewport=Viewport {origin:[rect.min.x as f64,rect.min.y as f64],size:[rect.width() as f64,rect.height() as f64]};
+    let camera=port.displayed_camera().unwrap().clone();
+    app.controller.delete_objects(&curve_ids).unwrap();
+    for _ in 0..15 {frame(&mut app,&ctx,vec![]);} settle(&mut app,&ctx);
+    let without_curves=texture_rgba(&app,app.gpu_viewports[&ViewId::Perspective].published_texture().unwrap());
+    for point in midpoints {
+        let screen=camera.project(point,viewport).unwrap().unwrap().screen;
+        let x=((screen[0]-viewport.origin[0])*width as f64/viewport.size[0]).floor() as isize;
+        let y=((screen[1]-viewport.origin[1])*height as f64/viewport.size[1]).floor() as isize;
+        let mut changed=false;
+        for dy in -3..=3 {for dx in -3..=3 {
+            let (x,y)=(x+dx,y+dy);
+            if x>=0 && y>=0 && (x as usize)<width && (y as usize)<height {
+                let i=(y as usize*width+x as usize)*4;
+                changed |= with_curves[i..i+4]!=without_curves[i..i+4];
+            }
+        }}
+        assert!(changed,"no extracted curve pixels near {point:?}");
+    }
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn dupedge_rejects_mode_change_until_gpu_image_is_published() {
+    use om9_scene::workspace::DisplayMode;
+    let Some(state) = gpu() else { eprintln!("SKIP: no GPU adapter"); return };
+    let limits = om9_core::budget::Limits::default();
+    let back = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, 0.01, &limits).unwrap();
+    let front = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 6., y_mm: 4., z_mm: 2. }, 0.01, &limits).unwrap();
+    let mut document = Document::with_template_tolerance("DupEdge GPU mode");
+    let mut back = Entity::new("back", Geometry::Brep(back), document.current_layer);
+    back.placement = Transform::translation([0., 1.234, 0.]);
+    let mut front = Entity::new("front", Geometry::Brep(front), document.current_layer);
+    front.placement = Transform::translation([-1., -2., 8.]);
+    document.entities.insert(back.id, back); document.entities.insert(front.id, front);
+    let mut app = MatrixApp::new(document).unwrap();
+    app.gpu_state = Some(state);
+    let view = app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap();
+    view.camera = Camera::orthographic([2., -8.766, 50.], [2., 1.234, 5.], [0., 1., 0.], 10.).unwrap();
+    view.mode = DisplayMode::Shaded;
+    let ctx = egui::Context::default();
+    settle(&mut app, &ctx);
+    app.controller.submit("DupEdge").unwrap();
+    settle(&mut app, &ctx);
+    let shaded_pixel = viewport_pixel(&app, ViewId::Perspective, [1.1, 0.3, 10.]);
+    let rect = app.view_rects[&ViewId::Perspective];
+    let viewport = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+    let camera = app.gpu_viewports[&ViewId::Perspective].displayed_camera().unwrap().clone();
+    let edge_point = [1.731, 1.234, 6.];
+    let shaded_edge_pixel = viewport_pixel(&app, ViewId::Perspective, edge_point);
+    let screen = camera.project(edge_point, viewport).unwrap().unwrap().screen;
+    let pos = egui::pos2(screen[0] as f32, screen[1] as f32);
+    let button = |pressed| egui::Event::PointerButton { pos, button: egui::PointerButton::Primary, pressed, modifiers: egui::Modifiers::NONE };
+    frame(&mut app, &ctx, vec![egui::Event::PointerMoved(pos), button(true)]);
+    assert_eq!(app.gpu_viewports[&ViewId::Perspective].displayed_mode(), Some(DisplayMode::Shaded));
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().mode = DisplayMode::Wireframe;
+    frame(&mut app, &ctx, vec![button(false)]);
+    assert_eq!(app.gpu_viewports[&ViewId::Perspective].displayed_mode(), Some(DisplayMode::Shaded), "old shaded image must remain published through the click");
+    assert!(app.status_line().contains("Viewport is updating"), "{}", app.status_line());
+    assert!(app.controller.subselection().is_empty(), "a mode change during the held image must not select the obscured edge");
+    assert!(app.controller.dupedge_needs_pick());
+    settle(&mut app, &ctx);
+    assert_eq!(app.gpu_viewports[&ViewId::Perspective].displayed_mode(), Some(DisplayMode::Wireframe));
+    let wireframe_pixel = viewport_pixel(&app, ViewId::Perspective, [1.1, 0.3, 10.]);
+    assert_ne!(shaded_pixel, wireframe_pixel, "published shaded and wireframe pixels must differ");
+    let wireframe_edge_pixel = viewport_pixel(&app, ViewId::Perspective, edge_point);
+    assert_ne!(shaded_edge_pixel, wireframe_edge_pixel, "the target edge should be visually hidden by the shaded solid");
+    frame(&mut app, &ctx, vec![egui::Event::PointerMoved(pos), button(true)]);
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().mode = DisplayMode::Shaded;
+    frame(&mut app, &ctx, vec![button(false)]);
+    assert_eq!(app.gpu_viewports[&ViewId::Perspective].displayed_mode(), Some(DisplayMode::Wireframe));
+    assert!(app.status_line().contains("Viewport is updating"), "{}", app.status_line());
+    assert!(app.controller.subselection().is_empty(), "a switch to shaded must also wait for publication");
+    settle(&mut app, &ctx);
+    assert_eq!(app.gpu_viewports[&ViewId::Perspective].displayed_mode(), Some(DisplayMode::Shaded));
+    frame(&mut app, &ctx, vec![egui::Event::PointerMoved(pos), button(true)]);
+    frame(&mut app, &ctx, vec![button(false)]);
+    assert!(app.controller.subselection().is_empty());
+    assert!(app.status_line().contains("hidden by shaded geometry"), "{}", app.status_line());
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().mode = DisplayMode::Wireframe;
+    settle(&mut app, &ctx);
+    assert_eq!(app.gpu_viewports[&ViewId::Perspective].displayed_mode(), Some(DisplayMode::Wireframe));
+    frame(&mut app, &ctx, vec![egui::Event::PointerMoved(pos), button(true)]);
+    frame(&mut app, &ctx, vec![button(false)]);
+    assert_eq!(app.controller.subselection().len(), 1, "the edge is available on the published wireframe image");
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|e| e.label == "DupEdge").unwrap();
+    let Geometry::Curve(curve) = &output.geometry else { panic!("expected curve") };
+    let endpoints: Vec<_> = [0., 1.].into_iter().map(|t| om9_core::evaluation::evaluate_curve(curve,
+        om9_core::evaluation::Parameter::Fraction(t), 0, Transform::identity(), &limits).unwrap()[0]).collect();
+    for expected in [[0., 1.234, 6.], [4., 1.234, 6.]] {
+        assert!(endpoints.iter().any(|point| (0..3).all(|i| (point[i] - expected[i]).abs() < 1e-8)));
     }
 }
 
@@ -1263,6 +1948,175 @@ fn point_command_waits_for_the_current_preview_to_be_published() {
     assert!(app.controller.prompt_with_options().contains("Start"), "publication after press must not validate that old press");
     frame(&mut app, &ctx, click());
     assert!(app.controller.prompt_with_options().contains("End"), "point input should work after preview publication: {}", app.controller.prompt_with_options());
+}
+
+#[test]
+#[cfg(feature = "occt-brep")]
+fn dupedge_source_view_waits_for_pointer_release() {
+    let Some(state) = gpu() else { eprintln!("SKIP: no GPU adapter"); return };
+    let mut app = MatrixApp::new(Document::with_template_tolerance("DupEdge source view")).unwrap();
+    app.controller.insert_attested_sphere_for_test().unwrap();
+    app.gpu_state = Some(state);
+    let id = *app.controller.document().entities.keys().next().unwrap();
+    app.controller.submit("DupEdge").unwrap();
+    let ctx = egui::Context::default();
+    settle(&mut app, &ctx);
+    let original = app.controller.scene().unwrap().publication_id();
+    app.controller.request_dupedge_source_view(id).unwrap();
+    let outside = egui::pos2(1500., 800.);
+    frame(&mut app, &ctx, vec![egui::Event::PointerMoved(outside), egui::Event::PointerButton {
+        pos: outside, button: egui::PointerButton::Primary, pressed: true, modifiers: egui::Modifiers::NONE,
+    }]);
+    for _ in 0..3 {
+        frame(&mut app, &ctx, vec![]);
+        assert!(app.controller.dupedge_source_view_pending());
+        assert_eq!(app.controller.scene().unwrap().publication_id(), original);
+    }
+    frame(&mut app, &ctx, vec![egui::Event::PointerButton {
+        pos: outside, button: egui::PointerButton::Primary, pressed: false, modifiers: egui::Modifiers::NONE,
+    }]);
+    assert_eq!(app.controller.scene().unwrap().publication_id(), original);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while app.controller.dupedge_source_view_pending() {
+        assert!(Instant::now() < deadline, "UI did not finish DupEdge source view");
+        frame(&mut app, &ctx, vec![]);
+    }
+    assert_ne!(app.controller.scene().unwrap().publication_id(), original);
+    app.controller.cancel();
+    assert_eq!(app.controller.scene().unwrap().publication_id(), original);
+    app.controller.submit("DupEdge").unwrap();
+    app.controller.request_dupedge_source_view(id).unwrap();
+    app.controller.cancel();
+    assert!(!app.controller.dupedge_source_view_pending());
+    app.controller.undo().unwrap();
+    let undone = app.controller.scene().unwrap().publication_id();
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while app.controller.dupedge_source_view_worker_active() {
+        assert!(Instant::now() < deadline, "cancelled worker did not finish");
+        frame(&mut app, &ctx, vec![]);
+    }
+    frame(&mut app, &ctx, vec![]);
+    assert_eq!(app.controller.scene().unwrap().publication_id(), undone, "cancelled worker must not replace the Undo scene");
+    assert!(app.controller.document().entities.is_empty());
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+}
+
+#[test]
+#[cfg(feature = "occt-brep")]
+fn occt_remesh_publishes_new_gpu_image_and_correct_pick() {
+    let Some(state) = gpu() else { eprintln!("SKIP: no GPU adapter"); return };
+    let mut app = MatrixApp::new(Document::with_template_tolerance("OCCT remesh GPU")).unwrap();
+    app.controller.insert_attested_sphere_for_test().unwrap();
+    app.gpu_state = Some(state);
+    app.controller.workspace.active = ViewId::Perspective;
+    let view = app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap();
+    view.camera = Camera::orthographic([0., 0., 20.], [0., 0., 0.], [0., 1., 0.], 8.).unwrap();
+    view.mode = om9_scene::workspace::DisplayMode::Shaded;
+    let ctx = egui::Context::default();
+    settle(&mut app, &ctx);
+    let original_scene = app.controller.scene().unwrap().publication_id();
+    let original_epoch = app.controller.scene().unwrap().epoch;
+    let old_texture = app.gpu_viewports[&ViewId::Perspective].published_texture().unwrap().clone();
+    let original_image = texture_rgba(&app, &old_texture);
+    app.controller.request_topology_remesh(0.5, 0.9, 16 * 1024 * 1024, 8 * 1024 * 1024, 8 * 1024 * 1024).unwrap();
+    let outside = egui::pos2(1500., 800.);
+    frame(&mut app, &ctx, vec![egui::Event::PointerMoved(outside), egui::Event::PointerButton {
+        pos: outside, button: egui::PointerButton::Primary, pressed: true, modifiers: egui::Modifiers::NONE,
+    }]);
+    for _ in 0..3 {
+        frame(&mut app, &ctx, vec![]);
+        assert!(app.controller.topology_remesh_pending(), "publication must wait for pointer release");
+        assert_eq!(app.controller.scene().unwrap().publication_id(), original_scene);
+    }
+    frame(&mut app, &ctx, vec![egui::Event::PointerButton {
+        pos: outside, button: egui::PointerButton::Primary, pressed: false, modifiers: egui::Modifiers::NONE,
+    }]);
+    assert!(app.controller.topology_remesh_pending(), "release frame must still use the original scene");
+    assert_eq!(app.controller.scene().unwrap().publication_id(), original_scene);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while app.controller.topology_remesh_pending() {
+        assert!(Instant::now() < deadline, "UI did not finish scheduled remesh");
+        frame(&mut app, &ctx, vec![]);
+    }
+    assert_ne!(app.controller.scene().unwrap().publication_id(), original_scene);
+    assert_eq!(app.controller.scene().unwrap().epoch, original_epoch);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while !app.gpu_viewports[&ViewId::Perspective].displays_scene(app.controller.scene().unwrap()) {
+        assert!(Instant::now() < deadline, "remeshed GPU scene never published");
+        frame(&mut app, &ctx, vec![]);
+    }
+    let new_texture = app.gpu_viewports[&ViewId::Perspective].published_texture().unwrap().clone();
+    let new_image = texture_rgba(&app, &new_texture);
+    assert!(new_image != original_image, "remeshed OCCT scene must change rendered pixels");
+    let port = &app.gpu_viewports[&ViewId::Perspective];
+    let camera = port.displayed_camera().unwrap();
+    let rect = app.view_rects[&ViewId::Perspective];
+    let viewport = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+    let distance = camera.eye.iter().map(|v| v * v).sum::<f64>().sqrt();
+    let point = camera.eye.map(|coordinate| coordinate * 3. / distance);
+    let cursor = camera.project(point, viewport).unwrap().unwrap().screen;
+    let hit = app.controller.scene().unwrap().pick_kind(cursor, camera, viewport, 3., PickIntent::Select, om9_scene::scene::PickKind::Face).unwrap().unwrap();
+    assert!(matches!(hit.subset, om9_scene::scene::Subelement::BrepFace(_)));
+    assert!(hit.revalidate_in_scene(app.controller.coordinator(), app.controller.scene(), camera, viewport).is_ok());
+    let candidates = om9_scene::osnap::candidates(app.controller.scene().unwrap(), camera, viewport, cursor, Default::default(), None).unwrap();
+    let candidate = candidates.iter().find(|candidate| candidate.kind == om9_scene::osnap::SnapKind::Surface).unwrap();
+    let refined = app.controller.refine_surface_snap(candidate, camera, viewport).unwrap();
+    let radius = refined.world.iter().map(|value| value * value).sum::<f64>().sqrt();
+    assert!((radius - 3.).abs() < 1e-6, "surface refinement must use the canonical sphere: {radius}");
+    let first_scene = app.controller.scene().unwrap().publication_id();
+    app.controller.request_topology_remesh(0.05, 0.3, 16 * 1024 * 1024, 8 * 1024 * 1024, 8 * 1024 * 1024).unwrap();
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while app.controller.topology_remesh_pending() {
+        assert!(Instant::now() < deadline, "second remesh timed out");
+        frame(&mut app, &ctx, vec![]);
+    }
+    assert_ne!(app.controller.scene().unwrap().publication_id(), first_scene);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while !app.gpu_viewports[&ViewId::Perspective].displays_scene(app.controller.scene().unwrap()) {
+        assert!(Instant::now() < deadline, "second GPU scene never published");
+        frame(&mut app, &ctx, vec![]);
+    }
+    let final_texture = app.gpu_viewports[&ViewId::Perspective].published_texture().unwrap().clone();
+    let final_image = texture_rgba(&app, &final_texture);
+    assert_ne!(final_image, new_image, "second mesh must change rendered pixels");
+    let camera = app.gpu_viewports[&ViewId::Perspective].displayed_camera().unwrap();
+    assert!(hit.revalidate_in_scene(app.controller.coordinator(), app.controller.scene(), camera, viewport).is_err(),
+        "pick from old scene must not validate against the new publication");
+    let latest = app.controller.scene().unwrap().pick_kind(cursor, camera, viewport, 3., PickIntent::Select, om9_scene::scene::PickKind::Face).unwrap().unwrap();
+    assert_eq!(latest.subset, hit.subset);
+    assert!(latest.revalidate_in_scene(app.controller.coordinator(), app.controller.scene(), camera, viewport).is_ok());
+}
+
+#[test]
+fn same_epoch_scene_replacement_waits_for_new_gpu_publication() {
+    let Some(state) = gpu() else { eprintln!("SKIP: no GPU adapter"); return };
+    let mut document = Document::new("same epoch scene replacement");
+    let entity = Entity::new("line", Geometry::Curve(Curve::Line {
+        start: [-10., 0., 0.], end: [10., 0., 0.], domain: [0., 20.],
+    }), None);
+    document.entities.insert(entity.id, entity);
+    let mut app = MatrixApp::new(document).unwrap();
+    app.gpu_state = Some(state);
+    app.controller.workspace.active = ViewId::Perspective;
+    let ctx = egui::Context::default();
+    settle(&mut app, &ctx);
+    let old_id = app.controller.scene().unwrap().publication_id();
+    let old_epoch = app.controller.scene().unwrap().epoch;
+    let before = viewport_pixel(&app, ViewId::Perspective, [0., 0., 0.]);
+    assert!(app.gpu_viewports[&ViewId::Perspective].displays_scene(app.controller.scene().unwrap()));
+    app.controller.replace_scene_same_epoch_for_test(5.).unwrap();
+    let replacement = app.controller.scene().unwrap();
+    assert_eq!(replacement.epoch, old_epoch);
+    assert_ne!(replacement.publication_id(), old_id);
+    assert!(!app.gpu_viewports[&ViewId::Perspective].displays_scene(replacement));
+    frame(&mut app, &ctx, vec![]);
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while !app.gpu_viewports[&ViewId::Perspective].displays_scene(app.controller.scene().unwrap()) {
+        assert!(Instant::now() < deadline, "replacement scene was never published");
+        frame(&mut app, &ctx, vec![]);
+    }
+    let after = viewport_pixel(&app, ViewId::Perspective, [0., 0., 0.]);
+    assert_ne!(before, after, "new publication must draw the changed buffer, not reuse the previous image");
 }
 
 #[test]

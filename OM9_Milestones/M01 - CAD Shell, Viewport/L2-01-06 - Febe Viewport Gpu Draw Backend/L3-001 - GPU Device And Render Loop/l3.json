@@ -258,6 +258,16 @@
       "manual_gate_promoted": false,
       "preview_mesh_policy": "LOD0 for all occurrences; resolution/MSAA adapt; certified decimation not integrated",
       "presentation_acceptance": "NOT_PROVED"
+    },
+    "rdp_viewport_pacing_2026_11_15": {
+      "status": "SCOPED_RDP_PACING_64_128_VERIFIED",
+      "scope": "Remote-session surface presentation bypasses blocking VSync; local sessions keep VSync. Existing CAD clock, source BRep, Boolean tolerance, picking and atomic transactions remain.",
+      "measurement": "Ten frozen-release native-window runs passed: two VSync controls at 64 spheres, six default RDP runs at 64, two at 128. Optimized steady encoded FPS 29.987–30.010 across both phases; same-binary controls approximately 10.6 FPS. Eighteen focused tests and public-source audit passed.",
+      "remaining": "Creation/request/publication pauses and high synthetic UI callback activity remain. Client displayed FPS, local-console/dynamic-session coverage, all-overlap/general scenes and full source/persistence migration are not established.",
+      "evidence": "docs/validation/2026-11-15-rdp-viewport-pacing.md",
+      "data": "docs/validation/2026-11-15-rdp-viewport-pacing.json",
+      "next_document": "crates/om9-app/src/ui.rs",
+      "next_action": "Profile remaining source capture/registration and UI repaint load while preserving exact source; broaden physical input/client presentation coverage separately from encoded FPS."
     }
   }
 }

@@ -158,7 +158,7 @@ fn inspect(path: &Path, hold: bool) -> Result<()> {
     )?;
     let sample = || om9_native_owner::physical_memory().map(|x| (x.total_bytes, x.available_bytes));
     let class = om9_core::budget::memory::MemoryClass::CpuCache;
-    let (archive_memory, restored) = Archive::open_restored_retaining_reservation(
+    let (archive_memory, restored, _legacy_displays) = Archive::open_restored_retaining_displays(
         path, &limits, &std::collections::BTreeSet::new(),
         |bytes| coordinator.reserve_external_memory(class, bytes.max(1), sample()),
         |reservation, bytes| coordinator.grow_external_memory_with_held(

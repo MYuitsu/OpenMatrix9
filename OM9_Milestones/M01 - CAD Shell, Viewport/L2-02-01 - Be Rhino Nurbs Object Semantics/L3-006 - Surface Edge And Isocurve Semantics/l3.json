@@ -185,15 +185,16 @@
     "date": "2026-10-19",
     "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "Boundary edges are pickable topology; exact isocurves are display-only and not exportable.",
+    "scope": "Boundary edges are topology; display isocurves remain derived. For tested untrimmed surfaces, ExtractWireframe can explicitly create exact curves at the same default-density parameters.",
     "evidence": [
       "implementation/design/M01/OM9-L2-02-01/crosswalk.json",
       "implementation/design/M01/OM9-L2-02-01/l4-matrix.json",
       "implementation/design/M01/OM9-L2-02-01/oracles.json",
-      "crates/om9-core/tests/rhino_semantics.rs:391"
+      "crates/om9-core/tests/rhino_semantics.rs:391",
+      "docs/validation/2026-11-13-union-surface-wire-default.md"
     ],
     "human_approval": null,
-    "remaining": []
+    "remaining": ["Non-default density, other trim configurations, physical desktop rendering and arbitrary surface coverage remain unverified."]
   },
   "children_l4": [
     {

@@ -648,6 +648,37 @@
         "full module/manual gates remain open",
         "2 unrelated broad app dock reset regressions remain failing"
       ]
+    },
+    "smooth_normals_selection_cache_20261115": {
+      "status": "implemented_focused_validation_native_matrix_pending",
+      "scope": "GPU-only smooth CAD-face normals with crease boundaries; immutable shared display bounds and conservative clipped selection-frame projection. Exact source authority and picking/snapping/Boolean remain unchanged.",
+      "evidence": "docs/validation/2026-11-15-smooth-normals-selection-cache.md",
+      "checks": [
+        "17 app integration tests passed including exact source equality, Boolean and Undo/Redo",
+        "3 smooth-normal math tests passed",
+        "GPU flat/smooth readback passed with identical silhouette",
+        "2 bounds/projection tests passed",
+        "15 scene renderer tests passed in saved sequential retry; 4 ignored measurement cases"
+      ],
+      "requires_manual_test": true,
+      "manual_acceptance": false,
+      "native_performance": "512/768 Light/High pending: current Windows session 1 is disconnected; no new native FPS/freeze/RAM claim",
+      "binary_receipt": "build/standalone-validation/ui-artifacts/viewport-normals-selection-20261115/frozen-binary.json",
+      "data": "docs/validation/2026-11-15-smooth-normals-selection-cache.json"
+    },
+    "progressive_publish_20261116": {
+      "status": "renderer_and_small_native_verified_large_matrix_incomplete",
+      "evidence": "docs/validation/2026-11-16-progressive-render-publish.md",
+      "scope": "Append-only presentation cohort drains while immutable source identities are retained; strict destructive/source/preview invalidation. Native per-sphere replay waits for all four current completed images; no Boolean.",
+      "validation": "30 GPU bridge tests and one exact-source test passed. 16 Light/High native exact 1..16 presentation acknowledgements and 16 Undo/Redo passed. 512 Light reached 409 acknowledgements before RDP disconnected; no accepted large FPS/freeze/RAM result.",
+      "manual_acceptance": false,
+      "remaining": [
+        "512 Light retry",
+        "512 High",
+        "768 Light",
+        "768 High",
+        "profile superlinear command/history inventory cost"
+      ]
     }
   },
   "sdk_integration_plan": {

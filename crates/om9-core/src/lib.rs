@@ -34,6 +34,7 @@ pub mod history_ops;
 pub mod identity;
 pub mod jobs;
 pub mod layer_ops;
+pub mod legacy_v4;
 pub mod layers;
 pub mod measure;
 pub mod measure_geometry;

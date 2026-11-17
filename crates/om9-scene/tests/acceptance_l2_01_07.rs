@@ -76,6 +76,84 @@ fn camera() -> Camera {
     Camera::orthographic([0., 0., 10.], [0., 0., 0.], [0., 1., 0.], 4.).expect("camera")
 }
 
+#[test]
+fn trimmed_planar_surface_picking_skips_the_hole() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::plane([-2.,-2.,0.],[1.,0.,0.],[0.,1.,0.],4.,4.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.1,0.1],[0.9,0.1],[0.9,0.9],[0.1,0.9]],
+        inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("trim",Geometry::Surface(surface),None);
+    set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut document=Document::new("trim picking");document.entities.insert(id,entity);
+    let scene=Scene::capture(std::sync::Arc::new(document),1,&limits).unwrap();
+    assert!(scene.pick(screen([0.,0.,0.]),&camera(),viewport(),2.,PickIntent::Select).unwrap().is_none());
+    assert_eq!(scene.pick(screen([-1.,0.,0.]),&camera(),viewport(),2.,PickIntent::Select).unwrap().unwrap().root,id);
+}
+
+#[test]
+fn larger_trimmed_surface_displays_and_picks_around_hole() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();let n=28usize;
+    let mut poles=Vec::new();for u in 0..n {for v in 0..n {poles.push([-2.+4.*u as f64/(n-1) as f64,-2.+4.*v as f64/(n-1) as f64,0.]);}}
+    let mut knots=vec![0.];knots.extend((0..n).map(|i|i as f64/(n-1) as f64));knots.push(1.);
+    let surface=om9_core::geometry::NurbsSurface {degree:[1,1],size:[n,n],poles,weights:vec![1.;n*n],knots:[knots.clone(),knots],domain:[[0.,1.],[0.,1.]],periodic:[false,false],reversed:false};
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.1,0.1],[0.9,0.1],[0.9,0.9],[0.1,0.9]],
+        inners:vec![vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("large trim",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    assert!(entity.extensions[om9_core::model::TRIM_SURFACE_EXTENSION_SLOT].payload.len()>16*1024);
+    let id=entity.id;let mut document=Document::new("large trim picking");document.entities.insert(id,entity);
+    let scene=Scene::capture(std::sync::Arc::new(document),1,&limits).unwrap();
+    assert!(!scene.objects.iter().find(|object|object.root==id).unwrap().buffers.is_trim_display_fallback());
+    assert!(scene.pick(screen([0.,0.,0.]),&camera(),viewport(),2.,PickIntent::Select).unwrap().is_none());
+    assert_eq!(scene.pick(screen([-1.,0.,0.]),&camera(),viewport(),2.,PickIntent::Select).unwrap().unwrap().root,id);
+}
+
+#[test]
+fn validated_129_edge_trim_picks_material_and_sees_objects_behind() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::plane([-2.,-2.,0.],[1.,0.,0.],[0.,1.,0.],4.,4.,&limits).unwrap();
+    let outer=(0..129).map(|i| {let angle=std::f64::consts::TAU*i as f64/129.;
+        [0.5+0.25*angle.cos(),0.5+0.25*angle.sin()]}).collect();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer,inners:vec![],reversed:false};
+    om9_core::rhino_semantics::validate_trim_loop_topology(&trim).unwrap();
+    let mut entity=Entity::new("trim",Geometry::Surface(surface),None);
+    set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut document=Document::new("trim fallback picking");document.entities.insert(id,entity);
+    let behind=Entity::new("behind",Geometry::Point([1.5,0.,-1.]),None);let behind_id=behind.id;
+    document.entities.insert(behind_id,behind);
+    let scene=Scene::capture(std::sync::Arc::new(document),1,&limits).unwrap();
+    assert!(!scene.objects.iter().find(|object|object.root==id).unwrap().buffers.is_trim_display_fallback());
+    // x=1.5 is outside the radius-1 trim.
+    let hits=scene.pick_all(screen([1.5,0.,0.]),&camera(),viewport(),2.,PickIntent::Select).unwrap();
+    assert_eq!(hits.iter().map(|hit|hit.root).collect::<Vec<_>>(),vec![behind_id]);
+    assert_eq!(scene.pick(screen([1.5,0.,0.]),&camera(),viewport(),2.,PickIntent::Select).unwrap().unwrap().root,behind_id);
+    assert_eq!(scene.pick(screen([0.,0.,0.]),&camera(),viewport(),2.,PickIntent::Select).unwrap().unwrap().root,id);
+}
+
+#[test]
+fn unsupported_trim_fallback_must_not_pick_outside_the_trim() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::plane([-2.,-2.,0.],[1.,0.,0.],[0.,1.,0.],4.,4.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.2,0.2],[0.8,0.2],[0.8,0.8],[0.2,0.8]],
+        inners:vec![vec![[0.3,0.3],[0.7,0.3],[0.7,0.7],[0.3,0.7]],vec![[0.4,0.4],[0.6,0.4],[0.6,0.6],[0.4,0.6]]],reversed:false};
+    let mut entity=Entity::new("trim",Geometry::Surface(surface),None);
+    set_trimmed_surface(&mut entity,&trim,&limits).unwrap();let id=entity.id;
+    let mut document=Document::new("trim fallback picking");document.entities.insert(id,entity);
+    let behind=Entity::new("behind",Geometry::Point([1.5,0.,-1.]),None);let behind_id=behind.id;
+    document.entities.insert(behind_id,behind);
+    let scene=Scene::capture(std::sync::Arc::new(document),1,&limits).unwrap();
+    assert!(scene.objects.iter().find(|object|object.root==id).unwrap().buffers.is_trim_display_fallback());
+    let hits=scene.pick_all(screen([1.5,0.,0.]),&camera(),viewport(),2.,PickIntent::Select).unwrap();
+    assert_eq!(hits.iter().map(|hit|hit.root).collect::<Vec<_>>(),vec![behind_id]);
+    assert_eq!(scene.pick(screen([1.5,0.,0.]),&camera(),viewport(),2.,PickIntent::Select).unwrap().unwrap().root,behind_id);
+    let rect=om9_scene::selection::SelectionRect {min:[0.,0.],max:[400.,400.]};
+    assert!(scene.select_band(&camera(),viewport(),rect,true).unwrap().contains(&id));
+    assert!(!scene.select_band(&camera(),viewport(),rect,false).unwrap().contains(&id));
+}
+
 fn viewport() -> Viewport {
     Viewport {
         origin: [0., 0.],

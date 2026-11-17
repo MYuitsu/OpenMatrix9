@@ -143,13 +143,17 @@ fn check_parameter(surface: &NurbsSurface, axis: usize, value: f64) -> Result<()
     Ok(())
 }
 
+fn surface_vector<T>(count: usize) -> Result<Vec<T>> {
+    std::alloc::Layout::array::<T>(count).map_err(|_| Error::Overflow("surface allocation"))?;
+    let mut values = Vec::new();
+    values.try_reserve_exact(count).map_err(|_| Error::Budget("bytes"))?;
+    Ok(values)
+}
+
 /// Basis values `N_i(t)` for every pole in `axis`.
 fn basis_row(surface: &NurbsSurface, axis: usize, t: f64) -> Result<Vec<f64>> {
     let degree = surface.degree[axis];
-    let mut values = Vec::new();
-    values
-        .try_reserve_exact(surface.size[axis])
-        .map_err(|_| Error::Budget("surface basis row"))?;
+    let mut values = surface_vector(surface.size[axis])?;
     for index in 0..surface.size[axis] {
         values.push(crate::curve_build::basis(
             degree,
@@ -165,10 +169,7 @@ fn basis_row(surface: &NurbsSurface, axis: usize, t: f64) -> Result<Vec<f64>> {
 fn basis_row_derivative(surface: &NurbsSurface, axis: usize, t: f64) -> Result<Vec<f64>> {
     let degree = surface.degree[axis];
     let knots = &surface.knots[axis];
-    let mut values = Vec::new();
-    values
-        .try_reserve_exact(surface.size[axis])
-        .map_err(|_| Error::Budget("surface basis row"))?;
+    let mut values = surface_vector(surface.size[axis])?;
     for index in 0..surface.size[axis] {
         let mut value = 0.0;
         if degree > 0 {
@@ -401,6 +402,25 @@ pub fn normal(surface: &NurbsSurface, u: f64, v: f64, limits: &Limits) -> Result
     Ok([cross[0] / length, cross[1] / length, cross[2] / length])
 }
 
+/// Interior wire parameters for the default surface wire density (one).
+/// Interior knots take precedence; a single-span surface uses its midpoint.
+pub fn default_wire_parameters(surface: &NurbsSurface, axis: usize) -> Result<impl Iterator<Item = f64> + '_> {
+    if axis >= 2 { return Err(Error::Invalid("surface wire axis")); }
+    let [start, end] = surface.domain[axis];
+    if !start.is_finite() || !end.is_finite() || start >= end {
+        return Err(Error::Invalid("surface wire domain"));
+    }
+    let knots = &surface.knots[axis];
+    let has_interior = knots.iter().any(|&k| k > start && k < end);
+    let midpoint = start / 2.0 + end / 2.0;
+    if !has_interior && !(midpoint > start && midpoint < end) {
+        return Err(Error::Invalid("surface wire midpoint"));
+    }
+    Ok(knots.iter().copied().enumerate().filter_map(move |(i, k)| {
+        (k > start && k < end && (i == 0 || knots[i - 1] != k)).then_some(k)
+    }).chain((!has_interior).then_some(midpoint)))
+}
+
 /// The exact iso-curve of a rational surface. Holding one parameter fixed leaves a
 /// rational curve whose poles are the weighted combination of the fixed-direction row and
 /// whose weights are the row's combined weights, so no geometry is approximated.
@@ -418,14 +438,8 @@ pub fn isocurve(
     };
     check_parameter(surface, fixed, value)?;
     let basis_values = basis_row(surface, fixed, value)?;
-    let mut poles = Vec::new();
-    let mut weights = Vec::new();
-    poles
-        .try_reserve_exact(surface.size[varying])
-        .map_err(|_| Error::Budget("iso-curve poles"))?;
-    weights
-        .try_reserve_exact(surface.size[varying])
-        .map_err(|_| Error::Budget("iso-curve weights"))?;
+    let mut poles = surface_vector(surface.size[varying])?;
+    let mut weights = surface_vector(surface.size[varying])?;
     for index in 0..surface.size[varying] {
         let mut denominator = 0.0;
         let mut numerator = [0.0; 3];
@@ -455,11 +469,13 @@ pub fn isocurve(
         ]);
         weights.push(denominator);
     }
+    let mut knots = surface_vector(surface.knots[varying].len())?;
+    knots.extend_from_slice(&surface.knots[varying]);
     let curve = NurbsCurve {
         degree: surface.degree[varying],
         poles,
         weights,
-        knots: surface.knots[varying].clone(),
+        knots,
         domain: surface.domain[varying],
         periodic: false,
         reversed: false,
@@ -1254,4 +1270,24 @@ fn sub_point(a: Point3, b: Point3) -> Point3 {
 fn distance_between(a: Point3, b: Point3) -> f64 {
     let d = sub_point(a, b);
     dot(d, d).sqrt()
+}
+
+#[cfg(test)]
+mod allocation_tests {
+    use super::*;
+
+    #[test]
+    fn surface_vector_rejects_unrepresentable_layout() {
+        assert!(matches!(surface_vector::<Point3>(usize::MAX), Err(Error::Overflow("surface allocation"))));
+        let vector = surface_vector::<f64>(4).unwrap();
+        assert!(vector.is_empty()); assert!(vector.capacity() >= 4);
+    }
+
+    #[cfg(all(windows, target_pointer_width = "64"))]
+    #[test]
+    fn surface_vector_reports_allocator_refusal_as_memory_pressure() {
+        let count = 1_usize << 57; // One EiB of f64 values exceeds Windows x64 user address space.
+        assert!(std::alloc::Layout::array::<f64>(count).is_ok());
+        assert!(matches!(surface_vector::<f64>(count), Err(Error::Budget("bytes"))));
+    }
 }
