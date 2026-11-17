@@ -6139,7 +6139,14 @@ impl MatrixApp {
                         if let Some(hit) = hit {
                             let root = hit.root;
                             let subset = hit.subset.clone();
-                            if let Err(error) = self.controller.select_objects(&[root]) {
+                            // Inside an add-on command the picks add up (edges of several
+                            // objects, as Rhino collects them); otherwise the object alone.
+                            let picked = if self.controller.addon_session().is_some() {
+                                self.controller.select_root(Some(root), true)
+                            } else {
+                                self.controller.select_objects(&[root])
+                            };
+                            if let Err(error) = picked {
                                 self.feedback(Err(error));
                                 return;
                             }

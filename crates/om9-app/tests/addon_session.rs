@@ -1089,3 +1089,72 @@ fn trimmed_surfaces_reach_brep_data_commands_exactly() {
     assert!((spans[1].0 - 4.0).abs() < 1e-9 && (spans[1].1 - 6.0).abs() < 1e-9, "{spans:?}");
     fs::remove_dir_all(&tmp).unwrap();
 }
+
+/// An add-on solid (`Geo::Brep`, here ExtrudeCrv Solid=Yes on a circle): with the B-Rep kernel
+/// its faces are sewn into one exact solid; a build without the kernel keeps the add-on's
+/// display mesh, a closed prism of the right volume.
+#[test]
+fn addon_solids_arrive_as_one_object() {
+    use om9_core::model::Entity;
+    let tmp = std::env::temp_dir().join(format!("om9-app-addon-solid-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&tmp);
+    fs::create_dir_all(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<FeatureName> = feats
+        .iter()
+        .map(|(id, c)| FeatureName {
+            id,
+            command: c.as_deref(),
+        })
+        .collect();
+    let mut doc = Document::new("solid");
+    let circle = Entity::new(
+        "circle",
+        Geometry::Curve(Curve::Circle {
+            center: [0.0; 3],
+            x: [1.0, 0.0, 0.0],
+            y: [0.0, 1.0, 0.0],
+            radius: 2.0,
+            domain: [0.0, std::f64::consts::TAU],
+            angle_domain: None,
+        }),
+        doc.current_layer,
+    );
+    let id = circle.id;
+    doc.entities.insert(id, circle);
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.attach_addons(host(&tmp), &names);
+    c.select_objects(&[id]).unwrap();
+    c.run_addon_command("SurfaceGVDExtrudeAll").unwrap();
+    c.submit("Solid").unwrap();
+    c.submit("3").unwrap();
+    assert!(c.addon_session().is_none(), "{}", c.prompt_text());
+    let made: Vec<&Geometry> = c.document().entities.values().filter(|e| e.id != id).map(|e| &e.geometry).collect();
+    assert_eq!(made.len(), 1, "one solid");
+    match made[0] {
+        #[cfg(feature = "occt-brep")]
+        Geometry::Brep(brep) => {
+            let m = om9_kernel::creation::measure(brep, &Limits::default()).unwrap();
+            assert_eq!(m.solids, 1);
+            assert!((m.volume_mm3 - std::f64::consts::PI * 12.0).abs() < 1e-6, "{}", m.volume_mm3);
+        }
+        Geometry::Mesh(mesh) => {
+            // Signed volume of the closed triangle mesh (divergence theorem).
+            // (Faces are fans: polygons split from their first corner.)
+            let v: f64 = mesh
+                .faces
+                .iter()
+                .flat_map(|f| (1..f.len() - 1).map(move |k| [f[0], f[k], f[k + 1]]))
+                .map(|t| {
+                    let [a, b, c] = t.map(|i| mesh.vertices[i as usize]);
+                    (a[0] * (b[1] * c[2] - b[2] * c[1]) - a[1] * (b[0] * c[2] - b[2] * c[0]) + a[2] * (b[0] * c[1] - b[1] * c[0])) / 6.0
+                })
+                .sum();
+            // The display samples the circle at 96 points: within 0.1 % of π r² h.
+            let exact = std::f64::consts::PI * 4.0 * 3.0;
+            assert!((v.abs() - exact).abs() < exact * 1e-3, "{v} vs {exact}");
+        }
+        other => panic!("{other:?}"),
+    }
+    fs::remove_dir_all(&tmp).unwrap();
+}

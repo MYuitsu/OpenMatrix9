@@ -227,3 +227,49 @@ extern "C" int om9_occt_face_nurbs(const char* source, size_t length, size_t max
     return 2;
   }
 }
+
+// Every edge of the shape as an exact NURBS curve, in the shape's edge order (the order of the
+// display's edge keys), each in its own direction: `E n`, then per edge `C …` or `D` for a
+// degenerate edge (a pole) or one without a 3D curve.
+extern "C" int om9_occt_edge_nurbs(const char* source, size_t length, size_t max_bytes,
+                                   int (*sink)(void*, const uint8_t*, size_t), void* context,
+                                   char* message, int capacity) {
+  try {
+    if (!sink) throw std::invalid_argument("missing edge NURBS sink");
+    const TopoDS_Shape shape = face_nurbs_source(source, length);
+    TopTools_IndexedMapOfShape edges;
+    TopExp::MapShapes(shape, TopAbs_EDGE, edges);
+    std::ostringstream out;
+    out << std::setprecision(17);
+    out << "E " << edges.Extent() << '\n';
+    for (int i = 1; i <= edges.Extent(); ++i) {
+      const TopoDS_Edge edge = TopoDS::Edge(edges(i).Oriented(TopAbs_FORWARD));
+      Standard_Real first = 0, last = 0;
+      const Handle(Geom_Curve) curve = BRep_Tool::Degenerated(edge) ? Handle(Geom_Curve)() : BRep_Tool::Curve(edge, first, last);
+      if (curve.IsNull()) {
+        out << "D\n";
+        continue;
+      }
+      Handle(Geom_BSplineCurve) bs = GeomConvert::CurveToBSplineCurve(new Geom_TrimmedCurve(curve, first, last));
+      if (bs.IsNull()) throw std::runtime_error("edge curve not convertible to NURBS");
+      TopoDS_Vertex v0, v1;
+      TopExp::Vertices(edge, v0, v1);
+      if (!v0.IsNull()) bs->SetPole(1, BRep_Tool::Pnt(v0));
+      if (!v1.IsNull()) bs->SetPole(bs->NbPoles(), BRep_Tool::Pnt(v1));
+      write_curve(out, bs);
+      if (static_cast<size_t>(out.tellp()) > max_bytes) throw std::length_error("edge NURBS exceed the budget");
+    }
+    const std::string text = out.str();
+    if (text.size() > max_bytes) throw std::length_error("edge NURBS exceed the budget");
+    return sink(context, reinterpret_cast<const uint8_t*>(text.data()), text.size()) == 0 ? 0 : 1;
+  } catch (const Standard_Failure& e) {
+    face_nurbs_failure(message, capacity, e.GetMessageString());
+    return 2;
+  } catch (const std::exception& e) {
+    face_nurbs_failure(message, capacity, e.what());
+    return 1;
+  } catch (...) {
+    face_nurbs_failure(message, capacity, "Unknown edge NURBS failure");
+    return 2;
+  }
+}

@@ -8,7 +8,7 @@ use om9_kernel::{
     brep::box_brep,
     creation::{self, Primitive},
     editing::{self, BooleanOp},
-    face_nurbs::{FaceNurbs, NurbsCurveData, face_nurbs, parse},
+    face_nurbs::{FaceNurbs, NurbsCurveData, edge_nurbs, face_nurbs, parse},
     transform_ops::transform_brep,
 };
 
@@ -240,6 +240,52 @@ fn a_sphere_and_a_torus_open_both_ways_and_stay_on_their_shapes() {
     // (The cut circles are the boolean's intersection curves: on the faces to its tolerance.)
     for f in &faces {
         check_loops(f, 1e-6);
+    }
+}
+
+/// Faces and edges come in the display's order: every display triangle lies on the surface of
+/// the face its index names, and every display segment on the curve of its edge — so a face
+/// or edge picked by its display key finds its exact geometry (subobject picks).
+#[test]
+fn faces_and_edges_come_in_the_display_order() {
+    let l = limits();
+    let plate = box_brep([10.0, 10.0, 4.0], 0.05, &l).unwrap();
+    let pin = creation::primitive(Primitive::Cylinder { radius_mm: 2.0, height_mm: 4.0 }, 0.05, &l).unwrap();
+    let pin = transform_brep(&pin, &Transform([[1.0, 0.0, 0.0, 5.0], [0.0, 1.0, 0.0, 5.0], [0.0, 0.0, 1.0, 0.0], [0.0, 0.0, 0.0, 1.0]]), 0.05, &l).unwrap();
+    let drilled = editing::boolean(&plate, &pin, BooleanOp::Difference, 0.05, &l).unwrap();
+    let ball = creation::primitive(Primitive::Sphere { radius_mm: 4.0 }, 0.05, &l).unwrap();
+    for body in [drilled.body().expect("a body").clone(), ball] {
+        let faces = face_nurbs(&body, &l).unwrap();
+        let edges = edge_nurbs(&body, &l).unwrap();
+        let d = &body.display;
+        assert_eq!((faces.len(), edges.len()), (d.faces.len(), d.edges.len()));
+        for t in d.triangles.iter().step_by(7) {
+            let f = &faces[t[3] as usize];
+            for k in 0..3 {
+                let p = d.points[t[k] as usize];
+                assert!(off_surface(f, p) < 1e-6, "triangle corner {p:?} on face {}", t[3]);
+            }
+        }
+        for s in &d.segments {
+            let c = edges[s[2] as usize].as_ref().expect("a drawn edge has a curve");
+            for k in 0..2 {
+                let p = d.points[s[k] as usize];
+                let near = (0..=400).map(|i| dist(curve_at(c, i as f64 / 400.0), p)).fold(f64::MAX, f64::min);
+                assert!(near < 0.05, "segment end {p:?} on edge {} ({near})", s[2]);
+            }
+        }
+    }
+    // A sphere's poles are degenerate edges: no curve.
+    let ball = creation::primitive(Primitive::Sphere { radius_mm: 4.0 }, 0.05, &l).unwrap();
+    let edges = edge_nurbs(&ball, &l).unwrap();
+    assert_eq!(edges.iter().filter(|e| e.is_none()).count(), 2);
+    // The box's twelve edges: four of each length, every curve a straight line between corners.
+    let edges = edge_nurbs(&box_brep([10.0, 6.0, 4.0], 0.05, &l).unwrap(), &l).unwrap();
+    let mut lengths: Vec<f64> = edges.iter().map(|e| { let c = e.as_ref().unwrap(); dist(curve_at(c, 0.0), curve_at(c, 1.0)) }).collect();
+    lengths.sort_by(f64::total_cmp);
+    assert_eq!(lengths.len(), 12);
+    for (i, want) in [4.0, 6.0, 10.0].iter().enumerate() {
+        assert!(lengths[i * 4..i * 4 + 4].iter().all(|v| (v - want).abs() < 1e-12), "{lengths:?}");
     }
 }
 

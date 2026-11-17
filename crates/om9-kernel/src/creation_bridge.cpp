@@ -16,7 +16,10 @@
 #include <ShapeFix_Wire.hxx>
 #include <GeomProjLib.hxx>
 #include <Geom2d_Curve.hxx>
+#include <gp_Pnt2d.hxx>
+#include <gp_Vec2d.hxx>
 #include <BRep_Builder.hxx>
+#include <algorithm>
 #include <BRepLib.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
@@ -438,19 +441,64 @@ extern "C" int om9_occt_trimmed_face(const size_t* shape, const double* poles, c
   std::vector<TopoDS_Wire> wires;
   size_t pole_at = 0, knot_at = 0;
   size_t current = size_t(-1);
-  BRepBuilderAPI_MakeWire wire;
+  // Each loop is chained edge to edge through shared vertices in the order given: a loop on a
+  // closed surface passes the same seam point more than once, which a search by position
+  // (BRepBuilderAPI_MakeWire) joins to the wrong edge.
+  std::vector<Handle(Geom_BSplineCurve)> ring_curves;
+  std::vector<bool> ring_reversed;
+  std::vector<Handle(Geom2d_Curve)> ring_pcurves;
   auto close_wire = [&]() {
-   if (current == size_t(-1)) return;
-   if (!wire.IsDone() || !wire.Wire().Closed()) throw std::invalid_argument("trimmed face loop is not closed");
-   wires.push_back(wire.Wire());
-   wire = BRepBuilderAPI_MakeWire();
+   const size_t m = ring_curves.size();
+   if (current == size_t(-1) || m == 0) return;
+   // A curve's start and end along the loop.
+   const auto along = [&](size_t i, bool end) {
+    const Handle(Geom_BSplineCurve)& c = ring_curves[i];
+    return c->Value(end != bool(ring_reversed[i]) ? c->LastParameter() : c->FirstParameter());
+   };
+   // Joint k: where curve k - 1 ends and curve k starts (joint 0 closes the loop).
+   std::vector<TopoDS_Vertex> joints(m);
+   for (size_t k = 0; k < m; ++k) {
+    const gp_Pnt end = along((k + m - 1) % m, true), start = along(k, false);
+    const double gap = end.Distance(start);
+    if (gap > 1.0e-4) throw std::invalid_argument("trimmed face loop is not closed");
+    builder.MakeVertex(joints[k], gp_Pnt((end.XYZ() + start.XYZ()) * 0.5), std::max(tol, gap));
+   }
+   TopoDS_Wire loop;
+   builder.MakeWire(loop);
+   for (size_t k = 0; k < m; ++k) {
+    const Handle(Geom_BSplineCurve)& c = ring_curves[k];
+    // In the curve's own direction a reversed edge runs from the loop's next joint back.
+    const TopoDS_Vertex& from = ring_reversed[k] ? joints[(k + 1) % m] : joints[k];
+    const TopoDS_Vertex& to = ring_reversed[k] ? joints[k] : joints[(k + 1) % m];
+    TopoDS_Edge e;
+    builder.MakeEdge(e, c, tol);
+    builder.Add(e, from.Oriented(TopAbs_FORWARD));
+    builder.Add(e, to.Oriented(TopAbs_REVERSED));
+    builder.Range(e, c->FirstParameter(), c->LastParameter());
+    builder.UpdateEdge(e, ring_pcurves[k], face, tol);
+    if (ring_reversed[k]) e.Reverse();
+    builder.Add(loop, e);
+   }
+   loop.Closed(Standard_True);
+   wires.push_back(loop);
+   ring_curves.clear();
+   ring_reversed.clear();
+   ring_pcurves.clear();
   };
+  // A closed surface (a cylinder's side opened at its seam) meets itself at both ends of a
+  // parameter: the projection puts a seam curve on one side only, so each p-curve is moved by
+  // whole periods to start where the previous one in its loop ends.
+  const bool u_closed = surface->IsUClosed(), v_closed = surface->IsVClosed();
+  Standard_Real su0, su1, sv0, sv1;
+  surface->Bounds(su0, su1, sv0, sv1);
+  bool have_prev = false;
+  gp_Pnt2d prev_end;
   for (size_t c = 0; c < curve_count; ++c) {
    const int degree = int(curves[4 * c]);
    const size_t n = curves[4 * c + 1];
    const size_t ring = curves[4 * c + 2];
    const bool reversed = curves[4 * c + 3] != 0;
-   if (ring != current) { close_wire(); current = ring; }
+   if (ring != current) { close_wire(); current = ring; have_prev = false; }
    TColgp_Array1OfPnt cp(1, int(n));
    TColStd_Array1OfReal cw(1, int(n));
    for (size_t i = 0; i < n; ++i) {
@@ -468,13 +516,22 @@ extern "C" int om9_occt_trimmed_face(const size_t* shape, const double* poles, c
    Handle(Geom2d_Curve) on_surface =
        GeomProjLib::Curve2d(curve, curve->FirstParameter(), curve->LastParameter(), surface);
    if (on_surface.IsNull()) throw std::invalid_argument("a trim curve does not lie on the surface");
-   BRepBuilderAPI_MakeEdge edge(curve);
-   if (!edge.IsDone()) throw std::invalid_argument("trimmed face edge");
-   TopoDS_Edge e = edge.Edge();
-   builder.UpdateEdge(e, on_surface, face, tol);
-   if (reversed) e.Reverse();
-   wire.Add(e);
-   if (!wire.IsDone()) throw std::invalid_argument("trimmed face loop is disconnected");
+   {
+    const double a = on_surface->FirstParameter(), b = on_surface->LastParameter();
+    const gp_Pnt2d start = on_surface->Value(reversed ? b : a), end = on_surface->Value(reversed ? a : b);
+    gp_Vec2d shift(0.0, 0.0);
+    const auto period_shift = [](double from, double to, double span) {
+     return std::abs(to - from) > 0.5 * span ? std::round((to - from) / span) * span : 0.0;
+    };
+    if (have_prev && u_closed) shift.SetX(period_shift(start.X(), prev_end.X(), su1 - su0));
+    if (have_prev && v_closed) shift.SetY(period_shift(start.Y(), prev_end.Y(), sv1 - sv0));
+    if (shift.Magnitude() > 0.0) on_surface = Handle(Geom2d_Curve)::DownCast(on_surface->Translated(shift));
+    prev_end = end.Translated(shift);
+    have_prev = true;
+   }
+   ring_curves.push_back(curve);
+   ring_reversed.push_back(reversed);
+   ring_pcurves.push_back(on_surface);
    pole_at += n;
    knot_at += n + size_t(degree) + 1;
   }

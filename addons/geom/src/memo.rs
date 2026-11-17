@@ -62,6 +62,7 @@ fn inputs_key(e: &Event) -> u64 {
             m.triangles.len().hash(&mut h);
         }
         serde_json::to_string(&s.exact).unwrap_or_default().hash(&mut h);
+        serde_json::to_string(&s.sub).unwrap_or_default().hash(&mut h);
     }
     h.finish()
 }

@@ -123,7 +123,9 @@ impl Interactive for Surfaces {
 
 /// Surface edges as curves (Rhino: "Select curves or surface edges"): a click on an
 /// untrimmed surface near one of its edges stands for that edge — the exact isoparametric
-/// curve — in the commands that take curves (Sweep1, Sweep2, Loft, NetworkSrf, EdgeSrf).
+/// curve — in the commands that take curves (Sweep1, Sweep2, Loft, NetworkSrf, EdgeSrf); on a
+/// trimmed surface, the nearest trim edge; and edges of any B-Rep picked with Ctrl+Shift+click
+/// arrive exactly (`Selected.sub`).
 #[derive(Serialize, Deserialize, Default, Clone)]
 struct EdgePicks {
     /// (surface id, the click) for each edge picked.
@@ -156,6 +158,13 @@ fn with_surface_edges(e: &Event, inner: fn(&Event) -> Reply) -> Reply {
     // The selection the command sees: picked surfaces become their edge curves.
     let mut sel: Vec<Selected> = Vec::new();
     for s in &e.selection {
+        // Edges picked with Ctrl+Shift+click (`brep_data`, any surface, polysurface or
+        // solid): the object stands for those edges' exact curves.
+        let picked: Vec<(usize, &Geo)> = s.sub.iter().filter_map(|p| Some((p.edge?, p.exact.as_ref()?))).collect();
+        if !picked.is_empty() {
+            sel.extend(picked.into_iter().map(|(k, g)| edge_selected(s, k, g.clone())));
+            continue;
+        }
         let edges: Vec<&Vec3> = st.picks.iter().filter(|(id, _)| id == &s.id).map(|(_, p)| p).collect();
         if !is_surface(s) || edges.is_empty() {
             sel.push(s.clone());
@@ -1975,19 +1984,21 @@ fn rail_revolve(e: &Event) -> Reply {
 
 /// Rhino 5 ExtrudeCrv (Matrix "Extrude All"): curves, then `Extrusion distance <d>` along
 /// the CPlane normal: typed, Enter for the default, or a click (its height over the first
-/// curve's start; the preview follows the pointer). BothSides, DeleteInput. Exact: each
-/// surface is the curve's own NURBS and its copy moved (degree 1 across).
+/// curve's start; the preview follows the pointer). BothSides, Solid, DeleteInput. Exact:
+/// each surface is the curve's own NURBS and its copy moved (degree 1 across). Solid=Yes caps
+/// closed planar curves (the curves inside one in its plane are its holes) into exact solids.
 fn extrude_all(e: &Event) -> Reply {
     let flow = Flow::new("Extrude All")
         .select_prompt("Select curves to extrude")
         .value("Extrusion distance", e.number("ea_distance", 2.0))
         .toggle("BothSides", e.flag("ea_both_sides", false))
+        .toggle("Solid", e.flag("ea_solid", false))
         .toggle("DeleteInput", false);
     let n = e.plane.normal();
     let picked = curves(e);
     let base = picked.first().and_then(|c| c.points.first().copied());
     let height = |at: Vec3| base.map(|b| dot(sub(at, b), n));
-    let make = |d: f64, both: bool| -> Result<Vec<Geo>, String> {
+    let make = |d: f64, both: bool, solid: bool| -> Result<Vec<Geo>, String> {
         if picked.is_empty() {
             return Err("select curves to extrude".into());
         }
@@ -1996,27 +2007,20 @@ fn extrude_all(e: &Event) -> Reply {
         }
         let lo = if both { scale(n, -d) } else { [0.0; 3] };
         let hi = scale(n, d);
-        Ok(picked
+        let ncs: Vec<Nc> = picked
             .iter()
             .filter_map(|s| {
-                let c = exact_curve(s).or_else(|| {
+                exact_curve(s).or_else(|| {
                     let mut q = dense(s);
                     if s.closed && dist(q[0], *q.last()?) > 1e-9 {
                         q.push(q[0]);
                     }
                     let g = interpolate(&q, 3, false)?;
                     Nc::from_geo(&g)
-                })?;
-                let shift = |v: Vec3| -> Vec<om9_addon_geom::exact::H> {
-                    c.points
-                        .iter()
-                        .map(|p| [p[0] + v[0] * p[3], p[1] + v[1] * p[3], p[2] + v[2] * p[3], p[3]])
-                        .collect()
-                };
-                let rows = vec![shift(lo), shift(hi)];
-                Some(exact::surface(&rows, [1, c.degree], [vec![0.0, 0.0, 1.0, 1.0], c.knots.clone()]))
+                })
             })
-            .collect())
+            .collect();
+        Ok(extruded(&ncs, lo, hi, solid))
     };
     flow.step(
         e,
@@ -2026,7 +2030,7 @@ fn extrude_all(e: &Event) -> Reply {
                 _ => flow_default(&flow, "Extrusion distance", 2.0),
             };
             Show {
-                geo: make(d, c.yes(&flow, "BothSides")).unwrap_or_default(),
+                geo: make(d, c.yes(&flow, "BothSides"), c.yes(&flow, "Solid")).unwrap_or_default(),
                 ..Default::default()
             }
         },
@@ -2035,15 +2039,139 @@ fn extrude_all(e: &Event) -> Reply {
                 Some(at) => height(at).ok_or("select curves to extrude")?,
                 None => c.n(0).unwrap_or(flow_default(&flow, "Extrusion distance", 2.0)),
             };
-            let out = make(d, c.yes(&flow, "BothSides"))?;
-            let k = out.len();
-            let mut r = Reply::finish(out).say(format!("Extrude All: {k} surfaces, {} mm", fmt(d)));
+            let out = make(d, c.yes(&flow, "BothSides"), c.yes(&flow, "Solid"))?;
+            let solids = out.iter().filter(|g| matches!(g, Geo::Brep { .. })).count();
+            let what = if solids > 0 {
+                format!("{solids} solids, {} surfaces", out.len() - solids)
+            } else {
+                format!("{} surfaces", out.len())
+            };
+            let mut r = Reply::finish(out).say(format!("Extrude All: {what}, {} mm", fmt(d)));
             if c.yes(&flow, "DeleteInput") {
                 r.delete = picked.iter().map(|s| s.id.clone()).collect();
             }
             Ok(r)
         },
     )
+}
+
+/// The surface swept by curve `c` from offset `lo` to `hi` (exact: the curve and its moved
+/// copy, degree 1 across).
+fn swept(c: &Nc, lo: Vec3, hi: Vec3) -> Geo {
+    let shift = |v: Vec3| -> Vec<om9_addon_geom::exact::H> {
+        c.points
+            .iter()
+            .map(|p| [p[0] + v[0] * p[3], p[1] + v[1] * p[3], p[2] + v[2] * p[3], p[3]])
+            .collect()
+    };
+    exact::surface(&[shift(lo), shift(hi)], [1, c.degree], [vec![0.0, 0.0, 1.0, 1.0], c.knots.clone()])
+}
+
+/// Curve `c` moved by `v`.
+fn moved(c: &Nc, v: Vec3) -> Nc {
+    Nc { points: c.points.iter().map(|p| [p[0] + v[0] * p[3], p[1] + v[1] * p[3], p[2] + v[2] * p[3], p[3]]).collect(), ..c.clone() }
+}
+
+/// Points along curve `c` over its whole domain (closing point left out).
+fn along(c: &Nc, n: usize) -> Vec<Vec3> {
+    let (a, b) = (c.knots[c.degree], c.knots[c.knots.len() - c.degree - 1]);
+    (0..n).map(|i| c.eval(a + (b - a) * i as f64 / n as f64)).collect()
+}
+
+/// The plane of a closed planar curve (a point on it, its unit normal), or `None` when the
+/// curve is open, flat to a line or not planar.
+fn curve_plane(c: &Nc) -> Option<(Vec3, Vec3)> {
+    let pts = along(c, 64);
+    let size = pts.iter().map(|p| dist(*p, pts[0])).fold(0.0, f64::max);
+    if !c.closed(1e-6 * size.max(1.0)) || size < 1e-9 {
+        return None;
+    }
+    let mut nrm = [0.0; 3];
+    for i in 0..pts.len() {
+        nrm = add(nrm, cross(pts[i], pts[(i + 1) % pts.len()]));
+    }
+    if norm(nrm) < 1e-12 * size * size {
+        return None;
+    }
+    let nrm = unit(nrm);
+    let tol = 1e-6 * size.max(1.0);
+    pts.iter().all(|p| dot(sub(*p, pts[0]), nrm).abs() <= tol).then_some((pts[0], nrm))
+}
+
+/// Even-odd point in polygon.
+fn in_polygon(p: [f64; 2], poly: &[[f64; 2]]) -> bool {
+    let mut inside = false;
+    for i in 0..poly.len() {
+        let (a, b) = (poly[i], poly[(i + 1) % poly.len()]);
+        if (a[1] > p[1]) != (b[1] > p[1]) && p[0] < a[0] + (p[1] - a[1]) / (b[1] - a[1]) * (b[0] - a[0]) {
+            inside = !inside;
+        }
+    }
+    inside
+}
+
+/// Extrusions of curves from offset `lo` to `hi`: one surface per curve, and with `solid`
+/// every closed planar curve (with the closed curves inside it in its plane as holes) is
+/// capped at both ends into a [`Geo::Brep`] solid. A closed curve inside another is a hole.
+fn extruded(curves: &[Nc], lo: Vec3, hi: Vec3, solid: bool) -> Vec<Geo> {
+    let planes: Vec<Option<(Vec3, Vec3)>> = curves.iter().map(|c| if solid { curve_plane(c) } else { None }).collect();
+    // In the same plane, and inside: its first point inside the other's outline.
+    let inside = |i: usize, j: usize| -> bool {
+        let (Some((pi, ni)), Some((pj, nj))) = (planes[i], planes[j]) else { return false };
+        let size = along(&curves[j], 16).iter().map(|p| dist(*p, pj)).fold(0.0, f64::max).max(1.0);
+        if i == j || norm(cross(ni, nj)) > 1e-6 || dot(sub(pi, pj), nj).abs() > 1e-6 * size {
+            return false;
+        }
+        let f = Frame::new(pj, nj, [1.0, 0.0, 0.0]);
+        let poly: Vec<[f64; 2]> = along(&curves[j], 128).iter().map(|p| { let l = f.local(*p); [l[0], l[1]] }).collect();
+        let q = f.local(pi);
+        in_polygon([q[0], q[1]], &poly)
+    };
+    let depth = |i: usize| (0..curves.len()).filter(|&j| inside(i, j)).count();
+    let mut out = Vec::new();
+    for (i, c) in curves.iter().enumerate() {
+        let Some((origin, nrm)) = planes[i] else {
+            out.push(swept(c, lo, hi));
+            continue;
+        };
+        // Odd depth: a hole of the curve round it (built with that one).
+        if depth(i) % 2 == 1 {
+            continue;
+        }
+        let holes: Vec<&Nc> = (0..curves.len()).filter(|&j| inside(j, i) && depth(j) == depth(i) + 1).map(|j| &curves[j]).collect();
+        // The cap plane: a square round the outline in its plane, a little larger.
+        let f = Frame::new(origin, nrm, [1.0, 0.0, 0.0]);
+        let local: Vec<Vec3> = along(c, 128).iter().map(|p| f.local(*p)).collect();
+        let (mut x0, mut x1, mut y0, mut y1) = (f64::MAX, f64::MIN, f64::MAX, f64::MIN);
+        for p in &local {
+            (x0, x1, y0, y1) = (x0.min(p[0]), x1.max(p[0]), y0.min(p[1]), y1.max(p[1]));
+        }
+        let m = 0.05 * (x1 - x0).max(y1 - y0);
+        let (x0, x1, y0, y1) = (x0 - m, x1 + m, y0 - m, y1 + m);
+        let cap = |v: Vec3| -> Geo {
+            let corner = |x: f64, y: f64| add(f.point([x, y, 0.0]), v);
+            let plane = Geo::Surface {
+                degree: [1, 1],
+                size: [2, 2],
+                points: vec![corner(x0, y0), corner(x0, y1), corner(x1, y0), corner(x1, y1)],
+                weights: Vec::new(),
+                knots: [vec![0.0, 0.0, 1.0, 1.0], vec![0.0, 0.0, 1.0, 1.0]],
+            };
+            let mut loops = vec![vec![moved(c, v).to_geo()]];
+            loops.extend(holes.iter().map(|h| vec![moved(h, v).to_geo()]));
+            Geo::Trimmed { surface: Box::new(plane), loops, display: None }
+        };
+        let mut faces = vec![swept(c, lo, hi)];
+        faces.extend(holes.iter().map(|h| swept(h, lo, hi)));
+        faces.push(cap(lo));
+        faces.push(cap(hi));
+        // What a build without the B-Rep kernel shows: the same prism as a mesh.
+        let hole_pts: Vec<Vec<Vec3>> = holes.iter().map(|h| along(h, 96).iter().map(|p| add(*p, lo)).collect()).collect();
+        let outline: Vec<Vec3> = along(c, 96).iter().map(|p| add(*p, lo)).collect();
+        let display = shapes::prism(&outline, &hole_pts, sub(hi, lo)).map(|m| Box::new(m.geo("Extrusion", None, None)));
+        out.push(Geo::Brep { faces, solid: true, display });
+    }
+    out
 }
 
 // ---- blends, fillets, chamfers ---------------------------------------------------------------

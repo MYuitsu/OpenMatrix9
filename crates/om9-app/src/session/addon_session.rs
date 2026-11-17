@@ -11,7 +11,7 @@
 //!
 //! Add-ons work in world millimetres; this module converts to and from document units.
 use super::Controller;
-use om9_addon_abi::session::{self as s, Event, Geo, Input, Reply, Selected, Want};
+use om9_addon_abi::session::{self as s, Event, Geo, Input, Reply, Selected, SubPick, Want};
 use om9_core::{
     Error, Result,
     geometry::{Curve, Geometry, Mesh, NurbsCurve, Point3, Transform},
@@ -44,6 +44,8 @@ pub struct AddonSession {
     /// The last accepted point (document units), for `@dx,dy` input.
     pub last_point: Option<Point3>,
     selection_seen: u64,
+    /// The subobject picks seen last (a second edge of the same object is a new selection).
+    sub_seen: u64,
     /// The pointer position last sent as a hover event; the UI reports it every frame.
     hover_at: Option<Point3>,
     /// The command reads the triangles of selected meshes (`mesh_data = true`).
@@ -273,6 +275,11 @@ fn to_geometry(g: &Geo, k: f64) -> Result<(Geometry, Option<Value>, String)> {
             loops,
             display,
         } => return trimmed_geometry(surface, loops, display.as_deref(), k),
+        Geo::Brep {
+            faces,
+            solid,
+            display,
+        } => return brep_geometry(faces, *solid, display.as_deref(), k),
         Geo::Mesh {
             name: n,
             vertices,
@@ -306,6 +313,42 @@ fn to_geometry(g: &Geo, k: f64) -> Result<(Geometry, Option<Value>, String)> {
     })
 }
 
+/// One add-on face for the kernel: a surface and its trim loops (lines or NURBS lying on
+/// it), in document units. A plain surface is a face with no loops (the whole surface).
+#[cfg(feature = "occt-brep")]
+fn face_parts(g: &Geo, k: f64) -> Result<(om9_core::geometry::NurbsSurface, Vec<Vec<NurbsCurve>>)> {
+    let (surface, loops): (&Geo, &[Vec<Geo>]) = match g {
+        Geo::Trimmed { surface, loops, .. } => (surface, loops),
+        Geo::Surface { .. } => (g, &[]),
+        _ => return Err(Error::Invalid("a face is a surface or a trimmed surface")),
+    };
+    let Geometry::Surface(srf) = to_geometry(surface, k)?.0 else {
+        return Err(Error::Invalid("trimmed surface base"));
+    };
+    let mut rings = Vec::with_capacity(loops.len());
+    for ring in loops {
+        let mut curves = Vec::with_capacity(ring.len());
+        for g in ring {
+            match to_geometry(g, k)?.0 {
+                Geometry::Curve(Curve::Nurbs(c)) => curves.push(c),
+                Geometry::Curve(Curve::Line { start, end, .. }) => curves.push(NurbsCurve {
+                    degree: 1,
+                    poles: vec![start, end],
+                    weights: vec![1.0; 2],
+                    knots: vec![0.0, 0.0, 1.0, 1.0],
+                    domain: [0.0, 1.0],
+                    periodic: false,
+                    reversed: false,
+                    seam: None,
+                }),
+                _ => return Err(Error::Invalid("trim loop curves are lines or NURBS")),
+            }
+        }
+        rings.push(curves);
+    }
+    Ok((srf, rings))
+}
+
 #[cfg(feature = "occt-brep")]
 thread_local! {
     /// B-Reps made for the objects being committed: their display meshes are staged with the
@@ -334,30 +377,10 @@ fn trimmed_geometry(
     #[cfg(feature = "occt-brep")]
     {
         let _ = display;
-        let Geometry::Surface(srf) = to_geometry(surface, k)?.0 else {
-            return Err(Error::Invalid("trimmed surface base"));
-        };
-        let mut rings = Vec::with_capacity(loops.len());
-        for ring in loops {
-            let mut curves = Vec::with_capacity(ring.len());
-            for g in ring {
-                match to_geometry(g, k)?.0 {
-                    Geometry::Curve(Curve::Nurbs(c)) => curves.push(c),
-                    Geometry::Curve(Curve::Line { start, end, .. }) => curves.push(NurbsCurve {
-                        degree: 1,
-                        poles: vec![start, end],
-                        weights: vec![1.0; 2],
-                        knots: vec![0.0, 0.0, 1.0, 1.0],
-                        domain: [0.0, 1.0],
-                        periodic: false,
-                        reversed: false,
-                        seam: None,
-                    }),
-                    _ => return Err(Error::Invalid("trim loop curves are lines or NURBS")),
-                }
-            }
-            rings.push(curves);
-        }
+        let (srf, rings) = face_parts(
+            &Geo::Trimmed { surface: Box::new(surface.clone()), loops: loops.to_vec(), display: None },
+            k,
+        )?;
         let limits = om9_core::budget::Limits::default();
         let brep = om9_kernel::creation::trimmed_face(
             &srf,
@@ -372,6 +395,45 @@ fn trimmed_geometry(
     {
         let _ = loops;
         to_geometry(display.unwrap_or(surface), k)
+    }
+}
+
+/// Sewing tolerance for add-on faces (millimetres): Rhino joins edges within twice the
+/// absolute tolerance (0.001 mm in jewellery templates); add-on faces are fitted to 0.001 mm.
+#[cfg(feature = "occt-brep")]
+const SEW_TOLERANCE_MM: f64 = 0.01;
+
+/// A polysurface or solid from an add-on: its faces made by the B-Rep kernel and sewn into one
+/// body; `solid` refuses anything but one closed solid. A build without the kernel keeps the
+/// add-on's display mesh.
+fn brep_geometry(
+    faces: &[Geo],
+    solid: bool,
+    display: Option<&Geo>,
+    k: f64,
+) -> Result<(Geometry, Option<Value>, String)> {
+    #[cfg(feature = "occt-brep")]
+    {
+        let _ = display;
+        let parts = faces.iter().map(|f| face_parts(f, k)).collect::<Result<Vec<_>>>()?;
+        let limits = om9_core::budget::Limits::default();
+        let brep = om9_kernel::editing::sew_faces(
+            &parts,
+            solid,
+            SEW_TOLERANCE_MM / k,
+            om9_kernel::creation::DEFAULT_DEFLECTION_MM,
+            &limits,
+        )
+        .map_err(|e| Error::Io(format!("{}: {e}", if solid { "solid" } else { "polysurface" })))?;
+        Ok((Geometry::Brep(new_brep(brep)), None, if solid { "Solid" } else { "Polysurface" }.into()))
+    }
+    #[cfg(not(feature = "occt-brep"))]
+    {
+        let _ = (faces, solid);
+        match display {
+            Some(d) => to_geometry(d, k),
+            None => Err(Error::Invalid("this build has no B-Rep kernel and the body has no display mesh")),
+        }
     }
 }
 
@@ -396,6 +458,14 @@ fn preview_lines(g: &Geo, k: f64, limits: &om9_core::budget::Limits) -> Vec<[Poi
             .into_iter()
             .map(|[a, b]| [doc(vertices[a], k), doc(vertices[b], k)])
             .collect(),
+        // A polysurface or solid previews as its faces' boundaries (and its display mesh).
+        Geo::Brep { faces, display, .. } => {
+            let mut out: Vec<[Point3; 2]> = faces.iter().flat_map(|f| preview_lines(f, k, limits)).collect();
+            if let Some(d) = display {
+                out.extend(preview_lines(d, k, limits));
+            }
+            out
+        }
         // A trimmed surface previews as its boundary loops (and its display mesh's edges).
         Geo::Trimmed { loops, display, .. } => {
             let mut out: Vec<[Point3; 2]> = loops
@@ -599,7 +669,27 @@ fn geo_in_local(g: &Geo, placement: &Transform, k: f64) -> Result<Geo> {
             weights: weights.clone(),
             knots: knots.clone(),
         },
-        other => other.clone(),
+        Geo::Trimmed {
+            surface,
+            loops,
+            display,
+        } => Geo::Trimmed {
+            surface: Box::new(geo_in_local(surface, placement, k)?),
+            loops: loops
+                .iter()
+                .map(|lp| lp.iter().map(|c| geo_in_local(c, placement, k)).collect::<Result<Vec<_>>>())
+                .collect::<Result<_>>()?,
+            display: display.as_deref().map(|d| geo_in_local(d, placement, k).map(Box::new)).transpose()?,
+        },
+        Geo::Brep {
+            faces,
+            solid,
+            display,
+        } => Geo::Brep {
+            faces: faces.iter().map(|f| geo_in_local(f, placement, k)).collect::<Result<_>>()?,
+            solid: *solid,
+            display: display.as_deref().map(|d| geo_in_local(d, placement, k).map(Box::new)).transpose()?,
+        },
     })
 }
 
@@ -608,16 +698,25 @@ fn geo_in_local(g: &Geo, placement: &Transform, k: f64) -> Result<Geo> {
 #[cfg(feature = "occt-brep")]
 const FACE_CACHE: usize = 32;
 
+/// Most faces a selected polysurface or solid may have to be sent exactly (a larger body is
+/// sent as its display mesh only: reading it would hold up every step).
+#[cfg(feature = "occt-brep")]
+const MAX_SENT_FACES: usize = 256;
+
+/// A B-Rep read for add-ons: its faces as exact NURBS, and whether it is one closed solid.
+#[cfg(feature = "occt-brep")]
+type ReadBrep = std::sync::Arc<(Vec<om9_kernel::face_nurbs::FaceNurbs>, bool)>;
+
 #[cfg(feature = "occt-brep")]
 thread_local! {
-    static FACES: std::cell::RefCell<Vec<([u8; 32], std::sync::Arc<Vec<om9_kernel::face_nurbs::FaceNurbs>>)>> =
-        const { std::cell::RefCell::new(Vec::new()) };
+    static FACES: std::cell::RefCell<Vec<([u8; 32], ReadBrep)>> = const { std::cell::RefCell::new(Vec::new()) };
 }
 
-/// A trimmed surface exactly, for `brep_data` commands: a one-face B-Rep (its underlying
-/// NURBS surface and trim loops from the kernel; a face that is its whole surface goes as the
-/// plain [`Geo::Surface`]) or a surface with Rhino trim loops (the parameter-space polygons,
-/// run along the surface). `None` for anything else.
+/// A trimmed surface or B-Rep exactly, for `brep_data` commands: a surface with Rhino trim
+/// loops (the parameter-space polygons, run along the surface) or a one-face B-Rep as
+/// [`Geo::Trimmed`] (its underlying NURBS surface and trim loops from the kernel); a
+/// polysurface or solid as [`Geo::Brep`] of such faces. A face that is its whole surface goes
+/// as the plain [`Geo::Surface`]. `None` for anything else.
 fn trimmed_in_world(entity: &Entity, k: f64) -> Option<Geo> {
     let limits = om9_core::budget::Limits::default();
     let placement = &entity.placement;
@@ -646,52 +745,129 @@ fn trimmed_in_world(entity: &Entity, k: f64) -> Option<Geo> {
         }
         return Some(Geo::Trimmed { surface: Box::new(surface), loops, display: None });
     }
+    // The display already counts the faces, so a body too large to send is never converted.
     #[cfg(feature = "occt-brep")]
-    // One face only (a polysurface or solid is not a trimmed surface): the display already
-    // counts the faces, so a solid is never converted.
     if let Geometry::Brep(brep) = &entity.geometry
-        && brep.topology().faces.len() == 1
+        && (1..=MAX_SENT_FACES).contains(&brep.topology().faces.len())
     {
-        let key = brep.canonical_fingerprints().0;
-        let faces = FACES.with(|c| c.borrow().iter().find(|(h, _)| *h == key).map(|(_, f)| f.clone())).or_else(|| {
-            let f = std::sync::Arc::new(om9_kernel::face_nurbs::face_nurbs(brep, &limits).ok()?);
-            FACES.with(|c| {
-                let mut c = c.borrow_mut();
-                if c.len() >= FACE_CACHE {
-                    c.remove(0);
-                }
-                c.push((key, f.clone()));
-            });
-            Some(f)
-        })?;
-        let [face] = faces.as_slice() else { return None };
-        let surface = Geo::Surface {
-            degree: face.degree,
-            size: face.size,
-            points: face.poles.iter().map(|q| p(*q)).collect::<Option<_>>()?,
-            weights: face.weights.clone(),
-            knots: face.knots.clone(),
+        let read = read_brep(brep)?;
+        let face = |f: &om9_kernel::face_nurbs::FaceNurbs| face_geo(f, &p);
+        let (faces, solid) = (&read.0, read.1);
+        return match faces.as_slice() {
+            [one] => face(one),
+            many => Some(Geo::Brep { faces: many.iter().map(face).collect::<Option<_>>()?, solid, display: None }),
         };
-        let loops = face
-            .loops
-            .iter()
-            .map(|lp| {
-                lp.iter()
-                    .map(|c| {
-                        Some(Geo::Nurbs {
-                            degree: c.degree,
-                            points: c.poles.iter().map(|q| p(*q)).collect::<Option<_>>()?,
-                            weights: c.weights.clone(),
-                            knots: c.knots.clone(),
-                        })
-                    })
-                    .collect::<Option<Vec<Geo>>>()
-            })
-            .collect::<Option<Vec<_>>>()?;
-        // A face that is its whole surface (no loops) goes as the plain surface.
-        return Some(if loops.is_empty() { surface } else { Geo::Trimmed { surface: Box::new(surface), loops, display: None } });
     }
     None
+}
+
+/// A B-Rep's faces as exact NURBS and whether it is one closed solid, read once per shape
+/// (cached by its source hash).
+#[cfg(feature = "occt-brep")]
+fn read_brep(brep: &om9_core::brep::CanonicalBrep) -> Option<ReadBrep> {
+    let limits = om9_core::budget::Limits::default();
+    let key = brep.canonical_fingerprints().0;
+    FACES.with(|c| c.borrow().iter().find(|(h, _)| *h == key).map(|(_, f)| f.clone())).or_else(|| {
+        let faces = om9_kernel::face_nurbs::face_nurbs(brep, &limits).ok()?;
+        let solid = faces.len() > 1 && om9_kernel::creation::measure(brep, &limits).is_ok_and(|m| m.solids == 1 && m.closed);
+        let f: ReadBrep = std::sync::Arc::new((faces, solid));
+        FACES.with(|c| {
+            let mut c = c.borrow_mut();
+            if c.len() >= FACE_CACHE {
+                c.remove(0);
+            }
+            c.push((key, f.clone()));
+        });
+        Some(f)
+    })
+}
+
+/// A kernel NURBS curve in world mm (`p` maps a local point).
+#[cfg(feature = "occt-brep")]
+fn curve_geo(c: &om9_kernel::face_nurbs::NurbsCurveData, p: &dyn Fn(Point3) -> Option<s::Vec3>) -> Option<Geo> {
+    Some(Geo::Nurbs {
+        degree: c.degree,
+        points: c.poles.iter().map(|q| p(*q)).collect::<Option<_>>()?,
+        weights: c.weights.clone(),
+        knots: c.knots.clone(),
+    })
+}
+
+/// A kernel face in world mm: [`Geo::Trimmed`], or the plain surface when it has no loops
+/// (it is its whole surface).
+#[cfg(feature = "occt-brep")]
+fn face_geo(f: &om9_kernel::face_nurbs::FaceNurbs, p: &dyn Fn(Point3) -> Option<s::Vec3>) -> Option<Geo> {
+    let surface = Geo::Surface {
+        degree: f.degree,
+        size: f.size,
+        points: f.poles.iter().map(|q| p(*q)).collect::<Option<_>>()?,
+        weights: f.weights.clone(),
+        knots: f.knots.clone(),
+    };
+    let loops = f
+        .loops
+        .iter()
+        .map(|lp| lp.iter().map(|c| curve_geo(c, p)).collect::<Option<Vec<Geo>>>())
+        .collect::<Option<Vec<_>>>()?;
+    Some(if loops.is_empty() { surface } else { Geo::Trimmed { surface: Box::new(surface), loops, display: None } })
+}
+
+#[cfg(feature = "occt-brep")]
+thread_local! {
+    /// Edges read for picked edges, by source hash (most recent last).
+    static EDGES: std::cell::RefCell<Vec<([u8; 32], std::sync::Arc<Vec<Option<om9_kernel::face_nurbs::NurbsCurveData>>>)>> =
+        const { std::cell::RefCell::new(Vec::new()) };
+}
+
+/// The faces and edges of `entity` picked with Ctrl+Shift+click (`picks`), as the display
+/// keys find them: their indices and, with the kernel, their exact geometry in world mm.
+fn sub_picks(entity: &Entity, picks: &[&om9_scene::scene::Subelement], k: f64) -> Vec<SubPick> {
+    use om9_scene::scene::Subelement;
+    let Geometry::Brep(brep) = &entity.geometry else { return Vec::new() };
+    let d = brep.topology();
+    #[cfg(feature = "occt-brep")]
+    let p = |q: Point3| entity.placement.point(q).ok().map(|w| mm(w, k));
+    #[cfg(not(feature = "occt-brep"))]
+    let _ = k;
+    picks
+        .iter()
+        .filter_map(|pick| match pick {
+            Subelement::BrepFace(key) => {
+                let i = d.faces.iter().position(|f| f == key)?;
+                #[cfg(feature = "occt-brep")]
+                let exact = (d.faces.len() <= MAX_SENT_FACES)
+                    .then(|| read_brep(brep))
+                    .flatten()
+                    .and_then(|r| r.0.get(i).and_then(|f| face_geo(f, &p)));
+                #[cfg(not(feature = "occt-brep"))]
+                let exact = None;
+                Some(SubPick { face: Some(i), edge: None, exact })
+            }
+            Subelement::BrepEdge(key) => {
+                let i = d.edges.iter().position(|e| e == key)?;
+                #[cfg(feature = "occt-brep")]
+                let exact = {
+                    let hash = brep.canonical_fingerprints().0;
+                    let edges = EDGES.with(|c| c.borrow().iter().find(|(h, _)| *h == hash).map(|(_, e)| e.clone())).or_else(|| {
+                        let e = std::sync::Arc::new(om9_kernel::face_nurbs::edge_nurbs(brep, &om9_core::budget::Limits::default()).ok()?);
+                        EDGES.with(|c| {
+                            let mut c = c.borrow_mut();
+                            if c.len() >= FACE_CACHE {
+                                c.remove(0);
+                            }
+                            c.push((hash, e.clone()));
+                        });
+                        Some(e)
+                    });
+                    edges.and_then(|e| e.get(i).cloned().flatten()).and_then(|c| curve_geo(&c, &p))
+                };
+                #[cfg(not(feature = "occt-brep"))]
+                let exact = None;
+                Some(SubPick { face: None, edge: Some(i), exact })
+            }
+            _ => None,
+        })
+        .collect()
 }
 
 /// The exact definition of a curve or NURBS surface object, in world mm.
@@ -901,6 +1077,17 @@ impl Controller {
                     } else {
                         exact_in_world(&entity.geometry, &entity.placement, k)
                     },
+                    sub: if brep_data {
+                        let picks: Vec<&om9_scene::scene::Subelement> = self
+                            .subselection()
+                            .iter()
+                            .filter(|r| r.root == object.root)
+                            .map(|r| &r.subset)
+                            .collect();
+                        sub_picks(entity, &picks, k)
+                    } else {
+                        Vec::new()
+                    },
                 });
                 out.len() - 1
             });
@@ -1070,6 +1257,7 @@ impl Controller {
             rubber_from: None,
             last_point: None,
             selection_seen: self.selection_revision,
+            sub_seen: self.sub_revision(),
             hover_at: None,
             mesh_data,
             brep_data,
@@ -1265,10 +1453,13 @@ impl Controller {
         let Some(s) = self.addon_session.as_ref() else {
             return;
         };
-        if s.selection_seen != self.selection_revision {
+        // Subobject picks count only for commands that receive them (`brep_data`).
+        let sub = if s.brep_data { self.sub_revision() } else { s.sub_seen };
+        if s.selection_seen != self.selection_revision || s.sub_seen != sub {
             let rev = self.selection_revision;
             if let Some(s) = self.addon_session.as_mut() {
                 s.selection_seen = rev;
+                s.sub_seen = sub;
             }
             let _ = self.session_step(Input::Selection);
         }

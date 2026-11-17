@@ -961,6 +961,14 @@ default = false
 commands = ["SurfaceGVDExtrudeAll"]
 
 [[settings]]
+key = "ea_solid"
+type = "bool"
+option = "Solid"
+label = "Khối đặc"
+default = false
+commands = ["SurfaceGVDExtrudeAll"]
+
+[[settings]]
 key = "bl_bulge"
 type = "length"
 option = "Bulge"
