@@ -22,6 +22,310 @@ fn frame(app: &mut MatrixApp, context: &egui::Context, events: Vec<Event>) {
     output.textures_delta.clear();
 }
 
+#[test]
+fn reopened_reordered_length_routes_through_measure_icon_and_cmd() {
+    let limits = Limits::default();
+    let shape = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 2., y_mm: 3., z_mm: 4. }, 0.1, &limits).unwrap();
+    let mut display = shape.display().clone();
+    let length = |index: usize| {
+        let segment = display.segments.iter().find(|segment| segment[2] as usize == index).unwrap();
+        om9_core::measure::distance_mm(display.points[segment[0] as usize], display.points[segment[1] as usize]).unwrap()
+    };
+    let first = (0..display.edges.len()).find(|&i| (length(i) - 4.).abs() < 1e-8).unwrap();
+    let other = (0..display.edges.len()).find(|&i| {
+        let segment = display.segments.iter().find(|segment| segment[2] as usize == i).unwrap();
+        let a = display.points[segment[0] as usize]; let b = display.points[segment[1] as usize];
+        (length(i) - 3.).abs() < 1e-8 && (0..3).all(|axis| ((a[axis]+b[axis])*0.5 - [2.,1.5,4.][axis]).abs() < 1e-8)
+    }).unwrap();
+    display.edges.swap(first, other);
+    for entry in &mut display.face_edges { if entry[1] as usize == first { entry[1] = other as u32; } else if entry[1] as usize == other { entry[1] = first as u32; } }
+    for entry in &mut display.segments { if entry[2] as usize == first { entry[2] = other as u32; } else if entry[2] as usize == other { entry[2] = first as u32; } }
+    let edge = display.edges[first];
+    let shape = om9_core::brep::Brep::from_native(shape.source().to_owned(), display, &limits).unwrap();
+    let mut document = Document::new("Length entry routes");
+    let entity = Entity::new("box", Geometry::Brep(shape), document.current_layer);
+    let id = entity.id;
+    document.entities.insert(id, entity);
+    let path = std::env::temp_dir().join(format!("om9-length-ui-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    for menu in [true, false] {
+        let mut app = MatrixApp::from_file(&path).unwrap();
+        let before = app.controller.document().clone();
+        let ctx = egui::Context::default();
+        frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+        app.set_sub_object_kind(om9_scene::scene::PickKind::Edge);
+        click_in_view(&mut app, &ctx, ViewId::Perspective, [2.,1.5,4.], Modifiers { ctrl: true, shift: true, ..Modifiers::NONE });
+        assert!(app.controller.subselection().iter().any(|selected| selected.root == id && selected.subset == om9_scene::scene::Subelement::BrepEdge(edge)), "viewport did not select expected edge");
+        if menu {
+            let at = app.top_menu_rect(3).unwrap().center();
+            for pressed in [true, false] { frame(&mut app, &ctx, vec![Event::PointerMoved(at), Event::PointerButton {
+                pos: at, button: PointerButton::Primary, pressed, modifiers: Modifiers::NONE }]); }
+            let index = om9_app::menu_catalog::MEASURE.iter().position(|name| *name == "AnalyzeLength").unwrap();
+            frame(&mut app, &ctx, vec![]);
+            let at = app.rail_icon_rects[2 + index].center();
+            for pressed in [true, false] { frame(&mut app, &ctx, vec![Event::PointerMoved(at), Event::PointerButton {
+                pos: at, button: PointerButton::Primary, pressed, modifiers: Modifiers::NONE }]); }
+        } else {
+            frame(&mut app, &ctx, vec![Event::Text("Length".into())]);
+            frame(&mut app, &ctx, vec![Event::Key { key: egui::Key::Enter, physical_key: None,
+                pressed: true, repeat: false, modifiers: Modifiers::NONE }]);
+        }
+        assert!(app.transcript.history().contains("Length = 3 mm"), "menu={menu} {}", app.transcript.history());
+        assert_eq!(app.controller.document(), &before);
+    }
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn viewport_selected_box_face_extracts_isocurve_through_cmd() {
+    use om9_core::evaluation::{evaluate_curve,Parameter};
+    let limits=Limits::default();let shape=om9_kernel::brep::box_brep([2.,3.,4.],0.1,&limits).unwrap();
+    let entity=Entity::new("box",Geometry::Brep(shape),None);let id=entity.id;
+    let mut document=Document::with_template_tolerance("isocurve face UI");document.entities.insert(id,entity);
+    let mut app=MatrixApp::new(document).unwrap();let before=app.controller.document().clone();let ctx=egui::Context::default();
+    frame(&mut app,&ctx,vec![]);frame(&mut app,&ctx,vec![]);app.set_sub_object_kind(om9_scene::scene::PickKind::Face);
+    click_in_view(&mut app,&ctx,ViewId::Perspective,[1.,1.5,4.],Modifiers {ctrl:true,shift:true,..Modifiers::NONE});
+    assert!(app.controller.subselection().iter().any(|s|s.root==id && matches!(s.subset,om9_scene::scene::Subelement::BrepFace(_))));
+    frame(&mut app,&ctx,vec![Event::Text("ExtractIsocurve".into())]);
+    frame(&mut app,&ctx,vec![Event::Key {key:egui::Key::Enter,physical_key:None,pressed:true,repeat:false,modifiers:Modifiers::NONE}]);
+    assert!(!app.controller.isocurve_option_tokens().is_empty(),"{}",app.transcript.history());
+    frame(&mut app,&ctx,vec![Event::Key {key:egui::Key::Enter,physical_key:None,pressed:true,repeat:false,modifiers:Modifiers::NONE}]);
+    let output=app.controller.document().entities.values().find(|e|e.label=="ExtractIsocurve").expect("isocurve output");
+    let Geometry::Curve(curve)=&output.geometry else {panic!("curve")};
+    for t in [0.,0.5,1.] {let p=evaluate_curve(curve,Parameter::Fraction(t),0,output.placement,&limits).unwrap()[0];assert!((p[2]-4.).abs()<1e-7,"{p:?}");}
+    let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);
+    app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+}
+
+#[test]
+fn viewport_selected_circular_hole_face_extracts_isocurve_after_reopen() {
+    use om9_kernel::{creation::{self,Primitive,Profile},editing::{self,BooleanOp,BooleanOutcome}};
+    let limits=Limits::default();
+    let profile=Profile::new(vec![[-5.,-5.,0.],[5.,-5.,0.],[5.,5.,0.],[-5.,5.,0.]]).unwrap();
+    let block=creation::extrude(&profile,[0.,0.,10.],true,0.2,&limits).unwrap();
+    let cutter=creation::primitive(Primitive::Cylinder {radius_mm:2.,height_mm:10.},0.2,&limits).unwrap();
+    let BooleanOutcome::Body(body)=editing::boolean(&block,&cutter,BooleanOp::Difference,0.2,&limits).unwrap() else {panic!("cut")};
+    let entity=Entity::new("drilled block",Geometry::Brep(body),None);let id=entity.id;
+    let mut doc=Document::with_template_tolerance("drilled block");doc.entities.insert(id,entity);
+    let path=std::env::temp_dir().join(format!("om9-circular-hole-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    for menu in [false,true] {
+        let mut app=MatrixApp::from_file(&path).unwrap();
+        app.controller.workspace.views.get_mut(&ViewId::LookingDown).unwrap().camera=
+            om9_scene::camera::Camera::orthographic([3.,1.,30.],[3.,1.,10.],[0.,1.,0.],14.).unwrap();
+        let before=app.controller.document().clone();let ctx=egui::Context::default();
+        frame(&mut app,&ctx,vec![]);frame(&mut app,&ctx,vec![]);app.set_sub_object_kind(om9_scene::scene::PickKind::Face);
+        click_in_view(&mut app,&ctx,ViewId::LookingDown,[3.,1.,10.],Modifiers {ctrl:true,shift:true,..Modifiers::NONE});
+        assert!(app.controller.subselection().iter().any(|s|s.root==id));
+        if menu {app.controller.dispatch("OM9-CURVE-019",InvocationOrigin::Menu).unwrap();}
+        else {app.controller.submit("ExtractIsocurve").unwrap();}
+        app.controller.submit("").unwrap();
+        assert_eq!(app.controller.document().entities.values().filter(|e|e.label=="ExtractIsocurve").count(),2);
+        let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);
+        app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+    }
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn viewport_selected_native_box_face_extracts_isocurve_through_cmd() {
+    use om9_core::evaluation::{evaluate_curve,Parameter};
+    let limits=Limits::default();let shape=om9_kernel::brep::box_brep([2.,3.,4.],0.1,&limits).unwrap();
+    let native=om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap();
+    let entity=Entity::new("native box",Geometry::NativeBrep(native),None);let id=entity.id;
+    let mut document=Document::with_template_tolerance("native isocurve UI");document.entities.insert(id,entity);
+    let path=std::env::temp_dir().join(format!("om9-native-isocurve-ui-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,&document,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    for menu in [false,true] {
+    let mut app=MatrixApp::from_file(&path).unwrap();
+    let before=app.controller.document().clone();let ctx=egui::Context::default();
+    frame(&mut app,&ctx,vec![]);frame(&mut app,&ctx,vec![]);app.set_sub_object_kind(om9_scene::scene::PickKind::Face);
+    click_in_view(&mut app,&ctx,ViewId::Perspective,[1.,1.5,4.],Modifiers {ctrl:true,shift:true,..Modifiers::NONE});
+    assert!(app.controller.subselection().iter().any(|s|s.root==id && matches!(s.subset,om9_scene::scene::Subelement::MeshFace(_))));
+    if menu {
+        let at=app.main_category_rect(0).unwrap().center();
+        for pressed in [true,false] {frame(&mut app,&ctx,vec![Event::PointerMoved(at),Event::PointerButton {pos:at,button:PointerButton::Primary,pressed,modifiers:Modifiers::NONE}]);}
+        let index=om9_app::menu_catalog::CURVE.iter().position(|name|*name=="CurveCurveFromObjectsExtractIsocurve").unwrap();
+        ctx.memory_mut(|memory|memory.data.insert_temp(egui::Id::new(("main-menu-page","Curve")),index/20));
+        frame(&mut app,&ctx,vec![]);let at=app.rail_icon_rects[2+index%20].center();
+        for pressed in [true,false] {frame(&mut app,&ctx,vec![Event::PointerMoved(at),Event::PointerButton {pos:at,button:PointerButton::Primary,pressed,modifiers:Modifiers::NONE}]);}
+    } else {
+        frame(&mut app,&ctx,vec![Event::Text("ExtractIsocurve".into())]);
+        frame(&mut app,&ctx,vec![Event::Key {key:egui::Key::Enter,physical_key:None,pressed:true,repeat:false,modifiers:Modifiers::NONE}]);
+    }
+    assert!(!app.controller.isocurve_option_tokens().is_empty(),"{}",app.transcript.history());
+    if menu {
+        let at=app.command_input_rect().unwrap().center();
+        for pressed in [true,false] {frame(&mut app,&ctx,vec![Event::PointerMoved(at),Event::PointerButton {pos:at,button:PointerButton::Primary,pressed,modifiers:Modifiers::NONE}]);}
+    }
+    frame(&mut app,&ctx,vec![Event::Key {key:egui::Key::Enter,physical_key:None,pressed:true,repeat:false,modifiers:Modifiers::NONE}]);
+    let output=app.controller.document().entities.values().find(|e|e.label=="ExtractIsocurve").unwrap_or_else(||panic!("menu={menu} {}",app.transcript.history()));
+    let Geometry::Curve(curve)=&output.geometry else {panic!("curve")};
+    for t in [0.,0.5,1.] {let p=evaluate_curve(curve,Parameter::Fraction(t),0,output.placement,&limits).unwrap()[0];assert!((p[2]-4.).abs()<1e-7,"{p:?}");}
+    let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);
+    app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+    }
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn selected_large_face_isocurve_worker_polls_in_egui() {
+    let limits=Limits::default();let shape=om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Sphere {radius_mm:3.},0.001,&limits).unwrap();
+    assert!(shape.display().triangles.len()>20_000);let face=shape.topology().faces[0];
+    let entity=Entity::new("sphere",Geometry::Brep(shape),None);let id=entity.id;
+    let mut doc=Document::with_template_tolerance("isocurve face worker UI");doc.entities.insert(id,entity);
+    let mut app=MatrixApp::new(doc).unwrap();let before=app.controller.document().clone();let ctx=egui::Context::default();
+    frame(&mut app,&ctx,vec![]);frame(&mut app,&ctx,vec![]);app.controller.select_objects(&[id]).unwrap();
+    app.controller.select_subobject(id,om9_scene::scene::Subelement::BrepFace(face)).unwrap();
+    frame(&mut app,&ctx,vec![Event::Text("ExtractIsocurve".into())]);
+    let start=std::time::Instant::now();frame(&mut app,&ctx,vec![Event::Key {key:egui::Key::Enter,physical_key:None,
+        pressed:true,repeat:false,modifiers:Modifiers::NONE}]);
+    assert!(start.elapsed()<std::time::Duration::from_secs(1));assert!(app.controller.isocurve_face_verification_pending());
+    let deadline=std::time::Instant::now()+std::time::Duration::from_secs(30);
+    while app.controller.face_verification_pending() {frame(&mut app,&ctx,vec![]);assert!(std::time::Instant::now()<deadline);
+        std::thread::sleep(std::time::Duration::from_millis(5));}
+    assert!(!app.controller.isocurve_option_tokens().is_empty(),"{}",app.transcript.history());
+    frame(&mut app,&ctx,vec![Event::Key {key:egui::Key::Enter,physical_key:None,pressed:true,repeat:false,modifiers:Modifiers::NONE}]);
+    assert_eq!(app.controller.document().entities.values().filter(|e|e.label=="ExtractIsocurve").count(),1);
+    let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);
+    app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+}
+
+#[test]
+fn large_selected_face_extract_polls_worker_in_egui() {
+    let limits = Limits::default();
+    let shape = om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Sphere { radius_mm: 3. }, 0.001, &limits).unwrap();
+    assert!(shape.display().triangles.len() > 20_000);
+    let mut document = Document::with_template_tolerance("async extract UI");
+    let entity = Entity::new("sphere", Geometry::Brep(shape), None);
+    let id = entity.id; document.entities.insert(id, entity);
+    let mut app = MatrixApp::new(document).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.select_objects(&[id]).unwrap();
+    app.controller.submit("ExtractSrf").unwrap(); app.controller.submit("Copy=Yes").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [0., 0., 3.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    let before = app.controller.document().clone();
+    app.controller.submit("").unwrap();
+    assert!(app.controller.face_verification_pending());
+    let start = std::time::Instant::now();
+    frame(&mut app, &ctx, vec![]);
+    assert!(start.elapsed() < std::time::Duration::from_secs(1), "polling a busy worker must not wait for it");
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+    while app.controller.face_verification_pending() {
+        frame(&mut app, &ctx, vec![]);
+        assert!(std::time::Instant::now() < deadline, "worker did not finish");
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
+    let output = app.controller.document().entities.values().find(|entity| entity.id != id).expect("extracted face");
+    let Geometry::Brep(face) = &output.geometry else { panic!("BRep face") };
+    let area = om9_kernel::creation::measure(face, &limits).unwrap().area_mm2;
+    assert!((area - 36. * std::f64::consts::PI).abs() < 1e-6);
+    app.controller.undo().unwrap(); assert_eq!(app.controller.document(), &before);
+    app.controller.redo().unwrap(); assert_eq!(app.controller.document().entities.len(), 2);
+}
+
+#[test]
+fn large_numeric_face_extract_polls_worker_in_egui() {
+    let limits = Limits::default();
+    let body = om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let mut document = Document::with_template_tolerance("async numeric UI");
+    let entity = Entity::new("sphere", Geometry::Brep(body), None);
+    let id = entity.id; document.entities.insert(id, entity);
+    let mut app = MatrixApp::new(document).unwrap();
+    app.controller.select_objects(&[id]).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    let enter_text = |app: &mut MatrixApp, text: &str| {
+        frame(app, &ctx, vec![Event::Text(text.into())]);
+        frame(app, &ctx, vec![Event::Key { key: egui::Key::Enter, physical_key: None,
+            pressed: true, repeat: false, modifiers: Modifiers::NONE }]);
+        frame(app, &ctx, vec![Event::Key { key: egui::Key::Enter, physical_key: None,
+            pressed: false, repeat: false, modifiers: Modifiers::NONE }]);
+    };
+    enter_text(&mut app, "ExtractSrf");
+    enter_text(&mut app, "Copy=Yes");
+    let before = app.controller.document().clone();
+    enter_text(&mut app, "0");
+    assert!(app.controller.face_verification_pending());
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+    while app.controller.face_verification_pending() {
+        frame(&mut app, &ctx, vec![]);
+        assert!(std::time::Instant::now() < deadline);
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
+    let output = app.controller.document().entities.values().find(|e| e.id != id).expect("extracted face");
+    let Geometry::Brep(face) = &output.geometry else { panic!() };
+    assert!((om9_kernel::creation::measure(face, &limits).unwrap().area_mm2 - 36. * std::f64::consts::PI).abs() < 1e-6);
+    app.controller.undo().unwrap(); assert_eq!(app.controller.document(), &before);
+    app.controller.redo().unwrap(); assert_eq!(app.controller.document().entities.len(), 2);
+}
+
+#[test]
+fn large_inline_shell_polls_worker_in_egui() {
+    let limits = Limits::default();
+    let body = om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Cylinder { radius_mm: 2., height_mm: 5. }, 0.0001, &limits).unwrap();
+    assert!(body.display().triangles.len() > 512);
+    let cap = (0..body.topology().faces.len()).find(|&i| {
+        let face = om9_kernel::editing::extract_face(&body, i, 0.1, &limits).unwrap();
+        (om9_kernel::creation::measure(&face, &limits).unwrap().area_mm2 - 4. * std::f64::consts::PI).abs() < 1e-6
+    }).unwrap();
+    let mut document = Document::with_template_tolerance("async shell UI");
+    let entity = Entity::new("cylinder", Geometry::Brep(body), None);
+    let id = entity.id; document.entities.insert(id, entity);
+    let mut app = MatrixApp::new(document).unwrap();
+    app.controller.select_objects(&[id]).unwrap();
+    let before = app.controller.document().clone();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    frame(&mut app, &ctx, vec![Event::Text(format!("Shell {cap} 0.5"))]);
+    frame(&mut app, &ctx, vec![Event::Key { key: egui::Key::Enter, physical_key: None,
+        pressed: true, repeat: false, modifiers: Modifiers::NONE }]);
+    assert!(app.controller.face_verification_pending());
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+    while app.controller.face_verification_pending() {
+        frame(&mut app, &ctx, vec![]);
+        assert!(std::time::Instant::now() < deadline);
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
+    let Geometry::Brep(shell) = &app.controller.document().entities[&id].geometry else { panic!() };
+    assert!((om9_kernel::creation::measure(shell, &limits).unwrap().volume_mm3 - 9.875 * std::f64::consts::PI).abs() < 1e-6);
+    app.controller.undo().unwrap(); assert_eq!(app.controller.document(), &before);
+    app.controller.redo().unwrap();
+}
+
+#[test]
+fn large_inline_face_extract_polls_worker_in_egui() {
+    let limits = Limits::default();
+    let body = om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let mut document = Document::with_template_tolerance("async inline UI");
+    let entity = Entity::new("sphere", Geometry::Brep(body), None);
+    let id = entity.id; document.entities.insert(id, entity);
+    let mut app = MatrixApp::new(document).unwrap();
+    app.controller.select_objects(&[id]).unwrap();
+    let before = app.controller.document().clone();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    frame(&mut app, &ctx, vec![Event::Text("ExtractSrf 0 Copy=Yes".into())]);
+    frame(&mut app, &ctx, vec![Event::Key { key: egui::Key::Enter, physical_key: None,
+        pressed: true, repeat: false, modifiers: Modifiers::NONE }]);
+    assert!(app.controller.face_verification_pending());
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+    while app.controller.face_verification_pending() {
+        frame(&mut app, &ctx, vec![]);
+        assert!(std::time::Instant::now() < deadline);
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
+    let output = app.controller.document().entities.values().find(|e| e.id != id).expect("extracted face");
+    let Geometry::Brep(face) = &output.geometry else { panic!() };
+    assert!((om9_kernel::creation::measure(face, &limits).unwrap().area_mm2 - 36. * std::f64::consts::PI).abs() < 1e-6);
+    app.controller.undo().unwrap(); assert_eq!(app.controller.document(), &before);
+    app.controller.redo().unwrap(); assert_eq!(app.controller.document().entities.len(), 2);
+}
+
 fn click(app: &mut MatrixApp, context: &egui::Context, world: [f64; 3]) {
     click_with_modifiers(app, context, world, Modifiers::NONE);
 }
@@ -65,6 +369,1380 @@ fn click_in_view(app: &mut MatrixApp, context: &egui::Context, view_id: ViewId, 
             }],
         );
     }
+}
+
+#[test]
+fn viewport_dupedge_selects_edges_after_invocation() {
+    let mut app = MatrixApp::new(Document::new("viewport DupEdge")).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("Box 4 6 8").unwrap();
+    app.controller.dispatch("OM9-CURVE-040", InvocationOrigin::Menu).unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [2., 0., 8.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.controller.prompt());
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [4., 3., 8.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 2, "two distinct edges should be selected");
+    let rect = app.view_rects[&ViewId::Perspective];
+    let vp = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+    let screen = app.controller.workspace.views[&ViewId::Perspective].camera.project([2., 0., 8.], vp).unwrap().unwrap().screen;
+    let pos = Pos2::new(screen[0] as f32, screen[1] as f32);
+    let moved = pos + Vec2::new(20., 10.);
+    frame(&mut app, &ctx, vec![Event::PointerButton { pos, button: PointerButton::Secondary, pressed: true, modifiers: Modifiers::NONE }]);
+    frame(&mut app, &ctx, vec![Event::PointerMoved(moved)]);
+    frame(&mut app, &ctx, vec![Event::PointerButton { pos: moved, button: PointerButton::Secondary, pressed: false, modifiers: Modifiers::NONE }]);
+    assert!(app.controller.dupedge_needs_pick(), "right-drag must not finish the command");
+    assert_eq!(app.controller.subselection().len(), 2);
+    for pressed in [true, false] {
+        frame(&mut app, &ctx, vec![Event::PointerButton { pos: moved, button: PointerButton::Secondary, pressed, modifiers: Modifiers::NONE }]);
+    }
+    assert_eq!(app.controller.document().entities.len(), 3);
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.document().entities.len(), 1);
+    app.controller.redo().unwrap();
+    assert_eq!(app.controller.document().entities.len(), 3);
+}
+
+#[test]
+fn viewport_dupedge_reopened_reordered_source_matches_the_visible_edge() {
+    let limits = Limits::default();
+    let forward = om9_kernel::brep::read_brep(include_str!("fixtures/dupedge-order-a.brep"), 0.01, &limits).unwrap();
+    let reverse = om9_kernel::brep::read_brep(include_str!("fixtures/dupedge-order-b.brep"), 0.01, &limits).unwrap();
+    let index_of_top_edge = |shape: &om9_core::brep::Brep| {
+        (0..shape.topology().edges.len()).find(|&index| {
+            let Ok((a, b)) = om9_kernel::editing::oriented_edge_endpoints(shape, index, &limits) else { return false; };
+            let matches = |p: [f64; 3], q: [f64; 3]| (0..3).all(|i| (p[i] - q[i]).abs() < 1e-8);
+            (matches(a, [0., 0., 6.]) && matches(b, [4., 0., 6.]))
+                || (matches(b, [0., 0., 6.]) && matches(a, [4., 0., 6.]))
+        }).expect("top source edge")
+    };
+    let old_index = index_of_top_edge(&forward);
+    let new_index = index_of_top_edge(&reverse);
+    assert_ne!(old_index, new_index, "fixture must actually change native edge order");
+    let mut old_display = forward.display().clone();
+    old_display.source_sha256 = [0; 32];
+    let hybrid = om9_core::brep::Brep::from_native(reverse.source().to_owned(), old_display, &limits).unwrap();
+    let mut document = Document::new("reordered source and prior display");
+    let entity = Entity::new("box faces", Geometry::Brep(hybrid), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-reordered-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [2., 0., 6.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [4., 2.5, 6.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 2, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let outputs: Vec<_> = app.controller.document().entities.values().filter(|entity| entity.label == "DupEdge").collect();
+    assert_eq!(outputs.len(), 2);
+    let ids: Vec<_> = outputs.iter().map(|entity| entity.id).collect();
+    for expected in [[[0., 0., 6.], [4., 0., 6.]], [[4., 0., 6.], [4., 5., 6.]]] {
+        assert!(outputs.iter().any(|entity| {
+            let Geometry::Curve(curve) = &entity.geometry else { return false; };
+            let endpoints: Vec<_> = [0., 1.].into_iter().map(|fraction| om9_core::evaluation::evaluate_curve(curve,
+                om9_core::evaluation::Parameter::Fraction(fraction), 0, Transform::identity(), &limits).unwrap()[0]).collect();
+            expected.iter().all(|point| endpoints.iter().any(|p| (0..3).all(|i| (p[i] - point[i]).abs() < 1e-8)))
+        }));
+    }
+    app.controller.undo().unwrap(); assert!(ids.iter().all(|id| !app.controller.document().entities.contains_key(id)));
+    app.controller.redo().unwrap(); assert!(ids.iter().all(|id| app.controller.document().entities.contains_key(id)));
+}
+
+#[test]
+fn viewport_dupedge_reopened_affine_box_picks_visible_edges() {
+    let limits = Limits::default();
+    let shape = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, 0.01, &limits).unwrap();
+    let placement = Transform([[2.,0.5,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,0.,0.,1.]]);
+    let mut document = Document::new("reopened affine viewport DupEdge");
+    let mut entity = Entity::new("box",Geometry::Brep(shape),document.current_layer); entity.placement=placement;
+    document.entities.insert(entity.id,entity);
+    let path=std::env::temp_dir().join(format!("om9-dupedge-affine-ui-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,&document,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app=MatrixApp::from_file(&path).unwrap(); std::fs::remove_file(path).unwrap();
+    let ctx=egui::Context::default(); frame(&mut app,&ctx,vec![]); frame(&mut app,&ctx,vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    for local in [[2.,0.,6.],[4.,2.5,6.]] {
+        click_in_view(&mut app,&ctx,ViewId::Perspective,placement.point(local).unwrap(),Modifiers::NONE);
+    }
+    assert_eq!(app.controller.subselection().len(),2,"{}",app.transcript.history());
+    app.controller.submit("").unwrap();
+    let outputs: Vec<_>=app.controller.document().entities.values().filter(|e|e.label=="DupEdge").collect();
+    assert_eq!(outputs.len(),2);
+    for local in [[[0.,0.,6.],[4.,0.,6.]],[[4.,0.,6.],[4.,5.,6.]]] {
+        let expected=local.map(|p|placement.point(p).unwrap());
+        assert!(outputs.iter().any(|entity| {
+            let Geometry::Curve(curve)=&entity.geometry else {return false};
+            let endpoints: Vec<_>=[0.,1.].into_iter().map(|t|om9_core::evaluation::evaluate_curve(curve,
+                om9_core::evaluation::Parameter::Fraction(t),0,entity.placement,&limits).unwrap()[0]).collect();
+            expected.iter().all(|p|endpoints.iter().any(|q|(0..3).all(|i|(p[i]-q[i]).abs()<1e-8)))
+        }));
+    }
+    let ids: Vec<_>=outputs.iter().map(|e|e.id).collect(); app.controller.undo().unwrap();
+    assert!(ids.iter().all(|id|!app.controller.document().entities.contains_key(id)));
+    app.controller.redo().unwrap(); assert!(ids.iter().all(|id|app.controller.document().entities.contains_key(id)));
+}
+
+#[test]
+fn viewport_dupedge_reopened_box_via_icon_and_typed_cmd() {
+    let limits = Limits::default();
+    let shape = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, 0.01, &limits).unwrap();
+    let mut document = Document::new("DupEdge entry routes");
+    let entity = Entity::new("box", Geometry::Brep(shape), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-routes-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    for menu in [true, false] {
+        let mut app = MatrixApp::from_file(&path).unwrap();
+        let ctx = egui::Context::default();
+        frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+        if menu {
+            let at = app.main_category_rect(0).unwrap().center();
+            for pressed in [true, false] {
+                frame(&mut app, &ctx, vec![Event::PointerMoved(at), Event::PointerButton { pos: at,
+                    button: PointerButton::Primary, pressed, modifiers: Modifiers::NONE }]);
+            }
+            let index = om9_app::menu_catalog::CURVE.iter().position(|name| *name == "CurveCurveFromObjectsDuplicateEdge").unwrap();
+            ctx.memory_mut(|memory| memory.data.insert_temp(egui::Id::new(("main-menu-page", "Curve")), index / 20));
+            frame(&mut app, &ctx, vec![]);
+            let at = app.rail_icon_rects[2 + index % 20].center();
+            for pressed in [true, false] {
+                frame(&mut app, &ctx, vec![Event::PointerMoved(at), Event::PointerButton { pos: at,
+                    button: PointerButton::Primary, pressed, modifiers: Modifiers::NONE }]);
+            }
+        } else {
+            frame(&mut app, &ctx, vec![Event::Text("DupEdge".into())]);
+            frame(&mut app, &ctx, vec![Event::Key { key: egui::Key::Enter, physical_key: None,
+                pressed: true, repeat: false, modifiers: Modifiers::NONE }]);
+        }
+        assert_eq!(app.controller.active_feature(), Some("OM9-CURVE-040"), "menu={menu} {}", app.transcript.history());
+        click_in_view(&mut app, &ctx, ViewId::Perspective, [2., 0., 6.], Modifiers::NONE);
+        assert_eq!(app.controller.subselection().len(), 1, "menu={menu} {}", app.transcript.history());
+        let rect = app.view_rects[&ViewId::Perspective];
+        let at = rect.center();
+        for pressed in [true, false] {
+            frame(&mut app, &ctx, vec![Event::PointerMoved(at), Event::PointerButton { pos: at,
+                button: PointerButton::Secondary, pressed, modifiers: Modifiers::NONE }]);
+        }
+        let output = app.controller.document().entities.values().find(|e| e.label == "DupEdge").unwrap();
+        let id = output.id;
+        let Geometry::Curve(curve) = &output.geometry else { panic!() };
+        let endpoints: Vec<_> = [0., 1.].into_iter().map(|fraction| om9_core::evaluation::evaluate_curve(curve,
+            om9_core::evaluation::Parameter::Fraction(fraction), 0, Transform::identity(), &limits).unwrap()[0]).collect();
+        for expected in [[0., 0., 6.], [4., 0., 6.]] {
+            assert!(endpoints.iter().any(|p| (0..3).all(|i| (p[i] - expected[i]).abs() < 1e-8)));
+        }
+        app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&id));
+        app.controller.redo().unwrap(); assert!(app.controller.document().entities.contains_key(&id));
+    }
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn viewport_extract_wireframe_reopened_box_via_icon_and_typed_cmd() {
+    let limits=Limits::default();
+    let shape=om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Box {x_mm:4.,y_mm:5.,z_mm:6.},0.01,&limits).unwrap();
+    let mut doc=Document::new("ExtractWireframe routes");
+    let entity=Entity::new("box",Geometry::Brep(shape),None); let id=entity.id; doc.entities.insert(id,entity);
+    let path=std::env::temp_dir().join(format!("om9-wireframe-ui-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    for menu in [true,false] {
+        let mut app=MatrixApp::from_file(&path).unwrap(); let ctx=egui::Context::default();
+        frame(&mut app,&ctx,vec![]); frame(&mut app,&ctx,vec![]);
+        click_in_view(&mut app,&ctx,ViewId::Perspective,[2.,0.,6.],Modifiers::NONE);
+        assert!(app.selected_objects().contains(&id),"viewport failed to select box");
+        let before=app.controller.document().clone();
+        if menu {
+            let at=app.main_category_rect(0).unwrap().center();
+            for pressed in [true,false] {frame(&mut app,&ctx,vec![Event::PointerMoved(at),Event::PointerButton {
+                pos:at,button:PointerButton::Primary,pressed,modifiers:Modifiers::NONE}]);}
+            let index=om9_app::menu_catalog::CURVE.iter().position(|name|*name=="CurveCurveFromObjectsExtractWireframe").unwrap();
+            ctx.memory_mut(|memory|memory.data.insert_temp(egui::Id::new(("main-menu-page","Curve")),index/20));
+            frame(&mut app,&ctx,vec![]); let at=app.rail_icon_rects[2+index%20].center();
+            for pressed in [true,false] {frame(&mut app,&ctx,vec![Event::PointerMoved(at),Event::PointerButton {
+                pos:at,button:PointerButton::Primary,pressed,modifiers:Modifiers::NONE}]);}
+        } else {
+            frame(&mut app,&ctx,vec![Event::Text("ExtractWireframe".into())]);
+            frame(&mut app,&ctx,vec![Event::Key {key:egui::Key::Enter,physical_key:None,pressed:true,repeat:false,modifiers:Modifiers::NONE}]);
+        }
+        let deadline=std::time::Instant::now()+std::time::Duration::from_secs(30);
+        while app.controller.brep_wireframe_worker_pending() {
+            assert!(std::time::Instant::now()<deadline,"ExtractWireframe worker timed out");
+            frame(&mut app,&ctx,vec![]);std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        let curves:Vec<_>=app.controller.document().entities.values().filter(|e|e.label=="ExtractWire").collect();
+        assert_eq!(curves.len(),12,"menu={menu}: {}",app.transcript.history());
+        let mut edges=std::collections::BTreeSet::new();
+        for entity in curves {
+            let Geometry::Curve(curve)=&entity.geometry else {panic!("curve")};
+            let eval=|t|om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(t),0,entity.placement,&limits).unwrap()[0];
+            let (a,b)=(eval(0.),eval(1.));
+            for p in [a,b] {assert!(p.iter().zip([4.,5.,6.]).all(|(v,d)|v.abs()<1e-8||(*v-d).abs()<1e-8));}
+            let corner=|p:[f64;3]|[p[0]>2.,p[1]>2.5,p[2]>3.]; let (a,b)=(corner(a),corner(b));
+            assert_eq!((0..3).filter(|i|a[*i]!=b[*i]).count(),1);
+            assert!(edges.insert(if a<b {(a,b)} else {(b,a)}));
+        }
+        assert_eq!(edges.len(),12); let after=app.controller.document().clone();
+        app.controller.undo().unwrap(); assert_eq!(app.controller.document(),&before);
+        app.controller.redo().unwrap(); assert_eq!(app.controller.document(),&after);
+    }
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn viewport_dupedge_reopened_box_selects_exact_edge_and_undoes() {
+    let mut original = om9_app::session::Controller::new(Document::new("reopened Box"), Limits::default()).unwrap();
+    original.submit("Box 4 6 8").unwrap();
+    let path = std::env::temp_dir().join(format!("om9-dupedge-ui-reopen-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, original.document(), &Limits::default(),
+        &om9_core::transaction::Cancellation::default()).unwrap();
+    for (pick, endpoints) in [
+        ([2., 0., 8.], [[0., 0., 8.], [4., 0., 8.]]),
+        ([4., 3., 8.], [[4., 0., 8.], [4., 6., 8.]]),
+    ] {
+        let mut app = MatrixApp::from_file(&path).unwrap();
+        let ctx = egui::Context::default();
+        frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+        app.controller.submit("DupEdge").unwrap();
+        click_in_view(&mut app, &ctx, ViewId::Perspective, pick, Modifiers::NONE);
+        assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+        app.controller.submit("").unwrap();
+        let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+        let output_id = output.id;
+        let Geometry::Curve(curve) = &output.geometry else { panic!("expected curve") };
+        let actual: Vec<_> = [0., 1.].into_iter().map(|fraction| om9_core::evaluation::evaluate_curve(curve,
+            om9_core::evaluation::Parameter::Fraction(fraction), 0, Transform::identity(), &Limits::default()).unwrap()[0]).collect();
+        for expected in endpoints {
+            assert!(actual.iter().any(|point| (0..3).all(|axis| (point[axis] - expected[axis]).abs() < 1e-8)));
+        }
+        app.controller.undo().unwrap();
+        assert!(!app.controller.document().entities.contains_key(&output_id));
+        app.controller.redo().unwrap();
+        assert!(app.controller.document().entities.contains_key(&output_id));
+        app.controller.undo().unwrap();
+        app.controller.submit("Point").unwrap();
+        app.controller.submit("10,10,10").unwrap();
+        assert_eq!(app.controller.coordinator().redo_len(), 0);
+        assert!(!app.controller.document().entities.contains_key(&output_id));
+        assert!(app.controller.document().entities.values().any(|e| matches!(e.geometry, Geometry::Brep(_))));
+    }
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
+#[ignore = "requires external openNURBS V5 example and admitted native exchange"]
+fn viewport_dupedge_external_v5_twisted_brep_after_reopen() {
+    use om9_core::transaction::{Cancellation,TransactionCoordinator,World};
+    use om9_exchange::{BrepMode,ImportMode,ImportOptions};use sha2::{Digest,Sha256};
+    let limits=Limits::default();let executable=std::path::PathBuf::from(std::env::var_os("OM9_EXCHANGE_NATIVE").unwrap());
+    let fixture=std::path::PathBuf::from(std::env::var_os("OM9_EXTERNAL_3DM_FIXTURE").unwrap());
+    let hash:[u8;32]=Sha256::digest(std::fs::read(&executable).unwrap()).into();
+    let host=om9_app::three_dm_host::ThreeDmHost::admit(&executable,hash).unwrap();
+    let doc=Document::with_template_tolerance("external native BRep");let doc_id=doc.id;
+    let mut coordinator=TransactionCoordinator::new(World::new(vec![doc],&limits).unwrap(),limits).unwrap();
+    host.import_with_options(&mut coordinator,doc_id,&fixture,&ImportOptions {mode:ImportMode::Geometry,brep:BrepMode::RetainOpaque,..Default::default()},&Cancellation::default()).unwrap();
+    let imported=&coordinator.world().documents[&doc_id];
+    let id=imported.entities.values().find(|e|matches!(e.geometry,Geometry::NativeBrep(_))).expect("imported native BRep").id;
+    let path=std::env::temp_dir().join(format!("om9-external-native-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,imported,&limits,&Cancellation::default()).unwrap();
+    let mut app=MatrixApp::from_file(&path).unwrap();std::fs::remove_file(path).unwrap();
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera=
+        om9_scene::camera::Camera::orthographic([24.,-24.,20.],[5.,3.,5.],[0.,0.,1.],30.).unwrap();
+    let ctx=egui::Context::default();frame(&mut app,&ctx,vec![]);frame(&mut app,&ctx,vec![]);
+    app.controller.submit("Point").unwrap();app.controller.submit("30,30,30").unwrap();app.controller.undo().unwrap();
+    app.controller.select_objects(&[id]).unwrap();let before=app.controller.document().clone();app.controller.submit("DupEdge").unwrap();
+    let deadline=std::time::Instant::now()+std::time::Duration::from_secs(20);
+    while app.controller.dupedge_source_view_pending() {assert!(std::time::Instant::now()<deadline);frame(&mut app,&ctx,vec![]);std::thread::yield_now();}
+    click_in_view(&mut app,&ctx,ViewId::Perspective,[5.,0.,0.],Modifiers::NONE);
+    click_in_view(&mut app,&ctx,ViewId::Perspective,[10.,0.,6.],Modifiers::NONE);
+    app.controller.submit("").unwrap_or_else(|e|panic!("{e:?}; {}",app.transcript.history()));
+    let curves:Vec<_>=app.controller.document().entities.values().filter(|e|e.label=="DupEdge").collect();
+    assert_eq!(curves.len(),2,"output {curves:?}; transcript {}",app.transcript.history());
+    let mut found=[false;2];
+    for entity in curves {
+        let Geometry::Curve(curve)=&entity.geometry else {panic!("curve")};
+        let points=[0.,0.2,0.5,0.8,1.].map(|t|om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(t),0,entity.placement,&limits).unwrap()[0]);
+        for (p,t) in points.iter().zip([0.,0.2,0.5,0.8,1.]) {
+            assert!((0..3).all(|i|(p[i]-(points[0][i]*(1.-t)+points[4][i]*t)).abs()<1e-6),"{points:?}");
+        }
+        let ab=points.iter().all(|p|p[1].abs()<1e-6&&p[2].abs()<1e-6&&p[0]>=-1e-6&&p[0]<=10.+1e-6);
+        let bf=points.iter().all(|p|(p[0]-10.).abs()<1e-6&&p[1].abs()<1e-6&&p[2]>=-1e-6&&p[2]<=12.+1e-6);
+        let endpoints=|a:[f64;3],b:[f64;3]| [a,b].iter().all(|expected|[points[0],points[4]].iter().any(|p|(0..3).all(|i|(p[i]-expected[i]).abs()<1e-6)));
+        if ab && endpoints([0.,0.,0.],[10.,0.,0.]) {found[0]=true;}
+        if bf && endpoints([10.,0.,0.],[10.,0.,12.]) {found[1]=true;}
+        assert!(ab||bf,"unexpected edge: {points:?}");
+    }
+    assert_eq!(found,[true,true]);
+    let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+}
+
+#[test]
+#[ignore = "requires external openNURBS V5 example and admitted native exchange"]
+fn viewport_dupedge_external_v5_ambiguous_edge_keeps_document_and_redo() {
+    use om9_core::transaction::{Cancellation,TransactionCoordinator,World};
+    use om9_exchange::{BrepMode,ImportMode,ImportOptions};
+    use sha2::{Digest,Sha256};
+    let limits=Limits::default();
+    let executable=std::path::PathBuf::from(std::env::var_os("OM9_EXCHANGE_NATIVE").unwrap());
+    let fixture=std::path::PathBuf::from(std::env::var_os("OM9_EXTERNAL_3DM_FIXTURE").unwrap());
+    let hash:[u8;32]=Sha256::digest(std::fs::read(&executable).unwrap()).into();
+    let host=om9_app::three_dm_host::ThreeDmHost::admit(&executable,hash).unwrap();
+    let doc=Document::with_template_tolerance("external ambiguous edge"); let doc_id=doc.id;
+    let mut coordinator=TransactionCoordinator::new(World::new(vec![doc],&limits).unwrap(),limits).unwrap();
+    host.import_with_options(&mut coordinator,doc_id,&fixture,&ImportOptions {mode:ImportMode::Geometry,brep:BrepMode::RetainOpaque,..Default::default()},&Cancellation::default()).unwrap();
+    let imported=&coordinator.world().documents[&doc_id];
+    let id=imported.entities.values().find(|e|matches!(e.geometry,Geometry::NativeBrep(_))).unwrap().id;
+    let path=std::env::temp_dir().join(format!("om9-external-ambiguous-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,imported,&limits,&Cancellation::default()).unwrap();
+    let mut app=MatrixApp::from_file(&path).unwrap(); std::fs::remove_file(path).unwrap();
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera=
+        om9_scene::camera::Camera::orthographic([5.,-20.,20.],[5.,0.,0.],[0.,0.,1.],30.).unwrap();
+    let ctx=egui::Context::default(); frame(&mut app,&ctx,vec![]); frame(&mut app,&ctx,vec![]);
+    app.controller.submit("Point").unwrap(); app.controller.submit("30,30,30").unwrap(); app.controller.undo().unwrap();
+    app.controller.select_objects(&[id]).unwrap(); let before=app.controller.document().clone();
+    let redo=app.controller.coordinator().redo_len(); assert!(redo>0);
+    app.controller.submit("DupEdge").unwrap();
+    let deadline=std::time::Instant::now()+std::time::Duration::from_secs(20);
+    while app.controller.dupedge_source_view_pending() {assert!(std::time::Instant::now()<deadline);frame(&mut app,&ctx,vec![]);std::thread::yield_now();}
+    click_in_view(&mut app,&ctx,ViewId::Perspective,[5.,0.,0.],Modifiers::NONE);
+    let rect=app.view_rects[&ViewId::Perspective];
+    let vp=Viewport {origin:[rect.min.x as f64,rect.min.y as f64],size:[rect.width() as f64,rect.height() as f64]};
+    let camera=&app.controller.workspace.views[&ViewId::Perspective].camera;
+    let screen=camera.project([10.,0.,6.],vp).unwrap().unwrap().screen;
+    let hits=app.controller.scene().unwrap().pick_edge_candidates(screen,camera,vp,6.,om9_scene::scene::PickIntent::Select).unwrap();
+    assert_eq!(hits.len(),2,"expected two projected edges: {hits:?}");
+    for expected in [[10.,0.,6.],[10.,48./7.,-6./7.]] {
+        assert!(hits.iter().any(|hit|(0..3).all(|i|(hit.world_point[i]-expected[i]).abs()<1e-6)),"{hits:?}");
+    }
+    assert!(hits.iter().all(|hit|hit.screen_distance<1e-6));
+    assert!((hits[0].depth-hits[1].depth).abs()>9.);
+    click_in_view(&mut app,&ctx,ViewId::Perspective,[10.,0.,6.],Modifiers::NONE);
+    assert!(app.transcript.history().contains("ambiguous edges"),"{}",app.transcript.history());
+    assert_eq!(app.controller.document(),&before);
+    assert_eq!(app.controller.coordinator().redo_len(),redo);
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera=
+        om9_scene::camera::Camera::orthographic([24.,-24.,20.],[5.,3.,5.],[0.,0.,1.],30.).unwrap();
+    frame(&mut app,&ctx,vec![]);
+    click_in_view(&mut app,&ctx,ViewId::Perspective,[10.,0.,6.],Modifiers::NONE);
+    app.controller.submit("").unwrap_or_else(|e|panic!("{e:?}; {}",app.transcript.history()));
+    let curves:Vec<_>=app.controller.document().entities.values().filter(|e|e.label=="DupEdge").collect();
+    assert_eq!(curves.len(),2,"first selection should survive ambiguity and camera change");
+    for expected in [[[0.,0.,0.],[10.,0.,0.]],[[10.,0.,0.],[10.,0.,12.]]] {
+        assert!(curves.iter().any(|e| {let Geometry::Curve(curve)=&e.geometry else {return false};
+            let ends=[0.,1.].map(|t|om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(t),0,e.placement,&limits).unwrap()[0]);
+            expected.iter().all(|target|ends.iter().any(|p|(0..3).all(|i|(p[i]-target[i]).abs()<1e-6)))
+        }),"missing expected edge {expected:?}");
+    }
+    let after=app.controller.document().clone();
+    app.controller.undo().unwrap(); assert_eq!(app.controller.document(),&before);
+    app.controller.redo().unwrap(); assert_eq!(app.controller.document(),&after);
+}
+
+#[test]
+#[ignore = "requires admitted native exchange and authored openNURBS 3DM fixture"]
+fn viewport_dupedge_opaque_imported_3dm_trimmed_arc_after_reopen() {
+    use om9_core::transaction::{Cancellation,TransactionCoordinator,World};
+    use om9_exchange::{BrepMode,ImportMode,ImportOptions};use sha2::{Digest,Sha256};
+    let limits=Limits::default();let executable=std::path::PathBuf::from(std::env::var_os("OM9_EXCHANGE_NATIVE").unwrap());
+    let fixture=std::path::PathBuf::from(std::env::var_os("OM9_DUPEDGE_3DM_ARC").unwrap());
+    let hash:[u8;32]=Sha256::digest(std::fs::read(&executable).unwrap()).into();
+    let host=om9_app::three_dm_host::ThreeDmHost::admit(&executable,hash).unwrap();
+    let doc=Document::with_template_tolerance("native imported arc");let doc_id=doc.id;
+    let mut coordinator=TransactionCoordinator::new(World::new(vec![doc],&limits).unwrap(),limits).unwrap();
+    host.import_with_options(&mut coordinator,doc_id,&fixture,&ImportOptions {mode:ImportMode::Geometry,brep:BrepMode::RetainOpaque,..Default::default()},&Cancellation::default()).unwrap();
+    let imported=&coordinator.world().documents[&doc_id];
+    let id=imported.entities.values().find(|e|matches!(e.geometry,Geometry::NativeBrep(_))).expect("native imported face").id;
+    let path=std::env::temp_dir().join(format!("om9-native-imported-arc-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,imported,&limits,&Cancellation::default()).unwrap();
+    let mut app=MatrixApp::from_file(&path).unwrap();std::fs::remove_file(path).unwrap();
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera=
+        om9_scene::camera::Camera::orthographic([8.,-10.,14.],[1.,1.,2.5],[0.,0.,1.],8.).unwrap();
+    let ctx=egui::Context::default();frame(&mut app,&ctx,vec![]);frame(&mut app,&ctx,vec![]);
+    app.controller.submit("Point").unwrap();app.controller.submit("20,20,20").unwrap();app.controller.undo().unwrap();
+    app.controller.select_objects(&[id]).unwrap();let before=app.controller.document().clone();app.controller.submit("DupEdge").unwrap();
+    let deadline=std::time::Instant::now()+std::time::Duration::from_secs(20);
+    while app.controller.dupedge_source_view_pending() {assert!(std::time::Instant::now()<deadline);frame(&mut app,&ctx,vec![]);std::thread::yield_now();}
+    let stamp=app.controller.document().stamp(id).unwrap();let display=app.controller.scene().unwrap().root_brep_pick_display(&stamp).unwrap();
+    let point=display.segments.iter().filter_map(|s| {let a=display.points[s[0] as usize];let b=display.points[s[1] as usize];
+        if (a[2]-5.).abs()>1e-7 || (b[2]-5.).abs()>1e-7 {return None;}
+        let p=std::array::from_fn::<_,3,_>(|i|(a[i]+b[i])*0.5);Some(((p[0]-1.847759065).powi(2)+(p[1]-0.765366865).powi(2),p))
+    }).min_by(|a,b|a.0.total_cmp(&b.0)).unwrap().1;
+    click_in_view(&mut app,&ctx,ViewId::Perspective,point,Modifiers::NONE);
+    app.controller.submit("").unwrap_or_else(|e|panic!("{e:?}; {}",app.transcript.history()));
+    let entity=app.controller.document().entities.values().find(|e|e.label=="DupEdge").expect("arc");
+    let Geometry::Curve(curve)=&entity.geometry else {panic!("curve")};
+    let points=[0.,0.2,0.5,0.8,1.].map(|t|om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(t),0,entity.placement,&limits).unwrap()[0]);
+    for p in points {assert!((p[0].hypot(p[1])-2.).abs()<1e-6&&(p[2]-5.).abs()<1e-6&&p[0]>=-1e-6&&p[1]>=-1e-6,"{p:?}");}
+    for expected in [[2.,0.,5.],[0.,2.,5.]] {assert!([points[0],points[4]].iter().any(|p|(0..3).all(|i|(p[i]-expected[i]).abs()<1e-6)),"{points:?}");}
+    for (point,expected) in [points[0],points[4]].iter().zip([[0.,2.,5.],[2.,0.,5.]]) {
+        assert!((0..3).all(|i|(point[i]-expected[i]).abs()<1e-6),"source edge orientation: {points:?}");
+    }
+    let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+}
+
+#[test]
+#[ignore = "requires the admitted native 3DM exchange and authored trimmed arc fixture"]
+fn viewport_dupedge_reopened_imported_3dm_trimmed_arc_keeps_geometry() {
+    let limits = Limits::default();
+    let source = std::path::PathBuf::from(std::env::var_os("OM9_DUPEDGE_3DM_ARC").expect("OM9_DUPEDGE_3DM_ARC"));
+    let mut imported = om9_app::session::Controller::new(Document::with_template_tolerance("arc import"), limits).unwrap();
+    imported.import_3dm(&source).unwrap();
+    assert!(imported.document().entities.values().any(|e| matches!(e.geometry, Geometry::Brep(_))), "expected editable BRep");
+    let path = std::env::temp_dir().join(format!("om9-dupedge-3dm-arc-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, imported.document(), &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera =
+        om9_scene::camera::Camera::orthographic([8., -10., 14.], [1., 1., 2.5], [0., 0., 1.], 8.).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    let shape = app.controller.document().entities.values().find_map(|e| match &e.geometry { Geometry::Brep(b) => Some(b), _ => None }).unwrap();
+    let display = shape.display();
+    let visible = display.segments.iter().filter_map(|s| {
+        let a = display.points[s[0] as usize]; let b = display.points[s[1] as usize];
+        if (a[2] - 5.).abs() > 1e-8 || (b[2] - 5.).abs() > 1e-8 { return None; }
+        let p = std::array::from_fn::<_, 3, _>(|i| (a[i] + b[i]) * 0.5);
+        Some(((p[0] - 1.847759065).powi(2) + (p[1] - 0.765366865).powi(2), p))
+    }).min_by(|a,b| a.0.total_cmp(&b.0)).unwrap().1;
+    click_in_view(&mut app, &ctx, ViewId::Perspective, visible, Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    let id = output.id;
+    let Geometry::Curve(curve) = &output.geometry else { panic!() };
+    let mut endpoints = Vec::new();
+    for fraction in [0., 0.2, 0.5, 0.8, 1.] {
+        let p = om9_core::evaluation::evaluate_curve(curve, om9_core::evaluation::Parameter::Fraction(fraction),
+            0, Transform::identity(), &limits).unwrap()[0];
+        assert!((p[0].hypot(p[1]) - 2.).abs() < 1e-7 && (p[2] - 5.).abs() < 1e-7 && p[0] >= -1e-8 && p[1] >= -1e-8, "{p:?}");
+        if fraction == 0. || fraction == 1. { endpoints.push(p); }
+    }
+    for expected in [[2., 0., 5.], [0., 2., 5.]] {
+        assert!(endpoints.iter().any(|p| (0..3).all(|i| (p[i] - expected[i]).abs() < 1e-7)));
+    }
+    // ON_BrepEdge start/end reported by the independent fixture generator.
+    for (actual, expected) in endpoints.iter().zip([[0., 2., 5.], [2., 0., 5.]]) {
+        assert!((0..3).all(|i| (actual[i] - expected[i]).abs() < 1e-7), "edge orientation {endpoints:?}");
+    }
+    app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&id));
+    app.controller.redo().unwrap(); assert!(app.controller.document().entities.contains_key(&id));
+}
+
+#[test]
+#[ignore = "requires the admitted native 3DM exchange and authored cylinder fixture"]
+fn viewport_dupedge_reopened_imported_3dm_cylinder_uses_source_and_undo() {
+    let limits = Limits::default();
+    let source = std::path::PathBuf::from(std::env::var_os("OM9_DUPEDGE_3DM_CYLINDER").expect("OM9_DUPEDGE_3DM_CYLINDER"));
+    let mut imported = om9_app::session::Controller::new(Document::with_template_tolerance("cylinder import"), limits).unwrap();
+    imported.import_3dm(&source).unwrap();
+    assert!(imported.document().entities.values().any(|e| matches!(e.geometry, Geometry::Brep(_))), "expected editable BRep");
+    let path = std::env::temp_dir().join(format!("om9-dupedge-3dm-cylinder-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, imported.document(), &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    app.controller.submit("Point").unwrap(); app.controller.submit("10,10,10").unwrap();
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    let before = app.controller.coordinator().snapshot();
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [0., -2., 5.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.cancel();
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+    assert!(!app.controller.is_running());
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [0., -2., 5.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    let id = output.id;
+    let Geometry::Curve(curve) = &output.geometry else { panic!() };
+    for fraction in [0., 0.2, 0.5, 0.8, 1.] {
+        let p = om9_core::evaluation::evaluate_curve(curve, om9_core::evaluation::Parameter::Fraction(fraction),
+            0, Transform::identity(), &limits).unwrap()[0];
+        assert!((p[0].hypot(p[1]) - 2.).abs() < 1e-7 && (p[2] - 5.).abs() < 1e-7, "{p:?}");
+    }
+    app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&id));
+    app.controller.redo().unwrap(); assert!(app.controller.document().entities.contains_key(&id));
+}
+
+#[test]
+#[ignore = "requires an admitted native 3DM exchange executable and authored 3DM fixture"]
+fn viewport_dupedge_reopened_imported_3dm_box_uses_source_and_undo() {
+    let limits = Limits::default();
+    // Authored inventory fixture: the root ON_Brep is the unit Box at the origin.
+    let path_3dm = std::path::PathBuf::from(std::env::var_os("OM9_DUPEDGE_3DM_FIXTURE").expect("OM9_DUPEDGE_3DM_FIXTURE"));
+    let mut imported = om9_app::session::Controller::new(Document::with_template_tolerance("import target"), limits).unwrap();
+    imported.import_3dm(&path_3dm).unwrap();
+    let entity = imported.document().entities.values().find(|e| matches!(e.geometry, Geometry::Brep(_)))
+        .expect("the imported box must be an editable OCCT BRep");
+    let mut isolated = Document::with_template_tolerance("isolated imported 3DM box");
+    let isolated_entity = Entity::new("imported box", entity.geometry.clone(), isolated.current_layer);
+    isolated.entities.insert(isolated_entity.id, isolated_entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-import-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &isolated, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera =
+        om9_scene::camera::Camera::orthographic([4., -5., 6.], [0.5, 0.5, 0.5], [0., 0., 1.], 2.5).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [0.5, 0., 1.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    let id = output.id;
+    let Geometry::Curve(curve) = &output.geometry else { panic!() };
+    let endpoints: Vec<_> = [0., 1.].into_iter().map(|fraction| om9_core::evaluation::evaluate_curve(curve,
+        om9_core::evaluation::Parameter::Fraction(fraction), 0, Transform::identity(), &limits).unwrap()[0]).collect();
+    for expected in [[0., 0., 1.], [1., 0., 1.]] {
+        assert!(endpoints.iter().any(|p| (0..3).all(|axis| (p[axis] - expected[axis]).abs() < 1e-7)));
+    }
+    app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&id));
+    app.controller.redo().unwrap(); assert!(app.controller.document().entities.contains_key(&id));
+}
+
+#[test]
+fn viewport_dupedge_reopened_on_brep_cylinder_edge_uses_source() {
+    let limits = Limits::default();
+    let original = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Cylinder { radius_mm: 2., height_mm: 5. }, 0.01, &limits).unwrap();
+    let native = om9_kernel::brep::to_3dm(&original, 0.001, &limits).unwrap();
+    let imported = om9_kernel::brep::from_3dm(&native.payload, 0.001, 0.01, &limits).unwrap();
+    let mut document = Document::new("ON_Brep cylinder converted to OCCT");
+    let entity = Entity::new("converted cylinder", Geometry::Brep(imported), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-onbrep-cylinder-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [0., -2., 5.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    let id = output.id;
+    let Geometry::Curve(curve) = &output.geometry else { panic!() };
+    for fraction in [0., 0.2, 0.5, 0.8, 1.] {
+        let p = om9_core::evaluation::evaluate_curve(curve, om9_core::evaluation::Parameter::Fraction(fraction),
+            0, Transform::identity(), &limits).unwrap()[0];
+        assert!((p[0].hypot(p[1]) - 2.).abs() < 1e-7 && (p[2] - 5.).abs() < 1e-7, "{p:?}");
+    }
+    app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&id));
+    app.controller.redo().unwrap(); assert!(app.controller.document().entities.contains_key(&id));
+}
+
+#[test]
+fn viewport_dupedge_reopened_on_brep_payload_uses_source_and_undo() {
+    let limits = Limits::default();
+    let original = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, 0.01, &limits).unwrap();
+    let native = om9_kernel::brep::to_3dm(&original, 0.001, &limits).unwrap();
+    let imported = om9_kernel::brep::from_3dm(&native.payload, 0.001, 0.01, &limits).unwrap();
+    let mut document = Document::new("ON_Brep payload converted to OCCT");
+    let entity = Entity::new("converted box", Geometry::Brep(imported), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-onbrep-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [2., 0., 6.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    let id = output.id;
+    let Geometry::Curve(curve) = &output.geometry else { panic!() };
+    let endpoints: Vec<_> = [0., 1.].into_iter().map(|fraction| om9_core::evaluation::evaluate_curve(curve,
+        om9_core::evaluation::Parameter::Fraction(fraction), 0, Transform::identity(), &limits).unwrap()[0]).collect();
+    for expected in [[0., 0., 6.], [4., 0., 6.]] {
+        assert!(endpoints.iter().any(|p| (0..3).all(|axis| (p[axis] - expected[axis]).abs() < 1e-7)));
+    }
+    app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&id));
+    app.controller.redo().unwrap(); assert!(app.controller.document().entities.contains_key(&id));
+}
+
+#[test]
+fn viewport_dupedge_reopened_box_large_world_placement() {
+    let limits = Limits::default();
+    let origin = 1e9;
+    let shape = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, 0.01, &limits).unwrap();
+    let mut document = Document::new("far placement");
+    let mut entity = Entity::new("box", Geometry::Brep(shape), document.current_layer);
+    entity.placement = Transform::translation([origin; 3]);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-far-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera =
+        om9_scene::camera::Camera::orthographic([origin + 8., origin - 10., origin + 14.],
+            [origin + 2., origin + 2.5, origin + 3.], [0., 0., 1.], 12.).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [origin + 2., origin, origin + 6.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    let Geometry::Curve(curve) = &output.geometry else { panic!() };
+    let middle = om9_core::evaluation::evaluate_curve(curve, om9_core::evaluation::Parameter::Fraction(0.5),
+        0, Transform::identity(), &limits).unwrap()[0];
+    assert!((middle[0] - origin - 2.).abs() < 0.001 && (middle[1] - origin).abs() < 0.001 && (middle[2] - origin - 6.).abs() < 0.001);
+}
+
+#[test]
+fn viewport_dupedge_shaded_refuses_edge_hidden_by_another_solid() {
+    use om9_scene::workspace::DisplayMode;
+    let limits = Limits::default();
+    let back = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, 0.01, &limits).unwrap();
+    let front = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 6., y_mm: 4., z_mm: 2. }, 0.01, &limits).unwrap();
+    let mut document = Document::with_template_tolerance("occluded edge");
+    let back = Entity::new("back", Geometry::Brep(back), document.current_layer);
+    let back_id = back.id;
+    let mut front = Entity::new("front", Geometry::Brep(front), document.current_layer);
+    front.placement = Transform::translation([-1., -2., 8.]);
+    document.entities.insert(back.id, back);
+    document.entities.insert(front.id, front);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-occlusion-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    let view = app.controller.workspace.views.get_mut(&ViewId::LookingDown).unwrap();
+    view.mode = DisplayMode::Shaded;
+    view.camera = om9_scene::camera::Camera::orthographic([2., -10., 50.], [2., 0., 5.], [0., 1., 0.], 10.).unwrap();
+    app.controller.submit("Point").unwrap(); app.controller.submit("20,20,20").unwrap();
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    let rect = app.view_rects[&ViewId::LookingDown];
+    let viewport = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+    let camera = &app.controller.workspace.views[&ViewId::LookingDown].camera;
+    let cursor = camera.project([2., 0., 6.], viewport).unwrap().unwrap().screen;
+    let candidates = app.controller.scene().unwrap().pick_edge_candidates(cursor, camera, viewport, 6., om9_scene::scene::PickIntent::Select).unwrap();
+    assert_eq!(candidates.len(), 1, "fixture needs exactly one edge candidate: {candidates:?}");
+    assert_eq!(candidates[0].root, back_id);
+    let before = app.controller.coordinator().snapshot();
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::LookingDown, [2., 0., 6.], Modifiers::NONE);
+    assert!(app.controller.subselection().is_empty(), "a shaded solid must occlude the edge");
+    assert!(app.controller.dupedge_needs_pick());
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+    assert!(app.transcript.history().contains("hidden by shaded geometry"), "{}", app.transcript.history());
+    app.controller.cancel();
+    app.set_sub_object_kind(om9_scene::scene::PickKind::Edge);
+    let modifiers = Modifiers { ctrl: true, shift: true, ..Modifiers::NONE };
+    click_in_view(&mut app, &ctx, ViewId::LookingDown, [2., 0., 6.], modifiers);
+    assert!(app.controller.subselection().is_empty(), "preselection must also reject the hidden edge");
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+    app.controller.workspace.views.get_mut(&ViewId::LookingDown).unwrap().mode = DisplayMode::Wireframe;
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::LookingDown, [2., 0., 6.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "wireframe exposes the edge");
+    app.controller.submit("").unwrap();
+    assert_eq!(app.controller.document().entities.values().filter(|entity| entity.label == "DupEdge").count(), 1);
+}
+
+#[test]
+fn viewport_dupedge_shaded_accepts_visible_box_edge() {
+    use om9_scene::workspace::DisplayMode;
+    let limits = Limits::default();
+    let shape = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, 0.01, &limits).unwrap();
+    let mut document = Document::with_template_tolerance("visible shaded edge");
+    let entity = Entity::new("box", Geometry::Brep(shape), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let mut app = MatrixApp::new(document).unwrap();
+    let view = app.controller.workspace.views.get_mut(&ViewId::LookingDown).unwrap();
+    view.mode = DisplayMode::Shaded;
+    view.camera = om9_scene::camera::Camera::orthographic([2., -10., 50.], [2., 0., 5.], [0., 1., 0.], 10.).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::LookingDown, [2., 0., 6.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    assert_eq!(app.controller.document().entities.values().filter(|entity| entity.label == "DupEdge").count(), 1);
+}
+
+#[test]
+fn viewport_dupedge_shaded_refuses_self_occluded_box_edge() {
+    use om9_scene::workspace::DisplayMode;
+    let limits = Limits::default();
+    let shape = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, 0.01, &limits).unwrap();
+    let mut document = Document::with_template_tolerance("self occluded edge");
+    let entity = Entity::new("box", Geometry::Brep(shape), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let mut app = MatrixApp::new(document).unwrap();
+    let view = app.controller.workspace.views.get_mut(&ViewId::LookingDown).unwrap();
+    view.mode = DisplayMode::Shaded;
+    view.camera = om9_scene::camera::Camera::orthographic([2., -10., 50.], [2., 0., 5.], [0., 1., 0.], 10.).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    let rect = app.view_rects[&ViewId::LookingDown];
+    let viewport = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+    let camera = &app.controller.workspace.views[&ViewId::LookingDown].camera;
+    let cursor = camera.project([2., 5., 0.], viewport).unwrap().unwrap().screen;
+    let candidates = app.controller.scene().unwrap().pick_edge_candidates(cursor, camera, viewport, 6., om9_scene::scene::PickIntent::Select).unwrap();
+    assert_eq!(candidates.len(), 1, "fixture needs one edge candidate: {candidates:?}");
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::LookingDown, [2., 5., 0.], Modifiers::NONE);
+    assert!(app.controller.subselection().is_empty());
+    assert!(app.transcript.history().contains("hidden by shaded geometry"), "{}", app.transcript.history());
+}
+
+#[test]
+fn viewport_dupedge_reopened_rotated_box_uses_current_layer_and_undo() {
+    use om9_app::layer_command::LayerChoice;
+    use om9_core::layers::PresetSlot;
+    let limits = Limits::default();
+    let shape = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 6., z_mm: 8. }, 0.01, &limits).unwrap();
+    let mut document = Document::new("rotated reopened box");
+    let mut entity = Entity::new("box", Geometry::Brep(shape), document.current_layer);
+    entity.placement.0[0] = [0., -1., 0., 10.];
+    entity.placement.0[1] = [1., 0., 0., -4.];
+    entity.placement.0[2][3] = 3.;
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-placed-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    app.controller.set_current_layer(LayerChoice::Slot(PresetSlot::new(5).unwrap())).unwrap();
+    let layer = app.controller.document().current_layer;
+    assert!(layer.is_some());
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera =
+        om9_scene::camera::Camera::orthographic([18., -14., 20.], [7., -2., 7.], [0., 0., 1.], 14.).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.dispatch("OM9-CURVE-040", InvocationOrigin::Menu).unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [10., -2., 11.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    assert_eq!(output.attributes.layer, layer);
+    let id = output.id;
+    let Geometry::Curve(curve) = &output.geometry else { panic!() };
+    let actual: Vec<_> = [0., 1.].into_iter().map(|fraction| om9_core::evaluation::evaluate_curve(curve,
+        om9_core::evaluation::Parameter::Fraction(fraction), 0, Transform::identity(), &limits).unwrap()[0]).collect();
+    for expected in [[10., -4., 11.], [10., 0., 11.]] {
+        assert!(actual.iter().any(|point| (0..3).all(|axis| (point[axis] - expected[axis]).abs() < 1e-8)));
+    }
+    app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&id));
+    app.controller.redo().unwrap();
+    assert_eq!(app.controller.document().entities[&id].attributes.layer, layer);
+}
+
+#[test]
+fn viewport_dupedge_reopened_box_commits_two_edges_in_one_undo() {
+    let mut original = om9_app::session::Controller::new(Document::new("reopened Box"), Limits::default()).unwrap();
+    original.submit("Box 4 6 8").unwrap();
+    let path = std::env::temp_dir().join(format!("om9-dupedge-ui-many-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, original.document(), &Limits::default(),
+        &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [2., 0., 8.], Modifiers::NONE);
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [4., 3., 8.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 2, "{}", app.transcript.history());
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [2., 0., 8.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1);
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [2., 0., 8.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 2);
+    app.controller.submit("").unwrap();
+    let curves: Vec<_> = app.controller.document().entities.values().filter(|entity| entity.label == "DupEdge").collect();
+    assert_eq!(curves.len(), 2);
+    let ids: Vec<_> = curves.iter().map(|entity| entity.id).collect();
+    for endpoints in [[[0., 0., 8.], [4., 0., 8.]], [[4., 0., 8.], [4., 6., 8.]]] {
+        assert!(curves.iter().any(|entity| {
+            let Geometry::Curve(curve) = &entity.geometry else { return false };
+            let actual: Vec<_> = [0., 1.].into_iter().map(|fraction| om9_core::evaluation::evaluate_curve(curve,
+                om9_core::evaluation::Parameter::Fraction(fraction), 0, Transform::identity(), &Limits::default()).unwrap()[0]).collect();
+            endpoints.iter().all(|expected| actual.iter().any(|point| (0..3).all(|axis| (point[axis] - expected[axis]).abs() < 1e-8)))
+        }));
+    }
+    app.controller.undo().unwrap();
+    assert!(ids.iter().all(|id| !app.controller.document().entities.contains_key(id)));
+    app.controller.redo().unwrap();
+    assert!(ids.iter().all(|id| app.controller.document().entities.contains_key(id)));
+}
+
+#[test]
+fn reopened_native_box_dupedge_two_edges_are_one_undo() {
+    let limits=Limits::default();let shape=om9_kernel::brep::box_brep([4.,6.,8.],0.1,&limits).unwrap();
+    let native=om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap();
+    let mut doc=Document::with_template_tolerance("native two edges");
+    let entity=Entity::new("box",Geometry::NativeBrep(native),doc.current_layer);let id=entity.id;doc.entities.insert(id,entity);
+    let path=std::env::temp_dir().join(format!("om9-native-two-edges-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app=MatrixApp::from_file(&path).unwrap();std::fs::remove_file(path).unwrap();
+    let ctx=egui::Context::default();frame(&mut app,&ctx,vec![]);frame(&mut app,&ctx,vec![]);
+    app.controller.submit("Point").unwrap();app.controller.submit("20,20,20").unwrap();app.controller.undo().unwrap();
+    app.controller.select_objects(&[id]).unwrap();let before=app.controller.document().clone();app.controller.submit("DupEdge").unwrap();
+    let deadline=std::time::Instant::now()+std::time::Duration::from_secs(20);
+    while app.controller.dupedge_source_view_pending() {assert!(std::time::Instant::now()<deadline);frame(&mut app,&ctx,vec![]);std::thread::yield_now();}
+    for point in [[2.,0.,8.],[4.,3.,8.],[2.,0.,8.],[2.,0.,8.]] {click_in_view(&mut app,&ctx,ViewId::Perspective,point,Modifiers::NONE);}
+    app.controller.submit("").unwrap_or_else(|e|panic!("{e:?}; {}",app.transcript.history()));
+    let curves:Vec<_>=app.controller.document().entities.values().filter(|e|e.label=="DupEdge").collect();assert_eq!(curves.len(),2);
+    for expected in [[[0.,0.,8.],[4.,0.,8.]],[[4.,0.,8.],[4.,6.,8.]]] {
+        assert!(curves.iter().any(|e| {let Geometry::Curve(curve)=&e.geometry else {return false};
+            let ends=[0.,1.].map(|t|om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(t),0,e.placement,&limits).unwrap()[0]);
+            expected.iter().all(|target|ends.iter().any(|p|(0..3).all(|i|(p[i]-target[i]).abs()<1e-6)))
+        }),"missing expected edge {expected:?}");
+    }
+    let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+}
+
+#[test]
+fn reopened_native_box_dupedge_selects_source_and_undoes() {
+    let limits=Limits::default();
+    let shape=om9_kernel::brep::box_brep([4.,5.,6.],0.1,&limits).unwrap();
+    let native=om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap();
+    let mut doc=Document::with_template_tolerance("native DupEdge");
+    let mut entity=Entity::new("box",Geometry::NativeBrep(native),doc.current_layer);
+    entity.placement=Transform([[2.,0.5,0.,10.],[0.,1.,0.,-3.],[0.,0.,1.,2.],[0.,0.,0.,1.]]);
+    let id=entity.id;doc.entities.insert(id,entity);
+    let path=std::env::temp_dir().join(format!("om9-native-dupedge-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    for preselected in [false,true] {
+    let mut app=MatrixApp::from_file(&path).unwrap();
+    app.controller.workspace.views.get_mut(&ViewId::LookingDown).unwrap().camera=
+        om9_scene::camera::Camera::orthographic([14.,-13.,52.],[14.,-3.,7.],[0.,1.,0.],14.).unwrap();
+    let ctx=egui::Context::default();frame(&mut app,&ctx,vec![]);frame(&mut app,&ctx,vec![]);
+    app.controller.submit("Point").unwrap();app.controller.submit("50,50,50").unwrap();app.controller.undo().unwrap();
+    if preselected {app.controller.select_objects(&[id]).unwrap();} let before=app.controller.document().clone();
+    if preselected {app.controller.dispatch("OM9-CURVE-040",om9_app::session::InvocationOrigin::Menu).unwrap();} else {app.controller.submit("DupEdge").unwrap();}
+    if !preselected {click_in_view(&mut app,&ctx,ViewId::LookingDown,[14.,-3.,8.],Modifiers::NONE);}
+    assert!(app.controller.dupedge_source_view_pending(),"{}",app.transcript.history());
+    let deadline=std::time::Instant::now()+std::time::Duration::from_secs(20);
+    while app.controller.dupedge_source_view_pending() {assert!(std::time::Instant::now()<deadline);frame(&mut app,&ctx,vec![]);std::thread::yield_now();}
+    click_in_view(&mut app,&ctx,ViewId::LookingDown,[14.,-3.,8.],Modifiers::NONE);
+    app.controller.submit("").unwrap_or_else(|e|panic!("{e:?}; {}",app.transcript.history()));
+    let entity=app.controller.document().entities.values().find(|e|e.label=="DupEdge").expect("curve");
+    let Geometry::Curve(curve)=&entity.geometry else {panic!("curve")};
+    let ends=[0.,1.].map(|t|om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(t),0,entity.placement,&limits).unwrap()[0]);
+    for expected in [[10.,-3.,8.],[18.,-3.,8.]] {assert!(ends.iter().any(|p|(0..3).all(|i|(p[i]-expected[i]).abs()<1e-6)),"{ends:?}");}
+    let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+    }
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn reopened_native_box_dupedge_initial_pick_starts_source_view() {
+    let limits=Limits::default();
+    let shape=om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box {x_mm:4.,y_mm:5.,z_mm:6.},0.01,&limits).unwrap();
+    let native=om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap();
+    for geometry in [Geometry::Brep(shape),Geometry::NativeBrep(native)] {
+        let is_native=matches!(geometry,Geometry::NativeBrep(_));
+        let mut doc=Document::with_template_tolerance("DupEdge native comparison");
+        let entity=Entity::new("box",geometry,doc.current_layer);doc.entities.insert(entity.id,entity);
+        let path=std::env::temp_dir().join(format!("om9-dupedge-native-{}.om9",uuid::Uuid::new_v4()));
+        om9_archive::Archive::save(&path,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+        let mut app=MatrixApp::from_file(&path).unwrap();std::fs::remove_file(path).unwrap();
+        let view=app.controller.workspace.views.get_mut(&ViewId::LookingDown).unwrap();
+        view.camera=om9_scene::camera::Camera::orthographic([2.,-10.,50.],[2.,0.,5.],[0.,1.,0.],10.).unwrap();
+        let ctx=egui::Context::default();frame(&mut app,&ctx,vec![]);frame(&mut app,&ctx,vec![]);
+        app.controller.submit("Point").unwrap();app.controller.submit("50,50,50").unwrap();app.controller.undo().unwrap();
+        let before=app.controller.document().clone();app.controller.submit("DupEdge").unwrap();
+        click_in_view(&mut app,&ctx,ViewId::LookingDown,[2.,0.,6.],Modifiers::NONE);
+        if is_native {
+            assert!(app.controller.subselection().is_empty(),"first click prepares the source view");
+            assert!(app.controller.dupedge_needs_pick());
+            assert!(app.controller.dupedge_source_view_pending());
+            assert_eq!(app.controller.document(),&before);assert_eq!(app.controller.coordinator().redo_len(),1);
+        } else {
+            assert_eq!(app.controller.subselection().len(),1,"{}",app.transcript.history());
+            app.controller.submit("").unwrap();
+            assert_eq!(app.controller.document().entities.values().filter(|e|e.label=="DupEdge").count(),1);
+        }
+    }
+}
+
+#[test]
+fn viewport_dupedge_reopened_sphere_selects_seam() {
+    let limits = Limits::default();
+    let shape = om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Sphere { radius_mm: 5. }, 0.01, &limits).unwrap();
+    let mut document = Document::new("reopened sphere");
+    let entity = Entity::new("Sphere", Geometry::Brep(shape), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-sphere-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [5., 0., 0.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    let id = output.id;
+    let Geometry::Curve(curve) = &output.geometry else { panic!("expected curve") };
+    for fraction in [0., 0.25, 0.5, 0.75, 1.] {
+        let p = om9_core::evaluation::evaluate_curve(curve, om9_core::evaluation::Parameter::Fraction(fraction),
+            0, Transform::identity(), &limits).unwrap()[0];
+        assert!((p.iter().map(|value| value * value).sum::<f64>().sqrt() - 5.).abs() < 1e-7);
+    }
+    app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&id));
+    app.controller.redo().unwrap(); assert!(app.controller.document().entities.contains_key(&id));
+}
+
+#[test]
+fn viewport_dupedge_reopened_trimmed_arc_keeps_source_geometry() {
+    let limits = Limits::default();
+    for profile_deflection in [0.5, 0.01] {
+    let arc = om9_core::curve_build::arc_through([2., 0., 0.], [2f64.sqrt(), 2f64.sqrt(), 0.], [0., 2., 0.]).unwrap();
+    let profile = Curve::Polycurve { segments: vec![arc,
+        Curve::Line { start: [0., 2., 0.], end: [2., 0., 0.], domain: [0., 1.] }], reversed: false };
+    let shape = om9_kernel::extrusion::shell(&profile, [0., 0., 5.], profile_deflection, &limits).unwrap();
+    let mut document = Document::new("reopened arc shell");
+    if profile_deflection == 0.5 {
+        document.tolerance = Some(om9_core::history::Tolerance::try_new(1e-7, 0., 0.).unwrap());
+    }
+    let entity = Entity::new("shell", Geometry::Brep(shape), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-arc-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera =
+        om9_scene::camera::Camera::orthographic([8., -10., 14.], [1., 1., 2.5], [0., 0., 1.], 8.).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    let Geometry::Brep(shape) = &app.controller.document().entities.values().next().unwrap().geometry else { panic!() };
+    let display = shape.display();
+    let visible_point = display.segments.iter().filter_map(|segment| {
+        let a = display.points[segment[0] as usize];
+        let b = display.points[segment[1] as usize];
+        if (a[2] - 5.).abs() > 1e-8 || (b[2] - 5.).abs() > 1e-8 { return None; }
+        let midpoint = std::array::from_fn::<_, 3, _>(|axis| (a[axis] + b[axis]) * 0.5);
+        let distance = (midpoint[0] - 1.847759065).powi(2) + (midpoint[1] - 0.765366865).powi(2);
+        Some((distance, midpoint))
+    }).min_by(|a, b| a.0.total_cmp(&b.0)).unwrap().1;
+    click_in_view(&mut app, &ctx, ViewId::Perspective, visible_point, Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    if profile_deflection==0.5 {assert!(app.controller.dupedge_source_view_pending(),"coarse view must be refreshed");}
+    if app.controller.dupedge_source_view_pending() {
+        let deadline=std::time::Instant::now()+std::time::Duration::from_secs(20);
+        while app.controller.dupedge_source_view_pending() {assert!(std::time::Instant::now()<deadline);frame(&mut app,&ctx,vec![]);std::thread::yield_now();}
+        let root=app.controller.document().entities.values().find(|e|matches!(e.geometry,Geometry::Brep(_))).unwrap().id;
+        let stamp=app.controller.document().stamp(root).unwrap();let display=app.controller.scene().unwrap().root_brep_pick_display(&stamp).unwrap();
+        let point=display.segments.iter().filter_map(|s| {let a=display.points[s[0] as usize];let b=display.points[s[1] as usize];
+            if (a[2]-5.).abs()>1e-8||(b[2]-5.).abs()>1e-8{return None;}
+            let p=std::array::from_fn::<_,3,_>(|i|(a[i]+b[i])*0.5);Some(((p[0]-1.847759065).powi(2)+(p[1]-0.765366865).powi(2),p))
+        }).min_by(|a,b|a.0.total_cmp(&b.0)).unwrap().1;
+        click_in_view(&mut app,&ctx,ViewId::Perspective,point,Modifiers::NONE);
+        app.controller.submit("").unwrap_or_else(|e|panic!("{e:?}; {}",app.transcript.history()));
+    }
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    let id = output.id;
+    let Geometry::Curve(curve) = &output.geometry else { panic!("expected curve") };
+    let mut endpoints = Vec::new();
+    for fraction in [0., 0.2, 0.5, 0.8, 1.] {
+        let p = om9_core::evaluation::evaluate_curve(curve, om9_core::evaluation::Parameter::Fraction(fraction),
+            0, Transform::identity(), &limits).unwrap()[0];
+        assert!((p[0].hypot(p[1]) - 2.).abs() < 1e-7 && (p[2] - 5.).abs() < 1e-7 && p[0] >= -1e-8 && p[1] >= -1e-8, "{p:?}");
+        if fraction == 0. || fraction == 1. { endpoints.push(p); }
+    }
+    for expected in [[2., 0., 5.], [0., 2., 5.]] {
+        assert!(endpoints.iter().any(|point| (0..3).all(|axis| (point[axis] - expected[axis]).abs() < 1e-7)));
+    }
+    app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&id));
+    app.controller.redo().unwrap(); assert!(app.controller.document().entities.contains_key(&id));
+    let output_path = std::env::temp_dir().join(format!("om9-dupedge-arc-output-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&output_path, app.controller.document(), &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let reopened = MatrixApp::from_file(&output_path).unwrap();
+    std::fs::remove_file(output_path).unwrap();
+    let Geometry::Curve(curve) = &reopened.controller.document().entities[&id].geometry else { panic!("expected saved curve") };
+    let p = om9_core::evaluation::evaluate_curve(curve, om9_core::evaluation::Parameter::Fraction(0.5),
+        0, Transform::identity(), &limits).unwrap()[0];
+    assert!((p[0].hypot(p[1]) - 2.).abs() < 1e-7 && (p[2] - 5.).abs() < 1e-7);
+    }
+}
+
+#[test]
+fn viewport_dupedge_reopened_misleading_display_chord_refuses() {
+    let limits = Limits::default();
+    let shape = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Cylinder { radius_mm: 2., height_mm: 5. }, 0.01, &limits).unwrap();
+    let mut display = shape.display().clone();
+    let edge = display.segments.iter().find(|s| {
+        let a = display.points[s[0] as usize]; let b = display.points[s[1] as usize];
+        (a[2] - 5.).abs() < 1e-8 && (b[2] - 5.).abs() < 1e-8
+    }).unwrap()[2];
+    let first = u32::try_from(display.points.len()).unwrap();
+    display.points.push([2., 0., 5.]); display.points.push([0., 2., 5.]);
+    display.segments.push([first, first + 1, edge]);
+    let altered = om9_core::brep::Brep::from_native(shape.source().to_owned(), display, &limits).unwrap();
+    let mut document = Document::new("misleading cylinder chord");
+    let entity = Entity::new("cylinder", Geometry::Brep(altered), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-fake-chord-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    app.controller.submit("Point").unwrap(); app.controller.submit("10,10,10").unwrap(); app.controller.undo().unwrap();
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera =
+        om9_scene::camera::Camera::orthographic([8., -10., 14.], [1., 1., 2.5], [0., 0., 1.], 40.).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [1., 1., 5.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    let before = app.controller.coordinator().snapshot();
+    let at = app.view_rects[&ViewId::Perspective].center();
+    for pressed in [true, false] {
+        frame(&mut app, &ctx, vec![Event::PointerMoved(at), Event::PointerButton { pos: at,
+            button: PointerButton::Secondary, pressed, modifiers: Modifiers::NONE }]);
+    }
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(20);
+    while app.controller.dupedge_source_view_pending() {
+        assert!(std::time::Instant::now() < deadline);
+        frame(&mut app, &ctx, vec![]);
+        std::thread::yield_now();
+    }
+    assert!(app.transcript.history().contains("source view ready; select the edge again"),
+        "{}", app.transcript.history());
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+    assert!(app.controller.dupedge_needs_pick());
+}
+
+#[test]
+fn viewport_dupedge_coarse_affine_curve_rebuilds_then_reselects() {
+    let limits=Limits::default();
+    let source=om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Cylinder{radius_mm:2.,height_mm:5.},0.01,&limits).unwrap();
+    let shape=om9_kernel::brep::read_brep(source.source(),0.5,&limits).unwrap();
+    let placement=Transform([[2.,0.5,0.,10.],[0.,1.,0.,-2.],[0.,0.,1.,1.],[0.,0.,0.,1.]]);
+    let s=shape.display().segments.iter().find(|s| {
+        let a=shape.display().points[s[0] as usize]; let b=shape.display().points[s[1] as usize];
+        (a[2]-5.).abs()<1e-8 && (b[2]-5.).abs()<1e-8
+    }).unwrap();
+    let a=shape.display().points[s[0] as usize]; let b=shape.display().points[s[1] as usize];
+    let midpoint=placement.point(std::array::from_fn(|i|(a[i]+b[i])*0.5)).unwrap();
+    let mut document=Document::new("coarse affine recovery");
+    let mut entity=Entity::new("cylinder",Geometry::Brep(shape),document.current_layer); entity.placement=placement; let id=entity.id;
+    document.entities.insert(id,entity);
+    let path=std::env::temp_dir().join(format!("om9-dupedge-affine-recovery-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,&document,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app=MatrixApp::from_file(&path).unwrap(); std::fs::remove_file(path).unwrap();
+    app.controller.submit("Point").unwrap(); app.controller.submit("20,20,20").unwrap(); app.controller.undo().unwrap();
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera=
+        om9_scene::camera::Camera::orthographic([20.,-15.,20.],[10.,-2.,3.],[0.,0.,1.],12.).unwrap();
+    let ctx=egui::Context::default(); frame(&mut app,&ctx,vec![]); frame(&mut app,&ctx,vec![]);
+    app.controller.submit("DupEdge").unwrap(); click_in_view(&mut app,&ctx,ViewId::Perspective,midpoint,Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(),1,"{}",app.transcript.history());
+    let before=app.controller.coordinator().snapshot(); app.controller.submit("").unwrap();
+    assert!(app.controller.dupedge_source_view_pending());
+    let deadline=std::time::Instant::now()+std::time::Duration::from_secs(20);
+    while app.controller.dupedge_source_view_pending() {
+        assert!(std::time::Instant::now()<deadline); frame(&mut app,&ctx,vec![]); std::thread::yield_now();
+    }
+    assert!(app.transcript.history().contains("source view ready; select the edge again"),"{}",app.transcript.history());
+    assert_eq!(app.controller.coordinator().snapshot(),before); assert_eq!(app.controller.coordinator().redo_len(),1);
+    let stamp=app.controller.document().stamp(id).unwrap();
+    let view=app.controller.scene().unwrap().root_brep_pick_display(&stamp).unwrap();
+    let s=view.segments.iter().filter(|s| {
+        let p=view.points[s[0] as usize]; let q=view.points[s[1] as usize];
+        (p[2]-5.).abs()<1e-8 && (q[2]-5.).abs()<1e-8
+    }).min_by(|x,y| {
+        let distance=|s: &&[u32;3]| {let p=view.points[s[0] as usize]; let q=view.points[s[1] as usize];
+            let w=placement.point(std::array::from_fn(|i|(p[i]+q[i])*0.5)).unwrap();
+            (0..3).map(|i|(w[i]-midpoint[i]).powi(2)).sum::<f64>()};
+        distance(x).total_cmp(&distance(y))
+    }).unwrap();
+    let p=view.points[s[0] as usize]; let q=view.points[s[1] as usize];
+    let retry=placement.point(std::array::from_fn(|i|(p[i]+q[i])*0.5)).unwrap();
+    click_in_view(&mut app,&ctx,ViewId::Perspective,retry,Modifiers::NONE);
+    app.controller.submit("").unwrap();
+    let output=app.controller.document().entities.values().find(|e|e.label=="DupEdge").expect("duplicated curve");
+    assert_eq!(output.placement,placement); let Geometry::Curve(curve)=&output.geometry else {panic!("curve")};
+    for t in [0.,0.2,0.5,0.8,1.] {
+        let point=om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(t),0,output.placement,&limits).unwrap()[0];
+        let y=point[1]+2.; let x=(point[0]-10.-0.5*y)/2.; assert!((x*x+y*y-4.).abs()<1e-7 && (point[2]-6.).abs()<1e-8);
+    }
+    let after=app.controller.document().entities.clone(); app.controller.undo().unwrap();
+    assert_eq!(app.controller.document().entities.len(),1); app.controller.redo().unwrap(); assert_eq!(app.controller.document().entities,after);
+}
+
+#[test]
+fn viewport_dupedge_reopened_modified_arc_display_refuses_and_preserves_redo() {
+    let limits = Limits::default();
+    for deflection in [0.5, 0.01] {
+    for shift in [0.01, 0.0000005] {
+    let arc = om9_core::curve_build::arc_through([2., 0., 0.], [2f64.sqrt(), 2f64.sqrt(), 0.], [0., 2., 0.]).unwrap();
+    let profile = Curve::Polycurve { segments: vec![arc,
+        Curve::Line { start: [0., 2., 0.], end: [2., 0., 0.], domain: [0., 1.] }], reversed: false };
+    let shape = om9_kernel::extrusion::shell(&profile, [0., 0., 5.], deflection, &limits).unwrap();
+    let mut display = shape.display().clone();
+    let segment = *display.segments.iter().filter(|segment| {
+        let a = display.points[segment[0] as usize];
+        let b = display.points[segment[1] as usize];
+        (a[2] - 5.).abs() < 1e-8 && (b[2] - 5.).abs() < 1e-8
+    }).min_by(|a, b| {
+        let distance = |s: &&[u32; 3]| {
+            let p = display.points[s[0] as usize]; let q = display.points[s[1] as usize];
+            ((p[0] + q[0]) * 0.5 - 1.847759065).powi(2) + ((p[1] + q[1]) * 0.5 - 0.765366865).powi(2)
+        };
+        distance(a).total_cmp(&distance(b))
+    }).unwrap();
+    display.points[segment[0] as usize][2] += shift;
+    display.points[segment[1] as usize][2] += shift;
+    let a = display.points[segment[0] as usize]; let b = display.points[segment[1] as usize];
+    let visible = std::array::from_fn(|i| (a[i] + b[i]) * 0.5);
+    if deflection == 0.01 {
+        assert!(om9_kernel::editing::source_edge_curve_at_point_admitted(&shape, visible, 0.05, &limits, |_, _| Ok(())).is_ok(),
+            "the point-only resolver sees one source edge despite the altered segment");
+    }
+    let altered = om9_core::brep::Brep::from_native(shape.source().to_owned(), display, &limits).unwrap();
+    let mut document = Document::new("modified arc display");
+    document.tolerance = Some(om9_core::history::Tolerance::try_new(
+        if shift < 1e-6 { 1e-7 } else { 0.001 }, 0., 0.).unwrap());
+    let entity = Entity::new("shell", Geometry::Brep(altered), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-modified-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    app.controller.submit("Box 1 1 1").unwrap();
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+    app.controller.workspace.views.get_mut(&ViewId::Perspective).unwrap().camera =
+        om9_scene::camera::Camera::orthographic([8., -10., 14.], [1., 1., 2.5], [0., 0., 1.], 8.).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, visible, Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    let before = app.controller.coordinator().snapshot();
+    let result = app.controller.submit("");
+    if result.is_ok() { assert!(app.controller.dupedge_source_view_pending()); }
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+    assert!(app.controller.dupedge_needs_pick());
+    }
+    }
+}
+
+#[test]
+fn reopened_native_cylinder_dupedge_selects_circle_and_undoes() {
+    let limits=Limits::default();
+    let shape=om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Cylinder {radius_mm:2.,height_mm:5.},0.01,&limits).unwrap();
+    let native=om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap();
+    let mut doc=Document::with_template_tolerance("native cylinder DupEdge");
+    let entity=Entity::new("cylinder",Geometry::NativeBrep(native),doc.current_layer);let id=entity.id;doc.entities.insert(id,entity);
+    let path=std::env::temp_dir().join(format!("om9-native-dupedge-circle-{}.om9",uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path,&doc,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app=MatrixApp::from_file(&path).unwrap();std::fs::remove_file(path).unwrap();
+    let ctx=egui::Context::default();frame(&mut app,&ctx,vec![]);frame(&mut app,&ctx,vec![]);
+    app.controller.submit("Point").unwrap();app.controller.submit("50,50,50").unwrap();app.controller.undo().unwrap();
+    app.controller.select_objects(&[id]).unwrap();let before=app.controller.document().clone();
+    app.controller.submit("DupEdge").unwrap();
+    let deadline=std::time::Instant::now()+std::time::Duration::from_secs(20);
+    while app.controller.dupedge_source_view_pending() {assert!(std::time::Instant::now()<deadline);frame(&mut app,&ctx,vec![]);std::thread::yield_now();}
+    click_in_view(&mut app,&ctx,ViewId::Perspective,[0.,-2.,5.],Modifiers::NONE);
+    app.controller.submit("").unwrap_or_else(|e|panic!("{e:?}; {}",app.transcript.history()));
+    let entity=app.controller.document().entities.values().find(|e|e.label=="DupEdge").expect("curve");
+    let Geometry::Curve(curve)=&entity.geometry else {panic!("curve")};
+    for t in [0.,0.2,0.4,0.7,1.] {
+        let p=om9_core::evaluation::evaluate_curve(curve,om9_core::evaluation::Parameter::Fraction(t),0,entity.placement,&limits).unwrap()[0];
+        assert!((p[0].hypot(p[1])-2.).abs()<1e-6&&(p[2]-5.).abs()<1e-6,"{p:?}");
+    }
+    let after=app.controller.document().clone();app.controller.undo().unwrap();assert_eq!(app.controller.document(),&before);app.controller.redo().unwrap();assert_eq!(app.controller.document(),&after);
+}
+
+#[test]
+fn viewport_dupedge_reopened_cylinder_selects_closed_source_edge() {
+    let limits = Limits::default();
+    for profile_deflection in [0.5, 0.01] {
+    let shape = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Cylinder { radius_mm: 2., height_mm: 5. }, profile_deflection, &limits,
+    ).unwrap();
+    let mut document = Document::new("reopened cylinder");
+    let entity = Entity::new("Cylinder", Geometry::Brep(shape), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-circle-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [0., -2., 5.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    let id = output.id;
+    let Geometry::Curve(curve) = &output.geometry else { panic!("expected curve") };
+    for fraction in [0., 0.2, 0.4, 0.7, 1.] {
+        let p = om9_core::evaluation::evaluate_curve(curve, om9_core::evaluation::Parameter::Fraction(fraction),
+            0, Transform::identity(), &limits).unwrap()[0];
+        assert!((p[0].hypot(p[1]) - 2.).abs() < 1e-7 && (p[2] - 5.).abs() < 1e-7, "{p:?}");
+    }
+    app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&id));
+    app.controller.redo().unwrap(); assert!(app.controller.document().entities.contains_key(&id));
+    }
+}
+
+#[test]
+fn viewport_dupedge_opens_preexisting_v4_box_fixture() {
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../../implementation/evidence/M03/solid-ui-followup-2026-10-23/review-fixtures/OM9-SOLID-012-after.om9");
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [1., 0., 4.], Modifiers::NONE);
+    assert_eq!(app.controller.subselection().len(), 1, "{}", app.transcript.history());
+    app.controller.submit("").unwrap();
+    let output = app.controller.document().entities.values().find(|entity| entity.label == "DupEdge").unwrap();
+    let output_id = output.id;
+    let Geometry::Curve(curve) = &output.geometry else { panic!("expected curve") };
+    let actual: Vec<_> = [0., 1.].into_iter().map(|fraction| om9_core::evaluation::evaluate_curve(curve,
+        om9_core::evaluation::Parameter::Fraction(fraction), 0, Transform::identity(), &Limits::default()).unwrap()[0]).collect();
+    for expected in [[0., 0., 4.], [2., 0., 4.]] {
+        assert!(actual.iter().any(|point| (0..3).all(|axis| (point[axis] - expected[axis]).abs() < 1e-8)));
+    }
+    app.controller.undo().unwrap(); assert!(!app.controller.document().entities.contains_key(&output_id));
+    app.controller.redo().unwrap(); assert!(app.controller.document().entities.contains_key(&output_id));
+}
+
+#[test]
+fn viewport_dupedge_reopened_box_accepts_two_preselected_edges() {
+    let mut original = om9_app::session::Controller::new(Document::new("reopened Box"), Limits::default()).unwrap();
+    original.submit("Box 4 6 8").unwrap();
+    let path = std::env::temp_dir().join(format!("om9-dupedge-preselect-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, original.document(), &Limits::default(),
+        &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.set_sub_object_kind(om9_scene::scene::PickKind::Edge);
+    let modifiers = Modifiers { ctrl: true, shift: true, ..Modifiers::NONE };
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [2., 0., 8.], modifiers);
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [4., 3., 8.], modifiers);
+    assert_eq!(app.controller.subselection().len(), 2);
+    app.controller.dispatch("OM9-CURVE-040", InvocationOrigin::Menu).unwrap();
+    let curves: Vec<_> = app.controller.document().entities.values().filter(|entity| entity.label == "DupEdge").collect();
+    assert_eq!(curves.len(), 2);
+    let ids: Vec<_> = curves.iter().map(|entity| entity.id).collect();
+    for endpoints in [[[0., 0., 8.], [4., 0., 8.]], [[4., 0., 8.], [4., 6., 8.]]] {
+        assert!(curves.iter().any(|entity| {
+            let Geometry::Curve(curve) = &entity.geometry else { return false };
+            let actual: Vec<_> = [0., 1.].into_iter().map(|fraction| om9_core::evaluation::evaluate_curve(curve,
+                om9_core::evaluation::Parameter::Fraction(fraction), 0, Transform::identity(), &Limits::default()).unwrap()[0]).collect();
+            endpoints.iter().all(|expected| actual.iter().any(|point| (0..3).all(|axis| (point[axis] - expected[axis]).abs() < 1e-8)))
+        }));
+    }
+    app.controller.undo().unwrap();
+    assert!(ids.iter().all(|id| !app.controller.document().entities.contains_key(id)));
+    app.controller.redo().unwrap();
+    assert!(ids.iter().all(|id| app.controller.document().entities.contains_key(id)));
+}
+
+#[test]
+fn viewport_dupedge_reopened_coincident_edges_refuse_without_losing_redo() {
+    let limits = Limits::default();
+    let shape = om9_kernel::brep::read_brep(include_str!("fixtures/dupedge-coincident.brep"), 0.01, &limits).unwrap();
+    let mut document = Document::new("coincident edges");
+    let entity = Entity::new("coincident boxes", Geometry::Brep(shape), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let path = std::env::temp_dir().join(format!("om9-dupedge-coincident-{}.om9", uuid::Uuid::new_v4()));
+    om9_archive::Archive::save(&path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+    let mut app = MatrixApp::from_file(&path).unwrap();
+    std::fs::remove_file(path).unwrap();
+    app.controller.submit("Box 1 1 1").unwrap();
+    app.controller.undo().unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    let before = app.controller.coordinator().snapshot();
+    app.controller.submit("DupEdge").unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [2., 0., 6.], Modifiers::NONE);
+    assert!(app.controller.dupedge_needs_pick());
+    assert!(app.controller.subselection().is_empty());
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+    assert_eq!(app.controller.coordinator().redo_len(), 1);
+}
+
+#[test]
+fn viewport_dupedge_rejects_corner_with_multiple_edges() {
+    let mut app = MatrixApp::new(Document::new("ambiguous DupEdge corner")).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("Box 4 6 8").unwrap();
+    let before = app.controller.coordinator().snapshot();
+    app.controller.dispatch("OM9-CURVE-040", InvocationOrigin::Menu).unwrap();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [4., 0., 8.], Modifiers::NONE);
+    assert!(app.controller.dupedge_needs_pick());
+    assert!(app.controller.subselection().is_empty());
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+}
+
+#[test]
+fn viewport_dupedge_reports_candidate_budget_error_and_keeps_session() {
+    let mut app = MatrixApp::new(Document::new("bounded DupEdge")).unwrap();
+    let body = om9_kernel::creation::primitive(
+        om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 6., z_mm: 8. },
+        0.01, &Limits::default(),
+    ).unwrap();
+    let mut document = Document::new("bounded DupEdge");
+    let entity = Entity::new("box", Geometry::Brep(body), document.current_layer);
+    document.entities.insert(entity.id, entity);
+    let limits = Limits { max_outputs: 1, ..Limits::default() };
+    app.controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.dispatch("OM9-CURVE-040", InvocationOrigin::Menu).unwrap();
+    let before = app.controller.coordinator().snapshot();
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [4., 0., 8.], Modifiers::NONE);
+    assert!(app.transcript.history().contains("edge pick candidates"), "{}", app.transcript.history());
+    assert!(app.controller.dupedge_needs_pick());
+    assert!(app.controller.subselection().is_empty());
+    assert_eq!(app.controller.coordinator().snapshot(), before);
+}
+
+#[test]
+fn viewport_dupedge_accepts_preselected_edges() {
+    let mut app = MatrixApp::new(Document::new("preselected DupEdge")).unwrap();
+    let ctx = egui::Context::default();
+    frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.submit("Box 4 6 8").unwrap();
+    app.set_sub_object_kind(om9_scene::scene::PickKind::Edge);
+    let modifiers = Modifiers { ctrl: true, shift: true, ..Modifiers::NONE };
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [2., 0., 8.], modifiers);
+    click_in_view(&mut app, &ctx, ViewId::Perspective, [4., 3., 8.], modifiers);
+    assert_eq!(app.controller.subselection().len(), 2);
+    app.controller.dispatch("OM9-CURVE-040", InvocationOrigin::Menu).unwrap();
+    assert_eq!(app.controller.document().entities.len(), 3);
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.document().entities.len(), 1);
 }
 
 #[test]
@@ -324,11 +2002,11 @@ fn viewport_sphere_aroundcurve_uses_selected_edge_when_hits_overlap() {
     app.controller.submit("Box 4 6 8").unwrap();
     let other_id = *app.controller.document().entities.keys().find(|&&x| x != id).unwrap();
     let Geometry::Brep(body) = &app.controller.document().entities[&id].geometry else { panic!("box") };
-    let index = (0..body.display.edges.len()).find(|&i| {
+    let index = (0..body.display().edges.len()).find(|&i| {
         let Ok((a,b)) = om9_kernel::editing::straight_edge_endpoints(body, i, app.controller.coordinator().limits()) else { return false; };
         [a,b].iter().all(|p| p[1].abs() < 1e-7 && (p[2] - 8.).abs() < 1e-7)
     }).unwrap();
-    let key = body.display.edges[index];
+    let key = body.display().edges[index];
     app.controller.clear_selection();
     app.controller.submit("Sphere AroundCurve").unwrap();
     let scene = app.controller.scene().unwrap();
@@ -1152,8 +2830,8 @@ fn viewport_pipe_thick_bent_brep_chain_makes_hollow_walls() {
             assert_eq!(m.solids, 0);
             assert!((m.area_mm2 - 30.0 * std::f64::consts::PI).abs() < 1e-4, "{m:?}");
             let mut signed = [0.0_f64; 2];
-            for [ia, ib, ic, _] in &brep.display.triangles {
-                let a = brep.display.points[*ia as usize]; let b = brep.display.points[*ib as usize]; let c = brep.display.points[*ic as usize];
+            for [ia, ib, ic, _] in &brep.display().triangles {
+                let a = brep.display().points[*ia as usize]; let b = brep.display().points[*ib as usize]; let c = brep.display().points[*ic as usize];
                 let center = std::array::from_fn::<_, 3, _>(|i| (a[i] + b[i] + c[i]) / 3.0);
                 let u = std::array::from_fn::<_, 3, _>(|i| b[i] - a[i]);
                 let v = std::array::from_fn::<_, 3, _>(|i| c[i] - a[i]);
@@ -2146,7 +3824,7 @@ fn viewport_shell_selects_two_faces_and_undoes() {
     let Geometry::Brep(original) = &before.entities[&id].geometry else { panic!() };
     let indices: Vec<_> = app.controller.subselection().iter().map(|item| {
         let om9_scene::scene::Subelement::BrepFace(key) = item.subset else { panic!() };
-        original.display.faces.iter().position(|face| *face == key).unwrap()
+        original.display().faces.iter().position(|face| *face == key).unwrap()
     }).collect();
     let expected = om9_kernel::editing::shell_faces(original, &indices, 1.0, 0.01, &limits).unwrap();
     let expected_volume = om9_kernel::creation::measure(&expected, &limits).unwrap().volume_mm3;
@@ -2210,7 +3888,7 @@ fn viewport_selects_extract_surface_face_then_enter_separates_it() {
         panic!("face")
     };
     assert!(
-        face.display
+        face.display()
             .points
             .iter()
             .all(|point| (point[2] - 10.0).abs() < 1e-8)
@@ -2436,7 +4114,7 @@ fn viewport_fillet_copy_handle_to_new_and_existing_location() {
     assert_eq!(app.controller.solid_fillet_handles().len(), 4);
     let Geometry::Brep(original) = &before.entities[&id].geometry else { panic!() };
     let om9_scene::scene::Subelement::BrepEdge(key) = reference.subset else { panic!() };
-    let edge = original.display.edges.iter().position(|e| *e == key).unwrap();
+    let edge = original.display().edges.iter().position(|e| *e == key).unwrap();
     let controls: Vec<_> = handles[2..].iter().map(|h| {
         let (fraction, _) = om9_kernel::editing::fillet_project_edge(original, edge, h.1, &limits).unwrap();
         (edge, fraction, h.2)
@@ -2533,7 +4211,7 @@ fn viewport_fillet_adds_and_edits_interior_handle_on_placed_edge() {
     assert!((handle.1[2] - 10.0).abs() < 1e-6 && handle.2 == 1.5);
     let Geometry::Brep(original) = &before.entities[&id].geometry else { panic!() };
     let om9_scene::scene::Subelement::BrepEdge(key) = reference.subset else { panic!() };
-    let edge = original.display.edges.iter().position(|e| *e == key).unwrap();
+    let edge = original.display().edges.iter().position(|e| *e == key).unwrap();
     let local = [handle.1[0] - 5.0, handle.1[1], handle.1[2]];
     let (fraction, _) = om9_kernel::editing::fillet_project_edge(original, edge, local, &limits).unwrap();
     let expected = om9_kernel::editing::fillet_with_radius_controls(original, &[(edge, 1.0, 1.0)], &[(edge, fraction, 1.5)], 0.01, &limits).unwrap();
@@ -2573,10 +4251,10 @@ fn viewport_fillet_selects_shared_tangent_vertex_handle() {
         [10.0, 10.0, 0.0], [0.0, 10.0, 0.0],
     ]).unwrap();
     let shape = om9_kernel::creation::extrude(&profile, [0.0, 0.0, 10.0], true, 0.01, &limits).unwrap();
-    let edges: Vec<_> = (0..shape.display.edges.len()).filter_map(|index| {
+    let edges: Vec<_> = (0..shape.display().edges.len()).filter_map(|index| {
         let (a, b) = om9_kernel::editing::oriented_edge_endpoints(&shape, index, &limits).ok()?;
         (a[1].abs() < 1e-6 && b[1].abs() < 1e-6 && (a[2]-10.0).abs() < 1e-6 &&
-         (b[2]-10.0).abs() < 1e-6 && ((a[0]-b[0]).abs()-5.0).abs() < 1e-6).then_some(shape.display.edges[index])
+         (b[2]-10.0).abs() < 1e-6 && ((a[0]-b[0]).abs()-5.0).abs() < 1e-6).then_some(shape.display().edges[index])
     }).collect();
     assert_eq!(edges.len(), 2);
     let mut doc = Document::new("Shared fillet handle");
@@ -2655,7 +4333,7 @@ fn viewport_fillet_edge_selects_then_previews_then_commits() {
                 panic!()
             };
             original
-                .display
+                .display()
                 .edges
                 .iter()
                 .position(|edge| *edge == key)
@@ -3070,6 +4748,42 @@ fn viewport_clicks_collect_boolean_intersection_sets() {
         .unwrap()
         .volume_mm3;
     assert!((volume - 500.0).abs() < 1e-6, "{volume}");
+}
+
+#[test]
+fn boolean_two_common_affine_preview_is_painted_at_world_location() {
+    let limits = Limits::default();
+    let body = om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Box { x_mm: 2., y_mm: 2., z_mm: 2. }, 0.01, &limits).unwrap();
+    let shifted = om9_kernel::transform_ops::transform_brep(&body, &Transform::translation([1., 0., 0.]), 0.01, &limits).unwrap();
+    let placement = Transform([[2., 0., 0., 10.], [0., 1., 0., 4.], [0., 0., 1., 0.], [0., 0., 0., 1.]]);
+    let mut doc = Document::new("Boolean Two affine preview");
+    let mut a = Entity::new("first", Geometry::Brep(body), None);
+    let mut b = Entity::new("second", Geometry::Brep(shifted), None);
+    a.placement = placement; b.placement = placement;
+    let ids = [a.id, b.id]; doc.entities.insert(a.id, a); doc.entities.insert(b.id, b);
+    let mut app = MatrixApp::new(doc).unwrap();
+    let ctx = egui::Context::default(); frame(&mut app, &ctx, vec![]); frame(&mut app, &ctx, vec![]);
+    app.controller.select_objects(&ids).unwrap();
+    app.controller.submit("Boolean2Objects").unwrap(); app.controller.submit("").unwrap();
+    let (preview, _) = app.controller.solid_boolean_two_preview().unwrap();
+    let rect = app.view_rects[&ViewId::LookingDown];
+    let viewport = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+    let camera = &app.controller.workspace.views[&ViewId::LookingDown].camera;
+    let expected: Vec<_> = preview.display().segments.iter().filter_map(|segment| {
+        let a = placement.point(preview.display().points[segment[0] as usize]).ok()?;
+        let b = placement.point(preview.display().points[segment[1] as usize]).ok()?;
+        let a = camera.project(a, viewport).ok()??.screen;
+        let b = camera.project(b, viewport).ok()??.screen;
+        Some([Pos2::new(a[0] as f32, a[1] as f32), Pos2::new(b[0] as f32, b[1] as f32)])
+    }).collect();
+    assert!(!expected.is_empty());
+    let mut output = ctx.run_ui(egui::RawInput { screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 900.))), ..Default::default() }, |ui| app.show(ui));
+    output.textures_delta.clear();
+    let painted = output.shapes.iter().any(|shape| match &shape.shape {
+        egui::Shape::LineSegment { points, stroke } if stroke.color == egui::Color32::from_rgb(0, 200, 130) => expected.iter().any(|line| points[0].distance(line[0]) < 0.1 && points[1].distance(line[1]) < 0.1),
+        _ => false,
+    });
+    assert!(painted, "preview line should be projected after applying its placement");
 }
 
 #[test]

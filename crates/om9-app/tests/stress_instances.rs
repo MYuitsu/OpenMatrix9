@@ -79,7 +79,7 @@ fn generate_instance_stress_project() {
     if std::env::var("OM9_STRESS_INSPECT").is_ok_and(|value| value == "1") {
         for entity in source_document.entities.values() {
             let kind = match &entity.geometry {
-                Geometry::Brep(brep) => format!("Brep {} tris", brep.display.triangles.len()),
+                Geometry::Brep(brep) => format!("Brep {} tris", brep.display().triangles.len()),
                 Geometry::Instance(id) => format!("Instance {id:?}"),
                 other => format!("{other:?}"),
             };
@@ -97,7 +97,7 @@ fn generate_instance_stress_project() {
             );
             for member in &definition.members {
                 let kind = match &member.geometry {
-                    Geometry::Brep(brep) => format!("Brep {} tris", brep.display.triangles.len()),
+                    Geometry::Brep(brep) => format!("Brep {} tris", brep.display().triangles.len()),
                     Geometry::Instance(id) => format!("Instance {id:?}"),
                     other => format!("{other:?}"),
                 };
@@ -128,7 +128,7 @@ fn generate_instance_stress_project() {
                     .placement
                     .compose(member.placement)
                     .expect("instance member transform");
-                let mut display = (*brep.display).clone();
+                let mut display = brep.display().clone();
                 for point in &mut display.points {
                     *point = placement.point(*point).expect("instance member point");
                 }
@@ -145,7 +145,7 @@ fn generate_instance_stress_project() {
     } else {
         for entity in source_document.entities.values() {
             if let Geometry::Brep(brep) = &entity.geometry {
-                let score = brep.display.triangles.len().abs_diff(wanted_triangles);
+                let score = brep.display().triangles.len().abs_diff(wanted_triangles);
                 if chosen.as_ref().is_none_or(|(best, _)| score < *best) {
                     chosen = Some((score, entity));
                 }
@@ -158,7 +158,7 @@ fn generate_instance_stress_project() {
     let triangles: usize = members
         .iter()
         .map(|entity| match &entity.geometry {
-            Geometry::Brep(brep) => brep.display.triangles.len(),
+            Geometry::Brep(brep) => brep.display().triangles.len(),
             _ => 0,
         })
         .sum();
@@ -172,7 +172,7 @@ fn generate_instance_stress_project() {
     let mut max = [f64::NEG_INFINITY; 3];
     for entity in &members {
         if let Geometry::Brep(brep) = &entity.geometry {
-            for point in &brep.display.points {
+            for point in &brep.display().points {
                 for axis in 0..3 {
                     min[axis] = min[axis].min(point[axis]);
                     max[axis] = max[axis].max(point[axis]);

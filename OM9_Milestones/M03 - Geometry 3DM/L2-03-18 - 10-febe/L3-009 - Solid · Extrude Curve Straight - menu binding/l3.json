@@ -474,6 +474,7 @@
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "feature": "OM9-SOLID-009",
     "command": "ExtrudeCrv 5",
+    "document_unit_regression_2026_11_12": "Centimeter bare heights through CMD and menu after reopen, positive and negative, with world bounds and Undo/Redo passed; explicit suffixes and desktop clicks unverified. See docs/validation/2026-11-12-extrude-curve-placement.md#document-units.",
     "evidence": [
       "implementation/evidence/M03/OM9-L3-03-18-009/OM9-L4-03-18-009-01.focused.log",
       "implementation/evidence/M03/OM9-L3-03-18-009/OM9-L4-03-18-009-01.acceptance.md",
@@ -483,7 +484,8 @@
       "implementation/evidence/M03/OM9-L3-03-18-009/OM9-L4-03-18-009-02.ui-review.json",
       "implementation/evidence/M03/OM9-L3-03-18-009/OM9-L4-03-18-009-03.focused.log",
       "implementation/evidence/M03/OM9-L3-03-18-009/OM9-L4-03-18-009-03.acceptance.md",
-      "implementation/evidence/M03/OM9-L3-03-18-009/OM9-L4-03-18-009-03.ui-review.json"
+      "implementation/evidence/M03/OM9-L3-03-18-009/OM9-L4-03-18-009-03.ui-review.json",
+      "docs/validation/2026-11-12-extrude-curve-placement.md"
     ],
     "tests": [
       "cargo test -p om9-app --test solid",

@@ -152,6 +152,7 @@ fn main() {
     println!("cargo:rerun-if-changed=src/face_nurbs_bridge.cpp");
     println!("cargo:rerun-if-changed=src/brep_bridge.cpp");
     println!("cargo:rerun-if-changed=src/brep_snapshot.hxx");
+    println!("cargo:rerun-if-changed=src/axis_box_certificate.hxx");
     println!("cargo:rerun-if-changed=src/creation_bridge.cpp");
     println!("cargo:rerun-if-changed=src/extrusion_bridge.cpp");
     println!("cargo:rerun-if-changed=src/editing_bridge.cpp");

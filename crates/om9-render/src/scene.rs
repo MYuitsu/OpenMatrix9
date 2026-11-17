@@ -14,6 +14,7 @@
 use crate::{Camera, MeshData, RenderError};
 
 const SORT_THRESHOLD: usize = 256;
+const VERTEX_BYTES: u64 = 24;
 
 /// One object in the batch.
 #[derive(Debug, Clone)]
@@ -170,24 +171,28 @@ impl SceneBatch {
                     @builtin(position) clip: vec4<f32>,
                     @location(0) world: vec3<f32>,
                     @location(1) tint: vec4<f32>,
+                    @location(2) normal: vec3<f32>,
                 };
 
                 @vertex
                 fn vs_main(@location(0) position: vec3<f32>,
                     @location(1) m0:vec4<f32>, @location(2) m1:vec4<f32>,
                     @location(3) m2:vec4<f32>, @location(4) m3:vec4<f32>,
-                    @location(5) tint:vec4<f32>) -> VertexOut {
+                    @location(5) tint:vec4<f32>, @location(6) normal:vec3<f32>) -> VertexOut {
                     var out: VertexOut;
                     let world=mat4x4<f32>(m0,m1,m2,m3)*vec4<f32>(position,1.0);
                     out.clip=object.mvp*world;
                     out.world=world.xyz;
                     out.tint=tint;
+                    out.normal=mat3x3<f32>(cross(m1.xyz,m2.xyz),cross(m2.xyz,m0.xyz),cross(m0.xyz,m1.xyz))*normal;
                     return out;
                 }
 
                 @fragment
                 fn fs_main(input: VertexOut) -> @location(0) vec4<f32> {
-                    let normal = normalize(cross(dpdx(input.world), dpdy(input.world)));
+                    var normal = cross(dpdx(input.world), dpdy(input.world));
+                    if dot(input.normal,input.normal)>1e-20 { normal=input.normal; }
+                    normal=normalize(normal);
                     let light = normalize(vec3<f32>(0.4, -0.7, 0.6));
                     let lambert = clamp(abs(dot(normal, light)), 0.0, 1.0);
                     return vec4<f32>(input.tint.rgb * (0.3 + 0.7 * lambert), input.tint.a);
@@ -223,12 +228,16 @@ impl SceneBatch {
                     entry_point: Some("vs_main"),
                     compilation_options: Default::default(),
                     buffers: &[Some(wgpu::VertexBufferLayout {
-                        array_stride: 12,
+                        array_stride: VERTEX_BYTES,
                         step_mode: wgpu::VertexStepMode::Vertex,
                         attributes: &[wgpu::VertexAttribute {
                             format: wgpu::VertexFormat::Float32x3,
                             offset: 0,
                             shader_location: 0,
+                        }, wgpu::VertexAttribute {
+                            format: wgpu::VertexFormat::Float32x3,
+                            offset: 12,
+                            shader_location: 6,
                         }],
                     }), Some(wgpu::VertexBufferLayout {
                         array_stride:80, step_mode:wgpu::VertexStepMode::Instance,
@@ -303,8 +312,8 @@ impl SceneBatch {
     pub fn add_static(&mut self, mesh: &MeshData, model: [[f32; 4]; 4]) -> usize {
         let (local_centre, local_radius) = bounds(mesh);
         let (centre, radius) = place_bounds(local_centre, local_radius, &model);
-        let mut bytes = Vec::with_capacity(mesh.positions.len() * 12);
-        for position in &mesh.positions {
+        let mut bytes = Vec::with_capacity(mesh.positions.len() * VERTEX_BYTES as usize);
+        for (index, position) in mesh.positions.iter().enumerate() {
             let x = model[0][0] * position[0]
                 + model[1][0] * position[1]
                 + model[2][0] * position[2]
@@ -320,6 +329,8 @@ impl SceneBatch {
             bytes.extend_from_slice(&x.to_le_bytes());
             bytes.extend_from_slice(&y.to_le_bytes());
             bytes.extend_from_slice(&z.to_le_bytes());
+            let normal = crate::normals::transform(mesh.normals.get(index).copied().unwrap_or([0.;3]), model);
+            for value in normal { bytes.extend_from_slice(&value.to_le_bytes()); }
         }
         let needed_v = bytes.len() as u64;
         let needed_i = (mesh.indices.len() * 4) as u64;
@@ -338,7 +349,7 @@ impl SceneBatch {
             }
         };
         let chunk = &mut self.chunks[chunk_index];
-        let base_vertex = (chunk.vertex_bytes / 12) as u32;
+        let base_vertex = (chunk.vertex_bytes / VERTEX_BYTES) as u32;
         let vertex_offset = chunk.vertex_bytes;
         let index_offset = chunk.index_bytes;
         let index_bytes: Vec<u8> = mesh
@@ -519,9 +530,12 @@ impl SceneBatch {
     /// Adds local geometry with a row-major core-style model transform.
     pub fn add_mesh(&mut self, mesh: &MeshData, model: [[f32; 4]; 4], tint: [f32; 4]) -> usize {
         let (centre, radius) = bounds(mesh);
-        let mut bytes = Vec::with_capacity(mesh.positions.len() * 12);
-        for position in &mesh.positions {
+        let mut bytes = Vec::with_capacity(mesh.positions.len() * VERTEX_BYTES as usize);
+        for (index, position) in mesh.positions.iter().enumerate() {
             for value in position {
+                bytes.extend_from_slice(&value.to_le_bytes());
+            }
+            for value in mesh.normals.get(index).copied().unwrap_or([0.;3]) {
                 bytes.extend_from_slice(&value.to_le_bytes());
             }
         }
@@ -548,7 +562,7 @@ impl SceneBatch {
             }
         };
         let chunk = &mut self.chunks[chunk_index];
-        let base_vertex = (chunk.vertex_bytes / 12) as u32;
+        let base_vertex = (chunk.vertex_bytes / VERTEX_BYTES) as u32;
         let index_start = (chunk.index_bytes / 4) as u32;
         let vertex_offset = chunk.vertex_bytes;
         let index_offset = chunk.index_bytes;
@@ -589,13 +603,16 @@ impl SceneBatch {
         if first_vertex as usize + positions.len() > entry.vertex_count {
             return;
         }
-        let mut bytes = Vec::with_capacity(positions.len() * 12);
+        let mut bytes = Vec::with_capacity(positions.len() * VERTEX_BYTES as usize);
         for position in positions {
             for value in position {
                 bytes.extend_from_slice(&value.to_le_bytes());
             }
+            // Sculpt changes geometry; a partial position update cannot reuse old
+            // smooth normals. Use flat shading until a complete mesh is rebuilt.
+            bytes.extend_from_slice(&[0u8;12]);
         }
-        let offset = entry.base_vertex as u64 * 12 + first_vertex as u64 * 12;
+        let offset = (entry.base_vertex as u64 + first_vertex as u64) * VERTEX_BYTES;
         let chunk = &self.chunks[entry.chunk];
         self.queue.write_buffer(&chunk.vertices, offset, &bytes);
     }

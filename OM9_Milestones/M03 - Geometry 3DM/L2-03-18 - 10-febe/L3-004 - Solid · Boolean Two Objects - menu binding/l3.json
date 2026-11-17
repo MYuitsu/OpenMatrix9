@@ -530,6 +530,40 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "viewport_detail_sphere_union_2026_11_14": {
+      "status": "SCOPED_SPHERE_BOOLEAN_PROFILES_VERIFIED",
+      "scope": "Manual Light/High viewport profiles, default Light; canonical Sphere and Boolean Two Union sources with separate display representations. Nine scoped integration tests and eight native-window release runs passed.",
+      "measurement": "Light preview observed ready median 122.624 ms vs High 247.005 ms; both approximately 30 encoded Perspective frames/s. No measured callback gap above 100 ms after first command. Not RDP displayed FPS.",
+      "remaining": "Full core separation, all producers/consumers, opaque NativeBrep, durable topology and BRep v5 save/reopen remain open. Library unit-test target has 319 compile errors from canonical migration.",
+      "evidence": "docs/validation/2026-11-14-viewport-detail-sphere-boolean.md",
+      "next_document": "implementation/design/M01/viewport-export-separation-20261102/PLAN_SOURCE_DISPLAY_COMPLETION_M01_M09.md",
+      "next_action": "Continue broader canonical/source-display migration; use the reproducible paired audit for this slice, without claiming general FPS improvement."
+    },
+    "common_affine_relative_rotation_2026_11_12": {
+      "status": "REOPENED_CURVED_FIVE_MODE_FIXTURES_PASSED",
+      "evidence": "docs/validation/2026-11-12-boolean-common-affine-relative-rotation.md",
+      "limitations": "Relative 90-degree rotation fixture only; arbitrary rotations, imported geometry, world-space tolerance, desktop and native peak remain open."
+    },
+    "shared_linear_distinct_translation_2026_11_12": {
+      "status": "REOPENED_BOX_UNION_MODE_FIXTURES_PASSED",
+      "evidence": "docs/validation/2026-11-12-boolean-shared-linear-translation.md",
+      "limitations": "Matching linear coefficients and exactly reconstructable translation only; this fixture commits Union mode, not all Boolean Two modes. Curved/imported geometry, tolerance, desktop and native peak remain open."
+    },
+    "shared_affine_placement_2026_11_12": {
+      "status": "REOPENED_PREVIEW_FIXTURES_PASSED",
+      "evidence": "docs/validation/2026-11-12-boolean-common-affine-union.md#boolean-two-objects-with-shared-placement",
+      "limitations": "Five preview modes checked; only Union committed in these fixtures. Preview line checked in egui, not interactive desktop. Unequal placements, imports, general tolerances and native peak remain open."
+    },
+    "rigid_placement_gate_2026_11_12": {
+      "status": "SHARED_EXACT_OCCT_CLASSIFIER_FIXTURES_PASSED",
+      "evidence": "docs/validation/2026-11-12-boolean-two-placed-source.md#consistent-placement-classification",
+      "limitations": "Near-rigid shear and scale are refused in tested fixtures. Some mathematically rigid floating-point placements can be refused; affine support, native peak and desktop remain open."
+    },
+    "boolean_result_guard_2026_11_12": {
+      "status": "REGULAR_BOOLEAN_PATH_CHECKED_LIMITED_FIXTURE",
+      "evidence": "docs/validation/2026-11-12-boolean-two-placed-source.md",
+      "limitations": "The checked path is shared by Boolean Two; the baked-affine regression directly exercises Union after reopen, not every Boolean Two mode. The check may reject valid results and does not correct affine geometry; empty results and internal fast paths remain outside its scope. Native peak and desktop are unverified."
+    },
     "operand_order_2026_10_28": {
       "status": "TWO_PRESELECTED_OPERANDS_AUTOMATED_CHECKS_PASSED",
       "evidence": "docs/validation/2026-10-28-solid-audit.md",
@@ -548,7 +582,8 @@
       "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-02.ui-review.json",
       "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-03.focused.log",
       "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-03.acceptance.md",
-      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-03.ui-review.json"
+      "implementation/evidence/M03/OM9-L3-03-18-004/OM9-L4-03-18-004-03.ui-review.json",
+      "docs/validation/2026-11-12-boolean-two-placed-source.md"
     ],
     "tests": [
       "cargo test -p om9-app --test solid",

@@ -13,14 +13,15 @@
 //! the body that reuses its slot.
 //!
 //! Units are millimetres, angles are radians, tolerances are absolute millimetres.
+use om9_core::brep::BrepSourceAccess;
 use crate::{
     KernelError,
-    brep::{snapshot_budget, snapshot_via},
+    brep::{snapshot_budget, snapshot_via, snapshot_via_with_admission},
 };
 use om9_core::{
     brep::Brep,
     brep_kernel::{HandleStore, KernelHandle},
-    budget::Limits,
+    budget::{Limits, Usage},
     geometry::Point3,
 };
 use std::{
@@ -90,6 +91,7 @@ struct MeasuresOut {
 type NativeSink = unsafe extern "C" fn(*mut c_void, *const crate::brep::Snapshot) -> c_int;
 
 unsafe extern "C" {
+    fn om9_occt_primitive_profile(kind: c_int, params: *const f64, count: usize, deflection: f64, angular: f64, max_points: usize, max_nodes: usize, max_bytes: usize, sink: NativeSink, context: *mut c_void, message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_primitive(
         kind: c_int,
         params: *const f64,
@@ -143,6 +145,9 @@ unsafe extern "C" {
         max_bytes: usize,
         sink: NativeSink,
         context: *mut c_void,
+        cancel: unsafe extern "C" fn(*mut c_void) -> c_int,
+        cancel_context: *mut c_void,
+        volume_mm3: *mut f64,
         message: *mut c_char,
         capacity: c_int,
     ) -> c_int;
@@ -538,6 +543,33 @@ pub fn primitive(
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, CreationError> {
+    primitive_impl(primitive, deflection_mm, 0.3, limits, None)
+}
+
+/// Construct a primitive while admitting Rust-owned snapshot allocations.
+/// OCCT's internal allocations are outside this callback's accounting.
+pub fn primitive_admitted(
+    primitive: Primitive,
+    deflection_mm: f64,
+    limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> Result<Brep, CreationError> {
+    primitive_impl(primitive, deflection_mm, 0.3, limits, Some(&mut admit))
+}
+
+pub fn primitive_profile_admitted(primitive: Primitive, deflection_mm: f64, angular: f64,
+    limits: &Limits, mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> Result<Brep, CreationError> {
+    primitive_impl(primitive, deflection_mm, angular, limits, Some(&mut admit))
+}
+
+fn primitive_impl(
+    primitive: Primitive,
+    deflection_mm: f64,
+    angular: f64,
+    limits: &Limits,
+    admission: Option<&mut dyn FnMut(u64, u64) -> om9_core::Result<()>>,
+) -> Result<Brep, CreationError> {
+    if !angular.is_finite() || angular <= 0. || angular > std::f64::consts::PI { return Err(CreationError::Invalid("display angular deflection".into())); }
     primitive.validate()?;
     let deflection = checked_deflection(deflection_mm)?;
     let (kind, scalars, count) = primitive.native();
@@ -551,14 +583,15 @@ pub fn primitive(
         &scalars[..count]
     };
     let budget = snapshot_budget(limits);
-    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+    crate::brep::snapshot_via_with_admission(deflection, limits, admission, |sink, context, message, capacity| {
         // SAFETY: all buffers and the callback context live through this synchronous call.
         unsafe {
-            om9_occt_primitive(
+            om9_occt_primitive_profile(
                 kind,
                 params.as_ptr(),
                 params.len(),
                 deflection,
+                angular,
                 budget.points,
                 budget.nodes,
                 budget.bytes,
@@ -570,6 +603,48 @@ pub fn primitive(
         }
     })
     .map_err(CreationError::from)
+}
+
+/// Create the primitive and capture its in-process topology proof in the same
+/// native snapshot, without an extra tessellation. The caller owns admission
+/// and must transfer the proof's reservation with its lifetime.
+pub fn primitive_with_topology(
+    primitive: Primitive, deflection_mm: f64, limits: &Limits,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> Result<crate::brep::CapturedTopologySnapshot, CreationError> {
+    primitive.validate()?;
+    let deflection = checked_deflection(deflection_mm)?;
+    let (kind, scalars, count) = primitive.native();
+    let net;
+    let params = if let Primitive::Ellipsoid { x_mm, y_mm, z_mm } = primitive {
+        net = ellipsoid_net([x_mm, y_mm, z_mm]);
+        &net[..]
+    } else { &scalars[..count] };
+    let budget = snapshot_budget(limits);
+    crate::brep::capture_via_topology(deflection, limits, admit, |sink, context, message, capacity| unsafe {
+        om9_occt_primitive(kind, params.as_ptr(), params.len(), deflection,
+            budget.points, budget.nodes, budget.bytes, sink, context, message, capacity)
+    }).map_err(CreationError::from)
+}
+
+pub fn primitive_with_topology_profile(
+    primitive: Primitive, deflection_mm: f64, angular: f64, limits: &Limits,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> Result<crate::brep::CapturedTopologySnapshot, CreationError> {
+    if !angular.is_finite() || angular <= 0. || angular > std::f64::consts::PI { return Err(CreationError::Invalid("display angular deflection".into())); }
+    primitive.validate()?;
+    let deflection = checked_deflection(deflection_mm)?;
+    let (kind, scalars, count) = primitive.native();
+    let net;
+    let params = if let Primitive::Ellipsoid { x_mm, y_mm, z_mm } = primitive {
+        net = ellipsoid_net([x_mm, y_mm, z_mm]);
+        &net[..]
+    } else { &scalars[..count] };
+    let budget = snapshot_budget(limits);
+    crate::brep::capture_via_topology(deflection, limits, admit, |sink, context, message, capacity| unsafe {
+        om9_occt_primitive_profile(kind, params.as_ptr(), params.len(), deflection, angular,
+            budget.points, budget.nodes, budget.bytes, sink, context, message, capacity)
+    }).map_err(CreationError::from)
 }
 
 /// Build a pyramid over a planar, alternating-radius star profile in the XY plane.
@@ -1041,35 +1116,135 @@ pub fn sewed_solid(
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, CreationError> {
+    sewed_solid_with_volume(points, quads, tolerance_mm, deflection_mm, limits).map(|(brep, _)| brep)
+}
+
+/// The validated solid and its native volume originate from the same OCCT
+/// shape and snapshot call. This receipt is not an attestation for other BReps.
+pub fn sewed_solid_with_volume(
+    points: &[Point3], quads: &[[u32; 4]], tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
+) -> Result<(Brep, f64), CreationError> {
+    sewed_solid_with_volume_admitted(points, quads, tolerance_mm, deflection_mm, limits, |_, _| Ok(()))
+        .map_err(|error| match error {
+            SewSolidError::Creation(error) => error,
+            SewSolidError::Admission(om9_core::Error::Budget(reason) | om9_core::Error::Overflow(reason)) => CreationError::Budget(reason.into()),
+            SewSolidError::Admission(error) => CreationError::Invalid(error.to_string()),
+        })
+}
+
+/// A native creation failure or an unchanged caller admission/cancellation error.
+#[derive(Debug)]
+pub enum SewSolidError { Creation(CreationError), Admission(om9_core::Error) }
+impl fmt::Display for SewSolidError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self { Self::Creation(error) => error.fmt(formatter), Self::Admission(error) => error.fmt(formatter) }
+    }
+}
+impl std::error::Error for SewSolidError {}
+
+/// `admit` accounts the temporary input tables and returned snapshot payload,
+/// in addition to caller-owned points, quads and the inline receipt envelope.
+/// Native OCCT internal allocations and allocator overhead are not covered.
+/// Cancellation is observed at admission checkpoints.
+pub fn sewed_solid_with_volume_admitted(
+    points: &[Point3], quads: &[[u32; 4]], tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+) -> Result<(Brep, f64), SewSolidError> {
+    sewed_solid_with_volume_cancellable(points, quads, tolerance_mm, deflection_mm, limits, admit, || false)
+}
+
+/// Cooperative cancellation is checked in the OCCT face loop and sewing progress.
+/// The predicate must remain true once canceled and may be called concurrently.
+/// Native routines that do not report progress may still delay cancellation.
+pub fn sewed_solid_with_volume_cancellable(
+    points: &[Point3], quads: &[[u32; 4]], tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>,
+    canceled: impl Fn() -> bool + Sync,
+) -> Result<(Brep, f64), SewSolidError> {
+    sewed_solid_with_signatures_impl(points, quads, tolerance_mm, deflection_mm, limits, admit, canceled, false)
+        .map(|(brep, _, volume)| (brep, volume))
+}
+
+pub(crate) fn sewed_solid_with_signatures_cancellable(
+    points: &[Point3], quads: &[[u32; 4]], tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
+    admit: impl FnMut(u64, u64) -> om9_core::Result<()>, canceled: impl Fn() -> bool + Sync,
+) -> Result<(Brep, Vec<crate::brep::SourceSignature>, f64), SewSolidError> {
+    sewed_solid_with_signatures_impl(points, quads, tolerance_mm, deflection_mm, limits, admit, canceled, true)
+}
+
+fn sewed_solid_with_signatures_impl(
+    points: &[Point3], quads: &[[u32; 4]], tolerance_mm: f64, deflection_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>, canceled: impl Fn() -> bool + Sync, signatures: bool,
+) -> Result<(Brep, Vec<crate::brep::SourceSignature>, f64), SewSolidError> {
+    use SewSolidError::{Admission, Creation};
+    struct CancelContext<'a> { check: &'a (dyn Fn() -> bool + Sync) }
+    unsafe extern "C" fn check_cancel(context: *mut c_void) -> c_int {
+        // SAFETY: the context stays live until the synchronous OCCT call returns.
+        let context = unsafe { &*context.cast::<CancelContext<'_>>() };
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| (context.check)()))
+            .unwrap_or(true) as c_int
+    }
+    if canceled() { return Err(Admission(om9_core::Error::Canceled)); }
     if points.len() < 4 || quads.len() < 4 {
-        return Err(CreationError::Invalid(
+        return Err(Creation(CreationError::Invalid(
             "sew solid needs four points and four faces".into(),
-        ));
+        )));
     }
     if points.len() > MAX_PROFILE_POINTS {
-        return Err(CreationError::Budget("sew solid point count".into()));
+        return Err(Creation(CreationError::Budget("sew solid point count".into())));
     }
     for point in points {
-        finite(*point, "sew solid point")?;
+        finite(*point, "sew solid point").map_err(Creation)?;
     }
     if !tolerance_mm.is_finite() || tolerance_mm <= 0.0 {
-        return Err(CreationError::Invalid(
+        return Err(Creation(CreationError::Invalid(
             "sew tolerance must be finite and positive".into(),
-        ));
+        )));
     }
-    let mut index: Vec<i32> = Vec::with_capacity(quads.len() * 4);
+    let index_count = quads.len().checked_mul(4).ok_or_else(|| Creation(CreationError::Budget("sew solid indices".into())))?;
+    let coordinate_count = points.len().checked_mul(3).ok_or_else(|| Creation(CreationError::Budget("sew solid coordinates".into())))?;
+    let planned = Usage::array::<i32>(index_count).and_then(|a| Usage::array::<f64>(coordinate_count)
+        .and_then(|b| a.bytes.checked_add(b.bytes).ok_or(om9_core::Error::Overflow("sew solid tables"))))
+        .map_err(Admission)?;
+    if planned > limits.max_bytes { return Err(Creation(CreationError::Budget("sew solid tables".into()))); }
+    admit(0, planned).map_err(Admission)?;
+    let mut index: Vec<i32> = Vec::new();
+    index.try_reserve_exact(index_count).map_err(|_| Creation(CreationError::Budget("sew solid indices".into())))?;
+    let index_bytes = Usage::array::<i32>(index.capacity()).map_err(Admission)?.bytes;
+    let table_pending = Usage::array::<f64>(coordinate_count).map_err(Admission)?.bytes;
+    if index_bytes.checked_add(table_pending).ok_or(Admission(om9_core::Error::Overflow("sew solid tables")))? > limits.max_bytes {
+        return Err(Creation(CreationError::Budget("sew solid tables".into())));
+    }
+    admit(index_bytes, table_pending).map_err(Admission)?;
+    let mut table: Vec<f64> = Vec::new();
+    table.try_reserve_exact(coordinate_count).map_err(|_| Creation(CreationError::Budget("sew solid coordinates".into())))?;
+    let staging = Usage::array::<i32>(index.capacity()).and_then(|a| Usage::array::<f64>(table.capacity())
+        .and_then(|b| a.bytes.checked_add(b.bytes).ok_or(om9_core::Error::Overflow("sew solid tables"))))
+        .map_err(Admission)?;
+    let remaining = limits.remaining_after(Usage { bytes: staging, ..Usage::default() }).map_err(Admission)?;
+    admit(staging, 0).map_err(Admission)?;
     for quad in quads {
         for vertex in quad {
             if *vertex as usize >= points.len() {
-                return Err(CreationError::Invalid("sew solid face index".into()));
+                return Err(Creation(CreationError::Invalid("sew solid face index".into())));
             }
             index.push(*vertex as i32);
         }
     }
-    let table = flatten(points);
-    let deflection = checked_deflection(deflection_mm)?;
-    let budget = snapshot_budget(limits);
-    snapshot_via(deflection, limits, |sink, context, message, capacity| {
+    for point in points { table.extend_from_slice(point); }
+    let deflection = checked_deflection(deflection_mm).map_err(Creation)?;
+    let budget = snapshot_budget(&remaining);
+    let mut volume_mm3 = f64::NAN;
+    let mut refusal = None;
+    let cancel_context = CancelContext { check: &canceled };
+    let result = {
+        let mut snapshot_admit = |live: u64, pending: u64| {
+            let total = staging.checked_add(live).ok_or(om9_core::Error::Overflow("sew solid snapshot"))?;
+            let result = admit(total, pending);
+            if let Err(error) = &result { refusal = Some(error.clone()); }
+            result
+        };
+        let invoke = |sink, context, message, capacity| {
         // SAFETY: both buffers and the callback context live through this synchronous call.
         unsafe {
             om9_occt_sew_solid(
@@ -1084,12 +1259,36 @@ pub fn sewed_solid(
                 budget.bytes,
                 sink,
                 context,
+                check_cancel,
+                (&cancel_context as *const CancelContext<'_>).cast_mut().cast(),
+                &mut volume_mm3,
                 message,
                 capacity,
             )
         }
-    })
-    .map_err(CreationError::from)
+        };
+        if signatures {
+            crate::brep::snapshot_via_signatures(deflection, &remaining, &mut snapshot_admit, &canceled, invoke)
+        } else {
+            snapshot_via_with_admission(deflection, &remaining, Some(&mut snapshot_admit), invoke)
+                .map(|brep| (brep, Vec::new()))
+        }
+    };
+    let (brep, signatures) = result.map_err(|error| {
+        if let Some(error) = refusal { Admission(error) }
+        else if canceled() { Admission(om9_core::Error::Canceled) }
+        else { Creation(CreationError::from(error)) }
+    })?;
+    if canceled() { return Err(Admission(om9_core::Error::Canceled)); }
+    if !volume_mm3.is_finite() || volume_mm3 <= 0.0 {
+        return Err(Creation(CreationError::Invalid("sew solid volume receipt".into())));
+    }
+    drop(index); drop(table);
+    let retained = brep.storage_usage(limits).map_err(Admission)?.bytes
+        .checked_add(Usage::array::<crate::brep::SourceSignature>(signatures.capacity()).map_err(Admission)?.bytes)
+        .ok_or(Admission(om9_core::Error::Overflow("sew signature output")))?;
+    admit(retained, 0).map_err(Admission)?;
+    Ok((brep, signatures, volume_mm3))
 }
 
 /// Build a planar face from one closed outer profile on its admitted plane.
@@ -2026,10 +2225,24 @@ impl Measures {
 }
 
 /// Measure an exact B-Rep: volume, area, topology counts, closedness and optimal bounds.
-pub fn measure(brep: &Brep, limits: &Limits) -> Result<Measures, CreationError> {
-    brep.validate(limits)
+pub fn measure(brep: &dyn BrepSourceAccess, limits: &Limits) -> Result<Measures, CreationError> {
+    // The legacy BRep still owns display allocations. Charge those bytes
+    // while validating the source, without treating display data as geometry.
+    let mut inventory_limits = *limits;
+    inventory_limits.max_points = u64::MAX;
+    inventory_limits.max_nodes = u64::MAX;
+    let owned = brep.storage_usage(&inventory_limits).map_err(|error| CreationError::Invalid(error.to_string()))?;
+    let source_bytes = brep.source_storage_bytes().map_err(|error| CreationError::Invalid(error.to_string()))?;
+    let display_bytes = owned.bytes.checked_sub(source_bytes).ok_or_else(|| CreationError::Invalid("BRep source accounting".into()))?;
+    let remaining = limits.remaining_after(Usage { bytes: display_bytes, ..Usage::default() })
         .map_err(|error| CreationError::Invalid(error.to_string()))?;
-    let source = brep.source();
+    brep.validate_source(&remaining)
+        .map_err(|error| CreationError::Invalid(error.to_string()))?;
+    measure_validated_source(brep.source())
+}
+
+/// Caller must have validated and admitted the immutable source beforehand.
+pub(crate) fn measure_validated_source(source: &str) -> Result<Measures, CreationError> {
     let mut out = MeasuresOut {
         volume_mm3: 0.0,
         area_mm2: 0.0,
@@ -2179,23 +2392,23 @@ impl CreationSession {
     pub fn names(&self, handle: KernelHandle) -> Result<Vec<EntityName>, CreationError> {
         let brep = self.body(handle)?;
         let mut names = Vec::with_capacity(
-            brep.display.faces.len() + brep.display.edges.len() + brep.display.vertex_ids.len(),
+            brep.topology().faces.len() + brep.topology().edges.len() + brep.topology().vertex_ids.len(),
         );
-        for (index, id) in brep.display.faces.iter().enumerate() {
+        for (index, id) in brep.topology().faces.iter().enumerate() {
             names.push(EntityName {
                 kind: EntityKind::Face,
                 index,
                 id: *id,
             });
         }
-        for (index, id) in brep.display.edges.iter().enumerate() {
+        for (index, id) in brep.topology().edges.iter().enumerate() {
             names.push(EntityName {
                 kind: EntityKind::Edge,
                 index,
                 id: *id,
             });
         }
-        for (index, id) in brep.display.vertex_ids.iter().enumerate() {
+        for (index, id) in brep.topology().vertex_ids.iter().enumerate() {
             names.push(EntityName {
                 kind: EntityKind::Vertex,
                 index,

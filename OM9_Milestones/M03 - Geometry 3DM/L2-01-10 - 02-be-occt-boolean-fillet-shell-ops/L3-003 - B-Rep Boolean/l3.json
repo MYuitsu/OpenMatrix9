@@ -479,6 +479,7 @@
     "rust_test_name": "m03_01_10_003"
   },
   "runtime_implementation": {
+    "binary_ui_worker_2026_11_14": "MatrixApp Difference and Intersection menu/CMD use admitted source workers; scoped headless tests verify group results, DeleteInput, empty, stale, quota and Undo/Redo. Evidence: docs/validation/2026-11-14-boolean-binary-ui-worker.md",
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED",
     "target": "standalone Rust OM9, Windows x64",

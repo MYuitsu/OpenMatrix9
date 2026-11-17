@@ -1,0 +1,9 @@
+# Controller-owned ring preview candidate
+
+Follow-up: [the background UI record](2026-11-13-ring-background-ui.md) supersedes the earlier UI-routing limitation below.
+
+2026-11-13. The controller exposes an explicitly polled ring candidate job. It admits the existing B-Rep Builder previews along with scene usage, reserves the request before preparing it, allows at most one ring worker at a time, and keeps the completed private candidate with its reservation. It checks coordinator authority/epoch, scene publication, document and builder revisions while polling and rechecks the prepared document/session token on completion. Closing, switching, refreshing, applying or reopening the Builder cancels the staged candidate. A stale retained candidate is reported not ready and released on the next poll.
+
+With `L:\om9-target`, `-j 2`, and the OCCT 8.0.1 runtime, nine app library worker fixtures passed. They include unchanged-document candidate retention, refusal of concurrent requests, rejection and eventual release after a builder edit, and cancellation on Builder close. The existing `ring_family_panel` suite passed 5 tests. `cargo check -p om9-app -j 2 --no-default-features` passed with 21 warnings from that configuration.
+
+This is an explicit staging API, not a production UI route. It does not install or paint the candidate; ordinary Builder preview still runs synchronously, and a stale candidate is only reclaimed when polled or canceled. Native OCCT internal allocations and interruption during native calls are not covered. UI responsiveness, menu/CMD routing, Apply/Undo under asynchronous publication, input-bearing requests and saved-tab preview ownership remain unverified. Topology signatures remain display-derived; source-only Document/Undo, eviction, cold restore and v5 remain open.

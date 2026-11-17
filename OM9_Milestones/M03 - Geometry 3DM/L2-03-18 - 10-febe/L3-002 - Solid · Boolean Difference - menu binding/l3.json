@@ -530,6 +530,21 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "multitool_false_empty_witness_2026_11_12": {
+      "status": "BAKED_AFFINE_MULTITOOL_FIXTURE_REFUSED",
+      "evidence": "docs/validation/2026-11-12-boolean-false-empty-witness.md#disjoint-multi-tool-path",
+      "limitations": "Numerical sampling is inconclusive without a witness and skips more than eight tool shapes or solids; arbitrary geometry, native peak and desktop remain unverified."
+    },
+    "false_empty_witness_2026_11_12": {
+      "status": "BAKED_AFFINE_FIXTURE_REFUSED",
+      "evidence": "docs/validation/2026-11-12-boolean-false-empty-witness.md",
+      "limitations": "Numerical sample-based diagnostic is inconclusive without a witness and skips large solid counts; native peak, arbitrary topology and desktop remain unverified."
+    },
+    "shared_affine_placement_2026_11_12": {
+      "status": "REOPENED_BOX_AND_MULTIPLE_CUTTER_FIXTURES_PASSED",
+      "evidence": "docs/validation/2026-11-12-boolean-common-affine-union.md#difference-intersection-and-split-with-shared-placement",
+      "limitations": "Exactly matching placement only; arbitrary geometry, tolerances, imports, desktop and native peak remain open."
+    },
     "fused_sets_deleteinput_2026_10_28": {
       "status": "BREP_GROUP_SEMANTICS_PARTIAL_AUTOMATED_CHECKS_PASSED",
       "evidence": "docs/validation/2026-10-28-solid-audit.md",

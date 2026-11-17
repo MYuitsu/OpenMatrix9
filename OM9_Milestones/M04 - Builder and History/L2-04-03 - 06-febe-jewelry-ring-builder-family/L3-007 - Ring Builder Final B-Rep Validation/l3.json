@@ -219,6 +219,44 @@
     "source_pin": "c116f8f224ebffe0ada049c91c0d15df3634f00d",
     "special_manual_flags": []
   },
+  "runtime_implementation": {
+    "ring_background_cancel_2026_11_13": {
+      "status": "SCOPED_CANCELLATION_CHECKS_PASSED",
+      "scope": "OCCT sewing polls a Rust cancellation flag in face construction and OCCT sewing progress; the kernel ring suite and headless Signet/Raised UI fixtures passed.",
+      "limitations": "Non-progress native stages and native internal memory are not bounded by this signal; source-bound topology and full C1–C4 acceptance remain open.",
+      "evidence": "docs/validation/2026-11-13-ring-background-ui.md"
+    },
+    "feature_admission_2026_11_13": {
+      "status": "SCOPED_FEATURE_ADMISSION_CHECKS_PASSED",
+      "scope": "Ring feature production admits BRep, output and topology allocations through a shared callback; an OCCT fixture produces on a secondary thread and publishes on its owner.",
+      "limitations": "Production Builder remains synchronous and topology signatures still depend on display; coordinator leases, preview lifetime, source-only ownership and cold restore are not established.",
+      "evidence": "docs/validation/2026-11-13-ring-feature-admission.md"
+    },
+    "producer_admission_2026_11_13": {
+      "status": "SCOPED_PRODUCER_ADMISSION_CHECKS_PASSED",
+      "scope": "Ring producer exposes caller admission and cancellation checkpoints; preview transfers output rather than cloning it. Seven kernel and five panel tests passed.",
+      "limitations": "Builder remains synchronous and the registry does not supply a coordinator reservation. Subshapes, retained preview ownership, native internal allocation, canonical source ownership and cold restore remain open.",
+      "evidence": "docs/validation/2026-11-13-ring-producer-admission.md"
+    },
+    "sewing_admission_2026_11_13": {
+      "status": "SCOPED_SEWING_ADMISSION_CHECKS_PASSED",
+      "scope": "Ring sewing accounts temporary tables and snapshot payload with caller admission/cancellation checkpoints, and producer subtracts live section tables from its limit.",
+      "limitations": "Producer is synchronous and lacks coordinator worker admission; native internal peak, display-derived associative signatures, cold restore and full acceptance remain open.",
+      "evidence": "docs/validation/2026-11-13-ring-sewing-admission.md"
+    },
+    "sewed_volume_receipt_2026_11_13": {
+      "status": "SCOPED_NATIVE_RECEIPT_CHECKS_PASSED",
+      "scope": "The OCCT sewing call returns a validated same-shape volume receipt with the BRep snapshot; the ring producer avoids a second native source measurement.",
+      "limitations": "Builder is synchronous, associative signatures still use display, native peak and full milestone acceptance remain unverified.",
+      "evidence": "docs/validation/2026-11-13-sewed-ring-volume-receipt.md"
+    },
+    "source_measurement_2026_11_13": {
+      "status": "SCOPED_SOURCE_MEASUREMENT_CHECKS_PASSED",
+      "scope": "Ring family OCCT producer checks source-based volume and closedness; mesh uses its own geometry. Kernel and controller fixture batches passed.",
+      "limitations": "Builder rebuild remains synchronous; native peak, desktop and full milestone acceptance remain unverified. Core-only BRep inspection returns Unsupported.",
+      "evidence": "docs/validation/2026-11-13-ring-source-measurement.md"
+    }
+  },
   "task_ids": [
     "OM9-L4-04-03-007-01",
     "OM9-L4-04-03-007-02",

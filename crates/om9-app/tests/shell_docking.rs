@@ -319,6 +319,26 @@ fn builder_area_stays_reserved_and_non_interactive() {
 }
 
 #[test]
+fn trim_display_fallback_warning_is_visible_without_hiding_errors() {
+    use om9_core::{budget::Limits,geometry::Geometry,model::Entity,rhino_semantics::{set_trimmed_surface,TrimmedSurface}};
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],10.,10.,&limits).unwrap();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer:vec![[0.,0.],[1.,0.],[1.,1.],[0.,1.]],
+        inners:vec![vec![[0.1,0.1],[0.9,0.1],[0.9,0.9],[0.1,0.9]],vec![[0.3,0.3],[0.7,0.3],[0.7,0.7],[0.3,0.7]]],reversed:false};
+    let mut entity=Entity::new("trim",Geometry::Surface(surface),None);
+    set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    let mut document=Document::new("trim warning");document.entities.insert(entity.id,entity);
+    let mut app=MatrixApp::new(document).unwrap();let context=egui::Context::default();
+    frame(&mut app,&context,vec![]);
+    assert!(app.status_line().contains("Trim display unsupported"));
+    assert!(app.status_line().contains("enclosing selection window"));
+    app.status.error("important error");
+    assert!(app.status_line().contains("important error"));
+    app.status.acknowledge();
+    assert!(app.status_line().contains("Trim display unsupported"));
+}
+
+#[test]
 fn invalid_command_stays_visible_in_the_status_surface_and_the_transcript() {
     let (mut app, context) = startup(None);
     frame(&mut app, &context, vec![Event::Text("NotACommand".into())]);

@@ -198,6 +198,9 @@ pub struct MemoryDiagnostics {
     pub tracked_total_bytes: Option<u64>,
     pub tracked_materialized_bytes: Option<u64>,
     pub tracked_pending_bytes: Option<u64>,
+    /// Shared live projection-index admission bound, included in tracked total.
+    /// This is not process RSS or an additional reservation to add to it.
+    pub projection_cache_accounted_bytes: u64,
     pub managed_headroom_bytes: Option<u64>,
     pub managed_overage_bytes: Option<u64>,
     pub inventory_error: Option<String>,
@@ -237,11 +240,12 @@ impl TransactionCoordinator {
             max_points: u64::MAX, max_history: u64::MAX, max_outputs: u64::MAX, ..self.limits };
         let held_bytes = held.as_ref().ok().map(|usage| usage.bytes);
         let pending_result = reservations.pending_bytes();
+        let projection_cache_accounted_bytes = reservations.projection_cache_bytes.load(Ordering::Acquire);
         let inventory = (|| -> Result<(u64, u64, u64)> {
             pending_result.as_ref().map_err(Clone::clone)?;
             let held = held?;
             let internal = self.retained_storage_usage(&self.identities, None, false, &inspection)?;
-            let mut outside = self.external_storage_usage(None, &inspection, &external,
+            let (mut outside, _, _) = self.external_storage_usage(None, &inspection, &external,
                 &reservations.accounted_classes(0)?, None)?;
             // Unlike validation, observation leaves expired proofs untouched.
             let proof = self.current_validation_cache.lock().unwrap_or_else(|e| e.into_inner());
@@ -313,7 +317,7 @@ impl TransactionCoordinator {
             caller_held_bytes: held_bytes, tracked_total_bytes: total,
             tracked_materialized_bytes: total.zip(pending).and_then(|(n, pending)| n.checked_sub(pending)), tracked_pending_bytes: pending,
             managed_headroom_bytes: total.map(|n| effective.saturating_sub(n)), managed_overage_bytes: total.map(|n| n.saturating_sub(effective)),
-            inventory_error, external_classes, physical, commit,
+            inventory_error, external_classes, physical, commit, projection_cache_accounted_bytes,
             undo_policy: self.undo_policy(), undo_ram_limit_mb: self.undo_ram_limit_mb(),
             undo_cached_estimated_bytes: undo.estimated_bytes, undo_cached_growth_since_inventory_bytes: undo.growth_since_inventory,
             undo_capture_change_pending: undo.capture_change_pending, request, collection_duration_us: micros(started),

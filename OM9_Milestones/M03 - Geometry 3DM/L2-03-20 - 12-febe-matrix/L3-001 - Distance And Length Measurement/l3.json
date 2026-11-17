@@ -326,6 +326,12 @@
   "readiness_state": "AUTOMATED_RUNTIME_READY_FOR_MANUAL_UI_REVIEW",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "native_distance_source_handoff_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Selected-object minimum distance converts native BRep payloads to temporary admitted source strings and queries without viewport geometry.",
+      "remaining": "Native internal allocations and distance behavior are not runtime verified; this does not complete other native consumers or C4.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#native-brep-minimum-distance-source-handoff"
+    },
     "plugin_sdk_v1_measurement": {
       "date": "2026-10-21",
       "target": "standalone Rust OM9, Windows x64 host with an out-of-checkout .om9p plugin",
@@ -437,6 +443,33 @@
       "manual_gate": "M03-UI",
       "manual_gate_promoted": false,
       "scope": "Canonical placed BRep edges/area/closed-solid volume, surface isocurves/numeric area, pointwise curvature, object Distance/straight-line Angle, continuous/ortho/dynamic feedback, grouped explicit gem carats and Analyze menu access. Annotation is owned separately by L2-03-21."
+    },
+    "length_mixed_display_segments_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "SCOPED_AUTOMATED_REGRESSION_PASSED",
+      "scope": "Selected B-rep edge Length verifies that all displayed segments under the selected ID resolve uniquely to the same source edge before measurement. Reopened cylinder fixture with a foreign segment is refused; document and Redo are preserved. Existing valid curved-edge and two-profile fixtures pass.",
+      "tests": "App measurement 19 passed; kernel library 33 passed and 3 ignored; debug build and source audit passed.",
+      "limitations": [
+        "No desktop click, large-model timing, native peak, or exhaustive trim/import topology validation.",
+        "Source witness checks are numerical and do not prove global geometric equivalence."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-12-length-mixed-display-segments.md"
+      ]
+    },
+    "complete_circle_segment_bound_2026_11_12": {
+      "date": "2026-11-12",
+      "state": "SCOPED_NUMERIC_OPTIMIZATION_VERIFIED",
+      "scope": "Complete-circle display-segment source verification uses endpoint-deviation plus sagitta as an upper bound when the node budget allows; other cases use existing subdivision. A 994-segment cylinder-ring debug fixture decreased from about 2.5 s to 27-28 ms in sequential runs.",
+      "tests": "Analytic sagitta threshold at 12 angles; 57 wireframe and 11 measurement tests passed with six ignored total; Solid input 102 and two five-test viewport subsets passed; debug build and audit passed.",
+      "limitations": [
+        "Floating-point and OCCT projection are not interval-certified.",
+        "Single-cylinder debug timings are not release, desktop, or general performance evidence; native peak unmeasured."
+      ],
+      "evidence": [
+        "docs/validation/2026-11-12-length-mixed-display-segments.md#complete-circle-chord-bound"
+      ],
+      "followup": "Analytic trimmed-arc and large-coordinate ring witness fixtures passed; see docs/validation/2026-11-12-length-mixed-display-segments.md#trim-and-large-coordinate-checks. Wireframe 59 passed, 5 ignored."
     }
   },
   "sdk_export_plan": {
@@ -469,5 +502,10 @@
       "tests": "docs/validation/2026-10-26-measure-completion/final-focused.log",
       "manual_ui": "See runtime-launch.json; no human acceptance signature"
     }
+  },
+  "runtime_evidence_2026_11_11_length_reopened": {
+    "status": "scoped_fixture_passed",
+    "evidence": "docs/validation/2026-11-11-length-reopened-edge.md",
+    "limitations": "Headless egui viewport selection and Measure icon/CMD passed for reopened Box. Desktop UI, arbitrary imported curves, native peak and latency remain unverified."
   }
 }

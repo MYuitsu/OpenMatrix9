@@ -1,0 +1,11 @@
+# Shared-source remesh rebind
+
+Follow-up: independent-source comparison and validation subsequently moved to the remesh worker; see [background independent-source rebind](2026-11-13-background-independent-source-rebind.md). This record describes the earlier build.
+
+2026-11-13. For an existing OCCT native attestation, remesh now first checks whether both canonical source and topology are the same live immutable allocations retained by the proof. After a document-only change such as placement, that exact identity permits source rebind without rescanning the source or allocating validation scratch on the caller. The method still checks account, authority, session, object generation and the proof's worker permit; it creates only a source binding and does not attest a display. Independent allocations fall back to exact content and admitted source validation. Native topology reconstruction remains on the worker.
+
+With `CARGO_TARGET_DIR=L:\om9-target`, OCCT 8.0.1 runtime and `-j 2`, app `--lib topology_ -- --test-threads=2` passed 162 tests with 6 ignored; kernel lib passed 33 with 3 ignored. The new fixture moves a Box, checks that a busy proof refuses rebind, rebinds the shared source without a scratch callback, confirms the display proof is not granted, and remeshes with placement intact. The independent-display fixture verifies the fast path declines and full source rebind remains required. Existing tests cover Undo/Redo, stale publication, cancellation and mismatched topology. Workspace check passed with two existing warnings. Kernel printed `File was not written with this version of the topology` after its success summary.
+
+This removes a redundant caller-thread scan for the shared-allocation case only; independent source comparisons and validation still run on the caller. It does not measure UI latency or physical/native/GPU peak, and it does not detach Document or Undo from display. General source-only ownership, eviction, cold restore, NativeBrep disposition, v5 and acceptance remain open.
+
+SHA-256: `topology_capture.rs` `efda7143ac12f9c205306a41fddc2dba0215ad0aef2eb5216019db149a2f0ea4`; `topology_remesh.rs` `57e122f47cdbc9196e47696a083fab93712d745006fa9b00a601026d28835be4`; `session.rs` `ea9fea5fb5cdc364e99821e40c08325b1620ad1688e57f96e685015e193ee3fd`.

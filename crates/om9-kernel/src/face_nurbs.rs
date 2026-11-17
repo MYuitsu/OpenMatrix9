@@ -8,7 +8,7 @@
 //! picked edges.
 use crate::KernelError;
 use crate::brep::{BytesContext, byte_bound, native_message, receive_bytes};
-use om9_core::{brep::Brep, budget::Limits};
+use om9_core::{brep::BrepSourceAccess, budget::Limits};
 use std::ffi::{c_char, c_int, c_void};
 
 unsafe extern "C" {
@@ -58,7 +58,7 @@ pub struct FaceNurbs {
 }
 
 /// The faces of `brep` as exact NURBS (see the module notes).
-pub fn face_nurbs(brep: &Brep, limits: &Limits) -> Result<Vec<FaceNurbs>, KernelError> {
+pub fn face_nurbs(brep: &(impl BrepSourceAccess + ?Sized), limits: &Limits) -> Result<Vec<FaceNurbs>, KernelError> {
     brep.validate(limits).map_err(|e| KernelError::InvalidInput(e.to_string()))?;
     let limit = byte_bound(limits);
     let mut context = BytesContext { bytes: Vec::new(), limit };
@@ -79,7 +79,7 @@ pub fn face_nurbs(brep: &Brep, limits: &Limits) -> Result<Vec<FaceNurbs>, Kernel
 /// Every edge of `brep` as an exact NURBS curve in its own direction, in the shape's edge order
 /// — the order of `brep.display.edges`, so a picked edge key finds its curve. `None` for a
 /// degenerate edge (a pole) or one without a 3D curve.
-pub fn edge_nurbs(brep: &Brep, limits: &Limits) -> Result<Vec<Option<NurbsCurveData>>, KernelError> {
+pub fn edge_nurbs(brep: &(impl BrepSourceAccess + ?Sized), limits: &Limits) -> Result<Vec<Option<NurbsCurveData>>, KernelError> {
     brep.validate(limits).map_err(|e| KernelError::InvalidInput(e.to_string()))?;
     let limit = byte_bound(limits);
     let mut context = BytesContext { bytes: Vec::new(), limit };

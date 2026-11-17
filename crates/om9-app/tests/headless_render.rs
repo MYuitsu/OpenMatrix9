@@ -59,6 +59,69 @@ fn a_project_renders_one_png_per_viewport_without_a_window() {
     let _ = std::fs::remove_dir_all(&directory);
 }
 
+#[test]
+fn many_edge_trim_hole_renders_on_gpu_after_reopen() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    use om9_scene::camera::{Camera,Viewport};
+    if om9_render::Renderer::new().is_none() {eprintln!("skip: no wgpu adapter on this machine");return;}
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::plane([-10.,-10.,0.],[1.,0.,0.],[0.,1.,0.],20.,20.,&limits).unwrap();
+    let outer=(0..708).map(|i| {let a=std::f64::consts::TAU*i as f64/708.;[0.5+0.45*a.cos(),0.5+0.45*a.sin()]}).collect();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer,inners:vec![vec![[0.3,0.3],[0.7,0.3],[0.7,0.7],[0.3,0.7]]],reversed:false};
+    let mut entity=Entity::new("trim",Geometry::Surface(surface),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    let mut doc=Document::with_template_tolerance("GPU trim");doc.entities.insert(entity.id,entity);
+    let directory=std::env::temp_dir().join(format!("om9-trim-gpu-{}",uuid::Uuid::new_v4()));std::fs::create_dir(&directory).unwrap();
+    struct Cleanup(std::path::PathBuf);impl Drop for Cleanup {fn drop(&mut self){let _=std::fs::remove_dir_all(&self.0);}}
+    let _cleanup=Cleanup(directory.clone());
+    let input=directory.join("input.om9");let empty=directory.join("empty.om9");
+    Archive::save(&input,&doc,&limits,&Cancellation::default()).unwrap();
+    Archive::save(&empty,&Document::with_template_tolerance("empty"),&limits,&Cancellation::default()).unwrap();
+    let actual=headless::render_project(&input,&directory.join("actual"),256,256).unwrap();
+    let blank=headless::render_project(&empty,&directory.join("blank"),256,256).unwrap();
+    let looking_down=|paths:&[std::path::PathBuf]|paths.iter().find(|p|p.file_name().unwrap().to_string_lossy().contains("looking-down")).unwrap().clone();
+    let a=image::open(looking_down(&actual)).unwrap().to_rgba8();let b=image::open(looking_down(&blank)).unwrap().to_rgba8();
+    let camera=Camera::orthographic([0.,0.,100.],[0.,0.,0.],[0.,1.,0.],41.).unwrap();
+    let viewport=Viewport {origin:[0.,0.],size:[256.,256.]};
+    let differences=|world|{let p=camera.project(world,viewport).unwrap().unwrap().screen;
+        let (x,y)=(p[0].round() as i32,p[1].round() as i32);
+        (-3..=3).flat_map(|dy|(-3..=3).map(move |dx|(x+dx,y+dy)))
+            .filter(|&(x,y)|a.get_pixel(x as u32,y as u32)!=b.get_pixel(x as u32,y as u32)).count()};
+    assert_eq!(differences([1.,1.,0.]),0,"hole must show the same background");
+    assert!(differences([6.5,1.,0.])>30,"material must draw visible pixels");
+    assert_eq!(differences([10.,1.,0.]),0,"outside must show the same background");
+}
+
+#[test]
+fn many_edge_curved_trim_hole_renders_on_gpu_after_reopen() {
+    use om9_core::rhino_semantics::{set_trimmed_surface,TrimmedSurface};
+    use om9_scene::camera::{Camera,Viewport};
+    if om9_render::Renderer::new().is_none() {eprintln!("skip: no wgpu adapter on this machine");return;}
+    let limits=Limits::default();
+    let surface=om9_core::surface_kernel::cylinder([0.,0.,-10.],[1.,0.,0.],[0.,1.,0.],8.,20.,&limits).unwrap();
+    let outer=(0..708).map(|i| {let a=std::f64::consts::TAU*i as f64/708.;[0.75+0.22*a.cos(),0.5+0.3*a.sin()]}).collect();
+    let trim=TrimmedSurface {underlying:surface.clone(),outer,inners:vec![vec![[0.72,0.35],[0.78,0.35],[0.78,0.65],[0.72,0.65]]],reversed:false};
+    let mut entity=Entity::new("curved trim",Geometry::Surface(surface.clone()),None);set_trimmed_surface(&mut entity,&trim,&limits).unwrap();
+    let mut doc=Document::with_template_tolerance("GPU curved trim");doc.entities.insert(entity.id,entity);
+    let directory=std::env::temp_dir().join(format!("om9-curved-trim-gpu-{}",uuid::Uuid::new_v4()));std::fs::create_dir(&directory).unwrap();
+    struct Cleanup(std::path::PathBuf);impl Drop for Cleanup {fn drop(&mut self){let _=std::fs::remove_dir_all(&self.0);}}
+    let _cleanup=Cleanup(directory.clone());let input=directory.join("input.om9");let empty=directory.join("empty.om9");
+    Archive::save(&input,&doc,&limits,&Cancellation::default()).unwrap();
+    Archive::save(&empty,&Document::with_template_tolerance("empty"),&limits,&Cancellation::default()).unwrap();
+    let actual=headless::render_project(&input,&directory.join("actual"),256,256).unwrap();
+    let blank=headless::render_project(&empty,&directory.join("blank"),256,256).unwrap();
+    let view=|paths:&[std::path::PathBuf]|paths.iter().find(|p|p.file_name().unwrap().to_string_lossy().contains("through-finger")).unwrap().clone();
+    let a=image::open(view(&actual)).unwrap().to_rgba8();let b=image::open(view(&blank)).unwrap().to_rgba8();
+    let camera=Camera::orthographic([0.,-100.,0.],[0.,0.,0.],[0.,0.,1.],41.).unwrap();
+    let viewport=Viewport {origin:[0.,0.],size:[256.,256.]};
+    let differences=|uv:[f64;2]|{let world=om9_core::surface_kernel::evaluate(&surface,uv[0],uv[1],&limits).unwrap();
+        let p=camera.project(world,viewport).unwrap().unwrap().screen;let (x,y)=(p[0].round() as i32,p[1].round() as i32);
+        (-2..=2).flat_map(|dy|(-2..=2).map(move |dx|(x+dx,y+dy)))
+            .filter(|&(x,y)|a.get_pixel(x as u32,y as u32)!=b.get_pixel(x as u32,y as u32)).count()};
+    assert_eq!(differences([0.75,0.5]),0,"hole must show the same background");
+    assert!(differences([0.88,0.5])>15,"material must draw visible pixels");
+    assert_eq!(differences([0.75,0.1]),0,"outside must show the same background");
+}
+
 #[cfg(feature = "occt-brep")]
 #[test]
 fn mirrored_nested_mesh_and_brep_render_and_pick_at_expected_positions() {
@@ -87,8 +150,8 @@ fn mirrored_nested_mesh_and_brep_render_and_pick_at_expected_positions() {
     let mut reference=Document::with_template_tolerance("mirror reference");
     let map=|p:[f64;3],y:f64|[-(p[0]+7.),p[1]+y,p[2]];
     let mut reference_mesh=mesh;reference_mesh.vertices=reference_mesh.vertices.into_iter().map(|p|map(p,5.)).collect();
-    let box_mesh=Mesh{vertices:box_shape.display.points.iter().map(|p|map(*p,-5.)).collect(),
-        faces:box_shape.display.triangles.iter().map(|t|vec![t[0],t[1],t[2]]).collect(),normals:vec![],colors:vec![],corner_uvs:vec![]};
+    let box_mesh=Mesh{vertices:box_shape.display().points.iter().map(|p|map(*p,-5.)).collect(),
+        faces:box_shape.display().triangles.iter().map(|t|vec![t[0],t[1],t[2]]).collect(),normals:vec![],colors:vec![],corner_uvs:vec![]};
     for e in [Entity::new("mesh",Geometry::Mesh(reference_mesh),None),Entity::new("brep",Geometry::Mesh(box_mesh),None)] {reference.entities.insert(e.id,e);}
     let expected=directory.join("expected.om9");Archive::save(&expected,&reference,&limits,&Cancellation::default()).unwrap();
     let empty=directory.join("empty.om9");Archive::save(&empty,&Document::with_template_tolerance("empty"),&limits,&Cancellation::default()).unwrap();

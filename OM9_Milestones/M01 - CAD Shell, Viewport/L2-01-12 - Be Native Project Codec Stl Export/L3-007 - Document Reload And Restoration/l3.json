@@ -184,6 +184,18 @@
     "OM9-L4-01-12-007-05"
   ],
   "runtime_implementation": {
+    "direct_batch_open_worker_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Direct and batch Open wait for candidate preparation and publication through the existing Open worker; batch retains saved naming and accepts arbitrary archive extensions.",
+      "remaining": "Open behavior and cancellation remain runtime-unverified; durable OCCT topology binding, opaque payload disposition and native allocation containment remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#direct-and-batch-open-preparation-worker"
+    },
+    "empty_legacy_native_display_rebuild_2026_11_14": {
+      "status": "IN_PROGRESS_COMPILE_ONLY",
+      "scope": "Private Open candidates can rebuild missing v4 and source-only v5 native BRep displays from retained 3DM payload through the selected OCCT adapter.",
+      "remaining": "Opaque payload disposition, durable OCCT topology binding, native allocation containment and runtime validation remain open.",
+      "evidence": "docs/validation/2026-11-14-canonical-representation-transfer.md#source-only-native-open-candidate"
+    },
     "date": "2026-10-19",
     "status": "AUTOMATED_TARGET_VALIDATED_REVIEW_PENDING",
     "target": "standalone Rust OM9",

@@ -35,6 +35,7 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
+#include <Message_ProgressIndicator.hxx>
 #include <BRepBuilderAPI_TransitionMode.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepCheck_Analyzer.hxx>
@@ -126,7 +127,7 @@ TopoDS_Shape checked(const TopoDS_Shape& shape, const char* what) {
 
 }  // namespace
 
-extern "C" int om9_occt_primitive(int kind, const double* params, size_t count, double deflection,
+extern "C" int om9_occt_primitive_profile(int kind, const double* params, size_t count, double deflection, double angular,
                                   size_t max_points, size_t max_nodes, size_t max_bytes,
                                   Om9BrepSink sink, void* context, char* message, int capacity) {
  try {
@@ -252,7 +253,7 @@ extern "C" int om9_occt_primitive(int kind, const double* params, size_t count, 
     throw std::invalid_argument("unknown primitive kind");
   }
   return om9_emit_brep_snapshot(checked(shape, "invalid primitive shape"), deflection, max_points,
-                                max_nodes, max_bytes, sink, context, message, capacity);
+                                max_nodes, max_bytes, sink, context, message, capacity, angular);
  } catch (const Standard_Failure& e) {
   if (message && capacity > 0) std::snprintf(message, capacity, "%s", e.what());
   return 2;
@@ -927,21 +928,38 @@ extern "C" int om9_occt_pipe_miter(const double* path, size_t count, double radi
 // closed solid. Rust has already validated the sections and their winding; this adapter
 // refuses anything that does not sew into exactly one closed shell with a positive volume,
 // so the OCCT body and the mesh body describe the same ring.
+using Om9CancelCheck = int (*)(void*);
+class Om9SewProgress final : public Message_ProgressIndicator {
+public:
+ Om9SewProgress(Om9CancelCheck check, void* context) : check_(check), context_(context) {}
+ bool canceled() const { return check_ && check_(context_) != 0; }
+protected:
+ bool UserBreak() override { return canceled(); }
+ void Show(const Message_ProgressScope&, const bool) override {}
+private:
+ Om9CancelCheck check_;
+ void* context_;
+};
+
 extern "C" int om9_occt_sew_solid(const double* points, size_t point_count, const int32_t* quads,
                                   size_t quad_count, double tolerance, double deflection,
                                   size_t max_points, size_t max_nodes, size_t max_bytes,
-                                  Om9BrepSink sink, void* context, char* message, int capacity) {
+                                  Om9BrepSink sink, void* context, Om9CancelCheck cancel, void* cancel_context,
+                                  double* volume_mm3, char* message, int capacity) {
  try {
+  if (!volume_mm3) throw std::invalid_argument("sew solid volume output");
   if (!points || point_count < 4) throw std::invalid_argument("sew solid needs four points");
   if (!quads || quad_count < 4) throw std::invalid_argument("sew solid needs four faces");
   require_finite(points, point_count * 3, "sew solid point");
   require_positive(tolerance, "sew tolerance");
   BRepBuilderAPI_Sewing sewing(tolerance);
+  occ::handle<Om9SewProgress> progress = new Om9SewProgress(cancel, cancel_context);
   // A modulated section leaves a side quad slightly non-planar (the outer radius changes
   // between the two stations), and a planar face cannot be built from it. Splitting every
   // quad into two triangles keeps every face exactly planar while the surface, the volume
   // and the closed boundary stay those of the sampled sections.
   for (size_t q = 0; q < quad_count; ++q) {
+   if (progress->canceled()) throw std::runtime_error("sew solid canceled");
    const int32_t* corner = quads + 4 * q;
    for (int half = 0; half < 2; ++half) {
     const int triangle[3] = {corner[0], corner[1 + half], corner[2 + half]};
@@ -960,7 +978,8 @@ extern "C" int om9_occt_sew_solid(const double* points, size_t point_count, cons
     sewing.Add(face.Face());
    }
   }
-  sewing.Perform();
+  sewing.Perform(progress->Start());
+  if (progress->canceled()) throw std::runtime_error("sew solid canceled");
   const TopoDS_Shape sewn = sewing.SewedShape();
   if (sewn.IsNull()) throw std::runtime_error("sew solid produced no shape");
   size_t shells = 0;
@@ -976,9 +995,12 @@ extern "C" int om9_occt_sew_solid(const double* points, size_t point_count, cons
   BRepBuilderAPI_MakeSolid solid(shell);
   if (!solid.IsDone()) throw std::runtime_error("sew solid failed");
   const TopoDS_Shape body = checked(solid.Solid(), "sew solid is not a valid solid");
+  if (progress->canceled()) throw std::runtime_error("sew solid canceled");
   GProp_GProps properties;
   BRepGProp::VolumeProperties(body, properties);
-  if (!(properties.Mass() > 0.0)) throw std::runtime_error("sew solid volume");
+  if (!std::isfinite(properties.Mass()) || !(properties.Mass() > 0.0)) throw std::runtime_error("sew solid volume");
+  *volume_mm3 = properties.Mass();
+  if (progress->canceled()) throw std::runtime_error("sew solid canceled");
   return om9_emit_brep_snapshot(body, deflection, max_points, max_nodes, max_bytes, sink, context,
                                 message, capacity);
  } catch (const Standard_Failure& e) {
@@ -991,4 +1013,9 @@ extern "C" int om9_occt_sew_solid(const double* points, size_t point_count, cons
   if (message && capacity > 0) std::snprintf(message, capacity, "Unknown sew solid failure");
   return 2;
  }
+}
+
+extern "C" int om9_occt_primitive(int kind, const double* params, size_t count, double deflection,
+ size_t max_points, size_t max_nodes, size_t max_bytes, Om9BrepSink sink, void* context, char* message, int capacity) {
+ return om9_occt_primitive_profile(kind, params, count, deflection, 0.3, max_points, max_nodes, max_bytes, sink, context, message, capacity);
 }

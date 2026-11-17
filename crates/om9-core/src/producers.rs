@@ -21,7 +21,7 @@ use crate::{
         ProducedFeature, ProducedSubshapes, RebuildRequest, RecomputeCache, RecomputeOutcome,
         Subshape, SubshapeKind, SubshapeSignature,
     },
-    budget::Limits,
+    budget::{Limits, Usage},
     curve_build, curve_ops,
     geometry::{Curve, Geometry, GeometryKind, Point3, finite},
     identity::{HistoryId, ObjectId},
@@ -135,6 +135,12 @@ pub trait SweepBackend {
         solid: bool,
         limits: &Limits,
     ) -> Result<Geometry>;
+    /// Transient native results must travel beside canonical geometry until
+    /// the host transfers their display into an accounted representation.
+    fn sweep_with_candidates(&self, rail: &Curve, profile: &Curve, solid: bool,
+        limits: &Limits) -> Result<(Geometry, Vec<crate::brep::Brep>)> {
+        Ok((self.sweep(rail, profile, solid, limits)?, Vec::new()))
+    }
 }
 
 /// The analytic reference backend: a NURBS surface swept from the profile along the rail.
@@ -159,6 +165,10 @@ impl SweepBackend for SurfaceSweepBackend {
 /// producer returns geometry for exactly those objects.
 pub trait FeatureProducer {
     fn produce(&self, request: &RebuildRequest) -> Result<Vec<crate::associative::RebuiltOutput>>;
+    fn produce_with_candidates(&self, request: &RebuildRequest)
+        -> Result<(Vec<crate::associative::RebuiltOutput>, Vec<crate::brep::Brep>)> {
+        Ok((self.produce(request)?, Vec::new()))
+    }
 }
 
 /// `RingRail`: a closed circle centerline at `diameter_mm` on the world XY plane.
@@ -506,6 +516,10 @@ impl<B: SweepBackend> RailSweepProducer<B> {
 
 impl<B: SweepBackend> FeatureProducer for RailSweepProducer<B> {
     fn produce(&self, request: &RebuildRequest) -> Result<Vec<crate::associative::RebuiltOutput>> {
+        self.produce_with_candidates(request).map(|(outputs, _)| outputs)
+    }
+    fn produce_with_candidates(&self, request: &RebuildRequest)
+        -> Result<(Vec<crate::associative::RebuiltOutput>, Vec<crate::brep::Brep>)> {
         let output = single_output(request)?;
         let rail = input_curve(request, "rail")?;
         let profile = input_curve(request, "profile")?;
@@ -516,13 +530,13 @@ impl<B: SweepBackend> FeatureProducer for RailSweepProducer<B> {
         if boolean_parameter(request, "closed_rail")? {
             crate::curve_ops::validate_ring_rail(rail, 1.0e-6, &Limits::default())?;
         }
-        let geometry = self
+        let (geometry, candidates) = self
             .backend
-            .sweep(rail, profile, solid, &Limits::default())?;
-        Ok(vec![crate::associative::RebuiltOutput {
+            .sweep_with_candidates(rail, profile, solid, &Limits::default())?;
+        Ok((vec![crate::associative::RebuiltOutput {
             object: output,
             geometry,
-        }])
+        }], candidates))
     }
 }
 
@@ -538,8 +552,8 @@ impl SnapshotTopology {
         limits: &Limits,
     ) -> Result<Vec<Subshape>> {
         match geometry {
-            Geometry::Brep(brep) => self.brep_subshapes(&brep.display),
-            Geometry::NativeBrep(brep) => self.mesh_subshapes(&brep.display),
+            Geometry::Brep(_) => Err(Error::Unsupported("canonical BRep topology requires source evaluator")),
+            Geometry::NativeBrep(_) => Err(Error::Unsupported("native BRep topology requires source evaluator")),
             Geometry::Mesh(mesh) => self.mesh_subshapes(mesh),
             Geometry::Curve(curve) => {
                 let points = curve_ops::sample_curve(curve, 33, limits)?;
@@ -580,28 +594,41 @@ impl SnapshotTopology {
         }
     }
 
-    fn brep_subshapes(&self, display: &crate::brep::BrepDisplay) -> Result<Vec<Subshape>> {
+    /// Temporary display-derived naming policy. `admit` covers this method's output
+    /// allocations; the caller must separately cover the live BRep and any envelopes.
+    pub fn brep_subshapes_admitted(&self, display: &crate::brep::BrepDisplay,
+        limits: &Limits, admit: &mut dyn FnMut(u64, u64) -> Result<()>) -> Result<Vec<Subshape>> {
+        let count = display.edges.len().checked_add(display.faces.len())
+            .and_then(|n| n.checked_add(display.vertices.len())).ok_or(Error::Overflow("BRep subshape count"))?;
+        let planned = Usage::array::<Subshape>(count)?;
+        planned.check(limits)?;
+        admit(0, planned.bytes)?;
         let mut subshapes = Vec::new();
+        subshapes.try_reserve_exact(count).map_err(|_| Error::Budget("BRep subshape table"))?;
+        let mut live = Usage::array::<Subshape>(subshapes.capacity())?.bytes;
+        Usage { bytes: live, ..Usage::default() }.check(limits)?;
+        admit(live, 0)?;
         for (index, _) in display.edges.iter().enumerate() {
-            let segments: Vec<_> = display
+            let mut segments = display
                 .segments
                 .iter()
-                .filter(|segment| segment[2] as usize == index)
-                .collect();
-            let (Some(first), Some(last)) = (segments.first(), segments.last()) else {
+                .filter(|segment| segment[2] as usize == index);
+            let Some(first) = segments.next() else {
                 continue;
             };
             let start = display.points[first[0] as usize];
-            let end = display.points[last[1] as usize];
+            let mut end = display.points[first[1] as usize];
             let mut measure = 0.0;
-            for segment in &segments {
+            for segment in std::iter::once(first).chain(segments) {
                 let a = display.points[segment[0] as usize];
                 let b = display.points[segment[1] as usize];
+                end = b;
                 measure +=
                     ((a[0] - b[0]).powi(2) + (a[1] - b[1]).powi(2) + (a[2] - b[2]).powi(2)).sqrt();
             }
+            let name = admitted_subshape_name("edge:", index, &mut live, limits, admit)?;
             subshapes.push(Subshape {
-                name: format!("edge:{index}"),
+                name,
                 kind: SubshapeKind::Edge,
                 signature: SubshapeSignature {
                     start,
@@ -643,8 +670,9 @@ impl SnapshotTopology {
                 centroid[1] / count as f64,
                 centroid[2] / count as f64,
             ];
+            let name = admitted_subshape_name("face:", index, &mut live, limits, admit)?;
             subshapes.push(Subshape {
-                name: format!("face:{index}"),
+                name,
                 kind: SubshapeKind::Face,
                 signature: SubshapeSignature {
                     start: center,
@@ -655,8 +683,9 @@ impl SnapshotTopology {
         }
         for (index, offset) in display.vertices.iter().enumerate() {
             let point = display.points[*offset as usize];
+            let name = admitted_subshape_name("vertex:", index, &mut live, limits, admit)?;
             subshapes.push(Subshape {
-                name: format!("vertex:{index}"),
+                name,
                 kind: SubshapeKind::Vertex,
                 signature: SubshapeSignature {
                     start: point,
@@ -696,6 +725,24 @@ impl SnapshotTopology {
         }
         Ok(subshapes)
     }
+}
+
+fn admitted_subshape_name(prefix: &str, index: usize, live: &mut u64, limits: &Limits,
+    admit: &mut dyn FnMut(u64, u64) -> Result<()>) -> Result<String> {
+    use std::fmt::Write;
+    let digits = index.checked_ilog10().unwrap_or(0) as usize + 1;
+    let capacity = prefix.len().checked_add(digits).ok_or(Error::Overflow("BRep subshape name"))?;
+    let pending = u64::try_from(capacity).map_err(|_| Error::Overflow("BRep subshape name"))?;
+    let required = live.checked_add(pending).ok_or(Error::Overflow("BRep subshape names"))?;
+    Usage { bytes: required, ..Usage::default() }.check(limits)?;
+    admit(*live, pending)?;
+    let mut name = String::new();
+    name.try_reserve_exact(capacity).map_err(|_| Error::Budget("BRep subshape name"))?;
+    *live = live.checked_add(name.capacity() as u64).ok_or(Error::Overflow("BRep subshape names"))?;
+    Usage { bytes: *live, ..Usage::default() }.check(limits)?;
+    admit(*live, 0)?;
+    write!(&mut name, "{prefix}{index}").map_err(|_| Error::Invalid("BRep subshape name"))?;
+    Ok(name)
 }
 
 fn polyline_length(points: &[Point3]) -> f64 {
@@ -774,7 +821,7 @@ impl ProducerRegistry {
             .producers
             .get(&request.command)
             .ok_or(Error::Unsupported("history producer"))?;
-        let outputs = producer.produce(request)?;
+        let (outputs, brep_candidates) = producer.produce_with_candidates(request)?;
         let limits = Limits::default();
         let mut subshapes = Vec::with_capacity(outputs.len());
         for output in &outputs {
@@ -783,7 +830,7 @@ impl ProducerRegistry {
                 subshapes: self.topology.subshapes(&output.geometry, &limits)?,
             });
         }
-        Ok(ProducedFeature { outputs, subshapes })
+        Ok(ProducedFeature { outputs, subshapes, brep_candidates })
     }
 }
 
@@ -812,6 +859,18 @@ pub fn recompute_registered(
     id: HistoryId,
     registry: &ProducerRegistry,
 ) -> Result<RecomputeOutcome> {
+    let command = document.history.recipes.get(&id).ok_or(Error::Missing("history recipe"))?.command.clone();
+    if !registry.contains(&command) { return Err(Error::Unsupported("history producer")); }
+    crate::associative::recompute_with(document, cache, id, None, |request| registry.produce(request))
+}
+
+/// Retain transient B-reps until the host has handed their displays to the
+/// representation store. Cached and failed rebuilds produce no candidates.
+pub fn recompute_registered_with_candidates(
+    document: &mut Document, cache: &mut RecomputeCache, id: HistoryId,
+    registry: &ProducerRegistry, candidates: &mut Vec<crate::brep::Brep>,
+) -> Result<RecomputeOutcome> {
+    candidates.clear();
     let command = document
         .history
         .recipes
@@ -822,7 +881,7 @@ pub fn recompute_registered(
     if !registry.contains(&command) {
         return Err(Error::Unsupported("history producer"));
     }
-    crate::associative::recompute_with(document, cache, id, |request| registry.produce(request))
+    crate::associative::recompute_with(document, cache, id, Some(candidates), |request| registry.produce(request))
 }
 
 /// The output geometry kind a producer is expected to return for a command, so a catalog or

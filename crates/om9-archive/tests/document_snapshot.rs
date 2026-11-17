@@ -68,7 +68,7 @@ fn snapshot_roundtrips_native_brep_chunked_payload() {
     let limits = Limits::default();
     let mut document = Document::new("native payload snapshot");
     let native = NativeBrep {
-        display: Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] },
+        display: std::sync::Arc::new(Mesh { vertices: vec![], faces: vec![], normals: vec![], colors: vec![], corner_uvs: vec![] }),
         payload: vec![37; 70_000].into(), crc: 123,
     };
     let entity = Entity::new("retained", Geometry::NativeBrep(native), None);

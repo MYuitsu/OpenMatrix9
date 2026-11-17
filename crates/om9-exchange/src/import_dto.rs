@@ -273,7 +273,7 @@ pub(crate) struct Object {
     pub native_class_uuid: String,
     pub capability: String,
     pub admission_required: bool,
-    pub geometry: Option<Geometry>,
+    pub geometry: Option<ProjectedGeometry>,
     pub placement: Option<Transform>,
     pub native_placement: Transform,
     #[serde(default)]
@@ -293,6 +293,61 @@ pub(crate) struct Object {
     pub preservation: Preservation,
     #[serde(default)]
     pub dependency_readiness: Option<IgnoredAny>,
+}
+
+/// The native process sends the payload and its display together. Split them
+/// at the DTO boundary so the document receives only canonical source bytes.
+pub(crate) struct ProjectedGeometry {
+    pub geometry: Geometry,
+    pub native_display: Option<om9_core::geometry::NativeBrepRepresentation>,
+}
+impl<'de> serde::Deserialize<'de> for ProjectedGeometry {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> std::result::Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        enum Wire {
+            #[serde(alias = "BRep", alias = "B-rep")]
+            Brep(om9_core::brep::CanonicalBrep),
+            NativeBrep(om9_core::geometry::NativeBrep),
+            Point(om9_core::geometry::Point3),
+            Curve(om9_core::geometry::Curve),
+            Surface(om9_core::geometry::NurbsSurface),
+            Mesh(om9_core::geometry::Mesh),
+            Cloud(om9_core::geometry::Cloud),
+            Instance(om9_core::identity::DefinitionId),
+            Hatch(om9_core::geometry::Hatch),
+            Light(om9_core::geometry::Light),
+        }
+        Ok(match Wire::deserialize(deserializer)? {
+            Wire::NativeBrep(native) => {
+                let (source, display) = native.into_source_and_representation();
+                Self { geometry: Geometry::NativeBrep(source), native_display: Some(display) }
+            }
+            other => Self { geometry: match other {
+                Wire::Brep(value) => Geometry::Brep(value),
+                Wire::Point(value) => Geometry::Point(value),
+                Wire::Curve(value) => Geometry::Curve(value),
+                Wire::Surface(value) => Geometry::Surface(value),
+                Wire::Mesh(value) => Geometry::Mesh(value),
+                Wire::Cloud(value) => Geometry::Cloud(value),
+                Wire::Instance(value) => Geometry::Instance(value),
+                Wire::Hatch(value) => Geometry::Hatch(value),
+                Wire::Light(value) => Geometry::Light(value),
+                Wire::NativeBrep(_) => unreachable!(),
+            }, native_display: None },
+        })
+    }
+}
+impl ProjectedGeometry {
+    fn validate(&self, limits: &Limits) -> Result<Usage> {
+        let mut usage = self.geometry.validate(limits)?;
+        if let Some(display) = &self.native_display {
+            let mut mesh = display.display().validate(limits)?;
+            mesh.add(Usage::array::<om9_core::geometry::Mesh>(1)?, limits)?;
+            mesh.add(Usage::array::<usize>(2)?, limits)?;
+            usage.add(mesh, limits)?;
+        }
+        Ok(usage)
+    }
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

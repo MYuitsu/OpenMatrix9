@@ -11,8 +11,10 @@
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRepTools.hxx>
+#include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
 #include <GCPnts_QuasiUniformDeflection.hxx>
+#include <GCPnts_UniformDeflection.hxx>
 #include <Poly_Triangulation.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
 #include <Standard_Failure.hxx>
@@ -46,14 +48,69 @@ struct Om9BrepSnapshot {
  const uint32_t* vertices; size_t vertices_len;
  const uint32_t* face_edges; size_t face_edges_len;
  size_t faces_count; size_t edges_count;
+ // Borrowed only during the synchronous sink call; never retain this pointer.
+ const void* topology_handle;
 };
 using Om9BrepSink = int (*)(void*, const Om9BrepSnapshot*);
+using Om9SourceSink = int (*)(void*, const char*, size_t);
 struct Om9EdgeNodeBinding { uint32_t point; uint32_t edge; uint32_t vertex; uint32_t reserved; double parameter; };
 using Om9FaceShellSink = int (*)(void*, const uint32_t*, size_t, const Om9EdgeNodeBinding*, size_t, double);
 
+// Read from the already-owned source without a second string-sized copy.
+// The source stays alive and unchanged for the lifetime of the stream.
+class Om9SourceBuffer final : public std::streambuf {
+ public:
+  explicit Om9SourceBuffer(std::string& source) {
+   char* begin = source.data();
+   setg(begin, begin, begin + source.size());
+  }
+ protected:
+  pos_type seekoff(off_type offset, std::ios_base::seekdir direction,
+                   std::ios_base::openmode mode) override {
+   if (!(mode & std::ios_base::in) || (mode & std::ios_base::out)) return pos_type(off_type(-1));
+   const off_type size = egptr() - eback();
+   const off_type base = direction == std::ios_base::beg ? 0
+       : direction == std::ios_base::cur ? gptr() - eback()
+       : direction == std::ios_base::end ? size : -1;
+   if (base < 0 || offset < -base || offset > size - base) return pos_type(off_type(-1));
+   const off_type position = base + offset;
+   setg(eback(), eback() + position, egptr());
+   return pos_type(position);
+  }
+  pos_type seekpos(pos_type position, std::ios_base::openmode mode) override {
+   return seekoff(off_type(position), std::ios_base::beg, mode);
+  }
+};
+
+// An intermediate operation returns only persisted CAD source. No tessellator is
+// invoked; Rust owns the source, fold, cancellation and publication decisions.
+inline int om9_emit_source(const TopoDS_Shape& shape, size_t max_nodes, size_t max_bytes,
+                           Om9SourceSink sink, void* context) {
+ if (!sink || shape.IsNull() || !BRepCheck_Analyzer(shape).IsValid())
+  throw std::invalid_argument("invalid intermediate BRep");
+ TopTools_IndexedMapOfShape faces, edges, vertices;
+ TopExp::MapShapes(shape, TopAbs_FACE, faces);
+ TopExp::MapShapes(shape, TopAbs_EDGE, edges);
+ TopExp::MapShapes(shape, TopAbs_VERTEX, vertices);
+ if (faces.IsEmpty() || size_t(faces.Extent()) + size_t(edges.Extent()) + size_t(vertices.Extent()) > max_nodes)
+  throw std::length_error("BRep topology budget");
+ std::ostringstream archive;
+ BRepTools::Write(shape, archive, false, false, TopTools_FormatVersion_CURRENT);
+ std::string text = archive.str();
+ if (text.empty() || text.size() > max_bytes) throw std::length_error("BRep source budget");
+ TopoDS_Shape restored;
+ BRep_Builder builder;
+ std::istringstream input(text);
+ BRepTools::Read(restored, input, builder);
+ if (restored.IsNull() || !BRepCheck_Analyzer(restored).IsValid())
+  throw std::runtime_error("BRep source roundtrip failed");
+ if (sink(context, text.data(), text.size())) throw std::runtime_error("Rust refused BRep source");
+ return 0;
+}
+
 // Writes OCCT text, tessellation, edge polylines and the face/edge/vertex maps in one bounded
 // pass. Throws std::invalid_argument / std::length_error / std::runtime_error on refusal.
-inline int om9_emit_brep_snapshot(const TopoDS_Shape& shape,
+inline int om9_emit_brep_snapshot(const TopoDS_Shape& input_shape,
                                   double deflection,
                                   size_t max_points,
                                   size_t max_nodes,
@@ -66,17 +123,40 @@ inline int om9_emit_brep_snapshot(const TopoDS_Shape& shape,
                                   Om9FaceShellSink shell_sink = nullptr,
                                   void* shell_context = nullptr,
                                   bool include_edge_bindings = false,
-                                  bool optimize_export_sphere = false) {
+                                  bool optimize_export_sphere = false,
+                                  const char* retained_source = nullptr,
+                                  size_t retained_source_len = 0) {
  try {
   if (!sink || !std::isfinite(deflection) || deflection <= 0 ||
       !std::isfinite(angular_deflection) || angular_deflection <= 0 || angular_deflection > std::acos(-1.0))
    throw std::invalid_argument("invalid BRep snapshot input");
-  if (shape.IsNull() || !BRepCheck_Analyzer(shape).IsValid())
+  if (input_shape.IsNull() || !BRepCheck_Analyzer(input_shape).IsValid())
    throw std::invalid_argument("invalid BRep source shape");
-  std::ostringstream archive;
-  BRepTools::Write(shape, archive, false, false, TopTools_FormatVersion_CURRENT);
-  std::string text = archive.str();
+  std::string text;
+  if (retained_source) {
+   if (!retained_source_len || retained_source_len > max_bytes)
+    throw std::length_error("BRep source budget");
+   text.assign(retained_source, retained_source_len);
+  } else {
+   std::ostringstream archive;
+   BRepTools::Write(input_shape, archive, false, false, TopTools_FormatVersion_CURRENT);
+   text = archive.str();
+  }
   if (text.size() > max_bytes) throw std::length_error("BRep source budget");
+  // New geometry must use the topology obtained from its persisted source,
+  // just like later source reads. An index from the pre-serialization shape
+  // alone does not establish which face or edge that source will expose.
+  TopoDS_Shape shape = input_shape;
+  if (!retained_source) {
+   BRep_Builder builder;
+   TopoDS_Shape restored;
+   Om9SourceBuffer buffer(text);
+   std::istream input(&buffer);
+   BRepTools::Read(restored, input, builder);
+   if (restored.IsNull() || !BRepCheck_Analyzer(restored).IsValid())
+    throw std::runtime_error("BRep source roundtrip failed");
+   shape = restored;
+  }
   TopTools_IndexedMapOfShape faces, edges, verts;
   TopExp::MapShapes(shape, TopAbs_FACE, faces);
   TopExp::MapShapes(shape, TopAbs_EDGE, edges);
@@ -214,15 +294,26 @@ inline int om9_emit_brep_snapshot(const TopoDS_Shape& shape,
    auto edge = TopoDS::Edge(edges(e));
    if (BRep_Tool::Degenerated(edge)) continue;
    BRepAdaptor_Curve curve(edge);
-   GCPnts_QuasiUniformDeflection sample(curve, deflection);
-   if (!sample.IsDone() || sample.NbPoints() < 2)
-    throw std::runtime_error("BRep edge sampling failed");
-   uint32_t previous = point(sample.Value(1));
-   for (int i = 2; i <= sample.NbPoints(); ++i) {
-    uint32_t next = point(sample.Value(i));
-    reserve(sizeof(std::array<uint32_t, 3>));
-    segments.push_back({previous, next, uint32_t(e - 1)});
-    previous = next;
+   const auto emit = [&](const auto& sample) {
+    if (!sample.IsDone() || sample.NbPoints() < 2)
+     throw std::runtime_error("BRep edge sampling failed");
+    uint32_t previous = point(sample.Value(1));
+    for (int i = 2; i <= sample.NbPoints(); ++i) {
+     uint32_t next = point(sample.Value(i));
+     reserve(sizeof(std::array<uint32_t, 3>));
+     segments.push_back({previous, next, uint32_t(e - 1)});
+     previous = next;
+    }
+   };
+   // Native OCCT adapter: the checked sampler requires C2 continuity. It fixes
+   // a tested oscillating spline missed by the quasi-uniform sampler; neither
+   // path bounds allocations made inside OCCT before the sink checks its arrays.
+   if (curve.GetType() == GeomAbs_BSplineCurve && curve.Continuity() >= GeomAbs_C2) {
+    GCPnts_UniformDeflection sample(curve, deflection, true);
+    emit(sample);
+   } else {
+    GCPnts_QuasiUniformDeflection sample(curve, deflection);
+    emit(sample);
    }
   }
   for (int v = 1; v <= verts.Extent(); ++v) {
@@ -236,7 +327,7 @@ inline int om9_emit_brep_snapshot(const TopoDS_Shape& shape,
       reinterpret_cast<const uint32_t*>(segments.data()), segments.size(),
       vertices.data(),      vertices.size(),
       reinterpret_cast<const uint32_t*>(face_edges.data()), face_edges.size(),
-      size_t(faces.Extent()), size_t(edges.Extent())};
+      size_t(faces.Extent()), size_t(edges.Extent()), &shape};
   if (sink(context, &snapshot) != 0) throw std::runtime_error("Rust refused BRep snapshot");
   return 0;
  } catch (const Standard_Failure& e) {

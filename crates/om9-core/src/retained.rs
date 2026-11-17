@@ -287,15 +287,83 @@ pub enum ImportMode {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct EntityBaseline {
+    /// Zero retains the original full-geometry baseline interpretation.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub geometry_hash_version: u8,
     pub geometry_sha256: [u8; 32],
     pub placement_sha256: [u8; 32],
     pub attributes_sha256: [u8; 32],
     pub label_sha256: [u8; 32],
 }
+fn is_zero(value: &u8) -> bool { *value == 0 }
+
+fn canonical_geometry_fingerprint(geometry: &crate::geometry::Geometry) -> Result<[u8; 32]> {
+    match geometry {
+        crate::geometry::Geometry::Brep(shape) => {
+            let (source, topology) = shape.canonical_fingerprints();
+            fingerprint(&("OM9 retained BRep source 1", source, topology))
+        }
+        crate::geometry::Geometry::NativeBrep(shape) => {
+            let mut hash = Sha256::new();
+            hash.update(b"OM9 retained NativeBrep source 1\0");
+            hash.update(shape.crc.to_le_bytes());
+            hash.update((shape.payload.len() as u64).to_le_bytes());
+            hash.update(shape.payload.as_slice());
+            Ok(hash.finalize().into())
+        }
+        _ => fingerprint(geometry),
+    }
+}
+
+fn entity_fingerprint(entity: &Entity, version: u8) -> Result<[u8; 32]> {
+    if version == 0 { return fingerprint(entity); }
+    if version != 1 { return Err(Error::Unsupported("entity baseline hash version")); }
+    #[derive(Serialize)]
+    struct SourceEntity<'a> {
+        id: ObjectId, label: &'a str, generation: u64, geometry_revision: u64, attributes_revision: u64,
+        geometry: [u8; 32], placement: &'a crate::geometry::Transform,
+        attributes: &'a crate::model::Attributes,
+        extensions: &'a std::collections::BTreeMap<String, crate::model::Extension>,
+    }
+    fingerprint(&SourceEntity { id: entity.id, label: &entity.label, generation: entity.generation,
+        geometry_revision: entity.geometry_revision, attributes_revision: entity.attributes_revision,
+        geometry: canonical_geometry_fingerprint(&entity.geometry)?, placement: &entity.placement,
+        attributes: &entity.attributes, extensions: &entity.extensions })
+}
+
+fn definition_fingerprint(definition: &Definition, version: u8) -> Result<[u8; 32]> {
+    if version == 0 { return fingerprint(definition); }
+    if version != 1 { return Err(Error::Unsupported("definition baseline hash version")); }
+    struct Members<'a>(&'a [Entity]);
+    impl Serialize for Members<'_> {
+        fn serialize<S: serde::Serializer>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> {
+            use serde::ser::{Error as _, SerializeSeq};
+            let mut sequence = serializer.serialize_seq(Some(self.0.len()))?;
+            for entity in self.0 {
+                sequence.serialize_element(&entity_fingerprint(entity, 1).map_err(S::Error::custom)?)?;
+            }
+            sequence.end()
+        }
+    }
+    #[derive(Serialize)]
+    struct SourceDefinition<'a> {
+        id: DefinitionId, label: &'a str, revision: u64, members: Members<'a>,
+    }
+    fingerprint(&SourceDefinition { id: definition.id, label: &definition.label,
+        revision: definition.revision, members: Members(&definition.members) })
+}
+
 impl EntityBaseline {
     pub fn capture(entity: &Entity) -> Result<Self> {
+        let version = u8::from(matches!(entity.geometry, crate::geometry::Geometry::Brep(_) | crate::geometry::Geometry::NativeBrep(_)));
+        Self::capture_for_version(entity, version)
+    }
+    /// Preserve legacy interpretation when comparing against a stored baseline.
+    pub fn capture_for_version(entity: &Entity, version: u8) -> Result<Self> {
+        if version > 1 { return Err(Error::Unsupported("entity baseline hash version")); }
         Ok(Self {
-            geometry_sha256: fingerprint(&entity.geometry)?,
+            geometry_hash_version: version,
+            geometry_sha256: if version == 0 { fingerprint(&entity.geometry)? } else { canonical_geometry_fingerprint(&entity.geometry)? },
             placement_sha256: fingerprint(&entity.placement)?,
             attributes_sha256: fingerprint(&entity.attributes)?,
             label_sha256: fingerprint(&entity.label)?,
@@ -311,6 +379,9 @@ pub struct SourceRecord {
     pub baseline_sha256: Option<[u8; 32]>,
     #[serde(default)]
     pub entity_baseline: Option<EntityBaseline>,
+    /// Version 1 excludes separate member B-rep displays from a definition baseline.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub definition_hash_version: u8,
     pub disposition: RecordDisposition,
     pub relations: Vec<NativeRelation>,
 }
@@ -322,6 +393,7 @@ impl SourceRecord {
             host: Some(host),
             baseline_sha256: Some(baseline),
             entity_baseline: None,
+            definition_hash_version: 0,
             disposition: RecordDisposition::Unchanged,
             relations: vec![],
         }
@@ -347,8 +419,21 @@ impl SourceRecord {
         {
             return Err(Error::Invalid("entity baseline native/host association"));
         }
-        let mut record = Self::bound(key, family, host, fingerprint(entity)?);
-        record.entity_baseline = Some(EntityBaseline::capture(entity)?);
+        let baseline = EntityBaseline::capture(entity)?;
+        let mut record = Self::bound(key, family, host, entity_fingerprint(entity, baseline.geometry_hash_version)?);
+        record.entity_baseline = Some(baseline);
+        Ok(record)
+    }
+    pub fn bound_definition(key: NativeRecordKey, family: &str, definition: &Definition) -> Result<Self> {
+        key.validate()?;
+        if key.kind != NativeRecordKind::Definition || definition.id.is_nil() || key.id == definition.id.0
+            || family.is_empty() || family.contains('\0') {
+            return Err(Error::Invalid("definition baseline native/host association"));
+        }
+        let version = u8::from(definition.members.iter().any(|entity| matches!(entity.geometry,
+            crate::geometry::Geometry::Brep(_) | crate::geometry::Geometry::NativeBrep(_))));
+        let mut record = Self::bound(key, family, HostRef::Definition(definition.id), definition_fingerprint(definition, version)?);
+        record.definition_hash_version = version;
         Ok(record)
     }
     pub fn retained(key: NativeRecordKey, family: &str) -> Self {
@@ -358,11 +443,20 @@ impl SourceRecord {
             host: None,
             baseline_sha256: None,
             entity_baseline: None,
+            definition_hash_version: 0,
             disposition: RecordDisposition::RetainedOnly,
             relations: vec![],
         }
     }
     fn owned_usage(&self, l: &Limits) -> Result<Usage> {
+        if self.definition_hash_version > 1 { return Err(Error::Unsupported("definition baseline hash version")); }
+        if self.definition_hash_version != 0 && !matches!((self.key.kind, self.host),
+            (NativeRecordKind::Definition, Some(HostRef::Definition(_)))) {
+            return Err(Error::Invalid("definition baseline binding kind"));
+        }
+        if self.entity_baseline.is_some_and(|baseline| baseline.geometry_hash_version > 1) {
+            return Err(Error::Unsupported("entity baseline hash version"));
+        }
         self.key.validate()?;
         name(&self.family, l)?;
         if self.family.is_empty() {
@@ -509,12 +603,12 @@ impl<'a> HostLookup<'a> {
             _ => None,
         }
     }
-    fn hash(&self, host: HostRef) -> Result<Option<[u8; 32]>> {
+    fn hash(&self, host: HostRef, version: u8, definition_version: u8) -> Result<Option<[u8; 32]>> {
         match host {
             HostRef::Object(_) | HostRef::DefinitionMember { .. } => {
-                self.entity(host).map(fingerprint).transpose()
+                self.entity(host).map(|entity| entity_fingerprint(entity, version)).transpose()
             }
-            HostRef::Definition(id) => self.definitions.get(&id).map(fingerprint).transpose(),
+            HostRef::Definition(id) => self.definitions.get(&id).map(|definition| definition_fingerprint(definition, definition_version)).transpose(),
             HostRef::Layer(id) => self.layers.get(&id).map(fingerprint).transpose(),
         }
     }
@@ -651,7 +745,7 @@ impl Document {
                     if !hosts.insert(host.identity()) {
                         return Err(Error::Invalid("host bound by multiple native records"));
                     }
-                    let current = lookup.hash(host)?;
+                    let current = lookup.hash(host, record.entity_baseline.map_or(0, |baseline| baseline.geometry_hash_version), record.definition_hash_version)?;
                     match record.disposition {
                         RecordDisposition::Unchanged
                             if current.is_some() && current == record.baseline_sha256 => {}
@@ -666,7 +760,7 @@ impl Document {
                         let entity = lookup
                             .entity(host)
                             .ok_or(Error::Missing("entity baseline host"))?;
-                        if baseline != EntityBaseline::capture(entity)? {
+                        if baseline != EntityBaseline::capture_for_version(entity, baseline.geometry_hash_version)? {
                             return Err(Error::Invalid("unchanged entity field baseline"));
                         }
                     }
@@ -719,7 +813,7 @@ impl Document {
         for ns in self.import_namespaces.values_mut() {
             for record in &mut ns.records {
                 let Some(host) = record.host else { continue };
-                let current = lookup.hash(host)?;
+                let current = lookup.hash(host, record.entity_baseline.map_or(0, |baseline| baseline.geometry_hash_version), record.definition_hash_version)?;
                 if record.disposition == RecordDisposition::Deleted {
                     if lookup.any_live(host) {
                         return Err(Error::Invalid("deleted native binding resurrected"));

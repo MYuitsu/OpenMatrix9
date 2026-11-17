@@ -126,10 +126,12 @@ fn box_brep() -> Brep {
         triangles,
         segments,
         vertices,
-        faces,
-        edges,
-        vertex_ids,
-        face_edges,
+        topology: om9_core::brep::BrepTopology {
+            faces,
+            edges,
+            vertex_ids,
+            face_edges,
+        }.into(),
     };
     Brep::from_native(
         "CASCADE Topology V3 synthetic box 10x20x30".into(),
@@ -313,6 +315,28 @@ fn without_resources(fixture: &Fixture) -> Document {
 }
 
 #[test]
+fn existing_v4_brep_keeps_source_and_topology_after_roundtrip() {
+    let bytes = include_bytes!("../../../implementation/evidence/M03/solid-ui-followup-2026-10-23/review-fixtures/Boolean2-D-after.om9");
+    let original_metadata: Value = serde_json::from_slice(&metadata_of(bytes)).unwrap();
+    let limits = Limits::default();
+    let document = Archive::decode(bytes, &limits).unwrap();
+    let mut checked = 0;
+    for (id, entity) in &document.entities {
+        let Geometry::Brep(brep) = &entity.geometry else { continue };
+        let original = &original_metadata["entities"][id.to_string()]["geometry"]["Brep"];
+        assert_eq!(Some(brep.source()), original["source"].as_str());
+        assert_eq!(serde_json::to_value(&brep.display().faces).unwrap(), original["display"]["faces"]);
+        assert_eq!(serde_json::to_value(&brep.display().edges).unwrap(), original["display"]["edges"]);
+        assert_eq!(serde_json::to_value(&brep.display().vertex_ids).unwrap(), original["display"]["vertex_ids"]);
+        assert_eq!(serde_json::to_value(&brep.display().face_edges).unwrap(), original["display"]["face_edges"]);
+        checked += 1;
+    }
+    assert!(checked > 0, "fixture must contain a B-rep");
+    let rewritten = Archive::encode(&document, &limits).unwrap();
+    assert_eq!(Archive::decode(&rewritten, &limits).unwrap(), document);
+}
+
+#[test]
 fn container_states_schema_document_id_layers_and_brep_payload() {
     let fixture = fixture();
     let bytes = Archive::encode(&fixture.document, &Limits::default()).unwrap();
@@ -406,8 +430,8 @@ fn brep_source_and_display_round_trip_without_mesh_substitution() {
     };
     assert_eq!(loaded, original);
     assert_eq!(loaded.source(), original.source());
-    assert_eq!(loaded.display.faces, original.display.faces);
-    assert!((display_volume(&loaded.display) - 6000.0).abs() < 1e-9);
+    assert_eq!(loaded.display().faces, original.display().faces);
+    assert!((display_volume(&loaded.display()) - 6000.0).abs() < 1e-9);
 
     let missing_source = edited(&without_resources(&fixture), |value| {
         value["entities"][fixture.box_id.to_string()]["geometry"]["Brep"]
@@ -545,7 +569,7 @@ fn roundtrip_fixture_keeps_two_layers_box_instance_group_and_jobbag_reference() 
     let Geometry::Brep(box_brep) = &reopened.entities[&fixture.box_id].geometry else {
         panic!("box lost");
     };
-    assert!((display_volume(&box_brep.display) - 6000.0).abs() < 1e-9);
+    assert!((display_volume(&box_brep.display()) - 6000.0).abs() < 1e-9);
 
     // A damaged saved bundle is refused and the original document stays usable.
     let mut damaged = std::fs::read(&path).unwrap();

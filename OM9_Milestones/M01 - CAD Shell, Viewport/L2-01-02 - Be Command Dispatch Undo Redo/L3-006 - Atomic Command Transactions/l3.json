@@ -192,6 +192,12 @@
   ],
   "hardening_notes": "# OM9-L3-01-02-006 — Hardened L3/L4 design (v0.15)\n\n**Đây là hợp đồng thiết kế đề xuất; không phải chữ ký API đã tồn tại trong QymCAD.** Chỉ implement khi M00 PASS và QymCAD fork được phép. Đọc source tại SHA `746a17f127897e921a57118b6caad08968602bf5`.\n\n## Ranh giới module\n- Owner: `OM9-L2-01-02`.\n- Luồng/đối tượng: atomic command transaction.\n- Mã QymCAD cần đọc và xác minh function thực tế: `crates/qymcad-core/src/feature.rs`.\n- API Rust dự kiến: `Document::apply(Command) -> Result<CommittedChange, CommandError>`. Nếu API hiện tại khác, lập ADR nhỏ, không tự thêm bản sao module trùng lặp.\n\n## Fixture đầu vào và oracle độc lập\n- **Positive:** one composite command creates precisely one undo frame.\n- **Negative:** failed intermediate operation restores snapshot and journal size.\n- Đóng băng `positive.json`, `negative.json` *trước khi sửa mã*. Bắt buộc có `observed.json` do runtime tạo, không tự sao `expected` thành `actual`.\n- Đối chiếu các assert `exact/near/error_code` theo `tools/m01_proof.py`, viết báo cáo `om9.m01.oracle.v1.5` gắn vào command receipt.\n\n## Việc cho từng L4\n1. `-01` SOURCE_AUDIT: tra source pin, tìm symbol với `rg`, lập bảng method→owner→khả năng REUSE/ADAPT/ADD; không báo build thành công.\n2. `-02` CONTRACT_TEST: chốt API và 2 fixture; chạy fixture-validation exit 0, lập test tích hợp RED có chủ đích.\n3. `-03` IMPLEMENT: thay đổi tại owner, chạy focused Rust tests + negative regression rồi ghi oracle từ run thật.\n4. `-04` INTEGRATE (nếu có): kiểm tra liên module và rollback/identity/viewport; không dùng mock thay kernel.\n5. `-05` ACCEPTANCE: chạy regression, kiểm thử môi trường Windows nếu GUI; đối chiếu reviewer độc lập.\n\n## Dừng khi không rõ\n- Không tìm thấy API/hàm theo pin: `BLOCKED_SOURCE` và báo đường dẫn đã đọc.\n- Không tạo được runtime fixture/thiếu OCCT hoặc GPU: `BLOCKED_ENV`/`BLOCKED_FIXTURE`.\n- Kết quả không đạt oracle: `FAIL` và giữ log; không tự ghi PASS.\n",
   "runtime_implementation": {
+    "boolean_prepared_display_publication_2026_11_15": {
+      "status": "SCOPED_ATOMIC_PUBLICATION_REGRESSIONS_PASSED",
+      "scope": "Worker-owned render-buffer receipts install only in an unpublished, admitted candidate scene before coordinator commit. Source registration, transaction validation and freshness/budget checks remain. Tests cover a single Undo entry, Undo/Redo, stale/cancel, wrong-source/root receipts and managed refusal preserving pre-existing Redo.",
+      "evidence": "docs/validation/2026-11-15-boolean-publication-worker-buffers.md",
+      "limits": "16 focused tests and 10 default-feature native-window release runs support this Boolean slice only. No global transaction acceptance, full migration or persistence closure."
+    },
     "plugin_sdk_v1": {
       "date": "2026-10-21",
       "target": "standalone Rust OM9",
@@ -221,6 +227,60 @@
         "macOS execution unverified",
         "full module/manual gates remain open"
       ]
+    },
+    "coupled_document_ab_2026_11_15": {
+      "status": "SCOPED_COUPLED_DOCUMENT_AB_64_128_VERIFIED",
+      "scope": "Same-binary reconstructed coupled document/display lifetime, validation and serialization versus independent representations. Quality, exact kernel, UI worker publication, GPU caching and RDP policy held constant; normal product remains separated.",
+      "measurement": "16/16 frozen-release native-window runs and 19 focused integration tests passed. 64 high UI final poll 216.7→53.5 ms (75.3% less); 64 light UI final poll 41.3→24.6 ms (40.5% less); 128 high UI final poll 486.0→151.8 ms (68.8% less); 128 light UI final poll 125.5→91.8 ms (26.9% less). Exact output source SHA and per-profile display counts matched. Both architectures stayed near 30 encoded FPS under the same cap; no material steady-FPS gain or consistent total Boolean speedup was established. High creation totals fell about 49/52 percent. Worst 128-sphere request pauses remain about 600/450 ms High/Light.",
+      "evidence": "docs/validation/2026-11-15-coupled-source-display-ab.md",
+      "data": "docs/validation/2026-11-15-coupled-source-display-ab.json",
+      "remaining": "Scoped reconstructed coupling, not a wholesale historical runtime rollback. 30-Hz cap, synthetic input, general scenes/native families, client video FPS and full migration/persistence remain outside evidence.",
+      "next_document": "crates/om9-app/src/ui.rs",
+      "next_action": "Use the separated product path; profile residual request/creation pauses independently of kernel mathematics and RDP presentation."
+    },
+    "boolean_request_source_batch_2026_11_15": {
+      "status": "SCOPED_BOOLEAN_REQUEST_BATCH_64_128_VERIFIED",
+      "scope": "Existing atomic source batch admission replaces per-operand retained-owner scans in shared Boolean request constructor. Exact source, stamps/placement, quotas, guards, native mathematics, display density and publication policies retained.",
+      "measurement": "20 focused integration tests and 16/16 same-binary native-window release runs passed. 64 high request 47.5→2.5 ms (94.7% less), worst active 182.3→138.7 ms; 64 light request 46.2→3.4 ms (92.7% less), worst active 86.6→86.5 ms; 128 high request 365.8→8.9 ms (97.6% less), worst active 626.5→266.1 ms; 128 light request 365.0→8.7 ms (97.6% less), worst active 447.3→210.2 ms. Exact native result source SHA and per-profile mesh counts matched. Both paths remain near 30 steady encoded FPS.",
+      "evidence": "docs/validation/2026-11-15-boolean-request-source-batch.md",
+      "data": "docs/validation/2026-11-15-boolean-request-source-batch.json",
+      "remaining": "Foreground selection/redraw, creation/fitting, worker admission and publication pauses remain. Large-scene Union fixtures only; full migration/persistence, arbitrary geometry and client-presented FPS remain open. Optional debug probe was interrupted and not counted as a passed test.",
+      "next_document": "crates/om9-app/src/ui.rs",
+      "next_action": "Profile selection_frame projection and associated redraw separately from the now-short Boolean request, preserving geometry and exact selection visuals."
+    },
+    "sphere_512_memory_undo_2026_11_15": {
+      "status": "SCOPED_512_LIGHT_COMPLETED_HIGH_SNAPSHOT_POINT_REFUSAL",
+      "scope": "512 spheres as 256 intersecting pairs, then Union. Current separated Light/High with process-only object cap 200000; point/RAM/Undo limits unchanged. One completed Light, one refused High; default-cap attempt stopped at 446.",
+      "measurement": "12 focused tests, release build and 2/2 eight-sphere resource smoke passed. light: performance_end, peak resident 616.4 MiB, retained Undo 513/Redo 0, pre-Boolean encoded FPS 30.008, max active gap 133725.2 ms; high: failure, peak resident 943.6 MiB, retained Undo 512/Redo 0, pre-Boolean encoded FPS 29.995, max active gap 20384.1 ms",
+      "evidence": "docs/validation/2026-11-15-512-spheres-memory-undo.md",
+      "data": "docs/validation/2026-11-15-512-spheres-memory-undo.json",
+      "remaining": "High refused BRep snapshot point ceiling before commit, retaining 512 objects/Undo. No High output or cross-profile source equality. Light result FPS lacks uninterrupted samples after a 32-second stall. Single samples; all-Undo replay, client video FPS and general geometry remain unproved.",
+      "next_document": "crates/om9-kernel/src/editing.rs",
+      "next_action": "Profile intermediate captured-group Union snapshot/tessellation and point accounting; preserve exact sources and admission while preparing a final-only display path. Separately profile retained-version creation/inventory stalls."
+    },
+    "retained_owner_freeze_2026_11_15": {
+      "stage": "build-validation",
+      "feature_ids": [
+        "OM9-L3-01-02-006",
+        "OM9-L3-01-10-001"
+      ],
+      "status": "SCOPED_512_LIGHT_STALL_REDUCED_SOURCE_AND_UNDO_VERIFIED",
+      "scope": "One release run/profile at 64 with stricter object cap 3000, one Light 512 at cap 200000 matching the prior fixture. Byte/point/Undo/tolerance and exact kernel remain unchanged; default-cap 512 acceptance is not claimed.",
+      "measurement": "25 focused checks and 3/3 native release runs passed. Light 512 largest active gap 133725.2→6703.2 ms; final UI poll 70393.0→1514.7 ms. Exact native source SHA and density match; retained Undo 513 / Redo 0.",
+      "evidence": "docs/validation/2026-11-15-512-light-freeze-fix.md",
+      "data": "docs/validation/2026-11-15-512-light-freeze-fix.json",
+      "uncertainties": "Individual samples; remaining creation and worker pauses, RDP client video FPS, all-overlap/general geometry, replay of every Undo and High 512 snapshot-point refusal remain outside closure.",
+      "next_document": "crates/om9-core/src/transaction.rs",
+      "next_action": "Profile the measured remaining foreground creation/admission gaps separately from kernel wall wait; preserve exact source and loaded Undo policy."
+    },
+    "speculative_union_20261115": {
+      "status": "IMPLEMENTED_NATIVE_64_128_512_LIGHT_VERIFIED_HIGH_512_FAILED",
+      "scope": "BooleanUnion disposable mesh preview concurrent with exact source-only fold; final-only display/topology capture and existing atomic source/scene commit. CAD tolerances, checks and Undo policy retained.",
+      "evidence": "docs/validation/2026-11-15-speculative-boolean.md",
+      "limitations": "512 Light completed with identical exact source and 513 Undo; High preview passed but exact worker failed after 884.358 s, retaining 512 inputs/Undo. No High final result/source equality or post-commit FPS. Long creation image holds remain. Error text, manual/client video, repeated/general geometry and full Undo/persistence acceptance remain open.",
+      "manual_gate_promoted": false,
+      "kernel_512": "Kernel source/final Light/High captures passed independently. Native Light passed, native High worker failed before commit; kernel proof does not close the full native path.",
+      "comparison_report": "docs/validation/2026-11-15-speculative-boolean-512-comparison.md"
     }
   },
   "sdk_export_plan": {

@@ -894,6 +894,128 @@
     }
   ],
   "runtime_implementation": {
+    "boolean_two_ui_worker_2026_11_14": "MatrixApp Boolean Two Objects prepares five preview modes on admitted source workers, preserving prior preview on stale or budget refusal; scoped headless tests pass. Document/Undo and C1-C5 remain open. Evidence: docs/validation/2026-11-14-boolean-two-ui-worker.md",
+    "boolean_split_ui_worker_2026_11_14": "MatrixApp Boolean Split menu/CMD uses admitted multi-set source workers and guarded transaction publication; scoped headless tests cover overlapping sets, placement, DeleteInput, stale/cancel, quota and Undo/Redo. C1-C5 remain open. Evidence: docs/validation/2026-11-14-boolean-split-ui-worker.md",
+    "split_captured_source_2026_11_14": "Source-only split and admitted piece extraction pass scoped detached worker and kernel fixtures; product multi-set Split and C1-C5 remain open. Evidence: docs/validation/2026-11-14-split-captured-source.md",
+    "boolean_binary_ui_worker_2026_11_14": "MatrixApp Difference and Intersection menu/CMD run captured source groups and placements on admitted workers; scoped headless tests check output, DeleteInput, stale/cancel, quota and Undo/Redo. Split, Two Objects and C1-C5 remain open. Evidence: docs/validation/2026-11-14-boolean-binary-ui-worker.md",
+    "boolean_union_ui_worker_2026_11_14": "MatrixApp Boolean Union menu/CMD runs captured source and placement on an admitted worker with guarded transaction publication; headless multi-box, stale, cancel, budget and Undo/Redo fixtures pass. Other Boolean routes and C1-C5 remain open. Evidence: docs/validation/2026-11-14-boolean-union-ui-worker.md",
+    "captured_boolean_source_2026_11_14": "Captured-source Boolean worker foundation passes scoped source/display lifetime and admission tests; product menu/CMD remains synchronous. Evidence: docs/validation/2026-11-14-boolean-captured-source.md",
+    "builder_topology_owner_2026_11_14": "Transient Ring Builder B-rep uses independent source, shared topology and display reservation owners, including per-owner metadata. Product fixtures confirm both source-only and display-only lifetime/charge release. Evidence: docs/validation/2026-11-14-builder-split-candidate-owners.md#independent-shared-topology-owner",
+    "builder_split_candidate_owners_2026_11_14": "Transient Ring Builder B-rep candidates now have separately accounted source/topology and display owners. A product fixture confirms display bytes are released while only the source survives; pin and invalid-account checks pass. Evidence: docs/validation/2026-11-14-builder-split-candidate-owners.md",
+    "hover_source_copy_worker_2026_11_14": "Large-scene hover source validation and copying runs on one admitted cancelable worker; its captured document is released before picking. Headless New/cancel/pressure and retry/permit fixtures pass. Evidence: docs/validation/2026-11-14-detached-hover-source.md#source-copy-preparation-on-the-worker",
+    "detached_hover_source_2026_11_14": "Background hover uses an admitted document-independent picking snapshot with exact curve copies and display pins, and rejects a changed scene publication. Headless parity, source lifetime, pressure and stale-result fixtures pass. Evidence: docs/validation/2026-11-14-detached-hover-source.md",
+    "remesh_cache_source_rebind_2026_11_14": "A stored remesh representation can be rebound to the current stamp after validated same-source proof reuse. One OCCT placement/Undo/Redo fixture checks buffer identity, placement, stale stamp, independent-source refusal and simulated budget failure. Evidence: docs/validation/2026-11-14-remesh-cache-source-rebind.md",
+    "isocurve_root_start_worker_2026_11_14": "MatrixApp resolves root-only B-rep and NativeBrep Isocurve bounds on an admitted worker. Headless planar single-face and multi-face refusal fixtures cover sampled geometry, Undo/Redo, changed draft/selection and simulated quota refusal. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#root-only-command-start-on-a-worker",
+    "isocurve_ray_start_worker_2026_11_14": "MatrixApp resolves Isocurve viewport-ray source hit and UV bounds on a worker for B-rep and NativeBrep, including payload conversion, with context and CMD guards. Headless sphere and simulated stale/quota fixtures pass. Root-only route, desktop, native peak and C1-C5 remain open. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#viewport-ray-command-start-on-a-worker",
+    "isocurve_native_brep_build_worker_2026_11_14": "MatrixApp NativeBrep Isocurve construction converts captured payload and builds curves on an admitted worker. Headless sphere UI, reopened box and affine cylinder fixtures cover selection, placement, Undo/Redo, simulated quota refusal and retry. Initial conversion/bounds, opaque payload, native peak and C1-C5 remain open. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#nativebrep-construction-on-the-worker",
+    "isocurve_brep_ray_worker_2026_11_14": "Editable OCCT B-rep Isocurve construction selected by viewport ray runs on the MatrixApp source-only worker. Headless sphere UI and drilled-block hole/stale selection fixtures pass; initial ray bounds resolution, NativeBrep, desktop and C1-C5 remain open. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#viewport-ray-b-rep-construction-on-the-worker",
+    "isocurve_ui_source_worker_2026_11_14": "MatrixApp polls non-ray OCCT B-rep Isocurve source construction on a worker with draft/context guards, atomic commit and asynchronous consented memory recovery. Sphere egui and simulated managed-pressure fixtures pass; NativeBrep/ray, desktop, native peak and C1-C5 remain open. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#product-ui-worker-polling",
+    "isocurve_explicit_worker_commit_20261114": {
+      "status": "EXPLICIT_ISOCURVE_CONTROLLER_WORKER_SCOPED_CHECKS_PASSED",
+      "scope": "Controller can explicitly start and poll admitted source-only Isocurve construction, guard context, block command input and commit one transaction. Sphere fixture checks managed-pressure refusal, preserved pending input/Redo, retry, source geometry and Undo/Redo; 24 Isocurve lib/UI tests passed.",
+      "evidence": "docs/validation/2026-11-14-captured-isocurve-source.md#explicit-controller-worker-and-commit",
+      "limitations": "Normal CMD/menu/UI construction still synchronous; UI draft guard and asynchronous recovery not wired. NativeBrep/ray, native peak, desktop, physical OOM, C1-C5 and synchronous hole verifier remain open."
+    },
+    "isocurve_construction_job_20261114": {
+      "status": "SOURCE_ISOCURVE_JOB_SCOPED_TESTS_PASSED_NOT_CONNECTED",
+      "scope": "Added a source-only admitted Isocurve construction job with permit, cancellation, output lifetime and controller context checks. One fixture checks worker thread, sphere geometry, parameter/selection stale refusal, cancellation and simulated budget refusal.",
+      "evidence": "docs/validation/2026-11-14-captured-isocurve-source.md#source-only-construction-job",
+      "limitations": "Job is not wired to product polling, CMD draft guard, asynchronous recovery or atomic commit. Native peak, desktop, physical OOM, other geometry/routes and C1-C5 remain open."
+    },
+    "captured_isocurve_source_20261114": {
+      "status": "CAPTURED_ISOCURVE_SOURCE_SCOPED_CHECKS_PASSED",
+      "scope": "Non-ray OCCT B-rep Isocurve commit now uses a tracked canonical source lease and drops it before transaction. A gated worker fixture releases its Document/display before producing clipped curves, retains output quota and checks cancellation/admission refusal. Isocurve integration 57 passed/4 ignored; 22 app lib/UI tests passed.",
+      "evidence": "docs/validation/2026-11-14-captured-isocurve-source.md",
+      "limitations": "Product curve construction remains synchronous; ray and NativeBrep routes differ. Worker publication guards, physical OOM, native peak, desktop, synchronous hole verifier and C1-C5 remain open."
+    },
+    "isocurve_bounds_worker_20261114": {
+      "status": "SELECTED_BREP_ISOCURVE_BOUNDS_WORKER_SCOPED_CHECKS_PASSED",
+      "scope": "Face verification worker now computes selected OCCT B-rep Isocurve UV bounds from its tracked source and releases source/display before publishing a guarded receipt. Tests verify different worker thread, stale-selection refusal, bounds-phase managed admission refusal, and CMD/menu geometry and Undo/Redo.",
+      "evidence": "docs/validation/2026-11-14-brep-hole-chord.md#selected-b-rep-isocurve-bounds-on-the-face-worker",
+      "limitations": "Other source-ray and NativeBrep routes and later curve construction still include synchronous work; physical OOM, native peak, desktop, plain kernel hole verification and C1-C5 remain open."
+    },
+    "isocurve_face_worker_all_sizes_20261114": {
+      "status": "SELECTED_BREP_ISOCURVE_WORKER_ALL_SIZES_SCOPED_TESTS_PASSED",
+      "scope": "Removed the 512-triangle threshold for selected-root OCCT B-rep face verification. Saved one-hole and five-hole fixtures use the worker through CMD/menu, produce correct clipped curves, preserve Undo/Redo and reject stale selection. Isocurve integration 56 passed/4 ignored; 21 matching app lib/UI tests passed.",
+      "evidence": "docs/validation/2026-11-14-brep-hole-chord.md#selected-b-rep-isocurve-verification-always-uses-a-worker",
+      "limitations": "Viewport-ray and NativeBrep routes differ; source bounds/result production still includes synchronous work. Plain synchronous kernel hole verification still fails; physical OOM, native peak, desktop and C1-C5 remain open."
+    },
+    "hole_face_worker_remesh_20261114": {
+      "status": "SCOPED_HOLE_FACE_WORKER_EXACT_REMESH_CHECKS_PASSED",
+      "scope": "Captured-source face worker retries the strict trim-crossing refusal with admitted exact source remesh, topology/triangle and witness checks. Saved drilled-block source tests reject altered display, stale selection, cancellation and admission denial; five-hole ExtractIsocurve menu/CMD output and Undo/Redo passed.",
+      "evidence": "docs/validation/2026-11-14-brep-hole-chord.md#captured-source-worker-exact-remesh-binding",
+      "limitations": "Synchronous verifier remains unchanged: full BRep precision suite 22 passed/1 failed. Other geometry/profiles, all face consumers, desktop, native peak, physical OOM and C1-C5 remain open."
+    },
+    "hole_source_remesh_probe_20261114": {
+      "status": "ONE_HOLE_SOURCE_REMESH_PROBE_PASSED_EXISTING_GUARD_FAILS",
+      "scope": "Authored drilled block after save/open regenerates exactly matching vertices, face-indexed triangles and face-edge incidence at two deflections; added cross-hole triangle and altered face label differ.",
+      "evidence": "docs/validation/2026-11-14-brep-hole-chord.md#same-source-remesh-probe",
+      "limitations": "No product acceptance changed; strict full-face test still fails. One geometry and pinned OCCT only, no general determinism, typed binding, managed admission, cancellation, desktop or C1-C5 completion."
+    },
+    "line_snap_admission_refusal_20261114": {
+      "status": "LINE_WORKER_ADMISSION_REFUSAL_SCOPED_TESTS_PASSED",
+      "scope": "Line Surface Snap refuses a point if its detached occlusion snapshot cannot be admitted, rather than running the source proof synchronously on UI. Scheduler pressure/retry and two egui click fixtures passed; 23 surface-snap tests passed, one ignored.",
+      "evidence": "docs/validation/2026-11-14-detached-occlusion-snapshot.md#refuse-line-occlusion-when-admission-fails",
+      "limitations": "Scene snapshot creation and source copies still run on UI. Other commands and Gumball remain synchronous; physical OOM, desktop, native peak, curved-hole full-face failure and C1-C5 remain open."
+    },
+    "trim_fallback_occlusion_worker_20261114": {
+      "status": "SCOPED_FALLBACK_SOURCE_WORKER_CHECKS_PASSED",
+      "scope": "Copied eligible trim fallback source and extension under independent admission and used the shared conservative proof on the Line Surface Snap worker. One affine 1025-vertex cylindrical fixture checks scheduler result, source lifetime after New, negative proof and simulated admission refusal/retry.",
+      "evidence": "docs/validation/2026-11-14-detached-occlusion-snapshot.md#source-only-trim-fallback-on-the-worker",
+      "limitations": "Snapshot capture and source copies still happen on UI; failure to admit falls back to synchronous proof. Other commands, native peak, desktop, physical OOM, arbitrary trims, curved-hole integration failure and C1-C5 remain open."
+    },
+    "line_occlusion_worker_20261114": {
+      "status": "SCOPED_LINE_OCCLUSION_WORKER_CHECKS_PASSED",
+      "scope": "Line Surface Snap worker refines source and checks ordinary detached display occlusion; headless UI receipt, sphere plus foreground mesh, stale camera and admitted snapshot New/lifetime fixtures passed.",
+      "evidence": "docs/validation/2026-11-14-detached-occlusion-snapshot.md#line-worker-integration",
+      "limitations": "Visible trim fallback and snapshot admission failure retain synchronous UI proof; snapshot capture runs on UI. Other commands and Gumball, native peak, desktop, full-face trim failure and C1-C5 remain open."
+    },
+    "detached_occlusion_snapshot_20261114": {
+      "status": "DETACHED_OCCLUSION_SNAPSHOT_TARGETED_TESTS_PASSED",
+      "scope": "Validated triangle/entity bindings, detached scene buffers from strong Document ownership, and shared live-scene occlusion query; two snapshot fixtures and three existing app occlusion tests passed.",
+      "evidence": "docs/validation/2026-11-14-detached-occlusion-snapshot.md",
+      "limitations": "Snapshot not integrated with product worker, fallback proof still on UI; native allocation peak, desktop, general geometries and curved-trim full-face failure remain unverified. Canonical document still owns display and C1-C5 remain open."
+    },
+    "line_surface_mode_guard_20261114": {
+      "status": "SCOPED_LINE_DISPLAY_MODE_STALE_GUARD_PASSED",
+      "scope": "A pending Line Surface Snap click records its viewport and display mode; the occupied-worker egui sphere fixture verifies immediate cancellation after a Wireframe/Shaded change, and existing input, pointer and camera cases.",
+      "evidence": "docs/validation/2026-11-14-surface-snap-source-worker.md#deferred-click-display-mode-guard",
+      "limitations": "Other commands, Gumball and some occlusion work remain synchronous; physical desktop, native peak, true OOM and full-face curved-trim integration remain unverified. Canonical document still owns display; C1-C5 remain open."
+    },
+    "line_surface_worker_ui_20261114": {
+      "status": "SCOPED_LINE_UI_WORKER_CHECKS_PASSED",
+      "scope": "Line viewport Surface Snap schedules source-only refinement and guards deferred clicks; headless sphere fixture verifies the exact source point and cancellation on new input.",
+      "evidence": "docs/validation/2026-11-14-surface-snap-source-worker.md#line-viewport-integration",
+      "limitations": "Other commands, Gumball and some occlusion work remain synchronous; native peak, desktop, real OOM, view-change coverage and curved-trim integration failure remain open. Canonical Document still owns display; C1-C5 remain open."
+    },
+    "brep_hole_chord_regression_20261114": {
+      "status": "POINT_GUARD_PASSED_FULL_FACE_VERIFICATION_OPEN",
+      "evidence": [
+        "docs/validation/2026-11-14-brep-hole-chord.md"
+      ],
+      "scope": "One displayed chord enters an exact hole; synchronous and worker point refinement reject it. Full-face verification still refuses the mesh and its integration test fails."
+    },
+    "surface_snap_source_worker_20261114": {
+      "status": "SCOPED_WORKER_CHECKS_PASSED_UI_SYNCHRONOUS",
+      "evidence": [
+        "docs/validation/2026-11-14-surface-snap-source-worker.md"
+      ],
+      "scope": "NURBS and OCCT B-rep batches can use admitted source-only worker inputs; retained result quota follows the final job/receipt owner and requests/receipts support repeated guarded polling. Unsupported types, low-copy-budget fallback and UI scheduling remain open. One separate B-rep trim verification integration test failed."
+    },
+    "opennurbs_source_archive_probe_20261114": {
+      "status": "SDK_FIXTURE_ONLY_PRODUCT_NOT_CHANGED",
+      "evidence": [
+        "docs/validation/2026-11-14-opennurbs-source-archive-probe.md"
+      ],
+      "scope": "One box fixture characterizes render/analysis mesh archive flags; source-only document ownership, real export and v5 remain open."
+    },
+    "scene_explicit_document_20261114": {
+      "status": "PARTIAL_OWNERSHIP_MIGRATION",
+      "evidence": [
+        "docs/validation/2026-11-14-scene-explicit-document.md"
+      ],
+      "scope": "Hover picking uses a detached scene snapshot and a separately accounted document lease; active scene and canonical B-rep still retain display through document ownership. C1 and release gates remain open."
+    },
     "regression_fixes_20261105": {
       "date": "2026-11-05",
       "status": "TARGETED_REGRESSIONS_PASSED_DESKTOP_PENDING",
@@ -937,6 +1059,37 @@
       ],
       "scope": "Integrated build/test observation only; planning, feature completion and manual approvals unchanged.",
       "results": "release build 0; workspace tests 101, 4497 passed/21 failed/183 ignored; native fixture protocol rejected"
+    },
+    "smooth_normals_selection_cache_20261115": {
+      "status": "implemented_focused_validation_native_matrix_pending",
+      "scope": "GPU-only smooth CAD-face normals with crease boundaries; immutable shared display bounds and conservative clipped selection-frame projection. Exact source authority and picking/snapping/Boolean remain unchanged.",
+      "evidence": "docs/validation/2026-11-15-smooth-normals-selection-cache.md",
+      "checks": [
+        "17 app integration tests passed including exact source equality, Boolean and Undo/Redo",
+        "3 smooth-normal math tests passed",
+        "GPU flat/smooth readback passed with identical silhouette",
+        "2 bounds/projection tests passed",
+        "15 scene renderer tests passed in saved sequential retry; 4 ignored measurement cases"
+      ],
+      "requires_manual_test": true,
+      "manual_acceptance": false,
+      "native_performance": "512/768 Light/High pending: current Windows session 1 is disconnected; no new native FPS/freeze/RAM claim",
+      "binary_receipt": "build/standalone-validation/ui-artifacts/viewport-normals-selection-20261115/frozen-binary.json",
+      "data": "docs/validation/2026-11-15-smooth-normals-selection-cache.json"
+    },
+    "progressive_publish_20261116": {
+      "status": "renderer_and_small_native_verified_large_matrix_incomplete",
+      "evidence": "docs/validation/2026-11-16-progressive-render-publish.md",
+      "scope": "Append-only presentation cohort drains while immutable source identities are retained; strict destructive/source/preview invalidation. Native per-sphere replay waits for all four current completed images; no Boolean.",
+      "validation": "30 GPU bridge tests and one exact-source test passed. 16 Light/High native exact 1..16 presentation acknowledgements and 16 Undo/Redo passed. 512 Light reached 409 acknowledgements before RDP disconnected; no accepted large FPS/freeze/RAM result.",
+      "manual_acceptance": false,
+      "remaining": [
+        "512 Light retry",
+        "512 High",
+        "768 Light",
+        "768 High",
+        "profile superlinear command/history inventory cost"
+      ]
     }
   },
   "sdk_integration_plan": {

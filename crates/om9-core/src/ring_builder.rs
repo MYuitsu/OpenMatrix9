@@ -11,7 +11,7 @@
 //! the mesh, while the OCCT adapter sews the same quads into a B-Rep solid
 //! (`om9_kernel::associative::RingFamilyBrepProducer`). [`inspect_measures`] is the one
 //! feasibility gate both bodies must satisfy (closed, positive volume), reached through
-//! [`inspect_solid`] for a mesh and [`inspect_geometry`] for either representation, so an open
+//! [`inspect_solid`] for a mesh and through the kernel adapter for a B-Rep, so an open
 //! body is refused instead of being called production geometry.
 use crate::{
     Error, Result,
@@ -464,42 +464,17 @@ pub fn inspect_measures(closed: bool, volume_mm3: f64) -> Result<SolidReport> {
     })
 }
 
-/// The feasibility gate for a committed or previewed ring of either representation.
-///
-/// `Geometry::Mesh` is checked edge by edge; `Geometry::Brep` is bound to its source and
-/// measured from its display snapshot (the sewn solid already passed the adapter's closed
-/// shell test). Any other geometry is not a ring body.
+/// Inspect an authored mesh. B-Rep callers must use the kernel's exact-source
+/// measurement; a viewport tessellation is not a reliable solid or volume.
 pub fn inspect_geometry(
     geometry: &Geometry,
-    limits: &crate::budget::Limits,
+    _limits: &crate::budget::Limits,
 ) -> Result<SolidReport> {
     match geometry {
         Geometry::Mesh(mesh) => inspect_solid(mesh),
-        Geometry::Brep(brep) => {
-            brep.validate(limits)?;
-            inspect_measures(true, display_volume(&brep.display)?)
-        }
+        Geometry::Brep(_) => Err(Error::Unsupported("ring BRep requires exact kernel measurement")),
         _ => Err(Error::Invalid("ring solid geometry")),
     }
-}
-
-/// Signed volume of the display triangles of a B-Rep snapshot, in mm^3.
-fn display_volume(display: &crate::brep::BrepDisplay) -> Result<f64> {
-    let mut volume = 0.0;
-    for [a, b, c, _face] in &display.triangles {
-        let (Some(a), Some(b), Some(c)) = (
-            display.points.get(*a as usize),
-            display.points.get(*b as usize),
-            display.points.get(*c as usize),
-        ) else {
-            return Err(Error::Invalid("ring solid face"));
-        };
-        volume += dot(*a, cross(*b, *c)) / 6.0;
-    }
-    if !volume.is_finite() {
-        return Err(Error::Invalid("ring solid volume"));
-    }
-    Ok(volume)
 }
 
 /// The feasibility numbers of a solid.

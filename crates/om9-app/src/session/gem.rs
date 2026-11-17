@@ -607,10 +607,11 @@ impl Controller {
             }
             let mut extensions = entity.extensions.clone();
             extensions.insert(GEM_EXTENSION_SLOT.to_owned(), record.as_extension()?);
+            let (geometry, mut reservation) = self.gem_geometry_with_guard(mesh, session.brep)?;
             let mut mutations = vec![
                 Mutation::Geometry {
                     source,
-                    geometry: self.gem_geometry(mesh, session.brep)?,
+                    geometry,
                 },
                 Mutation::Extensions { source, extensions },
             ];
@@ -619,7 +620,7 @@ impl Controller {
                 attributes.layer = layer;
                 mutations.push(Mutation::Attributes { source, attributes });
             }
-            self.commit_gem("Gem reload", mutations)
+            self.commit_gem_with_guard("Gem reload", mutations, reservation.as_mut())
         } else {
             self.ensure_layer_writable(layer)?;
             let mut record = GemRecord::new(spec.clone()).with_material(
@@ -628,21 +629,23 @@ impl Controller {
                 material_color(&session.material).unwrap_or([180, 180, 180, 255]),
             );
             record.gem_id = GemId::new();
+            let (geometry, mut reservation) = self.gem_geometry_with_guard(mesh, session.brep)?;
             let mut entity = Entity::new(
                 format!("{} {}", spec.shape.label(), spec.cut.label()),
-                self.gem_geometry(mesh, session.brep)?,
+                geometry,
                 layer,
             );
             entity.placement = Transform::translation(session.origin);
             entity
                 .extensions
                 .insert(GEM_EXTENSION_SLOT.to_owned(), record.as_extension()?);
-            self.commit_gem(
+            self.commit_gem_with_guard(
                 "Gem loader",
                 vec![Mutation::Insert {
                     document: self.document,
                     entity,
                 }],
+                reservation.as_mut(),
             )
         }
     }
@@ -662,7 +665,7 @@ impl Controller {
             let record = gem_record_in(self.document(), target)
                 .ok_or(Error::Invalid("gem positioner target is not a gem"))?;
             let keep_brep = matches!(&entity.geometry, Geometry::Brep(_));
-            let definition_member = {
+            let (definition_member, mut reservation) = {
                 let mut member = Entity::new(
                     format!("{} {}", record.spec.shape.label(), record.spec.cut.label()),
                     entity.geometry.clone(),
@@ -670,8 +673,9 @@ impl Controller {
                 );
                 member.extensions = entity.extensions.clone();
                 let mesh = build_mesh(&record.spec)?;
-                member.geometry = self.gem_geometry(mesh, keep_brep)?;
-                member
+                let (geometry, guard) = self.gem_geometry_with_guard(mesh, keep_brep)?;
+                member.geometry = geometry;
+                (member, guard)
             };
             let definition = Definition::new(record.spec.asset_key(), vec![definition_member]);
             let definition_id = definition.id;
@@ -685,7 +689,7 @@ impl Controller {
             let mut instance = instance;
             instance.placement = placement;
             let revision = self.document().revision;
-            self.commit_gem(
+            self.commit_gem_with_guard(
                 "Gem duplicate",
                 vec![
                     Mutation::DefinitionInsert {
@@ -703,10 +707,12 @@ impl Controller {
                         placement: entity.placement,
                     },
                 ],
+                reservation.as_mut(),
             )
         } else {
             let placement = self.gem_placement(&entity.placement, session)?;
             let mut mutations = vec![Mutation::Placement { source, placement }];
+            let mut reservation = None;
             if (session.scale - 1.0).abs() > 1.0e-12 {
                 let record = gem_record_in(self.document(), target)
                     .ok_or(Error::Invalid("gem positioner target is not a gem"))?;
@@ -732,13 +738,12 @@ impl Controller {
                 updated.gem_id = record.gem_id;
                 let mut extensions = entity.extensions.clone();
                 extensions.insert(GEM_EXTENSION_SLOT.to_owned(), updated.as_extension()?);
-                mutations.push(Mutation::Geometry {
-                    source,
-                    geometry: self.gem_geometry(mesh, keep_brep)?,
-                });
+                let (geometry, guard) = self.gem_geometry_with_guard(mesh, keep_brep)?;
+                reservation = guard;
+                mutations.push(Mutation::Geometry { source, geometry });
                 mutations.push(Mutation::Extensions { source, extensions });
             }
-            self.commit_gem("Gem positioner", mutations)
+            self.commit_gem_with_guard("Gem positioner", mutations, reservation.as_mut())
         }
     }
 
@@ -759,11 +764,24 @@ impl Controller {
         if brep {
             let shape = om9_kernel::gem::gem_brep(&mesh, self.coordinator.limits())
                 .map_err(|_| Error::Invalid("gem B-Rep conversion"))?;
-            return Ok(Geometry::Brep(shape));
+            return Ok(Geometry::Brep(self.coordinator.register_brep_candidate(shape)?));
         }
         #[cfg(not(feature = "occt-brep"))]
         let _ = brep;
         Ok(Geometry::Mesh(mesh.mesh))
+    }
+    pub(super) fn gem_geometry_with_guard(&self, mesh: GemMesh, brep: bool)
+        -> Result<(Geometry, Option<om9_core::transaction::ExternalMemoryReservation>)> {
+        #[cfg(feature = "occt-brep")]
+        if brep {
+            let shape = om9_kernel::gem::gem_brep(&mesh, self.coordinator.limits())
+                .map_err(|_| Error::Invalid("gem B-Rep conversion"))?;
+            let (source, guard) = self.reserve_solid_candidate(shape)?;
+            return Ok((Geometry::Brep(source), Some(guard)));
+        }
+        #[cfg(not(feature = "occt-brep"))]
+        let _ = brep;
+        Ok((Geometry::Mesh(mesh.mesh), None))
     }
 
     /// The session preview in world space: the mesh, its placement and nothing written to the
@@ -817,6 +835,20 @@ impl Controller {
     }
 
     pub(super) fn commit_gem(&mut self, name: &str, mutations: Vec<Mutation>) -> Result<()> {
+        self.commit_gem_with_guard(name, mutations, None)
+    }
+    fn commit_gem_with_guard(&mut self, name: &str, mutations: Vec<Mutation>,
+        reservation: Option<&mut om9_core::transaction::ExternalMemoryReservation>) -> Result<()> {
+        self.commit_gem_with_guards(name, mutations, reservation.map(std::slice::from_mut))
+    }
+    pub(super) fn commit_gem_with_guards(&mut self, name: &str, mutations: Vec<Mutation>,
+        reservations: Option<&mut [om9_core::transaction::ExternalMemoryReservation]>) -> Result<()> {
+        let result = self.commit_gem_inner(name, mutations, reservations);
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
+    }
+    fn commit_gem_inner(&mut self, name: &str, mutations: Vec<Mutation>,
+        reservations: Option<&mut [om9_core::transaction::ExternalMemoryReservation]>) -> Result<()> {
         if mutations.is_empty() {
             return Ok(());
         }
@@ -825,9 +857,11 @@ impl Controller {
             return Err(Error::Stale("gem scene"));
         }
         let held = self.scene_cache_usage()?;
-        let prepared = self
-            .coordinator
-            .prepare_with_held_usage(TransactionRequest::new(name, mutations), held)?;
+        let request = TransactionRequest::new(name, mutations);
+        let prepared = match reservations {
+            Some(guards) => self.coordinator.prepare_with_reserved_brep_mutations(request, held, guards)?,
+            None => self.coordinator.prepare_with_held_usage(request, held)?,
+        };
         self.commit_with_candidate_scene(prepared, held)?;
         Ok(())
     }
@@ -946,6 +980,7 @@ impl Controller {
         record.material = editor.material.clone();
         record.color = editor.color;
         let mut mutations = Vec::new();
+        let mut reservation = None;
         if geometry_changed {
             if matches!(entity.geometry, Geometry::Instance(_)) {
                 return Err(Error::Invalid(
@@ -961,10 +996,9 @@ impl Controller {
             record.spec = spec;
             let mesh = build_mesh(&record.spec)?;
             let keep_brep = matches!(&entity.geometry, Geometry::Brep(_));
-            mutations.push(Mutation::Geometry {
-                source,
-                geometry: self.gem_geometry(mesh, keep_brep)?,
-            });
+            let (geometry, guard) = self.gem_geometry_with_guard(mesh, keep_brep)?;
+            reservation = guard;
+            mutations.push(Mutation::Geometry { source, geometry });
         }
         let mut extensions = entity.extensions.clone();
         extensions.insert(GEM_EXTENSION_SLOT.to_owned(), record.as_extension()?);
@@ -981,7 +1015,7 @@ impl Controller {
                 label: editor.label.clone(),
             });
         }
-        self.commit_gem("Gem properties", mutations)?;
+        self.commit_gem_with_guard("Gem properties", mutations, reservation.as_mut())?;
         // A property edit is one command: once committed the editor closes, so the panel never
         // keeps the controller busy and Undo is immediately available.
         self.gem_editor = None;

@@ -225,10 +225,24 @@ pub(super) struct FilletControl {
 }
 
 pub(super) struct BooleanTwoPreview {
+    #[cfg(feature = "occt-brep")]
+    pub(super) topology_proof: Option<std::sync::Mutex<Option<(om9_kernel::brep::TopologyAttestation, om9_core::transaction::ExternalMemoryReservation)>>>,
     pub(super) mode: usize,
     pub(super) sources: [om9_core::identity::SourceStamp; 2],
     pub(super) body: Option<om9_core::brep::Brep>,
+    pub(super) placement: om9_core::geometry::Transform,
     pub(super) usage: om9_core::budget::Usage,
+    #[cfg(feature = "occt-brep")]
+    pub(super) reservation: Option<om9_core::transaction::ExternalMemoryReservation>,
+}
+
+impl BooleanTwoPreview {
+    pub(super) fn is_accounted(&self) -> bool {
+        #[cfg(feature = "occt-brep")]
+        { self.reservation.is_some() || self.body.as_ref().is_some_and(om9_core::brep::Brep::has_allocation_owner) }
+        #[cfg(not(feature = "occt-brep"))]
+        { false }
+    }
 }
 
 impl SolidPending {
@@ -695,7 +709,7 @@ impl SolidPending {
         if let Some(preview) = &self.fillet_preview {
             usage.bytes = usage
                 .bytes
-                .checked_add(preview.usage.bytes)
+                .checked_add(if preview.body.has_allocation_owner() { 0 } else { preview.usage.bytes })
                 .ok_or(Error::Overflow("fillet preview bytes"))?;
             usage.points = usage
                 .points
@@ -709,7 +723,7 @@ impl SolidPending {
         if let Some(preview) = &self.boolean_two_preview {
             usage.bytes = usage
                 .bytes
-                .checked_add(preview.usage.bytes)
+                .checked_add(if preview.is_accounted() { 0 } else { preview.usage.bytes })
                 .ok_or(Error::Overflow("Boolean preview bytes"))?;
             usage.points = usage
                 .points

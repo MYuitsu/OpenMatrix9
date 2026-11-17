@@ -43,6 +43,23 @@ fn document_with_overlap() -> (
     (document, near_id, far_id)
 }
 
+#[cfg(feature = "occt-brep")]
+#[test]
+#[ignore = "create an isolated desktop overlap fixture"]
+fn write_overlapping_brep_desktop_fixture() {
+    let path = std::env::var_os("OM9_OVERLAP_DESKTOP_FIXTURE").expect("new fixture path");
+    let path = std::path::Path::new(&path);
+    assert!(!path.exists());
+    let limits = om9_core::budget::Limits::default();
+    let body = om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Sphere { radius_mm: 3. }, 0.01, &limits).unwrap();
+    let mut document = Document::new("overlap desktop fixture");
+    for label in ["sphere", "Boolean Union"] {
+        let entity = Entity::new(label, Geometry::Brep(body.clone()), None);
+        document.entities.insert(entity.id, entity);
+    }
+    om9_archive::Archive::save(path, &document, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
+}
+
 fn frames(app: &mut MatrixApp, context: &egui::Context, count: usize) {
     for _ in 0..count {
         let mut output = context.run_ui(
@@ -126,6 +143,21 @@ fn a_click_on_two_objects_offers_a_choice_and_the_choice_selects() {
         app.ambiguous_candidates().is_empty(),
         "the popup closes after a choice"
     );
+}
+
+#[test]
+fn clicking_popup_row_selects_without_reopening_popup() {
+    let context = egui::Context::default();
+    let (document, near, _) = document_with_overlap();
+    let mut app = MatrixApp::new(document).unwrap();
+    frames(&mut app, &context, 4);
+    let position = screen_of_origin(&app);
+    click(&mut app, &context, position);
+    assert_eq!(app.ambiguous_candidates().len(), 2);
+    // The popup begins at the original click; its first button is below its title.
+    click(&mut app, &context, position + Vec2::new(35., 35.));
+    assert!(app.ambiguous_candidates().is_empty(), "choosing a row must not reopen the popup");
+    assert!(app.controller.selected().contains(&near), "the clicked row must select its object");
 }
 
 #[test]

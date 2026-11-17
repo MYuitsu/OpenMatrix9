@@ -5,6 +5,11 @@
 use super::*;
 
 #[cfg(all(test, feature = "occt-brep"))]
+std::thread_local! {
+    pub(super) static TEST_REFUSE_TOPOLOGY: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+#[cfg(all(test, feature = "occt-brep"))]
 mod box_base_preview_tests {
     use super::*;
 
@@ -1370,7 +1375,7 @@ impl Controller {
             .collect()
     }
 
-    pub(super) fn solid_brep(&self, id: om9_core::identity::ObjectId) -> Result<&om9_core::brep::Brep> {
+    pub(super) fn solid_brep(&self, id: om9_core::identity::ObjectId) -> Result<&om9_core::brep::CanonicalBrep> {
         match &self
             .document()
             .entities
@@ -1389,8 +1394,20 @@ impl Controller {
         name: &'static str,
         brep: om9_core::brep::Brep,
     ) -> Result<()> {
-        let entity = Entity::new(name, Geometry::Brep(brep), self.document().current_layer);
-        self.commit_entity(feature, name, entity)
+        self.insert_placed_solid(feature, name, brep, om9_core::geometry::Transform::identity())
+    }
+    fn insert_placed_solid(&mut self, feature: &'static str, name: &'static str,
+        brep: om9_core::brep::Brep, placement: om9_core::geometry::Transform) -> Result<()> {
+        let held = self.scene_cache_usage()?;
+        let bytes = brep.storage_usage(self.coordinator.limits())?.bytes;
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel, bytes, physical, held)?;
+        reservation.set_allocated_bytes(bytes)?;
+        let source = self.coordinator.register_reserved_brep_candidate(brep, &mut reservation, held)?;
+        let mut entity = Entity::new(name, Geometry::Brep(source), self.document().current_layer);
+        entity.placement = placement;
+        self.commit_entity_reserved_brep(feature, name, entity, &mut reservation)
     }
 }
 
@@ -1678,15 +1695,7 @@ impl Controller {
                 Error::Io(format!("Boss: {planar_error}; cylinder: {cylinder_error}"))
             })?,
         };
-        self.commit_solid_result(
-            "OM9-SOLID-021",
-            "Boss",
-            vec![Mutation::Geometry {
-                source,
-                geometry: Geometry::Brep(local),
-            }],
-            Some(vec![boundary]),
-        )
+        self.commit_reserved_brep_replacement("OM9-SOLID-021", "Boss", source, local)
     }
 
     #[cfg(not(feature = "occt-brep"))]
@@ -1745,7 +1754,7 @@ impl Controller {
         let body=editing::rib_straight_planar_boundary_many(&refs,local_distance,self.solid_brep(boundary.object)?,
             creation::DEFAULT_DEFLECTION_MM,self.coordinator.limits()).map_err(|e|Error::Io(format!("Rib: {e}")))?;
         for (source,_) in sources {self.document().resolve(source)?;}self.document().resolve(&boundary)?;
-        self.commit_solid_result("OM9-SOLID-022","Rib",vec![Mutation::Geometry {source:boundary,geometry:Geometry::Brep(body)}],Some(vec![boundary.object]))
+        self.commit_reserved_brep_replacement("OM9-SOLID-022", "Rib", boundary, body)
     }
 
     /// Development-only Rib session; not a public command route.
@@ -1857,10 +1866,12 @@ impl Controller {
             return self.dispatch_solid_args(feature, &[]);
         }
         if feature == "OM9-SOLID-012" {
+            self.box_recovery_run = self.box_recovery_run.wrapping_add(1);
             self.solid_pending = Some(SolidPending::box_pending());
             return Ok(());
         }
         if feature == "OM9-SOLID-014" {
+            self.sphere_recovery_run = self.sphere_recovery_run.wrapping_add(1);
             self.solid_pending = Some(SolidPending::sphere_pending());
             return Ok(());
         }
@@ -1874,35 +1885,110 @@ impl Controller {
         Err(Error::Missing(usage(feature)))
     }
 
-    pub fn solid_fit_selection_points(&self) -> Vec<om9_core::geometry::Point3> {
+    pub fn solid_fit_selection_points(&self) -> Result<Vec<om9_core::geometry::Point3>> {
+        self.solid_fit_selection_points_with_pending(0)
+    }
+
+    pub(super) fn solid_fit_selection_points_with_pending(&self, pending_bytes: u64) -> Result<Vec<om9_core::geometry::Point3>> {
+        use om9_core::budget::{memory::MemoryClass, Usage};
+        fn append(points: &mut Vec<om9_core::geometry::Point3>, local: &[om9_core::geometry::Point3],
+            placement: om9_core::geometry::Transform, limits: &Limits, owned: u64,
+            admit: &mut impl FnMut(u64, u64) -> Result<()>) -> Result<()> {
+            let count = points.len().checked_add(local.len()).ok_or(Error::Overflow("Sphere FitPoints"))?;
+            if count as u64 > limits.max_points { return Err(Error::Budget("Sphere FitPoints")); }
+            let old = Usage::array::<[f64; 3]>(points.capacity())?.bytes;
+            let new = if count > points.capacity() {
+                let grown = points.capacity().checked_mul(2).ok_or(Error::Overflow("Sphere FitPoints"))?.max(4).max(count);
+                Usage::array::<[f64; 3]>(grown)?.bytes
+            } else { 0 };
+            admit(old.checked_add(owned).ok_or(Error::Overflow("Sphere FitPoints"))?, new)?;
+            points.try_reserve(local.len()).map_err(|_| Error::Budget("bytes"))?;
+            let actual = Usage::array::<[f64; 3]>(points.capacity())?.bytes;
+            admit(actual.checked_add(owned).ok_or(Error::Overflow("Sphere FitPoints"))?, 0)?;
+            for &point in local { points.push(placement.point(point)?); }
+            Ok(())
+        }
+        let limits = *self.coordinator.limits();
+        let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let mut reservation: Option<om9_core::transaction::ExternalMemoryReservation> = None;
+        let mut held = None;
+        let mut admit = |live: u64, pending: u64| -> Result<()> {
+            let live = pending_bytes.checked_add(live).ok_or(Error::Overflow("Sphere FitPoints"))?;
+            let needed = live.checked_add(pending).ok_or(Error::Overflow("Sphere FitPoints"))?.max(1);
+            if reservation.is_none() {
+                let scene = self.scene_cache_usage()?;
+                reservation = Some(self.coordinator.reserve_external_memory_with_held(MemoryClass::Kernel, needed, physical(), scene)?);
+                held = Some(scene);
+            }
+            let reservation = reservation.as_mut().expect("reservation initialized");
+            if needed > reservation.bytes() {
+                let extra = needed - reservation.bytes();
+                self.coordinator.grow_external_memory_with_held(reservation, extra, physical(), held.expect("scene usage captured"))?;
+            }
+            reservation.set_allocated_bytes(live)?;
+            reservation.recheck_pending()
+        };
         let mut points = Vec::new();
         for id in &self.selection {
             let Some(entity) = self.document().entities.get(id) else {
                 continue;
             };
             match &entity.geometry {
-                Geometry::Point(point) => points.push(*point),
+                Geometry::Point(point) => append(&mut points, std::slice::from_ref(point), entity.placement, &limits, 0, &mut admit)?,
                 Geometry::Curve(curve) => {
-                    if let Ok(samples) =
-                        om9_core::surface_kernel::sample_curve(curve, 16, self.coordinator.limits())
+                    let existing = Usage::array::<[f64; 3]>(points.capacity())?.bytes;
+                    admit(existing, Usage::array::<[f64; 3]>(16)?.bytes)?;
+                    let local = om9_core::surface_kernel::sample_curve(curve, 16, &limits).map_err(|error| {
+                        if matches!(error, Error::Budget("curve samples")) { Error::Budget("bytes") } else { error }
+                    })?;
+                    let owned = Usage::array::<[f64; 3]>(local.capacity())?.bytes;
+                    append(&mut points, &local, entity.placement, &limits, owned, &mut admit)?;
+                }
+                Geometry::Mesh(mesh) => append(&mut points, &mesh.vertices, entity.placement, &limits, 0, &mut admit)?,
+                Geometry::Brep(brep) => {
+                    #[cfg(feature = "occt-brep")]
                     {
-                        points.extend(samples);
+                        let existing = Usage::array::<[f64; 3]>(points.capacity())?.bytes;
+                        let local = om9_kernel::brep::source_vertices_admitted(brep, &limits, |live, pending| {
+                            admit(existing.checked_add(live).ok_or(Error::Overflow("Sphere FitPoints"))?, pending)
+                        })?;
+                        let owned = Usage::array::<[f64; 3]>(local.capacity())?.bytes;
+                        append(&mut points, &local, entity.placement, &limits, owned, &mut admit)?;
+                    }
+                    #[cfg(not(feature = "occt-brep"))]
+                    {
+                        let _ = brep;
+                        return Err(Error::Unsupported("B-Rep vertices require OCCT"));
                     }
                 }
-                Geometry::Mesh(mesh) => {
-                    points.extend(mesh.vertices.iter().copied());
-                }
-                Geometry::Brep(brep) => {
-                    for offset in &brep.display.vertices {
-                        if let Some(point) = brep.display.points.get(*offset as usize) {
-                            points.push(*point);
-                        }
+                Geometry::NativeBrep(native) => {
+                    #[cfg(feature = "occt-brep")]
+                    {
+                        let existing_points_bytes = Usage::array::<[f64; 3]>(points.capacity())?.bytes;
+                        let tolerance = self.document().effective_tolerance()?.absolute_mm;
+                        let source = om9_kernel::brep::from_3dm_source_typed_admitted(&native.payload, tolerance, &limits, |live, pending| {
+                            admit(existing_points_bytes.checked_add(live).ok_or(Error::Overflow("Sphere FitPoints"))?, pending)
+                        })?;
+                        let source_bytes = u64::try_from(source.capacity()).map_err(|_| Error::Overflow("Sphere FitPoints"))?;
+                        admit(existing_points_bytes.checked_add(source_bytes).ok_or(Error::Overflow("Sphere FitPoints"))?, 0)?;
+                        let local = om9_kernel::brep::source_vertices_from_source_admitted(&source, &limits, |live, pending| {
+                            admit(existing_points_bytes.checked_add(source_bytes).and_then(|n| n.checked_add(live))
+                                .ok_or(Error::Overflow("Sphere FitPoints"))?, pending)
+                        })?;
+                        let local_bytes = Usage::array::<[f64; 3]>(local.capacity())?.bytes;
+                        let owned = source_bytes.checked_add(local_bytes).ok_or(Error::Overflow("Sphere FitPoints"))?;
+                        append(&mut points, &local, entity.placement, &limits, owned, &mut admit)?;
+                    }
+                    #[cfg(not(feature = "occt-brep"))]
+                    {
+                        let _ = (native, pending_bytes);
+                        return Err(Error::Unsupported("Native B-Rep vertices require OCCT"));
                     }
                 }
                 _ => {}
             }
         }
-        points
+        Ok(points)
     }
 
     pub fn solid_preview_markers(&self) -> Vec<om9_core::geometry::Point3> {
@@ -2756,7 +2842,7 @@ impl Controller {
         let Some(index) = pending.sphere_edge else { return false; };
         let Some(entity) = self.document().entities.get(&reference.root) else { return false; };
         let Geometry::Brep(brep) = &entity.geometry else { return false; };
-        matches!(&reference.subset, om9_scene::scene::Subelement::BrepEdge(key) if brep.display.edges.get(index) == Some(key))
+        matches!(&reference.subset, om9_scene::scene::Subelement::BrepEdge(key) if brep.topology().edges.get(index) == Some(key))
     }
 
     #[cfg(feature = "occt-brep")]
@@ -2789,7 +2875,7 @@ impl Controller {
         let om9_scene::scene::Subelement::BrepEdge(key) = reference.subset else { return Err(Error::Invalid("select a B-Rep edge")); };
         let entity = self.document().entities.get(&reference.root).ok_or(Error::Stale("Sphere AroundCurve source"))?;
         let Geometry::Brep(brep) = &entity.geometry else { return Err(Error::Invalid("select a B-Rep edge")); };
-        let index = brep.display.edges.iter().position(|id| *id == key).ok_or(Error::Stale("Sphere AroundCurve edge"))?;
+        let index = brep.topology().edges.iter().position(|id| *id == key).ok_or(Error::Stale("Sphere AroundCurve edge"))?;
         if stage == 2 {
             let pending = self.solid_pending.as_ref().expect("Sphere session");
             if pending.sphere_sources.first() != Some(&reference.source) || pending.sphere_edge != Some(index) {
@@ -2797,7 +2883,7 @@ impl Controller {
             }
             return self.accept_sphere_point(world);
         }
-        let source = sphere_curve_source(entity, Some(index), self.coordinator.limits())?;
+        let source = self.sphere_verified_curve_source(entity, Some(index))?;
         let samples = sphere_world_curve_samples(&source, self.coordinator.limits())?;
         let pending = self.solid_pending.as_mut().expect("Sphere session");
         pending.sphere_curve = samples;
@@ -2832,6 +2918,11 @@ impl Controller {
         // Every solid prompt advertises Cancel. Handle the word once here so a
         // feature handler cannot read it as a coordinate or an option value.
         let input = text.trim();
+        #[cfg(feature = "occt-brep")]
+        if self.face_verification_pending() && !input.eq_ignore_ascii_case("cancel") && !input.eq_ignore_ascii_case("esc") {
+            self.solid_pending = Some(pending);
+            return Some(Err(Error::Busy));
+        }
         if input.eq_ignore_ascii_case("cancel") || input.eq_ignore_ascii_case("esc") {
             self.clear_subselection();
             self.cancel();
@@ -3210,6 +3301,56 @@ impl Controller {
         {
             return Some(self.dispatch("SolidGVDMultiPipe", InvocationOrigin::Cmd));
         }
+        // Route valid large inline Shell requests through the staged verifier.
+        #[cfg(feature = "occt-brep")]
+        if feature == "OM9-SOLID-029" && args.len() == 2 && self.selection.len() == 1 {
+            if let (Ok(value), Ok(thickness)) = (args[0].parse::<f64>(), args[1].parse::<f64>()) {
+                if value.is_finite() && value >= 0. && value.fract() == 0. && thickness.is_finite() && thickness > 0. {
+                    let id = *self.selection.iter().next().expect("one selected root");
+                    let valid_face = self.solid_brep(id).is_ok_and(|brep| (value as usize) < brep.topology().faces.len());
+                    let large = self.document().stamp(id).ok().and_then(|stamp| self.scene.as_ref()
+                        .and_then(|scene| scene.root_brep_pick_display(&stamp).ok()))
+                        .is_some_and(|display| display.triangles.len() > 512);
+                    if valid_face && large {
+                        self.command_run = self.command_run.wrapping_add(1);
+                        self.solid_pending = SolidPending::start(feature);
+                        return self.submit_solid_text(&format!("{} {}", args[0], args[1]));
+                    }
+                }
+            }
+        }
+        // Route valid large inline Extract Surface requests through the same
+        // staged worker path as a face number entered at the prompt.
+        #[cfg(feature = "occt-brep")]
+        if feature == "OM9-SOLID-006" && !args.is_empty() && self.selection.len() == 1 {
+            let mut copy = false; let mut input_layer = false;
+            let mut seen_copy = false; let mut seen_layer = false; let mut valid = true;
+            for option in &args[1..] {
+                match option.to_ascii_lowercase().as_str() {
+                    "copy=yes" | "copy=true" if !seen_copy => { copy = true; seen_copy = true; }
+                    "copy=no" | "copy=false" if !seen_copy => { copy = false; seen_copy = true; }
+                    "outputlayer=input" if !seen_layer => { input_layer = true; seen_layer = true; }
+                    "outputlayer=current" if !seen_layer => { input_layer = false; seen_layer = true; }
+                    _ => { valid = false; break; }
+                }
+            }
+            if let Ok(value) = args[0].parse::<f64>() {
+                if valid && value.is_finite() && value >= 0. && value.fract() == 0. {
+                    let id = *self.selection.iter().next().expect("one selected root");
+                    let valid_face = self.solid_brep(id).is_ok_and(|brep| (value as usize) < brep.topology().faces.len());
+                    let large = self.document().stamp(id).ok().and_then(|stamp| self.scene.as_ref()
+                        .and_then(|scene| scene.root_brep_pick_display(&stamp).ok()))
+                        .is_some_and(|display| display.triangles.len() > 512);
+                    if valid_face && large {
+                        let mut pending = SolidPending::start(feature).expect("Extract Surface session");
+                        pending.extract_copy = copy; pending.extract_input_layer = input_layer;
+                        self.command_run = self.command_run.wrapping_add(1);
+                        self.solid_pending = Some(pending);
+                        return self.submit_solid_text(args[0]);
+                    }
+                }
+            }
+        }
         if feature == "OM9-SOLID-006" && args.len() == 1 && args[0].parse::<f64>().is_err() {
             self.command_run = self.command_run.wrapping_add(1);
             self.clear_subselection();
@@ -3254,10 +3395,12 @@ impl Controller {
             return Some(result);
         }
         if args.is_empty() && feature == "OM9-SOLID-012" {
+            self.box_recovery_run = self.box_recovery_run.wrapping_add(1);
             self.solid_pending = Some(SolidPending::box_pending());
             return Some(Ok(()));
         }
         if args.is_empty() && feature == "OM9-SOLID-014" {
+            self.sphere_recovery_run = self.sphere_recovery_run.wrapping_add(1);
             self.solid_pending = Some(SolidPending::sphere_pending());
             return Some(Ok(()));
         }
@@ -3353,7 +3496,7 @@ impl Controller {
             }
             "OM9-SOLID-007" => {
                 let v = values(2)?;
-                self.solid_fillet(feature, topology_index(v[0])?, v[1])
+                self.solid_fillet(feature, topology_index(v[0])?, self.document().page_unit.length_to_mm(v[1])?)
             }
             "OM9-SOLID-008" => {
                 if args.len() < 2 {
@@ -3365,10 +3508,10 @@ impl Controller {
                     .filter(|value| value.is_finite())
                     .ok_or(Error::Invalid("text height"))?;
                 let text = args[..args.len() - 1].join(" ");
-                self.solid_text(feature, &text, height)
+                self.solid_text(feature, &text, self.document().page_unit.length_to_mm(height)?)
             }
             "OM9-SOLID-009" | "OM9-SOLID-010" => {
-                let height = values(1)?[0];
+                let height = self.document().page_unit.length_to_mm(values(1)?[0])?;
                 self.solid_extrude(feature, height, feature == "OM9-SOLID-010")
             }
             "OM9-SOLID-011" => {
@@ -3388,18 +3531,9 @@ impl Controller {
                             .ok_or(Error::Invalid("Pipe radius must be finite and positive"))
                     })
                     .collect();
-                let radii = radii?;
-                match radii.as_slice() {
-                    [radius] if round => self.solid_pipe_round(feature, *radius, *radius),
-                    [start, end] if round => self.solid_pipe_round(feature, *start, *end),
-                    [a, b, c, d] if round => {
-                        self.solid_pipe_thick(feature, [*a, *b, *c, *d], true, true)
-                    }
-                    [radius] => self.solid_pipe(feature, *radius, capped),
-                    [start, end] => self.solid_pipe_linear(feature, *start, *end, capped),
-                    [a, b, c, d] => self.solid_pipe_thick(feature, [*a, *b, *c, *d], capped, false),
-                    _ => Err(Error::Missing(usage(feature))),
-                }
+                let unit = self.document().page_unit;
+                let radii: Result<Vec<_>> = radii?.into_iter().map(|value| unit.length_to_mm(value)).collect();
+                self.solid_pipe_radii_mm(feature, &radii?, capped, round)
             }
             "OM9-SOLID-012" => {
                 let v = values(3)?;
@@ -3414,47 +3548,46 @@ impl Controller {
             }
             "OM9-SOLID-013" => {
                 let v = values(3)?;
+                let unit = self.document().page_unit;
                 self.solid_primitive(
                     feature,
                     Primitive::Ellipsoid {
-                        x_mm: v[0],
-                        y_mm: v[1],
-                        z_mm: v[2],
+                        x_mm: unit.length_to_mm(v[0])?,
+                        y_mm: unit.length_to_mm(v[1])?,
+                        z_mm: unit.length_to_mm(v[2])?,
                     },
                 )
             }
             "OM9-SOLID-014" => {
                 let v = values(1)?;
-                self.solid_primitive(
-                    feature,
-                    Primitive::Sphere {
-                        radius_mm: self.document().page_unit.length_to_mm(v[0])?,
-                    },
-                )
+                self.solid_sphere_points([0., 0., 0.], self.document().page_unit.length_to_mm(v[0])?)
             }
             "OM9-SOLID-015" => {
                 let v = values(2)?;
+                let unit = self.document().page_unit;
                 self.solid_primitive(
                     feature,
                     Primitive::Torus {
-                        ring_radius_mm: v[0],
-                        tube_radius_mm: v[1],
+                        ring_radius_mm: unit.length_to_mm(v[0])?,
+                        tube_radius_mm: unit.length_to_mm(v[1])?,
                     },
                 )
             }
             "OM9-SOLID-016" => {
                 let v = values(2)?;
+                let unit = self.document().page_unit;
                 self.solid_primitive(
                     feature,
                     Primitive::Cylinder {
-                        radius_mm: v[0],
-                        height_mm: v[1],
+                        radius_mm: unit.length_to_mm(v[0])?,
+                        height_mm: unit.length_to_mm(v[1])?,
                     },
                 )
             }
             "OM9-SOLID-017" => {
                 let v = values(3)?;
-                self.solid_tube(feature, v[0], v[1], v[2])
+                let unit = self.document().page_unit;
+                self.solid_tube(feature, unit.length_to_mm(v[0])?, unit.length_to_mm(v[1])?, unit.length_to_mm(v[2])?)
             }
             "OM9-SOLID-018" => {
                 let v = values(3)?;
@@ -3469,47 +3602,53 @@ impl Controller {
                 {
                     return Err(Error::Budget("pyramid side count"));
                 }
+                let unit = self.document().page_unit;
                 self.solid_primitive(
                     feature,
                     Primitive::Pyramid {
                         sides: v[0] as u32,
-                        base_radius_mm: v[1],
-                        height_mm: v[2],
+                        base_radius_mm: unit.length_to_mm(v[1])?,
+                        height_mm: unit.length_to_mm(v[2])?,
                     },
                 )
             }
             "OM9-SOLID-019" => {
                 let v = values(2)?;
+                let unit = self.document().page_unit;
                 self.solid_primitive(
                     feature,
                     Primitive::Cone {
-                        bottom_radius_mm: v[0],
+                        bottom_radius_mm: unit.length_to_mm(v[0])?,
                         top_radius_mm: 0.0,
-                        height_mm: v[1],
+                        height_mm: unit.length_to_mm(v[1])?,
                     },
                 )
             }
             "OM9-SOLID-020" => {
                 let v = values(3)?;
+                let unit = self.document().page_unit;
+                let bottom = unit.length_to_mm(v[0])?;
+                let top = unit.length_to_mm(v[1])?;
+                let height = unit.length_to_mm(v[2])?;
                 self.solid_primitive(
                     feature,
-                    if v[0] == v[1] {
+                    if bottom == top {
                         Primitive::Cylinder {
-                            radius_mm: v[0],
-                            height_mm: v[2],
+                            radius_mm: bottom,
+                            height_mm: height,
                         }
                     } else {
                         Primitive::Cone {
-                            bottom_radius_mm: v[0],
-                            top_radius_mm: v[1],
-                            height_mm: v[2],
+                            bottom_radius_mm: bottom,
+                            top_radius_mm: top,
+                            height_mm: height,
                         }
                     },
                 )
             }
             "OM9-SOLID-029" => {
                 let v = values(2)?;
-                self.solid_shell(feature, topology_index(v[0])?, v[1])
+                self.solid_shell(feature, topology_index(v[0])?, self.document().page_unit.length_to_mm(v[1])?)
             }
             _ => Err(Error::Unsupported(usage(feature))),
         }
@@ -3719,6 +3858,20 @@ impl Controller {
         height: f64,
         solid: bool,
     ) -> Result<()> {
+        if solid && star_radius.is_none() {
+            let mut matrix = om9_core::geometry::Transform::identity().0;
+            let normal = plane.normal();
+            let sign = height.signum();
+            for i in 0..3 {
+                matrix[i][0] = plane.x[i];
+                matrix[i][1] = plane.y[i] * sign;
+                matrix[i][2] = normal[i] * sign;
+                matrix[i][3] = center[i];
+            }
+            return self.commit_primitive_optional_topology("OM9-SOLID-018", label("OM9-SOLID-018"), "pyramid",
+                Primitive::Pyramid { sides, base_radius_mm: radius, height_mm: height.abs() },
+                om9_core::geometry::Transform(matrix));
+        }
         let body = if let Some(second) = star_radius {
             creation::star_pyramid(
                 sides,
@@ -3777,11 +3930,6 @@ impl Controller {
             }
             shell
         };
-        let mut entity = Entity::new(
-            label("OM9-SOLID-018"),
-            Geometry::Brep(body),
-            self.document().current_layer,
-        );
         let mut matrix = om9_core::geometry::Transform::identity().0;
         let normal = plane.normal();
         let sign = height.signum();
@@ -3791,8 +3939,8 @@ impl Controller {
             matrix[i][2] = normal[i] * sign;
             matrix[i][3] = center[i];
         }
-        entity.placement = om9_core::geometry::Transform(matrix);
-        self.commit_entity("OM9-SOLID-018", label("OM9-SOLID-018"), entity)
+        self.insert_placed_solid("OM9-SOLID-018", label("OM9-SOLID-018"), body,
+            om9_core::geometry::Transform(matrix))
     }
     pub(super) fn solid_cone_commit(
         &mut self,
@@ -3816,6 +3964,19 @@ impl Controller {
                 height_mm: height.abs(),
             }
         };
+        if solid {
+            let sign = height.signum();
+            let normal = plane.normal();
+            let mut matrix = om9_core::geometry::Transform::identity().0;
+            for i in 0..3 {
+                matrix[i][0] = plane.x[i];
+                matrix[i][1] = plane.y[i] * sign;
+                matrix[i][2] = normal[i] * sign;
+                matrix[i][3] = center[i];
+            }
+            return self.commit_primitive_optional_topology(feature, label(feature), "Truncated Cone", primitive,
+                om9_core::geometry::Transform(matrix));
+        }
         let body = creation::primitive(
             primitive,
             creation::DEFAULT_DEFLECTION_MM,
@@ -3869,13 +4030,7 @@ impl Controller {
             matrix[i][2] = n[i] * sign;
             matrix[i][3] = center[i];
         }
-        let mut entity = Entity::new(
-            label(feature),
-            Geometry::Brep(body),
-            self.document().current_layer,
-        );
-        entity.placement = om9_core::geometry::Transform(matrix);
-        self.commit_entity(feature, label(feature), entity)
+        self.insert_placed_solid(feature, label(feature), body, om9_core::geometry::Transform(matrix))
     }
     fn sphere_circumcenter(
         a: om9_core::geometry::Point3,
@@ -4141,8 +4296,8 @@ impl Controller {
                 let radius =
                     ((b[0] - a[0]).powi(2) + (b[1] - a[1]).powi(2) + (b[2] - a[2]).powi(2)).sqrt()
                         * 0.5;
-                self.solid_pending = None;
-                self.solid_sphere_points(center, radius)
+                pending.points.pop();
+                self.finish_pending_sphere(pending, center, radius)
             }
             "Tangent2Point" | "TangentCurvePoint" => {
                 pending.points.push(point);
@@ -4152,13 +4307,17 @@ impl Controller {
             "TangentPoint" => {
                 pending.points.push(point);
                 if pending.points.len() >= 3 {
-                    let (center, radius, _) = Self::sphere_circumcenter(
+                    let result = Self::sphere_circumcenter(
                         pending.points[0],
                         pending.points[1],
                         pending.points[2],
-                    )?;
-                    self.solid_pending = None;
-                    return self.solid_sphere_points(center, radius);
+                    );
+                    pending.points.pop();
+                    let (center, radius, _) = match result {
+                        Ok(sphere) => sphere,
+                        Err(error) => { self.solid_pending = Some(pending); return Err(error); }
+                    };
+                    return self.finish_pending_sphere(pending, center, radius);
                 }
                 self.solid_pending = Some(pending);
                 Ok(())
@@ -4249,8 +4408,7 @@ impl Controller {
                     tangent_point[1] + normal[1] * radius,
                     tangent_point[2] + normal[2] * radius,
                 ];
-                self.solid_pending = None;
-                self.solid_sphere_points(center, radius)
+                self.finish_pending_sphere(pending, center, radius)
             }
             "AroundCurve" => {
                 if let Some(center) = pending.sphere_center {
@@ -4258,14 +4416,17 @@ impl Controller {
                         + (point[1] - center[1]).powi(2)
                         + (point[2] - center[2]).powi(2))
                     .sqrt();
-                    self.solid_pending = None;
-                    self.solid_sphere_points(center, radius)
+                    self.finish_pending_sphere(pending, center, radius)
                 } else {
-                    let Some(entity) = pending.sphere_sources.first().and_then(|stamp| self.document().entities.get(&stamp.object)) else {
+                    let Some(stamp) = pending.sphere_sources.first() else {
                         self.solid_pending = Some(pending);
                         return Err(Error::Invalid("AroundCurve has no source curve"));
                     };
-                    let source = match sphere_curve_source(entity, pending.sphere_edge, self.coordinator.limits()) {
+                    let entity = match self.document().resolve(stamp) {
+                        Ok(entity) => entity,
+                        Err(error) => { self.solid_pending = Some(pending); return Err(error); }
+                    };
+                    let source = match self.sphere_verified_curve_source(entity, pending.sphere_edge) {
                         Ok(source) => source, Err(error) => { self.solid_pending = Some(pending); return Err(error); }
                     };
                     let center = match sphere_closest_world_curve_point(&source, point, self.coordinator.limits()) {
@@ -4278,8 +4439,41 @@ impl Controller {
                 }
             }
             "FitPoints" => {
+                let mut admission = None;
+                let prepare = (|| -> Result<()> {
+                    use om9_core::budget::{memory::MemoryClass, Usage};
+                    let count = pending.points.len().checked_add(1).ok_or(Error::Overflow("Sphere FitPoints"))?;
+                    if count as u64 > self.coordinator.limits().max_points {
+                        return Err(Error::Budget("Sphere FitPoints"));
+                    }
+                    if count > pending.points.capacity() {
+                        let target = pending.points.capacity().checked_mul(2).ok_or(Error::Overflow("Sphere FitPoints"))?.max(4).max(count);
+                        let live = pending.usage()?.bytes;
+                        let needed = live.checked_add(Usage::array::<[f64; 3]>(target)?.bytes)
+                            .ok_or(Error::Overflow("Sphere FitPoints"))?;
+                        let held = self.scene_cache_usage()?;
+                        let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+                        let mut reservation = self.coordinator.reserve_external_memory_with_held(MemoryClass::Kernel, needed, physical(), held)?;
+                        pending.points.try_reserve_exact(target - pending.points.len()).map_err(|_| Error::Budget("bytes"))?;
+                        let actual = pending.usage()?.bytes;
+                        if actual > reservation.bytes() {
+                            let extra = actual - reservation.bytes();
+                            self.coordinator.grow_external_memory_with_held(&mut reservation, extra, physical(), held)?;
+                        }
+                        reservation.set_allocated_bytes(actual)?;
+                        reservation.recheck_pending()?;
+                        admission = Some(reservation);
+                    }
+                    Ok(())
+                })();
+                if let Err(error) = prepare {
+                    self.solid_pending = Some(pending);
+                    return Err(error);
+                }
                 pending.points.push(point);
+                self.sphere_points_revision = self.sphere_points_revision.wrapping_add(1);
                 self.solid_pending = Some(pending);
+                drop(admission);
                 Ok(())
             }
             "ThreePoint" | "FourPoint" => {
@@ -4317,8 +4511,7 @@ impl Controller {
                                 return Err(error);
                             }
                         };
-                        self.solid_pending = None;
-                        return self.solid_sphere_points(center, radius);
+                        return self.finish_pending_sphere(pending, center, radius);
                     }
                     pending.points.push(point);
                     self.solid_pending = Some(pending);
@@ -4360,8 +4553,7 @@ impl Controller {
                                     return Err(error);
                                 }
                             };
-                            self.solid_pending = None;
-                            return self.solid_sphere_points(result, result_radius);
+                            return self.finish_pending_sphere(pending, result, result_radius);
                         }
                         _ => {}
                     }
@@ -4377,8 +4569,7 @@ impl Controller {
                         + (point[1] - center[1]).powi(2)
                         + (point[2] - center[2]).powi(2))
                     .sqrt();
-                    self.solid_pending = None;
-                    self.solid_sphere_points(center, radius)
+                    self.finish_pending_sphere(pending, center, radius)
                 } else {
                     pending.sphere_center = Some(point);
                     self.solid_pending = Some(pending);
@@ -4386,6 +4577,13 @@ impl Controller {
                 }
             }
         }
+    }
+
+    pub(super) fn finish_pending_sphere(&mut self, pending: SolidPending,
+        center: om9_core::geometry::Point3, radius: f64) -> Result<()> {
+        let result = self.solid_sphere_points(center, radius);
+        if result.is_err() { self.solid_pending = Some(pending); }
+        result
     }
 
     pub(super) fn fit_sphere_points(&mut self, points: &[om9_core::geometry::Point3]) -> Result<()> {
@@ -4454,22 +4652,174 @@ impl Controller {
         center: om9_core::geometry::Point3,
         radius: f64,
     ) -> Result<()> {
+        let profile=std::env::var_os("OM9_COMMIT_PROFILE").map(|_|std::time::Instant::now());
         if !radius.is_finite() || radius <= 0.0 {
             return Err(Error::Invalid("sphere radius must be positive"));
         }
-        let brep = creation::primitive(
-            Primitive::Sphere { radius_mm: radius },
-            creation::DEFAULT_DEFLECTION_MM,
-            self.coordinator.limits(),
-        )
-        .map_err(|error| Error::Io(format!("sphere: {error}")))?;
-        let mut entity = Entity::new(
-            label("OM9-SOLID-014"),
-            Geometry::Brep(brep),
-            self.document().current_layer,
-        );
+        let limits = *self.coordinator.limits();
+        let held = self.scene_cache_usage()?;
+        let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes))
+            .ok_or(Error::Unsupported("physical RAM availability is unavailable"));
+        // The optional in-process proof is created with the same native
+        // snapshot as the Sphere. A failed optional attempt falls back to the
+        // ordinary admitted constructor before publishing any transaction.
+        let attempt = (|| -> Result<_> {
+            #[cfg(test)]
+            if TEST_REFUSE_TOPOLOGY.with(|refuse| refuse.get()) { return Err(Error::Budget("test topology refusal")); }
+            let mut reservation = self.coordinator.reserve_external_memory_with_held(
+                om9_core::budget::memory::MemoryClass::CpuCache, 1, Some(physical()?), held)?;
+            let refusal = std::cell::RefCell::new(None);
+            let capture = creation::primitive_with_topology_profile(Primitive::Sphere { radius_mm: radius },
+                self.viewport_detail.linear_mm(), self.viewport_detail.angular(), &limits, |live, pending| {
+                    let result = (|| {
+                        let needed = live.checked_add(pending).ok_or(Error::Overflow("sphere snapshot"))?.max(1);
+                        if needed > reservation.bytes() {
+                            let additional = needed - reservation.bytes();
+                            self.coordinator.grow_external_memory_with_held(&mut reservation, additional, Some(physical()?), held)?;
+                        }
+                        reservation.set_allocated_bytes(live)?;
+                        let (total, available) = physical()?;
+                        reservation.recheck_physical(total, available)
+                    })();
+                    if let Err(error) = &result { *refusal.borrow_mut() = Some(error.clone()); }
+                    result
+                }).map_err(|error| refusal.into_inner().unwrap_or_else(|| Error::Io(format!("sphere: {error}"))))?;
+            let (brep, proof) = capture.into_parts();
+            let proof_bytes = proof.storage_bytes()?;
+            let total = proof_bytes.checked_add(brep.storage_usage(&limits)?.bytes).ok_or(Error::Overflow("sphere proof"))?;
+            reservation.set_allocated_bytes(total)?;
+            reservation.shrink_to(total)?;
+            let proof_reservation = reservation.split_off(proof_bytes)?;
+            Ok((brep, proof, reservation, proof_reservation))
+        })();
+        if let Ok((brep, proof, mut reservation, proof_reservation)) = attempt {
+            let captured_ms=profile.map(|start|start.elapsed().as_secs_f64()*1000.);
+            let source = self.coordinator.register_reserved_brep_candidate(brep, &mut reservation, held)?;
+            let mut entity = Entity::new(label("OM9-SOLID-014"), Geometry::Brep(source), self.document().current_layer);
+            entity.placement = om9_core::geometry::Transform::translation(center);
+            let id = entity.id;
+            let registered_ms=profile.map(|start|start.elapsed().as_secs_f64()*1000.);
+            match self.commit_entity_reserved_brep("OM9-SOLID-014", label("OM9-SOLID-014"), entity, &mut reservation) {
+                Ok(()) => {
+                    let committed_ms=profile.map(|start|start.elapsed().as_secs_f64()*1000.);
+                    drop(reservation);
+                    if let Ok(stamp) = self.document().stamp(id) {
+                        if let Ok(shared) = self.prepare_shared_topology_proof(stamp, proof, proof_reservation) {
+                            let _ = self.retain_sphere_history_proof(stamp, shared.clone());
+                            let _ = self.cache_topology_proof(shared);
+                        }
+                    }
+                    if let Some(start)=profile {let total=start.elapsed().as_secs_f64()*1000.;eprintln!("OM9_COMMIT_PROFILE sphere_capture_ms={:.3} sphere_register_ms={:.3} sphere_transaction_ms={:.3} sphere_proof_ms={:.3} sphere_total_ms={total:.3} objects={} thread={:?}",captured_ms.unwrap_or(0.),registered_ms.unwrap_or(0.)-captured_ms.unwrap_or(0.),committed_ms.unwrap_or(0.)-registered_ms.unwrap_or(0.),total-committed_ms.unwrap_or(0.),self.document().entities.len(),std::thread::current().id());}
+                    return Ok(());
+                }
+                Err(Error::Budget(_) | Error::Invalid("reserved BRep input owner")
+                    | Error::Invalid("reserved BRep input accounting")) => {
+                    drop(proof); drop(proof_reservation); drop(reservation);
+                }
+                Err(error) => return Err(error),
+            }
+        }
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::CpuCache, 1, Some(physical()?), held)?;
+        let refusal = std::cell::RefCell::new(None);
+        let brep = creation::primitive_profile_admitted(Primitive::Sphere { radius_mm: radius }, self.viewport_detail.linear_mm(), self.viewport_detail.angular(),
+            &limits, |live, pending| {
+                let result = (|| {
+                    let needed = live.checked_add(pending).ok_or(Error::Overflow("sphere snapshot"))?.max(1);
+                    if needed > reservation.bytes() {
+                        let additional = needed - reservation.bytes();
+                        self.coordinator.grow_external_memory_with_held(&mut reservation, additional, Some(physical()?), held)?;
+                    }
+                    reservation.set_allocated_bytes(live)?;
+                    let (total, available) = physical()?;
+                    reservation.recheck_physical(total, available)
+                })();
+                if let Err(error) = &result { *refusal.borrow_mut() = Some(error.clone()); }
+                result
+            }).map_err(|error| refusal.into_inner().unwrap_or_else(|| Error::Io(format!("sphere: {error}"))))?;
+        let bytes = brep.storage_usage(&limits)?.bytes;
+        reservation.set_allocated_bytes(bytes)?;
+        reservation.shrink_to(bytes)?;
+        let source = self.coordinator.register_reserved_brep_candidate(brep, &mut reservation, held)?;
+        let mut entity = Entity::new(label("OM9-SOLID-014"), Geometry::Brep(source), self.document().current_layer);
         entity.placement = om9_core::geometry::Transform::translation(center);
-        self.commit_entity("OM9-SOLID-014", label("OM9-SOLID-014"), entity)
+        self.commit_entity_reserved_brep("OM9-SOLID-014", label("OM9-SOLID-014"), entity, &mut reservation)
+    }
+
+    /// Topology evidence is an optional cache: refusal retries the original
+    /// primitive path only while no transaction has been published.
+    pub(super) fn commit_primitive_optional_topology(&mut self, feature: &'static str, name: &'static str,
+        kind: &'static str, primitive: Primitive, placement: om9_core::geometry::Transform) -> Result<()> {
+        use om9_core::budget::memory::MemoryClass;
+        let limits = *self.coordinator.limits();
+        let held = self.scene_cache_usage()?;
+        let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let attempt = (|| -> Result<_> {
+            #[cfg(test)]
+            if TEST_REFUSE_TOPOLOGY.with(|refuse| refuse.get()) { return Err(Error::Budget("test topology refusal")); }
+            let mut reservation = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, 1, physical(), held)?;
+            let capture = creation::primitive_with_topology(primitive, creation::DEFAULT_DEFLECTION_MM, &limits, |live, pending| {
+                let needed = live.checked_add(pending).ok_or(Error::Overflow("primitive capture"))?.max(1);
+                if needed > reservation.bytes() {
+                    let additional = needed - reservation.bytes();
+                    self.coordinator.grow_external_memory_with_held(&mut reservation, additional, physical(), held)?;
+                }
+                reservation.set_allocated_bytes(live)?;
+                reservation.recheck_pending()
+            }).map_err(|error| Error::Io(format!("{kind}: {error}")))?;
+            let (brep, proof) = capture.into_parts();
+            let proof_bytes = proof.storage_bytes()?;
+            let total = proof_bytes.checked_add(brep.storage_usage(&limits)?.bytes).ok_or(Error::Overflow("primitive capture"))?;
+            reservation.set_allocated_bytes(total)?;
+            reservation.shrink_to(total)?;
+            let proof_reservation = reservation.split_off(proof_bytes)?;
+            Ok((brep, proof, reservation, proof_reservation))
+        })();
+        if let Ok((brep, proof, mut body_reservation, proof_reservation)) = attempt {
+            let source = self.coordinator.register_reserved_brep_candidate(brep, &mut body_reservation, held)?;
+            let mut entity = Entity::new(name, Geometry::Brep(source), self.document().current_layer);
+            entity.placement = placement;
+            let id = entity.id;
+            match self.commit_entity_reserved_brep(feature, name, entity, &mut body_reservation) {
+                Ok(()) => {
+                    drop(body_reservation);
+                    if let Ok(stamp) = self.document().stamp(id) {
+                        // A cache refusal must not turn a committed command into an error.
+                        let _ = self.adopt_topology_proof(stamp, proof, proof_reservation);
+                    }
+                    return Ok(());
+                }
+                Err(Error::Budget(_) | Error::Invalid("reserved BRep input owner")
+                    | Error::Invalid("reserved BRep input accounting")) => {
+                    drop(proof); drop(proof_reservation); drop(body_reservation);
+                }
+                Err(error) => return Err(error),
+            }
+        }
+        // The proof-free fallback still needs a continuous source reservation
+        // until the staged document takes ownership of the candidate.
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, 1, physical(), held)?;
+        let refusal = std::cell::RefCell::new(None);
+        let brep = creation::primitive_admitted(primitive, creation::DEFAULT_DEFLECTION_MM, &limits, |live, pending| {
+            let result = (|| {
+                let needed = live.checked_add(pending).ok_or(Error::Overflow("primitive capture"))?.max(1);
+                if needed > reservation.bytes() {
+                    let additional = needed - reservation.bytes();
+                    self.coordinator.grow_external_memory_with_held(&mut reservation, additional, physical(), held)?;
+                }
+                reservation.set_allocated_bytes(live)?;
+                reservation.recheck_pending()
+            })();
+            if let Err(error) = &result { *refusal.borrow_mut() = Some(error.clone()); }
+            result
+        }).map_err(|error| refusal.into_inner().unwrap_or_else(|| Error::Io(format!("{kind}: {error}"))))?;
+        let bytes = brep.storage_usage(&limits)?.bytes;
+        reservation.set_allocated_bytes(bytes)?;
+        reservation.shrink_to(bytes)?;
+        let source = self.coordinator.register_reserved_brep_candidate(brep, &mut reservation, held)?;
+        let mut entity = Entity::new(name, Geometry::Brep(source), self.document().current_layer);
+        entity.placement = placement;
+        self.commit_entity_reserved_brep(feature, name, entity, &mut reservation)
     }
 
     pub fn solid_box_dimensions(
@@ -4490,21 +4840,6 @@ impl Controller {
                 "box length and width must be positive and height non-zero",
             ));
         }
-        let brep = creation::primitive(
-            Primitive::Box {
-                x_mm: length,
-                y_mm: width,
-                z_mm: height.abs(),
-            },
-            creation::DEFAULT_DEFLECTION_MM,
-            self.coordinator.limits(),
-        )
-        .map_err(|error| Error::Io(format!("box: {error}")))?;
-        let mut entity = Entity::new(
-            label("OM9-SOLID-012"),
-            Geometry::Brep(brep),
-            self.document().current_layer,
-        );
         let axes = [plane.x, plane.y, plane.normal()];
         let mut matrix = om9_core::geometry::Transform::identity().0;
         for i in 0..3 {
@@ -4514,8 +4849,9 @@ impl Controller {
             matrix[i][3] = center[i] - axes[0][i] * length * 0.5 - axes[1][i] * width * 0.5
                 + axes[2][i] * height.min(0.0);
         }
-        entity.placement = om9_core::geometry::Transform(matrix);
-        self.commit_entity("OM9-SOLID-012", label("OM9-SOLID-012"), entity)
+        self.commit_primitive_optional_topology("OM9-SOLID-012", label("OM9-SOLID-012"), "box",
+            Primitive::Box { x_mm: length, y_mm: width, z_mm: height.abs() },
+            om9_core::geometry::Transform(matrix))
     }
 
     pub fn solid_box_points(
@@ -4616,21 +4952,6 @@ impl Controller {
                 "box needs a non-zero base and positive height",
             ));
         }
-        let brep = creation::primitive(
-            Primitive::Box {
-                x_mm: dims[0],
-                y_mm: dims[1],
-                z_mm: dims[2],
-            },
-            creation::DEFAULT_DEFLECTION_MM,
-            self.coordinator.limits(),
-        )
-        .map_err(|error| Error::Io(format!("box: {error}")))?;
-        let mut entity = Entity::new(
-            label("OM9-SOLID-012"),
-            Geometry::Brep(brep),
-            self.document().current_layer,
-        );
         let mut matrix = om9_core::geometry::Transform::identity().0;
         for column in 0..3 {
             for row in 0..3 {
@@ -4641,18 +4962,14 @@ impl Controller {
             matrix[row][3] =
                 world_first[row] + (0..3).map(|j| frame_axes[j][row] * origin[j]).sum::<f64>();
         }
-        entity.placement = om9_core::geometry::Transform(matrix);
-        self.commit_entity("OM9-SOLID-012", label("OM9-SOLID-012"), entity)
+        self.commit_primitive_optional_topology("OM9-SOLID-012", label("OM9-SOLID-012"), "box",
+            Primitive::Box { x_mm: dims[0], y_mm: dims[1], z_mm: dims[2] },
+            om9_core::geometry::Transform(matrix))
     }
 
     pub(super) fn solid_primitive(&mut self, feature: &'static str, primitive: Primitive) -> Result<()> {
-        let brep = creation::primitive(
-            primitive,
-            creation::DEFAULT_DEFLECTION_MM,
-            self.coordinator.limits(),
-        )
-        .map_err(|error| Error::Io(format!("solid primitive: {error}")))?;
-        self.insert_solid(feature, label(feature), brep)
+        self.commit_primitive_optional_topology(feature, label(feature), "solid primitive", primitive,
+            om9_core::geometry::Transform::identity())
     }
 
     pub(super) fn solid_torus_points(
@@ -4662,20 +4979,6 @@ impl Controller {
         ring: f64,
         tube: f64,
     ) -> Result<()> {
-        let brep = creation::primitive(
-            Primitive::Torus {
-                ring_radius_mm: ring,
-                tube_radius_mm: tube,
-            },
-            creation::DEFAULT_DEFLECTION_MM,
-            self.coordinator.limits(),
-        )
-        .map_err(|e| Error::Io(format!("torus: {e}")))?;
-        let mut entity = Entity::new(
-            label("OM9-SOLID-015"),
-            Geometry::Brep(brep),
-            self.document().current_layer,
-        );
         let mut matrix = om9_core::geometry::Transform::identity().0;
         for row in 0..3 {
             for col in 0..3 {
@@ -4683,8 +4986,8 @@ impl Controller {
             }
             matrix[row][3] = center[row];
         }
-        entity.placement = om9_core::geometry::Transform(matrix);
-        self.commit_entity("OM9-SOLID-015", label("OM9-SOLID-015"), entity)
+        self.commit_primitive_optional_topology("OM9-SOLID-015", label("OM9-SOLID-015"), "torus",
+            Primitive::Torus { ring_radius_mm: ring, tube_radius_mm: tube }, om9_core::geometry::Transform(matrix))
     }
 
     pub(super) fn solid_ellipsoid_points(
@@ -4694,6 +4997,16 @@ impl Controller {
         radii: [f64; 3],
         foci: Option<[[f64; 3]; 2]>,
     ) -> Result<()> {
+        if foci.is_none() {
+            let mut matrix = om9_core::geometry::Transform::identity().0;
+            for row in 0..3 {
+                for column in 0..3 { matrix[row][column] = axes[column][row]; }
+                matrix[row][3] = center[row];
+            }
+            return self.commit_primitive_optional_topology("OM9-SOLID-013", label("OM9-SOLID-013"), "ellipsoid",
+                Primitive::Ellipsoid { x_mm: radii[0], y_mm: radii[1], z_mm: radii[2] },
+                om9_core::geometry::Transform(matrix));
+        }
         let brep = creation::primitive(
             Primitive::Ellipsoid {
                 x_mm: radii[0],
@@ -4704,9 +5017,16 @@ impl Controller {
             self.coordinator.limits(),
         )
         .map_err(|error| Error::Io(format!("ellipsoid: {error}")))?;
+        let held = self.scene_cache_usage()?;
+        let bytes = brep.storage_usage(self.coordinator.limits())?.bytes;
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel, bytes, physical, held)?;
+        reservation.set_allocated_bytes(bytes)?;
+        let source = self.coordinator.register_reserved_brep_candidate(brep, &mut reservation, held)?;
         let mut entity = Entity::new(
             label("OM9-SOLID-013"),
-            Geometry::Brep(brep),
+            Geometry::Brep(source),
             self.document().current_layer,
         );
         let mut matrix = om9_core::geometry::Transform::identity().0;
@@ -4732,30 +5052,104 @@ impl Controller {
                     ),
                 });
             }
-            return self.commit_solid_result(
+            let result = self.commit_solid_result_with_reserved_sources(
                 "OM9-SOLID-013",
                 label("OM9-SOLID-013"),
                 mutations,
                 None,
+                std::slice::from_mut(&mut reservation),
             );
+            if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+            return result;
         }
-        self.commit_entity("OM9-SOLID-013", label("OM9-SOLID-013"), entity)
+        self.commit_entity_reserved_brep("OM9-SOLID-013", label("OM9-SOLID-013"), entity, &mut reservation)
+    }
+
+    pub(super) fn solid_output_deflection(&self, id: om9_core::identity::ObjectId) -> Result<f64> {
+        let stamp = self.document().stamp(id)?;
+        self.scene.as_ref().ok_or(Error::Missing("solid scene"))?.root_brep_output_deflection(&stamp)
+    }
+
+    /// Converted or staged B-reps can still be associated with a Surface or
+    /// NativeBrep document entity. Their private candidate owns its profile.
+    pub(super) fn solid_candidate_output_deflection(&self, id: om9_core::identity::ObjectId,
+        candidate: &om9_core::brep::Brep) -> Result<f64> {
+        if self.document().entities.get(&id).is_some_and(|entity| match &entity.geometry {
+            Geometry::Brep(current) => om9_core::brep::BrepSourceAccess::shares_validation_payload(current, candidate),
+            _ => false,
+        }) {
+            self.solid_output_deflection(id)
+        } else {
+            Ok(candidate.display().deflection_mm)
+        }
     }
 
     fn world_solid_brep(&self, id: om9_core::identity::ObjectId) -> Result<om9_core::brep::Brep> {
         let brep = self.solid_brep(id)?;
         let entity = &self.document().entities[&id];
         if entity.placement == om9_core::geometry::Transform::identity() {
-            Ok(brep.clone())
+            self.coordinator.materialize_brep_with_held(brep, self.scene_cache_usage()?)
         } else {
             om9_kernel::transform_ops::transform_brep(
                 brep,
                 &entity.placement,
-                brep.display.deflection_mm,
+                self.solid_output_deflection(id)?,
                 self.coordinator.limits(),
             )
             .map_err(|error| Error::Io(format!("solid placement: {error}")))
         }
+    }
+
+    fn world_boolean_brep(&self, id: om9_core::identity::ObjectId) -> Result<om9_core::brep::Brep> {
+        let matrix = &self.document().entities.get(&id).ok_or(Error::Missing("Boolean input"))?.placement;
+        if !om9_kernel::transform_ops::is_exact_occt_rigid(matrix)
+            .map_err(|error| Error::Io(format!("Boolean placement: {error}")))? {
+            return Err(Error::Unsupported("Boolean requires a rigid B-Rep placement; scaled or reflected inputs are not yet supported"));
+        }
+        self.world_solid_brep(id)
+    }
+
+    pub(super) fn boolean_relative_rigid(base: om9_core::geometry::Transform, other: om9_core::geometry::Transform) -> Option<om9_core::geometry::Transform> {
+        if base == other { return Some(om9_core::geometry::Transform::identity()); }
+        let same_linear = (0..3).all(|row| (0..3).all(|col| base.0[row][col] == other.0[row][col]));
+        if !same_linear {
+            let inverse = om9_kernel::transform_ops::inverse(&base).ok()?;
+            let relative = inverse.compose(other).ok()?;
+            if !om9_kernel::transform_ops::is_exact_occt_rigid(&relative).ok()? || base.compose(relative).ok()? != other { return None; }
+            return Some(relative);
+        }
+        let mut linear = base;
+        for row in 0..3 { linear.0[row][3] = 0.; }
+        let inverse = om9_kernel::transform_ops::inverse(&linear).ok()?;
+        let delta = [other.0[0][3] - base.0[0][3], other.0[1][3] - base.0[1][3], other.0[2][3] - base.0[2][3]];
+        let local = inverse.point(delta).ok()?;
+        let world = base.point(local).ok()?;
+        if (0..3).any(|row| world[row] != other.0[row][3]) { return None; }
+        Some(om9_core::geometry::Transform::translation(local))
+    }
+
+    pub(super) fn common_boolean_affine(&self, ids: impl IntoIterator<Item = om9_core::identity::ObjectId>) -> Result<Option<om9_core::geometry::Transform>> {
+        let mut ids = ids.into_iter();
+        let Some(first) = ids.next().and_then(|id| self.document().entities.get(&id)) else { return Ok(None); };
+        let placement = first.placement;
+        let rigid = om9_kernel::transform_ops::is_exact_occt_rigid(&placement)
+            .map_err(|error| Error::Io(format!("Boolean placement: {error}")))?;
+        if rigid { return Ok(None); }
+        for id in ids {
+            let Some(entity) = self.document().entities.get(&id) else { return Ok(None); };
+            if Self::boolean_relative_rigid(placement, entity.placement).is_none() { return Ok(None); }
+        }
+        Ok(Some(placement))
+    }
+
+    fn boolean_group_brep(&self, id: om9_core::identity::ObjectId, frame: Option<om9_core::geometry::Transform>) -> Result<om9_core::brep::Brep> {
+        let Some(frame) = frame else { return self.world_boolean_brep(id); };
+        let source = self.solid_brep(id)?;
+        let placement = self.document().entities.get(&id).ok_or(Error::Missing("Boolean input"))?.placement;
+        let relative = Self::boolean_relative_rigid(frame, placement).ok_or(Error::Invalid("Boolean shared placement"))?;
+        if relative == om9_core::geometry::Transform::identity() { return self.coordinator.materialize_brep_with_held(source, self.scene_cache_usage()?); }
+        om9_kernel::transform_ops::transform_brep(source, &relative, self.solid_output_deflection(id)?, self.coordinator.limits())
+            .map_err(|error| Error::Io(format!("Boolean relative placement: {error}")))
     }
 
     pub(super) fn commit_solid_result(
@@ -4768,6 +5162,100 @@ impl Controller {
         self.commit_solid_result_with_extra(feature, name, mutations, select, None)
     }
 
+    pub(super) fn commit_solid_result_with_reserved_sources(&mut self, feature: &'static str,
+        name: &'static str, mutations: Vec<Mutation>, select: Option<Vec<om9_core::identity::ObjectId>>,
+        reservations: &mut [om9_core::transaction::ExternalMemoryReservation]) -> Result<()> {
+        self.commit_solid_result_inner(feature, name, mutations, select, None, Some(reservations), None)
+    }
+
+    pub(super) fn commit_solid_result_with_prepared_wire(&mut self, feature: &'static str,
+        name: &'static str, mutations: Vec<Mutation>, select: Option<Vec<om9_core::identity::ObjectId>>,
+        reservations: &mut [om9_core::transaction::ExternalMemoryReservation], wire: super::PreparedEditWire) -> Result<()> {
+        self.commit_solid_result_inner(feature, name, mutations, select, None, Some(reservations), Some(wire))
+    }
+
+    pub(super) fn reserve_solid_candidate(&self, candidate: om9_core::brep::Brep)
+        -> Result<(om9_core::brep::CanonicalBrep, om9_core::transaction::ExternalMemoryReservation)> {
+        let held = self.scene_cache_usage()?;
+        self.reserve_solid_candidate_with_held(candidate, held)
+    }
+    pub(super) fn reserve_solid_candidate_with_held(&self, candidate: om9_core::brep::Brep, held: om9_core::budget::Usage)
+        -> Result<(om9_core::brep::CanonicalBrep, om9_core::transaction::ExternalMemoryReservation)> {
+        let bytes = candidate.storage_usage(self.coordinator.limits())?.bytes;
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel, bytes, physical, held)?;
+        reservation.set_allocated_bytes(bytes)?;
+        let source = self.coordinator.register_reserved_brep_candidate(candidate, &mut reservation, held)?;
+        Ok((source, reservation))
+    }
+    pub(super) fn reserve_solid_guard_vector(&self, count: usize)
+        -> Result<(Vec<om9_core::transaction::ExternalMemoryReservation>, om9_core::transaction::ExternalMemoryReservation)> {
+        self.reserve_solid_guard_vector_with_held(count, self.scene_cache_usage()?)
+    }
+    pub(super) fn reserve_solid_guard_vector_with_held(&self, count: usize, held: om9_core::budget::Usage)
+        -> Result<(Vec<om9_core::transaction::ExternalMemoryReservation>, om9_core::transaction::ExternalMemoryReservation)> {
+        use om9_core::{budget::{Usage, memory::MemoryClass}, transaction::ExternalMemoryReservation};
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let bytes = Usage::array::<ExternalMemoryReservation>(count)?.bytes.max(1);
+        let mut storage = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, bytes, physical, held)?;
+        let mut guards = Vec::new();
+        guards.try_reserve_exact(count).map_err(|_| Error::Budget("solid source guards"))?;
+        let actual = Usage::array::<ExternalMemoryReservation>(guards.capacity())?.bytes.max(1);
+        if actual > storage.bytes() {
+            self.coordinator.grow_external_memory_with_held(&mut storage, actual - bytes, physical, held)?;
+        }
+        storage.set_allocated_bytes(actual)?;
+        Ok((guards, storage))
+    }
+    pub(super) fn grow_solid_guard_vector(&self, guards: &mut Vec<om9_core::transaction::ExternalMemoryReservation>,
+        storage: &mut Option<om9_core::transaction::ExternalMemoryReservation>, additional: usize) -> Result<()> {
+        use om9_core::{budget::{Usage, memory::MemoryClass}, transaction::ExternalMemoryReservation};
+        let required = guards.len().checked_add(additional).ok_or(Error::Overflow("solid source guards"))?;
+        if required <= guards.capacity() { return Ok(()); }
+        let held = self.scene_cache_usage()?;
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let bytes = Usage::array::<ExternalMemoryReservation>(required)?.bytes.max(1);
+        // The old backing allocation stays charged during Vec reallocation.
+        let mut next = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, bytes, physical, held)?;
+        guards.try_reserve_exact(required - guards.len()).map_err(|_| Error::Budget("solid source guards"))?;
+        let actual = Usage::array::<ExternalMemoryReservation>(guards.capacity())?.bytes.max(1);
+        if actual > next.bytes() {
+            self.coordinator.grow_external_memory_with_held(&mut next, actual - bytes, physical, held)?;
+        }
+        next.set_allocated_bytes(actual)?;
+        *storage = Some(next);
+        Ok(())
+    }
+    fn commit_slab_candidate(&mut self, candidate: om9_core::brep::Brep,
+        placement: om9_core::geometry::Transform) -> Result<()> {
+        let (source, mut reservation) = self.reserve_solid_candidate(candidate)?;
+        let mut entity = Entity::new("Slab", Geometry::Brep(source), self.document().current_layer);
+        entity.placement = placement;
+        let id = entity.id;
+        let mutation = Mutation::Insert { document: self.document, entity };
+        let result = self.commit_solid_result_with_reserved_sources("SolidSlab", "Slab", vec![mutation],
+            Some(vec![id]), std::slice::from_mut(&mut reservation));
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
+    }
+
+    fn commit_reserved_brep_replacement(&mut self, feature: &'static str, name: &'static str,
+        target: om9_core::identity::SourceStamp, candidate: om9_core::brep::Brep) -> Result<()> {
+        let held = self.scene_cache_usage()?;
+        let bytes = candidate.storage_usage(self.coordinator.limits())?.bytes;
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel, bytes, physical, held)?;
+        reservation.set_allocated_bytes(bytes)?;
+        let source = self.coordinator.register_reserved_brep_candidate(candidate, &mut reservation, held)?;
+        let mutation = Mutation::Geometry { source: target, geometry: Geometry::Brep(source) };
+        let result = self.commit_solid_result_with_reserved_sources(feature, name, vec![mutation],
+            Some(vec![target.object]), std::slice::from_mut(&mut reservation));
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
+    }
+
     fn commit_solid_result_with_extra(
         &mut self,
         feature: &'static str,
@@ -4776,14 +5264,43 @@ impl Controller {
         select: Option<Vec<om9_core::identity::ObjectId>>,
         extra: Option<om9_core::budget::Usage>,
     ) -> Result<()> {
+        self.commit_solid_result_inner(feature, name, mutations, select, extra, None, None)
+    }
+    fn commit_solid_result_inner(
+        &mut self,
+        feature: &'static str,
+        name: &'static str,
+        mutations: Vec<Mutation>,
+        select: Option<Vec<om9_core::identity::ObjectId>>,
+        extra: Option<om9_core::budget::Usage>,
+        reservations: Option<&mut [om9_core::transaction::ExternalMemoryReservation]>,
+        wire: Option<super::PreparedEditWire>,
+    ) -> Result<()> {
+        let profile = std::env::var_os("OM9_COMMIT_PROFILE").map(|_| std::time::Instant::now());
+        #[cfg(test)]
+        let timing = (feature == "OM9-SOLID-006" && mutations.len() >= 20).then(std::time::Instant::now);
         let mut held = self.scene_cache_usage()?;
         if let Some(extra) = extra {
             held.add(extra, self.coordinator.limits())?;
         }
-        let prepared = self
-            .coordinator
-            .prepare_with_held_usage(TransactionRequest::new(name, mutations), held)?;
-        let receipt = self.commit_with_candidate_scene(prepared, held)?;
+        let request = TransactionRequest::new(name, mutations);
+        let prepared = match reservations {
+            Some(guards) => self.coordinator.prepare_with_reserved_brep_mutations(request, held, guards)?,
+            None => self.coordinator.prepare_with_held_usage(request, held)?,
+        };
+        if let Some(start) = profile { eprintln!("OM9_COMMIT_PROFILE {feature} transaction_prepare_ms={:.3}", start.elapsed().as_secs_f64()*1000.); }
+        #[cfg(test)]
+        if let Some(start) = timing { eprintln!("extract_transaction_prepare_ms={}", start.elapsed().as_millis()); }
+        let receipt = if let Some(wire) = wire {
+            let result = self.commit_with_candidate_scene_guard(prepared, held, Some(wire),
+                || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes)), |_| Ok(()));
+            if !result.as_ref().is_ok_and(|receipt| receipt.published) {
+                self.coordinator.prune_orphaned_brep_representations();
+                self.coordinator.prune_orphaned_native_representations();
+            }
+            result?
+        } else { self.commit_with_candidate_scene(prepared, held)? };
+        if let Some(start) = profile { eprintln!("OM9_COMMIT_PROFILE {feature} scene_and_commit_total_ms={:.3}", start.elapsed().as_secs_f64()*1000.); }
         if receipt.published {
             self.sync_published(om9_core::changes::ChangeCause::Edit);
             if let Some(ids) = select {
@@ -4820,7 +5337,7 @@ impl Controller {
             .coordinator
             .retained_usage_with_held_usage(self.scene_cache_usage()?)?;
         let remaining = self.coordinator.limits().remaining_after(held)?;
-        let deflection = inputs[0].display.deflection_mm;
+        let deflection = self.solid_output_deflection(ids[0])?;
         let regions = editing::create_solid_regions(&inputs, deflection, &remaining)
             .map_err(|e| Error::Io(format!("create solid: {e}")))?
             .ok_or(Error::Invalid("no closed solid regions"))?;
@@ -4841,12 +5358,16 @@ impl Controller {
                 mutations.push(Mutation::Delete { source });
             }
         }
+        let result = (|| {
+        let (mut guards, _guard_storage) = self.reserve_solid_guard_vector(regions.pieces)?;
         for index in 0..regions.pieces {
             let body = editing::split_solid_piece(&regions, index, deflection, &remaining)
                 .map_err(|e| Error::Io(format!("create solid region: {e}")))?;
+            let (source, guard) = self.reserve_solid_candidate(body)?;
+            guards.push(guard);
             let entity = Entity::new(
                 "Create Solid",
-                Geometry::Brep(body),
+                Geometry::Brep(source),
                 self.document().current_layer,
             );
             outputs.push(entity.id);
@@ -4855,7 +5376,10 @@ impl Controller {
                 entity,
             });
         }
-        self.commit_solid_result("SolidCreateSolid", "Create Solid", mutations, Some(outputs))
+        self.commit_solid_result_with_reserved_sources("SolidCreateSolid", "Create Solid", mutations, Some(outputs), &mut guards)
+        })();
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
     }
 
     pub(super) fn solid_split_groups(
@@ -4867,6 +5391,7 @@ impl Controller {
         if targets.is_empty() || cutters.is_empty() {
             return Err(Error::Missing("select the second Boolean set"));
         }
+        let common_placement = self.common_boolean_affine(targets.iter().map(|source| source.object).chain(cutters.iter().copied()))?;
         let mut target_bodies = Vec::new();
         let mut cutter_bodies = Vec::new();
         let mut sources = std::collections::BTreeMap::new();
@@ -4881,14 +5406,14 @@ impl Controller {
                 return Err(Error::Stale("Boolean first set"));
             }
             sources.insert(source.object, *source);
-            target_bodies.push(self.world_solid_brep(source.object)?);
+            target_bodies.push(self.boolean_group_brep(source.object, common_placement)?);
         }
         for id in cutters {
             let source = self.document().stamp(*id)?;
             sources.insert(*id, source);
-            cutter_bodies.push(self.world_solid_brep(*id)?);
+            cutter_bodies.push(self.boolean_group_brep(*id, common_placement)?);
         }
-        let deflection = target_bodies[0].display.deflection_mm;
+        let deflection = self.solid_output_deflection(targets[0].object)?;
         let held = self
             .coordinator
             .retained_usage_with_held_usage(self.scene_cache_usage()?)?;
@@ -4916,24 +5441,33 @@ impl Controller {
                 mutations.push(Mutation::Delete { source });
             }
         }
+        let result = (|| {
+        let (mut guards, _guard_storage) = self.reserve_solid_guard_vector(pieces.len())?;
         for body in pieces {
-            let entity = Entity::new(
+            let (source, guard) = self.reserve_solid_candidate(body)?;
+            guards.push(guard);
+            let mut entity = Entity::new(
                 "Boolean Split",
-                Geometry::Brep(body),
+                Geometry::Brep(source),
                 self.document().current_layer,
             );
+            if let Some(placement) = common_placement { entity.placement = placement; }
             outputs.push(entity.id);
             mutations.push(Mutation::Insert {
                 document: self.document,
                 entity,
             });
         }
-        self.commit_solid_result(
+        self.commit_solid_result_with_reserved_sources(
             "SolidBooleanSplit",
             "Boolean Split",
             mutations,
             Some(outputs),
+            &mut guards,
         )
+        })();
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
     }
 
     pub(super) fn solid_binary_groups(
@@ -4970,6 +5504,7 @@ impl Controller {
             self.solid_brep(*id)?;
             cutter_stamps.push(self.document().stamp(*id)?);
         }
+        let common_placement = self.common_boolean_affine(targets.iter().map(|source| source.object).chain(cutters.iter().copied()))?;
         let delete_targets = feature == "OM9-SOLID-001" || delete_input;
         let count = (if delete_targets { targets.len() } else { 0 })
             .checked_add(if delete_input { cutters.len() } else { 0 })
@@ -4979,11 +5514,11 @@ impl Controller {
         mutations
             .try_reserve_exact(count)
             .map_err(|_| Error::Budget("boolean mutations"))?;
-        let mut target_body = self.world_solid_brep(targets[0].object)?;
-        let deflection = target_body.display.deflection_mm;
+        let mut target_body = self.boolean_group_brep(targets[0].object, common_placement)?;
+        let deflection = self.solid_output_deflection(targets[0].object)?;
         for target in &targets[1..] {
-            let operand = self.world_solid_brep(target.object)?;
-            target_body = match editing::boolean(
+            let operand = self.boolean_group_brep(target.object, common_placement)?;
+            target_body = match editing::boolean_checked(
                 &target_body,
                 &operand,
                 BooleanOp::Union,
@@ -5005,7 +5540,7 @@ impl Controller {
             let mut held = self.coordinator.retained_usage_with_held_usage(self.scene_cache_usage()?)?;
             held.add(target_body.validate(self.coordinator.limits())?, self.coordinator.limits())?;
             for cutter in &cutter_stamps {
-                let body = self.world_solid_brep(cutter.object)?;
+                let body = self.boolean_group_brep(cutter.object, common_placement)?;
                 held.add(body.validate(self.coordinator.limits())?, self.coordinator.limits())?;
                 cutter_bodies.push(body);
             }
@@ -5013,17 +5548,17 @@ impl Controller {
                 .map_err(|error| Error::Io(format!("solid boolean: {error}")))?
         } else { None };
         let result = if let Some(outcome) = fast { outcome } else {
-            let mut cutter_body = self.world_solid_brep(cutter_stamps[0].object)?;
+            let mut cutter_body = self.boolean_group_brep(cutter_stamps[0].object, common_placement)?;
             for cutter in &cutter_stamps[1..] {
-                let operand = self.world_solid_brep(cutter.object)?;
-                cutter_body = match editing::boolean(&cutter_body, &operand, BooleanOp::Union,
+                let operand = self.boolean_group_brep(cutter.object, common_placement)?;
+                cutter_body = match editing::boolean_checked(&cutter_body, &operand, BooleanOp::Union,
                     deflection, self.coordinator.limits())
                     .map_err(|error| Error::Io(format!("solid cutter union: {error}")))? {
                     editing::BooleanOutcome::Body(body) => body,
                     editing::BooleanOutcome::Empty => return Err(Error::Invalid("cutter union produced an empty body")),
                 };
             }
-            editing::boolean(&target_body, &cutter_body, op, deflection, self.coordinator.limits())
+            editing::boolean_checked(&target_body, &cutter_body, op, deflection, self.coordinator.limits())
                 .map_err(|error| Error::Io(format!("solid boolean: {error}")))?
         };
         let body = match result {
@@ -5042,17 +5577,22 @@ impl Controller {
                 mutations.push(Mutation::Delete { source: cutter });
             }
         }
-        let entity = Entity::new(
+        let (body, mut reservation) = self.reserve_solid_candidate(body)?;
+        let mut entity = Entity::new(
             label(feature),
             Geometry::Brep(body),
             self.document().current_layer,
         );
+        if let Some(placement) = common_placement { entity.placement = placement; }
         let output = entity.id;
         mutations.push(Mutation::Insert {
             document: self.document,
             entity,
         });
-        self.commit_solid_result(feature, label(feature), mutations, Some(vec![output]))
+        let result = self.commit_solid_result_with_reserved_sources(feature, label(feature), mutations,
+            Some(vec![output]), std::slice::from_mut(&mut reservation));
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
     }
 
     pub(super) fn solid_union_selected(&mut self, delete_input: bool) -> Result<()> {
@@ -5068,16 +5608,19 @@ impl Controller {
             self.document().stamp(ids[0])?,
             self.document().stamp(ids[1])?,
         ];
-        let a = self.world_solid_brep(ids[0])?;
-        let b = self.world_solid_brep(ids[1])?;
-        let deflection = a.display.deflection_mm;
+        let common_placement = self.common_boolean_affine(ids.iter().copied())?;
+        let a = self.boolean_group_brep(ids[0], common_placement)?;
+        let b = self.boolean_group_brep(ids[1], common_placement)?;
+        let placement = common_placement.unwrap_or_else(om9_core::geometry::Transform::identity);
+        let deflection = self.viewport_detail.linear_mm();
         let limits = self.coordinator.limits();
         let calculate = |left: &om9_core::brep::Brep, right: &om9_core::brep::Brep, op| {
-            editing::boolean(left, right, op, deflection, limits)
+            editing::boolean_checked(left, right, op, deflection, limits)
                 .map_err(|error| Error::Io(format!("solid boolean: {error}")))
         };
         let result = match mode {
-            0 => calculate(&a, &b, BooleanOp::Union)?,
+            0 => editing::boolean_checked_certified_union(&a, &b, deflection, limits)
+                .map_err(|error| Error::Io(format!("solid boolean: {error}")))?,
             1 => calculate(&a, &b, BooleanOp::Difference)?,
             2 => calculate(&b, &a, BooleanOp::Difference)?,
             3 => calculate(&a, &b, BooleanOp::Intersection)?,
@@ -5110,11 +5653,22 @@ impl Controller {
         let mut held = self.scene_cache_usage()?;
         held.add(usage, limits)?;
         self.coordinator.retained_usage_with_held_usage(held)?;
+        let body = if let Some(candidate) = body {
+            let bytes = candidate.storage_usage(limits)?.bytes;
+            let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+            let mut reservation = self.coordinator.reserve_external_memory_with_held(
+                om9_core::budget::memory::MemoryClass::Kernel, bytes, physical, self.scene_cache_usage()?)?;
+            reservation.set_allocated_bytes(bytes)?;
+            Some(self.own_brep_preview(candidate, reservation)?)
+        } else { None };
         Ok(BooleanTwoPreview {
+            topology_proof: None,
             mode,
             sources,
             body,
+            placement,
             usage,
+            reservation: None,
         })
     }
 
@@ -5132,11 +5686,12 @@ impl Controller {
             .body
             .as_ref()
             .ok_or(Error::Invalid("boolean produced an empty body"))?;
-        let entity = Entity::new(
+        let mut entity = Entity::new(
             "Boolean Two Objects",
-            Geometry::Brep(body.clone()),
+            Geometry::Brep(self.coordinator.register_brep_candidate(body.clone())?),
             self.document().current_layer,
         );
+        entity.placement = preview.placement;
         let output = entity.id;
         let mut mutations = Vec::new();
         if delete_input {
@@ -5153,8 +5708,19 @@ impl Controller {
             "Boolean Two Objects",
             mutations,
             Some(vec![output]),
-            Some(preview.usage),
-        )
+            if preview.is_accounted() { None } else { Some(preview.usage) },
+        )?;
+        if let Some(proof) = &preview.topology_proof {
+            if let Some((proof, owner)) = proof.lock().unwrap_or_else(|e| e.into_inner()).take() {
+                if let Ok(stamp) = self.document().stamp(output) {
+                    if let Ok(shared) = self.prepare_shared_topology_proof(stamp, proof, owner) {
+                        let _ = self.retain_sphere_history_proof(stamp, shared.clone());
+                        let _ = self.cache_topology_proof(shared);
+                    }
+                }
+            }
+        }
+        Ok(())
     }
 
     pub(super) fn solid_boolean(
@@ -5174,12 +5740,19 @@ impl Controller {
         for id in &selected {
             self.solid_brep(*id)?;
         }
-        let mut brep = self.world_solid_brep(selected[0])?;
-        let deflection = brep.display.deflection_mm;
+        // Factor out a non-rigid frame only when each relative rigid placement
+        // reconstructs the original placement exactly.
+        let common_placement = if multi_union { self.common_boolean_affine(selected.iter().copied())? } else { None };
+        let mut brep = self.boolean_group_brep(selected[0], common_placement)?;
+        let deflection = self.viewport_detail.linear_mm();
         for id in &selected[1..] {
-            let operand = self.world_solid_brep(*id)?;
+            let operand = self.boolean_group_brep(*id, common_placement)?;
             let outcome =
-                editing::boolean(&brep, &operand, op, deflection, self.coordinator.limits())
+                (if multi_union {
+                    editing::boolean_checked_certified_union(&brep, &operand, deflection, self.coordinator.limits())
+                } else {
+                    editing::boolean_checked(&brep, &operand, op, deflection, self.coordinator.limits())
+                })
                     .map_err(|error| Error::Io(format!("solid boolean: {error}")))?;
             brep = match outcome {
                 editing::BooleanOutcome::Body(body) => body,
@@ -5188,12 +5761,6 @@ impl Controller {
                 }
             };
         }
-        let entity = Entity::new(
-            label(feature),
-            Geometry::Brep(brep),
-            self.document().current_layer,
-        );
-        let result_id = entity.id;
         let mut mutations = Vec::new();
         if delete_input {
             for id in &selected {
@@ -5202,11 +5769,18 @@ impl Controller {
                 });
             }
         }
+        let (brep, mut reservation) = self.reserve_solid_candidate(brep)?;
+        let mut entity = Entity::new(label(feature), Geometry::Brep(brep), self.document().current_layer);
+        if let Some(placement) = common_placement { entity.placement = placement; }
+        let result_id = entity.id;
         mutations.push(Mutation::Insert {
             document: self.document,
             entity,
         });
-        self.commit_solid_result(feature, label(feature), mutations, Some(vec![result_id]))
+        let result = self.commit_solid_result_with_reserved_sources(feature, label(feature), mutations,
+            Some(vec![result_id]), std::slice::from_mut(&mut reservation));
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
     }
 
     pub(super) fn solid_cap(&mut self, feature: &'static str) -> Result<()> {
@@ -5214,32 +5788,55 @@ impl Controller {
         if ids.is_empty() {
             return Err(Error::Missing("select surfaces or polysurfaces to cap"));
         }
-        let mut mutations = Vec::new();
-        mutations
-            .try_reserve_exact(ids.len())
-            .map_err(|_| Error::Budget("cap inputs"))?;
-        let mut held = self.scene_cache_usage()?;
-        for id in &ids {
-            let source = self.document().stamp(*id)?;
-            let brep = self.solid_brep(*id)?;
-            let capped = editing::cap_planar(
-                brep,
-                1e-7,
-                brep.display.deflection_mm,
-                self.coordinator.limits(),
-            )
-            .map_err(|error| Error::Io(format!("cap planar: {error}")))?;
-            held.add(
-                capped.validate(self.coordinator.limits())?,
-                self.coordinator.limits(),
-            )?;
-            self.coordinator.retained_usage_with_held_usage(held)?;
-            mutations.push(Mutation::Geometry {
-                source,
-                geometry: Geometry::Brep(capped),
-            });
+        let result = (|| {
+            use om9_core::{budget::{Usage, memory::MemoryClass}, transaction::ExternalMemoryReservation};
+            let held = self.scene_cache_usage()?;
+            let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+            let guard_bytes = Usage::array::<ExternalMemoryReservation>(ids.len())?.bytes.max(1);
+            let mut guard_storage = self.coordinator.reserve_external_memory_with_held(
+                MemoryClass::CpuCache, guard_bytes, physical, held)?;
+            let mut guards = Vec::new();
+            guards.try_reserve_exact(ids.len()).map_err(|_| Error::Budget("cap source guards"))?;
+            let actual = Usage::array::<ExternalMemoryReservation>(guards.capacity())?.bytes.max(1);
+            if actual > guard_storage.bytes() {
+                self.coordinator.grow_external_memory_with_held(&mut guard_storage, actual - guard_bytes, physical, held)?;
+            }
+            guard_storage.set_allocated_bytes(actual)?;
+            let mut mutations = Vec::new();
+            mutations.try_reserve_exact(ids.len()).map_err(|_| Error::Budget("cap inputs"))?;
+            for id in &ids {
+                let source = self.document().stamp(*id)?;
+                let brep = self.solid_brep(*id)?;
+                let capped = editing::cap_planar(brep, 1e-7, self.solid_output_deflection(*id)?, self.coordinator.limits())
+                    .map_err(|error| Error::Io(format!("cap planar: {error}")))?;
+                let bytes = capped.storage_usage(self.coordinator.limits())?.bytes;
+                let mut guard = self.coordinator.reserve_external_memory_with_held(MemoryClass::Kernel, bytes, physical, held)?;
+                guard.set_allocated_bytes(bytes)?;
+                let candidate = self.coordinator.register_reserved_brep_candidate(capped, &mut guard, held)?;
+                guards.push(guard);
+                mutations.push(Mutation::Geometry { source, geometry: Geometry::Brep(candidate) });
+            }
+            self.commit_solid_result_with_reserved_sources(feature, label(feature), mutations, Some(ids), &mut guards)
+        })();
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
+    }
+
+    pub(super) fn solid_face_display_triangle(&self, reference: &super::SelectedSubobject)
+        -> Result<[om9_core::geometry::Point3; 3]> {
+        let om9_scene::scene::Subelement::BrepFace(key) = reference.subset else { return Err(Error::Invalid("B-Rep face")); };
+        let scene = self.scene.as_ref().ok_or(Error::Missing("face selection scene"))?;
+        reference.validate(scene, self.coordinator.epoch())?;
+        let display = scene.root_brep_pick_display(&reference.source)?;
+        let index = display.topology.faces.iter().position(|id| *id == key).ok_or(Error::Stale("display face"))?;
+        if let Some(receipt) = &self.face_verification_receipt {
+            return receipt.accept_for(self, reference);
         }
-        self.commit_solid_result(feature, label(feature), mutations, Some(ids))
+        let witness = super::face_verification::choose_witness(display, index, None)?;
+        let tolerance = self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6));
+        editing::verify_face_display(self.solid_brep(reference.root)?, display, index, witness, tolerance, self.coordinator.limits())
+            .map_err(|error| Error::Io(format!("face display verification: {error}")))?;
+        Ok(witness)
     }
 
     pub(super) fn solid_extract(
@@ -5254,10 +5851,21 @@ impl Controller {
         }
         let id = *self.selection.iter().next().expect("one selected");
         let brep = self.solid_brep(id)?;
-        let extracted = editing::extract_face(
+        let key = *brep.topology().faces.get(face).ok_or(Error::Invalid("face index"))?;
+        let scene = self.scene.as_ref().ok_or(Error::Missing("face selection scene"))?;
+        let reference = super::SelectedSubobject { root: id, path: Vec::new(), subset: om9_scene::scene::Subelement::BrepFace(key),
+            source: self.document().stamp(id)?, world_epoch: scene.epoch };
+        let triangle = self.solid_face_display_triangle(&reference)?;
+        let tolerance = self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6));
+        let witness_deflection = scene.root_brep_pick_display(&reference.source)?.deflection_mm;
+        let output_deflection = scene.root_brep_output_deflection(&reference.source)?;
+        let extracted = editing::extract_verified_face_with_witness_deflection(
             brep,
             face,
-            brep.display.deflection_mm,
+            triangle,
+            tolerance,
+            witness_deflection,
+            output_deflection,
             self.coordinator.limits(),
         )
         .map_err(|error| Error::Io(format!("extract surface: {error}")))?;
@@ -5268,32 +5876,49 @@ impl Controller {
         } else {
             self.document().current_layer
         };
+        let (extracted, extracted_guard) = self.reserve_solid_candidate(extracted)?;
+        let controller = &mut *self;
+        let result = (move || {
+        let brep = controller.solid_brep(id)?;
+        let (delete_source, remainder) = if copy { (false, None) } else {
+            let native_faces = om9_kernel::creation::measure(brep, controller.coordinator.limits())
+                .map_err(|error| Error::Io(format!("extract surface source: {error}")))?.faces;
+            if native_faces == 1 {
+                (true, None)
+            } else {
+                let remainder = editing::remove_verified_face_with_deflection(
+                    brep,
+                    face,
+                    triangle,
+                    tolerance,
+                    witness_deflection,
+                    output_deflection,
+                    controller.coordinator.limits(),
+                )
+                .map_err(|error| Error::Io(format!("extract surface remainder: {error}")))?;
+                (false, Some(remainder))
+            }
+        };
+        let (mut guards, _guard_storage) = controller.reserve_solid_guard_vector(if remainder.is_some() { 2 } else { 1 })?;
+        let mut mutations = Vec::new();
+        if delete_source { mutations.push(Mutation::Delete { source }); }
+        if let Some(remainder) = remainder {
+            let (candidate, guard) = controller.reserve_solid_candidate(remainder)?;
+            guards.push(guard);
+            mutations.push(Mutation::Geometry { source, geometry: Geometry::Brep(candidate) });
+        }
+        guards.push(extracted_guard);
         let mut entity = Entity::new(label(feature), Geometry::Brep(extracted), layer);
         entity.placement = placement;
         let result_id = entity.id;
-        let mut mutations = Vec::new();
-        if !copy {
-            if brep.display.faces.len() == 1 {
-                mutations.push(Mutation::Delete { source });
-            } else {
-                let remainder = editing::remove_face(
-                    brep,
-                    face,
-                    brep.display.deflection_mm,
-                    self.coordinator.limits(),
-                )
-                .map_err(|error| Error::Io(format!("extract surface remainder: {error}")))?;
-                mutations.push(Mutation::Geometry {
-                    source,
-                    geometry: Geometry::Brep(remainder),
-                });
-            }
-        }
         mutations.push(Mutation::Insert {
-            document: self.document,
+            document: controller.document,
             entity,
         });
-        self.commit_solid_result(feature, label(feature), mutations, Some(vec![result_id]))
+        controller.commit_solid_result_with_reserved_sources(feature, label(feature), mutations, Some(vec![result_id]), &mut guards)
+        })();
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
     }
 
     pub(super) fn solid_extract_picks(
@@ -5302,7 +5927,12 @@ impl Controller {
         copy: bool,
         input_layer: bool,
     ) -> Result<()> {
-        let mut groups: std::collections::BTreeMap<om9_core::identity::ObjectId, Vec<usize>> =
+        let mut held = self.scene_cache_usage()?;
+        held.add(om9_core::budget::Usage::array::<(usize, [om9_core::geometry::Point3; 3])>(picks.len())?, self.coordinator.limits())?;
+        held.add(om9_core::budget::Usage::array::<[om9_core::geometry::Point3; 3]>(picks.len())?, self.coordinator.limits())?;
+        held.add(om9_core::budget::Usage::array::<usize>(picks.len())?, self.coordinator.limits())?;
+        self.coordinator.retained_usage_with_held_usage(held)?;
+        let mut groups: std::collections::BTreeMap<om9_core::identity::ObjectId, Vec<(usize, [om9_core::geometry::Point3; 3])>> =
             std::collections::BTreeMap::new();
         for pick in picks {
             let om9_scene::scene::Subelement::BrepFace(face) = pick.subset else {
@@ -5310,7 +5940,7 @@ impl Controller {
             };
             let brep = self.solid_brep(pick.root)?;
             let index = brep
-                .display
+                .topology()
                 .faces
                 .iter()
                 .position(|id| *id == face)
@@ -5319,8 +5949,11 @@ impl Controller {
             group
                 .try_reserve(1)
                 .map_err(|_| Error::Budget("extract indices"))?;
-            group.push(index);
+            group.push((index, self.solid_face_display_triangle(pick)?));
         }
+        let result = (|| {
+        let guard_count = picks.len().checked_add(groups.len()).ok_or(Error::Overflow("extract source guards"))?;
+        let (mut guards, _guard_storage) = self.reserve_solid_guard_vector_with_held(guard_count, held)?;
         let mut mutations = Vec::new();
         mutations
             .try_reserve(picks.len() + groups.len())
@@ -5329,9 +5962,12 @@ impl Controller {
         output_ids
             .try_reserve(picks.len())
             .map_err(|_| Error::Budget("extract outputs"))?;
-        let mut held = self.scene_cache_usage()?;
-        for (id, indices) in groups {
+        let tolerance = self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6));
+        for (id, selected) in groups {
             let source = self.document().stamp(id)?;
+            let scene = self.scene.as_ref().ok_or(Error::Missing("face selection scene"))?;
+            let witness_deflection = scene.root_brep_pick_display(&source)?.deflection_mm;
+            let output_deflection = scene.root_brep_output_deflection(&source)?;
             let brep = self.solid_brep(id)?;
             let entity = &self.document().entities[&id];
             let layer = if input_layer {
@@ -5339,20 +5975,26 @@ impl Controller {
             } else {
                 self.document().current_layer
             };
-            for index in &indices {
-                let face = editing::extract_face(
+            let mut indices = Vec::new(); let mut triangles = Vec::new();
+            indices.try_reserve_exact(selected.len()).map_err(|_| Error::Budget("extract indices"))?;
+            triangles.try_reserve_exact(selected.len()).map_err(|_| Error::Budget("extract triangles"))?;
+            for (index, triangle) in &selected { indices.push(*index); triangles.push(*triangle); }
+            editing::verify_source_face_triangles_with_deflection(brep, &triangles, tolerance, witness_deflection, self.coordinator.limits())
+                .map_err(|error| Error::Io(format!("extract surface faces: {error}")))?;
+            for (index, triangle) in &selected {
+                let face = editing::extract_verified_face_with_witness_deflection(
                     brep,
                     *index,
-                    brep.display.deflection_mm,
+                    *triangle,
+                    tolerance,
+                    witness_deflection,
+                    output_deflection,
                     self.coordinator.limits(),
                 )
                 .map_err(|error| Error::Io(format!("extract surface: {error}")))?;
-                held.add(
-                    face.validate(self.coordinator.limits())?,
-                    self.coordinator.limits(),
-                )?;
-                self.coordinator.retained_usage_with_held_usage(held)?;
-                let mut output = Entity::new(label("OM9-SOLID-006"), Geometry::Brep(face), layer);
+                let (candidate, guard) = self.reserve_solid_candidate_with_held(face, held)?;
+                guards.push(guard);
+                let mut output = Entity::new(label("OM9-SOLID-006"), Geometry::Brep(candidate), layer);
                 output.placement = entity.placement;
                 output_ids.push(output.id);
                 mutations.push(Mutation::Insert {
@@ -5361,34 +6003,40 @@ impl Controller {
                 });
             }
             if !copy {
-                if indices.len() == brep.display.faces.len() {
+                let native_faces = om9_kernel::creation::measure(brep, self.coordinator.limits())
+                    .map_err(|error| Error::Io(format!("extract surface source: {error}")))?.faces;
+                if selected.len() == native_faces {
                     mutations.push(Mutation::Delete { source });
                 } else {
-                    let remainder = editing::remove_faces(
+                    let remainder = editing::remove_verified_faces_with_deflection(
                         brep,
                         &indices,
-                        brep.display.deflection_mm,
+                        &triangles,
+                        tolerance,
+                        witness_deflection,
+                        output_deflection,
                         self.coordinator.limits(),
                     )
                     .map_err(|error| Error::Io(format!("extract surface remainder: {error}")))?;
-                    held.add(
-                        remainder.validate(self.coordinator.limits())?,
-                        self.coordinator.limits(),
-                    )?;
-                    self.coordinator.retained_usage_with_held_usage(held)?;
+                    let (candidate, guard) = self.reserve_solid_candidate_with_held(remainder, held)?;
+                    guards.push(guard);
                     mutations.push(Mutation::Geometry {
                         source,
-                        geometry: Geometry::Brep(remainder),
+                        geometry: Geometry::Brep(candidate),
                     });
                 }
             }
         }
-        self.commit_solid_result(
+        self.commit_solid_result_with_reserved_sources(
             "OM9-SOLID-006",
             label("OM9-SOLID-006"),
             mutations,
             Some(output_ids),
+            &mut guards,
         )
+        })();
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
     }
 
     pub(super) fn solid_fillet(&mut self, feature: &'static str, edge: usize, radius: f64) -> Result<()> {
@@ -5397,40 +6045,53 @@ impl Controller {
         }
         let id = *self.selection.iter().next().expect("one selected");
         let brep = self.solid_brep(id)?;
-        let filleted = editing::fillet_with_radii(
+        let key = *brep.topology().edges.get(edge).ok_or(Error::Invalid("fillet edge index"))?;
+        let scene = self.scene.as_ref().ok_or(Error::Missing("fillet scene"))?;
+        let reference = super::SelectedSubobject { root: id, path: Vec::new(),
+            subset: om9_scene::scene::Subelement::BrepEdge(key), source: self.document().stamp(id)?, world_epoch: scene.epoch };
+        let (segment, display_deflection) = self.solid_fillet_display_segment(&reference)?;
+        let filleted = editing::fillet_with_verified_segments(
             brep,
-            &[(edge, radius)],
-            brep.display.deflection_mm,
+            &[(edge, radius, radius)],
+            &[],
+            &[segment],
+            display_deflection,
+            self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6)),
+            scene.root_brep_output_deflection(&reference.source)?,
             self.coordinator.limits(),
         )
         .map_err(|error| Error::Io(format!("fillet edge: {error}")))?;
         let source = self.document().stamp(id)?;
-        self.commit_solid_result(
-            feature,
-            label(feature),
-            vec![Mutation::Geometry {
-                source,
-                geometry: Geometry::Brep(filleted),
-            }],
-            Some(vec![id]),
-        )
+        self.commit_reserved_brep_replacement(feature, label(feature), source, filleted)
+    }
+
+    fn solid_fillet_display_segment(&self, reference: &super::SelectedSubobject)
+        -> Result<([om9_core::geometry::Point3; 2], f64)> {
+        let om9_scene::scene::Subelement::BrepEdge(key) = reference.subset else { return Err(Error::Invalid("fillet edge")); };
+        let scene = self.scene.as_ref().ok_or(Error::Missing("fillet scene"))?;
+        reference.validate(scene, self.coordinator.epoch())?;
+        let display = scene.root_brep_pick_display(&reference.source)?;
+        let index = display.topology.edges.iter().position(|id| *id == key).ok_or(Error::Stale("fillet display edge"))?;
+        let tolerance = self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6));
+        om9_kernel::measurement::verified_display_edge_length(
+            self.solid_brep(reference.root)?, om9_core::geometry::Transform::identity(),
+            &display.points, &display.segments,
+            u32::try_from(index).map_err(|_| Error::Overflow("fillet display edge"))?,
+            display.deflection_mm + tolerance, tolerance, self.coordinator.limits(),
+        ).map_err(|error| Error::Io(format!("fillet cannot verify the selected edge against the source: {error}")))?;
+        let segment = display.segments.iter().find(|segment| segment[2] as usize == index).ok_or(Error::Stale("fillet display segment"))?;
+        Ok(([*display.points.get(segment[0] as usize).ok_or(Error::Stale("fillet display segment"))?,
+            *display.points.get(segment[1] as usize).ok_or(Error::Stale("fillet display segment"))?], display.deflection_mm))
     }
 
     pub(super) fn solid_fillet_edge_endpoints(
         &self,
         reference: &super::SelectedSubobject,
     ) -> Result<Option<(om9_core::geometry::Point3, om9_core::geometry::Point3)>> {
-        let om9_scene::scene::Subelement::BrepEdge(key) = reference.subset else {
-            return Err(Error::Invalid("fillet edge"));
-        };
+        let (segment, display_deflection) = self.solid_fillet_display_segment(reference)?;
         let brep = self.solid_brep(reference.root)?;
-        let index = brep
-            .display
-            .edges
-            .iter()
-            .position(|id| *id == key)
-            .ok_or(Error::Stale("B-Rep edge"))?;
-        editing::oriented_edge_endpoints_or_closed(brep, index, self.coordinator.limits())
+        editing::verified_edge_endpoints(brep, segment, display_deflection,
+            self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6)), self.coordinator.limits())
             .map_err(|error| Error::Io(format!("fillet edge endpoints: {error}")))
     }
 
@@ -5445,13 +6106,15 @@ impl Controller {
         };
         let brep = self.solid_brep(reference.root)?;
         let index = brep
-            .display
+            .topology()
             .edges
             .iter()
             .position(|id| *id == key)
             .ok_or(Error::Stale("B-Rep edge"))?;
         let local = om9_core::top11::inverse_affine(placement)?.point(world)?;
-        editing::fillet_project_edge(brep, index, local, self.coordinator.limits())
+        let (segment, display_deflection) = self.solid_fillet_display_segment(reference)?;
+        editing::fillet_project_verified_edge(brep, index, local, segment, display_deflection,
+            self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6)), self.coordinator.limits())
             .map_err(|error| Error::Io(format!("fillet edge projection: {error}")))
     }
 
@@ -5480,25 +6143,39 @@ impl Controller {
             let om9_scene::scene::Subelement::BrepEdge(key) = edge.reference.subset else {
                 return Err(Error::Invalid("fillet edge"));
             };
-            brep.display
+            brep.topology()
                 .edges
                 .iter()
                 .position(|id| *id == key)
                 .ok_or(Error::Stale("B-Rep edge"))
         };
         let anchor_index = index_of(anchor)?;
+        let mut held = self.scene_cache_usage()?;
+        held.add(om9_core::budget::Usage::array::<[om9_core::geometry::Point3; 2]>(edges.len())?, self.coordinator.limits())?;
+        self.coordinator.retained_usage_with_held_usage(held)?;
         let mut indices = Vec::new();
+        let mut segments = Vec::new();
+        let mut display_deflection = None;
         indices
             .try_reserve_exact(edges.len())
             .map_err(|_| Error::Budget("fillet edge indices"))?;
+        segments.try_reserve_exact(edges.len()).map_err(|_| Error::Budget("fillet display segments"))?;
         for edge in edges {
             indices.push(index_of(edge)?);
+            let (segment, deflection) = self.solid_fillet_display_segment(&edge.reference)?;
+            if display_deflection.is_some_and(|value| value != deflection) { return Err(Error::Stale("fillet display profile")); }
+            display_deflection = Some(deflection);
+            segments.push(segment);
         }
-        editing::fillet_shared_endpoints(
+        editing::fillet_shared_verified_endpoints(
             brep,
             anchor_index,
             handle % 2,
             &indices,
+            &segments,
+            handle / 2,
+            display_deflection.ok_or(Error::Missing("fillet display profile"))?,
+            self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6)),
             self.coordinator.limits(),
         )
         .map_err(|error| Error::Io(format!("fillet shared endpoint: {error}")))
@@ -5512,6 +6189,12 @@ impl Controller {
         let first = edges.first().ok_or(Error::Missing("fillet edge"))?;
         let id = first.reference.root;
         let brep = self.solid_brep(id)?;
+        let mut segment_usage = self.scene_cache_usage()?;
+        segment_usage.add(om9_core::budget::Usage::array::<[om9_core::geometry::Point3; 2]>(edges.len())?, self.coordinator.limits())?;
+        self.coordinator.retained_usage_with_held_usage(segment_usage)?;
+        let mut segments = Vec::new();
+        let mut display_deflection = None;
+        segments.try_reserve_exact(edges.len()).map_err(|_| Error::Budget("fillet display segments"))?;
         let mut indices = Vec::new();
         indices
             .try_reserve_exact(edges.len())
@@ -5523,8 +6206,12 @@ impl Controller {
             let om9_scene::scene::Subelement::BrepEdge(key) = edge.reference.subset else {
                 return Err(Error::Invalid("fillet edge"));
             };
+            let (segment, deflection) = self.solid_fillet_display_segment(&edge.reference)?;
+            if display_deflection.is_some_and(|value| value != deflection) { return Err(Error::Stale("fillet display profile")); }
+            display_deflection = Some(deflection);
+            segments.push(segment);
             indices.push((
-                brep.display
+                brep.topology()
                     .edges
                     .iter()
                     .position(|id| *id == key)
@@ -5543,11 +6230,14 @@ impl Controller {
                 .0;
             laws.push((edge_index, control.fraction, control.radius));
         }
-        let body = editing::fillet_with_radius_controls(
+        let body = editing::fillet_with_verified_segments(
             brep,
             &indices,
             &laws,
-            brep.display.deflection_mm,
+            &segments,
+            display_deflection.ok_or(Error::Missing("fillet display profile"))?,
+            self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6)),
+            self.scene.as_ref().ok_or(Error::Missing("fillet scene"))?.root_brep_output_deflection(&first.reference.source)?,
             self.coordinator.limits(),
         )
         .map_err(|error| Error::Io(format!("fillet preview: {error}")))?;
@@ -5555,6 +6245,12 @@ impl Controller {
         let mut held = self.scene_cache_usage()?;
         held.add(usage, self.coordinator.limits())?;
         self.coordinator.retained_usage_with_held_usage(held)?;
+        let bytes = body.storage_usage(self.coordinator.limits())?.bytes;
+        let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel, bytes, physical, self.scene_cache_usage()?)?;
+        reservation.set_allocated_bytes(bytes)?;
+        let body = self.own_brep_preview(body, reservation)?;
         Ok(FilletPreview {
             source: first.reference.source,
             placement: self.document().entities[&id].placement,
@@ -5574,10 +6270,10 @@ impl Controller {
             label("OM9-SOLID-007"),
             vec![Mutation::Geometry {
                 source: preview.source,
-                geometry: Geometry::Brep(preview.body.clone()),
+                geometry: Geometry::Brep(self.coordinator.register_brep_candidate(preview.body.clone())?),
             }],
             Some(vec![preview.source.object]),
-            Some(preview.usage),
+            if preview.body.has_allocation_owner() { None } else { Some(preview.usage) },
         )
     }
 
@@ -5615,19 +6311,13 @@ impl Controller {
                     .map_err(|e|Error::Io(format!("Slab closed NURBS cut: {e}")))?
                     .body().ok_or(Error::Invalid("Slab closed NURBS cut is empty"))?.clone();
                 if self.document().stamp(source.object)? != source {return Err(Error::Stale("Slab source"));}
-                let mut result=Entity::new("Slab",Geometry::Brep(body),self.document().current_layer);
-                result.placement=om9_core::geometry::Transform::translation(geometry.base_shift);
-                let id=result.id;
-                return self.commit_solid_result("SolidSlab","Slab",vec![Mutation::Insert {document:self.document,entity:result}],Some(vec![id]));
+                return self.commit_slab_candidate(body, om9_core::geometry::Transform::translation(geometry.base_shift));
             }
             let geometry = om9_core::slab::nurbs_slab(&world, normal, offset, height, both_sides, 1e-4, &limits)?;
             let body = om9_kernel::extrusion::solid(&geometry.profile, geometry.direction, creation::DEFAULT_DEFLECTION_MM, &limits)
                 .map_err(|e| Error::Io(format!("Slab NURBS extrusion: {e}")))?;
             if self.document().stamp(source.object)? != source { return Err(Error::Stale("Slab source")); }
-            let mut result = Entity::new("Slab", Geometry::Brep(body), self.document().current_layer);
-            result.placement = om9_core::geometry::Transform::translation(geometry.base_shift);
-            let id = result.id;
-            return self.commit_solid_result("SolidSlab", "Slab", vec![Mutation::Insert { document: self.document, entity: result }], Some(vec![id]));
+            return self.commit_slab_candidate(body, om9_core::geometry::Transform::translation(geometry.base_shift));
         }
         if let om9_core::geometry::Curve::Circle { domain, angle_domain, .. } = curve {
             let angles = angle_domain.unwrap_or(*domain);
@@ -5637,10 +6327,7 @@ impl Controller {
                 let body = om9_kernel::extrusion::solid(&geometry.profile, geometry.direction, creation::DEFAULT_DEFLECTION_MM, &limits)
                     .map_err(|e| Error::Io(format!("Slab arc extrusion: {e}")))?;
                 if self.document().stamp(source.object)? != source { return Err(Error::Stale("Slab source")); }
-                let mut result = Entity::new("Slab", Geometry::Brep(body), self.document().current_layer);
-                result.placement = om9_core::geometry::Transform::translation(geometry.base_shift);
-                let id = result.id;
-                return self.commit_solid_result("SolidSlab", "Slab", vec![Mutation::Insert { document: self.document, entity: result }], Some(vec![id]));
+                return self.commit_slab_candidate(body, om9_core::geometry::Transform::translation(geometry.base_shift));
             }
             let geometry = om9_core::slab::circle_slab(curve, entity.placement, normal, offset, height, both_sides, &limits)?;
             let outside = creation::primitive(Primitive::Cylinder { radius_mm: geometry.outer_radius, height_mm: geometry.height }, creation::DEFAULT_DEFLECTION_MM, &limits)
@@ -5655,11 +6342,9 @@ impl Controller {
             let outcome = editing::boolean(&outside, &inside, BooleanOp::Difference, creation::DEFAULT_DEFLECTION_MM, &boolean_limits)
                 .map_err(|e| Error::Io(format!("Slab circular cut: {e}")))?;
             let body = outcome.body().ok_or(Error::Invalid("Slab circular cut is empty"))?.clone();
+            drop(outcome);
             if self.document().stamp(source.object)? != source { return Err(Error::Stale("Slab source")); }
-            let mut result = Entity::new("Slab", Geometry::Brep(body), self.document().current_layer);
-            result.placement = geometry.placement;
-            let id = result.id;
-            return self.commit_solid_result("SolidSlab", "Slab", vec![Mutation::Insert { document: self.document, entity: result }], Some(vec![id]));
+            return self.commit_slab_candidate(body, geometry.placement);
         }
         if let Ok(points) = om9_core::slab::placed_closed_polyline(curve, entity.placement, &limits) {
             let mut point_usage=om9_core::budget::Usage::array::<om9_core::geometry::Point3>(points.capacity())?;
@@ -5686,9 +6371,7 @@ impl Controller {
                 .map_err(|e|Error::Io(format!("Slab closed cut: {e}")))?
                 .body().ok_or(Error::Invalid("Slab closed cut is empty"))?.clone();
             if self.document().stamp(source.object)? != source {return Err(Error::Stale("Slab source"));}
-            let result=Entity::new("Slab",Geometry::Brep(body),self.document().current_layer);
-            let id=result.id;
-            return self.commit_solid_result("SolidSlab","Slab",vec![Mutation::Insert {document:self.document,entity:result}],Some(vec![id]));
+            return self.commit_slab_candidate(body, om9_core::geometry::Transform::identity());
         }
         let points = om9_core::slab::placed_open_polyline(curve, entity.placement, &limits)?;
         let mut point_usage = om9_core::budget::Usage::array::<om9_core::geometry::Point3>(points.capacity())?;
@@ -5703,9 +6386,7 @@ impl Controller {
         let body = creation::extrude(&profile, direction, true, creation::DEFAULT_DEFLECTION_MM, &operation_limits)
             .map_err(|e| Error::Io(format!("Slab extrusion: {e}")))?;
         if self.document().stamp(source.object)? != source { return Err(Error::Stale("Slab source")); }
-        let result = Entity::new("Slab", Geometry::Brep(body), self.document().current_layer);
-        let id = result.id;
-        self.commit_solid_result("SolidSlab", "Slab", vec![Mutation::Insert { document: self.document, entity: result }], Some(vec![id]))
+        self.commit_slab_candidate(body, om9_core::geometry::Transform::identity())
     }
 
     pub(super) fn solid_extrude(&mut self, feature: &'static str, height: f64, all: bool) -> Result<()> {
@@ -5724,34 +6405,59 @@ impl Controller {
             plane.x[0] * plane.y[1] - plane.x[1] * plane.y[0],
         ];
         let direction = [normal[0] * height, normal[1] * height, normal[2] * height];
+        let result = (|| {
+        use om9_core::{budget::{Usage, memory::MemoryClass}, transaction::ExternalMemoryReservation};
+        let held = self.scene_cache_usage()?;
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let guard_bytes = Usage::array::<ExternalMemoryReservation>(ids.len())?.bytes.max(1);
+        let mut guard_storage = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, guard_bytes, physical, held)?;
+        let mut guards = Vec::new();
+        guards.try_reserve_exact(ids.len()).map_err(|_| Error::Budget("extrude source guards"))?;
+        let actual = Usage::array::<ExternalMemoryReservation>(guards.capacity())?.bytes.max(1);
+        if actual > guard_storage.bytes() {
+            self.coordinator.grow_external_memory_with_held(&mut guard_storage, actual - guard_bytes, physical, held)?;
+        }
+        guard_storage.set_allocated_bytes(actual)?;
         let mut mutations = Vec::new();
         let mut inserted = Vec::new();
-        let mut staged_usage = om9_core::budget::Usage::default();
+        let mut staged_usage = Usage::default();
         for id in ids {
-            let Geometry::Curve(curve) = &self.document().entities[&id].geometry else {
+            let source = &self.document().entities[&id];
+            let Geometry::Curve(curve) = &source.geometry else {
                 return Err(Error::Invalid("extrude needs a curve"));
             };
+            let inverse = om9_core::top11::inverse_affine(source.placement)?;
+            let local_direction = std::array::from_fn(|i| (0..3).map(|j| inverse.0[i][j] * direction[j]).sum());
             let operation_limits = self.coordinator.limits().remaining_after(staged_usage)?;
             let brep = om9_kernel::extrusion::solid(
                 curve,
-                direction,
+                local_direction,
                 creation::DEFAULT_DEFLECTION_MM,
                 &operation_limits,
             )
             .map_err(|error| Error::Io(format!("extrude: {error}")))?;
-            staged_usage.add(brep.validate(&operation_limits)?, self.coordinator.limits())?;
-            let entity = Entity::new(
+            let usage = brep.storage_usage(&operation_limits)?;
+            staged_usage.add(usage, self.coordinator.limits())?;
+            let mut guard = self.coordinator.reserve_external_memory_with_held(MemoryClass::Kernel, usage.bytes, physical, held)?;
+            guard.set_allocated_bytes(usage.bytes)?;
+            let candidate = self.coordinator.register_reserved_brep_candidate(brep, &mut guard, held)?;
+            guards.push(guard);
+            let mut entity = Entity::new(
                 label(feature),
-                Geometry::Brep(brep),
+                Geometry::Brep(candidate),
                 self.document().current_layer,
             );
+            entity.placement = source.placement;
             inserted.push(entity.id);
             mutations.push(Mutation::Insert {
                 document: self.document,
                 entity,
             });
         }
-        self.commit_solid_result(feature, label(feature), mutations, Some(inserted))
+        self.commit_solid_result_with_reserved_sources(feature, label(feature), mutations, Some(inserted), &mut guards)
+        })();
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
     }
 
     pub(super) fn solid_shell(&mut self, feature: &'static str, face: usize, thickness: f64) -> Result<()> {
@@ -5760,24 +6466,26 @@ impl Controller {
         }
         let id = *self.selection.iter().next().expect("one selected");
         let brep = self.solid_brep(id)?;
-        let shell = editing::shell(
+        let key = *brep.topology().faces.get(face).ok_or(Error::Invalid("shell face index"))?;
+        let scene = self.scene.as_ref().ok_or(Error::Missing("shell scene"))?;
+        let reference = super::SelectedSubobject { root: id, path: Vec::new(), subset: om9_scene::scene::Subelement::BrepFace(key),
+            source: self.document().stamp(id)?, world_epoch: scene.epoch };
+        let triangle = self.solid_face_display_triangle(&reference)?;
+        let tolerance = self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6));
+        let witness_deflection = scene.root_brep_pick_display(&reference.source)?.deflection_mm;
+        let shell = editing::shell_verified_faces_with_deflection(
             brep,
-            face,
+            &[face],
+            &[triangle],
+            tolerance,
+            witness_deflection,
             thickness,
-            brep.display.deflection_mm,
+            scene.root_brep_output_deflection(&reference.source)?,
             self.coordinator.limits(),
         )
         .map_err(|error| Error::Io(format!("shell: {error}")))?;
         let source = self.document().stamp(id)?;
-        self.commit_solid_result(
-            feature,
-            label(feature),
-            vec![Mutation::Geometry {
-                source,
-                geometry: Geometry::Brep(shell),
-            }],
-            Some(vec![id]),
-        )
+        self.commit_reserved_brep_replacement(feature, label(feature), source, shell)
     }
     pub(super) fn solid_shell_picks(
         &mut self,
@@ -5795,11 +6503,14 @@ impl Controller {
             om9_core::budget::Usage::array::<usize>(faces.len())?,
             self.coordinator.limits(),
         )?;
+        held.add(om9_core::budget::Usage::array::<[om9_core::geometry::Point3; 3]>(faces.len())?, self.coordinator.limits())?;
         self.coordinator.retained_usage_with_held_usage(held)?;
         let mut indices = Vec::new();
+        let mut triangles = Vec::new();
         indices
             .try_reserve_exact(faces.len())
             .map_err(|_| Error::Budget("shell face indices"))?;
+        triangles.try_reserve_exact(faces.len()).map_err(|_| Error::Budget("shell face triangles"))?;
         for reference in faces {
             if reference.root != id
                 || reference.source != first.source
@@ -5811,30 +6522,28 @@ impl Controller {
                 return Err(Error::Invalid("shell face"));
             };
             indices.push(
-                brep.display
+                brep.topology()
                     .faces
                     .iter()
                     .position(|face| *face == key)
                     .ok_or(Error::Stale("B-Rep face"))?,
             );
+            triangles.push(self.solid_face_display_triangle(reference)?);
         }
-        let body = editing::shell_faces(
+        let witness_deflection = self.scene.as_ref().ok_or(Error::Missing("shell scene"))?
+            .root_brep_pick_display(&first.source)?.deflection_mm;
+        let body = editing::shell_verified_faces_with_deflection(
             brep,
             &indices,
+            &triangles,
+            self.document().tolerance().map_or(1e-6, |value| value.absolute_mm.min(1e-6)),
+            witness_deflection,
             thickness,
-            brep.display.deflection_mm,
+            self.scene.as_ref().ok_or(Error::Missing("shell scene"))?.root_brep_output_deflection(&first.source)?,
             self.coordinator.limits(),
         )
         .map_err(|error| Error::Io(format!("shell: {error}")))?;
-        self.commit_solid_result(
-            "OM9-SOLID-029",
-            label("OM9-SOLID-029"),
-            vec![Mutation::Geometry {
-                source: first.source,
-                geometry: Geometry::Brep(body),
-            }],
-            Some(vec![id]),
-        )
+        self.commit_reserved_brep_replacement("OM9-SOLID-029", label("OM9-SOLID-029"), first.source, body)
     }
     pub(super) fn solid_text(&mut self, feature: &'static str, text: &str, height: f64) -> Result<()> {
         if text.len() > self.coordinator.limits().max_name_bytes {
@@ -5957,6 +6666,7 @@ impl Controller {
                 result = joined.clone();
             }
         }
+        drop(breps);
         self.insert_solid(feature, label(feature), result)
     }
     pub(super) fn solid_pipe_round(
@@ -6411,12 +7121,22 @@ impl Controller {
             limits,
         )
         .map_err(|error| Error::Io(format!("tube boolean: {error}")))?;
-        let Some(brep) = outcome.body() else {
+        let editing::BooleanOutcome::Body(brep) = outcome else {
             return Err(Error::Invalid("tube produced an empty body"));
         };
+        // Release the Boolean inputs before accounting the retained output.
+        drop(outside);
+        drop(inside);
+        let held = self.scene_cache_usage()?;
+        let bytes = brep.storage_usage(limits)?.bytes;
+        let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let mut reservation = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::CpuCache, bytes, physical, held)?;
+        reservation.set_allocated_bytes(bytes)?;
+        let source = self.coordinator.register_reserved_brep_candidate(brep, &mut reservation, held)?;
         let mut entity = Entity::new(
             label(feature),
-            Geometry::Brep(brep.clone()),
+            Geometry::Brep(source),
             self.document().current_layer,
         );
         let mut matrix = om9_core::geometry::Transform::identity().0;
@@ -6429,6 +7149,6 @@ impl Controller {
             matrix[i][3] = center[i];
         }
         entity.placement = om9_core::geometry::Transform(matrix);
-        self.commit_entity(feature, label(feature), entity)
+        self.commit_entity_reserved_brep(feature, label(feature), entity, &mut reservation)
     }
 }

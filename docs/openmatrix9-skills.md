@@ -2,6 +2,16 @@
 
 Nguồn skill được quản lý trong `skills/` của repository. Bản dùng cho Codex được cài vào `C:/Users/nguye/.codex/skills/`. Specs đích ở `OM9_Milestones/M01 - CAD Shell, Viewport/`; tài liệu gốc/private registry được giữ nguyên, đọc theo nhu cầu thay vì sao chép tất cả vào từng skill.
 
+Chỉ đạo người dùng 2026-11-16: khi kiểm tra/triển khai/sửa từng lệnh CAD,
+[hợp đồng nguồn–viewport](../skills/openmatrix9-workflow/references/source-and-viewport-contract.md)
+yêu cầu rà phần nguồn chính xác, representation riêng, preview nhẹ trước exact
+khi có chờ và commit/Undo. Tái dùng phần đã có; bổ sung phần thiếu của lệnh
+đang được giao, trừ yêu cầu chỉ đọc/chỉ chạy test. Cập nhật một
+[danh sách theo lệnh](validation/command-source-viewport-checklist.md), tách
+code có sẵn khỏi nghiệm thu runtime. Cập nhật skill không tự triển khai toàn
+bộ danh mục. Các entrypoint workflow/feature/UI/workspace/build/headless cùng
+dẫn về quy tắc chung này.
+
 | Khi làm việc này | Skill | Tài liệu được chọn |
 |---|---|---|
 | Bắt đầu, tiếp tục, hỏi đã làm tới đâu | `openmatrix9-workflow` | Ledger tiến độ, bằng chứng code/test, bản đồ giai đoạn |

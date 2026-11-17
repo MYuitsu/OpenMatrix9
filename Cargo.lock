@@ -1965,6 +1965,7 @@ dependencies = [
  "cc",
  "om9-core",
  "serde_json",
+ "sha2",
  "uuid",
 ]
 
