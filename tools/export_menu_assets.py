@@ -11,6 +11,7 @@ import struct
 import xml.etree.ElementTree as ET
 import zlib
 from modern_icons import symbol_for_key, svg
+from core_icons import write_asset as write_core_asset
 from solid_icons import SOLID_ICONS, describe_style as describe_solid_style, write_asset as write_solid_asset
 
 SCRIPT_BINDINGS = {
@@ -40,7 +41,7 @@ SIDEBAR_BUTTONS += ['ObjectProperties','AllObjectInfo','CommandHistory','Project
     'InfoSettingsDesignReport','InfoSettingsGumballAlignment','InfoSettingsRelocateGumball','InfoSettingsGumballON',
     'InfoSettingsSmartTargetsGumballON','RhinoSmartTrackON','RhinoHistoryON','GVHistoryUpdateON','GVHistoryRecordON',
     'InfoSettingsGVClearHistory','GridON','PreviewCutterON','PreviewShadeON','ShadeSelectedOnlyON','GVGemView_1','GVSurfaceView_1',
-    'GridSnapON','OrthoSnapON','PlanarSnapON','ProjectSnapON','SnapBetween','SnapOnSurface','SnapOnPolysurface',
+    'GridSnapON','OrthoSnapON','PlanarSnapON','ProjectSnapON','SnapObjectMaster','SnapBetween','SnapOnSurface','SnapOnPolysurface',
     'LayerArrow','LayerLock','LayerVisibility','LayerHide','LayerShow',
     'ProjectAdd','ProjectOut','ProjectIn','ProjectSave','ProjectDelete','ProjectManager','ViewIsometric']
 DISPLAY_BUTTONS=['Dial_Wireframe','Dial_Shaded','Dial_Working Shade','Dial_Working Render','Dial_Ghosted','Dial_Tech Shade']
@@ -234,6 +235,10 @@ def export_assets(ref_root,output_root,named_root=None,named_bindings=None,butto
     auxiliary=[name for name in dict.fromkeys(list(BUTTON_ALIASES)+SIDEBAR_BUTTONS+DISPLAY_BUTTONS+list(named)) if name not in names]
     for name in names+auxiliary:
         resolution_key='resolved' if name in names else 'auxiliary_resolved'
+        if name == 'SnapObjectMaster':
+            dest[name], result['authored_symbols'][name] = write_core_asset(output_root, name)
+            result[resolution_key].append(name)
+            continue
         if name in SOLID_ICONS:
             metadata, record = write_solid_asset(output_root, name)
             dest[name] = metadata

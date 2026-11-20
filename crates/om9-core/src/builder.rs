@@ -154,6 +154,12 @@ pub struct BuilderField {
     pub value: Value,
 }
 
+fn rail_center_field(name: &'static str, label: &'static str) -> BuilderField {
+    BuilderField { name, label,
+        domain: OptionDomain::Number { dimension: Dimension::Length, min: Some(-1_000_000.), min_inclusive: true, max: Some(1_000_000.), step: None },
+        value: Value::length(crate::units::LengthMm::try_new(0.).expect("finite origin")) }
+}
+
 impl BuilderField {
     fn length(name: &'static str, label: &'static str, default: Value, min: f64, max: f64) -> Self {
         Self {
@@ -383,6 +389,9 @@ pub struct BuilderPlan {
 #[derive(Debug, Clone)]
 pub struct BuilderSession {
     kind: BuilderKind,
+    rail_frame: &'static str,
+    rail_mm_per_unit: f64,
+    rail_shape: Option<crate::ring_rail_shape::RailShape>,
     label: String,
     output: ObjectId,
     recipe: HistoryId,
@@ -438,20 +447,23 @@ impl BuilderSession {
         let (fields, label) = match kind {
             BuilderKind::RingRail => (
                 vec![
-                    BuilderField::length(
-                        "diameter_mm",
-                        "Diameter",
-                        Value::length(crate::units::LengthMm::try_new(18.0)?),
-                        1.0,
-                        40.0,
-                    ),
+                    BuilderField { name: "diameter_mm", label: "Diameter",
+                        domain: OptionDomain::Number { dimension: Dimension::Length,
+                            min: Some(crate::ring_size::MIN_RAIL_DIAMETER_MM), min_inclusive: true,
+                            max: Some(crate::ring_size::MAX_RAIL_DIAMETER_MM), step: None },
+                        value: Value::length(crate::units::LengthMm::try_new(18.0)?) },
                     BuilderField::choice(
                         "standard",
                         "Standard",
-                        ["explicit", "US"].into_iter(),
-                        "explicit",
+                        ["VNM", "vnm_circumference", "explicit", "US", "iso", "diameter_inches", "circumference_inches"].into_iter(),
+                        "VNM",
                     ),
-                    BuilderField::count("us_size", "US size", 8, 1, 15),
+                    BuilderField { name: "us_size", label: "Size",
+                        domain: OptionDomain::Number { dimension: Dimension::Ratio, min: Some(0.001), min_inclusive: true, max: Some(1000.), step: None },
+                        value: Value::ratio(18.)? },
+                    rail_center_field("center_x_mm", "Center X"),
+                    rail_center_field("center_y_mm", "Center Y"),
+                    rail_center_field("center_z_mm", "Center Z"),
                 ],
                 "Ring Rail".to_string(),
             ),
@@ -551,6 +563,9 @@ impl BuilderSession {
             preview_document: None,
             removed_presets: BTreeSet::new(),
             revision: 0,
+            rail_frame: "front",
+            rail_mm_per_unit: document.page_unit.factor(),
+            rail_shape: None,
         };
         // Validate the defaults against their own domains before showing the panel.
         for field in &session.fields {
@@ -587,8 +602,55 @@ impl BuilderSession {
         self.preview_document = None;
         self.revision = self.revision.wrapping_add(1);
     }
+
+    /// Restore a recorded builder without letting defaults or field iteration order
+    /// change the physical size, frame or model units of a saved Ring Rail.
+    pub fn from_history(kind: BuilderKind, document: &Document, object: ObjectId, recipe: &Recipe) -> Result<Self> {
+        if !recipe.command.eq_ignore_ascii_case(kind.command()) || !recipe.outputs.contains(&object) { return Err(Error::Invalid("builder history owner")); }
+        let inputs: Vec<_> = recipe.inputs.iter().map(|binding| binding.source.object).collect();
+        let mut session = Self::new(kind, document, &inputs)?;
+        if kind == BuilderKind::RingRail {
+            if let Some(value) = recipe.parameters.get("custom_rail") {
+                let Value::Text(text) = value else { return Err(Error::Invalid("custom Ring Rail snapshot")); };
+                session.rail_shape = Some(crate::ring_rail_shape::RailShape::from_json(text, &Limits::default())?);
+            }
+            session.rail_frame = match recipe.parameters.get("rail_frame") {
+                None => "xy",
+                Some(Value::Choice(frame)) if frame == "front" => "front",
+                Some(Value::Choice(frame)) if frame == "xy" => "xy",
+                _ => return Err(Error::Invalid("ring rail frame")),
+            };
+            session.rail_mm_per_unit = match recipe.parameters.get("model_mm_per_unit") {
+                None => 1.,
+                Some(value) => value.as_ratio()?,
+            };
+            if !session.rail_mm_per_unit.is_finite() || session.rail_mm_per_unit <= 0. { return Err(Error::Invalid("ring rail model units")); }
+            if !recipe.parameters.contains_key("standard") { session.set_field("standard", Value::Choice("explicit".into()))?; }
+        }
+        for (name, value) in &recipe.parameters {
+            if session.field(name).is_some() { session.set_field(name, value.clone())?; }
+        }
+        if kind == BuilderKind::RingRail && session.field("standard").and_then(BuilderField::selected_choice)
+            .is_some_and(|standard| standard.eq_ignore_ascii_case("VNM"))
+            && let Some(value) = recipe.parameters.get("diameter_mm") {
+                session.set_field("diameter_mm", value.clone())?;
+            }
+        session.adopt_history(object, recipe.id);
+        Ok(session)
+    }
     pub fn recipe(&self) -> HistoryId {
         self.recipe
+    }
+    pub fn rail_shape(&self) -> Option<&crate::ring_rail_shape::RailShape> { self.rail_shape.as_ref() }
+    pub fn set_rail_shape(&mut self, shape: Option<crate::ring_rail_shape::RailShape>, limits: &Limits) -> Result<()> {
+        if self.kind != BuilderKind::RingRail { return Err(Error::Unsupported("custom Ring Rail builder")); }
+        if let Some(shape) = &shape { shape.validate(limits)?; }
+        if self.rail_shape != shape {
+            self.rail_shape = shape;
+            self.preview = None;
+            self.revision = self.revision.wrapping_add(1);
+        }
+        Ok(())
     }
     pub fn preview(&self) -> Option<&BuilderPreview> {
         self.preview.as_ref()
@@ -617,7 +679,10 @@ impl BuilderSession {
     /// object makes the session read-only, so the panel hides its handles and a drag is
     /// refused instead of silently moving a locked input (`OM9-L3-03-11-005`).
     pub fn editable(&self, document: &Document) -> bool {
-        self.inputs.iter().all(|(_, object)| {
+        document.entities.get(&self.output).is_none_or(|entity|
+            document.permissions_for_entity(entity, false).is_ok_and(|permissions| permissions.editable))
+        && document.history.recipes.get(&self.recipe).is_none_or(|recipe| !recipe.policy.lock)
+        && self.inputs.iter().all(|(_, object)| {
             document.entities.get(object).is_some_and(|entity| {
                 document
                     .permissions_for_entity(entity, false)
@@ -665,15 +730,36 @@ impl BuilderSession {
     /// Apply one typed field value. The domain decides the range and the unit; a value of the
     /// wrong dimension is refused with the same rule the command line uses.
     pub fn set_field(&mut self, name: &str, value: Value) -> Result<()> {
+        // Accept the old integer API while allowing quarter-size and custom values.
+        let value = if self.kind == BuilderKind::RingRail && name == "us_size" {
+            match value { Value::Quantity { value, dimension: Dimension::Count } => Value::ratio(value)?, other => other }
+        } else { value };
         // Validate first: a rejected edit must not change another field while leaving
         // the revision (and any in-flight preview token) unchanged.
         self.field(name)
             .ok_or(Error::Missing("builder field"))?
             .domain
             .check(&value, &Limits::default())?;
+        let converted_size = if self.kind == BuilderKind::RingRail && name == "diameter_mm"
+            && self.field("standard").and_then(BuilderField::selected_choice).is_some_and(|standard| standard.eq_ignore_ascii_case("VNM")) {
+            Some(value.as_length()?.mm())
+        } else if self.kind == BuilderKind::RingRail && name == "standard"
+            && self.field(name).is_some_and(|field| field.value != value) {
+            let Value::Choice(id) = &value else { return Err(Error::Invalid("ring size standard")) };
+            Some(crate::ring_size::rail_size_for_diameter(id,
+                self.field("diameter_mm").and_then(BuilderField::numeric).ok_or(Error::Missing("ring diameter"))?)?)
+        } else { None };
+        if self.kind == BuilderKind::RingRail && matches!(name, "standard" | "us_size") {
+            let standard = if name == "standard" { match &value { Value::Choice(id) => id.as_str(), _ => return Err(Error::Invalid("ring size standard")) } }
+                else { self.field("standard").and_then(BuilderField::selected_choice).unwrap_or("explicit") };
+            let size = if let Some(size) = converted_size { size }
+                else if name == "us_size" { match &value { Value::Quantity { value, .. } => *value, _ => return Err(Error::Invalid("ring size")) } }
+                else { self.field("us_size").and_then(BuilderField::numeric).ok_or(Error::Missing("ring size"))? };
+            if standard != "explicit" { crate::ring_size::rail_diameter_mm(standard, size)?; }
+        }
         let switches_standard = name == "diameter_mm" && self.field("standard")
             .and_then(BuilderField::selected_choice)
-            .is_some_and(|standard| standard.eq_ignore_ascii_case("US"));
+            .is_some_and(|standard| !standard.eq_ignore_ascii_case("explicit") && !standard.eq_ignore_ascii_case("VNM"));
         if !switches_standard && self.field(name).is_some_and(|field| field.value == value) {
             return Ok(());
         }
@@ -683,7 +769,7 @@ impl BuilderSession {
             && self
                 .field("standard")
                 .and_then(BuilderField::selected_choice)
-                .is_some_and(|standard| standard.eq_ignore_ascii_case("US"))
+                .is_some_and(|standard| !standard.eq_ignore_ascii_case("explicit") && !standard.eq_ignore_ascii_case("VNM"))
             && let Some(field) = self
                 .fields
                 .iter_mut()
@@ -697,6 +783,10 @@ impl BuilderSession {
             .find(|field| field.name == name)
             .ok_or(Error::Missing("builder field"))?;
         field.value = value;
+        if let Some(size) = converted_size
+            && let Some(field) = self.fields.iter_mut().find(|field| field.name == "us_size") {
+                field.value = Value::ratio(size)?;
+            }
         self.preview = None;
         self.revision = self.revision.wrapping_add(1);
         if self.kind == BuilderKind::RingRail {
@@ -715,15 +805,13 @@ impl BuilderSession {
     /// Copy the frozen standard diameter into the `diameter_mm` field, which stays the one
     /// value the preview, handle, recipe and panel all read.
     fn sync_standard_diameter(&mut self) -> Result<()> {
-        let Some(standard) = self.selected_standard() else {
-            return Ok(());
-        };
+        let standard = self.field("standard").and_then(BuilderField::selected_choice).unwrap_or("explicit");
+        if standard.eq_ignore_ascii_case("explicit") { return Ok(()); }
         let size = self
             .field("us_size")
             .and_then(BuilderField::numeric)
             .ok_or(Error::Missing("US ring size"))?;
-        let size = u8::try_from(size as u32).map_err(|_| Error::Invalid("US ring size 1..15"))?;
-        let diameter = standard.diameter_mm(size)?;
+        let diameter = crate::ring_size::rail_diameter_mm(standard, size)?;
         if let Some(field) = self
             .fields
             .iter_mut()
@@ -791,7 +879,18 @@ impl BuilderSession {
     }
     /// Reset every field to the values the session started with.
     pub fn reset(&mut self, document: &Document, selection: &[ObjectId]) -> Result<()> {
-        *self = Self::new(self.kind, document, selection)?;
+        let mut reset = if let Some(recipe) = document.history.recipes.get(&self.recipe) {
+            Self::from_history(self.kind, document, self.output, recipe)?
+        } else {
+            let mut fresh = Self::new(self.kind, document, selection)?;
+            fresh.output = self.output;
+            fresh.recipe = self.recipe;
+            fresh.rail_frame = self.rail_frame;
+            fresh.rail_mm_per_unit = self.rail_mm_per_unit;
+            fresh
+        };
+        reset.revision = self.revision.wrapping_add(1);
+        *self = reset;
         Ok(())
     }
 
@@ -799,17 +898,19 @@ impl BuilderSession {
     pub fn is_dirty(&self) -> bool {
         match self.kind {
             BuilderKind::RingRail => {
-                self.field("diameter_mm")
+                self.rail_shape.is_some() || self.field("diameter_mm")
                     .and_then(BuilderField::numeric)
                     .is_none_or(|value| (value - 18.0).abs() > 1.0e-12)
                     || self
                         .field("standard")
                         .and_then(BuilderField::selected_choice)
-                        .is_none_or(|value| !value.eq_ignore_ascii_case("explicit"))
+                        .is_none_or(|value| !value.eq_ignore_ascii_case("VNM"))
                     || self
                         .field("us_size")
                         .and_then(BuilderField::numeric)
-                        .is_none_or(|value| (value - 8.0).abs() > 1.0e-12)
+                        .is_none_or(|value| (value - 18.0).abs() > 1.0e-12)
+                    || ["center_x_mm", "center_y_mm", "center_z_mm"].iter().any(|name|
+                        self.field(name).and_then(BuilderField::numeric).is_none_or(|value| value != 0.))
             }
             BuilderKind::RailProfile => {
                 self.field("width_mm")
@@ -874,10 +975,16 @@ impl BuilderSession {
     }
 
     fn parameters(&self) -> Options {
-        self.fields
+        let mut parameters: Options = self.fields
             .iter()
             .map(|field| (field.name.to_string(), field.value.clone()))
-            .collect()
+            .collect();
+        if self.kind == BuilderKind::RingRail {
+            parameters.insert("rail_frame".into(), Value::Choice(self.rail_frame.into()));
+            parameters.insert("model_mm_per_unit".into(), Value::ratio(self.rail_mm_per_unit).expect("validated model units"));
+            if let Some(shape) = &self.rail_shape { parameters.insert("custom_rail".into(), Value::Text(shape.to_json())); }
+        }
+        parameters
     }
 
     /// Build the synthetic request the producer receives. The output is the session's own
@@ -1085,9 +1192,13 @@ impl BuilderSession {
     }
 
     fn summary(&self, geometry: &Geometry) -> String {
+        if self.kind == BuilderKind::RingRail && let Some(shape) = &self.rail_shape {
+            let diameter = self.field("diameter_mm").and_then(BuilderField::numeric).unwrap_or(0.);
+            return format!("{}: inner circumference {:.2} mm (equivalent diameter {:.2} mm)", shape.name(), diameter * std::f64::consts::PI, diameter);
+        }
         match (self.kind, geometry) {
             (BuilderKind::RingRail, Geometry::Curve(Curve::Circle { radius, .. })) => {
-                let diameter = radius * 2.0;
+                let diameter = radius * 2.0 * self.rail_mm_per_unit;
                 let circumference = diameter * std::f64::consts::PI;
                 match self.selected_standard() {
                     Some(standard) => {
@@ -1096,9 +1207,9 @@ impl BuilderSession {
                             .and_then(BuilderField::numeric)
                             .unwrap_or(0.0);
                         format!(
-                            "{} {size:.0} -> diameter {diameter:.2} mm, circumference {circumference:.2} mm; {}",
+                            "{} {size} -> diameter {diameter:.2} mm, circumference {circumference:.2} mm; {}",
                             standard.label(),
-                            standard.provenance()
+                            "Stuller table; quarter sizes interpolated to 0.01 mm"
                         )
                     }
                     None => {
@@ -1222,13 +1333,14 @@ impl BuilderSession {
                 handles.push(BuilderHandle {
                     name: "diameter",
                     field: field.name,
-                    label: "Diameter",
-                    position: [diameter / 2.0, 0.0, 0.0],
+                    label: if self.rail_shape.is_some() { "Equivalent diameter" } else { "Diameter" },
+                    position: [self.ring_numeric("center_x_mm", "rail center")? / self.rail_mm_per_unit + diameter / (2. * self.rail_mm_per_unit),
+                        self.ring_numeric("center_y_mm", "rail center")? / self.rail_mm_per_unit, self.ring_numeric("center_z_mm", "rail center")? / self.rail_mm_per_unit],
                     axis: [1.0, 0.0, 0.0],
                     value: diameter,
                     min: 1.0,
                     max: 40.0,
-                    scale: 1.0,
+                    scale: self.rail_mm_per_unit,
                 });
             }
             BuilderKind::RailProfile => {
@@ -1678,6 +1790,10 @@ pub fn producer_name(kind: BuilderKind) -> &'static str {
 
 /// Register the analytic builder chain (the OCCT registry replaces the sweep backend).
 pub fn register_reference_producers(registry: &mut ProducerRegistry) -> Result<()> {
+    registry.register(
+        crate::producers::JOIN_HISTORY_COMMAND,
+        crate::producers::JoinHistoryProducer,
+    )?;
     registry.register(RING_RAIL_COMMAND, crate::producers::RingRailProducer)?;
     registry.register(RAIL_PROFILE_COMMAND, crate::producers::RailProfileProducer)?;
     registry.register(

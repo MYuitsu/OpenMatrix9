@@ -3,7 +3,7 @@
 use super::*;
 use om9_core::{
     geometry::Mesh,
-    mesh_csg::{BooleanOp, CsgOptions, mesh_boolean},
+    mesh_csg::{BooleanOp, CsgOptions, mesh_boolean_cancellable},
 };
 use om9_scene::scene::{RenderBuffers, SceneBuffers};
 use std::collections::BTreeMap;
@@ -215,12 +215,12 @@ fn compute(inputs: &[(SceneBuffers, Transform)], cancel: &Cancellation) -> Resul
                     max_fragments: 16000,
                     max_work: 5_000_000,
                 };
-                mesh = match mesh_boolean(&mesh, &other, BooleanOp::Union, options) {
+                mesh = match mesh_boolean_cancellable(&mesh, &other, BooleanOp::Union, options, cancel) {
                     Ok(result) => result,
                     // Coarse QEM facets can leave tiny intersection slivers.
                     // Retry only this approximate display with a smaller
                     // classifier tolerance; all closedness checks stay active.
-                    Err(Error::Invalid(_)) => mesh_boolean(
+                    Err(Error::Invalid(_)) => mesh_boolean_cancellable(
                         &mesh,
                         &other,
                         BooleanOp::Union,
@@ -228,6 +228,7 @@ fn compute(inputs: &[(SceneBuffers, Transform)], cancel: &Cancellation) -> Resul
                             tolerance: 1e-7,
                             ..options
                         },
+                        cancel,
                     )?,
                     Err(error) => return Err(error),
                 }

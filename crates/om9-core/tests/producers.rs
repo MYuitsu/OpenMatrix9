@@ -198,6 +198,183 @@ fn face_signature(outcome: &RecomputeOutcome, output: ObjectId) -> SubshapeSigna
 }
 
 #[test]
+fn join_history_rebuilds_from_parents_and_retains_last_good_result_on_failure() {
+    let mut document = Document::new("join-history");
+    let a = add(&mut document, "a", curve([0.0; 3], [1.0, 0.0, 0.0]));
+    let b = add(&mut document, "b", curve([0.0; 3], [1.0, 0.0, 0.0]));
+    document.entities.get_mut(&b).unwrap().placement = Transform::translation([1.0, 0.0, 0.0]);
+    let child = add(&mut document, "child", curve([0.0; 3], [2.0, 0.0, 0.0]));
+    let mut recipe = Recipe::new(
+        document.id,
+        "JoinHistory",
+        vec![binding(&document, a, "curve"), binding(&document, b, "curve")],
+        vec![child],
+        environment(),
+    );
+    recipe.parameters.insert("tolerance_mm".into(), length(0.001));
+    let id = recipe.id;
+    document.history.recipes.insert(id, recipe);
+    let registry = reference_registry().unwrap();
+    let mut cache = RecomputeCache::default();
+    assert!(matches!(recompute_registered(&mut document, &mut cache, id, &registry).unwrap(), RecomputeOutcome::Rebuilt { .. }));
+    assert!(document.entities.contains_key(&a) && document.entities.contains_key(&b));
+    let before = document.entities[&child].geometry.clone();
+    document.entities.get_mut(&b).unwrap().geometry = curve([0.0; 3], [2.0, 0.0, 0.0]);
+    document.entities.get_mut(&b).unwrap().geometry_revision += 1;
+    assert!(matches!(recompute_registered(&mut document, &mut cache, id, &registry).unwrap(), RecomputeOutcome::Rebuilt { .. }));
+    let updated = document.entities[&child].geometry.clone();
+    assert_ne!(before, updated);
+    assert_eq!(document.results[&child].source_stamps, vec![document.stamp(a).unwrap(), document.stamp(b).unwrap()]);
+    let Geometry::Curve(joined) = &updated else { panic!("joined curve") };
+    let ends = om9_core::curve_ops::curve_endpoints(joined, &limits()).unwrap();
+    assert!(ends.contains(&[0.0, 0.0, 0.0]) && ends.contains(&[3.0, 0.0, 0.0]));
+    document.entities.get_mut(&b).unwrap().geometry = curve([10.0, 0.0, 0.0], [11.0, 0.0, 0.0]);
+    document.entities.get_mut(&b).unwrap().geometry_revision += 1;
+    assert!(matches!(recompute_registered(&mut document, &mut cache, id, &registry).unwrap(), RecomputeOutcome::Failed { previous_retained: true, .. }));
+    assert_eq!(document.entities[&child].geometry, updated);
+    assert!(document.entities.contains_key(&a) && document.entities.contains_key(&b));
+}
+
+#[test]
+fn dependent_join_chain_rebuilds_in_order_and_stops_before_publishing_a_failed_draft() {
+    use std::collections::BTreeSet;
+    let mut document = Document::new("dependent joins");
+    let a = add(&mut document, "a", curve([0.0; 3], [1.0, 0.0, 0.0]));
+    let b = add(&mut document, "b", curve([1.0, 0.0, 0.0], [2.0, 0.0, 0.0]));
+    let c = add(&mut document, "c", curve([2.0, 0.0, 0.0], [3.0, 0.0, 0.0]));
+    let first = add(&mut document, "first", curve([0.0; 3], [2.0, 0.0, 0.0]));
+    let second = add(&mut document, "second", curve([0.0; 3], [3.0, 0.0, 0.0]));
+    let u = add(&mut document, "u", curve([0.0, 5.0, 0.0], [1.0, 5.0, 0.0]));
+    let v = add(&mut document, "v", curve([1.0, 5.0, 0.0], [2.0, 5.0, 0.0]));
+    let unrelated = add(&mut document, "unrelated", curve([0.0, 5.0, 0.0], [2.0, 5.0, 0.0]));
+    let mut ids = Vec::new();
+    for (inputs, output) in [(vec![a, b], first), (vec![first, c], second)] {
+        let mut recipe = Recipe::new(document.id, "JoinHistory",
+            inputs.into_iter().map(|id| binding(&document, id, "curve")).collect(),
+            vec![output], environment());
+        recipe.parameters.insert("tolerance_mm".into(), length(0.001));
+        ids.push(recipe.id);
+        document.history.recipes.insert(recipe.id, recipe);
+    }
+    let mut unrelated_recipe = Recipe::new(document.id, "JoinHistory",
+        vec![binding(&document, u, "curve"), binding(&document, v, "curve")],
+        vec![unrelated], environment());
+    unrelated_recipe.parameters.insert("tolerance_mm".into(), length(0.001));
+    let unrelated_id = unrelated_recipe.id;
+    document.history.recipes.insert(unrelated_id, unrelated_recipe);
+    let registry = reference_registry().unwrap();
+    let mut cache = RecomputeCache::default();
+    for id in &ids {
+        recompute_registered(&mut document, &mut cache, *id, &registry).unwrap();
+    }
+    recompute_registered(&mut document, &mut cache, unrelated_id, &registry).unwrap();
+    let mut candidate = document.clone();
+    candidate.entities.get_mut(&a).unwrap().geometry = curve([-1.0, 0.0, 0.0], [1.0, 0.0, 0.0]);
+    candidate.entities.get_mut(&a).unwrap().geometry_revision += 1;
+    let outcomes = om9_core::producers::recompute_dependents(
+        &mut candidate, &mut RecomputeCache::default(), &BTreeSet::from([a]),
+        &registry, &limits(), &om9_core::transaction::Cancellation::default(),
+    ).unwrap();
+    assert_eq!(outcomes.iter().map(|outcome| match outcome {
+        RecomputeOutcome::Rebuilt { recipe, .. } => *recipe,
+        _ => panic!("expected rebuilt dependency"),
+    }).collect::<Vec<_>>(), ids);
+    assert_eq!(candidate.history.recipes[&unrelated_id], document.history.recipes[&unrelated_id]);
+    assert_eq!(candidate.entities[&unrelated], document.entities[&unrelated]);
+    let Geometry::Curve(joined) = &candidate.entities[&second].geometry else { panic!("curve") };
+    let ends = om9_core::curve_ops::curve_endpoints(joined, &limits()).unwrap();
+    assert!(ends.contains(&[-1.0, 0.0, 0.0]) && ends.contains(&[3.0, 0.0, 0.0]));
+    let mut bad = document.clone();
+    bad.entities.get_mut(&a).unwrap().geometry = curve([-1.0, 0.0, 0.0], [1.0, 0.0, 0.0]);
+    bad.entities.get_mut(&a).unwrap().geometry_revision += 1;
+    bad.entities.get_mut(&c).unwrap().geometry = curve([20.0, 0.0, 0.0], [21.0, 0.0, 0.0]);
+    bad.entities.get_mut(&c).unwrap().geometry_revision += 1;
+    let failed = om9_core::producers::recompute_dependents(
+        &mut bad, &mut RecomputeCache::default(), &BTreeSet::from([a, c]),
+        &registry, &limits(), &om9_core::transaction::Cancellation::default(),
+    ).unwrap();
+    assert!(matches!(failed.last(), Some(RecomputeOutcome::Failed { recipe, .. }) if *recipe == ids[1]));
+    assert_eq!(document.entities[&second].geometry, bad.entities[&second].geometry);
+    assert_ne!(document.entities[&first].geometry, bad.entities[&first].geometry);
+
+    let mut disabled = document.clone();
+    disabled.history.recipes.get_mut(&ids[0]).unwrap().policy.update = false;
+    disabled.entities.get_mut(&a).unwrap().geometry = curve([-1.0, 0.0, 0.0], [1.0, 0.0, 0.0]);
+    disabled.entities.get_mut(&a).unwrap().geometry_revision += 1;
+    let skipped = om9_core::producers::recompute_dependents(
+        &mut disabled, &mut RecomputeCache::default(), &BTreeSet::from([a]),
+        &registry, &limits(), &om9_core::transaction::Cancellation::default(),
+    ).unwrap();
+    assert!(skipped.is_empty());
+    assert_eq!(disabled.entities[&second].geometry, document.entities[&second].geometry);
+
+    let mut canceled_candidate = document.clone();
+    let canceled = om9_core::transaction::Cancellation::default();
+    canceled.cancel();
+    assert_eq!(om9_core::producers::recompute_dependents(
+        &mut canceled_candidate, &mut RecomputeCache::default(), &BTreeSet::from([a]),
+        &registry, &limits(), &canceled,
+    ), Err(Error::Canceled));
+    assert_eq!(canceled_candidate, document);
+    let mut budget_candidate = document.clone();
+    let small = Limits { max_bytes: 1, ..limits() };
+    assert!(matches!(om9_core::producers::recompute_dependents(
+        &mut budget_candidate, &mut RecomputeCache::default(), &BTreeSet::from([a]),
+        &registry, &small, &om9_core::transaction::Cancellation::default(),
+    ), Err(Error::Budget(_))));
+    assert_eq!(budget_candidate, document);
+
+    let mut point_candidate = document.clone();
+    point_candidate.entities.get_mut(&a).unwrap().geometry = curve([-1.0, 0.0, 0.0], [1.0, 0.0, 0.0]);
+    point_candidate.entities.get_mut(&a).unwrap().geometry_revision += 1;
+    let small_nodes = Limits { max_nodes: 1, ..limits() };
+    let refused = om9_core::producers::recompute_dependents(
+        &mut point_candidate, &mut RecomputeCache::default(), &BTreeSet::from([a]),
+        &registry, &small_nodes, &om9_core::transaction::Cancellation::default(),
+    ).unwrap();
+    assert!(matches!(refused.last(), Some(RecomputeOutcome::Failed { recipe, .. }) if *recipe == ids[0]));
+    assert_eq!(point_candidate.entities[&first].geometry, document.entities[&first].geometry);
+
+    struct Unbounded;
+    impl om9_core::producers::FeatureProducer for Unbounded {
+        fn produce(&self, _: &om9_core::associative::RebuildRequest) -> Result<Vec<om9_core::associative::RebuiltOutput>> {
+            panic!("candidate path must not call an unbounded producer")
+        }
+    }
+    let mut unbounded_registry = ProducerRegistry::new();
+    unbounded_registry.register("Unbounded", Unbounded).unwrap();
+    let mut unbounded = document.clone();
+    unbounded.history.recipes.get_mut(&ids[0]).unwrap().command = "Unbounded".into();
+    let refused = om9_core::producers::recompute_dependents(
+        &mut unbounded, &mut RecomputeCache::default(), &BTreeSet::from([a]),
+        &unbounded_registry, &limits(), &om9_core::transaction::Cancellation::default(),
+    ).unwrap();
+    assert!(matches!(refused.last(), Some(RecomputeOutcome::Failed { reason, .. }) if reason.contains("limited history producer")));
+
+    struct CancelDuringProduce;
+    impl om9_core::producers::FeatureProducer for CancelDuringProduce {
+        fn produce(&self, _: &om9_core::associative::RebuildRequest) -> Result<Vec<om9_core::associative::RebuiltOutput>> {
+            panic!("candidate path must use caller limits")
+        }
+        fn produce_with_limits(&self, _: &om9_core::associative::RebuildRequest, _: &Limits,
+            cancel: &om9_core::transaction::Cancellation) -> Result<Vec<om9_core::associative::RebuiltOutput>> {
+            cancel.cancel();
+            Err(Error::Canceled)
+        }
+    }
+    let mut cancel_registry = ProducerRegistry::new();
+    cancel_registry.register("CancelDuringProduce", CancelDuringProduce).unwrap();
+    let mut canceled_during = document.clone();
+    canceled_during.history.recipes.get_mut(&ids[0]).unwrap().command = "CancelDuringProduce".into();
+    let token = om9_core::transaction::Cancellation::default();
+    assert_eq!(om9_core::producers::recompute_dependents(
+        &mut canceled_during, &mut RecomputeCache::default(), &BTreeSet::from([a]),
+        &cancel_registry, &limits(), &token,
+    ), Err(Error::Canceled));
+    assert_eq!(canceled_during.entities[&first].geometry, document.entities[&first].geometry);
+}
+
+#[test]
 fn the_registry_builds_rail_profile_and_sweep_from_parameters() {
     let mut chain = chain(2.0);
     let registry = reference_registry().unwrap();
@@ -206,6 +383,7 @@ fn the_registry_builds_rail_profile_and_sweep_from_parameters() {
         vec![
             "AwardRing",
             "EternityBand",
+            "JoinHistory",
             "OutsideRail",
             "RailProfile",
             "RailSweep",

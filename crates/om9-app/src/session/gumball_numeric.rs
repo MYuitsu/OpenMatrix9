@@ -12,7 +12,9 @@ use om9_core::{
 };
 
 impl Controller {
-    /// Applies `delta` to every selected object in one transaction and returns how many moved.
+    /// Applies `delta` to every selected object in one transaction and returns the target count.
+    /// When a background Join History update is needed, this returns after scheduling;
+    /// `join_history_worker_pending` and polling report its completion.
     ///
     /// `delta` is already expressed in world space and about the pivot the caller chose; the placement of
     /// each object is `delta.compose(placement)`, the same composition the drag path uses.
@@ -40,6 +42,12 @@ impl Controller {
         }
         if mutations.is_empty() {
             return Ok(0);
+        }
+        if self.source_mutations_update_join_history(&mutations) {
+            let count = self.gumball_targets().len();
+            self.request_join_history_edit_worker(TransactionRequest::new(name, mutations))?;
+            self.mark_history_completion_command("Gumball");
+            return Ok(count);
         }
         let held = self.scene_cache_usage()?;
         let prepared = self

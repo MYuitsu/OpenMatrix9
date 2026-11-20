@@ -23,6 +23,10 @@ mod source_signatures;
 pub(crate) mod intermediate;
 pub use source_signatures::{SourceSignature, source_signatures};
 pub use topology_capture::{BoundSourceSignature, CapturedTopologySnapshot, NamedTopologySnapshot, NamedTopologySource, PendingSourceRebind, RegisteredTopologyProof, RegisteredTopologySource, SharedTopologyProof, TopologyAttestation, ValidatedSourceRebind, capture_source_topology, capture_source_with_shape_set, attested_source_signatures};
+#[cfg(feature = "test-fixtures")]
+pub use topology_capture::test_restore_captured_shape_set;
+#[cfg(feature = "isolated-brep-worker")]
+pub use topology_capture::restore_isolated_worker_input;
 pub(crate) use topology_capture::capture_via_topology;
 
 #[repr(C)]
@@ -1656,6 +1660,31 @@ pub fn from_3dm_source_typed_admitted(payload:&[u8],tolerance_mm:f64,limits:&Lim
     if status != 0 { return Err(om9_core::Error::Io(native_message(&message))); }
     if context.bytes.is_empty() { return Err(om9_core::Error::Invalid("3DM BRep source missing")); }
     String::from_utf8(context.bytes).map_err(|_| om9_core::Error::Invalid("3DM BRep source encoding"))
+}
+
+/// Inspect the face count of a retained 3DM BRep without treating its display
+/// triangles as topology. The caller owns the worker, cancellation checkpoints
+/// and memory reservation; individual native calls cannot be interrupted.
+pub fn native_face_count_admitted(payload: &[u8], tolerance_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> om9_core::Result<usize> {
+    let (source, faces) = native_source_and_face_count_admitted(payload, tolerance_mm, limits, &mut admit)?;
+    drop(source);
+    admit(0, 0)?;
+    Ok(faces)
+}
+
+/// Convert and inspect once, retaining the admitted source for a follow-up query.
+pub fn native_source_and_face_count_admitted(payload: &[u8], tolerance_mm: f64, limits: &Limits,
+    mut admit: impl FnMut(u64, u64) -> om9_core::Result<()>) -> om9_core::Result<(String, usize)> {
+    let source = from_3dm_source_typed_admitted(payload, tolerance_mm, limits, &mut admit)?;
+    let live = u64::try_from(source.capacity()).map_err(|_| om9_core::Error::Overflow("native face count source"))?;
+    let scratch = live.checked_mul(4).and_then(|value| value.checked_add(4 * 1024 * 1024))
+        .ok_or(om9_core::Error::Overflow("native face count scratch"))?;
+    admit(live, scratch)?;
+    let faces = crate::creation::measure_validated_source(&source)
+        .map_err(|error| om9_core::Error::Io(format!("native face count: {error}")))?.faces;
+    if faces == 0 { return Err(om9_core::Error::Invalid("native BRep has no faces")); }
+    Ok((source, faces))
 }
 
 /// Convert a retained 3DM BRep using an explicit angular deflection in radians.

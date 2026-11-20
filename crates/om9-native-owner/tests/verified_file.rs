@@ -52,6 +52,40 @@ fn bounded_fingerprint_keeps_one_handle_and_denies_content_or_name_changes() {
 }
 
 #[test]
+fn publish_new_never_replaces_a_destination_created_after_admission() {
+    let folder = Folder::new();
+    let staged = folder.file("private.3dm", b"new");
+    let destination = folder.0.join("destination.3dm");
+    let cancel = Cancellation::default();
+    let guard = VerifiedFile::open(&staged, 100, &cancel).unwrap();
+    fs::write(&destination, b"existing").unwrap();
+    assert!(guard.publish_new(&destination, &cancel).is_err());
+    assert_eq!(fs::read(&destination).unwrap(), b"existing");
+    assert_eq!(fs::read(&staged).unwrap(), b"new");
+    fs::remove_file(&destination).unwrap();
+    let guard = VerifiedFile::open(&staged, 100, &cancel).unwrap();
+    guard.publish_new(&destination, &cancel).unwrap();
+    assert_eq!(fs::read(&destination).unwrap(), b"new");
+}
+
+#[test]
+fn published_new_file_can_rollback_only_its_owned_handle() {
+    let folder = Folder::new();
+    let staged = folder.file("private.3dm", b"new");
+    let destination = folder.0.join("destination.3dm");
+    let unrelated = folder.file("unrelated.3dm", b"keep");
+    let cancel = Cancellation::default();
+    let owner = VerifiedFile::open(&staged, 100, &cancel).unwrap()
+        .publish_new_retained(&destination, &cancel).unwrap();
+    assert_eq!(fs::read(&destination).unwrap(), b"new");
+    assert!(fs::write(&destination, b"replace").is_err());
+    assert!(fs::remove_file(&destination).is_err());
+    owner.rollback().unwrap();
+    assert!(!destination.exists());
+    assert_eq!(fs::read(unrelated).unwrap(), b"keep");
+}
+
+#[test]
 fn invalid_size_nonregular_missing_and_early_cancel_never_admit_a_file() {
     let folder = Folder::new();
     let staged = folder.file("private.3dm", b"file");

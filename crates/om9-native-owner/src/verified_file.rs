@@ -18,6 +18,20 @@ pub struct VerifiedFile {
     sha256: [u8; 32],
     bytes: u64,
 }
+
+/// A file created by a no-replace publication whose original handle is still
+/// held. Only this owner may attempt rollback of that exact file.
+#[derive(Debug)]
+pub struct PublishedNewFile(VerifiedFile);
+
+impl PublishedNewFile {
+    pub fn rollback(self) -> Result<()> {
+        #[cfg(windows)]
+        { platform::rollback(&self.0) }
+        #[cfg(not(windows))]
+        { Err(Failure::new(FailureKind::Invalid("verified file rollback requires Windows"))) }
+    }
+}
 impl VerifiedFile {
     /// Open, bound and stream-hash the same held file. Ordinary writers and
     /// namespace replacement cannot enter after successful admission.
@@ -55,7 +69,7 @@ impl VerifiedFile {
         }
         #[cfg(windows)]
         {
-            platform::publish(self, destination, cancel)
+            platform::publish(&self, destination, cancel, true)
         }
         #[cfg(not(windows))]
         {
@@ -64,6 +78,25 @@ impl VerifiedFile {
                 "verified file publication requires Windows",
             )))
         }
+    }
+
+    /// Publish only if no destination exists at the atomic rename boundary.
+    pub fn publish_new(self, destination: &Path, cancel: &Cancellation) -> Result<()> {
+        if cancel.is_canceled() { return Err(Failure::new(FailureKind::Canceled)); }
+        #[cfg(windows)]
+        { platform::publish(&self, destination, cancel, false) }
+        #[cfg(not(windows))]
+        { let _ = destination; Err(Failure::new(FailureKind::Invalid("verified file publication requires Windows"))) }
+    }
+
+    /// Create a new destination while retaining the admitted handle for a
+    /// possible rollback. Existing destinations are never replaced.
+    pub fn publish_new_retained(self, destination: &Path, cancel: &Cancellation) -> Result<PublishedNewFile> {
+        if cancel.is_canceled() { return Err(Failure::new(FailureKind::Canceled)); }
+        #[cfg(windows)]
+        { platform::publish(&self, destination, cancel, false)?; Ok(PublishedNewFile(self)) }
+        #[cfg(not(windows))]
+        { let _ = destination; Err(Failure::new(FailureKind::Invalid("verified file publication requires Windows"))) }
     }
 }
 
@@ -88,7 +121,7 @@ mod platform {
             BY_HANDLE_FILE_INFORMATION, DELETE, FILE_ATTRIBUTE_DIRECTORY, FILE_ATTRIBUTE_READONLY,
             FILE_ATTRIBUTE_REPARSE_POINT, FILE_FLAG_OPEN_REPARSE_POINT, FILE_FLAG_SEQUENTIAL_SCAN,
             FILE_RENAME_INFO, FILE_RENAME_INFO_0, FILE_SHARE_READ, FILE_TYPE_DISK,
-            FileRenameInfoEx, GetFileInformationByHandle, GetFileType, SetFileInformationByHandle,
+            FILE_DISPOSITION_INFO, FileDispositionInfo, FileRenameInfoEx, GetFileInformationByHandle, GetFileType, SetFileInformationByHandle,
         },
     };
 
@@ -240,9 +273,10 @@ mod platform {
         Ok(())
     }
     pub(super) fn publish(
-        owner: VerifiedFile,
+        owner: &VerifiedFile,
         destination: &Path,
         cancel: &Cancellation,
+        replace: bool,
     ) -> Result<()> {
         canceled(cancel)?;
         let name = absolute_name(destination)?;
@@ -285,7 +319,7 @@ mod platform {
         // two nonoverlapping allocations remain live until the system call.
         unsafe {
             (*info).Anonymous = FILE_RENAME_INFO_0 {
-                Flags: REPLACE_IF_EXISTS,
+                Flags: if replace { REPLACE_IF_EXISTS } else { 0 },
             };
             (*info).RootDirectory = null_mut();
             (*info).FileNameLength = name_bytes;
@@ -311,6 +345,18 @@ mod platform {
             )
         } == 0
         {
+            return Err(io(std::io::Error::last_os_error()));
+        }
+        Ok(())
+    }
+
+    pub(super) fn rollback(owner: &VerifiedFile) -> Result<()> {
+        if snapshot(&owner.file)? != owner.metadata { return Err(Failure::new(FailureKind::Fingerprint)); }
+        let disposition = FILE_DISPOSITION_INFO { DeleteFile: true };
+        // SAFETY: the file is the same verified handle used for no-replace
+        // publication, owns DELETE access, and the structure is initialized.
+        if unsafe { SetFileInformationByHandle(handle(&owner.file), FileDispositionInfo,
+            (&disposition as *const FILE_DISPOSITION_INFO).cast(), size_of::<FILE_DISPOSITION_INFO>() as u32) } == 0 {
             return Err(io(std::io::Error::last_os_error()));
         }
         Ok(())

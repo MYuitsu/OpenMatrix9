@@ -57,6 +57,25 @@ pub enum Projection {
     Orthographic { vertical_span_mm: f64 },
     Perspective { vertical_fov_rad: f64 },
 }
+
+impl Projection {
+    /// Convert a fraction along the projected chord to a fraction between its
+    /// two 3D endpoints. The depths belong to those same, possibly clipped endpoints.
+    pub(crate) fn segment_source_fraction(self, screen_fraction: f64, depths: [f64; 2]) -> Result<f64> {
+        match self {
+            Self::Orthographic { .. } => Ok(screen_fraction),
+            Self::Perspective { .. } => {
+                let weighted_start = screen_fraction * depths[0];
+                let divisor = (1. - screen_fraction) * depths[1] + weighted_start;
+                if divisor <= 0. || !divisor.is_finite() {
+                    return Err(Error::Invalid("perspective segment interpolation"));
+                }
+                Ok(weighted_start / divisor)
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Camera {
@@ -81,9 +100,19 @@ pub struct PointProjector<'a> {
     basis: [Point3; 3],
 }
 impl PointProjector<'_> {
+    pub(crate) fn depth(&self, p: Point3) -> f64 {
+        dot(sub(p, self.camera.eye), self.basis[2])
+    }
+
     pub fn project(&self, p: Point3) -> Result<Option<Projected>> {
         finite(p)?;
-        self.camera.project_from_basis(p, self.viewport, self.basis)
+        self.camera.project_from_basis(p, self.viewport, self.basis, true)
+    }
+
+    /// Project a rational curve control point before clipping the evaluated curve.
+    pub(crate) fn project_unclipped(&self, p: Point3) -> Result<Option<Projected>> {
+        finite(p)?;
+        self.camera.project_from_basis(p, self.viewport, self.basis, false)
     }
     /// Project a conservative affine box, clipping its edges against the depth
     /// slab. Extremes of a perspective projection occur at clipped box vertices.
@@ -377,18 +406,21 @@ impl Camera {
         self.validate()?;
         viewport.validate()?;
         finite(p)?;
-        self.project_from_basis(p, viewport, self.basis()?)
+        self.project_from_basis(p, viewport, self.basis()?, true)
     }
     pub fn projector(&self, viewport: Viewport) -> Result<PointProjector<'_>> {
         self.validate()?;
         viewport.validate()?;
         Ok(PointProjector { camera: self, viewport, basis: self.basis()? })
     }
-    fn project_from_basis(&self, p: Point3, viewport: Viewport, basis: [Point3; 3]) -> Result<Option<Projected>> {
+    fn project_from_basis(&self, p: Point3, viewport: Viewport, basis: [Point3; 3], clip_depth: bool) -> Result<Option<Projected>> {
         let [right, up, forward] = basis;
         let delta = sub(p, self.eye);
         let z = dot(delta, forward);
-        if !z.is_finite() || z < self.near_mm || z > self.far_mm {
+        if !z.is_finite()
+            || (clip_depth && (z < self.near_mm || z > self.far_mm))
+            || (z <= 0. && matches!(self.projection, Projection::Perspective { .. }))
+        {
             return Ok(None);
         }
         let height = match self.projection {

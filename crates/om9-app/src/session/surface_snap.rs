@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 //! Refine B-rep display candidates only after checking their captured context.
 use super::Controller;
-use om9_core::{Error, Result};
+use om9_core::{Error, Result, geometry::{Point3, Transform}};
 use om9_scene::{
     camera::{Camera, Viewport},
     osnap::{SnapCandidate, SnapKind},
@@ -796,13 +796,13 @@ mod receipt_tests {
     }
 
     #[test]
-    fn native_surface_candidate_refuses_changed_payload_or_display() {
+    fn native_surface_candidate_refuses_changed_payload_or_checksum() {
         let body = NativeBrep {
             display: Arc::new(Mesh { vertices: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]], faces: vec![vec![0, 1, 2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
             payload: vec![1, 2, 3].into(), crc: 1,
         };
         let mut document = Document::new("native surface source");
-        let entity = Entity::new("body", Geometry::NativeBrep(body), None);
+        let entity = Entity::new("body", Geometry::NativeBrep(body.into_source_and_representation().0), None);
         let id = entity.id;
         let receipt = om9_scene::scene::brep_display_fingerprint(&entity);
         document.entities.insert(id, entity);
@@ -813,17 +813,17 @@ mod receipt_tests {
             placement: Transform::identity(),
             camera: Camera { eye: [0., 0., 10.], target: [0., 0., 0.], up: [0., 1., 0.],
                 projection: Projection::Orthographic { vertical_span_mm: 10. }, near_mm: 0.1, far_mm: 100., revision: 1 },
-            viewport: Viewport { origin: [0., 0.], size: [100., 100.] }, cursor: [50., 50.], face: None, face_witness: None, face_witness_triangle: None,
+            viewport: Viewport { origin: [0., 0.], size: [100., 100.] }, cursor: [50., 50.], face: None, face_witness: None, face_witness_triangle: None, native_face_count: None,
         };
         let candidate = SnapCandidate { kind: SnapKind::Surface, root: Some(id), world: [0., 0., 0.],
-            screen: [50., 50.], distance_px: 0., normal: None, parameter: None, surface_source: Some(source) };
+            screen: [50., 50.], distance_px: 0., normal: None, parameter: None, tracking_tangent: None, source: None, second_source: None, surface_source: Some(source), apparent: false };
         assert!(captured_entity(&document, &candidate).is_ok());
         let mut changed_payload = document.clone();
         let Geometry::NativeBrep(brep) = &mut changed_payload.entities.get_mut(&id).unwrap().geometry else { panic!("native BRep") };
         brep.payload = vec![4, 5, 6].into();
         assert!(matches!(captured_entity(&changed_payload, &candidate), Err(Error::Stale("surface snap BRep display source"))));
         let Geometry::NativeBrep(brep) = &mut document.entities.get_mut(&id).unwrap().geometry else { panic!("native BRep") };
-        Arc::make_mut(&mut brep.display).vertices[1][0] = 2.;
+        brep.crc = 2;
         assert!(matches!(captured_entity(&document, &candidate), Err(Error::Stale("surface snap BRep display source"))));
     }
 }
@@ -866,6 +866,19 @@ fn candidate_weak_owner_bytes(candidate: &SnapCandidate) -> u64 {
     } else { 0 }
 }
 
+fn candidate_path_entries(candidate: &SnapCandidate, include_clone: bool) -> Result<usize> {
+    let paths = [
+        candidate.surface_source.as_ref().map(|source| &source.path),
+        candidate.source.as_ref().map(|source| &source.path),
+        candidate.second_source.as_ref().map(|source| &source.path),
+    ];
+    paths.into_iter().flatten().try_fold(0usize, |total, path| {
+        let entries = if include_clone { path.capacity().checked_add(path.len()) } else { Some(path.capacity()) }
+            .ok_or(Error::Overflow("surface snap candidate paths"))?;
+        total.checked_add(entries).ok_or(Error::Overflow("surface snap candidate paths"))
+    })
+}
+
 impl SurfaceSnapReceipt {
     /// Available only when the worker captured a complete display occlusion snapshot.
     pub(crate) fn display_occluded(&self) -> Option<bool> { self.display_occluded }
@@ -889,7 +902,7 @@ impl SurfaceSnapReceipt {
         let mut bytes = surface_receipt_fixed_bytes()?.checked_add(u64::try_from(slots)
             .map_err(|_| Error::Overflow("surface snap receipt"))?).ok_or(Error::Overflow("surface snap receipt"))?;
         for candidate in self.original.iter().chain(&self.refined) {
-            let path = candidate.surface_source.as_ref().map_or(0, |source| source.path.capacity())
+            let path = candidate_path_entries(candidate, false)?
                 .checked_mul(std::mem::size_of::<om9_core::identity::ObjectId>()).ok_or(Error::Overflow("surface snap receipt"))?;
             bytes = bytes.checked_add(u64::try_from(path).map_err(|_| Error::Overflow("surface snap receipt"))?)
                 .and_then(|n| n.checked_add(candidate_weak_owner_bytes(candidate)))
@@ -947,6 +960,8 @@ enum SurfaceWorkerSource {
     #[cfg(feature = "occt-brep")]
     Brep { source: om9_core::transaction::CapturedBrepSource, tolerance: Result<f64> },
     #[cfg(feature = "occt-brep")]
+    Native { source: om9_core::transaction::CapturedNativeBrepSource, tolerance: Result<f64> },
+    #[cfg(feature = "occt-brep")]
     Surface { geometry: om9_core::geometry::Geometry, trim: Option<om9_core::model::Extension>, tolerance: Result<f64> },
     #[cfg(feature = "occt-brep")]
     Sources { sources: Vec<OwnedSnapSource>, tolerance: Result<f64> },
@@ -962,7 +977,7 @@ struct SurfaceWorkerInput {
 impl Drop for SurfaceWorkerInput { fn drop(&mut self) {} }
 
 /// Own the immutable display buffers and their admission independently of Document.
-struct SurfaceOcclusionInput {
+pub(super) struct SurfaceOcclusionInput {
     scene: om9_scene::scene::OcclusionSnapshot,
     tolerance: f64,
     #[cfg(feature = "occt-brep")]
@@ -971,6 +986,13 @@ struct SurfaceOcclusionInput {
     limits: om9_core::budget::Limits,
     _buffers: Arc<super::SceneBufferLease>,
     _reservation: om9_core::transaction::ExternalMemoryReservation,
+}
+
+impl SurfaceOcclusionInput {
+    pub(super) fn edge_occluded(&self, camera: &Camera, viewport: Viewport,
+        candidate: &SnapCandidate) -> Result<bool> {
+        self.scene.visible_display_occludes_before(camera, viewport, candidate.screen, candidate.world, self.tolerance)
+    }
 }
 
 #[cfg(feature = "occt-brep")]
@@ -1046,7 +1068,7 @@ fn fallback_surface_proven_clear_source(geometry: &om9_core::geometry::Geometry,
 
 impl Controller {
     /// Capture display and any fallback source copies under separate admission.
-    fn capture_surface_occlusion(&self) -> Result<Option<SurfaceOcclusionInput>> {
+    pub(super) fn capture_surface_occlusion(&self) -> Result<Option<SurfaceOcclusionInput>> {
         use om9_core::budget::memory::MemoryClass;
         let scene = self.scene().ok_or(Error::Missing("surface occlusion scene"))?;
         #[cfg(not(feature = "occt-brep"))]
@@ -1144,6 +1166,7 @@ impl Controller {
 enum OwnedSnapSource {
     Surface { geometry: om9_core::geometry::Geometry, trim: Option<om9_core::model::Extension> },
     Brep(om9_core::transaction::CapturedBrepSource),
+    Native(om9_core::transaction::CapturedNativeBrepSource),
 }
 
 #[cfg(feature = "occt-brep")]
@@ -1157,7 +1180,7 @@ fn mixed_source_copy_budget(document: &om9_core::model::Document, candidates: &[
             om9_core::geometry::Geometry::Surface(_) => {
                 total = total.checked_add(surface_copy_budget(entity)?).ok_or(Error::Overflow("surface batch sources"))?;
             }
-            om9_core::geometry::Geometry::Brep(_) => {}
+            om9_core::geometry::Geometry::Brep(_) | om9_core::geometry::Geometry::NativeBrep(_) => {}
             _ => return Ok(None),
         }
     }
@@ -1269,10 +1292,8 @@ impl SurfaceSnapJob {
         let slots = candidates.capacity().checked_add(candidates.len()).ok_or_else(overflow)?;
         let mut minimum = slots.checked_mul(std::mem::size_of::<SnapCandidate>()).ok_or_else(overflow)?;
         for candidate in candidates {
-            if let Some(source) = &candidate.surface_source {
-                let paths = source.path.capacity().checked_add(source.path.len()).ok_or_else(overflow)?;
-                minimum = minimum.checked_add(paths.checked_mul(std::mem::size_of::<om9_core::identity::ObjectId>()).ok_or_else(overflow)?).ok_or_else(overflow)?;
-            }
+            let paths = candidate_path_entries(candidate, true)?;
+            minimum = minimum.checked_add(paths.checked_mul(std::mem::size_of::<om9_core::identity::ObjectId>()).ok_or_else(overflow)?).ok_or_else(overflow)?;
         }
         let mut minimum = u64::try_from(minimum).map_err(|_| overflow())?
             .checked_add(surface_receipt_fixed_bytes()?).ok_or_else(overflow)?;
@@ -1312,7 +1333,7 @@ impl SurfaceSnapJob {
         }
         let first = &candidates[0];
         if candidates.iter().all(|candidate| same_batch_source(first, candidate))
-            && matches!(captured_entity(controller.document(), first)?.geometry, om9_core::geometry::Geometry::Brep(_)) {
+            && matches!(captured_entity(controller.document(), first)?.geometry, om9_core::geometry::Geometry::Brep(_) | om9_core::geometry::Geometry::NativeBrep(_)) {
             return Ok(Some(minimum));
         }
         mixed_source_copy_budget(controller.document(), candidates)?
@@ -1383,6 +1404,9 @@ impl SurfaceSnapJob {
             if let Some(object) = occurrence.filter(|object| eligible && matches!(object.brep_display_fingerprint, Some(om9_scene::scene::BrepDisplayReceipt::Occt(_)))) {
                 let lease = scene.capture_brep_source_for(controller.coordinator(), object)?;
                 SurfaceWorkerSource::Brep { source: lease, tolerance: controller.document().effective_tolerance().map(|value| value.absolute_mm) }
+            } else if let Some(object) = occurrence.filter(|object| eligible && matches!(object.brep_display_fingerprint, Some(om9_scene::scene::BrepDisplayReceipt::Native { .. }))) {
+                let lease = scene.capture_native_brep_source_for(controller.coordinator(), object)?;
+                SurfaceWorkerSource::Native { source: lease, tolerance: controller.document().effective_tolerance().map(|value| value.absolute_mm) }
             } else if let Some(entity) = single_surface_source(controller.document(), &candidates)? {
                 reservation.recheck_pending()?;
                 let (geometry, trim, allocated) = copy_surface_source(entity)?;
@@ -1419,6 +1443,14 @@ impl SurfaceSnapJob {
                                 .ok_or(Error::Stale("surface snap scene occurrence"))?;
                             sources.push(OwnedSnapSource::Brep(scene.capture_brep_source_for(controller.coordinator(), object)?));
                         }
+                        om9_core::geometry::Geometry::NativeBrep(_) => {
+                            let reference = candidate.surface_source.as_ref().ok_or(Error::Missing("surface snap source"))?;
+                            let object = scene.objects.iter().find(|object| object.root == reference.source.object
+                                && object.path == reference.path && object.leaf == reference.leaf
+                                && object.source == reference.source && object.brep_display_fingerprint == reference.brep_display_fingerprint)
+                                .ok_or(Error::Stale("surface snap scene occurrence"))?;
+                            sources.push(OwnedSnapSource::Native(scene.capture_native_brep_source_for(controller.coordinator(), object)?));
+                        }
                         _ => return Err(Error::Stale("surface snap batch source")),
                     }
                 }
@@ -1453,6 +1485,12 @@ impl SurfaceSnapJob {
             let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 #[cfg(test)]
                 if let Some(gate) = gate { gate.recv().map_err(|_| Error::Canceled)?; }
+                #[cfg(feature = "occt-brep")]
+                let worker_baseline = {
+                    let owner = reservation.lock().unwrap_or_else(|error| error.into_inner());
+                    minimum.checked_add(owner.bytes().saturating_sub(owner.pending_bytes()))
+                        .ok_or(Error::Overflow("surface worker baseline"))?
+                };
                 let mut refined = Vec::new();
                 refined.try_reserve_exact(worker_candidates.len()).map_err(|_| Error::Budget("surface snap results"))?;
                 let mut index = 0;
@@ -1470,6 +1508,12 @@ impl SurfaceSnapJob {
                             for (slot, candidate) in group.iter_mut().zip(&worker_candidates[index..end]) { *slot = candidate; }
                             let tolerance = tolerance.as_ref().map_err(Clone::clone)?;
                             refined.extend(refine_leased_brep_group(source, &group[..end-index], &worker_camera, viewport, *tolerance, &limits)?.into_iter().flatten());
+                        }
+                        #[cfg(feature = "occt-brep")]
+                        SurfaceWorkerSource::Native { source, tolerance } => {
+                            let tolerance = *tolerance.as_ref().map_err(Clone::clone)?;
+                            refine_leased_native_group(source, &worker_candidates[index..end], &worker_camera, viewport,
+                                tolerance, &limits, &reservation, worker_baseline, &worker_cancel, &mut refined)?;
                         }
                         #[cfg(feature = "occt-brep")]
                         SurfaceWorkerSource::Surface { geometry, trim, tolerance } => {
@@ -1495,6 +1539,10 @@ impl SurfaceSnapJob {
                                     for (slot, candidate) in group.iter_mut().zip(&worker_candidates[index..end]) { *slot = candidate; }
                                     refined.extend(refine_leased_brep_group(source, &group[..end-index], &worker_camera,
                                         viewport, tolerance, &limits)?.into_iter().flatten());
+                                }
+                                OwnedSnapSource::Native(source) => {
+                                    refine_leased_native_group(source, &worker_candidates[index..end], &worker_camera, viewport,
+                                        tolerance, &limits, &reservation, worker_baseline, &worker_cancel, &mut refined)?;
                                 }
                             }
                         }
@@ -1741,9 +1789,14 @@ fn trim_snap_scratch(document: &om9_core::model::Document, candidate: &SnapCandi
 
 fn captured_entity<'a>(document: &'a om9_core::model::Document, candidate: &SnapCandidate) -> Result<&'a om9_core::model::Entity> {
     let source = candidate.surface_source.as_ref().ok_or(Error::Missing("surface snap source"))?;
-    if candidate.root != Some(source.source.object) { return Err(Error::Stale("surface snap root")); }
+    captured_surface_entity(document, candidate.root.ok_or(Error::Missing("surface snap root"))?, source)
+}
+
+fn captured_surface_entity<'a>(document: &'a om9_core::model::Document, root: om9_core::identity::ObjectId,
+    source: &om9_scene::osnap::SurfaceCandidateSource) -> Result<&'a om9_core::model::Entity> {
+    if root != source.source.object { return Err(Error::Stale("surface snap root")); }
     document.resolve(&source.source)?;
-    let mut entity = document.entities.get(&candidate.root.ok_or(Error::Missing("surface snap root"))?)
+    let mut entity = document.entities.get(&root)
         .ok_or(Error::Missing("surface snap root"))?;
     for id in &source.path {
         let om9_core::geometry::Geometry::Instance(definition) = entity.geometry else { return Err(Error::Invalid("surface snap instance path")) };
@@ -1759,6 +1812,287 @@ fn captured_entity<'a>(document: &'a om9_core::model::Document, candidate: &Snap
         return Err(Error::Stale("surface snap BRep display source"));
     }
     Ok(entity)
+}
+
+fn typed_trim_boundary_witness(surface: &om9_core::geometry::NurbsSurface,
+    trim: &om9_core::rhino_semantics::TrimmedSurface, placement: Transform, point: Point3,
+    tolerance: f64, limits: &om9_core::budget::Limits, canceled: &dyn Fn() -> bool) -> Result<Option<Point3>> {
+    let cost = surface.size[0].checked_mul(surface.size[1]).ok_or(Error::Overflow("surface boundary work"))?;
+    let work = std::cell::Cell::new(0usize);
+    for loop_ in std::iter::once(&trim.outer).chain(&trim.inners) {
+        for index in 0..loop_.len() {
+            if canceled() { return Err(Error::Canceled); }
+            let a = loop_[index]; let b = loop_[(index + 1) % loop_.len()];
+            let evaluate = |fraction: f64| -> Result<(f64, Point3)> {
+                let next = work.get().checked_add(cost).ok_or(Error::Overflow("surface boundary work"))?;
+                if next > 20_000_000 { return Err(Error::Budget("surface boundary work")); }
+                work.set(next);
+                let uv = std::array::from_fn::<_, 2, _>(|axis| a[axis] * (1. - fraction) + b[axis] * fraction);
+                let witness = placement.point(om9_core::surface_kernel::evaluate(surface, uv[0], uv[1], limits)?)?;
+                let distance = (0..3).map(|axis| (point[axis] - witness[axis]).powi(2)).sum::<f64>().sqrt();
+                if !distance.is_finite() { return Err(Error::Invalid("surface boundary distance")); }
+                Ok((distance, witness))
+            };
+            let mut distances = [0.; 65];
+            for sample in 0..=64 {
+                if sample % 16 == 0 && canceled() { return Err(Error::Canceled); }
+                let (distance, witness) = evaluate(sample as f64 / 64.)?;
+                if distance <= tolerance { return Ok(Some(witness)); }
+                distances[sample] = distance;
+            }
+            for sample in 0usize..=64 {
+                if sample > 0 && distances[sample] > distances[sample - 1]
+                    || sample < 64 && distances[sample] > distances[sample + 1] { continue; }
+                let mut low = sample.saturating_sub(1) as f64 / 64.;
+                let mut high = (sample + 1).min(64) as f64 / 64.;
+                for _ in 0..40 {
+                    if canceled() { return Err(Error::Canceled); }
+                    let left = low + (high - low) * 0.3819660112501051;
+                    let right = high - (high - low) * 0.3819660112501051;
+                    let (left_distance, left_witness) = evaluate(left)?;
+                    let (right_distance, right_witness) = evaluate(right)?;
+                    if left_distance <= tolerance { return Ok(Some(left_witness)); }
+                    if right_distance <= tolerance { return Ok(Some(right_witness)); }
+                    if left_distance < right_distance { high = right; } else { low = left; }
+                }
+            }
+        }
+    }
+    Ok(None)
+}
+
+/// Find a source-evaluated witness for a typed point on a standalone surface.
+/// A missing witness is inconclusive: the numerical projection can miss a valid
+/// point or find a different branch. The caller must run this off the UI thread
+/// and revalidate the source, occurrence and prompt before accepting its result.
+pub(crate) fn typed_surface_witness(document: &om9_core::model::Document,
+    root: om9_core::identity::ObjectId, source: &om9_scene::osnap::SurfaceCandidateSource,
+    point: om9_core::geometry::Point3, limits: &om9_core::budget::Limits,
+    canceled: &dyn Fn() -> bool) -> Result<Option<om9_core::geometry::Point3>> {
+    if canceled() { return Err(Error::Canceled); }
+    let tolerance = document.effective_tolerance()?.absolute_mm;
+    if !tolerance.is_finite() || tolerance <= 0. { return Err(Error::Invalid("surface point tolerance")); }
+    let entity = captured_surface_entity(document, root, source)?;
+    let om9_core::geometry::Geometry::Surface(surface) = &entity.geometry else {
+        return Err(Error::Unsupported("typed point on BRep surface"));
+    };
+    let projection = om9_core::curve_surface_ops::closest_point_on_placed_surface_cancellable(
+        surface, source.placement, point, limits, canceled)?;
+    if let Some(extension) = entity.extensions.get(om9_core::model::TRIM_SURFACE_EXTENSION_SLOT) {
+        if extension.payload.len() > om9_core::model::trim_surface_payload_limit(limits) {
+            return Err(Error::Unsupported("surface point trim metadata exceeds supported size"));
+        }
+        let trim = om9_core::rhino_semantics::TrimmedSurface::from_extension(extension, limits)?;
+        if trim.underlying != *surface { return Err(Error::Invalid("surface point trim source mismatch")); }
+        om9_core::rhino_semantics::validate_trim_loop_topology_for_source_pick(&trim)?;
+        if canceled() { return Err(Error::Canceled); }
+        if projection.distance.is_finite() && projection.distance <= tolerance
+            && om9_core::rhino_semantics::classify_trim_uv(&trim, projection.parameters)? == Some(true) {
+            return Ok(Some(projection.point));
+        }
+        return typed_trim_boundary_witness(surface, &trim, source.placement, point, tolerance, limits, canceled);
+    }
+    Ok((projection.distance.is_finite() && projection.distance <= tolerance).then_some(projection.point))
+}
+
+/// Owns a single typed-coordinate witness search and its tracked source lease.
+enum TypedPointSource {
+    Surface(om9_core::transaction::CapturedDocument),
+    #[cfg(feature = "occt-brep")]
+    Brep(om9_core::transaction::CapturedBrepSource),
+    #[cfg(feature = "occt-brep")]
+    Native(om9_core::transaction::CapturedNativeBrepSource),
+}
+
+pub(crate) struct TypedSurfaceJob {
+    cancel: Arc<AtomicBool>,
+    receiver: std::sync::mpsc::Receiver<Result<Option<om9_core::geometry::Point3>>>,
+}
+
+impl TypedSurfaceJob {
+    pub(crate) fn start(controller: &Controller, root: om9_core::identity::ObjectId,
+        source: &om9_scene::osnap::SurfaceCandidateSource, point: om9_core::geometry::Point3) -> Result<Self> {
+        use om9_core::budget::memory::MemoryClass;
+        om9_core::geometry::finite(point)?;
+        let scene = controller.scene().ok_or(Error::Missing("surface point scene"))?;
+        let object = scene.objects.iter().find(|object| object.root == root && object.path == source.path
+            && object.leaf == source.leaf && object.source == source.source
+            && object.leaf_generation == source.leaf_generation
+            && object.leaf_geometry_revision == source.leaf_geometry_revision
+            && object.brep_display_fingerprint == source.brep_display_fingerprint
+            && object.display_transform().is_ok_and(|placement| placement == source.placement)
+            && object.visible && (object.selectable || object.reference_snappable))
+            .ok_or(Error::Stale("surface point target"))?;
+        let entity = scene.entity_for(&scene.document, object)?;
+        let limits = *controller.coordinator().limits();
+        let tolerance = controller.document().effective_tolerance()?.absolute_mm;
+        let (input, bytes) = match &entity.geometry {
+            om9_core::geometry::Geometry::Surface(surface) => {
+                let trim_bytes = entity.extensions.get(om9_core::model::TRIM_SURFACE_EXTENSION_SLOT)
+                    .map_or(0, |extension| extension.payload.len());
+                let bytes = surface.validate(&limits)?.bytes.checked_mul(4)
+                    .and_then(|n| n.checked_add((trim_bytes as u64).checked_mul(64)?))
+                    .and_then(|n| n.checked_add(1024 * 1024)).ok_or(Error::Overflow("surface point worker"))?;
+                (TypedPointSource::Surface(controller.coordinator().capture_tracked_document(controller.document().id)?), bytes)
+            }
+            #[cfg(feature = "occt-brep")]
+            om9_core::geometry::Geometry::Brep(_) => {
+                let lease = scene.capture_brep_source_for(controller.coordinator(), object)?;
+                let bytes = lease.canonical_storage_bytes()?.checked_mul(4)
+                    .and_then(|n| n.checked_add(4 * 1024 * 1024)).ok_or(Error::Overflow("surface point worker"))?;
+                (TypedPointSource::Brep(lease), bytes)
+            }
+            #[cfg(feature = "occt-brep")]
+            om9_core::geometry::Geometry::NativeBrep(_) => {
+                let lease = scene.capture_native_brep_source_for(controller.coordinator(), object)?;
+                let bytes = u64::try_from(lease.payload().len()).map_err(|_| Error::Overflow("surface point native payload"))?
+                    .checked_mul(64).and_then(|n| n.checked_add(16 * 1024 * 1024))
+                    .ok_or(Error::Overflow("surface point worker"))?;
+                (TypedPointSource::Native(lease), bytes)
+            }
+            _ => return Err(Error::Unsupported("typed point on this surface source")),
+        };
+        let mut reservation = controller.coordinator().reserve_external_memory_with_held(MemoryClass::Kernel, bytes,
+            om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes)),
+            controller.scene_cache_usage()?)?;
+        reservation.recheck_pending()?;
+        let account = controller.coordinator().external_memory_account();
+        let source = source.clone();
+        let cancel = Arc::new(AtomicBool::new(false));
+        let worker_cancel = Arc::clone(&cancel);
+        let (sender, receiver) = std::sync::mpsc::sync_channel(1);
+        std::thread::Builder::new().name("om9-typed-surface".into()).spawn(move || {
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                let _permit = loop {
+                    if worker_cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
+                    match account.try_acquire_surface_snap() {
+                        Ok(permit) => break permit,
+                        Err(Error::Invalid("surface snap already active")) => std::thread::sleep(std::time::Duration::from_millis(10)),
+                        Err(error) => return Err(error),
+                    }
+                };
+                reservation.recheck_pending()?;
+                match &input {
+                    TypedPointSource::Surface(document) => typed_surface_witness(document, root, &source, point, &limits,
+                        &|| worker_cancel.load(Ordering::Acquire)),
+                    #[cfg(feature = "occt-brep")]
+                    TypedPointSource::Brep(brep) => {
+                        let faces = &brep.topology().faces;
+                        if faces.is_empty() || faces.len() as u64 > limits.max_nodes { return Err(Error::Budget("surface point faces")); }
+                        if source.face.is_some_and(|face| !faces.contains(&face)) { return Err(Error::Stale("surface point face")); }
+                        for (index, face) in faces.iter().enumerate() {
+                            if worker_cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
+                            if source.face.is_some_and(|selected| selected != *face) { continue; }
+                            reservation.recheck_pending()?;
+                            let witness = om9_kernel::measurement::point_on_source_face(brep.source(), index,
+                                source.placement, point, tolerance, limits.max_nodes)
+                                .map_err(|error| Error::Io(format!("surface point face: {error}")))?;
+                            if witness.is_some() { return Ok(witness); }
+                        }
+                        Ok(None)
+                    }
+                    #[cfg(feature = "occt-brep")]
+                    TypedPointSource::Native(native) => {
+                        let mut admit = |live: u64, pending: u64| -> Result<()> {
+                            if worker_cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
+                            let total = live.checked_add(pending).ok_or(Error::Overflow("surface point native admission"))?;
+                            if total > reservation.bytes() { return Err(Error::Budget("surface point native admission")); }
+                            reservation.set_allocated_bytes(live)?;
+                            reservation.recheck_pending()
+                        };
+                        let (converted, faces) = om9_kernel::brep::native_source_and_face_count_admitted(
+                            native.payload(), tolerance, &limits, &mut admit)?;
+                        if faces == 0 || faces as u64 > limits.max_nodes { return Err(Error::Budget("surface point faces")); }
+                        if source.native_face_count != Some(faces) || source.face.is_some() {
+                            return Err(Error::Stale("surface point native face count"));
+                        }
+                        for index in 0..faces {
+                            if worker_cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
+                            reservation.recheck_pending()?;
+                            let witness = om9_kernel::measurement::point_on_source_face(&converted, index,
+                                source.placement, point, tolerance, limits.max_nodes)
+                                .map_err(|error| Error::Io(format!("surface point native face: {error}")))?;
+                            if witness.is_some() { return Ok(witness); }
+                        }
+                        Ok(None)
+                    }
+                }
+            })).unwrap_or_else(|_| Err(Error::Io("surface point worker panicked".into())));
+            drop(input);
+            drop(reservation);
+            let _ = sender.send(result);
+        }).map_err(|error| Error::Io(format!("surface point worker: {error}")))?;
+        Ok(Self { cancel, receiver })
+    }
+
+    pub(crate) fn try_result(&self) -> Option<Result<Option<om9_core::geometry::Point3>>> {
+        match self.receiver.try_recv() {
+            Ok(result) => Some(result),
+            Err(std::sync::mpsc::TryRecvError::Empty) => None,
+            Err(std::sync::mpsc::TryRecvError::Disconnected) => Some(Err(Error::Io("surface point worker disconnected".into()))),
+        }
+    }
+}
+
+impl Drop for TypedSurfaceJob {
+    fn drop(&mut self) { self.cancel.store(true, Ordering::Release); }
+}
+
+#[cfg(feature = "occt-brep")]
+fn refine_native_surface(text: &str, face_count: usize, candidate: &SnapCandidate, camera: &Camera,
+    viewport: Viewport, tolerance: f64, limits: &om9_core::budget::Limits) -> Result<Option<SnapCandidate>> {
+    let source = candidate.surface_source.as_ref().ok_or(Error::Missing("native surface source"))?;
+    source.face_witness.ok_or(Error::Missing("native surface witness"))?;
+    let inverse = om9_core::top11::inverse_affine(source.placement)?;
+    let ray = camera.visible_ray(source.cursor, viewport)?;
+    let origin = inverse.point(ray.origin)?;
+    let next = inverse.point(std::array::from_fn(|index| ray.origin[index] + ray.direction[index]))?;
+    let direction = std::array::from_fn(|index| next[index] - origin[index]);
+    let matrix = source.placement.0;
+    let bound = (0..3).flat_map(|row| (0..3).map(move |column| matrix[row][column] * matrix[row][column])).sum::<f64>().sqrt();
+    if !bound.is_finite() || bound <= 0. { return Err(Error::Invalid("native surface placement")); }
+    let local_tolerance = tolerance / bound.max(1.);
+    // Native display meshes have no certified face mapping or deflection. Use
+    // them only to nominate the object; find its nearest exact source hit from
+    // the near plane, and let the viewport projection enforce clipping.
+    let ray = om9_kernel::editing::IsocurveFaceRay { origin, direction, reference: origin,
+        tolerance: local_tolerance, max_distance: f64::MAX, witness: None };
+    let Some((_, local)) = om9_kernel::editing::try_ray_face_isocurve_hit_with_witness_from_source(text, ray, limits)
+        .map_err(|error| Error::Io(format!("native surface snap: {error}")))? else { return Ok(None) };
+    let world = source.placement.point(local)?;
+    let Some(projected) = camera.project(world, viewport)? else { return Ok(None) };
+    let mut refined = candidate.clone();
+    refined.world = world;
+    refined.screen = projected.screen;
+    refined.distance_px = (projected.screen[0] - source.cursor[0]).hypot(projected.screen[1] - source.cursor[1]);
+    refined.normal = None;
+    refined.surface_source.as_mut().expect("native surface source").native_face_count = Some(face_count);
+    Ok(Some(refined))
+}
+
+#[cfg(feature = "occt-brep")]
+fn refine_leased_native_group(source: &om9_core::transaction::CapturedNativeBrepSource,
+    candidates: &[SnapCandidate], camera: &Camera, viewport: Viewport, tolerance: f64,
+    limits: &om9_core::budget::Limits, reservation: &std::sync::Mutex<om9_core::transaction::ExternalMemoryReservation>,
+    baseline: u64, cancel: &AtomicBool, refined: &mut Vec<SnapCandidate>) -> Result<()> {
+    let mut admit = |live: u64, pending: u64| -> Result<()> {
+        if cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
+        let allocated = baseline.checked_add(live).ok_or(Error::Overflow("native surface snap admission"))?;
+        let required = allocated.checked_add(pending).ok_or(Error::Overflow("native surface snap admission"))?;
+        let mut owner = reservation.lock().unwrap_or_else(|error| error.into_inner());
+        if required > owner.bytes() { return Err(Error::Budget("native surface snap admission")); }
+        owner.set_allocated_bytes(allocated)?;
+        owner.recheck_pending()
+    };
+    let (text, face_count) = om9_kernel::brep::native_source_and_face_count_admitted(source.payload(), tolerance, limits, &mut admit)?;
+    for candidate in candidates {
+        if cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
+        if let Some(result) = refine_native_surface(&text, face_count, candidate, camera, viewport, tolerance, limits)? {
+            refined.push(result);
+        }
+    }
+    drop(text);
+    admit(0, 0)
 }
 
 #[cfg(feature = "occt-brep")]
@@ -2385,6 +2719,16 @@ impl Controller {
             if deflection != display.deflection_mm || !({
                 triangle[3] as usize == index && (0..3).all(|i| display.points.get(triangle[i] as usize) == Some(&witness[i]))
             }) { return Err(Error::Stale("surface snap face witness")); }
+        } else if matches!(&entity.geometry, om9_core::geometry::Geometry::NativeBrep(_)) {
+            let (witness, deflection) = source.face_witness.ok_or(Error::Missing("native surface snap witness"))?;
+            let om9_scene::scene::RenderBuffers::Mesh { vertices, triangles, .. } = object.buffers.as_ref() else {
+                return Err(Error::Stale("native surface snap display"));
+            };
+            let (indices, _) = source.face_witness_triangle.and_then(|index| triangles.get(index))
+                .ok_or(Error::Stale("native surface snap witness"))?;
+            if deflection != 0. || !(0..3).all(|index| vertices.get(indices[index] as usize) == Some(&witness[index])) {
+                return Err(Error::Stale("native surface snap witness"));
+            }
         } else if !matches!(&entity.geometry, om9_core::geometry::Geometry::Surface(_)) && source.face.is_none() {
             return Err(Error::Unsupported("surface snap face binding"));
         }

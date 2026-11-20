@@ -66,11 +66,12 @@ pub struct SurfaceProjection {
 
 fn surface_distance(
     surface: &NurbsSurface,
+    placement: Transform,
     point: Point3,
     uv: [f64; 2],
     limits: &Limits,
 ) -> Result<(f64, Point3)> {
-    let value = surface_kernel::evaluate(surface, uv[0], uv[1], limits)?;
+    let value = placement.point(surface_kernel::evaluate(surface, uv[0], uv[1], limits)?)?;
     Ok((distance(value, point), value))
 }
 
@@ -81,18 +82,33 @@ pub fn closest_point_on_surface(
     point: Point3,
     limits: &Limits,
 ) -> Result<SurfaceProjection> {
+    closest_point_on_placed_surface_cancellable(surface, Transform::identity(), point, limits, &|| false)
+}
+
+/// Search in world space without copying the surface. A successful result is a
+/// source-evaluated witness; this sampled search does not prove global proximity
+/// or non-membership when it fails to find a point within a caller's tolerance.
+pub fn closest_point_on_placed_surface_cancellable(
+    surface: &NurbsSurface,
+    placement: Transform,
+    point: Point3,
+    limits: &Limits,
+    canceled: &dyn Fn() -> bool,
+) -> Result<SurfaceProjection> {
     surface.validate(limits)?;
+    placement.validate()?;
     finite(point)?;
     let grid = 16usize;
     let mut best = [surface.domain[0][0], surface.domain[1][0]];
     let mut best_distance = f64::INFINITY;
     for i in 0..=grid {
+        if canceled() { return Err(Error::Canceled); }
         let u = surface.domain[0][0]
             + (surface.domain[0][1] - surface.domain[0][0]) * i as f64 / grid as f64;
         for j in 0..=grid {
             let v = surface.domain[1][0]
                 + (surface.domain[1][1] - surface.domain[1][0]) * j as f64 / grid as f64;
-            let (measured, _) = surface_distance(surface, point, [u, v], limits)?;
+            let (measured, _) = surface_distance(surface, placement, point, [u, v], limits)?;
             if measured < best_distance {
                 best_distance = measured;
                 best = [u, v];
@@ -101,14 +117,22 @@ pub fn closest_point_on_surface(
     }
     let mut uv = best;
     for _ in 0..48 {
+        if canceled() { return Err(Error::Canceled); }
         let derivatives = surface_kernel::derivatives(surface, uv[0], uv[1], limits)?;
-        let value = derivatives.point;
+        let value = placement.point(derivatives.point)?;
+        let direction = |local: Point3| -> Result<Point3> {
+            let world = std::array::from_fn(|i| (0..3).map(|j| placement.0[i][j] * local[j]).sum());
+            finite(world)?;
+            Ok(world)
+        };
+        let du = direction(derivatives.du)?;
+        let dv = direction(derivatives.dv)?;
         let residual = sub(value, point);
-        let a = dot(derivatives.du, derivatives.du);
-        let b = dot(derivatives.du, derivatives.dv);
-        let c = dot(derivatives.dv, derivatives.dv);
-        let g1 = dot(derivatives.du, residual);
-        let g2 = dot(derivatives.dv, residual);
+        let a = dot(du, du);
+        let b = dot(du, dv);
+        let c = dot(dv, dv);
+        let g1 = dot(du, residual);
+        let g2 = dot(dv, residual);
         let determinant = a * c - b * b;
         if !determinant.is_finite() || determinant.abs() <= 1e-18 {
             break;
@@ -121,6 +145,7 @@ pub fn closest_point_on_surface(
         let mut factor = 1.0;
         let mut moved = false;
         for _ in 0..16 {
+            if canceled() { return Err(Error::Canceled); }
             let candidate = [
                 clamp(
                     uv[0] + step_u * factor,
@@ -133,7 +158,7 @@ pub fn closest_point_on_surface(
                     surface.domain[1][1],
                 ),
             ];
-            let (measured, _) = surface_distance(surface, point, candidate, limits)?;
+            let (measured, _) = surface_distance(surface, placement, point, candidate, limits)?;
             if measured < best_distance - 1e-14 {
                 uv = candidate;
                 best_distance = measured;
@@ -146,7 +171,8 @@ pub fn closest_point_on_surface(
             break;
         }
     }
-    let (measured, value) = surface_distance(surface, point, uv, limits)?;
+    if canceled() { return Err(Error::Canceled); }
+    let (measured, value) = surface_distance(surface, placement, point, uv, limits)?;
     Ok(SurfaceProjection {
         parameters: uv,
         point: value,
@@ -565,7 +591,9 @@ fn line_quadratic_nurbs(first: &Curve, second: &Curve, tolerance: f64, limits: &
     Ok(Some(hits))
 }
 
-fn line_multispan_quadratic(first: &Curve, second: &Curve, tolerance: f64, limits: &Limits) -> Result<Option<Vec<CurveIntersection>>> {
+fn line_multispan_quadratic(first: &Curve, second: &Curve, tolerance: f64, limits: &Limits,
+    canceled: &dyn Fn() -> bool) -> Result<Option<Vec<CurveIntersection>>> {
+    if canceled() { return Err(Error::Canceled); }
     let (line, curve, swapped) = match (first, second) {
         (Curve::Line { .. }, Curve::Nurbs(_)) => (first, second, false),
         (Curve::Nurbs(_), Curve::Line { .. }) => (second, first, true),
@@ -578,7 +606,7 @@ fn line_multispan_quadratic(first: &Curve, second: &Curve, tolerance: f64, limit
         let mut base = n.clone(); base.seam = None;
         let base = Curve::Nurbs(base);
         if !crate::curve_ops::is_closed(&base, 1e-9, limits)? { return Err(Error::Invalid("NURBS seam needs a closed curve")); }
-        let mut hits = match if swapped { line_multispan_quadratic(&base, line, tolerance, limits)? } else { line_multispan_quadratic(line, &base, tolerance, limits)? } {
+        let mut hits = match if swapped { line_multispan_quadratic(&base, line, tolerance, limits, canceled)? } else { line_multispan_quadratic(line, &base, tolerance, limits, canceled)? } {
             Some(hits) => hits,
             None => return Ok(None),
         };
@@ -620,6 +648,7 @@ fn line_multispan_quadratic(first: &Curve, second: &Curve, tolerance: f64, limit
     let mut hits: Vec<CurveIntersection> = Vec::new();
     let native = |f: f64| if working.reversed { working.domain[1]-f*(working.domain[1]-working.domain[0]) } else { working.domain[0]+f*(working.domain[1]-working.domain[0]) };
     for pair in boundaries.windows(2) {
+        if canceled() { return Err(Error::Canceled); }
         if expanded.is_some() && (native(pair[0]).max(native(pair[1])) < n.domain[0] || native(pair[0]).min(native(pair[1])) > n.domain[1]) { continue; }
         let span = match crate::curve_ops::trim_curve_by_parameter(working_curve, pair[0], pair[1], limits) {
             Ok(span) => span,
@@ -629,7 +658,7 @@ fn line_multispan_quadratic(first: &Curve, second: &Curve, tolerance: f64, limit
         let local = if swapped { line_quadratic_nurbs(&span, line, tolerance, limits)? } else { line_quadratic_nurbs(line, &span, tolerance, limits)? };
         let local = match local {
             Some(hits) => hits,
-            None => if swapped { numeric_intersections(&span, line, tolerance, limits)? } else { numeric_intersections(line, &span, tolerance, limits)? },
+            None => if swapped { numeric_intersections(&span, line, tolerance, limits, canceled)? } else { numeric_intersections(line, &span, tolerance, limits, canceled)? },
         };
         for mut hit in local {
             let fraction = if swapped { &mut hit.first_fraction } else { &mut hit.second_fraction };
@@ -654,6 +683,242 @@ fn line_multispan_quadratic(first: &Curve, second: &Curve, tolerance: f64, limit
         }
     }
     hits.sort_by(|a,b| a.first_fraction.total_cmp(&b.first_fraction).then(a.second_fraction.total_cmp(&b.second_fraction)));
+    Ok(Some(hits))
+}
+
+/// Subdivide a positive-weight NURBS control hull against a finite line. This
+/// also retains tangent contacts that do not change sign. A budget or parameter
+/// mismatch is an explicit refusal rather than an incomplete intersection set.
+fn line_nurbs_hulls(first: &Curve, second: &Curve, tolerance: f64, limits: &Limits,
+    canceled: &dyn Fn() -> bool) -> Result<Option<Vec<CurveIntersection>>> {
+    let (line, curve, swapped) = match (first, second) {
+        (Curve::Line { .. }, Curve::Nurbs(_)) => (first, second, false),
+        (Curve::Nurbs(_), Curve::Line { .. }) => (second, first, true),
+        _ => return Ok(None),
+    };
+    let Curve::Line { start, end, .. } = line else { unreachable!() };
+    let Curve::Nurbs(nurbs) = curve else { unreachable!() };
+    // Preserve the established knot-aware path for piecewise linear curves.
+    if nurbs.degree == 1 { return Ok(None); }
+    if nurbs.weights.iter().any(|weight| !weight.is_finite() || *weight <= 0.) {
+        return Err(Error::Unsupported("line NURBS intersection weights"));
+    }
+    let direction = sub(*end, *start);
+    let length = norm(direction);
+    if !length.is_finite() || length <= 0. { return Err(Error::Invalid("intersection line")); }
+    let axis = scale(direction, 1. / length);
+    let helper = if axis[0].abs() <= axis[1].abs() && axis[0].abs() <= axis[2].abs() { [1., 0., 0.] }
+        else if axis[1].abs() <= axis[2].abs() { [0., 1., 0.] } else { [0., 0., 1.] };
+    let normal = cross(axis, helper);
+    let normal_length = norm(normal);
+    if !normal_length.is_finite() || normal_length <= 0. { return Err(Error::Invalid("intersection frame")); }
+    let normal = scale(normal, 1. / normal_length);
+    let binormal = cross(axis, normal);
+    let evaluator = CurveEvaluator::capture(curve, limits)?;
+    let cost = nurbs.degree.checked_add(1).and_then(|n| n.checked_mul(n))
+        .and_then(|n| n.checked_mul(nurbs.poles.len().saturating_add(16)))
+        .ok_or(Error::Overflow("line NURBS intersection work"))?;
+    let mut work = 0usize;
+    let mut intervals = vec![(0., 1.)];
+    let mut hits: Vec<CurveIntersection> = Vec::new();
+    while let Some((from, to)) = intervals.pop() {
+        if canceled() { return Err(Error::Canceled); }
+        work = work.checked_add(cost).ok_or(Error::Overflow("line NURBS intersection work"))?;
+        if work > 2_000_000 { return Err(Error::Budget("line NURBS intersection work")); }
+        let owned = if from == 0. && to == 1. { None }
+            else { Some(crate::curve_ops::trim_curve_by_parameter(curve, from, to, limits)?) };
+        let piece = owned.as_ref().unwrap_or(curve);
+        let Curve::Nurbs(piece_nurbs) = piece else { return Err(Error::Unsupported("line NURBS intersection subcurve")); };
+        let middle = from * 0.5 + to * 0.5;
+        let source_point = evaluator.evaluate(Parameter::Fraction(middle), 0, Transform::identity())?[0];
+        let piece_point = CurveEvaluator::capture(piece, limits)?
+            .evaluate(Parameter::Fraction(0.5), 0, Transform::identity())?[0];
+        if distance(source_point, piece_point) > tolerance.min(1e-6) {
+            return Err(Error::Unsupported("line NURBS intersection parameterization"));
+        }
+        let mut low = [f64::INFINITY; 3]; let mut high = [f64::NEG_INFINITY; 3];
+        let mut magnitude = length.max(1.);
+        for &pole in &piece_nurbs.poles {
+            let delta = sub(pole, *start);
+            let values = [dot(delta, axis), dot(delta, normal), dot(delta, binormal)];
+            if values.iter().any(|value| !value.is_finite()) { return Err(Error::Invalid("line NURBS hull")); }
+            for i in 0..3 { low[i] = low[i].min(values[i]); high[i] = high[i].max(values[i]); magnitude = magnitude.max(values[i].abs()); }
+        }
+        let margin = tolerance + 128. * f64::EPSILON * magnitude;
+        if !margin.is_finite() { return Err(Error::Unsupported("line NURBS hull precision")); }
+        if high[0] < -margin || low[0] > length + margin
+            || high[1] < -margin || low[1] > margin || high[2] < -margin || low[2] > margin { continue; }
+        let axial_overlap = high[0].min(length) - low[0].max(0.);
+        if axial_overlap > tolerance * 4.
+            && low[1].abs().max(high[1].abs()) <= tolerance * 0.01
+            && low[2].abs().max(high[2].abs()) <= tolerance * 0.01 {
+            return Err(Error::Unsupported("line and NURBS may overlap"));
+        }
+        let diameter = (high[0]-low[0]).hypot(high[1]-low[1]).hypot(high[2]-low[2]);
+        if !diameter.is_finite() { return Err(Error::Invalid("line NURBS hull diameter")); }
+        if diameter <= tolerance * 0.25 {
+            let line_fraction = clamp(dot(sub(source_point, *start), axis) / length, 0., 1.);
+            let line_point = add(*start, scale(direction, line_fraction));
+            let deviation = distance(source_point, line_point);
+            if deviation <= tolerance && !hits.iter().any(|hit| distance(hit.point, source_point) <= tolerance) {
+                if hits.len() as u64 >= limits.max_outputs { return Err(Error::Budget("line NURBS intersections")); }
+                hits.try_reserve(1).map_err(|_| Error::Budget("line NURBS intersections"))?;
+                hits.push(CurveIntersection { point: scale(add(source_point, line_point), 0.5),
+                    first_fraction: if swapped { middle } else { line_fraction },
+                    second_fraction: if swapped { line_fraction } else { middle }, distance: deviation });
+            }
+            continue;
+        }
+        if middle == from || middle == to { return Err(Error::Unsupported("line NURBS intersection precision")); }
+        if intervals.len() >= 2048 { return Err(Error::Budget("line NURBS intersection intervals")); }
+        intervals.try_reserve(2).map_err(|_| Error::Budget("line NURBS intersection intervals"))?;
+        intervals.push((middle, to)); intervals.push((from, middle));
+    }
+    Ok(Some(hits))
+}
+
+#[derive(Clone, Copy)]
+struct IntersectionHull {
+    from: f64, to: f64, point: Point3, low: Point3, high: Point3,
+}
+
+fn intersection_hull(curve: &Curve, evaluator: &CurveEvaluator, from: f64, to: f64,
+    tolerance: f64, limits: &Limits, work: &mut usize, canceled: &dyn Fn() -> bool) -> Result<IntersectionHull> {
+    if canceled() { return Err(Error::Canceled); }
+    let Curve::Nurbs(original) = curve else { return Err(Error::Invalid("intersection hull curve")); };
+    let cost = original.degree.checked_add(1).and_then(|n| n.checked_mul(n))
+        .and_then(|n| n.checked_mul(original.poles.len().saturating_add(16)))
+        .ok_or(Error::Overflow("NURBS pair work"))?;
+    *work = work.checked_add(cost).ok_or(Error::Overflow("NURBS pair work"))?;
+    if *work > 4_000_000 { return Err(Error::Budget("NURBS pair work")); }
+    let owned = if from == 0. && to == 1. { None }
+        else { Some(crate::curve_ops::trim_curve_by_parameter(curve, from, to, limits)?) };
+    let piece = owned.as_ref().unwrap_or(curve);
+    let Curve::Nurbs(nurbs) = piece else { return Err(Error::Unsupported("NURBS pair subcurve")); };
+    if nurbs.weights.iter().any(|weight| !weight.is_finite() || *weight <= 0.) {
+        return Err(Error::Unsupported("NURBS pair weights"));
+    }
+    let middle = from * 0.5 + to * 0.5;
+    let point = evaluator.evaluate(Parameter::Fraction(middle), 0, Transform::identity())?[0];
+    let check = CurveEvaluator::capture(piece, limits)?.evaluate(Parameter::Fraction(0.5), 0, Transform::identity())?[0];
+    if distance(point, check) > tolerance.min(1e-6) { return Err(Error::Unsupported("NURBS pair parameterization")); }
+    let mut low = [f64::INFINITY; 3]; let mut high = [f64::NEG_INFINITY; 3];
+    for pole in &nurbs.poles {
+        for axis in 0..3 { low[axis] = low[axis].min(pole[axis]); high[axis] = high[axis].max(pole[axis]); }
+    }
+    if low.iter().chain(high.iter()).any(|value| !value.is_finite()) { return Err(Error::Invalid("NURBS pair hull")); }
+    Ok(IntersectionHull { from, to, point, low, high })
+}
+
+/// Paired control-hull subdivision for positive-weight NURBS sources. A
+/// tolerance-verified witness is emitted only after both hulls are small.
+fn nurbs_pair_hulls(first: &Curve, second: &Curve, tolerance: f64, limits: &Limits,
+    canceled: &dyn Fn() -> bool) -> Result<Option<Vec<CurveIntersection>>> {
+    if !matches!((first, second), (Curve::Nurbs(_), Curve::Nurbs(_))) { return Ok(None); }
+    if first == second { return Err(Error::Unsupported("overlapping NURBS curves")); }
+    // A clamped Bezier with equal weights and uniformly spaced poles is
+    // exactly affine in its fraction. Reducing it avoids quadratic work near
+    // tangential contacts without changing the reported source parameters.
+    let affine_line = |curve: &Curve| -> Option<Curve> {
+        let Curve::Nurbs(n) = curve else { return None; };
+        if n.periodic || n.seam.is_some() || n.degree == 0 || n.poles.len() != n.degree + 1
+            || n.knots.len() != 2 * (n.degree + 1)
+            || n.knots[..=n.degree].iter().any(|&k| k != n.domain[0])
+            || n.knots[n.degree + 1..].iter().any(|&k| k != n.domain[1])
+            || n.weights.iter().any(|&w| w != n.weights[0] || w <= 0.) { return None; }
+        let (start, end) = (*n.poles.first()?, *n.poles.last()?);
+        let magnitude = start.into_iter().chain(end).map(f64::abs).fold(1_f64, f64::max);
+        if n.poles.iter().enumerate().any(|(i, &p)| {
+            let t = i as f64 / n.degree as f64;
+            distance(p, add(scale(start, 1. - t), scale(end, t)))
+                > (128. * f64::EPSILON * magnitude).min(tolerance * 0.01)
+        }) { return None; }
+        let (start, end) = if n.reversed { (end, start) } else { (start, end) };
+        Some(Curve::Line { start, end, domain: [0., 1.] })
+    };
+    if let Some(line) = affine_line(first) {
+        return Ok(Some(curve_curve_intersections_cancellable(&line, second, tolerance, limits, canceled)?));
+    }
+    if let Some(line) = affine_line(second) {
+        return Ok(Some(curve_curve_intersections_cancellable(first, &line, tolerance, limits, canceled)?));
+    }
+    let a = CurveEvaluator::capture(first, limits)?;
+    let b = CurveEvaluator::capture(second, limits)?;
+    let mut work = 0;
+    let first_hull = intersection_hull(first, &a, 0., 1., tolerance, limits, &mut work, canceled)?;
+    let second_hull = intersection_hull(second, &b, 0., 1., tolerance, limits, &mut work, canceled)?;
+    let mut stack = vec![(first_hull, second_hull)];
+    let mut hits: Vec<CurveIntersection> = Vec::new();
+    while let Some((left, right)) = stack.pop() {
+        if canceled() { return Err(Error::Canceled); }
+        let magnitude = left.low.into_iter().chain(left.high).chain(right.low).chain(right.high)
+            .map(f64::abs).fold(1_f64, f64::max);
+        let margin = tolerance + 128. * f64::EPSILON * magnitude;
+        if !margin.is_finite() { return Err(Error::Unsupported("NURBS pair precision")); }
+        if (0..3).any(|axis| left.high[axis] + margin < right.low[axis]
+            || right.high[axis] + margin < left.low[axis]) { continue; }
+        let diameter = |hull: IntersectionHull| (hull.high[0] - hull.low[0])
+            .hypot(hull.high[1] - hull.low[1]).hypot(hull.high[2] - hull.low[2]);
+        let (dl, dr) = (diameter(left), diameter(right));
+        if !dl.is_finite() || !dr.is_finite() { return Err(Error::Invalid("NURBS pair diameter")); }
+        if dl <= tolerance * 0.25 && dr <= tolerance * 0.25 {
+            let mut f = left.from * 0.5 + left.to * 0.5;
+            let mut g = right.from * 0.5 + right.to * 0.5;
+            let mut p = left.point;
+            let mut q = right.point;
+            let mut deviation = distance(p, q);
+            // Refine a tolerance witness before clustering: a shallow crossing
+            // otherwise produces a wide band of distinct-looking near misses.
+            for _ in 0..12 {
+                if deviation > tolerance || canceled() { break; }
+                let (a, b) = match (fraction_derivatives(first, f, 1, limits), fraction_derivatives(second, g, 1, limits)) {
+                    (Ok(a), Ok(b)) => (a, b),
+                    (Err(Error::Unsupported(_)), _) | (_, Err(Error::Unsupported(_))) => break,
+                    (Err(error), _) | (_, Err(error)) => return Err(error),
+                };
+                let residual = sub(a[0], b[0]);
+                let (aa, ab, bb) = (dot(a[1], a[1]), dot(a[1], b[1]), dot(b[1], b[1]));
+                let determinant = aa * bb - ab * ab;
+                if !determinant.is_finite() || determinant <= f64::EPSILON * aa * bb { break; }
+                let (g1, g2) = (dot(a[1], residual), -dot(b[1], residual));
+                let next_f = clamp(f - (bb * g1 + ab * g2) / determinant, 0., 1.);
+                let next_g = clamp(g - (ab * g1 + aa * g2) / determinant, 0., 1.);
+                let next_p = point_at(first, next_f, limits)?;
+                let next_q = point_at(second, next_g, limits)?;
+                let next_distance = distance(next_p, next_q);
+                if !next_distance.is_finite() || next_distance >= deviation { break; }
+                (f, g, p, q, deviation) = (next_f, next_g, next_p, next_q, next_distance);
+            }
+            if canceled() { return Err(Error::Canceled); }
+            let point = scale(add(p, q), 0.5);
+            if deviation <= tolerance {
+                let candidate = CurveIntersection { point, first_fraction: f, second_fraction: g, distance: deviation };
+                if let Some(previous) = hits.iter_mut().find(|hit| distance(hit.point, point) <= tolerance) {
+                    if deviation < previous.distance { *previous = candidate; }
+                    continue;
+                }
+                if hits.len() as u64 >= limits.max_outputs { return Err(Error::Budget("NURBS pair intersections")); }
+                hits.try_reserve(1).map_err(|_| Error::Budget("NURBS pair intersections"))?;
+                hits.push(candidate);
+            }
+            continue;
+        }
+        if stack.len() >= 2048 { return Err(Error::Budget("NURBS pair intervals")); }
+        stack.try_reserve(2).map_err(|_| Error::Budget("NURBS pair intervals"))?;
+        if dl >= dr {
+            let middle = left.from * 0.5 + left.to * 0.5;
+            if middle == left.from || middle == left.to { return Err(Error::Unsupported("NURBS pair parameter precision")); }
+            let one = intersection_hull(first, &a, left.from, middle, tolerance, limits, &mut work, canceled)?;
+            let two = intersection_hull(first, &a, middle, left.to, tolerance, limits, &mut work, canceled)?;
+            stack.push((two, right)); stack.push((one, right));
+        } else {
+            let middle = right.from * 0.5 + right.to * 0.5;
+            if middle == right.from || middle == right.to { return Err(Error::Unsupported("NURBS pair parameter precision")); }
+            let one = intersection_hull(second, &b, right.from, middle, tolerance, limits, &mut work, canceled)?;
+            let two = intersection_hull(second, &b, middle, right.to, tolerance, limits, &mut work, canceled)?;
+            stack.push((left, two)); stack.push((left, one));
+        }
+    }
     Ok(Some(hits))
 }
 
@@ -829,7 +1094,7 @@ fn coplanar_circles(
     Ok(Some(result))
 }
 
-fn intersection_samples(curve: &Curve, limits: &Limits) -> Result<Vec<(f64, Point3)>> {
+fn intersection_samples(curve: &Curve, limits: &Limits, canceled: &dyn Fn() -> bool) -> Result<Vec<(f64, Point3)>> {
     let extra = match curve { Curve::Nurbs(n) => n.knots.len().checked_mul(2).and_then(|n| n.checked_add(3)).ok_or(Error::Overflow("intersection samples"))?, _ => 0 };
     let capacity = 257usize.checked_add(extra).ok_or(Error::Overflow("intersection samples"))?;
     if capacity as u64 > limits.max_points || capacity as u64 > limits.max_bytes / std::mem::size_of::<(f64, Point3)>() as u64 {
@@ -857,7 +1122,10 @@ fn intersection_samples(curve: &Curve, limits: &Limits) -> Result<Vec<(f64, Poin
     fractions.sort_by(f64::total_cmp); fractions.dedup();
     let mut samples = Vec::new();
     samples.try_reserve_exact(fractions.len()).map_err(|_| Error::Budget("intersection samples"))?;
-    for fraction in fractions { samples.push((fraction, point_at(curve, fraction, limits)?)); }
+    for fraction in fractions {
+        if canceled() { return Err(Error::Canceled); }
+        samples.push((fraction, point_at(curve, fraction, limits)?));
+    }
     Ok(samples)
 }
 
@@ -866,6 +1134,7 @@ fn numeric_intersections(
     second: &Curve,
     tolerance: f64,
     limits: &Limits,
+    canceled: &dyn Fn() -> bool,
 ) -> Result<Vec<CurveIntersection>> {
     let capacity = |curve: &Curve| -> Result<usize> {
         let knots = match curve { Curve::Nurbs(n) => n.knots.len().checked_mul(2).and_then(|n| n.checked_add(3)).ok_or(Error::Overflow("intersection samples"))?, _ => 0 };
@@ -875,8 +1144,8 @@ fn numeric_intersections(
     // Covers both retained sample arrays, the sample-building scratch and candidate pairs.
     let scratch_bytes = (count as u64).saturating_mul(64);
     if scratch_bytes > limits.max_bytes { return Err(Error::Budget("intersection scratch")); }
-    let first_samples = intersection_samples(first, limits)?;
-    let second_samples = intersection_samples(second, limits)?;
+    let first_samples = intersection_samples(first, limits, canceled)?;
+    let second_samples = intersection_samples(second, limits, canceled)?;
     let mut candidates: Vec<(f64, f64)> = Vec::new();
     let mut low = [f64::INFINITY; 3];
     let mut high = [f64::NEG_INFINITY; 3];
@@ -899,6 +1168,7 @@ fn numeric_intersections(
     if (capacity as u64).saturating_mul(std::mem::size_of::<(f64,f64)>() as u64) > limits.max_bytes { return Err(Error::Budget("intersection candidates")); }
     candidates.try_reserve_exact(capacity).map_err(|_| Error::Budget("intersection candidates"))?;
     for &(fraction, point) in &first_samples {
+        if canceled() { return Err(Error::Canceled); }
         let mut best_other = 0.0;
         let mut best_distance = f64::INFINITY;
         for &(other_fraction, other_point) in &second_samples {
@@ -913,6 +1183,7 @@ fn numeric_intersections(
         }
     }
     for &(fraction, point) in &second_samples {
+        if canceled() { return Err(Error::Canceled); }
         let mut best_other = 0.0; let mut best_distance = f64::INFINITY;
         for &(other_fraction, other_point) in &first_samples {
             let measured = distance(point, other_point);
@@ -924,9 +1195,11 @@ fn numeric_intersections(
     candidates.dedup();
     let mut refined: Vec<CurveIntersection> = Vec::new();
     for (mut f, mut g) in candidates {
+        if canceled() { return Err(Error::Canceled); }
         let mut best = distance(point_at(first, f, limits)?, point_at(second, g, limits)?);
         let mut factor = 1.0;
         for _ in 0..40 {
+            if canceled() { return Err(Error::Canceled); }
             let a = match fraction_derivatives(first, f, 1, limits) {
                 Ok(jet) => jet,
                 Err(Error::Unsupported("derivative at insufficient knot continuity")) => break,
@@ -997,14 +1270,15 @@ fn numeric_intersections(
 
 fn polycurve_intersections(
     segments: &[Curve], reversed: bool, other: &Curve, swapped: bool,
-    tolerance: f64, limits: &Limits,
+    tolerance: f64, limits: &Limits, canceled: &dyn Fn() -> bool,
 ) -> Result<Vec<CurveIntersection>> {
     let mut hits: Vec<CurveIntersection> = Vec::new();
     for (index, segment) in segments.iter().enumerate() {
+        if canceled() { return Err(Error::Canceled); }
         let local = if swapped {
-            curve_curve_intersections(other, segment, tolerance, limits)?
+            curve_curve_intersections_cancellable(other, segment, tolerance, limits, canceled)?
         } else {
-            curve_curve_intersections(segment, other, tolerance, limits)?
+            curve_curve_intersections_cancellable(segment, other, tolerance, limits, canceled)?
         };
         for mut hit in local {
             let fraction = if swapped { &mut hit.second_fraction } else { &mut hit.first_fraction };
@@ -1038,25 +1312,37 @@ pub fn curve_curve_intersections(
     tolerance: f64,
     limits: &Limits,
 ) -> Result<Vec<CurveIntersection>> {
+    curve_curve_intersections_cancellable(first, second, tolerance, limits, &|| false)
+}
+
+/// As above, with cooperative cancellation during sampling and refinement.
+/// Native callers must still budget the complete solver scratch independently.
+pub fn curve_curve_intersections_cancellable(
+    first: &Curve, second: &Curve, tolerance: f64, limits: &Limits,
+    canceled: &dyn Fn() -> bool,
+) -> Result<Vec<CurveIntersection>> {
+    if canceled() { return Err(Error::Canceled); }
     if !tolerance.is_finite() || tolerance <= 0.0 {
         return Err(Error::Invalid("intersection tolerance"));
     }
     first.validate(limits)?;
     second.validate(limits)?;
     if let Curve::Polycurve { segments, reversed } = first {
-        return polycurve_intersections(segments, *reversed, second, false, tolerance, limits);
+        return polycurve_intersections(segments, *reversed, second, false, tolerance, limits, canceled);
     }
     if let Curve::Polycurve { segments, reversed } = second {
-        return polycurve_intersections(segments, *reversed, first, true, tolerance, limits);
+        return polycurve_intersections(segments, *reversed, first, true, tolerance, limits, canceled);
     }
     if let Some(exact) = line_line(first, second, tolerance)? { return Ok(exact); }
     if let Some(exact) = line_circle(first, second, tolerance, limits)? { return Ok(exact); }
     if let Some(exact) = line_quadratic_nurbs(first, second, tolerance, limits)? { return Ok(exact); }
-    if let Some(exact) = line_multispan_quadratic(first, second, tolerance, limits)? { return Ok(exact); }
+    if let Some(exact) = line_multispan_quadratic(first, second, tolerance, limits, canceled)? { return Ok(exact); }
+    if let Some(hits) = line_nurbs_hulls(first, second, tolerance, limits, canceled)? { return Ok(hits); }
     if let Some(circles) = coplanar_circles(first, second, tolerance, limits)? {
         return Ok(circles);
     }
-    numeric_intersections(first, second, tolerance, limits)
+    if let Some(hits) = nurbs_pair_hulls(first, second, tolerance, limits, canceled)? { return Ok(hits); }
+    numeric_intersections(first, second, tolerance, limits, canceled)
 }
 
 /// Intersections of a curve and a NURBS surface. The solver samples the curve, keeps

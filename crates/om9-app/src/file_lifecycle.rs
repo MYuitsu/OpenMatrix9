@@ -48,6 +48,7 @@ pub enum FilePhase {
     OpenPath,
     OpenPreparing,
     SavePath,
+    SavePreparing,
     Overwrite,
     CloseReady,
 }

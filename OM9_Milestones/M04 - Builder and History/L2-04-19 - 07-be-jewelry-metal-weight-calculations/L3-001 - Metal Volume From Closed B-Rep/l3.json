@@ -1,4 +1,9 @@
 {
+  "runtime_implementation": {
+    "status": "SCOPED_SOURCE_ROUTE_TESTED_WORKFLOW_OPEN",
+    "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md",
+    "traceability": "OM9-TOOLS-006 / BuilderMetalWeights / gvMetalWeights; box and nested BRep occurrence fixtures with Light/High through the headless controller. Desktop, native-package instance, full geometry and UI acceptance remain open."
+  },
   "level": "L3",
   "id": "OM9-L3-04-19-001",
   "milestone": "M04",

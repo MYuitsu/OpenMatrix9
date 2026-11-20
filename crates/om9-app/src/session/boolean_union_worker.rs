@@ -9,6 +9,7 @@ use om9_core::{
     transaction::{Cancellation, CapturedBrepSource, ExternalMemoryReservation, Mutation},
     Error, Result,
 };
+use om9_kernel::brep::TopologyAttestation;
 use std::sync::{Arc, atomic::{AtomicBool, Ordering}, mpsc};
 
 enum Event {
@@ -18,7 +19,7 @@ enum Event {
 enum Bodies { One(Brep), Many(Vec<Brep>), Empty }
 struct Output {
     bodies: Bodies,
-    proof: Option<om9_kernel::brep::TopologyAttestation>,
+    proof: Option<TopologyAttestation>,
     prepared: Option<(om9_scene::scene::PreparedBrepBuffers, u64)>,
     reservation: ExternalMemoryReservation,
 }
@@ -37,6 +38,19 @@ pub(super) struct UnionJob {
     waiting_output: Option<Result<Output>>,
 }
 impl Drop for UnionJob { fn drop(&mut self) { self.cancel.cancel(); } }
+
+fn own_topology_proof(controller: &Controller, proof: &TopologyAttestation,
+    reservation: &mut ExternalMemoryReservation) -> Result<ExternalMemoryReservation> {
+    let bytes = proof.storage_bytes()?;
+    let held = controller.scene_cache_usage()?;
+    let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+    let mut owner = controller.coordinator.reserve_external_memory_with_held(
+        MemoryClass::CpuCache, bytes, physical, held,
+    )?;
+    owner.set_allocated_bytes(bytes)?;
+    drop(reservation.split_off(bytes)?);
+    Ok(owner)
+}
 
 fn grow(sender: &mpsc::SyncSender<Event>, cancel: &Cancellation,
     reservation: &mut ExternalMemoryReservation, needed: u64) -> Result<()> {
@@ -476,13 +490,7 @@ impl Controller {
                 if let Some(mode) = job.preview_mode {
                     let Output { bodies, proof, prepared: _, mut reservation } = output;
                     let topology_proof = proof.map(|proof| {
-                        let bytes = proof.storage_bytes()?;
-                        let kernel_owner = reservation.split_off(bytes)?;
-                        let held = self.scene_cache_usage()?;
-                        let physical = om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
-                        let mut owner = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, bytes, physical, held)?;
-                        owner.set_allocated_bytes(bytes)?;
-                        drop(kernel_owner);
+                        let owner = own_topology_proof(self, &proof, &mut reservation)?;
                         Ok::<_, Error>(std::sync::Mutex::new(Some((proof, owner))))
                     }).transpose()?;
                     let body = match bodies { Bodies::One(body) => Some(body), Bodies::Empty => None,
@@ -503,7 +511,7 @@ impl Controller {
                     return Ok(());
                 }
                 let pending = self.solid_pending.take().ok_or(Error::Stale("Boolean command"))?;
-                let Output { bodies, proof: _, prepared, mut reservation } = output;
+                let Output { bodies, proof, prepared, mut reservation } = output;
                 let name = match job.feature { "OM9-SOLID-001" => "Boolean Difference", "OM9-SOLID-002" => "Boolean Intersection", "SolidBooleanSplit" => "Boolean Split", _ => "Boolean Union" };
                 let profile = std::env::var_os("OM9_COMMIT_PROFILE").map(|_| std::time::Instant::now());
                 let result = (|| {
@@ -545,6 +553,7 @@ impl Controller {
                     match bodies { Bodies::One(body) => push_body(body)?, Bodies::Many(pieces) => {
                         for body in pieces { push_body(body)?; }
                     }, Bodies::Empty => unreachable!("empty result rejected above") }
+                    let proof_output = outputs.first().copied();
                     if let Some(start) = profile { eprintln!("OM9_COMMIT_PROFILE register_output_ms={:.3}", start.elapsed().as_secs_f64()*1000.); }
                     if let Some((buffers, bytes)) = prepared {
                         if outputs.len()!=1 { return Err(Error::Invalid("Boolean prepared wire output")); }
@@ -564,7 +573,18 @@ impl Controller {
                         self.commit_solid_result_with_prepared_wire(job.feature, name, mutations, Some(outputs), &mut source_guards, wire)
                     } else {
                         self.commit_solid_result_with_reserved_sources(job.feature, name, mutations, Some(outputs), &mut source_guards)
+                    }?;
+                    // The worker already attested single-body output. Keep that evidence
+                    // available to Save without turning a committed edit into a cache error.
+                    if let (Some(proof), Some(object)) = (proof, proof_output)
+                        && let Ok(stamp) = self.document().stamp(object)
+                        && let Ok(owner) = own_topology_proof(self, &proof, &mut reservation)
+                        && let Ok(shared) = self.prepare_shared_topology_proof(stamp, proof, owner)
+                    {
+                        let _ = self.retain_inserted_topology_proof(stamp, shared.clone());
+                        let _ = self.cache_topology_proof(shared);
                     }
+                    Ok(())
                 })();
                 drop(reservation);
                 if result.is_err() {

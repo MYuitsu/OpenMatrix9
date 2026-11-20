@@ -1,4 +1,9 @@
 {
+  "runtime_implementation": {
+    "status": "SCOPED_COMPARISON_AND_ASSIGNMENT_TESTED",
+    "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#native-instance-and-registry-comparison-follow-up",
+    "scope": "All-density comparison and object/layer/parent material breakdown passed scoped fixtures; document/material bindings reload in reconstructed-document tests. Actual BRep archive reopen and wider instance/layer coverage remain open."
+  },
   "level": "L3",
   "id": "OM9-L3-04-19-004",
   "milestone": "M04",

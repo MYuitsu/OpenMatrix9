@@ -159,7 +159,7 @@ fn detached_history_is_not_silently_discarded() {
 #[test]
 fn selected_clean_history_and_result_remap_and_survive_undo_redo() {
     use om9_core::{
-        associative::FeaturePort,
+        associative::{FeaturePort, ReferenceAnchor, SubshapeKind, SubshapeSignature, bind_reference},
         geometry::{GeometryKind, Transform, Unit},
         history::{Recipe, ReplayEnvironment, Tolerance},
         request::{Selection, SourceBinding},
@@ -197,6 +197,11 @@ fn selected_clean_history_and_result_remap_and_survive_undo_redo() {
     );
     let old_recipe = recipe.id;
     doc.history.recipes.insert(recipe.id, recipe);
+    let old_reference = bind_reference(&mut doc.history, &Default::default(), old_recipe, output_id, "tip", ReferenceAnchor {
+        kind: SubshapeKind::Vertex,
+        fingerprint: SubshapeSignature { start: [2., 0., 0.], end: [2., 0., 0.], measure_mm: 0. },
+        tolerance_mm: 0.01,
+    }).unwrap();
     doc.results.insert(
         output_id,
         PublishedResult {
@@ -223,6 +228,10 @@ fn selected_clean_history_and_result_remap_and_survive_undo_redo() {
     assert_eq!(copied.document, target.document().id);
     let new_input = copied.inputs[0].source.object;
     let new_output = copied.outputs[0];
+    let reference = target.document().history.references.values().next().unwrap();
+    assert_ne!(reference.id, old_reference);
+    assert_eq!((reference.recipe, reference.output), (copied.id, new_output));
+    assert_eq!(reference.role, "tip");
     assert_eq!(target.document().entities[&new_input].label, "input");
     assert_eq!(target.document().entities[&new_output].label, "output");
     assert_eq!(
@@ -241,15 +250,76 @@ fn selected_clean_history_and_result_remap_and_survive_undo_redo() {
     target.undo().unwrap();
     assert!(target.document().entities.is_empty());
     assert!(target.document().history.recipes.is_empty());
+    assert!(target.document().history.references.is_empty());
     assert!(target.document().results.is_empty());
     target.redo().unwrap();
     assert_eq!(target.document().history.recipes.len(), 1);
+    assert_eq!(target.document().history.references.len(), 1);
     assert_eq!(target.document().results.len(), 1);
     let restored = target.document().history.recipes.values().next().unwrap();
     target.document().resolve(&restored.inputs[0].source).unwrap();
     target.document().results[&restored.outputs[0]]
         .validate(restored.outputs[0], target.document(), &Default::default())
         .unwrap();
+    let bag = from.copy_jobbag_objects_om9(&[output_id]).unwrap();
+    #[cfg(feature = "test-fixtures")]
+    {
+        use om9_app::{project_manager::BagFilter, ui::MatrixApp};
+        let context = eframe::egui::Context::default();
+        let mut source_app = MatrixApp::new(from.document().clone()).unwrap();
+        source_app.controller.select_objects(&[output_id]).unwrap();
+        source_app.test_capture_filtered_jobbag(0, BagFilter::All).unwrap();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(30);
+        while source_app.test_capture_pending() {
+            assert!(std::time::Instant::now() < deadline);
+            source_app.test_service_capture(&context);
+            std::thread::sleep(std::time::Duration::from_millis(5));
+        }
+        assert!(source_app.project_manager.active().slot(0).unwrap().snapshot.is_some(), "{}", source_app.status_line());
+        let mut recipient = MatrixApp::new(Document::new("UI history destination")).unwrap();
+        recipient.project_manager = source_app.project_manager.clone();
+        drop(source_app);
+        recipient.test_insert_filtered_jobbag(0, BagFilter::All).unwrap();
+        assert_eq!(recipient.controller.document().entities.len(), 2);
+        assert_eq!(recipient.controller.document().history.recipes.len(), 1);
+        recipient.controller.undo().unwrap();
+        assert!(recipient.controller.document().entities.is_empty());
+        recipient.controller.redo().unwrap();
+        assert_eq!(recipient.controller.document().entities.len(), 2);
+    }
+    let mut manager = om9_app::project_manager::ProjectManager::new("history jobbag");
+    manager.capture_archive(0, vec![from.document().entities[&output_id].clone()], from.document(), bag).unwrap();
+    let manager = om9_app::project_manager::ProjectManager::from_json(&manager.to_json().unwrap(), "history jobbag").unwrap();
+    drop(from);
+    let snapshot = manager.active().slot(0).unwrap().snapshot.as_ref().unwrap();
+    let archive = snapshot.archive.as_ref().unwrap();
+    let mut other = Controller::new(Document::new("jobbag destination"), Default::default()).unwrap();
+    other.insert_jobbag_archive(archive, snapshot).unwrap();
+    assert_eq!(other.document().entities.len(), 2);
+    assert_eq!(other.document().history.references.len(), 1);
+    let copied = other.document().history.recipes.values().next().unwrap();
+    assert_eq!(other.document().entities[&copied.inputs[0].source.object].label, "input");
+    assert_eq!(other.document().entities[&copied.outputs[0]].label, "output");
+    assert_eq!(other.coordinator().undo_len(), 1);
+    other.undo().unwrap();
+    assert!(other.document().entities.is_empty());
+    assert!(other.document().history.recipes.is_empty());
+    assert!(other.document().history.references.is_empty());
+    other.redo().unwrap();
+    assert_eq!(other.document().history.references.len(), 1);
+    let copied = other.document().history.recipes.values().next().unwrap();
+    other.document().resolve(&copied.inputs[0].source).unwrap();
+    let mut filtered = Controller::new(Document::new("filtered history jobbag"), Default::default()).unwrap();
+    filtered.insert_filtered_jobbag(archive, &[output_id], snapshot).unwrap();
+    assert_eq!(filtered.document().entities.len(), 2);
+    assert_eq!(filtered.document().history.references.len(), 1);
+    let copied = filtered.document().history.recipes.values().next().unwrap();
+    filtered.document().resolve(&copied.inputs[0].source).unwrap();
+    filtered.undo().unwrap();
+    assert!(filtered.document().entities.is_empty());
+    assert!(filtered.document().history.recipes.is_empty());
+    filtered.redo().unwrap();
+    assert_eq!(filtered.document().history.references.len(), 1);
 }
 
 #[test]
@@ -419,6 +489,32 @@ fn material_and_line_pattern_dependencies_transfer_atomically_and_avoid_collisio
     assert_eq!(empty.document().exchange.materials.len(), 1);
     empty.redo().unwrap();
     assert!(empty.document().entities.contains_key(&second[0]));
+    let pasted = source.paste_om9(&bytes).unwrap();
+    let attrs = &source.document().entities[&pasted[0]].attributes;
+    assert_eq!(attrs.material, Some(material.id));
+    assert_eq!(attrs.line_pattern, Some(pattern.id));
+    let archive = source.copy_jobbag_objects_om9(&[id]).unwrap();
+    let mut manager = om9_app::project_manager::ProjectManager::new("styled jobbag");
+    manager.capture_archive(0, vec![source.document().entities[&id].clone()], source.document(), archive).unwrap();
+    let manager = om9_app::project_manager::ProjectManager::from_json(&manager.to_json().unwrap(), "styled jobbag").unwrap();
+    drop(source);
+    let snapshot = manager.active().slot(0).unwrap().snapshot.as_ref().unwrap();
+    let mut jobbag_target = Controller::new(Document::new("styled jobbag target"), Default::default()).unwrap();
+    let jobbag_ids = jobbag_target.insert_jobbag_archive(snapshot.archive.as_ref().unwrap(), snapshot).unwrap();
+    let attrs = &jobbag_target.document().entities[&jobbag_ids[0]].attributes;
+    let (jobbag_material, jobbag_pattern, jobbag_layer) = (attrs.material.unwrap(), attrs.line_pattern.unwrap(), attrs.layer.unwrap());
+    assert_eq!(jobbag_target.document().exchange.materials[&jobbag_material].diffuse, material.diffuse);
+    assert_eq!(jobbag_target.document().exchange.line_patterns[&jobbag_pattern].segments, pattern.segments);
+    assert_eq!(jobbag_target.document().layers[&jobbag_layer].material, Some(jobbag_material));
+    assert_eq!(jobbag_target.document().layers[&jobbag_layer].line_pattern, Some(jobbag_pattern));
+    assert_eq!(jobbag_target.coordinator().undo_len(), 1);
+    jobbag_target.undo().unwrap();
+    assert!(jobbag_target.document().entities.is_empty());
+    assert!(jobbag_target.document().exchange.materials.is_empty());
+    assert!(jobbag_target.document().exchange.line_patterns.is_empty());
+    assert!(jobbag_target.document().layers.is_empty());
+    jobbag_target.redo().unwrap();
+    assert_eq!(jobbag_target.document().entities[&jobbag_ids[0]].attributes.material, Some(jobbag_material));
     let mut changed = Document::new("changed");
     let mut altered = material.clone();
     altered.diffuse = [0, 0, 0, 255];
@@ -440,10 +536,6 @@ fn material_and_line_pattern_dependencies_transfer_atomically_and_avoid_collisio
         target.document().exchange.materials[&replacement].diffuse,
         material.diffuse
     );
-    assert_eq!(attrs.line_pattern, Some(pattern.id));
-    let pasted = source.paste_om9(&bytes).unwrap();
-    let attrs = &source.document().entities[&pasted[0]].attributes;
-    assert_eq!(attrs.material, Some(material.id));
     assert_eq!(attrs.line_pattern, Some(pattern.id));
 }
 
@@ -565,6 +657,37 @@ fn mesh_uv_payload_survives_copy_and_external_texture_is_refused() {
         entity.geometry
     );
 
+    let resource = om9_core::resource::Resource::from_bytes("embedded texture", om9_core::resource::ResourceKind::OpaqueBinary,
+        b"authored texture bytes", &Default::default()).unwrap();
+    let old_resource = resource.id;
+    uv.pbr.texture = Some(om9_core::rhino_semantics::embedded_texture_uri(old_resource).unwrap());
+    set_mesh_uv(&mut entity, &uv, &Default::default()).unwrap();
+    let mut embedded = Document::new("embedded texture");
+    embedded.resources.insert(resource.id, resource);
+    embedded.entities.insert(id, entity.clone());
+    let mut broken = embedded.clone();
+    broken.resources.clear();
+    assert!(Controller::new(broken, Default::default()).is_err());
+    let source = Controller::new(embedded, Default::default()).unwrap();
+    let payload = source.copy_jobbag_objects_om9(&[id]).unwrap();
+    let mut target = Controller::new(Document::new("embedded target"), Default::default()).unwrap();
+    let before = target.coordinator().snapshot();
+    let pressure = target.coordinator().reserve_remaining_external_memory_with_held(
+        om9_core::budget::memory::MemoryClass::Kernel, None, target.scene_cache_usage().unwrap(),
+    ).unwrap();
+    assert!(matches!(target.paste_om9(&payload), Err(om9_core::Error::Budget(_))));
+    assert_eq!(target.coordinator().snapshot(), before);
+    drop(pressure);
+    let pasted = target.paste_om9(&payload).unwrap();
+    let copied_uv = om9_core::rhino_semantics::mesh_uv_of(&target.document().entities[&pasted[0]], &Default::default()).unwrap().unwrap();
+    let copied_id = om9_core::rhino_semantics::embedded_texture_id(copied_uv.pbr.texture.as_deref().unwrap()).unwrap();
+    assert_ne!(copied_id, old_resource);
+    assert_eq!(target.document().resources[&copied_id].payload().unwrap(), b"authored texture bytes");
+    target.undo().unwrap();
+    assert!(target.document().resources.is_empty());
+    target.redo().unwrap();
+    assert_eq!(target.document().resources[&copied_id].payload().unwrap(), b"authored texture bytes");
+
     uv.pbr.texture = Some("unresolved-texture".into());
     set_mesh_uv(&mut entity, &uv, &Default::default()).unwrap();
     let mut textured = Document::new("textured");
@@ -573,6 +696,79 @@ fn mesh_uv_payload_survives_copy_and_external_texture_is_refused() {
     controller.select_objects(&[id]).unwrap();
     assert!(controller.copy_selected_om9().is_err());
     assert_eq!(controller.coordinator().undo_len(), 0);
+}
+
+#[test]
+fn filtered_jobbag_uses_configured_budget_for_large_embedded_resource() {
+    use om9_core::{budget::Limits, geometry::Mesh, resource::{Resource, ResourceKind}, rhino_semantics::{MeshUv, PbrMaterial, set_mesh_uv}};
+    let limits = Limits { max_bytes: 2 * 1024 * 1024 * 1024, ..Limits::default() };
+    let data = vec![0x5a; 65 * 1024 * 1024];
+    let resource = Resource::from_bytes("large embedded texture", ResourceKind::OpaqueBinary, &data, &limits).unwrap();
+    drop(data);
+    let mut entity = Entity::new("textured mesh", Geometry::Mesh(Mesh {
+        vertices: vec![[0., 0., 0.], [1., 0., 0.], [0., 1., 0.]], faces: vec![vec![0, 1, 2]],
+        normals: vec![], colors: vec![], corner_uvs: vec![],
+    }), None);
+    let uv = MeshUv { uvs: vec![[0., 0.], [1., 0.], [0., 1.]], corners: vec![], material: "fixture".into(),
+        pbr: PbrMaterial { texture: Some(om9_core::rhino_semantics::embedded_texture_uri(resource.id).unwrap()), ..Default::default() } };
+    set_mesh_uv(&mut entity, &uv, &limits).unwrap();
+    let root = entity.id;
+    let mut document = Document::new("large filtered bag");
+    document.resources.insert(resource.id, resource);
+    document.entities.insert(root, entity.clone());
+    let source = Controller::new(document, limits).unwrap();
+    let archive = source.copy_jobbag_objects_om9(&[root]).unwrap();
+    assert!(archive.len() > 64 * 1024 * 1024);
+    let mut manager = om9_app::project_manager::ProjectManager::new("large filtered bag");
+    manager.capture_archive(0, vec![entity], source.document(), archive).unwrap();
+    let snapshot = manager.active().slot(0).unwrap().snapshot.as_ref().unwrap();
+    let mut target = Controller::new(Document::new("large target"), limits).unwrap();
+    let before = target.coordinator().snapshot();
+    let pressure = target.coordinator().reserve_remaining_external_memory_with_held(
+        om9_core::budget::memory::MemoryClass::Kernel, None, target.scene_cache_usage().unwrap(),
+    ).unwrap();
+    assert!(matches!(target.insert_filtered_jobbag(snapshot.archive.as_ref().unwrap(), &[root], snapshot), Err(om9_core::Error::Budget(_))));
+    assert_eq!(target.coordinator().snapshot(), before);
+    drop(pressure);
+    let inserted = target.insert_filtered_jobbag(snapshot.archive.as_ref().unwrap(), &[root], snapshot).unwrap();
+    assert_eq!(inserted.len(), 1);
+    let uv = om9_core::rhino_semantics::mesh_uv_of(&target.document().entities[&inserted[0]], &limits).unwrap().unwrap();
+    let texture = om9_core::rhino_semantics::embedded_texture_id(uv.pbr.texture.as_deref().unwrap()).unwrap();
+    assert_eq!(target.document().resources[&texture].byte_length(), 65 * 1024 * 1024);
+    target.undo().unwrap();
+    assert!(target.document().entities.is_empty());
+    assert!(target.document().resources.is_empty());
+    target.redo().unwrap();
+    assert_eq!(target.document().resources[&texture].byte_length(), 65 * 1024 * 1024);
+}
+
+#[test]
+fn filtered_jobbag_rejects_unrecorded_or_duplicate_roots_atomically() {
+    let mut document = Document::new("filter roots");
+    let first = Entity::new("captured", Geometry::Point([1., 2., 3.]), None);
+    let second = Entity::new("not in snapshot", Geometry::Point([4., 5., 6.]), None);
+    let (first_id, second_id) = (first.id, second.id);
+    document.entities.insert(first_id, first.clone());
+    document.entities.insert(second_id, second);
+    let source = Controller::new(document, Default::default()).unwrap();
+    let archive = source.copy_jobbag_objects_om9(&[first_id, second_id]).unwrap();
+    let mut manager = om9_app::project_manager::ProjectManager::new("filter roots");
+    manager.capture_archive(0, vec![first], source.document(), archive).unwrap();
+    let snapshot = manager.active().slot(0).unwrap().snapshot.as_ref().unwrap();
+    let mut target = Controller::new(Document::new("target"), Default::default()).unwrap();
+    let before = target.coordinator().snapshot();
+    for roots in [&[second_id][..], &[first_id, first_id][..]] {
+        assert!(target.insert_filtered_jobbag(snapshot.archive.as_ref().unwrap(), roots, snapshot).is_err());
+        assert_eq!(target.coordinator().snapshot(), before);
+    }
+    assert!(target.insert_filtered_jobbag(snapshot.archive.as_ref().unwrap(), &[first_id], snapshot).is_err());
+    assert_eq!(target.coordinator().snapshot(), before);
+    let archive = source.copy_jobbag_objects_om9(&[first_id]).unwrap();
+    let mut valid = om9_app::project_manager::ProjectManager::new("valid filter roots");
+    valid.capture_archive(0, vec![source.document().entities[&first_id].clone()], source.document(), archive).unwrap();
+    let snapshot = valid.active().slot(0).unwrap().snapshot.as_ref().unwrap();
+    assert_eq!(target.insert_filtered_jobbag(snapshot.archive.as_ref().unwrap(), &[first_id], snapshot).unwrap().len(), 1);
+    assert_eq!(target.document().entities.len(), 1);
 }
 
 #[test]
@@ -677,6 +873,87 @@ fn unlayered_cross_document_paste_is_one_transaction() {
     assert_eq!(to.coordinator().undo_len(), 1);
     to.undo().unwrap();
     assert!(to.document().entities.is_empty());
+}
+
+#[test]
+fn jobbag_preserves_retained_source_and_related_objects_in_one_undo() {
+    use om9_core::{identity::*, resource::{Resource, ResourceKind}, retained::{HostRef, ImportMode, ImportNamespace,
+        DefinitionUnits, NativeRecordKey, NativeRecordKind, NativeRelation, NativeUnits, RecordDisposition, ResolvedBy, RetainedSource, SourceRecord, SourceUnits, fingerprint}};
+    let limits = Default::default();
+    let mut document = Document::new("retained jobbag source");
+    let first = Entity::new("first", Geometry::Point([1., 2., 3.]), None);
+    let second = Entity::new("dependency", Geometry::Point([4., 5., 6.]), None);
+    let (first_id, second_id) = (first.id, second.id);
+    let key = || NativeRecordKey { kind: NativeRecordKind::Geometry, id: uuid::Uuid::new_v4(), native_index: None };
+    let dependency_key = key();
+    let mut root = SourceRecord::bound_entity(key(), "point", HostRef::Object(first_id), &first).unwrap();
+    root.relations.push(NativeRelation { role: "dependency".into(), target: dependency_key });
+    let parent = om9_core::model::Layer::new("native parent", [10, 20, 30, 255]);
+    let mut child = om9_core::model::Layer::new("native layer", [30, 40, 50, 255]);
+    let extra_layer = om9_core::model::Layer::new("source context layer", [50, 60, 70, 255]);
+    child.parent = Some(parent.id);
+    let parent_key = NativeRecordKey { kind: NativeRecordKind::Layer, id: uuid::Uuid::new_v4(), native_index: None };
+    let child_key = NativeRecordKey { kind: NativeRecordKind::Layer, id: uuid::Uuid::new_v4(), native_index: None };
+    root.relations.push(NativeRelation { role: "native layer".into(), target: child_key });
+    let parent_record = SourceRecord::bound(parent_key, "layer", HostRef::Layer(parent.id), fingerprint(&parent).unwrap());
+    let mut child_record = SourceRecord::bound(child_key, "layer", HostRef::Layer(child.id), fingerprint(&child).unwrap());
+    child_record.relations.push(NativeRelation { role: "parent layer".into(), target: parent_key });
+    let extra_key = NativeRecordKey { kind: NativeRecordKind::Layer, id: uuid::Uuid::new_v4(), native_index: None };
+    let extra_record = SourceRecord::bound(extra_key, "layer", HostRef::Layer(extra_layer.id), fingerprint(&extra_layer).unwrap());
+    document.layer_order.extend([parent.id, child.id, extra_layer.id]);
+    document.layers.insert(parent.id, parent);
+    document.layers.insert(child.id, child);
+    document.layers.insert(extra_layer.id, extra_layer);
+    let dependency = SourceRecord::bound_entity(dependency_key, "point", HostRef::Object(second_id), &second).unwrap();
+    let unrelated = SourceRecord::retained(key(), "unrelated");
+    let member = Entity::new("native member", Geometry::Point([7., 8., 9.]), None);
+    let definition = om9_core::model::Definition::new("native definition", vec![member]);
+    let definition_key = NativeRecordKey { kind: NativeRecordKind::Definition, id: uuid::Uuid::new_v4(), native_index: None };
+    let member_key = key();
+    let member_record = SourceRecord::bound_entity(member_key, "point", HostRef::DefinitionMember {
+        definition: definition.id, object: definition.members[0].id }, &definition.members[0]).unwrap();
+    let mut definition_record = SourceRecord::bound_definition(definition_key, "definition", &definition).unwrap();
+    definition_record.relations.push(NativeRelation { role: "definition member".into(), target: member_key });
+    root.relations.push(NativeRelation { role: "definition".into(), target: definition_key });
+    document.definitions.insert(definition.id, definition);
+    document.entities.insert(first_id, first);
+    document.entities.insert(second_id, second);
+    let resource = Resource::from_bytes("retained fixture", ResourceKind::RetainedThreeDm { archive_version: 50 }, b"authored native fixture", &limits).unwrap();
+    let hash = resource.sha256();
+    let unit = NativeUnits { native_enum: 2, name: "Millimeters".into(), declared_mm_per_unit: Some(1.),
+        millimeters_per_unit: 1., resolved_by: ResolvedBy::Declared, absolute_tolerance: 0.001,
+        angular_tolerance_radians: 0.001, relative_tolerance: 0. };
+    let definition_units = DefinitionUnits { native_enum: 2, name: "Millimeters".into(), declared_mm_per_unit: Some(1.),
+        millimeters_per_unit: Some(1.), resolved_by: Some(ResolvedBy::Declared) };
+    let source = RetainedSource { id: SourceId::new(), resource: resource.id, sha256: hash,
+        archive_version: 50, units: SourceUnits { model: unit.clone(), page: unit, definitions: [(definition_key.id, definition_units)].into_iter().collect() } };
+    let namespace = ImportNamespace { id: ImportNamespaceId::new(), source: source.id, import_mode: Some(ImportMode::Preserve),
+        records: vec![root, dependency, parent_record, child_record, extra_record, definition_record, member_record, unrelated] };
+    document.resources.insert(resource.id, resource);
+    document.retained_sources.insert(source.id, source);
+    document.import_namespaces.insert(namespace.id, namespace);
+    let source = Controller::new(document, limits).unwrap();
+    let archive = source.copy_jobbag_objects_om9(&[first_id]).unwrap();
+    let mut target = Controller::new(Document::new("retained jobbag target"), limits).unwrap();
+    target.paste_om9(&archive).unwrap();
+    assert_eq!(target.document().entities.len(), 2);
+    assert_eq!(target.document().layers.len(), 3);
+    assert_eq!(target.document().definitions.len(), 1);
+    let retained = target.document().retained_sources.values().next().unwrap();
+    assert_eq!(retained.sha256, hash);
+    assert_eq!(target.document().resources[&retained.resource].payload().unwrap(), b"authored native fixture");
+    let namespace = target.document().import_namespaces.values().next().unwrap();
+    assert_eq!(namespace.records.iter().filter(|record| record.disposition == RecordDisposition::Excluded).count(), 1);
+    target.undo().unwrap();
+    assert!(target.document().entities.is_empty());
+    assert!(target.document().retained_sources.is_empty());
+    assert!(target.document().layers.is_empty());
+    assert!(target.document().definitions.is_empty());
+    target.redo().unwrap();
+    assert_eq!(target.document().entities.len(), 2);
+    assert_eq!(target.document().retained_sources.len(), 1);
+    assert_eq!(target.document().layers.len(), 3);
+    assert_eq!(target.document().definitions.len(), 1);
 }
 
 #[test]
@@ -843,18 +1120,21 @@ fn editable_brep_copy_and_paste_with_nondefault_document_tolerance() {
     for tolerance in [0.02, 0.00001] {
         let mut document = Document::new("3dm B-rep tolerance");
         document.tolerance = Some(om9_core::history::Tolerance::try_new(tolerance, 0.01, 0.1).unwrap());
-        let sphere = om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap();
-        let entity = Entity::new("sphere", Geometry::Brep(sphere), None);
-        let id = entity.id;
-        document.entities.insert(id, entity);
         let mut controller = Controller::new(document, limits).unwrap();
+        controller.submit("Sphere").unwrap();
+        controller.accept_world_point([0., 0., 0.]).unwrap();
+        controller.submit("3").unwrap();
+        let id = *controller.document().entities.keys().next().unwrap();
+        let before_undo = controller.coordinator().undo_len();
         controller.select_objects(&[id]).unwrap();
         let payload = controller.copy_selected_3dm().unwrap();
         assert!(matches!(controller.document().entities[&id].geometry, Geometry::Brep(_)));
-        assert_eq!(controller.coordinator().undo_len(), 0);
+        assert_eq!(controller.coordinator().undo_len(), before_undo);
         controller.paste_3dm(&payload, None).unwrap();
         assert_eq!(controller.document().entities.len(), 2);
-        assert_eq!(controller.coordinator().undo_len(), 1);
+        assert_eq!(controller.coordinator().undo_len(), before_undo + 1);
+        controller.undo().unwrap();
+        assert_eq!(controller.document().entities.len(), 1);
     }
 }
 

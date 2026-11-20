@@ -5,7 +5,50 @@
 use super::*;
 
 impl Controller {
+    /// True only for built-in stages routed through ordinary world-point input.
+    /// Selection, text, numeric-only and worker stages must not be replaced by
+    /// a nested Between or surface target prompt.
+    pub fn builtin_wants_coordinate(&self) -> bool {
+        if !self.is_running() || self.dupedge_needs_pick()
+            || self.solid_boolean_two_preview_mode().is_some()
+            || self.solid_fillet_adding_handle() || self.solid_fillet_preview().is_some()
+            || self.solid_slab_needs_curve() || self.solid_sphere_brep_edge_stage() != 0
+            || self.solid_fillet_needs_edge() || self.solid_face_needs_pick()
+            || self.solid_pipe_needs_curve() || self.solid_boolean_needs_object()
+            || self.top11_needs_object() || self.top11_split_iso_target().is_some()
+            || self.top11_trim_many_ready() {
+            return false;
+        }
+        if let Some(pending) = self.top11_pending.as_ref() {
+            return matches!(pending, top11::Top11Pending::Duplicate { .. }
+                | top11::Top11Pending::Move { .. } | top11::Top11Pending::Rotate { .. }
+                | top11::Top11Pending::Mirror { .. } | top11::Top11Pending::SplitPoint { .. });
+        }
+        if self.annotation_pending.is_some() { return self.annotation_wants_point(); }
+        if let Some(pending) = self.transform_pending.as_ref() {
+            return matches!(pending.next(), Some(transform::Field::Point(_)));
+        }
+        if let Some(pending) = self.circle_pending.as_ref() {
+            return !(pending.mode == "AroundCurve" && pending.points.is_empty() && pending.path.is_none());
+        }
+        if let Some(pending) = self.solid_pending.as_ref() {
+            return pending.sphere_mode || pending.box_mode
+                || matches!(pending.feature, "SolidSlab" | "OM9-SOLID-011" | "OM9-SOLID-013"
+                    | "OM9-SOLID-015" | "OM9-SOLID-016" | "OM9-SOLID-017"
+                    | "OM9-SOLID-018" | "OM9-SOLID-019" | "OM9-SOLID-020");
+        }
+        self.measure_pending.is_some() || self.control_curve_pending.is_some()
+            || self.continue_curve_pending.is_some() || self.rect_pending.is_some()
+            || self.polyline_pending.is_some() || self.interp_pending.is_some()
+            || self.polygon_pending.is_some() || self.continue_interp_pending.is_some()
+            || self.helix_pending.is_some() || self.spiral_pending.is_some()
+            || self.ellipse_pending.is_some() || self.arc_pending.is_some()
+            || self.slash_pending.is_some()
+            || self.session.as_ref().is_some_and(|session| self.validate_context(&session.context).is_ok())
+    }
+
     pub fn accept_world_point(&mut self, point: Point3) -> Result<()> {
+        self.input_revision = self.input_revision.wrapping_add(1);
         finite(point)?;
         #[cfg(feature = "occt-brep")]
         if self

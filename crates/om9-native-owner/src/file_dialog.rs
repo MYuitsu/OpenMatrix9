@@ -14,7 +14,7 @@ use windows::{
         },
         UI::Shell::{
             Common::COMDLG_FILTERSPEC, FILEOPENDIALOGOPTIONS, FOS_FORCEFILESYSTEM, FOS_NOCHANGEDIR,
-            FOS_OVERWRITEPROMPT, FOS_PATHMUSTEXIST, FOS_STRICTFILETYPES, FileOpenDialog,
+            FOS_OVERWRITEPROMPT, FOS_PATHMUSTEXIST, FOS_PICKFOLDERS, FOS_STRICTFILETYPES, FileOpenDialog,
             FileSaveDialog, IFileDialog, IShellItem, SHCreateItemFromParsingName,
             SIGDN_FILESYSPATH,
         },
@@ -35,6 +35,8 @@ pub enum DialogFilter {
     Stl,
     /// OM9 add-on package (Tools › Install Add-on from Disk…).
     AddonZip,
+    ProjectArchive,
+    ProjectFolder,
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DialogError {
@@ -172,6 +174,12 @@ pub fn choose_stl(
 pub fn choose_addon_zip(parent: usize) -> Result<Option<PathBuf>, DialogError> {
     choose_impl(parent, Mode::Open, None, DialogFilter::AddonZip, false)
 }
+pub fn choose_project_archive(parent: usize, mode: Mode) -> Result<Option<PathBuf>, DialogError> {
+    choose_impl(parent, mode, None, DialogFilter::ProjectArchive, false)
+}
+pub fn choose_project_folder(parent: usize) -> Result<Option<PathBuf>, DialogError> {
+    choose_impl(parent, Mode::Open, None, DialogFilter::ProjectFolder, false)
+}
 /// Explicit own-app audit prefill. Show and GetResult remain the native
 /// selection boundary; this hint never becomes a returned selection itself.
 pub fn choose_fixture_for_audit(
@@ -217,8 +225,10 @@ fn choose_impl(
         )
         .map_err(|e| native("Create dialog", e))?;
         let defaults = dialog.GetOptions().map_err(|e| native("GetOptions", e))?;
+        let mut dialog_options = options(defaults, mode);
+        if filter == DialogFilter::ProjectFolder { dialog_options |= FOS_PICKFOLDERS; }
         dialog
-            .SetOptions(options(defaults, mode))
+            .SetOptions(dialog_options)
             .map_err(|e| native("SetOptions", e))?;
         let (title, filter_name, filter_spec, extension, default_name) = match filter {
             DialogFilter::Om9 => (
@@ -261,17 +271,21 @@ fn choose_impl(
                 w!("zip"),
                 "addon.zip",
             ),
+            DialogFilter::ProjectArchive => (
+                if mode == Mode::Open { w!("Import OM9 project") } else { w!("Export OM9 project") },
+                w!("OM9 project archive"), w!("*.om9project"), w!("om9project"), "Project.om9project",
+            ),
+            DialogFilter::ProjectFolder => (
+                w!("Select project folder"), w!("Folders"), w!("*"), w!(""), "",
+            ),
         };
         dialog.SetTitle(title).map_err(|e| native("SetTitle", e))?;
-        dialog
-            .SetFileTypes(&[COMDLG_FILTERSPEC {
-                pszName: filter_name,
-                pszSpec: filter_spec,
-            }])
-            .map_err(|e| native("SetFileTypes", e))?;
-        dialog
-            .SetDefaultExtension(extension)
-            .map_err(|e| native("SetDefaultExtension", e))?;
+        if filter != DialogFilter::ProjectFolder {
+            dialog
+                .SetFileTypes(&[COMDLG_FILTERSPEC { pszName: filter_name, pszSpec: filter_spec }])
+                .map_err(|e| native("SetFileTypes", e))?;
+            dialog.SetDefaultExtension(extension).map_err(|e| native("SetDefaultExtension", e))?;
+        }
         if let Some(directory) = current
             .and_then(Path::parent)
             .filter(|directory| directory.is_dir())
@@ -288,6 +302,8 @@ fn choose_impl(
                 DialogFilter::ThreeDm => "3dm",
                 DialogFilter::Stl => "stl",
                 DialogFilter::AddonZip => "zip",
+                DialogFilter::ProjectArchive => "om9project",
+                DialogFilter::ProjectFolder => "",
                 DialogFilter::Om9 => "om9",
             };
             let suggested = if audit_prefill {

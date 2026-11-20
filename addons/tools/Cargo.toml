@@ -11,6 +11,7 @@ publish = false
 name = "om9_tools"
 
 [dependencies]
+om9-core = { path = "../../crates/om9-core" }
 om9-addon-abi = { path = "../../crates/om9-addon-abi", features = ["session"] }
 om9-addon-geom = { path = "../geom" }
 serde = { workspace = true }

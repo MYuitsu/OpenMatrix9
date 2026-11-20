@@ -21,22 +21,33 @@
       "id": "narrow-800x600-with-right-dock-yields-and-keeps-command-input",
       "kind": "negative",
       "window": [800, 600],
-      "layout": { "dock_right": ["main-menu"] },
-      "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
+      "layout": {
+        "dock_right": [
+          "main-menu"
+        ]
+      },
+      "views": [
+        "LookingDown",
+        "Perspective",
+        "ThroughFinger",
+        "SideView"
+      ],
       "expect": {
         "result": "ok",
         "right_dock": null,
-        "notes": ["RightDockYielded"],
+        "notes": [
+          "RightDockYielded"
+        ],
         "left_rail": [0, 21, 300, 579],
         "command_input": [300, 21, 500, 90],
-        "toolbar": [300, 111, 500, 67],
+        "toolbar": [300, 111, 500, 0],
         "status_bar": [300, 580, 500, 20],
-        "center": [300, 178, 500, 402],
+        "center": [300, 111, 500, 469],
         "views": {
-          "LookingDown": [300, 178, 249, 200],
-          "Perspective": [551, 178, 249, 200],
-          "ThroughFinger": [300, 380, 249, 200],
-          "SideView": [551, 380, 249, 200]
+          "LookingDown": [300, 111, 249, 233.5],
+          "Perspective": [551, 111, 249, 233.5],
+          "ThroughFinger": [300, 346.5, 249, 233.5],
+          "SideView": [551, 346.5, 249, 233.5]
         },
         "command_input_overlaps_nothing": true
       }
@@ -45,79 +56,145 @@
       "id": "zero-window",
       "kind": "negative",
       "window": [0, 0],
-      "expect": { "result": "error", "error": "InvalidWindow", "layout_unchanged": true }
+      "expect": {
+        "result": "error",
+        "error": "InvalidWindow",
+        "layout_unchanged": true
+      }
     },
     {
       "id": "negative-width",
       "kind": "negative",
       "window": [-10, 500],
-      "expect": { "result": "error", "error": "InvalidWindow", "layout_unchanged": true }
+      "expect": {
+        "result": "error",
+        "error": "InvalidWindow",
+        "layout_unchanged": true
+      }
     },
     {
       "id": "nan-width",
       "kind": "negative",
-      "window": ["NaN", 500],
-      "expect": { "result": "error", "error": "InvalidWindow", "layout_unchanged": true }
+      "window": [
+        "NaN",
+        500
+      ],
+      "expect": {
+        "result": "error",
+        "error": "InvalidWindow",
+        "layout_unchanged": true
+      }
     },
     {
       "id": "infinite-height",
       "kind": "negative",
       "window": [800, "inf"],
-      "expect": { "result": "error", "error": "InvalidWindow", "layout_unchanged": true }
+      "expect": {
+        "result": "error",
+        "error": "InvalidWindow",
+        "layout_unchanged": true
+      }
     },
     {
       "id": "absurdly-large-window",
       "kind": "negative",
       "window": [1000000, 500],
-      "expect": { "result": "error", "error": "InvalidWindow", "layout_unchanged": true }
+      "expect": {
+        "result": "error",
+        "error": "InvalidWindow",
+        "layout_unchanged": true
+      }
     },
     {
       "id": "window-300x150-too-small",
       "kind": "negative",
       "window": [300, 150],
-      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [800, 400], "layout_unchanged": true }
+      "expect": {
+        "result": "error",
+        "error": "WindowTooSmall",
+        "min_window": [800, 400],
+        "layout_unchanged": true
+      }
     },
     {
       "id": "one-pixel-below-minimum-width",
       "kind": "negative",
       "window": [799, 400],
-      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [800, 400], "layout_unchanged": true }
+      "expect": {
+        "result": "error",
+        "error": "WindowTooSmall",
+        "min_window": [800, 400],
+        "layout_unchanged": true
+      }
     },
     {
       "id": "one-pixel-below-minimum-height",
       "kind": "negative",
       "window": [800, 399],
-      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [800, 400], "layout_unchanged": true }
+      "expect": {
+        "result": "error",
+        "error": "WindowTooSmall",
+        "min_window": [800, 400],
+        "layout_unchanged": true
+      }
     },
     {
       "id": "left-rail-hidden-does-not-change-the-floor-799x400",
       "kind": "negative",
       "window": [799, 400],
-      "layout": { "hide_panels": ["left-rail"] },
-      "expect": { "result": "error", "error": "WindowTooSmall", "min_window": [800, 400], "layout_unchanged": true }
+      "layout": {
+        "hide_panels": [
+          "left-rail"
+        ]
+      },
+      "expect": {
+        "result": "error",
+        "error": "WindowTooSmall",
+        "min_window": [800, 400],
+        "layout_unchanged": true
+      }
     },
     {
       "id": "left-rail-hidden-800x400-is-usable",
       "kind": "negative",
       "window": [800, 400],
-      "layout": { "hide_panels": ["left-rail"] },
-      "expect": { "result": "ok", "left_rail": null, "command_input": [0, 21, 800, 90], "center": [0, 178, 800, 202] }
+      "layout": {
+        "hide_panels": [
+          "left-rail"
+        ]
+      },
+      "expect": {
+        "result": "ok",
+        "left_rail": null,
+        "command_input": [0, 21, 800, 90],
+        "center": [0, 111, 800, 269]
+      }
     },
     {
       "id": "hidden-right-dock-is-a-defined-state-not-an-error",
       "kind": "negative",
       "window": [1600, 1000],
       "layout": {},
-      "expect": { "result": "ok", "right_dock": null, "notes": [] }
+      "expect": {
+        "result": "ok",
+        "right_dock": null,
+        "notes": []
+      }
     },
     {
       "id": "command-line-hidden-by-layout-is-kept",
       "kind": "negative",
       "window": [1280, 900],
-      "layout": { "hide_panels": ["command-line"] },
+      "layout": {
+        "hide_panels": [
+          "command-line"
+        ]
+      },
       "expect": {
         "result": "ok",
-        "notes": ["CommandInputKept"],
+        "notes": [
+          "CommandInputKept"
+        ],
         "command_input": [300, 21, 980, 90],
         "layout_unchanged": true
       }
@@ -126,40 +203,86 @@
       "id": "command-input-host-not-ready",
       "kind": "negative",
       "window": [1280, 900],
-      "host": { "command_input_ready": false },
-      "expect": { "result": "error", "error": "CommandInputUnavailable", "layout_unchanged": true }
+      "host": {
+        "command_input_ready": false
+      },
+      "expect": {
+        "result": "error",
+        "error": "CommandInputUnavailable",
+        "layout_unchanged": true
+      }
     },
     {
       "id": "empty-view-set",
       "kind": "negative",
       "window": [1280, 900],
       "views": [],
-      "expect": { "result": "error", "error": "ViewSetInvalid", "count": 0, "layout_unchanged": true }
+      "expect": {
+        "result": "error",
+        "error": "ViewSetInvalid",
+        "count": 0,
+        "layout_unchanged": true
+      }
     },
     {
       "id": "five-views",
       "kind": "negative",
       "window": [1280, 900],
-      "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView", "SideView"],
-      "expect": { "result": "error", "error": "ViewSetInvalid", "count": 5, "layout_unchanged": true }
+      "views": [
+        "LookingDown",
+        "Perspective",
+        "ThroughFinger",
+        "SideView",
+        "SideView"
+      ],
+      "expect": {
+        "result": "error",
+        "error": "ViewSetInvalid",
+        "count": 5,
+        "layout_unchanged": true
+      }
     },
     {
       "id": "duplicate-view",
       "kind": "negative",
       "window": [1280, 900],
-      "views": ["Perspective", "Perspective"],
-      "expect": { "result": "error", "error": "ViewSetInvalid", "count": 2, "layout_unchanged": true }
+      "views": [
+        "Perspective",
+        "Perspective"
+      ],
+      "expect": {
+        "result": "error",
+        "error": "ViewSetInvalid",
+        "count": 2,
+        "layout_unchanged": true
+      }
     },
     {
       "id": "sweep-never-overlaps-or-hides-command-input",
       "kind": "negative",
-      "sweep": { "width": { "from": 200, "to": 1600, "step": 20 }, "height": { "from": 100, "to": 1000, "step": 20 } },
-      "layouts": ["default", "right-dock-main-menu", "command-line-hidden"],
+      "sweep": {
+        "width": {
+          "from": 200,
+          "to": 1600,
+          "step": 20
+        },
+        "height": {
+          "from": 100,
+          "to": 1000,
+          "step": 20
+        }
+      },
+      "layouts": [
+        "default",
+        "right-dock-main-menu",
+        "command-line-hidden"
+      ],
       "expect": {
         "every_ok_plan": "command_input.height >= 58, command_input inside the window, command_input overlaps no other region",
         "every_other_size": "explicit WindowTooSmall error",
         "silent_fallbacks": 0
       }
     }
-  ]
+  ],
+  "layout_update_2026_11_17": "User requested the left MAIN MENU as the command surface; horizontal strip removed."
 }

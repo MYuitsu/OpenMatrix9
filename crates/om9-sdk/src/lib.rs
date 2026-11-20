@@ -86,10 +86,89 @@ pub enum Geometry {
     },
 }
 
+/// Immutable host point-input context. The opaque token is valid only for the
+/// scene, camera and construction plane captured for the current invocation.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct SnapContext {
+    pub token: String,
+    pub view: String,
+    pub absolute_tolerance_mm: f64,
+    pub plane_origin_mm: [f64; 3],
+    pub plane_x: [f64; 3],
+    pub plane_y: [f64; 3],
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct SnapQuery {
+    pub context_token: String,
+    pub viewport_origin: [f64; 2],
+    pub viewport_size: [f64; 2],
+    pub cursor: [f64; 2],
+    pub radius_px: f64,
+    /// Request `intersection` for true 3D hits, or `apparent_intersection`
+    /// to also allow intersections in the active view.
+    pub kinds: Vec<String>,
+    /// Previous world point in millimetres. Used for directional snaps and
+    /// as the Planar base when constraining the issued hit with Project.
+    pub from_mm: Option<[f64; 3]>,
+    /// Up to two caller-provided world points for an ephemeral SmartTrack query.
+    /// These coordinates are not authenticated as object-snap results.
+    #[serde(default)]
+    pub tracking_anchors_mm: Vec<[f64; 3]>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct SnapHit {
+    /// A projected intersection is reported as `Apparent Intersection` and
+    /// carries the selected source point along with both source identities.
+    pub kind: String,
+    pub point_mm: [f64; 3],
+    pub root_id: Option<String>,
+    pub member_path: Vec<String>,
+    pub leaf_id: Option<String>,
+    pub source_generation: Option<u64>,
+    pub geometry_revision: Option<u64>,
+    pub leaf_generation: Option<u64>,
+    pub leaf_geometry_revision: Option<u64>,
+    pub second_source: Option<SnapSourceIdentity>,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq)]
+pub struct SnapSourceIdentity {
+    pub root_id: String,
+    pub member_path: Vec<String>,
+    pub leaf_id: String,
+    pub source_generation: u64,
+    pub geometry_revision: u64,
+    pub leaf_generation: u64,
+    pub leaf_geometry_revision: u64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct SnapConstrain {
+    pub context_token: String,
+    pub point_mm: [f64; 3],
+    /// Previous point of the command, when available. Planar plus Project
+    /// projects an object snap onto the parallel plane through this point.
+    pub base_mm: Option<[f64; 3]>,
+    pub shift: bool,
+    /// The caller supplies an already-resolved object-snap point. Grid and
+    /// Ortho then yield to the snap; the host's Project setting still applies.
+    /// This flag does not authenticate the point or its source identity.
+    #[serde(default)]
+    pub object_snap: bool,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "method", rename_all = "snake_case")]
 pub enum HostRequest {
     Capabilities,
+    SnapContext,
+    SnapQuery { query: SnapQuery },
+    SnapConstrain { request: SnapConstrain },
+    SnapConstrainHit { context_token: String, hit: SnapHit },
+    SnapTrackAnchor { context_token: String, hit: SnapHit },
+    SnapQueryTracked { query: SnapQuery, anchors: Vec<String> },
     DocumentInfo,
     ObjectsList,
     SelectionGet,
@@ -685,7 +764,7 @@ pub struct ObjectProvenance {
     pub original_uuid: String,
     pub original_index: Option<i32>,
     pub original_family: String,
-    /// `unchanged`, `edited`, `deleted` or `retained_only`.
+    /// `unchanged`, `edited`, `deleted`, `retained_only` or `excluded`.
     pub disposition: String,
 }
 
@@ -976,6 +1055,43 @@ impl<'a> Host<'a> {
 
     pub fn capabilities(&mut self) -> Result<Vec<String>> {
         self.request(HostRequest::Capabilities)
+    }
+
+    pub fn snap_context(&mut self) -> Result<SnapContext> {
+        self.request(HostRequest::SnapContext)
+    }
+
+    pub fn snap_query(&mut self, query: SnapQuery) -> Result<Option<SnapHit>> {
+        self.request(HostRequest::SnapQuery { query })
+    }
+
+    pub fn snap_constrain(&mut self, request: SnapConstrain) -> Result<[f64; 3]> {
+        self.request(HostRequest::SnapConstrain { request })
+    }
+
+    /// Apply the host's object-snap constraints to a hit issued for this context
+    /// in the current invocation. Supply the returned hit unchanged. The
+    /// latest matching query supplies the previous point, if one was given.
+    pub fn snap_constrain_hit(&mut self, context: &SnapContext, hit: &SnapHit) -> Result<[f64; 3]> {
+        self.request(HostRequest::SnapConstrainHit {
+            context_token: context.token.clone(),
+            hit: hit.clone(),
+        })
+    }
+
+    /// Retain a source-backed hit for a later SmartTrack query. The returned
+    /// token belongs to this plugin and requires the same scene and input plane.
+    pub fn snap_track_anchor(&mut self, context: &SnapContext, hit: &SnapHit) -> Result<String> {
+        self.request(HostRequest::SnapTrackAnchor {
+            context_token: context.token.clone(),
+            hit: hit.clone(),
+        })
+    }
+
+    /// Use one or two retained anchor tokens with the current invocation's
+    /// snap context. Leave `query.tracking_anchors_mm` empty on this route.
+    pub fn snap_query_tracked(&mut self, query: SnapQuery, anchors: Vec<String>) -> Result<Option<SnapHit>> {
+        self.request(HostRequest::SnapQueryTracked { query, anchors })
     }
 
     pub fn selected_objects(&mut self) -> Result<Vec<String>> {

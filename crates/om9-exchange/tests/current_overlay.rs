@@ -188,6 +188,18 @@ fn edited_a_deleted_b_and_new_c_are_current_actions_with_retained_brep_and_undo(
 }
 
 #[test]
+fn excluded_selection_inventory_is_omitted_even_in_preserve_mode() {
+    let (original, id, namespace, _, _) = fixture(bundle(Some(ImportMode::Preserve)));
+    let mut document = original.world().documents[&id].as_ref().clone();
+    document.import_namespaces.get_mut(&namespace).unwrap().records[2].disposition =
+        om9_core::retained::RecordDisposition::Excluded;
+    let coordinator = TransactionCoordinator::new(World::new(vec![document], &Limits::default()).unwrap(), Limits::default()).unwrap();
+    let capture = ExportCapture::all(&coordinator, id).unwrap();
+    let overlay = capture.current_overlay(&coordinator, &Cancellation::default()).unwrap();
+    assert_eq!(overlay.namespaces[0].records[2].action, RecordAction::Omit);
+}
+
+#[test]
 fn geometry_mode_regenerates_current_bindings_and_does_not_resurrect_retained_only_data() {
     let (mut c, d, _, _, b) = fixture(bundle(Some(ImportMode::Geometry)));
     let stamp = c.world().documents[&d].stamp(b).unwrap();
@@ -354,7 +366,7 @@ fn placement_attributes_and_label_change_only_their_explicit_native_patch_fields
 
 #[test]
 fn source_brep_display_change_does_not_turn_label_patch_into_geometry_patch() {
-    use om9_core::brep::{Brep, BrepDisplay, BrepTopology};
+    use om9_core::brep::{Brep, BrepDisplay, BrepSourceAccess, BrepTopology};
     let mut bundle = bundle(Some(ImportMode::Preserve));
     let entity = &mut bundle.entities[0];
     let shape = Brep::from_native("CASCADE Topology authored fixture".into(), BrepDisplay {
@@ -362,17 +374,18 @@ fn source_brep_display_change_does_not_turn_label_patch_into_geometry_patch() {
         triangles: vec![[0, 1, 2, 0]], segments: vec![], vertices: vec![],
         topology: BrepTopology { faces: vec![Uuid::from_u128(42)], edges: vec![], vertex_ids: vec![], face_edges: vec![] }.into(),
     }, &Limits::default()).unwrap();
-    entity.geometry = Geometry::Brep(shape);
+    entity.geometry = Geometry::Brep(shape.to_canonical());
     bundle.namespace.records[0] = SourceRecord::bound_entity(key(NativeRecordKind::Geometry), "ON_Brep", HostRef::Object(entity.id), entity).unwrap();
-    let Geometry::Brep(shape) = &mut entity.geometry else { panic!() };
     let mut display = shape.display().clone();
     display.deflection_mm = 0.02;
     display.points[1][0] = 2.;
-    *shape = Brep::from_native(shape.source().to_owned(), display, &Limits::default()).unwrap();
-    let (coordinator, document, _, object, _) = fixture(bundle);
-    let snapshot = om9_archive::DocumentSnapshot::capture(&coordinator.world().documents[&document], &Limits::default()).unwrap();
-    let restored = snapshot.restore(&Limits::default()).unwrap();
-    let mut coordinator = TransactionCoordinator::new(World::new(vec![restored], &Limits::default()).unwrap(), Limits::default()).unwrap();
+    entity.geometry = Geometry::Brep(Brep::from_native(shape.source().to_owned(), display, &Limits::default()).unwrap().to_canonical());
+    let (mut coordinator, document, _, object, _) = fixture(bundle);
+    // The v5 snapshot intentionally refuses canonical BRep. Preserve that
+    // guard separately; this authored source is not a native-verified v6
+    // packet, so it cannot be used as archive round-trip evidence.
+    assert!(matches!(om9_archive::DocumentSnapshot::capture(&coordinator.world().documents[&document], &Limits::default()),
+        Err(Error::Unsupported("BRep archive migration to v5 is not available"))));
     let capture = ExportCapture::all(&coordinator, document).unwrap();
     let overlay = capture.current_overlay(&coordinator, &Cancellation::default()).unwrap();
     assert_eq!(overlay.namespaces[0].records[0].action, RecordAction::Retain);

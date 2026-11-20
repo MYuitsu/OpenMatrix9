@@ -1121,6 +1121,17 @@ impl Host {
             .collect())
     }
 
+    /// Read one setting without copying the add-on's full settings list.
+    pub fn setting(&self, id: &str, key: &str) -> Option<(&SettingSpec, SettingValue)> {
+        let manifest = self.installed.get(id)?.manifest.as_ref()?;
+        let spec = manifest.settings.iter().find(|spec| spec.key == key)?;
+        let value = self.prefs.addons.get(id)
+            .and_then(|addon| addon.settings.get(key))
+            .and_then(|stored| spec.validate(stored).ok())
+            .unwrap_or_else(|| spec.default.clone());
+        Some((spec, value))
+    }
+
     /// The settings of one command only (its builder panel), resolved like [`Self::settings`]:
     /// the stored value when it is still valid, else the default. Interactive commands ask
     /// for these at every step, so only the specs that apply to `command` are looked at and
@@ -1149,25 +1160,29 @@ impl Host {
     }
 
     pub fn set_setting(&mut self, id: &str, key: &str, raw: &str) -> Result<SettingValue, String> {
-        let specs = self
+        let manifest = self
             .installed
             .get(id)
             .and_then(|i| i.manifest.as_ref())
-            .map(|m| m.settings.clone())
             .ok_or_else(|| format!("add-on {id:?} chưa được cài"))?;
-        let spec = specs
+        let spec = manifest.settings
             .iter()
             .find(|s| s.key == key)
             .ok_or_else(|| format!("{id} không có setting {key:?}"))?;
         let v = spec
             .parse_user(raw)
             .map_err(|e| format!("{}: {e}", spec.label))?;
+        let previous = self.prefs.clone();
         self.prefs
             .addons
             .entry(id.to_string())
             .or_default()
             .settings
             .insert(key.to_string(), v.clone());
+        if let Err(error) = self.save() {
+            self.prefs = previous;
+            return Err(error);
+        }
         if let Some(a) = self.active.get_mut(id) {
             a.settings.insert(key.to_string(), v.clone());
             let s = a.settings.clone();
@@ -1176,7 +1191,6 @@ impl Host {
                 r.settings_changed(id, &s);
             }
         }
-        self.save()?;
         Ok(v)
     }
 
@@ -1244,15 +1258,10 @@ impl Host {
         let mut tr: Option<Tr> = None;
         let mut errs = Vec::new();
         for (id, dir) in self.assets("lang") {
-            let lang = self
-                .settings(&id)
-                .ok()
-                .and_then(|s| {
-                    s.into_iter()
-                        .find_map(|(spec, v)| match (spec.key.as_str(), v) {
-                            ("language", SettingValue::Str(code)) => Lang::parse(&code),
-                            _ => None,
-                        })
+            let lang = self.setting(&id, "language")
+                .and_then(|(_, value)| match value {
+                    SettingValue::Str(code) => Lang::parse(&code),
+                    _ => None,
                 })
                 .unwrap_or_default();
             if lang == Lang::En {

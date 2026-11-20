@@ -89,6 +89,33 @@ fn coordinator(doc: Document) -> (TransactionCoordinator, DocumentId) {
 /* ------------------------------- L3-001 ------------------------------- */
 
 #[test]
+fn object_creation_order_follows_insertions_in_a_committed_batch() {
+    let (mut coordinator, id) = coordinator(Document::new("creation order"));
+    let first = Entity::new("first", Geometry::Point([0.; 3]), None);
+    let second = Entity::new("second", Geometry::Point([1.; 3]), None);
+    let ids = [first.id, second.id];
+    let request = |first, second| TransactionRequest::new("two new objects", vec![
+        Mutation::Insert { document: id, entity: first },
+        Mutation::Insert { document: id, entity: second },
+    ]);
+    let discarded = coordinator.prepare(request(second.clone(), first.clone())).unwrap();
+    drop(discarded);
+    assert!(coordinator.world().documents[&id].entities.is_empty());
+
+    let prepared = coordinator.prepare(request(first, second)).unwrap();
+    coordinator.commit(prepared).unwrap();
+    let doc = &coordinator.world().documents[&id];
+    let orders = ids.map(|id| doc.entities[&id].creation_order.unwrap());
+    assert_eq!(orders, [[doc.revision, 0], [doc.revision, 1]]);
+
+    coordinator.undo().unwrap();
+    assert!(coordinator.world().documents[&id].entities.is_empty());
+    coordinator.redo().unwrap();
+    let doc = &coordinator.world().documents[&id];
+    assert_eq!(ids.map(|id| doc.entities[&id].creation_order.unwrap()), orders);
+}
+
+#[test]
 fn l3_001_two_entities_and_one_feature_receive_unique_stable_ids() {
     let (doc, _) = layer_document();
     let (mut c, d) = coordinator(doc);

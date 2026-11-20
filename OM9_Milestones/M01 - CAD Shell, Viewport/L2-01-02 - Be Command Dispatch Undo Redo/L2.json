@@ -95,6 +95,11 @@
     }
   ],
   "runtime_implementation": {
+    "ring_rail_shared_publication_2026_11_17": {
+      "status": "PARTIAL_HEADLESS_RING_RAIL_HISTORY",
+      "evidence": "docs/validation/2026-11-17-ring-rail-shared-input.md#host-owned-recipe-model-units-and-recorded-editing",
+      "scope": "Official Ring Rail add-ons use direct-builder source/recipe publication. Headless fixtures check two menu icon starts, mm/inch cold reopen, F6 edit dispatch, stable Reset identity, one Undo/Redo and unchanged Apply; locked output/recipe editing uses existing permissions. Replacement, downstream F6 recompute and desktop acceptance remain open."
+    },
     "isocurve_root_start_worker_2026_11_14": "MatrixApp resolves root-only B-rep and NativeBrep Isocurve bounds on an admitted worker. Headless planar single-face and multi-face refusal fixtures cover sampled geometry, Undo/Redo, changed draft/selection and simulated quota refusal. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#root-only-command-start-on-a-worker",
     "isocurve_ray_start_worker_2026_11_14": "MatrixApp resolves Isocurve viewport-ray source hit and UV bounds on a worker for B-rep and NativeBrep, including payload conversion, with context and CMD guards. Headless sphere and simulated stale/quota fixtures pass. Root-only route, desktop, native peak and C1-C5 remain open. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#viewport-ray-command-start-on-a-worker",
     "isocurve_native_brep_build_worker_2026_11_14": "MatrixApp NativeBrep Isocurve construction converts captured payload and builds curves on an admitted worker. Headless sphere UI, reopened box and affine cylinder fixtures cover selection, placement, Undo/Redo, simulated quota refusal and retry. Initial conversion/bounds, opaque payload, native peak and C1-C5 remain open. Evidence: docs/validation/2026-11-14-captured-isocurve-source.md#nativebrep-construction-on-the-worker",
@@ -330,6 +335,23 @@
       "evidence": "docs/validation/2026-11-11-extractsurface-reopened-face.md#reuse-of-validated-candidate",
       "scope": "Single-document batches of at least 20 inserts retain a successful tighter validation proof tied to the exact immutable candidate; otherwise normal validation is retried. Core 375 passed, atomic 29 passed, Extract worker 8 passed, Solid input 95 passed. Two sequential release 22-source fixture runs max poll 669/644 ms versus 807 ms baseline.",
       "remaining": "Uncontrolled fixture timings; desktop and native peak unverified, 20-insert threshold untuned and near-budget cases may validate twice. Plan A open; B1-B3 deferred."
+    },
+    "boolean_builder_worker_2026_11_17": {
+      "status": "PARTIAL",
+      "evidence": "docs/validation/2026-11-17-boolean-preview-cache.md#host-worker-for-final-mesh-calculation",
+      "scope": "MatrixApp mesh Boolean Builder final calculation checks worker context before one transaction; allowance/preview/scene limitations remain."
+    },
+    "boolean_builder_preview_worker_2026_11_17": {
+      "status": "PARTIAL",
+      "evidence": "docs/validation/2026-11-17-boolean-preview-cache.md#host-worker-for-mesh-preview",
+      "scope": "Mesh preview and in-flight Enter promotion use guarded Boolean worker; admission and full desktop validation remain open."
+    },
+    "ring_rail_dependent_worker_2026_11_17": {
+      "status": "PARTIAL_COMMAND_VALIDATED",
+      "evidence": "docs/validation/2026-11-17-ring-rail-shared-input.md",
+      "scope": "One guarded transaction publishes Ring Rail source/recipe/current pointer and supported dependent outputs/scene; source/context and cancellation guards preserve old document/Undo on refusal.",
+      "validation": "39 focused checks plus 1 native rail/profile/sweep F6-controller worker fixture passed. Native fixture: 389.04 s, one Undo/Redo.",
+      "limitations": "Full command custom/library/region and real desktop/native add-on acceptance remain open. Native call itself is not claimed interruptible; complete transient allocation admission is not proved."
     }
   },
   "sdk_integration_plan": {

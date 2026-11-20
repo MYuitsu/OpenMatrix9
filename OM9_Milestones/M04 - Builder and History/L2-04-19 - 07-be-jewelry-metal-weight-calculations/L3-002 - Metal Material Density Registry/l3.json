@@ -1,4 +1,9 @@
 {
+  "runtime_implementation": {
+    "status": "REGISTRY_COMPARISON_TESTED_BUILDER_OPEN",
+    "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#native-instance-and-registry-comparison-follow-up",
+    "scope": "The all command compares registered densities; validated user entries and document/material bindings persist through startup and filter separately from OM9 reference entries. Actual GV catalog, concurrent settings writers and real BRep archive reopen remain open."
+  },
   "level": "L3",
   "id": "OM9-L3-04-19-002",
   "milestone": "M04",

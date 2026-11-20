@@ -183,6 +183,11 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
+    "windows_21_control_tooltips_2026_11_18": {
+      "date": "2026-11-18",
+      "scope": "The standard Windows application displayed all 21 expanded SNAPS tooltips, restored active End and Mid after an O-Snap off/on cycle, and showed Grid Snap, Ortho, Planar and Project in the compact row. Compact enable and expanded disable used the same Project state. Human M02-UI review remains open.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#standard-windows-snaps-panel-and-cross-view-line-replay"]
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
@@ -217,6 +222,55 @@
         "implementation/evidence/M02/OM9-L3-03-04-001/OM9-L4-03-04-001-06-acceptance.md"
       ],
       "acceptance": "Clicking END in the palette changes the core enabled bit and icon state; turning snaps off makes the marker disappear."
+    },
+    "palette_state_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The expanded palette renders sixteen icons, the O-Snap master and four numeric Grid Snap step buttons. The fixture clicks all four step buttons, verifies that End and Mid dim with the master off, and verifies that End remains clickable and returns to full opacity with the master on. The compact constraint toggles also dim when disabled.",
+      "tests": ["chrome_actions::collapsed_snaps_use_the_expanded_icons_and_follow_cmd_state"],
+      "evidence": [
+        "docs/validation/2026-11-17-snaps-p07.md#compact-snaps-icon-and-dock-parity-2026-11-18",
+        "docs/validation/2026-11-17-snaps-p07.md#inactive-snaps-icon-rendering-on-2026-11-18"
+      ]
+    },
+    "o_snap_master_icon_2026_11_19": {
+      "status": "WINDOWS_INTEGRATION_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The expanded palette binds the authored SnapObjectMaster SVG to the O-Snap master. The active frame and dimmed texture follow the master, left-click preserves the per-kind mask, and right-click exposes the apparent Intersection option in both master states.",
+      "tests": ["chrome_actions::collapsed_snaps_use_the_expanded_icons_and_follow_cmd_state", "chrome_actions::apparent_intersection_option_uses_the_osnap_context_menu"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#o-snap-master-icon"]
+    },
+    "wide_o_snap_master_switch_2026_11_19": {
+      "status": "WINDOWS_INTEGRATION_AND_DESKTOP_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The wider master switch shows I in its blue enabled state and O in its dark disabled state. Both ends toggle it, and right-click opens the same apparent Intersection option.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#wide-o-snap-switch-with-i-and-o-states"]
+    },
+    "single_o_snap_mark_2026_11_19": {
+      "status": "WINDOWS_INTEGRATION_AND_DESKTOP_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A single centered I or O represents the active or inactive state of the wide O-Snap switch.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#single-centered-o-snap-mark"]
+    },
+    "windows_palette_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "SCOPED_WINDOWS_DESKTOP_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The standard Windows window displays all 21 expanded controls. O-Snap off dims End/Mid and turning the master on restores both selections. The compact row displays Grid Snap, Ortho, Planar and Project.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#current-build-windows-panel-and-end-shortcut-on-2026-11-18"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G01",
+        "G02",
+        "G03",
+        "G04",
+        "G12"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

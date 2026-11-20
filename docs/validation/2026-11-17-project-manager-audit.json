@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-17T04:05:36+00:00",
+  "client_date": "2026-11-17",
+  "status": "AUDIT_AND_PLAN_ONLY_GAPS_OPEN",
+  "scope": "PROJECTS panel from user image: Project Manager, ordinary and named Job Bags, Mngr; not the Tools 31-command menu",
+  "target": "Standalone Rust OM9; Windows; current dirty checkout preserved",
+  "source_commit": "fea59b67f4284d0a3d4545e7b90e7e5ecd7f64fd",
+  "plan": "docs/plans/2026-11-17-project-manager-gap-plan.md",
+  "local_private_native_analysis": "docs/analysis/matrix90/2026-11-17-project-manager.md",
+  "source_image": {
+    "description": "User supplied PROJECTS crop, 298x233; not copied to public assets",
+    "sha256": "86b504539902033af2e7972393cee736fec3e0e110a4b01c0286735bff0712d9"
+  },
+  "manual_resolution": {
+    "requested": "Book 2",
+    "normalized_owner_source": "Matrix8 Book1 PDF 58-62 and 63-66; printed 48-56",
+    "book2_dedicated_project_section_in_local_extract_index": "NOT_FOUND",
+    "policy": "Use existing normalized sections; do not relabel them Book2 or reread whole PDFs"
+  },
+  "owners": [
+    "OM9-L2-03-15",
+    "OM9-L2-01-03",
+    "OM9-L2-01-12",
+    "OM9-L2-01-02",
+    "OM9-L2-01-01",
+    "OM9-L2-03-07"
+  ],
+  "feature_ids": [
+    "OM9-L3-03-15-001",
+    "OM9-L3-03-15-002",
+    "OM9-L3-03-15-003",
+    "OM9-L3-03-15-004",
+    "OM9-L3-03-15-005",
+    "OM9-L3-03-15-006",
+    "OM9-L3-03-15-007",
+    "OM9-L3-03-15-008",
+    "OM9-L3-03-15-009"
+  ],
+  "counts": {
+    "gaps": 20,
+    "implementation_packages": 8,
+    "existing_integration_tests_passed": 8,
+    "diagnostic_cases_reproducing_gaps": 6,
+    "features_promoted_to_complete": 0
+  },
+  "tests": {
+    "integration_cargo": {
+      "command": "cargo test -p om9-app --test project_manager_ui --test project_manager_persistence -j 2",
+      "result": "BUILD_DID_NOT_COMPLETE",
+      "reason": "Could not replace debug/om9.exe: access denied; no user app was closed",
+      "log": "docs/validation/project-manager-audit-2026-11-17/project-manager-integration.log"
+    },
+    "integration_direct": {
+      "result": "3 UI + 5 persistence passed, 0 failed",
+      "scope": "Fresh test executables produced during the Cargo attempt; direct execution with target/debug DLL path; egui headless and authored point fixtures, not desktop",
+      "binaries": [
+        {
+          "binary": "L:\\om9-target\\debug\\deps\\project_manager_ui-70489292427dd478.exe",
+          "sha256": "24e54cd99d3b2869596ad52bdfac17ba1ebca6a15e77f2112223e501cea8d985",
+          "binary_mtime": "2026-11-17T10:54:52.441956",
+          "exit_code": 0,
+          "log": "docs/validation/project-manager-audit-2026-11-17/project_manager_ui-direct.log"
+        },
+        {
+          "binary": "L:\\om9-target\\debug\\deps\\project_manager_persistence-1582fe4446d1a97d.exe",
+          "sha256": "88599e084966a66f0dc91ebf13d0dff79c0251447824efb3ef42b05f55ffc9db",
+          "binary_mtime": "2026-11-17T10:55:03.796246",
+          "exit_code": 0,
+          "log": "docs/validation/project-manager-audit-2026-11-17/project_manager_persistence-direct.log"
+        }
+      ]
+    },
+    "lib_model_cargo": {
+      "command": "cargo test -p om9-app --lib project_manager::tests -j 2",
+      "result": "NOT_RUN_COMPILE_FAILURE",
+      "reason": "318 errors across lib-test fixtures/API migration, including CanonicalBrep/Brep mismatches; not fixed in plan task",
+      "log": "docs/validation/project-manager-audit-2026-11-17/project-manager-model.log"
+    },
+    "isolated_model_probe": {
+      "command": "cargo run --manifest-path build/project-manager-audit-2026-11-17/model-probe/Cargo.toml -j 2 --offline",
+      "target_dir": "L:/om9-target",
+      "result": "DIAGNOSTIC_EXECUTED_SIX_GAPS_OBSERVED",
+      "observations": {
+        "clear_notes_allowed": false,
+        "invalid_duplicate_project_ids_accepted": true,
+        "master_resource_json_roundtrip": {
+          "after_error": "missing embedded resource payload",
+          "after_payload_available": false,
+          "before_payload_bytes": 16
+        },
+        "placement": {
+          "preserved": false,
+          "restored_world": [
+            4.0,
+            3.0,
+            4.0
+          ],
+          "source_world": [
+            12.0,
+            23.0,
+            34.0
+          ]
+        },
+        "rename_only_persisted_by_staging_predicate": false,
+        "scope": "production ProjectManager model compiled by path; no UI or host replacement",
+        "snapshot_after_source_delete": {
+          "saved_entity_count": 1,
+          "ui_available": false
+        }
+      },
+      "result_file": "docs/validation/project-manager-audit-2026-11-17/model-probe-results.json"
+    }
+  },
+  "source_fingerprints": [
+    {
+      "path": "crates/om9-app/src/project_manager.rs",
+      "bytes": 22533,
+      "sha256": "8a0b4cb531572997d0d1f269243e92d2fe2aa2d749c72be2a2aec62cc61b2566"
+    },
+    {
+      "path": "crates/om9-app/src/session/jobbag.rs",
+      "bytes": 2335,
+      "sha256": "62f3cba8c687146afd7475ad492c1e5fa91a564d3bdeb3f90c659cfa74b2198a"
+    },
+    {
+      "path": "crates/om9-app/src/session/project_state.rs",
+      "bytes": 4956,
+      "sha256": "639cf4be315b639d31399d3eaff74d64fa2330ea23a7e04ad6f6336d2619804d"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "bytes": 580224,
+      "sha256": "8839f48060780dd335a0489713123e264872e4928daa8ac86dcb2c741204c17c"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "bytes": 277592,
+      "sha256": "dc82703c4f4943ffc68d0bbdfdbfe534dbf501e4d2d7f0f8bf9d3f7869e2125b"
+    },
+    {
+      "path": "crates/om9-core/src/resource.rs",
+      "bytes": 4900,
+      "sha256": "c094512acf7e18d1c56e3bc5c02c4675cbe12307b3028624817d07b84958d98a"
+    },
+    {
+      "path": "crates/om9-archive/src/container.rs",
+      "bytes": 21421,
+      "sha256": "f72aca055c9ce1545fb65704a4f9b459d45a551192f16c30e5e8d765b9c89929"
+    },
+    {
+      "path": "crates/om9-app/tests/project_manager_ui.rs",
+      "bytes": 3428,
+      "sha256": "8d62e72728971ee567aff70bdc0c60e0c536eb46f402920f9af2f7b35f8cf5d5"
+    },
+    {
+      "path": "crates/om9-app/tests/project_manager_persistence.rs",
+      "bytes": 6428,
+      "sha256": "dcae572b221b9638436795a8c8682e29b1adcc9584a1486480698acb3f690532"
+    },
+    {
+      "path": "docs/validation/project-manager-audit-2026-11-17/model-probe/src/main.rs",
+      "bytes": 3545,
+      "sha256": "9488687dd57138baeb61237fe186b3ff5d8ae4dae730d9187b863497c277655e"
+    },
+    {
+      "path": "docs/validation/project-manager-audit-2026-11-17/model-probe/Cargo.toml",
+      "bytes": 327,
+      "sha256": "66df906345c7af24cfb3e633d1a6dabbf2c12cb60080c72880f95ceecbc81dc0"
+    }
+  ],
+  "manual_extract_fingerprints": [
+    {
+      "path": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/reference/text/m8book1__p58-62__using-project-manager.md",
+      "bytes": 14340,
+      "sha256": "c33e995ec3ac06c63d65beeb285917d6881049f095f29e45931f363ad53dad78"
+    },
+    {
+      "path": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/reference/text/m8book1__p63-63__project-manager-database.md",
+      "bytes": 2337,
+      "sha256": "2f8a1402f1bf1d56d30fc7bb9ffdfe821618bb309053c09dd450941c3dc57204"
+    },
+    {
+      "path": "OM9_Milestones/M01 - CAD Shell, Viewport/L2-03-15 - Febe Matrix File Project And Jobbags/reference/text/m8book1__p64-66__project-manager-database.md",
+      "bytes": 6822,
+      "sha256": "e7b246ca8d943ff9cd825f46f800d96e28d5f5a364515d825a0ed13fe9b56f36"
+    }
+  ],
+  "decompile_scope": "Bounded VB6/Ghidra panel procedures and selected managed entries; exact/partial/timeout confidence recorded in private local analysis; no full export claim",
+  "limits": [
+    "No product source or skill modified by this audit.",
+    "Existing user changes preserved; no commit or publish.",
+    "Eight passing integration tests do not cover complex geometry, dependency remap or CAD manufacturing accuracy.",
+    "No desktop/GPU screenshot comparison, large memory acceptance or full BRep/resource snapshot acceptance.",
+    "BRep archive v5 guard is an owner blocker, not bypassed.",
+    "Manual M01-UI gate remains pending."
+  ],
+  "gaps": [
+    {
+      "id": "G01",
+      "title": "G01 Snapshot phụ thuộc live source",
+      "owner": "`03-15-005/006`",
+      "current_evidence": "`Snapshot::available` đòi captured IDs còn trong document hiện tại. Probe: sau xóa source, snapshot vẫn chứa 1 entity nhưng UI availability=false.",
+      "next_work": "Snapshot có nội dung tự khôi phục; source stamp dùng provenance, không dùng sự tồn tại live để khóa bag đã lưu. Thử source bị xóa, New/Open và insert vào document khác.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G02",
+      "title": "G02 Restore làm mất placement",
+      "owner": "`03-15-006`, `01-03`",
+      "current_evidence": "`restore_entities` thay placement bằng translation cố định. Probe: point world `[12,23,34]` restore thành `[4,3,4]`.",
+      "next_work": "Giữ transform gốc; nếu có tùy chọn đặt lại vị trí thì compose transform rõ ràng, không tự dời mặc định. Remap IDs đồng bộ.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G03",
+      "title": "G03 Thiếu dependency closure",
+      "owner": "`03-15-005/006`, `01-03`",
+      "current_evidence": "Snapshot ô thường chỉ có `Vec<Entity>`; restore chỉ Insert entity. Chưa capture layer definitions/blocks/resources/history graph cần thiết.",
+      "next_work": "Đóng gói phần nguồn được chọn cùng dependency bắt buộc; remap layer/definition/resource/feature IDs và membership. Không chứng nhận từ fixture Point.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G04",
+      "title": "G04 Master mất resource payload qua JSON",
+      "owner": "`03-15-007`, `01-12`",
+      "current_evidence": "`Resource.payload` là `serde(skip)`, Master nằm trong JSON của manager. Probe: resource 16 byte có trước encode; sau manager decode báo thiếu embedded resource payload.",
+      "next_work": "Snapshot codec/container có manifest và chunks được hydrate đúng hash/length. Dùng codec owner, tránh serialize Document như JSON độc lập rồi coi đã đủ.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G05",
+      "title": "G05 Rename đơn lẻ có thể không được stage",
+      "owner": "`03-15-003/008`",
+      "current_evidence": "`has_persistent_state` không xét đổi tên row mặc định. Probe rename-only trả false; `stage_project_state` dùng predicate này.",
+      "next_work": "Theo dõi metadata dirty/version; save/reopen khi chỉ rename phải giữ tên. Không làm bản vẽ mới dirty chỉ do default UI.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G06",
+      "title": "G06 Decode chưa kiểm đủ và notes không xóa trắng được",
+      "owner": "`03-15-003/008`, `01-12`",
+      "current_evidence": "Probe `from_json` nhận duplicate ProjectId; `set_notes(\"\")` bị từ chối. Code decode chủ yếu kiểm row/active/slot count.",
+      "next_work": "Validate ID uniqueness/counters/ranges/text/dependencies sau decode; field được phép trống phải xóa được. Phân biệt giới hạn tài nguyên với schema hỏng.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G07",
+      "title": "G07 Ba ô cố định",
+      "owner": "`03-15-004`",
+      "current_evidence": "`SLOT_COUNT=3`, UI `(0..3)`, decode buộc đúng 3. Test hiện cũng yêu cầu 3.",
+      "next_work": "List ô động, index/ID ổn định, initial capacity theo contract đã chốt; mở rộng/compact và migration state cũ, budget có thông báo.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G08",
+      "title": "G08 Thumbnail chỉ là icon và chữ",
+      "owner": "`03-15-004`, `01-06`",
+      "current_evidence": "`Thumbnail` lưu label/count/kind/revision; UI vẽ icon Project, không có ảnh capture.",
+      "next_work": "Render/capture thumbnail thật có camera/source binding, lưu asset riêng; placeholder cho pending/error, cache có giới hạn. Không dùng bitmap thương mại.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G09",
+      "title": "G09 Thiếu hành vi card In/Load/Save/X",
+      "owner": "`03-15-004/005/006`",
+      "current_evidence": "UI có text Capture/Restore. Response thumbnail không xử lý click load; chưa có Save/X/context menu theo loại.",
+      "next_work": "Authored icon bindings và tooltip, click thumbnail/load cùng dispatcher; per-bag export/clear, filtered capture/insert và cancel/error.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G10",
+      "title": "G10 Chỉ một Master",
+      "owner": "`03-15-007`",
+      "current_evidence": "Model có `master: Option<MasterSnapshot>`, chưa có Creation/Parts/Render/Output hoặc các phiên bản cùng loại.",
+      "next_work": "Typed named bag kind với list version, toàn document độc lập; `+` thêm cùng loại. Kiểm hidden/locked/layers/materials/history/display khi nguồn hỗ trợ.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G11",
+      "title": "G11 Master thay bản vẽ ngay, atomicity toàn luồng cần kiểm",
+      "owner": "`03-15-007`, `03-15-001`",
+      "current_evidence": "Click Restore Master gọi replacement rồi `stage_project_state`; chưa thấy dirty/save/cancel dialog ở đường này. Point test chỉ kiểm số entity.",
+      "next_work": "Dùng cùng lifecycle guard của Open. Chuẩn bị cả state/scene/resource trước publish; kiểm lỗi staging sau replacement, giữ document/file path/Undo/Redo đúng contract.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G12",
+      "title": "G12 Thiếu row Save/Load/Delete/Compact",
+      "owner": "`03-15-003`, `03-15-001`",
+      "current_evidence": "Có create/rename/select bằng model. Chưa có archive theo row, delete/compact/update row và xử lý file kèm.",
+      "next_work": "Service row catalog, atomic archive/import/export; phân biệt xóa khỏi danh sách với xóa dữ liệu trên đĩa. Không dùng label làm stable identity.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G13",
+      "title": "G13 Chưa có workspace catalog độc lập document",
+      "owner": "`03-15-003/008`, `01-12`",
+      "current_evidence": "Manager gắn vào UI của document và embedded resource; New/Open reload tạo/đọc manager của document đó.",
+      "next_work": "Catalog project của người dùng tồn tại xuyên New/Open/restart; xác định phần app workspace, phần document và snapshot. Không để mở một file thay cả catalog mà không có policy.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G14",
+      "title": "G14 Layout chưa giống panel ảnh",
+      "owner": "`03-15-004/009`, `03-07`",
+      "current_evidence": "Row dùng horizontal wrapped labels; các ô dựng dọc cùng field Name/Customer/Notes, không có hai hàng filmstrip.",
+      "next_work": "List trái, numbered strip trên, named strip dưới, Create/Load/Mngr và scroll/expand; giữ thứ tự dock. Kiểm kích thước hẹp/DPI/floating và focus CMD.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G15",
+      "title": "G15 Timer chưa có",
+      "owner": "`03-15-003/008`, cần task con",
+      "current_evidence": "Chưa có elapsed/start/stop/reset trong ProjectRow. Listing và Book 1 có timer riêng.",
+      "next_work": "Timer theo row, chỉ chạy khi bật, persist elapsed/state theo contract; không dựa vào vòng render để cộng thời gian.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G16",
+      "title": "G16 Chưa có Mngr và search/visibility",
+      "owner": "`03-15-008` owner ứng viên, mở rộng task explicit",
+      "current_evidence": "Không có cửa sổ/database catalog, search/filter, visible/hidden row hoặc Refresh/Import Folder/Change root.",
+      "next_work": "Rust catalog/index + egui Mngr, typed filters và import/export; dùng ID/relative paths, xử lý file thiếu/duplicate và hủy. Không mang SQL/COM runtime gốc vào OM9.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G17",
+      "title": "G17 Metadata chỉ notes/customer text",
+      "owner": "`03-15-008`",
+      "current_evidence": "Thiếu customer records/designer/status/tags/dates/job number/labor/ring/weights và Files/Info.",
+      "next_work": "DTO/search contract có units/nullability; CRUD các danh mục bằng service chung, tạo metadata nhập tay trước; tích hợp gem/metal report chỉ khi source và unit đã xác minh.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G18",
+      "title": "G18 Thiếu command entry thống nhất",
+      "owner": "`03-15-003/009`, `01-02`",
+      "current_evidence": "Decompile có `gvProjectManager`/`gvOpenProjectManager`; trong parser/registry đã tra chưa tìm thấy các alias này. Hành vi hiện gọi trực tiếp từ UI.",
+      "next_work": "Panel/Mngr/menu/CMD đi qua typed action owner, phân biệt mở panel với mở Mngr; shortcut, icon và focus dùng cùng route; không tự tạo F6 geometry command không có căn cứ.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G19",
+      "title": "G19 Giới hạn nguồn và dữ liệu nặng",
+      "owner": "`03-15-005/007`, `01-12`, `01-03`",
+      "current_evidence": "Capture clone đồng bộ, MAX_CAPTURE=64, JSON 16 MiB, Master clone toàn Document; chưa có receipt budget cho toàn phần snapshot/thumbnail/serialization. `.om9` v5 đang từ chối BRep ở container encode.",
+      "next_work": "Admission và worker/lazy asset theo nhu cầu, reuse immutable source; xử lý quota/cancel/stale và BRep codec blocker. Không bỏ guard hoặc dùng display mesh thay nguồn để save thành công.",
+      "status": "OPEN"
+    },
+    {
+      "id": "G20",
+      "title": "G20 Tiến độ cũ mô tả mâu thuẫn",
+      "owner": "`03-15` và L3 liên quan",
+      "current_evidence": "Một số `remaining` nói chỉ in-session, trong khi source/test đã có point `.om9` embedding; Master scope cũ nói chỉ inspection nhưng đã có live restore.",
+      "next_work": "Ghi audit mới phân biệt point/notes pass với resource/BRep/full document còn hở; giữ receipt lịch sử và manual gate pending. Không nâng toàn module thành hoàn tất.",
+      "status": "OPEN"
+    }
+  ],
+  "next_package": "Implement P00-P06 in the planned order; defer grouped tests until P07",
+  "validation": {
+    "public_source_audit": {
+      "source_files": 16163,
+      "icon_bindings": 594,
+      "svg_files": 593,
+      "errors": []
+    },
+    "audit_log_sha256": "b589aed706a1defd7d9b5f8ad17fd39e8e530454d71a889539ec9003ec4af938",
+    "git_diff_check": "PASS",
+    "report_links": "PASS",
+    "archived_probe_module_paths": "PASS",
+    "production_source_fingerprints": "UNCHANGED_SINCE_RECEIPT",
+    "prune": "PASS; 0 runs removed; 10 newest plus referenced runs retained"
+  },
+  "execution_policy": {
+    "date": "2026-11-17",
+    "authority": "User: giảm các phần test lại làm xong rồi mới test",
+    "implementation_order": "P00 -> P01/P02 -> P03/P04 -> P05 -> P06 -> P07",
+    "test_timing": "One grouped validation after implementation and integration P00-P06 are complete; no per-helper/per-package test, probe or benchmark batches",
+    "coverage": "Reuse existing tests; focused regressions for six reproduced gaps and representative end-to-end source/persistence/UI flows",
+    "rerun": "Only affected checks after fixes; whole-suite rerun only when shared changes invalidate prior evidence"
+  }
+}

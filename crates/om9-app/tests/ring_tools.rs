@@ -330,24 +330,28 @@ fn a_ring_size_edit_rebuilds_the_profile_and_one_dirty_sweep() {
         .expect("sweep");
     let before = controller.document().entities[&sweep_id]
         .geometry_revision;
-    let ring_recipe = controller
-        .document()
-        .history
-        .recipes
-        .iter()
-        .find_map(|(id, recipe)| (recipe.command == "RingRail").then_some(*id))
-        .expect("ring recipe");
-    controller
-        .set_history_parameter(
-            ring_recipe,
-            "diameter_mm",
-            om9_core::request::Value::length(om9_core::units::LengthMm::try_new(19.0).unwrap()),
-        )
-        .unwrap();
-    controller.recompute_history(ring_recipe).unwrap();
+    let document_before = controller.document().clone();
+    let undo_before = controller.coordinator().undo_len();
+    controller.select_objects(&[rail_id]).unwrap();
+    controller.dispatch("EditHistory", InvocationOrigin::Menu).unwrap();
+    controller.submit("Diameter=19mm").unwrap();
+    controller.builder_apply().unwrap();
+    assert!(controller.join_history_worker_pending());
+    assert_eq!(controller.document(), &document_before, "worker has not published its private source edit");
+    let deadline = std::time::Instant::now() + std::time::Duration::from_secs(900);
+    loop {
+        if let Some(result) = controller.poll_join_history_worker() { result.unwrap(); break; }
+        assert!(std::time::Instant::now() < deadline, "native Ring Rail worker timed out");
+        std::thread::sleep(std::time::Duration::from_millis(5));
+    }
     let after = controller.document().entities[&sweep_id]
         .geometry_revision;
-    assert!(after > before, "the dependent sweep must be rebuilt once");
+    assert_eq!(after, before + 1, "the dependent sweep must be rebuilt once");
+    assert_eq!(controller.coordinator().undo_len(), undo_before + 1);
+    assert_ne!(controller.document().entities[&sweep_id].geometry, document_before.entities[&sweep_id].geometry);
+    let document_after = controller.document().clone();
+    controller.undo().unwrap(); assert_eq!(controller.document(), &document_before);
+    controller.redo().unwrap(); assert_eq!(controller.document(), &document_after);
     let sweep = &controller.document().entities[&sweep_id];
     assert_eq!(sweep.label, "Rail Sweep");
     // This build uses the OCCT registry, so the sweep lands as a B-Rep; the reference

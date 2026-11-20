@@ -869,25 +869,13 @@ fn trim(e: &Event) -> Reply {
 // ---- ring rail -----------------------------------------------------------------------------
 
 fn ring_rail(e: &Event) -> Reply {
-    let system = e.text("t11_size_system", "us").to_owned();
-    let size = e.number("t11_ring_size", 7.0);
-    let r = om9_tools::inner_diameter(&system, size) / 2.0;
-    let flow = Flow::new("Ring Rail").no_selection();
-    flow.step(
-        e,
-        &|_, _| Show {
-            geo: vec![om9_tools::rail_circle(r)],
-            ..Default::default()
-        },
-        &|_| {
-            Ok(Reply::finish(vec![om9_tools::rail_circle(r)]).say(format!(
-                "Ring Rail: size {} ({}), {} mm inside",
-                om9_addon_abi::session::fmt(size),
-                system,
-                om9_addon_abi::session::fmt(2.0 * r)
-            )))
-        },
-    )
+    // Old standalone Top11 packages retain their setting keys. The Matrix host
+    // sends both menu icons directly to BuilderRingRail and its shared panel.
+    let mut event = e.clone();
+    for (old, new) in [("t11_size_system", "rr_size_system"), ("t11_ring_size", "rr_ring_size")] {
+        if let Some(value) = e.settings.get(old) { event.settings.insert(new.into(), value.clone()); }
+    }
+    om9_tools::ring_rail(&event)
 }
 
 /// For tests.

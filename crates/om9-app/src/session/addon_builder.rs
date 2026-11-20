@@ -53,6 +53,16 @@ pub struct AddonBuilder {
 }
 
 impl AddonBuilder {
+    /// Ring Rail adapters keep the physical size while switching input systems.
+    fn adjust_ring_size(&mut self, key: &str, value: &SettingValue) -> Result<()> {
+        if self.code != "BuilderRingRail" || key != "rr_size_system" || self.values.get(key) == Some(value) { return Ok(()); }
+        let (Some(SettingValue::Str(previous)), Some(SettingValue::Float(size)), SettingValue::Str(next)) =
+            (self.values.get(key), self.values.get("rr_ring_size"), value) else { return Err(Error::Invalid("ring size settings")); };
+        let diameter = om9_core::ring_size::rail_diameter_mm(previous, *size)?;
+        let size = om9_core::ring_size::rail_size_for_diameter(next, diameter)?;
+        self.values.insert("rr_ring_size".into(), SettingValue::Float(size));
+        Ok(())
+    }
     /// The current value of a setting.
     pub fn value(&self, key: &str) -> Option<&SettingValue> {
         self.values.get(key)
@@ -249,6 +259,7 @@ impl Controller {
         let value = spec
             .parse_user(&raw)
             .map_err(|e| Error::Io(format!("{}: {e}", spec.label)))?;
+        b.adjust_ring_size(key, &value)?;
         b.values.insert(key.to_owned(), value);
         b.revision += 1;
         Ok(())
@@ -269,6 +280,7 @@ impl Controller {
             .validate(&value)
             .map_err(|e| Error::Io(format!("{}: {e}", spec.label)))?;
         if b.values.get(key) != Some(&value) {
+            b.adjust_ring_size(key, &value)?;
             b.values.insert(key.to_owned(), value);
             b.revision += 1;
         }
@@ -418,6 +430,7 @@ impl Controller {
 
     /// Esc / Cancel: close the builder; nothing is created or stored.
     pub fn cancel_addon_builder(&mut self) -> bool {
+        if self.addon_builder.as_ref().is_some_and(|builder| matches!(builder.code.as_str(), "BuilderRingRail" | "TopIconRingRail")) { self.ring_rail_replace = None; }
         match self.addon_builder.take() {
             Some(b) => {
                 self.events.emit(

@@ -184,6 +184,161 @@
     "OM9-L4-01-12-007-05"
   ],
   "runtime_implementation": {
+    "trimmed_boolean_v6_save_open_2026_11_18": {
+      "status": "PACKAGED_WORKER_AND_EGUI_VALIDATED",
+      "scope": "The existing Save As and Open lifecycle now round-trips a single-body trimmed Boolean Difference result after its worker retains the already-captured topology attestation. The v6 archive restores the source identity and supports Surface Snap to the same face.",
+      "remaining": "The v5 batch encoder still refuses BRep. Other BRep producers and desktop workflow require their own coverage.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#trimmed-brep-surface-snap-after-application-save-as-and-open"
+    },
+    "native_history_worker_routing_2026_11_18": {
+      "status": "IMPLEMENTED_NOT_RUNTIME_VALIDATED",
+      "scope": "Native history display rebuild passes the shared history cancellation flag to the packaged native display worker when its fingerprint is embedded; both cargo check configurations passed.",
+      "remaining": "Undo/Redo cache-miss and cancellation during a native call need runtime coverage. Builds without the fingerprint keep the in-process path, and opaque NativeBrep archive persistence remains unsupported.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "native_payload_async_open_2026_11_18": {
+      "status": "PARTIAL_HEADLESS_VALIDATED",
+      "scope": "With a packaged native worker fingerprint, asynchronous legacy v4 Open rebuilds a missing native display in the contained worker, retaining source identity and transferring the accounted display before scene publication. One generated Box fixture passed Controller Open.",
+      "remaining": "Opaque NativeBrep archive save and Job Bag persistence remain unsupported; history remeshing and builds without the fingerprint retain the existing in-process path. Other payloads, cancellation during native work, paired production build and desktop remain unverified.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "native_payload_display_worker_2026_11_18": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "A pinned, process-limited native 3DM payload display worker and Rust host passed focused payload identity, stale context, cancellation, rejection and scene adoption tests.",
+      "remaining": "Legacy Open and Job Bag are not connected to this worker; opaque NativeBrep archive roundtrip, paired production build and desktop behavior remain open. Native allocator safety is not certified by process containment.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "creation_order_v5_reload_2026_11_19": {
+      "status": "AUTOMATED_CROSS_BUILD_ROUND_TRIP_VERIFIED",
+      "scope": "The v5 archive writes creation order through the existing entity extension envelope. The earlier Windows build opened and saved the updated archive. The newer build reopened it with all seven source identities, geometry, and creation stamps preserved.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#v5-compatibility-for-apparent-int-creation-order"
+    },
+    "brep_reopen_resave_2026_11_18": {
+      "status": "PARTIAL_HEADLESS_VALIDATED",
+      "scope": "Normal v6 Open retains the accounted verified input. Subsequent Save selects current source packets, combines newly attested sources, and omits deleted sources. A headless Box fixture passed save/open, edits and multiple resaves including an added and removed BRep.",
+      "remaining": "The entire original archive stays cached until replacement, and newly saved sources require current proofs until reopening. NativeBrep, Job Bag, native capture containment, actual paired build and desktop remain open; v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_controller_async_save_2026_11_18": {
+      "status": "PARTIAL_HEADLESS_VALIDATED",
+      "scope": "Normal Controller Save stages v6 on a worker when all sources have current topology proofs and a worker fingerprint is embedded. A command-created Box passed Save As, overwrite, Open, cancel and stale Undo headlessly; 20 existing file lifecycle checks passed.",
+      "remaining": "Proofs for reopened documents are not retained, so another BRep Save may refuse. Missing proofs, NativeBrep, Job Bag integration, native containment, production paired build and desktop acceptance remain open; v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_staged_publication_context_2026_11_18": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "Verified v6 staging returns a locked file whose publication checks the coordinator context and cancellation. A background peer completed after an intervening edit; stale publication was refused and the destination remained unchanged.",
+      "remaining": "The caller must supply the original coordinator and separately validate file/project operation state. Controller proof discovery, normal Save/Job Bag, reopened proofs, native containment and desktop remain open. Deferred v6 staging currently requires Windows; v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_attested_capture_save_2026_11_18": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "Experimental capture-and-save converts current account-owned attested topology sources into packets and verifies coverage. A box reused by a root, translated block definition and result round-tripped with one packet; cancellation and stale proof preserved the destination.",
+      "remaining": "Callers must supply proofs and run capture off the UI thread. Proof discovery for every source and reopened documents, native containment, normal Save/Job Bag and desktop remain open; OCCT calls are not bounded or interruptible by Rust admission; v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_verified_v6_staging_2026_11_18": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "An experimental writer accepts admitted v6 source/ShapeSet packets, verifies native restoration before staging and from staging readback, then atomically replaces the target. The two-box fixture exercised success, cancellation, absent packet and mismatched native source.",
+      "remaining": "The writer does not capture packets or connect normal Save or Job Bag. Native topology proof, DLL authentication, production packaging, full codec acceptance and desktop remain open; v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "archive_truncation_refusal_2026_11_18": {
+      "status": "PARTIAL_HEADLESS_VALIDATED",
+      "scope": "Archive reads reject truncation after the initial size measurement; the integration fixture confirms the admission guard is released. Growth refusal also passed.",
+      "remaining": "Same-length concurrent changes are not detected. The full archive suite still has a project_codec_acceptance compile failure against CanonicalBrep; BRep round-trip and desktop acceptance remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_normal_open_2026_11_18": {
+      "status": "PARTIAL_HEADLESS_VALIDATED",
+      "scope": "Experimental v6 BRep enters the normal Open worker in builds with a pinned sibling worker; a two-box archive with a translated block and resource opened, while corrupt input preserved the prior scene and document.",
+      "remaining": "Production paired build and desktop validation were not run. Save, Job Bag, source capture, native DLL authentication, exact topology proof and decoder bounds remain open; v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_worker_image_fingerprint_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "The app has an explicit packaged-worker admission path using a build-embedded SHA-256 and a sibling executable; a Windows build helper builds the worker first and embeds its digest while reusing an existing external target. A fixture accepted the matching worker and refused missing, malformed and mismatched fingerprints.",
+      "remaining": "The paired app/worker build was not run because OM9 is open. Native dependency DLLs are not authenticated, the worker is not a sandbox, and ordinary Open/Save and Job Bag are not connected. Source capture, topology proof and desktop acceptance remain open; v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_bound_controller_replacement_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "A private bound v6 candidate can pass document restoration, shared-account representation setup, scene construction and atomic Controller replacement. A two-box fixture retained a block instance placement, result and resource after the old Controller was dropped; cancellation and stale context preserved the old state.",
+      "remaining": "Only the integration fixture calls this path; normal Open/Save and Job Bag do not. File lifecycle, capture for all BRep owners, trusted worker packaging, exact native topology attestation, broader budgets and desktop acceptance remain open; v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_replacement_representation_sharing_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "A private replacement coordinator sharing the existing memory account can reuse its validated account-owned BRep representation store. A two-source fixture built a replacement scene with a block instance after releasing the detached staging owner; a foreign account and cancellation were refused.",
+      "remaining": "No controller replacement is published and the old coordinator remained alive in the fixture. The caller must recheck operation context at publication. Trusted worker packaging, topology proof, source capture, ordinary Open/Save, Job Bag and desktop acceptance remain open; the v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_document_detached_scene_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "A bound v6 candidate can build an admitted detached scene using the restoring coordinator's representations. A fixture checked pick geometry for two BRep roots and a block instance while the existing document and epoch stayed unchanged.",
+      "remaining": "The scene and document are not published or transferred into a replacement coordinator. Trusted worker packaging, native topology proof, source capture for all owners, ordinary Open/Save, Job Bag and desktop acceptance remain open; the v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_document_source_binding_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "A detached v6 document can bind registered restored BRep sources into all root, definition-member and published-result occurrences while retaining source and document reservations. An authored fixture checked shared versus distinct source identities, representation availability and an embedded resource payload.",
+      "remaining": "The bound document is not yet transferred into a replacement controller or published scene. Trusted worker packaging, durable native topology attestation, capture coverage, ordinary Open/Save, Job Bag and desktop acceptance remain open; the v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_document_worker_restore_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "The private host decodes an experimental v6 candidate, admits each packet, checks complete portable association and restores all unique sources through the contained worker while retaining document, vector and candidate reservations. Two distinct box sources passed; a changed packet chunk ID was refused and tested reservations returned to baseline.",
+      "remaining": "This returns detached candidates, not a published document. Normal Open/Save, Job Bag integration, trusted worker packaging, source capture for all owners, native topology proof, geometry-occurrence mapping, typed decoder bounds and desktop acceptance remain open. The v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_document_candidate_v6_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "An explicit experimental v6 document candidate stores canonical metadata and checked source/ShapeSet chunks, checks packet coverage across roots, definitions and results on encode, and offers structural decode plus separately reserved packet association validation. A box file was written, reopened and restored by the contained worker; two distinct box sources passed an in-memory structural round trip.",
+      "remaining": "This is not wired to ordinary Open, Save or Job Bags. NativeBrep is refused; source packet capture across all owners, trusted worker packaging, retained topology attestation, full typed allocation bounds, document/scene publication and desktop acceptance remain open. The v5 guard remains and normal decode rejects v6.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_batch_candidate_scene_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "The Job Bag controller can prepare a scene before committing already restored root BReps. Two box candidates appeared as scene roots with pick geometry after commit and Redo; Undo removed both. Invalid input retained the scene publication and Undo count.",
+      "remaining": "Only a test fixture invokes this path; it does not read or write Job Bags. Exact subshape attestation, trusted worker packaging, definitions, results, multi-source archive integration and the v5 BRep guard remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_batch_transaction_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "Private restore candidates can be registered and prepared together under source and temporary vector reservations. Two differently sized OCCT boxes retained their distinct sources through one commit, Undo and Redo; invalid second input refused the batch and released tested reservations.",
+      "remaining": "The batch accepts prepared root entities with placeholders and is not wired to document Open, definitions, result geometry, scene publication or Job Bag. Worker trust, retained topology attestation and the v5 BRep guard remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_packet_envelope_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "A bounded versioned source-record/ShapeSet envelope checks lengths and checksums, holds the record reservation and passes the packet to the isolated worker. An OCCT box completed envelope encode/decode, restore, commit, Undo and Redo; corrupted checksum, length and cancellation were refused in the fixture.",
+      "remaining": "This auxiliary envelope is not integrated in .om9 or Job Bag, nor a native topology attestation. Trusted worker packaging, source packet capture for all geometry owners, retained proof, generic typed-allocation bounds, arbitrary input and multi-object publication remain open. The v5 BRep guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_record_integrity_checkpoints_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "The source-only BRep record checks allocation limits before integrity hashing and calls admission between source and topology chunks. A large source fixture exercised cancellation, an integrity marker across a chunk boundary and budget refusal.",
+      "remaining": "Typed JSON decoding, sorting and individual native operations are not made interruptible. Project archive/Job Bag integration and retained topology attestation remain open; the v5 BRep guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "reserved_brep_record_restore_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "A source-only record borrowed from a captured box was encoded, admitted by the reserved record decoder and passed to the isolated restore host; the resulting candidate committed and supported Undo and Redo. A record owned by another memory account was refused.",
+      "remaining": "The source record and ShapeSet are not yet stored or loaded by a project archive. Worker trust, retained topology attestation, bounded typed allocation and multi-object integration remain open. The v5 BRep guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "isolated_brep_transaction_handoff_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "The private restore host retains the operation context and candidate reservation; an authored OCCT box passed coordinator registration, transaction commit, Undo and Redo, while a stale context refused registration and released the candidate reservation.",
+      "remaining": "This is not connected to Open, Job Bag or the archive codec. Trusted worker packaging, retained topology attestation, multi-source ownership and broader input and allocation coverage remain open; the v5 BRep guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "isolated_brep_restore_host_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "A separately built Rust worker and private app host prepared one detached OCCT box candidate under owned process/output limits, with a held fingerprinted input, response preflight, source and UUID/adjacency validation and a retained reservation. Wrong executable hash, cancellation, budget pressure, corrupt packet, foreign source and tiny output were refused in the fixture.",
+      "remaining": "The fixture computes its own executable hash; trusted packaging, transaction handoff, archive integration, generic typed/native allocation bounds, arbitrary inputs and topology remain open. The v5 BRep guard remains; no document Open or Job Bag roundtrip is claimed.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
     "direct_batch_open_worker_2026_11_14": {
       "status": "IN_PROGRESS_COMPILE_ONLY",
       "scope": "Direct and batch Open wait for candidate preparation and publication through the existing Open worker; batch retains saved naming and accepts arbitrary archive extensions.",

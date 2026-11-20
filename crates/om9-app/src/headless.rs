@@ -195,6 +195,74 @@ fn layers(scene: &Scene) -> Result<(Vec<LayerMesh>, Vec<LayerLine>, Vec<LayerPoi
     Ok((meshes, lines, points))
 }
 
+/// Render a detached native snapshot with a deterministic fitted perspective
+/// camera. The caller owns worker admission and handles unavailable GPUs.
+pub(crate) fn render_jobbag_thumbnail(archive: &[u8], limits: Limits,
+    coordinator: &om9_core::transaction::TransactionCoordinator, held: om9_core::budget::Usage,
+    cancel: &om9_core::transaction::Cancellation, mut admit: impl FnMut(u64) -> Result<()>) -> Result<Vec<u8>> {
+    let check = || if cancel.is_canceled() { Err(Error::Canceled) } else { Ok(()) };
+    check()?;
+    #[cfg(feature = "occt-brep")]
+    if crate::brep_restore_host::is_brep_archive(archive) {
+        struct Prune<'a>(&'a om9_core::transaction::TransactionCoordinator);
+        impl Drop for Prune<'_> { fn drop(&mut self) { self.0.prune_orphaned_brep_representations(); self.0.prune_orphaned_native_representations(); } }
+        let _prune = Prune(coordinator);
+        return (|| {
+            let host = crate::brep_restore_host::BrepRestoreHost::admit_packaged(om9_native_owner::ProcessLimits::default())?;
+            let bound = host.restore_bound_archive(coordinator, archive, true, held, cancel)?;
+            let scene_owner = bound.prepare_scene(coordinator, held, cancel)?;
+            let scene = scene_owner.scene();
+            let working = scene.cache_usage()?.bytes.checked_mul(3).and_then(|n| n.checked_add(archive.len() as u64))
+                .and_then(|n| n.checked_add(128 * 1024 * 1024)).ok_or(Error::Overflow("thumbnail scene admission"))?;
+            admit(working)?;
+            check()?;
+            let (center, radius) = Controller::scene_world_bounds(scene, None)?;
+            let mut camera = om9_scene::workspace::Workspace::default_camera(om9_scene::workspace::ViewId::Perspective);
+            camera.fit_bounds(center, radius, 1.0, 1.1)?;
+            render_jobbag_thumbnail_scene(scene, &camera, cancel)
+        })();
+    }
+    #[cfg(not(feature = "occt-brep"))]
+    let _ = (coordinator, held);
+    let document = om9_archive::Archive::decode_with_admission(archive, &limits, |estimated| {
+        check()?;
+        admit(estimated.checked_add(128 * 1024 * 1024).ok_or(Error::Overflow("thumbnail admission"))?)
+    })?;
+    check()?;
+    let working = document.validate(&limits)?.bytes.checked_mul(3)
+        .and_then(|bytes| bytes.checked_add(archive.len() as u64))
+        .and_then(|bytes| bytes.checked_add(128 * 1024 * 1024))
+        .ok_or(Error::Overflow("thumbnail scene admission"))?;
+    admit(working)?;
+    let mut controller = Controller::new(document, limits)?;
+    check()?;
+    controller.activate_view("Perspective")?;
+    controller.zoom_extents(1.0)?;
+    let camera = controller.view_cameras().into_iter().find(|(title, _, _)| *title == "Perspective")
+        .ok_or(Error::Missing("thumbnail camera"))?.1;
+    let scene = controller.scene().ok_or(Error::Missing("thumbnail scene"))?;
+    render_jobbag_thumbnail_scene(scene, &camera, cancel)
+}
+
+fn render_jobbag_thumbnail_scene(scene: &Scene, camera: &om9_scene::camera::Camera,
+    cancel: &om9_core::transaction::Cancellation) -> Result<Vec<u8>> {
+    let check = || if cancel.is_canceled() { Err(Error::Canceled) } else { Ok(()) };
+    let (meshes, lines, points) = layers(scene)?;
+    check()?;
+    let mut renderer = Renderer::new().ok_or(Error::Unsupported("thumbnail GPU adapter"))?;
+    check()?;
+    let frame = renderer.render_layers(&meshes, &lines, &points, crate::gpu_viewport::scene_camera(camera), 96, 96)
+        .map_err(|error| Error::Io(format!("thumbnail render: {error:?}")))?;
+    check()?;
+    let mut bytes = Vec::new();
+    use image::ImageEncoder;
+    image::codecs::png::PngEncoder::new(&mut bytes).write_image(&frame.pixels, 96, 96, image::ExtendedColorType::Rgba8)
+        .map_err(|error| Error::Io(format!("thumbnail encode: {error}")))?;
+    check()?;
+    if bytes.len() > 128 * 1024 { return Err(Error::Budget("thumbnail bytes")); }
+    Ok(bytes)
+}
+
 fn identity() -> [[f32; 4]; 4] {
     [
         [1., 0., 0., 0.],

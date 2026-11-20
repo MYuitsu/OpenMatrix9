@@ -12,6 +12,8 @@ gpu-sphere = ["dep:om9-kernel"]
 # Editable 3DM BRep import through the pinned OCCT 8.0.1 kernel. This is the default
 # product build; --no-default-features is a developer fallback that cannot display BReps.
 occt-brep = ["dep:om9-kernel", "om9-kernel/3dm-brep"]
+# Test-only access to the normal definition transaction path for integration fixtures.
+test-fixtures = []
 
 [dependencies]
 om9-core = { path = "../om9-core" }

@@ -1,0 +1,9 @@
+
+running 5 tests
+test staging_default_ui_state_preserves_document_and_redo ... ok
+test restore_master_live_replaces_the_document_atomically ... ok
+test metadata_admission_failure_preserves_document_scene_and_redo ... ok
+test unchanged_embedded_ui_records_preserve_document_and_redo ... ok
+test jobbag_state_survives_save_and_reopen_inside_the_om9_file ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s

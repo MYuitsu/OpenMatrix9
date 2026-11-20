@@ -14,7 +14,7 @@
 //! - the rail's OUTER width is 300 and its inner content is `LEFT_RAIL_CHROME_PX`
 //!   narrower;
 //! - the sidebar icons follow the rail width (`rail_icon_edge`) without
-//!   overflowing, while toolbar icons stay at 22;
+//!   overflowing; the duplicate horizontal toolbar stays hidden;
 //! - the widest rail keeps the 320 pt canvas minimum.
 //!
 //! No test docks Layers to the right: the only right-dock fixture is
@@ -341,18 +341,11 @@ fn icon_edge_follows_the_rail_width() {
                 "{label}: icon {rect:?} overflows the sidebar {sidebar:?}"
             );
         }
-        // Toolbar icons follow the same screen scale, not the rail column rule.
-        let toolbar = app
-            .file_toolbar_rect(FileKind::New)
-            .expect("New toolbar icon");
-        assert!(
-            (toolbar.width() - app.toolbar_icon_edge()).abs() <= 0.5,
-            "{label}: toolbar icon {toolbar:?} must match the responsive edge"
-        );
+        assert!(app.toolbar_rect.is_none(), "{label}: duplicate strip is hidden");
+        assert!(app.file_toolbar_rect(FileKind::New).is_none());
         println!(
-            "OM9_SWEEP icon_edge rail={rail} outer={outer} edge={edge} icons={} toolbar={}",
+            "OM9_SWEEP icon_edge rail={rail} outer={outer} edge={edge} icons={}",
             app.rail_icon_rects.len(),
-            toolbar.width()
         );
     }
     // Anchors of the rule at the three documented widths.

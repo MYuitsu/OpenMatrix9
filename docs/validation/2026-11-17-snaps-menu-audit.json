@@ -1,0 +1,415 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-17T04:27:12.045384+00:00",
+  "client_date": "2026-11-17",
+  "status": "STATIC_AUDIT_AND_PLAN_COMPLETE_PRODUCT_GAPS_OPEN",
+  "scope": "User supplied SNAPS panel; no product changes or product test execution",
+  "target": "standalone Rust OM9 / Windows",
+  "source_commit": "fea59b67f4284d0a3d4545e7b90e7e5ecd7f64fd",
+  "working_tree": "Dirty, shared with unrelated ongoing work; fingerprints are observations, not an atomic checkout snapshot",
+  "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+  "local_private_native_analysis": "docs/analysis/matrix90/2026-11-17-snaps-menu.md",
+  "source_image": {
+    "source": "User-supplied SNAPS screenshot",
+    "bytes": 7830,
+    "sha256": "84ebda3859efe002676968a1fc2dd3f47a368213fd314541b06f62bd92d206d4"
+  },
+  "manual_resolution": {
+    "primary": "Normalized Matrix Book 1 PDF 67-72 / printed 57-62; Using the Snaps Menu",
+    "supporting": [
+      "Book 1 PDF 40 SmartTrack",
+      "Rhino5 PDF 48-49 SmartTrack and Elevator"
+    ],
+    "book2": "No dedicated SNAPS section identified in scoped milestone references/title search; Book2 PDF90 retopology snap is separate",
+    "registered_original_pdf_paths_available": false,
+    "original_pdf_reread": false,
+    "whole_book2_content_search": false
+  },
+  "owners": [
+    "OM9-L2-03-04",
+    "OM9-L2-02-03",
+    "OM9-L2-02-02"
+  ],
+  "feature_ids": [
+    "OM9-L3-03-04-001",
+    "OM9-L3-03-04-002",
+    "OM9-L3-03-04-003",
+    "OM9-L3-03-04-004",
+    "OM9-L3-03-04-005",
+    "OM9-L3-02-03-001",
+    "OM9-L3-02-03-002",
+    "OM9-L3-02-03-003",
+    "OM9-L3-02-03-004",
+    "OM9-L3-02-03-005",
+    "OM9-L3-02-03-006",
+    "OM9-L3-02-03-007",
+    "OM9-L3-02-02-006",
+    "OM9-L3-02-02-007"
+  ],
+  "counts": {
+    "visible_controls": 21,
+    "gap_groups": 13,
+    "implementation_packages": 7,
+    "planned_final_validation_batches": 1,
+    "product_test_batches_executed_this_audit": 0
+  },
+  "source_fingerprints": [
+    {
+      "path": "crates/om9-scene/src/osnap.rs",
+      "bytes": 39342,
+      "sha256": "233a947746f42d8eecea57748480a73dfd49f5baf5b2de5e5506347785eef6f0"
+    },
+    {
+      "path": "crates/om9-app/src/ui.rs",
+      "bytes": 580736,
+      "sha256": "8e04c9210f9843621cbc2af4ffaff84856d4d475475c9cc165e20d9fa2a84a56"
+    },
+    {
+      "path": "crates/om9-app/src/session.rs",
+      "bytes": 514695,
+      "sha256": "3be58b78298656829e79691ddeda0f265923d4c6ee0acea305c6dfd23ec593cc"
+    },
+    {
+      "path": "crates/om9-app/src/ui/sidebar_palettes.rs",
+      "bytes": 21968,
+      "sha256": "d9aca2f874ea18676a8c14e5412f4839f291b7b492d6cece7d58d54a8e33b093"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "bytes": 277592,
+      "sha256": "dc82703c4f4943ffc68d0bbdfdbfe534dbf501e4d2d7f0f8bf9d3f7869e2125b"
+    },
+    {
+      "path": "crates/om9-app/src/ui/viewport_menu.rs",
+      "bytes": 6049,
+      "sha256": "debc0548d6f96e2dbc0ad8c681e1f65ee8345d9e9a0a856e3ab8d747b2b5de20"
+    },
+    {
+      "path": "crates/om9-app/src/session/surface_snap.rs",
+      "bytes": 163362,
+      "sha256": "6c34921313b2044f0fd308c691ed156521bc629c6b12d58273549488321617df"
+    },
+    {
+      "path": "crates/om9-scene/tests/osnap.rs",
+      "bytes": 15278,
+      "sha256": "94391440326fd640e851b3d4b4adfd1adbb3cea39854fe003bd9f85a1509bc69"
+    },
+    {
+      "path": "crates/om9-app/tests/osnap_ui.rs",
+      "bytes": 66001,
+      "sha256": "3d4cb6aa89e0f7a16561d277b1e6b0a9be336509b42ac9b29baed41111849fe2"
+    },
+    {
+      "path": "crates/om9-app/tests/snap_panel_modes.rs",
+      "bytes": 5092,
+      "sha256": "f147f9d831b9f513fa7f776260a1745591cfe05051764b72d06cdddd8eb30edd"
+    },
+    {
+      "path": "crates/om9-sdk/src/lib.rs",
+      "bytes": 70753,
+      "sha256": "732263a65bd1a4baa72a379c982d86fe6a7c1fa623a6fd1f9c1b4b12fda078dc"
+    },
+    {
+      "path": "crates/om9-addon-abi/src/session.rs",
+      "bytes": 29799,
+      "sha256": "b364fa32e0ae25caa67f47d0b65ef7bb67f1da36b145baf1e20bfe407736b81d"
+    },
+    {
+      "path": "crates/om9-kernel/src/editing.rs",
+      "bytes": 231741,
+      "sha256": "e032cc346299e6124562fc992c839be2f6f44c4afaec1ce0722b151e0a10b849"
+    },
+    {
+      "path": "crates/om9-kernel/src/intersect.rs",
+      "bytes": 19345,
+      "sha256": "20df59f4b2d5d32d7882d85291edde81ac87579308eba8d4d30a68e866d96dbb"
+    }
+  ],
+  "manual_extract_fingerprints": [
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-001 - Osnap End Mid Center Quadrant/reference/text/m8book1__p69-69__center-snap.md",
+      "bytes": 2110,
+      "sha256": "f542d40424fbb380f0f6f473753ec6db3185e34b0beee5d106a0d0d8919d44a8"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-001 - Osnap End Mid Center Quadrant/reference/text/m8book1__p69-69__end-snap.md",
+      "bytes": 2095,
+      "sha256": "33de863efdcf8018c560cac64a8afe762f6114d38cde2a49df7144951164f636"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-001 - Osnap End Mid Center Quadrant/reference/text/m8book1__p69-69__mid-snap.md",
+      "bytes": 2095,
+      "sha256": "3292a6eafccba2ffdf87d18193bc864fa51e64af3f0bdb1e449bcb05f58cca3b"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-001 - Osnap End Mid Center Quadrant/reference/text/m8book1__p69-70__quad-snap.md",
+      "bytes": 3765,
+      "sha256": "ceee9a7bf5d34732d052421a6f3a69071cacb3fb3764b38743e1fe40d4a79871"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-002 - Osnap Near Point Intersection/reference/text/m8book1__p70-70__intersection-snap.md",
+      "bytes": 2113,
+      "sha256": "0072f5d109772111803bed2dabc614adf4ee6ec75d0c1e9711b13d44cd4e5842"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-002 - Osnap Near Point Intersection/reference/text/m8book1__p70-70__near-snap.md",
+      "bytes": 2073,
+      "sha256": "3f280aaa330d9f7404c3a06231743236c34e194b370d9992922c62876626ab9f"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-002 - Osnap Near Point Intersection/reference/text/m8book1__p70-70__point-snap.md",
+      "bytes": 2078,
+      "sha256": "aa75798ee3d6c9bca187e12a881365bd57ec654a694962a6c82b2ef3307ad217"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-003 - Osnap Tangent Perpendicular/reference/text/m8book1__p70-71__tangent-snap.md",
+      "bytes": 4010,
+      "sha256": "4802a5814cb4980f806c961be6f6b7065af8f856a6d9b57871c30de84bb469f7"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-003 - Osnap Tangent Perpendicular/reference/text/m8book1__p71-71__perpendicular-snap.md",
+      "bytes": 2375,
+      "sha256": "81f5a027e4f11e3b293edd168b02bbeda768cb0ff7a1b7694277834cb13120bf"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-004 - Osnap Surface And Polysurface/reference/text/m8book1__p71-71__polysurface-snap.md",
+      "bytes": 2365,
+      "sha256": "f23de77807bb3433ee023bfeb9d0c5e5bdc80316d13d51fb69f8e08ee06d571b"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-004 - Osnap Surface And Polysurface/reference/text/m8book1__p71-71__surface-snap.md",
+      "bytes": 2345,
+      "sha256": "a50908c69b1ce1d7e189b8eaf2111b85bc0984bf7c39d6d115f8094234a6712d"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-005 - Osnap Priority And One Shot Overrides/reference/text/m8book1__p71-72__between.md",
+      "bytes": 4631,
+      "sha256": "d00240240ca1a3a999d798a6319103fda5a6303e9c9a58594d3423f46bdeb4a9"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-006 - Smarttrack Inferred Alignment Lines/reference/text/m8book1__p40-40__smarttrack.md",
+      "bytes": 2710,
+      "sha256": "f3641e767d68ddc8ce81227274a0a4bf808dffecd61b7523b59a0499d2650166"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/L3-006 - Smarttrack Inferred Alignment Lines/reference/text/rhino5__p48-49__smarttrack.md",
+      "bytes": 4534,
+      "sha256": "2a6ad4289bf5251dbec768438b3016de737376d5ff02c11f232c12fd5382cb77"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/reference/text/m8book1__p67-68__using-the-snaps-menu.md",
+      "bytes": 4791,
+      "sha256": "842713b01945bb8a053509d207ff8d6baa08457716350f638604491399c1f5c3"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-02-03 - Febe Osnaps And Basic Smarttrack/reference/text/rhino5__p46-47__snap-to-existing-objects.md",
+      "bytes": 5140,
+      "sha256": "5435a71c6b1cd260d827fde68216c63cad37409220088d403d63fdf5505679e9"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-03-04 - Febe Viewport Snaps Ortho Smarttrack/L3-002 - Matrix Ortho Planar Project Toggles/reference/text/m8book1__p72-72__grid-snap.md",
+      "bytes": 2719,
+      "sha256": "49ddd61f211079de3158953cb844beca3a50b02ccdc136c21d381d71b0cdbfea"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-03-04 - Febe Viewport Snaps Ortho Smarttrack/L3-002 - Matrix Ortho Planar Project Toggles/reference/text/m8book1__p72-72__ortho.md",
+      "bytes": 2699,
+      "sha256": "0d58c9c6f2afd263f86f0377ed417db16ebe67fc3d894d94e6a5e19ece60df83"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-03-04 - Febe Viewport Snaps Ortho Smarttrack/L3-002 - Matrix Ortho Planar Project Toggles/reference/text/m8book1__p72-72__planar.md",
+      "bytes": 2704,
+      "sha256": "0d88ba0cdd2ff39bd77026fb9942288bbbd88ee7184f6b01839c5118e013431e"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-03-04 - Febe Viewport Snaps Ortho Smarttrack/L3-002 - Matrix Ortho Planar Project Toggles/reference/text/m8book1__p72-72__project.md",
+      "bytes": 2709,
+      "sha256": "34042f11f841bbbde2abf44694cee6525fd04cb15be720e9fdb3f667bb7f0ddc"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-03-04 - Febe Viewport Snaps Ortho Smarttrack/L3-003 - Matrix Snap Activation And Indicator/reference/text/rhino5__p46-47__snap-to-existi.md",
+      "bytes": 5140,
+      "sha256": "5435a71c6b1cd260d827fde68216c63cad37409220088d403d63fdf5505679e9"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-03-04 - Febe Viewport Snaps Ortho Smarttrack/L3-004 - Matrix Smarttrack Toggle And Feedback/reference/text/m8book1__p40-40__smarttrack.md",
+      "bytes": 2710,
+      "sha256": "f3641e767d68ddc8ce81227274a0a4bf808dffecd61b7523b59a0499d2650166"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-03-04 - Febe Viewport Snaps Ortho Smarttrack/L3-004 - Matrix Smarttrack Toggle And Feedback/reference/text/rhino5__p48-49__smarttrack.md",
+      "bytes": 4534,
+      "sha256": "2a6ad4289bf5251dbec768438b3016de737376d5ff02c11f232c12fd5382cb77"
+    },
+    {
+      "path": "OM9_Milestones/M02 - Viewport, Gumball/L2-03-04 - Febe Viewport Snaps Ortho Smarttrack/reference/text/m8book1__p67-68__using-the-snaps-menu.md",
+      "bytes": 4791,
+      "sha256": "842713b01945bb8a053509d207ff8d6baa08457716350f638604491399c1f5c3"
+    }
+  ],
+  "decompile_scope": {
+    "matched_native_definitions": [
+      {
+        "va": "0x0182AB70",
+        "ghidra_definition_line": 296456,
+        "mapping": "EXACT/A"
+      },
+      {
+        "va": "0x0182E730",
+        "ghidra_definition_line": 297898,
+        "mapping": "EXACT/A"
+      },
+      {
+        "va": "0x0182EF40",
+        "ghidra_definition_line": 298101,
+        "mapping": "EXACT/A"
+      },
+      {
+        "va": "0x0182F150",
+        "ghidra_definition_line": 298155,
+        "mapping": "EXACT/A"
+      },
+      {
+        "va": "0x0182F3D0",
+        "ghidra_definition_line": 298231,
+        "mapping": "EXACT/A"
+      },
+      {
+        "va": "0x0182FAA0",
+        "ghidra_definition_line": 298408,
+        "mapping": "EXACT/A"
+      },
+      {
+        "va": "0x01830220",
+        "ghidra_definition_line": 298620,
+        "mapping": "EXACT/A"
+      }
+    ],
+    "managed_route": {
+      "command": "gvSnaps",
+      "run_command_token": "0x06000F47",
+      "rva": "0x00026B7E",
+      "proves": "Window open only"
+    },
+    "limitations": "COM dispatch and constants do not recover the Rhino snap solver; first three GridSnap values verified from manual/image, not pseudocode constants"
+  },
+  "gaps": [
+    {
+      "id": "G01",
+      "title": "O-Snap master and End/Mid defaults",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G02",
+      "title": "Grid Snap enable and four millimetre increments",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G03",
+      "title": "Between nested two-point prompt",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G04",
+      "title": "Surface/Polysurface selected target and left/right lifecycle",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G05",
+      "title": "Ortho 45 degrees, F8/Shift and offset Planar plane",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G06",
+      "title": "One-shot effective mask and consistent point resolution",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G07",
+      "title": "NURBS, curve and source edge snap coverage",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G08",
+      "title": "Camera-correct Near/Tan/Perp and placement",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G09",
+      "title": "Curve intersections and explicit apparent-intersection policy",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G10",
+      "title": "Tab direction lock and Ctrl+Click elevator",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G11",
+      "title": "SmartTrack smart-point and guide/curve relationships",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G12",
+      "title": "Shared panel/CMD state and scoped SDK query integration",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    },
+    {
+      "id": "G13",
+      "title": "Current scope reconciliation and pending final acceptance",
+      "evidence_kind": "STATIC_SOURCE_INSPECTION_NOT_RUNTIME_REPRODUCED"
+    }
+  ],
+  "historical_evidence_reviewed": [
+    "implementation/evidence/M02/2026-10-22-l2-02-03-osnaps-checks.json",
+    "implementation/evidence/M02/2026-10-22-l2-03-04-snaps-ortho-smarttrack-checks.json",
+    "docs/validation/2026-11-11-surface-snap-reopened-face-regression.md",
+    "docs/validation/2026-11-12-parallel-view-osnap.md"
+  ],
+  "tests": {
+    "status": "NOT_RUN_USER_DEFERRED_UNTIL_IMPLEMENTATION_COMPLETE",
+    "existing_receipts": "Historical only; not fresh verification of this working tree"
+  },
+  "execution_policy": {
+    "user_request": "giảm các phần test lại làm xong rồi mới test",
+    "order": "P00-P06 implementation, then one grouped P07",
+    "no_per_package_test_or_probe_batches": true,
+    "after_fixes": "Rerun only affected checks, then close final gate"
+  },
+  "validation": {
+    "documentation_checks": {
+      "status": "PASS",
+      "json_parsed": 19,
+      "annotated_owners_and_features": 17,
+      "plan_links_checked": 3,
+      "broken_links": 0,
+      "unique_ledger_entry": true
+    },
+    "diff_check": {
+      "status": "PASS",
+      "scope": "README, ledger, checklist and M02 annotation files",
+      "note": "Only Git line-ending warnings; no whitespace errors"
+    },
+    "public_source_audit": {
+      "status": "PASS",
+      "command": "rtk proxy python tools/public_source_audit.py",
+      "exit_code": 0,
+      "source_files": 16169,
+      "icon_bindings": 594,
+      "svg_files": 593,
+      "errors": []
+    },
+    "product_tests": {
+      "executed": false,
+      "reason": "User requested implementation complete before grouped final validation"
+    }
+  },
+  "limits": [
+    "No physical desktop/GPU/manual M02-UI acceptance",
+    "No macOS execution",
+    "No complete Matrix/Rhino solver recovery",
+    "No product implementation or milestone completion promotion",
+    "No openNURBS measurement attempt or invented remaining batch total"
+  ],
+  "next_package": "P00 input contract, followed by P01 shared state and panel"
+}

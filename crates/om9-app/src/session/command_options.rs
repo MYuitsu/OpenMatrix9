@@ -88,6 +88,14 @@ pub(super) const PROVIDERS: &[(&str, TokenProvider)] = &[
 
 impl CommandOptionInterface for Controller {
     fn command_options(&self) -> Vec<CommandOption> {
+        if self.ring_rail_history_pending() { return Vec::new(); }
+        if self.ring_rail_confirmation_pending() {
+            let mut options = vec![descriptor("ring_rail_replace", "Yes", "Yes"), descriptor("ring_rail_replace", "No", "No"), descriptor("ring_rail_replace", "Cancel", "Cancel")];
+            for option in &mut options { option.id.run = self.command_run; }
+            assign_shortcuts(&mut options);
+            return options;
+        }
+        if self.ring_rail_is_open() { return self.ring_rail_options(); }
         if self.polyline_pending.is_some() {
             return self
                 .polyline_command_options()
@@ -192,6 +200,7 @@ impl CommandOptionInterface for Controller {
                 Ok(CommandOptionEffect::Applied)
             }
             Activation::Polyline(id) => {
+                self.input_revision = self.input_revision.wrapping_add(1);
                 self.activate_polyline_option(id)?;
                 Ok(CommandOptionEffect::Applied)
             }
@@ -241,6 +250,60 @@ fn descriptor(owner: &'static str, label: &'static str, command: &'static str) -
 }
 
 impl Controller {
+    fn ring_rail_options(&self) -> Vec<CommandOption> {
+        use crate::command_options::CommandValue;
+        let direct = self.builder.as_ref().filter(|builder| builder.kind() == om9_core::builder::BuilderKind::RingRail);
+        let addon = self.addon_builder.as_ref();
+        let text = |field: &str, key: &str| -> Option<String> {
+            if let Some(builder) = direct {
+                builder.field(field).map(|field| match &field.value {
+                    om9_core::request::Value::Choice(value) => value.clone(),
+                    om9_core::request::Value::Quantity { value, .. } | om9_core::request::Value::Number(value) => value.to_string(),
+                    _ => String::new(),
+                })
+            } else { addon.and_then(|builder| builder.value(key)).map(|value| match value {
+                om9_addons::settings::SettingValue::Str(value) => value.clone(),
+                om9_addons::settings::SettingValue::Float(value) => value.to_string(),
+                om9_addons::settings::SettingValue::Int(value) => value.to_string(),
+                om9_addons::settings::SettingValue::Bool(value) => value.to_string(),
+            }) }
+        };
+        let mut options = Vec::new();
+        for (name, prefix, field, key) in [
+            ("SizeSystem", "SizeSystem=", "standard", "rr_size_system"),
+            ("RingSize", "RingSize=", "us_size", "rr_ring_size"),
+            ("CenterX", "CenterX=", "center_x_mm", "rr_center_x"),
+            ("CenterY", "CenterY=", "center_y_mm", "rr_center_y"),
+            ("CenterZ", "CenterZ=", "center_z_mm", "rr_center_z"),
+        ] {
+            let value = text(field, key).unwrap_or_default();
+            let mut option = descriptor("ring_rail", name, prefix);
+            option.kind = if name == "SizeSystem" { Kind::Text } else { Kind::Number };
+            option.value = if name == "SizeSystem" { CommandValue::Text(Some(value.clone())) }
+                else { CommandValue::Number(value.parse().ok()) };
+            option.label = format!("{name}={value}");
+            options.push(option);
+        }
+        if let Some(builder) = direct {
+            let mut option = descriptor("ring_rail", "Diameter", "Diameter=");
+            let value = builder.field("diameter_mm").and_then(om9_core::builder::BuilderField::numeric);
+            option.value = CommandValue::Number(value);
+            option.label = numeric_label("Diameter", value);
+            options.push(option);
+        }
+        let name = self.ring_rail_selected_shape().map(|shape| shape.name()).unwrap_or("Round").to_owned();
+        let mut shape = descriptor("ring_rail", "Shape", "Shape=");
+        shape.kind = Kind::Text; shape.label = format!("Shape={name}"); shape.value = CommandValue::Text(Some(name));
+        options.push(shape);
+        if self.selected_ordered().as_slice().first().is_some_and(|id| self.selected_ordered().len() == 1
+            && self.document().entities.get(id).is_some_and(|entity| matches!(entity.geometry, om9_core::geometry::Geometry::Curve(_)))) {
+            let mut save = descriptor("ring_rail", "ShapeSave", "ShapeSave="); save.kind = Kind::Text; options.push(save);
+        }
+        assign_shortcuts(&mut options);
+        for option in &mut options { option.id.run = self.command_run; }
+        options
+    }
+
     /// Normalize only declared assignment names/fixed choices. Values and owner
     /// validation are preserved; arbitrary geometry input is never rewritten.
     pub(super) fn canonical_option_assignment(&self, text: &str) -> Option<String> {

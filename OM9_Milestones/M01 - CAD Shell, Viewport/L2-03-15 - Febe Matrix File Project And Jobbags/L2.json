@@ -131,6 +131,17 @@
     ]
   },
   "runtime_implementation": {
+    "native_brep_catalog_followup_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "Canonical and native BRep Job Bag, mixed archive and five named Box cases have scoped headless evidence; a native Box catalog was reloaded and inserted in a separate test process using synthetic sidebar events. The release executable opened and rendered a native Box v7 offscreen. Physical desktop, DPI, broader geometry and the synthetic om9_ui BRep replay remain unverified.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "project_manager_p07_2026_11_17": {
+      "status": "PARTIAL_INTEGRATION_MANUAL_UI_PENDING",
+      "scope": "Dynamic Job Bags, five named snapshot groups, workspace catalog, metadata/search and image-guided UI have partial integration coverage. Embedded document projects are preserved on Save and can be imported explicitly as separate rows. Native point, line, rational curve/surface, mesh, mixed selection and nested-instance fixtures, GPU thumbnail, dirty-open lifecycle and a 257 MiB catalog/archive round trip under configured limits have scoped evidence.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md",
+      "remaining": "Native desktop/picker workflow, visual/DPI acceptance, BRep v5 archive migration, wider native tables, catalog root crash/non-Windows failure recovery, and precise memory/GPU peak remain open. Manual M01-UI is unsigned."
+    },
     "regression_fixes_20261105": {
       "date": "2026-11-05",
       "status": "TARGETED_REGRESSIONS_PASSED_DESKTOP_PENDING",
@@ -141,10 +152,10 @@
       "results": "21/21 original failures resolved; 669 passed/0 failed/1 ignored; release build exit 0",
       "scope": "Regression evidence only; existing planning and manual acceptance gates unchanged."
     },
-    "date": "2026-10-22",
-    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "date": "2026-11-17",
+    "status": "PARTIAL_INTEGRATION_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "File lifecycle plus Project Manager/Job Bags; three slots, capture/restore, Master snapshot, notes/metadata and dock placement.",
+    "scope": "File lifecycle and Project Manager/Job Bags. The 2026-10-22 last_verified record below is historical; see project_manager_p07_2026_11_17 for the current scoped evidence.",
     "evidence": [
       "implementation/design/M01/OM9-L2-03-15/README.md",
       "implementation/evidence/M01/2026-10-22-l2-03-15-project-jobbags-checks.json",
@@ -155,7 +166,7 @@
     "human_approval": null,
     "remaining": [
       "Manual M01-UI visual review pending.",
-      "Job Bag state is in-session; project-file embedding is not claimed."
+      "Point, resource, nested-instance and representative canonical/native BRep snapshots have scoped evidence; arbitrary geometry and dependencies, desktop workflow and DPI acceptance remain open (P07)."
     ],
     "tests": null,
     "last_verified": {
@@ -173,6 +184,13 @@
       "evidence": "implementation/evidence/M01/2026-10-22-l2-03-15-project-jobbags-checks.json",
       "logs": "build/standalone-validation/ui-artifacts/m01-l2-03-15-20261022/acceptance.log",
       "note": "Job Bag state embedded as .om9 resource and restored on Open; Master restore live; manual M01-UI pending."
+    },
+    "project_manager_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "AUDIT_ONLY_GAPS_OPEN",
+      "scope": "Image-led Project Manager audit: eight existing integration tests pass; six model gaps reproduced; twenty gaps planned. No implementation or manual gate promotion.",
+      "plan": "docs/plans/2026-11-17-project-manager-gap-plan.md",
+      "evidence": "docs/validation/2026-11-17-project-manager-audit.json"
     }
   }
 }

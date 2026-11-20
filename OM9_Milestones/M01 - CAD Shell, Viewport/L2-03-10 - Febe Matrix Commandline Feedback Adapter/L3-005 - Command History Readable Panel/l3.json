@@ -210,6 +210,28 @@
       "command_transcript 3 passed",
       "command_sessions 6 passed"
     ],
+    "elevator_transcript_2026_11_18": {
+      "scope": "The Command history retains Elevator prompt entry, typed and picked heights, rejected input and cancellation. The Line fixture verifies retained history and exact geometry after completion.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#elevator-in-command-history"]
+    },
+    "nested_snap_transcript_2026_11_18": {
+      "scope": "Between retains its prompts, submitted input, accepted midpoint and cancellation. Surface and Polysurface target prompts and acceptance also remain in history. An intentional miss is recorded once and passive hover remains status-only. The standard Windows build confirmed Between scrollback and right-button On Surface history, including a miss and cancellation, with exact source-coordinate readback.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#between-and-surface-targets-in-command-history"]
+    },
+    "command_history_entry_points_2026_11_18": {
+      "scope": "CMD, Info & Settings and F2 toggle a read-only view of the same bounded command transcript. The egui fixture copies the full history beyond the scroll area and confirms that Cut and Paste preserve the log, Line draft and Undo count.",
+      "evidence": [
+        "docs/validation/2026-11-17-snaps-p07.md#command-history-opens-the-snaps-transcript",
+        "docs/validation/2026-11-17-snaps-p07.md#alternate-windows-command-history-and-smarttrack-replay",
+        "docs/validation/2026-11-17-snaps-p07.md#line-start-prompt-retained-in-cmd-history"
+      ]
+    },
+    "line_typed_start_2026_11_19": {
+      "status": "AUTOMATED_AND_WINDOWS_REPLAY_VERIFIED_MANUAL_UI_PENDING",
+      "scope": "Line records End of line when a typed start advances the prompt. A Windows icon launch, typed start and viewport endpoint retained both point prompts in F2 after commit.",
+      "tests": ["om9-app chrome_actions::line_history_keeps_both_prompts_after_typed_or_viewport_start"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#line-typed-start-and-viewport-end-in-command-history"]
+    },
     "evidence": [
       "implementation/design/M01/OM9-L2-03-10/README.md",
       "implementation/evidence/M01/2026-10-22-l2-03-10-commandline-feedback.json"

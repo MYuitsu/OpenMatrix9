@@ -1,0 +1,35 @@
+     Locking 38 packages to latest Rust 1.98.1 compatible versions
+   Compiling om9-core v0.1.0 (H:\OpenMatrix9\crates\om9-core)
+warning: methods `clone_for_document_staging` and `tracked_source_snapshot` are never used
+    --> H:\OpenMatrix9\crates\om9-core\src\brep.rs:1177:19
+     |
+ 912 | impl Brep {
+     | --------- methods in this implementation
+...
+1177 |     pub(crate) fn clone_for_document_staging(&self) -> Self {
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+1227 |     pub(crate) fn tracked_source_snapshot(&self) -> BrepSource {
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: methods `display_allocation_key`, `display_allocation_bytes`, and `payload_allocation_key` are never used
+   --> H:\OpenMatrix9\crates\om9-core\src\geometry.rs:884:19
+    |
+868 | impl NativeBrep {
+    | --------------- methods in this implementation
+...
+884 |     pub(crate) fn display_allocation_key(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+...
+887 |     pub(crate) fn display_allocation_bytes(&self) -> Result<u64> {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+890 |     pub(crate) fn payload_allocation_key(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `om9-core` (lib) generated 2 warnings
+   Compiling om9-project-manager-audit-probe v0.0.0 (H:\OpenMatrix9\build\project-manager-audit-2026-11-17\model-probe)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 40.09s
+     Running `L:/om9-target\debug\om9-project-manager-audit-probe.exe`

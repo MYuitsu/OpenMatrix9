@@ -216,6 +216,44 @@
         "implementation/evidence/M02/OM9-L3-03-04-002/OM9-L4-03-04-002-06-acceptance.md"
       ],
       "acceptance": "Each toggle changes its core flag and indicator; Ortho/Planar/Project remain compatible and the active CPlane is unchanged."
+    },
+    "compact_constraint_toggles_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Grid Snap, Ortho, Planar and Project share the expanded icons, help and CMD toggle path on the compact row. CMD state is reflected in the rendered frames, and collapsed Snaps retains all four controls in the right dock.",
+      "tests": ["chrome_actions::collapsed_snaps_use_the_expanded_icons_and_follow_cmd_state"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#compact-snaps-icon-and-dock-parity-2026-11-18"]
+    },
+    "shift_and_planar_viewport_click_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "An egui Line fixture accepts a start at 3 mm. Shift temporarily bypasses Ortho, Planar enabled after the start preserves its height, and releasing Shift restores the 45-degree endpoint.",
+      "tests": ["snap_panel_modes::shift_inverts_ortho_during_click_and_planar_uses_the_accepted_height"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#p00p07-acceptance-audit-2026-11-18"]
+    },
+    "combined_constraints_windows_2026_11_19": {
+      "status": "WINDOWS_OM9_POINTER_VERIFIED_MANUAL_UI_PENDING",
+      "scope": "The SNAPS toggles apply both approved point constraints when invoked from the Windows rail. The clicked free point and source Point produced the expected committed Line endpoints.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#approved-grid-snap-plus-ortho-and-planar-plus-project"]
+    },
+    "snaps_grid_step_desktop_2026_11_19": {
+      "status": "WINDOWS_PANEL_AND_OM9_POINTER_VERIFIED_MANUAL_UI_PENDING",
+      "scope": "The current Windows review executable separately renders the selected 0.25 mm step and the Grid Snap switch. At the same viewport pointer position, Grid Snap off accepts the free point and Grid Snap on accepts (4.75,3,0). Undo restores both source Lines. The live Matrix9 palette shows the matching numeric step group and a separate Grid Snap switch.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#snaps-panel-comparison-and-025-mm-desktop-pick"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G02",
+        "G05",
+        "G12"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

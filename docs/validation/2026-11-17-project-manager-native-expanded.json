@@ -1,0 +1,72 @@
+{
+  "scope": "Six authored native selected-object Job Bag results with geometry and placement checks; see P07 record for methods and limits",
+  "artifacts": [
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-placement-p07/project-jobbag-1177ba22-cf97-413c-9d5c-292cd1010951/result.3dm",
+      "sha256": "283c098fde552d2a1ef10caeba357514a65c1ca11ccff31f34d2afab66729359",
+      "bytes": 7663
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-placement-p07/project-jobbag-9f3df62a-33b1-49a8-8240-1ed9f553b5d2/result.3dm",
+      "sha256": "8a50e69d2725265e816e7c00e08f4c5b6c3d2f41234408d08dae31b46d0f2dcc",
+      "bytes": 7943
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-placement-p07/project-jobbag-a2dbe1a1-ac03-49b2-8caa-b528fa871db3/result.3dm",
+      "sha256": "e30267f6e80410b598be9a97e5bc757bf02236fdb4178dc6ed7d7ac4bf87f34b",
+      "bytes": 7823
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-placement-p07/project-jobbag-b6040339-2ca6-4eb7-9cc5-8044c5cc9737/result.3dm",
+      "sha256": "65934d888c7b7c06b785234ea0a3672700adc4adcf3a2731baf0a252112c2425",
+      "bytes": 9113
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-placement-p07/project-jobbag-c3da61a1-2697-4c4b-816e-1f3c34a6b336/result.3dm",
+      "sha256": "d2be83704237e801d92465781d0967e6bd11b0ee8cab947f6f100853d714f4b9",
+      "bytes": 7621
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-placement-p07/project-jobbag-cfe0db4a-45d3-4c3b-8775-afad4dfce13a/result.3dm",
+      "sha256": "f5be886e1d3abbae0a0b989f15570866305961cf303e115588405d89749f449a",
+      "bytes": 8114
+    }
+  ],
+  "mixed_selection_and_regression": [
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-final-p07/project-jobbag-4123a64b-2965-453b-b05c-04f0d437c224/result.3dm",
+      "sha256": "4f7bb8f290cf8a4afa0c8d0995307f17244b1cf7bffc72408b9f10ff47182114",
+      "bytes": 9105
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-final-p07/project-jobbag-5d3a4696-4108-4d74-bbeb-cdebf3ad27d5/result.3dm",
+      "sha256": "1ff3cdf20665b704496d973debbdf79c83187f246c678b4ebd5fad9e09ea812b",
+      "bytes": 7935
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-final-p07/project-jobbag-861bfa96-2b5f-4b3f-92b7-cb5919a5c2da/result.3dm",
+      "sha256": "f850b392c177530bb3d3e949c3a6b1d2fd639f857b4bb2bfc510b08f26604e57",
+      "bytes": 7655
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-final-p07/project-jobbag-c05034d6-3e03-4fc3-9f5b-ab22da6dc68e/result.3dm",
+      "sha256": "3b89155286b3bc8b927ef37cce028766c01cca96bc0251c4ea6605b5eb23c8ec",
+      "bytes": 7613
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-final-p07/project-jobbag-c9256046-6544-4f4a-b9fc-5a20bceaef60/result.3dm",
+      "sha256": "5cd357fe18a75cce97928893d00c177eda03802ffc990cb650bfa9a4df557100",
+      "bytes": 7815
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-final-p07/project-jobbag-cd1e7d74-678d-432f-8990-e7f9b37c0d2f/result.3dm",
+      "sha256": "14f422fff24cfb7182ee4bb87ee06fe5f547095c81de6a03d3fb7abccafd0da1",
+      "bytes": 9508
+    },
+    {
+      "path": "build/standalone-validation/ui-artifacts/project-native-final-p07/project-jobbag-e201e443-4d6b-4054-a4db-5adb893bb636/result.3dm",
+      "sha256": "61fe2038dcf6a0d66e40cbfb9e47bc1b99fb7ec8ad1d886ce2dcced010f75c65",
+      "bytes": 8106
+    }
+  ]
+}

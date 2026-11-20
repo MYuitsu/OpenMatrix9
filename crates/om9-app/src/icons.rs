@@ -3243,6 +3243,12 @@ const SIDEBAR_PALETTE: &[Icon] = &[
         "core-minimal/SnapOnPolysurface.svg"
     ),
     icon!(
+        "O-Snap",
+        "SnapObjectMaster",
+        "",
+        "core-minimal/SnapObjectMaster.svg"
+    ),
+    icon!(
         "SnapBetween",
         "SnapBetween",
         "OM9-SNAP-009",
@@ -3453,11 +3459,15 @@ impl Icons {
         Self::default()
     }
     pub fn paint(&mut self, ui: &egui::Ui, rect: egui::Rect, name: &str) {
+        self.paint_with_opacity(ui, rect, name, 255);
+    }
+
+    pub(crate) fn paint_with_opacity(&mut self, ui: &egui::Ui, rect: egui::Rect, name: &str, opacity: u8) {
         if !rect.is_finite() || rect.width() <= 0.0 || rect.height() <= 0.0 {
             return;
         }
         let Some(icon) = lookup(name) else {
-            fallback(ui, rect);
+            fallback(ui, rect, opacity);
             return;
         };
         let texture = self.textures.entry(icon.name).or_insert_with(|| {
@@ -3476,10 +3486,10 @@ impl Icons {
                 texture.id(),
                 square,
                 egui::Rect::from_min_max(egui::pos2(0.0, 0.0), egui::pos2(1.0, 1.0)),
-                egui::Color32::WHITE,
+                egui::Color32::from_white_alpha(opacity),
             );
         } else {
-            fallback(ui, rect);
+            fallback(ui, rect, opacity);
         }
     }
 }
@@ -3498,18 +3508,18 @@ fn raster(svg: &[u8]) -> Option<egui::ColorImage> {
         pixmap.data(),
     ))
 }
-fn fallback(ui: &egui::Ui, rect: egui::Rect) {
+fn fallback(ui: &egui::Ui, rect: egui::Rect, opacity: u8) {
     // Neutral authored placeholder, deliberately without a command glyph.
     let side = rect.width().min(rect.height()) * 0.56;
     let square = egui::Rect::from_center_size(rect.center(), egui::vec2(side, side));
+    let color = egui::Color32::from_rgba_unmultiplied(155, 155, 155, opacity);
     ui.painter().rect_stroke(
         square,
         2.0,
-        egui::Stroke::new(1.2, egui::Color32::from_gray(155)),
+        egui::Stroke::new(1.2, color),
         egui::StrokeKind::Inside,
     );
-    ui.painter()
-        .circle_filled(rect.center(), 1.0, egui::Color32::from_gray(155));
+    ui.painter().circle_filled(rect.center(), 1.0, color);
 }
 
 #[cfg(test)]

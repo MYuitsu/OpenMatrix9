@@ -1,4 +1,9 @@
 {
+  "runtime_implementation": {
+    "status": "SCOPED_REFUSALS_TESTED_WORKFLOW_OPEN",
+    "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md",
+    "traceability": "Open BRep, non-solid, mixed instance and missing density fixtures preserve previous report and Undo. Invalid and other unsupported shapes require further coverage."
+  },
   "level": "L3",
   "id": "OM9-L3-04-19-005",
   "milestone": "M04",

@@ -82,7 +82,9 @@ pub const RIGHT_DOCK_DEFAULT: f32 = 300.;
 pub const COMMAND_MIN: f32 = 58.;
 pub const COMMAND_MAX: f32 = 400.;
 pub const COMMAND_DEFAULT: f32 = 90.;
-pub const TOOLBAR_HEIGHT: f32 = 67.;
+/// The duplicate horizontal command strip is hidden; retain its serialized
+/// panel identity without reserving canvas space (user direction 2026-11-17).
+pub const TOOLBAR_HEIGHT: f32 = 0.;
 pub const STATUS_BAR_HEIGHT: f32 = 20.;
 pub const CANVAS_MIN_WIDTH: f32 = 320.;
 pub const CANVAS_MIN_HEIGHT: f32 = 120.;
@@ -164,7 +166,10 @@ impl PanelId {
         match self {
             PanelId::LeftRail => state.size = LEFT_RAIL_DEFAULT,
             PanelId::CommandLine => state.size = COMMAND_DEFAULT,
-            PanelId::Toolbar => state.size = TOOLBAR_HEIGHT,
+            PanelId::Toolbar => {
+                state.visible = false;
+                state.size = TOOLBAR_HEIGHT;
+            }
             // Docking menus to the right is a user action, so the column starts
             // hidden and shows nothing until a menu is docked there.
             PanelId::RightDock => {
@@ -576,6 +581,12 @@ impl DockLayout {
                 .panels
                 .entry(id.key().to_owned())
                 .or_insert_with(|| id.default_state());
+            if id == PanelId::Toolbar {
+                // Retired command strip: older profiles legitimately stored 67.
+                // Migrate this hidden surface without a spurious size warning.
+                *state = id.default_state();
+                continue;
+            }
             let default = id.default_state().size;
             let original = state.size;
             let (min, max) = size_bounds(id);

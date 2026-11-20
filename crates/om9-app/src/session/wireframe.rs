@@ -260,7 +260,7 @@ pub(super) fn append_trimmed_surface_edges(
     append_trimmed_surface_edges_at(entity, entity.placement, items, label, limits, tolerance, retained, admit)
 }
 
-fn append_trimmed_surface_edges_at(
+pub(super) fn append_trimmed_surface_edges_at(
     entity: &om9_core::model::Entity,
     placement: om9_core::geometry::Transform,
     items: &mut Vec<(&'static str, Geometry, om9_core::geometry::Transform)>,

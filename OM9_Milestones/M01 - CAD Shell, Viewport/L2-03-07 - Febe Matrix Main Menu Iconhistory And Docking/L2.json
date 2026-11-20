@@ -77,6 +77,11 @@
     }
   ],
   "runtime_implementation": {
+    "options_tree_2026_11_19": {
+      "scope": "Shared Options dialog for the RhinoOptions icon, command line, and File Properties. Two category trees and detail panels with 34 display modes.",
+      "evidence": "docs/validation/2026-11-19-options-full-tree.md",
+      "limitations": "Some fields are read-only or unavailable. Desktop review and original preset values remain open."
+    },
     "command_toolbar_icons_2026_10_28": {
       "scope": "Partial toolbar icon work: Standard and Visibility reference order, 75% sizing, SubD flyouts, authored plugin and standard assets, shared feature availability dispatch.",
       "status": "IN_PROGRESS",
@@ -233,6 +238,13 @@
       ],
       "logs": "build/standalone-validation/ui-artifacts/m01-l2-03-07-20261022/acceptance.log",
       "note": "L4 source/API/fixture/implementation/integration/acceptance artefacts created; all eight L3 buckets now have 5/5 L4 evidence. Manual M01-UI review remains pending."
+    },
+    "left_main_menu_only_2026_11_17": {
+      "status": "AUTOMATED_LAYOUT_VALIDATED_DESKTOP_OBSERVED_MANUAL_GATE_PENDING",
+      "evidence": "docs/validation/2026-11-17-left-main-menu-only.md",
+      "scope": "Hide the duplicate horizontal command/view strip; retain left MAIN MENU and Top11; recover 67 logical points for the canvas. Layout-only, no geometry changes.",
+      "tests": "77 focused headless checks passed: chrome_actions 30, file_widgets 21, workbench_regions 8, workbench_regions_sizes 10, left_stack_layers 8. Real debug window observed without the strip.",
+      "limitations": "Human UI sign-off remains pending. The real window observation predates the final old-toolbar-state warning cleanup; the user is editing in that preview, so its executable was preserved."
     }
   },
   "execution_state": "RUNTIME_IMPLEMENTED",

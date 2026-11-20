@@ -65,6 +65,7 @@ fn space_repeats_the_allowlisted_command_when_the_editor_is_idle() {
     );
     assert_eq!(app.controller.phase(), CmdPhase::AwaitPoint);
     assert!(app.controller.prompt().starts_with("Location of point"));
+    assert!(context.memory(|memory| memory.has_focus(egui::Id::new("matrix-command-transcript"))));
 }
 
 #[test]
@@ -86,11 +87,14 @@ fn escape_aborts_the_running_command_and_keeps_the_document() {
     let mut app = MatrixApp::new(Document::new("abort")).expect("app");
     frames(&mut app, &context, 4);
     app.controller.submit("Line").expect("Line");
+    app.focus_command_editor();
     frames(&mut app, &context, 2);
+    assert!(context.memory(|memory| memory.has_focus(egui::Id::new("matrix-command-transcript"))));
     press(&mut app, &context, Key::Escape);
     assert!(!app.controller.is_running(), "Escape aborts the prompt");
     assert_eq!(app.controller.phase(), CmdPhase::Idle);
     assert_eq!(app.controller.prompt(), "Command: ");
+    assert!(!context.memory(|memory| memory.has_focus(egui::Id::new("matrix-command-transcript"))));
     assert!(
         app.controller.document().entities.is_empty(),
         "aborting writes no geometry"

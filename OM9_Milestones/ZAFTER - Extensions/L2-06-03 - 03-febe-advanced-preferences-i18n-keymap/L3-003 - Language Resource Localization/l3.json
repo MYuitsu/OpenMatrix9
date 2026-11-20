@@ -67,6 +67,13 @@
     "implementation_estimate": "UNESTIMATED_PENDING_SOURCE_AUDIT",
     "execution_status": "SPEC_ONLY; NOT READY TO CODE UNTIL M00 AND TASK L4 AUDIT"
   },
+  "runtime_implementation": {
+    "matrix_addon_language_options_2026_11_19": {
+      "status": "WINDOWS_SCOPED_ADDON_LANGUAGE_SETTINGS_VALIDATED",
+      "scope": "The existing English and Vietnamese OM9 Matrix add-on setting is available from Options General and persists in the existing user preferences. A Windows integration verifies Line messages and write failure recovery. Full localization remains a separate acceptance gate.",
+      "evidence": ["docs/validation/2026-11-19-matrix-language-options.md"]
+    }
+  },
   "children_l4": [],
   "l4_status": "NOT_PLANNED_YET"
 }

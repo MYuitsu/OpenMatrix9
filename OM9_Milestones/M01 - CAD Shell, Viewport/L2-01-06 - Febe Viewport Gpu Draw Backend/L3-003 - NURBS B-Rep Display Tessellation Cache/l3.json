@@ -218,6 +218,11 @@
     "manual_pending": "the mesh must rebuild and look identical after a real OCCT parameter change"
   },
   "runtime_implementation": {
+    "viewport_detail_ui_publication_2026_11_18": {
+      "date": "2026-11-18",
+      "scope": "A standalone High detail request is serviced by the UI independently from topology remesh. A Sphere and Box fixture covers completion and Escape while preserving the source document and Undo. An offscreen paired render compares the sphere outline under Light and High detail.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#sphere-outline-and-viewport-detail-publication"
+    },
     "light_navigation_smoothness_2026_11_14": {
       "status": "SCOPED_LIGHT_GPU_COST_REDUCTION_VERIFIED",
       "scope": "Light moving targets use 70-percent dimensions and 1x MSAA, then restore full-size 4x MSAA at rest. Source geometry and the derived tessellation are unchanged. Already-handled navigation events are consumed after native widgets; keyboard/IME/focus/primary clicks remain.",

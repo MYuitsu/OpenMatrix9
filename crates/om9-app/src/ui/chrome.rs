@@ -222,38 +222,75 @@ impl MatrixApp {
                         }
                     }
                     "File" => {
-                        for kind in crate::file_lifecycle::FileKind::ALL {
-                            let label=if kind==crate::file_lifecycle::FileKind::New {kind.label().to_owned()} else {format!("{}…",kind.label())};
-                            let response=ui.button(label).on_hover_text("Native OM9 document (.om9)");
-                            self.file_menu_items.insert(kind,response.rect);
-                            if response.clicked() {self.invoke(kind.feature_id(),InvocationOrigin::Menu);ui.close();}
-                        }
-                        for (label, export) in [("Import 3DM…", false), ("Export 3DM…", true)] {
-                            let response = ui
-                                .add_enabled(
-                                    !self.controller.is_running(),
-                                    egui::Button::new(label),
-                                )
-                                .on_hover_text(
-                                    "Native Rhino 3DM reader/writer (requires the admitted OM9 exchange executable)",
-                                );
-                            if response.clicked() {
-                                self.three_dm_request = Some(export);
+                        use crate::file_lifecycle::FileKind;
+                        // Empty labels mark the same groups as the Matrix File menu.
+                        let rows = [
+                            ("New", "FileNew", "Ctrl+N", Some(FileKind::New), 0),
+                            ("Open...", "FileOpen", "Ctrl+O", Some(FileKind::Open), 0),
+                            ("Open RVOC...", "", "", None, 0),
+                            ("", "", "", None, 0),
+                            ("Save", "FileSave", "Ctrl+S", Some(FileKind::Save), 0),
+                            ("Save As...", "FileSaveAs", "", Some(FileKind::SaveAs), 0),
+                            ("", "", "", None, 0),
+                            ("Save Small", "FileSaveSmall", "", None, 0),
+                            ("Save Small As...", "FileSaveSmallAs", "", None, 0),
+                            ("", "", "", None, 0),
+                            ("Incremental Save", "", "", None, 0),
+                            ("User Library", "FileUserLibrary", "", None, 0),
+                            ("User Library Add...", "FileUserLibraryAdd", "", None, 0),
+                            ("Submit to CAD/CAM", "FileStullerSubmit", "", None, 0),
+                            ("Export and Zip", "", "", None, 0),
+                            ("Insert...", "", "Ctrl+I", None, 0),
+                            ("Import...", "FileImport", "", None, 1),
+                            ("Export Selected...", "FileExportSelected", "", None, 2),
+                            ("Export with Origin...", "", "", None, 0),
+                            ("Notes", "FileNotes", "", None, 0),
+                            ("", "", "", None, 0),
+                            ("Properties...", "", "", None, 5),
+                            ("Print...", "FilePrint", "Ctrl+P", None, 0),
+                            ("", "", "", None, 0),
+                            ("Send...", "", "", None, 0),
+                            ("Exit", "", "", None, 3),
+                            ("", "", "", None, 0),
+                            ("Export 3DM...", "FileExportSelected", "", None, 4),
+                        ];
+                        ui.set_min_width(285.);
+                        let max_height = (ui.ctx().content_rect().height() - 45.).max(100.);
+                        egui::ScrollArea::vertical().max_height(max_height).show(ui, |ui| {
+                        for (label, icon, shortcut, kind, action) in rows {
+                            if label.is_empty() { ui.separator(); continue; }
+                            let enabled = kind.is_some() || action == 3 || (action != 0 && !self.controller.is_running());
+                            let (rect, response) = ui.allocate_exact_size(egui::vec2(285., 29.), egui::Sense::click());
+                            if enabled && response.hovered() { ui.painter().rect_filled(rect, 0., Color32::from_rgb(220, 235, 250)); }
+                            if !icon.is_empty() {
+                                let icon_rect = egui::Rect::from_min_size(rect.min + egui::vec2(2., 2.), egui::vec2(25., 25.));
+                                self.icons.paint_with_opacity(ui, icon_rect, icon, if enabled {255} else {100});
+                            }
+                            let color = if enabled { Color32::BLACK } else { Color32::GRAY };
+                            ui.painter().text(rect.left_center() + egui::vec2(38., 0.), Align2::LEFT_CENTER, label, FontId::proportional(11.), color);
+                            ui.painter().text(rect.right_center() - egui::vec2(8., 0.), Align2::RIGHT_CENTER, shortcut, FontId::proportional(11.), color);
+                            if let Some(kind) = kind { self.file_menu_items.insert(kind, rect); }
+                            let response = match action {
+                                1 => response.on_hover_text("Import Rhino 3DM"),
+                                2 => response.on_hover_text("Export selected objects as STL"),
+                                4 => response.on_hover_text("Export Rhino 3DM"),
+                                _ if !enabled => response.on_hover_text("Not yet supported"),
+                                _ => response,
+                            };
+                            if enabled && response.clicked() {
+                                if let Some(kind) = kind { self.invoke(kind.feature_id(), InvocationOrigin::Menu); }
+                                else { match action {
+                                    1 => self.three_dm_request = Some(false),
+                                    2 => self.invoke("OM9-FILE-001", InvocationOrigin::Menu),
+                                    3 => ui.ctx().send_viewport_cmd(egui::ViewportCommand::Close),
+                                    4 => self.three_dm_request = Some(true),
+                                    5 => self.invoke("DocumentProperties", InvocationOrigin::Menu),
+                                    _ => {}
+                                }}
                                 ui.close();
                             }
                         }
-                        let stl = ui
-                            .add_enabled(
-                                !self.controller.is_running(),
-                                egui::Button::new("Export Selected STL…"),
-                            )
-                            .on_hover_text(
-                                "Selected meshes and editable B-Rep solids, binary STL in millimetres",
-                            );
-                        if stl.clicked() {
-                            self.invoke("OM9-FILE-001", InvocationOrigin::Menu);
-                            ui.close();
-                        }
+                        });
                     }
                     "Edit" => {
                         let can_copy = !self.controller.is_running() && !self.controller.selected().is_empty();
@@ -514,60 +551,17 @@ impl MatrixApp {
         }
         let collapsed = self.dock.section(id).collapsed;
         if collapsed && id.keeps_controls_while_collapsed() {
-            self.closed_bar_controls.insert(id.key());
             self.section_bar_controls(ui, id);
         }
         !collapsed
     }
     /// Snaps and Layers keep important controls on their closed title bar.
     fn section_bar_controls(&mut self, ui: &mut egui::Ui, id: SectionId) {
+        self.closed_bar_controls.insert(id.key());
         ui.horizontal_wrapped(|ui| match id {
             SectionId::Snaps => {
-                for name in ["GridSnap", "Ortho", "Planar", "Project"] {
-                    let enabled = matches!(name, "GridSnap" | "Ortho" | "Planar" | "Project");
-                    let active = match name {
-                        "GridSnap" => self.controller.grid_snap(),
-                        "Ortho" => self.controller.ortho(),
-                        "Planar" => self.controller.planar(),
-                        "Project" => self.controller.project(),
-                        _ => false,
-                    };
-                    let response = if enabled {
-                        self.icon_toggle(ui, name, active, name)
-                    } else {
-                        self.icon(ui, name, false, name)
-                    };
-                    if enabled && response.clicked() {
-                        match name {
-                            "GridSnap" => {
-                                let enabled = !self.controller.grid_snap();
-                                self.controller.set_grid_snap(enabled);
-                                self.status.info(if enabled { "Grid Snap on" } else { "Grid Snap off" });
-                            }
-                            "Ortho" => {
-                                let enabled = !self.controller.ortho();
-                                self.controller.set_ortho(enabled);
-                                self.status
-                                    .info(if enabled { "Ortho on" } else { "Ortho off" });
-                            }
-                            "Planar" => {
-                                let enabled = !self.controller.planar();
-                                self.controller.set_planar(enabled);
-                                self.status
-                                    .info(if enabled { "Planar on" } else { "Planar off" });
-                            }
-                            "Project" => {
-                                let enabled = !self.controller.project();
-                                self.controller.set_project(enabled);
-                                self.status.info(if enabled {
-                                    "Project on"
-                                } else {
-                                    "Project off"
-                                });
-                            }
-                            _ => {}
-                        }
-                    }
+                for icon in ["GridSnapON", "OrthoSnapON", "PlanarSnapON", "ProjectSnapON"] {
+                    self.snap_constraint_icon(ui, icon);
                 }
             }
             SectionId::Layers => {
@@ -626,16 +620,18 @@ impl MatrixApp {
         });
     }
 
-    /// A clickable icon whose active state is drawn as a bright frame instead of
-    /// being disabled: snap toggles must stay clickable while they are off.
+    /// Toggle state changes the frame and, for SNAPS, icon opacity.
+    /// The off state remains clickable.
     pub(super) fn icon_toggle(
         &mut self,
         ui: &mut egui::Ui,
         name: &str,
         active: bool,
         help: &str,
+        dim_when_off: bool,
     ) -> egui::Response {
-        let response = self.icon_slot(ui, name, true, help, None);
+        let opacity = if dim_when_off && !active { 140 } else { 255 };
+        let response = self.icon_slot_with_opacity(ui, name, true, help, None, opacity);
         if active {
             ui.painter().rect_stroke(
                 response.rect.shrink(1.5),
@@ -653,6 +649,18 @@ impl MatrixApp {
         enabled: bool,
         help: &str,
         right_click: Option<&str>,
+    ) -> egui::Response {
+        self.icon_slot_with_opacity(ui, name, enabled, help, right_click, 255)
+    }
+
+    fn icon_slot_with_opacity(
+        &mut self,
+        ui: &mut egui::Ui,
+        name: &str,
+        enabled: bool,
+        help: &str,
+        right_click: Option<&str>,
+        opacity: u8,
     ) -> egui::Response {
         // Menu columns draw at the width-driven edge; every other caller (the
         // toolbars) keeps the responsive base because `column_icon_edge` is reset after
@@ -696,7 +704,7 @@ impl MatrixApp {
             Stroke::new(1., Color32::from_white_alpha(if enabled { 65 } else { 28 })),
         );
         let inset = if self.toolbar_drawing { 1.125 } else { 1.5 };
-        self.icons.paint(ui, rect.shrink(inset), name);
+        self.icons.paint_with_opacity(ui, rect.shrink(inset), name, opacity);
         match self.icon_column {
             IconColumn::Left => self.rail_icon_rects.push(rect),
             IconColumn::Right => self.right_dock_icon_rects.push(rect),
@@ -721,7 +729,7 @@ impl MatrixApp {
     }
     fn feature_icon(&mut self, ui: &mut egui::Ui, id: &str, name: &str) {
         if name == "RhinoOptions" {
-            if self.icon(ui, name, true, "Options: General / Undo").clicked() {
+            if self.icon(ui, name, true, "Options").clicked() {
                 self.invoke(name, InvocationOrigin::Menu);
             }
             return;
@@ -1879,6 +1887,9 @@ impl MatrixApp {
                 continue;
             }
             if self.dock.section(*id).collapsed {
+                if id.keeps_controls_while_collapsed() {
+                    self.section_bar_controls(ui, *id);
+                }
                 continue;
             }
             self.sidebar_section_ui(ui, *id);

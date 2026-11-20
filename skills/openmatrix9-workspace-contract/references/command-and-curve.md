@@ -13,14 +13,16 @@ References: default rows and options (registry other_private_references key `mat
 
 ## Idle command-name suggestions
 
-While idle, typing original command names opens suggestions below the input. Use local spec names and supported native mappings; rank exact matches, prefixes, then contained matches. An available exact typed name takes priority over a previously selected contained match. Unavailable commands remain visibly disabled and cannot execute.
+Click the CMD input to type an original command name while idle. Suggestions appear below the input. Use local spec names and supported native mappings and rank exact matches, prefixes, then contained matches. An available exact typed name takes priority over a previously selected contained match. Unavailable commands remain visibly disabled and cannot execute.
 
 - Up/Down selects available suggestions, skipping disabled rows.
 - Tab fills the selected name without executing it.
 - Enter or a mouse click executes through the shared CMD/menu handler.
 - First Esc dismisses the list and preserves the draft; further Esc cancels/clears as usual.
 
-Hide named-command suggestions during point/interactive options or coordinate input, on no match, focus loss and workbench exit. When the popup is hidden, Up/Down recalls command history while preserving the current draft. Empty Enter repeats the last supported command; viewport typing uses the same Command input path.
+Hide named-command suggestions during point input, interactive options or coordinate input, on no match, focus loss and workbench exit. When the popup is hidden, Up/Down recalls command history while preserving the current draft. Empty Enter repeats the last supported command when no tool is awaiting input.
+
+An idle viewport owns keyboard shortcuts. `E` arms End one-shot, and unbound keys leave the CMD draft empty. A command icon or start shortcut can focus CMD at a prompt that accepts input. For a command that picks an object and then asks for a parameter, the successful pick focuses CMD when the parameter prompt opens. Completing or canceling the command returns the keyboard to the viewport. [Approved viewport and CMD keyboard ownership](../../openmatrix9-ui/SKILL.md).
 
 ## Straight Line/Polyline
 

@@ -207,10 +207,40 @@
     }
   ],
   "runtime_implementation": {
+    "native_brep_catalog_followup_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "All five named groups captured and reopened canonical and native Box fixtures; selected snapshot persistence and mixed BRep cases passed scoped tests. Arbitrary whole-document state and desktop lifecycle acceptance remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "named_brep_save_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "The named BRep v6 Save worker validates native packets before writing the archive. A Parts Box snapshot was saved and reopened in a headless fixture. Other geometry and desktop acceptance remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "named_brep_scene_worker_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "Named BRep restoration and candidate-scene construction run on the worker; publication rejects cancellation and stale project, selection, file, document or scene context. The scoped Box fixture passed, including cancellation, changed selection, all five groups and Save As/Open. Large-scene responsiveness and desktop remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "named_brep_validation_worker_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "Embedded project assets for named BRep Open are checked on the worker and a resource-identity proof is checked before replacement. Five Box groups and refusal of changed or missing proof resources passed focused tests. Restoration and scene construction still run on the UI thread; desktop responsiveness remains open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "named_brep_box_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "Master, Creation, Parts, Render and Output capture and open an OCCT Box through the pinned worker; stale-project refusal and Save As/Open of a restored snapshot passed. Broader BRep, production build and desktop remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "named_open_p07_2026_11_17": {
+      "status": "PARTIAL_LIFECYCLE_TEST_MANUAL_UI_PENDING",
+      "scope": "Headless Master opening exercised dirty Save, Discard and Cancel, and refused corrupt or removed snapshots without replacing the current document. Pointer-driven tests also opened the newest of two versions in each of the five named groups and selected an older Master version after Discard. Other version actions, native picker and the full desktop workflow remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "Master Job Bag deep-clones the whole document (entities/layers/instances/history) for inspection; no silent live replacement.",
+    "scope": "Master captures a full Document in session and has live replacement; point restore works. Resource payload JSON roundtrip, dirty confirmation and full-design persistence remain open; see 2026-11-17 audit.",
     "owner": "crates/om9-app/src/project_manager.rs",
     "tests": [
       "project_manager 8 passed",
@@ -223,7 +253,7 @@
     "human_approval": null,
     "remaining": [
       "Manual M01-UI visual review pending.",
-      "Job Bag state is in-session; project-file embedding is not claimed."
+      "Point, resource, nested-instance and representative canonical/native BRep cases have scoped P07 evidence; arbitrary geometry and dependencies, full native desktop workflow and visual/DPI acceptance remain open."
     ],
     "last_verified": {
       "date": "2026-10-22",
@@ -240,6 +270,18 @@
       "evidence": "implementation/evidence/M01/2026-10-22-l2-03-15-project-jobbags-checks.json",
       "logs": "build/standalone-validation/ui-artifacts/m01-l2-03-15-20261022/acceptance.log",
       "note": "Job Bag state embedded as .om9 resource and restored on Open; Master restore live; manual M01-UI pending."
+    },
+    "project_manager_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "AUDIT_ONLY_GAPS_OPEN",
+      "scope": "Image-led Project Manager audit: eight existing integration tests pass; six model gaps reproduced; twenty gaps planned. No implementation or manual gate promotion.",
+      "plan": "docs/plans/2026-11-17-project-manager-gap-plan.md",
+      "evidence": "docs/validation/2026-11-17-project-manager-audit.json"
+    },
+    "named_panel_full_document_p07_2026_11_17": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "All five named panel groups preserve authored hidden/locked point entities, layer, material, recipe and opaque payload through catalog reload and dirty-document Discard; native BRep and desktop acceptance remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
     }
   }
 }

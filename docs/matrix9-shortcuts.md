@@ -6,7 +6,7 @@ Nguồn: các mô tả tại `ref/matrix9/OpenMatrix9_Codex_Spec_v1/specs/01-cor
 
 | Phím | Lệnh / tác dụng gốc | Trạng thái bản thử | Spec |
 |---|---|---|---|
-| F2 | `CommandHistory` | Mở/ẩn lịch sử nhập CMD và đầu ra Report view; chưa đủ toàn bộ tùy chọn lịch sử Rhino | OM9-INFO-004 |
+| F2 | `CommandHistory` | Mở hoặc đóng cửa sổ lịch sử CMD chỉ đọc. Nút Command History trong Info & Settings cũng mở cùng cửa sổ. | OM9-INFO-004 |
 | F4 | Gốc mặt phẳng dựng hiện tại | Nhận điểm gốc trong Line, Polyline, Distance, Angle, PictureFrame; chỉ F4 không kèm Ctrl/Alt/Shift, ngoài hộp thoại | OM9-VIEWPORT-001 |
 | F5 | `CenterViewport` | Đưa camera của viewport đang dùng về tâm, giữ mức zoom | OM9-VIEW-012 |
 | F6 | Menu ngữ cảnh | Có 8 nhóm gốc; nội dung đọc từ ContextMenu.xml gốc theo lựa chọn. Chỉ lệnh đã có handler được bật | OM9-F6-001 |

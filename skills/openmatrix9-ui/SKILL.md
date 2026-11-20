@@ -15,6 +15,8 @@ description: "Implement or review the Matrix9 interface described by OpenMatrix9
 
 [Command/grid theme](references/command-grid-theme.md) và workspace references giữ Command xanh, canvas đen, finite world grid, titles/dropdowns, pinned copyable CMD và Line/Polyline interaction đã duyệt. Defaults/unknowns không lấy từ upstream. UI giống hình không chứng minh solver đã hoạt động.
 
+**Quyền bàn phím của viewport và CMD (2026-11-18).** Khi không có lệnh đang chạy, viewport xử lý bàn phím theo cơ chế phím tắt. Phím chưa gán không đi vào CMD. Bấm `E` gọi End Snap một lần cho điểm kế tiếp, kể cả khi End thường trực đang tắt. Đổi nhóm icon, chuyển viewport, đóng menu tiêu đề và chọn đối tượng thông thường vẫn giữ phím tắt. Icon hoặc phím tắt khởi động lệnh đưa focus vào CMD theo prompt. Nếu lệnh yêu cầu chọn đối tượng rồi nhập tham số, chuyển focus sang CMD khi chọn xong đối tượng và tới bước nhập. Sau click nhận điểm trong viewport, kể cả điểm trả từ worker, trả bàn phím cho viewport trừ bước đang yêu cầu nhập như Elevator height. Khi lệnh kết thúc hoặc bị hủy, trả bàn phím cho viewport. Người dùng vẫn có thể bấm trực tiếp vào ô CMD để chủ động nhập lệnh hoặc tham số.
+
 ## Command: icon, mặc định và tham số
 
 Khi sửa UI/input/preview/picking của lệnh CAD, áp dụng [hợp đồng nguồn và viewport](../openmatrix9-workflow/references/source-and-viewport-contract.md): đồng bộ đường tương tác với hình học nguồn và kiểm kết quả commit, không dừng ở hình vẽ hoặc handler mở được. Pick/snap phải gắn đúng nguồn và trạng thái; không dùng độ mịn hiển thị để thay dung sai CAD.
@@ -48,6 +50,18 @@ Người dùng đồng ý ghi quy tắc ngày 2026-11-01: orbit Perspective mặ
 Người dùng duyệt ngày 2026-10-19 cho OM9: pick BRep giữ root, đầy đủ member path, UUID face/edge/vertex và SourceStamp/publication. Không chọn đường chéo tessellation như cạnh BRep. Publication mới làm pick cũ mất hiệu lực; Undo không làm pick cũ hợp lệ trở lại. Đây là quy tắc OM9 đã duyệt, không tự coi là hành vi Matrix gốc được chứng minh.
 
 Khi triển khai hoặc kiểm tra selection BRep, đối chiếu bằng chứng trong checkout: `implementation/evidence/M02/2026-10-19-brep-selection.md` và các test/runtime được dẫn tại đó. Bằng chứng tự động không thay chữ ký reviewer UI.
+
+## Project Manager nhúng và workspace (người dùng duyệt 2026-11-17)
+
+Khi workspace catalog và Project Manager nhúng cùng tồn tại, giữ nguyên dữ liệu nhúng khi lưu; chỉ nhập vào workspace qua thao tác rõ ràng, cấp lại ID cục bộ, giữ bag legacy inline và từ chối nhập nguyên lô nếu hủy, dữ liệu lỗi hoặc nguồn thay đổi. Đây là quy tắc OM9 do người dùng duyệt, không phải kết luận về định dạng Matrix gốc. Bằng chứng và giới hạn kiểm thử: `docs/validation/2026-11-17-project-manager-p07.md`; nghiệm thu desktop còn mở.
+
+Khi Info của project có bản nháp đang mở, không đổi project qua sidebar và không bắt đầu import/refresh catalog; từ chối áp dụng kết quả import hoặc tải catalog đến trong thời gian đó. Bản nháp kết thúc khi Save, Cancel hoặc đóng cửa sổ. Nếu New/Open thay manager trong trường hợp không có workspace catalog, giữ bản nháp cũ để người dùng sao chép nhưng vô hiệu hóa Save và các thao tác phụ thuộc project; không gắn lại vào ID trùng của catalog mới. Người dùng duyệt quy tắc bảo vệ bản nháp ngày 2026-11-17; desktop và các thời điểm chuyển trạng thái thực vẫn cần nghiệm thu.
+
+Khi đổi thư mục project, nếu catalog nguồn đã bị phiên khác sửa trên đĩa, từ chối chuyển bản cũ; sau khi tải lại catalog mới, người dùng có thể thử lại. Quy tắc OM9 được người dùng duyệt ngày 2026-11-17; kiểm thử Windows và giới hạn cạnh tranh hệ thống tệp được ghi tại `docs/validation/2026-11-17-project-manager-p07.md`.
+
+Trên Windows, khi đổi thư mục project, có thể dùng lại catalog đích đã tồn tại nếu manifest và toàn bộ asset cần thiết khớp chính xác catalog đang chuyển, không ghi đè; từ chối nếu nội dung khác hoặc thiếu asset. Người dùng duyệt ngày 2026-11-17; bằng chứng thử lại sau tiến trình kết thúc và giới hạn tại `docs/validation/2026-11-17-project-manager-p07.md`.
+
+Khi lọc Job Bag, giữ nguyên block lồng nếu các phần tử bên trong cùng một loại đã xác định; từ chối lọc block hỗn hợp hoặc chưa xác định để tránh lấy thiếu hoặc lấy dư. Khi Load, có thể xác định lại loại của block từ archive đã kiểm tra, kể cả khi metadata cũ ghi chưa xác định. Người dùng duyệt ngày 2026-11-17; bằng chứng và giới hạn tại `docs/validation/2026-11-17-project-manager-p07.md`.
 
 ## Cập nhật nghiệp vụ sau khi code
 

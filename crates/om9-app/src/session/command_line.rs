@@ -7,10 +7,16 @@ use super::*;
 
 impl Controller {
     pub fn prompt(&self) -> String {
+        if self.ring_rail_history_pending() { return "Ring Rail: updating dependent features (Esc to cancel)".into(); }
+        if self.ring_rail_confirmation_pending() { return "You already have a Ring Rail. Replace it? Yes / No / Cancel".into(); }
         // A session whose context is gone asks for nothing: the prompt and the
         // phase machine must never disagree (OM9-L3-01-02-004 N5).
+        if self.ring_rail_is_open() { return "Ring Rail: ".into(); }
         if !self.is_running() {
             return "Command: ".to_owned();
+        }
+        if self.boolean_builder_worker_pending() {
+            return if self.boolean_builder_worker_preview() { "Boolean Builder: previewing (Esc to cancel)" } else { "Boolean Builder: computing (Esc to cancel)" }.into();
         }
         #[cfg(feature="occt-brep")]
         if self.wireframe_worker.is_some() { return "Preparing ExtractWireframe (Esc to cancel)".to_owned(); }
@@ -411,7 +417,8 @@ impl Controller {
     }
     pub fn prompt_with_options(&self) -> String {
         let prompt = self.prompt();
-        if !self.is_running() {
+        if self.boolean_builder_worker_pending() { return prompt; }
+        if !self.is_running() && !self.ring_rail_is_open() {
             // An open add-on session or builder asks its own question.
             return self.session_prompt().or_else(|| self.addon_builder_prompt()).unwrap_or(prompt);
         }
@@ -491,8 +498,13 @@ impl Controller {
         CommandInputSnapshot {
             owner,
             run: self.command_run,
+            input_revision: self.input_revision,
             phase: self.phase(),
             options,
         }
+    }
+
+    pub(crate) fn command_run(&self) -> u64 {
+        self.command_run
     }
 }

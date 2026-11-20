@@ -344,7 +344,7 @@ fn capped_high_dpi_case_911x480() {
         for slot in &plan.views {
             assert!(
                 (slot.rect.width - 304.5).abs() <= PLAN_TOLERANCE
-                    && (slot.rect.height - 140.).abs() <= PLAN_TOLERANCE,
+                    && (slot.rect.height - 173.5).abs() <= PLAN_TOLERANCE,
                 "{:?}: {:?}",
                 slot.view,
                 slot.rect
@@ -355,9 +355,9 @@ fn capped_high_dpi_case_911x480() {
     // Exact numbers from the pure planner (default rails 300 + 300).
     let pure = pure_plan(911., 480.);
     assert_eq!(pure.right_dock, None);
-    assert_eq!((pure.center.width, pure.center.height), (611., 282.));
+    assert_eq!((pure.center.width, pure.center.height), (611., 349.));
     for slot in &pure.views {
-        assert_eq!((slot.rect.width, slot.rect.height), (304.5, 140.));
+        assert_eq!((slot.rect.width, slot.rect.height), (304.5, 173.5));
     }
 }
 
@@ -411,7 +411,7 @@ fn dock_threshold_sweep_1150_to_1250() {
 
 /// The pure planner (`compute_regions`) for the default layout with Snaps
 /// docked on the right: the numbers a reader can recompute by hand from the
-/// documented constants (rails 300 + 300, command 90, menu 21, toolbar 67,
+/// documented constants (rails 300 + 300, command 90, menu 21, hidden toolbar 0,
 /// status 20, view gap 2).
 fn pure_plan(width: f32, height: f32) -> RegionPlan {
     let mut layout = DockLayout::matrix_default();
@@ -429,14 +429,14 @@ fn pure_plan(width: f32, height: f32) -> RegionPlan {
 #[test]
 fn layout_evidence_table() {
     let rows: [(f32, f32, bool, f32, f32, f32, f32); 8] = [
-        (1280., 720., true, 680., 522., 339., 260.),
-        (1366., 728., true, 766., 530., 382., 264.),
-        (1093., 585., false, 793., 387., 395.5, 192.5),
-        (911., 480., false, 611., 282., 304.5, 140.),
-        (1920., 1080., true, 1320., 882., 659., 440.),
-        (5120., 1440., true, 4520., 1242., 2259., 620.),
-        (1200., 720., true, 600., 522., 299., 260.),
-        (1199., 720., false, 899., 522., 448.5, 260.),
+        (1280., 720., true, 680., 589., 339., 293.5),
+        (1366., 728., true, 766., 597., 382., 297.5),
+        (1093., 585., false, 793., 454., 395.5, 226.),
+        (911., 480., false, 611., 349., 304.5, 173.5),
+        (1920., 1080., true, 1320., 949., 659., 473.5),
+        (5120., 1440., true, 4520., 1309., 2259., 653.5),
+        (1200., 720., true, 600., 589., 299., 293.5),
+        (1199., 720., false, 899., 589., 448.5, 293.5),
     ];
     let rects = |r: RegionRect| serde_json::json!([r.x, r.y, r.width, r.height]);
     for (width, height, dock, center_w, center_h, view_w, view_h) in rows {

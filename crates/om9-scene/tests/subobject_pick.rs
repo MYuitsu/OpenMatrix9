@@ -186,12 +186,15 @@ fn coincident_brep_segments_keep_both_topology_candidates() {
         segments: vec![[0, 1, 0], [0, 1, 1]], vertices: vec![],
         topology: BrepTopology { faces: vec![uuid::Uuid::new_v4()], edges: ids.to_vec(), vertex_ids: vec![], face_edges: vec![] }.into(),
     };
-    let shape = Brep::from_native("CASCADE Topology fixture".into(), display, &Limits::default()).unwrap();
+    let limits = Limits::default();
+    let shape = Brep::from_native("CASCADE Topology fixture".into(), display, &limits).unwrap();
+    let (source, representation) = shape.into_canonical_and_representation();
     let mut document = Document::new("coincident edges");
-    let entity = Entity::new("brep", Geometry::Brep(shape), document.current_layer);
+    let entity = Entity::new("brep", Geometry::Brep(source.clone()), document.current_layer);
     document.entities.insert(entity.id, entity);
     let document_id = document.id;
-    let coordinator = TransactionCoordinator::new(World::new(vec![document], &Limits::default()).unwrap(), Limits::default()).unwrap();
+    let coordinator = TransactionCoordinator::new(World::new(vec![document], &limits).unwrap(), limits).unwrap();
+    coordinator.representation_store().lock().unwrap().insert(&source, representation, &limits).unwrap();
     let hits = scene(&coordinator, document_id).pick_edge_candidates(
         screen_of([0., 0., 0.]), &camera(), viewport(), 6., PickIntent::Select,
     ).unwrap();

@@ -698,7 +698,7 @@ fn commit_geometry(
             geometry: map(&geometry, &placement)?,
         });
     }
-    controller.commit_utility_mutations(name, mutations)
+    controller.commit_transform_geometry_mutations(name, mutations)
 }
 
 /// The selected curves and the objects to flow: exactly two curves are the frames.

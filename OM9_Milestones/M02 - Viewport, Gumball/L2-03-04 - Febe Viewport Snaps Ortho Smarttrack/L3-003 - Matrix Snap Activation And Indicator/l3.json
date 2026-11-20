@@ -217,6 +217,37 @@
         "implementation/evidence/M02/OM9-L3-03-04-003/OM9-L4-03-04-003-06-acceptance.md"
       ],
       "acceptance": "An END/MID one-shot applies to exactly one pick and its indicator disappears; Escape clears the indicator and does not carry it to the next project."
+    },
+    "standalone_verification_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Between viewport reference clicks return keyboard focus so E arms End for the second reference. The references produce only one midpoint in the outer Line transaction.",
+      "tests": ["om9-app snap_panel_modes::between_viewport_picks_keep_end_shortcut_and_commit_only_midpoint"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md"]
+    },
+    "current_frame_marker_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A Line started in Looking Down resolves a Point snap in Perspective. The marker paints in the hovered pane on the same frame as Project and the Line preview, and disappears when the pointer leaves.",
+      "tests": ["om9-app snap_panel_modes::combined_constraints_keep_line_preview_pick_and_typed_coordinates_consistent"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#combined-point-constraints-through-viewport-and-cmd-on-2026-11-18"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G01",
+        "G03",
+        "G04",
+        "G06"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

@@ -56,6 +56,9 @@ impl ZoomResponse {
         }
     }
     pub fn add_points(&mut self, points: f64, now: Instant) {
+        self.add_points_with_scale(points, now, 0.9);
+    }
+    fn add_points_with_scale(&mut self, points: f64, now: Instant, scale: f64) {
         if !points.is_finite() {
             return;
         }
@@ -65,7 +68,7 @@ impl ZoomResponse {
         }
         self.last_direction = points.signum();
         let initial = self.base.ortho_span.unwrap_or(self.base.distance);
-        self.target = (self.target + points / 40. * 0.81_f64.ln())
+        self.target = (self.target + points / 40. * scale.powi(2).ln())
             .clamp((1e-6 / initial).ln(), (1e15 / initial).ln());
         let remaining = self.target - self.x;
         // A reversal must not continue travelling away from the user's new target.
@@ -264,6 +267,21 @@ impl NavigationController {
         now: Instant,
         speed: f64,
     ) {
+        self.wheel_displayed_with_scale(id, camera, displayed, viewport, cursor, points, now, speed, 0.9);
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn wheel_displayed_with_scale(
+        &mut self,
+        id: ViewId,
+        camera: &Camera,
+        displayed: &Camera,
+        viewport: Viewport,
+        cursor: [f64; 2],
+        points: f64,
+        now: Instant,
+        speed: f64,
+        scale: f64,
+    ) {
         if !points.is_finite() || points == 0. || self.gesture.is_some() {
             return;
         }
@@ -294,7 +312,7 @@ impl NavigationController {
             s.zoom = Some(ZoomResponse::new(base, anchor, now, speed));
         }
         if let Some(z) = s.zoom.as_mut() {
-            z.add_points(points, now);
+            z.add_points_with_scale(points, now, scale);
         }
         s.last_input = now;
         s.phase = NavigationPhase::Settling;

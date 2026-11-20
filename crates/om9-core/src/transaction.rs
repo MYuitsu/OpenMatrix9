@@ -243,6 +243,10 @@ pub struct Cancellation {
     linked: [Option<Arc<AtomicBool>>; 3],
 }
 impl Cancellation {
+    /// Observe the same cancellation flag as an existing worker owner.
+    pub fn from_shared_flag(flag: Arc<AtomicBool>) -> Self {
+        Self { own: flag, linked: [None, None, None] }
+    }
     /// A bounded union of shared operation owners. Neither caller can replace
     /// a cancellation already bound to a completed worker's result.
     pub fn either(&self, other: &Self) -> Result<Self> {
@@ -316,6 +320,12 @@ pub enum Mutation {
         expected_revision: u64,
         bundle: Box<ImportBundle>,
     },
+    /// Retained provenance for hosts inserted earlier in the same transaction.
+    RetainedSelectionInsert {
+        document: DocumentId,
+        expected_revision: u64,
+        selection: Box<crate::retained::RetainedSelection>,
+    },
     Delete {
         source: SourceStamp,
     },
@@ -369,6 +379,12 @@ pub enum Mutation {
         /// An insert without a result is valid for a feature whose geometry is not yet
         /// published; a builder that computes the geometry publishes both together.
         published: Vec<(ObjectId, crate::result::PublishedResult)>,
+    },
+    /// Insert semantic references belonging to recipes in the same transaction.
+    HistoryReferencesInsert {
+        document: DocumentId,
+        expected_revision: u64,
+        references: Vec<crate::associative::SemanticReference>,
     },
     /// Replace one recorded feature and the published results of its outputs after a
     /// recompute, in one atomic step. The recipes must already exist; a recompute never
@@ -461,9 +477,11 @@ impl Mutation {
             | Self::ExchangeInsert { document, .. }
             | Self::ResourceDelete { document, .. }
             | Self::Import { document, .. }
+            | Self::RetainedSelectionInsert { document, .. }
             | Self::Context { document, .. }
             | Self::Tolerance { document, .. }
             | Self::History { document, .. }
+            | Self::HistoryReferencesInsert { document, .. }
             | Self::HistoryUpdate { document, .. }
             | Self::DefinitionInsert { document, .. }
             | Self::FeatureInsert { document, .. }
@@ -489,6 +507,11 @@ pub struct TransactionRequest {
     pub cancel: Cancellation,
 }
 impl TransactionRequest {
+    /// Conservative owned-input inventory for retaining a request across a
+    /// worker handoff. It does not include later transaction staging.
+    pub fn worker_input_bytes(&self, limits: &Limits) -> Result<u64> {
+        Ok(self.storage_usage(limits)?.bytes.max(1))
+    }
     fn storage_usage(&self, l: &Limits) -> Result<Usage> {
         let mut u = Usage::array::<Mutation>(self.mutations.capacity())?;
         u.add(
@@ -508,6 +531,7 @@ impl TransactionRequest {
             match mutation {
                 Mutation::Layers(plan) => value = plan.storage_usage(l)?,
                 Mutation::Import { bundle, .. } => value = bundle.storage_usage(l)?,
+                Mutation::RetainedSelectionInsert { selection, .. } => value = selection.storage_usage(l)?,
                 Mutation::ResourceInsert { resource, .. } => value = resource.validate(l)?,
                 Mutation::ExchangeInsert { records, .. } => value = records.validate(l)?,
                 Mutation::Insert { entity, .. } => {
@@ -644,6 +668,13 @@ impl TransactionRequest {
                     value.add(crate::model::Document::recipe_storage_usage(recipe, l)?, l)?;
                     for (id, result) in published {
                         value.add(published_result_usage(*id, result, l)?, l)?;
+                    }
+                }
+                Mutation::HistoryReferencesInsert { references, .. } => {
+                    value.add(Usage::array::<crate::associative::SemanticReference>(references.capacity())?, l)?;
+                    for reference in references {
+                        reference.validate(l)?;
+                        value.add(Usage { bytes: reference.role.capacity() as u64, ..Usage::default() }, l)?;
                     }
                 }
                 Mutation::Publish(result) => {
@@ -839,6 +870,140 @@ pub struct PreparedTransaction {
     pending_brep_representations: Option<PendingBrepRepresentations>,
 }
 
+/// A source edit, optional inserts or extensions, and the candidate prepared from that exact request.
+/// The private fields prevent pairing a rebuild with a different source edit.
+pub struct PreparedJoinHistoryEdit {
+    request: TransactionRequest,
+    prepared: PreparedTransaction,
+    document: DocumentId,
+    limits: Limits,
+    _baseline: CapturedDocument,
+    _candidate: Arc<Document>,
+    _input_reservation: ExternalMemoryReservation,
+    only_command: Option<&'static str>,
+}
+
+// Conservative duplicate-inclusive allowance for the current draft, graph
+// traversal, input/rollback snapshots and estimated update packaging. It is not
+// a proven peak bound and excludes producer geometry temporaries.
+fn join_history_snapshot_allowance(document: &Document, changed: usize, limits: &Limits) -> Result<u64> {
+    let mut bytes = document.validation_peak_estimate(limits, true)?.bytes;
+    let upper = document.storage_usage_upper(limits)?.bytes;
+    bytes = bytes.checked_add(upper.checked_mul(6).ok_or(Error::Overflow("history snapshots"))?)
+        .ok_or(Error::Overflow("history snapshots"))?;
+    let mut outputs = changed;
+    let mut most_inputs = 0usize;
+    let mut most_outputs = 0usize;
+    for recipe in document.history.recipes.values() {
+        outputs = outputs.checked_add(recipe.outputs.len()).ok_or(Error::Overflow("history outputs"))?;
+        most_inputs = most_inputs.max(recipe.inputs.len());
+        most_outputs = most_outputs.max(recipe.outputs.len());
+    }
+    for extra in [
+        Usage::btree::<ObjectId, ()>(changed)?.bytes,
+        Usage::btree::<ObjectId, ()>(outputs)?.bytes,
+        Usage::btree::<ObjectId, ()>(most_inputs)?.bytes,
+        Usage::array::<crate::associative::InputSnapshot>(most_inputs.checked_mul(2).ok_or(Error::Overflow("history inputs"))?)?.bytes,
+        Usage::array::<(ObjectId, Entity, Option<crate::result::PublishedResult>)>(most_outputs.checked_mul(2).ok_or(Error::Overflow("history outputs"))?)?.bytes,
+        Usage::array::<crate::associative::RecomputeOutcome>(document.history.recipes.len())?.bytes,
+        Usage::btree::<ObjectId, ()>(outputs)?.bytes,
+        Usage::array::<Mutation>(outputs.checked_add(1).and_then(|n| n.checked_mul(2)).ok_or(Error::Overflow("history mutations"))?)?.bytes,
+        Usage::array::<(ObjectId, crate::result::PublishedResult)>(outputs.checked_mul(2).ok_or(Error::Overflow("history results"))?)?.bytes,
+        Usage::array::<Box<crate::history::Recipe>>(document.history.recipes.len().checked_mul(2).ok_or(Error::Overflow("history recipes"))?)?.bytes,
+        document.history.execution_scratch_usage()?.bytes,
+    ] {
+        bytes = bytes.checked_add(extra).ok_or(Error::Overflow("history snapshots"))?;
+    }
+    Ok(bytes.max(1))
+}
+
+impl PreparedJoinHistoryEdit {
+    /// Initial admission for the staged draft, graph traversal and conservative
+    /// duplicate-inclusive snapshots and update packaging. A growing draft may
+    /// require more; producer geometry temporaries are extra.
+    pub fn draft_minimum_bytes(&self, limits: &Limits) -> Result<u64> {
+        if limits.max_bytes > self.limits.max_bytes || limits.max_objects > self.limits.max_objects
+            || limits.max_nodes > self.limits.max_nodes || limits.max_points > self.limits.max_points
+            || limits.max_history > self.limits.max_history || limits.max_outputs > self.limits.max_outputs
+            || limits.max_depth > self.limits.max_depth || limits.max_degree > self.limits.max_degree
+            || limits.max_name_bytes > self.limits.max_name_bytes {
+            return Err(Error::Invalid("history draft limits"));
+        }
+        join_history_snapshot_allowance(&self._candidate, self.request.mutations.len(), limits)
+    }
+    /// Rebuild a private copy on a worker and append its changes to the exact
+    /// source request. The caller must separately admit the draft, producer
+    /// scratch, and returned mutations for their complete lifetimes. On error
+    /// the private candidate must be discarded; nothing is published here.
+    pub fn assemble(self, limits: &Limits, cancel: &Cancellation,
+        draft_reservation: ExternalMemoryReservation)
+        -> Result<(TransactionRequest, ExternalMemoryReservation, ExternalMemoryReservation)> {
+        self.assemble_with_admission(limits, cancel, draft_reservation, |_, _| Ok(()))
+    }
+    /// The callback may grow the draft reservation through the same memory
+    /// account before each rebuild. It must return only after the requested
+    /// bytes are reserved; refusal aborts the private draft.
+    pub fn assemble_with_admission(self, limits: &Limits, cancel: &Cancellation,
+        draft_reservation: ExternalMemoryReservation,
+        admit: impl FnMut(&mut ExternalMemoryReservation, u64) -> Result<()>)
+        -> Result<(TransactionRequest, ExternalMemoryReservation, ExternalMemoryReservation)> {
+        let registry = crate::producers::reference_registry()?;
+        let (request, input, draft, candidates) = self.assemble_registered_with_admission(
+            &registry, limits, cancel, draft_reservation, admit)?;
+        if !candidates.is_empty() { return Err(Error::Unsupported("dependent native representation handoff")); }
+        Ok((request, input, draft))
+    }
+
+    /// General builder dependencies use the host's capability-scoped registry.
+    /// The returned native candidates must remain accounted until their source
+    /// and representations are handed to the final prepared transaction.
+    pub fn assemble_registered_with_admission(mut self, registry: &crate::producers::ProducerRegistry,
+        limits: &Limits, cancel: &Cancellation, mut draft_reservation: ExternalMemoryReservation,
+        mut admit: impl FnMut(&mut ExternalMemoryReservation, u64) -> Result<()>)
+        -> Result<(TransactionRequest, ExternalMemoryReservation, ExternalMemoryReservation, Vec<crate::brep::Brep>)> {
+        if cancel.is_canceled() || self.request.cancel.is_canceled() { return Err(Error::Canceled); }
+        if !Arc::ptr_eq(&draft_reservation.registry, &self._input_reservation.registry) {
+            return Err(Error::Invalid("history draft memory account"));
+        }
+        let minimum = self.draft_minimum_bytes(limits)?;
+        admit(&mut draft_reservation, minimum)?;
+        if draft_reservation.pending_bytes < minimum { return Err(Error::Budget("history draft memory")); }
+        draft_reservation.recheck_pending()?;
+        let before = self.prepared.entry.before.get(&self.document).ok_or(Error::Missing("history edit baseline"))?;
+        let staged = self.prepared.staged.documents.get(&self.document).ok_or(Error::Missing("history edit candidate"))?;
+        let changed: BTreeSet<_> = self.request.mutations.iter().filter_map(|mutation| match mutation {
+            Mutation::Geometry { source, .. } | Mutation::Placement { source, .. } => Some(source.object),
+            _ => None,
+        }).collect();
+        let mut candidate = (**staged).clone();
+        let mut candidates = Vec::new();
+        let mut snapshot_admission = |document: &Document, _: &crate::history::Recipe| -> Result<()> {
+            if cancel.is_canceled() || self.request.cancel.is_canceled() { return Err(Error::Canceled); }
+            let required = join_history_snapshot_allowance(document, changed.len(), limits)?;
+            admit(&mut draft_reservation, required)?;
+            if draft_reservation.pending_bytes < required { return Err(Error::Budget("history snapshot memory")); }
+            draft_reservation.recheck_pending()
+        };
+        let updates = crate::producers::dependent_history_updates_with_admission(before, &mut candidate,
+            &changed, registry, limits, cancel, self.only_command, Some(&mut snapshot_admission),
+            self.only_command.is_none().then_some(&mut candidates))?;
+        let mut required = join_history_snapshot_allowance(&candidate, changed.len(), limits)?;
+        for brep in &candidates {
+            required = required.checked_add(brep.storage_usage(limits)?.bytes)
+                .ok_or(Error::Overflow("dependent native candidates"))?;
+        }
+        required = required.checked_add(Usage::array::<crate::brep::Brep>(candidates.capacity())?.bytes)
+            .ok_or(Error::Overflow("dependent native candidates"))?;
+        admit(&mut draft_reservation, required)?;
+        if draft_reservation.pending_bytes < required { return Err(Error::Budget("dependent native candidates")); }
+        draft_reservation.recheck_pending()?;
+        if cancel.is_canceled() || self.request.cancel.is_canceled() { return Err(Error::Canceled); }
+        self.request.mutations.try_reserve(updates.len()).map_err(|_| Error::Budget("history edit mutations"))?;
+        self.request.mutations.extend(updates);
+        Ok((self.request, self._input_reservation, draft_reservation, candidates))
+    }
+}
+
 /// Private cache entries created for a staged transaction. Dropping a failed
 /// preparation or commit removes only the exact entries that it inserted.
 struct PendingBrepRepresentations {
@@ -1010,6 +1175,11 @@ impl PreparedTransaction {
     pub fn held_usage(&self) -> Usage {
         self.held
     }
+    /// Conservative preparation peak for a shared-account worker that must
+    /// retain this transaction's private staging while building a scene.
+    pub fn worker_staging_allowance_bytes(&self) -> u64 {
+        self.reservation.bytes
+    }
     pub fn belongs_to(&self, token: &ScopeToken) -> bool {
         self.owner.as_ref() == Some(token)
     }
@@ -1089,6 +1259,16 @@ pub struct TransactionCoordinator {
     /// than once again for every admission peer that shares it.
     shared_peer_identities: Option<IdentityLedger>,
     memory_peer_initialized: AtomicBool,
+}
+
+/// Immutable preparation authority captured from a coordinator. Prepared
+/// transactions still require the original coordinator's publication checks.
+pub struct TransactionPreparationPeer {
+    coordinator: TransactionCoordinator,
+    _metadata: ExternalMemoryReservation,
+}
+impl TransactionPreparationPeer {
+    pub fn coordinator(&self) -> &TransactionCoordinator { &self.coordinator }
 }
 
 /// Bytes reserved for a live external owner. Dropping the guard releases them.
@@ -2012,6 +2192,65 @@ impl TransactionCoordinator {
     pub fn representation_store(&self) -> Arc<std::sync::Mutex<crate::brep::BrepRepresentationStore>> {
         self.representations.clone()
     }
+    /// Reuse account-owned representations while a private replacement world
+    /// is prepared. The replacement must already share the memory account and
+    /// have an empty, exclusively owned store. Every BRep in its world must
+    /// resolve to a representation owned by that account. This never publishes
+    /// either world or attests native topology. The caller must recheck the
+    /// original operation context before publishing the replacement.
+    pub fn share_brep_representations_for_replacement(&mut self, previous: &Self, held: Usage,
+        mut check: impl FnMut() -> Result<()>) -> Result<()> {
+        use crate::budget::memory::MemoryClass;
+        self.available()?;
+        previous.available()?;
+        check()?;
+        if !Arc::ptr_eq(&self.external_reservations, &previous.external_reservations)
+            || Arc::strong_count(&self.representations) != 1
+            || !self.representations.lock().unwrap_or_else(|e| e.into_inner()).is_empty() {
+            return Err(Error::Invalid("replacement BRep representation account"));
+        }
+        let geometries = || self.world.documents.values().flat_map(|document| {
+            document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
+                .map(|entity| &entity.geometry).chain(document.results.values().map(|result| &result.geometry_snapshot))
+        });
+        let count = geometries().filter(|geometry| matches!(geometry, Geometry::Brep(_))).count();
+        let native_count = geometries().filter(|geometry| matches!(geometry, Geometry::NativeBrep(_))).count();
+        let total_count = count.checked_add(native_count).ok_or(Error::Overflow("replacement BRep sources"))?;
+        if total_count == 0 { return Err(Error::Invalid("replacement BRep sources")); }
+        if total_count as u64 > self.limits.max_nodes { return Err(Error::Budget("replacement BRep sources")); }
+        let bytes = Usage::btree::<crate::brep::BrepSourceIdentity, ()>(count)?.bytes
+            .checked_add(Usage::btree::<crate::geometry::NativeBrepSourceIdentity, ()>(native_count)?.bytes)
+            .ok_or(Error::Overflow("replacement BRep source index"))?.max(1);
+        let mut index = self.reserve_external_memory_with_held(MemoryClass::CpuCache, bytes, self.physical_memory_sample()?, held)?;
+        let mut seen = std::collections::BTreeSet::new();
+        let mut seen_native = std::collections::BTreeSet::new();
+        index.set_allocated_bytes(bytes)?;
+        for geometry in geometries() {
+            check()?;
+            match geometry {
+                Geometry::NativeBrep(source) if seen_native.insert(source.identity()) => {
+                    let display = previous.representations.lock().unwrap_or_else(|e| e.into_inner()).get_native(source)?.clone();
+                    if !display.display_owned_by(&self.external_memory_account()) {
+                        return Err(Error::Invalid("replacement native BRep representation owner"));
+                    }
+                    display.validate_binding(source, &self.limits)?;
+                }
+                Geometry::Brep(source) if seen.insert(source.identity()) => {
+                    if source.has_coupled_display_diagnostic() { return Err(Error::Unsupported("coupled BRep diagnostic replacement")); }
+                    let display = previous.representations.lock().unwrap_or_else(|e| e.into_inner()).get(source)?.clone();
+                    if !display.display_owned_by(&self.external_memory_account()) {
+                        return Err(Error::Invalid("replacement BRep representation owner"));
+                    }
+                    self.validate_brep_representation_admitted(source, &display, &self.limits, held)?;
+                }
+                _ => {}
+            }
+        }
+        check()?;
+        drop((seen, seen_native, index));
+        self.representations = Arc::clone(&previous.representations);
+        Ok(())
+    }
     /// Retire native cache entries after their source is gone. Display pins
     /// retain their own mesh and owner. Drop entries outside the cache lock;
     /// this does not evict a live opaque source or assert it can be rebuilt.
@@ -2702,11 +2941,11 @@ impl TransactionCoordinator {
     }
 
     /// Capture a B-rep root or member of a nested instance. The caller supplies
-    /// the leaf revision and validated display fingerprint from its snapshot,
+    /// the leaf revision and canonical source binding from its scene receipt,
     /// so an unchanged root stamp cannot authorize a changed source.
     pub fn capture_brep_occurrence_source(&self, stamp: &SourceStamp, path: &[ObjectId],
-        leaf: crate::model::GeometryHandle, display_fingerprint: [u8; 32]) -> Result<CapturedBrepSource> {
-        let expected = ExpectedBrepLeaf::Occt { handle: leaf, fingerprint: display_fingerprint };
+        leaf: crate::model::GeometryHandle, binding_fingerprint: [u8; 32]) -> Result<CapturedBrepSource> {
+        let expected = ExpectedBrepLeaf::Occt { handle: leaf, fingerprint: binding_fingerprint };
         self.capture_brep_source_inner(stamp, path, Some(expected), false).map(CapturedBrepSource)
     }
 
@@ -2733,7 +2972,8 @@ impl TransactionCoordinator {
         if let Some(expected) = leaf {
             let matches = match (expected, &entity.geometry) {
                 (ExpectedBrepLeaf::Occt { handle, fingerprint }, Geometry::Brep(brep)) =>
-                    entity.geometry_handle() == handle && self.brep_representation(brep).is_ok_and(|representation| representation.display_fingerprint() == fingerprint),
+                    entity.geometry_handle() == handle && brep.canonical_fingerprints().1 == fingerprint
+                        && self.brep_representation(brep).is_ok(),
                 (ExpectedBrepLeaf::Native { handle, payload, display, crc }, Geometry::NativeBrep(brep)) =>
                     entity.geometry_handle() == handle && payload.ptr_eq(&Arc::downgrade(&brep.payload))
                         && crc == brep.crc && self.representations.lock().unwrap_or_else(|e| e.into_inner())
@@ -4504,6 +4744,67 @@ impl TransactionCoordinator {
     pub fn prepare(&self, request: TransactionRequest) -> Result<PreparedTransaction> {
         self.prepare_with_held_usage(request, Usage::default())
     }
+    /// Prepare geometry/placement source edits with optional same-document inserts or extensions for dependent Join History.
+    /// The returned owner preserves the exact request used to create the draft.
+    /// Publication still requires a new prepare and all ordinary stale checks.
+    pub fn prepare_join_history_edit(&self, request: TransactionRequest, held: Usage) -> Result<PreparedJoinHistoryEdit> {
+        self.prepare_dependent_edit(request, held, Some(crate::producers::JOIN_HISTORY_COMMAND))
+    }
+
+    /// Prepare a builder source edit, its recipe and document metadata together;
+    /// dependent outputs are rebuilt privately before one final publication.
+    pub fn prepare_dependent_history_edit(&self, request: TransactionRequest, held: Usage) -> Result<PreparedJoinHistoryEdit> {
+        self.prepare_dependent_edit(request, held, None)
+    }
+
+    fn prepare_dependent_edit(&self, request: TransactionRequest, held: Usage,
+        only_command: Option<&'static str>) -> Result<PreparedJoinHistoryEdit> {
+        if request.owner.is_some() || !request.recording || request.mutations.is_empty() {
+            return Err(Error::Invalid("history source edit request"));
+        }
+        let mut document = None;
+        let mut changed_count = 0usize;
+        for mutation in &request.mutations {
+            let id = match mutation {
+                Mutation::Geometry { source, .. } | Mutation::Placement { source, .. } => {
+                    changed_count += 1;
+                    source.document
+                }
+                Mutation::Insert { document, .. } => *document,
+                Mutation::Extensions { source, .. } => source.document,
+                Mutation::History { document, .. } | Mutation::HistoryUpdate { document, .. }
+                    | Mutation::ResourceInsert { document, .. } | Mutation::ResourceDelete { document, .. }
+                    if only_command.is_none() => *document,
+                _ => return Err(Error::Unsupported("history source edit mutation")),
+            };
+            if document.is_some_and(|previous| previous != id) {
+                return Err(Error::Invalid("history source edit documents"));
+            }
+            document = Some(id);
+        }
+        if changed_count == 0 { return Err(Error::Invalid("history source edit request")); }
+        let source_bytes = Usage::btree::<(ObjectId, u8), ()>(request.mutations.len())?.bytes;
+        let input_bytes = request.storage_usage(&self.limits)?.bytes;
+        let bytes = input_bytes.checked_mul(2)
+            .and_then(|value| value.checked_add(source_bytes))
+            .ok_or(Error::Overflow("history edit input"))?.max(1);
+        let reservation = self.reserve_external_memory_with_held(
+            crate::budget::memory::MemoryClass::CpuCache, bytes, self.physical_memory_sample()?, held)?;
+        let mut sources = BTreeSet::new();
+        for mutation in &request.mutations {
+            if let Mutation::Geometry { source, .. } | Mutation::Placement { source, .. } = mutation {
+                let kind = u8::from(only_command.is_none() && matches!(mutation, Mutation::Placement { .. }));
+                if !sources.insert((source.object, kind)) { return Err(Error::Invalid("duplicate history source edit")); }
+            }
+        }
+        drop(sources);
+        let document = document.expect("nonempty source edits");
+        let baseline = self.capture_tracked_document(document)?;
+        let prepared = self.prepare_with_held_usage(request.clone(), held)?;
+        let candidate = self.register_prepared_document(&prepared, document)?;
+        Ok(PreparedJoinHistoryEdit { request, prepared, document, limits: self.limits, _baseline: baseline, _candidate: candidate,
+            _input_reservation: reservation, only_command })
+    }
     /// Admit external scene/resource allocation while a private candidate and
     /// its preparation reservation are still retained. This is conservative:
     /// scene owners may count the shared candidate document a second time.
@@ -4704,7 +5005,13 @@ impl TransactionCoordinator {
                         for entity in definition.members.iter().chain(instances) { account_geometry(&entity.geometry)?; }
                     }
                     Mutation::Delete { .. } | Mutation::Placement { .. } | Mutation::Attributes { .. }
-                    | Mutation::Extensions { .. } | Mutation::Label { .. } | Mutation::GroupReplace { .. } => {},
+                    | Mutation::Extensions { .. } | Mutation::Label { .. } | Mutation::GroupReplace { .. }
+                    // These carry no geometry of their own. Their full input
+                    // remains in request_storage and is admitted normally;
+                    // only the explicitly guarded BRep source is subtracted.
+                    | Mutation::Layers(_) | Mutation::ResourceInsert { .. } | Mutation::ExchangeInsert { .. }
+                    | Mutation::RetainedSelectionInsert { .. } | Mutation::FeatureInsert { .. }
+                    | Mutation::GroupCreate { .. } | Mutation::HistoryReferencesInsert { .. } => {},
                     Mutation::History { published, .. } if published.is_empty() => {},
                     _ => return Err(Error::Invalid("reserved BRep insert request")),
                 }
@@ -4838,6 +5145,15 @@ impl TransactionCoordinator {
             Usage::btree::<AllocatedIdentity, ()>(object_slots)?,
             Usage::btree::<(DocumentId, GroupId), ()>(count)?,
         ] { planning.add(storage, &planning_limits)?; }
+        // One HistoryUpdate at a time may defer source checks for objects
+        // edited by this request; staged validation checks their final stamps.
+        if request
+            .mutations
+            .iter()
+            .any(|mutation| matches!(mutation, Mutation::HistoryUpdate { .. }))
+        {
+            planning.add(Usage::btree::<ObjectId, ()>(count)?, &planning_limits)?;
+        }
         // Request-owned extension JSON is parsed during planning, before a
         // candidate document exists to report its validation scratch. Admit
         // the largest such payload separately before entering that loop.
@@ -5136,6 +5452,32 @@ impl TransactionCoordinator {
                         .checked_add(1)
                         .ok_or(Error::Overflow("resource count"))?;
                 }
+                Mutation::RetainedSelectionInsert { document, expected_revision, selection } => {
+                    let d = base.document(*document)?;
+                    if d.revision != *expected_revision { return Err(Error::Stale("retained selection revision")); }
+                    peak.add(selection.storage_usage(&limits)?, &limits)?;
+                    for id in selection.resources.keys().copied() {
+                        let identity = AllocatedIdentity::Resource(id);
+                        if self.identities.contains_identity(identity) || !proposed_identities.insert(identity)
+                            || !resource_writes.insert((*document, id)) || !inserted_resources.insert(id) {
+                            return Err(Error::Invalid("retained selection resource identity"));
+                        }
+                    }
+                    for id in selection.sources.keys().copied() {
+                        let identity = AllocatedIdentity::Source(id);
+                        if self.identities.contains_identity(identity) || !proposed_identities.insert(identity) {
+                            return Err(Error::Invalid("retained selection source identity"));
+                        }
+                    }
+                    for id in selection.namespaces.keys().copied() {
+                        let identity = AllocatedIdentity::Namespace(id);
+                        if self.identities.contains_identity(identity) || !proposed_identities.insert(identity) {
+                            return Err(Error::Invalid("retained selection namespace identity"));
+                        }
+                    }
+                    let count = resource_insert_counts.entry(*document).or_default();
+                    *count = count.checked_add(selection.resources.len()).ok_or(Error::Overflow("retained selection resource count"))?;
+                }
                 Mutation::ExchangeInsert {
                     document,
                     expected_revision,
@@ -5390,6 +5732,32 @@ impl TransactionCoordinator {
                         .collect();
                     peak.add(recipe.validate_with_pending(d, &limits, &pending)?, &limits)?;
                 }
+                Mutation::HistoryReferencesInsert { document, expected_revision, references } => {
+                    let d = base.document(*document)?;
+                    if d.revision != *expected_revision { return Err(Error::Stale("history reference document revision")); }
+                    if request.mutations.iter().filter(|mutation| matches!(mutation,
+                        Mutation::HistoryReferencesInsert { document: owner, .. } if owner == document)).count() != 1 {
+                        return Err(Error::Invalid("conflicting semantic reference inserts"));
+                    }
+                    let mut ids = BTreeSet::new();
+                    let mut roles = BTreeSet::new();
+                    peak.add(Usage::btree::<crate::identity::ReferenceId, crate::associative::SemanticReference>(references.len())?, &limits)?;
+                    peak.add(Usage::btree::<crate::identity::ReferenceId, ()>(references.len())?, &limits)?;
+                    peak.add(Usage::btree::<(HistoryId, ObjectId, &str), ()>(references.len())?, &limits)?;
+                    for reference in references {
+                        reference.validate(&limits)?;
+                        let recipe = request.mutations.iter().find_map(|mutation| match mutation {
+                            Mutation::History { document: owner, recipe, .. } if owner == document && recipe.id == reference.recipe => Some(recipe.as_ref()),
+                            _ => None,
+                        }).ok_or(Error::Missing("new semantic reference recipe"))?;
+                        if !recipe.outputs.contains(&reference.output) || recipe.state != crate::history::EvaluationState::Clean
+                            || d.history.references.contains_key(&reference.id) || !ids.insert(reference.id)
+                            || !roles.insert((reference.recipe, reference.output, reference.role.as_str()))
+                            || d.history.references.values().any(|old| old.recipe == reference.recipe && old.output == reference.output && old.role == reference.role) {
+                            return Err(Error::Invalid("semantic reference target or identity"));
+                        }
+                    }
+                }
                 Mutation::HistoryUpdate {
                     document,
                     expected_revision,
@@ -5400,13 +5768,25 @@ impl TransactionCoordinator {
                     if d.revision != *expected_revision {
                         return Err(Error::Stale("history document revision"));
                     }
+                    let pending: BTreeSet<ObjectId> = request
+                        .mutations
+                        .iter()
+                        .filter_map(|mutation| match mutation {
+                            Mutation::Geometry { source, .. }
+                            | Mutation::Placement { source, .. }
+                                if source.document == *document => Some(source.object),
+                            _ => None,
+                        })
+                        .collect();
                     for recipe in recipes {
                         if recipe.document != *document
                             || !d.history.recipes.contains_key(&recipe.id)
                         {
                             return Err(Error::Missing("history recipe"));
                         }
-                        peak.add(recipe.validate(d, &limits)?, &limits)?;
+                        // Preflight cannot resolve stamps for edits that have not happened
+                        // yet. The complete staged world is validated before publication.
+                        peak.add(recipe.validate_with_pending(d, &limits, &pending)?, &limits)?;
                     }
                     for (id, _) in published {
                         if !recipes.iter().any(|recipe| recipe.outputs.contains(id)) {
@@ -5833,6 +6213,7 @@ impl TransactionCoordinator {
         };
         before_clone()?;
         let mut staged = base.clone();
+        let mut next_creation = 0;
         for mutation in request.mutations {
             request.cancel.check()?;
             match mutation {
@@ -5844,13 +6225,14 @@ impl TransactionCoordinator {
                 }
                 Mutation::Publish(result) => {
                     let d = staged.document_mut(result.document)?;
-                    result.apply(d)?;
+                    result.apply(d, &mut next_creation)?;
                 }
-                Mutation::Insert { document, entity } => {
+                Mutation::Insert { document, mut entity } => {
                     let d = staged.document_mut(document)?;
                     if d.entities.contains_key(&entity.id) {
                         return Err(Error::Invalid("duplicate object ID"));
                     }
+                    d.record_creation_order(&mut entity, &mut next_creation)?;
                     d.entities.insert(entity.id, entity);
                 }
                 Mutation::ResourceInsert {
@@ -5860,6 +6242,9 @@ impl TransactionCoordinator {
                     if d.resources.insert(resource.id, resource).is_some() {
                         return Err(Error::Invalid("duplicate resource ID"));
                     }
+                }
+                Mutation::RetainedSelectionInsert { document, selection, .. } => {
+                    selection.apply(staged.document_mut(document)?, &limits)?;
                 }
                 Mutation::ExchangeInsert {
                     document, records, ..
@@ -6012,6 +6397,16 @@ impl TransactionCoordinator {
                         d.results.insert(id, result);
                     }
                 }
+                Mutation::HistoryReferencesInsert { document, references, .. } => {
+                    let d = staged.document_mut(document)?;
+                    for reference in references {
+                        let recipe = d.history.recipes.get(&reference.recipe).ok_or(Error::Missing("semantic reference recipe"))?;
+                        if !recipe.outputs.contains(&reference.output) || recipe.state != crate::history::EvaluationState::Clean
+                            || d.history.references.insert(reference.id, reference).is_some() {
+                            return Err(Error::Invalid("semantic reference target or identity"));
+                        }
+                    }
+                }
                 Mutation::HistoryUpdate {
                     document,
                     recipes,
@@ -6038,10 +6433,11 @@ impl TransactionCoordinator {
                     if d.definitions.contains_key(&definition.id) {
                         return Err(Error::Invalid("duplicate definition ID"));
                     }
-                    for instance in instances {
+                    for mut instance in instances {
                         if d.entities.contains_key(&instance.id) {
                             return Err(Error::Invalid("duplicate object ID"));
                         }
+                        d.record_creation_order(&mut instance, &mut next_creation)?;
                         d.entities.insert(instance.id, instance);
                     }
                     d.definitions.insert(definition.id, *definition);

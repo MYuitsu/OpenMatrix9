@@ -5,7 +5,7 @@ Dò ảnh (PNG, BMP, PGM) thành đường cong theo ngưỡng tối.
 - **Mã lệnh:** `BuilderImageTrace`
 - **Vị trí:** menu Tools, ô số 17
 - **Icon:** `Resources/icons/tools-minimal/BuilderImageTrace.svg`
-- **Gọi bằng dòng lệnh:** `BuilderImageTrace`, `ImageTrace`
+- **Gọi bằng dòng lệnh:** `BuilderImageTrace`, `ImageTrace`, `gvImageTrace`
 - **Cách chạy:** từng bước trên dòng lệnh, kèm bảng BUILDERS; Enter để tạo, Esc để huỷ
 
 ## Cách dùng

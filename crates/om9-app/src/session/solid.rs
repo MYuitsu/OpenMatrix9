@@ -4705,7 +4705,7 @@ impl Controller {
                     drop(reservation);
                     if let Ok(stamp) = self.document().stamp(id) {
                         if let Ok(shared) = self.prepare_shared_topology_proof(stamp, proof, proof_reservation) {
-                            let _ = self.retain_sphere_history_proof(stamp, shared.clone());
+                            let _ = self.retain_inserted_topology_proof(stamp, shared.clone());
                             let _ = self.cache_topology_proof(shared);
                         }
                     }
@@ -5714,7 +5714,7 @@ impl Controller {
             if let Some((proof, owner)) = proof.lock().unwrap_or_else(|e| e.into_inner()).take() {
                 if let Ok(stamp) = self.document().stamp(output) {
                     if let Ok(shared) = self.prepare_shared_topology_proof(stamp, proof, owner) {
-                        let _ = self.retain_sphere_history_proof(stamp, shared.clone());
+                        let _ = self.retain_inserted_topology_proof(stamp, shared.clone());
                         let _ = self.cache_topology_proof(shared);
                     }
                 }

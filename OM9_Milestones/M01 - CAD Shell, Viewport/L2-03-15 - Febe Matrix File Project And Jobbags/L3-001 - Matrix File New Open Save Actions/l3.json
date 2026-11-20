@@ -234,7 +234,7 @@
     "human_approval": null,
     "remaining": [
       "Manual M01-UI visual review pending.",
-      "Job Bag state is in-session; project-file embedding is not claimed."
+      "Point, resource, nested-instance and representative canonical/native BRep cases have scoped P07 evidence; arbitrary geometry and dependencies, full native desktop workflow and visual/DPI acceptance remain open."
     ],
     "last_verified": {
       "date": "2026-10-22",
@@ -251,6 +251,13 @@
       "evidence": "implementation/evidence/M01/2026-10-22-l2-03-15-project-jobbags-checks.json",
       "logs": "build/standalone-validation/ui-artifacts/m01-l2-03-15-20261022/acceptance.log",
       "note": "Job Bag state embedded as .om9 resource and restored on Open; Master restore live; manual M01-UI pending."
+    },
+    "project_manager_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "AUDIT_ONLY_GAPS_OPEN",
+      "scope": "Image-led Project Manager audit: eight existing integration tests pass; six model gaps reproduced; twenty gaps planned. No implementation or manual gate promotion.",
+      "plan": "docs/plans/2026-11-17-project-manager-gap-plan.md",
+      "evidence": "docs/validation/2026-11-17-project-manager-audit.json"
     }
   }
 }

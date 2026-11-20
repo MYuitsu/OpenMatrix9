@@ -207,11 +207,46 @@
     }
   ],
   "runtime_implementation": {
+    "native_brep_catalog_followup_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "Canonical and native Box BRep bags produced offscreen GPU thumbnails; a synthetic pointer fixture captured and inserted a native Box after catalog reload, including in a separate test process. Visual desktop and DPI acceptance remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "manager_brep_preview_2026_11_18": {
+      "status": "OFFSCREEN_PARTIAL_VALIDATED",
+      "scope": "After a saved catalog reload, a headless pointer fixture opened Manager > Files, previewed a numbered Box thumbnail without editing, then double-clicked to insert it with one Undo. This uses an offscreen adapter and synthetic input; physical desktop and DPI remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_thumbnail_2026_11_18": {
+      "status": "OFFSCREEN_PARTIAL_VALIDATED",
+      "scope": "The thumbnail worker validates and binds v6 BRep sources before rendering their scene. Numbered and Parts Box thumbnails rendered after source deletion; a corrupted archive was refused. Offscreen evidence does not establish arbitrary BRep, desktop or DPI acceptance.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "inactive_project_thumbnail_gpu_2026_11_17": {
+      "status": "PARTIAL_GPU_MANUAL_UI_PENDING",
+      "scope": "While Manager is open, the worker also prepares one missing preview for non-active rows. An enabled offscreen GPU fixture rendered a nonuniform 96x96 image from two points and attached it to the correct non-active row without changing selection. Other geometry, desktop presentation and BRep remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "manager_named_preview_2026_11_17": {
+      "status": "HEADLESS_TARGETED_MANUAL_UI_PENDING",
+      "scope": "Manager project tiles fall back to the newest named-snapshot thumbnail when no numbered bag has a preview. An authored Master-only thumbnail was observed in headless paint output; live desktop rendering remains unverified.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "project_controls_layout_p07_2026_11_17": {
+      "status": "HEADLESS_TARGETED_MANUAL_UI_PENDING",
+      "scope": "Project action buttons use the authored icon bindings, larger controls and neutral contrast; headless UI and catalog interaction suites passed. Visual desktop and real DPI review remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "project_thumbnail_p07_2026_11_17": {
+      "status": "PARTIAL_GPU_TEST_MANUAL_UI_PENDING",
+      "scope": "A two-point captured archive produced a nonuniform decodable 96x96 thumbnail through the GPU worker. Desktop presentation, DPI, performance and other geometry remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
     "date": "2026-10-22",
-    "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+    "status": "IN_PROGRESS_PARTIALLY_VALIDATED",
     "target": "standalone Rust OM9",
-    "scope": "Three Job Bag slots per project with snapshot revision/ID and data thumbnail; unavailable when captured geometry is missing.",
-    "owner": "crates/om9-app/src/project_manager.rs + crates/om9-app/src/ui/chrome.rs",
+    "scope": "Dynamic numbered Job Bags with snapshot provenance and asynchronous thumbnails; archived content remains available after the source objects are removed. Current evidence and remaining limits are in the P07 record; tests below are historical 2026-10-22 results.",
+    "owner": "crates/om9-app/src/project_manager.rs + crates/om9-app/src/ui/projects.rs",
     "tests": [
       "project_manager 8 passed",
       "project_manager_ui 3 passed",
@@ -224,7 +259,7 @@
     "human_approval": null,
     "remaining": [
       "Manual M01-UI visual review pending.",
-      "Job Bag state is in-session; project-file embedding is not claimed."
+      "Point, resource, nested-instance and representative canonical/native BRep cases have scoped P07 evidence; arbitrary geometry and dependencies, full native desktop workflow and visual/DPI acceptance remain open."
     ],
     "last_verified": {
       "date": "2026-10-22",
@@ -241,6 +276,18 @@
       "evidence": "implementation/evidence/M01/2026-10-22-l2-03-15-project-jobbags-checks.json",
       "logs": "build/standalone-validation/ui-artifacts/m01-l2-03-15-20261022/acceptance.log",
       "note": "Job Bag state embedded as .om9 resource and restored on Open; Master restore live; manual M01-UI pending."
+    },
+    "project_manager_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "AUDIT_ONLY_GAPS_OPEN",
+      "scope": "Image-led Project Manager audit: eight existing integration tests pass; six model gaps reproduced; twenty gaps planned. No implementation or manual gate promotion.",
+      "plan": "docs/plans/2026-11-17-project-manager-gap-plan.md",
+      "evidence": "docs/validation/2026-11-17-project-manager-audit.json"
+    },
+    "project_controls_visual_p07_2026_11_17": {
+      "status": "PARTIAL_OFFSCREEN_REVIEW_DESKTOP_PENDING",
+      "scope": "Distinct authored add, capture and clear symbols, open triangles and spaced card controls; offscreen panel render and interaction suites passed. Physical desktop/DPI review remains open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
     }
   }
 }

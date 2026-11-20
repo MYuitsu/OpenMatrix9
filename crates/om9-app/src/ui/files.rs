@@ -13,6 +13,34 @@ pub enum FileControl {
 #[cfg(all(test, windows))]
 mod tests {
     use super::*;
+    #[test]
+    fn named_jobbag_open_uses_unsaved_lifecycle() {
+        let mut app = MatrixApp::new(Document::new("snapshot lifecycle")).unwrap();
+        app.controller.submit("Point").unwrap();
+        app.controller.submit("1,0,0").unwrap();
+        let (document, archive) = app.controller.capture_jobbag_document().unwrap();
+        let snapshot = app.project_manager.capture_named_version("Master", document, archive).unwrap();
+        app.controller.submit("Point").unwrap();
+        app.controller.submit("2,0,0").unwrap();
+        let ctx = egui::Context::default();
+        let before = app.controller.coordinator().snapshot();
+        app.begin_named_jobbag_open("Master", snapshot).unwrap();
+        let operation = app.controller.file_operation().unwrap();
+        assert_eq!(operation.phase(), FilePhase::Unsaved);
+        let token = operation.token();
+        app.controller.cancel_file_operation(token).unwrap();
+        ctx.run_logic(&egui::RawInput::default(), |ctx| app.file_ui(ctx));
+        assert_eq!(app.controller.document().entities.len(), 2);
+        assert_eq!(app.controller.coordinator().snapshot(), before);
+        assert!(app.pending_jobbag_open.is_none());
+
+        app.begin_named_jobbag_open("Master", snapshot).unwrap();
+        let token = app.controller.file_operation().unwrap().token();
+        app.controller.decide_unsaved(token, UnsavedDecision::Discard).unwrap();
+        ctx.run_logic(&egui::RawInput::default(), |ctx| app.file_ui(ctx));
+        assert_eq!(app.controller.document().entities.len(), 1);
+        assert!(app.controller.file_operation().is_none());
+    }
     fn raw_close() -> egui::RawInput {
         let mut raw = egui::RawInput::default();
         raw.viewports
@@ -367,12 +395,55 @@ mod tests {
     }
 }
 impl MatrixApp {
+    pub(super) fn begin_named_jobbag_open(&mut self, name: &'static str, snapshot: crate::project_manager::SnapshotId) -> Result<()> {
+        if self.controller.file_operation().is_some() || self.pending_jobbag_open.is_some() {
+            return Err(Error::Busy);
+        }
+        let row = self.project_manager.active();
+        let project = row.id;
+        self.project_manager.named_master_by_id(name, snapshot).ok_or(Error::Missing("named jobbag version"))?;
+        self.controller.begin_file_operation(FileKind::Open)?;
+        self.pending_jobbag_open = Some((project, snapshot, name, self.project_manager_generation));
+        Ok(())
+    }
     /// Runs in both normal UI and eframe's minimized/occluded logic pass.
     /// Keep the approved operation alive until native shutdown, so a later
     /// document mutation cannot reuse consent captured for an older owner.
     pub(super) fn service_window_close(&mut self, ctx: &egui::Context) -> bool {
         let requested = ctx.input(|input| input.viewport().close_requested());
         if requested {
+            if self.project_capture_worker.is_some() || self.project_brep_insert_pending() || self.project_brep_open_pending() || self.project_document_worker.is_some() || self.project_import_worker.is_some() || self.project_export_worker.is_some() || self.project_root_worker.is_some() || self.project_catalog_load_worker.is_some() || self.project_thumbnail_worker.is_some() {
+                if let Some(worker) = &self.project_capture_worker { worker.cancel(); }
+                #[cfg(feature = "occt-brep")]
+                if let Some(worker) = &self.project_brep_insert_worker { worker.cancel(); }
+                #[cfg(feature = "occt-brep")]
+                if let Some(worker) = &self.project_brep_open_worker { worker.cancel(); }
+                if let Some(worker) = &self.project_document_worker { worker.cancel(); }
+                if let Some(worker) = &self.project_import_worker { worker.cancel(); }
+                if let Some(worker) = &self.project_export_worker { worker.cancel(); }
+                if let Some(worker) = &self.project_root_worker { worker.cancel(); }
+                if let Some(worker) = &self.project_catalog_load_worker { worker.cancel(); }
+                if let Some(worker) = &self.project_thumbnail_worker { worker.cancel(); }
+                self.project_capture_close_wait = true;
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                ctx.request_repaint();
+                return false;
+            }
+            let revision = self.project_manager.change_revision();
+            let dirty_catalog = self.project_catalog_path.is_some()
+                && (self.project_catalog_ready && self.project_catalog_revision != Some(revision)
+                    || !self.project_catalog_ready && revision != 0);
+            if dirty_catalog && self.project_catalog_discard_revision != Some(revision) {
+                if self.project_catalog_worker.is_some() {
+                    self.project_catalog_close_wait = true;
+                } else {
+                    self.apply_project_action(crate::project_manager::ProjectAction::OpenManager);
+                    self.project_confirmation = Some((super::projects::ProjectConfirmation::CloseUnsavedCatalog(revision), self.project_manager_generation));
+                }
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                ctx.request_repaint();
+                return false;
+            }
             self.cancel_stl_export();
             self.controller.invalidate_stl_session_for_close();
         }
@@ -458,6 +529,13 @@ impl MatrixApp {
     pub fn file_toolbar_rect(&self, kind: FileKind) -> Option<Rect> {
         self.file_toolbar_rects.get(&kind).copied()
     }
+    /// The current File palette's icon target in the left MAIN MENU.
+    pub fn file_sidebar_rect(&self, kind: FileKind) -> Option<Rect> {
+        (self.top_menu_selected() == Some(0)).then(|| {
+            self.current_ui_context.as_ref()?.memory(|memory|
+                memory.data.get_temp::<Rect>(egui::Id::new(("file-sidebar", kind.feature_id()))))
+        }).flatten()
+    }
     pub fn file_f6_rect(&self, kind: FileKind) -> Option<Rect> {
         self.file_f6_rects.get(&kind).copied()
     }
@@ -469,6 +547,15 @@ impl MatrixApp {
     }
     pub fn pending_file_picker(&self) -> Option<FileToken> {
         self.file_picker_request
+    }
+    fn restore_keyboard_after_file_action(&mut self, ctx: &egui::Context) {
+        if self.controller.file_operation().is_none()
+            && (self.controller.is_running() || self.controller.addon_session().is_some())
+        {
+            self.focus_command_editor();
+        } else {
+            self.release_command_editor_focus(ctx);
+        }
     }
     pub(super) fn file_feedback(
         &mut self,
@@ -518,7 +605,7 @@ impl MatrixApp {
                 }
                 self.transcript
                     .set_prompt(&self.controller.prompt_with_options());
-                self.focus_cmd = self.controller.file_operation().is_none();
+                self.restore_keyboard_after_file_action(ctx);
                 ctx.request_repaint();
                 Ok(())
             }
@@ -543,7 +630,7 @@ impl MatrixApp {
                         .append_history("Document saved; requested replacement was not accepted.");
                 }
                 self.feedback(Err(error.clone()));
-                self.focus_cmd = self.controller.file_operation().is_none();
+                self.restore_keyboard_after_file_action(ctx);
                 Err(error)
             }
         }
@@ -560,8 +647,9 @@ impl MatrixApp {
         self.file_picker_request = None;
         let Some(path) = path else {
             self.controller.cancel_file_operation(token)?;
+            self.pending_jobbag_open = None;
             self.file_error.clear();
-            self.focus_cmd = true;
+            self.restore_keyboard_after_file_action(ctx);
             ctx.request_repaint();
             return Ok(());
         };
@@ -577,17 +665,47 @@ impl MatrixApp {
     pub(super) fn file_ui(&mut self, ctx: &egui::Context) {
         self.file_controls.clear();
         let Some(operation) = self.controller.file_operation() else {
+            self.pending_jobbag_open = None;
             self.file_prompt_token = None;
             self.file_picker_request = None;
             return;
         };
         let token = operation.token();
         let phase = operation.phase();
+        if self.pending_jobbag_open.is_some_and(|(_, _, _, generation)| generation != self.project_manager_generation) {
+            self.pending_jobbag_open = None;
+            self.file_picker_request = None;
+            let result = self.controller.cancel_file_operation(token).and(Err(Error::Stale("project catalog changed")));
+            self.feedback(result);
+            return;
+        }
+        if self.project_brep_open_pending() { return; }
+        if phase == FilePhase::OpenPath && let Some((project, snapshot, name, _)) = self.pending_jobbag_open.take() {
+            let current = self.project_manager.active().id == project
+                && self.project_manager.named_master_by_id(name, snapshot).is_some();
+            #[cfg(feature = "occt-brep")]
+            if current && let Some(archive) = self.project_manager.named_master_by_id(name, snapshot).and_then(|item| item.archive.clone())
+                && archive.len() >= 12 && &archive[..8] == b"OM9\0\r\n\x1a\n"
+                && matches!(u32::from_le_bytes(archive[8..12].try_into().expect("header checked")), 6 | 7) {
+                if let Err(error) = self.start_named_brep_open(token, project, name, snapshot, archive) {
+                    let _ = self.controller.cancel_file_operation(token);
+                    self.feedback(Err(error));
+                }
+                return;
+            }
+            let result = self.controller.cancel_file_operation(token).and_then(|_| {
+                if !current { return Err(Error::Stale("named jobbag changed")); }
+                self.restore_named_jobbag_version(name, snapshot)?;
+                Ok(FileOutcome::Replaced)
+            });
+            let _ = self.file_feedback(ctx, result);
+            return;
+        }
         if phase == FilePhase::CloseReady {
             self.service_window_close(ctx);
             return;
         }
-        if phase == FilePhase::OpenPreparing { return; }
+        if matches!(phase, FilePhase::OpenPreparing | FilePhase::SavePreparing) { return; }
         let initial = self.file_prompt_token != Some(token);
         let mut painted = false;
         let affirmable = !initial
@@ -626,7 +744,7 @@ impl MatrixApp {
                     FilePhase::Overwrite => "Replace existing file?",
                     FilePhase::OpenPath => "Open document",
                     FilePhase::SavePath => "Save document",
-                    FilePhase::CloseReady | FilePhase::OpenPreparing => unreachable!("handled before modal"),
+                    FilePhase::CloseReady | FilePhase::OpenPreparing | FilePhase::SavePreparing => unreachable!("handled before modal"),
                 });
                 ui.separator();
                 match phase {
@@ -648,7 +766,7 @@ impl MatrixApp {
                         ui.label("Native OM9 document (*.om9)");
                         ui.weak("For Rhino archives use File > Import 3DM… / Export 3DM….");
                     }
-                    FilePhase::CloseReady | FilePhase::OpenPreparing => unreachable!("handled before modal"),
+                    FilePhase::CloseReady | FilePhase::OpenPreparing | FilePhase::SavePreparing => unreachable!("handled before modal"),
                 }
                 if !self.file_error.is_empty() {
                     ui.colored_label(Color32::DARK_RED, &self.file_error);
@@ -697,11 +815,20 @@ impl MatrixApp {
         self.focus_cmd = false;
         self.viewport_menu_owns_frame = true;
         if cancel {
+            let closing = self.controller.file_operation().is_some_and(|operation| operation.intent() == crate::file_lifecycle::FileIntent::WindowClose);
             let result = self.controller.cancel_file_operation(token);
+            if closing { self.project_catalog_discard_revision = None; }
+            self.pending_jobbag_open = None;
             self.file_picker_request = None;
             self.feedback(result);
+            self.restore_keyboard_after_file_action(ctx);
         } else if let Some(decision) = decision {
-            let result = self.controller.decide_unsaved(token, decision);
+            let result = if decision == UnsavedDecision::Save && self.pending_jobbag_open.is_some() && !self.preserve_embedded_project_state() {
+                self.controller.stage_project_for_unsaved_save(token, &self.project_manager)
+                    .and_then(|next| self.controller.decide_unsaved(next, decision))
+            } else {
+                self.controller.decide_unsaved(token, decision)
+            };
             let _ = self.file_feedback(ctx, result);
         } else if let Some(yes) = overwrite {
             let result = self.controller.confirm_file_overwrite(token, yes);

@@ -495,7 +495,7 @@ impl Controller {
                     })
                 })
                 .collect::<Result<Vec<_>>>()?;
-            self.commit_utility_mutations("Set Points", mutations)?;
+            self.commit_transform_geometry_mutations("Set Points", mutations)?;
         }
         self.finish_transform_events(pending)
     }
@@ -750,6 +750,11 @@ impl Controller {
     }
 
     fn finish_transform_events(&mut self, pending: &TransformPending) -> Result<()> {
+        if self.join_history_worker_pending() {
+            self.mark_history_completion_command(pending.feature);
+            self.events.emit(crate::command_events::EventKind::Progress, pending.feature, "updating History", None);
+            return Ok(());
+        }
         self.events.emit(
             crate::command_events::EventKind::Finished,
             pending.feature,
@@ -848,6 +853,9 @@ impl Controller {
                 });
             }
         }
+        if !copies && self.source_mutations_update_join_history(&mutations) {
+            return self.request_join_history_edit_worker(TransactionRequest::new(name, mutations));
+        }
         let held = self.scene_cache_usage()?;
         let prepared = self
             .coordinator
@@ -857,6 +865,14 @@ impl Controller {
             self.sync_published(om9_core::changes::ChangeCause::Edit);
         }
         Ok(())
+    }
+
+    fn commit_transform_geometry_mutations(&mut self, name: &'static str, mutations: Vec<Mutation>) -> Result<()> {
+        if self.source_mutations_update_join_history(&mutations) {
+            self.request_join_history_edit_worker(TransactionRequest::new(name, mutations))
+        } else {
+            self.commit_utility_mutations(name, mutations)
+        }
     }
 
     /// Split a curve row's selection into its path and its objects: exactly one selected

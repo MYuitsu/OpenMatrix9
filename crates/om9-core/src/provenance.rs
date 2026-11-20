@@ -41,6 +41,8 @@ pub struct ImportSummary {
     pub bound: usize,
     pub retained_only: usize,
     pub deleted: usize,
+    /// Inventory records deliberately excluded from a derived selection.
+    pub excluded: usize,
     /// Records that could not be represented in this document and are kept as
     /// retained native data only. Reported, never dropped silently.
     pub unsupported: usize,
@@ -174,6 +176,9 @@ fn accumulate(summary: &mut ImportSummary, namespace: &crate::retained::ImportNa
                 if record.host.is_none() {
                     summary.unsupported = summary.unsupported.saturating_add(1);
                 }
+            }
+            RecordDisposition::Excluded => {
+                summary.excluded = summary.excluded.saturating_add(1);
             }
             RecordDisposition::Unchanged | RecordDisposition::Edited => {
                 summary.bound = summary.bound.saturating_add(1);

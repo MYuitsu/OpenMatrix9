@@ -18,6 +18,48 @@ fn reclaimable(error: &Error) -> bool {
     matches!(error, Error::Budget("bytes" | "managed RAM" | "available physical RAM" | "available system commit" | "external memory headroom"))
 }
 impl TransactionCoordinator {
+    /// Capture an unscoped coordinator view for transaction preparation on a
+    /// worker. Its metadata is admitted before cloning; documents and identity
+    /// storage remain shared immutable owners. It has no publication privilege
+    /// over the originating coordinator, which must recheck its epoch on commit.
+    pub fn capture_transaction_preparation_peer(&self, held: Usage) -> Result<TransactionPreparationPeer> {
+        self.available()?;
+        if self.scope.is_some() { return Err(Error::WrongOwner); }
+        let evidence_slots = Usage::array::<UndoEvidence>(self.overflow_evidence.entries.len())?.bytes;
+        // A canceled worker may outlive the primary journal entries. Retain a
+        // separate allowance for every cloned evidence owner until it drains.
+        let evidence_owners = self.undo.iter().chain(&self.redo).filter_map(|entry| entry.evidence.as_ref())
+            .chain(self.overflow_evidence.entries.iter()).try_fold(0u64, |total, item| {
+                total.checked_add(item.bytes).and_then(|n| n.checked_add(item.source_upper))
+                    .ok_or(Error::Overflow("transaction peer evidence"))
+            })?;
+        let metadata = self.peer_unshared_metadata_bytes()?.checked_add(evidence_slots)
+            .and_then(|bytes| bytes.checked_add(evidence_owners))
+            .and_then(|bytes| bytes.checked_mul(2)).ok_or(Error::Overflow("transaction peer metadata"))?.max(1);
+        let owner = self.reserve_external_memory_with_held(crate::budget::memory::MemoryClass::CpuCache,
+            metadata, self.physical_memory_sample()?, held)?;
+        let mut peer = self.memory_admission_peer_with_held(held)?;
+        peer.world = self.world.clone();
+        peer.epoch = self.epoch;
+        peer.scope_generation = self.scope_generation;
+        peer.undo = self.undo.clone();
+        peer.redo = self.redo.clone();
+        peer.identities = self.identities.clone();
+        peer.shared_peer_identities = Some(self.identities.clone());
+        peer.benchmark_no_undo = self.benchmark_no_undo;
+        peer.undo_policy = self.undo_policy;
+        peer.undo_ram_limit_mb = self.undo_ram_limit_mb;
+        peer.undo_memory_stats = self.undo_memory_stats;
+        peer.undo_capture_generation = self.undo_capture_generation;
+        peer.undo_evidence_upper = self.undo_evidence_upper;
+        peer.undo_evidence_count = self.undo_evidence_count;
+        peer.overflow_evidence = DeferredUndoEvidence { entries: self.overflow_evidence.entries.clone(), _reservation: None };
+        // The admission-only peer's projection was built for another owner.
+        // An independently captured journal must not reuse that mutable cache.
+        peer.retained_projection = None;
+        peer.projection_reclaimer = None;
+        Ok(TransactionPreparationPeer { coordinator: peer, _metadata: owner })
+    }
     /// Mark an actual interactive cache read. The existing weak index doubles
     /// as its recency queue; touching its newest entry is allocation-free O(1).
     pub fn touch_optional_memory_cache(&self, owner: &Arc<dyn OptionalMemoryCache>) -> Result<()> {

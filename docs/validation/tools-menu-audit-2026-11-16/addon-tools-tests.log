@@ -1,0 +1,19 @@
+   Compiling om9-addon-abi v0.1.0 (H:\OpenMatrix9\crates\om9-addon-abi)
+   Compiling om9-addon-geom v0.1.0 (H:\OpenMatrix9\addons\geom)
+   Compiling om9-addon-tools v0.1.0 (H:\OpenMatrix9\addons\tools)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.67s
+     Running unittests src\lib.rs (L:/om9-target\debug\deps\om9_tools-fa24d7732a0d7174.exe)
+
+running 10 tests
+test tests::every_command_starts ... ok
+test tests::smart_targets_blend ... ok
+test tests::four_rail_profile_passes_through_four_curves ... ok
+test tests::weights_and_resizer ... ok
+test tests::custom_rail_follows_the_top_view_shape ... ok
+test tests::ring_rail_profiles_and_outside_rail ... ok
+test tests::inset_pullback_and_printing ... ok
+test tests::curve_tools_and_libraries ... ok
+test tests::image_trace_finds_a_dark_square ... ok
+test tests::checker_repair_and_reducer ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s

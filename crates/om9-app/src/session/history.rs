@@ -216,18 +216,7 @@ impl Controller {
         }
         let kind = builder_kind_for_command(&recipe.command)
             .ok_or(Error::Unsupported("history builder"))?;
-        let inputs: Vec<ObjectId> = recipe
-            .inputs
-            .iter()
-            .map(|binding| binding.source.object)
-            .collect();
-        let mut session = BuilderSession::new(kind, &document, &inputs)?;
-        session.adopt_history(object, id);
-        for (name, value) in &recipe.parameters {
-            if session.field(name).is_some() {
-                session.set_field(name, value.clone())?;
-            }
-        }
+        let mut session = BuilderSession::from_history(kind, &document, object, &recipe)?;
         #[cfg(feature = "occt-brep")]
         let background = self.background_ring_preview_enabled && kind.ring_family().is_some();
         #[cfg(not(feature = "occt-brep"))]
@@ -286,7 +275,7 @@ impl Controller {
             "historyupdate" | "gvhistoryupdate" | "historyupdateon" => {
                 Some(self.toggle_history_update().map(|_| ()))
             }
-            "history" | "historyreport" | "commandhistory" | "historypanel" => {
+            "history" | "historyreport" | "historypanel" => {
                 self.history_window_requested = true;
                 self.history_notice = Some("History report".into());
                 Some(Ok(()))
@@ -306,7 +295,7 @@ impl Controller {
                 Some(self.toggle_history_record().map(|_| ()))
             }
             "HistoryUpdate" | "GVHistoryUpdateON" => Some(self.toggle_history_update().map(|_| ())),
-            "HistoryReport" | "CommandHistory" | "HistoryPanel" => {
+            "HistoryReport" | "HistoryPanel" => {
                 self.history_window_requested = true;
                 Some(Ok(()))
             }
@@ -322,6 +311,18 @@ impl Controller {
 
     pub fn take_history_notice(&mut self) -> Option<String> {
         self.history_notice.take()
+    }
+
+    pub(crate) fn request_command_history(&mut self, name: &str) -> bool {
+        if !name.trim().trim_start_matches('_').eq_ignore_ascii_case("CommandHistory") {
+            return false;
+        }
+        self.command_history_requested = true;
+        true
+    }
+
+    pub(crate) fn take_command_history_request(&mut self) -> bool {
+        std::mem::take(&mut self.command_history_requested)
     }
 
     pub fn take_history_window_request(&mut self) -> bool {

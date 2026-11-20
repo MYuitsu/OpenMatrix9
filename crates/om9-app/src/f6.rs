@@ -156,7 +156,26 @@ pub fn context(
     providers: Providers,
 ) -> Context {
     let kind = classify(document, selection);
-    context_for_kind(kind, providers)
+    let mut context = context_for_kind(kind, providers);
+    if selection.is_empty() {
+        context.actions.push(if providers.m04_builder {
+            Action::enabled("OM9-TOOLS-001", "Ring Rail")
+        } else {
+            Action::registered_disabled("OM9-TOOLS-001", "Ring Rail", "M04 builder provider is not available")
+        });
+    } else if selection.len() == 1
+        && let Some(object) = selection.first()
+        && let Some(recipe) = document.history.owner(*object).and_then(|id| document.history.recipes.get(&id))
+        && recipe.command.eq_ignore_ascii_case("RingRail") && recipe.state != om9_core::history::EvaluationState::Detached {
+            let editable = !recipe.policy.lock && document.entities.get(object).is_some_and(|entity|
+                document.permissions_for_entity(entity, false).is_ok_and(|permissions| permissions.editable));
+            context.actions.push(if !providers.m04_builder {
+                Action::registered_disabled("EditHistory", "Edit Ring Rail", "M04 builder provider is not available")
+            } else if !editable {
+                Action::disabled("EditHistory", "Edit Ring Rail", "Ring Rail or its History is locked")
+            } else { Action::enabled("EditHistory", "Edit Ring Rail") });
+        }
+    context
 }
 
 fn context_for_kind(kind: ContextKind, providers: Providers) -> Context {

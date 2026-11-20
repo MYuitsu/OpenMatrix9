@@ -1,0 +1,953 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-16T16:22:39+00:00",
+  "client_date": "2026-11-16",
+  "status": "AUDIT_AND_PLAN_ONLY_GAPS_OPEN",
+  "target": "standalone Rust OM9; Windows; add-on and built-in code paths",
+  "source_commit": "fea59b67f4284d0a3d4545e7b90e7e5ecd7f64fd",
+  "plan": "docs/plans/2026-11-16-tools-menu-gap-plan.md",
+  "native_analysis": "docs/analysis/matrix90/2026-11-16-tools-menu.md",
+  "counts": {
+    "tools_menu_rows": 31,
+    "tools_addon_commands": 30,
+    "tools_addon_settings": 56,
+    "boolean_commands_from_other_provider": 1,
+    "tests_passed": 11,
+    "tests_failed": 0,
+    "commands_accepted_as_complete": 0
+  },
+  "tests": [
+    {
+      "command": "cargo test -p om9-addon-tools --lib -j 2",
+      "target_dir": "L:/om9-target",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "log": {
+        "path": "docs/validation/tools-menu-audit-2026-11-16/addon-tools-tests.log",
+        "bytes": 986,
+        "sha256": "290eadabd58fb2231a7137dd33b0f84eb4497d6f30ff9913227a2ab9aa377ecb"
+      }
+    },
+    {
+      "command": "cargo test -p om9-addon-setting-tools --lib boolean -j 2",
+      "target_dir": "L:/om9-target",
+      "passed": 1,
+      "failed": 0,
+      "filtered": 6,
+      "log": {
+        "path": "docs/validation/tools-menu-audit-2026-11-16/boolean-tests.log",
+        "bytes": 427,
+        "sha256": "6729fe3393c68f5d11f4104c9fa6f3d6840f323a496eb76166acfbd81a4419d4"
+      }
+    }
+  ],
+  "source_fingerprints": [
+    {
+      "path": "Resources/menu/MainMenu.ini",
+      "bytes": 16112,
+      "sha256": "2b4215ce4b98304be15d572de47655e967e8200c4d03bfb9da08932640efd224"
+    },
+    {
+      "path": "crates/om9-app/src/menu_catalog.rs",
+      "bytes": 18876,
+      "sha256": "c9846190c43aa914fbe5537bab147e75fcaebdc99abb68b947f629fff82a7b6e"
+    },
+    {
+      "path": "crates/om9-app/src/icons.rs",
+      "bytes": 96535,
+      "sha256": "23e0ce0e5b069ad19ce3f1dc597888a1654ba8018af971420b7aebf7b15e969f"
+    },
+    {
+      "path": "crates/om9-app/src/session.rs",
+      "bytes": 508572,
+      "sha256": "601c8bbcc0a57c3bf5cfb6c781083ee21fc9a61b35f3e414cd7dbd6fc170e9b6"
+    },
+    {
+      "path": "crates/om9-app/src/session/addon_session.rs",
+      "bytes": 52970,
+      "sha256": "6234d2fd1109b9ee470af3da7a9fdac87f9d1f670ef8a99ee532d2addc8c3449"
+    },
+    {
+      "path": "crates/om9-app/src/session/ring_tools.rs",
+      "bytes": 8365,
+      "sha256": "0a5ce6e4b02e6c8e59404e9ff5aba04ddbe036de0cf31efd1ee9381cf8258408"
+    },
+    {
+      "path": "crates/om9-app/src/session/metal.rs",
+      "bytes": 11415,
+      "sha256": "56b021ed8c1172f0928eb75e91b002a1ccafe7bf1cc531e303d19c6f4d817b19"
+    },
+    {
+      "path": "crates/om9-app/src/session/builder.rs",
+      "bytes": 58997,
+      "sha256": "8dcae508ea5228f1d928bbe13c81ff6440f96d84620b89d03aa517de83e3a91a"
+    },
+    {
+      "path": "crates/om9-app/src/ui/chrome.rs",
+      "bytes": 278539,
+      "sha256": "0397f5983910e520df317d1a6226ccf8259a342964dd1011b8652b09d9aed682"
+    },
+    {
+      "path": "crates/om9-core/src/builder.rs",
+      "bytes": 69013,
+      "sha256": "b9f4fd5bb54ba92c1ac2766a305913792d424798ceee09d0d1ab976d04952f22"
+    },
+    {
+      "path": "crates/om9-addon-abi/src/session.rs",
+      "bytes": 29799,
+      "sha256": "b364fa32e0ae25caa67f47d0b65ef7bb67f1da36b145baf1e20bfe407736b81d"
+    },
+    {
+      "path": "addons/tools/src/lib.rs",
+      "bytes": 69084,
+      "sha256": "acf6de477fb885cd077778bfdfcc69af643bc1343203798f00960d07da78851a"
+    },
+    {
+      "path": "addons/tools/src/tests.rs",
+      "bytes": 12021,
+      "sha256": "3f504df81e3b02f432b5c05e254e9d72f90a6d99ec87dd48e89a8ae3eb8fa570"
+    },
+    {
+      "path": "addons/tools/addon/om9_addon.toml",
+      "bytes": 20320,
+      "sha256": "fb86de8a357db0584de4618e20dcfe4fdb91cca170f5e1b35ee6f4da1e8c9826"
+    },
+    {
+      "path": "addons/setting_tools/src/lib.rs",
+      "bytes": 31253,
+      "sha256": "333644e2dbfe99dd80aad38acbb27546be96a63a464b23932cc79726e794e83d"
+    },
+    {
+      "path": "addons/matrix/src/lib.rs",
+      "bytes": 9472,
+      "sha256": "904e32562fd6f93ca71e24fc4cc679b562827181b3f1a63d49a99f230d155c34"
+    },
+    {
+      "path": "Cargo.lock",
+      "bytes": 91794,
+      "sha256": "e2e7de69326f08503b52c60c223ae4236716f5fc7cb5bd75f5a82590d5f8dd3e"
+    }
+  ],
+  "private_source_fingerprints": [
+    {
+      "logical_source": "code/vb6-lite/Matrix90/frmMenuTools.frm",
+      "bytes": 203383,
+      "sha256": "2069e37fcfe99cb68ad29f1b4a06b28166d8e2fe4b78ba6a32673f68c59f7c31",
+      "read_scope": "bounded procedures or metadata; see analysis note; not whole-export behavioral coverage"
+    },
+    {
+      "logical_source": "code/vb6-lite/Matrix90/frmBuilderCenterLine.frm",
+      "bytes": 57593,
+      "sha256": "95b5d4867678bf801e4294ad905458341a03bdbe15cdadde262bac2d7a4bee84",
+      "read_scope": "bounded procedures or metadata; see analysis note; not whole-export behavioral coverage"
+    },
+    {
+      "logical_source": "code/vb6-lite/Matrix90/frmBuilderMeshMapper.frm",
+      "bytes": 112675,
+      "sha256": "facd45016c684593f059397eda45eba02c2d066f5316e337a14b68b525faa0b0",
+      "read_scope": "bounded procedures or metadata; see analysis note; not whole-export behavioral coverage"
+    },
+    {
+      "logical_source": "code/ghidra/Matrix90.exe.c",
+      "bytes": 14903864,
+      "sha256": "dcbee0f15ca62c18c19273403165af3ccdbb7064acc5988090148f46f0c1e2cb",
+      "read_scope": "bounded procedures or metadata; see analysis note; not whole-export behavioral coverage"
+    },
+    {
+      "logical_source": "code/decompiled-ui/Matrix/Commands/gvJoinHistory.cs",
+      "bytes": 2889,
+      "sha256": "468875807659735d026ac68a16e3c4119501acdbf8068839fb694322d9e18409",
+      "read_scope": "bounded procedures or metadata; see analysis note; not whole-export behavioral coverage"
+    },
+    {
+      "logical_source": "code/decompiled-ui/Matrix/SmartTargets/gvSmartTargetOnCrvEnd.cs",
+      "bytes": 2600,
+      "sha256": "ca1fd87d2d532821f365a40b8455976aedb90f6c48c81c25fdcfce288d0c2f6a",
+      "read_scope": "bounded procedures or metadata; see analysis note; not whole-export behavioral coverage"
+    },
+    {
+      "logical_source": "code/decompiled-ui/Matrix/SmartTargets/MSR/MSRCommand.cs",
+      "bytes": 7510,
+      "sha256": "fdb36c330bf73033b84d07a093b119901bc5864f32b4a14926dfca6190bd6d25",
+      "read_scope": "bounded procedures or metadata; see analysis note; not whole-export behavioral coverage"
+    },
+    {
+      "logical_source": "code/decompiled-ui/Matrix/MatrixBuilder/ImageTrace/ImageTraceBuilder.cs",
+      "bytes": 24918,
+      "sha256": "aac9bd1cf7d8f4865d87878d92450731e6b044ee72206c97e765617348a335e5",
+      "read_scope": "bounded procedures or metadata; see analysis note; not whole-export behavioral coverage"
+    },
+    {
+      "logical_source": "code/decompiled-ui/Matrix/Commands/MeshRepairCommand.cs",
+      "bytes": 12432,
+      "sha256": "909324869c1322585d79ae594493095f62fb6bd291e135470f83843dfa9a8f24",
+      "read_scope": "bounded procedures or metadata; see analysis note; not whole-export behavioral coverage"
+    },
+    {
+      "logical_source": "code/decompiled-ui/Matrix/UserInterface/MetalWeight/MetalWeightsCommand.cs",
+      "bytes": 1445,
+      "sha256": "64b01346419aa09a3ae5f5b96826a3ab4520f6e667b6f2598d9636bc506cc369",
+      "read_scope": "bounded procedures or metadata; see analysis note; not whole-export behavioral coverage"
+    }
+  ],
+  "manual_reference_fingerprints": [
+    {
+      "path": "OM9_Milestones/M03 - Geometry 3DM/L2-02-04 - 04/L3-009 - Project Pullback And Curve Intersections/reference/text/m8book2__p144-145__surface-pullback.md",
+      "bytes": 4247,
+      "sha256": "446390e27b261cadd7aa82cdcbce5a70c2ba56bc69032db5bd05ed3c1905a45f"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-03-13 - 04-febe-matrix-history/L3-005 - Edit Existing Builder By History/reference/text/m8book2__p149-149__154-join-history.md",
+      "bytes": 2518,
+      "sha256": "358f391bfeab6f3eb9f0798d5bf8b16108a38851fc9ee6a9603a8860c8056f5e"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/reference/text/m8book2__p135-139__141-profile-placer.md",
+      "bytes": 12738,
+      "sha256": "bc39525b23d815ae3fd1f245b16936d56a62df022a1ae118c7014aae8dec4288"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-001 - Ring Rail Jewelry Size Standard/reference/text/m8book2__p134-134__140-ring-rail.md",
+      "bytes": 2404,
+      "sha256": "7332f4d35bc8ff623bffd97d9832ed8c8b91580837db6b44354e22384d385d7e"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-002 - Outside Ring Rail Generator/reference/text/m8book2__p139-140__142-outside-ring-rail.md",
+      "bytes": 5725,
+      "sha256": "d16aff99d6810d14e71623488e0af72ee17d049b83265f7818e563235eb12726"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-004 - Custom Rail And Advanced Rail/reference/text/m8book2__p140-141__143-custom-rail.md",
+      "bytes": 6273,
+      "sha256": "0906fc28b7c19dd6daf8115370d45e96bfa7f8711ee02bd2ca27ba744c00724f"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-004 - Custom Rail And Advanced Rail/reference/text/m8book2__p163-164__173-custom-rail-advanced.md",
+      "bytes": 4895,
+      "sha256": "f1b634c6e97982b6c2abaec682873ba6f2c79c8be1a56f6232b022261db9a54d"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-005 - Four Rail Profile Tool/reference/text/m8book2__p141-141__144-four-rail-profile.md",
+      "bytes": 3305,
+      "sha256": "87d946365d722d7ae97f9779b9b6bcc98401cebb83901e214961bfead491a3e4"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-006 - Profile Edit Merge And Endcap/reference/text/m8book2__p160-161__170-profile.md",
+      "bytes": 4655,
+      "sha256": "ccee1594c595a39c8a355eda9ee47ee7aca24eb089bbcb75ea66771c4f571937"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-006 - Profile Edit Merge And Endcap/reference/text/m8book2__p162-162__171-profile-merge.md",
+      "bytes": 2519,
+      "sha256": "d1594d850dc4ee0e143a521139f4936fb576bfac8fc8013e620fba130cb8fd68"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-006 - Profile Edit Merge And Endcap/reference/text/m8book2__p162-163__172-profile-end-cap.md",
+      "bytes": 4559,
+      "sha256": "f61c645512322ed0aa4b3328d84a0626c3f61c6296c583a7b83d0aec2ff6be6d"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-02 - 05-febe-ring-rail-profile-and-resize-tools/L3-007 - Ring Resizer Builder/reference/text/m8book2__p143-144__146-ring-resizer.md",
+      "bytes": 4221,
+      "sha256": "8dc728880af92323aa0dcae78508a3068d3f6be937057bcf4ff1fa6b1ac6de50"
+    },
+    {
+      "path": "OM9_Milestones/M04 - Builder and History/L2-04-19 - 07-be-jewelry-metal-weight-calculations/reference/text/m8book2__p142-143__145-metal-weights.md",
+      "bytes": 4892,
+      "sha256": "b35f77ed60ea984af60d632923d4f6aaa8761f5400907ad77d67997190d222ba"
+    },
+    {
+      "path": "OM9_Milestones/M07 - Cutters/L2-04-16 - 01-febe-single-gem-seat-cutter-workflows/L3-006 - Interactive Boolean On Metal/reference/text/m8book2__p171-173__boolean-builder.md",
+      "bytes": 6919,
+      "sha256": "2e985bfed6cb724b4bd8b0c23f84ab80fad317ffca83f8f38165357d99af4c4c"
+    },
+    {
+      "path": "OM9_Milestones/M08 - Jewelry Modeling/L2-04-04 - 01-febe-smart-target-curve-blend-network/L3-001 - Smart Target Place And Add/reference/text/m8book2__p146-146__smart-target.md",
+      "bytes": 2239,
+      "sha256": "6fcbe0c32fe01ed03edd601918f53ffef5eb9826b790d70c6b8f4b13bfe4c8a5"
+    },
+    {
+      "path": "OM9_Milestones/M08 - Jewelry Modeling/L2-04-04 - 01-febe-smart-target-curve-blend-network/L3-001 - Smart Target Place And Add/reference/text/m8book2__p147-147__smart-target-add.md",
+      "bytes": 2059,
+      "sha256": "a1dbe18f4841b991b25d47955afbfc59a34105ed952bdabda85743e850399796"
+    },
+    {
+      "path": "OM9_Milestones/M08 - Jewelry Modeling/L2-04-04 - 01-febe-smart-target-curve-blend-network/L3-002 - Smart Target Curve End/reference/text/m8book2__p147-147__smart-targets-on-curve-end.md",
+      "bytes": 2109,
+      "sha256": "364610f6afebb98360d731ebdb742d479854f4e9be3859ab2e60ffa9b34fa14e"
+    },
+    {
+      "path": "OM9_Milestones/M08 - Jewelry Modeling/L2-04-04 - 01-febe-smart-target-curve-blend-network/L3-003 - Smart Blend Curve Network/reference/text/m8book2__p147-147__smart-blend.md",
+      "bytes": 2034,
+      "sha256": "03cbe4868ed6aa6efc89cb5da56a91e6a35841b0f5892b2c39a8cbc228498c92"
+    },
+    {
+      "path": "OM9_Milestones/M08 - Jewelry Modeling/L2-04-04 - 01-febe-smart-target-curve-blend-network/L3-004 - Smart MSR Control Handles/reference/text/m8book2__p148-149__smart-msr.md",
+      "bytes": 4307,
+      "sha256": "328c7570597ef1d8c5d8b1ea7afdca1b16a6543b39c4f07c906646fe283e5d2f"
+    },
+    {
+      "path": "OM9_Milestones/M08 - Jewelry Modeling/L2-04-07 - 04-febe-jewelry-surface-object-placement/L3-009 - Object On Curve Tool/reference/text/m8book2__p164-167__object-on-curve.md",
+      "bytes": 10627,
+      "sha256": "3087dff27af28221bfd57ff5f204d7d22ee364678815b26dde0422f1fc489f5f"
+    },
+    {
+      "path": "OM9_Milestones/M08 - Jewelry Modeling/L2-04-07 - 04-febe-jewelry-surface-object-placement/L3-009 - Object On Curve Tool/reference/text/m8book2__p169-171__curve-transform.md",
+      "bytes": 5777,
+      "sha256": "023958876ebacb68e9d5729fb2d5cca8093d65e86b43a727a430ac49f89a0eb8"
+    },
+    {
+      "path": "OM9_Milestones/M08 - Jewelry Modeling/L2-05-03 - 08-febe-user-design-libraries/L3-001 - User Library Folder Catalog/reference/text/m8book2__p145-146__stuller-findings-library.md",
+      "bytes": 4110,
+      "sha256": "b2d1d8edc340040215878b416781695bebacdefcb84387c77eacf69a97c3a545"
+    },
+    {
+      "path": "OM9_Milestones/ZAFTER - Extensions/L2-10-02 - 02-febe-advanced-jewelry-mesh-repair/reference/text/m8book2__p151-151__mesh-repair.md",
+      "bytes": 2930,
+      "sha256": "7f1bba0cc72f6087f1c075b51d5d9c7186f7272a1a8bddc6fbab8e040cf2dc51"
+    },
+    {
+      "path": "OM9_Milestones/ZAFTER - Extensions/L2-10-02 - 02-febe-advanced-jewelry-mesh-repair/L3-004 - Mesh Reduction Advanced/reference/text/m8book2__p167-168__mesh-reducer.md",
+      "bytes": 6447,
+      "sha256": "a6da7886f21e29cc9b453f11b8125a791827e561990094504878168e2eae260e"
+    },
+    {
+      "path": "OM9_Milestones/ZAFTER - Extensions/L2-10-02 - 02-febe-advanced-jewelry-mesh-repair/L3-005 - Mesh Repair Before After Report/reference/text/m8book2__p150-151__object-checker.md",
+      "bytes": 5472,
+      "sha256": "af20022f43d20ba74b41c3b80310a2320dc58cd1d67325ad8127024c454de2ef"
+    },
+    {
+      "path": "OM9_Milestones/ZAFTER - Extensions/L2-10-03 - 03-febe-jewelry-print-supports/L3-006 - 3d Printing Export Support Workflow/reference/text/m8book2__p151-151__3d-printing.md",
+      "bytes": 2930,
+      "sha256": "cecec684cf162bc77456f423d58d3211b8296c3afb610860c9e0d9d14b0e830b"
+    }
+  ],
+  "manual_reference_lookup_missing": [],
+  "native_mapping": [
+    {
+      "container": "frmMenuTools",
+      "procedure": "CmdIcon_UnknownEvent_10",
+      "va": "0x0151E910",
+      "ghidra_definition_line": 33562,
+      "mapping": "EXACT",
+      "mapping_confidence": "A",
+      "behavior_confidence": "Medium"
+    },
+    {
+      "container": "frmMenuTools",
+      "procedure": "CmdIcon_UnknownEvent_A",
+      "va": "0x0151EE10",
+      "ghidra_definition_line": 33761,
+      "mapping": "EXACT",
+      "mapping_confidence": "A",
+      "behavior_confidence": "Medium"
+    },
+    {
+      "container": "frmMenuTools",
+      "procedure": "CmdIcon_UnknownEvent_C",
+      "va": "0x0151F0B0",
+      "ghidra_definition_line": 33845,
+      "mapping": "EXACT_ENTRY_PARTIAL_BODY",
+      "mapping_confidence": "A",
+      "behavior_confidence": "Low"
+    },
+    {
+      "container": "frmBuilderCenterLine",
+      "procedure": "ctrMenu_UnknownEvent_9",
+      "va": "0x015CB780",
+      "ghidra_definition_line": 99673,
+      "mapping": "EXACT",
+      "mapping_confidence": "A",
+      "behavior_confidence": "High for mean-then-pull; Medium for error/reset details"
+    }
+  ],
+  "scope_limits": [
+    "No product code or reusable skill changed.",
+    "No desktop/GPU/LightHigh/host Undo/persistence acceptance in this audit.",
+    "Installed DLL/profile route not verified.",
+    "Managed RVAs are not native VB6 VAs.",
+    "Some Tools semantics occur on shared two-column reference pages; own section is required before implementation.",
+    "Source presence and passing existing tests do not establish manual parity."
+  ],
+  "commands": [
+    {
+      "ordinal": 1,
+      "command_id": "BuilderRingRail",
+      "label": "Ring Rail",
+      "book2_contract_summary": "PDF 134–135: chọn region hoặc mm/inch, đường kính/chu vi; đặt rail; thay rail Yes/No/Cancel",
+      "milestone_owner_note": "M04 `04-02-001`; M03 `03-08-005` entry",
+      "existing_code_and_gap": "Add-on tạo circle, US/ISO/diameter; built-in có builder/history. Thiếu đủ region, inch, custom shape/library và replace workflow; kiểm hướng/placement và parity hai đường.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "RingRail",
+        "gvRingRail"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 2,
+      "command_id": "BuilderProfilePlacer",
+      "label": "Profile Placer",
+      "book2_contract_summary": "PDF 135–139: chọn một rail bất kỳ, profile; Width/Height/Position/Tilt/Twist/Roll/XYZ; Add/Mirror/Second Rail/Edit",
+      "milestone_owner_note": "M04 `04-02-003`, `008`, `009`; `03-11` UI",
+      "existing_code_and_gap": "Add-on tạo các profile tại các góc circle; built-in có RailProfile/handles/history. Cần arbitrary rail, interactive Add, editor/library, mirror và đủ orientation. Count hiện đặt 3/5 nhưng sinh 4/6 section; làm rõ bằng fixture.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "ProfilePlacer",
+        "gvProfilePlacer"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 3,
+      "command_id": "BuilderOutsideRingRail",
+      "label": "Outside Ring Rail",
+      "book2_contract_summary": "PDF 139–140: chọn rail/profile, Top/Side/Bottom Thickness, Lock, Reset và F6 Edit",
+      "milestone_owner_note": "M04 `04-02-002`, `009`",
+      "existing_code_and_gap": "Có rail theo thickness và builder circle. Thiếu Lock, custom shape, editor/handle và History tương ứng với nguồn rail. Alias `gvOutsideRingRail` chưa có trong manifest Tools.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "OutsideRingRail"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 4,
+      "command_id": "BuilderCustomRail",
+      "label": "Custom Rail",
+      "book2_contract_summary": "PDF 140–141: ring rail và shape Top, Make Rail, guide width/size, Delete Curves; kết quả có hai curve chưa join",
+      "milestone_owner_note": "M04 `04-02-004`",
+      "existing_code_and_gap": "Add-on tạo curve từ mẫu rail/shape, mirror tùy chọn; built-in chỉ validate rồi sao chép một rail kín. Cần đúng input, kết quả, guides, Delete Curves và ràng buộc frame.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "CustomRail"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 5,
+      "command_id": "BuilderFourProfile",
+      "label": "Four Rail Profile",
+      "book2_contract_summary": "PDF 141–142: bốn rail, hai điểm Set Plane, profile; Move/Rotate Y/Z/Add/Sweep 4",
+      "milestone_owner_note": "M04 `04-02-005`, `008`, `009`",
+      "existing_code_and_gap": "Add-on có mặt phẳng cắt và profile nội suy; built-in có metadata Sweep4. Thiếu nối profile library, handles, các lần Add và associative sweep theo cùng nguồn.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "FourRailProfile"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 6,
+      "command_id": "BuilderMetalWeights",
+      "label": "Metal Weights",
+      "book2_contract_summary": "PDF 142–143: chọn solid kín, Calculate; GV/User/Use Object Materials; grams/DWT",
+      "milestone_owner_note": "M04 `04-19-001`…`005`; M06 `04-15-010` consumer",
+      "existing_code_and_gap": "Built-in có đo BRep/density/multi-material; add-on dùng mesh và vẫn tính khi hở. Tái dùng service đo nguồn, từ chối nguồn không hợp lệ, hoàn thiện panel/material binding; thêm alias gốc `gvMetalWeights`.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "MetalWeights"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 7,
+      "command_id": "BuilderResize",
+      "label": "Ring Resizer",
+      "book2_contract_summary": "PDF 143–144: metal + rail gốc, primary radius, góc trái/phải, nhiều cỡ; Symmetrical/Add Rings/Save to File/STL",
+      "milestone_owner_note": "M04 `04-02-007`",
+      "existing_code_and_gap": "Add-on có nhiều output mesh bằng radial offset; built-in có producer circle. Chưa giữ vùng head bằng góc, đọc rail gốc bắt buộc, asymmetry và file output; không nghiệm thu từ circle resize.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "RingResizer",
+        "Resize"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 8,
+      "command_id": "BuilderSurfacePullback",
+      "label": "Surface Pullback",
+      "book2_contract_summary": "PDF 144–145: surface + curve kín trên mặt, Drop Depth/Bevel/Extrude/Insert Only/Cap, Apply/Select/Undo",
+      "milestone_owner_note": "Ref tại M03 `02-04-009`; chốt capability Tools riêng",
+      "existing_code_and_gap": "Handler hiện drop thiết kế phẳng lên mesh mặt. Cần tạo recess/cap bằng nguồn surface/BRep, đúng depth và trim; không đồng nhất với Curve Pullback.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "SurfacePullback"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 9,
+      "command_id": "BuilderBermarkLibrary",
+      "label": "Bermark library",
+      "book2_contract_summary": "Chưa tìm thấy mục riêng Book 2 trong refs Tools đã tra; đối chiếu nguồn Matrix9 trước chốt nội dung",
+      "milestone_owner_note": "M08 `05-03` là owner ứng viên",
+      "existing_code_and_gap": "Add-on hiện là Settings Library gồm head tham số OM9. Không tự coi tương đương thư viện gốc; cần catalog/import/preview cho tài sản người dùng hoặc có quyền sử dụng.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "BermarkLibrary"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 10,
+      "command_id": "BuilderStullerFindingsLibrary",
+      "label": "Stuller findings",
+      "book2_contract_summary": "PDF 145–146: duyệt category/size/quality, nhiều view preview, chọn finding để load",
+      "milestone_owner_note": "M08 `05-03-001`…`005`, chốt adapter catalog",
+      "existing_code_and_gap": "Có phụ kiện tham số OM9, chưa phải browser/catalog Stuller. Làm provider/browser và import có quyền, không đóng gói bộ mẫu thương mại.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "FindingsLibrary"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 11,
+      "command_id": "gvSmartTarget",
+      "label": "Smart Target",
+      "book2_contract_summary": "PDF 146: click blend point, click hướng handle; target dùng cho curve có History",
+      "milestone_owner_note": "M08 `04-04-001`, `005`",
+      "existing_code_and_gap": "Có Point + Line rời. Thiếu semantic target ID, nhiều handle cùng điểm, selection filter, serialization/dependency và lifecycle.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "SmartTarget"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 12,
+      "command_id": "gvSmartTargetAdd",
+      "label": "Add Smart Target",
+      "book2_contract_summary": "PDF 147: chọn blend point cũ, thêm hướng vào chính target",
+      "milestone_owner_note": "M08 `04-04-001`, `005`",
+      "existing_code_and_gap": "Có tạo line tại midpoint curve chọn; thiếu xác minh đúng target và thêm handle vào cùng object/History.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "SmartTargetAdd"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 13,
+      "command_id": "gvSmartTargetOnCrvEnd",
+      "label": "Target at curve end",
+      "book2_contract_summary": "PDF 147: pick gần đầu curve, đặt target tại endpoint theo tangent nguồn",
+      "milestone_owner_note": "M08 `04-04-002`",
+      "existing_code_and_gap": "Có chọn endpoint từ mẫu points; tangent là chord mẫu. Cần derivative/parameter nguồn, sub-pick đúng endpoint; fallback built-in đang dùng ID Target thường.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "SmartTargetOnCrvEnd"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 14,
+      "command_id": "gvSmartBlend",
+      "label": "Smart Blend",
+      "book2_contract_summary": "PDF 147: pick hai handle đúng phía, blend giữa hai điểm; sửa target cập nhật curve",
+      "milestone_owner_note": "M08 `04-04-003`, `005`",
+      "existing_code_and_gap": "Có NURBS blend theo midpoint và hướng line; thiếu semantic handle, hướng pick, History/recompute và persistence.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "SmartBlend"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 15,
+      "command_id": "gvSmartMSR",
+      "label": "Smart MSR",
+      "book2_contract_summary": "PDF 148–149: bật/tắt filter chỉ target, move/scale và xoay từng handle độc lập",
+      "milestone_owner_note": "M08 `04-04-004`, `005`",
+      "existing_code_and_gap": "Hiện là chuỗi nhập góc/scale/move một lần, nhận curve thông thường. Cần chế độ filter, gumball từng handle và giữ History.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "SmartMSR"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 16,
+      "command_id": "gvJoinHistory",
+      "label": "Join History",
+      "book2_contract_summary": "PDF 149: chọn ≥2 curve, giữ cha, tạo child cập nhật theo cha và downstream",
+      "milestone_owner_note": "M04 `03-13-005`; `01-04` History service",
+      "existing_code_and_gap": "Handler đang Join thường và xóa cha; test yêu cầu xóa. Phải thay semantics và test bằng giữ cha + recipe/recompute; dùng curve nguồn.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "JoinHistory"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 17,
+      "command_id": "BuilderImageTrace",
+      "label": "Image Trace",
+      "book2_contract_summary": "PDF 149–150: mở ảnh, Threshold/Despeckle/Corner Soften/Invert/Blur/Outline/Preprocess/Prescale/Group/Reset",
+      "milestone_owner_note": "Chưa thấy L3 riêng; chốt owner, không gán theo trang Join History",
+      "existing_code_and_gap": "Có đọc PNG/BMP/PGM/PPM, threshold và smooth. Thiếu JPG/GIF/TIFF theo manual, preprocess/options, preview cập nhật, group và budget ảnh; alias `gvImageTrace` thiếu.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "ImageTrace"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 18,
+      "command_id": "BuilderObjectChecker",
+      "label": "Object Checker",
+      "book2_contract_summary": "PDF 150–151: chọn object, Shell và Naked Edges pass/fail; highlight lỗi",
+      "milestone_owner_note": "AFTER `10-02-005` có ref; M03 health service tái dùng",
+      "existing_code_and_gap": "Có mesh edge/degenerate/volume report. Cần validity/topology nguồn BRep, báo face/edge lỗi, không dùng manifold mesh để chứng nhận BRep.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "ObjectChecker"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 19,
+      "command_id": "BuilderMeshRepair",
+      "label": "Mesh Repair",
+      "book2_contract_summary": "PDF 151: đối tượng → mesh sửa kín, report; tolerance, ExtendedRepair/DeleteInput/SimplePlanes/Milgrain",
+      "milestone_owner_note": "AFTER `10-02-001`…`005`",
+      "existing_code_and_gap": "Có weld/degenerate/cap/flip từng mesh. Thiếu unite/intersection repair, tolerance mesh nguồn, options, kiểm hậu điều kiện trước thông báo kín; không nhập Netfabb thương mại.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "MeshRepair"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 20,
+      "command_id": "Builder3dPrinting",
+      "label": "3D Printing",
+      "book2_contract_summary": "PDF 151–160: mở bộ support tools, support regions, ring/base/cylinder/taper/blend supports",
+      "milestone_owner_note": "AFTER `10-03-001`…`006`",
+      "existing_code_and_gap": "Có auto sprue và pad theo bbox vật đầu tiên. Thiếu palette, từng generator và control, vùng overhang, nhiều object, kiểm giao/support và export workflow.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "3dPrinting",
+        "RingSupportSprue"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 21,
+      "command_id": "BuilderProfile",
+      "label": "Profile",
+      "book2_contract_summary": "PDF 160–162: đưa curve kín phẳng vào editor hoặc tạo từ library, handles/Select Rail",
+      "milestone_owner_note": "M04 `04-02-006`, `003`; UI `03-11-007`",
+      "existing_code_and_gap": "Add-on chỉ đặt preset polyline mới; built-in trỏ Profile Placer. Thiếu sửa curve có sẵn, editor/library/save/seam/baseline và giữ identity.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "Profile"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 22,
+      "command_id": "BuilderProfileMerge",
+      "label": "Profile Merge",
+      "book2_contract_summary": "PDF 162: hai profile kín phẳng chồng nhau → outline mới, giữ gốc",
+      "milestone_owner_note": "M04 `04-02-006`",
+      "existing_code_and_gap": "Add-on có outline union qua prism mesh; built-in merge section đầu-cuối. Cần curve boolean theo dung sai, holes/coplanarity, giữ gốc; Amount/Flip trên trang chung thuộc End Cap.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "ProfileMerge"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 23,
+      "command_id": "BuilderProfileEndCap",
+      "label": "Profile End Cap",
+      "book2_contract_summary": "PDF 162–163: profile → blended cap, Amount/Flip, preview/handle, Enter; Shift bước 0.10",
+      "milestone_owner_note": "M04 `04-02-006`",
+      "existing_code_and_gap": "Add-on có dome mesh; built-in cap phẳng. Cần cap theo semantics surface/curve nguồn, đúng Amount/Flip/handles; kiểm liên tục biên theo mức contract được chốt.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "ProfileEndCap"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 24,
+      "command_id": "BuilderCustomRailAdvanced",
+      "label": "Custom Rail Advanced",
+      "book2_contract_summary": "PDF 163–164: rail + Top shape + Side Profile tùy chọn, blends/History; sửa CV shape cập nhật kết quả",
+      "milestone_owner_note": "M04 `04-02-004`, `008`, `009`",
+      "existing_code_and_gap": "Có nội suy mẫu Top/Side; built-in sao chép rail. Thiếu associative History, blend handles, nguồn curve chính xác và propagation sau edit/reopen.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "CustomRailAdvanced"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 25,
+      "command_id": "BuilderObjectOnCrv",
+      "label": "Object on Curve",
+      "book2_contract_summary": "PDF 164–167: rail + browser/object F4, Start/End/Spacing/Size/Taper/Roll/Z/Mirror/orient modes/styles",
+      "milestone_owner_note": "M08 `04-07-009`",
+      "existing_code_and_gap": "Có count/spacing/end-scale/twist transforms. Thiếu nhiều mode/options, nguồn arc-length và frame; host hiện transform toàn selection, cần fixture chứng minh rail không bị copy cùng object.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "ObjectOnCrv"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 26,
+      "command_id": "BuilderSurfaceInset",
+      "label": "Surface Inset",
+      "book2_contract_summary": "PDF 167, phần chung trong ref Object on Curve: surface + curve, inset theo tolerance",
+      "milestone_owner_note": "Chốt owner; M03 surface service ứng viên",
+      "existing_code_and_gap": "Có pocket mesh CSG thay object; chưa có route BRep, tolerance/trim và bảo toàn loại nguồn. Chuẩn hóa phần ref riêng trước chốt đầy đủ option; không lấy Weld/Reduce trang kế bên làm option Inset.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "SurfaceInset"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 27,
+      "command_id": "BuilderMeshReducer",
+      "label": "Mesh Reducer",
+      "book2_contract_summary": "PDF 167–168: giảm mesh từng mức, ModelUnits/Delete/Reduce/Select/Undo/Weld/WeldAngle/SplitDisjointMeshes",
+      "milestone_owner_note": "AFTER `10-02-004`; M03 `03-19-006` basic",
+      "existing_code_and_gap": "Có grid clustering và percent; thiếu đủ options, sai số hình học, giữ component/boundary và kiểm topology sau giảm. Mesh người dùng giữ là nguồn mesh.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "MeshReducer"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 28,
+      "command_id": "BuilderMesh",
+      "label": "Mesh Mapper",
+      "book2_contract_summary": "PDF 168–169: mesh + hai curve Top/Bottom hoặc Left/Right; Maintain Z, Transform/Select/Undo",
+      "milestone_owner_note": "Chốt owner; M08 `04-07` ứng viên",
+      "existing_code_and_gap": "Handler `to_mesh_command` chỉ copy mesh từ selection, manifest gọi Mesh. Cần mapping thực, source mesh và curve frame; fallback icon đang dùng MeshRepair ID.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "Mesh"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 29,
+      "command_id": "BuilderCurveTransformTool",
+      "label": "Curve Transform",
+      "book2_contract_summary": "PDF 169–171: Hold/Bend Point, Bend/Scale/Straighten/Blend/Mirror Reflect/Rotate và Undo",
+      "milestone_owner_note": "Chốt owner; M08 `04-08` ứng viên",
+      "existing_code_and_gap": "Có hold/bend/angle theo samples. Thiếu Scale/Straighten/Blend/mirror, handles, ảnh hưởng profile/history và kiểm sai số nguồn.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "CurveTransform"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 30,
+      "command_id": "BuilderCenterLine",
+      "label": "Center Line",
+      "book2_contract_summary": "PDF 171: surface + hai curve trên mặt, Start; Reset",
+      "milestone_owner_note": "Chốt owner; M03 curve/surface service ứng viên",
+      "existing_code_and_gap": "Hiện midpoint hai sampled paths hoặc dấu cộng. Cần mean curve rồi pull về mặt đúng trim; decompile có nhánh đủ ba input và fallback MeanCurve, không có căn cứ cho center cross.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-tools::Tools",
+      "manifest_aliases": [
+        "CenterLine"
+      ],
+      "source": "addons/tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    },
+    {
+      "ordinal": 31,
+      "command_id": "BuilderBooleanBuilder",
+      "label": "Boolean Builder",
+      "book2_contract_summary": "PDF 171–173: Objects/Cutters, Difference/Union/Intersection, KeepCutter/OneByOne và kiểm vật kín",
+      "milestone_owner_note": "M07 `04-18-004`; `04-16-006` consumer",
+      "existing_code_and_gap": "Có add-on mesh CSG, cache preview và ba mode. Cần BRep route qua kernel hiện có, validity/refusal thay warning-only, invalidation theo source revision, OneByOne/retry và parity Tools/Cutters/F6.",
+      "audit_status": "MOT_PHAN",
+      "implementation_changed_by_audit": false,
+      "provider": "om9-addon-setting-tools::BooleanTool",
+      "manifest_aliases": [],
+      "source": "addons/setting_tools/src/lib.rs",
+      "desktop_verified_in_audit": false,
+      "light_high_geometry_verified_in_audit": false,
+      "host_undo_persistence_verified_in_audit": false
+    }
+  ],
+  "next_package": "T00 scoped to Join History and Metal Weights, then T02/T03 with the required source service slice of T01",
+  "validation": {
+    "public_source_audit": {
+      "source_files": 16122,
+      "icon_bindings": 594,
+      "svg_files": 593,
+      "errors": []
+    },
+    "public_source_audit_log": {
+      "path": "docs/validation/tools-menu-audit-2026-11-16/public-source-audit.log",
+      "sha256": "096cb3ba927de8776185122f44a96a1d187f69d0a8e6a98d52204e2af5770d84"
+    },
+    "git_diff_check": "PASS",
+    "inventory_check": "31 unique ordered rows match the menu and 30 Tools command definitions plus one Boolean command",
+    "plan_work_packages": 12,
+    "prune": "PASS; 0 runs removed; 10 newest per root and 208 referenced older runs retained",
+    "native_analysis_distribution": "docs/analysis is gitignored; local derived mapping stays private, no raw export copied"
+  }
+}

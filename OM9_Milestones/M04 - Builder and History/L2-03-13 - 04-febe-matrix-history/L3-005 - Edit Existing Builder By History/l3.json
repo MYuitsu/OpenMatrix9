@@ -4,6 +4,12 @@
   "milestone": "M04",
   "parent_l2_id": "OM9-L2-03-13",
   "title": "Edit Existing Builder By History",
+  "runtime_implementation": {
+    "status": "PARTIAL_MATRIXAPP_JOIN_HISTORY_SOURCE_EDITS",
+    "scope": "MatrixApp parent grip, gumball gestures, numeric and tested Transform menu operations including Cage Edit and Smart Flow, supported interactive add-on source edits, single-piece Trim and non-copy Move/Rotate/Mirror edits feeding update-enabled Join History rebuild affected descendants on a worker; headless fixtures cover two levels, interactive mutual and one/two-surface Trim session restore, simulated grip and command-editor input, menu-origin dispatch, Undo/Redo, Escape, failure and reopen. Center Object controller placements also use the worker; no menu/CMD route has been identified.",
+    "evidence": "docs/validation/2026-11-17-history-dependent-candidate.md#mirror-source-command",
+    "limitations": "Interactive add-on edits support Geometry/Placement, same-document Inserts and Extensions; other mixed mutations including parent deletion refuse, and exact-source replacement behavior remains open. Cage/flow source calculation remains on the caller. Transform menu synthetic native-source fixtures do not certify real topology. Mirror source preparation runs on the History worker; its input allowance is an estimate, not a producer peak proof. Trim geometry and surface partitions are still prepared on the caller; parent replacement by multiple pieces is refused in tested interactive Trim paths. A separate TrimMany continuation has no identified entry point. OCCT internal allocation and cancellation within a native call remain unbounded. Other source edits, full producer memory bounds, desktop/GPU, Join History creation menu/CMD/F6 and general Builder History are not complete. Skill update consent pending. Join History is visible but disabled in icon and F6 availability, and typed/add-on starts refuse; see docs/validation/2026-11-17-tools-routing.md. Top 11 unhandled parent replacement is refused; multi-piece replacement and recipe adaptation remain unimplemented."
+  },
   "parameter_contract": {
     "schema": "om9.parameter_contract.v1",
     "status": "DOMAIN_ONLY",

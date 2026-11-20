@@ -4,6 +4,12 @@
   "milestone": "M04",
   "parent_l2_id": "OM9-L2-04-02",
   "title": "Outside Ring Rail Generator",
+  "runtime_implementation": {
+    "status": "PARTIAL_ALIAS_ROUTING",
+    "scope": "gvOutsideRingRail is explicitly declared in both add-on manifests; headless menu and alias fixtures produce equal default rail geometry.",
+    "evidence": "docs/validation/2026-11-17-tools-alias-routing.md",
+    "limitations": "Lock, custom shapes, full editor, handles, History and desktop validation remain open. Alias behavior alone does not complete the capability."
+  },
   "parameter_contract": {
     "schema": "om9.parameter_contract.v1",
     "status": "DOMAIN_ONLY",

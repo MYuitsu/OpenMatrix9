@@ -328,6 +328,80 @@ fn scale_translation_and_reversed_winding_preserve_geometry() {
 }
 
 #[test]
+fn jewellery_scale_document_tolerance_handles_all_boolean_modes() {
+    let a = cube([0.; 3], [4.; 3]);
+    let b = cube([2.; 3], [6.; 3]);
+    let options = CsgOptions { tolerance: 0.001, ..CsgOptions::default() };
+    for (op, expected) in [(BooleanOp::Difference, 56.), (BooleanOp::Union, 120.), (BooleanOp::Intersection, 8.)] {
+        let (result, _) = mesh_csg::mesh_boolean(&a, &b, op, options).unwrap();
+        check(&result, expected);
+    }
+    let excessively_coarse = CsgOptions { tolerance: 0.1, ..options };
+    assert!(mesh_csg::mesh_boolean(&a, &b, BooleanOp::Difference, excessively_coarse).is_err());
+}
+
+#[test]
+fn cancellable_mesh_boolean_retains_input_and_matches_uncancelled_result() {
+    use om9_core::{Error, transaction::Cancellation};
+    let a = cube([0.; 3], [4.; 3]);
+    let b = cube([2.; 3], [6.; 3]);
+    let original = (a.clone(), b.clone());
+    let options = CsgOptions::default();
+    let cancel = Cancellation::default();
+    let expected = mesh_csg::mesh_boolean(&a, &b, BooleanOp::Difference, options).unwrap().0;
+    let actual = mesh_csg::mesh_boolean_cancellable(&a, &b, BooleanOp::Difference, options, &cancel).unwrap().0;
+    assert_eq!(actual, expected);
+    cancel.cancel();
+    assert!(matches!(mesh_csg::mesh_boolean_cancellable(&a, &b, BooleanOp::Difference, options, &cancel), Err(Error::Canceled)));
+    assert_eq!((a, b), original);
+}
+
+#[test]
+fn cancellable_mesh_boolean_stops_scheduled_large_operation() {
+    use om9_core::{Error, transaction::Cancellation};
+    let mut source = cube([0.; 3], [1.; 3]);
+    for i in 1..700 {
+        let x = f64::from(i) * 2.;
+        source = join(&source, &cube([x, 0., 0.], [x + 1., 1., 1.]));
+    }
+    let cutter = cube([0.5, 0.5, 0.5], [1.5, 1.5, 1.5]);
+    let cancel = Cancellation::default();
+    let (ready, receiver) = std::sync::mpsc::sync_channel(0);
+    std::thread::scope(|scope| {
+        let task = scope.spawn(|| {
+            ready.send(()).unwrap();
+            mesh_csg::mesh_boolean_cancellable(&source, &cutter, BooleanOp::Difference, CsgOptions::default(), &cancel)
+        });
+        receiver.recv().unwrap();
+        std::thread::sleep(std::time::Duration::from_millis(10));
+        cancel.cancel();
+        assert!(matches!(task.join().unwrap(), Err(Error::Canceled)));
+    });
+    assert_eq!(source.faces.len(), 700 * 12);
+}
+
+#[test]
+fn boolean_batch_builds_independent_outputs_and_refuses_atomically() {
+    use om9_core::{Error, transaction::Cancellation};
+    let objects = vec![cube([0.; 3], [4.; 3]), cube([10.,0.,0.], [14.,4.,4.])];
+    let cutters = vec![cube([2.; 3], [6.; 3]), cube([12.,2.,2.], [16.,6.,6.])];
+    let original = (objects.clone(), cutters.clone());
+    let cancel = Cancellation::default();
+    let options = CsgOptions { tolerance: 0.001, ..CsgOptions::default() };
+    let results = mesh_csg::mesh_boolean_batch_cancellable(&objects, &cutters, BooleanOp::Difference, options, &cancel).unwrap();
+    assert_eq!(results.len(), 2);
+    for mesh in &results { check(mesh, 56.); }
+    let mut far = cutters.clone();
+    far.truncate(1);
+    assert!(mesh_csg::mesh_boolean_batch_cancellable(&objects, &far, BooleanOp::Intersection, options, &cancel).is_err());
+    let constrained = CsgOptions { max_work: 1, ..options };
+    assert!(mesh_csg::mesh_boolean_batch_cancellable(&objects, &cutters, BooleanOp::Difference, constrained, &cancel).is_err());
+    cancel.cancel();
+    assert!(matches!(mesh_csg::mesh_boolean_batch_cancellable(&objects, &cutters, BooleanOp::Difference, options, &cancel), Err(Error::Canceled)));
+    assert_eq!((objects, cutters), original);
+}
+
+#[test]
 fn connected_self_crossing_pentagram_prism_rebuilds_material_boundary() {
     let mut m = Mesh {
         vertices: vec![],

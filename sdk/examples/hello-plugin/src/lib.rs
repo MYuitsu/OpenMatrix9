@@ -173,10 +173,56 @@ impl Plugin for HelloPlugin {
                     id: "HistoryDemo".into(),
                     title: "Read associative history and its rebuild plan".into(),
                 },
+                CommandDescriptor {
+                    id: "SnapDemo".into(),
+                    title: "Query and constrain an endpoint snap".into(),
+                },
             ],
         }
     }
     fn execute(&mut self, host: &mut Host<'_>, command: &str, arguments: Value) -> Result<Value> {
+        if command == "SnapDemo" {
+            let context = host.snap_context()?;
+            let kinds = match arguments.get("kinds") {
+                Some(kinds) => serde_json::from_value(kinds.clone())
+                    .map_err(|error| om9_sdk::SdkError::new("invalid", error.to_string()))?,
+                None => vec![arguments.get("kind").and_then(Value::as_str).unwrap_or("end").to_owned()],
+            };
+            let query = om9_sdk::SnapQuery {
+                context_token: context.token.clone(),
+                viewport_origin: [0., 0.],
+                viewport_size: [number(&arguments, "width", 800.)?, number(&arguments, "height", 600.)?],
+                cursor: [number(&arguments, "cursor_x", 400.)?, number(&arguments, "cursor_y", 300.)?],
+                radius_px: number(&arguments, "radius_px", 8.)?,
+                kinds,
+                from_mm: serde_json::from_value(arguments.get("from_mm").cloned().unwrap_or(Value::Null))
+                    .map_err(|error| om9_sdk::SdkError::new("invalid", error.to_string()))?,
+                tracking_anchors_mm: serde_json::from_value(arguments.get("tracking_anchors_mm").cloned().unwrap_or(serde_json::json!([])))
+                    .map_err(|error| om9_sdk::SdkError::new("invalid", error.to_string()))?,
+            };
+            let hit = if let Some(anchors) = arguments.get("tracking_anchors") {
+                let anchors = serde_json::from_value(anchors.clone())
+                    .map_err(|error| om9_sdk::SdkError::new("invalid", error.to_string()))?;
+                host.snap_query_tracked(query, anchors)?
+            } else {
+                host.snap_query(query)?
+            };
+            let point = match &hit {
+                Some(hit) => Some(host.snap_constrain_hit(&context, hit)?),
+                None => None,
+            };
+            let anchor = match &hit {
+                Some(hit) if arguments.get("retain_anchor").and_then(Value::as_bool).unwrap_or(false) =>
+                    Some(host.snap_track_anchor(&context, hit)?),
+                _ => None,
+            };
+            let created = match point {
+                Some(point) if arguments.get("create_point").and_then(Value::as_bool).unwrap_or(false) =>
+                    Some(host.add_point("SDK snapped point", point)?),
+                _ => None,
+            };
+            return Ok(serde_json::json!({"hit": hit, "point_mm": point, "created": created, "anchor": anchor}));
+        }
         if command == "HistoryDemo" {
             let features = host.history_list()?;
             let dependencies = host.history_dependencies()?;

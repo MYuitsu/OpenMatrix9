@@ -653,27 +653,27 @@ mod tests {
         // Hand-computed from the documented constants (see positive.json).
         assert_eq!(plan.menu_bar, rect(0., 0., 1600., 21.));
         assert_eq!(plan.left_rail, Some(rect(0., 21., 300., 979.)));
-        assert_eq!(plan.right_dock, Some(rect(1300., 178., 300., 822.)));
+        assert_eq!(plan.right_dock, Some(rect(1300., 111., 300., 889.)));
         assert_eq!(plan.command_input, rect(300., 21., 1300., 90.));
-        assert_eq!(plan.toolbar, rect(300., 111., 1300., 67.));
+        assert_eq!(plan.toolbar, rect(300., 111., 1300., 0.));
         assert_eq!(plan.status_bar, rect(300., 980., 1000., 20.));
-        assert_eq!(plan.center, rect(300., 178., 1000., 802.));
+        assert_eq!(plan.center, rect(300., 111., 1000., 869.));
         assert_eq!(plan.views.len(), 4);
         assert_eq!(
             view_rect(&plan, ViewId::LookingDown),
-            rect(300., 178., 499., 400.)
+            rect(300., 111., 499., 433.5)
         );
         assert_eq!(
             view_rect(&plan, ViewId::Perspective),
-            rect(801., 178., 499., 400.)
+            rect(801., 111., 499., 433.5)
         );
         assert_eq!(
             view_rect(&plan, ViewId::ThroughFinger),
-            rect(300., 580., 499., 400.)
+            rect(300., 546.5, 499., 433.5)
         );
         assert_eq!(
             view_rect(&plan, ViewId::SideView),
-            rect(801., 580., 499., 400.)
+            rect(801., 546.5, 499., 433.5)
         );
         assert!(plan.notes.is_empty());
         plan.validate().unwrap();
@@ -688,10 +688,10 @@ mod tests {
         )
         .unwrap();
         assert_eq!(plan.right_dock, None);
-        assert_eq!(plan.center, rect(300., 178., 980., 702.));
+        assert_eq!(plan.center, rect(300., 111., 980., 769.));
         assert_eq!(
             view_rect(&plan, ViewId::SideView),
-            rect(791., 530., 489., 350.)
+            rect(791., 496.5, 489., 383.5)
         );
     }
 
@@ -720,24 +720,24 @@ mod tests {
         assert_eq!(plan.menu_bar, rect(0., 0., 800., 21.));
         assert_eq!(plan.left_rail, Some(rect(0., 21., 300., 379.)));
         assert_eq!(plan.command_input, rect(300., 21., 500., 90.));
-        assert_eq!(plan.toolbar, rect(300., 111., 500., 67.));
-        assert_eq!(plan.center, rect(300., 178., 500., 202.));
+        assert_eq!(plan.toolbar, rect(300., 111., 500., 0.));
+        assert_eq!(plan.center, rect(300., 111., 500., 269.));
         assert_eq!(plan.status_bar, rect(300., 380., 500., 20.));
         assert_eq!(
             view_rect(&plan, ViewId::LookingDown),
-            rect(300., 178., 249., 100.)
+            rect(300., 111., 249., 133.5)
         );
         assert_eq!(
             view_rect(&plan, ViewId::Perspective),
-            rect(551., 178., 249., 100.)
+            rect(551., 111., 249., 133.5)
         );
         assert_eq!(
             view_rect(&plan, ViewId::ThroughFinger),
-            rect(300., 280., 249., 100.)
+            rect(300., 246.5, 249., 133.5)
         );
         assert_eq!(
             view_rect(&plan, ViewId::SideView),
-            rect(551., 280., 249., 100.)
+            rect(551., 246.5, 249., 133.5)
         );
         // 300 + 320 fits in 800, so the rail keeps its stored width.
         assert!(plan.notes.is_empty());

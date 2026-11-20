@@ -188,6 +188,11 @@ impl super::Controller {
     /// replacement controller and keep the replaced document as the diff
     /// baseline, so a replacement is published as one ordered batch.
     pub(crate) fn move_contract_state(&mut self, previous: &mut Self) {
+        // Background command capability belongs to the application session. Keep the
+        // permit shared too, so a canceled worker cannot overlap its replacement.
+        previous.cancel_boolean_builder_worker();
+        self.background_boolean_builder = previous.background_boolean_builder;
+        self.boolean_builder_active = previous.boolean_builder_active.clone();
         self.observers = std::mem::take(&mut previous.observers);
         self.observer_diagnostics = std::mem::take(&mut previous.observer_diagnostics);
         self.changes = std::mem::take(&mut previous.changes);

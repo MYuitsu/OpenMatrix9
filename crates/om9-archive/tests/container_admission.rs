@@ -72,6 +72,46 @@ fn typed_document_roundtrip_preserves_master_identity_basis_attributes_and_chann
     assert_eq!(decoded, d);
     assert_eq!(decoded.entities.len(), 4);
 }
+
+#[test]
+fn encode_admission_refuses_during_serialization_without_returning_partial_archive() {
+    let document = fixture();
+    let limits = Limits::default();
+    let mut calls = 0;
+    let error = Archive::encode_with_admission(&document, &limits, |_, pending| {
+        calls += 1;
+        if calls > 2 && pending > 0 { Err(Error::Canceled) } else { Ok(()) }
+    }).unwrap_err();
+    assert_eq!(error, Error::Canceled);
+    assert!(calls > 2);
+    assert!(matches!(Archive::encode_with_admission(&document, &limits, |live, pending| {
+        if live + pending > 128 { Err(Error::Budget("fixture archive")) } else { Ok(()) }
+    }), Err(Error::Budget("fixture archive"))));
+    let encoded = Archive::encode_with_admission(&document, &limits, |_, _| Ok(())).unwrap();
+    assert_eq!(Archive::decode(&encoded, &limits).unwrap(), document);
+}
+
+#[test]
+fn encode_checks_cancellation_while_copying_a_large_resource() {
+    use om9_core::resource::{Resource, ResourceKind};
+    let limits = Limits::default();
+    let mut document = fixture();
+    let data = vec![0x5a; 4 * 1024 * 1024];
+    let resource = Resource::from_bytes("large", ResourceKind::OpaqueBinary, &data, &limits).unwrap();
+    document.resources.insert(resource.id, resource);
+    let mut checkpoints = 0;
+    let result = Archive::encode_with_admission(&document, &limits, |live, pending| {
+        if live >= data.len() as u64 && pending == 0 {
+            checkpoints += 1;
+            if checkpoints == 5 { return Err(Error::Canceled); }
+        }
+        Ok(())
+    });
+    assert_eq!(result, Err(Error::Canceled));
+    assert_eq!(checkpoints, 5);
+    let encoded = Archive::encode_with_admission(&document, &limits, |_, _| Ok(())).unwrap();
+    assert_eq!(Archive::decode(&encoded, &limits).unwrap(), document);
+}
 #[test]
 fn document_nodes_are_not_json_scalar_token_count() {
     let mut document = Document::new("parser structural units");

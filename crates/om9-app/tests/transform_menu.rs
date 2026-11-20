@@ -17,7 +17,35 @@ fn build(entities: Vec<Entity>) -> Controller {
     for entity in entities {
         document.entities.insert(entity.id, entity);
     }
-    Controller::new(document, Limits::default()).expect("controller")
+    if !document.entities.values().any(|entity| matches!(entity.geometry, Geometry::NativeBrep(_))) {
+        return Controller::new(document, Limits::default()).expect("controller");
+    }
+    // Exercise the actual v4 migration path, which binds the legacy native
+    // display to an admitted owner before publishing the initial scene.
+    use sha2::{Digest, Sha256};
+    let mut metadata = serde_json::to_value(&document).unwrap();
+    for entity in document.entities.values() {
+        if let Geometry::NativeBrep(source) = &entity.geometry {
+            let display: Mesh = serde_json::from_slice(&source.payload).unwrap();
+            let native = NativeBrep { display: std::sync::Arc::new(display), payload: source.payload.clone(), crc: source.crc };
+            metadata["entities"][entity.id.0.to_string()]["geometry"]["NativeBrep"] = serde_json::to_value(native).unwrap();
+        }
+    }
+    let metadata = serde_json::to_vec(&metadata).unwrap();
+    let mut archive = vec![0u8; 88];
+    archive[..8].copy_from_slice(b"OM9\0\r\n\x1a\n");
+    archive[8..12].copy_from_slice(&4u32.to_le_bytes());
+    archive[12..16].copy_from_slice(&1u32.to_le_bytes());
+    archive[16..20].copy_from_slice(&1u32.to_le_bytes());
+    archive[40..48].copy_from_slice(&88u64.to_le_bytes());
+    archive[48..56].copy_from_slice(&(metadata.len() as u64).to_le_bytes());
+    archive[56..88].copy_from_slice(&Sha256::digest(&metadata));
+    archive.extend_from_slice(&metadata);
+    let path = std::env::temp_dir().join(format!("om9-transform-fixture-{}.om9", uuid::Uuid::new_v4()));
+    std::fs::write(&path, archive).unwrap();
+    let controller = Controller::open_archive_for_batch(&path, Limits::default()).expect("legacy native display migration");
+    std::fs::remove_file(path).unwrap();
+    controller
 }
 
 /// A closed box as a native solid: the display mesh carries the exact corners.
@@ -47,17 +75,9 @@ fn box_solid(origin: Point3, size: Point3) -> Geometry {
         vec![1, 5, 7],
         vec![1, 7, 3],
     ];
-    Geometry::NativeBrep(NativeBrep {
-        display: std::sync::Arc::new(Mesh {
-            vertices,
-            faces,
-            normals: Vec::new(),
-            colors: Vec::new(),
-            corner_uvs: Vec::new(),
-        }),
-        payload: vec![1, 2, 3, 4].into(),
-        crc: 0,
-    })
+    let display = Mesh { vertices, faces, normals: Vec::new(), colors: Vec::new(), corner_uvs: Vec::new() };
+    let payload = serde_json::to_vec(&display).unwrap();
+    Geometry::NativeBrep(NativeBrep { display: std::sync::Arc::new(display), payload: payload.into(), crc: 0 }.canonical_source())
 }
 
 fn boxed(origin: Point3, size: Point3) -> Entity {
@@ -87,7 +107,7 @@ fn mesh_box(origin: Point3, size: Point3) -> Entity {
     let Geometry::NativeBrep(native) = box_solid(origin, size) else {
         panic!("box_solid builds a native solid");
     };
-    Entity::new("mesh", Geometry::Mesh((*native.display).clone()), None)
+    Entity::new("mesh", Geometry::Mesh(serde_json::from_slice(&native.payload).unwrap()), None)
 }
 
 /// Every display vertex of a mesh object, in world space, after a row rewrote it.
@@ -202,12 +222,13 @@ fn surface_entity(surface: NurbsSurface) -> Entity {
 fn mesh_centre(controller: &Controller, id: om9_core::identity::ObjectId) -> Point3 {
     let entity = controller.document().entities.get(&id).expect("entity");
     let vertices: Vec<Point3> = match &entity.geometry {
-        Geometry::NativeBrep(native) => native
-            .display
-            .vertices
-            .iter()
-            .map(|vertex| entity.placement.point(*vertex).expect("placement"))
-            .collect(),
+        Geometry::NativeBrep(native) => {
+            let store = controller.coordinator().representation_store();
+            let store = store.lock().unwrap();
+            store.get_native(native).expect("retained native display").display().vertices.iter()
+                .map(|vertex| entity.placement.point(*vertex).expect("placement"))
+                .collect()
+        }
         other => panic!("expected a native solid, found {other:?}"),
     };
     let count = vertices.len() as f64;

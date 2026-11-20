@@ -13,7 +13,7 @@ use om9_addon_abi::session::{
     Event, Geo, Input, Interactive, ObjectMatrix, Replacement, Reply, Selected, SelectedMesh,
     TransformOp, Vec3, Want, add, apply, cross, dist, dot, fmt, norm, scale, sub, unit,
 };
-use om9_addon_geom::cmd::{Collected, Flow, Show, load, save, selected_gems};
+use om9_addon_geom::cmd::{Collected, Flow, Show, load, save};
 use om9_addon_geom::csg::{self, Op};
 use om9_addon_geom::mesh::{self, Frame, Mesh};
 use om9_addon_geom::path::{Path, Target, frame_matrix};
@@ -316,19 +316,48 @@ pub fn profile_shape(kind: &str, width: f64, height: f64) -> Vec<[f64; 2]> {
 
 // ---- ring rails and profiles -----------------------------------------------------------------
 
-fn ring_rail(e: &Event) -> Reply {
-    let r = ring_radius(e, "rr");
+/// Canonical Ring Rail session, also used by the legacy Top11 adapter.
+pub fn ring_rail(e: &Event) -> Reply {
+    // Custom source travels in the bounded session state. The sampled ABI
+    // polyline is display-only; the host validates and publishes the exact
+    // shared-core curve, never this outline.
+    if let Some(value) = e.settings.get("_om9_ring_rail_shape") {
+        let result = (|| -> om9_core::Result<_> {
+            let limits = om9_core::budget::Limits::default();
+            let shape = om9_core::ring_rail_shape::RailShape::from_json(&value.to_string(), &limits)?;
+            let diameter = om9_core::ring_size::rail_diameter_mm(e.text("rr_size_system", "vnm"), e.number("rr_ring_size", 18.))?;
+            let center = [e.number("rr_center_x", 0.), e.number("rr_center_y", 0.), e.number("rr_center_z", 0.)];
+            let curve = shape.sized_curve(diameter, center, "front", 1., &limits)?;
+            let points = om9_core::surface_kernel::sample_curve(&curve, 129, &limits)?;
+            Ok((curve, points, diameter, shape.name().to_owned()))
+        })();
+        return match result {
+            Ok((curve, points, diameter, name)) => {
+                let mut reply = Reply::ask(format!("Ring Rail: {name}, {} mm inside circumference. Enter to create", fmt(PI * diameter)),
+                    json!({"_om9_ring_rail_curve": curve})).want(Want::Objects);
+                if matches!(e.input, Input::Enter) { reply.done = true; }
+                else { reply.preview = vec![Geo::Polyline { points, closed: true }]; }
+                reply
+            }
+            Err(error) => Reply::ask("Ring Rail: choose a valid custom shape", json!({})).refuse(error.to_string()),
+        };
+    }
     built(
         e,
         "Ring Rail",
         "choose the size in the builder, Enter",
         || {
+            let diameter = om9_core::ring_size::rail_diameter_mm(e.text("rr_size_system", "vnm"), e.number("rr_ring_size", 18.0))
+                .map_err(|error| error.to_string())?;
+            let center = [e.number("rr_center_x", 0.), e.number("rr_center_y", 0.), e.number("rr_center_z", 0.)];
+            let curve = om9_core::ring_size::front_rail(center, diameter).map_err(|error| error.to_string())?;
+            let om9_core::geometry::Curve::Circle { center, x, y, radius, .. } = curve else { unreachable!() };
             Ok((
-                vec![rail_circle(r)],
+                vec![Geo::Circle { center, x, y, radius }],
                 format!(
                     "{} mm inside diameter, {} mm around",
-                    fmt(2.0 * r),
-                    fmt(TAU * r)
+                    fmt(diameter),
+                    fmt(PI * diameter)
                 ),
             ))
         },
@@ -889,103 +918,25 @@ pub fn join_curves(pieces: &[Vec<Vec3>], tol: f64) -> Vec<(Vec<Vec3>, bool)> {
 }
 
 fn join(e: &Event) -> Reply {
-    let tol = e.number("jh_tolerance", 0.01);
     let flow = Flow::new("Join");
     flow.step(e, &|_, _| Show::default(), &|_| {
         let cs = curves(e);
         if cs.len() < 2 {
             return Err("select two or more curves that meet".into());
         }
-        let joined = join_curves(
-            &cs.iter().map(|c| c.points.clone()).collect::<Vec<_>>(),
-            tol,
-        );
-        let out: Vec<Geo> = joined
-            .into_iter()
-            .map(|(p, closed)| Geo::Polyline { points: p, closed })
-            .collect();
-        let n = out.len();
-        let mut r = Reply::finish(out).say(format!("Join: {} curves into {n}", cs.len()));
-        r.delete = cs.iter().map(|c| c.id.clone()).collect();
-        Ok(r)
+        Err("Join History is unavailable until associative curve history is supported".into())
     })
 }
 
 // ---- metal weights, resizer, pullback --------------------------------------------------------
 
-/// Metal densities (g/cm³).
-pub const METALS: &[(&str, f64)] = &[
-    ("24k gold", 19.32),
-    ("22k gold", 17.8),
-    ("18k yellow gold", 15.5),
-    ("18k white gold", 15.8),
-    ("14k yellow gold", 13.1),
-    ("14k white gold", 13.4),
-    ("10k gold", 11.6),
-    ("platinum 950", 20.7),
-    ("palladium 950", 12.0),
-    ("sterling silver", 10.36),
-    ("brass", 8.5),
-    ("wax", 1.0),
-];
-
 fn metal_weights(e: &Event) -> Reply {
-    let label = "Metal Weights";
-    let objs = solids(e);
-    let (gems, _) = selected_gems(e);
-    let vol: f64 = objs
-        .iter()
-        .map(|s| s.mesh.as_ref().unwrap().volume().abs())
-        .sum();
-    let open = objs
-        .iter()
-        .filter(|s| s.mesh.as_ref().unwrap().open_and_nonmanifold_edges().0 > 0)
-        .count();
-    if objs.is_empty() && gems.is_empty() {
-        let r = Reply::ask(
-            format!("{label}: select the metal (and stones), Enter"),
-            json!({}),
-        )
-        .want(Want::Objects);
-        return if matches!(e.input, Input::Enter) {
-            r.refuse(format!("{label}: select solids"))
-        } else {
-            r
-        };
-    }
-    let mut lines = vec![format!("{label}: {} objects, {} mm³", objs.len(), fmt(vol))];
-    for (m, d) in METALS {
-        let g = vol / 1000.0 * d;
-        lines.push(format!("  {m}: {} g ({} dwt)", fmt(g), fmt(g / 1.55517)));
-    }
-    if !gems.is_empty() {
-        let ct: f64 = gems.iter().map(|g| g.gem.carat(&g.material)).sum();
-        lines.push(format!(
-            "  {} stones: {} ct ({} g)",
-            gems.len(),
-            fmt(ct),
-            fmt(ct * 0.2)
-        ));
-    }
-    if open > 0 {
-        lines.push(format!(
-            "  warning: {open} objects are open: their volume is not reliable"
-        ));
-    }
+    let reply = Reply::ask("Metal Weights requires source-based measurement in OM9", json!({}));
     if matches!(e.input, Input::Enter) {
-        let mut r = Reply::finish(Vec::new());
-        r.messages = lines;
-        return r;
+        reply.refuse("Metal Weights requires source-based measurement in OM9")
+    } else {
+        reply
     }
-    Reply::ask(
-        format!(
-            "{label}: {} mm³ = {} g in 18k yellow gold. Enter for the list",
-            fmt(vol),
-            fmt(vol / 1000.0 * 15.5)
-        ),
-        json!({}),
-    )
-    .want(Want::Objects)
 }
 
 /// Resize a ring about the world Y axis: every point moves out by the change of the finger

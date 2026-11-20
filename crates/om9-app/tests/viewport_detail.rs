@@ -118,6 +118,51 @@ fn viewport_detail_batch_cancel_stale_and_old_preferences() {
 }
 
 #[test]
+fn viewport_detail_completes_in_ui_without_a_separate_remesh() {
+    use eframe::egui::{Context, Event, Key, Modifiers, Pos2, RawInput, Rect, Vec2};
+    use std::time::{Duration, Instant};
+
+    let mut app = MatrixApp::new(Document::with_template_tolerance("detail UI polling")).unwrap();
+    app.controller.solid_sphere_points([0.; 3], 5.).unwrap();
+    app.controller.submit("Box 10 10 10").unwrap();
+    let document = app.controller.document().clone();
+    let undo = app.controller.coordinator().undo_len();
+    let light_triangles = triangles(&app);
+    app.controller.request_viewport_detail(ViewportDetail::High).unwrap();
+    assert!(app.controller.viewport_detail_pending());
+    assert!(!app.controller.topology_remesh_pending());
+
+    let context = Context::default();
+    let frame = |app: &mut MatrixApp, events| {
+        let mut output = context.run_ui(RawInput {
+            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 900.))),
+            events,
+            ..Default::default()
+        }, |ui| app.show(ui));
+        output.textures_delta.clear();
+    };
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while app.controller.viewport_detail_pending() {
+        assert!(Instant::now() < deadline, "the UI did not publish High detail");
+        frame(&mut app, Vec::new());
+        std::thread::sleep(Duration::from_millis(5));
+    }
+    assert_eq!(app.controller.viewport_detail(), ViewportDetail::High);
+    assert!(triangles(&app) > light_triangles);
+    assert_eq!(app.controller.document(), &document);
+    assert_eq!(app.controller.coordinator().undo_len(), undo);
+
+    let publication = app.controller.scene().unwrap().publication_id();
+    app.controller.request_viewport_detail(ViewportDetail::Light).unwrap();
+    frame(&mut app, vec![Event::Key {
+        key: Key::Escape, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::NONE,
+    }]);
+    assert!(!app.controller.viewport_detail_pending());
+    assert_eq!(app.controller.viewport_detail(), ViewportDetail::High);
+    assert_eq!(app.controller.scene().unwrap().publication_id(), publication);
+}
+
+#[test]
 fn viewport_detail_stale_scene_cannot_publish() {
     let mut app=MatrixApp::new(Document::with_template_tolerance("stale detail")).unwrap();
     app.controller.solid_sphere_points([0.,0.,0.],5.).unwrap();

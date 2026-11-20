@@ -241,6 +241,47 @@ impl ExportCapture {
     pub fn document(&self) -> &Document {
         self.converted.as_deref().unwrap_or(&self.document)
     }
+    /// Transfer a private selection projection together with its admission
+    /// receipt. The caller must keep that receipt until the document is
+    /// incorporated into another accounted owner or discarded.
+    pub fn into_projected_document(mut self) -> Result<(Document, om9_core::transaction::ExternalMemoryReservation)> {
+        let document = self.converted.take().ok_or(Error::Missing("export projection"))?;
+        let reservation = self.projection_reservation.take().ok_or(Error::Missing("export projection reservation"))?;
+        let document = Arc::try_unwrap(document).map_err(|_| Error::Invalid("shared export projection"))?;
+        Ok((document, reservation))
+    }
+    /// Attach the native dependency inventory to a private selection projection.
+    pub fn retain_selected_sources(&mut self, hosts: &std::collections::BTreeSet<om9_core::retained::HostRef>, limits: &Limits) -> Result<()> {
+        let retained = om9_core::retained::project_retained_selection(&self.document, hosts, limits)?;
+        let output = Arc::get_mut(self.converted.as_mut().ok_or(Error::Missing("export projection"))?)
+            .ok_or(Error::Invalid("shared export projection"))?;
+        for host in hosts {
+            if let om9_core::retained::HostRef::Definition(id) = host {
+                if !output.definitions.contains_key(id) {
+                    let definition = self.document.definitions.get(id).ok_or(Error::Missing("selected native definition"))?;
+                    output.definitions.insert(*id, definition.clone());
+                }
+            }
+        }
+        for (id, resource) in retained.resources { output.resources.insert(id, resource); }
+        output.retained_sources = retained.sources;
+        output.import_namespaces = retained.namespaces;
+        output.validate(limits).map(|_| ())
+    }
+    /// Omit an application-owned resource from a private selection projection.
+    /// Validation prevents callers from omitting a resource required by content.
+    pub fn omit_resource_named(&mut self, name: &str, limits: &om9_core::budget::Limits) -> Result<()> {
+        let document = Arc::get_mut(self.converted.as_mut().ok_or(Error::Missing("export projection"))?)
+            .ok_or(Error::Invalid("shared export projection"))?;
+        document.resources.retain(|_, resource| resource.name != name);
+        document.validate(limits).map(|_| ())
+    }
+    pub fn omit_resources_with_prefix(&mut self, prefix: &str, limits: &om9_core::budget::Limits) -> Result<()> {
+        let document = Arc::get_mut(self.converted.as_mut().ok_or(Error::Missing("export projection"))?)
+            .ok_or(Error::Invalid("shared export projection"))?;
+        document.resources.retain(|_, resource| !resource.name.starts_with(prefix));
+        document.validate(limits).map(|_| ())
+    }
     /// Preserve selected OM9 feature ownership and complete clean history;
     /// 3DM export continues to use the geometry-only projection from `selected`.
     pub fn selected_om9(
@@ -275,11 +316,18 @@ impl ExportCapture {
                 || recipe.inputs.iter().any(|input| {
                     !output.entities.contains_key(&input.source.object)
                 })
-                || capture.document.history.references.values().any(|r| r.recipe == recipe.id)
             {
                 return Err(Error::Unsupported("clipboard history dependencies or state"));
             }
             output.history.recipes.insert(recipe.id, recipe.clone());
+        }
+        for reference in capture.document.history.references.values() {
+            if output.history.recipes.contains_key(&reference.recipe) {
+                if !output.entities.contains_key(&reference.output) {
+                    return Err(Error::Missing("clipboard semantic reference output"));
+                }
+                output.history.references.insert(reference.id, reference.clone());
+            }
         }
         for (id, result) in &capture.document.results {
             if !output.entities.contains_key(id) {

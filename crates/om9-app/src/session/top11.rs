@@ -741,6 +741,10 @@ impl Controller {
         let geometry =
             top11::move_grip_geometry(self.document(), handle, world, self.coordinator.limits())?;
         let source = self.document().stamp(handle.object)?;
+        if self.source_edits_update_join_history(&[handle.object]) {
+            self.request_join_history_edit_worker(TransactionRequest::new("Grip edit", vec![Mutation::Geometry { source, geometry }]))?;
+            return Ok(Top11Result::Awaiting { label: "Grip edit", prompt: "updating History" });
+        }
         self.commit_top11(
             if handle.mode == GripMode::Edit {
                 Top11Action::EditPoints
@@ -939,6 +943,10 @@ impl Controller {
         }
         let objects = ids.len();
         let selection: Vec<ObjectId> = self.selection.iter().copied().collect();
+        if self.source_edits_update_join_history(&ids) {
+            self.request_join_history_edit_worker(TransactionRequest::new("Grip edit", mutations))?;
+            return Ok(Top11Result::Awaiting { label: "Grip edit", prompt: "updating History" });
+        }
         self.commit_top11(
             if first.0.mode == GripMode::Edit {
                 Top11Action::EditPoints
@@ -1285,6 +1293,8 @@ impl Controller {
             Ok((index, *target, pieces, remaining))
         })();
         let result = match result {
+            Ok((_, target, _, _)) if self.source_edits_update_join_history(&[target]) =>
+                Err(Error::Unsupported("multi-target Trim with Join History is not yet supported")),
             Ok((index, target, pieces, remaining)) => self
                 .commit_cut(Top11Action::Trim, target, pieces)
                 .map(|ids| {
@@ -1836,6 +1846,9 @@ impl Controller {
             } else {
                 Vec::new()
             };
+            if self.source_edits_update_join_history(&[picked]) && pieces.len() != 1 {
+                return Err(Error::Unsupported("Trim cannot replace a Join History parent with multiple pieces"));
+            }
             let mut replacements = Vec::new();
             let mut mutations = Vec::new();
             if pieces.len() == 1 {
@@ -1883,6 +1896,11 @@ impl Controller {
             Ok((mutations, selected, ids, next_partitions, next_fractions))
         })();
         let result = match result {
+            Ok((mutations, _, next_ids, next_partitions, next_fractions)) if self.source_mutations_update_join_history(&mutations) => {
+                let before = Top11Pending::TrimSurfaces { objects, partitions, original_edges: original_edges.clone(), fractions, completed };
+                let after = Top11Pending::TrimSurfaces { objects: next_ids, partitions: next_partitions, original_edges, fractions: next_fractions, completed: completed + 1 };
+                return self.start_trim_history_resume(mutations, before, after);
+            }
             Ok((mutations, selected, next_ids, next_partitions, next_fractions)) => self
                 .commit_top11(Top11Action::Trim, mutations, Some(selected))
                 .map(|_| {
@@ -2178,6 +2196,9 @@ impl Controller {
             } else {
                 Vec::new()
             };
+            if self.source_edits_update_join_history(&[*curve_id]) && pieces.len() != 1 {
+                return Err(Error::Unsupported("Trim cannot replace a Join History parent with multiple pieces"));
+            }
             let mut replacements = Vec::new();
             let mut mutations = Vec::new();
             if pieces.len() == 1 {
@@ -2258,6 +2279,11 @@ impl Controller {
             Ok((mutations, selected, ids, next_fractions, next_partition))
         })();
         let result = match result {
+            Ok((mutations, _, next_ids, next_fractions, next_partition)) if self.source_mutations_update_join_history(&mutations) => {
+                let before = Top11Pending::TrimFace { target: face_id, partition, merge_regions, original_edges: original_edges.clone(), objects, fractions, completed };
+                let after = Top11Pending::TrimFace { target: face_id, partition: next_partition, merge_regions, original_edges, objects: next_ids, fractions: next_fractions, completed: completed + 1 };
+                return self.start_trim_history_resume(mutations, before, after);
+            }
             Ok((mutations, selected, next_ids, next_fractions, next_partition)) => self
                 .commit_top11(Top11Action::Trim, mutations, Some(selected))
                 .map(|_| {
@@ -2281,6 +2307,58 @@ impl Controller {
             label: Top11Action::Trim.label(),
             prompt: "pick portions to remove (Enter to finish)",
         })
+    }
+
+    fn trim_surface_resume_bytes(&self, state: &Top11Pending) -> Result<u64> {
+        use om9_core::budget::Usage;
+        let limits = self.coordinator.limits();
+        let mut usage = Usage { bytes: std::mem::size_of::<Top11Pending>() as u64, ..Usage::default() };
+        let mut add_brep = |body: &om9_core::brep::Brep| -> Result<()> {
+            usage.add(Usage { bytes: body.storage_usage(limits)?.bytes, ..Usage::default() }, limits)
+        };
+        match state {
+            Top11Pending::TrimFace { partition, original_edges, .. } => {
+                if let Some(body) = partition { add_brep(body)?; }
+                if let Some(body) = original_edges { add_brep(body)?; }
+            }
+            Top11Pending::TrimSurfaces { partitions, original_edges, .. } => {
+                for (_, body) in partitions.iter().chain(original_edges) { add_brep(body)?; }
+            }
+            _ => return Err(Error::Invalid("Trim History continuation")),
+        }
+        let (objects, fractions) = match state {
+            Top11Pending::TrimFace { objects, fractions, .. } | Top11Pending::TrimSurfaces { objects, fractions, .. } => (objects, fractions),
+            _ => unreachable!(),
+        };
+        usage.add(Usage::array::<ObjectId>(objects.capacity())?, limits)?;
+        usage.add(Usage::array::<(ObjectId, Vec<f64>)>(fractions.capacity())?, limits)?;
+        for (_, values) in fractions { usage.add(Usage::array::<f64>(values.capacity())?, limits)?; }
+        if let Top11Pending::TrimSurfaces { partitions, original_edges, .. } = state {
+            usage.add(Usage::array::<(ObjectId, om9_core::brep::Brep)>(partitions.capacity())?, limits)?;
+            usage.add(Usage::array::<(ObjectId, om9_core::brep::Brep)>(original_edges.capacity())?, limits)?;
+        }
+        Ok(usage.bytes)
+    }
+
+    fn start_trim_history_resume(&mut self, mutations: Vec<Mutation>, before: Top11Pending, after: Top11Pending) -> Result<Top11Result> {
+        use om9_core::budget::memory::MemoryClass;
+        let owner = (|| {
+            let bytes = self.trim_surface_resume_bytes(&before)?.checked_add(self.trim_surface_resume_bytes(&after)?)
+                .ok_or(Error::Overflow("Trim History continuation"))?.max(1);
+            let held = self.scene_cache_usage()?;
+            self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, bytes,
+                om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes)), held)
+        })();
+        let owner = match owner {
+            Ok(owner) => owner,
+            Err(error) => { self.top11_pending = Some(before); return Err(error); }
+        };
+        if let Err(error) = self.request_join_history_edit_worker(TransactionRequest::new(Top11Action::Trim.command(), mutations)) {
+            self.top11_pending = Some(before);
+            return Err(error);
+        }
+        self.resume_trim_after_history(before, after, owner);
+        Ok(Top11Result::Awaiting { label: Top11Action::Trim.label(), prompt: "updating History" })
     }
 
     fn apply_trim_mutual(
@@ -2359,6 +2437,9 @@ impl Controller {
             } else {
                 Vec::new()
             };
+            if self.source_edits_update_join_history(&[*target]) && pieces.len() != 1 {
+                return Err(Error::Unsupported("Trim cannot replace a Join History parent with multiple pieces"));
+            }
             let mut replacements = Vec::new();
             let mut mutations = Vec::new();
             if pieces.len() == 1 {
@@ -2407,6 +2488,34 @@ impl Controller {
         let mut next_objects = objects;
         let mut next_fractions = fractions;
         let result = match result {
+            Ok((mutations, _, prospective_objects, prospective_fractions)) if self.source_mutations_update_join_history(&mutations) => {
+                use om9_core::budget::{Usage, memory::MemoryClass};
+                let bytes = (|| -> Result<u64> {
+                    let mut usage = Usage::array::<ObjectId>(next_objects.capacity())?;
+                    usage.add(Usage::array::<ObjectId>(prospective_objects.capacity())?, self.coordinator.limits())?;
+                    usage.add(Usage::array::<(ObjectId, Vec<f64>)>(next_fractions.capacity())?, self.coordinator.limits())?;
+                    usage.add(Usage::array::<(ObjectId, Vec<f64>)>(prospective_fractions.capacity())?, self.coordinator.limits())?;
+                    for (_, values) in next_fractions.iter().chain(&prospective_fractions) {
+                        usage.add(Usage::array::<f64>(values.capacity())?, self.coordinator.limits())?;
+                    }
+                    usage.bytes.checked_add(2 * std::mem::size_of::<Top11Pending>() as u64)
+                        .ok_or(Error::Overflow("Trim History continuation"))
+                })();
+                let owner = bytes.and_then(|bytes| self.coordinator.reserve_external_memory_with_allocated(
+                    MemoryClass::CpuCache, bytes.max(1), bytes, om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes)), self.scene_cache_usage()?));
+                let owner = match owner {
+                    Ok(owner) => owner,
+                    Err(error) => { self.top11_pending = Some(Top11Pending::TrimMutual { objects: next_objects, fractions: next_fractions, completed }); return Err(error); }
+                };
+                if let Err(error) = self.request_join_history_edit_worker(TransactionRequest::new(Top11Action::Trim.command(), mutations)) {
+                    self.top11_pending = Some(Top11Pending::TrimMutual { objects: next_objects, fractions: next_fractions, completed });
+                    return Err(error);
+                }
+                let before = Top11Pending::TrimMutual { objects: next_objects, fractions: next_fractions, completed };
+                let after = Top11Pending::TrimMutual { objects: prospective_objects, fractions: prospective_fractions, completed: completed + 1 };
+                self.resume_trim_after_history(before, after, owner);
+                return Ok(Top11Result::Awaiting { label: Top11Action::Trim.label(), prompt: "updating History" });
+            }
             Ok((mutations, selected, prospective_objects, prospective_fractions)) => self
                 .commit_top11(Top11Action::Trim, mutations, Some(selected))
                 .map(|_| {
@@ -3869,6 +3978,9 @@ impl Controller {
                 };
                 self.commit_cut(Top11Action::Trim, target, pieces)?;
                 self.top11_pending = None;
+                if self.join_history_worker_pending() {
+                    return Ok(Top11Result::Awaiting { label: Top11Action::Trim.label(), prompt: "updating History" });
+                }
                 Ok(Top11Result::Completed {
                     label: Top11Action::Trim.label(),
                     objects: self.selection.len(),
@@ -3897,6 +4009,10 @@ impl Controller {
                 let (delta,_,_)=translation.ok_or(Error::Invalid("move candidate"))?;
                 let moves = top11::translate_placements(self.document(), &ids, delta)?;
                 let mutations = self.placement_mutations(moves)?;
+                if self.source_mutations_update_join_history(&mutations) {
+                    self.request_join_history_edit_worker(TransactionRequest::new(Top11Action::Move.command(), mutations))?;
+                    return Ok(Top11Result::Awaiting { label: Top11Action::Move.label(), prompt: "updating History" });
+                }
                 self.commit_top11(Top11Action::Move, mutations, None)?;
                 Ok(Top11Result::Completed {
                     label: Top11Action::Move.label(),
@@ -3954,6 +4070,9 @@ impl Controller {
                 let degrees =
                     signed_degrees(axis, vector(center, reference), vector(center, point))?;
                 self.commit_top11_rotation(&ids, center, axis, degrees, copy)?;
+                if self.join_history_worker_pending() {
+                    return Ok(Top11Result::Awaiting { label: Top11Action::Rotate.label(), prompt: "updating History" });
+                }
                 Ok(Top11Result::Completed {
                     label: Top11Action::Rotate.label(),
                     objects: ids.len(),
@@ -3985,6 +4104,9 @@ impl Controller {
                 }
                 let (origin, normal) = mirror_plane(&points[..points.len()-1], point, three_point, self.input_plane())?;
                 self.commit_top11_mirror_axis(&ids, origin, normal, copy)?;
+                if self.join_history_worker_pending() {
+                    return Ok(Top11Result::Awaiting { label: Top11Action::Mirror.label(), prompt: "updating History" });
+                }
                 Ok(Top11Result::Completed {
                     label: Top11Action::Mirror.label(),
                     objects: ids.len(),
@@ -4449,6 +4571,10 @@ impl Controller {
         if pieces.len() == 1 {
             let geometry = Geometry::Curve(pieces.into_iter().next().expect("one piece"));
             let source = self.document().stamp(target)?;
+            if self.source_edits_update_join_history(&[target]) {
+                self.request_join_history_edit_worker(TransactionRequest::new(action.command(), vec![Mutation::Geometry { source, geometry }]))?;
+                return Ok(vec![target]);
+            }
             self.commit_top11(
                 action,
                 vec![Mutation::Geometry { source, geometry }],
@@ -4708,6 +4834,9 @@ impl Controller {
         let placements = top11::rotate_placements(self.document(), ids, center, axis, degrees)?;
         if !copy {
             let mutations = self.placement_mutations(placements)?;
+            if self.source_mutations_update_join_history(&mutations) {
+                return self.request_join_history_edit_worker(TransactionRequest::new(Top11Action::Rotate.command(), mutations));
+            }
             return self.commit_top11(Top11Action::Rotate, mutations, None);
         }
         let mut mutations = Vec::with_capacity(placements.len());
@@ -4737,7 +4866,10 @@ impl Controller {
         copy: bool,
     ) -> Result<()> {
         let result = (|| {
-        let (copies, replacements, placements, mut guards, _guard_storage) = self.mirror_entities(ids, origin, normal, copy)?;
+        if !copy && ids.iter().any(|id| self.source_edits_update_join_history(std::slice::from_ref(id))) {
+            return self.request_join_history_mirror(ids, origin, normal);
+        }
+        let (copies, replacements, placements, mut guards, guard_storage) = self.mirror_entities(ids, origin, normal, copy)?;
         let mut mutations = Vec::with_capacity(replacements.len() + copies.len() + placements.len());
         for (id,placement) in placements {mutations.push(Mutation::Placement {source:self.document().stamp(id)?,placement});}
         for (id, geometry) in replacements {
@@ -4756,6 +4888,9 @@ impl Controller {
         } else {
             ids.iter().copied().collect()
         };
+        if !copy && self.source_mutations_update_join_history(&mutations) {
+            return self.request_join_history_edit_worker_with_guards(TransactionRequest::new(Top11Action::Mirror.command(), mutations), guards, guard_storage);
+        }
         if guards.is_empty() {
             self.commit_top11(Top11Action::Mirror, mutations, Some(selection))
         } else {
@@ -4776,6 +4911,16 @@ impl Controller {
     }
     fn commit_top11_inner(&mut self, action: Top11Action, mutations: Vec<Mutation>, selection: Option<Vec<ObjectId>>,
         reservations: Option<&mut [om9_core::transaction::ExternalMemoryReservation]>) -> Result<()> {
+        // Source edits supported by History are routed through its worker before reaching
+        // this ordinary publication path. Refuse any remaining edit or replacement of an
+        // update-enabled parent rather than silently leaving dependent curves stale.
+        if mutations.iter().any(|mutation| match mutation {
+            Mutation::Geometry { source, .. } | Mutation::Placement { source, .. } | Mutation::Delete { source } =>
+                self.source_edits_update_join_history(std::slice::from_ref(&source.object)),
+            _ => false,
+        }) {
+            return Err(Error::Unsupported("Top 11 History source edit"));
+        }
         let old_scene=self.scene.as_ref().ok_or(Error::Missing("top11 scene"))?;
         if old_scene.epoch!=self.coordinator.epoch() {return Err(Error::Stale("top11 scene"));}
         let held = self.scene_cache_usage()?;
@@ -4953,9 +5098,10 @@ impl Controller {
             if result.is_err() {
                 self.top11_pending = pending;
             }
-            return Some(result.map(|_| Top11Result::Completed {
-                label: Top11Action::Rotate.label(),
-                objects: ids.len(),
+            return Some(result.map(|_| if self.join_history_worker_pending() {
+                Top11Result::Awaiting { label: Top11Action::Rotate.label(), prompt: "updating History" }
+            } else {
+                Top11Result::Completed { label: Top11Action::Rotate.label(), objects: ids.len() }
             }));
         }
         if let Some(Top11Pending::Move { vertical, .. }) = self.top11_pending.as_mut()
@@ -4996,9 +5142,10 @@ impl Controller {
                 if result.is_err() {
                     self.top11_pending = pending;
                 }
-                return Some(result.map(|_| Top11Result::Completed {
-                    label: Top11Action::Mirror.label(),
-                    objects: ids.len(),
+                return Some(result.map(|_| if self.join_history_worker_pending() {
+                    Top11Result::Awaiting { label: Top11Action::Mirror.label(), prompt: "updating History" }
+                } else {
+                    Top11Result::Completed { label: Top11Action::Mirror.label(), objects: ids.len() }
                 }));
             }
             if let Some(value) = text
@@ -5207,6 +5354,10 @@ impl Controller {
         let geometry =
             top11::trim_entity(self.document(), id, from, to, self.coordinator.limits())?;
         let source = self.document().stamp(id)?;
+        if self.source_edits_update_join_history(&[id]) {
+            self.request_join_history_edit_worker(TransactionRequest::new(Top11Action::Trim.command(), vec![Mutation::Geometry { source, geometry }]))?;
+            return Ok(Top11Result::Awaiting { label: Top11Action::Trim.label(), prompt: "updating History" });
+        }
         self.commit_top11(
             Top11Action::Trim,
             vec![Mutation::Geometry { source, geometry }],

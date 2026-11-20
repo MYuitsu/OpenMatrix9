@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<title>O-Snap</title>
+<desc>Toggle persistent object snaps; authored OpenMatrix9 vector.</desc>
+<path d="M7 8 V17 A9 9 0 0 0 25 17 V8" fill="none" stroke="#80A9E8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 6 V9 M25 6 V9" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="14" r="3.2199999999999998" fill="#D5E7FF"/>
+</svg>

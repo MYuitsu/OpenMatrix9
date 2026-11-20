@@ -307,7 +307,29 @@ impl MatrixApp {
         self.memory_recovery_open = true;
     }
 
+    pub(super) fn validate_snap_anchor(&self, anchor: &Option<om9_scene::osnap::SnapCandidate>) -> Result<()> {
+        if let Some(candidate) = anchor {
+            let scene = self.controller.scene().ok_or(Error::Missing("snap scene"))?;
+            if candidate.root.is_some() && candidate.source.is_none() {
+                return Err(Error::Stale("snap source binding"));
+            }
+            if candidate.root.is_some() {
+                let (view_id, camera, viewport) = self.snap_view.as_ref().ok_or(Error::Stale("snap view"))?;
+                let view = self.controller.workspace.views.get(view_id).ok_or(Error::Stale("snap view"))?;
+                let rect = self.view_rects.get(view_id).ok_or(Error::Stale("snap viewport"))?;
+                let current = Viewport { origin: [rect.min.x as f64, rect.min.y as f64], size: [rect.width() as f64, rect.height() as f64] };
+                if &view.camera != camera || current != *viewport || self.hover_view != Some(*view_id) {
+                    return Err(Error::Stale("snap camera or viewport"));
+                }
+            }
+            if let Some(source) = &candidate.source { source.validate(scene)?; }
+            if let Some(source) = &candidate.second_source { source.validate(scene)?; }
+        }
+        Ok(())
+    }
+
     pub(super) fn accept_viewport_command_point(&mut self, point: [f64; 3], anchor: &Option<om9_scene::osnap::SnapCandidate>) -> Result<()> {
+        self.validate_snap_anchor(anchor)?;
         let key = self.controller.sphere_point_recovery_key();
         let box_key = self.controller.box_recovery_key();
         let plane = self.controller.input_plane();
@@ -388,20 +410,22 @@ impl MatrixApp {
                     return Err(Error::Stale("memory recovery Sphere selection"));
                 }
             }
-            MemoryRecoveryTarget::SpherePoint { authority, epoch, key, draft, .. } => {
+            MemoryRecoveryTarget::SpherePoint { authority, epoch, key, draft, anchor, .. } => {
                 if self.controller.coordinator().authority() != *authority || self.controller.coordinator().epoch() != *epoch || self.controller.sphere_point_recovery_key() != Some(*key) || self.transcript.draft() != draft {
                     return Err(Error::Stale("memory recovery Sphere input"));
                 }
+                self.validate_snap_anchor(anchor)?;
             }
             MemoryRecoveryTarget::Box { authority, epoch, key, input } => {
                 if self.controller.coordinator().authority() != *authority || self.controller.coordinator().epoch() != *epoch || self.controller.box_recovery_key() != Some(*key) || self.transcript.draft() != input.as_str() {
                     return Err(Error::Stale("memory recovery Box input"));
                 }
             }
-            MemoryRecoveryTarget::BoxPoint { authority, epoch, key, draft, .. } => {
+            MemoryRecoveryTarget::BoxPoint { authority, epoch, key, draft, anchor, .. } => {
                 if self.controller.coordinator().authority() != *authority || self.controller.coordinator().epoch() != *epoch || self.controller.box_recovery_key() != Some(*key) || self.transcript.draft() != draft {
                     return Err(Error::Stale("memory recovery Box input"));
                 }
+                self.validate_snap_anchor(anchor)?;
             }
         }
         let result = match &target {
@@ -463,7 +487,9 @@ impl MatrixApp {
                 }
                 if let MemoryRecoveryTarget::SpherePoint { anchor, plane, one_shot, .. } | MemoryRecoveryTarget::BoxPoint { anchor, plane, one_shot, .. } = &target {
                     if self.snap_state.settings.one_shot == *one_shot { self.snap_state.accept(); }
-                    if let Some(candidate) = anchor { let _ = self.smarttrack.push(candidate, *plane); }
+                    if self.smarttrack_enabled && let Some(candidate) = anchor {
+                        let _ = self.smarttrack.push(candidate, *plane);
+                    }
                     self.append_running_prompt();
                 }
                 Ok(true)
@@ -605,13 +631,22 @@ impl MatrixApp {
     }
 
     pub(super) fn open_undo_settings_command(&mut self, text: &str) -> bool {
-        if !["Options", "RhinoOptions", "UndoSettings"]
+        if !["Options", "RhinoOptions", "UndoSettings", "DocumentProperties"]
             .iter()
             .any(|s| text.trim().eq_ignore_ascii_case(s))
         {
             return false;
         }
+        self.options.page = if text.trim().eq_ignore_ascii_case("UndoSettings") {
+            Some(options::general())
+        } else if text.trim().eq_ignore_ascii_case("DocumentProperties") {
+            Some(options::document_properties())
+        } else {
+            None
+        };
+        self.options.draft = Some(self.options_draft());
         self.undo_settings_draft = Some(self.controller.coordinator().undo_policy());
+        self.viewport_menu_owns_frame = true;
         self.focus_cmd = false;
         true
     }
@@ -653,83 +688,135 @@ impl MatrixApp {
     }
 
     pub(super) fn undo_settings_ui(&mut self, ctx: &egui::Context) {
-        let Some(mut draft) = self.undo_settings_draft else {
-            return;
-        };
+        let Some(mut draft) = self.undo_settings_draft else { return; };
+        let mut options_draft = self.options.draft.take().unwrap_or_else(|| self.options_draft());
+        let mut page = self.options.page;
         let mut open = true;
         let mut apply = false;
         let mut cancel = false;
-        let max_mb = self.controller.coordinator().undo_ram_limit_mb();
-        egui::Window::new("Options — General")
-            .id(egui::Id::new("undo-settings"))
-            .open(&mut open)
-            .resizable(false)
-            .collapsible(false)
+        let available = ctx.content_rect().size();
+        let height = (available.y - 135.).clamp(220., 530.);
+        let width = (available.x - 85.).clamp(460., 790.);
+        let tree_width = (width * 0.34).clamp(175., 260.);
+        let detail_width = width - tree_width - 32.;
+        let id = egui::Id::new("undo-settings");
+        let top = ((available.y - height - 90.) * 0.5).max(0.);
+        egui::Modal::new(id)
+            .area(egui::Modal::default_area(id).anchor(egui::Align2::CENTER_TOP, egui::vec2(0., top)))
+            .backdrop_color(Color32::from_black_alpha(68))
+            .frame(egui::Frame::popup(&ctx.style_of(egui::Theme::Light)).fill(Color32::from_rgb(250, 252, 255)))
             .show(ctx, |ui| {
-                ui.heading("Undo");
-                egui::Grid::new("undo-policy-fields").show(ui, |ui| {
-                    ui.label("Min number of undos:");
-                    let r =
-                        ui.add(egui::DragValue::new(&mut draft.minimum_steps).range(1..=1_000_000));
-                    ctx.data_mut(|m| m.insert_temp(egui::Id::new("undo-minimum-rect"), r.rect));
-                    ui.end_row();
-                    ui.label("Max memory used (MB):");
-                    let r = ui.add(
-                        egui::DragValue::new(&mut draft.max_memory_mb)
-                            .range(1..=max_mb.unwrap_or(1024)),
-                    );
-                    ctx.data_mut(|m| m.insert_temp(egui::Id::new("undo-memory-rect"), r.rect));
-                    ui.end_row();
-                });
-                ui.label("Oldest steps are removed over the memory budget; the minimum is kept.");
-                if let Some(max) = max_mb {
-                    ui.label(format!(
-                        "Maximum configurable: {max} MB (50% of physical RAM)."
-                    ));
-                } else {
-                    ui.colored_label(
-                        Color32::YELLOW,
-                        "Physical RAM capacity unavailable; the 50% limit cannot be verified.",
-                    );
-                }
-                let c = self.controller.coordinator();
-                {
-                    let stats = c.undo_memory_stats();
-                    let bytes = stats.estimated_bytes;
-                    ui.label(format!(
-                        "Undo: {}   Redo: {}   Estimated history memory: {:.1} MB",
-                        c.undo_len(),
-                        c.redo_len(),
-                        bytes as f64 / 1_048_576.
-                    ));
-                    if stats.capture_change_pending {
-                        ui.label("History memory estimate awaits capture-owner reconciliation.");
-                    }
-                }
-                ui.label(
-                    "Full memory inventory every 100 MB of growth, or earlier near the budget.",
-                );
+                options::style_dialog(ui);
+                ui.set_width(width);
                 ui.horizontal(|ui| {
-                    let r = ui.add_enabled(!self.controller.is_running(), egui::Button::new("OK"));
-                    apply = r.clicked();
-                    ctx.data_mut(|m| m.insert_temp(egui::Id::new("undo-apply-rect"), r.rect));
-                    cancel = ui.button("Cancel").clicked();
+                    ui.label(egui::RichText::new("OpenMatrix9 Options").font(super::typography::semibold(ctx, 19.)));
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        open = !ui.button("×").on_hover_text("Close Options").clicked();
+                    });
+                });
+                ui.separator();
+                ui.horizontal_top(|ui| {
+                    egui::Frame::group(ui.style()).show(ui, |ui| {
+                        ui.set_width(tree_width);
+                        egui::ScrollArea::both().id_salt("options-tree").max_width(tree_width)
+                            .max_height(height).min_scrolled_height(height).auto_shrink([false, false])
+                            .show(ui, |ui| {
+                                ui.vertical(|ui| options::tree(ui, &mut page));
+                            });
+                    });
+                    ui.vertical(|ui| {
+                        ui.set_width(detail_width);
+                        let selected = page.unwrap_or_else(options::view);
+                        egui::ScrollArea::vertical().id_salt(selected.id()).max_height(height).min_scrolled_height(height)
+                            .auto_shrink([false, false]).show(ui, |ui| {
+                                if selected.is_general() {
+                                    self.general_options(ui, &mut draft);
+                                } else {
+                                    self.options_page(ui, selected, &mut options_draft);
+                                }
+                            });
+                    });
+                });
+                ui.separator();
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    let cancel_button = ui.button("Cancel");
+                    cancel = cancel_button.clicked();
+                    ctx.data_mut(|data| data.insert_temp(egui::Id::new("options-cancel-rect"), cancel_button.rect));
+                    let response = ui.add_enabled(!self.controller.is_running(), egui::Button::new("OK"));
+                    apply = response.clicked();
+                    ctx.data_mut(|data| data.insert_temp(egui::Id::new("undo-apply-rect"), response.rect));
                 });
             });
-        if apply {
-            let result = self
-                .controller
-                .set_undo_policy(draft)
-                .and_then(|_| self.save_undo_settings(draft));
+        cancel |= ctx.input_mut(|input| input.consume_key(egui::Modifiers::NONE, egui::Key::Escape));
+        if apply && !cancel {
+            let result = (|| {
+                if draft != self.controller.coordinator().undo_policy() {
+                    self.controller.set_undo_policy(draft)?;
+                    self.save_undo_settings(draft)?;
+                }
+                self.apply_options_draft(options_draft.clone())
+            })();
             if result.is_ok() {
                 open = false;
             }
             self.feedback(result);
         }
-        self.undo_settings_draft = (open && !cancel).then_some(draft);
-        if self.undo_settings_draft.is_none() {
+        let active = open && !cancel;
+        self.undo_settings_draft = active.then_some(draft);
+        self.options.draft = active.then_some(options_draft);
+        self.options.page = page;
+        if !active {
             self.focus_cmd = true;
         }
+    }
+
+    fn general_options(&mut self, ui: &mut egui::Ui, draft: &mut UndoPolicy) {
+        let ctx = ui.ctx().clone();
+        let max_mb = self.controller.coordinator().undo_ram_limit_mb();
+        ui.heading("General");
+        ui.add_enabled_ui(!self.controller.is_running(), |ui| self.matrix_language_control(ui));
+        ui.heading("Undo");
+        egui::Grid::new("undo-policy-fields").show(ui, |ui| {
+            ui.label("Min number of undos:");
+            let r = ui.add(egui::DragValue::new(&mut draft.minimum_steps).range(1..=1_000_000));
+            ctx.data_mut(|m| m.insert_temp(egui::Id::new("undo-minimum-rect"), r.rect));
+            ui.end_row();
+            ui.label("Max memory used (MB):");
+            let r = ui.add(
+                egui::DragValue::new(&mut draft.max_memory_mb)
+                    .range(1..=max_mb.unwrap_or(1024)),
+            );
+            ctx.data_mut(|m| m.insert_temp(egui::Id::new("undo-memory-rect"), r.rect));
+            ui.end_row();
+        });
+        ui.label("Oldest steps are removed over the memory budget; the minimum is kept.");
+        if let Some(max) = max_mb {
+            ui.label(format!(
+                "Maximum configurable: {max} MB (50% of physical RAM)."
+            ));
+        } else {
+            ui.colored_label(
+                Color32::YELLOW,
+                "Physical RAM capacity unavailable; the 50% limit cannot be verified.",
+            );
+        }
+        let c = self.controller.coordinator();
+        {
+            let stats = c.undo_memory_stats();
+            let bytes = stats.estimated_bytes;
+            ui.label(format!(
+                "Undo: {}   Redo: {}   Estimated history memory: {:.1} MB",
+                c.undo_len(),
+                c.redo_len(),
+                bytes as f64 / 1_048_576.
+            ));
+            if stats.capture_change_pending {
+                ui.label("History memory estimate awaits capture-owner reconciliation.");
+            }
+        }
+        ui.label(
+            "Full memory inventory every 100 MB of growth, or earlier near the budget.",
+        );
     }
 }
 
@@ -1876,7 +1963,7 @@ mod tests {
             MemoryClass::Kernel, None, app.controller.scene_cache_usage().unwrap()).unwrap();
         pressure.shrink_to(pressure.bytes() - 2048).unwrap();
         app.snap_state.settings.one_shot = Some(SnapKind::End);
-        let anchor = Some(SnapCandidate { kind: SnapKind::End, root: None, world: [15.,20.,30.], screen: [0.,0.], distance_px: 0., normal: None, parameter: None, surface_source: None });
+        let anchor = Some(SnapCandidate { kind: SnapKind::End, root: None, world: [15.,20.,30.], screen: [0.,0.], distance_px: 0., normal: None, parameter: None, tracking_tangent: None, source: None, second_source: None, surface_source: None, apparent: false });
         assert!(app.accept_viewport_command_point([15.,20.,30.], &anchor).is_err());
         assert!(app.memory_recovery_open); assert_eq!(app.controller.document(), &before);
         app.snap_state.settings.one_shot = Some(SnapKind::Mid);

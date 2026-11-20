@@ -270,7 +270,7 @@ impl MatrixApp {
             for [a, c] in session.lines.iter().chain(&session.hover_lines) {
                 super::paint_line(painter, camera, viewport, *a, *c, PREVIEW, 1.2);
             }
-            if let (Some(from), Some(to)) = (session.rubber_from, self.hover) {
+            if let (Some(from), Some(to)) = (session.rubber_from, self.preview_hover_point()) {
                 super::paint_line(painter, camera, viewport, from, to, RUBBER, 1.0);
             }
         }

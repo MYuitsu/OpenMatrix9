@@ -141,5 +141,16 @@
       "OM9-L3-04-07-008",
       "OM9-L3-04-07-009"
     ]
+  },
+  "runtime_implementation": {
+    "tools_menu_audit_2026_11_16": {
+      "date": "2026-11-16",
+      "status": "AUDIT_ONLY_GAPS_OPEN",
+      "scope": "Tools menu audit: compare this owner with Book2, relevant decompile and current built-in/add-on routes. Existing handler/tests are partial evidence; see per-command gaps in plan.",
+      "plan": "docs/plans/2026-11-16-tools-menu-gap-plan.md",
+      "evidence": "docs/validation/2026-11-16-tools-menu-audit.json",
+      "implementation_changed": false,
+      "manual_gate_promoted": false
+    }
   }
 }

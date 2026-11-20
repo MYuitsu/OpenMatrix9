@@ -480,24 +480,63 @@ pub fn join_entities(
     if ids.len() < 2 {
         return Err(Error::Invalid("join selection"));
     }
-    let mut source: Option<&Entity> = None;
-    let mut curves = Vec::new();
+    let mut entities = Vec::new();
     for id in ids {
         let entity = document.entities.get(id).ok_or(Error::Missing("object"))?;
-        let curve = curve_of(document, *id)?;
-        if source.is_none() { source = Some(entity); }
+        entities.push(entity);
+    }
+    let joined = join_curve_entities(&entities, tolerance, limits)?;
+    Ok(clone_entity(
+        entities[0],
+        Geometry::Curve(joined),
+        Transform::identity(),
+    ))
+}
+
+/// Join canonical curve entities in world coordinates, preserving the caller's input order.
+pub fn join_curve_entities(
+    entities: &[&Entity],
+    tolerance: f64,
+    limits: &Limits,
+) -> Result<Curve> {
+    join_curve_entities_guarded(entities, tolerance, limits, &mut || Ok(()))
+}
+
+/// Join with a cooperative check between pieces and within the endpoint sweep.
+/// A caller must discard the private result when its check refuses the operation.
+pub fn join_curve_entities_guarded(
+    entities: &[&Entity],
+    tolerance: f64,
+    limits: &Limits,
+    check: &mut dyn FnMut() -> Result<()>,
+) -> Result<Curve> {
+    check()?;
+    if entities.len() < 2 {
+        return Err(Error::Invalid("join selection"));
+    }
+    let mut curves = Vec::new();
+    curves
+        .try_reserve_exact(entities.len())
+        .map_err(|_| Error::Budget("join curves"))?;
+    for entity in entities {
+        check()?;
+        let Geometry::Curve(curve) = &entity.geometry else {
+            return Err(Error::Unsupported("curve operation needs a curve"));
+        };
         curves.push(if entity.placement == Transform::identity() {
             curve.clone()
         } else {
             bake_curve(curve, entity.placement)?
         });
     }
-    let curves = chain_curves(curves, tolerance, limits)?;
+    let curves = chain_curves(curves, tolerance, limits, check)?;
+    check()?;
     let joined = curve_ops::join_curves(&curves, tolerance, limits)?;
-    let joined = heal_joined_curve(joined, tolerance, limits)?;
+    check()?;
+    let joined = heal_joined_curve(joined, tolerance, limits, check)?;
+    check()?;
     joined.validate(limits)?;
-    let source = source.ok_or(Error::Missing("join source"))?;
-    Ok(clone_entity(source, Geometry::Curve(joined), Transform::identity()))
+    Ok(joined)
 }
 
 /// Replace a curve endpoint while retaining the other poles and parameters where possible.
@@ -529,9 +568,10 @@ fn set_join_endpoint(curve: &Curve, start: bool, target: Point3, tolerance: f64,
 }
 
 /// Replace each pair of tolerated endpoints by their common world-space midpoint.
-fn heal_joined_curve(curve: Curve, tolerance: f64, limits: &Limits) -> Result<Curve> {
+fn heal_joined_curve(curve: Curve, tolerance: f64, limits: &Limits, check: &mut dyn FnMut() -> Result<()>) -> Result<Curve> {
     let Curve::Polycurve { mut segments, reversed: false } = curve else { return Ok(curve) };
     for i in 1..segments.len() {
+        check()?;
         let a=curve_ops::curve_endpoints(&segments[i-1],limits)?[1];
         let b=curve_ops::curve_endpoints(&segments[i],limits)?[0];
         if distance(a,b)>tolerance { return Err(Error::Invalid("join continuity")); }
@@ -560,7 +600,8 @@ fn distance(a: Point3, b: Point3) -> f64 {
 }
 
 /// Order curves as a continuous trail, including loops encountered along the way.
-fn chain_curves(curves: Vec<Curve>, tolerance: f64, limits: &Limits) -> Result<Vec<Curve>> {
+fn chain_curves(mut curves: Vec<Curve>, tolerance: f64, limits: &Limits, check: &mut dyn FnMut() -> Result<()>) -> Result<Vec<Curve>> {
+    check()?;
     if curves.len() < 2 { return Err(Error::Invalid("join selection")); }
     if !tolerance.is_finite() || tolerance < 0.0 { return Err(Error::Invalid("join tolerance")); }
     let endpoint_count = curves.len().checked_mul(2).ok_or(Error::Overflow("join endpoints"))?;
@@ -572,7 +613,7 @@ fn chain_curves(curves: Vec<Curve>, tolerance: f64, limits: &Limits) -> Result<V
     scratch.add(crate::budget::Usage::array::<(usize, usize, bool)>(endpoint_count)?, limits)?;
     let mut endpoints = Vec::new();
     endpoints.try_reserve_exact(endpoint_count).map_err(|_| Error::Budget("join endpoints"))?;
-    for curve in &curves { endpoints.extend(curve_ops::curve_endpoints(curve, limits)?); }
+    for curve in &curves { check()?; endpoints.extend(curve_ops::curve_endpoints(curve, limits)?); }
     let mut parent = Vec::new();
     parent.try_reserve_exact(endpoint_count).map_err(|_| Error::Budget("join nodes"))?;
     parent.extend(0..endpoint_count);
@@ -592,10 +633,14 @@ fn chain_curves(curves: Vec<Curve>, tolerance: f64, limits: &Limits) -> Result<V
     let mut order = Vec::new();
     order.try_reserve_exact(endpoint_count).map_err(|_| Error::Budget("join sweep"))?;
     order.extend(0..endpoint_count);
+    check()?;
     order.sort_unstable_by(|&a, &b| endpoints[a][axis].total_cmp(&endpoints[b][axis]).then(a.cmp(&b)));
+    check()?;
     for position in 0..endpoint_count {
+        check()?;
         let i = order[position];
-        for &j in order[..position].iter().rev() {
+        for (index, &j) in order[..position].iter().rev().enumerate() {
+            if index % 256 == 0 { check()?; }
             if endpoints[i][axis] - endpoints[j][axis] > tolerance { break; }
             if distance(endpoints[i], endpoints[j]) <= tolerance {
                 let a = root(&mut parent, i); let b = root(&mut parent, j);
@@ -607,6 +652,7 @@ fn chain_curves(curves: Vec<Curve>, tolerance: f64, limits: &Limits) -> Result<V
     adjacency.try_reserve_exact(endpoint_count).map_err(|_| Error::Budget("join adjacency"))?;
     adjacency.resize_with(endpoint_count, Vec::new);
     for index in 0..curves.len() {
+        check()?;
         let a = root(&mut parent, index * 2); let b = root(&mut parent, index * 2 + 1);
         adjacency[a].try_reserve(1).map_err(|_| Error::Budget("join adjacency"))?;
         adjacency[a].push((index, b, false));
@@ -620,6 +666,7 @@ fn chain_curves(curves: Vec<Curve>, tolerance: f64, limits: &Limits) -> Result<V
     let mut stack = vec![(start, None)];
     let mut trail = Vec::new();
     while let Some(&(vertex, _)) = stack.last() {
+        check()?;
         let next = loop {
             match adjacency[vertex].pop() {
                 Some((edge, other, reverse)) if !used[edge] => break Some((edge, other, reverse)),
@@ -636,11 +683,16 @@ fn chain_curves(curves: Vec<Curve>, tolerance: f64, limits: &Limits) -> Result<V
     let mut ordered = Vec::new();
     ordered.try_reserve_exact(curves.len()).map_err(|_| Error::Budget("join trail"))?;
     for (edge, reverse) in trail {
-        ordered.push(if reverse { curve_ops::reverse_curve(&curves[edge], limits)? } else { curves[edge].clone() });
+        check()?;
+        // Each edge occurs once in the trail. Move it out instead of retaining
+        // a second copy of every forward curve until the whole join finishes.
+        let curve = std::mem::replace(&mut curves[edge], Curve::Polycurve { segments: Vec::new(), reversed: false });
+        ordered.push(if reverse { curve_ops::reverse_curve(&curve, limits)? } else { curve });
     }
     // Tolerance clusters can be non-transitive: reject any consecutive endpoints
     // farther apart than the requested tolerance instead of inventing a connection.
     for pair in ordered.windows(2) {
+        check()?;
         let end = curve_ops::curve_endpoints(&pair[0], limits)?[1];
         let start = curve_ops::curve_endpoints(&pair[1], limits)?[0];
         if distance(end, start) > tolerance { return Err(Error::Invalid("join ambiguous tolerance cluster")); }
@@ -816,7 +868,8 @@ pub fn inverse_affine(placement: Transform) -> Result<Transform> {
 
 /// Exact affine image of a circle: a rational quadratic NURBS ellipse. The weights and
 /// knots are unchanged by an affine map, so only the Cartesian poles are transformed.
-pub(crate) fn affine_circle(
+/// Express a placed circular arc as an exact rational quadratic curve.
+pub fn affine_circle(
     center: Point3,
     x: Point3,
     y: Point3,

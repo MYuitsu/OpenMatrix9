@@ -18,6 +18,7 @@ use om9_sdk::{
     LengthValue, MeasuredAngle, MeasuredArea, MeasuredDistance, ObjectAttributes, ObjectBounds,
     ObjectExtension, ObjectInfo, ObjectPage, ObjectProvenance, ObjectQuery, ObjectSummary,
     ParameterDomain, ParameterValue, PluginMessage, ProjectChange, ProjectInfo, Result, SdkError,
+    SnapConstrain, SnapHit,
     abi::{self, ReplyFn},
 };
 use serde_json::Value;
@@ -104,7 +105,17 @@ pub(super) struct Staged<'a> {
     used: Usage,
     calls: usize,
     failed: Option<SdkError>,
+    snap_service: Option<&'a dyn Fn(HostRequest) -> Result<Value>>,
+    snap_calls: usize,
+    snap_hits: Vec<IssuedSnapHit>,
 }
+
+struct IssuedSnapHit {
+    context_token: String,
+    hit: SnapHit,
+    base_mm: Option<[f64; 3]>,
+}
+
 impl<'a> Staged<'a> {
     pub(super) fn new(
         coordinator: &'a TransactionCoordinator,
@@ -149,6 +160,9 @@ impl<'a> Staged<'a> {
             used: Usage::default(),
             calls: 0,
             failed: None,
+            snap_service: None,
+            snap_calls: 0,
+            snap_hits: Vec::new(),
         })
     }
     /// Attach the host project snapshot the command may read; the app calls this before
@@ -159,6 +173,9 @@ impl<'a> Staged<'a> {
     /// Attach the change batch recorded for the last plugin command.
     pub fn set_last_change(&mut self, change: Option<ProjectChange>) {
         self.last_change = change;
+    }
+    pub fn set_snap_service(&mut self, service: Option<&'a dyn Fn(HostRequest) -> Result<Value>>) {
+        self.snap_service = service;
     }
     fn id(&self, text: &str) -> Result<ObjectId> {
         let id = ObjectId(uuid::Uuid::parse_str(text).map_err(|e| error("id", e))?);
@@ -1025,13 +1042,68 @@ impl<'a> Staged<'a> {
             .map(|id| self.history_record(id))
             .collect()
     }
+
+    fn handle_snap(&mut self, request: HostRequest) -> Result<Value> {
+        self.snap_calls += 1;
+        if self.snap_calls > 32 {
+            return Err(error("budget", "too many snap calls in one command"));
+        }
+        if !self.added.is_empty() || !self.deleted.is_empty() || !self.edits.is_empty()
+            || !self.created_layers.is_empty() || !self.updated_layers.is_empty() || !self.assignments.is_empty()
+            || !self.extensions.is_empty() || !self.groups_created.is_empty() || !self.groups_deleted.is_empty()
+            || self.current_layer.is_some() || self.tolerance.is_some() {
+            return Err(error("stale", "snap context predates staged document changes"));
+        }
+        let service = self.snap_service.ok_or_else(|| error("unsupported", "snap context is unavailable"))?;
+        match request {
+            HostRequest::SnapConstrainHit { context_token, hit } => {
+                let issued = self.issued_snap_hit(&context_token, &hit)?;
+                service(HostRequest::SnapConstrain { request: SnapConstrain {
+                    context_token,
+                    point_mm: issued.hit.point_mm,
+                    base_mm: issued.base_mm,
+                    shift: false,
+                    object_snap: true,
+                } })
+            }
+            HostRequest::SnapTrackAnchor { context_token, hit } => {
+                let issued = self.issued_snap_hit(&context_token, &hit)?;
+                if issued.hit.root_id.is_none() {
+                    return Err(error("invalid", "SmartTrack anchor requires a source-backed snap hit"));
+                }
+                service(HostRequest::SnapTrackAnchor { context_token, hit: issued.hit.clone() })
+            }
+            request => {
+                let query_context = match &request {
+                    HostRequest::SnapQuery { query } | HostRequest::SnapQueryTracked { query, .. } =>
+                        Some((query.context_token.clone(), query.from_mm)),
+                    _ => None,
+                };
+                let value = service(request)?;
+                if let Some((context_token, base_mm)) = query_context && !value.is_null() {
+                    let hit = serde_json::from_value(value.clone()).map_err(|err| error("protocol", err))?;
+                    self.snap_hits.try_reserve(1).map_err(|err| error("budget", err))?;
+                    self.snap_hits.push(IssuedSnapHit { context_token, hit, base_mm });
+                }
+                Ok(value)
+            }
+        }
+    }
+
+    fn issued_snap_hit(&self, context: &str, hit: &SnapHit) -> Result<&IssuedSnapHit> {
+        self.snap_hits.iter().rev()
+            .find(|issued| issued.context_token == context && &issued.hit == hit)
+            .ok_or_else(|| error("stale", "snap hit was not issued for this context"))
+    }
+
     fn handle(&mut self, request: HostRequest) -> Result<Value> {
         self.calls += 1;
         if self.calls > 4096 {
             return Err(error("budget", "too many host calls in one command"));
         }
         match request {
-            HostRequest::Capabilities => json(&vec![
+            HostRequest::Capabilities => {
+                let mut capabilities = vec![
                 "document_info",
                 "document_units",
                 "objects_list",
@@ -1104,7 +1176,16 @@ impl<'a> Staged<'a> {
                 "history_dependencies",
                 "history_provenance",
                 "history_rebuild_plan",
-            ]),
+                ];
+                if self.snap_service.is_some() {
+                    capabilities.extend(["snap_context", "snap_query", "snap_constrain", "snap_constrain_hit",
+                        "snap_track_anchor", "snap_query_tracked"]);
+                }
+                json(&capabilities)
+            },
+            request @ (HostRequest::SnapContext | HostRequest::SnapQuery { .. }
+                | HostRequest::SnapConstrain { .. } | HostRequest::SnapConstrainHit { .. }
+                | HostRequest::SnapTrackAnchor { .. } | HostRequest::SnapQueryTracked { .. }) => self.handle_snap(request),
             HostRequest::DocumentInfo => json(&DocumentInfo {
                 id: self.base.id.to_string(),
                 name: self.base.name.clone(),
@@ -2288,6 +2369,7 @@ fn disposition_name(disposition: om9_core::retained::RecordDisposition) -> Strin
         om9_core::retained::RecordDisposition::Edited => "edited",
         om9_core::retained::RecordDisposition::Deleted => "deleted",
         om9_core::retained::RecordDisposition::RetainedOnly => "retained_only",
+        om9_core::retained::RecordDisposition::Excluded => "excluded",
     }
     .to_string()
 }
@@ -4627,6 +4709,120 @@ mod tests {
             assert_eq!(error.code, "conflict");
         });
     }
+    #[test]
+    fn snap_constraint_requires_the_issued_hit_and_current_invocation() {
+        use om9_sdk::{SnapContext, SnapQuery, SnapSourceIdentity};
+
+        let limits = Limits::default();
+        let document = Document::with_template_tolerance("snap receipt");
+        let (coordinator, doc_id) = coordinator_with(document, limits);
+        let base = &coordinator.world().documents[&doc_id];
+        let context = SnapContext {
+            token: "current context".into(),
+            view: "Looking Down".into(),
+            absolute_tolerance_mm: 0.001,
+            plane_origin_mm: [0.; 3],
+            plane_x: [1., 0., 0.],
+            plane_y: [0., 1., 0.],
+        };
+        let query = SnapQuery {
+            context_token: context.token.clone(),
+            viewport_origin: [0.; 2],
+            viewport_size: [800., 600.],
+            cursor: [400., 300.],
+            radius_px: 8.,
+            kinds: vec!["intersection".into()],
+            from_mm: None,
+            tracking_anchors_mm: Vec::new(),
+        };
+        let hit = SnapHit {
+            kind: "Intersection".into(),
+            point_mm: [0.30000000000000004, 0.7, 2.],
+            root_id: Some("first root".into()),
+            member_path: vec!["first member".into()],
+            leaf_id: Some("first leaf".into()),
+            source_generation: Some(1),
+            geometry_revision: Some(2),
+            leaf_generation: Some(3),
+            leaf_geometry_revision: Some(4),
+            second_source: Some(SnapSourceIdentity {
+                root_id: "second root".into(),
+                member_path: vec![],
+                leaf_id: "second root".into(),
+                source_generation: 1,
+                geometry_revision: 2,
+                leaf_generation: 1,
+                leaf_geometry_revision: 2,
+            }),
+        };
+        let service = |request| match request {
+            HostRequest::SnapQuery { query: requested }
+            | HostRequest::SnapQueryTracked { query: requested, .. } => {
+                assert_eq!(SnapQuery { from_mm: None, ..requested }, query);
+                json(&hit)
+            }
+            HostRequest::SnapConstrain { request } => {
+                assert_eq!(request.context_token, context.token);
+                assert_eq!(request.point_mm, hit.point_mm);
+                assert!(request.object_snap);
+                let height = request.base_mm.map_or(0., |point| point[2]);
+                json(&[hit.point_mm[0], hit.point_mm[1], height])
+            }
+            _ => panic!("unexpected snap request"),
+        };
+        let make_staged = || {
+            let mut staged = Staged::new(&coordinator, base, &[], &limits).unwrap();
+            staged.set_snap_service(Some(&service));
+            staged
+        };
+
+        let mut staged = make_staged();
+        with_host(&mut staged, |host| {
+            assert!(host.capabilities().unwrap().iter().any(|name| name == "snap_constrain_hit"));
+            let returned = host.snap_query(query.clone()).unwrap().unwrap();
+            assert_eq!(returned, hit);
+            assert_eq!(host.snap_constrain_hit(&context, &returned).unwrap(), [hit.point_mm[0], 0.7, 0.]);
+            let with_base = SnapQuery { from_mm: Some([1., 2., 3.]), ..query.clone() };
+            assert_eq!(host.snap_query(with_base.clone()).unwrap(), Some(returned.clone()));
+            assert_eq!(host.snap_constrain_hit(&context, &returned).unwrap(), [hit.point_mm[0], 0.7, 3.]);
+            let tracked = SnapQuery { from_mm: Some([1., 2., 4.]), ..with_base };
+            assert_eq!(host.snap_query_tracked(tracked, vec!["anchor".into()]).unwrap(), Some(returned.clone()));
+            assert_eq!(host.snap_constrain_hit(&context, &returned).unwrap(), [hit.point_mm[0], 0.7, 4.]);
+            assert_eq!(host.snap_query(query.clone()).unwrap(), Some(returned.clone()));
+            assert_eq!(host.snap_constrain_hit(&context, &returned).unwrap(), [hit.point_mm[0], 0.7, 0.]);
+        });
+        assert!(staged.finish("snap".into(), Value::Null).unwrap().request.is_none());
+
+        let mut different_context = context.clone();
+        different_context.token = "different context".into();
+        let mut changed_point = hit.clone();
+        changed_point.point_mm[0] = 7.;
+        let mut changed_source = hit.clone();
+        changed_source.second_source = None;
+        for (provided_context, provided_hit) in [
+            (&different_context, &hit), (&context, &changed_point), (&context, &changed_source),
+        ] {
+            with_host(&mut make_staged(), |host| {
+                host.snap_query(query.clone()).unwrap();
+                assert_eq!(host.snap_constrain_hit(provided_context, provided_hit).unwrap_err().code, "stale");
+            });
+        }
+        with_host(&mut make_staged(), |host| {
+            assert_eq!(host.snap_constrain_hit(&context, &hit).unwrap_err().code, "stale");
+        });
+
+        let mut staged = make_staged();
+        with_host(&mut staged, |host| {
+            let returned = host.snap_query(query.clone()).unwrap().unwrap();
+            host.add_point("staged", [0.; 3]).unwrap();
+            let error = host.snap_constrain_hit(&context, &returned).unwrap_err();
+            assert_eq!(error.code, "stale");
+            assert!(error.message.contains("staged document changes"));
+        });
+        assert!(staged.finish("stale snap".into(), Value::Null).is_err());
+        assert!(base.entities.is_empty());
+    }
+
     #[test]
     fn project_state_is_host_owned_and_save_is_staged_after_commit() {
         let limits = Limits::default();

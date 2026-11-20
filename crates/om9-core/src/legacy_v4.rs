@@ -161,6 +161,7 @@ impl EntityV4 {
     fn split(self, displays: &mut LegacyDisplays) -> Entity {
         Entity { id: self.id, label: self.label, generation: self.generation,
             geometry_revision: self.geometry_revision, attributes_revision: self.attributes_revision,
+            creation_order: None,
             geometry: self.geometry.split(displays), placement: self.placement,
             attributes: self.attributes, extensions: self.extensions }
     }

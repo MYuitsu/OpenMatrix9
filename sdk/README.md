@@ -20,6 +20,46 @@ This is the initial developer SDK, not a Rhino binary compatibility layer. It ca
 | Exposed APIs and future candidates | [`API-INVENTORY.md`](API-INVENTORY.md) |
 | AI migration workflow | [`openmatrix9-plugin-port`](../skills/openmatrix9-plugin-port/SKILL.md) |
 
+The `SnapDemo` example opens a fresh snap context, queries a point and passes
+the returned hit to `Host::snap_constrain_hit`. Use the `snap_constrain_hit`
+capability to discover this route. It requires the returned hit in the same
+context and invocation, before any staged document writes. With Planar on,
+Project uses the plane through the latest matching query's `from_mm` when
+provided. The hit retains its original point on the source.
+`Host::snap_constrain` accepts caller-supplied
+coordinates. If a source query reports `pending`, get a fresh context in a
+later invocation. Switching to Point releases queued edge work, and a new
+scene publication cancels work tied to the old scene.
+[P07 validation](../docs/validation/2026-11-17-snaps-p07.md)
+
+Viewport and cursor coordinates and the pick radius use logical pixels.
+`from_mm`, the original hit and the constrained point use World millimetres.
+A host without source workers may return `unsupported` for a query that
+requires those workers, even when it advertises `snap_query`.
+[Snap query inputs and support](../crates/om9-sdk/README.md#snap-queries-and-point-constraints)
+
+Supply the previous world point as `from_mm` when placing a subsequent point.
+Tangent and Perpendicular also use this point to solve the snap.
+`SnapDemo` accepts the same argument in millimetres.
+For Perpendicular on a temporary SmartTrack guide, request both
+`perpendicular` and `smarttrack` and provide the base and tracking anchors.
+`SnapDemo` accepts a `kinds` array for this query. A guide foot can be passed
+to `snap_constrain_hit` as an issued hit. It carries no source ID, so it
+cannot be retained as a source anchor.
+
+On an OCCT-enabled host, `Host::snap_track_anchor` retains a source-backed
+hit from the current invocation. Pass one or two returned tokens to
+`Host::snap_query_tracked` with `smarttrack` in the query kinds and an empty
+`tracking_anchors_mm` array. On `pending`, the next invocation gets a fresh
+query context and reuses the anchor tokens. The same plugin, scene publication
+and input plane must match. The host keeps its 32 most recent tokens. A new
+scene publication expires the old tokens, including after Undo. `SnapDemo`
+accepts `retain_anchor: true` to return a token and `tracking_anchors` to use
+previously returned tokens.
+When an issued curve End has a source direction, its token also preserves
+the evaluated tangent and the corresponding perpendicular guide. Raw
+`tracking_anchors_mm` supply only positions.
+
 ## Separate SDK distribution
 
 Create a source SDK ZIP for developers who do not have the full OM9 checkout:

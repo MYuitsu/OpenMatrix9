@@ -57,6 +57,21 @@ impl NamedTopologySnapshot {
         })?;
         Ok(Self { snapshot, shape_set })
     }
+
+    /// Bind a packet captured from the same native snapshot to an existing
+    /// tracked, attested source without materializing its old display. The
+    /// caller keeps the source lease and proof charged, and must verify the
+    /// current session and object before publishing the resulting packet.
+    pub fn into_rebound_for_source(self, original: &RegisteredTopologySource,
+        limits: &Limits, mut admit: impl FnMut(u64, u64) -> Result<()>) -> Result<Self> {
+        let Self { snapshot, shape_set } = self;
+        let packet_bytes = Usage::array::<u8>(shape_set.capacity())?.bytes;
+        let remaining = limits.remaining_after(Usage { bytes: packet_bytes, ..Usage::default() })?;
+        let snapshot = snapshot.into_rebound_for_source(original, &remaining, |live, pending| {
+            admit(packet_bytes.checked_add(live).ok_or(Error::Overflow("named topology admission"))?, pending)
+        })?;
+        Ok(Self { snapshot, shape_set })
+    }
     /// Restore only the packet owned by this same capture. Its UUIDs and
     /// packet are inseparable here; arbitrary file input is not supported.
     /// Native OCCT parsing and meshing allocations are outside Rust admission.
@@ -81,6 +96,8 @@ pub struct NamedTopologySource {
 impl NamedTopologySource {
     pub fn source(&self) -> &str { self.source.source() }
     pub fn topology(&self) -> &BrepTopology { self.source.topology() }
+    /// Borrow the source record paired with this capture's shape set.
+    pub fn canonical_record(&self) -> om9_core::brep::CanonicalBrepRef<'_> { self.source.canonical_record() }
     pub fn shape_set(&self) -> &[u8] { &self.shape_set }
     pub fn storage_bytes(&self) -> Result<u64> {
         Usage::array::<u8>(self.shape_set.capacity())?.bytes.checked_add(self.source.storage_bytes()?)
@@ -94,6 +111,7 @@ impl NamedTopologySource {
     /// by Rust admission and are not interruptible within each native call.
     pub fn signatures(&self, limits: &Limits, mut admit: impl FnMut(u64, u64) -> Result<()>,
         canceled: impl Fn() -> bool) -> Result<Vec<BoundSourceSignature>> {
+        preflight_shape_set(&self.shape_set, self.topology(), limits)?;
         let held = self.storage_bytes()?;
         limits.remaining_after(Usage { bytes: held, ..Usage::default() })?;
         admit(held, 0)?;
@@ -155,6 +173,48 @@ impl NamedTopologySource {
     }
 }
 
+/// Check the bounded envelope before invoking the native ShapeSet parser.
+/// This cannot bound OCCT's internal parsing or certify untrusted input.
+fn preflight_shape_set(packet: &[u8], topology: &BrepTopology, limits: &Limits) -> Result<()> {
+    if packet.len() as u64 > limits.max_bytes { return Err(Error::Budget("shape set packet")); }
+    let rest = packet.strip_prefix(b"OM9-SHAPESET 1\n").ok_or(Error::Invalid("shape set version"))?;
+    let newline = rest.iter().take(128).position(|byte| *byte == b'\n').ok_or(Error::Invalid("shape set counts"))?;
+    let line = std::str::from_utf8(&rest[..newline]).map_err(|_| Error::Invalid("shape set counts"))?;
+    let mut parts = line.split_ascii_whitespace();
+    let expected = [topology.faces.len(), topology.edges.len(), topology.vertex_ids.len()];
+    let mut total = 0u64;
+    for expected_count in expected {
+        let count = parts.next().ok_or(Error::Invalid("shape set counts"))?.parse::<u64>()
+            .map_err(|_| Error::Invalid("shape set counts"))?;
+        if count > i32::MAX as u64 { return Err(Error::Budget("shape set topology")); }
+        total = total.checked_add(count).ok_or(Error::Overflow("shape set topology"))?;
+        if count != expected_count as u64 { return Err(Error::Invalid("shape set topology count")); }
+    }
+    if parts.next().is_some() || expected[0] == 0 { return Err(Error::Invalid("shape set counts")); }
+    if total > limits.max_nodes { return Err(Error::Budget("shape set topology")); }
+    if rest.len() == newline + 1 { return Err(Error::Invalid("shape set body")); }
+    Ok(())
+}
+
+/// Test-only entry point for an internally generated packet transferred to a
+/// fresh process. This is not admission for arbitrary user-supplied files.
+#[cfg(feature = "test-fixtures")]
+pub fn test_restore_captured_shape_set(packet: &[u8], source: &str, topology: &BrepTopology, held: u64,
+    deflection: f64, angular: f64, limits: &Limits,
+    admit: impl FnMut(u64, u64) -> Result<()>) -> std::result::Result<Brep, KernelError> {
+    restore_shape_set(packet, source, topology, held, deflection, angular, limits, admit)
+}
+
+/// Native parsing entry for the separately built restore worker. The caller
+/// must run this in an owned process with enforced memory, output and lifetime
+/// limits; this API does not certify arbitrary input or authorize publication.
+#[cfg(feature = "isolated-brep-worker")]
+pub fn restore_isolated_worker_input(packet: &[u8], source: &str, topology: &BrepTopology, held: u64,
+    deflection: f64, angular: f64, limits: &Limits,
+    admit: impl FnMut(u64, u64) -> Result<()>) -> std::result::Result<Brep, KernelError> {
+    restore_shape_set(packet, source, topology, held, deflection, angular, limits, admit)
+}
+
 fn restore_shape_set(packet: &[u8], source: &str, topology: &BrepTopology, held: u64,
     deflection: f64, angular: f64, limits: &Limits,
     mut admit: impl FnMut(u64, u64) -> Result<()>) -> std::result::Result<Brep, KernelError> {
@@ -162,6 +222,7 @@ fn restore_shape_set(packet: &[u8], source: &str, topology: &BrepTopology, held:
             || angular <= 0. || angular > std::f64::consts::PI {
             return Err(KernelError::InvalidInput("shape set restore profile".into()));
         }
+        preflight_shape_set(packet, topology, limits).map_err(|error| KernelError::InvalidInput(error.to_string()))?;
         let operation = (|| -> Result<Brep> {
             limits.remaining_after(Usage { bytes: held, ..Usage::default() })?;
             admit(held, 0)?;
@@ -579,6 +640,32 @@ impl RegisteredTopologySource {
     pub fn into_source(self) -> CapturedBrepSource { self.source }
     #[doc(hidden)]
     pub fn shares_source_lease(&self, source: &CapturedBrepSource) -> bool { self.source.same_lease(source) }
+
+    /// Prepare an owned source and its explicit native topology references
+    /// from this already-accounted source/proof pair. The returned allocations
+    /// belong to the caller's admission; retain that reservation for their
+    /// entire lifetime. Recheck the document and object before publication.
+    /// Cancellation is observed between native calls, not within OCCT.
+    pub fn capture_named_source(&self, deflection: f64, angular: f64, limits: &Limits,
+        mut admit: impl FnMut(u64, u64) -> Result<()>, canceled: impl Fn() -> bool) -> Result<NamedTopologySource> {
+        let _permit = self.proof.acquire_worker()?;
+        if canceled() { return Err(Error::Canceled); }
+        let refusal = RefCell::new(None);
+        let snapshot = capture_source_with_shape_set(self.source(), deflection, angular, limits, |live, pending| {
+            if canceled() { *refusal.borrow_mut() = Some(Error::Canceled); return Err(Error::Canceled); }
+            match admit(live, pending) {
+                Ok(()) => Ok(()),
+                Err(error) => { *refusal.borrow_mut() = Some(error.clone()); Err(error) }
+            }
+        }).map_err(|error| refusal.into_inner().unwrap_or_else(|| Error::Io(error.to_string())))?;
+        if canceled() { return Err(Error::Canceled); }
+        let rebound = snapshot.into_rebound_for_source(self, limits, |live, pending| {
+            if canceled() { return Err(Error::Canceled); }
+            admit(live, pending)
+        })?;
+        if canceled() { return Err(Error::Canceled); }
+        Ok(rebound.into_source())
+    }
 }
 impl RegisteredTopologyProof {
     /// Adopt an already materialized, exclusively reserved proof. The caller

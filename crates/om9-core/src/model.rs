@@ -8,6 +8,8 @@ use crate::{
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
+mod entity_wire;
+
 /// Scratch for a caller-admitted storage inventory. It is not document state.
 #[derive(Default)]
 pub(crate) struct BrepStorageIndex {
@@ -76,24 +78,21 @@ fn not_hidden(value: &bool) -> bool {
 fn is_zero_u32(value: &u32) -> bool {
     *value == 0
 }
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(deny_unknown_fields)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Entity {
     pub id: ObjectId,
     pub label: String,
     pub generation: u64,
     pub geometry_revision: u64,
     pub attributes_revision: u64,
+    /// Document revision and insertion index assigned by a committed creation.
+    /// Imported or older records may carry no known creation order.
+    pub creation_order: Option<[u64; 2]>,
     pub geometry: Geometry,
     pub placement: Transform,
     pub attributes: Attributes,
     /// Versioned jewellery semantic slots (OM9-L3-01-03-009). Optional and
     /// additive: an entity without extensions stays byte-identical on save.
-    #[serde(
-        default,
-        skip_serializing_if = "BTreeMap::is_empty",
-        deserialize_with = "crate::identity::unique_named_slot_map"
-    )]
     pub extensions: BTreeMap<String, Extension>,
 }
 impl Entity {
@@ -115,6 +114,7 @@ impl Entity {
             generation: 1,
             geometry_revision: 1,
             attributes_revision: 1,
+            creation_order: None,
             geometry,
             placement: Transform::identity(),
             attributes: Attributes {
@@ -554,6 +554,18 @@ struct DefinitionPath<'a> {
     parent: Option<&'a DefinitionPath<'a>>,
 }
 impl Document {
+    pub(crate) fn record_creation_order(&self, entity: &mut Entity, next: &mut u64) -> Result<()> {
+        // Preserve opaque future versions of the creation metadata on a copy.
+        if entity.extensions.contains_key(entity_wire::CREATION_ORDER_SLOT) {
+            entity.creation_order = None;
+            return Ok(());
+        }
+        let revision = self.revision.checked_add(1).ok_or(Error::Overflow("document revision"))?;
+        entity.creation_order = Some([revision, *next]);
+        *next = next.checked_add(1).ok_or(Error::Overflow("object creation order"))?;
+        Ok(())
+    }
+
     pub fn new(name: impl Into<String>) -> Self {
         Self {
             id: DocumentId::new(),
@@ -903,6 +915,16 @@ impl Document {
                 }
             } else {
                 crate::rhino_semantics::validate_extension(slot, &extension.payload, l)?;
+            }
+            if slot == MESH_UV_EXTENSION_SLOT {
+                let uv = crate::rhino_semantics::MeshUv::from_extension(extension, l)?;
+                if let Some(texture) = uv.pbr.texture.as_deref().filter(|value| value.starts_with("om9-resource:")) {
+                    let id = crate::rhino_semantics::embedded_texture_id(texture)?;
+                    let resource = self.resources.get(&id).ok_or(Error::Missing("mesh texture resource"))?;
+                    if !matches!(resource.kind, crate::resource::ResourceKind::OpaqueBinary) {
+                        return Err(Error::Invalid("mesh texture resource kind"));
+                    }
+                }
             }
             if slot==crate::annotation::SLOT&&extension.version==1 {
                 crate::annotation::Annotation::read(e)?.layout(l)?;

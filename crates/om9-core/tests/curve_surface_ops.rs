@@ -93,6 +93,84 @@ fn line_intersections_respect_tolerance_at_finite_segment_endpoints() {
     assert!(curve_curve_intersections(&target,&skew,0.001,&limits).unwrap().is_empty());
 }
 
+#[test]
+fn cubic_nurbs_contacts_are_checked_against_both_sources() {
+    use om9_core::{curve_surface_ops::curve_curve_intersections_cancellable, geometry::NurbsCurve};
+    let limits = Limits::default();
+    let make = |ys: [f64; 4], z: f64| Curve::Nurbs(NurbsCurve {
+        degree: 3,
+        poles: vec![[-1., ys[0], z], [-1. / 3., ys[1], z], [1. / 3., ys[2], z], [1., ys[3], z]],
+        weights: vec![1.; 4], knots: vec![0., 0., 0., 0., 1., 1., 1., 1.],
+        domain: [0., 1.], periodic: false, reversed: false, seam: None,
+    });
+    // y=(t-1/2)^2 touches the X axis without a sign change.
+    let tangent = make([0.25, -1. / 12., -1. / 12., 0.25], 0.);
+    let straight_nurbs = make([0.; 4], 0.);
+    let straight_line = line([-1., 0., 0.], [1., 0., 0.]);
+    for other in [&straight_line, &straight_nurbs] {
+        for (a, b) in [(&tangent, other), (other, &tangent)] {
+            let hits = curve_curve_intersections(a, b, 0.001, &limits).unwrap();
+            assert!(hits.iter().any(|hit| close(hit.point, [0.; 3], 0.003)), "{hits:?}");
+            for hit in hits {
+                let p = point_at(a, hit.first_fraction, &limits).unwrap();
+                let q = point_at(b, hit.second_fraction, &limits).unwrap();
+                assert!(close(p, q, 0.001), "{p:?} {q:?}");
+                assert!(close(hit.point, p, 0.001) && close(hit.point, q, 0.001));
+            }
+        }
+    }
+    let separated = make([0.; 4], 0.01);
+    assert!(curve_curve_intersections(&tangent, &separated, 0.001, &limits).unwrap().is_empty());
+    assert!(matches!(curve_curve_intersections_cancellable(&tangent, &straight_nurbs, 0.001, &limits, &|| true),
+        Err(om9_core::Error::Canceled)));
+}
+
+#[test]
+fn two_curved_cubic_nurbs_cross_at_one_source_point() {
+    use om9_core::geometry::NurbsCurve;
+    let curve = |ys: [f64; 4]| Curve::Nurbs(NurbsCurve {
+        degree: 3, poles: vec![[-1., ys[0], 0.], [-1. / 3., ys[1], 0.],
+            [1. / 3., ys[2], 0.], [1., ys[3], 0.]],
+        weights: vec![1.; 4], knots: vec![0., 0., 0., 0., 1., 1., 1., 1.],
+        domain: [0., 1.], periodic: false, reversed: false, seam: None,
+    });
+    let first = curve([-0.75, -0.25, 1. / 12., 1.25]);
+    let second = curve([1.25, 1. / 12., -0.25, -0.75]);
+    let limits = Limits::default();
+    let mut reversed = first.clone();
+    let Curve::Nurbs(nurbs) = &mut reversed else { unreachable!() };
+    nurbs.reversed = true;
+    for (left, right) in [(&first, &second), (&second, &first), (&reversed, &second), (&second, &reversed)] {
+        let hits = curve_curve_intersections(left, right, 1e-4, &limits).unwrap();
+        assert_eq!(hits.len(), 1, "{hits:?}");
+        let hit = hits[0];
+        let a = point_at(left, hit.first_fraction, &limits).unwrap();
+        let b = point_at(right, hit.second_fraction, &limits).unwrap();
+        assert!(close(a, b, 1e-4) && close(hit.point, a, 1e-4) && close(hit.point, b, 1e-4));
+    }
+    let first = curve([0.1875, 0.1875 - 1. / 3., 0.1875 - 1. / 3., 0.1875]);
+    let second = curve([-0.1875, 1. / 3. - 0.1875, 1. / 3. - 0.1875, -0.1875]);
+    let hits = curve_curve_intersections(&first, &second, 1e-4, &limits).unwrap();
+    assert_eq!(hits.len(), 2, "distinct crossings: {hits:?}");
+    assert!(hits.iter().any(|hit| (hit.point[0] + 0.5).abs() < 1e-3));
+    assert!(hits.iter().any(|hit| (hit.point[0] - 0.5).abs() < 1e-3));
+}
+
+#[test]
+fn placed_surface_projection_uses_world_space_distance() {
+    use om9_core::{curve_surface_ops::closest_point_on_placed_surface_cancellable, geometry::Transform};
+    let limits = Limits::default();
+    let placement = Transform::translation([3., -2., 5.]).compose(Transform::scale([2., 3., 0.5]).unwrap()).unwrap();
+    let local = [4., 6., 0.];
+    let world = placement.point(local).unwrap();
+    let query = [world[0], world[1], world[2] + 0.25];
+    let projection = closest_point_on_placed_surface_cancellable(&plane(), placement, query, &limits, &|| false).unwrap();
+    assert!(close(projection.point, world, 1e-7));
+    assert!((projection.distance - 0.25).abs() < 1e-7);
+    assert!(matches!(closest_point_on_placed_surface_cancellable(&plane(), placement, query, &limits, &|| true),
+        Err(om9_core::Error::Canceled)));
+}
+
 fn plane() -> om9_core::geometry::NurbsSurface {
     surface_kernel::plane(
         [0.0; 3],

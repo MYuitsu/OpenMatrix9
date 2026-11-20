@@ -249,6 +249,45 @@
         "implementation/evidence/M02/OM9-L3-02-03-003/OM9-L4-02-03-003-06-acceptance.md"
       ],
       "acceptance": "An external point yields real tangent/perpendicular branches; a point at/inside the circle reports no fake tangent."
+    },
+    "directional_nurbs_commit_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Viewport one-shots and SDK queries both require the previous point. On one rotated and nonuniformly scaled quadratic NURBS, both modes verify source membership and tangent or perpendicular residuals, then commit the returned point through the normal transaction path.",
+      "tests": ["snap_panel_modes::directional_nurbs_snaps_require_a_line_base_and_commit_the_refined_point", "plugin_native::native_plugin_directional_nurbs_snaps_require_a_base_and_commit_source_point", "om9-scene osnap"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#directional-nurbs-snap-from-base-to-commit-2026-11-18"]
+    },
+    "source_rim_directional_snap_2026_11_19": {
+      "status": "WINDOWS_EGUI_SOURCE_RIM_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The viewport selects the top circular edge of a canonical BRep cylinder. The exact native knot trim fixes the Perpendicular refusal. Tangent and Perpendicular each commit the source witness and undo correctly in Wireframe and Shaded.",
+      "tests": ["om9-app osnap_ui::directional_snaps_on_cylinder_rim_commit_the_source_witness"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#tangent-and-perpendicular-on-a-cylinder-rim"]
+    },
+    "source_knot_trim_both_directions_2026_11_19": {
+      "status": "WINDOWS_CORE_TRIM_REPRODUCTION_AND_REGRESSION_VALIDATED",
+      "scope": "A nonperiodic NURBS trim without a seam override keeps the exact original native knot for each cut, including curves traversed in reverse. Four cuts on a rational circle check the source evaluation, direction and control points on both sides of the knot.",
+      "tests": ["om9-core curve_ops::parameter_trim_keeps_a_native_knot_in_both_directions"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#exact-nurbs-knot-cuts-in-both-directions"]
+    },
+    "bounded_segment_perp_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The projection rejects perpendicular feet outside the finite segment. The viewport keeps Perp armed after a miss and commits a valid elevated source foot with one Undo entry and complete Undo and Redo.",
+      "tests": ["om9-app osnap_ui::perpendicular_refuses_a_segment_extension_and_accepts_a_true_foot"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#perp-on-a-bounded-line-segment"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G07",
+        "G08"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

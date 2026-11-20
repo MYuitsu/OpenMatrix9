@@ -189,5 +189,12 @@
     "OM9-L4-04-18-004-02",
     "OM9-L4-04-18-004-03",
     "OM9-L4-04-18-004-04"
-  ]
+  ],
+  "runtime_implementation": {
+    "status": "PARTIAL_HOST_MESH_BOOLEAN_WORKER",
+    "scope": "Add-on mesh preview cache uses exact mesh-content and mode digest; fixture covers same bounds/vertex count changes. The mesh path also refuses basic invalid meshes and BRep display tessellations. Host validates captured first-group source stamps before subsequent steps and clears stale preview. Preview refresh also tracks current cutter stamps and clears stale captured object previews. Mesh path now refuses structurally invalid or empty final results and cutter unions. Mesh path now calls bounded core mesh CSG; the prior non-axis-aligned open-edge fixture produces a closed output, and three modes plus two cutters have volume fixtures. Direct mesh inputs are now extracted from document geometry and placement; simple convex planar polygons are triangulated. Simple planar concave source faces now use bounded core triangulation preserving winding. Mesh CSG receives document absolute tolerance and its preview key includes that tolerance. Single-member mesh instances resolve composed definition placements, with object and cutter/KeepCutters fixtures. Core mesh CSG has a cancellable worker entry point; existing Solid Union mesh preview uses it. Shared cancellable core batch service computes object results against cutter union under one work/output-face budget; add-on uses it. MatrixApp final mesh batches run on a cancellable host worker with stale context guards and one transaction. Worker setting and permit survive document reopen; Matrix and standalone package routing were tested in-process. MatrixApp mesh preview now uses the worker, permits cutter selection and supports promoting an in-flight preview to guarded commit.",
+    "evidence": "docs/validation/2026-11-17-boolean-preview-cache.md#host-worker-for-mesh-preview",
+    "worker_source_preparation": "MatrixApp uses a tracked immutable document and resolves, transforms and triangulates selected cutter-stage mesh inputs on the worker, including single-member mesh instances. See docs/validation/2026-11-17-boolean-preview-cache.md#cutter-stage-source-preparation-on-the-worker.",
+    "limitations": "Preview is full mesh CSG; Enter after displayed preview recomputes. Worker allowance is estimated, not a peak bound; metadata preflight, initial object-group extraction and scene preparation remain on caller. OS/native DLL, BRep worker, OneByOne and full parity remain open. Manual acceptance pending."
+  }
 }

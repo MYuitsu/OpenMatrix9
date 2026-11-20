@@ -1,0 +1,16 @@
+[
+  {
+    "binary": "L:\\om9-target\\debug\\deps\\project_manager_ui-70489292427dd478.exe",
+    "sha256": "24e54cd99d3b2869596ad52bdfac17ba1ebca6a15e77f2112223e501cea8d985",
+    "binary_mtime": "2026-11-17T10:54:52.441956",
+    "exit_code": 0,
+    "log": "build\\project-manager-audit-2026-11-17\\project_manager_ui-direct.log"
+  },
+  {
+    "binary": "L:\\om9-target\\debug\\deps\\project_manager_persistence-1582fe4446d1a97d.exe",
+    "sha256": "88599e084966a66f0dc91ebf13d0dff79c0251447824efb3ef42b05f55ffc9db",
+    "binary_mtime": "2026-11-17T10:55:03.796246",
+    "exit_code": 0,
+    "log": "build\\project-manager-audit-2026-11-17\\project_manager_persistence-direct.log"
+  }
+]

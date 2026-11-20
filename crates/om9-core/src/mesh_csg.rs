@@ -104,6 +104,7 @@ struct Budget {
     initial: usize,
     ray_triangle_tests: usize,
     winding_fallbacks: usize,
+    cancellation: Option<crate::transaction::Cancellation>,
 }
 impl Budget {
     fn new(work: usize) -> Self {
@@ -112,9 +113,13 @@ impl Budget {
             initial: work,
             ray_triangle_tests: 0,
             winding_fallbacks: 0,
+            cancellation: None,
         }
     }
     fn spend(&mut self, count: usize) -> Result<()> {
+        if self.cancellation.as_ref().is_some_and(crate::transaction::Cancellation::is_canceled) {
+            return Err(Error::Canceled);
+        }
         self.remaining = self
             .remaining
             .checked_sub(count)
@@ -382,16 +387,64 @@ pub fn mesh_boolean(
     op: BooleanOp,
     options: CsgOptions,
 ) -> Result<(Mesh, CsgReport)> {
-    run(a, Some(b), op, options)
+    run(a, Some(b), op, options, None)
+}
+
+/// Cancellable variant for worker-owned mesh Booleans. Cancellation is checked during
+/// budgeted spatial, splitting, classification and output work; preflight validation is
+/// checked between stages rather than inside every allocation or mesh-validation loop.
+pub fn mesh_boolean_cancellable(
+    a: &Mesh, b: &Mesh, op: BooleanOp, options: CsgOptions,
+    cancellation: &crate::transaction::Cancellation,
+) -> Result<(Mesh, CsgReport)> {
+    run(a, Some(b), op, options, Some(cancellation))
+}
+
+/// Boolean each object against the union of all cutters as one all-or-nothing batch.
+/// Work and retained output-face limits apply to the entire batch, not each pair.
+/// No document mutation occurs; caller owns admission and publication.
+pub fn mesh_boolean_batch_cancellable(
+    objects: &[Mesh], cutters: &[Mesh], op: BooleanOp, options: CsgOptions,
+    cancellation: &crate::transaction::Cancellation,
+) -> Result<Vec<Mesh>> {
+    if cancellation.is_canceled() { return Err(Error::Canceled); }
+    if objects.is_empty() || cutters.is_empty() { return Err(Error::Invalid("Boolean batch inputs")); }
+    let mut remaining_work = options.max_work;
+    let mut output_faces = 0usize;
+    let mut tool = std::borrow::Cow::Borrowed(&cutters[0]);
+    for cutter in &cutters[1..] {
+        if remaining_work == 0 { return Err(Error::Budget("Boolean batch work")); }
+        let (combined, report) = mesh_boolean_cancellable(&tool, cutter, BooleanOp::Union,
+            CsgOptions { max_work: remaining_work, ..options }, cancellation)?;
+        if combined.faces.is_empty() { return Err(Error::Invalid("Boolean cutter union is empty")); }
+        remaining_work = remaining_work.checked_sub(report.work).ok_or(Error::Budget("Boolean batch work"))?;
+        tool = std::borrow::Cow::Owned(combined);
+    }
+    let mut results = Vec::new();
+    results.try_reserve_exact(objects.len()).map_err(|_| Error::Budget("Boolean batch outputs"))?;
+    for object in objects {
+        if remaining_work == 0 { return Err(Error::Budget("Boolean batch work")); }
+        let (result, report) = mesh_boolean_cancellable(object, &tool, op,
+            CsgOptions { max_work: remaining_work, ..options }, cancellation)?;
+        if result.faces.is_empty() { return Err(Error::Invalid("Boolean batch output is empty")); }
+        remaining_work = remaining_work.checked_sub(report.work).ok_or(Error::Budget("Boolean batch work"))?;
+        output_faces = output_faces.checked_add(result.faces.len()).ok_or(Error::Overflow("Boolean batch output"))?;
+        if output_faces > options.max_fragments { return Err(Error::Budget("Boolean batch outputs")); }
+        results.push(result);
+    }
+    if cancellation.is_canceled() { return Err(Error::Canceled); }
+    Ok(results)
 }
 
 /// Resolve self-overlap using the nonzero winding solid, without deleting a
 /// triangle merely because it intersects another. Open surfaces are refused.
 pub fn repair_self_intersections(mesh: &Mesh, options: CsgOptions) -> Result<(Mesh, CsgReport)> {
-    run(mesh, None, BooleanOp::Union, options)
+    run(mesh, None, BooleanOp::Union, options, None)
 }
 
-fn run(a: &Mesh, b: Option<&Mesh>, op: BooleanOp, o: CsgOptions) -> Result<(Mesh, CsgReport)> {
+fn run(a: &Mesh, b: Option<&Mesh>, op: BooleanOp, o: CsgOptions, cancellation: Option<&crate::transaction::Cancellation>) -> Result<(Mesh, CsgReport)> {
+    let check_cancel = || if cancellation.is_some_and(crate::transaction::Cancellation::is_canceled) { Err(Error::Canceled) } else { Ok(()) };
+    check_cancel()?;
     if !o.tolerance.is_finite()
         || o.tolerance <= 0.0
         || o.max_triangles == 0
@@ -409,7 +462,9 @@ fn run(a: &Mesh, b: Option<&Mesh>, op: BooleanOp, o: CsgOptions) -> Result<(Mesh
         return Err(Error::Invalid("CSG triangle budget exceeded"));
     }
     for m in std::iter::once(a).chain(b) {
+        check_cancel()?;
         m.validate(&Limits::default())?;
+        check_cancel()?;
         topology(m, false)?;
         if !m.colors.is_empty() {
             return Err(Error::Invalid("CSG vertex colours unsupported"));
@@ -437,7 +492,7 @@ fn run(a: &Mesh, b: Option<&Mesh>, op: BooleanOp, o: CsgOptions) -> Result<(Mesh
     if !scale.is_finite()
         || scale <= 0.0
         || !eps.is_finite()
-        || !(1.0e-13..=1.0e-4).contains(&eps)
+        || !(1.0e-13..=1.0e-3).contains(&eps)
         || world_magnitude * f64::EPSILON * 4.0 > o.tolerance
     {
         return Err(Error::Invalid(
@@ -445,6 +500,7 @@ fn run(a: &Mesh, b: Option<&Mesh>, op: BooleanOp, o: CsgOptions) -> Result<(Mesh
         ));
     }
     let ap = polygons(a, origin, scale, eps)?;
+    check_cancel()?;
     let bp = match b {
         Some(b) => polygons(b, origin, scale, eps)?,
         None => Vec::new(),
@@ -455,6 +511,8 @@ fn run(a: &Mesh, b: Option<&Mesh>, op: BooleanOp, o: CsgOptions) -> Result<(Mesh
         ..CsgReport::default()
     };
     let mut budget = Budget::new(o.max_work);
+    budget.cancellation = cancellation.cloned();
+    budget.spend(0)?;
     let a_solid = Solid::new(&ap, eps, &mut budget)?;
     let b_solid = Solid::new(&bp, eps, &mut budget)?;
     let source_bounds: Vec<_> = sources
@@ -574,12 +632,14 @@ fn run(a: &Mesh, b: Option<&Mesh>, op: BooleanOp, o: CsgOptions) -> Result<(Mesh
         &mut budget,
         &mut report,
     )?;
+    budget.spend(0)?;
     topology(&mesh, true)?;
     verify_embedding(&mesh, eps, &mut budget)?;
     for p in &mut mesh.vertices {
         *p = add(origin, mul(*p, scale));
     }
     mesh.validate(&Limits::default())?;
+    budget.spend(0)?;
     report.output_triangles = mesh.faces.len();
     report.work = budget.initial - budget.remaining;
     report.ray_triangle_tests = budget.ray_triangle_tests;

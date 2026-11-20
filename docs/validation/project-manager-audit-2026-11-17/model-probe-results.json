@@ -1,0 +1,28 @@
+{
+  "clear_notes_allowed": false,
+  "invalid_duplicate_project_ids_accepted": true,
+  "master_resource_json_roundtrip": {
+    "after_error": "missing embedded resource payload",
+    "after_payload_available": false,
+    "before_payload_bytes": 16
+  },
+  "placement": {
+    "preserved": false,
+    "restored_world": [
+      4.0,
+      3.0,
+      4.0
+    ],
+    "source_world": [
+      12.0,
+      23.0,
+      34.0
+    ]
+  },
+  "rename_only_persisted_by_staging_predicate": false,
+  "scope": "production ProjectManager model compiled by path; no UI or host replacement",
+  "snapshot_after_source_delete": {
+    "saved_entity_count": 1,
+    "ui_available": false
+  }
+}

@@ -589,11 +589,8 @@ fn metal_weights_enabled_addon_routes_a_selected_brep_instance_to_source() {
 }
 
 #[cfg(all(feature = "occt-brep", windows))]
-#[test]
-#[ignore = "requires OM9_TEST_MATRIX_DLL pointing to the freshly built native add-on"]
-fn metal_weights_with_installed_native_matrix_package_uses_brep_source() {
+fn native_matrix_host(tmp: &Path) -> Arc<Mutex<Host>> {
     let dll = PathBuf::from(std::env::var_os("OM9_TEST_MATRIX_DLL").expect("native Matrix DLL"));
-    let tmp = std::env::temp_dir().join(format!("om9-metal-native-{}", uuid::Uuid::new_v4()));
     let stage = tmp.join("stage");
     fs::create_dir_all(stage.join("icons")).unwrap();
     fs::create_dir_all(stage.join("lang")).unwrap();
@@ -620,10 +617,15 @@ fn metal_weights_with_installed_native_matrix_package_uses_brep_source() {
         enable: true, grant_permissions: true, ..Default::default()
     }).unwrap();
     assert!(installed.enabled, "{:?}", installed.warnings);
-    assert!(native.bound_commands().iter().any(|(code, _, _)| code == "BuilderMetalWeights"),
-        "registered={} warnings={:?}", native.bound_commands().len(), installed.warnings.iter()
-            .filter(|warning| warning.contains("BuilderMetalWeights")).collect::<Vec<_>>());
-    let native = Arc::new(Mutex::new(native));
+    Arc::new(Mutex::new(native))
+}
+
+#[cfg(all(feature = "occt-brep", windows))]
+#[test]
+#[ignore = "requires OM9_TEST_MATRIX_DLL pointing to the freshly built native add-on"]
+fn metal_weights_with_installed_native_matrix_package_uses_brep_source() {
+    let tmp = std::env::temp_dir().join(format!("om9-metal-native-{}", uuid::Uuid::new_v4()));
+    let native = native_matrix_host(&tmp);
     let feats = features();
     let names: Vec<FeatureName> = feats.iter().map(|(id, command)| FeatureName {
         id, command: command.as_deref(),
@@ -696,6 +698,211 @@ fn metal_weights_with_installed_native_matrix_package_uses_brep_source() {
         assert!((c.metal_report().unwrap().grams - 124.8).abs() < 1e-6);
         assert_eq!(c.document(), &before_instance);
         assert_eq!(c.coordinator().undo_len(), undo_instance);
+    }
+}
+
+#[cfg(all(feature = "occt-brep", windows))]
+#[test]
+#[ignore = "requires OM9_TEST_MATRIX_DLL pointing to the freshly built native add-on"]
+fn native_addon_polyline_commits_viewport_end_snap_preview() {
+    use eframe::egui::{self, Event, Key, Modifiers, PointerButton, Pos2, Rect, Vec2};
+    use om9_app::ui::MatrixApp;
+    use om9_core::model::Entity;
+    use om9_scene::{camera::Viewport, osnap::SnapKind, workspace::ViewId};
+
+    let tmp = std::env::temp_dir().join(format!("om9-native-polyline-{}", uuid::Uuid::new_v4()));
+    let host = native_matrix_host(&tmp);
+    let features = features();
+    let names: Vec<_> = features.iter().map(|(id, command)| FeatureName {
+        id,
+        command: command.as_deref(),
+    }).collect();
+    let start = [-8., 0., 0.];
+    let end = [8., 4., 0.];
+    let elevated_end = [3., -5., 9.];
+    let mut document = Document::with_template_tolerance("native add-on viewport End");
+    for (a, b) in [
+        (start, [-8., 8., 0.]),
+        (end, [12., 8., 0.]),
+        (elevated_end, [6., -6., 9.]),
+    ] {
+        let line = Entity::new("End reference", Geometry::Curve(Curve::Line {
+            start: a,
+            end: b,
+            domain: [0., 1.],
+        }), None);
+        document.entities.insert(line.id, line);
+    }
+    let mut app = MatrixApp::new(document).unwrap();
+    assert!(host.lock().unwrap().bound_commands().iter().any(|(code, _, _)| code == "CurvePolylinePolyline"));
+    app.controller.attach_addons(host, &names);
+    let before = app.controller.document().clone();
+    let undo = app.controller.coordinator().undo_len();
+    let ctx = egui::Context::default();
+    let frame = |app: &mut MatrixApp, events| {
+        let mut output = ctx.run_ui(egui::RawInput {
+            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 900.))),
+            events,
+            ..Default::default()
+        }, |ui| app.show(ui));
+        output.textures_delta.clear();
+    };
+    let click = |app: &mut MatrixApp, pos| {
+        frame(app, vec![Event::PointerMoved(pos)]);
+        for pressed in [true, false] {
+            frame(app, vec![Event::PointerButton {
+                pos, button: PointerButton::Primary, pressed, modifiers: Modifiers::NONE,
+            }]);
+        }
+    };
+    let key = |key| Event::Key {
+        key, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::NONE,
+    };
+    frame(&mut app, vec![]);
+    frame(&mut app, vec![]);
+    assert_eq!(app.controller.addon_code("CurvePolylinePolyline").as_deref(), Some("CurvePolylinePolyline"));
+    let input = app.command_input_rect().unwrap().center();
+    click(&mut app, input);
+    frame(&mut app, vec![Event::Text("CurvePolylinePolyline".into())]);
+    assert_eq!(app.transcript.draft(), "CurvePolylinePolyline");
+    frame(&mut app, vec![key(Key::Enter)]);
+    assert_eq!(app.controller.addon_session().map(|session| session.code.as_str()),
+        Some("CurvePolylinePolyline"), "{}: {}", app.status_line(), app.transcript.draft());
+    app.controller.workspace.active = ViewId::LookingDown;
+    let rect = app.view_rects[&ViewId::LookingDown];
+    let viewport = Viewport {
+        origin: [rect.min.x as f64, rect.min.y as f64],
+        size: [rect.width() as f64, rect.height() as f64],
+    };
+    let camera = app.controller.workspace.views[&ViewId::LookingDown].camera.clone();
+    let hover_end = |app: &mut MatrixApp, expected: [f64; 3]| {
+        let near = [expected[0] + 0.2, expected[1], expected[2]];
+        let [x, y] = camera.project(near, viewport).unwrap().unwrap().screen;
+        let at = Pos2::new(x as f32, y as f32);
+        frame(app, vec![Event::PointerMoved(at)]);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(10);
+        loop {
+            if let Some(candidate) = app.snap_candidate().filter(|hit| hit.kind == SnapKind::End) {
+                assert_eq!(candidate.world, expected);
+                break;
+            }
+            assert!(std::time::Instant::now() < deadline, "{}", app.status_line());
+            std::thread::sleep(std::time::Duration::from_millis(5));
+            frame(app, vec![]);
+        }
+        at
+    };
+
+    let at = hover_end(&mut app, start);
+    click(&mut app, at);
+    assert_eq!(app.controller.addon_session().unwrap().last_point, Some(start));
+    app.set_snap_enabled(SnapKind::End, false);
+    frame(&mut app, vec![key(Key::E), Event::Text("e".into())]);
+    assert_eq!(app.snap_override(), Some(SnapKind::End), "{}", app.transcript.draft());
+    let at = hover_end(&mut app, end);
+    assert!(app.controller.addon_session().unwrap().hover_lines.contains(&[start, end]));
+    click(&mut app, at);
+    assert_eq!(app.controller.addon_session().unwrap().last_point, Some(end));
+    assert_eq!(app.snap_override(), None);
+    assert_eq!(app.controller.document(), &before);
+    assert_eq!(app.controller.coordinator().undo_len(), undo);
+
+    click(&mut app, input);
+    frame(&mut app, vec![key(Key::Enter)]);
+    assert!(app.controller.addon_session().is_none());
+    let committed = app.controller.document().clone();
+    assert_eq!(committed.entities.len(), before.entities.len() + 1);
+    let created = committed.entities.values().find(|entity| !before.entities.contains_key(&entity.id)).unwrap();
+    let Geometry::Curve(Curve::Line { start: committed_start, end: committed_end, .. }) = &created.geometry else {
+        panic!("expected the two-point polyline to commit a line");
+    };
+    assert_eq!([*committed_start, *committed_end], [start, end]);
+    assert_eq!(app.controller.coordinator().undo_len(), undo + 1);
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.document(), &before);
+    app.controller.redo().unwrap();
+    assert_eq!(app.controller.document(), &committed);
+
+    app.controller.undo().unwrap();
+    let submit = |app: &mut MatrixApp, text: &str| {
+        app.focus_command_editor();
+        frame(app, vec![]);
+        frame(app, vec![Event::Text(text.into())]);
+        assert_eq!(app.transcript.draft(), text);
+        frame(app, vec![key(Key::Enter)]);
+    };
+    submit(&mut app, "CurvePolylinePolyline");
+    app.set_snap_enabled(SnapKind::End, true);
+    let at = hover_end(&mut app, start);
+    click(&mut app, at);
+    hover_end(&mut app, end);
+    assert!(app.controller.addon_session().unwrap().hover_lines.contains(&[start, end]));
+    submit(&mut app, "Between");
+    assert!(app.transcript.prompt().starts_with("Between: first point"));
+    assert!(app.controller.addon_session().unwrap().hover_lines.is_empty(),
+        "Between must discard the previous endpoint preview");
+
+    let first = [-8., 8., 0.];
+    let midpoint = [0., 6., 0.];
+    app.set_snap_enabled(SnapKind::End, false);
+    submit(&mut app, "End");
+    assert_eq!(app.snap_override(), Some(SnapKind::End), "{}: {}", app.status_line(), app.transcript.draft());
+    let at = hover_end(&mut app, first);
+    click(&mut app, at);
+    assert!(app.transcript.prompt().starts_with("Between: second point"));
+    assert_eq!(app.controller.addon_session().unwrap().last_point, Some(start));
+    frame(&mut app, vec![key(Key::E), Event::Text("e".into())]);
+    assert_eq!(app.snap_override(), Some(SnapKind::End));
+    let at = hover_end(&mut app, end);
+    let preview = &app.controller.addon_session().unwrap().hover_lines;
+    assert!(preview.contains(&[start, midpoint]));
+    assert!(!preview.contains(&[start, end]));
+    click(&mut app, at);
+    assert_eq!(app.controller.addon_session().unwrap().last_point, Some(midpoint));
+    assert_eq!(app.snap_override(), None);
+    assert_eq!(app.controller.document(), &before);
+    assert_eq!(app.controller.coordinator().undo_len(), undo);
+
+    click(&mut app, input);
+    frame(&mut app, vec![key(Key::Enter)]);
+    assert!(app.controller.addon_session().is_none());
+    let document = app.controller.document();
+    assert_eq!(document.entities.len(), before.entities.len() + 1);
+    let created = document.entities.values().find(|entity| !before.entities.contains_key(&entity.id)).unwrap();
+    assert!(matches!(&created.geometry, Geometry::Curve(Curve::Line { start: a, end: b, .. }) if *a == start && *b == midpoint));
+    assert_eq!(app.controller.coordinator().undo_len(), undo + 1);
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.document(), &before);
+
+    let typed_start = [-4., -8., 3.];
+    app.controller.set_project(true);
+    app.set_snap_enabled(SnapKind::End, true);
+    for (planar, expected_end) in [(false, [3., -5., 0.]), (true, [3., -5., 3.])] {
+        app.controller.set_planar(planar);
+        submit(&mut app, "CurvePolylinePolyline");
+        submit(&mut app, "-4,-8,3");
+        assert_eq!(app.controller.addon_session().unwrap().last_point, Some(typed_start));
+
+        let at = hover_end(&mut app, elevated_end);
+        let preview = &app.controller.addon_session().unwrap().hover_lines;
+        assert!(preview.contains(&[typed_start, expected_end]), "Planar {planar}: {preview:?}");
+        click(&mut app, at);
+        assert_eq!(app.controller.addon_session().unwrap().last_point, Some(expected_end));
+        assert_eq!(app.controller.document(), &before);
+        assert_eq!(app.controller.coordinator().undo_len(), undo);
+
+        click(&mut app, input);
+        frame(&mut app, vec![key(Key::Enter)]);
+        assert!(app.controller.addon_session().is_none());
+        let document = app.controller.document();
+        assert_eq!(document.entities.len(), before.entities.len() + 1);
+        assert!(document.entities.values().any(|entity| {
+            matches!(&entity.geometry, Geometry::Curve(Curve::Line { start, end, .. })
+                if *start == typed_start && *end == expected_end)
+        }));
+        assert_eq!(app.controller.coordinator().undo_len(), undo + 1);
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
     }
 }
 
@@ -2424,6 +2631,82 @@ fn vietnamese_interface_keeps_english_typing() {
         c.prompt_text()
     );
     c.cancel_addon_session();
+}
+
+#[test]
+fn general_options_persist_matrix_language_and_change_line_summary() {
+    use eframe::egui::{self, Event, Key, Modifiers, PointerButton, Pos2, Rect, Vec2};
+    use om9_app::ui::MatrixApp;
+
+    let tmp = std::env::temp_dir().join(format!("om9-options-language-{}", uuid::Uuid::new_v4()));
+    fs::create_dir_all(&tmp).unwrap();
+    let host = host_lang(&tmp, "vi");
+    let mut app = MatrixApp::new(Document::with_template_tolerance("Language options")).unwrap();
+    app.controller.attach_addons(host.clone(), &[]);
+    let ctx = egui::Context::default();
+    let frame = |app: &mut MatrixApp, events| {
+        let mut output = ctx.run_ui(egui::RawInput {
+            screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 900.))),
+            events,
+            ..Default::default()
+        }, |ui| app.show(ui));
+        output.textures_delta.clear();
+        output
+    };
+    let click = |app: &mut MatrixApp, pos| {
+        frame(app, vec![Event::PointerMoved(pos)]);
+        for pressed in [true, false] {
+            frame(app, vec![Event::PointerButton {
+                pos, button: PointerButton::Primary, pressed, modifiers: Modifiers::NONE,
+            }]);
+        }
+    };
+    let find_text = |app: &mut MatrixApp, label: &str| {
+        frame(app, vec![]).shapes.iter().find_map(|shape| match &shape.shape {
+            egui::Shape::Text(text) if text.galley.job.text == label => {
+                Some(text.pos + text.galley.size() / 2.)
+            }
+            _ => None,
+        }).unwrap_or_else(|| panic!("missing Options label {label:?}"))
+    };
+    let line_summary = |app: &mut MatrixApp| {
+        app.controller.run_addon_command("CurveLineSingleLine").unwrap();
+        app.controller.session_point([0., 0., 0.]).unwrap();
+        app.controller.session_point([3., 0., 0.]).unwrap();
+        app.controller.take_addon_messages()
+    };
+    assert!(line_summary(&mut app).iter().any(|line| line == "Đoạn thẳng: dài 3 mm"));
+    frame(&mut app, vec![]);
+    let cmd = app.command_input_rect().unwrap().center();
+    click(&mut app, cmd);
+    frame(&mut app, vec![Event::Text("Options".into())]);
+    frame(&mut app, vec![Event::Key {
+        key: Key::Enter, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::NONE,
+    }]);
+    find_text(&mut app, "Single-click maximize");
+    let general = find_text(&mut app, "General");
+    click(&mut app, general);
+    find_text(&mut app, "OM9 Matrix language");
+    let prefs = tmp.join("config/userprefs.toml");
+    let blocked_save = prefs.with_extension("toml.tmp");
+    fs::create_dir(&blocked_save).unwrap();
+    for expected in ["Đường cong", "Curve"] {
+        let vietnamese = find_text(&mut app, "Tiếng Việt");
+        click(&mut app, vietnamese);
+        let english = find_text(&mut app, "English");
+        click(&mut app, english);
+        assert_eq!(app.controller.tr().menu("Curve"), expected);
+        if expected == "Đường cong" {
+            assert!(app.status_line().contains("preferences"));
+            fs::remove_dir(&blocked_save).unwrap();
+        }
+    }
+    let (saved, warning) = om9_addons::prefs::Prefs::load(&prefs);
+    assert!(warning.is_none());
+    assert_eq!(saved.addons["om9_matrix"].settings["language"],
+        om9_addons::settings::SettingValue::Str("en".into()));
+    assert!(line_summary(&mut app).iter().any(|line| line == "Line: length 3 mm"));
+    fs::remove_dir_all(&tmp).unwrap();
 }
 
 #[test]

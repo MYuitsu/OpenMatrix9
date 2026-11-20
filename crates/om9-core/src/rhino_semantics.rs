@@ -818,6 +818,19 @@ impl Default for PbrMaterial {
     }
 }
 
+/// An explicit texture reference to bytes owned by the OM9 document.
+pub fn embedded_texture_uri(id: crate::identity::ResourceId) -> Result<String> {
+    if id.is_nil() { return Err(Error::Invalid("texture resource identity")); }
+    Ok(format!("om9-resource:{}", id.0))
+}
+
+pub fn embedded_texture_id(value: &str) -> Result<crate::identity::ResourceId> {
+    let text = value.strip_prefix("om9-resource:").ok_or(Error::Unsupported("external mesh texture"))?;
+    let id = uuid::Uuid::parse_str(text).map_err(|_| Error::Invalid("texture resource identity"))?;
+    if id.is_nil() { return Err(Error::Invalid("texture resource identity")); }
+    Ok(crate::identity::ResourceId(id))
+}
+
 impl MeshUv {
     pub fn validate(&self, limits: &Limits) -> Result<()> {
         for uv in self.uvs.iter().chain(&self.corners) {

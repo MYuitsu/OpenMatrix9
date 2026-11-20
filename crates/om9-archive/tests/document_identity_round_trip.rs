@@ -214,6 +214,38 @@ fn a_document_without_the_new_keys_is_byte_identical() {
     );
 }
 #[test]
+fn creation_order_reads_interim_archives_and_saves_in_the_v5_extension_envelope() {
+    const SLOT: &str = "om9.object.creation-order";
+    let limits = Limits::default();
+    let fixture = identity_fixture();
+    let id = fixture.first.to_string();
+    let mut interim = serde_json::to_value(&fixture.document).unwrap();
+    interim["entities"][&id]["creation_order"] = serde_json::json!([1, 2]);
+
+    let decoded = Archive::decode(&pack_json(5, &interim), &limits).unwrap();
+    assert_eq!(decoded.entities[&fixture.first].creation_order, Some([1, 2]));
+    assert_eq!(decoded.entities[&fixture.first].extensions, fixture.document.entities[&fixture.first].extensions);
+    assert_eq!(decoded.entities[&fixture.second].creation_order, None);
+
+    let bytes = Archive::encode(&decoded, &limits).unwrap();
+    assert_eq!(&bytes[8..12], &5u32.to_le_bytes());
+    let metadata: serde_json::Value = serde_json::from_slice(&bytes[88..]).unwrap();
+    let entity = &metadata["entities"][&id];
+    assert!(entity.get("creation_order").is_none());
+    assert_eq!(entity["extensions"][GEM_EXTENSION_SLOT], interim["entities"][&id]["extensions"][GEM_EXTENSION_SLOT]);
+    assert_eq!(entity["extensions"][SLOT], serde_json::json!({"version": 1, "payload": "{\"order\":[1,2]}"}));
+    assert_eq!(Archive::decode(&bytes, &limits).unwrap(), decoded);
+
+    let mut future = metadata;
+    future["entities"][&id]["extensions"][SLOT] = serde_json::json!({"version": 2, "payload": "{\"order\":[3,4]}"});
+    let future = Archive::decode(&pack_json(5, &future), &limits).unwrap();
+    assert_eq!(future.entities[&fixture.first].creation_order, None);
+    assert_eq!(future.entities[&fixture.first].extensions[SLOT].version, 2);
+    let bytes = Archive::encode(&future, &limits).unwrap();
+    assert_eq!(Archive::decode(&bytes, &limits).unwrap(), future);
+}
+
+#[test]
 fn additive_keys_are_admitted_in_schema4_and_refused_by_legacy_schema3() {
     let limits = Limits::default();
     let fixture = identity_fixture();

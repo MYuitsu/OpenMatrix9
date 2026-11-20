@@ -1,0 +1,134 @@
+warning: methods `clone_for_document_staging` and `tracked_source_snapshot` are never used
+    --> crates\om9-core\src\brep.rs:1177:19
+     |
+ 912 | impl Brep {
+     | --------- methods in this implementation
+...
+1177 |     pub(crate) fn clone_for_document_staging(&self) -> Self {
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+1227 |     pub(crate) fn tracked_source_snapshot(&self) -> BrepSource {
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: methods `display_allocation_key`, `display_allocation_bytes`, and `payload_allocation_key` are never used
+   --> crates\om9-core\src\geometry.rs:884:19
+    |
+868 | impl NativeBrep {
+    | --------------- methods in this implementation
+...
+884 |     pub(crate) fn display_allocation_key(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+...
+887 |     pub(crate) fn display_allocation_bytes(&self) -> Result<u64> {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+890 |     pub(crate) fn payload_allocation_key(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `om9-core` (lib) generated 2 warnings
+   Compiling om9-addon-tools v0.1.0 (H:\OpenMatrix9\addons\tools)
+warning: unused import: `brep::Brep`
+ --> crates\om9-kernel\src\intersect.rs:7:5
+  |
+7 |     brep::Brep,
+  |     ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `brep`
+   --> crates\om9-kernel\src\associative.rs:180:28
+    |
+180 |         let Geometry::Brep(brep) = &output.geometry else { return Err(Error::Invalid("ring BRep output")); };
+    |                            ^^^^ help: if this is intentional, prefix it with an underscore: `_brep`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-kernel` (lib) generated 2 warnings (run `cargo fix --lib -p om9-kernel` to apply 2 suggestions)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+   Compiling om9-addon-surfaces v0.1.0 (H:\OpenMatrix9\addons\surfaces)
+warning: unreachable pattern
+   --> crates\om9-app\src\session\addon_session.rs:591:9
+    |
+591 |         other => other.clone(),
+    |         ^^^^^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates\om9-app\src\session\addon_session.rs:591:9
+    |
+521 |           Geo::Point { point } => Geo::Point { point: p(*point) },
+    |           -------------------- matches some of the same values
+522 |           Geo::Line { start, end } => Geo::Line {
+    |           ------------------------ matches some of the same values
+...
+526 |           Geo::Polyline { points, closed } => Geo::Polyline {
+    |           -------------------------------- matches some of the same values
+...
+530 | /         Geo::Circle {
+531 | |             center,
+532 | |             x,
+533 | |             y,
+534 | |             radius,
+535 | |         } => Geo::Circle {
+    | |_________- matches some of the same values
+...
+591 |           other => other.clone(),
+    |           ^^^^^ ...and 4 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `brep`
+    --> crates\om9-app\src\session\top11.rs:1432:36
+     |
+1432 |                     Geometry::Brep(brep) => self.solid_output_deflection(face.id)?,
+     |                                    ^^^^ help: if this is intentional, prefix it with an underscore: `_brep`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `brep`
+    --> crates\om9-app\src\session\top11.rs:1556:32
+     |
+1556 |                 Geometry::Brep(brep) => self.solid_output_deflection(face.id)?,
+     |                                ^^^^ help: if this is intentional, prefix it with an underscore: `_brep`
+
+warning: unused variable: `brep`
+    --> crates\om9-app\src\session\top11.rs:2251:40
+     |
+2251 |                         Geometry::Brep(brep) => self.solid_output_deflection(face.id)?,
+     |                                        ^^^^ help: if this is intentional, prefix it with an underscore: `_brep`
+
+warning: methods `replace_from_file_guard` and `replace_from_file_with_planning_sample` are never used
+    --> crates\om9-app\src\session\files.rs:1202:8
+     |
+ 378 | impl Controller {
+     | --------------- methods in this implementation
+...
+1202 |     fn replace_from_file_guard<F>(&mut self, token: FileToken, path: PathBuf, guard: F) -> Result<FileOutcome>
+     |        ^^^^^^^^^^^^^^^^^^^^^^^
+...
+1208 |     fn replace_from_file_with_planning_sample<F, S>(&mut self, token: FileToken, path: PathBuf, guard: F, sample: S, name_from_pat...
+     |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `solid_candidate_output_deflection` is never used
+    --> crates\om9-app\src\session\solid.rs:5075:19
+     |
+3850 | impl Controller {
+     | --------------- method in this implementation
+...
+5075 |     pub(super) fn solid_candidate_output_deflection(&self, id: om9_core::identity::ObjectId,
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   Compiling om9-addon-top11 v0.1.0 (H:\OpenMatrix9\addons\top11)
+   Compiling om9-addon-solid v0.1.0 (H:\OpenMatrix9\addons\solid)
+   Compiling om9-addon-transform-tools v0.1.0 (H:\OpenMatrix9\addons\transform_tools)
+   Compiling om9-addon-subd v0.1.0 (H:\OpenMatrix9\addons\subd)
+   Compiling om9-addon-setting-tools v0.1.0 (H:\OpenMatrix9\addons\setting_tools)
+   Compiling om9-addon-matrix v0.9.0 (H:\OpenMatrix9\addons\matrix)
+warning: `om9-app` (lib) generated 6 warnings (run `cargo fix --lib -p om9-app` to apply 3 suggestions)
+error: failed to remove file `L:/om9-target\debug\om9.exe`
+
+Caused by:
+  Access is denied. (os error 5)
+warning: build failed, waiting for other jobs to finish...

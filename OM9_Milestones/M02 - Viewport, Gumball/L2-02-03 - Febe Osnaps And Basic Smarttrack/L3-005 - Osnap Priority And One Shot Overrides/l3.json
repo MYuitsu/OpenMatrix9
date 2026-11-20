@@ -209,6 +209,11 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
+    "windows_four_view_one_shot_2026_11_18": {
+      "date": "2026-11-18",
+      "scope": "With the master off, desktop clicks started a Line in Perspective and accepted an exact elevated End in Side View after a miss. A second Line started in Looking Down and accepted an exact elevated Mid in Through Finger. Each command consumed its one-shot and produced one Undo entry. Human M02-UI review remains open.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#standard-windows-snaps-panel-and-cross-view-line-replay"]
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
@@ -242,6 +247,67 @@
         "implementation/evidence/M02/OM9-L3-02-03-005/OM9-L4-02-03-005-06-acceptance.md"
       ],
       "acceptance": "A one-shot MID beats persistent END for one pick, then END returns; Escape consumes the override without leaking it."
+    },
+    "standalone_verification_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "In a Looking Down Line point prompt with master off, a deferred End miss leaves the one-shot armed and keyboard focus in the viewport. Escape clears the override and leaves the Line active. E re-arms and a sphere-pole retry commits the exact preview point.",
+      "tests": ["om9-app snap_panel_modes::deferred_end_miss_keeps_viewport_focus_for_retry"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md"]
+    },
+    "between_icon_prompt_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "After the first Line viewport pick, the Between icon focuses the reference prompt. The fixture types the first reference, cancels Between with Escape, and completes the original Line by mouse with one Undo entry.",
+      "tests": ["om9-app chrome_actions::between_icon_focuses_its_prompt_and_escape_preserves_the_outer_line"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#between-icon-prompt-focus-on-2026-11-18"]
+    },
+    "between_addon_preview_2026_11_19": {
+      "status": "WINDOWS_PACKAGED_ADDON_REPLAY_VALIDATED",
+      "scope": "Between discards the old Polyline hover segment. The packaged add-on sees the midpoint of two End references in its preview and accepted point. The outer command commits one segment with one Undo.",
+      "tests": ["om9-app addon_session::native_addon_polyline_commits_viewport_end_snap_preview"],
+      "evidence": [
+        "docs/validation/2026-11-17-snaps-p07.md#between-preview-in-the-packaged-polyline-add-on",
+        "docs/validation/2026-11-17-snaps-p07.md#windows-between-preview-and-model-readback",
+        "docs/validation/2026-11-17-snaps-p07.md#viewport-enter-completes-the-add-on-point-prompt",
+        "docs/validation/2026-11-17-snaps-p07.md#windows-between-cancellation-and-retry-inside-polyline"
+      ]
+    },
+    "between_completion_shortcut_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The repaired sequence gives focus to the Between reference prompt, commits the midpoint in one Undo entry, then arms End one-shot with an empty draft. Windows replay on the patched binary showed the End badge and Escape cancellation. The archive readback confirmed exactly one Line with the expected midpoint.",
+      "tests": ["om9-app chrome_actions::between_icon_focuses_its_prompt_and_escape_preserves_the_outer_line"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#windows-confirmation-of-between-and-idle-end-on-the-patched-build"]
+    },
+    "one_shot_miss_status_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The immediate Mid and deferred End paths report the active kind when a click misses. No geometry reaches Line on a miss and Escape clears only the override. The End retry accepts the exact source pole in one Undo entry.",
+      "tests": ["om9-app snap_panel_modes::e_and_m_select_end_and_mid_while_a_command_is_running", "om9-app snap_panel_modes::deferred_end_miss_keeps_viewport_focus_for_retry"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#one-shot-miss-feedback-for-immediate-and-deferred-picks"]
+    },
+    "escape_release_one_shot_2026_11_19": {
+      "status": "AUTOMATED_AND_WINDOWS_REPLAY_VERIFIED_MANUAL_UI_PENDING",
+      "scope": "The viewport recovers an unpaired physical Escape release to clear End while idle or during Line. Windows trace and model readback verify that Line keeps its prompt and accepts its endpoint in one Undo entry.",
+      "tests": ["om9-app snap_panel_modes::escape_release_without_a_press_cancels_only_the_viewport_one_shot"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#escape-release-with-a-viewport-one-shot-armed"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G01",
+        "G03",
+        "G04",
+        "G06"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

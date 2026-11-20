@@ -92,6 +92,22 @@ impl LoadedPlugin {
         command: &str,
         arguments: Value,
     ) -> Result<PluginRun> {
+        self.prepare_with_snap_service(coordinator, document, selection, project, last_change, command, arguments, None)
+    }
+
+    /// Attach an invocation-scoped host point service. It cannot retain UI or document pointers.
+    #[allow(clippy::too_many_arguments)]
+    pub fn prepare_with_snap_service(
+        &self,
+        coordinator: &TransactionCoordinator,
+        document: DocumentId,
+        selection: &[ObjectId],
+        project: staged::ProjectState,
+        last_change: Option<ProjectChange>,
+        command: &str,
+        arguments: Value,
+        snap_service: Option<&dyn Fn(om9_sdk::HostRequest) -> om9_sdk::Result<Value>>,
+    ) -> Result<PluginRun> {
         if !self.descriptor.commands.iter().any(|c| c.id == command) {
             return Err(error("command", "command is not declared by this plugin"));
         }
@@ -104,6 +120,7 @@ impl LoadedPlugin {
             staged::Staged::new(coordinator, document, selection, coordinator.limits())?;
         staged.set_project(project);
         staged.set_last_change(last_change);
+        staged.set_snap_service(snap_service);
         let host = HostApi {
             abi_version: abi::ABI_VERSION,
             struct_size: std::mem::size_of::<HostApi>() as u32,

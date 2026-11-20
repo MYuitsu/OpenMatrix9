@@ -100,6 +100,11 @@
     ]
   },
   "runtime_implementation": {
+    "options_grid_2026_11_19": {
+      "scope": "Separate persisted grid line and grid axis visibility settings for Wireframe and Shaded.",
+      "evidence": "docs/validation/2026-11-19-options-full-tree.md",
+      "limitations": "Desktop and GPU readback pending. Additional mode names are visible with unavailable rendering."
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

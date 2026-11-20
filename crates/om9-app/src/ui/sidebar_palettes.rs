@@ -2,6 +2,7 @@
 //! Fixed reference slots for Display, Snaps and Info & Settings. These are
 //! presentation adapters only; unimplemented operations remain non-invoking.
 use super::*;
+use std::borrow::Cow;
 
 pub(super) const DISPLAY: [&str; 11] = [
     "GridON",
@@ -65,6 +66,93 @@ pub(super) const INFO_BOTTOM: [&str; 11] = [
 const REFERENCE_WIDTH: f32 = 296.;
 
 impl MatrixApp {
+    pub(super) fn snap_constraint_icon(&mut self, ui: &mut egui::Ui, icon: &str) -> bool {
+        let (command, active, help): (&str, bool, Cow<'_, str>) = match icon {
+            "GridSnapON" => (
+                "GridSnap",
+                self.controller.grid_snap(),
+                format!(
+                    "Grid Snap: round pointer input to the {} mm step",
+                    self.controller.grid_snap_step_mm()
+                ).into(),
+            ),
+            "OrthoSnapON" => (
+                "Ortho",
+                self.controller.ortho(),
+                "Ortho: constrain direction from the previous point".into(),
+            ),
+            "PlanarSnapON" => (
+                "Planar",
+                self.controller.planar(),
+                "Planar: keep points on a plane through the previous point".into(),
+            ),
+            "ProjectSnapON" => (
+                "Project",
+                self.controller.project(),
+                "Project: project object snaps onto the active input plane".into(),
+            ),
+            _ => return false,
+        };
+        if self.icon_toggle(ui, icon, active, &help, true).clicked() {
+            let _ = self.apply_snap_command(command);
+        }
+        true
+    }
+
+    fn object_snap_master_button(&mut self, ui: &mut egui::Ui, rect: Rect, scale: f32) {
+        let active = self.object_snaps_enabled();
+        let response = ui.interact(rect, ui.id().with("object-snaps-master"), Sense::click());
+        response.widget_info(|| egui::WidgetInfo::selected(egui::WidgetType::Checkbox, true, active, "O-Snap"));
+        let (fill, border, mark) = if active {
+            (
+                Color32::from_rgb(31, 66, 96),
+                Color32::from_rgb(90, 190, 245),
+                Color32::from_rgb(213, 231, 255),
+            )
+        } else {
+            (
+                Color32::from_rgb(24, 36, 48),
+                Color32::from_rgb(72, 99, 121),
+                Color32::from_rgb(163, 183, 201),
+            )
+        };
+        let radius = 4. * scale;
+        let painter = ui.painter();
+        let fill = if response.hovered() { fill.gamma_multiply(1.22) } else { fill };
+        painter.rect_filled(rect, radius, fill);
+        painter.rect_stroke(rect.shrink(0.5), radius, Stroke::new(1.2, border), egui::StrokeKind::Inside);
+
+        let state = rect.center();
+        let stroke = Stroke::new(2.2 * scale, mark);
+        if active {
+            let offset = Vec2::new(0., 4.2 * scale);
+            painter.line_segment([state - offset, state + offset], stroke);
+        } else {
+            painter.circle_stroke(state, 4. * scale, stroke);
+        }
+        match self.icon_column {
+            IconColumn::Left => self.rail_icon_rects.push(rect),
+            IconColumn::Right => self.right_dock_icon_rects.push(rect),
+            IconColumn::None => {}
+        }
+
+        let response = response.on_hover_text(if active {
+            "O-Snap on. Right-click for options."
+        } else {
+            "O-Snap off. Right-click for options."
+        });
+        if response.clicked() {
+            self.set_object_snaps_enabled(!active);
+        }
+        response.context_menu(|ui| {
+            let enabled = self.snap_state.settings.apparent_intersections;
+            if ui.selectable_label(enabled, "Snap to apparent intersections").clicked() {
+                let _ = self.apply_snap_command("ApparentIntersections");
+                ui.close();
+            }
+        });
+    }
+
     pub(super) fn fixed_sidebar_palette(&mut self, ui: &mut egui::Ui, section: SectionId) {
         let height = match section {
             SectionId::Display => 45.,
@@ -104,13 +192,15 @@ impl MatrixApp {
             );
             icon_index += 1;
             app.column_icon_edge = rect.width();
+            if app.snap_constraint_icon(&mut child, key) {
+                return;
+            }
             let snap_kind = snap_kind_for_icon(key);
             let toggle = snap_kind.is_some()
                 || matches!(
                     key,
-                    "OrthoSnapON"
-                        | "PlanarSnapON"
-                        | "ProjectSnapON"
+                    "SnapOnSurface"
+                        | "SnapOnPolysurface"
                         | "RhinoSmartTrackON"
                         | "RhinoHistoryON"
                         | "GVHistoryRecordON"
@@ -119,9 +209,8 @@ impl MatrixApp {
                 );
             let active = snap_kind.map_or_else(
                 || match key {
-                    "OrthoSnapON" => app.controller.ortho(),
-                    "PlanarSnapON" => app.controller.planar(),
-                    "ProjectSnapON" => app.controller.project(),
+                    "SnapOnSurface" => app.surface_constraint.as_ref().is_some_and(|constraint| constraint.kind == SurfaceConstraintKind::Surface),
+                    "SnapOnPolysurface" => app.surface_constraint.as_ref().is_some_and(|constraint| constraint.kind == SurfaceConstraintKind::Polysurface),
                     "RhinoSmartTrackON" => app.smarttrack_enabled(),
                     "RhinoHistoryON" | "GVHistoryRecordON" => {
                         app.controller.history_record_enabled()
@@ -129,10 +218,15 @@ impl MatrixApp {
                     "GVHistoryUpdateON" => app.controller.history_update_enabled(),
                     _ => false,
                 },
-                |kind| app.snap_enabled(kind),
+                |kind| app.snap_enabled(kind) && app.object_snaps_enabled(),
             );
             let response = if toggle {
-                app.icon_toggle(&mut child, key, active, key)
+                let help = snap_kind.map(|kind| kind.tooltip()).unwrap_or(match key {
+                    "SnapOnSurface" => "On Surface: left selects once; right selects persistently",
+                    "SnapOnPolysurface" => "On Polysurface: left selects once; right selects persistently",
+                    _ => key,
+                });
+                app.icon_toggle(&mut child, key, active, help, section == SectionId::Snaps)
             } else {
                 let help = match key {
                     "InfoSettingsGumballON" | "InfoSettingsSmartTargetsGumballON" => {
@@ -141,16 +235,25 @@ impl MatrixApp {
                     "InfoSettingsGumballAlignment" => {
                         "Gumball settings: axes, Smooth/Snappy, drag strength"
                     }
+                    "SnapBetween" => "Between: pick two points and use their midpoint",
+                    "CommandHistory" => "Command History (F2)",
                     _ => key,
                 };
-                let enabled = matches!(key, "InfoSettingsGumballAlignment" | "RhinoOptions");
+                let enabled = matches!(key, "InfoSettingsGumballAlignment" | "RhinoOptions" | "SnapBetween" | "CommandHistory");
                 app.icon_slot(&mut child, key, enabled, help, None)
             };
             if key == "InfoSettingsGumballAlignment" && response.clicked() {
                 app.gumball_settings_open = true;
             }
-            if key == "RhinoOptions" && response.clicked() {
+            if matches!(key, "RhinoOptions" | "CommandHistory") && response.clicked() {
                 app.invoke(key, InvocationOrigin::Menu);
+            }
+            if key == "SnapBetween" && response.clicked() {
+                app.begin_between();
+            }
+            if matches!(key, "SnapOnSurface" | "SnapOnPolysurface") && (response.clicked() || response.secondary_clicked()) {
+                let kind = if key == "SnapOnSurface" { SurfaceConstraintKind::Surface } else { SurfaceConstraintKind::Polysurface };
+                app.begin_surface_constraint(kind, response.secondary_clicked());
             }
             if toggle && response.clicked() {
                 if let Some(kind) = snap_kind {
@@ -163,22 +266,6 @@ impl MatrixApp {
                     ));
                 } else {
                     match key {
-                        "OrthoSnapON" => {
-                            let on = !app.controller.ortho();
-                            app.controller.set_ortho(on);
-                            app.status.info(if on { "Ortho on" } else { "Ortho off" });
-                        }
-                        "PlanarSnapON" => {
-                            let on = !app.controller.planar();
-                            app.controller.set_planar(on);
-                            app.status.info(if on { "Planar on" } else { "Planar off" });
-                        }
-                        "ProjectSnapON" => {
-                            let on = !app.controller.project();
-                            app.controller.set_project(on);
-                            app.status
-                                .info(if on { "Project on" } else { "Project off" });
-                        }
                         "RhinoSmartTrackON" => {
                             let on = !app.smarttrack_enabled();
                             app.set_smarttrack_enabled(on);
@@ -241,6 +328,7 @@ impl MatrixApp {
                     icon(self, key, i as f32 * 27., 30.);
                 }
                 icon(self, "GridSnapON", 272., 30.);
+                self.object_snap_master_button(ui, slot(244., 0., 51., 23.), scale);
             }
             SectionId::InfoSettings => {
                 for (row, keys) in [INFO_TOP, INFO_BOTTOM].iter().enumerate() {
@@ -328,20 +416,20 @@ impl MatrixApp {
                 ui.interact(track, ui.id().with("display-slider"), Sense::hover())
                     .on_hover_text("Display adjustment — operation unavailable");
             }
-            SectionId::Snaps => {
-                control("I", 244., 0., 50., 23., false);
-                for (i, label) in ["0.1", "0.25", "0.5", "1.0"].iter().enumerate() {
-                    control(
-                        label,
-                        158. + i as f32 * 28.,
-                        31.5,
-                        26.,
-                        20.,
-                        *label == "0.5",
-                    );
+            SectionId::Snaps => {}
+            _ => {}
+        }
+        if section == SectionId::Snaps {
+            for (i, (label, step)) in [("0.1", 0.1), ("0.25", 0.25), ("0.5", 0.5), ("1.0", 1.0)].iter().enumerate() {
+                let rect = slot(158. + i as f32 * 28., 31.5, 26., 20.);
+                let mut child = ui.new_child(egui::UiBuilder::new().id_salt(("grid-step", i)).max_rect(rect));
+                child.spacing_mut().button_padding = Vec2::new(2. * scale, 0.5 * scale);
+                if child.add(egui::Button::new(egui::RichText::new(*label).size(10. * scale))
+                    .selected(self.controller.grid_snap_step_mm() == *step).min_size(rect.size()))
+                    .on_hover_text(format!("Grid Snap step: {label} mm")).clicked() {
+                    self.controller.set_grid_snap_step_mm(*step);
                 }
             }
-            _ => {}
         }
     }
 }
@@ -358,7 +446,6 @@ fn snap_kind_for_icon(key: &str) -> Option<om9_scene::osnap::SnapKind> {
         "ToolsObjectSnapNear" => SnapKind::Near,
         "ToolsObjectSnapTangentTo" => SnapKind::Tangent,
         "ToolsObjectSnapPerpendicularTo" => SnapKind::Perpendicular,
-        "SnapOnSurface" | "SnapOnPolysurface" => SnapKind::Surface,
         _ => return None,
     })
 }
@@ -439,7 +526,7 @@ mod tests {
         for width in [235., 295., 355., 455.] {
             for (section, count, first_row) in [
                 (SectionId::Display, 11, 11),
-                (SectionId::Snaps, 16, 9),
+                (SectionId::Snaps, 17, 10),
                 (SectionId::InfoSettings, 22, 11),
             ] {
                 let mut app = MatrixApp::new(Document::new("fixed palette")).unwrap();
@@ -459,6 +546,9 @@ mod tests {
                     },
                 );
                 output.textures_delta.clear();
+                app.rail_icon_rects.sort_by(|a, b| {
+                    a.top().total_cmp(&b.top()).then_with(|| a.left().total_cmp(&b.left()))
+                });
                 let slots = &app.rail_icon_rects;
                 assert_eq!(slots.len(), count, "{section:?} at {width}");
                 let top = slots[0].top();

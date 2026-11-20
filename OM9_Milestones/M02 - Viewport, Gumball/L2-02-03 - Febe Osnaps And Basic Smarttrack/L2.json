@@ -159,6 +159,77 @@
         "OM9-L3-02-03-007": "5/5"
       },
       "manual_gate": "M02-UI"
+    },
+    "sdk_issued_hit_constraints_2026_11_18": {
+      "status": "AUTOMATED_SDK_TARGET_VALIDATED",
+      "scope": "A plugin can constrain a SnapQuery result with the same context and invocation. The host compares the issued point and source identities, rejects staged document changes and applies its Project setting. Loaded fixtures include a block-member intersection, Surface, SmartTrack and deferred NURBS End.",
+      "tests": ["om9-plugin-host staged::tests::snap_constraint_requires_the_issued_hit_and_current_invocation", "om9-app plugin_native (11 rebuilt package snap tests and 1 previous package Project test)"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#sdk-constraining-an-issued-snap-hit-2026-11-18"]
+    },
+    "p06_snap_sdk_documentation_2026_11_19": {
+      "status": "SDK_DOCUMENTATION_AND_SOURCE_BUNDLE_VALIDATED",
+      "scope": "The SDK crate README and API inventory describe the six snap methods, coordinate units, issued hits, SmartTrack tokens and host support limits.",
+      "tests": ["56 plugin-host unit tests", "SDK ZIP entry comparison", "Offline cargo check for the README function and bundled hello-plugin"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#sdk-snap-contract-and-source-bundle"]
+    },
+    "p06_synchronous_sdk_snap_runtime_2026_11_19": {
+      "status": "LOADED_SDK_WINDOWS_WITHOUT_OCCT_VALIDATED",
+      "scope": "The native SnapDemo package verifies a completed true Intersection miss, a two-Line apparent hit with both sources, and the Project Point transaction. Surface, SmartTrack and apparent Intersection with a Circle return unsupported while preserving the document and Undo depth.",
+      "tests": ["om9-app plugin_native::native_plugin_synchronous_snap_distinguishes_hit_miss_and_unsupported"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#loaded-sdk-snaps-on-the-windows-host-without-occt"]
+    },
+    "matrix9_competing_pair_fixtures_2026_11_19": {
+      "status": "VERSION_50_ARCHIVE_ORDER_AND_GEOMETRY_VERIFIED_NATIVE_PICK_PENDING",
+      "scope": "Two Rhino 5 files contain identical three-Line geometry with opposite horizontal and vertical iterator order. The native reader verifies archive version and ordering. The normal OM9 importer verifies both sets of endpoints.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#ordered-rhino-5-fixtures-for-competing-pairs"]
+    },
+    "snaps_p07_grouped_current_windows_2026_11_19": {
+      "status": "WINDOWS_AUTOMATED_REVALIDATED_MANUAL_UI_PENDING",
+      "scope": "The grouped Windows run passed 286 cases across source, viewport, CMD, SDK, packaged Polyline and worker-backed BRep reopen. It includes nested member paths, Shaded visibility and directional snaps on a cylinder rim. Another 33 core trim tests passed. Direct Matrix9 readback and M02-UI remain open.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#grouped-p07-after-the-nurbs-knot-trim-fix"]
+    },
+    "snaps_remaining_source_witnesses_2026_11_19": {
+      "status": "WINDOWS_SIX_SNAP_SOURCE_WITNESSES_VALIDATED",
+      "scope": "Point, Near, Quad, Center, Tangent and Perpendicular each return the expected World source in Looking Down and commit the marker coordinate through both palette and CMD, with one Undo.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#user-review-and-remaining-snap-routes"]
+    },
+    "snaps_p07_grouped_nested_and_shaded_windows_2026_11_19": {
+      "status": "WINDOWS_AUTOMATED_REVALIDATED_MANUAL_UI_PENDING",
+      "scope": "The grouped Windows run passed 285 cases across source, viewport, CMD, SDK, packaged Polyline and worker-backed BRep reopen. It includes nested member paths and Shaded visibility before Project. Direct Matrix9 readback and M02-UI remain open.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#grouped-p07-after-the-nested-and-shaded-int-checks"]
+    },
+    "snaps_p07_polyline_enter_recheck_2026_11_19": {
+      "status": "WINDOWS_AUTOMATED_REVALIDATED_MANUAL_UI_PENDING",
+      "scope": "The grouped default-feature run covers exact source geometry, cubic NURBS self-crossing, BRep reopen and loaded SnapDemo. Current Windows packaged Polyline retains the apparent Intersection through the Enter commit.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#p07-recheck-after-the-viewport-enter-fix"]
+    },
+    "snaps_p07_current_worktree_2026_11_19": {
+      "status": "WINDOWS_AUTOMATED_REVALIDATED_MANUAL_UI_PENDING",
+      "scope": "The current Windows grouped run covers native-feature viewport snaps, source geometry, loaded SDK SnapDemo, Matrix Polyline, and BRep reopen. Direct Matrix9 apparent Intersection preference and coordinates remain pending.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#p07-current-worktree-acceptance-audit"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G01",
+        "G03",
+        "G04",
+        "G06",
+        "G07",
+        "G08",
+        "G09",
+        "G11",
+        "G12",
+        "G13"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

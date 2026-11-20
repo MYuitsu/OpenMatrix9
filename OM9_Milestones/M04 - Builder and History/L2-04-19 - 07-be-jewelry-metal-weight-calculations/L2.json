@@ -104,5 +104,71 @@
       "OM9-L3-04-19-004",
       "OM9-L3-04-19-005"
     ]
+  },
+  "runtime_implementation": {
+    "metal_background_worker_2026_11_17": {
+      "status": "SCOPED_BACKGROUND_TESTS_NATIVE_LIMITS_OPEN",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#background-builder-measurement",
+      "scope": "MatrixApp builder and explicit-option calculations use tracked snapshots, stale/cancel guards and admitted Rust-side estimates. OCCT mid-call cancellation and complete native peak accounting remain open."
+    },
+    "metal_worker_preparation_2026_11_17": {
+      "status": "VALIDATION_CANCELLATION_TESTED_WORKER_OPEN",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#measurement-worker-preparation",
+      "scope": "Source validation admission and cancellation checks, occurrence traversal and pure report construction prepared; live measurement remains synchronous and OCCT native allocations/cancellation remain unproved."
+    },
+    "metal_binding_persistence_2026_11_17": {
+      "status": "PERSISTENT_SETTINGS_SCOPED_TESTS_PASSED",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#persistent-bindings-and-user-material-editing",
+      "scope": "Document/material-scoped density bindings and validated user material edit/delete persist in the user catalog; bound deletion refuses. Actual BRep archive reopen, GV, desktop and worker remain open."
+    },
+    "metal_user_catalog_2026_11_17": {
+      "status": "PERSISTENT_USER_CATALOG_SCOPED_TESTS_PASSED",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#persistent-user-catalog-follow-up",
+      "scope": "User densities persist and reload through startup with validated atomic replacement; OM9 reference and User filters are distinct. GV remains disabled without a verified catalog; binding persistence and worker remain open."
+    },
+    "metal_object_materials_2026_11_17": {
+      "status": "SESSION_BINDINGS_SCOPED_TESTS_PASSED",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#object-material-binding-follow-up",
+      "scope": "Explicit session bindings map per-occurrence object/layer/parent render materials to densities, with missing binding refusal. Persistence, GV/User catalog and worker remain open."
+    },
+    "metal_explicit_calculate_2026_11_17": {
+      "status": "SCOPED_EXPLICIT_CALCULATE_TESTED",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#explicit-calculate-follow-up",
+      "scope": "Opening waits for Calculate with or without preselection across built-in and enabled add-on routes; headless UI dropdown and native package fixture passed. GV/User, object materials and worker remain open."
+    },
+    "metal_panel_2026_11_17": {
+      "status": "PARTIAL_HEADLESS_BUILDER_TESTED",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#partial-builder-panel-follow-up",
+      "scope": "Builder opens without selection; Calculate and typed Calculate share one material choice and source service. Preselected invocation still auto-calculates; GV/User/object-material controls, desktop and worker remain open."
+    },
+    "metal_catalog_2026_11_17": {
+      "status": "COMMAND_COMPARISON_TESTED_BUILDER_OPEN",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#native-instance-and-registry-comparison-follow-up",
+      "scope": "The explicit all option compares every registered density with per-object breakdown. GV/User filters, material binding, builder UI, persistence and worker/cancel remain open."
+    },
+    "metal_instance_routes_2026_11_17": {
+      "status": "HEADLESS_CONTROLLER_INSTANCE_TESTED_WORKFLOW_OPEN",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#controller-instance-routing-follow-up",
+      "scope": "Nested BRep instance menu/CMD, Light/High and mixed-member refusal passed in an admitted fixture; enabled in-process add-on passed for a selected instance. Desktop, native package instance and material/worker workflows remain open."
+    },
+    "metal_occurrence_source_2026_11_17": {
+      "status": "SOURCE_FIXTURE_TESTED_INSTANCE_UI_OPEN",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#source-occurrence-service-follow-up",
+      "scope": "Canonical source volumes include nested occurrence placements; scoped source fixture and scaled-root controller fixture passed. Selectable instance and its actual UI/report/Undo path remain unverified."
+    },
+    "metal_source_routing_2026_11_17": {
+      "status": "SCOPED_SOURCE_ROUTE_TESTED_WORKFLOW_OPEN",
+      "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md",
+      "scope": "Enabled add-on icon and aliases call the host BRep measurement; direct add-on display-mesh mass is refused. Box, open shell, material, translated source, Light/High and native-package fixtures passed; UI, worker, instances and human acceptance remain open."
+    },
+    "tools_menu_audit_2026_11_16": {
+      "date": "2026-11-16",
+      "status": "AUDIT_ONLY_GAPS_OPEN",
+      "scope": "Tools menu audit: compare this owner with Book2, relevant decompile and current built-in/add-on routes. Existing handler/tests are partial evidence; see per-command gaps in plan.",
+      "plan": "docs/plans/2026-11-16-tools-menu-gap-plan.md",
+      "evidence": "docs/validation/2026-11-16-tools-menu-audit.json",
+      "implementation_changed": false,
+      "manual_gate_promoted": false
+    }
   }
 }

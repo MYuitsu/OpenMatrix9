@@ -1679,6 +1679,13 @@ impl Controller {
         }
     }
 
+    pub(crate) fn clear_session_hover(&mut self) {
+        if let Some(session) = self.addon_session.as_mut() {
+            session.hover_at = None;
+            session.hover_lines.clear();
+        }
+    }
+
     /// The add-on command right-click or an empty Enter would run again.
     pub fn addon_repeatable(&self) -> Option<&str> {
         self.addon_last.as_deref()

@@ -58,6 +58,9 @@ unsafe extern "C" {
         message: *mut c_char,
         capacity: c_int,
     ) -> c_int;
+    fn om9_occt_point_face_witness(target: *const Part, face_index: c_int,
+        point: *const f64, tolerance: f64, max_nodes: usize, output: *mut f64,
+        message: *mut c_char, capacity: c_int) -> c_int;
     fn om9_occt_measure_edge_length(
         source: *const u8,
         length: usize,
@@ -882,6 +885,31 @@ pub fn distance(
     limits: &Limits,
 ) -> Result<Distance, KernelError> {
     distance_with_native_sources(a, at, None, b, bt, None, limits)
+}
+
+/// Find a point on one canonical trimmed face within world-space tolerance.
+/// The caller owns and admits `source`, and must bind the face index to it.
+pub fn point_on_source_face(source: &str, face_index: usize, placement: Transform,
+    point: Point3, tolerance: f64, max_nodes: u64) -> Result<Option<Point3>, KernelError> {
+    admit(placement.validate())?;
+    if source.is_empty() || !source.contains("CASCADE Topology") || !point.iter().all(|v| v.is_finite())
+        || !tolerance.is_finite() || tolerance <= 0. {
+        return Err(KernelError::InvalidInput("point face witness input".into()));
+    }
+    let index = c_int::try_from(face_index).map_err(|_| KernelError::InvalidInput("point face index".into()))?;
+    let mut part = Part::new(placement);
+    part.source = source.as_ptr(); part.source_len = source.len();
+    let mut output = [0.; 3]; let mut message = [0 as c_char; 512];
+    // SAFETY: borrowed source and all inputs/outputs remain valid through the synchronous adapter call.
+    let status = unsafe { om9_occt_point_face_witness(&part, index, point.as_ptr(), tolerance,
+        usize::try_from(max_nodes).unwrap_or(usize::MAX), output.as_mut_ptr(), message.as_mut_ptr(), 512) };
+    if status == 3 { return Ok(None); }
+    if status != 0 { return Err(error(status, &message)); }
+    let separation = (0..3).map(|i| (output[i] - point[i]).powi(2)).sum::<f64>().sqrt();
+    if !separation.is_finite() || separation > tolerance {
+        return Err(KernelError::Failure("invalid point face witness".into()));
+    }
+    Ok(Some(output))
 }
 
 /// Measure against exact converted native sources without constructing or

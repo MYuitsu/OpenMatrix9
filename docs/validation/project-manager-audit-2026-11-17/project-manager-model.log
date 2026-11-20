@@ -1,0 +1,4243 @@
+    Blocking waiting for file lock on build directory
+warning: methods `clone_for_document_staging` and `tracked_source_snapshot` are never used
+    --> crates\om9-core\src\brep.rs:1177:19
+     |
+ 912 | impl Brep {
+     | --------- methods in this implementation
+...
+1177 |     pub(crate) fn clone_for_document_staging(&self) -> Self {
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+...
+1227 |     pub(crate) fn tracked_source_snapshot(&self) -> BrepSource {
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: methods `display_allocation_key`, `display_allocation_bytes`, and `payload_allocation_key` are never used
+   --> crates\om9-core\src\geometry.rs:884:19
+    |
+868 | impl NativeBrep {
+    | --------------- methods in this implementation
+...
+884 |     pub(crate) fn display_allocation_key(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+...
+887 |     pub(crate) fn display_allocation_bytes(&self) -> Result<u64> {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+890 |     pub(crate) fn payload_allocation_key(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `om9-core` (lib) generated 2 warnings
+warning: unused import: `brep::Brep`
+ --> crates\om9-kernel\src\intersect.rs:7:5
+  |
+7 |     brep::Brep,
+  |     ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `brep`
+   --> crates\om9-kernel\src\associative.rs:180:28
+    |
+180 |         let Geometry::Brep(brep) = &output.geometry else { return Err(Error::Invalid("ring BRep output")); };
+    |                            ^^^^ help: if this is intentional, prefix it with an underscore: `_brep`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `om9-kernel` (lib) generated 2 warnings (run `cargo fix --lib -p om9-kernel` to apply 2 suggestions)
+   Compiling om9-app v0.1.0 (H:\OpenMatrix9\crates\om9-app)
+error[E0599]: no method named `display_liveness` found for reference `&CanonicalBrep` in the current scope
+   --> crates\om9-app\src\gpu_viewport.rs:931:28
+    |
+931 |         let display = brep.display_liveness();
+    |                            ^^^^^^^^^^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:52:56
+     |
+  52 |         let entity = Entity::new("box", Geometry::Brep(body), None);
+     |                                         -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session.rs:120:28
+    |
+120 |         let segment = brep.display().segments.iter().find(|s| {
+    |                            ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session.rs:121:26
+    |
+121 |             let a = brep.display().points[s[0] as usize];
+    |                          ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session.rs:122:26
+    |
+122 |             let b = brep.display().points[s[1] as usize];
+    |                          ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:153:56
+     |
+ 153 |         let entity = Entity::new("box", Geometry::Brep(body), None);
+     |                                         -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:185:68
+     |
+ 185 |                 let mut entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                     |
+     |                                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:213:56
+     |
+ 213 |         let entity = Entity::new("box", Geometry::Brep(body), None);
+     |                                         -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:309:74
+     |
+ 309 |             Mutation::Geometry { source: stamp, geometry: Geometry::Brep(replacement) },
+     |                                                           -------------- ^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:338:74
+     |
+ 338 |             Mutation::Geometry { source: stamp, geometry: Geometry::Brep(replacement) },
+     |                                                           -------------- ^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:831:55
+     |
+ 831 |         let first = Entity::new("box", Geometry::Brep(a), None);
+     |                                        -------------- ^ expected `CanonicalBrep`, found `Brep`
+     |                                        |
+     |                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:832:63
+     |
+ 832 |         let mut second = Entity::new("sphere", Geometry::Brep(b), None);
+     |                                                -------------- ^ expected `CanonicalBrep`, found `Brep`
+     |                                                |
+     |                                                arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session.rs:878:29
+    |
+878 |             assert_eq!(body.display().deflection_mm, 0.1);
+    |                             ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display_liveness` found for reference `&CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session.rs:890:29
+    |
+890 |         let display = shape.display_liveness();
+    |                             ^^^^^^^^^^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `source_liveness` found for reference `&CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session.rs:891:28
+    |
+891 |         let source = shape.source_liveness();
+    |                            ^^^^^^^^^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session.rs:940:44
+    |
+940 |         let mut changed_display = original.display().clone();
+    |                                            ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:947:74
+     |
+ 947 |             Mutation::Geometry { source: stamp, geometry: Geometry::Brep(replacement) },
+     |                                                           -------------- ^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:1010:40
+     |
+1010 |         let mut wrong_topology = shape.display().clone();
+     |                                        ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:1016:74
+     |
+1016 |             Mutation::Geometry { source: stamp, geometry: Geometry::Brep(replacement) },
+     |                                                           -------------- ^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:1037:41
+     |
+1037 |         assert!(scene_deflection > brep.display().deflection_mm);
+     |                                         ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:1044:23
+     |
+1044 |         assert!((face.display().deflection_mm - 0.1).abs() < 1e-12, "output keeps document profile");
+     |                       ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:1059:76
+     |
+1059 |         let entity = om9_core::model::Entity::new("sphere", Geometry::Brep(sphere), None);
+     |                                                             -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                             |
+     |                                                             arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:1110:78
+     |
+1110 |         let entity = om9_core::model::Entity::new("cylinder", Geometry::Brep(brep), None);
+     |                                                               -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                               |
+     |                                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:1163:27
+     |
+1163 |         assert_eq!(source.display().deflection_mm, 0.1);
+     |                           ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:1207:73
+     |
+1207 |         let entity=om9_core::model::Entity::new("sphere",Geometry::Brep(shape),None);let id=entity.id;
+     |                                                          -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                          |
+     |                                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:1242:73
+     |
+1242 |         let entity=om9_core::model::Entity::new("sphere",Geometry::Brep(shape),None);let id=entity.id;
+     |                                                          -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                          |
+     |                                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:1495:27
+     |
+1495 |         assert_eq!(source.display().deflection_mm, 0.1);
+     |                           ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:1580:76
+     |
+1580 |         let entity = om9_core::model::Entity::new("sphere", Geometry::Brep(shape), None);
+     |                                                             -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                             |
+     |                                                             arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:1680:78
+     |
+1680 |         let entity = om9_core::model::Entity::new("cylinder", Geometry::Brep(body), None);
+     |                                                               -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                               |
+     |                                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:1844:80
+     |
+1844 |             let entity = om9_core::model::Entity::new("sphere", Geometry::Brep(body), None);
+     |                                                                 -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                 |
+     |                                                                 arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:1879:80
+     |
+1879 |             let entity = om9_core::model::Entity::new("sphere", Geometry::Brep(body), None);
+     |                                                                 -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                 |
+     |                                                                 arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:1910:80
+     |
+1910 |             let entity = om9_core::model::Entity::new("sphere", Geometry::Brep(body), None);
+     |                                                                 -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                 |
+     |                                                                 arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:2003:78
+     |
+2003 |         let entity = om9_core::model::Entity::new("cylinder", Geometry::Brep(body), None);
+     |                                                               -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                               |
+     |                                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:2042:82
+     |
+2042 |             let entity = om9_core::model::Entity::new("cylinder", Geometry::Brep(body), None);
+     |                                                                   -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                   |
+     |                                                                   arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:2089:88
+     |
+2089 |                 let mut entity = om9_core::model::Entity::new("sphere", Geometry::Brep(body), None);
+     |                                                                         -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                         |
+     |                                                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:2154:84
+     |
+2154 |             let mut entity = om9_core::model::Entity::new("sphere", Geometry::Brep(source), None);
+     |                                                                     -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                     |
+     |                                                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:2206:80
+     |
+2206 |             let entity = om9_core::model::Entity::new("sphere", Geometry::Brep(body), Some(source_id));
+     |                                                                 -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                 |
+     |                                                                 arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:2232:80
+     |
+2232 |             let entity = om9_core::model::Entity::new("sphere", Geometry::Brep(body), None);
+     |                                                                 -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                 |
+     |                                                                 arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:2277:82
+     |
+2277 |             let entity = om9_core::model::Entity::new("cylinder", Geometry::Brep(body), None);
+     |                                                                   -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                   |
+     |                                                                   arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:2380:70
+     |
+2380 |         let triangle = super::face_verification::choose_witness(body.display(), 0, None).unwrap();
+     |                                                                      ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:2384:18
+     |
+2384 |             body.display().deflection_mm, body.display().deflection_mm, &limits, |live, pending| {
+     |                  ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:2384:48
+     |
+2384 |             body.display().deflection_mm, body.display().deflection_mm, &limits, |live, pending| {
+     |                                                ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:2396:22
+     |
+2396 |                 body.display().deflection_mm, body.display().deflection_mm, &limits, admit)
+     |                      ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:2396:52
+     |
+2396 |                 body.display().deflection_mm, body.display().deflection_mm, &limits, admit)
+     |                                                    ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:2420:82
+     |
+2420 |             let entity = om9_core::model::Entity::new("cylinder", Geometry::Brep(body), None);
+     |                                                                   -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                   |
+     |                                                                   arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:2468:78
+     |
+2468 |         let entity = om9_core::model::Entity::new("cylinder", Geometry::Brep(body), None);
+     |                                                               -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                               |
+     |                                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:2511:29
+     |
+2511 |             assert_eq!(face.display().deflection_mm, 0.1);
+     |                             ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:2531:25
+     |
+2531 |         assert_eq!(face.display().deflection_mm, 0.1);
+     |                         ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:2550:29
+     |
+2550 |             assert_eq!(face.display().deflection_mm, 0.1);
+     |                             ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:2584:29
+     |
+2584 |             assert_eq!(body.display().deflection_mm, 0.1);
+     |                             ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:2632:29
+     |
+2632 |             assert_eq!(body.display().deflection_mm, 0.1);
+     |                             ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0061]: this function takes 4 arguments but 3 arguments were supplied
+    --> crates\om9-app\src\session.rs:2959:21
+     |
+2959 |         let cache = topology_cache::TopologyProofCache::new(&controller.coordinator, held, physical).unwrap();
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                          ---- argument #2 of type `&std::sync::Arc<om9_core::model::Document>` is missing
+     |
+note: associated function defined here
+    --> crates\om9-app\src\session\topology_cache.rs:76:19
+     |
+  76 |     pub(super) fn new(coordinator: &TransactionCoordinator, document: &Arc<Document>, held: Usage,
+     |                   ^^^                                       ------------------------
+help: provide the argument
+     |
+2959 |         let cache = topology_cache::TopologyProofCache::new(&controller.coordinator, /* &std::sync::Arc<om9_core::model::Document> */, held, physical).unwrap();
+     |                                                                                      +++++++++++++++++++++++++++++++++++++++++++++++++
+
+error[E0599]: no method named `display_liveness` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:3021:41
+     |
+3021 |         let original_display = original.display_liveness();
+     |                                         ^^^^^^^^^^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:3305:59
+     |
+3305 |         let entity = Entity::new("sphere", Geometry::Brep(brep), None);
+     |                                            -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                            |
+     |                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:3395:74
+     |
+3395 |         changed.entities.get_mut(&id).unwrap().geometry = Geometry::Brep(replacement);
+     |                                                           -------------- ^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:3397:22
+     |
+3397 |         cache.retain(&changed);
+     |               ------ ^^^^^^^^ expected `&Arc<Document>`, found `&Document`
+     |               |
+     |               arguments to this method are incorrect
+     |
+     = note: expected reference `&std::sync::Arc<om9_core::model::Document>`
+                found reference `&om9_core::model::Document`
+note: method defined here
+    --> crates\om9-app\src\session\topology_cache.rs:195:19
+     |
+ 195 |     pub(super) fn retain(&self, document: &Arc<Document>) {
+     |                   ^^^^^^        ------------------------
+
+error[E0061]: this function takes 4 arguments but 3 arguments were supplied
+    --> crates\om9-app\src\session.rs:3412:21
+     |
+3412 |         let cache = topology_cache::TopologyProofCache::new(&controller.coordinator, held, physical).unwrap();
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                          ---- argument #2 of type `&std::sync::Arc<om9_core::model::Document>` is missing
+     |
+note: associated function defined here
+    --> crates\om9-app\src\session\topology_cache.rs:76:19
+     |
+  76 |     pub(super) fn new(coordinator: &TransactionCoordinator, document: &Arc<Document>, held: Usage,
+     |                   ^^^                                       ------------------------
+help: provide the argument
+     |
+3412 |         let cache = topology_cache::TopologyProofCache::new(&controller.coordinator, /* &std::sync::Arc<om9_core::model::Document> */, held, physical).unwrap();
+     |                                                                                      +++++++++++++++++++++++++++++++++++++++++++++++++
+
+error[E0061]: this function takes 4 arguments but 3 arguments were supplied
+    --> crates\om9-app\src\session.rs:3437:21
+     |
+3437 |         let cache = topology_cache::TopologyProofCache::new(&controller.coordinator, held, physical).unwrap();
+     |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                          ---- argument #2 of type `&std::sync::Arc<om9_core::model::Document>` is missing
+     |
+note: associated function defined here
+    --> crates\om9-app\src\session\topology_cache.rs:76:19
+     |
+  76 |     pub(super) fn new(coordinator: &TransactionCoordinator, document: &Arc<Document>, held: Usage,
+     |                   ^^^                                       ------------------------
+help: provide the argument
+     |
+3437 |         let cache = topology_cache::TopologyProofCache::new(&controller.coordinator, /* &std::sync::Arc<om9_core::model::Document> */, held, physical).unwrap();
+     |                                                                                      +++++++++++++++++++++++++++++++++++++++++++++++++
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:3635:44
+     |
+3635 |             Geometry::Brep(shape) => shape.display().triangles.len(), _ => panic!("expected BRep"),
+     |                                            ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:3857:97
+     |
+3857 | ...ve(original.source().to_owned(),original.display().clone(),controller.coordinator.limits()).unwrap();
+     |                                             ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:3860:70
+     |
+3860 |             Mutation::Geometry {source:stamp,geometry:Geometry::Brep(independent)}]),held).unwrap();
+     |                                                       -------------- ^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                       |
+     |                                                       arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:4024:56
+     |
+4024 |         let (buffers, _) = Scene::prepare_brep_buffers(&shape, controller.coordinator.limits(), |_, _| Ok(())).unwrap();
+     |                            --------------------------- ^^^^^^ expected `&Brep`, found `&CanonicalBrep`
+     |                            |
+     |                            arguments to this function are incorrect
+     |
+     = note: expected reference `&om9_core::brep::Brep`
+                found reference `&CanonicalBrep`
+note: associated function defined here
+    --> crates\om9-scene\src\scene.rs:2207:12
+     |
+2207 |     pub fn prepare_brep_buffers(shape: &om9_core::brep::Brep, limits: &Limits,
+     |            ^^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:4025:88
+     |
+4025 |         let forged = controller.scene().unwrap().try_replace_root_brep_display(&stamp, &shape, buffers,
+     |                                                  -----------------------------         ^^^^^^ expected `&Brep`, found `&CanonicalBrep`
+     |                                                  |
+     |                                                  arguments to this method are incorrect
+     |
+     = note: expected reference `&om9_core::brep::Brep`
+                found reference `&CanonicalBrep`
+note: method defined here
+    --> crates\om9-scene\src\scene.rs:2226:12
+     |
+2226 |     pub fn try_replace_root_brep_display(&self, stamp: &SourceStamp, candidate: &om9_core::brep::Brep,
+     |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session.rs:4154:94
+     |
+4154 |                 baseline.commit_entity("probe", "probe", Entity::new("probe", Geometry::Brep(brep), None)).unwrap();
+     |                                                                               -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                               |
+     |                                                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display_liveness` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session.rs:4349:28
+     |
+4349 |         let display = brep.display_liveness();
+     |                            ^^^^^^^^^^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display_allocation_bytes` found for struct `CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session\ring_preview_worker.rs:561:32
+    |
+561 |         let display_bytes=brep.display_allocation_bytes().unwrap();let live=brep.display_liveness();
+    |                                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `topology_allocation_bytes` with a similar name
+    |
+561 -         let display_bytes=brep.display_allocation_bytes().unwrap();let live=brep.display_liveness();
+561 +         let display_bytes=brep.topology_allocation_bytes().unwrap();let live=brep.display_liveness();
+    |
+
+error[E0599]: no method named `display_liveness` found for struct `CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session\ring_preview_worker.rs:561:82
+    |
+561 |         let display_bytes=brep.display_allocation_bytes().unwrap();let live=brep.display_liveness();
+    |                                                                                  ^^^^^^^^^^^^^^^^ method not found in `CanonicalBrep`
+
+error[E0599]: no method named `into_owned_source` found for struct `CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session\ring_preview_worker.rs:565:25
+    |
+565 |         let source=brep.into_owned_source();assert!(!live.is_alive());
+    |                         ^^^^^^^^^^^^^^^^^ method not found in `CanonicalBrep`
+
+error[E0599]: no method named `display_allocation_bytes` found for struct `CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session\ring_preview_worker.rs:578:32
+    |
+578 |         let display_bytes=brep.display_allocation_bytes().unwrap();let topology_bytes=brep.topology_allocation_bytes().unwrap();
+    |                                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `topology_allocation_bytes` with a similar name
+    |
+578 -         let display_bytes=brep.display_allocation_bytes().unwrap();let topology_bytes=brep.topology_allocation_bytes().unwrap();
+578 +         let display_bytes=brep.topology_allocation_bytes().unwrap();let topology_bytes=brep.topology_allocation_bytes().unwrap();
+    |
+
+error[E0599]: no method named `source_liveness` found for struct `CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session\ring_preview_worker.rs:580:30
+    |
+580 |         let source_live=brep.source_liveness();let display_live=brep.display_liveness();let pin=brep.pin_display(Arc::new(()));
+    |                              ^^^^^^^^^^^^^^^ method not found in `CanonicalBrep`
+
+error[E0599]: no method named `display_liveness` found for struct `CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session\ring_preview_worker.rs:580:70
+    |
+580 |         let source_live=brep.source_liveness();let display_live=brep.display_liveness();let pin=brep.pin_display(Arc::new(()));
+    |                                                                      ^^^^^^^^^^^^^^^^ method not found in `CanonicalBrep`
+
+error[E0599]: no method named `pin_display` found for struct `CanonicalBrep` in the current scope
+   --> crates\om9-app\src\session\ring_preview_worker.rs:580:102
+    |
+580 |         let source_live=brep.source_liveness();let display_live=brep.display_liveness();let pin=brep.pin_display(Arc::new(()));
+    |                                                                                                      ^^^^^^^^^^^ method not found in `CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:29:52
+     |
+  29 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:69:52
+     |
+  69 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:100:52
+     |
+ 100 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:132:52
+     |
+ 132 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:171:54
+     |
+ 171 |     let entity = Entity::new("shell", Geometry::Brep(shape), None);
+     |                                       -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                       |
+     |                                       arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:207:52
+     |
+ 207 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:243:52
+     |
+ 243 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:272:52
+     |
+ 272 |     let entity = Entity::new("box", Geometry::Brep(source), None);
+     |                                     -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:362:52
+     |
+ 362 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:411:52
+     |
+ 411 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:446:52
+     |
+ 446 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:486:52
+     |
+ 486 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:531:52
+     |
+ 531 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:595:52
+     |
+ 595 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:628:52
+     |
+ 628 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:655:57
+     |
+ 655 |     let entity = Entity::new("cylinder", Geometry::Brep(shape), None);
+     |                                          -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:680:52
+     |
+ 680 |     let entity = Entity::new("box", Geometry::Brep(source), None);
+     |                                     -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:739:52
+     |
+ 739 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:777:52
+     |
+ 777 |     let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:871:76
+     |
+ 871 |                         om9_core::model::Entity::new("box", Geometry::Brep(shape), None);
+     |                                                             -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                             |
+     |                                                             arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:993:81
+     |
+ 993 |             let mut entity = om9_core::model::Entity::new("box", Geometry::Brep(body), None);
+     |                                                                  -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                  |
+     |                                                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1067:77
+     |
+1067 |         let mut entity = om9_core::model::Entity::new("box", Geometry::Brep(body), None);
+     |                                                              -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                              |
+     |                                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1110:78
+     |
+1110 |         let mut entity = om9_core::model::Entity::new("body", Geometry::Brep(body), None);
+     |                                                               -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                               |
+     |                                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1147:81
+     |
+1147 |             let mut entity = om9_core::model::Entity::new("box", Geometry::Brep(body), None);
+     |                                                                  -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                  |
+     |                                                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1249:81
+     |
+1249 |             let mut entity = om9_core::model::Entity::new("box", Geometry::Brep(body), None);
+     |                                                                  -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                  |
+     |                                                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1334:77
+     |
+1334 |         let mut entity = om9_core::model::Entity::new("box", Geometry::Brep(body), None);
+     |                                                              -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                              |
+     |                                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1386:9
+     |
+1385 |     entity.geometry = Geometry::Brep(
+     |                       -------------- arguments to this enum variant are incorrect
+1386 |         om9_kernel::editing::remove_face(body, 0, 0.01, &Limits::default()).unwrap(),
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1442:81
+     |
+1442 |             let mut entity = om9_core::model::Entity::new("box", Geometry::Brep(body), None);
+     |                                                                  -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                  |
+     |                                                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1530:9
+     |
+1529 |     entity.geometry = Geometry::Brep(
+     |                       -------------- arguments to this enum variant are incorrect
+1530 |         om9_kernel::editing::remove_face(body, 0, 0.01, &Limits::default()).unwrap(),
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1588:86
+     |
+1588 |                 let mut entity = om9_core::model::Entity::new("face", Geometry::Brep(face), None);
+     |                                                                       -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                       |
+     |                                                                       arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1643:70
+     |
+1643 |     doc.entities.get_mut(&ids[0]).unwrap().geometry = Geometry::Brep(face);
+     |                                                       -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                       |
+     |                                                       arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1829:87
+     |
+1829 |         let mut entity = om9_core::model::Entity::new("open cylinder", Geometry::Brep(sampled), None);
+     |                                                                        -------------- ^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                        |
+     |                                                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1875:73
+     |
+1875 |                 om9_core::model::Entity::new("open box", Geometry::Brep(shell.clone()), None);
+     |                                                          -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                          |
+     |                                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1931:78
+     |
+1931 |         let mut entity = om9_core::model::Entity::new("body", Geometry::Brep(shape), None);
+     |                                                               -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                               |
+     |                                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:1987:74
+     |
+1987 |     let entity = om9_core::model::Entity::new("open box", Geometry::Brep(shell), None);
+     |                                                           -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2050:75
+     |
+2050 |     let entity = om9_core::model::Entity::new("open tube", Geometry::Brep(shell), None);
+     |                                                            -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                            |
+     |                                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2131:84
+     |
+2131 |     let entity = om9_core::model::Entity::new("open stepped shell", Geometry::Brep(shell), None);
+     |                                                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                     |
+     |                                                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2188:73
+     |
+2188 |     let mut entity = om9_core::model::Entity::new("box", Geometry::Brep(body), None);
+     |                                                          -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                          |
+     |                                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2258:73
+     |
+2258 |         let entity = om9_core::model::Entity::new("box", Geometry::Brep(body), Some(source_id));
+     |                                                          -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                          |
+     |                                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2299:68
+     |
+2299 |                 om9_core::model::Entity::new("box", Geometry::Brep(shape.clone()), None);
+     |                                                     -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                     |
+     |                                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2314:29
+     |
+2314 |             let face = brep.display().faces[index];
+     |                             ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2388:69
+     |
+2388 |     let entity = om9_core::model::Entity::new("box", Geometry::Brep(shape), None);
+     |                                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                      |
+     |                                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2397:22
+     |
+2397 |     let faces = brep.display().faces.clone();
+     |                      ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2431:69
+     |
+2431 |     let entity = om9_core::model::Entity::new("box", Geometry::Brep(shape), None);
+     |                                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                      |
+     |                                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2469:69
+     |
+2469 |     let entity = om9_core::model::Entity::new("box", Geometry::Brep(body), None);
+     |                                                      -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                      |
+     |                                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2513:74
+     |
+2513 |     let entity = om9_core::model::Entity::new("cylinder", Geometry::Brep(shape), None);
+     |                                                           -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2574:77
+     |
+2574 |     let entity = om9_core::model::Entity::new("split prism", Geometry::Brep(shape), None);
+     |                                                              -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                              |
+     |                                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2630:69
+     |
+2630 |     let entity = om9_core::model::Entity::new("box", Geometry::Brep(shape), None);
+     |                                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                      |
+     |                                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2643:25
+     |
+2643 |         let edge = brep.display().edges[index];
+     |                         ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2705:69
+     |
+2705 |     let entity = om9_core::model::Entity::new("box", Geometry::Brep(shape), None);
+     |                                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                      |
+     |                                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2716:25
+     |
+2716 |         let edge = brep.display().edges[index];
+     |                         ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2765:21
+     |
+2765 |     let edge = brep.display().edges[0];
+     |                     ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2828:75
+     |
+2828 |         let entity = om9_core::model::Entity::new("shell", Geometry::Brep(shell.clone()), None);
+     |                                                            -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                            |
+     |                                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2849:69
+     |
+2849 |                 subset: om9_scene::scene::Subelement::BrepEdge(brep.display().edges[edge]),
+     |                                                                     ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2907:71
+     |
+2907 |         let a = om9_core::model::Entity::new("sphere", Geometry::Brep(sphere), None);
+     |                                                        -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                        |
+     |                                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2913:72
+     |
+2913 |         let mut b = om9_core::model::Entity::new("box", Geometry::Brep(box_source), None);
+     |                                                         -------------- ^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                         |
+     |                                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2979:71
+     |
+2979 | ...here", Geometry::Brep(brep::read_brep(sphere.source(), profile, &limits).unwrap()), None);
+     |           -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |           |
+     |           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:2980:74
+     |
+2980 |         let b = om9_core::model::Entity::new("baked box", Geometry::Brep(block.clone()), None);
+     |                                                           -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3022:73
+     |
+3022 |     let mut a = om9_core::model::Entity::new("compound", Geometry::Brep(compound), None);
+     |                                                          -------------- ^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                          |
+     |                                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3024:70
+     |
+3024 |     let mut b = om9_core::model::Entity::new("other", Geometry::Brep(cube), None);
+     |                                                       -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                       |
+     |                                                       arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3065:79
+     |
+3065 | ...here", Geometry::Brep(brep::read_brep(sphere.source(), profile, &limits).unwrap()), None);
+     |           -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |           |
+     |           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3066:76
+     |
+3066 |             let mut b = om9_core::model::Entity::new("box", Geometry::Brep(box_body.clone()), None);
+     |                                                             -------------- ^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                             |
+     |                                                             arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3104:79
+     |
+3104 | ...arget", Geometry::Brep(brep::read_brep(body.source(), profile, &limits).unwrap()), None);
+     |            -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |            |
+     |            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3105:77
+     |
+3105 |             let mut b = om9_core::model::Entity::new("tool", Geometry::Brep(body.clone()), None);
+     |                                                              -------------- ^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                              |
+     |                                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3156:79
+     |
+3156 | ...arget", Geometry::Brep(brep::read_brep(body.source(), profile, &limits).unwrap()), None);
+     |            -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |            |
+     |            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3157:77
+     |
+3157 |             let mut b = om9_core::model::Entity::new("tool", Geometry::Brep(body.clone()), None);
+     |                                                              -------------- ^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                              |
+     |                                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3199:75
+     |
+3199 |         let mut a = om9_core::model::Entity::new("target", Geometry::Brep(body.clone()), None);
+     |                                                            -------------- ^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                            |
+     |                                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3201:69
+     |
+3201 |         let b = om9_core::model::Entity::new("tool", Geometry::Brep(body), None);
+     |                                                      -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                      |
+     |                                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3228:98
+     |
+3228 | ..._core::model::Entity::new("body", Geometry::Brep(body), None); entity.placement = placement; ids.push(entity.id); doc.entities....
+     |                                      -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3261:79
+     |
+3261 | ...arget", Geometry::Brep(brep::read_brep(cube.source(), profile, &limits).unwrap()), None);
+     |            -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |            |
+     |            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3262:77
+     |
+3262 |             let mut b = om9_core::model::Entity::new("tool", Geometry::Brep(shifted.clone()), None);
+     |                                                              -------------- ^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                              |
+     |                                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3314:74
+     |
+3314 | ...irst", Geometry::Brep(brep::read_brep(block.source(), profile, &limits).unwrap()), None);
+     |           -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |           |
+     |           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3315:75
+     |
+3315 |         let mut b = om9_core::model::Entity::new("second", Geometry::Brep(shifted.clone()), None);
+     |                                                            -------------- ^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                            |
+     |                                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3355:77
+     |
+3355 |     let mut a = om9_core::model::Entity::new("local result", Geometry::Brep(initial), None);
+     |                                                              -------------- ^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                              |
+     |                                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3356:74
+     |
+3356 |     let mut b = om9_core::model::Entity::new("local box", Geometry::Brep(box_body), None);
+     |                                                           -------------- ^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3386:74
+     |
+3386 | ...first", Geometry::Brep(brep::read_brep(cube.source(), profile, &limits).unwrap()), None);
+     |            -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |            |
+     |            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3387:75
+     |
+3387 |         let mut b = om9_core::model::Entity::new("second", Geometry::Brep(shifted.clone()), None);
+     |                                                            -------------- ^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                            |
+     |                                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3432:65
+     |
+3432 |     let a = om9_core::model::Entity::new("cube", Geometry::Brep(cube.clone()), None);
+     |                                                  -------------- ^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                  |
+     |                                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3433:72
+     |
+3433 |     let mut b = om9_core::model::Entity::new("rotated", Geometry::Brep(cube), None);
+     |                                                         -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                         |
+     |                                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3462:72
+     |
+3462 |             let a = om9_core::model::Entity::new("box", Geometry::Brep(body.clone()), None);
+     |                                                         -------------- ^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                         |
+     |                                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3463:83
+     |
+3463 |             let mut b = om9_core::model::Entity::new("placed box", Geometry::Brep(body), None);
+     |                                                                    -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                    |
+     |                                                                    arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3497:77
+     |
+3497 |         let mut entity = om9_core::model::Entity::new("box", Geometry::Brep(body), None);
+     |                                                              -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                              |
+     |                                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3633:81
+     |
+3633 |             let mut entity = om9_core::model::Entity::new("box", Geometry::Brep(body), None);
+     |                                                                  -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                  |
+     |                                                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3702:78
+     |
+3702 |         let mut entity = om9_core::model::Entity::new("body", Geometry::Brep(brep), None);
+     |                                                               -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                               |
+     |                                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3723:71
+     |
+3723 | ...here", Geometry::Brep(brep::read_brep(sphere.source(), profile, &limits).unwrap()), None);
+     |           -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |           |
+     |           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3724:74
+     |
+3724 |         let b = om9_core::model::Entity::new("baked box", Geometry::Brep(block.clone()), None);
+     |                                                           -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3725:80
+     |
+3725 |         let mut d = om9_core::model::Entity::new("distant box", Geometry::Brep(distant.clone()), None);
+     |                                                                 -------------- ^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                 |
+     |                                                                 arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3753:75
+     |
+3753 | ...here", Geometry::Brep(brep::read_brep(sphere.source(), profile, &limits).unwrap()), None);
+     |           -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |           |
+     |           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3755:74
+     |
+3755 |         let b = om9_core::model::Entity::new("baked box", Geometry::Brep(block.clone()), None);
+     |                                                           -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3789:72
+     |
+3789 | ...sphere",Geometry::Brep(brep::read_brep(sphere.source(),profile,&limits).unwrap()),None);
+     |            -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |            |
+     |            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3791:65
+     |
+3791 |         let b=om9_core::model::Entity::new("box",Geometry::Brep(block.clone()),None);
+     |                                                  -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                  |
+     |                                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3821:75
+     |
+3821 | ...here", Geometry::Brep(brep::read_brep(sphere.source(), profile, &limits).unwrap()), None);
+     |           -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |           |
+     |           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3823:74
+     |
+3823 |         let b = om9_core::model::Entity::new("baked box", Geometry::Brep(block.clone()), None);
+     |                                                           -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3856:64
+     |
+3856 |     let a=om9_core::model::Entity::new("sphere",Geometry::Brep(sphere),None);
+     |                                                 -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                 |
+     |                                                 arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3857:61
+     |
+3857 |     let b=om9_core::model::Entity::new("box",Geometry::Brep(block.clone()),None);
+     |                                              -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                              |
+     |                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3904:71
+     |
+3904 | ...here", Geometry::Brep(brep::read_brep(sphere.source(), profile, &limits).unwrap()), None);
+     |           -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |           |
+     |           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3905:74
+     |
+3905 |         let b = om9_core::model::Entity::new("baked box", Geometry::Brep(block.clone()), None);
+     |                                                           -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                           |
+     |                                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3933:71
+     |
+3933 | ...rget", Geometry::Brep(brep::read_brep(block.source(), profile, &limits).unwrap()), None);
+     |           -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |           |
+     |           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3934:78
+     |
+3934 |         let b = om9_core::model::Entity::new("sphere cutter", Geometry::Brep(sphere.clone()), None);
+     |                                                               -------------- ^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                               |
+     |                                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3935:83
+     |
+3935 |         let mut d = om9_core::model::Entity::new("distant cutter", Geometry::Brep(far.clone()), None);
+     |                                                                    -------------- ^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                    |
+     |                                                                    arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:3982:82
+     |
+3982 |             let mut entity = om9_core::model::Entity::new("body", Geometry::Brep(body), None);
+     |                                                                   -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                   |
+     |                                                                   arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\solid_input_regressions.rs:4250:38
+     |
+4250 |     entity.geometry = Geometry::Brep(open);
+     |                       -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                       |
+     |                       arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\surface_snap.rs:159:69
+     |
+ 159 |         let mut sphere=Entity::new("behind fallback",Geometry::Brep(om9_kernel::brep::sphere_brep(0.2,0.02,&limits).unwrap()),None);
+     |                                                      -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                      |
+     |                                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\surface_snap.rs:470:52
+     |
+ 470 |         let body=Entity::new("body",Geometry::Brep(brep),None);let body_id=body.id;document.entities.insert(body.id,body);
+     |                                     -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\surface_snap.rs:652:56
+     |
+ 652 |         let entity = Entity::new("box", Geometry::Brep(body), None);
+     |                                         -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\surface_snap.rs:713:59
+     |
+ 713 |         let entity = Entity::new("sphere", Geometry::Brep(body), None);
+     |                                            -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                            |
+     |                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\surface_snap.rs:775:57
+     |
+ 775 |         let entity = Entity::new("body", Geometry::Brep(body), None);
+     |                                          -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\surface_snap.rs:805:63
+     |
+ 805 |         let entity = Entity::new("body", Geometry::NativeBrep(body), None);
+     |                                          -------------------- ^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0609]: no field `display` on type `&mut NativeBrepSource`
+   --> crates\om9-app\src\session\surface_snap.rs:826:33
+    |
+826 |         Arc::make_mut(&mut brep.display).vertices[1][0] = 2.;
+    |                                 ^^^^^^^ unknown field
+    |
+    = note: available fields are: `payload`, `crc`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\topology_remesh.rs:736:56
+     |
+ 736 |         let entity = Entity::new("box", Geometry::Brep(shape), document.current_layer);
+     |                                         -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\topology_remesh.rs:752:59
+     |
+ 752 |         let entity=Entity::new("box",Geometry::NativeBrep(native),None);let id=entity.id;doc.entities.insert(id,entity);
+     |                                      -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\topology_remesh.rs:793:63
+     |
+ 793 |             let entity=Entity::new("box",Geometry::NativeBrep(source),None);let id=entity.id;doc.entities.insert(id,entity);
+     |                                          -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\topology_remesh.rs:810:64
+     |
+ 810 |         let entity=Entity::new("cylinder",Geometry::NativeBrep(native),None);let id=entity.id;doc.entities.insert(id,entity);
+     |                                           -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                           |
+     |                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\topology_remesh.rs:835:63
+     |
+ 835 |             let entity=Entity::new("box",Geometry::NativeBrep(native.clone()),None);let id=entity.id;doc.entities.insert(id,entity);
+     |                                          -------------------- ^^^^^^^^^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\topology_remesh.rs:1256:57
+     |
+1256 |         let mut entity=Entity::new("box",Geometry::Brep(shape),None); entity.placement=placement; let id=entity.id;
+     |                                          -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&dyn BrepSourceAccess` in the current scope
+    --> crates\om9-app\src\session\wireframe.rs:1322:29
+     |
+1322 |         let display = shape.display();
+     |                             ^^^^^^^ method not found in `&dyn BrepSourceAccess`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1345:63
+     |
+1345 |             let mut entity = Entity::new("Box",Geometry::Brep(body),None); entity.placement = placement;
+     |                                                -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                |
+     |                                                arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\wireframe.rs:1353:34
+     |
+1353 |             for segment in &body.display().segments {
+     |                                  ^^^^^^^ method not found in `&CanonicalBrep`
+     |
+note: there's an earlier shadowed binding `body` of type `om9_core::brep::Brep` that has method `display` available
+    --> crates\om9-app\src\session\wireframe.rs:1344:17
+     |
+1344 |             let body = om9_kernel::brep::read_brep(shape.source(),profile,&limits).unwrap();
+     |                 ^^^^ `body` of type `om9_core::brep::Brep` that has method `display` defined earlier here
+...
+1351 |             let Geometry::Brep(body) = &c.document().entities[&id].geometry else { panic!("B-rep") };
+     |                                ---- earlier `body` shadowed here with type `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\wireframe.rs:1354:30
+     |
+1354 |                 let a = body.display().points[segment[0] as usize]; let b = body.display().points[segment[1] as usize];
+     |                              ^^^^^^^ method not found in `&CanonicalBrep`
+     |
+note: there's an earlier shadowed binding `body` of type `om9_core::brep::Brep` that has method `display` available
+    --> crates\om9-app\src\session\wireframe.rs:1344:17
+     |
+1344 |             let body = om9_kernel::brep::read_brep(shape.source(),profile,&limits).unwrap();
+     |                 ^^^^ `body` of type `om9_core::brep::Brep` that has method `display` defined earlier here
+...
+1351 |             let Geometry::Brep(body) = &c.document().entities[&id].geometry else { panic!("B-rep") };
+     |                                ---- earlier `body` shadowed here with type `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\wireframe.rs:1354:82
+     |
+1354 |                 let a = body.display().points[segment[0] as usize]; let b = body.display().points[segment[1] as usize];
+     |                                                                                  ^^^^^^^ method not found in `&CanonicalBrep`
+     |
+note: there's an earlier shadowed binding `body` of type `om9_core::brep::Brep` that has method `display` available
+    --> crates\om9-app\src\session\wireframe.rs:1344:17
+     |
+1344 |             let body = om9_kernel::brep::read_brep(shape.source(),profile,&limits).unwrap();
+     |                 ^^^^ `body` of type `om9_core::brep::Brep` that has method `display` defined earlier here
+...
+1351 |             let Geometry::Brep(body) = &c.document().entities[&id].geometry else { panic!("B-rep") };
+     |                                ---- earlier `body` shadowed here with type `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1397:127
+     |
+1397 | ...let entity=Entity::new("cylinder",Geometry::Brep(shape),None);
+     |                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1421:68
+     |
+1421 |             let mut entity = Entity::new("cylinder",Geometry::Brep(body),None); entity.placement=placement;
+     |                                                     -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                     |
+     |                                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\wireframe.rs:1428:30
+     |
+1428 |             let segment=body.display().segments.iter().find(|s| {
+     |                              ^^^^^^^ method not found in `&CanonicalBrep`
+     |
+note: there's an earlier shadowed binding `body` of type `om9_core::brep::Brep` that has method `display` available
+    --> crates\om9-app\src\session\wireframe.rs:1420:17
+     |
+1420 |             let body = om9_kernel::brep::read_brep(shape.source(),profile,&limits).unwrap();
+     |                 ^^^^ `body` of type `om9_core::brep::Brep` that has method `display` defined earlier here
+...
+1427 |             let Geometry::Brep(body)=&c.document().entities[&id].geometry else { panic!("B-rep") };
+     |                                ---- earlier `body` shadowed here with type `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\wireframe.rs:1429:28
+     |
+1429 |                 let a=body.display().points[s[0] as usize]; let b=body.display().points[s[1] as usize];
+     |                            ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\wireframe.rs:1429:72
+     |
+1429 |                 let a=body.display().points[s[0] as usize]; let b=body.display().points[s[1] as usize];
+     |                                                                        ^^^^^^^ method not found in `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\wireframe.rs:1432:24
+     |
+1432 |             let a=body.display().points[segment[0] as usize]; let b=body.display().points[segment[1] as usize];
+     |                        ^^^^^^^ method not found in `&CanonicalBrep`
+     |
+note: there's an earlier shadowed binding `body` of type `om9_core::brep::Brep` that has method `display` available
+    --> crates\om9-app\src\session\wireframe.rs:1420:17
+     |
+1420 |             let body = om9_kernel::brep::read_brep(shape.source(),profile,&limits).unwrap();
+     |                 ^^^^ `body` of type `om9_core::brep::Brep` that has method `display` defined earlier here
+...
+1427 |             let Geometry::Brep(body)=&c.document().entities[&id].geometry else { panic!("B-rep") };
+     |                                ---- earlier `body` shadowed here with type `&CanonicalBrep`
+
+error[E0599]: no method named `display` found for reference `&CanonicalBrep` in the current scope
+    --> crates\om9-app\src\session\wireframe.rs:1432:74
+     |
+1432 |             let a=body.display().points[segment[0] as usize]; let b=body.display().points[segment[1] as usize];
+     |                                                                          ^^^^^^^ method not found in `&CanonicalBrep`
+     |
+note: there's an earlier shadowed binding `body` of type `om9_core::brep::Brep` that has method `display` available
+    --> crates\om9-app\src\session\wireframe.rs:1420:17
+     |
+1420 |             let body = om9_kernel::brep::read_brep(shape.source(),profile,&limits).unwrap();
+     |                 ^^^^ `body` of type `om9_core::brep::Brep` that has method `display` defined earlier here
+...
+1427 |             let Geometry::Brep(body)=&c.document().entities[&id].geometry else { panic!("B-rep") };
+     |                                ---- earlier `body` shadowed here with type `&CanonicalBrep`
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1500:65
+     |
+1500 |         let mut entity=Entity::new("large scale",Geometry::Brep(shape),None);
+     |                                                  -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                  |
+     |                                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1522:56
+     |
+1522 |         let entity = Entity::new("box", Geometry::Brep(shape.clone()), document.current_layer);
+     |                                         -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1579:56
+     |
+1579 |         let entity = Entity::new("Box", Geometry::Brep(shape), document.current_layer);
+     |                                         -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1610:56
+     |
+1610 |         let entity = Entity::new("Box", Geometry::Brep(shape), document.current_layer);
+     |                                         -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1659:58
+     |
+1659 |         let entity = Entity::new("shell", Geometry::Brep(shape.clone()), original.current_layer);
+     |                                           -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                           |
+     |                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1698:58
+     |
+1698 |         let entity = Entity::new("shell", Geometry::Brep(altered), document.current_layer);
+     |                                           -------------- ^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                           |
+     |                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1911:65
+     |
+1911 |         let mut entity = Entity::new("cylinder", Geometry::Brep(altered), document.current_layer);
+     |                                                  -------------- ^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                  |
+     |                                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1948:60
+     |
+1948 |             let entity = Entity::new("Box", Geometry::Brep(shape), document.current_layer);
+     |                                             -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                             |
+     |                                             arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1968:71
+     |
+1968 |                 Mutation::Geometry { source, geometry: Geometry::Brep(replacement) }
+     |                                                        -------------- ^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                        |
+     |                                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:1999:56
+     |
+1999 |         let entity = Entity::new("Box", Geometry::Brep(shape), document.current_layer);
+     |                                         -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\wireframe.rs:2032:56
+     |
+2032 |         let entity = Entity::new("Box", Geometry::Brep(shape), document.current_layer);
+     |                                         -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\stl.rs:2021:63
+     |
+2021 |         let mut sphere = Entity::new("sphere", Geometry::Brep(om9_kernel::brep::sphere_brep(2., 0.2, &limits).unwrap()), None);
+     |                                                -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                |
+     |                                                arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\stl.rs:2086:57
+     |
+2086 |         let brep = Entity::new("sphere", Geometry::Brep(om9_kernel::brep::sphere_brep(2., 0.2, &limits).unwrap()), None);
+     |                                          -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\stl.rs:2119:57
+     |
+2119 |         let brep = Entity::new("sphere", Geometry::Brep(sphere), None);
+     |                                          -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\stl.rs:2190:73
+     |
+2190 |         let visible_leaf = Entity::new("visible sphere", Geometry::Brep(sphere.clone()), None);
+     |                                                          -------------- ^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                          |
+     |                                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\stl.rs:2191:68
+     |
+2191 |         let mut leaf = Entity::new("hidden sphere", Geometry::Brep(sphere), None);
+     |                                                     -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                     |
+     |                                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\stl.rs:2248:57
+     |
+2248 |         let first = Entity::new("first", Geometry::Brep(sphere.clone()), None);
+     |                                          -------------- ^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\stl.rs:2249:66
+     |
+2249 |         let mut second = Entity::new("reflected", Geometry::Brep(sphere), None);
+     |                                                   -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                   |
+     |                                                   arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\stl.rs:2305:56
+     |
+2305 |         let first = Entity::new("occt", Geometry::Brep(sphere), None);
+     |                                         -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\stl.rs:2306:69
+     |
+2306 |         let mut second = Entity::new("native", Geometry::NativeBrep(native), None);
+     |                                                -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                                |
+     |                                                arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\stl.rs:2496:56
+     |
+2496 |         let entity = Entity::new("box", Geometry::Brep(brep), None);
+     |                                         -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\boolean_union_worker.rs:591:64
+     |
+ 591 |             let mut entity = Entity::new("box", Geometry::Brep(shape.clone()), None);
+     |                                                 -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                 |
+     |                                                 arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\boolean_union_worker.rs:713:59
+     |
+ 713 |         let target = Entity::new("target", Geometry::Brep(target), None);
+     |                                            -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                            |
+     |                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\boolean_union_worker.rs:718:65
+     |
+ 718 |             let mut entity = Entity::new("tool", Geometry::Brep(cutter.clone()), None);
+     |                                                  -------------- ^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                  |
+     |                                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\boolean_union_worker.rs:807:64
+     |
+ 807 |             let mut entity = Entity::new("box", Geometry::Brep(shape.clone()), None);
+     |                                                 -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                 |
+     |                                                 arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\boolean_union_worker.rs:895:49
+     |
+ 895 |         let a = Entity::new("a", Geometry::Brep(shape.clone()), None);
+     |                                  -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                  |
+     |                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\session\boolean_union_worker.rs:896:49
+     |
+ 896 |         let b = Entity::new("b", Geometry::Brep(shape), None);
+     |                                  -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                  |
+     |                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:2566:34
+     |
+2566 |               Geometry::NativeBrep(NativeBrep {
+     |  _____________--------------------_^
+     | |             |
+     | |             arguments to this enum variant are incorrect
+2567 | |                 display: std::sync::Arc::new(Mesh {
+2568 | |                     vertices: vec![[0., 0., 0.], [2., 0., 0.], [0., 2., 0.]],
+2569 | |                     faces: vec![vec![0, 1, 2]],
+...    |
+2575 | |                 crc: 0,
+2576 | |             }),
+     | |_____________^ expected `NativeBrepSource`, found `NativeBrep`
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:3926:57
+     |
+3926 |         let target = Entity::new("face", Geometry::Brep(face), None);
+     |                                          -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4022:66
+     |
+4022 |         let target = Entity::new("cylinder side", Geometry::Brep(side), None);
+     |                                                   -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                   |
+     |                                                   arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4092:57
+     |
+4092 |         let target = Entity::new("face", Geometry::Brep(face), None);
+     |                                          -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4200:63
+     |
+4200 |             let target = Entity::new("joined", Geometry::Brep(joined), None);
+     |                                                -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                |
+     |                                                arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4308:57
+     |
+4308 |         let target = Entity::new("face", Geometry::Brep(face), None);
+     |                                          -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4400:57
+     |
+4400 |         let target = Entity::new("face", Geometry::Brep(face), None);
+     |                                          -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4497:17
+     |
+4496 |             Geometry::Brep(
+     |             -------------- arguments to this enum variant are incorrect
+4497 |                 creation::planar(&horizontal, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap(),
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4504:17
+     |
+4503 |             Geometry::Brep(
+     |             -------------- arguments to this enum variant are incorrect
+4504 |                 creation::planar(&vertical, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap(),
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4586:17
+     |
+4585 |             Geometry::Brep(
+     |             -------------- arguments to this enum variant are incorrect
+4586 |                 creation::planar(&horizontal, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap(),
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4593:17
+     |
+4592 |             Geometry::Brep(
+     |             -------------- arguments to this enum variant are incorrect
+4593 |                 creation::planar(&vertical, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap(),
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4695:57
+     |
+4695 |         let target = Entity::new("face", Geometry::Brep(joined), None);
+     |                                          -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4812:58
+     |
+4812 |         let a = Entity::new("horizontal", Geometry::Brep(a), None);
+     |                                           -------------- ^ expected `CanonicalBrep`, found `Brep`
+     |                                           |
+     |                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4813:56
+     |
+4813 |         let b = Entity::new("vertical", Geometry::Brep(b), None);
+     |                                         -------------- ^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4913:53
+     |
+4913 |         let a = Entity::new("solid", Geometry::Brep(solid), None);
+     |                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4914:54
+     |
+4914 |         let b = Entity::new("cutter", Geometry::Brep(cutter), None);
+     |                                       -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                       |
+     |                                       arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4992:54
+     |
+4992 |         let a = Entity::new("sphere", Geometry::Brep(sphere), None);
+     |                                       -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                       |
+     |                                       arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\chrome.rs:4993:54
+     |
+4993 |         let b = Entity::new("cutter", Geometry::Brep(cutter), None);
+     |                                       -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                       |
+     |                                       arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\files.rs:31:96
+     |
+  31 |         let object = om9_core::model::Entity::new("sphere", om9_core::geometry::Geometry::Brep(sphere), None);
+     |                                                             ---------------------------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                             |
+     |                                                             arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:745:109
+     |
+ 745 |             let mut doc=Document::new("background wire memory");let entity=Entity::new("box",Geometry::Brep(shape),None);
+     |                                                                                              -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                                              |
+     |                                                                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:786:63
+     |
+ 786 |             let entity=Entity::new("box",Geometry::NativeBrep(native.clone()),None);let id=entity.id;doc.entities.insert(id,entity);
+     |                                          -------------------- ^^^^^^^^^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:822:63
+     |
+ 822 |             let entity=Entity::new("box",Geometry::NativeBrep(native.clone()),None);let id=entity.id;doc.entities.insert(id,entity);
+     |                                          -------------------- ^^^^^^^^^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:842:59
+     |
+ 842 |         let entity=Entity::new("box",Geometry::NativeBrep(native),None);let id=entity.id;
+     |                                      -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1065:55
+     |
+1065 |         let entity=Entity::new("shell",Geometry::Brep(shell),None);let id=entity.id;
+     |                                        -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                        |
+     |                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1087:53
+     |
+1087 |         let entity=Entity::new("box",Geometry::Brep(shape),None);let id=entity.id;
+     |                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1125:57
+     |
+1125 |             let entity=Entity::new("box",Geometry::Brep(shape.clone()),None);let id=entity.id;
+     |                                          -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1159:53
+     |
+1159 |         let entity=Entity::new("box",Geometry::Brep(shape.clone()),None);let id=entity.id;
+     |                                      -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1188:53
+     |
+1188 |         let entity=Entity::new("box",Geometry::Brep(shape),None);let id=entity.id;
+     |                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1243:53
+     |
+1243 |         let entity=Entity::new("box",Geometry::Brep(shape),None);let id=entity.id;
+     |                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1275:55
+     |
+1275 |         let entity=Entity::new("shell",Geometry::Brep(shell),None);let id=entity.id;
+     |                                        -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                        |
+     |                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1366:53
+     |
+1366 |         let entity=Entity::new("box",Geometry::Brep(shape),None);let id=entity.id;
+     |                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1386:54
+     |
+1386 |           let brep = Entity::new("box", Geometry::Brep(om9_kernel::creation::primitive(
+     |  _______________________________________--------------_^
+     | |                                       |
+     | |                                       arguments to this enum variant are incorrect
+1387 | |             om9_kernel::creation::Primitive::Box { x_mm: 4., y_mm: 5., z_mm: 6. }, 0.1, &limits).unwrap()), None);
+     | |_________________________________________________________________________________________________________^ expected `CanonicalBrep`, found `Brep`
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1490:98
+     |
+1490 |             let faces=shape.topology().faces.clone();let entity=Entity::new("box",Geometry::Brep(shape),None);let id=entity.id;
+     |                                                                                   -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                                   |
+     |                                                                                   arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1517:91
+     |
+1517 |         let face=shape.topology().faces[0];let entity=Entity::new("sphere",Geometry::Brep(shape),None);let id=entity.id;
+     |                                                                            -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                                            |
+     |                                                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1564:56
+     |
+1564 |         let entity=Entity::new("sphere",Geometry::Brep(shape),None);let id=entity.id;
+     |                                         -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1597:56
+     |
+1597 |         let entity=Entity::new("sphere",Geometry::Brep(shape),None);let id=entity.id;
+     |                                         -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1621:56
+     |
+1621 |         let entity=Entity::new("sphere",Geometry::Brep(shape),None);let id=entity.id;
+     |                                         -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:1689:129
+     |
+1689 | ...tity=Entity::new("native",Geometry::NativeBrep(native),None);let id=entity.id;
+     |                              -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                              |
+     |                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:2514:68
+     |
+2514 |             let shape = Entity::new("native", Geometry::NativeBrep(native.clone()), None);
+     |                                               -------------------- ^^^^^^^^^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                               |
+     |                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:2547:64
+     |
+2547 |         let shape = Entity::new("native", Geometry::NativeBrep(native.clone()), None);
+     |                                           -------------------- ^^^^^^^^^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                           |
+     |                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:2570:64
+     |
+2570 |         let shape = Entity::new("native", Geometry::NativeBrep(native), None);
+     |                                           -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                           |
+     |                                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:2638:68
+     |
+2638 |         let mut shape = Entity::new("native", Geometry::NativeBrep(native), None);
+     |                                               -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                               |
+     |                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\undo_settings.rs:2684:65
+     |
+2684 |         let entity = Entity::new("native", Geometry::NativeBrep(native), None);
+     |                                            -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                            |
+     |                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\object_info.rs:207:57
+     |
+ 207 |         let first = Entity::new("first", Geometry::Brep(make(4.)), None);
+     |                                          -------------- ^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\object_info.rs:208:59
+     |
+ 208 |         let second = Entity::new("second", Geometry::Brep(make(8.)), None);
+     |                                            -------------- ^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                            |
+     |                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\object_info.rs:274:60
+     |
+ 274 |         let mut entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                             -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                             |
+     |                                             arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\object_info.rs:305:56
+     |
+ 305 |         let entity = Entity::new("box", Geometry::Brep(shape), None);
+     |                                         -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\object_info.rs:344:42
+     |
+ 344 |         entity.geometry = Geometry::Brep(replacement);
+     |                           -------------- ^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                           |
+     |                           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\object_info.rs:373:60
+     |
+ 373 |         let entity = Entity::new("corrupt", Geometry::Brep(corrupt), None);
+     |                                             -------------- ^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                             |
+     |                                             arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\object_info.rs:392:63
+     |
+ 392 |         let mut entity = Entity::new("sphere", Geometry::Brep(shape), None);
+     |                                                -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                |
+     |                                                arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:8826:53
+     |
+8826 |         let entity=Entity::new("box",Geometry::Brep(shape),None);let id=entity.id;document.entities.insert(id,entity);
+     |                                      -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                      |
+     |                                      arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:8969:57
+     |
+8969 |             let entity=Entity::new("box",Geometry::Brep(shape),None);let id=entity.id;document.entities.insert(id,entity);
+     |                                          -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:8996:56
+     |
+8996 |         let entity = Entity::new("box", Geometry::Brep(shape.clone()), document.current_layer);
+     |                                         -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9043:69
+     |
+9043 |         let entity = Entity::new("native box", Geometry::NativeBrep(native), None);
+     |                                                -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                                |
+     |                                                arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9091:59
+     |
+9091 |         let member = Entity::new("member", Geometry::Brep(shape), None);
+     |                                            -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                            |
+     |                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9370:61
+     |
+9370 |         let body = Entity::new("body", Geometry::NativeBrep(native), None);
+     |                                        -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                        |
+     |                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9468:56
+     |
+9468 | ...   let mut body=Entity::new("BRep",Geometry::Brep(shape),None);body.placement=Transform::translation([8.,0.,0.]);document.entit...
+     |                                       -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                       |
+     |                                       arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9469:68
+     |
+9469 | ...   let mut body=Entity::new("NativeBrep",Geometry::NativeBrep(native),None);body.placement=Transform::translation([13.,0.,0.]);...
+     |                                             -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+     |                                             |
+     |                                             arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1030:5
+     |
+1030 |     NativeBrep(NativeBrepSource),
+     |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9672:59
+     |
+9672 |         let entity = Entity::new("sphere", Geometry::Brep(om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap()), None);
+     |                                            -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                            |
+     |                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9707:56
+     |
+9707 |         let entity = Entity::new("box", Geometry::Brep(brep), None);
+     |                                         -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9736:56
+     |
+9736 |         let entity = Entity::new("box", Geometry::Brep(brep), None);
+     |                                         -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9782:59
+     |
+9782 |         let sphere = Entity::new("sphere", Geometry::Brep(om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap()), None);
+     |                                            -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                            |
+     |                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9832:59
+     |
+9832 |         let sphere = Entity::new("sphere", Geometry::Brep(om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap()), None);
+     |                                            -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                            |
+     |                                            arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9883:56
+     |
+9883 |         let entity = Entity::new("box", Geometry::Brep(om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &limits).unwrap()), None);
+     |                                         -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                         |
+     |                                         arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9922:55
+     |
+9922 |         let back = Entity::new("back", Geometry::Brep(brep.clone()), None);
+     |                                        -------------- ^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                        |
+     |                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9924:61
+     |
+9924 |         let mut front = Entity::new("front", Geometry::Brep(brep), None);
+     |                                              -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                              |
+     |                                              arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9951:62
+     |
+9951 |         let back = Entity::new("back member", Geometry::Brep(brep.clone()), None);
+     |                                               -------------- ^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                               |
+     |                                               arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9952:68
+     |
+9952 |         let mut front = Entity::new("front member", Geometry::Brep(brep), None);
+     |                                                     -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                     |
+     |                                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui.rs:9989:66
+     |
+9989 |         let entity = Entity::new("16-hole block", Geometry::Brep(brep), None);
+     |                                                   -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                                   |
+     |                                                   arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10083:58
+      |
+10083 | ... geometry=if native {Geometry::NativeBrep(om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap())} else {Geometry::Brep(shape)};
+      |                         -------------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+      |                         |
+      |                         arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1030:5
+      |
+ 1030 |     NativeBrep(NativeBrepSource),
+      |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10083:136
+      |
+10083 | ...e,1e-6,&limits).unwrap())} else {Geometry::Brep(shape)};
+      |                                     -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+      |                                     |
+      |                                     arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1029:5
+      |
+ 1029 |     Brep(crate::brep::CanonicalBrep),
+      |     ^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10137:68
+      |
+10137 |                 let mut entity = Entity::new("box", Geometry::Brep(shape.clone()), None);
+      |                                                     -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+      |                                                     |
+      |                                                     arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1029:5
+      |
+ 1029 |     Brep(crate::brep::CanonicalBrep),
+      |     ^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10188:68
+      |
+10188 |                 let mut entity = Entity::new("box", Geometry::Brep(shape.clone()), None);
+      |                                                     -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+      |                                                     |
+      |                                                     arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1029:5
+      |
+ 1029 |     Brep(crate::brep::CanonicalBrep),
+      |     ^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10232:68
+      |
+10232 |                 let mut entity = Entity::new("box", Geometry::Brep(shape.clone()), None);
+      |                                                     -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+      |                                                     |
+      |                                                     arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1029:5
+      |
+ 1029 |     Brep(crate::brep::CanonicalBrep),
+      |     ^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10277:68
+      |
+10277 |                 let mut entity = Entity::new("box", Geometry::Brep(shape.clone()), None);
+      |                                                     -------------- ^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+      |                                                     |
+      |                                                     arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1029:5
+      |
+ 1029 |     Brep(crate::brep::CanonicalBrep),
+      |     ^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10335:54
+      |
+10335 |         let geometry=if native {Geometry::NativeBrep(om9_kernel::brep::to_3dm(&shape,1e-6,&limits).unwrap())}
+      |                                 -------------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+      |                                 |
+      |                                 arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1030:5
+      |
+ 1030 |     NativeBrep(NativeBrepSource),
+      |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10336:34
+      |
+10336 |             else {Geometry::Brep(shape)};
+      |                   -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+      |                   |
+      |                   arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1029:5
+      |
+ 1029 |     Brep(crate::brep::CanonicalBrep),
+      |     ^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10384:63
+      |
+10384 |             let entity=Entity::new("box",Geometry::NativeBrep(native),None);let id=entity.id;
+      |                                          -------------------- ^^^^^^ expected `NativeBrepSource`, found `NativeBrep`
+      |                                          |
+      |                                          arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1030:5
+      |
+ 1030 |     NativeBrep(NativeBrepSource),
+      |     ^^^^^^^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10429:59
+      |
+10429 |         let entity = Entity::new("sphere", Geometry::Brep(body), None);
+      |                                            -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+      |                                            |
+      |                                            arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1029:5
+      |
+ 1029 |     Brep(crate::brep::CanonicalBrep),
+      |     ^^^^
+
+error[E0308]: mismatched types
+     --> crates\om9-app\src\ui.rs:10476:63
+      |
+10476 |             let entity = Entity::new("sphere", Geometry::Brep(body), None);
+      |                                                -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+      |                                                |
+      |                                                arguments to this enum variant are incorrect
+      |
+note: tuple variant defined here
+     --> crates\om9-core\src\geometry.rs:1029:5
+      |
+ 1029 |     Brep(crate::brep::CanonicalBrep),
+      |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:229:57
+     |
+ 229 |     let entity = Entity::new("cylinder", Geometry::Brep(shape), document.current_layer);
+     |                                          -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:460:55
+     |
+ 460 |         let entity = Entity::new(name, Geometry::Brep(body.clone()), None);
+     |                                        -------------- ^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                        |
+     |                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:546:50
+     |
+ 546 |     let a = Entity::new("sphere", Geometry::Brep(sphere), None);
+     |                                   -------------- ^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                   |
+     |                                   arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:547:47
+     |
+ 547 |     let b = Entity::new("box", Geometry::Brep(block), None);
+     |                                -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                |
+     |                                arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:607:49
+     |
+ 607 |     let entity=Entity::new("box",Geometry::Brep(shape),None); let id=entity.id; doc.entities.insert(id,entity);
+     |                                  -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                  |
+     |                                  arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:687:55
+     |
+ 687 |     let mut back = Entity::new("back", Geometry::Brep(back), document.current_layer);
+     |                                        -------------- ^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                        |
+     |                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:689:57
+     |
+ 689 |     let mut front = Entity::new("front", Geometry::Brep(front), document.current_layer);
+     |                                          -------------- ^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                          |
+     |                                          arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:1469:55
+     |
+1469 |     let sphere = Entity::new("sphere", Geometry::Brep(om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap()), None);
+     |                                        -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                        |
+     |                                        arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:1589:52
+     |
+1589 |     let entity = Entity::new("box", Geometry::Brep(om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &limits).unwrap()), None);
+     |                                     -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:1640:52
+     |
+1640 |     let entity = Entity::new("box", Geometry::Brep(om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &limits).unwrap()), None);
+     |                                     -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:1761:52
+     |
+1761 | ..."box", Geometry::Brep(om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &om9_core::budget::Limits::default()).unwrap()), None);
+     |           -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |           |
+     |           arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+error[E0308]: mismatched types
+    --> crates\om9-app\src\ui\gumball_gpu_tests.rs:1804:52
+     |
+1804 |     let entity = Entity::new("box", Geometry::Brep(om9_kernel::brep::box_brep([10., 10., 10.], 0.1, &limits).unwrap()), None);
+     |                                     -------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `CanonicalBrep`, found `Brep`
+     |                                     |
+     |                                     arguments to this enum variant are incorrect
+     |
+note: tuple variant defined here
+    --> crates\om9-core\src\geometry.rs:1029:5
+     |
+1029 |     Brep(crate::brep::CanonicalBrep),
+     |     ^^^^
+
+warning: unreachable pattern
+   --> crates\om9-app\src\session\addon_session.rs:591:9
+    |
+591 |         other => other.clone(),
+    |         ^^^^^ no value can reach this
+    |
+note: multiple earlier patterns match some of the same values
+   --> crates\om9-app\src\session\addon_session.rs:591:9
+    |
+521 |           Geo::Point { point } => Geo::Point { point: p(*point) },
+    |           -------------------- matches some of the same values
+522 |           Geo::Line { start, end } => Geo::Line {
+    |           ------------------------ matches some of the same values
+...
+526 |           Geo::Polyline { points, closed } => Geo::Polyline {
+    |           -------------------------------- matches some of the same values
+...
+530 | /         Geo::Circle {
+531 | |             center,
+532 | |             x,
+533 | |             y,
+534 | |             radius,
+535 | |         } => Geo::Circle {
+    | |_________- matches some of the same values
+...
+591 |           other => other.clone(),
+    |           ^^^^^ ...and 4 other patterns collectively make this unreachable
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `brep`
+    --> crates\om9-app\src\session\top11.rs:1432:36
+     |
+1432 |                     Geometry::Brep(brep) => self.solid_output_deflection(face.id)?,
+     |                                    ^^^^ help: if this is intentional, prefix it with an underscore: `_brep`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `brep`
+    --> crates\om9-app\src\session\top11.rs:1556:32
+     |
+1556 |                 Geometry::Brep(brep) => self.solid_output_deflection(face.id)?,
+     |                                ^^^^ help: if this is intentional, prefix it with an underscore: `_brep`
+
+warning: unused variable: `brep`
+    --> crates\om9-app\src\session\top11.rs:2251:40
+     |
+2251 |                         Geometry::Brep(brep) => self.solid_output_deflection(face.id)?,
+     |                                        ^^^^ help: if this is intentional, prefix it with an underscore: `_brep`
+
+Some errors have detailed explanations: E0061, E0308, E0599, E0609.
+For more information about an error, try `rustc --explain E0061`.
+warning: `om9-app` (lib test) generated 4 warnings
+error: could not compile `om9-app` (lib test) due to 318 previous errors; 4 warnings emitted

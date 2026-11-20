@@ -698,18 +698,27 @@ pub struct BrepTopology {
 /// Detect accidental changes to source/ID/adjacency associations. This hash
 /// is not an attestation that these IDs belong to native OCCT subshapes.
 pub fn source_topology_fingerprint(source_sha256: [u8; 32], topology: &BrepTopology) -> [u8; 32] {
+    source_topology_fingerprint_checked(source_sha256, topology, || Ok(())).expect("infallible fingerprint")
+}
+
+fn source_topology_fingerprint_checked(source_sha256: [u8; 32], topology: &BrepTopology,
+    mut checkpoint: impl FnMut() -> Result<()>) -> Result<[u8; 32]> {
     let mut hash = Sha256::new();
     hash.update(b"OM9 canonical BRep topology 1\0");
     hash.update(source_sha256);
     for group in [&topology.faces, &topology.edges, &topology.vertex_ids] {
         hash.update((group.len() as u64).to_le_bytes());
-        for id in group { hash.update(id.as_bytes()); }
+        for chunk in group.chunks(4096) {
+            checkpoint()?;
+            for id in chunk { hash.update(id.as_bytes()); }
+        }
     }
     hash.update((topology.face_edges.len() as u64).to_le_bytes());
-    for [face, edge] in &topology.face_edges {
-        hash.update(face.to_le_bytes()); hash.update(edge.to_le_bytes());
+    for chunk in topology.face_edges.chunks(4096) {
+        checkpoint()?;
+        for [face, edge] in chunk { hash.update(face.to_le_bytes()); hash.update(edge.to_le_bytes()); }
     }
-    hash.finalize().into()
+    Ok(hash.finalize().into())
 }
 
 /// Portable source-only wire view. It borrows the tracked owner and never
@@ -748,17 +757,15 @@ impl CanonicalBrepRecord {
     pub fn source(&self) -> &str { &self.source }
     pub fn topology(&self) -> &BrepTopology { &self.topology }
     pub fn fingerprint(&self) -> [u8; 32] { self.source_sha256 }
+    /// Portable integrity fingerprint; this does not attest native topology.
+    pub fn binding_fingerprint(&self) -> [u8; 32] { self.binding_sha256 }
     /// Check source integrity, portable IDs and adjacency without a display.
     /// `admit` sees this record's actual capacities plus transient scratch;
     /// it does not cover the original encoded input or native OCCT memory.
     pub fn validate_admitted(&self, limits: &Limits,
         mut admit: impl FnMut(u64, u64) -> Result<()>) -> Result<Usage> {
-        if self.source.is_empty() || !self.source.contains("CASCADE Topology")
-            || <[u8; 32]>::from(Sha256::digest(self.source.as_bytes())) != self.source_sha256 {
+        if self.source.is_empty() {
             return Err(Error::Invalid("BRep source binding"));
-        }
-        if source_topology_fingerprint(self.source_sha256, &self.topology) != self.binding_sha256 {
-            return Err(Error::Invalid("BRep source/topology integrity"));
         }
         if self.topology.faces.is_empty() { return Err(Error::Invalid("BRep source topology")); }
         let nodes = self.topology.faces.len().checked_add(self.topology.edges.len())
@@ -772,6 +779,26 @@ impl CanonicalBrepRecord {
             |sum, bytes| sum.checked_add(bytes).ok_or(Error::Overflow("BRep source bytes")))?;
         let mut usage = Usage { bytes, nodes: u64::try_from(nodes).map_err(|_| Error::Overflow("BRep topology count"))?, ..Usage::default() };
         usage.check(limits)?;
+        admit(usage.bytes, 0)?;
+        let mut hash = Sha256::new();
+        let source = self.source.as_bytes();
+        let marker = b"CASCADE Topology";
+        let mut has_marker = false;
+        for (index, chunk) in source.chunks(1024 * 1024).enumerate() {
+            admit(usage.bytes, 0)?;
+            hash.update(chunk);
+            if !has_marker {
+                let start = index * (1024 * 1024);
+                let window_start = start.saturating_sub(marker.len() - 1);
+                has_marker = source[window_start..start + chunk.len()].windows(marker.len()).any(|item| item == marker);
+            }
+        }
+        if !has_marker || <[u8; 32]>::from(hash.finalize()) != self.source_sha256 {
+            return Err(Error::Invalid("BRep source binding"));
+        }
+        if source_topology_fingerprint_checked(self.source_sha256, &self.topology, || admit(usage.bytes, 0))? != self.binding_sha256 {
+            return Err(Error::Invalid("BRep source/topology integrity"));
+        }
         validate_topology_admitted(&self.topology, &mut usage, limits, &mut admit)?;
         Ok(usage)
     }
@@ -813,6 +840,8 @@ pub struct OwnedBrepSource(BrepSource);
 impl OwnedBrepSource {
     pub fn source(&self) -> &str { self.0.source() }
     pub fn topology(&self) -> &BrepTopology { self.0.topology() }
+    /// Borrow the source-only wire view while this owner remains live.
+    pub fn canonical_record(&self) -> CanonicalBrepRef<'_> { self.0.canonical_record() }
     pub fn storage_bytes(&self) -> Result<u64> {
         self.0.source_bytes()?.checked_add(self.0.topology_bytes()?)
             .ok_or(Error::Overflow("BRep source storage"))

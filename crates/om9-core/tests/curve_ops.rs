@@ -17,6 +17,50 @@ fn close(a: Point3, b: Point3, tolerance: f64) -> bool {
 }
 
 #[test]
+fn parameter_trim_keeps_a_native_knot_in_both_directions() {
+    use om9_core::{curve_ops::trim_curve_by_parameter, geometry::NurbsCurve};
+
+    let limits = Limits::default();
+    let start = -0.1;
+    let first_knot = start + 2.0943951023931966;
+    let knot = start + 4.188790204786393;
+    let end = start + 6.28318530717959;
+    let height = 3_f64.sqrt();
+    let forward = Curve::Nurbs(NurbsCurve {
+        degree: 2,
+        poles: vec![
+            [2., 0., 0.], [2., 2. * height, 0.], [-1., height, 0.], [-4., 0., 0.],
+            [-1., -height, 0.], [2., -2. * height, 0.], [2., 0., 0.],
+        ],
+        weights: vec![1., 0.5, 1., 0.5, 1., 0.5, 1.],
+        knots: vec![start, start, start, first_knot, first_knot, knot, knot, end, end, end],
+        domain: [start, end],
+        periodic: false,
+        reversed: false,
+        seam: None,
+    });
+    let reverse = reverse_curve(&forward, &limits).unwrap();
+    let at_knot = (knot - start) / (end - start);
+    for (source, reversed, from, to) in [
+        (&forward, false, at_knot, 0.6875),
+        (&reverse, true, 0.3125, 1.0 - at_knot),
+        (&forward, false, 0.625, at_knot),
+        (&reverse, true, 1.0 - at_knot, 0.375),
+    ] {
+        let result = trim_curve_by_parameter(source, from, to, &limits).unwrap();
+        let Curve::Nurbs(result_nurbs) = &result else { panic!("expected NURBS") };
+        assert_eq!(result_nurbs.reversed, reversed);
+        assert!(result_nurbs.domain.contains(&knot), "{from}..{to}: {:?}", result_nurbs.domain);
+        assert_eq!(result_nurbs.poles.len(), 3, "{from}..{to}: {:?}", result_nurbs.knots);
+        for fraction in [0., 0.25, 0.5, 1.] {
+            let expected = point_at(source, from + fraction * (to - from), &limits).unwrap();
+            let actual = point_at(&result, fraction, &limits).unwrap();
+            assert!(close(actual, expected, 1e-12), "{actual:?} != {expected:?}");
+        }
+    }
+}
+
+#[test]
 fn reseamed_parameter_trim_preserves_affine_fraction_across_original_seam() {
     use om9_core::{curve_ops::trim_curve_by_parameter, geometry::NurbsCurve};
     let limits=Limits::default();

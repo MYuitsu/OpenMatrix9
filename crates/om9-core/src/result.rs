@@ -286,11 +286,13 @@ impl PreparedResult {
         }
         Ok(u)
     }
-    pub(crate) fn apply(self, d: &mut Document) -> Result<()> {
+    pub(crate) fn apply(self, d: &mut Document, next_creation: &mut u64) -> Result<()> {
         let recipe_id = self.recipe.as_ref().map(|r| r.id);
         for output in self.outputs {
             let mut entity = output.entity;
             if let Some(old) = output.expected_existing {
+                entity.creation_order = d.entities.get(&entity.id)
+                    .ok_or(Error::Missing("replay result entity"))?.creation_order;
                 entity.geometry_revision = old
                     .geometry_revision
                     .checked_add(1)
@@ -300,6 +302,8 @@ impl PreparedResult {
                     .checked_add(1)
                     .ok_or(Error::Overflow("replay attributes revision"))?;
                 d.invalidate_results(entity.id, false)?;
+            } else {
+                d.record_creation_order(&mut entity, next_creation)?;
             }
             d.results.insert(
                 entity.id,

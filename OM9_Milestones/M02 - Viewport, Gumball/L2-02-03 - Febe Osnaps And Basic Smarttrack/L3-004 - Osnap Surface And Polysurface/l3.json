@@ -221,6 +221,33 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
+    "native_v7_surface_snap_and_resave_2026_11_19": {
+      "status": "WINDOWS_EGUI_NATIVE_V7_SURFACE_SAVE_REOPEN_VALIDATED",
+      "scope": "An authored native Sphere reopens from v7 with nonuniform placement, and both viewport display modes commit the exact Surface preview. Undo and Redo preserve source identity. Worker-backed Save As and Open preserve the NativeBrep and new Line.",
+      "tests": ["om9-app osnap_ui::native_v7_surface_snap_survives_save_as_and_reopen"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#surface-snap-on-a-native-sphere-reopened-from-v7"]
+    },
+    "target_command_history_2026_11_18": {
+      "date": "2026-11-18",
+      "scope": "Surface and Polysurface keep their prompts and accepted target in CMD. The standard Windows application retains an explicit Sphere miss and a wrong-type Sphere selection before the successful Box pick. Live Line endpoints lie on the Sphere and top of the Box, with one Undo entry for each Line.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#between-and-surface-targets-in-command-history"]
+    },
+    "windows_right_button_on_surface_2026_11_18": {
+      "date": "2026-11-18",
+      "scope": "Desktop mouse replay on the standard Windows build held a radius-5 sphere target across both Line endpoints. An intervening miss preserved the endpoint prompt, and the two accepted points were within 1e-13 mm of the source sphere. Human M02-UI review remains pending.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#windows-right-button-on-surface-on-the-standard-build"]
+    },
+    "sphere_surface_pointer_buttons_2026_11_18": {
+      "date": "2026-11-18",
+      "scope": "Egui pointer replay exercises the On Surface icon with left and right buttons on an exact radius-5 sphere. Left releases the target after one point, right constrains the second point and retries after a miss. The user confirmed the physical left-button test, and live readback placed the start on the radius-5 sphere and the end on the CPlane. Physical right-button review remains open.",
+      "tests": ["om9-app chrome_actions::on_surface_icon_buttons_control_how_many_line_points_snap_to_a_sphere"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#on-surface-pointer-replay-in-egui"]
+    },
+    "windows_polysurface_pointer_2026_11_18": {
+      "date": "2026-11-18",
+      "scope": "On the standard Windows build, left-click On Polysurface on a 10 mm Box constrained only the Line start. Right-click constrained both endpoints and a miss outside the Box kept the endpoint prompt for retry. Live readback confirmed both Lines and one Undo entry per Line. Human M02-UI review remains open.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#windows-pointer-replay-for-surface-target-modes"]
+    },
     "surface_snap_trim_1024_2026_11_13": "Tested reopened plane and cylinder trims through 1024 edges snap to material rather than holes; simulated Line/Undo/Redo passed. Arbitrary trim and actual desktop unverified. Evidence: docs/validation/2026-11-13-large-trim-support.md#surface-snap-on-1024-edge-trim-material",
     "curved_fallback_occlusion_2026_11_13": "Tested reopened affine cylinder allows Surface Snap to a rear plane through an excluded front region or hole, then Line and Undo/Redo, in simulated Wireframe/Shaded; front material and near-hole-edge cases block. Numerical/geometry scope, desktop and native peak remain open. Evidence: docs/validation/2026-11-13-fallback-source-selection.md#viewport-line-through-the-curved-hole",
     "planar_fallback_grazing_ray_guard_2026_11_13": {
@@ -299,6 +326,69 @@
       "scope": "Authored drilled block refines one material point and refuses a candidate with a manipulated hole cursor.",
       "remaining": "Actual desktop, arbitrary holes and whole-display verification remain open.",
       "evidence": "docs/validation/2026-11-13-small-trim-hole-witness.md#surface-snap-product-path-distinction"
+    },
+    "standalone_verification_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The persistent Polysurface prompt tolerates separate Enter press and release frames. The box rejects an interior point, accepts exact points on opposed faces, and cancels pending work if the target is deleted.",
+      "tests": ["om9-app snap_panel_modes::typed_persistent_polysurface_points_survive_enter_release"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md"]
+    },
+    "deferred_surface_click_release_and_focus_loss_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A Looking Down click queues a Surface one-shot on a sphere. Enter release preserves the click and accepts the exact pole. Window focus loss drops the old click and leaves the one-shot available for retry.",
+      "tests": ["om9-app snap_panel_modes::deferred_surface_click_ignores_key_release_and_cancels_on_window_focus_loss"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#deferred-surface-click-release-and-focus-loss-on-2026-11-18"]
+    },
+    "persistent_surface_same_archive_reopen_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A persistent planar On Surface target remains active after Line completes. File > Open reloads the same source ID under a new session and clears the constraint. A fresh Line then accepts two typed points outside the old target plane.",
+      "tests": ["om9-app chrome_actions::reopening_the_same_archive_drops_the_persistent_surface_target"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#persistent-surface-target-and-same-archive-reopen-on-2026-11-18"]
+    },
+    "deferred_polysurface_target_focus_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A right-click persistent Polysurface constraint resolves a deferred viewport pick on a native box and gives CMD focus for coordinate entry. Two typed points on opposed faces produce the expected Line in one Undo entry.",
+      "tests": ["om9-app chrome_actions::deferred_polysurface_target_pick_focuses_the_typed_point_prompt"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#deferred-polysurface-target-keyboard-focus-on-2026-11-18"]
+    },
+    "project_surface_cross_view_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The Side View On Surface path verifies Project against the selected face and the CPlane captured in Looking Down. The Line commits the on-face projection and reports a specific refusal for the off-face case.",
+      "tests": ["om9-app snap_panel_modes::project_on_surface_checks_captured_plane_before_committing_side_view_pick"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md"]
+    },
+    "sdk_surface_scene_publication_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Moving the sphere publishes a new scene and releases queued SDK Surface work before another plugin invocation. A fresh query misses the old cursor, and Undo restores the exact hit and its source identity.",
+      "tests": ["om9-app plugin_native::native_plugin_surface_pending_is_invalidated_by_source_move"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#sdk-surface-cancellation-on-scene-publication-2026-11-18"]
+    },
+    "trimmed_boolean_v6_surface_2026_11_18": {
+      "status": "PACKAGED_WORKER_AND_EGUI_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Application Save As and Open round-trip a Boolean Difference result in v6 with the packaged worker. The restored source ID and sphere face supply the expected Surface marker and identical Line start, with one Undo and Redo.",
+      "tests": ["om9-app snap_panel_modes::reopened_boolean_brep_surface_override_commits_source_face"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#trimmed-brep-surface-snap-after-application-save-as-and-open"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G04",
+        "G07"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

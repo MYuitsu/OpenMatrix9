@@ -5,31 +5,45 @@
   "l3": "OM9-L3-01-01-002",
   "l4": "OM9-L4-01-01-002-02",
   "case": "workbench-docking-regions-positive",
-  "source": "authored for the OM9 standalone shell; every number below is hand-computed from the documented constants (left rail 300, right column 300, command line 90, menu bar 21, toolbar 67, status 20, view gap 2) and NOT copied from program output",
+  "source": "authored for the OM9 standalone shell; every number below is hand-computed from the documented constants (left rail 300, right column 300, command line 90, menu bar 21, hidden toolbar 0, status 20, view gap 2) and NOT copied from program output",
   "status": "RUNTIME_DRIVEN_BY_TEST",
   "positive_oracle": "Show left rail, four viewport center region and optional right properties dock",
   "rect_format": "[x, y, width, height] in window pixels, origin top-left",
-  "view_order": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
+  "view_order": [
+    "LookingDown",
+    "Perspective",
+    "ThroughFinger",
+    "SideView"
+  ],
   "cases": [
     {
       "id": "left-rail-four-views-right-dock-1600x1000",
       "kind": "positive",
       "window": [1600, 1000],
-      "layout": { "dock_right": ["main-menu"] },
-      "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
+      "layout": {
+        "dock_right": [
+          "main-menu"
+        ]
+      },
+      "views": [
+        "LookingDown",
+        "Perspective",
+        "ThroughFinger",
+        "SideView"
+      ],
       "expect": {
         "menu_bar": [0, 0, 1600, 21],
         "left_rail": [0, 21, 300, 979],
-        "right_dock": [1300, 178, 300, 822],
+        "right_dock": [1300, 111, 300, 889],
         "command_input": [300, 21, 1300, 90],
-        "toolbar": [300, 111, 1300, 67],
+        "toolbar": [300, 111, 1300, 0],
         "status_bar": [300, 980, 1000, 20],
-        "center": [300, 178, 1000, 802],
+        "center": [300, 111, 1000, 869],
         "views": {
-          "LookingDown": [300, 178, 499, 400],
-          "Perspective": [801, 178, 499, 400],
-          "ThroughFinger": [300, 580, 499, 400],
-          "SideView": [801, 580, 499, 400]
+          "LookingDown": [300, 111, 499, 433.5],
+          "Perspective": [801, 111, 499, 433.5],
+          "ThroughFinger": [300, 546.5, 499, 433.5],
+          "SideView": [801, 546.5, 499, 433.5]
         },
         "notes": []
       }
@@ -39,20 +53,25 @@
       "kind": "positive",
       "window": [1280, 900],
       "layout": {},
-      "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
+      "views": [
+        "LookingDown",
+        "Perspective",
+        "ThroughFinger",
+        "SideView"
+      ],
       "expect": {
         "menu_bar": [0, 0, 1280, 21],
         "left_rail": [0, 21, 300, 879],
         "right_dock": null,
         "command_input": [300, 21, 980, 90],
-        "toolbar": [300, 111, 980, 67],
+        "toolbar": [300, 111, 980, 0],
         "status_bar": [300, 880, 980, 20],
-        "center": [300, 178, 980, 702],
+        "center": [300, 111, 980, 769],
         "views": {
-          "LookingDown": [300, 178, 489, 350],
-          "Perspective": [791, 178, 489, 350],
-          "ThroughFinger": [300, 530, 489, 350],
-          "SideView": [791, 530, 489, 350]
+          "LookingDown": [300, 111, 489, 383.5],
+          "Perspective": [791, 111, 489, 383.5],
+          "ThroughFinger": [300, 496.5, 489, 383.5],
+          "SideView": [791, 496.5, 489, 383.5]
         },
         "notes": []
       }
@@ -62,10 +81,14 @@
       "kind": "positive",
       "window": [1280, 900],
       "layout": {},
-      "views": ["Perspective"],
+      "views": [
+        "Perspective"
+      ],
       "expect": {
-        "center": [300, 178, 980, 702],
-        "views": { "Perspective": [300, 178, 980, 702] },
+        "center": [300, 111, 980, 769],
+        "views": {
+          "Perspective": [300, 111, 980, 769]
+        },
         "right_dock": null,
         "notes": []
       }
@@ -75,23 +98,29 @@
       "kind": "positive",
       "window": [800, 400],
       "layout": {},
-      "views": ["LookingDown", "Perspective", "ThroughFinger", "SideView"],
+      "views": [
+        "LookingDown",
+        "Perspective",
+        "ThroughFinger",
+        "SideView"
+      ],
       "expect": {
         "menu_bar": [0, 0, 800, 21],
         "left_rail": [0, 21, 300, 379],
         "right_dock": null,
         "command_input": [300, 21, 500, 90],
-        "toolbar": [300, 111, 500, 67],
+        "toolbar": [300, 111, 500, 0],
         "status_bar": [300, 380, 500, 20],
-        "center": [300, 178, 500, 202],
+        "center": [300, 111, 500, 269],
         "views": {
-          "LookingDown": [300, 178, 249, 100],
-          "Perspective": [551, 178, 249, 100],
-          "ThroughFinger": [300, 280, 249, 100],
-          "SideView": [551, 280, 249, 100]
+          "LookingDown": [300, 111, 249, 133.5],
+          "Perspective": [551, 111, 249, 133.5],
+          "ThroughFinger": [300, 246.5, 249, 133.5],
+          "SideView": [551, 246.5, 249, 133.5]
         },
         "notes": []
       }
     }
-  ]
+  ],
+  "layout_update_2026_11_17": "User requested the left MAIN MENU as the command surface; horizontal strip removed."
 }

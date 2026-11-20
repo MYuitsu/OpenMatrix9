@@ -777,6 +777,35 @@ extern "C" int om9_occt_measure_distance(const Om9MeasurePart* a,size_t ac,
  catch(...){failure(message,capacity,"native distance failure");return 2;}
 }
 
+// Distance to one trimmed source face, not to the enclosing solid volume.
+// A successful witness includes interior, trim edge and vertex solutions.
+extern "C" int om9_occt_point_face_witness(const Om9MeasurePart* target, int face_index,
+ const double* point, double tolerance, size_t max_nodes, double* output,
+ char* message, int capacity) {
+ try {
+  if (!target || !point || !output || face_index<0 || !std::isfinite(tolerance) || tolerance<=0.)
+   throw std::invalid_argument("point face witness: invalid input");
+  for (int axis=0;axis<3;++axis) if (!std::isfinite(point[axis]))
+   throw std::invalid_argument("point face witness: invalid point");
+  const TopoDS_Shape source=part(*target);
+  TopTools_IndexedMapOfShape faces; TopExp::MapShapes(source,TopAbs_FACE,faces);
+  if (size_t(faces.Extent())>max_nodes || face_index>=faces.Extent())
+   throw std::invalid_argument("point face witness: face index or budget");
+  const TopoDS_Shape vertex=BRepBuilderAPI_MakeVertex(gp_Pnt(point[0],point[1],point[2])).Shape();
+  BRepExtrema_DistShapeShape closest(vertex,faces(face_index+1)); closest.Perform();
+  if (!closest.IsDone() || closest.NbSolution()<1 || !std::isfinite(closest.Value()))
+   throw std::runtime_error("point face witness did not converge");
+  if (closest.Value()>tolerance) return 3;
+  const gp_Pnt witness=closest.PointOnShape2(1);
+  output[0]=witness.X(); output[1]=witness.Y(); output[2]=witness.Z();
+  for (int axis=0;axis<3;++axis) if (!std::isfinite(output[axis]))
+   throw std::runtime_error("nonfinite point face witness");
+  return 0;
+ } catch(const Standard_Failure& e){failure(message,capacity,e.GetMessageString());return 2;}
+ catch(const std::exception& e){failure(message,capacity,e.what());return 1;}
+ catch(...){failure(message,capacity,"native point face witness failure");return 2;}
+}
+
 extern "C" int om9_occt_measure_edge_length(const char* source,size_t length,int index,
  const double* matrix,const double (*points)[3],size_t point_count,const uint32_t (*segments)[3],size_t segment_count,
  uint32_t display_edge,double pick_tolerance,double segment_tolerance,size_t max_points,size_t max_nodes,double* value,char* message,int capacity) {

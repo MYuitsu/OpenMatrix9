@@ -251,7 +251,7 @@ pub(super) fn flow(
             extensions,
         });
     }
-    controller.commit_utility_mutations(name, mutations)
+    controller.commit_transform_geometry_mutations(name, mutations)
 }
 
 /// `Smart Flow Break`: mark the selected links `BROKEN` and keep the geometry where it is.
@@ -312,5 +312,5 @@ pub(super) fn pulldown(
             geometry: moved,
         });
     }
-    controller.commit_utility_mutations(name, mutations)
+    controller.commit_transform_geometry_mutations(name, mutations)
 }

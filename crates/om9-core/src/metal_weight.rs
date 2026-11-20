@@ -12,6 +12,7 @@ use crate::{
     geometry::Unit,
 };
 use std::collections::{BTreeMap, BTreeSet};
+use serde::{Deserialize, Serialize};
 
 /// One cubic centimetre in cubic millimetres.
 pub const MM3_PER_CM3: f64 = 1000.0;
@@ -49,7 +50,8 @@ impl DensityUnit {
 
 /// A named metal/alloy density. `provenance` records where the number came from and
 /// `test_only` marks a fixture density that must not be presented as a supplier value.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct MetalMaterial {
     pub id: String,
     pub name: String,
@@ -142,6 +144,7 @@ impl MetalMaterial {
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct MetalMaterialRegistry {
     materials: BTreeMap<String, MetalMaterial>,
+    reference_ids: BTreeSet<String>,
 }
 
 impl MetalMaterialRegistry {
@@ -204,6 +207,7 @@ impl MetalMaterialRegistry {
             registry
                 .insert(material)
                 .expect("built-in material insertion");
+            registry.reference_ids.insert(normalized_id(id));
         }
         registry
     }
@@ -211,7 +215,9 @@ impl MetalMaterialRegistry {
     /// Insert or replace a material under a case-insensitive id.
     pub fn insert(&mut self, material: MetalMaterial) -> Result<()> {
         material.validate()?;
-        self.materials.insert(normalized_id(&material.id), material);
+        let id = normalized_id(&material.id);
+        self.reference_ids.remove(&id);
+        self.materials.insert(id, material);
         Ok(())
     }
 
@@ -238,6 +244,11 @@ impl MetalMaterialRegistry {
 
     pub fn iter(&self) -> impl Iterator<Item = &MetalMaterial> {
         self.materials.values()
+    }
+
+    /// OM9 reference entries are not claimed to be Gemvision's material library.
+    pub fn is_reference(&self, id: &str) -> bool {
+        self.reference_ids.contains(&normalized_id(id))
     }
 }
 

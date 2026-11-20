@@ -13,18 +13,63 @@ use om9_scene::{
     scene::{PickIntent, PickKind, Subelement},
 };
 
+// Preserve the exact combined v4 source/display fixture through the normal
+// migration path, which installs the representation before scene capture.
+fn controller_with_brep_fixture(mut document: Document, name: &str, brep: om9_core::brep::Brep,
+    limits: Limits) -> (om9_app::session::Controller, om9_core::identity::ObjectId) {
+    let (source, _) = brep.clone().into_canonical_and_representation();
+    let entity = Entity::new(name, Geometry::Brep(source), None);
+    let id = entity.id;
+    document.entities.insert(id, entity);
+    (controller_with_brep_displays(document, vec![(id, brep)], limits), id)
+}
+
+fn controller_with_brep_displays(document: Document, displays: Vec<(om9_core::identity::ObjectId, om9_core::brep::Brep)>,
+    limits: Limits) -> om9_app::session::Controller {
+    use sha2::{Digest, Sha256};
+    let mut metadata = serde_json::to_value(document).unwrap();
+    fn replace(value: &mut serde_json::Value, id: &str, legacy: &serde_json::Value) -> bool {
+        match value {
+            serde_json::Value::Object(map) if map.get("id").and_then(|value| value.as_str()) == Some(id)
+                && map.get("geometry").is_some_and(|geometry| geometry.get("Brep").is_some()) => {
+                    map.get_mut("geometry").unwrap()["Brep"] = legacy.clone(); true
+                }
+            serde_json::Value::Object(map) => map.values_mut().any(|child| replace(child, id, legacy)),
+            serde_json::Value::Array(items) => items.iter_mut().any(|child| replace(child, id, legacy)),
+            _ => false,
+        }
+    }
+    for (id, brep) in displays {
+        assert!(replace(&mut metadata, &id.to_string(), &serde_json::to_value(brep).unwrap()));
+    }
+    let metadata = serde_json::to_vec(&metadata).unwrap();
+    let template = include_bytes!("../../../implementation/evidence/M03/solid-ui-followup-2026-10-23/review-fixtures/Boolean2-D-after.om9");
+    let start = u64::from_le_bytes(template[40..48].try_into().unwrap()) as usize;
+    let mut fixture = template[..start].to_vec();
+    fixture[48..56].copy_from_slice(&(metadata.len() as u64).to_le_bytes());
+    fixture[56..88].copy_from_slice(&Sha256::digest(&metadata));
+    fixture.extend_from_slice(&metadata);
+    let path = std::env::temp_dir().join(format!("om9-picking-fixture-{}.om9", uuid::Uuid::new_v4()));
+    std::fs::write(&path, fixture).unwrap();
+    let controller = om9_app::session::Controller::from_file(&path, limits).unwrap();
+    std::fs::remove_file(path).unwrap();
+    controller
+}
+
 #[test]
 fn existing_v4_brep_face_ids_resolve_to_their_original_surfaces() {
     let archive = include_bytes!("../../../implementation/evidence/M03/solid-ui-followup-2026-10-23/review-fixtures/Boolean2-D-after.om9");
     let limits = Limits::default();
-    let document = om9_archive::Archive::decode(archive, &limits).unwrap();
+    let (document, displays) = om9_archive::Archive::decode_v4_migration_candidate(archive, &limits, |_| Ok(())).unwrap();
     let mut checked = 0;
     for entity in document.entities.values() {
         let Geometry::Brep(brep) = &entity.geometry else { continue };
+        let display = displays.occt.iter().find(|(source, _)| source.identity() == brep.identity())
+            .expect("fixture must retain the matching display").1.display();
         for (index, face) in brep.topology().faces.iter().enumerate() {
-            let triangle = brep.display().triangles.iter().find(|triangle| triangle[3] as usize == index)
+            let triangle = display.triangles.iter().find(|triangle| triangle[3] as usize == index)
                 .expect("each fixture face has a display triangle");
-            let [a, b, c] = [triangle[0], triangle[1], triangle[2]].map(|i| brep.display().points[i as usize]);
+            let [a, b, c] = [triangle[0], triangle[1], triangle[2]].map(|i| display.points[i as usize]);
             let u = std::array::from_fn::<_, 3, _>(|i| b[i] - a[i]);
             let v = std::array::from_fn::<_, 3, _>(|i| c[i] - a[i]);
             let normal = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
@@ -37,7 +82,7 @@ fn existing_v4_brep_face_ids_resolve_to_their_original_surfaces() {
                 brep, *face, Transform::identity(), origin, direction, center, 1e-6, &limits,
             ).unwrap();
             let distance = (0..3).map(|i| (hit[i] - center[i]).powi(2)).sum::<f64>().sqrt();
-            assert!(distance <= brep.display().deflection_mm + 1e-6, "face {index}: {distance}");
+            assert!(distance <= display.deflection_mm + 1e-6, "face {index}: {distance}");
             checked += 1;
         }
     }
@@ -48,11 +93,9 @@ fn existing_v4_brep_face_ids_resolve_to_their_original_surfaces() {
 fn brep_display_is_an_occluder_even_without_reference_permission() {
     let limits = Limits::default();
     let sphere = om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap();
-    let mut document = Document::with_template_tolerance("B-rep occlusion");
-    let entity = Entity::new("front", Geometry::Brep(sphere), None);
-    let id = entity.id;
-    document.entities.insert(id, entity);
-    let mut scene = om9_scene::scene::Scene::capture(std::sync::Arc::new(document), 0, &limits).unwrap();
+    let document = Document::with_template_tolerance("B-rep occlusion");
+    let (controller, id) = controller_with_brep_fixture(document, "front", sphere, limits);
+    let mut scene = om9_scene::scene::Scene::capture_in_world(controller.coordinator(), controller.document().id, Default::default()).unwrap();
     let object = scene.objects.iter_mut().find(|object| object.root == id).unwrap();
     object.selectable = false;
     object.reference_snappable = false;
@@ -69,11 +112,8 @@ fn analytic_sphere_silhouette_surface_candidate_coverage() {
     let limits = Limits::default();
     let radius = 5.0_f64;
     let sphere = om9_kernel::brep::sphere_brep(radius, radius * 0.1, &limits).unwrap();
-    let mut document = Document::with_template_tolerance("sphere silhouette coverage");
-    let entity = Entity::new("sphere", Geometry::Brep(sphere), None);
-    let id = entity.id;
-    document.entities.insert(id, entity);
-    let controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let document = Document::with_template_tolerance("sphere silhouette coverage");
+    let (controller, id) = controller_with_brep_fixture(document, "sphere", sphere, limits);
     let camera = Camera::orthographic([0., 0., 20.], [0., 0., 0.], [0., 1., 0.], 12.).unwrap();
     let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
     let mut found = 0;
@@ -110,11 +150,8 @@ fn coarse_sphere_face_hit_needs_kernel_refinement_for_world_coordinates() {
     let limits = Limits::default();
     for radius in [5.0_f64, 0.05] {
         let sphere = om9_kernel::brep::sphere_brep(radius, radius * 0.1, &limits).unwrap();
-        let mut document = Document::with_template_tolerance("coarse sphere picking");
-        let entity = Entity::new("sphere", Geometry::Brep(sphere), None);
-        let id = entity.id;
-        document.entities.insert(id, entity);
-        let controller = om9_app::session::Controller::new(document, limits).unwrap();
+        let document = Document::with_template_tolerance("coarse sphere picking");
+        let (controller, id) = controller_with_brep_fixture(document, "sphere", sphere, limits);
         let camera = Camera::orthographic(
             [0., 0., radius * 4.],
             [0., 0., 0.],
@@ -325,11 +362,9 @@ fn coarse_sphere_face_hit_needs_kernel_refinement_for_world_coordinates() {
 fn surface_scheduler_coalesces_input_and_rejects_stale_pending_work() {
     use om9_core::budget::memory::MemoryClass;
     let limits = Limits::default();
-    let mut document = Document::with_template_tolerance("surface scheduler");
-    let entity = Entity::new("sphere", Geometry::Brep(om9_kernel::brep::sphere_brep(5., 0.2, &limits).unwrap()), None);
-    let id = entity.id;
-    document.entities.insert(id, entity);
-    let mut controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let document = Document::with_template_tolerance("surface scheduler");
+    let sphere = om9_kernel::brep::sphere_brep(5., 0.2, &limits).unwrap();
+    let (mut controller, id) = controller_with_brep_fixture(document, "sphere", sphere.clone(), limits);
     let camera = Camera::orthographic([0., 0., 20.], [0., 0., 0.], [0., 1., 0.], 12.).unwrap();
     let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
     let input = |controller: &om9_app::session::Controller, x: f64| {
@@ -401,7 +436,7 @@ fn surface_scheduler_coalesces_input_and_rejects_stale_pending_work() {
 
     // Identical candidate IDs/revisions in a replaced document must schedule
     // fresh work, not deduplicate against the older active request.
-    let same_ids = om9_app::session::Controller::new(controller.document().clone(), limits).unwrap();
+    let same_ids = controller_with_brep_displays(controller.document().clone(), vec![(id, sphere)], limits);
     let (cursor, candidates) = input(&controller, 1.2);
     let guard = controller.coordinator().reserve_external_memory(MemoryClass::Kernel, 1024 * 1024, None).unwrap();
     scheduler.submit(&controller, candidates.clone(), camera.clone(), viewport, cursor, guard).unwrap();
@@ -487,11 +522,8 @@ fn surface_worker_and_stl_export_use_the_same_immutable_source() {
     let limits = Limits::default();
     let sphere = om9_kernel::brep::sphere_brep(5., 0.2, &limits).unwrap();
     let original_source = sphere.source().to_owned();
-    let mut document = Document::with_template_tolerance("surface and STL concurrency");
-    let entity = Entity::new("sphere", Geometry::Brep(sphere), None);
-    let id = entity.id;
-    document.entities.insert(id, entity);
-    let mut controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let document = Document::with_template_tolerance("surface and STL concurrency");
+    let (mut controller, id) = controller_with_brep_fixture(document, "sphere", sphere, limits);
     controller.select_objects(&[id]).unwrap();
     let capture = controller.capture_stl_selected().unwrap();
     let camera = Camera::orthographic([0., 0., 20.], [0., 0., 0.], [0., 1., 0.], 12.).unwrap();
@@ -544,11 +576,8 @@ fn surface_worker_receipt_rejects_stale_cursor_camera_and_document() {
     use om9_core::budget::memory::MemoryClass;
     let limits = Limits::default();
     let sphere = om9_kernel::brep::sphere_brep(5., 0.2, &limits).unwrap();
-    let mut document = Document::with_template_tolerance("surface worker");
-    let entity = Entity::new("sphere", Geometry::Brep(sphere), None);
-    let id = entity.id;
-    document.entities.insert(id, entity);
-    let mut controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let document = Document::with_template_tolerance("surface worker");
+    let (mut controller, id) = controller_with_brep_fixture(document, "sphere", sphere.clone(), limits);
     let camera = Camera::orthographic([0., 0., 20.], [0., 0., 0.], [0., 1., 0.], 12.).unwrap();
     let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
     let cursor = camera.project([2., 1., 20_f64.sqrt()], viewport).unwrap().unwrap().screen;
@@ -592,7 +621,7 @@ fn surface_worker_receipt_rejects_stale_cursor_camera_and_document() {
     assert!(get_receipt(&controller).accept(&controller, &changed_camera, viewport, cursor).is_err());
     let another = om9_app::session::Controller::new(Document::with_template_tolerance("another document"), limits).unwrap();
     assert!(get_receipt(&controller).accept(&another, &camera, viewport, cursor).is_err());
-    let same_ids = om9_app::session::Controller::new(controller.document().clone(), limits).unwrap();
+    let same_ids = controller_with_brep_displays(controller.document().clone(), vec![(id, sphere)], limits);
     assert!(get_receipt(&controller).accept(&same_ids, &camera, viewport, cursor).is_err(),
         "a replacement document allocation with identical IDs and revisions must reject an old receipt");
     let wrong_guard = another.coordinator().reserve_external_memory(MemoryClass::Kernel, 1024 * 1024, None).unwrap();
@@ -685,11 +714,9 @@ fn a_single_box_exposes_each_intersected_face_for_canonical_depth_comparison() {
     let brep = om9_kernel::creation::primitive(
         om9_kernel::creation::Primitive::Box { x_mm: 10., y_mm: 10., z_mm: 10. }, 0.1, &limits,
     ).unwrap();
-    let entity = Entity::new("box", Geometry::Brep(brep), None);
-    let id = entity.id;
-    let mut document = Document::with_template_tolerance("box face candidates");
-    document.entities.insert(id, entity);
-    let controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let display = brep.display().clone();
+    let document = Document::with_template_tolerance("box face candidates");
+    let (controller, id) = controller_with_brep_fixture(document, "box", brep, limits);
     let camera = Camera::orthographic([5., 5., 30.], [5., 5., 0.], [0., 1., 0.], 15.).unwrap();
     let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
     let cursor = camera.project([4., 4., 10.], viewport).unwrap().unwrap().screen;
@@ -732,7 +759,6 @@ fn a_single_box_exposes_each_intersected_face_for_canonical_depth_comparison() {
         "a face ID changed without a matching display witness must be rejected");
     // Bind the missed face to its real display triangle. This synthetic broad-phase
     // false positive exercises a valid face whose exact ray misses, not a forged ID.
-    let display = brep.display();
     let face_index = brep.topology().faces.iter().position(|face| *face == missed_face).unwrap();
     let (triangle_index, triangle) = display.triangles.iter().enumerate()
         .find(|(_, triangle)| triangle[3] as usize == face_index).unwrap();
@@ -758,16 +784,18 @@ fn a_single_box_exposes_each_intersected_face_for_canonical_depth_comparison() {
 fn overlapping_surface_candidates_prefer_the_visible_front_sphere() {
     let limits = Limits::default();
     let sphere = om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap();
-    let first = Entity::new("first", Geometry::Brep(sphere.clone()), None);
-    let second = Entity::new("second", Geometry::Brep(sphere), None);
+    let source = sphere.clone().into_canonical_and_representation().0;
+    let first = Entity::new("first", Geometry::Brep(source.clone()), None);
+    let second = Entity::new("second", Geometry::Brep(source), None);
     let (mut back, mut front) = if first.id < second.id { (first, second) } else { (second, first) };
     back.placement = Transform::translation([0., 0., -5.]);
     front.placement = Transform::translation([0., 0., 5.]);
     let front_id = front.id;
     let mut document = Document::with_template_tolerance("overlapping surface picking");
-    document.entities.insert(back.id, back);
+    let back_id = back.id;
+    document.entities.insert(back_id, back);
     document.entities.insert(front.id, front);
-    let controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let controller = controller_with_brep_displays(document, vec![(back_id, sphere.clone()), (front_id, sphere)], limits);
     let viewport = Viewport { origin: [0., 0.], size: [640., 640.] };
     let expected = [1., 0.5, 5. + (9_f64 - 1. - 0.25).sqrt()];
     for camera in [
@@ -801,11 +829,8 @@ fn overlapping_surface_candidates_prefer_the_visible_front_sphere() {
 fn perspective_surface_snap_matches_sphere_and_rejects_outdated_context() {
     let limits = Limits::default();
     let sphere = om9_kernel::brep::sphere_brep(5., 0.5, &limits).unwrap();
-    let mut document = Document::with_template_tolerance("perspective sphere picking");
-    let entity = Entity::new("sphere", Geometry::Brep(sphere), None);
-    let id = entity.id;
-    document.entities.insert(id, entity);
-    let mut controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let document = Document::with_template_tolerance("perspective sphere picking");
+    let (mut controller, id) = controller_with_brep_fixture(document, "sphere", sphere, limits);
     let camera = Camera::perspective([0., 0., 20.], [0., 0., 0.], [0., 1., 0.], 0.8).unwrap();
     let viewport = Viewport { origin: [12., 18.], size: [640., 480.] };
     let expected = [2., 1., 20_f64.sqrt()];
@@ -854,11 +879,8 @@ fn perspective_surface_snap_refines_shared_triangle_edge_after_preview() {
 #[test]
 fn surface_candidate_index_tracks_preview_and_cancellation() {
     let limits = Limits::default();
-    let mut document = Document::with_template_tolerance("surface preview index");
-    let entity = Entity::new("sphere", Geometry::Brep(om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap()), None);
-    let id = entity.id;
-    document.entities.insert(id, entity);
-    let mut controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let document = Document::with_template_tolerance("surface preview index");
+    let (mut controller, id) = controller_with_brep_fixture(document, "sphere", om9_kernel::brep::sphere_brep(3., 0.1, &limits).unwrap(), limits);
     controller.select_objects(&[id]).unwrap();
     let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
     let find = |controller: &om9_app::session::Controller, x: f64| {
@@ -884,12 +906,13 @@ fn surface_snap_uses_first_hit_inside_the_camera_clip_slab() {
     let sphere = om9_kernel::brep::sphere_brep(2., 0.1, &limits).unwrap();
     for is_brep in [false, true] {
     let mut document = Document::with_template_tolerance("clipped surface");
-    let geometry = if is_brep { Geometry::Brep(sphere.clone()) } else { Geometry::Surface(surface.clone()) };
+    let geometry = if is_brep { Geometry::Brep(sphere.clone().into_canonical_and_representation().0) } else { Geometry::Surface(surface.clone()) };
     let mut entity = Entity::new("surface", geometry, None);
     if is_brep { entity.placement = Transform::translation([0., 0., 5.]); }
     let id = entity.id;
     document.entities.insert(id, entity);
-    let controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let controller = if is_brep { controller_with_brep_displays(document, vec![(id, sphere.clone())], limits) }
+        else { om9_app::session::Controller::new(document, limits).unwrap() };
     for perspective in [false, true] {
     let mut camera = if perspective {
         Camera::perspective([20., 0., 5.], [0., 0., 5.], [0., 0., 1.], 0.8).unwrap()
@@ -897,12 +920,13 @@ fn surface_snap_uses_first_hit_inside_the_camera_clip_slab() {
     camera.near_mm = 20.;
     let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
     let screen = [300., 300.];
-    let snaps = om9_scene::osnap::candidates(controller.scene().unwrap(), &camera, viewport, screen, Default::default(), None).unwrap();
+    let settings = om9_scene::osnap::SnapSettings { enabled: om9_scene::osnap::SnapKind::Surface.bit(), ..Default::default() };
+    let snaps = om9_scene::osnap::candidates(controller.scene().unwrap(), &camera, viewport, screen, settings, None).unwrap();
     let candidate = snaps.iter().find(|snap| snap.kind == om9_scene::osnap::SnapKind::Surface && snap.root == Some(id)).expect("visible rear surface candidate");
     let hit = controller.refine_surface_snap(candidate, &camera, viewport).unwrap();
     assert!((hit.world[0] + 2.).abs() < 1e-7, "{:?}", hit.world);
     camera.far_mm = 21.;
-    let clipped = om9_scene::osnap::candidates(controller.scene().unwrap(), &camera, viewport, screen, Default::default(), None).unwrap();
+    let clipped = om9_scene::osnap::candidates(controller.scene().unwrap(), &camera, viewport, screen, settings, None).unwrap();
     assert!(!clipped.iter().any(|snap| snap.kind == om9_scene::osnap::SnapKind::Surface && snap.root == Some(id)));
     }
     }
@@ -912,11 +936,8 @@ fn surface_snap_uses_first_hit_inside_the_camera_clip_slab() {
 fn off_axis_sphere_snap_respects_camera_clip_planes() {
     let limits = Limits::default();
     let sphere = om9_kernel::brep::sphere_brep(2., 0.05, &limits).unwrap();
-    let mut document = Document::with_template_tolerance("off-axis clipping");
-    let entity = Entity::new("sphere", Geometry::Brep(sphere), None);
-    let id = entity.id;
-    document.entities.insert(id, entity);
-    let controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let document = Document::with_template_tolerance("off-axis clipping");
+    let (controller, id) = controller_with_brep_fixture(document, "sphere", sphere, limits);
     let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
     let cursor = [330., 270.];
     for perspective in [false, true] {
@@ -960,7 +981,8 @@ fn nurbs_cylinder_snap_selects_first_forward_hit_and_rejects_stale_context() {
         let camera = Camera::perspective([20., 0., 7.5], [0., 0., 7.5], [0., 0., 1.], 0.8).unwrap();
         let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
         let screen = [300., 300.];
-        let snaps = om9_scene::osnap::candidates(controller.scene().unwrap(), &camera, viewport, screen, Default::default(), None).unwrap();
+        let settings = om9_scene::osnap::SnapSettings { enabled: om9_scene::osnap::SnapKind::Surface.bit(), ..Default::default() };
+        let snaps = om9_scene::osnap::candidates(controller.scene().unwrap(), &camera, viewport, screen, settings, None).unwrap();
         let candidate = snaps.iter().find(|snap| snap.kind == om9_scene::osnap::SnapKind::Surface && snap.root == Some(id)).expect("cylinder candidate");
         let hit = controller.refine_surface_snap(candidate, &camera, viewport).unwrap();
         assert!((hit.world[0] - 4.).abs() < 1e-7 && hit.world[1].abs() < 1e-7 && (hit.world[2] - 7.5).abs() < 1e-7, "{:?}", hit.world);
@@ -978,11 +1000,12 @@ fn indexed_brep_face_ray_resolves_every_transformed_box_face() {
     let brep = om9_kernel::brep::box_brep([2., 4., 6.], 0.1, &limits).unwrap();
     for scale_x in [2., -2.] {
         let placement = Transform::scale([scale_x, 0.5, 1.5]).unwrap();
-        let mut document = Document::new("placed box face picking");
-        let mut entity = Entity::new("box", Geometry::Brep(brep.clone()), None);
+        let mut document = Document::with_template_tolerance("placed box face picking");
+        let mut entity = Entity::new("box", Geometry::Brep(brep.clone().into_canonical_and_representation().0), None);
         entity.placement = placement;
-        document.entities.insert(entity.id, entity);
-        let controller = om9_app::session::Controller::new(document, limits).unwrap();
+        let id = entity.id;
+        document.entities.insert(id, entity);
+        let controller = controller_with_brep_displays(document, vec![(id, brep.clone())], limits);
         let center = [scale_x, 1., 4.5];
         let viewport = Viewport {
             origin: [0., 0.],
@@ -1052,7 +1075,7 @@ fn surface_candidate_resolves_the_correct_shared_instance_and_rejects_stale_cont
     let limits = Limits::default();
     let sphere = om9_kernel::brep::sphere_brep(5., 0.5, &limits).unwrap();
     let mut document = Document::with_template_tolerance("shared sphere snaps");
-    let member = Entity::new("member", Geometry::Brep(sphere), None);
+    let member = Entity::new("member", Geometry::Brep(sphere.clone().into_canonical_and_representation().0), None);
     let member_id = member.id;
     let definition = Definition::new("sphere definition", vec![member]);
     let definition_id = definition.id;
@@ -1065,7 +1088,7 @@ fn surface_candidate_resolves_the_correct_shared_instance_and_rejects_stale_cont
     let second_id = second.id;
     document.entities.insert(first_id, first);
     document.entities.insert(second_id, second);
-    let mut controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let mut controller = controller_with_brep_displays(document, vec![(member_id, sphere)], limits);
     let camera = Camera::orthographic([0., 0., 40.], [0., 0., 0.], [0., 1., 0.], 40.).unwrap();
     let viewport = Viewport {
         origin: [0., 0.],
@@ -1133,20 +1156,18 @@ fn hole_face_source_remesh_reconstructs_display_probe() {
         let block = creation::extrude(&profile, [0.,0.,10.], true, deflection, &limits).unwrap();
         let cutter = creation::primitive(Primitive::Cylinder { radius_mm: 2., height_mm: 10. }, deflection, &limits).unwrap();
         let BooleanOutcome::Body(body) = editing::boolean(&block,&cutter,BooleanOp::Difference,deflection,&limits).unwrap() else { panic!("cut") };
-        let mut document = Document::with_template_tolerance("hole source remesh");
-        let entity = Entity::new("body",Geometry::Brep(body.clone()),None);let id=entity.id;
-        document.entities.insert(id,entity);
-        let path=std::env::temp_dir().join(format!("om9-hole-remesh-{}.om9",uuid::Uuid::new_v4()));
-        struct Cleanup(std::path::PathBuf);impl Drop for Cleanup {fn drop(&mut self){let _=std::fs::remove_file(&self.0);}}
-        let _cleanup=Cleanup(path.clone());
-        om9_archive::Archive::save(&path,&document,&limits,&om9_core::transaction::Cancellation::default()).unwrap();
-        let reopened=om9_archive::Archive::open(&path,&limits).unwrap();
+        let document = Document::with_template_tolerance("hole source remesh");
+        let (mut controller,id)=controller_with_brep_fixture(document,"body",body.clone(),limits);
+        let reopened=controller.document();
         let Geometry::Brep(reopened_body)=&reopened.entities[&id].geometry else {panic!("reopened B-rep")};
+        let stamp=reopened.stamp(id).unwrap();
+        let display_pin=controller.scene().unwrap().root_brep_display_pin(&stamp).unwrap().unwrap();
+        let actual=display_pin.display();
         assert_eq!(body.source(),reopened_body.source());
-        assert_eq!(body.display().points,reopened_body.display().points);
-        assert_eq!(body.display().triangles,reopened_body.display().triangles);
+        assert_eq!(body.display().points,actual.points);
+        assert_eq!(body.display().triangles,actual.triangles);
         let captured = om9_kernel::brep::capture_source_topology(reopened_body.source(),deflection,0.3,&limits,|_,_| Ok(())).unwrap();
-        let actual=reopened_body.display();let fresh=captured.brep().display();
+        let fresh=captured.brep().display();
         assert_eq!(actual.points,fresh.points,"same-source mesh vertices at deflection {deflection}");
         assert_eq!(actual.triangles,fresh.triangles,"same-source face triangles at deflection {deflection}");
         assert_eq!(actual.topology.face_edges,fresh.topology.face_edges,"same-source face/edge incidence");
@@ -1161,11 +1182,9 @@ fn hole_face_source_remesh_reconstructs_display_probe() {
         let mut relabeled=actual.triangles.clone();
         relabeled[0][3]=(relabeled[0][3]+1) % actual.topology.faces.len() as u32;
         assert_ne!(relabeled,fresh.triangles,"changing a face association cannot match the fresh source mesh");
-        let mut controller=om9_app::session::Controller::new(reopened,limits).unwrap();
         let stamp=controller.document().stamp(id).unwrap();
         let lease=controller.coordinator().capture_brep_source(&stamp).unwrap();
-        let Geometry::Brep(reopened_body)=&controller.document().entities[&id].geometry else {panic!("reopened B-rep")};
-        let display=reopened_body.display();
+        let display=display_pin.display();
         let triangle=*display.triangles.iter().find(|tri|tri[..3].iter().all(|index|(display.points[*index as usize][2]-10.).abs()<1e-7)).unwrap();
         let witness=std::array::from_fn(|index|display.points[triangle[index] as usize]);
         let cancel=om9_core::transaction::Cancellation::default();
@@ -1218,7 +1237,9 @@ fn indexed_face_refinement_respects_a_trimmed_through_hole() {
     let display = body.display();
     let top = *display.triangles.iter().find(|tri| tri[..3].iter().all(|i| (display.points[*i as usize][2] - 10.).abs() < 1e-7)).unwrap();
     let witness = std::array::from_fn(|i| display.points[top[i] as usize]);
-    editing::verify_face_display(&body, display, top[3] as usize, witness, 1e-6, &limits).unwrap();
+    // This independent all-triangle check conservatively rejects the original
+    // coarse hole chords; source-remesh verification is exercised separately.
+    assert!(editing::verify_face_display(&body, display, top[3] as usize, witness, 1e-6, &limits).is_err());
     let mut through_trim = display.clone();
     let start = through_trim.points.len() as u32;
     for angle in [0., std::f64::consts::TAU / 3., 2. * std::f64::consts::TAU / 3.] {
@@ -1227,11 +1248,8 @@ fn indexed_face_refinement_respects_a_trimmed_through_hole() {
     through_trim.triangles.push([start, start+1, start+2, top[3]]);
     assert!(editing::verify_face_display(&body, &through_trim, top[3] as usize, witness, 1e-6, &limits).is_err(),
         "triangle spanning a trimmed hole must fail even though its vertices lie on the boundary");
-    let mut document = Document::with_template_tolerance("trimmed hole snap");
-    let entity = Entity::new("drilled block", Geometry::Brep(body), None);
-    let id = entity.id;
-    document.entities.insert(id, entity);
-    let controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let document = Document::with_template_tolerance("trimmed hole snap");
+    let (controller, id) = controller_with_brep_fixture(document, "drilled block", body, limits);
     let camera = Camera::orthographic([0., 0., 30.], [0., 0., 0.], [0., 1., 0.], 14.).unwrap();
     let viewport = Viewport { origin: [0., 0.], size: [700., 700.] };
     let cursor = camera.project([3., 1., 10.], viewport).unwrap().unwrap().screen;
@@ -1278,9 +1296,8 @@ fn displayed_hole_chord_does_not_authorize_a_source_surface_hit() {
         }
     }
     assert!(closest.0 < 2.-1e-4, "fixture must exercise a displayed chord inside the exact hole");
-    let mut document=Document::with_template_tolerance("hole chord");
-    let entity=Entity::new("drilled",Geometry::Brep(body),None); let id=entity.id; document.entities.insert(id,entity);
-    let controller=om9_app::session::Controller::new(document,limits).unwrap();
+    let document=Document::with_template_tolerance("hole chord");
+    let (controller,id)=controller_with_brep_fixture(document,"drilled",body,limits);
     let camera=Camera::orthographic([0.,0.,30.],[0.,0.,0.],[0.,1.,0.],14.).unwrap();
     let viewport=Viewport {origin:[0.,0.],size:[700.,700.]};
     let cursor=camera.project(closest.1,viewport).unwrap().unwrap().screen;
@@ -1311,9 +1328,8 @@ fn surface_snap_on_drilled_block_checks_source_through_hole() {
     let block=creation::extrude(&profile,[0.,0.,10.],true,0.2,&limits).unwrap();
     let cutter=creation::primitive(Primitive::Cylinder {radius_mm:2.,height_mm:10.},0.2,&limits).unwrap();
     let BooleanOutcome::Body(body)=editing::boolean(&block,&cutter,BooleanOp::Difference,0.2,&limits).unwrap() else {panic!("cut")};
-    let mut doc=Document::with_template_tolerance("drilled block surface snap");
-    let entity=Entity::new("drilled block",Geometry::Brep(body),None);let id=entity.id;doc.entities.insert(id,entity);
-    let c=om9_app::session::Controller::new(doc,limits).unwrap();
+    let doc=Document::with_template_tolerance("drilled block surface snap");
+    let (c,id)=controller_with_brep_fixture(doc,"drilled block",body,limits);
     let camera=Camera::orthographic([0.,0.,30.],[0.,0.,0.],[0.,1.,0.],14.).unwrap();
     let viewport=Viewport {origin:[0.,0.],size:[700.,700.]};
     let cursor=camera.project([3.,1.,10.],viewport).unwrap().unwrap().screen;
@@ -1330,10 +1346,8 @@ fn surface_snap_on_drilled_block_checks_source_through_hole() {
 fn surface_snap_refines_near_both_sides_of_periodic_sphere_seam() {
     let limits = Limits::default();
     let sphere = om9_kernel::brep::sphere_brep(5., 0.1, &limits).unwrap();
-    let mut document = Document::with_template_tolerance("sphere seam snap");
-    let entity = Entity::new("sphere", Geometry::Brep(sphere), None);
-    document.entities.insert(entity.id, entity);
-    let controller = om9_app::session::Controller::new(document, limits).unwrap();
+    let document = Document::with_template_tolerance("sphere seam snap");
+    let (controller, _) = controller_with_brep_fixture(document, "sphere", sphere, limits);
     let camera = Camera::orthographic([0., 0., 20.], [0., 0., 0.], [0., 1., 0.], 12.).unwrap();
     let viewport = Viewport { origin: [0., 0.], size: [600., 600.] };
     for y in [-0.0001_f64, 0.0, 0.0001] {

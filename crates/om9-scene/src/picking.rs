@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 use crate::{
-    camera::{Camera, Ray, Viewport, add, cross, dot, mul, sub},
+    camera::{Camera, Projected, Projection, Ray, Viewport, add, cross, dot, mul, sub},
     scene::{PickHit, PickIntent, PickKind, RenderBuffers, SceneObject, Subelement},
 };
 
@@ -35,30 +35,23 @@ use om9_core::{
 /// on the edge instead of the label's own guess.
 fn edge_point(
     pointer: [f64; 2],
-    start_screen: [f64; 2],
-    end_screen: [f64; 2],
-    start: om9_core::geometry::Point3,
-    end: om9_core::geometry::Point3,
-    depths: [f64; 2],
-) -> Option<om9_core::geometry::Point3> {
+    [first, last]: [Projected; 2],
+    [start, end]: [Point3; 2],
+    projection: Projection,
+) -> Result<Point3> {
     let ab = [
-        end_screen[0] - start_screen[0],
-        end_screen[1] - start_screen[1],
+        last.screen[0] - first.screen[0],
+        last.screen[1] - first.screen[1],
     ];
-    let ap = [pointer[0] - start_screen[0], pointer[1] - start_screen[1]];
+    let ap = [pointer[0] - first.screen[0], pointer[1] - first.screen[1]];
     let length2 = ab[0] * ab[0] + ab[1] * ab[1];
     let t = if length2 <= 1e-18 {
         0.0
     } else {
         ((ap[0] * ab[0] + ap[1] * ab[1]) / length2).clamp(0.0, 1.0)
     };
-    // Perspective divides by depth: linear screen interpolation is not linear in world space.
-    let t = (t / depths[1]) / ((1.0 - t) / depths[0] + t / depths[1]);
-    Some([
-        start[0] + (end[0] - start[0]) * t,
-        start[1] + (end[1] - start[1]) * t,
-        start[2] + (end[2] - start[2]) * t,
-    ])
+    let t = projection.segment_source_fraction(t, [first.depth, last.depth])?;
+    Ok(add(start, mul(sub(end, start), t)))
 }
 
 /// Closest point of a 2D triangle to `p`, as barycentric `(u, v)` with the third weight `1 - u - v`.
@@ -483,14 +476,7 @@ pub(crate) fn pick_candidates_resolved<'a>(
                         else {
                             continue;
                         };
-                        let depths = match camera.projection {
-                            crate::camera::Projection::Perspective { .. } => [pa.depth, pb.depth],
-                            crate::camera::Projection::Orthographic { .. } => [1., 1.],
-                        };
-                        let Some(point) = edge_point(screen, pa.screen, pb.screen, a, b, depths)
-                        else {
-                            continue;
-                        };
+                        let point = edge_point(screen, [pa, pb], [a, b], camera.projection)?;
                         if let Some(candidate) = hit(
                             scene,
                             object,
@@ -576,21 +562,12 @@ pub(crate) fn pick_candidates_resolved<'a>(
                             continue;
                         };
                         // The edge is picked at the point on it nearest the pointer.
-                        let Some(midpoint) = edge_point(
+                        let midpoint = edge_point(
                             screen,
-                            start.screen,
-                            end.screen,
-                            world_start,
-                            world_end,
-                            match camera.projection {
-                                crate::camera::Projection::Perspective { .. } => {
-                                    [start.depth, end.depth]
-                                }
-                                crate::camera::Projection::Orthographic { .. } => [1., 1.],
-                            },
-                        ) else {
-                            continue;
-                        };
+                            [start, end],
+                            [world_start, world_end],
+                            camera.projection,
+                        )?;
                         if segment_distance(screen, start.screen, end.screen) > tolerance {
                             continue;
                         }

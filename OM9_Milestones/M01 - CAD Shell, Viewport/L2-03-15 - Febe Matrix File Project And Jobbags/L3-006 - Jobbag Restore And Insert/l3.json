@@ -207,6 +207,77 @@
     }
   ],
   "runtime_implementation": {
+    "native_brep_catalog_followup_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "Canonical and native BRep Job Bags passed representative source-preserving insert, scene/pick and Undo/Redo checks; a native Box catalog reloaded and inserted through synthetic sidebar input in a separate test process. Broader dependency combinations and desktop acceptance remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_bag_save_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "The numbered BRep v6 bag Save worker validates native packets before writing the archive. A Box bag was saved and reopened; cancel preserved an existing destination. Broader geometry, native desktop and production build remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_jobbag_scene_worker_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "Numbered BRep Job Bag Load prepares its Paste transaction and candidate scene on a worker, then rechecks the live context and publishes one Undoable edit. Tests include a translated block, cancellation/staleness, insertion into an existing BRep scene and a 1,024-point document. Desktop responsiveness and broader geometry remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "jobbag_dependency_closure_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "Archive root validation accepts the exact dependency closure of selected roots and rejects unrelated extras; a clean-History MatrixApp capture/load and Undo/Redo passed. BRep paste remapping is prepared on the worker. Candidate scene, broad geometry and desktop acceptance remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "filtered_brep_projection_worker_2026_11_18": {
+      "status": "HEADLESS_PARTIAL_VALIDATED",
+      "scope": "Numbered BRep Job Bag filter classification and dependency projection run on a worker; prepared results are rejected after cancellation or project/catalog changes. A translated homogeneous block, mixed-block refusal, no-match and Undo/Redo passed scoped headless tests. Paste remapping, candidate-scene preparation, large-scene latency and desktop remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_filtered_load_2026_11_18": {
+      "status": "PARTIAL_HEADLESS_VALIDATED",
+      "scope": "Numbered v6 Job Bag type filtering validates original roots, expands dependencies and remaps a selected projection. A polysurface fixture preserved BRep roots, a translated homogeneous block and Undo/Redo; no-match and mixed blocks preserved state.",
+      "remaining": "Projection and candidate preparation after native restore run on the UI thread. Project archive import, named snapshots, broader geometry/resource/history cases, native containment and desktop acceptance remain open. The full Projects suite did not finish.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_capture_load_2026_11_18": {
+      "status": "PARTIAL_HEADLESS_VALIDATED",
+      "scope": "Numbered Job Bag BRep capture and Load All run on workers. A command-created, moved Box survived catalog reload, source deletion, insertion into another document and Undo/Redo; canceled and stale captures left the slot unchanged.",
+      "remaining": "Filtered v6 Load, project archive import, named snapshots, broader geometry/dependencies, native capture containment, paired production build and desktop remain open. The full Projects suite did not finish within ten minutes.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "brep_load_all_2026_11_18": {
+      "status": "PARTIAL_HEADLESS_VALIDATED",
+      "scope": "Experimental v6 Job Bag Load All restores on a worker, validates project/slot/selection and exact root manifest, and uses the existing dependency-remapping transaction. A two-box translated-block fixture passed Undo/Redo, cancel, stale and invalid-root checks.",
+      "remaining": "BRep capture and v6 project import are not connected; filtered Load, named snapshots, full dependencies, native capture containment and desktop remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "reserved_brep_dependency_mutations_2026_11_17": {
+      "status": "PREPARATORY_PARTIAL_TEST_ONLY",
+      "scope": "Reserved BRep mutations can coexist with the non-geometry resource and metadata mutation kinds used by paste. An authored BRep plus resource payload committed in one transaction and survived Undo/Redo; a stale resource mutation refused the whole request while preserving Redo.",
+      "remaining": "Only the resource case has BRep integration evidence; layer, metadata and other dependency combinations need end-to-end fixtures. Published BRep history results, native payloads, archive/Job Bag integration and desktop acceptance remain open; the v5 guard remains.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "exact_jobbag_root_set_2026_11_17": {
+      "status": "PARTIAL_AUTOMATED_MANUAL_UI_PENDING",
+      "scope": "A decoded selection archive must contain exactly the top-level roots listed in the Job Bag manifest; dependency tables remain separate. Insert, filtered insert and project import refuse extra, missing or duplicate roots before publication.",
+      "remaining": "BRep archive integration and desktop end-to-end acceptance remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "filtered_nested_instance_reload_2026_11_17": {
+      "status": "PARTIAL_AUTOMATED_MANUAL_UI_PENDING",
+      "scope": "Filtered Load validates archived roots and can resolve a homogeneous legacy UnknownInstance from its archived definitions. An authored nested-mesh and embedded-texture fixture retained placement, remapped resources and Undo/Redo after the original root was deleted and the catalog reopened. A mismatched stored class was refused; mixed blocks and BRep archive support remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
+    "filtered_bag_admission_2026_11_17": {
+      "status": "PARTIAL_AUTOMATED",
+      "scope": "Filtered insert uses configured-budget archive admission and validates snapshot roots. One 65 MiB embedded texture passed insertion and Undo/Redo at a 2 GiB configured limit; budget and invalid-root failures preserved the target.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md",
+      "remaining": "Physical and GPU peak, desktop filtering and broader asset types remain unverified."
+    },
+    "native_selection_p07_2026_11_17": {
+      "status": "PARTIAL_NATIVE_FIXTURES",
+      "scope": "SDK-authored point and nested mirrored instance passed insertion, Undo/Redo, 3DM publication and reimport; nested world-space point coordinates were checked. BRep and arbitrary native tables remain open.",
+      "evidence": "docs/validation/2026-11-17-project-manager-p07.md"
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
@@ -224,7 +295,7 @@
     "human_approval": null,
     "remaining": [
       "Manual M01-UI visual review pending.",
-      "Job Bag state is in-session; project-file embedding is not claimed."
+      "Point, resource, nested-instance and representative canonical/native BRep cases have scoped P07 evidence; arbitrary geometry and dependencies, full native desktop workflow and visual/DPI acceptance remain open."
     ],
     "last_verified": {
       "date": "2026-10-22",
@@ -241,6 +312,13 @@
       "evidence": "implementation/evidence/M01/2026-10-22-l2-03-15-project-jobbags-checks.json",
       "logs": "build/standalone-validation/ui-artifacts/m01-l2-03-15-20261022/acceptance.log",
       "note": "Job Bag state embedded as .om9 resource and restored on Open; Master restore live; manual M01-UI pending."
+    },
+    "project_manager_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "AUDIT_ONLY_GAPS_OPEN",
+      "scope": "Image-led Project Manager audit: eight existing integration tests pass; six model gaps reproduced; twenty gaps planned. No implementation or manual gate promotion.",
+      "plan": "docs/plans/2026-11-17-project-manager-gap-plan.md",
+      "evidence": "docs/validation/2026-11-17-project-manager-audit.json"
     }
   }
 }

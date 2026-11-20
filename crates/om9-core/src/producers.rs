@@ -28,11 +28,12 @@ use crate::{
     model::Document,
     request::Value,
 };
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 pub const RING_RAIL_COMMAND: &str = "RingRail";
 pub const RAIL_PROFILE_COMMAND: &str = "RailProfile";
 pub const RAIL_SWEEP_COMMAND: &str = "RailSweep";
+pub const JOIN_HISTORY_COMMAND: &str = "JoinHistory";
 
 fn unit(vector: Point3) -> Result<Point3> {
     finite(vector)?;
@@ -165,9 +166,67 @@ impl SweepBackend for SurfaceSweepBackend {
 /// producer returns geometry for exactly those objects.
 pub trait FeatureProducer {
     fn produce(&self, request: &RebuildRequest) -> Result<Vec<crate::associative::RebuiltOutput>>;
+    /// Opt in to receiving caller-supplied geometry limits. This does not reserve
+    /// process memory or certify every temporary allocation made by a producer.
+    fn produce_with_limits(&self, _request: &RebuildRequest, _limits: &Limits,
+        _cancel: &crate::transaction::Cancellation)
+        -> Result<Vec<crate::associative::RebuiltOutput>> {
+        Err(Error::Unsupported("limited history producer"))
+    }
     fn produce_with_candidates(&self, request: &RebuildRequest)
         -> Result<(Vec<crate::associative::RebuiltOutput>, Vec<crate::brep::Brep>)> {
         Ok((self.produce(request)?, Vec::new()))
+    }
+    fn produce_limited_with_candidates(&self, request: &RebuildRequest, limits: &Limits,
+        cancel: &crate::transaction::Cancellation)
+        -> Result<(Vec<crate::associative::RebuiltOutput>, Vec<crate::brep::Brep>)> {
+        Ok((self.produce_with_limits(request, limits, cancel)?, Vec::new()))
+    }
+}
+
+/// Rebuild a joined curve from the current canonical parent entities.
+pub struct JoinHistoryProducer;
+
+impl FeatureProducer for JoinHistoryProducer {
+    fn produce(&self, request: &RebuildRequest) -> Result<Vec<crate::associative::RebuiltOutput>> {
+        self.produce_with_limits(request, &Limits::default(), &crate::transaction::Cancellation::default())
+    }
+    fn produce_with_limits(&self, request: &RebuildRequest, limits: &Limits,
+        cancel: &crate::transaction::Cancellation)
+        -> Result<Vec<crate::associative::RebuiltOutput>> {
+        let output = single_output(request)?;
+        let tolerance = positive_length(request, "tolerance_mm")?;
+        let mut scratch = Usage::btree::<ObjectId, ()>(request.inputs.len())?;
+        scratch.add(Usage::array::<&crate::model::Entity>(request.inputs.len())?, limits)?;
+        for input in &request.inputs {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            let Geometry::Curve(curve) = &input.entity.geometry else {
+                return Err(Error::Invalid("producer curve input"));
+            };
+            scratch.add(curve.validate(&limits.remaining_after(scratch)?)?, limits)?;
+        }
+        let mut seen = std::collections::BTreeSet::new();
+        if request.inputs.iter().any(|input| {
+            input.role != "curve"
+                || input.object != input.entity.id
+                || input.object == output
+                || !seen.insert(input.object)
+        }) {
+            return Err(Error::Invalid("join history inputs"));
+        }
+        let mut entities = Vec::new();
+        entities
+            .try_reserve_exact(request.inputs.len())
+            .map_err(|_| Error::Budget("join history inputs"))?;
+        entities.extend(request.inputs.iter().map(|input| &input.entity));
+        let curve = crate::top11::join_curve_entities_guarded(
+            &entities, tolerance, &limits.remaining_after(scratch)?,
+            &mut || if cancel.is_canceled() { Err(Error::Canceled) } else { Ok(()) },
+        )?;
+        Ok(vec![crate::associative::RebuiltOutput {
+            object: output,
+            geometry: Geometry::Curve(curve),
+        }])
     }
 }
 
@@ -183,22 +242,39 @@ impl FeatureProducer for RingRailProducer {
     fn produce(&self, request: &RebuildRequest) -> Result<Vec<crate::associative::RebuiltOutput>> {
         let output = single_output(request)?;
         let standard = match request.parameters.get("standard") {
-            None => None,
-            Some(Value::Choice(id)) => crate::ring_size::standard_from_id(id)?,
+            None => "explicit",
+            Some(Value::Choice(id)) => id.as_str(),
             Some(_) => return Err(Error::Invalid("ring size standard")),
         };
-        let diameter = match standard {
-            Some(standard) => {
-                let size = request
-                    .parameters
-                    .get("us_size")
-                    .ok_or(Error::Missing("US ring size"))?
-                    .as_count()?;
-                let size = u8::try_from(size).map_err(|_| Error::Invalid("US ring size 1..15"))?;
-                standard.diameter_mm(size)?
-            }
-            None => positive_length(request, "diameter_mm")?,
+        let diameter = if standard.eq_ignore_ascii_case("explicit") || standard.eq_ignore_ascii_case("VNM") || standard.is_empty() {
+            positive_length(request, "diameter_mm")?
+        } else {
+            let size = match request.parameters.get("us_size") {
+                Some(Value::Quantity { value, dimension: crate::request::Dimension::Count | crate::request::Dimension::Ratio }) => *value,
+                _ => return Err(Error::Invalid("ring size value")),
+            };
+            crate::ring_size::rail_diameter_mm(standard, size)?
         };
+        if let Some(frame_value) = request.parameters.get("rail_frame") {
+            let diameter = crate::ring_size::rail_diameter_mm("diameter", diameter)?;
+            let Value::Choice(frame) = frame_value else { return Err(Error::Invalid("ring rail frame")) };
+            if !matches!(frame.as_str(), "front" | "xy") { return Err(Error::Unsupported("ring rail frame")); }
+            let factor = match request.parameters.get("model_mm_per_unit") { None => 1., Some(value) => value.as_ratio()? };
+            if !factor.is_finite() || factor <= 0. { return Err(Error::Invalid("ring rail model units")); }
+            let coordinate = |name| -> Result<f64> {
+                if request.parameters.contains_key(name) { length_parameter(request, name) } else { Ok(0.) }
+            };
+            let center = [coordinate("center_x_mm")? / factor, coordinate("center_y_mm")? / factor, coordinate("center_z_mm")? / factor];
+            let curve = match request.parameters.get("custom_rail") {
+                None => crate::ring_size::rail_curve(center, diameter / factor, frame)?,
+                Some(Value::Text(text)) => crate::ring_rail_shape::RailShape::from_json(text, &Limits::default())?
+                    .sized_curve(diameter, center, frame, factor, &Limits::default())?,
+                _ => return Err(Error::Invalid("custom Ring Rail snapshot")),
+            };
+            return Ok(vec![crate::associative::RebuiltOutput { object: output,
+                geometry: Geometry::Curve(curve) }]);
+        }
+        // Recipes predating rail_frame retain their original XY orientation.
         let radius = diameter / 2.0;
         if !radius.is_finite() || radius <= 0.0 {
             return Err(Error::Invalid("ring rail radius"));
@@ -337,6 +413,11 @@ pub struct RailProfileProducer;
 
 impl FeatureProducer for RailProfileProducer {
     fn produce(&self, request: &RebuildRequest) -> Result<Vec<crate::associative::RebuiltOutput>> {
+        self.produce_with_limits(request, &Limits::default(), &crate::transaction::Cancellation::default())
+    }
+    fn produce_with_limits(&self, request: &RebuildRequest, limits: &Limits,
+        cancel: &crate::transaction::Cancellation) -> Result<Vec<crate::associative::RebuiltOutput>> {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
         let output = single_output(request)?;
         let rail = input_curve(request, "rail")?;
         let width = positive_length(request, "width_mm")?;
@@ -354,7 +435,6 @@ impl FeatureProducer for RailProfileProducer {
             }
             Some(_) => return Err(Error::Invalid("profile preset")),
         };
-        let limits = Limits::default();
         let position = ratio_parameter(request, "position")?;
         if !(0.0..=1.0).contains(&position) {
             return Err(Error::Invalid("profile position 0..1"));
@@ -401,6 +481,13 @@ impl FeatureProducer for RailProfileProducer {
 pub struct OutsideRailProducer;
 
 impl FeatureProducer for OutsideRailProducer {
+    fn produce_with_limits(&self, request: &RebuildRequest, limits: &Limits,
+        cancel: &crate::transaction::Cancellation) -> Result<Vec<crate::associative::RebuiltOutput>> {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        let outputs = self.produce(request)?;
+        for output in &outputs { output.geometry.validate(limits)?; }
+        Ok(outputs)
+    }
     fn produce(&self, request: &RebuildRequest) -> Result<Vec<crate::associative::RebuiltOutput>> {
         let output = single_output(request)?;
         let rail = input_curve(request, "rail")?;
@@ -520,6 +607,12 @@ impl<B: SweepBackend> FeatureProducer for RailSweepProducer<B> {
     }
     fn produce_with_candidates(&self, request: &RebuildRequest)
         -> Result<(Vec<crate::associative::RebuiltOutput>, Vec<crate::brep::Brep>)> {
+        self.produce_limited_with_candidates(request, &Limits::default(), &crate::transaction::Cancellation::default())
+    }
+    fn produce_limited_with_candidates(&self, request: &RebuildRequest, limits: &Limits,
+        cancel: &crate::transaction::Cancellation)
+        -> Result<(Vec<crate::associative::RebuiltOutput>, Vec<crate::brep::Brep>)> {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
         let output = single_output(request)?;
         let rail = input_curve(request, "rail")?;
         let profile = input_curve(request, "profile")?;
@@ -528,11 +621,14 @@ impl<B: SweepBackend> FeatureProducer for RailSweepProducer<B> {
         // Older or generic sweep recipes leave the flag absent and keep their previous
         // open-rail behavior instead of failing to replay.
         if boolean_parameter(request, "closed_rail")? {
-            crate::curve_ops::validate_ring_rail(rail, 1.0e-6, &Limits::default())?;
+            crate::curve_ops::validate_ring_rail(rail, 1.0e-6, limits)?;
         }
         let (geometry, candidates) = self
             .backend
-            .sweep_with_candidates(rail, profile, solid, &Limits::default())?;
+            .sweep_with_candidates(rail, profile, solid, limits)?;
+        // Native calls can finish after cancellation; their private result must
+        // still be discarded before topology or publication.
+        if cancel.is_canceled() { return Err(Error::Canceled); }
         Ok((vec![crate::associative::RebuiltOutput {
             object: output,
             geometry,
@@ -832,11 +928,31 @@ impl ProducerRegistry {
         }
         Ok(ProducedFeature { outputs, subshapes, brep_candidates })
     }
+
+    /// Candidate recompute refuses producers that do not accept caller limits.
+    fn produce_with_limits(&self, request: &RebuildRequest, limits: &Limits,
+        cancel: &crate::transaction::Cancellation) -> Result<ProducedFeature> {
+        let producer = self.producers.get(&request.command)
+            .ok_or(Error::Unsupported("history producer"))?;
+        let (outputs, brep_candidates) = producer.produce_limited_with_candidates(request, limits, cancel)?;
+        let mut subshapes = Vec::new();
+        subshapes.try_reserve_exact(outputs.len()).map_err(|_| Error::Budget("history subshapes"))?;
+        for output in &outputs {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            subshapes.push(ProducedSubshapes {
+                output: output.object,
+                subshapes: self.topology.subshapes(&output.geometry, limits)?,
+            });
+        }
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        Ok(ProducedFeature { outputs, subshapes, brep_candidates })
+    }
 }
 
 /// The reference producer set for the builder chain, using the analytic sweep backend.
 pub fn reference_registry() -> Result<ProducerRegistry> {
     let mut registry = ProducerRegistry::new();
+    registry.register(JOIN_HISTORY_COMMAND, JoinHistoryProducer)?;
     registry.register(RING_RAIL_COMMAND, RingRailProducer)?;
     registry.register(RAIL_PROFILE_COMMAND, RailProfileProducer)?;
     registry.register(
@@ -864,6 +980,198 @@ pub fn recompute_registered(
     crate::associative::recompute_with(document, cache, id, None, |request| registry.produce(request))
 }
 
+/// Rebuild affected dependents on a private candidate, in dependency order.
+///
+/// The caller owns the candidate and cache and must discard both on an error, a
+/// cancellation, or a returned `Failed` outcome. This function does not publish
+/// or create an Undo entry. The caller must account for the candidate and producer
+/// allocations separately. Producers without an implementation that accepts these
+/// limits are refused; native BRep representation handoff is not supported here.
+pub fn recompute_dependents(
+    document: &mut Document,
+    cache: &mut RecomputeCache,
+    changed: &BTreeSet<ObjectId>,
+    registry: &ProducerRegistry,
+    limits: &Limits,
+    cancel: &crate::transaction::Cancellation,
+) -> Result<Vec<RecomputeOutcome>> {
+    recompute_dependents_for(document, cache, changed, registry, limits, cancel, None, &mut None, &mut None)
+}
+
+fn recompute_dependents_for(
+    document: &mut Document,
+    cache: &mut RecomputeCache,
+    changed: &BTreeSet<ObjectId>,
+    registry: &ProducerRegistry,
+    limits: &Limits,
+    cancel: &crate::transaction::Cancellation,
+    only_command: Option<&str>,
+    admit_snapshot: &mut Option<&mut dyn FnMut(&Document, &crate::history::Recipe) -> Result<()>>,
+    candidates: &mut Option<&mut Vec<crate::brep::Brep>>,
+) -> Result<Vec<RecomputeOutcome>> {
+    if cancel.is_canceled() {
+        return Err(Error::Canceled);
+    }
+    if changed.is_empty() {
+        return Ok(Vec::new());
+    }
+    let output_count = document.history.recipes.values().try_fold(changed.len(), |count, recipe| {
+        count.checked_add(recipe.outputs.len()).ok_or(Error::Overflow("dependent history outputs"))
+    })?;
+    let mut held = Usage::btree::<ObjectId, ()>(output_count)?;
+    held.add(Usage::array::<RecomputeOutcome>(document.history.recipes.len())?, limits)?;
+    let order = document.history.execution_order_bounded(limits, held)?;
+    let mut affected = changed.clone();
+    let mut outcomes = Vec::new();
+    outcomes.try_reserve_exact(order.len()).map_err(|_| Error::Budget("dependent history outcomes"))?;
+    for id in order {
+        if cancel.is_canceled() {
+            return Err(Error::Canceled);
+        }
+        let recipe = document.history.recipes.get(&id).ok_or(Error::Missing("history recipe"))?;
+        if recipe.state == crate::history::EvaluationState::Detached
+            || !recipe.inputs.iter().any(|input| affected.contains(&input.source.object))
+            || !recipe.policy.update
+        {
+            continue;
+        }
+        if recipe.policy.lock {
+            return Err(Error::Permission("frozen history"));
+        }
+        if only_command.is_some_and(|command| recipe.command != command) {
+            return Err(Error::Unsupported("dependent history producer handoff"));
+        }
+        if let Some(admit) = admit_snapshot.as_mut() { admit(document, recipe)?; }
+        if only_command == Some(JOIN_HISTORY_COMMAND) {
+            let mut inputs = BTreeSet::new();
+            for input in &recipe.inputs {
+                if !inputs.insert(input.source.object) {
+                    return Err(Error::Invalid("duplicate join history input"));
+                }
+            }
+        }
+        let producer_limits = limits.remaining_after(held)?;
+        let mut produced_candidates = Vec::new();
+        let outcome = crate::associative::recompute_with(document, cache, id,
+            candidates.as_ref().map(|_| &mut produced_candidates),
+            |request| registry.produce_with_limits(request, &producer_limits, cancel))?;
+        if let Some(candidates) = candidates.as_mut() {
+            candidates.try_reserve(produced_candidates.len()).map_err(|_| Error::Budget("dependent BRep candidates"))?;
+            candidates.extend(produced_candidates);
+        }
+        if cancel.is_canceled() {
+            return Err(Error::Canceled);
+        }
+        if let RecomputeOutcome::Rebuilt { outputs, .. } = &outcome {
+            affected.extend(outputs.iter().copied());
+        }
+        let failed = matches!(outcome, RecomputeOutcome::Failed { .. });
+        outcomes.push(outcome);
+        if failed {
+            break;
+        }
+    }
+    Ok(outcomes)
+}
+
+/// Assemble Join History updates for a source edit already applied to a private
+/// candidate. The caller owns and accounts for the candidate, inputs and returned
+/// mutations, and must discard the candidate on any error or cancellation. The
+/// caller appends these mutations to the original source edit and prepares one
+/// transaction; this function never publishes or writes an Undo entry. The
+/// candidate must come from preparing precisely that source edit against `before`;
+/// the identity, revision and source-stamp checks do not prove its provenance.
+pub fn join_history_updates_from_candidate(
+    before: &Document,
+    candidate: &mut Document,
+    changed: &BTreeSet<ObjectId>,
+    registry: &ProducerRegistry,
+    limits: &Limits,
+    cancel: &crate::transaction::Cancellation,
+) -> Result<Vec<crate::transaction::Mutation>> {
+    join_history_updates_with_admission(before, candidate, changed, registry, limits, cancel, None)
+}
+
+pub(crate) fn join_history_updates_with_admission(
+    before: &Document, candidate: &mut Document, changed: &BTreeSet<ObjectId>,
+    registry: &ProducerRegistry, limits: &Limits, cancel: &crate::transaction::Cancellation,
+    admit_snapshot: Option<&mut dyn FnMut(&Document, &crate::history::Recipe) -> Result<()>>,
+) -> Result<Vec<crate::transaction::Mutation>> {
+    dependent_history_updates_with_admission(before, candidate, changed, registry, limits, cancel,
+        Some(JOIN_HISTORY_COMMAND), admit_snapshot, None)
+}
+
+/// Rebuild an admitted private candidate in dependency order, retaining native
+/// representations beside their canonical sources until the host stages them.
+pub(crate) fn dependent_history_updates_with_admission(
+    before: &Document,
+    candidate: &mut Document,
+    changed: &BTreeSet<ObjectId>,
+    registry: &ProducerRegistry,
+    limits: &Limits,
+    cancel: &crate::transaction::Cancellation,
+    only_command: Option<&str>,
+    mut admit_snapshot: Option<&mut dyn FnMut(&Document, &crate::history::Recipe) -> Result<()>>,
+    mut candidates: Option<&mut Vec<crate::brep::Brep>>,
+) -> Result<Vec<crate::transaction::Mutation>> {
+    use crate::{associative::RecomputeOutcome, transaction::Mutation};
+    if before.id != candidate.id || before.owner_session != candidate.owner_session
+        || before.epoch != candidate.epoch || before.session_generation != candidate.session_generation
+        || before.revision.checked_add(1) != Some(candidate.revision)
+    {
+        return Err(Error::Stale("dependent history candidate"));
+    }
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    for id in changed {
+        if before.stamp(*id)? == candidate.stamp(*id)? {
+            return Err(Error::Invalid("unchanged dependent history source"));
+        }
+    }
+    let mut cache = RecomputeCache::default();
+    let outcomes = recompute_dependents_for(candidate, &mut cache, changed, registry, limits, cancel,
+        only_command, &mut admit_snapshot, &mut candidates)?;
+    let mut recipes = Vec::new();
+    let mut published = Vec::new();
+    let mut updates = Vec::new();
+    let mut seen_outputs = BTreeSet::new();
+    for outcome in outcomes {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        match outcome {
+            RecomputeOutcome::Rebuilt { recipe, outputs, .. } => {
+                let record = candidate.history.recipes.get(&recipe).ok_or(Error::Missing("dependent history recipe"))?;
+                if only_command.is_some_and(|command| record.command != command) {
+                    return Err(Error::Unsupported("dependent history producer handoff"));
+                }
+                if let Some(admit) = admit_snapshot.as_mut() { admit(candidate, record)?; }
+                recipes.try_reserve(1).map_err(|_| Error::Budget("dependent history recipes"))?;
+                recipes.push(Box::new(record.clone()));
+                for output in outputs {
+                    if changed.contains(&output) || !seen_outputs.insert(output) {
+                        return Err(Error::Invalid("dependent history output conflict"));
+                    }
+                    if seen_outputs.len() as u64 > limits.max_outputs { return Err(Error::Budget("dependent history outputs")); }
+                    let entity = candidate.entities.get(&output).ok_or(Error::Missing("dependent history output"))?;
+                    if only_command == Some(JOIN_HISTORY_COMMAND) && !matches!(entity.geometry, Geometry::Curve(_)) {
+                        return Err(Error::Unsupported("dependent history output geometry"));
+                    }
+                    let result = candidate.results.get(&output).ok_or(Error::Missing("dependent history result"))?;
+                    updates.try_reserve(1).map_err(|_| Error::Budget("dependent history mutations"))?;
+                    published.try_reserve(1).map_err(|_| Error::Budget("dependent history results"))?;
+                    updates.push(Mutation::Geometry { source: before.stamp(output)?, geometry: entity.geometry.clone() });
+                    published.push((output, result.clone()));
+                }
+            }
+            RecomputeOutcome::Failed { reason, .. } => return Err(Error::Io(format!("dependent history rebuild: {reason}"))),
+            RecomputeOutcome::Cached { .. } => return Err(Error::Invalid("unexpected dependent history cache")),
+        }
+    }
+    if !recipes.is_empty() {
+        updates.try_reserve(1).map_err(|_| Error::Budget("dependent history mutations"))?;
+        updates.push(Mutation::HistoryUpdate { document: before.id, expected_revision: before.revision, recipes, published });
+    }
+    Ok(updates)
+}
+
 /// Retain transient B-reps until the host has handed their displays to the
 /// representation store. Cached and failed rebuilds produce no candidates.
 pub fn recompute_registered_with_candidates(
@@ -888,7 +1196,7 @@ pub fn recompute_registered_with_candidates(
 /// the builder UI can declare an output port without running the producer.
 pub fn expected_output_kind(command: &str) -> Option<GeometryKind> {
     match command {
-        RING_RAIL_COMMAND | RAIL_PROFILE_COMMAND | OUTSIDE_RAIL_COMMAND | RING_RESIZER_COMMAND => {
+        JOIN_HISTORY_COMMAND | RING_RAIL_COMMAND | RAIL_PROFILE_COMMAND | OUTSIDE_RAIL_COMMAND | RING_RESIZER_COMMAND => {
             Some(GeometryKind::Curve)
         }
         crate::ring_builder::ETERNITY_BAND_COMMAND

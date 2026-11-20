@@ -469,6 +469,7 @@
     "ToolsObjectSnapTangentTo",
     "ToolsObjectSnapQuadrant",
     "ToolsObjectSnapKnot",
+    "SnapObjectMaster",
     "SnapBetween",
     "SnapOnSurface",
     "SnapOnPolysurface",
@@ -7680,6 +7681,22 @@
       "sha256": "df5c9ed0d97920f33944b8fd41477a2fba56470cb50d955b93d34f237ee700d2",
       "mapping": "authored-command-symbol"
     },
+    "SnapObjectMaster": {
+      "symbol": "SnapObjectMaster",
+      "label": "O-Snap",
+      "meaning": "Toggle persistent object snaps",
+      "style": "minimal-core-v1",
+      "spec_id": "OM9-L3-03-04-001",
+      "semantic_source": "local behavior specification",
+      "design_note": "A magnet and snap point use the blue and white of the SNAPS palette.",
+      "palette": [
+        "#80A9E8",
+        "#D5E7FF",
+        "#FFFFFF"
+      ],
+      "sha256": "4e94913cfd16e2ae44a66a1d9f4429f25a3f61ad6d4d288cdf4b0710cdad0310",
+      "mapping": "authored-command-symbol"
+    },
     "SnapBetween": {
       "symbol": "SnapBetween",
       "label": "Between Snap",
@@ -9801,7 +9818,7 @@
   },
   "core_icon_style": {
     "name": "minimal-core-v1",
-    "count": 154,
+    "count": 155,
     "source": "OpenMatrix9-authored-svg",
     "generator": "tools/core_icons.py",
     "geometry": "independent primitives; no traced/embedded bitmap data",

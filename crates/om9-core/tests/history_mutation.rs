@@ -200,6 +200,81 @@ fn a_recompute_is_one_transaction_with_geometry_recipe_and_result_and_undoes_tog
 }
 
 #[test]
+fn source_edit_and_history_rebuild_share_one_transaction_and_reject_forged_stamps() {
+    let limits = Limits::default();
+    let mut doc = Document::new("atomic source and history");
+    let source = Entity::new("source", Geometry::Point([0.0; 3]), None);
+    let child = Entity::new("child", Geometry::Point([0.0; 3]), None);
+    let (source_id, child_id) = (source.id, child.id);
+    doc.entities.insert(source_id, source);
+    doc.entities.insert(child_id, child);
+    let mut recipe = recipe_for(&doc, "TestHistory", source_id, child_id);
+    recipe.state = EvaluationState::Clean;
+    recipe.input_ports = vec![om9_core::associative::FeaturePort::geometry(
+        "input", &[om9_core::geometry::GeometryKind::Point],
+    )];
+    recipe.output_ports = vec![om9_core::associative::FeaturePort::geometry(
+        "result", &[om9_core::geometry::GeometryKind::Point],
+    )];
+    let recipe_id = recipe.id;
+    doc.history.recipes.insert(recipe_id, recipe.clone());
+    let document = doc.id;
+    let mut c = TransactionCoordinator::new(World::new(vec![doc], &limits).unwrap(), limits).unwrap();
+    let base = &c.world().documents[&document];
+    let before = (**base).clone();
+    let source_stamp = base.stamp(source_id).unwrap();
+    let child_stamp = base.stamp(child_id).unwrap();
+    let mut new_stamp = source_stamp;
+    new_stamp.geometry_revision += 1;
+    recipe.inputs[0].source = new_stamp;
+    recipe.revision += 1;
+    let next = Geometry::Point([1.0, 0.0, 0.0]);
+    let result = published_for(vec![new_stamp], recipe_id, next.clone(), child_stamp.geometry_revision + 1);
+    let request = TransactionRequest::new("Edit with history", vec![
+        Mutation::Geometry { source: source_stamp, geometry: next.clone() },
+        Mutation::Geometry { source: child_stamp, geometry: next.clone() },
+        Mutation::HistoryUpdate { document, expected_revision: base.revision, recipes: vec![Box::new(recipe)], published: vec![(child_id, result)] },
+    ]);
+    let mut forged = request.clone();
+    if let Mutation::HistoryUpdate { recipes, .. } = &mut forged.mutations[2] {
+        recipes[0].inputs[0].source.generation += 1;
+    }
+    assert!(c.prepare(forged.clone()).is_err());
+    let mut wrong_type = request.clone();
+    if let Mutation::Geometry { geometry, .. } = &mut wrong_type.mutations[0] {
+        *geometry = Geometry::Curve(om9_core::geometry::Curve::Line {
+            start: [0.0; 3], end: [1.0, 0.0, 0.0], domain: [0.0, 1.0],
+        });
+    }
+    assert!(c.prepare(wrong_type).is_err());
+    let mut placement_request = request.clone();
+    placement_request.mutations[0] = Mutation::Placement {
+        source: source_stamp,
+        placement: Transform::translation([1.0, 0.0, 0.0]),
+    };
+    assert_eq!(&**c.world().documents.get(&document).unwrap(), &before);
+    let prepared = c.prepare(request).unwrap();
+    c.commit(prepared).unwrap();
+    let after = (**c.world().documents.get(&document).unwrap()).clone();
+    assert_eq!(after.entities[&source_id].geometry, next);
+    assert_eq!(after.entities[&child_id].geometry, next);
+    assert_eq!(after.history.recipes[&recipe_id].inputs[0].source, after.stamp(source_id).unwrap());
+    assert_eq!(c.undo_len(), 1);
+    c.undo().unwrap();
+    assert_eq!(&**c.world().documents.get(&document).unwrap(), &before);
+    assert!(c.prepare(forged).is_err());
+    assert_eq!(c.redo_len(), 1);
+    c.redo().unwrap();
+    assert_eq!(&**c.world().documents.get(&document).unwrap(), &after);
+    c.undo().unwrap();
+    let placed = c.prepare(placement_request).unwrap();
+    c.commit(placed).unwrap();
+    let placed = &c.world().documents[&document];
+    assert_eq!(placed.entities[&source_id].placement, Transform::translation([1.0, 0.0, 0.0]));
+    assert_eq!(placed.history.recipes[&recipe_id].inputs[0].source, placed.stamp(source_id).unwrap());
+}
+
+#[test]
 fn a_history_update_is_refused_for_a_missing_recipe_or_a_foreign_result() {
     let limits = Limits::default();
     let mut doc = Document::new("recompute refusals");

@@ -55,6 +55,21 @@ fn check_fraction(fraction: f64) -> Result<()> {
     Ok(())
 }
 
+/// The parent fractions at each child's start and end, in storage order.
+/// Reversal reverses each interval and the order of the intervals along the parent.
+pub fn polycurve_segment_ranges(
+    parent: [f64; 2],
+    count: usize,
+    reversed: bool,
+) -> impl Iterator<Item = [f64; 2]> {
+    let [start, end] = if reversed { [parent[1], parent[0]] } else { parent };
+    (0..count).map(move |index| {
+        [index, index + 1].map(|boundary| {
+            start + (end - start) * (boundary as f64 / count as f64)
+        })
+    })
+}
+
 /// Evaluate `curve` at a global fraction, returning `D0..Dorder` in world coordinates.
 ///
 /// The polycurve branch scales each local derivative by `segments^order`, because the
@@ -1066,10 +1081,8 @@ mod join_active_interval_tests {
     }
 }
 
+/// Return the lower and upper native intervals, preserving traversal on each piece.
 fn split_nurbs(nurbs: &NurbsCurve, parameter: f64, limits: &Limits) -> Result<(Curve, Curve)> {
-    if nurbs.reversed {
-        return Err(Error::Unsupported("split of a reversed NURBS record"));
-    }
     let [start, end] = nurbs.domain;
     if !parameter.is_finite() || parameter <= start || parameter >= end {
         return Err(Error::Invalid("split parameter"));
@@ -1107,7 +1120,7 @@ fn split_nurbs(nurbs: &NurbsCurve, parameter: f64, limits: &Limits) -> Result<(C
         knots: left_knots,
         domain: [start, parameter],
         periodic: false,
-        reversed: false,
+        reversed: nurbs.reversed,
         seam: None,
     };
     let right = NurbsCurve {
@@ -1117,7 +1130,7 @@ fn split_nurbs(nurbs: &NurbsCurve, parameter: f64, limits: &Limits) -> Result<(C
         knots: right_knots,
         domain: [parameter, end],
         periodic: false,
-        reversed: false,
+        reversed: nurbs.reversed,
         seam: None,
     };
     left.validate(limits)?;
@@ -1267,6 +1280,50 @@ pub fn trim_curve(curve: &Curve, from: f64, to: f64, limits: &Limits) -> Result<
     }
     if let Curve::Nurbs(n)=curve && n.seam.is_some() {
         return trim_seamed_nurbs(n,from,to,limits);
+    }
+    if let Curve::Nurbs(nurbs) = curve && !nurbs.periodic {
+        nurbs.validate(limits)?;
+        let [start, end] = nurbs.domain;
+        let span = end - start;
+        let knot_fraction = |knot| {
+            let forward = (knot - start) / span;
+            if nurbs.reversed { 1.0 - forward } else { forward }
+        };
+        let native_parameter = |fraction| {
+            if fraction == 0.0 {
+                return if nurbs.reversed { end } else { start };
+            }
+            if fraction == 1.0 {
+                return if nurbs.reversed { start } else { end };
+            }
+            // Recover exact knots from their normalized fractions. Mapping a
+            // fraction back by multiplication can put the cut one ULP across a knot.
+            let index = nurbs.knots.partition_point(|&knot| {
+                let at_knot = knot_fraction(knot);
+                if nurbs.reversed { at_knot > fraction } else { at_knot < fraction }
+            });
+            nurbs.knots.get(index).copied()
+                .filter(|&knot| knot_fraction(knot) == fraction)
+                .unwrap_or_else(|| {
+                    if nurbs.reversed { end - fraction * span } else { start + fraction * span }
+                })
+        };
+        let (from, to) = if nurbs.reversed { (to, from) } else { (from, to) };
+        let (low, high) = (native_parameter(from), native_parameter(to));
+        if low >= high {
+            return Err(Error::Invalid("trim interval"));
+        }
+        let head = if high < end {
+            split_nurbs(nurbs, high, limits)?.0
+        } else {
+            curve.clone()
+        };
+        if low == start {
+            return Ok(head);
+        }
+        let Curve::Nurbs(head) = head else { unreachable!("NURBS split returns NURBS") };
+        // Use the original native parameter for the second cut as well.
+        return split_nurbs(&head, low, limits).map(|(_, tail)| tail);
     }
     if let Curve::Polycurve { segments, reversed } = curve {
         if *reversed {

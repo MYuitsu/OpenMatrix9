@@ -122,7 +122,7 @@ impl Controller {
 impl HistoryRebuilds {
     pub(super) fn run(self, coordinator: &om9_core::transaction::TransactionCoordinator,
         prepared: &mut om9_core::transaction::PreparedHistory,
-        held: om9_core::budget::Usage, cancel: &AtomicBool) -> Result<HistoryWireBatch> {
+        held: om9_core::budget::Usage, cancel: &Arc<AtomicBool>) -> Result<HistoryWireBatch> {
         use om9_core::budget::Usage;
         let limits = *coordinator.limits();
         let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
@@ -130,6 +130,7 @@ impl HistoryRebuilds {
         if pending_count != 0 {
             coordinator.begin_pending_history_brep_representations(prepared, pending_count, held)?;
         }
+        let native_cancel = om9_core::transaction::Cancellation::from_shared_flag(Arc::clone(cancel));
         for source in &self.native_jobs {
             if cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
             let store = coordinator.representation_store();
@@ -137,7 +138,7 @@ impl HistoryRebuilds {
             let mut reservation = coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, 1, physical(), held)?;
             let check = || if cancel.load(Ordering::Acquire) { Err(Error::Canceled) } else { Ok(()) };
             let mut display = super::files::rebuild_native_display(coordinator, source,
-                self.native_tolerance.ok_or(Error::Missing("native history tolerance"))?, &mut reservation, held, &check)?;
+                self.native_tolerance.ok_or(Error::Missing("native history tolerance"))?, &mut reservation, held, &check, Some(&native_cancel))?;
             let display_bytes = display.display_bytes()?;
             let owner_bytes = (std::mem::size_of::<std::sync::Mutex<ExternalMemoryReservation>>() + 2 * std::mem::size_of::<usize>()) as u64;
             let store_bytes = Usage::btree::<om9_core::geometry::NativeBrepSourceIdentity, om9_core::geometry::NativeBrepRepresentation>(1)?.bytes

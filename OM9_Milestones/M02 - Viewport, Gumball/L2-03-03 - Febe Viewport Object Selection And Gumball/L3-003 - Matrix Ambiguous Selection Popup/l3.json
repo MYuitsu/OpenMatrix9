@@ -227,6 +227,12 @@
     "remaining": [
       "Manual M02-UI review pending; no human sign-off is claimed."
     ],
+    "overlap_chooser_shortcut_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Choosing an overlapping point or dismissing its chooser with Escape leaves End available. Reopening two coincident sphere BReps from an authored v4 fixture, selecting a popup row and pressing E keeps CMD unfocused and leaves the model and Undo history untouched.",
+      "tests": ["pick_disambiguation 6 passed and 1 explicit fixture pass", "matrix_selection_sequence 10 passed"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#overlap-chooser-and-end-shortcut-2026-11-18"]
+    },
     "standalone_verification_2026_10_22": {
       "date": "2026-10-22",
       "status": "AUTOMATED_TARGET_VALIDATED",

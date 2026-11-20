@@ -209,24 +209,35 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
-    "date": "2026-10-22",
+    "date": "2026-11-19",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
-    "scope": "Controller::constrain_point projects to the active plane first, then snaps the dominant local X/Y direction from the previous point; typed coordinates bypass both modes.",
+    "scope": "Grid Snap chooses the Ortho octant from the quantized free pointer, then uses the raw pointer to find the closest grid-line crossing along that direction. Planar plus Project uses a parallel plane through the accepted base for object snaps. Typed coordinates bypass pointer constraints. The packaged Matrix Polyline verifies that the add-on start determines that plane.",
     "evidence": [
       "implementation/design/M02/OM9-L3-02-02-006/api.md",
       "implementation/evidence/M02/OM9-L3-02-02-006/OM9-L4-02-02-006-03-implementation.json",
       "implementation/evidence/M02/OM9-L3-02-02-006/OM9-L4-02-02-006-04-integration.json",
-      "implementation/evidence/M02/OM9-L3-02-02-006/OM9-L4-02-02-006-06-acceptance.md"
+      "implementation/evidence/M02/OM9-L3-02-02-006/OM9-L4-02-02-006-06-acceptance.md",
+      "docs/validation/2026-11-17-snaps-p07.md#windows-grid-snap-and-ortho-precedence",
+      "docs/validation/2026-11-17-snaps-p07.md#rhino-5-native-grid-snap-and-ortho-composition",
+      "docs/validation/2026-11-17-snaps-p07.md#rhino-5-native-int-and-project-point-path",
+      "docs/validation/2026-11-17-snaps-p07.md#approved-grid-snap-plus-ortho-and-planar-plus-project",
+      "docs/validation/2026-11-17-snaps-p07.md#planar-and-project-through-packaged-matrix-polyline"
     ],
     "tests": [
       "om9-app cplane_coordinate_input: 10 passed",
-      "om9-app chrome_actions: 13 passed"
+      "om9-app chrome_actions: 13 passed",
+      "om9-app snap_panel_modes combined constraints and SDK SnapConstrain base regression"
     ],
     "human_approval": null,
     "remaining": [
-      "Manual M02-UI review pending; no human sign-off is claimed."
+      "Measure the prepared fixtures in Matrix9 and complete human M02-UI review."
     ],
+    "approved_combined_constraints_2026_11_19": {
+      "status": "AUTOMATED_AND_WINDOWS_OM9_VERIFIED_MATRIX9_VIEWPORT_PENDING",
+      "scope": "Windows Line readback confirms Grid Snap plus Ortho at (2.5,2.5,0) and Planar plus Project at (7.31,3.27,3) from a Point source at Z=9. Rotated CPlane tests verify marker, preview, Undo and typed bypass.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#approved-grid-snap-plus-ortho-and-planar-plus-project"]
+    },
     "standalone_verification_2026_10_22": {
       "date": "2026-10-22",
       "status": "AUTOMATED_TARGET_VALIDATED",
@@ -242,6 +253,59 @@
         "implementation/evidence/M02/OM9-L3-02-02-006/OM9-L4-02-02-006-06-acceptance.md"
       ],
       "acceptance": "Ortho keeps a CPlane axis direction; Planar lands on the active plane; enabling both still yields a point with local z = 0."
+    },
+    "sdk_project_stale_cplane_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A loaded SDK query preserves the exact End source and projects it onto the current CPlane when the previous point prompt has an expired context. A live cross-view Line retains its captured CPlane.",
+      "tests": ["om9-app plugin_native::native_plugin_project_uses_current_plane_after_stale_line", "om9-app snap_panel_modes::project_on_surface_checks_captured_plane_before_committing_side_view_pick"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md"]
+    },
+    "sdk_issued_snap_planar_base_2026_11_19": {
+      "status": "LOADED_WINDOWS_SDK_VERIFIED_MANUAL_UI_PENDING",
+      "scope": "The latest matching issued-hit query supplies from_mm to the point constraints. The loaded package projects the arc witness at Z=2 to Z=3 with Planar plus Project, and uses Z=0 for Project alone or a missing base. Undo and Redo verify the committed Point.",
+      "tests": ["om9-plugin-host staged::tests::snap_constraint_requires_the_issued_hit_and_current_invocation", "om9-app plugin_native::native_plugin_apparent_intersection_applies_project_to_the_issued_source"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#planar-base-for-issued-sdk-snap-hits"]
+    },
+    "matrix9_combined_constraints_fixture_2026_11_18": {
+      "date": "2026-11-18",
+      "scope": "A Rhino 5-format 3DM round-trips two exact Point objects to support manual Grid and Ortho ordering and Planar and Project height comparison. The Matrix9 point acceptance and human gate remain pending.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#matrix9-combined-constraints-fixture"]
+    },
+    "combined_constraints_preview_and_cmd_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "An inch document with a rotated and translated CPlane exercises all four toggles together. Free viewport input rounds before 45-degree Ortho and keeps the Planar height. A source Point projects to the CPlane with marker/preview/Line agreement. CMD coordinates keep their explicitly typed values. Each Line undoes once.",
+      "tests": ["om9-app snap_panel_modes::combined_constraints_keep_line_preview_pick_and_typed_coordinates_consistent"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#combined-point-constraints-through-viewport-and-cmd-on-2026-11-18"]
+    },
+    "command_plane_click_feedback_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A Perspective-started Line retains its captured Top plane. A Through Finger click parallel to that plane reports the miss at both point prompts and leaves the document untouched. A compatible view still accepts the point.",
+      "tests": ["om9-app snap_panel_modes::parallel_view_miss_does_not_reuse_previous_view_point"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#line-reports-a-view-that-cannot-reach-the-command-plane"]
+    },
+    "standalone_grid_negative_half_step_2026_11_19": {
+      "status": "SOURCE_AND_OM9_REPLAY_VERIFIED_CHANGE_PENDING_APPROVAL",
+      "scope": "Six exact World Top viewport or CMD cases verify the current OM9 endpoint. With a 0.5 mm grid, standalone pointer X=-2.25 becomes X=-2.5. The Rhino 5 ordinary grid helper applies floor with a 0.5 bias before conditional Ortho, predicting X=-2.0. OM9 with both Grid Snap and Ortho already returns X=-2.0.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#standalone-grid-snap-negative-half-step"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G02",
+        "G05",
+        "G06",
+        "G10"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

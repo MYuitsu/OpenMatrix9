@@ -250,6 +250,178 @@
         "implementation/evidence/M02/OM9-L3-02-03-002/OM9-L4-02-03-002-06-acceptance.md"
       ],
       "acceptance": "Crossing segments return (5,0); parallel segments return no intersection; a point beyond a segment clamps to its endpoint with t=1."
+    },
+    "standalone_verification_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A loaded SDK Point query returns the exact source and releases queued NURBS extraction from a superseded End query while the worker permit is held.",
+      "tests": ["om9-app plugin_native::native_plugin_point_query_cancels_queued_edge_source"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md"]
+    },
+    "isolated_intersection_among_overlaps_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Line viewport fixtures report overlap-only cases and commit isolated 3D intersections with both source identities. One fixture refuses a screen crossing between sources at different depths. A second verifies that a Line and cubic NURBS overlap at Z=2 cannot suppress a Line/Line crossing at Z=0 at the same screen location.",
+      "tests": [
+        "om9-app snap_panel_modes::intersection_keeps_isolated_hit_among_overlaps_and_refuses_projected_crossing",
+        "om9-app snap_panel_modes::intersection_keeps_isolated_hit_when_a_line_and_nurbs_may_overlap"
+      ],
+      "evidence": [
+        "docs/validation/2026-11-17-snaps-p07.md",
+        "docs/validation/2026-11-17-snaps-p07.md#isolated-intersection-beside-a-line-and-nurbs-overlap"
+      ]
+    },
+    "intersection_touch_and_visibility_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Synchronous Intersection resolves a placed collinear endpoint contact. Native viewport and SDK Intersection resolve a line crossing in Wireframe and refuse it behind a mesh in Shaded.",
+      "tests": ["om9-scene osnap::collinear_placed_line_touch_is_an_isolated_intersection", "om9-app osnap_ui::shaded_mesh_hides_line_intersection_from_native_viewport", "om9-app plugin_native::native_plugin_intersection_follows_shaded_visibility"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md"]
+    },
+    "apparent_intersection_shaded_visibility_2026_11_19": {
+      "status": "WINDOWS_VIEWPORT_AND_LOADED_SDK_VALIDATED",
+      "scope": "A Shaded mesh between Z=0 and Z=8 leaves the upper apparent witness usable before Project maps the point to Z=0. A mesh at Z=10 suppresses the viewport marker and leaves the one-shot armed, and the SDK returns a completed miss.",
+      "tests": ["om9-app osnap_ui::shaded_mesh_hides_line_intersection_from_native_viewport", "om9-app plugin_native::native_plugin_apparent_int_checks_source_visibility_before_project"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#apparent-intersection-checks-shaded-visibility-before-project"]
+    },
+    "shared_instance_intersection_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Synchronous Intersection reports the placed crossing and two source member paths under one root. A loaded SDK query also preserves both member identities in Wireframe and respects occlusion in Shaded.",
+      "tests": ["om9-scene osnap::shared_leaf_occurrences_in_one_block_produce_an_intersection", "om9-app plugin_native::native_plugin_intersection_follows_shaded_visibility"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md"]
+    },
+    "installed_apparent_intersection_default_2026_11_18": {
+      "status": "REFERENCE_FACTORY_DEFAULT_TRACED_MANUAL_UI_PENDING",
+      "scope": "The installed Rhino 5 native Osnap menu, profile setting and defaults use the same apparent-intersection field. The factory enables it and the shipped Matrix90 scheme has no override. Viewport acceptance depth, tie, true/apparent ranking, and Project still require Matrix9 runtime evidence.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#installed-rhino-5-defaults-for-apparent-intersection-and-smarttrack"]
+    },
+    "apparent_intersection_perspective_reference_2026_11_18": {
+      "status": "REFERENCE_BINARY_AND_FIXTURE_VERIFIED_MATRIX9_VIEWPORT_PENDING",
+      "scope": "The installed host's apparent Intersection check uses the camera-to-source rays on the Perspective near plane. An off-axis fixture distinguishes both original source points after World Top Project and exercises unequal source parameter and screen chord fraction.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#apparent-intersection-in-perspective"]
+    },
+    "perspective_segment_source_parameter_2026_11_18": {
+      "status": "AUTOMATED_SOURCE_MAPPING_VERIFIED",
+      "scope": "Near resolves both sources of the off-axis Perspective fixture. The remaining source retains its point and fraction after near-plane clipping. Line-based snaps and ordinary edge picking share a camera interpolation.",
+      "tests": ["om9-scene osnap::off_axis_perspective_near_recovers_the_two_source_parameters", "om9-scene selection_regressions", "om9-scene subobject_pick"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#source-parameters-for-projected-segments"]
+    },
+    "opt_in_apparent_intersection_segments_2026_11_18": {
+      "status": "AUTOMATED_SEGMENT_FALLBACK_VERIFIED_MATRIX9_VIEWPORT_PENDING",
+      "scope": "The opt-in viewport fallback retains both visible segment sources and resolves the selected world point before Project. Curved apparent sources and Matrix9 multi-pair ordering remain open.",
+      "tests": ["om9-scene osnap", "om9-app snap_panel_modes::apparent_intersection_keeps_the_selected_perspective_source_before_project", "om9-app chrome_actions::apparent_intersection_option_uses_the_osnap_context_menu"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#opt-in-apparent-intersection-for-straight-segments"]
+    },
+    "apparent_intersection_curves_2026_11_18": {
+      "status": "AUTOMATED_CURVE_FALLBACK_VERIFIED_MATRIX9_VIEWPORT_PENDING",
+      "scope": "The default-feature worker handles circular arcs and positive-weight rational NURBS in the apparent fallback. The Perspective replay verifies original source parameters, clipping, both source IDs and Project applied after picking a source.",
+      "tests": ["om9-scene osnap::apparent_curves_preserve_rational_parameters_and_arc_membership", "om9-app snap_panel_modes::apparent_intersection_keeps_the_selected_perspective_source_before_project"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#apparent-intersection-on-arcs-and-rational-nurbs"]
+    },
+    "apparent_intersection_cylinder_rim_2026_11_19": {
+      "status": "WINDOWS_OCCT_SOURCE_AND_EGUI_REPLAY_VALIDATED",
+      "scope": "The viewport worker resolves an apparent crossing of an OCCT cylinder rim and a Line in Perspective. Wireframe and Shaded retain the two source IDs and the rim point before Project. Four Line commits cover both Project settings and individual Undo.",
+      "tests": ["om9-app snap_panel_modes::apparent_intersection_uses_cylinder_rim_before_project"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#apparent-intersection-on-a-cylinder-rim"]
+    },
+    "single_cubic_nurbs_intersection_2026_11_19": {
+      "status": "WINDOWS_OCCT_SOURCE_AND_EGUI_REPLAY_VALIDATED",
+      "scope": "The viewport resolves a true self-crossing of one cubic NURBS and retains the source in both identity fields. The replay evaluates the issued fraction on the original curve and checks the Line commit with each Project setting and one Undo.",
+      "tests": ["om9-app snap_panel_modes::line_intersection_snap_uses_a_single_cubic_nurbs_crossing"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#true-intersection-on-one-cubic-nurbs"]
+    },
+    "trim_hole_intersection_reopen_2026_11_19": {
+      "status": "WINDOWS_EGUI_REOPENED_TRIM_BOUNDARY_VALIDATED",
+      "scope": "A Line intersects only the inner boundary of a reopened, rotated and nonuniformly scaled planar NURBS surface. Wireframe and Shaded retain both source identities and the verified World point before Project. Each display mode checks both Project states and one Undo per Line.",
+      "tests": ["om9-app snap_panel_modes::intersection_on_a_trim_hole_uses_the_placed_surface_boundary"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#true-intersection-on-a-reopened-trim-hole-boundary"]
+    },
+    "apparent_int_partly_visible_nurbs_2026_11_19": {
+      "status": "AUTOMATED_OM9_VERIFIED_MATRIX9_VIEWPORT_PENDING",
+      "scope": "The Perspective worker splits mixed-depth positive-weight NURBS and restores the original source fraction. The scene test covers a split endpoint, reversed traversal and near-plane rejection. The Windows egui replay verifies two source IDs and Line commits with Project on and off.",
+      "tests": ["om9-scene osnap::apparent_intersection_survives_a_nurbs_control_point_behind_the_eye", "om9-app snap_panel_modes::apparent_intersection_keeps_the_selected_perspective_source_before_project"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#apparent-int-on-a-partly-visible-perspective-curve"]
+    },
+    "polycurve_intersection_parent_parameter_2026_11_19": {
+      "status": "WINDOWS_VIEWPORT_REPLAY_VALIDATED",
+      "scope": "The default worker maps Line and arc constituent witnesses to the connected nested Polycurve's original normalized traversal. The replay covers reversal, one shared source ID, true and apparent crossings, and Project applied to the accepted Line point.",
+      "tests": ["om9-app snap_panel_modes::polycurve_int_parameter_resolves_on_the_reversed_source"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#intersection-parameter-on-a-reversed-polycurve"]
+    },
+    "scene_intersection_source_parameters_2026_11_19": {
+      "status": "AUTOMATED_SCENE_VALIDATED",
+      "scope": "Synchronous supported pairs report parameters on the selected original curve. Verified examples cover nested reversed Polycurve, degree-one rational NURBS with clipped active domain, a Line–circle tangency and a Polycurve arc crossing a circle. The fixture checks original point evaluation and both source IDs.",
+      "tests": ["om9-scene osnap::scene_intersection_parameter_follows_the_original_curve"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#scene-intersection-source-parameters"]
+    },
+    "nested_apparent_intersection_viewport_2026_11_19": {
+      "status": "WINDOWS_EGUI_OCCURRENCE_AND_COMMIT_VALIDATED",
+      "scope": "Viewport Apparent Int preserves two distinct member paths under the same root and leaf. The rotated and nonuniformly scaled source reevaluates at the reported parameter. Wireframe and Shaded each retain the unprojected witness and commit the correct Line with Project off or on. One Undo restores the block and definitions.",
+      "tests": ["om9-app osnap_ui::apparent_int_keeps_distinct_nested_occurrences_through_line_commit"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#apparent-intersection-between-two-placements-of-one-block-member"]
+    },
+    "sdk_apparent_intersection_2026_11_18": {
+      "status": "AUTOMATED_LOADED_SDK_VERIFIED_MATRIX9_VIEWPORT_PENDING",
+      "scope": "The optional SDK query kind binds two source member paths. Consuming the issued hit applies Project to the selected source witness and allows one staged Point commit.",
+      "tests": ["om9-app plugin_native::native_plugin_apparent_intersection_applies_project_to_the_issued_source", "om9-app plugin_native::native_plugin_intersection_follows_shaded_visibility"],
+      "evidence": [
+        "docs/validation/2026-11-17-snaps-p07.md#apparent-intersection-through-the-sdk",
+        "docs/validation/2026-11-17-snaps-p07.md#loaded-sdk-snaps-on-the-windows-host-without-occt"
+      ]
+    },
+    "imported_apparent_int_repeatability_2026_11_19": {
+      "status": "IMPORTED_APPARENT_TIE_VARIATION_REPRODUCED_DECISION_PENDING",
+      "scope": "Five fresh imports of the same version-50 3DM retain exact source geometry but yield two different World heights for an apparent-option Int tie. Authored creation stamps are retained in the OM9 control. Matrix9 ordering and the proposed import tie rule remain pending.",
+      "evidence": [
+        "docs/validation/2026-11-17-snaps-p07.md#repeatability-of-int-after-3dm-import",
+        "docs/validation/2026-11-17-snaps-p07.md#rhino-5-ordinary-3dm-open-order-in-int"
+      ]
+    },
+    "apparent_intersection_creation_order_2026_11_19": {
+      "status": "AUTOMATED_CREATION_ORDER_VERIFIED_MATRIX9_VIEWPORT_PENDING",
+      "scope": "At equal screen distance, two creation orders of the same three Lines select apparent Z=8 and true Z=2, respectively. A strictly closer true candidate can replace a prior hit. The replay covers Undo/Redo and .om9 reopen. Direct Matrix9 viewport observation remains pending.",
+      "tests": ["om9-core document_graph::object_creation_order_follows_insertions_in_a_committed_batch", "om9-scene osnap::apparent_segment_pairs_respect_document_insertion_order", "om9-app snap_panel_modes::competing_intersections_follow_line_creation_order_and_keep_an_exact_tie"],
+      "evidence": [
+        "docs/validation/2026-11-17-snaps-p07.md#om9-creation-order-for-competing-intersections",
+        "docs/validation/2026-11-17-snaps-p07.md#v5-compatibility-for-apparent-int-creation-order"
+      ]
+    },
+    "apparent_int_project_windows_2026_11_19": {
+      "status": "WINDOWS_OM9_POINTER_VERIFIED_MATRIX9_VIEWPORT_PENDING",
+      "scope": "The same Looking Down pixel on two Lines shows Apparent Int and commits World (-8,6,8) with Project off and (-8,6,0) with Project on. The native Windows run used the O-Snap context menu and preserved both sources through Undo.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#windows-apparent-int-with-project-on-and-off"]
+    },
+    "apparent_int_project_review_build_2026_11_19": {
+      "status": "CURRENT_WINDOWS_POINTER_VERIFIED_MATRIX9_VIEWPORT_PENDING",
+      "scope": "The current alternate Windows OM9 build accepted (-8,6,8) and (-8,6,0) at the same Looking Down pointer position, with Project off and on respectively. Both showed the apparent marker and added one Line Undo. Undo restored both source objects.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#windows-snaps-review-build"]
+    },
+    "matrix9_fixture_native_viewport_2026_11_19": {
+      "status": "NATIVE_FIXTURE_OPEN_WORLD_READBACK_PENDING",
+      "scope": "The separate Matrix90 viewport displayed the matching two-Line archive and native CMD reported a successful read. Automated CMD and Int clicks showed no state change. The native preference and both Project coordinate results remain pending.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#matrix9-fixture-opens-in-the-native-viewport"]
+    },
+    "matrix9_native_cmd_replay_2026_11_18": {
+      "status": "MATRIX9_VIEWPORT_CAPTURE_PENDING",
+      "scope": "The Matrix9 replay creates the source geometry at two known heights using native Line input. The elevated window prevented automated input, and the archive workflow produced a Rhino RDK version warning. A Matrix9 observer still needs to capture the point cue and accepted World coordinates with Project off and on.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#matrix9-replay-using-geometry-drawn-in-cmd"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G07",
+        "G08",
+        "G09"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

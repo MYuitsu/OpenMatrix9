@@ -215,6 +215,21 @@
       "implementation/evidence/M01/2026-10-22-l2-03-10-commandline-feedback.json"
     ],
     "human_approval": null,
+    "keyboard_focus_2026_11_18": {
+      "scope": "An icon that opens an interactive command retains its CMD focus request through the triggering click. The keyboard repeat shortcut opens the Point prompt with CMD focused. Selecting a Pipe curve advances to the focused radius prompt. The idle category and View menus leave End available, and Escape releases the command editor.",
+      "tests": ["chrome_actions", "command_shortcuts", "snap_panel_modes"],
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#command-icon-focus-and-idle-shortcuts-2026-11-18"
+    },
+    "typed_point_completion_focus_2026_11_18": {
+      "scope": "Typed completion releases CMD focus when the outer command finishes. Exact Line endpoints and idle keyboard routing are verified for a typed Between midpoint and a deferred typed Polysurface point.",
+      "tests": ["chrome_actions", "command_shortcuts", "snap_panel_modes"],
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#return-keyboard-focus-after-typed-point-completion-on-2026-11-18"
+    },
+    "file_dialog_keyboard_focus_2026_11_18": {
+      "scope": "Windows keyboard input confirmed that idle Save and Save As cancellation restore End one-shot with a blank CMD. Canceling Save As while Line is active keeps the numeric draft and the ability to continue typing. The same native build transferred focus to the Start radius prompt on the Pipe curve pick and committed one BRep with typed radii.",
+      "tests": ["file_widgets", "chrome_actions", "command_shortcuts", "snap_panel_modes"],
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#standard-windows-build-confirms-file-and-object-selection-focus"
+    },
     "remaining": [
       "Manual M01-UI visual review pending."
     ]

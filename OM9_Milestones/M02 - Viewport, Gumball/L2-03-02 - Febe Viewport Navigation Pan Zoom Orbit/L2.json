@@ -74,6 +74,11 @@
     }
   ],
   "runtime_implementation": {
+    "options_view_2026_11_19": {
+      "scope": "Persisted wheel zoom scale and optional single-click viewport maximize are routed through Options. The default scale remains 0.9.",
+      "evidence": "docs/validation/2026-11-19-options-full-tree.md",
+      "limitations": "Desktop and remaining navigation controls are pending."
+    },
     "toolbar_index_2026_11_02": {
       "status": "PARTIAL_CHECKS_PASSED",
       "scope": "Index icon lookups to eliminate repeated toolbar palette scans during navigation.",

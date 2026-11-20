@@ -2,6 +2,10 @@
 #![forbid(unsafe_code)]
 pub mod addons;
 mod brep_bridge;
+#[cfg(all(feature = "occt-brep", not(feature = "test-fixtures")))]
+mod brep_restore_host;
+#[cfg(all(feature = "occt-brep", feature = "test-fixtures"))]
+pub mod brep_restore_host;
 pub mod command_events;
 pub mod command_options;
 pub mod curve_menu;
@@ -24,6 +28,10 @@ pub mod panel_ops;
 pub mod pictureframe;
 pub mod polyline_options;
 pub mod project_manager;
+#[cfg(not(feature = "test-fixtures"))]
+mod project_catalog;
+#[cfg(feature = "test-fixtures")]
+pub mod project_catalog;
 pub mod report;
 pub mod session;
 pub mod solid_menu;

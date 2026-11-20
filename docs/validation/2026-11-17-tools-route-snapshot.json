@@ -1,0 +1,998 @@
+{
+  "date": "2026-11-17",
+  "rows": [
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderRingRail",
+      "package": "om9_tools",
+      "route": "BuilderRingRail",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderProfilePlacer",
+      "package": "om9_tools",
+      "route": "BuilderProfilePlacer",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderOutsideRingRail",
+      "package": "om9_tools",
+      "route": "BuilderOutsideRingRail",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderCustomRail",
+      "package": "om9_tools",
+      "route": "BuilderCustomRail",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderFourProfile",
+      "package": "om9_tools",
+      "route": "BuilderFourProfile",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderMetalWeights",
+      "package": "om9_tools",
+      "route": "BuilderMetalWeights",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderResize",
+      "package": "om9_tools",
+      "route": "BuilderResize",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderSurfacePullback",
+      "package": "om9_tools",
+      "route": "BuilderSurfacePullback",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderBermarkLibrary",
+      "package": "om9_tools",
+      "route": "BuilderBermarkLibrary",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderStullerFindingsLibrary",
+      "package": "om9_tools",
+      "route": "BuilderStullerFindingsLibrary",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "gvSmartTarget",
+      "package": "om9_tools",
+      "route": "gvSmartTarget",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "gvSmartTargetAdd",
+      "package": "om9_tools",
+      "route": "gvSmartTargetAdd",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "gvSmartTargetOnCrvEnd",
+      "package": "om9_tools",
+      "route": "gvSmartTargetOnCrvEnd",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "gvSmartBlend",
+      "package": "om9_tools",
+      "route": "gvSmartBlend",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "gvSmartMSR",
+      "package": "om9_tools",
+      "route": "gvSmartMSR",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": false,
+      "icon": "gvJoinHistory",
+      "package": "om9_tools",
+      "route": "gvJoinHistory",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderImageTrace",
+      "package": "om9_tools",
+      "route": "BuilderImageTrace",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderObjectChecker",
+      "package": "om9_tools",
+      "route": "BuilderObjectChecker",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderMeshRepair",
+      "package": "om9_tools",
+      "route": "BuilderMeshRepair",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "Builder3dPrinting",
+      "package": "om9_tools",
+      "route": "Builder3dPrinting",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderProfile",
+      "package": "om9_tools",
+      "route": "BuilderProfile",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderProfileMerge",
+      "package": "om9_tools",
+      "route": "BuilderProfileMerge",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderProfileEndCap",
+      "package": "om9_tools",
+      "route": "BuilderProfileEndCap",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderCustomRailAdvanced",
+      "package": "om9_tools",
+      "route": "BuilderCustomRailAdvanced",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderObjectOnCrv",
+      "package": "om9_tools",
+      "route": "BuilderObjectOnCrv",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderSurfaceInset",
+      "package": "om9_tools",
+      "route": "BuilderSurfaceInset",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderMeshReducer",
+      "package": "om9_tools",
+      "route": "BuilderMeshReducer",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderMesh",
+      "package": "om9_tools",
+      "route": "BuilderMesh",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderCurveTransformTool",
+      "package": "om9_tools",
+      "route": "BuilderCurveTransformTool",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderCenterLine",
+      "package": "om9_tools",
+      "route": "BuilderCenterLine",
+      "state": "enabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderBooleanBuilder",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-041",
+      "state": "enabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderRingRail",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-001",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderProfilePlacer",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-002",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderOutsideRingRail",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-003",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderCustomRail",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-004",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderFourProfile",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-032",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderMetalWeights",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-006",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderResize",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-007",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderSurfacePullback",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-008",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderBermarkLibrary",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-009",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderStullerFindingsLibrary",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-010",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvSmartTarget",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-011",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvSmartTargetAdd",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-013",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvSmartTargetOnCrvEnd",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-011",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvSmartBlend",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-012",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvSmartMSR",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-015",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvJoinHistory",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-017",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderImageTrace",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-016",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderObjectChecker",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-018",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderMeshRepair",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-020",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "Builder3dPrinting",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-019",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderProfile",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-002",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderProfileMerge",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-034",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderProfileEndCap",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-033",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderCustomRailAdvanced",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-035",
+      "state": "disabled"
+    },
+    {
+      "addon": null,
+      "enabled": null,
+      "icon": "BuilderObjectOnCrv",
+      "package": "om9_tools",
+      "route": null,
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderSurfaceInset",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-038",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderMeshReducer",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-037",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderMesh",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-020",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderCurveTransformTool",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-040",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderCenterLine",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-042",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderBooleanBuilder",
+      "package": "om9_tools",
+      "route": "OM9-TOOLS-041",
+      "state": "disabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderRingRail",
+      "package": "om9_matrix",
+      "route": "BuilderRingRail",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderProfilePlacer",
+      "package": "om9_matrix",
+      "route": "BuilderProfilePlacer",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderOutsideRingRail",
+      "package": "om9_matrix",
+      "route": "BuilderOutsideRingRail",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderCustomRail",
+      "package": "om9_matrix",
+      "route": "BuilderCustomRail",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderFourProfile",
+      "package": "om9_matrix",
+      "route": "BuilderFourProfile",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderMetalWeights",
+      "package": "om9_matrix",
+      "route": "BuilderMetalWeights",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderResize",
+      "package": "om9_matrix",
+      "route": "BuilderResize",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderSurfacePullback",
+      "package": "om9_matrix",
+      "route": "BuilderSurfacePullback",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderBermarkLibrary",
+      "package": "om9_matrix",
+      "route": "BuilderBermarkLibrary",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderStullerFindingsLibrary",
+      "package": "om9_matrix",
+      "route": "BuilderStullerFindingsLibrary",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "gvSmartTarget",
+      "package": "om9_matrix",
+      "route": "gvSmartTarget",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "gvSmartTargetAdd",
+      "package": "om9_matrix",
+      "route": "gvSmartTargetAdd",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "gvSmartTargetOnCrvEnd",
+      "package": "om9_matrix",
+      "route": "gvSmartTargetOnCrvEnd",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "gvSmartBlend",
+      "package": "om9_matrix",
+      "route": "gvSmartBlend",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "gvSmartMSR",
+      "package": "om9_matrix",
+      "route": "gvSmartMSR",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": false,
+      "icon": "gvJoinHistory",
+      "package": "om9_matrix",
+      "route": "gvJoinHistory",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderImageTrace",
+      "package": "om9_matrix",
+      "route": "BuilderImageTrace",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderObjectChecker",
+      "package": "om9_matrix",
+      "route": "BuilderObjectChecker",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderMeshRepair",
+      "package": "om9_matrix",
+      "route": "BuilderMeshRepair",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "Builder3dPrinting",
+      "package": "om9_matrix",
+      "route": "Builder3dPrinting",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderProfile",
+      "package": "om9_matrix",
+      "route": "BuilderProfile",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderProfileMerge",
+      "package": "om9_matrix",
+      "route": "BuilderProfileMerge",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderProfileEndCap",
+      "package": "om9_matrix",
+      "route": "BuilderProfileEndCap",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderCustomRailAdvanced",
+      "package": "om9_matrix",
+      "route": "BuilderCustomRailAdvanced",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderObjectOnCrv",
+      "package": "om9_matrix",
+      "route": "BuilderObjectOnCrv",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderSurfaceInset",
+      "package": "om9_matrix",
+      "route": "BuilderSurfaceInset",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderMeshReducer",
+      "package": "om9_matrix",
+      "route": "BuilderMeshReducer",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderMesh",
+      "package": "om9_matrix",
+      "route": "BuilderMesh",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderCurveTransformTool",
+      "package": "om9_matrix",
+      "route": "BuilderCurveTransformTool",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderCenterLine",
+      "package": "om9_matrix",
+      "route": "BuilderCenterLine",
+      "state": "enabled"
+    },
+    {
+      "addon": true,
+      "enabled": true,
+      "icon": "BuilderBooleanBuilder",
+      "package": "om9_matrix",
+      "route": "BuilderBooleanBuilder",
+      "state": "enabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderRingRail",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-001",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderProfilePlacer",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-002",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderOutsideRingRail",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-003",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderCustomRail",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-004",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderFourProfile",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-032",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderMetalWeights",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-006",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderResize",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-007",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderSurfacePullback",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-008",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderBermarkLibrary",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-009",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderStullerFindingsLibrary",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-010",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvSmartTarget",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-011",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvSmartTargetAdd",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-013",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvSmartTargetOnCrvEnd",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-011",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvSmartBlend",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-012",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvSmartMSR",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-015",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "gvJoinHistory",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-017",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderImageTrace",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-016",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderObjectChecker",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-018",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderMeshRepair",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-020",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "Builder3dPrinting",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-019",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderProfile",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-002",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderProfileMerge",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-034",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderProfileEndCap",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-033",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": true,
+      "icon": "BuilderCustomRailAdvanced",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-035",
+      "state": "disabled"
+    },
+    {
+      "addon": null,
+      "enabled": null,
+      "icon": "BuilderObjectOnCrv",
+      "package": "om9_matrix",
+      "route": null,
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderSurfaceInset",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-038",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderMeshReducer",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-037",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderMesh",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-020",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderCurveTransformTool",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-040",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderCenterLine",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-042",
+      "state": "disabled"
+    },
+    {
+      "addon": false,
+      "enabled": false,
+      "icon": "BuilderBooleanBuilder",
+      "package": "om9_matrix",
+      "route": "OM9-TOOLS-041",
+      "state": "disabled"
+    }
+  ],
+  "scope": "headless icon_target resolution; no command completion claim"
+}

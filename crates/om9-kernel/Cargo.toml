@@ -10,6 +10,10 @@ description = "OCCT 8.0.1 bridge: one C ABI of complete operations per capabilit
 # Optional 3DM ON_Brep <-> OCCT conversion. Requires the pinned openNURBS static
 # library in addition to the OCCT SDK.
 3dm-brep = []
+test-fixtures = ["dep:serde_json"]
+# This binary may parse untrusted native data only inside an owned, bounded
+# process. It does not enable the project archive codec.
+isolated-brep-worker = ["3dm-brep", "dep:serde_json"]
 
 [build-dependencies]
 cc = "1"
@@ -18,9 +22,27 @@ cc = "1"
 om9-core = { path = "../om9-core" }
 uuid.workspace = true
 sha2.workspace = true
+serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
 serde_json.workspace = true
+om9-archive = { path = "../om9-archive" }
+om9-native-owner = { path = "../om9-native-owner" }
+
+[[bin]]
+name = "om9-shapeset-probe"
+path = "src/bin/shapeset_probe.rs"
+required-features = ["3dm-brep", "test-fixtures"]
+
+[[bin]]
+name = "om9-brep-restore-worker"
+path = "src/bin/brep_restore_worker.rs"
+required-features = ["isolated-brep-worker"]
+
+[[bin]]
+name = "om9-native-brep-worker"
+path = "src/bin/native_brep_worker.rs"
+required-features = ["isolated-brep-worker"]
 
 # The 3DM conversion symbols live behind the `3dm-brep` feature; a test binary that links the
 # whole crate needs it enabled.

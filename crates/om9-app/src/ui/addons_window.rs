@@ -5,6 +5,8 @@ use crate::addons::FeatureName;
 use crate::session::InvocationOrigin;
 use eframe::egui::{self, Color32, RichText};
 use om9_addons::host::{AddonStatus, InstallOptions, RepoKind};
+use om9_addons::i18n::Lang;
+use om9_addons::settings::{Kind, SettingValue};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
@@ -53,6 +55,59 @@ struct RowView {
 }
 
 impl MatrixApp {
+    pub(super) fn matrix_language_control(&mut self, ui: &mut egui::Ui) {
+        const ADDON: &str = "om9_matrix";
+        let Some(host) = self.controller.addon_host() else {
+            return;
+        };
+        let Ok(addons) = host.lock() else {
+            return;
+        };
+        if !addons.is_enabled(ADDON) {
+            return;
+        }
+        let Some((spec, SettingValue::Str(code))) = addons.setting(ADDON, "language") else {
+            return;
+        };
+        let Kind::Enum { choices } = &spec.kind else {
+            return;
+        };
+        let choices: Vec<_> = [Lang::En, Lang::Vi].into_iter()
+            .filter(|language| choices.iter().any(|choice| choice == language.code()))
+            .collect();
+        let Some(current) = Lang::parse(&code) else {
+            return;
+        };
+        drop(addons);
+
+        let language_label = |language| match language {
+            Lang::En => "English",
+            Lang::Vi => "Tiếng Việt",
+        };
+        let mut language = current;
+        ui.horizontal(|ui| {
+            ui.label("OM9 Matrix language");
+            egui::ComboBox::from_id_salt("matrix-language")
+                .selected_text(language_label(current))
+                .show_ui(ui, |ui| {
+                    for choice in choices {
+                        ui.selectable_value(&mut language, choice, language_label(choice));
+                    }
+                });
+            ui.weak("Applies immediately");
+        });
+        ui.separator();
+        if language != current {
+            let result = host.lock()
+                .map_err(|_| "Add-on host is unavailable".to_owned())
+                .and_then(|mut addons| addons.set_setting(ADDON, "language", language.code()));
+            match result {
+                Ok(_) => self.refresh_addons(),
+                Err(error) => { self.status.error(&error); }
+            }
+        }
+    }
+
     pub(crate) fn refresh_addons(&mut self) {
         let names: Vec<FeatureName<'_>> = self
             .features

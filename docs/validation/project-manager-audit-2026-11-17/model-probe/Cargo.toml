@@ -1,0 +1,12 @@
+[package]
+name = "om9-project-manager-audit-probe"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+om9-core = { path = "../../../../crates/om9-core" }
+serde = { version = "=1.0.228", features = ["derive", "rc"] }
+serde_json = { version = "=1.0.150", features = ["float_roundtrip"] }

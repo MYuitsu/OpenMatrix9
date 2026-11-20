@@ -43,7 +43,7 @@ pub fn remote_desktop_session() -> bool {
 pub fn report_startup_failure(_title: &str, _message: &str) -> bool {
     false
 }
-pub use verified_file::VerifiedFile;
+pub use verified_file::{PublishedNewFile, VerifiedFile};
 mod system_memory;
 pub use system_memory::{CommitMemory, PhysicalMemory, ProcessMemory, commit_memory, physical_memory, physical_memory_bytes, process_memory};
 #[cfg(windows)]

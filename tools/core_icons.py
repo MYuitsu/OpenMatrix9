@@ -236,6 +236,10 @@ for key,label,geom,spec in [
  ('Quadrant','Quadrant',circle(16,16,10,WHITE)+points((6,16),(16,6),(26,16),(16,26),color=BLUE,radius=2.5),'004'),
  ('Knot','Knot',path('M4 24 C5 3 15 10 16 16 S27 30 28 7',WHITE)+points((16,16),color=BLUE,radius=3),None),
 ]:add('ToolsObjectSnap'+key,label+' Snap','Snap to '+label.lower()+' geometry',geom,'OM9-SNAP-'+spec if spec else None,'Reference snap cue; knot has no dedicated core spec.')
+add('SnapObjectMaster','O-Snap','Toggle persistent object snaps',
+    path('M7 8 V17 A9 9 0 0 0 25 17 V8',BLUE,width=5)+
+    path('M7 6 V9 M25 6 V9',WHITE,width=5)+points((16,14),color=LIGHT,radius=2.8),
+    'OM9-L3-03-04-001','A magnet and snap point use the blue and white of the SNAPS palette.')
 add('SnapBetween','Between Snap','Find a position between picked points',path('M4 24 L28 8',WHITE)+points((4,24),(28,8),color=BLUE,radius=2.5)+points((16,16),color=WHITE,radius=3),'OM9-SNAP-009')
 add('SnapOnSurface','Surface Snap','Snap to a selected surface',patch(WHITE)+points((16,17),color=BLUE,radius=3),'OM9-SNAP-012')
 add('SnapOnPolysurface','Polysurface Snap','Snap to a selected polysurface',cube(WHITE)+points((10,20),color=BLUE,radius=3),'OM9-SNAP-011')
@@ -285,11 +289,11 @@ for key,label,meaning,geom in [
  ('LayerVisibility','Layer Visibility','Toggle layer visibility',face('M3 16 Q16 2 29 16 Q16 30 3 16 Z',WHITE)+circle(16,16,4,'#2678c9')),
  ('LayerHide','Hide Layers','Hide layer objects',face('M3 16 Q16 2 29 16 Q16 30 3 16 Z',WHITE)+path('M5 27 L27 5','#2678c9',width=2.5)),
  ('LayerShow','Show Layers','Show layer objects',face('M3 16 Q16 2 29 16 Q16 30 3 16 Z',WHITE)+circle(16,16,4,'#2678c9')+path('M16 1 V5 M16 27 V31',WHITE,width=1.6)),
- ('ProjectAdd','New Project','Add a project',folder().replace(BLUE,'#2678c9')+plus('#f5b400')),
- ('ProjectOut','Project Out','Save current workspace objects into a project slot',folder().replace(BLUE,'#2678c9')+arrow('M14 19 H29','M25 15 L29 19 L25 23',color='#f5b400')),
+ ('ProjectAdd','New Project','Add a project',path('M16 5 V27 M5 16 H27','#f5b400',width=3.2)),
+ ('ProjectOut','Project Out','Save current workspace objects into a project slot',path('M16 24 V5 M8 13 L16 5 L24 13','#f5b400',width=3)+path('M5 23 V28 H27 V23','#2678c9',width=2.5)),
  ('ProjectIn','Project In','Load project objects into the workspace',folder().replace(BLUE,'#2678c9')+arrow('M29 19 H14','M18 15 L14 19 L18 23',color='#f5b400')),
  ('ProjectSave','Save Project','Save the project',save().replace(BLUE,'#2678c9').replace(LIGHT,'#f5b400')),
- ('ProjectDelete','Delete Project','Delete a project slot',folder().replace(BLUE,'#2678c9')+path('M19 19 L29 29 M29 19 L19 29','#e66352',width=2.3)),
+ ('ProjectDelete','Delete Project','Delete a project slot',path('M7 7 L25 25 M25 7 L7 25','#e66352',width=3.2)),
  ('ProjectManager','Project Manager','Manage saved project slots',folder().replace(BLUE,'#2678c9')+path('M7 19 H11 M15 19 H19 M23 19 H27','#f5b400',width=3)),
  ('ViewIsometric','Isometric View','Set the isometric view',cube('#2678c9')),
 ]:add(key,label,meaning,geom,None,'Native UI / previously authored generic asset; retained existing blue/gold palette. No reference PNG exists.')

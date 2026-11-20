@@ -6,6 +6,16 @@
   "owner_l2_id": "OM9-L2-03-15",
   "title": "Triển khai logic có kiểm thử — Project Notes And Basic Metadata",
   "planning_state": "NOT_STARTED",
+  "project_manager_gap_tasks_20261117": {
+    "status": "IN_PROGRESS_NOT_VALIDATED",
+    "contract": "docs/plans/2026-11-17-project-manager-contract.md",
+    "tasks": [
+      "Implement typed manually entered project metadata with explicit units and Save/Cancel validation.",
+      "Implement Mngr Info/Files, previews, typed search, visibility and refresh, project/folder import/export and root selection using the workspace catalog.",
+      "Preserve Unicode and nullable measurements; do not infer computed weights from display meshes."
+    ],
+    "acceptance": "P07 combined project-manager batch and manual M01-UI remain pending; source presence is not acceptance."
+  },
   "task": {
     "task_id": "OM9-L4-03-15-008-03",
     "parent_l3_id": "OM9-L3-03-15-008",

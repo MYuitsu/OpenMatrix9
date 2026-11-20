@@ -217,3 +217,14 @@ fn a_breakdown_refuses_unknown_materials_and_bad_counts() {
     );
     assert!(MassBreakdown::compute(&[], &registry).is_err());
 }
+#[test]
+fn registry_distinguishes_reference_entries_from_user_replacements() {
+    use om9_core::metal_weight::{DensityUnit, MetalMaterial, MetalMaterialRegistry};
+    let mut registry = MetalMaterialRegistry::builtin();
+    assert!(registry.is_reference("GOLD_18K_YELLOW"));
+    registry.insert(MetalMaterial::new("gold_18k_yellow", "custom gold", 16.,
+        DensityUnit::GramsPerCubicCentimeter, "user fixture").unwrap()).unwrap();
+    assert!(!registry.is_reference("gold_18k_yellow"));
+    assert_eq!(registry.get("GOLD_18K_YELLOW").unwrap().density_g_cm3, 16.);
+    assert!(registry.is_reference("platinum_950"));
+}

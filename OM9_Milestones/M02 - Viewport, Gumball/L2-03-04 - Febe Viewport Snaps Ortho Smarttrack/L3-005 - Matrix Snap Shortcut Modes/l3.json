@@ -215,6 +215,62 @@
         "implementation/evidence/M02/OM9-L3-03-04-005/OM9-L4-03-04-005-06-acceptance.md"
       ],
       "acceptance": "E selects END and M selects MID while a command runs; a focused command editor does not trigger the shortcut."
+    },
+    "standalone_verification_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Ctrl+Click in Looking Down starts Elevator. Side View accepts the height along the captured CPlane normal, and the viewport receives E for the next exact endpoint.",
+      "tests": ["om9-app snap_panel_modes::elevator_height_click_in_side_view_returns_keyboard_to_viewport"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md"]
+    },
+    "windows_end_shortcut_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "SCOPED_WINDOWS_DESKTOP_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The standard native window confirmed idle E and E after a mouse-picked Line start. With the master off, a native click used the exact source endpoint. The live document contained two Lines and two Undo entries. Ctrl+Z and the Redo icon removed and restored the second Line.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#current-build-windows-panel-and-end-shortcut-on-2026-11-18"]
+    },
+    "windows_tab_and_escape_2026_11_18": {
+      "status": "SCOPED_WINDOWS_DESKTOP_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Windows Tab locked the horizontal Line direction in Looking Down and Perspective committed equal Y/Z coordinates. Raw input showed a release-only Escape on the idle attempt whose badge stayed active. A delivered Escape press canceled End, including with an active Line prompt retained.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#windows-escape-trace-before-shortcut-routing", "docs/validation/2026-11-17-snaps-p07.md#standard-windows-tab-lock-from-looking-down-to-perspective"]
+    },
+    "workspace_keyboard_reference_sync_2026_11_19": {
+      "status": "APPROVED_SKILL_RULE_SYNCHRONIZED_AND_AUTOMATED_RECHECKED",
+      "scope": "The installed and repository Workspace references follow the approved UI keyboard rule. Eight egui checks verify idle E, input focus, deferred point delivery, cancellation and transcript prompts.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#workspace-skill-aligned-with-the-approved-keyboard-routing"]
+    },
+    "windows_tab_with_free_click_control_2026_11_19": {
+      "status": "SCOPED_WINDOWS_DESKTOP_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Tab locks the horizontal Line preview away from the pointer. At the same endpoint pixel, the live model confirms identical start and end Y with Tab and a 5.107266 mm Y change without Tab. One Undo restores the exact source drawing in each trial.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#windows-tab-lock-and-free-click-comparison"]
+    },
+    "physical_elevator_prompt_2026_11_18": {
+      "date": "2026-11-18",
+      "scope": "The user confirmed the physical Line icon, Ctrl+Click and typed Elevator workflow in Looking Down. Read-only live geometry verified Z=2 at the start, (9,10,8) at the end, and one additional Undo entry.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#windows-desktop-handoff-for-elevator-and-polysurface"]
+    },
+    "deferred_elevator_base_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A queued End click retains Ctrl across worker completion and opens a focused Elevator height prompt at the source pole. Completing Line after a typed height produces one transaction with exact Undo and Redo.",
+      "tests": ["om9-app snap_panel_modes::deferred_end_ctrl_click_keeps_the_elevator_base_after_ctrl_release"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#deferred-end-supplies-the-elevator-base-after-ctrl-release"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G05",
+        "G06",
+        "G10",
+        "G12"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

@@ -1,4 +1,9 @@
 {
+  "runtime_implementation": {
+    "status": "SCOPED_CATALOG_ESTIMATES_TESTED",
+    "evidence": "docs/validation/2026-11-17-metal-weights-source-routing.md#native-instance-and-registry-comparison-follow-up",
+    "scope": "Per-density grams and DWT tested on two BRep boxes; full builder, worker and material workflows remain open."
+  },
   "level": "L3",
   "id": "OM9-L3-04-19-003",
   "milestone": "M04",

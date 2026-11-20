@@ -739,20 +739,92 @@ fn metal_piece(e: &Event) -> Reply {
 // ---- Boolean Builder -------------------------------------------------------------------------
 
 /// Boolean Builder: the preview wires of the last computed result, by its inputs.
-static BOOLEAN_PREVIEW: std::sync::Mutex<Option<(String, Vec<Geo>)>> = std::sync::Mutex::new(None);
+static BOOLEAN_PREVIEW: std::sync::Mutex<Option<([u8; 32], Vec<Geo>)>> = std::sync::Mutex::new(None);
 
 #[derive(Default, Serialize, Deserialize)]
 struct Objects {
     objects: Vec<(String, SelectedMesh)>,
 }
 
-/// Why a mesh will not boolean well: open or non-manifold edges, no volume.
+fn boolean_preview_key(objects: &Objects, cutters: &[&Selected], op: Op, tolerance: f64) -> [u8; 32] {
+    use sha2::{Digest, Sha256};
+    fn mesh(hash: &mut Sha256, id: &str, mesh: &SelectedMesh) {
+        hash.update((id.len() as u64).to_le_bytes());
+        hash.update(id.as_bytes());
+        hash.update((mesh.vertices.len() as u64).to_le_bytes());
+        for vertex in &mesh.vertices {
+            for coordinate in vertex { hash.update(coordinate.to_bits().to_le_bytes()); }
+        }
+        hash.update((mesh.triangles.len() as u64).to_le_bytes());
+        for triangle in &mesh.triangles {
+            for index in triangle { hash.update(index.to_le_bytes()); }
+        }
+    }
+    let mut hash = Sha256::new();
+    hash.update([match op { Op::Difference => 0, Op::Union => 1, Op::Intersection => 2 }]);
+    hash.update(tolerance.to_bits().to_le_bytes());
+    hash.update((objects.objects.len() as u64).to_le_bytes());
+    for (id, selected) in &objects.objects { mesh(&mut hash, id, selected); }
+    hash.update((cutters.len() as u64).to_le_bytes());
+    for cutter in cutters { mesh(&mut hash, &cutter.id, cutter.mesh.as_ref().expect("selected cutter mesh")); }
+    hash.finalize().into()
+}
+
+#[cfg(test)]
+fn boolean_mesh(a: &Mesh, b: &Mesh, op: Op, tolerance: f64) -> Result<Mesh, String> {
+    use om9_core::{geometry::Mesh as CoreMesh, mesh_csg::{BooleanOp, CsgOptions, mesh_boolean}};
+    let options = CsgOptions { tolerance, ..CsgOptions::default() };
+    if a.triangles.len().checked_add(b.triangles.len()).is_none_or(|n| n > options.max_triangles) {
+        return Err("Boolean mesh input exceeds the triangle budget".into());
+    }
+    let convert = |mesh: &Mesh| CoreMesh {
+        vertices: mesh.vertices.clone(), faces: mesh.triangles.iter().map(|face| face.to_vec()).collect(),
+        normals: vec![], colors: vec![], corner_uvs: vec![],
+    };
+    let operation = match op { Op::Union => BooleanOp::Union, Op::Difference => BooleanOp::Difference, Op::Intersection => BooleanOp::Intersection };
+    let (result, _) = mesh_boolean(&convert(a), &convert(b), operation, options)
+        .map_err(|error| error.to_string())?;
+    let triangles = result.faces.iter().map(|face| <[u32; 3]>::try_from(face.as_slice())
+        .map_err(|_| "Boolean output contains a non-triangle face".to_owned())).collect::<Result<Vec<_>, _>>()?;
+    Ok(Mesh { vertices: result.vertices, triangles })
+}
+
+/// Reject malformed, open, inconsistently oriented or zero-volume triangle meshes.
 pub fn check(m: &SelectedMesh) -> Option<String> {
-    let (open, bad) = m.open_and_nonmanifold_edges();
+    check_mesh(&m.vertices, &m.triangles)
+}
+
+fn check_mesh(vertices: &[Vec3], triangles: &[[u32; 3]]) -> Option<String> {
+    if vertices.iter().flatten().any(|coordinate| !coordinate.is_finite()) {
+        return Some("non-finite vertex".into());
+    }
+    let mut edges = std::collections::BTreeMap::<(u32, u32), (usize, i32)>::new();
+    let mut volume = 0.0;
+    for triangle in triangles {
+        if triangle.iter().any(|index| *index as usize >= vertices.len())
+            || triangle[0] == triangle[1] || triangle[1] == triangle[2] || triangle[2] == triangle[0] {
+            return Some("invalid triangle indices".into());
+        }
+        let [a, b, c] = triangle.map(|index| vertices[index as usize]);
+        let normal = cross(sub(b, a), sub(c, a));
+        let area2 = dot(normal, normal);
+        if !area2.is_finite() || area2 == 0.0 { return Some("degenerate triangle".into()); }
+        volume += dot(a, cross(b, c)) / 6.0;
+        for (a, b) in [(triangle[0], triangle[1]), (triangle[1], triangle[2]), (triangle[2], triangle[0])] {
+            let edge = edges.entry((a.min(b), a.max(b))).or_default();
+            edge.0 += 1;
+            edge.1 += if a < b { 1 } else { -1 };
+        }
+    }
+    let open = edges.values().filter(|(count, _)| *count == 1).count();
+    let bad = edges.values().filter(|(count, _)| *count > 2).count();
     if open > 0 || bad > 0 {
         return Some(format!("{open} open and {bad} non-manifold edges"));
     }
-    if m.volume().abs() < 1e-12 {
+    if edges.values().any(|(_, direction)| *direction != 0) {
+        return Some("inconsistent triangle orientation".into());
+    }
+    if !volume.is_finite() || volume.abs() < 1e-12 {
         return Some("no volume".into());
     }
     None
@@ -766,19 +838,28 @@ fn boolean_builder(e: &Event) -> Reply {
         _ => Op::Difference,
     };
     let keep = e.flag("bb_keep_cutters", false);
+    let tolerance = e.number("_om9_document_tolerance_mm", om9_core::mesh_csg::CsgOptions::default().tolerance);
+    if !tolerance.is_finite() || tolerance <= 0.0 {
+        return Reply::ask(format!("{label}: invalid document tolerance"), e.state.clone())
+            .want(Want::Objects).refuse(format!("{label}: invalid document tolerance"));
+    }
     let mut st: Objects = load(e);
     let objs = solids(e);
     if st.objects.is_empty() {
-        if matches!(e.input, Input::Enter) && !objs.is_empty() {
-            let bad: Vec<String> = objs
-                .iter()
-                .filter_map(|s| check(s.mesh.as_ref().unwrap()).map(|w| format!("{}: {w}", s.name)))
-                .collect();
+        if matches!(e.input, Input::Enter) && !e.selection.is_empty() {
+            if let Some(bad) = e.selection.iter().find(|s| s.kind != "mesh" || s.gem.is_some() || s.mesh.as_ref().is_none_or(|m| m.triangles.is_empty())) {
+                return Reply::ask(format!("{label}: select mesh objects"), save(&st)).want(Want::Objects)
+                    .refuse(format!("{label}: {} is not a source mesh", bad.name));
+            }
+            if let Some(bad) = objs.iter().find_map(|s| check(s.mesh.as_ref().unwrap()).map(|w| format!("{}: {w}", s.name))) {
+                return Reply::ask(format!("{label}: select valid objects"), save(&st)).want(Want::Objects)
+                    .refuse(format!("{label}: {bad}"));
+            }
             st.objects = objs
                 .iter()
                 .map(|s| (s.id.clone(), s.mesh.clone().unwrap()))
                 .collect();
-            let mut r = Reply::ask(
+            return Reply::ask(
                 format!(
                     "{label}: {} objects. Now select the cutters, Enter",
                     st.objects.len()
@@ -786,11 +867,6 @@ fn boolean_builder(e: &Event) -> Reply {
                 save(&st),
             )
             .want(Want::Objects);
-            r.messages = bad
-                .into_iter()
-                .map(|w| format!("{label}: warning {w}"))
-                .collect();
-            return r;
         }
         return Reply::ask(
             format!("{label}: select the object(s) to cut, Enter"),
@@ -799,6 +875,11 @@ fn boolean_builder(e: &Event) -> Reply {
         .want(Want::Objects);
     }
     let ids: Vec<&String> = st.objects.iter().map(|o| &o.0).collect();
+    if let Some(bad) = e.selection.iter().filter(|s| !ids.contains(&&s.id))
+        .find(|s| s.kind != "mesh" || s.gem.is_some() || s.mesh.as_ref().is_none_or(|m| m.triangles.is_empty())) {
+        return Reply::ask(format!("{label}: select mesh cutters"), save(&st)).want(Want::Objects)
+            .refuse(format!("{label}: {} is not a source mesh", bad.name));
+    }
     let mut cutters: Vec<&Selected> = objs.into_iter().filter(|s| !ids.contains(&&s.id)).collect();
     // The same cutters give the same result whatever order the selection lists them in.
     cutters.sort_by(|a, b| a.id.cmp(&b.id));
@@ -811,41 +892,50 @@ fn boolean_builder(e: &Event) -> Reply {
             r
         };
     }
-    let warnings: Vec<String> = cutters
-        .iter()
-        .filter_map(|s| {
-            check(s.mesh.as_ref().unwrap()).map(|w| format!("{label}: warning {}: {w}", s.name))
-        })
-        .collect();
-    let compute = || -> Vec<(String, Mesh)> {
-        let tool = csg::fold(
-            &cutters
-                .iter()
-                .map(|s| to_mesh(s.mesh.as_ref().unwrap()))
-                .collect::<Vec<_>>(),
-            Op::Union,
-        )
-        .unwrap();
-        st.objects
-            .iter()
-            .map(|(id, m)| (id.clone(), csg::boolean(&to_mesh(m), &tool, op)))
-            .collect()
+    if let Some(bad) = st.objects.iter().find_map(|(id, mesh)| check(mesh).map(|why| format!("{id}: {why}")))
+        .or_else(|| cutters.iter().find_map(|s| check(s.mesh.as_ref().unwrap()).map(|why| format!("{}: {why}", s.name)))) {
+        return Reply::ask(format!("{label}: select valid objects and cutters"), save(&st)).want(Want::Objects)
+            .refuse(format!("{label}: {bad}"));
+    }
+    let compute = |validate_output: bool| -> Result<Vec<(String, Mesh)>, String> {
+        use om9_core::{geometry::Mesh as CoreMesh, mesh_csg::{BooleanOp, CsgOptions, mesh_boolean_batch_cancellable}, transaction::Cancellation};
+        let options = CsgOptions { tolerance, ..CsgOptions::default() };
+        let convert = |mesh: &SelectedMesh| -> Result<CoreMesh, String> {
+            if mesh.triangles.len() > options.max_triangles { return Err("Boolean mesh input exceeds the triangle budget".into()); }
+            let mut vertices = Vec::new();
+            vertices.try_reserve_exact(mesh.vertices.len()).map_err(|_| "Boolean mesh vertices budget")?;
+            vertices.extend_from_slice(&mesh.vertices);
+            let mut faces = Vec::new();
+            faces.try_reserve_exact(mesh.triangles.len()).map_err(|_| "Boolean mesh faces budget")?;
+            for triangle in &mesh.triangles { faces.push(triangle.to_vec()); }
+            Ok(CoreMesh { vertices, faces, normals: vec![], colors: vec![], corner_uvs: vec![] })
+        };
+        let objects = st.objects.iter().map(|(_, mesh)| convert(mesh)).collect::<Result<Vec<_>, _>>()?;
+        let tools = cutters.iter().map(|s| convert(s.mesh.as_ref().unwrap())).collect::<Result<Vec<_>, _>>()?;
+        let operation = match op { Op::Union => BooleanOp::Union, Op::Difference => BooleanOp::Difference, Op::Intersection => BooleanOp::Intersection };
+        let results = mesh_boolean_batch_cancellable(&objects, &tools, operation, options, &Cancellation::default()).map_err(|e| e.to_string())?;
+        st.objects.iter().zip(results).map(|((id, _), result)| {
+            let triangles = result.faces.iter().map(|face| <[u32; 3]>::try_from(face.as_slice())
+                .map_err(|_| "Boolean output contains a non-triangle face".to_owned())).collect::<Result<Vec<_>, _>>()?;
+            let result = Mesh { vertices: result.vertices, triangles };
+            if validate_output && let Some(reason) = check_mesh(&result.vertices, &result.triangles) {
+                return Err(format!("{id}: invalid or empty result: {reason}"));
+            }
+            Ok((id.clone(), result))
+        }).collect()
     };
     // The result of the last objects × cutters × mode: the preview is redrawn on every cursor
     // move, but a boolean of a ring against its cutters takes seconds.
-    let key = format!(
-        "{:?}|{:?}|{:?}",
-        ids,
-        cutters
-            .iter()
-            .map(|s| (&s.id, s.bbox, s.mesh.as_ref().map(|m| m.vertices.len())))
-            .collect::<Vec<_>>(),
-        op
-    );
     if !matches!(e.input, Input::Enter) {
+        let key = boolean_preview_key(&st, &cutters, op, tolerance);
         let mut cache = BOOLEAN_PREVIEW.lock().unwrap_or_else(|p| p.into_inner());
         if cache.as_ref().is_none_or(|(k, _)| *k != key) {
-            let wire = compute().iter().flat_map(|r| r.1.wire()).collect();
+            let results = match compute(false) {
+                Ok(results) => results,
+                Err(reason) => return Reply::ask(format!("{label}: select valid objects and cutters"), save(&st))
+                    .want(Want::Objects).refuse(format!("{label}: {reason}")),
+            };
+            let wire = results.iter().flat_map(|r| r.1.wire()).collect();
             *cache = Some((key, wire));
         }
         let preview = cache.as_ref().map(|c| c.1.clone()).unwrap_or_default();
@@ -860,14 +950,17 @@ fn boolean_builder(e: &Event) -> Reply {
         .want(Want::Objects)
         .preview(preview);
     }
-    let results = compute();
+    let results = match compute(true) {
+        Ok(results) => results,
+        Err(reason) => return Reply::ask(format!("{label}: select valid objects and cutters"), save(&st))
+            .want(Want::Objects).refuse(format!("{label}: {reason}")),
+    };
     let mut r = Reply::finish(Vec::new()).say(format!(
         "{label}: {} objects, {} cutters, volume {} mm³",
         results.len(),
         cutters.len(),
         fmt(results.iter().map(|r| r.1.volume()).sum::<f64>())
     ));
-    r.messages.extend(warnings);
     r.replace = results
         .into_iter()
         .map(|(id, m)| Replacement {

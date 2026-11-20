@@ -1,0 +1,7 @@
+
+running 3 tests
+test projects_and_three_jobbag_slots_are_visible ... ok
+test new_project_row_and_notes_keep_selection ... ok
+test capture_selection_then_restore_inserts_fresh_ids ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s

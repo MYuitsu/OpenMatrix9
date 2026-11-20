@@ -329,7 +329,7 @@ pub(super) fn edit(
         source,
         geometry: Geometry::Mesh(cage_kernel::box_mesh(local)),
     });
-    controller.commit_utility_mutations(name, mutations)
+    controller.commit_transform_geometry_mutations(name, mutations)
 }
 
 /// `ReleaseFromCage`: drop the back pointer from the selection, or from every object attached to

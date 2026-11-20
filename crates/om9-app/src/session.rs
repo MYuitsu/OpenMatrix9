@@ -3133,7 +3133,7 @@ mod topology_owner_tests {
         let proof = controller.topology_proof_for(None).unwrap();
         let stamp = proof.stamp();
         drop(controller.topology_cache.take());
-        controller.retain_sphere_history_proof(stamp, proof.clone()).unwrap();
+        controller.retain_inserted_topology_proof(stamp, proof.clone()).unwrap();
         let before = controller.coordinator.snapshot();
         let held = controller.scene_cache_usage().unwrap();
         let pressure = controller.coordinator.reserve_remaining_external_memory_with_held(MemoryClass::Kernel, None, held).unwrap();
@@ -3319,7 +3319,7 @@ mod topology_owner_tests {
         reservation.set_allocated_bytes(bytes).unwrap();
         let stamp = controller.document().stamp(object).unwrap();
         let shared = controller.prepare_shared_topology_proof(stamp, proof, reservation).unwrap();
-        controller.retain_sphere_history_proof(stamp, shared.clone()).unwrap();
+        controller.retain_inserted_topology_proof(stamp, shared.clone()).unwrap();
         drop(shared);
         controller.coordinator.close_document(other_id).unwrap();
         assert_eq!(controller.coordinator.undo_len(), 0);
@@ -5450,6 +5450,7 @@ pub struct Controller {
     history_notice: Option<String>,
     /// The command line asked for the history report window.
     history_window_requested: bool,
+    command_history_requested: bool,
     fit_pending: Option<self::fit::FitPending>,
     refit_srf_pending: Option<self::refit_srf::RefitSrfPending>,
     offset_curve_pending: Option<self::offset::OffsetPending>,
@@ -5960,6 +5961,7 @@ impl Controller {
             history_rebuilding: false,
             history_notice: None,
             history_window_requested: false,
+            command_history_requested: false,
             fit_pending: None,
             refit_srf_pending: None,
             offset_curve_pending: None,
@@ -6245,11 +6247,10 @@ impl Controller {
                 self.document().id, |_, proof, brep| if source_only { proof.may_candidate_source(brep) } else { proof.may_candidate_source(brep) }),
         }
     }
-    /// Keep the already-accounted proof with the Sphere insertion entry when
-    /// possible. Failure leaves the committed document and its v4 display
-    /// untouched; evidence alone never authorizes display eviction.
+    /// Keep the already-accounted proof with the insertion entry when possible.
+    /// Failure leaves the committed document and its display untouched.
     #[cfg(feature = "occt-brep")]
-    fn retain_sphere_history_proof(&mut self, stamp: om9_core::identity::SourceStamp,
+    fn retain_inserted_topology_proof(&mut self, stamp: om9_core::identity::SourceStamp,
         proof: Arc<om9_kernel::brep::SharedTopologyProof>) -> Result<()> {
         #[cfg(test)]
         if TEST_REFUSE_SPHERE_HISTORY.with(|refuse| refuse.get()) { return Err(Error::Budget("test sphere history refusal")); }
@@ -6284,6 +6285,10 @@ impl Controller {
         if let Some(cache) = &self.topology_cache { cache.retain(document); }
     }
     fn publish_owned_scene(&mut self, scene: Scene, buffer_owner: Option<SceneBufferOwner>) {
+        // SDK snap work is bound to the previous publication. Drop its
+        // receivers now so cancellation can drain without another SDK call.
+        #[cfg(feature = "occt-brep")]
+        { *self.sdk_snap_workers.get_mut() = Default::default(); }
         #[cfg(feature = "occt-brep")]
         drop(self.dupedge_source_view_job.take());
         #[cfg(feature = "occt-brep")]
@@ -6852,6 +6857,9 @@ impl Controller {
         feature: &str,
         origin: InvocationOrigin,
     ) -> Result<DispatchOutcome> {
+        if self.request_command_history(feature) {
+            return Ok(DispatchOutcome::Command);
+        }
         if !self::metal::handles_command(feature) { self.metal_panel_open = false; }
         #[cfg(feature = "occt-brep")]
         if self.viewport_detail_pending() { return Err(Error::Busy); }
@@ -7111,6 +7119,14 @@ impl Controller {
         self.project = enabled;
     }
     pub fn grid_snap(&self) -> bool { self.grid_snap }
+    pub(crate) fn annotation_style(&self) -> &om9_core::annotation::Style {
+        &self.annotation_style
+    }
+    pub(crate) fn set_annotation_style(&mut self, style: om9_core::annotation::Style) -> Result<()> {
+        style.validate()?;
+        self.annotation_style = style;
+        Ok(())
+    }
     pub fn set_grid_snap(&mut self, enabled: bool) { self.grid_snap = enabled; }
     pub fn grid_snap_step_mm(&self) -> f64 { self.grid_snap_step_mm }
     pub fn set_grid_snap_step_mm(&mut self, step: f64) {
@@ -7183,17 +7199,21 @@ impl Controller {
         let world = om9_core::coords::WorldPoint::try_new(point)?;
         let local = <CPlane as om9_core::coords::LocalFrame>::to_local(&plane, world)?.xyz();
         let mut constrained = local;
+        let ortho_base = ortho.then_some(base).flatten();
+        let grid_coordinate = |coordinate: f64| {
+            let steps = coordinate / self.grid_snap_step_mm;
+            let nearest = if ortho_base.is_some() { (steps + 0.5).floor() } else { steps.round() };
+            nearest * self.grid_snap_step_mm
+        };
         if self.grid_snap {
             for coordinate in &mut constrained[..2] {
-                *coordinate = (*coordinate / self.grid_snap_step_mm).round() * self.grid_snap_step_mm;
+                *coordinate = grid_coordinate(*coordinate);
             }
         }
         if self.planar && let Some(base) = base {
             constrained[2] = <CPlane as om9_core::coords::LocalFrame>::to_local(&plane, base)?.xyz()[2];
         }
-        if ortho
-            && let Some(base) = base
-        {
+        if let Some(base) = ortho_base {
             let base = <CPlane as om9_core::coords::LocalFrame>::to_local(&plane, base)?.xyz();
             let dx = constrained[0] - base[0];
             let dy = constrained[1] - base[1];
@@ -7204,18 +7224,36 @@ impl Controller {
                 3 => (-diagonal, diagonal), 4 => (-1., 0.), 5 => (-diagonal, -diagonal),
                 6 => (0., -1.), _ => (diagonal, -diagonal),
             };
-            let distance = dx * cos + dy * sin;
-            constrained[0] = base[0] + distance * cos;
-            constrained[1] = base[1] + distance * sin;
+            // The grid aim selects the direction. Project the raw pick onto it,
+            // then compare the nearest grid crossing on each moving axis.
+            let distance = (local[0] - base[0]) * cos + (local[1] - base[1]) * sin;
+            let direction = [cos, sin];
+            let crossing = if self.grid_snap {
+                direction.into_iter().enumerate().filter(|(_, component)| *component != 0.)
+                    .map(|(axis, component)| {
+                        let grid = grid_coordinate(base[axis] + distance * component);
+                        (axis, grid, (grid - base[axis]) / component)
+                    })
+                    .min_by(|first, second| (first.2 - distance).abs().total_cmp(&(second.2 - distance).abs()))
+            } else { None };
+            let along = crossing.map_or(distance, |(_, _, along)| along);
+            constrained[0] = base[0] + along * cos;
+            constrained[1] = base[1] + along * sin;
+            if let Some((axis, grid, _)) = crossing {
+                constrained[axis] = grid;
+            }
             constrained[2] = base[2];
         }
         plane.point(constrained)
     }
     /// Project an arbitrary world point onto the active CPlane's local Z=0.
-    /// This is the Project snap; it never changes the CPlane itself.
     pub fn project_to_plane(&self, point: Point3) -> Result<Point3> {
-        finite(point)?;
-        let plane = self.input_plane();
+        Self::project_point_onto(point, self.input_plane())
+    }
+    pub(crate) fn project_snap_with_base(&self, point: Point3, base: Option<om9_core::coords::WorldPoint>) -> Result<Point3> {
+        Self::project_point_onto(point, self.pointer_input_plane_with_base(base))
+    }
+    fn project_point_onto(point: Point3, plane: CPlane) -> Result<Point3> {
         let world = om9_core::coords::WorldPoint::try_new(point)?;
         let local = <CPlane as om9_core::coords::LocalFrame>::to_local(&plane, world)?.xyz();
         plane.point([local[0], local[1], 0.])
@@ -7237,6 +7275,9 @@ impl Controller {
             worker.cancel.store(true, std::sync::atomic::Ordering::Release);
             return;
         }
+        // Some typed commands enter a prompt directly, without dispatch_effect.
+        // Retire the old run here so a replacement cannot inherit its input.
+        self.command_run = self.command_run.wrapping_add(1);
         #[cfg(feature = "occt-brep")]
         drop(self.wireframe_worker.take());
         #[cfg(feature = "occt-brep")]
@@ -7510,6 +7551,9 @@ impl Controller {
         self.submit_effect(text).map(|_| ())
     }
     pub fn submit_effect(&mut self, text: &str) -> Result<DispatchOutcome> {
+        if self.request_command_history(text) {
+            return Ok(DispatchOutcome::Command);
+        }
         self.input_revision = self.input_revision.wrapping_add(1);
         if let Some(result) = self.submit_ring_rail_confirmation(text) { return result.map(|_| DispatchOutcome::Command); }
         if let Some(result) = self.submit_ring_rail_shape(text) { return result.map(|_| DispatchOutcome::Command); }
@@ -8909,6 +8953,7 @@ impl Controller {
     pub fn input_plane(&self) -> CPlane {
         self.session
             .as_ref()
+            .filter(|session| self.validate_context(&session.context).is_ok())
             .map_or_else(|| self.workspace.views[&self.workspace.active].cplane, |s| s.plane)
     }
     /// Plane used for free pointer intersection; Project applies to object snaps separately.

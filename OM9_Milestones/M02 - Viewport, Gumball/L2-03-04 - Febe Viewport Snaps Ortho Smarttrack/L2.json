@@ -137,6 +137,62 @@
         "OM9-L3-03-04-005": "5/5"
       },
       "manual_gate": "M02-UI"
+    },
+    "snaps_p07_windows_review_build_2026_11_19": {
+      "status": "WINDOWS_DESKTOP_REPLAY_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The current isolated desktop build confirms the O-Snap menu route, panel Project toggle, Apparent Int cue at the same viewport pixel, active/dim icon feedback, and idle E followed by Escape. A two-Line drawing is staged for reviewer inspection.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#windows-snaps-review-build"]
+    },
+    "snaps_p07_grouped_current_windows_2026_11_19": {
+      "status": "WINDOWS_AUTOMATED_REVALIDATED_MANUAL_UI_PENDING",
+      "scope": "P07 passed 286 tests on Windows. The two-Line OM9 scratch drawing and manual checklist cover palette appearance, tooltips, one-shot, CMD, SmartTrack, Tab and Project for M02-UI review.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#grouped-p07-after-the-nurbs-knot-trim-fix", "docs/plans/2026-11-17-snaps-menu-gap-plan.md#các-mục-còn-chờ-xác-nhận-m02-ui"]
+    },
+    "snaps_remaining_cmd_routes_2026_11_19": {
+      "status": "WINDOWS_SNAP_UI_ROUTES_VALIDATED_USER_REVIEW_RECORDED",
+      "scope": "Exact snap names at a Line point prompt use the point dispatcher before fuzzy command suggestions. Six palette and one-shot routes pass. The user confirmed the previously tried SNAPS workflows at group level.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#user-review-and-remaining-snap-routes"]
+    },
+    "snaps_p07_polyline_enter_recheck_2026_11_19": {
+      "status": "WINDOWS_AUTOMATED_REVALIDATED_MANUAL_UI_PENDING",
+      "scope": "The latest grouped replay covers snap-panel and CMD interaction. Current Windows mouse input enabled the apparent option through the O-Snap context menu and compared both Project states in packaged Polyline.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#p07-recheck-after-the-viewport-enter-fix"]
+    },
+    "snaps_p07_current_worktree_2026_11_19": {
+      "status": "WINDOWS_AUTOMATED_REVALIDATED_MANUAL_UI_PENDING",
+      "scope": "The current Windows app integration replay covers expanded and compact state, all four grid steps, one-shot indicator behavior, CMD routes, and point-input modes. Earlier desktop evidence recorded all 21 tooltips. Human M02-UI remains pending.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#p07-current-worktree-acceptance-audit"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G01",
+        "G02",
+        "G03",
+        "G04",
+        "G05",
+        "G06",
+        "G07",
+        "G08",
+        "G09",
+        "G10",
+        "G11",
+        "G12",
+        "G13"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
+    },
+    "snaps_p07_partial_2026_11_17": {
+      "status": "IMPLEMENTATION_IN_PROGRESS_PARTIALLY_VALIDATED",
+      "receipt": "docs/validation/2026-11-17-snaps-p07.md",
+      "qualification": "Selected core, scene, panel, coordinate, CMD and native adapter fixtures passed. Native UI and app-library tests remain blocked by stale BRep test APIs; desktop, SDK end-to-end and human M02-UI review remain pending. Historical evidence is not promoted to whole-menu acceptance."
     }
   }
 }

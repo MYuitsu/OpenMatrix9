@@ -112,5 +112,56 @@
       "OM9-L3-03-13-005",
       "OM9-L3-03-13-006"
     ]
+  },
+  "runtime_implementation": {
+    "cage_smart_flow_history_2026_11_17": {
+      "status": "MATRIXAPP_CAGE_SMART_FLOW_PARTIAL",
+      "evidence": "docs/validation/2026-11-17-history-dependent-candidate.md#cage-and-smart-flow-source-commands",
+      "scope": "Cage Edit, Smart Flow and Pull Down carry source geometry and metadata through the Join History worker; tested two-level output, Undo/Redo, failure and cancel. Source calculations and other source-edit families remain open."
+    },
+    "addon_history_edits_2026_11_17": {
+      "status": "INTERACTIVE_ADDON_SOURCE_EDIT_PARTIAL",
+      "evidence": "docs/validation/2026-11-17-history-dependent-candidate.md#interactive-add-on-source-edits",
+      "scope": "Interactive add-on Geometry/Placement source edits with optional same-document Inserts and Extensions rebuild Join History in one worker transaction; unsupported mixed mutations including parent deletion refuse. Tested through an in-process Matrix Scale and scripted mixed reply; exact-source replacements and other source-edit families remain open."
+    },
+    "transform_menu_fixture_migration_2026_11_17": {
+      "status": "HEADLESS_SYNTHETIC_NATIVE_FIXTURES",
+      "evidence": "docs/validation/2026-11-17-history-dependent-candidate.md#transform-menu-native-fixture-migration",
+      "scope": "The Transform menu's synthetic native-source display fixtures now use the legacy migration owner; all 50 fixtures pass with and without default features. This does not certify native topology or complete Join History."
+    },
+    "history_dependent_candidate_2026_11_17": {
+      "status": "CORE_CANDIDATE_FIXTURES_HOST_OPEN",
+      "evidence": "docs/validation/2026-11-17-history-dependent-candidate.md",
+      "scope": "MatrixApp parent grip edits, gumball gestures, numeric and tested Transform menu operations, single-piece Trim and non-copy Move/Rotate/Mirror commands feeding Join History schedule source and descendant updates on the worker. Interactive mutual and one/two-surface Trim retain their sessions on success/failure/cancel; Trim geometry and partitions are still prepared on the caller. Headless fixtures cover two levels, command-editor input and menu-origin dispatch, Undo/Redo, failure, simulated grip drag and reopen. Mixed Mirror includes points, meshes, surfaces, instances and an OCCT box with placement; other source edits, native/producer peak bounds, desktop latency and Join History creation routes remain open."
+    },
+    "history_atomic_source_update_2026_11_17": {
+      "status": "CORE_TRANSACTION_ADMISSION_ONLY",
+      "evidence": "docs/validation/2026-11-17-history-atomic-source-update.md",
+      "scope": "Same-transaction geometry/placement edits can accompany a clean HistoryUpdate using staged source stamps; final world validation and one Undo are tested. Host automatic propagation remains open."
+    },
+    "join_history_interim_refusal_2026_11_16": {
+      "status": "ADDON_REFUSAL_ONLY_HISTORY_OPEN",
+      "evidence": "docs/validation/2026-11-16-join-history-interim-refusal.md",
+      "scope": "The add-on refuses its sampled non-associative operation instead of deleting parents. Scoped host fixtures cover canonical placed-curve creation, recipe/Undo, save/open and explicit recompute. Automatic propagation, command routing and lifecycle acceptance remain open."
+    },
+    "tools_menu_audit_2026_11_16": {
+      "date": "2026-11-16",
+      "status": "AUDIT_ONLY_GAPS_OPEN",
+      "scope": "Tools menu audit: compare this owner with Book2, relevant decompile and current built-in/add-on routes. Existing handler/tests are partial evidence; see per-command gaps in plan.",
+      "plan": "docs/plans/2026-11-16-tools-menu-gap-plan.md",
+      "evidence": "docs/validation/2026-11-16-tools-menu-audit.json",
+      "implementation_changed": false,
+      "manual_gate_promoted": false
+    },
+    "center_controller_history_2026_11_17": {
+      "status": "CONTROLLER_METHOD_PARTIAL",
+      "evidence": "docs/validation/2026-11-17-history-dependent-candidate.md#center-object-controller-source-edits",
+      "scope": "Center Object controller placements and dependent Join History rebuild publish atomically; no menu/CMD route established."
+    },
+    "top11_parent_guard_2026_11_17": {
+      "status": "PARENT_REPLACEMENT_REFUSAL_PARTIAL",
+      "evidence": "docs/validation/2026-11-17-history-dependent-candidate.md#top-11-parent-replacement-guard",
+      "scope": "Top 11 ordinary publication refuses unhandled mutations of update-enabled Join History parents; parent replacement semantics remain unimplemented."
+    }
   }
 }

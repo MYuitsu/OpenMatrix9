@@ -36,7 +36,43 @@ fn apply_command_theme(ui: &mut egui::Ui) {
     visuals.widgets.hovered.weak_bg_fill = COMMAND_SELECTION;
 }
 
-fn consume_command_shortcut(ctx: &egui::Context, shortcut: char) -> bool {
+impl MatrixApp {
+    pub(super) fn command_history_ui(&mut self, ctx: &egui::Context) {
+        if !self.viewport_menu_owns_frame {
+            let shortcut = ctx.input_mut(|input| {
+                let pressed = input.events.iter().any(|event| {
+                    matches!(event, egui::Event::Key {
+                        key: Key::F2, pressed: true, repeat: false, modifiers, ..
+                    } if *modifiers == Modifiers::NONE)
+                });
+                pressed && input.consume_key(Modifiers::NONE, Key::F2)
+            });
+            if self.controller.take_command_history_request() || shortcut {
+                self.command_history_open = !self.command_history_open;
+            }
+        }
+        if !self.command_history_open {
+            return;
+        }
+        let mut history = self.transcript.history();
+        egui::Window::new("Command History")
+            .id(egui::Id::new("om9-command-history"))
+            .open(&mut self.command_history_open)
+            .default_size([640., 280.])
+            .show(ctx, |ui| {
+                if self.viewport_menu_owns_frame {
+                    ui.disable();
+                }
+                egui::ScrollArea::vertical().stick_to_bottom(true).show(ui, |ui| {
+                    ui.add(egui::TextEdit::multiline(&mut history)
+                        .font(egui::TextStyle::Monospace)
+                        .desired_width(f32::INFINITY));
+                });
+            });
+    }
+}
+
+pub(super) fn consume_command_shortcut(ctx: &egui::Context, shortcut: char) -> bool {
     let text = shortcut.to_string();
     ctx.input_mut(|input| {
         if input.events.iter().any(|event| {
@@ -75,7 +111,9 @@ impl MatrixApp {
         let names: std::collections::BTreeSet<String> = self
             .features
             .iter()
-            .filter(|feature| Controller::availability(&feature.id).is_ok())
+            .filter(|feature| Controller::availability(&feature.id).is_ok()
+                || matches!(om9_core::top11::Top11Action::from_feature(&feature.id),
+                    Some(om9_core::top11::Top11Action::Move | om9_core::top11::Top11Action::Rotate | om9_core::top11::Top11Action::Mirror)))
             .filter_map(|feature| feature.command.clone())
             .collect();
         let mut matches: Vec<(u8, String)> = names
@@ -122,15 +160,15 @@ impl MatrixApp {
         // controller owns the current stage text and its inline option signature;
         // refreshing here means a command that started without a feedback call
         // still names its options inside the live row instead of a chip row.
-        let prompt = self.controller.prompt_with_options();
-        if self.transcript.prompt() != prompt {
-            self.transcript.set_prompt(&prompt);
-            // The prompt grew or shrank, so the editor's stored character index
-            // no longer points at the draft end. Land the caret there again.
-            self.focus_cmd = true;
-        }
         let ctx = ui.ctx().clone();
         let id = egui::Id::new("matrix-command-transcript");
+        let prompt = self.live_command_prompt();
+        if self.transcript.prompt() != prompt {
+            self.transcript.set_prompt(&prompt);
+            // Reposition an active caret as the prompt changes length.
+            // A viewport pick can advance the prompt without activating CMD.
+            self.focus_cmd |= ctx.memory(|memory| memory.has_focus(id));
+        }
         let popup_open = self.viewport_menu_owns_frame || egui::Popup::is_any_open(&ctx);
         let focused = !popup_open && ctx.memory(|m| m.has_focus(id));
         // Enter can confirm an IME candidate. Egui keeps composition purpose
@@ -158,12 +196,16 @@ impl MatrixApp {
         let composing = was_composing || self.cmd_ime_composing || ime_frame;
         let draft = self.transcript.draft().to_owned();
         let query = draft.trim().to_owned();
+        // An exact snap word is point input. A fuzzy command match must not replace it.
+        let exact_snap = self.has_nested_point_prompt() && Self::one_shot_snap_kind(&query).is_some();
         let suggestions_visible = focused
+            && self.between.is_none() && !(self.surface_constraint.is_some() && self.has_nested_point_prompt()) && self.elevator.is_none()
             && !popup_open
             && !composing
             && !query.is_empty()
             && !draft.ends_with(' ')
             && !query.chars().any(char::is_whitespace)
+            && !exact_snap
             && self.controller.command_options().is_empty();
         if suggestions_visible {
             if query != self.cmd_suggestions_query {
@@ -221,9 +263,11 @@ impl MatrixApp {
             let result = self.controller.delete_objects(&ids).map(|_| ());
             self.feedback(result);
         }
+        let was_running = self.controller.is_running() || self.controller.addon_session().is_some();
         // One accelerator path for every owner: the declared snapshot decides
         // which letter is advertised; typed text never bypasses the resolver.
         if !composing
+            && self.between.is_none() && !(self.surface_constraint.is_some() && self.has_nested_point_prompt()) && self.elevator.is_none()
             && !popup_open
             && (focused || ctx.memory(|m| m.focused().is_none()))
             && self.transcript.draft().is_empty()
@@ -257,7 +301,11 @@ impl MatrixApp {
             // focus Space is ordinary text and never repeats (OM9-L3-03-10-006).
             self.submit_draft();
         }
-        if self.focus_cmd && !popup_open {
+        if was_running && !self.controller.is_running() && self.controller.addon_session().is_none() {
+            self.release_command_editor_focus(&ctx);
+        }
+        let focus_requested = self.focus_cmd && !popup_open;
+        if focus_requested {
             ctx.memory_mut(|m| m.request_focus(id));
             let mut state = TextEdit::load_state(&ctx, id).unwrap_or_default();
             state
@@ -352,6 +400,11 @@ impl MatrixApp {
                     .layouter(&mut layouter)
                     .show(ui)
             });
+        // A command icon click can make TextEdit give up focus in the same frame
+        // that the command opens a prompt. Honor the prompt's focus request.
+        if focus_requested && (self.controller.is_running() || self.controller.addon_session().is_some()) {
+            ctx.memory_mut(|memory| memory.request_focus(id));
+        }
         self.cmd_history_rect = Some(scrolled.inner_rect);
         let mut state = scrolled.inner.state;
         let full_galley = scrolled.inner.galley;
@@ -359,7 +412,7 @@ impl MatrixApp {
         let history_chars = self.transcript.history().chars().count();
         let live: String = self.transcript.text().chars().skip(history_chars).collect();
         let live_prompt = &live[..live.len() - self.transcript.draft().len()];
-        let options = self.controller.command_options();
+        let options = if self.between.is_some() || (self.surface_constraint.is_some() && self.has_nested_point_prompt()) || self.elevator.is_some() { Vec::new() } else { self.controller.command_options() };
         let mut search_from = 0;
         let inline_options = !options.is_empty()
             && options.iter().all(|option| {
@@ -641,6 +694,7 @@ impl MatrixApp {
         // An interactive add-on command shows its sub-options: `Close=No  Length  Undo …`.
         // A click on a flag/choice/action sends it at once; a number puts `Length=` in the line.
         if !popup_open
+            && !self.controller.ring_rail_is_open()
             && self.controller.phase() == crate::session::CmdPhase::Idle
             && let Some(session) = self.controller.addon_session()
         {

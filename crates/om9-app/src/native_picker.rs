@@ -115,6 +115,38 @@ pub fn pick_stl(_parent: &eframe::Frame, _current: Option<&Path>) -> Result<Opti
 }
 
 #[cfg(windows)]
+pub fn pick_project_archive(parent: &eframe::Frame, save: bool) -> Result<Option<PathBuf>> {
+    use om9_native_owner::file_dialog::{Mode, choose_project_archive};
+    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+    let RawWindowHandle::Win32(handle) = parent.window_handle().map_err(|error| Error::Io(error.to_string()))?.as_raw() else {
+        return Err(Error::Unsupported("Win32 project picker parent"));
+    };
+    let mode = if save { Mode::Save } else { Mode::Open };
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| choose_project_archive(handle.hwnd.get() as usize, mode)))
+        .map_err(|_| Error::Io("native project picker panicked".into()))?
+        .map_err(|error| Error::Io(format!("Windows project dialog: {error}")))
+}
+#[cfg(not(windows))]
+pub fn pick_project_archive(_parent: &eframe::Frame, _save: bool) -> Result<Option<PathBuf>> {
+    Err(Error::Unsupported("native project chooser on this platform"))
+}
+
+#[cfg(windows)]
+pub fn pick_project_folder(parent: &eframe::Frame) -> Result<Option<PathBuf>> {
+    use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+    let RawWindowHandle::Win32(handle) = parent.window_handle().map_err(|error| Error::Io(error.to_string()))?.as_raw() else {
+        return Err(Error::Unsupported("Win32 folder picker parent"));
+    };
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| om9_native_owner::file_dialog::choose_project_folder(handle.hwnd.get() as usize)))
+        .map_err(|_| Error::Io("native folder picker panicked".into()))?
+        .map_err(|error| Error::Io(format!("Windows folder dialog: {error}")))
+}
+#[cfg(not(windows))]
+pub fn pick_project_folder(_parent: &eframe::Frame) -> Result<Option<PathBuf>> {
+    Err(Error::Unsupported("native project folder chooser on this platform"))
+}
+
+#[cfg(windows)]
 pub fn pick_addon_zip(parent: &eframe::Frame) -> Result<Option<PathBuf>> {
     use om9_native_owner::file_dialog::choose_addon_zip;
     use raw_window_handle::{HasWindowHandle, RawWindowHandle};

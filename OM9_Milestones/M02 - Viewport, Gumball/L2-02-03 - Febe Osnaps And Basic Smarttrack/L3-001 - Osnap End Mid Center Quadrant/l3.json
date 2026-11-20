@@ -247,6 +247,31 @@
       "status": "SCOPED_PARALLEL_VIEW_SNAP_PASSED",
       "evidence": "docs/validation/2026-11-12-parallel-view-osnap.md",
       "limitations": "Headless Surface and Endpoint fixtures only; other commands, cameras and desktop unverified."
+    },
+    "native_mid_one_shot_2026_11_18": {
+      "status": "SCOPED_NATIVE_WINDOWS_INPUT_PASSED",
+      "scope": "A Line started in Looking Down received the exact source midpoint in Through Finger through keyboard M while the persistent master was off. The live model confirmed the endpoint and one additional Undo entry. The midpoint badge was consumed on acceptance.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#standard-windows-mid-one-shot-across-viewports"
+    },
+    "reopened_native_edge_quad_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A reopened native cylinder with rotated, nonuniform placement resolves Quad to the expected top-rim extremum in Wireframe and Shaded. The marker has the native source identity, and the same point starts the viewport Line with one Undo entry. The fixture uses the legacy restore path.",
+      "tests": ["om9-app osnap_ui::reopened_native_cylinder_edge_quad_matches_line_in_both_display_modes"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#quad-on-a-reopened-placed-native-cylinder-edge"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G07"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

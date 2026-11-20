@@ -480,6 +480,11 @@
     "rust_test_name": "m03_01_10_002"
   },
   "runtime_implementation": {
+    "retained_output_topology_for_save_2026_11_18": {
+      "status": "PACKAGED_WORKER_AND_EGUI_VALIDATED",
+      "scope": "A committed single-body Boolean worker output retains its captured topology proof when admission permits. A Difference between offset spheres passed Save As, v6 Open, and a source-bound Surface Snap in Line.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#trimmed-brep-surface-snap-after-application-save-as-and-open"
+    },
     "binary_ui_worker_2026_11_14": "MatrixApp Difference and Intersection menu/CMD use admitted source workers; scoped headless tests verify group results, DeleteInput, empty, stale, quota and Undo/Redo. Evidence: docs/validation/2026-11-14-boolean-binary-ui-worker.md",
     "multi_cutter_validation_2026_11_02": "docs/validation/2026-11-02-boolean-multi-cutter-dice.md",
     "obb_validation_2026_11_02": "docs/validation/2026-11-02-boolean-obb-blender-rhino.md",

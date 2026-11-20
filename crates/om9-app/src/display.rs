@@ -228,6 +228,19 @@ pub fn consume_handled_navigation_events(events: &mut Vec<eframe::egui::Event>) 
         | Event::PointerButton { button: PointerButton::Secondary | PointerButton::Middle, .. }));
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
+pub(crate) struct GridVisibility {
+    pub lines: bool,
+    pub axes: bool,
+}
+
+impl Default for GridVisibility {
+    fn default() -> Self {
+        Self { lines: true, axes: true }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DisplayPreferences {
     pub version: u32,

@@ -34,6 +34,8 @@ fn start() -> (MatrixApp, egui::Context) {
     for _ in 0..3 {
         frame(&mut app, &ctx, vec![]);
     }
+    let file = app.top_menu_rect(0).expect("left File menu").center();
+    click(&mut app, &ctx, file);
     (app, ctx)
 }
 fn click(app: &mut MatrixApp, ctx: &egui::Context, pos: Pos2) {
@@ -184,14 +186,14 @@ fn file_menu_and_cmd_dispatch_owned_intents_through_same_controller() {
     );
 }
 #[test]
-fn toolbar_new_opens_unsaved_prompt_and_escape_keeps_line_draft_and_redo() {
+fn sidebar_new_opens_unsaved_prompt_and_escape_keeps_line_draft_and_redo() {
     let (mut app, ctx) = start();
     dirty_line(&mut app);
     let before = app.controller.coordinator().snapshot();
     let views = app.controller.workspace.views.clone();
     let pos = app
-        .file_toolbar_rect(FileKind::New)
-        .expect("New toolbar target")
+        .file_sidebar_rect(FileKind::New)
+        .expect("New left-menu target")
         .center();
     click(&mut app, &ctx, pos);
     assert_eq!(
@@ -333,7 +335,7 @@ fn ui_startup_from_file_keeps_active_path_and_missing_module_diagnostics() {
     assert!(!app.controller.file_diagnostics().is_empty());
 }
 #[test]
-fn real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_once() {
+fn real_file_menu_cancel_and_sidebar_picker_reply_preserve_or_replace_exactly_once() {
     let (mut app, ctx) = start();
     dirty_line(&mut app);
     let before = app.controller.coordinator().snapshot();
@@ -345,7 +347,7 @@ fn real_file_menu_cancel_and_toolbar_picker_reply_preserve_or_replace_exactly_on
     click(&mut app, &ctx, pos);
     assert_eq!(app.controller.coordinator().snapshot(), before);
     assert_eq!(app.transcript.draft(), "12,6,");
-    let pos = app.file_toolbar_rect(FileKind::Save).unwrap().center();
+    let pos = app.file_sidebar_rect(FileKind::Save).unwrap().center();
     click(&mut app, &ctx, pos);
     let token = app.pending_file_picker().unwrap();
     app.accept_file_picker_reply(&ctx, token, None).unwrap();
@@ -359,7 +361,7 @@ fn actual_save_control_routes_pending_new_without_a_second_geometry_undo() {
     let (mut app, ctx) = start();
     dirty_line(&mut app);
     let before = app.controller.coordinator().snapshot();
-    let pos = app.file_toolbar_rect(FileKind::New).unwrap().center();
+    let pos = app.file_sidebar_rect(FileKind::New).unwrap().center();
     click(&mut app, &ctx, pos);
     let pos = app.file_control_rect(FileControl::Save).unwrap().center();
     click(&mut app, &ctx, pos);
@@ -383,7 +385,7 @@ fn owned_overwrite_cancel_and_stale_picker_response_keep_a_newer_owner() {
     std::fs::write(&target, b"old target").unwrap();
     let (mut app, ctx) = start();
     dirty_line(&mut app);
-    let pos = app.file_toolbar_rect(FileKind::Save).unwrap().center();
+    let pos = app.file_sidebar_rect(FileKind::Save).unwrap().center();
     click(&mut app, &ctx, pos);
     let old = app.pending_file_picker().unwrap();
     app.accept_file_picker_reply(&ctx, old, Some(target.clone()))
@@ -406,6 +408,8 @@ fn cmd_enter_opens_prompt_without_saving_and_ime_enter_cannot_affirm_it() {
     let (mut app, ctx) = start();
     dirty_line(&mut app);
     let before = app.controller.coordinator().snapshot();
+    let input = app.command_input_rect().expect("CMD input").center();
+    click(&mut app, &ctx, input);
     app.transcript.set_draft("New");
     frame(&mut app, &ctx, vec![key(egui::Key::Enter)]);
     for _ in 0..3 {
@@ -444,7 +448,7 @@ fn discard_new_resets_runtime_only_after_actual_button_and_blocks_canvas_input()
     let (mut app, ctx) = start();
     dirty_line(&mut app);
     let before = app.controller.coordinator().snapshot();
-    let pos = app.file_toolbar_rect(FileKind::New).unwrap().center();
+    let pos = app.file_sidebar_rect(FileKind::New).unwrap().center();
     click(&mut app, &ctx, pos);
     click(&mut app, &ctx, Pos2::new(800., 400.));
     assert_eq!(app.controller.coordinator().snapshot(), before);
@@ -486,6 +490,7 @@ fn shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save()
     assert!(app.controller.is_running());
     assert!(!app.controller.is_dirty().unwrap());
     frame(&mut app, &ctx, vec![]);
+    assert!(ctx.memory(|memory| memory.has_focus(egui::Id::new("matrix-command-transcript"))));
     let mut event = key(egui::Key::S);
     if let Event::Key { modifiers, .. } = &mut event {
         *modifiers = Modifiers {
@@ -510,6 +515,36 @@ fn shortcuts_preserve_numeric_draft_and_save_as_requests_a_new_path_after_save()
 }
 
 #[test]
+fn idle_end_shortcut_survives_save_picker_success_and_cancel() {
+    let files = Files::new();
+    let path = files.0.join("shortcut-focus.om9");
+    let (mut app, ctx) = start();
+    let cmd = egui::Id::new("matrix-command-transcript");
+    for (kind, reply) in [(FileKind::Save, Some(path.clone())), (FileKind::SaveAs, None)] {
+        let pos = app.file_sidebar_rect(kind).unwrap().center();
+        click(&mut app, &ctx, pos);
+        let token = app.pending_file_picker().unwrap();
+        app.accept_file_picker_reply(&ctx, token, reply).unwrap();
+        frame(&mut app, &ctx, vec![]);
+        assert!(!app.controller.is_running());
+        assert!(!ctx.memory(|memory| memory.has_focus(cmd)), "{kind:?}");
+        frame(&mut app, &ctx, vec![key(egui::Key::E), Event::Text("e".into())]);
+        assert_eq!(
+            app.snap_override(),
+            Some(om9_scene::osnap::SnapKind::End),
+            "{kind:?}: {} (focus {:?}, operation {:?})",
+            app.status_line(),
+            ctx.memory(|memory| memory.focused()),
+            app.controller.file_operation().map(|op| op.phase()),
+        );
+        assert!(app.transcript.draft().is_empty());
+        frame(&mut app, &ctx, vec![key(egui::Key::Escape)]);
+        assert!(app.snap_override().is_none());
+    }
+    assert_eq!(app.controller.active_file_path(), Some(path.as_path()));
+}
+
+#[test]
 fn failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo() {
     let files = Files::new();
     let (mut app, ctx) = start();
@@ -517,7 +552,7 @@ fn failed_picker_path_shows_retry_without_loop_and_cancel_preserves_redo() {
     app.controller.cancel();
     app.controller.undo().unwrap();
     let before = app.controller.coordinator().snapshot();
-    let pos = app.file_toolbar_rect(FileKind::Save).unwrap().center();
+    let pos = app.file_sidebar_rect(FileKind::Save).unwrap().center();
     click(&mut app, &ctx, pos);
     let token = app.pending_file_picker().unwrap();
     assert!(
@@ -547,7 +582,7 @@ fn overwrite_replace_button_accepts_archive_once_and_replayed_reply_cannot_repla
     let (mut app, ctx) = start();
     dirty_line(&mut app);
     let before = app.controller.coordinator().snapshot();
-    let pos = app.file_toolbar_rect(FileKind::Save).unwrap().center();
+    let pos = app.file_sidebar_rect(FileKind::Save).unwrap().center();
     click(&mut app, &ctx, pos);
     let token = app.pending_file_picker().unwrap();
     app.accept_file_picker_reply(&ctx, token, Some(target.clone()))
@@ -577,7 +612,7 @@ fn old_discard_or_cancel_pointer_release_cannot_answer_a_new_prompt_owner() {
         let (mut app, ctx) = start();
         dirty_line(&mut app);
         let before = app.controller.coordinator().snapshot();
-        let pos = app.file_toolbar_rect(FileKind::New).unwrap().center();
+        let pos = app.file_sidebar_rect(FileKind::New).unwrap().center();
         click(&mut app, &ctx, pos);
         let old = app.controller.file_operation().unwrap().token();
         let pos = app.file_control_rect(control).unwrap().center();
@@ -621,7 +656,7 @@ fn ime_commit_enter_and_escape_wait_for_a_fresh_key_after_composition() {
     let (mut app, ctx) = start();
     dirty_line(&mut app);
     let before = app.controller.coordinator().snapshot();
-    let pos = app.file_toolbar_rect(FileKind::New).unwrap().center();
+    let pos = app.file_sidebar_rect(FileKind::New).unwrap().center();
     click(&mut app, &ctx, pos);
     frame(
         &mut app,
@@ -666,7 +701,7 @@ fn thirty_closed_file_prompts_reuse_area_state_and_keep_cmd_editor() {
     let before = app.controller.coordinator().snapshot();
     let mut baseline = None;
     for _ in 0..30 {
-        let pos = app.file_toolbar_rect(FileKind::New).unwrap().center();
+        let pos = app.file_sidebar_rect(FileKind::New).unwrap().center();
         click(&mut app, &ctx, pos);
         let pos = app.file_control_rect(FileControl::Cancel).unwrap().center();
         click(&mut app, &ctx, pos);
@@ -698,7 +733,7 @@ fn held_opening_enter_cannot_accept_save_on_the_new_prompt() {
     let target = files.0.join("held-enter.om9");
     let (mut app, ctx) = start();
     dirty_line(&mut app);
-    let pos = app.file_toolbar_rect(FileKind::Save).unwrap().center();
+    let pos = app.file_sidebar_rect(FileKind::Save).unwrap().center();
     click(&mut app, &ctx, pos);
     let token = app.pending_file_picker().unwrap();
     app.accept_file_picker_reply(&ctx, token, Some(target.clone()))
@@ -739,7 +774,7 @@ fn cmd_composition_transfers_to_file_prompt_until_commit() {
             active_range_chars: None,
         })],
     );
-    let pos = app.file_toolbar_rect(FileKind::New).unwrap().center();
+    let pos = app.file_sidebar_rect(FileKind::New).unwrap().center();
     click(&mut app, &ctx, pos);
     let token = app.controller.file_operation().unwrap().token();
     frame(&mut app, &ctx, vec![key(egui::Key::Enter)]);

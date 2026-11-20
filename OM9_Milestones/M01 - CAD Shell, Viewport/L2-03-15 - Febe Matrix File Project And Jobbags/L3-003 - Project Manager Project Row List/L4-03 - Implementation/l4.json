@@ -6,6 +6,16 @@
   "owner_l2_id": "OM9-L2-03-15",
   "title": "Triển khai logic có kiểm thử — Project Manager Project Row List",
   "planning_state": "NOT_STARTED",
+  "project_manager_gap_tasks_20261117": {
+    "status": "IN_PROGRESS_NOT_VALIDATED",
+    "contract": "docs/plans/2026-11-17-project-manager-contract.md",
+    "tasks": [
+      "Persist a workspace catalog across document New/Open/restart; handle concurrent writers and corrupt or missing assets without replacing existing data.",
+      "Implement row create, rename, selection, visibility, confirmed delete, compact and a durable start/stop/reset timer.",
+      "Import and export native row archives atomically; validate all assets and remap local IDs. Track .mpj compatibility separately."
+    ],
+    "acceptance": "P07 combined project-manager batch and manual M01-UI remain pending; source presence is not acceptance."
+  },
   "task": {
     "task_id": "OM9-L4-03-15-003-03",
     "parent_l3_id": "OM9-L3-03-15-003",
@@ -354,6 +364,12 @@
       "Private archive paths in public documentation, manifests or release packages."
     ],
     "status_effect": "NONE_REQUIREMENTS_ONLY"
+  },
+  "runtime_implementation": {
+    "status": "PARTIAL_INTEGRATION_MANUAL_UI_PENDING",
+    "scope": "Workspace rows and catalog are implemented. Separately embedded document managers are preserved on Save and can be explicitly imported with fresh IDs; legacy inline bags remain intact and stale/canceled import is not published.",
+    "evidence": "docs/validation/2026-11-17-project-manager-p07.md",
+    "remaining": "Desktop review, complex legacy dependency recovery and full memory-peak verification remain open."
   },
   "implementation_samples": {
     "schema": "om9.l4.implementation_samples.v1",

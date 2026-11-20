@@ -336,6 +336,9 @@ impl Controller {
             return self.commit_gumball_grips(session);
         }
         let mutations = session.move_mutations(self.document())?;
+        if self.source_edits_update_join_history(session.targets()) {
+            return self.request_join_history_edit_worker(TransactionRequest::new(name, mutations));
+        }
         self.commit_gumball_mutations(name, mutations)
     }
 

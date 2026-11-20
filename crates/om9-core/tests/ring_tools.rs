@@ -104,6 +104,40 @@ fn registry() -> ProducerRegistry {
 }
 
 #[test]
+fn rail_history_restores_model_units_frame_and_reset_identity() {
+    use om9_core::{geometry::Unit, request::Value, units::LengthMm};
+    let mut document = Document::with_template_tolerance("rail history");
+    document.page_unit = Unit::Inch;
+    let mut session = BuilderSession::new(BuilderKind::RingRail, &document, &[]).unwrap();
+    session.set_field("diameter_mm", Value::length(LengthMm::try_new(19.).unwrap())).unwrap();
+    session.refresh(&document, &registry()).unwrap();
+    let plan = session.plan(&document).unwrap();
+    let Geometry::Curve(Curve::Circle { radius, x, y, .. }) = &plan.entity.geometry else { panic!("circle") };
+    assert!((radius * 2. * 25.4 - 19.).abs() < 1e-10);
+    assert_eq!((*x, *y), ([0.,0.,1.], [1.,0.,0.]));
+    document.entities.insert(plan.entity.id, plan.entity.clone());
+    document.history.recipes.insert(plan.recipe.id, plan.recipe.clone());
+    let mut restored = BuilderSession::from_history(BuilderKind::RingRail, &document, plan.entity.id, &plan.recipe).unwrap();
+    restored.refresh(&document, &registry()).unwrap();
+    assert_eq!(restored.preview().unwrap().geometry, plan.entity.geometry);
+    restored.set_field("diameter_mm", Value::length(LengthMm::try_new(20.).unwrap())).unwrap();
+    let revision = restored.revision();
+    restored.reset(&document, &[]).unwrap();
+    assert!(restored.revision() > revision);
+    assert_eq!((restored.output(), restored.recipe()), (plan.entity.id, plan.recipe.id));
+    restored.refresh(&document, &registry()).unwrap();
+    assert_eq!(restored.preview().unwrap().geometry, plan.entity.geometry);
+
+    let mut legacy = plan.recipe.clone();
+    legacy.parameters.remove("rail_frame");
+    legacy.parameters.remove("model_mm_per_unit");
+    let mut restored = BuilderSession::from_history(BuilderKind::RingRail, &document, plan.entity.id, &legacy).unwrap();
+    restored.refresh(&document, &registry()).unwrap();
+    let Geometry::Curve(Curve::Circle { radius, x, y, .. }) = &restored.preview().unwrap().geometry else { panic!("legacy circle") };
+    assert_eq!((*radius, *x, *y), (9.5, [1.,0.,0.], [0.,1.,0.]));
+}
+
+#[test]
 fn a_us_ring_size_resolves_through_the_frozen_table_and_an_unknown_locale_is_refused() {
     let document = Document::new("ring-size");
     let registry = registry();
@@ -121,7 +155,7 @@ fn a_us_ring_size_resolves_through_the_frozen_table_and_an_unknown_locale_is_ref
     let summary = session.preview().unwrap().summary.clone();
     assert!(summary.contains("US size 8"), "{summary}");
     assert!(summary.contains("diameter 18.13 mm"), "{summary}");
-    assert!(summary.contains("ISO 8653"), "{summary}");
+    assert!(summary.contains("Stuller"), "{summary}");
     let Geometry::Curve(Curve::Circle { radius, .. }) = &session.preview().unwrap().geometry else {
         panic!("ring rail circle");
     };

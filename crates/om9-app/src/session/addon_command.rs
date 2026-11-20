@@ -22,6 +22,12 @@ use std::collections::BTreeMap;
 /// power-of-two segment counts; the tangent error at this density is far below 0.01°.
 pub const CURVE_SAMPLES: usize = 1025;
 
+fn join_history_unavailable(name: &str) -> bool {
+    ["gvJoinHistory", "JoinHistory", "OM9-TOOLS-017"]
+        .iter()
+        .any(|candidate| name.trim().eq_ignore_ascii_case(candidate))
+}
+
 fn cross(a: [f64; 3], b: [f64; 3]) -> [f64; 3] {
     [
         a[1] * b[2] - a[2] * b[1],
@@ -99,9 +105,13 @@ impl Controller {
     /// The catalog code an add-on provides for a typed name, feature id or code.
     pub fn addon_code(&self, name: &str) -> Option<String> {
         let key = name.trim().to_ascii_lowercase();
-        (!key.is_empty())
+        let code = (!key.is_empty())
             .then(|| self.addon_names.get(&key).cloned())
-            .flatten()
+            .flatten()?;
+        if code == "TopIconRingRail" {
+            return self.addon_names.get("builderringrail").cloned().or(Some(code));
+        }
+        Some(code)
     }
     /// The add-on command an OM9 icon names: by the icon's catalog code (MainMenu.ini key),
     /// else by its name as a manifest alias (`Circle`).
@@ -116,9 +126,10 @@ impl Controller {
     /// by other means.
     pub fn icon_target(&self, icon: &str, fallback: Option<&str>) -> Option<IconTarget> {
         if let Some(code) = self.icon_addon(icon) {
+            let enabled = !join_history_unavailable(&code);
             return Some(IconTarget {
                 command: code,
-                enabled: true,
+                enabled,
                 addon: true,
             });
         }
@@ -133,12 +144,22 @@ impl Controller {
             && surface.is_none_or(crate::surface_menu::SurfaceMenuBinding::enabled);
         Some(IconTarget::builtin(
             builtin,
-            Self::availability(builtin).is_ok() && catalog_enabled,
+            Self::availability(builtin).is_ok()
+                && catalog_enabled
+                && !join_history_unavailable(builtin)
+                && icon != "BuilderProfile",
         ))
     }
     /// Menu/icon/F6 gate: a built-in operation or a command an enabled add-on provides.
     pub fn is_available(&self, feature: &str) -> bool {
-        Self::availability(feature).is_ok() || self.addon_code(feature).is_some()
+        if join_history_unavailable(feature) {
+            return false;
+        }
+        let addon = self.addon_code(feature);
+        if addon.as_deref().is_some_and(join_history_unavailable) {
+            return false;
+        }
+        Self::availability(feature).is_ok() || addon.is_some()
     }
     pub fn take_addon_messages(&mut self) -> Vec<String> {
         std::mem::take(&mut self.addon_messages)
@@ -147,9 +168,20 @@ impl Controller {
     /// Run an add-on command: a builder command opens its builder, any other runs at once
     /// with the add-on's remembered values.
     pub fn run_addon_command(&mut self, code: &str) -> Result<()> {
+        let ring_rail = (code == "TopIconRingRail").then(|| self.addon_code(code)).flatten();
+        let code = ring_rail.as_deref().unwrap_or(code);
+        if join_history_unavailable(code) {
+            return Err(Error::Unsupported("Join History creation"));
+        }
         if self.is_running() {
             return Err(Error::Busy);
         }
+        if super::metal::handles_command(code) {
+            self.cancel_addon_builder();
+            self.cancel_addon_session();
+            return self.dispatch_metal_tool(code);
+        }
+        self.metal_panel_open = false;
         let host = self
             .addons
             .clone()

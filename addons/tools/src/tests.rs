@@ -83,17 +83,17 @@ fn ring_rail_profiles_and_outside_rail() {
     let r = run(
         RING_RAIL,
         vec![],
-        json!({"rr_ring_size": 7}),
+        json!({"rr_size_system": "us", "rr_ring_size": 7}),
         vec![Input::Enter],
     );
     let p = nurbs::samples(&r.create[0], 64);
     assert!(
         p.iter()
-            .all(|q| (norm(*q) - 17.3196 / 2.0).abs() < 1e-6 && q[1].abs() < 1e-12),
+            .all(|q| (norm(*q) - 17.32 / 2.0).abs() < 1e-6 && q[1].abs() < 1e-12),
         "in the Front view"
     );
     assert!(
-        dist(p[0], [0.0, 0.0, 17.3196 / 2.0]) < 1e-6,
+        dist(p[0], [0.0, 0.0, 17.32 / 2.0]) < 1e-6,
         "starts at the top"
     );
     let r = run(
@@ -175,14 +175,10 @@ fn four_rail_profile_passes_through_four_curves() {
 #[test]
 fn weights_and_resizer() {
     let cube = solid("c", cuboid([0.0; 3], [10.0, 10.0, 10.0]));
-    let r = run(METAL_WEIGHTS, vec![cube], json!({}), vec![Input::Enter]);
-    assert!(
-        r.messages
-            .iter()
-            .any(|m| m.contains("18k yellow gold: 15.5 g")),
-        "{:?}",
-        r.messages
-    );
+    let e = event(METAL_WEIGHTS, Input::Enter, vec![cube], json!({}));
+    let r = Tools::step(&e).unwrap();
+    assert!(r.error.as_deref().unwrap_or_default().contains("source-based"));
+    assert!(r.messages.is_empty());
     // A ring band resized from 7 to 9 keeps its thickness.
     let band = solid(
         "b",
@@ -211,6 +207,22 @@ fn weights_and_resizer() {
 }
 
 #[test]
+fn metal_weights_never_reports_display_mesh_mass_without_host_source_service() {
+    let closed = cuboid([0.0; 3], [10.0, 10.0, 10.0]);
+    let mut open = closed.clone();
+    open.triangles.truncate(10);
+    for mesh in [closed, open] {
+        let selection = vec![solid("mesh", mesh)];
+        let start = Tools::step(&event(METAL_WEIGHTS, Input::Start, selection.clone(), json!({}))).unwrap();
+        assert!(start.messages.is_empty());
+        let reply = Tools::step(&event(METAL_WEIGHTS, Input::Enter, selection, json!({}))).unwrap();
+        assert!(reply.error.is_some());
+        assert!(reply.messages.is_empty());
+        assert!(!reply.done);
+    }
+}
+
+#[test]
 fn smart_targets_blend() {
     let r = run(
         SMART_TARGET,
@@ -225,12 +237,21 @@ fn smart_targets_blend() {
     let p = nurbs::samples(&r.create[0], 100);
     assert!(dist(p[0], [0.0; 3]) < 1e-9 && dist(*p.last().unwrap(), [10.0, 10.0, 0.0]) < 1e-9);
     assert!(dot(unit(sub(p[1], p[0])), [1.0, 0.0, 0.0]) > 0.99);
-    // Join two touching lines.
+}
+
+#[test]
+fn join_history_refuses_without_deleting_parents_or_creating_nonassociative_output() {
     let a = curve("a", vec![[0.0; 3], [1.0, 0.0, 0.0]], false);
     let b = curve("b", vec![[2.0, 0.0, 0.0], [1.0, 0.0, 0.0]], false);
-    let r = run(JOIN_HISTORY, vec![a, b], json!({}), vec![Input::Enter]);
-    assert_eq!(r.create.len(), 1);
-    assert_eq!(r.delete.len(), 2);
+    let mut e = event(JOIN_HISTORY, Input::Start, vec![a, b], json!({}));
+    let first = Tools::step(&e).unwrap();
+    e.state = first.state;
+    e.input = Input::Enter;
+    let reply = Tools::step(&e).unwrap();
+    assert!(reply.error.as_deref().unwrap_or_default().contains("associative"));
+    assert!(!reply.done);
+    assert!(reply.create.is_empty());
+    assert!(reply.delete.is_empty());
 }
 
 #[test]

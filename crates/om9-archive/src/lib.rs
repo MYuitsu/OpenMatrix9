@@ -45,11 +45,30 @@ pub struct Migration {
     pub bytes: Vec<u8>,
 }
 impl Archive {
+    /// Restore a previously decoded, detached document under caller admission.
+    /// This does not itself authorize a schema or publish a document.
+    #[doc(hidden)]
+    pub fn restore_document_with_admission(document: Document, limits: &Limits,
+        available: &std::collections::BTreeSet<ReplayKey>, mut admit: impl FnMut(u64) -> Result<()>) -> Result<RestoredDocument> {
+        restore::restore_with_admission(document, limits, available, &mut admit)
+    }
     pub fn encode(document: &Document, limits: &Limits) -> Result<Vec<u8>> {
         container::encode(document, limits)
     }
+    /// Admit serialization buffers and validation scratch before allocation.
+    /// The caller accounts for the input document and retains the returned
+    /// buffer's reservation for as long as the buffer is live.
+    pub fn encode_with_admission(document: &Document, limits: &Limits,
+        mut admit: impl FnMut(u64, u64) -> Result<()>) -> Result<Vec<u8>> {
+        container::encode_with_admission(document, limits, &mut admit)
+    }
     pub fn decode(bytes: &[u8], limits: &Limits) -> Result<Document> {
         container::decode(bytes, limits)
+    }
+    /// Decode while admitting the estimated peak before each allocation phase.
+    /// The estimate includes the encoded input owned by the caller.
+    pub fn decode_with_admission(bytes: &[u8], limits: &Limits, mut admit: impl FnMut(u64) -> Result<()>) -> Result<Document> {
+        container::decode_with_admission(bytes, limits, &mut admit)
     }
     /// Decode a v4 archive for an explicit migration while retaining every old
     /// display. The caller owns the admission and must keep the returned

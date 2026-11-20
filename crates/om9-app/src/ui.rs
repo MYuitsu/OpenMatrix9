@@ -51,6 +51,7 @@ mod file_audit;
 mod file_success_audit;
 mod files;
 mod undo_settings;
+mod options;
 mod layer_dialogs;
 mod startup_audit;
 pub use files::FileControl;
@@ -258,6 +259,11 @@ struct HoverWorkerPermit(std::sync::Arc<std::sync::atomic::AtomicBool>);
 impl Drop for HoverWorkerPermit {fn drop(&mut self){self.0.store(false,std::sync::atomic::Ordering::Release);}}
 
 #[cfg(feature = "occt-brep")]
+const DEFERRED_SNAP_MISS: &str = "snap point under the pointer";
+#[cfg(feature = "occt-brep")]
+const PROJECTED_SURFACE_MISS: &str = "could not verify Project on the selected surface";
+
+#[cfg(feature = "occt-brep")]
 struct DeferredLineSurfaceClick {
     command: crate::session::CommandInputSnapshot,
     addon: Option<(uuid::Uuid, u64)>,
@@ -294,6 +300,25 @@ struct BetweenPrompt {
     first: Option<Point3>,
 }
 
+const BETWEEN_FIRST_PROMPT: &str = "Between: first point: ";
+const BETWEEN_SECOND_PROMPT: &str = "Between: second point: ";
+
+#[derive(PartialEq)]
+struct SmartTrackBasis {
+    publication: uuid::Uuid,
+    command_run: u64,
+    addon_session: Option<uuid::Uuid>,
+    plane: om9_scene::camera::CPlane,
+}
+
+struct SmartTrackHover {
+    view: ViewId,
+    candidate: om9_scene::osnap::SnapCandidate,
+    since: f64,
+    frame: u64,
+    acquired: bool,
+}
+
 struct DirectionLock {
     origin: Point3,
     direction: Point3,
@@ -301,6 +326,8 @@ struct DirectionLock {
     epoch: u64,
     addon: Option<(uuid::Uuid, u64)>,
 }
+
+const ELEVATOR_HEIGHT_PROMPT: &str = "Elevator: height: ";
 
 struct ElevatorPrompt {
     base: Point3,
@@ -312,6 +339,15 @@ struct ElevatorPrompt {
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum SurfaceConstraintKind { Surface, Polysurface }
+
+impl SurfaceConstraintKind {
+    fn selection_prompt(self) -> &'static str {
+        match self {
+            Self::Surface => "Select surface: ",
+            Self::Polysurface => "Select polysurface: ",
+        }
+    }
+}
 
 #[derive(Clone, PartialEq)]
 struct SurfaceConstraintTarget {
@@ -483,6 +519,7 @@ pub struct MatrixApp {
     /// Gumball settings popup opened from Info & Settings.
     gumball_settings_open: bool,
     undo_settings_draft: Option<om9_core::transaction::UndoPolicy>,
+    options: options::Options,
     memory_recovery_open: bool,
     memory_recovery_running: bool,
     memory_recovery_defer: bool,
@@ -549,6 +586,7 @@ pub struct MatrixApp {
     #[cfg(feature = "occt-brep")]
     edge_snap_click: Option<DeferredEdgeClick>,
     snap_state: om9_scene::osnap::SnapState,
+    escape_key_down: bool,
     between: Option<BetweenPrompt>,
     direction_lock: Option<DirectionLock>,
     viewport_keyboard_free_previous: bool,
@@ -558,7 +596,8 @@ pub struct MatrixApp {
     #[cfg(feature = "occt-brep")]
     projected_surface_query: Option<ProjectedSurfaceQuery>,
     smarttrack: om9_scene::osnap::SmartTrack,
-    smarttrack_basis: Option<(u64, om9_scene::camera::CPlane)>,
+    smarttrack_basis: Option<SmartTrackBasis>,
+    smarttrack_hover: Option<SmartTrackHover>,
     smarttrack_enabled: bool,
     /// Rubber-band selection: where the drag started, in screen points.
     band_start: Option<egui::Pos2>,
@@ -689,6 +728,7 @@ pub struct MatrixApp {
     builder_profile_window: bool,
     /// The Matrix History report window (`OM9-L3-03-13-003`).
     history_window: bool,
+    command_history_open: bool,
     /// The builder style browser window (`OM9-L3-03-12-002`).
     builder_style_window: bool,
     /// The name typed into the style browser's save field (`OM9-L3-03-12-004`).
@@ -987,6 +1027,9 @@ impl MatrixApp {
             if let Err(error) = app.load_undo_settings(&path.with_file_name("undo.json")) {
                 app.transcript.append_history(&format!("Undo settings: {error}"));
             }
+            if let Err(error) = app.options.load(&path.with_file_name("options.json")) {
+                app.transcript.append_history(&format!("Options: {error}"));
+            }
             if let Err(error) = app.load_user_metal_catalog(&path.with_file_name("metal-catalog.json")) {
                 app.transcript.append_history(&format!("Metal catalog: {error}"));
             }
@@ -1120,13 +1163,14 @@ impl MatrixApp {
             builder_handle_drag: None,
             builder_profile_window: false,
             history_window: false,
+            command_history_open: false,
             builder_style_window: false,
             builder_style_name: String::new(),
             grip_cache: std::cell::RefCell::new(None),
             gpu_drawn_views: std::collections::BTreeSet::new(),
             transcript: Transcript::new(),
             features,
-            focus_cmd: true,
+            focus_cmd: false,
             cmd_rect: None,
             cmd_suggestions_rect: None,
             cmd_suggestions: Vec::new(),
@@ -1163,6 +1207,7 @@ impl MatrixApp {
             stl_job: None,
             gumball_settings_open: false,
             undo_settings_draft: None,
+            options: options::Options::default(),
             memory_recovery_open: false,
             memory_recovery_running: false,
             boolean_builder_worker_draft: None,
@@ -1205,6 +1250,7 @@ impl MatrixApp {
                     ..Default::default()
                 },
             },
+            escape_key_down: false,
             between: None,
             direction_lock: None,
             viewport_keyboard_free_previous: false,
@@ -1236,6 +1282,7 @@ impl MatrixApp {
             edge_snap_click: None,
             smarttrack: om9_scene::osnap::SmartTrack::new(),
             smarttrack_basis: None,
+            smarttrack_hover: None,
             smarttrack_enabled: true,
             band_start: None,
             band_view: None,
@@ -1653,19 +1700,16 @@ impl MatrixApp {
             self.history_window = true;
         }
         self.transcript.set_prompt(&self.live_command_prompt());
-        self.focus_cmd = true;
+        self.focus_cmd |= self.controller.is_running() || self.controller.addon_session().is_some();
     }
     fn live_command_prompt(&self) -> String {
-        if self.elevator.is_some() { return "Elevator: height: ".to_owned(); }
+        if self.elevator.is_some() { return ELEVATOR_HEIGHT_PROMPT.to_owned(); }
         if let Some(constraint) = self.surface_constraint.as_ref().filter(|constraint| constraint.target.is_none()) {
-            return match constraint.kind {
-                SurfaceConstraintKind::Surface => "Select surface: ",
-                SurfaceConstraintKind::Polysurface => "Select polysurface: ",
-            }.to_owned();
+            return constraint.kind.selection_prompt().to_owned();
         }
         match self.between.as_ref() {
-            Some(between) if between.first.is_none() => "Between: first point: ".to_owned(),
-            Some(_) => "Between: second point: ".to_owned(),
+            Some(between) if between.first.is_none() => BETWEEN_FIRST_PROMPT.to_owned(),
+            Some(_) => BETWEEN_SECOND_PROMPT.to_owned(),
             None => self.controller.prompt_with_options(),
         }
     }
@@ -1976,6 +2020,9 @@ impl MatrixApp {
     }
 
     fn invoke(&mut self, id: &str, origin: InvocationOrigin) {
+        if self.controller.request_command_history(id) {
+            return;
+        }
         if let Some(action) = crate::project_manager::ProjectAction::from_command(id) {
             self.apply_project_action(action);
             return;
@@ -2037,10 +2084,12 @@ impl MatrixApp {
             self.echo_builder_start(builder_before);
         }
         if result.is_ok() && self.controller.is_running() {
-            // The first prompt belongs to the live row; history records the command that
-            // started, exactly like the Matrix command line (`Command: Box`).
             let label = self.command_label(id);
             self.transcript.append_history(&format!("Command: {label}"));
+            // A viewport click advances Line without a typed echo of its start prompt.
+            if id == crate::session::LINE {
+                self.append_running_prompt();
+            }
         }
         if result.is_ok() && !self.f6_pinned {
             self.f6_open = false;
@@ -2141,6 +2190,7 @@ impl MatrixApp {
         self.direction_lock = None;
         self.snap = None;
         self.hover = None;
+        self.transcript.append_history(kind.selection_prompt().trim_end());
         self.status.info(match kind {
             SurfaceConstraintKind::Surface => "Select a surface for point constraint",
             SurfaceConstraintKind::Polysurface => "Select a polysurface for point constraint",
@@ -2174,7 +2224,7 @@ impl MatrixApp {
         self.surface_constraint.as_mut().expect("surface constraint").target = Some(target);
         self.snap = None;
         self.hover = None;
-        self.status.info("Surface target selected; pick a point on it");
+        self.report_snap_notice("Surface target selected; pick a point on it");
         Ok(())
     }
 
@@ -2287,7 +2337,7 @@ impl MatrixApp {
         let Some(pending) = self.typed_surface_pending.as_ref() else { return };
         let command = self.controller.active_command_input_snapshot();
         let input_changed = ctx.input(|input| input.events.iter().any(|event| matches!(event,
-            egui::Event::Key { .. } | egui::Event::Text(_) | egui::Event::Paste(_)
+            egui::Event::Key { pressed: true, .. } | egui::Event::Text(_) | egui::Event::Paste(_)
                 | egui::Event::PointerButton { .. } | egui::Event::PointerGone)));
         let current = !input_changed && self.has_nested_point_prompt() && self.surface_target_is_current()
             && self.surface_constraint.as_ref().and_then(|constraint| constraint.target.as_ref()) == Some(&pending.target)
@@ -2324,6 +2374,9 @@ impl MatrixApp {
             Ok(())
         });
         self.feedback(result);
+        if !self.controller.is_running() && self.controller.addon_session().is_none() {
+            self.release_command_editor_focus(ctx);
+        }
         ctx.request_repaint();
     }
 
@@ -2341,7 +2394,10 @@ impl MatrixApp {
         self.direction_lock = None;
         self.hover = None;
         self.snap = None;
-        self.transcript.set_prompt("Between: first point: ");
+        self.controller.clear_session_hover();
+        self.transcript.append_history(BETWEEN_FIRST_PROMPT.trim_end());
+        self.transcript.set_prompt(BETWEEN_FIRST_PROMPT);
+        self.focus_command_editor();
         self.status.info("Between: pick first point");
     }
 
@@ -2354,6 +2410,7 @@ impl MatrixApp {
             || current.phase != between.command.phase || current.options != between.command.options
             || self.controller.coordinator().epoch() != between.epoch || addon != between.addon {
             self.between = None;
+            self.controller.clear_session_hover();
             self.append_running_prompt();
             return Err(Error::Stale("Between point prompt"));
         }
@@ -2362,7 +2419,8 @@ impl MatrixApp {
             self.direction_lock = None;
             self.between.as_mut().expect("Between prompt").first = Some(point);
             self.snap_state.accept();
-            self.transcript.set_prompt("Between: second point: ");
+            self.transcript.append_history(BETWEEN_SECOND_PROMPT.trim_end());
+            self.transcript.set_prompt(BETWEEN_SECOND_PROMPT);
             self.status.info("Between: pick second point");
             return Ok(());
         };
@@ -2373,6 +2431,8 @@ impl MatrixApp {
             self.accept_viewport_command_point(middle, &None)
         };
         if result.is_ok() {
+            let [x, y, z] = middle;
+            self.transcript.append_history(&format!("Between midpoint (World mm): {x},{y},{z}"));
             self.consume_surface_constraint();
             self.direction_lock = None;
             self.between = None;
@@ -2427,6 +2487,7 @@ impl MatrixApp {
         self.snap_state.accept();
         self.hover = None;
         self.snap = None;
+        self.transcript.append_history(ELEVATOR_HEIGHT_PROMPT.trim_end());
         self.status.info("Elevator: pick or type height");
     }
 
@@ -2462,8 +2523,13 @@ impl MatrixApp {
     }
 
     fn elevator_click(&mut self, point: Point3, ctrl: bool) -> Option<Result<()>> {
-        if self.elevator.is_some() {
+        if let Some(elevator) = &self.elevator {
             if let Err(error) = self.validate_snap_anchor(&self.snap) { return Some(Err(error)); }
+            let height_mm: f64 = point.into_iter().zip(elevator.base).zip(elevator.normal)
+                .map(|((coordinate, base), normal)| (coordinate - base) * normal)
+                .sum();
+            let height = height_mm / self.controller.document().page_unit.factor();
+            self.transcript.append_history(&prompt_echo(ELEVATOR_HEIGHT_PROMPT, &format!("{height:.6}")));
             return Some(self.accept_elevator_point(point));
         }
         if ctrl && self.surface_constraint.is_none() && self.has_nested_point_prompt() {
@@ -2510,36 +2576,41 @@ impl MatrixApp {
         self.status.info("Direction lock on");
     }
 
-    /// CMD and panel use the same session state. Object-snap names are one-shot
-    /// only while an outer command is waiting for a point.
-    fn apply_snap_command(&mut self, text: &str) -> Option<Result<()>> {
+    fn one_shot_snap_kind(name: &str) -> Option<om9_scene::osnap::SnapKind> {
         use om9_scene::osnap::SnapKind;
-        let mut words = text.split_whitespace();
-        let name = words.next()?.trim_start_matches('_');
-        let option = words.next();
-        if words.next().is_some() { return None; }
-        let kind = match name.to_ascii_lowercase().as_str() {
+        match name.trim_start_matches('_').to_ascii_lowercase().as_str() {
             "end" => Some(SnapKind::End), "mid" | "midpoint" => Some(SnapKind::Mid),
             "cen" | "center" => Some(SnapKind::Center), "quad" => Some(SnapKind::Quadrant),
             "point" => Some(SnapKind::Point), "int" | "intersection" => Some(SnapKind::Intersection),
             "perp" | "perpendicular" => Some(SnapKind::Perpendicular),
             "tan" | "tangent" => Some(SnapKind::Tangent), "near" => Some(SnapKind::Near),
             _ => None,
-        };
-        if let Some(kind) = kind {
+        }
+    }
+
+    /// CMD and panel use the same session state. Object-snap names are one-shot
+    /// only while an outer command is waiting for a point.
+    fn apply_snap_command(&mut self, text: &str) -> Option<Result<()>> {
+        let mut words = text.split_whitespace();
+        let name = words.next()?.trim_start_matches('_');
+        let option = words.next();
+        if words.next().is_some() { return None; }
+        if let Some(kind) = Self::one_shot_snap_kind(name) {
             if option.is_some() || !self.has_nested_point_prompt() { return None; }
             if self.surface_constraint.is_some() { return Some(Err(Error::Busy)); }
             self.set_snap_override(Some(kind));
             self.status.info(&format!("{} one-shot", kind.label()));
             return Some(Ok(()));
         }
-        let current = match name.to_ascii_lowercase().as_str() {
+        let mode = name.to_ascii_lowercase();
+        let current = match mode.as_str() {
             "ortho" => self.controller.ortho(),
             "planar" => self.controller.planar(),
             "project" | "projectosnap" => self.controller.project(),
             "snap" | "gridsnap" => self.controller.grid_snap(),
             "osnap" => self.object_snaps_enabled(),
             "smarttrack" => self.smarttrack_enabled(),
+            "apparentintersections" => self.snap_state.settings.apparent_intersections,
             "snapsize" => {
                 let value = match option.and_then(|word| word.parse::<f64>().ok()) {
                     Some(value) if value.is_finite() => value * self.controller.document().page_unit.factor(),
@@ -2561,21 +2632,33 @@ impl MatrixApp {
             Some("off") | Some("no") => false,
             _ => return Some(Err(Error::Invalid("expected On, Off or Toggle"))),
         };
-        match name.to_ascii_lowercase().as_str() {
+        match mode.as_str() {
             "ortho" => self.controller.set_ortho(enabled),
             "planar" => self.controller.set_planar(enabled),
             "project" | "projectosnap" => self.controller.set_project(enabled),
             "snap" | "gridsnap" => self.controller.set_grid_snap(enabled),
             "osnap" => self.set_object_snaps_enabled(enabled),
             "smarttrack" => self.set_smarttrack_enabled(enabled),
+            "apparentintersections" => self.set_apparent_intersections(enabled),
             _ => unreachable!(),
         }
-        self.status.info(&format!("{name} {}", if enabled { "on" } else { "off" }));
+        let label = if matches!(mode.as_str(), "snap" | "gridsnap") {
+            "Grid Snap"
+        } else {
+            name
+        };
+        self.status.info(&format!("{label} {}", if enabled { "on" } else { "off" }));
         Some(Ok(()))
     }
 
     fn submit_draft(&mut self) {
         use crate::command_options::CommandOptionInterface;
+        let draft = self.transcript.draft().to_owned();
+        if self.controller.request_command_history(&draft) {
+            self.transcript.append_history(&prompt_echo("Command:", &draft));
+            self.transcript.set_draft("");
+            return;
+        }
         self.typed_surface_pending = None;
         #[cfg(feature = "occt-brep")]
         { self.projected_surface_query = None; }
@@ -2585,7 +2668,9 @@ impl MatrixApp {
         if self.line_surface_click.is_some() { self.cancel_line_surface(true); }
         #[cfg(feature = "occt-brep")]
         { self.edge_snap_click = None; }
-        let draft = self.transcript.draft().to_owned();
+        if self.elevator.is_some() {
+            self.transcript.append_history(&prompt_echo(ELEVATOR_HEIGHT_PROMPT, &draft));
+        }
         if let Some(result) = self.apply_snap_command(&draft) {
             if result.is_ok() { self.transcript.set_draft(""); }
             if let Err(error) = result { self.feedback(Err(error)); }
@@ -2607,6 +2692,7 @@ impl MatrixApp {
             return;
         }
         if self.between.is_some() {
+            self.transcript.append_history(&prompt_echo(&self.live_command_prompt(), &draft));
             if self.surface_constraint.is_some() && self.has_nested_point_prompt() {
                 let result = self.start_typed_surface_point(&draft);
                 self.feedback(result);
@@ -2741,7 +2827,10 @@ impl MatrixApp {
                 values.len() == *count && values.iter().all(|value| sphere_number(value))
             }).map(|(name, _)| name)
         } else { None };
+        let command_run = self.controller.command_run();
+        let previous_phase = self.controller.phase();
         let result = self.controller.submit_effect(&draft);
+        let finished = result.is_ok() && !self.controller.is_running() && self.controller.addon_session().is_none();
         if let Some(key) = sphere_selection_key && self.controller.sphere_fit_selection_recovery_key() == Some(key)
             && matches!(&result, Err(error) if Self::is_memory_refusal(error)) {
             self.offer_sphere_selection_memory_recovery(key, draft.clone());
@@ -2784,9 +2873,16 @@ impl MatrixApp {
         }
         if result.is_ok() {
             self.transcript.record_command(&draft);
-            // The transcript mirrors the Matrix command log: the typed command and its
-            // prompt+value lines only. The canonical feature id stays in the document
-            // history/receipts instead of adding a `[OM9-…]` line to every command.
+            if self.controller.running_feature() == Some(crate::session::LINE) {
+                use crate::session::CmdPhase;
+                let started = self.controller.command_run() != command_run;
+                let next_phase = self.controller.phase();
+                if (started && next_phase == CmdPhase::AwaitPoint)
+                    || (!started && previous_phase == CmdPhase::AwaitPoint && next_phase == CmdPhase::AwaitEnd)
+                {
+                    self.append_running_prompt();
+                }
+            }
             self.transcript.set_draft("");
             #[cfg(feature="occt-brep")]
             if self.controller.brep_wireframe_worker_pending() {self.wireframe_worker_draft=Some(String::new());}
@@ -2824,13 +2920,16 @@ impl MatrixApp {
             }
             other => self.feedback(other.map(|_| ())),
         }
+        if finished && let Some(ctx) = self.current_ui_context.clone() {
+            self.release_command_editor_focus(&ctx);
+        }
     }
     /// Whether the command editor asked for keyboard focus on this frame (tests and audit).
     pub fn command_focus_requested(&self) -> bool {
         self.focus_cmd
     }
 
-    /// Put keyboard focus back on the command editor (the normal state after a typed command).
+    /// Return keyboard input to the viewport shortcut handlers.
     pub fn focus_command_editor(&mut self) {
         self.focus_cmd = true;
     }
@@ -2897,6 +2996,19 @@ impl MatrixApp {
         }
     }
 
+    fn set_apparent_intersections(&mut self, enabled: bool) {
+        if self.snap_state.settings.apparent_intersections != enabled {
+            self.snap_state.settings.apparent_intersections = enabled;
+            self.snap = None;
+            self.hover = None;
+            #[cfg(feature = "occt-brep")]
+            {
+                self.intersection_snap.cancel();
+                self.edge_snap_click = None;
+            }
+        }
+    }
+
     /// Enable or disable one persistent snap kind.
     pub fn set_snap_enabled(&mut self, kind: om9_scene::osnap::SnapKind, enabled: bool) {
         self.snap_state.settings.set(kind, enabled);
@@ -2929,6 +3041,7 @@ impl MatrixApp {
         if !enabled {
             self.smarttrack.clear();
             self.smarttrack_basis = None;
+            self.smarttrack_hover = None;
         }
     }
 
@@ -3403,6 +3516,7 @@ impl MatrixApp {
         id: ViewId,
         view: &om9_scene::workspace::ViewState,
         viewport: Viewport,
+        pointer_in_view: bool,
     ) {
         if self.hover_view == Some(id) && let Some(elevator) = &self.elevator
             && let Some(point) = self.hover
@@ -3424,15 +3538,7 @@ impl MatrixApp {
         }
         if self.smarttrack_enabled {
             for guide in self.smarttrack.guides() {
-                let center: Point3 = std::array::from_fn(|index| (guide.start[index] + guide.end[index]) * 0.5);
-                let direction: Point3 = std::array::from_fn(|index| guide.end[index] - guide.start[index]);
-                let length = direction.iter().map(|value| value * value).sum::<f64>().sqrt();
-                if !length.is_finite() || length <= 0. { continue; }
-                let from_eye = (0..3).map(|index| (center[index] - view.camera.eye[index]).powi(2)).sum::<f64>().sqrt();
-                let extent = (view.camera.far_mm + from_eye).min(1e12);
-                if !extent.is_finite() { continue; }
-                let a = std::array::from_fn(|index| center[index] - direction[index] * extent / length);
-                let b = std::array::from_fn(|index| center[index] + direction[index] * extent / length);
+                let Some([a, b]) = guide.segment_for_view(&view.camera) else { continue; };
                 let Ok(Some([a, b])) = view.camera.clip_segment(a, b) else { continue };
                 let (Ok(Some(start)), Ok(Some(end))) = (view.camera.project(a, viewport), view.camera.project(b, viewport)) else { continue };
                 painter.line_segment(
@@ -3440,14 +3546,13 @@ impl MatrixApp {
                         egui::pos2(start.screen[0] as f32, start.screen[1] as f32),
                         egui::pos2(end.screen[0] as f32, end.screen[1] as f32),
                     ],
-                    egui::Stroke::new(1.0, Color32::from_rgb(220, 190, 80)),
+                    egui::Stroke::new(1.0, Color32::from_gray(200)),
                 );
             }
         }
-        if id != self.controller.workspace.active {
-            return;
-        }
-        if let Some(kind) = self.snap_state.settings.one_shot {
+        if id == self.controller.workspace.active
+            && let Some(kind) = self.snap_state.settings.one_shot
+        {
             painter.text(
                 egui::pos2(
                     viewport.origin[0] as f32 + 12.0,
@@ -3459,13 +3564,17 @@ impl MatrixApp {
                 Color32::from_rgb(255, 220, 90),
             );
         }
-        let Some(snap) = &self.snap else {
+        let Some(snap) = self.snap.as_ref()
+            .filter(|_| pointer_in_view && self.hover_view == Some(id))
+        else {
             return;
         };
-        let at = self.hover.filter(|_| self.hover_view == Some(id))
+        let Some(point) = self.hover
             .and_then(|point| view.camera.project(point, viewport).ok().flatten())
-            .map_or_else(|| egui::pos2(snap.screen[0] as f32, snap.screen[1] as f32),
-                |point| egui::pos2(point.screen[0] as f32, point.screen[1] as f32));
+        else {
+            return;
+        };
+        let at = egui::pos2(point.screen[0] as f32, point.screen[1] as f32);
         let size = 10.0;
         painter.rect_stroke(
             egui::Rect::from_center_size(at, egui::vec2(size, size)),
@@ -3943,7 +4052,52 @@ impl MatrixApp {
         self.feedback(result);
     }
 
+    fn unpaired_escape_release(&mut self, ui: &egui::Ui) -> bool {
+        if ui.ctx().current_pass_index() != 0 {
+            return false;
+        }
+        // Windows replay delivered an Escape release with a Backspace press.
+        // Winit can also synthesize releases during a focus transition.
+        ui.input(|input| {
+            let mut eligible = input.focused;
+            let mut unpaired = false;
+            for event in &input.raw.events {
+                match event {
+                    egui::Event::Key { key: Key::Escape, pressed: true, .. } => {
+                        self.escape_key_down = true;
+                        eligible = false;
+                    }
+                    egui::Event::Key { key: Key::Escape, physical_key, pressed: false, modifiers, .. } => {
+                        if !std::mem::take(&mut self.escape_key_down)
+                            && *physical_key == Some(Key::Escape) && *modifiers == Modifiers::NONE
+                        {
+                            unpaired = true;
+                        }
+                    }
+                    egui::Event::WindowFocused(_) | egui::Event::Ime(_)
+                    | egui::Event::PointerButton { .. } => {
+                        eligible = false;
+                    }
+                    egui::Event::Key { key, pressed: true, .. } if *key != Key::Backspace => {
+                        eligible = false;
+                    }
+                    _ => {}
+                }
+            }
+            eligible && unpaired
+        })
+    }
+
     pub fn show(&mut self, ui: &mut egui::Ui) {
+        if self.undo_settings_draft.is_some()
+            && !egui::Popup::is_any_open(ui.ctx())
+            && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
+        {
+            self.undo_settings_draft = None;
+            self.options.draft = None;
+            self.focus_cmd = true;
+        }
+        let unpaired_escape_release = self.unpaired_escape_release(ui);
         self.poll_typed_surface_point(ui.ctx());
         self.ring_rail_confirmation_ui(ui.ctx());
         #[cfg(feature = "occt-brep")]
@@ -3961,9 +4115,11 @@ impl MatrixApp {
         }
         #[cfg(feature = "occt-brep")]
         {
-            let changed = self.line_surface_click.is_some() && ui.input(|input| input.events.iter().any(|event|
-                matches!(event, egui::Event::Key { .. } | egui::Event::Text(_) | egui::Event::Paste(_)
-                    | egui::Event::PointerButton { .. } | egui::Event::PointerGone)));
+            let changed = self.line_surface_click.is_some() && ui.input(|input| {
+                !input.focused || input.events.iter().any(|event| matches!(event,
+                    egui::Event::Key { pressed: true, .. } | egui::Event::Text(_) | egui::Event::Paste(_)
+                        | egui::Event::PointerButton { .. } | egui::Event::PointerGone))
+            });
             if changed { self.cancel_line_surface(true); }
             if self.line_surface_scheduler.is_busy() {
                 if let Some(result) = self.line_surface_scheduler.poll(&self.controller) {
@@ -4276,7 +4432,7 @@ impl MatrixApp {
             }
         }
         #[cfg(feature = "occt-brep")]
-        if self.controller.topology_remesh_pending() {
+        if self.controller.topology_remesh_pending() || self.controller.viewport_detail_pending() {
             // Preserve the image/scene pair for an in-progress pointer gesture.
             // A completed remesh waits until the gesture releases its input.
             let gesture_active = self.gumball_session.is_some() || self.grip_drag.is_some()
@@ -4289,7 +4445,11 @@ impl MatrixApp {
                 }
                 ui.ctx().request_repaint();
             }
-            if let Some(result) = self.controller.poll_viewport_detail() {
+            if self.controller.viewport_detail_pending() && ui.input(|i| i.key_pressed(Key::Escape)) {
+                self.controller.cancel_viewport_detail();
+                self.display_preferences.viewport_detail = self.controller.viewport_detail();
+                self.status.info("Viewport detail update cancelled");
+            } else if !gesture_active && let Some(result) = self.controller.poll_viewport_detail() {
                 match result {
                     Ok(detail) => { self.display_preferences.viewport_detail = detail; self.status.info("Viewport detail updated"); }
                     Err(error) => {
@@ -4298,11 +4458,6 @@ impl MatrixApp {
                     }
                 }
                 ui.ctx().request_repaint();
-            }
-            if self.controller.viewport_detail_pending() && ui.input(|i| i.key_pressed(Key::Escape)) {
-                self.controller.cancel_viewport_detail();
-                self.display_preferences.viewport_detail = self.controller.viewport_detail();
-                self.status.info("Viewport detail update cancelled");
             }
             if self.controller.topology_remesh_pending() || self.controller.viewport_detail_pending() {
                 ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
@@ -4380,14 +4535,21 @@ impl MatrixApp {
         {
             self.top11_action("ControlPoints");
         }
-        if self.picking_points() && !self.focus_cmd {
+        let point_input = self.picking_points();
+        let idle = !self.controller.is_running() && self.controller.addon_session().is_none();
+        // A file dialog's pointer guard can outlive the dialog for a frame.
+        // Only a live modal or editor owns these keyboard shortcuts.
+        if !self.focus_cmd && !egui::Popup::is_any_open(ui.ctx())
+            && self.controller.file_operation().is_none() && self.controller.layer_dialog().is_none()
+        {
             for (key, kind) in [
                 (Key::E, om9_scene::osnap::SnapKind::End),
                 (Key::M, om9_scene::osnap::SnapKind::Mid),
             ] {
                 // Declared accelerators own their keys. Editors retain normal text.
                 use crate::command_options::CommandOptionInterface;
-                if ui.ctx().egui_wants_keyboard_input()
+                if !(point_input || idle && key == Key::E)
+                    || ui.ctx().egui_wants_keyboard_input()
                     || self.controller.command_options().iter().any(|option| {
                         option.shortcut.is_some_and(|shortcut| {
                             key.name().eq_ignore_ascii_case(&shortcut.to_string())
@@ -4412,7 +4574,8 @@ impl MatrixApp {
             self.between = None;
             self.hover = None;
             self.snap = None;
-            self.status.info("Between cancelled: point prompt changed");
+            self.controller.clear_session_hover();
+            self.report_snap_notice("Between cancelled: point prompt changed");
         }
         if !self.direction_lock_is_current() {
             self.direction_lock = None;
@@ -4421,17 +4584,20 @@ impl MatrixApp {
         if !self.elevator_is_current() {
             self.elevator = None;
             self.hover = None;
-            self.status.info("Elevator cancelled: point prompt changed");
+            let message = "Elevator cancelled: point prompt changed";
+            self.transcript.append_history(message);
+            self.transcript.set_prompt(&self.live_command_prompt());
+            self.status.info(message);
         }
         if !self.surface_target_is_current() {
             self.surface_constraint = None;
             self.snap = None;
             self.hover = None;
-            self.status.info("Surface constraint cancelled: target changed");
+            self.report_snap_notice("Surface constraint cancelled: target changed");
         }
         if !self.has_nested_point_prompt() && self.surface_constraint.as_ref().is_some_and(|constraint| constraint.target.is_none()) {
             self.surface_constraint = None;
-            self.status.info("Surface target selection cancelled: point prompt changed");
+            self.report_snap_notice("Surface target selection cancelled: point prompt changed");
         }
         let picking_points = self.picking_points();
         #[cfg(feature = "occt-brep")]
@@ -4449,8 +4615,6 @@ impl MatrixApp {
         }
         if !picking_points {
             self.snap = None;
-            self.smarttrack.clear();
-            self.smarttrack_basis = None;
             self.direction_lock = None;
             self.elevator = None;
             if self.surface_constraint.as_ref().is_some_and(|constraint| !constraint.persistent || constraint.target.is_none()) {
@@ -4507,13 +4671,31 @@ impl MatrixApp {
                 }
             }
         }
-        if self.snap_state.settings.one_shot.is_some()
-            && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
-        {
-            self.snap_state.cancel();
-            self.snap = None;
-            self.hover = None;
-            self.status.info("One-shot snap cancelled");
+        if self.snap_state.settings.one_shot.is_some() {
+            let recover_release = unpaired_escape_release
+                && (idle || self.has_nested_point_prompt())
+                && !self.focus_cmd && !ui.ctx().egui_wants_keyboard_input()
+                && !self.cmd_ime_composing && !self.file_ime_composing && !self.layer_dialog_ime_composing
+                && !egui::Popup::is_any_open(ui.ctx()) && !self.command_history_open
+                && self.controller.file_operation().is_none() && self.controller.layer_dialog().is_none()
+                && self.stl_profile_draft.is_none() && self.section_drag().is_none();
+            if ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape)) || recover_release {
+                #[cfg(feature = "occt-brep")]
+                if recover_release {
+                    self.edge_snap_click = None;
+                    if self.line_surface_click.is_some() {
+                        self.cancel_line_surface(false);
+                    }
+                }
+                if recover_release && let Some(log) = self.interaction_log.as_mut() {
+                    log.record(serde_json::json!({
+                        "event": "one_shot_escape_release",
+                        "frame_id": ui.ctx().cumulative_frame_nr(),
+                    }));
+                }
+                self.set_snap_override(None);
+                self.status.info("One-shot snap cancelled");
+            }
         }
         if self.elevator.is_some()
             && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
@@ -4521,6 +4703,8 @@ impl MatrixApp {
             self.elevator = None;
             self.hover = None;
             self.snap = None;
+            self.transcript.append_history("Elevator cancelled");
+            self.transcript.set_prompt(&self.live_command_prompt());
             self.status.info("Elevator cancelled");
         }
         if self.between.is_some()
@@ -4529,8 +4713,9 @@ impl MatrixApp {
             self.between = None;
             self.hover = None;
             self.snap = None;
+            self.controller.clear_session_hover();
             self.transcript.set_prompt(&self.controller.prompt_with_options());
-            self.status.info("Between cancelled");
+            self.report_snap_notice("Between cancelled");
         }
         if self.surface_constraint.is_some()
             && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
@@ -4538,7 +4723,7 @@ impl MatrixApp {
             self.surface_constraint = None;
             self.snap = None;
             self.hover = None;
-            self.status.info("Surface constraint cancelled");
+            self.report_snap_notice("Surface constraint cancelled");
         }
         if self.direction_lock.is_some()
             && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
@@ -4551,6 +4736,7 @@ impl MatrixApp {
             self.snap = None;
             self.snap_state.cancel();
             self.smarttrack.clear();
+            self.smarttrack_hover = None;
             if self.ambiguous_pos.take().is_some() {
                 self.ambiguous.clear();
                 self.ambiguous_extract_context = None;
@@ -4620,11 +4806,13 @@ impl MatrixApp {
             self.view_menu_capture.is_some() && egui::Popup::is_any_open(&ctx);
         let layer_dialog_open = self.controller.layer_dialog().is_some();
         let file_open = self.controller.file_operation().is_some();
+        let options_open = self.undo_settings_draft.is_some();
         self.viewport_menu_owns_frame = viewport_popup_open
             || layer_dialog_open
             || file_open
+            || options_open
             || self.viewport_menu_pointer_guard;
-        if (viewport_popup_open || layer_dialog_open || file_open)
+        if (viewport_popup_open || layer_dialog_open || file_open || options_open)
             && ctx.input(|i| i.pointer.any_down())
         {
             self.viewport_menu_pointer_guard = true;
@@ -4652,9 +4840,10 @@ impl MatrixApp {
         {
             egui::Popup::close_id(&ctx, *id);
             self.view_menu_capture = None;
-            self.focus_cmd = true;
+            self.focus_cmd = self.controller.is_running() || self.controller.addon_session().is_some();
         }
-        if ctx.memory(|m| m.focused().is_none())
+        if (self.controller.is_running() || self.controller.addon_session().is_some())
+            && ctx.memory(|m| m.focused().is_none())
             && ctx.input(|i| {
                 i.events
                     .iter()
@@ -4742,7 +4931,7 @@ impl MatrixApp {
             } else if self.viewport_menu_owns_frame || egui::Popup::is_any_open(&ctx) {
                 egui::Popup::close_all(&ctx);
                 self.view_menu_capture = None;
-                self.focus_cmd = true;
+                self.focus_cmd = self.controller.is_running() || self.controller.addon_session().is_some();
             } else {
                 if !self.f6_pinned {
                     self.f6_open = false;
@@ -4753,7 +4942,7 @@ impl MatrixApp {
                 self.transcript.set_draft("");
                 self.transcript
                     .set_prompt(&self.controller.prompt_with_options());
-                self.focus_cmd = true;
+                self.release_command_editor_focus(&ctx);
             }
         }
         self.configure_style(&ctx);
@@ -4878,6 +5067,7 @@ impl MatrixApp {
                 self.status_dismiss_rect = None;
                 self.status_bar_ui(ui);
             });
+        self.sync_smarttrack_basis();
         egui::CentralPanel::default()
             .frame(egui::Frame::new().fill(Color32::BLACK).inner_margin(0))
             .show(ui, |ui| {
@@ -4927,6 +5117,7 @@ impl MatrixApp {
                 }
                 ui.allocate_rect(rect, Sense::hover());
             });
+        self.command_history_ui(&ctx);
         if !self.viewport_menu_owns_frame
             && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::F6))
         {
@@ -5044,7 +5235,7 @@ impl MatrixApp {
             && !egui::Popup::is_id_open(&ctx, *id)
         {
             self.view_menu_capture = None;
-            self.focus_cmd = true;
+            self.focus_cmd = self.controller.is_running() || self.controller.addon_session().is_some();
         }
         self.layer_dialog_ui(&ctx);
         self.file_ui(&ctx);
@@ -5322,7 +5513,7 @@ impl MatrixApp {
                             size: [rect.width() as f64, rect.height() as f64],
                         };
                         if let Some(view) = self.controller.workspace.views.get(id) {
-                            self.navigation.wheel_displayed(
+                            self.navigation.wheel_displayed_with_scale(
                                 *id,
                                 &view.camera,
                                 self.gpu_viewports
@@ -5334,6 +5525,7 @@ impl MatrixApp {
                                 delta.y as f64,
                                 now,
                                 speed,
+                                self.options.preferences.zoom_scale,
                             );
                             self.nav_actions.insert(*id, "zoom");
                         }
@@ -5582,6 +5774,7 @@ impl MatrixApp {
             port.hold_publication_on_press(primary_gesture && self.gumball_session.is_none()
                 && self.primary_press_scene.as_ref().is_some_and(|(press_id, _, _, _)| *press_id == id));
             port.set_display_mode(view.mode);
+            port.set_grid_visibility(self.options.preferences.grid(view.mode));
             let drew = port.show(
                 ui,
                 rect,
@@ -5746,9 +5939,6 @@ impl MatrixApp {
             self.hover_picked_at = None;
             self.hover_retry_at = None;
         }
-        if !temporary_boolean && self.controller.solid_boolean_two_hidden_sources().is_none() {
-            self.paint_osnap(&painter, id, &view, viewport);
-        }
         if let (Some((body, _mode)), Some(placement)) = (self.controller.solid_boolean_two_preview(), self.controller.solid_boolean_two_preview_placement()) {
             for &[a, b, _] in &body.display().segments {
                 if let (Some(&a), Some(&b)) = (
@@ -5858,19 +6048,14 @@ impl MatrixApp {
                 );
             }
         }
-        if !self.viewport_menu_owns_frame && response.hovered() && let Some(pos) = response.hover_pos() {
+        let pointer_pos = response.hover_pos().filter(|_| !self.viewport_menu_owns_frame);
+        if let Some(pos) = pointer_pos {
             let previous_hover = (self.hover, self.hover_view);
             let active = self.controller.workspace.active;
             if self.picking_points() || self.controller.top11_transform_is_pending() {
                 self.controller.workspace.active = id;
             }
-            if self.smarttrack_enabled && self.picking_points() {
-                let basis = (self.controller.coordinator().epoch(), self.controller.input_plane());
-                if self.smarttrack_basis.is_some_and(|previous| previous != basis) {
-                    self.smarttrack.clear();
-                }
-                self.smarttrack_basis = Some(basis);
-            }
+            self.sync_smarttrack_basis();
             if self.controller.solid_cube_needs_corner() {
                 self.hover = None;
                 self.snap = None;
@@ -5900,6 +6085,9 @@ impl MatrixApp {
             });
             if world.is_some() || self.picking_points() {
                 let active_surface = self.surface_constraint.is_some() && self.has_nested_point_prompt();
+                let deferred = cfg!(feature = "occt-brep") && self.picking_points()
+                    && self.has_surface_pick_prompt() && self.transcript.draft().is_empty()
+                    && !active_surface;
                 #[cfg(feature = "occt-brep")]
                 if !active_surface || !self.controller.project() { self.projected_surface_query = None; }
                 let mut snap = None;
@@ -5914,8 +6102,6 @@ impl MatrixApp {
                     if active_surface {
                         settings.one_shot = Some(om9_scene::osnap::SnapKind::Surface);
                     }
-                    let deferred = cfg!(feature = "occt-brep") && self.has_surface_pick_prompt()
-                        && self.transcript.draft().is_empty() && !active_surface;
                     let query = if deferred { om9_scene::osnap::candidates_in_plane_deferred }
                         else { om9_scene::osnap::candidates_in_plane };
                     let candidates = query(
@@ -5928,7 +6114,7 @@ impl MatrixApp {
                         view.cplane,
                     ).and_then(|mut candidates| {
                         #[cfg(feature = "occt-brep")]
-                        if !active_surface && self.has_surface_pick_prompt() && self.transcript.draft().is_empty() {
+                        if deferred {
                             match self.edge_snap_preview(&view.camera, viewport, [pos.x as f64, pos.y as f64],
                                 settings, from, view.cplane, view.mode, ui.ctx())? {
                                 Some(edges) => {
@@ -5981,7 +6167,12 @@ impl MatrixApp {
                             snap = Some(candidate);
                         } else if !line_surface_pending && (active_surface || self.snap_state.settings.one_shot == Some(om9_scene::osnap::SnapKind::Surface)) {
                             unsupported_surface = true;
-                            self.status.info("Surface snap unavailable: no surface candidate under the pointer");
+                            let message = "Surface snap unavailable: no surface candidate under the pointer";
+                            if response.clicked() && published_scene_current && !ambiguous_popup_owns_pointer {
+                                self.report_snap_notice(message);
+                            } else {
+                                self.status.info(message);
+                            }
                         }
                       }
                       Err(error) => {
@@ -6003,24 +6194,44 @@ impl MatrixApp {
                     }
                 }
                 if line_surface_pending { unsupported_surface = true; }
-                if self.smarttrack_enabled
-                    && !active_surface
-                    && self.snap_state.settings.one_shot.is_none()
-                    && !unsupported_surface
-                    && snap.is_none()
-                    && !self.smarttrack.anchors().is_empty()
-                    && let Some(world)=world
+                let track = self.smarttrack_enabled && !active_surface && !unsupported_surface
+                    && !self.smarttrack.anchors().is_empty();
+                let cursor = [pos.x as f64, pos.y as f64];
+                let radius = self.snap_state.settings.radius_px;
+                use om9_scene::osnap::SnapKind;
+                if track && self.snap_state.settings.is_effective(SnapKind::Perpendicular)
+                    && let Some(base) = point_base
+                    && snap.as_ref().is_none_or(|hit| hit.kind == SnapKind::SmartTrack)
                 {
-                    let tolerance = world_per_pixel(&view.camera, viewport)
-                        * self.snap_state.settings.radius_px;
-                    if let Ok(source_tolerance) = self.controller.document().effective_tolerance() {
-                        let curve_hit = self.controller.scene().map(|scene| self.smarttrack.infer_on_curves(
-                            scene, &view.camera, viewport, [pos.x as f64, pos.y as f64],
-                            self.snap_state.settings.radius_px, source_tolerance.absolute_mm));
-                        match curve_hit {
-                            Some(Ok(Some(candidate))) => snap = Some(candidate),
-                            Some(Err(error)) => { self.status.info(&format!("SmartTrack curve query unavailable: {error}")); }
-                            _ => snap = self.smarttrack.infer_with_source_tolerance(world, tolerance, source_tolerance.absolute_mm),
+                    match self.smarttrack.infer_perpendicular_in_view(base.xyz(), &view.camera, viewport, cursor, radius) {
+                        Ok(Some(hit)) => snap = Some(hit),
+                        Ok(None) => (),
+                        Err(error) => {
+                            self.status.info(&format!("SmartTrack perpendicular unavailable: {error}"));
+                        }
+                    }
+                }
+                if track
+                    && self.snap_state.settings.one_shot.is_none()
+                    && snap.is_none()
+                    && let Ok(tolerance) = self.controller.document().effective_tolerance()
+                {
+                    // The worker already checks curve hits against shaded occluders.
+                    let curve_hit = if !deferred && let Some(scene) = self.controller.scene() {
+                        self.smarttrack.infer_on_curves(scene, &view.camera, viewport, cursor,
+                            radius, tolerance.absolute_mm)
+                    } else {
+                        Ok(None)
+                    };
+                    let result = match curve_hit {
+                        Ok(None) => self.smarttrack.infer_in_view(&view.camera, viewport, cursor,
+                            radius, tolerance.absolute_mm),
+                        result => result,
+                    };
+                    match result {
+                        Ok(candidate) => snap = candidate,
+                        Err(error) => {
+                            self.status.info(&format!("SmartTrack query unavailable: {error}"));
                         }
                     }
                 }
@@ -6033,7 +6244,7 @@ impl MatrixApp {
                     let selecting_target = active_surface && self.surface_constraint.as_ref()
                         .is_some_and(|constraint| constraint.target.is_none());
                     let resolved = if self.controller.project() && !selecting_target {
-                        self.controller.project_to_plane(candidate.world)
+                        self.controller.project_snap_with_base(candidate.world, point_base)
                     } else { Ok(candidate.world) };
                     let constrained_target = active_surface && self.surface_constraint.as_ref()
                         .is_some_and(|constraint| constraint.target.is_some());
@@ -6046,7 +6257,7 @@ impl MatrixApp {
                                 #[cfg(feature = "occt-brep")]
                                 match self.projected_surface_verified(&candidate, point, ui.ctx())? {
                                     Some(true) => {},
-                                    Some(false) => return Err(Error::Unsupported("could not verify Project on the selected surface")),
+                                    Some(false) => return Err(Error::Unsupported(PROJECTED_SURFACE_MISS)),
                                     None => { line_surface_pending = true; self.line_surface_view = Some(id); return Err(Error::Busy); }
                                 }
                                 #[cfg(not(feature = "occt-brep"))]
@@ -6073,15 +6284,7 @@ impl MatrixApp {
                 }
                 self.hover_view = Some(id);
                 self.snap_view = self.snap.as_ref().map(|_| (id, view.camera.clone(), viewport));
-                if self.smarttrack_enabled && !active_surface
-                    && let Some(candidate) = &self.snap
-                    && matches!(candidate.kind, om9_scene::osnap::SnapKind::End | om9_scene::osnap::SnapKind::Mid
-                        | om9_scene::osnap::SnapKind::Center | om9_scene::osnap::SnapKind::Quadrant
-                        | om9_scene::osnap::SnapKind::Point | om9_scene::osnap::SnapKind::Intersection)
-                    && let Ok(tolerance) = self.controller.document().effective_tolerance()
-                {
-                    let _ = self.smarttrack.acquire(candidate, self.controller.input_plane(), tolerance.absolute_mm);
-                }
+                self.update_smarttrack_hover(ui, id);
                 if let Some(elevator) = &self.elevator {
                     let height = if let Some(candidate) = &self.snap {
                         Some((0..3).map(|index| (candidate.world[index] - elevator.base[index]) * elevator.normal[index]).sum::<f64>())
@@ -6137,16 +6340,34 @@ impl MatrixApp {
                         let pending = self.edge_snap_click.take().expect("edge click checked above");
                         let result = self.finish_deferred_point_click(pending.click,
                             ui.input(|input| input.modifiers.shift), false);
-                        self.feedback(result);
+                        self.feedback_deferred_point(ui.ctx(), result);
                     }
                 }
                 #[cfg(feature = "occt-brep")]
                 if !line_surface_pending && self.line_surface_view == Some(id) && self.line_surface_click.is_some() {
+                    let selecting_target = self.surface_constraint.as_ref()
+                        .is_some_and(|constraint| constraint.target.is_none());
                     let result = self.finish_line_surface_click(ui.input(|input| input.modifiers.shift));
-                    self.feedback(result);
+                    if selecting_target && result.is_ok() {
+                        self.feedback(result);
+                    } else {
+                        self.feedback_deferred_point(ui.ctx(), result);
+                    }
                 }
                 if let Some(point) = self.preview_hover_point() {
                     self.controller.session_hover(point);
+                }
+                if response.clicked() && published_scene_current && !ambiguous_popup_owns_pointer
+                    && self.hover.is_none() && !unsupported_surface && !active_surface
+                    && self.has_nested_point_prompt()
+                {
+                    if let Some(kind) = self.snap_state.settings.one_shot {
+                        self.report_one_shot_miss(kind);
+                    } else if world.is_none() && self.elevator.is_none() {
+                        self.report_snap_notice(
+                            "No point on the command plane in this view. Choose another view or type coordinates.",
+                        );
+                    }
                 }
             } else if self.controller.top11_transform_is_pending() {
                 self.hover = None;
@@ -6158,6 +6379,9 @@ impl MatrixApp {
                 // Other viewports may already have painted this frame.
                 ui.ctx().request_repaint();
             }
+        }
+        if !temporary_boolean && self.controller.solid_boolean_two_hidden_sources().is_none() {
+            self.paint_osnap(&painter, id, &view, viewport, pointer_pos.is_some());
         }
         if let Some(point) = self.preview_hover_point() {
             if let Ok(Some((record, layout))) = self.controller.annotation_preview(point) {
@@ -6430,9 +6654,13 @@ impl MatrixApp {
         ));
         if title_response.clicked() || arrow_response.clicked() {
             self.controller.workspace.active = id;
-            self.focus_cmd = true;
         }
-        if title_response.double_clicked() {
+        let maximize = if self.options.preferences.single_click_maximize {
+            title_response.clicked() && !title_response.double_clicked()
+        } else {
+            title_response.double_clicked()
+        };
+        if maximize {
             let r = self.controller.workspace.toggle_maximize(id);
             self.feedback(r);
         }
@@ -6519,7 +6747,9 @@ impl MatrixApp {
                     if let Some(point) = self.hover {
                         let result = self.elevator_click(point, ctrl_or_command(ui).1)
                             .unwrap_or_else(|| self.validate_snap_anchor(&self.snap).and_then(|_| self.accept_between_point(point)));
+                        let accepted = result.is_ok();
                         self.feedback(result);
+                        if accepted { self.release_after_viewport_point(ui.ctx()); }
                     } else {
                         #[cfg(feature = "occt-brep")]
                         if self.line_surface_view == Some(id) && (self.line_surface_scheduler.is_busy()
@@ -6531,11 +6761,11 @@ impl MatrixApp {
                     }
                 } else if !self.controller.is_running() && self.controller.session_wants_point() {
                     if let Some(point) = self.hover {
-                        let elevator = self.elevator_click(point, ctrl_or_command(ui).1);
-                        let handled_elevator = elevator.is_some();
-                        let result = elevator.unwrap_or_else(|| self.validate_snap_anchor(&self.snap).and_then(|_| self.controller.session_point(point)));
-                        if result.is_ok() && !handled_elevator { self.consume_surface_constraint(); self.direction_lock = None; self.snap_state.accept(); }
+                        let result = self.elevator_click(point, ctrl_or_command(ui).1)
+                            .unwrap_or_else(|| self.accept_snapped_command_point(point, self.snap.clone()));
+                        let accepted = result.is_ok();
                         self.feedback(result);
+                        if accepted { self.release_after_viewport_point(ui.ctx()); }
                     } else {
                         #[cfg(feature = "occt-brep")]
                         if self.line_surface_view == Some(id) && (self.line_surface_scheduler.is_busy()
@@ -6757,7 +6987,6 @@ impl MatrixApp {
                             self.append_running_prompt();
                         }
                         self.feedback(result);
-                        self.focus_cmd = false;
                     } else if self.controller.solid_sphere_brep_edge_stage() == 3 {
                         let candidates = self
                             .controller
@@ -7090,7 +7319,6 @@ impl MatrixApp {
                             self.append_running_prompt();
                         }
                         self.feedback(result);
-                        self.focus_cmd = false;
                     } else if self.controller.solid_boolean_needs_object() {
                         let candidates = self
                             .controller
@@ -7302,7 +7530,9 @@ impl MatrixApp {
                         let anchor = self.snap.clone();
                         let point = self.viewport_command_point(point);
                         if let Some(result) = self.elevator_click(point, ctrl_or_command(ui).1) {
+                            let accepted = result.is_ok();
                             self.feedback(result);
+                            if accepted { self.release_after_viewport_point(ui.ctx()); }
                             return;
                         }
                         // Matrix Rectangle: Shift while picking a corner makes it square.
@@ -7310,24 +7540,11 @@ impl MatrixApp {
                             let shift = ui.input(|input| input.modifiers.shift);
                             let _ = self.controller.set_rect_square(shift);
                         }
-                        let result = self.accept_viewport_command_point(point, &anchor);
-                        if result.is_ok() {
-                            self.consume_surface_constraint();
-                            self.direction_lock = None;
-                            self.snap_state.accept();
-                            if let Some(candidate) = anchor {
-                                let plane = self.controller.input_plane();
-                                let _ = self.smarttrack.push(&candidate, plane);
-                            }
-                            self.append_running_prompt();
-                        }
+                        let result = self.accept_snapped_command_point(point, anchor);
                         self.feedback(result);
                         // After a viewport pick the keyboard belongs to the viewport, so the
                         // End/Mid one-shot shortcuts can be typed without entering command text.
-                        self.focus_cmd = false;
-                        if let Some(focus) = ui.ctx().memory(|memory| memory.focused()) {
-                            ui.ctx().memory_mut(|memory| memory.surrender_focus(focus));
-                        }
+                        self.release_command_editor_focus(ui.ctx());
                     } else {
                         #[cfg(feature = "occt-brep")]
                         if self.line_surface_view == Some(id) && (self.line_surface_scheduler.is_busy()
@@ -7429,7 +7646,9 @@ impl MatrixApp {
                         self.ambiguous_extract_context = None;
                         self.ambiguous_sphere_context = None;
                         self.ambiguous_slab_context = None;
-                        self.focus_cmd = true;
+                        if !self.controller.is_running() && self.controller.addon_session().is_none() {
+                            self.release_command_editor_focus(ui.ctx());
+                        }
                         return;
                     }
                     self.ambiguous.clear();
@@ -7548,7 +7767,9 @@ impl MatrixApp {
                         _ => self.controller.select_root(picked, shift || collecting),
                     };
                     self.feedback(result);
-                    self.focus_cmd = true;
+                    if !collecting && !self.controller.is_running() && self.controller.addon_session().is_none() {
+                        self.release_command_editor_focus(ui.ctx());
+                    }
                 }
             }
         }
@@ -8423,6 +8644,74 @@ impl MatrixApp {
             || self.grip_drag.is_some()
     }
 
+    fn sync_smarttrack_basis(&mut self) {
+        let basis = if self.smarttrack_enabled && self.picking_points() {
+            self.controller.scene().map(|scene| SmartTrackBasis {
+                publication: scene.publication_id(),
+                command_run: self.controller.command_run(),
+                addon_session: self.controller.addon_session().map(|session| session.prompt_token().0),
+                plane: self.controller.input_plane(),
+            })
+        } else {
+            None
+        };
+        if self.smarttrack_basis != basis {
+            self.smarttrack.clear();
+            self.smarttrack_hover = None;
+            self.smarttrack_basis = basis;
+        }
+    }
+
+    fn update_smarttrack_hover(&mut self, ui: &egui::Ui, view: ViewId) {
+        use om9_scene::osnap::SnapKind;
+
+        let candidate = self.snap.as_ref().filter(|candidate| {
+            candidate.source.is_some()
+                && matches!(candidate.kind, SnapKind::End | SnapKind::Mid | SnapKind::Center
+                    | SnapKind::Quadrant | SnapKind::Point | SnapKind::Intersection)
+        });
+        let Some(candidate) = candidate.filter(|_| {
+            self.smarttrack_enabled && self.has_surface_pick_prompt()
+                && ui.input(|input| input.focused && !input.pointer.any_down())
+        }) else {
+            self.smarttrack_hover = None;
+            return;
+        };
+        let frame = ui.ctx().cumulative_frame_nr();
+        let now = ui.input(|input| input.time);
+        let continuous = self.smarttrack_hover.as_ref().is_some_and(|hover| {
+            hover.view == view
+                && frame.saturating_sub(hover.frame) <= 1
+                && hover.candidate.kind == candidate.kind
+                && hover.candidate.world == candidate.world
+                && hover.candidate.source == candidate.source
+                && hover.candidate.second_source == candidate.second_source
+        });
+        if !continuous {
+            self.smarttrack_hover = Some(SmartTrackHover {
+                view, candidate: candidate.clone(), since: now, frame, acquired: false,
+            });
+        }
+        let hover = self.smarttrack_hover.as_mut().expect("initialized hover");
+        hover.frame = frame;
+        if hover.acquired {
+            return;
+        }
+        let remaining = f64::from(ui.style().interaction.tooltip_delay) - (now - hover.since);
+        if remaining > 0. {
+            ui.ctx().request_repaint_after(std::time::Duration::from_secs_f64(remaining));
+        } else if self.validate_snap_anchor(&self.snap).is_ok()
+            && let Ok(tolerance) = self.controller.document().effective_tolerance()
+        {
+            if self.smarttrack.acquire(candidate, self.controller.input_plane(), tolerance.absolute_mm)
+                .unwrap_or(false)
+            {
+                ui.ctx().request_repaint();
+            }
+            self.smarttrack_hover.as_mut().expect("validated hover").acquired = true;
+        }
+    }
+
     fn cancel_gumball(&mut self) {
         self.gumball_session = None;
         self.gumball_handle = None;
@@ -8480,6 +8769,66 @@ impl MatrixApp {
             snap_settings: self.snap_state.settings, view, mode, _reservation: reservation })
     }
 
+    fn release_command_editor_focus(&mut self, ctx: &egui::Context) {
+        self.focus_cmd = false;
+        ctx.memory_mut(|memory| memory.surrender_focus(egui::Id::new("matrix-command-transcript")));
+    }
+
+    fn release_after_viewport_point(&mut self, ctx: &egui::Context) {
+        if self.elevator.is_none()
+            && (self.controller.addon_session().is_none() || self.controller.session_wants_coordinate())
+        {
+            self.release_command_editor_focus(ctx);
+        }
+    }
+
+    fn report_snap_notice(&mut self, message: &str) {
+        self.transcript.append_history(message);
+        self.status.info(message);
+    }
+
+    fn report_one_shot_miss(&mut self, kind: om9_scene::osnap::SnapKind) {
+        self.report_snap_notice(&format!(
+            "No {} snap point under the pointer. Click near the source or press Esc to clear the one-shot.",
+            kind.label(),
+        ));
+    }
+
+    #[cfg(feature = "occt-brep")]
+    fn feedback_deferred_point(&mut self, ctx: &egui::Context, result: Result<()>) {
+        let keep_viewport_focus = matches!(&result,
+            Ok(()) | Err(Error::Missing(DEFERRED_SNAP_MISS) | Error::Unsupported(PROJECTED_SURFACE_MISS)));
+        let one_shot_miss = match &result {
+            Err(Error::Missing(DEFERRED_SNAP_MISS)) => self.snap_state.settings.one_shot,
+            _ => None,
+        };
+        if let Some(kind) = one_shot_miss {
+            self.report_one_shot_miss(kind);
+        } else {
+            self.feedback(result);
+        }
+        if keep_viewport_focus {
+            self.release_after_viewport_point(ctx);
+        }
+    }
+
+    fn accept_snapped_command_point(&mut self, point: Point3, anchor: Option<om9_scene::osnap::SnapCandidate>) -> Result<()> {
+        if self.controller.addon_session().is_some() && !self.controller.is_running() {
+            self.validate_snap_anchor(&anchor)?;
+            self.controller.session_point(point)?;
+        } else {
+            self.accept_viewport_command_point(point, &anchor)?;
+        }
+        self.consume_surface_constraint();
+        self.direction_lock = None;
+        self.snap_state.accept();
+        if self.smarttrack_enabled && let Some(candidate) = anchor {
+            let _ = self.smarttrack.push(&candidate, self.controller.input_plane());
+        }
+        self.append_running_prompt();
+        Ok(())
+    }
+
     #[cfg(feature = "occt-brep")]
     fn finish_line_surface_click(&mut self, shift: bool) -> Result<()> {
         let Some(click) = self.line_surface_click.take() else { return Ok(()) };
@@ -8505,7 +8854,14 @@ impl MatrixApp {
             || !self.transcript.draft().is_empty() {
             return Err(Error::Stale("surface pick command"));
         }
-        let point = self.hover.ok_or(Error::Missing("exact surface snap intersection"))?;
+        let point = self.hover.ok_or_else(|| {
+            let projection = self.projected_surface_query.as_ref().and_then(|query| query.result.as_ref());
+            if surface_view && matches!(projection, Some(Ok(false))) {
+                Error::Unsupported(PROJECTED_SURFACE_MISS)
+            } else {
+                Error::Missing(DEFERRED_SNAP_MISS)
+            }
+        })?;
         let anchor = self.snap.clone();
         let point = self.viewport_command_point(point);
         if self.surface_constraint.as_ref().is_some_and(|constraint| constraint.target.is_none()) {
@@ -8518,19 +8874,7 @@ impl MatrixApp {
             self.validate_snap_anchor(&anchor)?;
             return self.accept_between_point(point);
         }
-        if self.controller.addon_session().is_some() {
-            self.validate_snap_anchor(&anchor)?;
-            self.controller.session_point(point)?;
-        } else {
-            self.accept_viewport_command_point(point, &anchor)?;
-        }
-        self.consume_surface_constraint();
-        self.direction_lock = None;
-        self.snap_state.accept();
-        if let Some(candidate) = anchor { let _ = self.smarttrack.push(&candidate, self.controller.input_plane()); }
-        self.append_running_prompt();
-        self.focus_cmd = false;
-        Ok(())
+        self.accept_snapped_command_point(point, anchor)
     }
 
     /// `None` means an edge source or view query is still pending.
@@ -8605,7 +8949,8 @@ impl MatrixApp {
             return Ok(None);
         }
         if !edge_query { return Ok(Some(Vec::new())); }
-        let input = crate::session::EdgeSnapViewInput { camera: camera.clone(), viewport, cursor, settings, from, cplane, mode, guides: [None; 4] };
+        let input = crate::session::EdgeSnapViewInput { camera: camera.clone(), viewport, cursor, settings, from, cplane, mode,
+            guides: [None; om9_scene::osnap::MAX_SMARTTRACK_GUIDES] };
         self.edge_snap_views.poll(&self.controller)?;
         let mut result = Vec::new();
         for source in &sources {
@@ -8677,7 +9022,7 @@ impl MatrixApp {
             occurrences.push(crate::session::IntersectionOccurrence { source, transform: object.display_transform()?, edges });
         }
         if occurrences.is_empty() { self.intersection_snap.cancel(); return Ok(Some(Vec::new())); }
-        let mut guides = [None; 4];
+        let mut guides = [None; om9_scene::osnap::MAX_SMARTTRACK_GUIDES];
         if track_query {
             for (slot, guide) in guides.iter_mut().zip(self.smarttrack.guides()) { *slot = Some(*guide); }
         }
@@ -9638,7 +9983,12 @@ impl eframe::App for MatrixApp {
         self.row_cutters_window_ui(ui.ctx());
         self.gem_edits_window_ui(ui.ctx());
         // Enter in the viewport finishes the running point command (Matrix/Rhino).
-        if self.controller.is_running()
+        let addon_point_prompt = self.controller.session_wants_coordinate()
+            && self.between.is_none()
+            && self.viewport_keyboard_free_previous
+            && self.controller.file_operation().is_none()
+            && self.controller.layer_dialog().is_none();
+        if (self.controller.is_running() || addon_point_prompt)
             && ui.ctx().memory(|memory| memory.focused().is_none())
             && ui
                 .ctx()
@@ -10373,8 +10723,8 @@ mod tests {
             camera, viewport, cursor: [400., 300.], face: None, face_witness: None,
             face_witness_triangle: None, native_face_count: None };
         let candidate = SnapCandidate { kind: SnapKind::Surface, root: Some(id), world: [1., 0., 2.],
-            screen: [400., 300.], distance_px: 0., normal: None, parameter: None,
-            source: Some(generic), second_source: None, surface_source: Some(source.clone()) };
+            screen: [400., 300.], distance_px: 0., normal: None, parameter: None, tracking_tangent: None,
+            source: Some(generic), second_source: None, surface_source: Some(source.clone()), apparent: false };
         app.surface_constraint = Some(super::SurfaceConstraint { kind: super::SurfaceConstraintKind::Surface,
             persistent: true, target: Some(super::SurfaceConstraintTarget { root: id, source }) });
         let ctx = egui::Context::default();

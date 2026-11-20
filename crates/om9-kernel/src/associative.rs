@@ -313,6 +313,10 @@ impl TopologyProvider for OcctTopology {
 /// The builder chain with the OCCT sweep and source-derived topology.
 pub fn history_registry() -> Result<ProducerRegistry> {
     let mut registry = ProducerRegistry::with_topology(OcctTopology);
+    registry.register(
+        om9_core::producers::JOIN_HISTORY_COMMAND,
+        om9_core::producers::JoinHistoryProducer,
+    )?;
     registry.register("RingRail", RingRailProducer)?;
     registry.register("RailProfile", RailProfileProducer)?;
     registry.register("RailSweep", RailSweepProducer::new(OcctSweepBackend))?;
@@ -330,6 +334,10 @@ pub fn history_registry() -> Result<ProducerRegistry> {
 /// Register the chain into an existing registry (a host that already owns a topology
 /// policy can keep it).
 pub fn register_occt_producers(registry: &mut ProducerRegistry) -> Result<()> {
+    registry.register(
+        om9_core::producers::JOIN_HISTORY_COMMAND,
+        om9_core::producers::JoinHistoryProducer,
+    )?;
     registry.register("RingRail", RingRailProducer)?;
     registry.register("RailProfile", RailProfileProducer)?;
     registry.register("RailSweep", RailSweepProducer::new(OcctSweepBackend))?;

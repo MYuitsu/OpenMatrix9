@@ -26,6 +26,50 @@ fn close(actual: f64, expected: f64, tolerance: f64) -> bool {
 }
 
 #[test]
+fn typed_surface_witness_checks_face_not_solid_interior() {
+    use om9_core::geometry::Transform;
+    use om9_kernel::measurement::point_on_source_face;
+    let limits = limits();
+    let sphere = om9_kernel::brep::sphere_brep(2., 0.1, &limits).unwrap();
+    let placement = Transform::translation([7., -3., 4.])
+        .compose(Transform::scale([2., 1., 0.5]).unwrap()).unwrap();
+    let center = placement.point([0.; 3]).unwrap();
+    let surface = placement.point([2., 0., 0.]).unwrap();
+    assert!(point_on_source_face(sphere.source(), 0, placement, center, 0.001, limits.max_nodes).unwrap().is_none());
+    let witness = point_on_source_face(sphere.source(), 0, placement, surface, 0.001, limits.max_nodes).unwrap().unwrap();
+    assert!((0..3).all(|axis| (witness[axis] - surface[axis]).abs() <= 0.001));
+    assert!(point_on_source_face(sphere.source(), 1, placement, surface, 0.001, limits.max_nodes).is_err());
+}
+
+#[test]
+fn circular_edge_centers_come_from_source_without_display_sampling() {
+    let limits = limits();
+    let cylinder = creation::primitive(Primitive::Cylinder { radius_mm: 5., height_mm: 10. }, deflection(), &limits).unwrap();
+    let centers = editing::circular_edge_centers_from_source_admitted(cylinder.source(), &limits, |_, _| Ok(())).unwrap();
+    for expected in [[0., 0., 0.], [0., 0., 10.]] {
+        assert!(centers.iter().any(|point| (0..3).all(|axis| (point[axis] - expected[axis]).abs() < 1e-8)), "{centers:?}");
+    }
+    assert!(editing::circular_edge_centers_from_source_admitted(cylinder.source(), &limits,
+        |_, _| Err(om9_core::Error::Canceled)).is_err());
+}
+
+#[test]
+fn source_vertices_include_degenerate_sphere_poles() {
+    let limits = limits();
+    let sphere = om9_kernel::brep::sphere_brep(2., 0.1, &limits).unwrap();
+    let snap_edges = editing::snap_edges_from_source_admitted(sphere.source(), &limits, |_, _| Ok(())).unwrap();
+    let ordinary_edges = editing::all_edges_from_source_admitted(sphere.source(), &limits, |_, _| Ok(())).unwrap();
+    assert_eq!(snap_edges.len(), ordinary_edges.len());
+    let vertices = editing::vertices_from_source_admitted(sphere.source(), &limits, |_, _| Ok(())).unwrap();
+    for z in [-2., 2.] {
+        assert!(vertices.iter().any(|point| point[0].abs() < 1e-8 && point[1].abs() < 1e-8
+            && (point[2] - z).abs() < 1e-8), "{vertices:?}");
+    }
+    assert!(editing::vertices_from_source_admitted(sphere.source(), &limits,
+        |_, _| Err(om9_core::Error::Canceled)).is_err());
+}
+
+#[test]
 #[ignore = "known nonuniform affine Boolean failure; run explicitly while investigating"]
 fn boolean_nonuniformly_scaled_box_matches_analytic_sphere_union() {
     use om9_core::geometry::Transform;
@@ -1904,7 +1948,7 @@ fn m03_01_10_003() {
 #[test]
 fn exact_surface_split_accepts_multiple_placed_lines_and_a_closed_circle() {
     use om9_core::geometry::{Curve, Geometry, Transform};
-    let face = Geometry::Brep(rect_face(10., 20.));
+    let face = Geometry::Brep(rect_face(10., 20.).into_canonical_and_representation().0);
     let vertical = Geometry::Curve(Curve::Line { start: [0., -1., 0.], end: [0., 21., 0.], domain: [0., 1.] });
     let horizontal = Geometry::Curve(Curve::Line { start: [-1., 10., 0.], end: [11., 10., 0.], domain: [0., 1.] });
     let split = om9_kernel::measurement::split_surface_by_geometry(
@@ -1921,11 +1965,11 @@ fn exact_surface_split_accepts_multiple_placed_lines_and_a_closed_circle() {
     assert_eq!(measured(&merged).faces, 1);
     assert!(close(measured(&merged).area_mm2, 150., 1e-6));
     let distance = |brep: &Brep, point| om9_kernel::measurement::distance(
-        &Geometry::Brep(brep.clone()), Transform::identity(), &Geometry::Point(point), Transform::identity(), &limits(),
+        &Geometry::Brep(brep.clone().into_canonical_and_representation().0), Transform::identity(), &Geometry::Point(point), Transform::identity(), &limits(),
     ).unwrap().millimetres;
     assert!((distance(&merged, [1., 1., 0.]) - 4.).abs() < 1e-6);
     assert!(distance(&merged, [1., 19., 0.]) < 1e-7);
-    let updated_target = Geometry::Brep(merged);
+    let updated_target = Geometry::Brep(merged.into_canonical_and_representation().0);
     let updated_split = om9_kernel::measurement::split_surface_by_geometry(
         &updated_target, Transform::identity(), &[(&horizontal, Transform::identity())], deflection(), &limits(),
     ).unwrap();
@@ -1991,7 +2035,7 @@ fn unify_regions_on_a_cylindrical_face_preserves_surface_area() {
     })).collect();
     let cutters: Vec<_> = tools.iter().map(|tool| (tool, Transform::identity())).collect();
     let split = om9_kernel::measurement::split_surface_by_geometry(
-        &Geometry::Brep(face), Transform::identity(), &cutters, deflection(), &limits(),
+        &Geometry::Brep(face.into_canonical_and_representation().0), Transform::identity(), &cutters, deflection(), &limits(),
     ).unwrap();
     assert!(split.pieces >= 3);
     let merged = editing::unify_surface_regions(&split.brep, deflection(), &limits()).unwrap();
@@ -2003,7 +2047,7 @@ fn unify_regions_on_a_cylindrical_face_preserves_surface_area() {
     assert_eq!(measured(&kept).faces, 1);
     assert!(close(measured(&kept).area_mm2, 75. * PI, 1e-5));
     let distance = om9_kernel::measurement::distance(
-        &Geometry::Brep(kept), Transform::identity(), &Geometry::Point([diagonal, diagonal, 5.]), Transform::identity(), &limits(),
+        &Geometry::Brep(kept.into_canonical_and_representation().0), Transform::identity(), &Geometry::Point([diagonal, diagonal, 5.]), Transform::identity(), &limits(),
     ).unwrap().millimetres;
     assert!(distance > 3.0, "removed quadrant distance {distance}");
 }
@@ -2018,7 +2062,7 @@ fn unify_trim_regions_preserves_original_coplanar_face_boundary() {
     assert_eq!(measured(&original).faces, 2);
     let line = Geometry::Curve(Curve::Line { start: [-1., 10., 0.], end: [11., 10., 0.], domain: [0., 1.] });
     let partition = om9_kernel::measurement::split_surface_by_geometry(
-        &Geometry::Brep(original.clone()), Transform::identity(), &[( &line, Transform::identity())], deflection(), &limits(),
+        &Geometry::Brep(original.clone().into_canonical_and_representation().0), Transform::identity(), &[( &line, Transform::identity())], deflection(), &limits(),
     ).unwrap();
     assert_eq!(partition.pieces, 4);
     let merged = editing::unify_surface_regions_preserving_edges(&partition.brep, &original, deflection(), &limits()).unwrap();
@@ -2034,7 +2078,7 @@ fn unify_trim_regions_preserves_original_coplanar_face_boundary() {
     let moved = Transform::translation([12., -3., 4.]);
     let world_original = om9_kernel::transform_ops::transform_brep(&original, &moved, deflection(), &limits()).unwrap();
     let partition = om9_kernel::measurement::split_surface_by_geometry(
-        &Geometry::Brep(original.clone()), moved, &[(&line, moved)], deflection(), &limits(),
+        &Geometry::Brep(original.clone().into_canonical_and_representation().0), moved, &[(&line, moved)], deflection(), &limits(),
     ).unwrap();
     let merged = editing::unify_surface_regions_preserving_edges(&partition.brep, &world_original, deflection(), &limits()).unwrap();
     assert_eq!(measured(&merged).faces, 2);
@@ -2048,8 +2092,8 @@ fn split_and_trim_solid_boundary_preserves_other_faces() {
     let cutter_profile = Profile::new(vec![[5., -5., -5.], [5., 15., -5.], [5., 15., 15.], [5., -5., 15.]]).unwrap();
     let cutter = creation::planar(&cutter_profile, deflection(), &limits()).unwrap();
     let split = om9_kernel::measurement::split_surface_by_geometry(
-        &Geometry::Brep(solid.clone()), Transform::identity(),
-        &[(&Geometry::Brep(cutter), Transform::identity())], deflection(), &limits(),
+        &Geometry::Brep(solid.clone().into_canonical_and_representation().0), Transform::identity(),
+        &[(&Geometry::Brep(cutter.into_canonical_and_representation().0), Transform::identity())], deflection(), &limits(),
     ).unwrap();
     let split_measure = measured(&split.brep);
     assert_eq!(split.pieces, 10);
@@ -2067,13 +2111,13 @@ fn split_and_trim_solid_boundary_preserves_other_faces() {
 #[test]
 fn exact_face_split_handles_nurbs_curve_and_placed_brep_cutter() {
     use om9_core::geometry::{Curve, Geometry, NurbsCurve, Transform};
-    let target = Geometry::Brep(rect_face(10., 20.));
+    let target = Geometry::Brep(rect_face(10., 20.).into_canonical_and_representation().0);
     let curve = Geometry::Curve(Curve::Nurbs(NurbsCurve {
         degree: 2, poles: vec![[5., -1., 0.], [7., 10., 0.], [5., 21., 0.]],
         weights: vec![1., 1., 1.], knots: vec![0., 0., 0., 1., 1., 1.],
         domain: [0., 1.], periodic: false, reversed: false, seam: None,
     }));
-    let box_cutter = Geometry::Brep(box_shape(2., 3., 4.));
+    let box_cutter = Geometry::Brep(box_shape(2., 3., 4.).into_canonical_and_representation().0);
     for (tool, placement) in [(&curve, Transform::identity()), (&box_cutter, Transform::translation([3., 4., -2.]))] {
         let split = om9_kernel::measurement::split_surface_by_geometry(
             &target, Transform::identity(), &[(tool, placement)], deflection(), &limits(),

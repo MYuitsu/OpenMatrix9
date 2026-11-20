@@ -124,6 +124,35 @@ fn title_popup_has_reference_actions_instead_of_the_old_three_entry_stub() {
         .override_text_color
         .unwrap_or(maximize.fallback_color);
     assert!(label_color.r() < 64 && label_color.g() < 64 && label_color.b() < 64);
+    frame(
+        &mut app,
+        &ctx,
+        vec![Event::Key {
+            key: egui::Key::Escape,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: Modifiers::NONE,
+        }],
+    );
+    assert!(!egui::Popup::is_any_open(&ctx));
+    frame(&mut app, &ctx, vec![]);
+    frame(
+        &mut app,
+        &ctx,
+        vec![
+            Event::Key {
+                key: egui::Key::E,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Modifiers::NONE,
+            },
+            Event::Text("e".into()),
+        ],
+    );
+    assert_eq!(app.snap_override(), Some(om9_scene::osnap::SnapKind::End));
+    assert_eq!(app.transcript.draft(), "");
     fn light_menu(shape: &egui::Shape, point: Pos2) -> bool {
         match shape {
             egui::Shape::Vec(shapes) => shapes.iter().any(|shape| light_menu(shape, point)),
@@ -661,7 +690,7 @@ fn keyboard_enter_activates_focused_menu_item_and_returns_to_command_draft() {
 
 #[test]
 fn outside_canvas_click_only_dismisses_popup_and_preserves_pending_point() {
-    let mut app = MatrixApp::new(Document::new("popup dismissal click")).unwrap();
+    let mut app = MatrixApp::new(Document::with_template_tolerance("popup dismissal click")).unwrap();
     let ctx = egui::Context::default();
     frame(&mut app, &ctx, vec![]);
     frame(&mut app, &ctx, vec![]);
@@ -695,7 +724,7 @@ fn outside_canvas_click_only_dismisses_popup_and_preserves_pending_point() {
     assert!(app.controller.is_running());
     assert_eq!(app.transcript.draft(), "1,2,3");
     click(&mut app, &ctx, outside);
-    assert_eq!(app.controller.document().entities.len(), 1);
+    assert_eq!(app.controller.document().entities.len(), 1, "{}", app.status_line());
     assert!(!app.controller.is_running());
 }
 

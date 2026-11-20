@@ -833,9 +833,32 @@ pub fn output_hash(document: &Document, outputs: &[ObjectId]) -> Result<[u8; 32]
                 hasher.update(brep.payload.as_slice());
             }
             geometry => {
-                let bytes = serde_json::to_vec(geometry).map_err(|_| Error::Invalid("cache geometry encoding"))?;
-                hasher.update((bytes.len() as u64).to_le_bytes());
-                hasher.update(&bytes);
+                // The existing digest includes the encoded byte length before
+                // its JSON payload. Count first, then stream the same bytes to
+                // SHA-256, avoiding a full-sized temporary geometry buffer.
+                struct Count(u64);
+                impl std::io::Write for Count {
+                    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+                        self.0 = self.0.checked_add(bytes.len() as u64)
+                            .ok_or_else(|| std::io::Error::other("cache geometry length overflow"))?;
+                        Ok(bytes.len())
+                    }
+                    fn flush(&mut self) -> std::io::Result<()> { Ok(()) }
+                }
+                struct HashWriter<'a>(&'a mut Sha256);
+                impl std::io::Write for HashWriter<'_> {
+                    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+                        self.0.update(bytes);
+                        Ok(bytes.len())
+                    }
+                    fn flush(&mut self) -> std::io::Result<()> { Ok(()) }
+                }
+                let mut count = Count(0);
+                serde_json::to_writer(&mut count, geometry).map_err(|_| Error::Invalid("cache geometry encoding"))?;
+                hasher.update(count.0.to_le_bytes());
+                let mut writer = std::io::BufWriter::with_capacity(4096, HashWriter(&mut hasher));
+                serde_json::to_writer(&mut writer, geometry).map_err(|_| Error::Invalid("cache geometry encoding"))?;
+                std::io::Write::flush(&mut writer).map_err(|_| Error::Invalid("cache geometry encoding"))?;
             }
         }
     }
@@ -1360,6 +1383,14 @@ pub(crate) fn recompute_with(
     // Applying the result mutates the document. If any write fails, the captured snapshot is
     // restored so a failed rebuild cannot leave a half-published node behind.
     let applied = (|| -> Result<[u8; 32]> {
+        // The producer consumed current inputs, not the stamps recorded by the old recipe.
+        // Publish and rebind the same current stamps so transaction validation sees the
+        // provenance of the geometry that was actually rebuilt.
+        let refreshed: Vec<SourceStamp> = recipe
+            .inputs
+            .iter()
+            .map(|input| document.stamp(input.source.object))
+            .collect::<Result<_>>()?;
         for output in &built {
             let entity = document
                 .entities
@@ -1372,7 +1403,7 @@ pub(crate) fn recompute_with(
                 .ok_or(Error::Overflow("rebuild geometry revision"))?;
             let revision = entity.geometry_revision;
             let snapshot_geometry = entity.geometry.clone();
-            let stamps: Vec<_> = recipe.inputs.iter().map(|input| input.source).collect();
+            let stamps = refreshed.clone();
             let operation = recipe.command.clone();
             let kind = snapshot_geometry.kind();
             match document.results.get_mut(&output.object) {
@@ -1400,11 +1431,6 @@ pub(crate) fn recompute_with(
         }
         // The rebuild consumed the sources as they are now; re-stamp the recorded inputs so
         // the next recompute does not see its own successful rebuild as stale input.
-        let refreshed: Vec<SourceStamp> = recipe
-            .inputs
-            .iter()
-            .map(|input| document.stamp(input.source.object))
-            .collect::<Result<_>>()?;
         let stored = document
             .history
             .recipes

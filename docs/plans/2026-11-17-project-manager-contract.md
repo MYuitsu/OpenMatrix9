@@ -1,0 +1,23 @@
+# Project Manager implementation contract (working decisions)
+
+Owner: M01 `OM9-L2-03-15`, with document/identity `01-03`, transactions `01-02`, codec `01-12`, and docking `03-07`. Source and evidence distinctions are in the [gap plan](2026-11-17-project-manager-gap-plan.md). These are OM9 implementation decisions, not claims that Matrix's storage format is known. Validation and manual acceptance remain open.
+
+| Action | Input and result | Confirmation, cancellation, Undo and files |
+| --- | --- | --- |
+| Create / rename / select row | Unicode name and stable project ID; duplicate names allowed, row order remains user-visible order. | Cancel leaves catalog unchanged. Metadata does not alter geometry. |
+| Delete row | Stable ID; remove catalog entry. | Confirm before removal; do not delete files merely by removing a row. Cancel preserves it. |
+| Compact | Active row; pack occupied numbered bags, retaining their identities and relative order. | Empty positions are removed and numbers change; geometry and files do not. |
+| Timer start / stop / reset | Active row; persist accumulated duration and running state. | Reset requires confirmation; rendering frequency must not drive time. |
+| Capture selection (In) | Selected source objects plus their required dependency closure. | Replacing an occupied bag requires confirmation; cancel or failure keeps the old bag and document. No document Undo entry. |
+| Insert selection (thumbnail / Load) | A numbered bag; add fresh identities with captured world placement and remapped dependencies. | One atomic transaction and one Undo/Redo; failure or cancel changes nothing. Provenance does not require the old source to exist. |
+| Clear / Save bag | Clear one bag, or export its content to a user-selected file. | Confirm clear; neither changes viewport objects. Cancel or failure preserves existing data. |
+| Capture document | Whole document, including hidden/locked content, into Master, Creation, Parts, Render or Output; plus adds a version of that kind. | Confirm overwrite; no selection or geometry mutation. Exclude recursively embedded manager state while retaining design resources. |
+| Open document snapshot | Named version; prepare and validate document, resources, scene and manager metadata before publication. | Reuse Open's dirty Save/Discard/Cancel lifecycle; failure or cancel leaves document, path and history intact. |
+| Archive / import project | Stable project identity and user-chosen destination/source; use native OM9 container and validated assets. | Atomic file replacement; failed or cancelled import leaves catalog intact. `.mpj` is separately unsupported until its format is verified. |
+| Mngr | Catalog metadata, typed filters, visibility, Files/Info and project/folder import/export. | Editing has Save/Cancel; hiding does not delete. Missing or duplicate data is reported without destructive replacement. |
+
+Numbered bags start with 10 empty positions, extend on filling the last position, and are bounded at 200 positions plus independent memory/storage admission. Book 1 describes ten initially and extension; the Matrix90 listing has a 200 warning. The 200 ceiling is an explicit conservative OM9 choice, not proof that all original versions used the same limit. Existing three-slot state must migrate without losing bag identities or positions. Clear leaves a position empty until Compact.
+
+The workspace catalog must survive New/Open/restart. When an existing workspace catalog and document-embedded manager coexist, retain the embedded resource on Save and offer an explicit import into separate workspace rows; assign fresh workspace-local project and snapshot IDs and retain legacy inline bags without fabricating missing dependencies. Repeating the action creates additional rows. The worker must reject a result if the document or workspace changes, and an error or cancellation must publish no partial rows. Native project-file export still refuses legacy bags lacking archives. Integration evidence and remaining desktop checks are in the P07 record. Thumbnail imagery is derived, bounded and disposable; it cannot determine CAD source or make a bag unavailable. Native BRep remains subject to the existing codec guard.
+
+P00 task ownership: row/archive/timer and catalog use `03-15-003`; slot grid/thumbnail `004`; capture `005`; insert and dependency remap `006`; whole-document snapshots and lifecycle `007` with `001`; metadata/search and Mngr `008`; dock/entry actions `009`. G01–G20 map to these existing owners in the gap plan. These entries are a working implementation contract; they do not mark any L4 or feature complete.

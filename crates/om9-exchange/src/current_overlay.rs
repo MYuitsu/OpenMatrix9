@@ -285,6 +285,10 @@ fn action(
     mode: ImportMode,
 ) -> Result<(RecordAction, ChangedFields)> {
     let unchanged = ChangedFields::default();
+    if record.disposition == RecordDisposition::Excluded {
+        if current.is_some() { return Err(Error::Invalid("excluded native binding is live")); }
+        return Ok((RecordAction::Omit, unchanged));
+    }
     if record.disposition == RecordDisposition::Deleted {
         if current.is_some() {
             return Err(Error::Invalid("deleted native binding is live"));

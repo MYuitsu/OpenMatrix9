@@ -5,17 +5,100 @@
 //! named standard size. A standard is only accepted when this module carries a frozen table
 //! and provenance for it; an unverified locale is refused instead of guessed.
 //!
-//! The US table is derived from the published US size increment (0.8128 mm per size) and
-//! its 11.63 mm base, rounded to 0.01 mm, and cross-checked against the ISO 8653 nominal
-//! circumference series. The values are frozen in [`US_TABLE`] so a library upgrade cannot
-//! silently change a saved ring.
+//! New Ring Rail input uses Stuller's published inside-diameter table (half sizes)
+//! and explicitly interpolates quarter sizes. The older integer API remains frozen.
 use crate::{Error, Result};
+
+/// Existing direct-builder physical diameter domain, shared by both adapters.
+pub const MIN_RAIL_DIAMETER_MM: f64 = 1.;
+pub const MAX_RAIL_DIAMETER_MM: f64 = 40.;
+
+pub fn rail_system_label(id: &str) -> &str {
+    match id {
+        "VNM" | "vnm" => "VNM (Việt Nam) — inside diameter (mm)",
+        "vnm_circumference" => "VNM (Việt Nam) — inside circumference (mm)",
+        "US" | "us" => "US / Canada (Stuller)",
+        "explicit" | "diameter" => "Inside diameter (mm)",
+        "iso" => "Inside circumference (mm)",
+        "diameter_inches" => "Inside diameter (inch)",
+        "circumference_inches" => "Inside circumference (inch)",
+        other => other,
+    }
+}
+
+/// Shared Ring Rail input conversion. US quarter sizes interpolate the frozen
+/// Stuller half-size table; custom dimensions are converted to world millimetres.
+pub fn rail_diameter_mm(system: &str, size: f64) -> Result<f64> {
+    if !size.is_finite() || size <= 0.0 { return Err(Error::Invalid("ring size")); }
+    let diameter = match system.trim().to_ascii_lowercase().as_str() {
+        "us" | "usa" => {
+            if !(1.0..=15.0).contains(&size) || (size * 4.0 - (size * 4.0).round()).abs() > 1e-8 {
+                return Err(Error::Invalid("US ring size 1..15 in quarter steps"));
+            }
+            let index = ((size - 1.) * 2.).floor() as usize;
+            let a = (US_HALF_DIAMETERS_MM[index] * 100.).round();
+            let b = (US_HALF_DIAMETERS_MM[(index + 1).min(28)] * 100.).round();
+            (a + (b - a) * ((size - 1.) * 2.).fract()).round() / 100.0
+        }
+        "diameter" | "explicit" | "vnm" => size,
+        "iso" | "circumference" | "vnm_circumference" => size / std::f64::consts::PI,
+        "diameter_inches" => size * 25.4,
+        "circumference_inches" => size * 25.4 / std::f64::consts::PI,
+        _ => return Err(Error::Unsupported("ring size standard")),
+    };
+    if !diameter.is_finite() || diameter <= 0.0 { return Err(Error::Invalid("ring rail diameter")); }
+    if !(MIN_RAIL_DIAMETER_MM..=MAX_RAIL_DIAMETER_MM).contains(&diameter) { return Err(Error::Invalid("ring rail diameter 1..40 mm")); }
+    Ok(diameter)
+}
+
+/// Preserve the physical diameter when changing the input system. US is snapped
+/// to the nearest supported quarter size; VNM is an explicit mm dimension.
+pub fn rail_size_for_diameter(system: &str, diameter_mm: f64) -> Result<f64> {
+    rail_diameter_mm("diameter", diameter_mm)?;
+    match system.trim().to_ascii_lowercase().as_str() {
+        "us" | "usa" => {
+            if !(US_TABLE[0].1..=US_TABLE[14].1).contains(&diameter_mm) { return Err(Error::Invalid("diameter outside US ring table")); }
+            (4..=60).map(|quarter| quarter as f64 / 4.).min_by(|a, b|
+                (rail_diameter_mm("us", *a).unwrap() - diameter_mm).abs().total_cmp(&(rail_diameter_mm("us", *b).unwrap() - diameter_mm).abs()))
+                .ok_or(Error::Invalid("US ring size"))
+        }
+        "diameter" | "explicit" | "vnm" => Ok(diameter_mm),
+        "iso" | "circumference" | "vnm_circumference" => Ok(diameter_mm * std::f64::consts::PI),
+        "diameter_inches" => Ok(diameter_mm / 25.4),
+        "circumference_inches" => Ok(diameter_mm * std::f64::consts::PI / 25.4),
+        _ => Err(Error::Unsupported("ring size standard")),
+    }
+}
+
+/// Canonical Front-view rail: starts at the top and turns toward +X.
+pub fn front_rail(center: crate::geometry::Point3, diameter_mm: f64) -> Result<crate::geometry::Curve> {
+    rail_curve(center, diameter_mm, "front")
+}
+
+/// Construct the common circle, including the frame of older saved recipes.
+pub fn rail_curve(center: crate::geometry::Point3, diameter_mm: f64, frame: &str) -> Result<crate::geometry::Curve> {
+    if !diameter_mm.is_finite() || diameter_mm <= 0. { return Err(Error::Invalid("ring rail diameter")); }
+    if center.iter().any(|coordinate| !coordinate.is_finite()) { return Err(Error::Invalid("ring rail center")); }
+    let (x, y) = match frame {
+        "front" => ([0., 0., 1.], [1., 0., 0.]),
+        "xy" => ([1., 0., 0.], [0., 1., 0.]),
+        _ => return Err(Error::Unsupported("ring rail frame")),
+    };
+    Ok(crate::geometry::Curve::Circle { center, x, y,
+        radius: diameter_mm / 2.0, domain: [0., std::f64::consts::TAU], angle_domain: None })
+}
 
 /// The provenance string recorded with a standard-size ring rail. It names the standard,
 /// the conversion rule and the rounding, so a reviewer can reproduce the table.
 pub const US_PROVENANCE: &str =
-    "US ring size: inside diameter mm = 11.63 + 0.8128 * size, rounded to 0.01 mm; \
-     cross-checked against ISO 8653 nominal circumference series; table frozen in om9-core";
+    "Stuller Ring Blank Lengths Chart (2013-06-05), inside diameter mm, half sizes 1..15; quarter sizes interpolated and rounded to 0.01 mm; https://www.stuller.com/articles/view/determining-ring-blank-lengths-in-b-and-s-gauge/";
+
+/// Factual diameter data from the cited supplier chart; no artwork or catalog assets.
+pub const US_HALF_DIAMETERS_MM: [f64; 29] = [
+    12.44,12.85,13.26,13.66,14.07,14.47,14.88,15.29,15.69,16.10,
+    16.51,16.91,17.32,17.73,18.13,18.54,18.95,19.35,19.76,20.16,
+    20.57,20.98,21.38,21.79,22.20,22.60,23.01,23.42,23.82,
+];
 
 /// The frozen US size table, sizes 1..=15. Size 0 and negative sizes are not jewelry
 /// standards handled by this builder.
@@ -129,8 +212,8 @@ mod tests {
         assert_eq!(RingSizeStandard::Us.diameter_mm(8).unwrap(), 18.13);
         assert_eq!(RingSizeStandard::Us.diameter_mm(1).unwrap(), 12.44);
         assert_eq!(RingSizeStandard::Us.diameter_mm(15).unwrap(), 23.82);
-        assert!(RingSizeStandard::Us.provenance().contains("ISO 8653"));
-        assert!(RingSizeStandard::Us.provenance().contains("0.8128"));
+        assert!(RingSizeStandard::Us.provenance().contains("Stuller"));
+        assert!(RingSizeStandard::Us.provenance().contains("0.01 mm"));
         assert_eq!(RingSizeStandard::Us.table().len(), 15);
     }
 

@@ -22,6 +22,28 @@ impl Drop for Staging {
         let _ = fs::remove_file(&self.0);
     }
 }
+
+/// Fully verified staging file. Dropping it leaves the destination untouched.
+/// The caller must revalidate its operation context before calling `publish`.
+pub struct PreparedArchive {
+    #[cfg(windows)]
+    held: om9_native_owner::VerifiedFile,
+    destination: PathBuf,
+    staging: Staging,
+}
+impl PreparedArchive {
+    pub fn publish(self, token: &Cancellation) -> Result<()> {
+        cancel(token)?;
+        #[cfg(windows)]
+        self.held.publish(&self.destination, token).map_err(|error| match error.kind {
+            om9_native_owner::FailureKind::Canceled => Error::Canceled,
+            _ => Error::Io(format!("archive held-file publication: {error:?}")),
+        })?;
+        #[cfg(not(windows))]
+        fs::rename(&self.staging.0, &self.destination).map_err(io)?;
+        Ok(())
+    }
+}
 pub fn read_bounded(path: &Path, limits: &Limits) -> Result<Vec<u8>> {
     read_bounded_reserved(path, limits, |_| Ok(())).map(|(bytes, ())| bytes)
 }
@@ -35,6 +57,11 @@ pub fn read_bounded_reserved<T>(path: &Path, limits: &Limits, reserve: impl FnOn
         return Err(Error::Budget("archive file bytes"));
     }
     let reservation = reserve(size)?;
+    let bytes = read_sized(&mut file, size)?;
+    Ok((bytes, reservation))
+}
+
+fn read_sized(file: &mut impl Read, size: u64) -> Result<Vec<u8>> {
     let mut bytes = Vec::new();
     bytes
         .try_reserve_exact(
@@ -56,7 +83,22 @@ pub fn read_bounded_reserved<T>(path: &Path, limits: &Limits, reserve: impl FnOn
         }
         bytes.extend_from_slice(&buffer[..count]);
     }
-    Ok((bytes, reservation))
+    if bytes.len() as u64 != size {
+        return Err(Error::Stale("archive file size changed during read"));
+    }
+    Ok(bytes)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reject_source_size_changes_while_reading() {
+        assert_eq!(read_sized(&mut &b"abc"[..], 3).unwrap(), b"abc");
+        assert!(matches!(read_sized(&mut &b"ab"[..], 3), Err(Error::Stale(_))));
+        assert!(matches!(read_sized(&mut &b"abcd"[..], 3), Err(Error::Budget(_))));
+    }
 }
 pub fn save(path: &Path, document: &Document, limits: &Limits, token: &Cancellation) -> Result<()> {
     save_with_admission(path, document, limits, token, &mut |_, _| Ok(()))
@@ -95,6 +137,31 @@ pub(crate) fn save_with_admission(path: &Path, document: &Document, limits: &Lim
     }
     drop(decoded);
     admit(encoded, 0)?;
+    publish_encoded(path, &bytes, &validation, token, admit, &mut |reread, admit| {
+        let live = encoded.checked_add(reread.capacity() as u64).ok_or(Error::Overflow("archive readback capacity"))?;
+        let decoded = crate::container::decode_with_admission(reread, &validation, &mut |estimated| {
+            admit(live, estimated.checked_sub(reread.len() as u64)
+                .ok_or(Error::Invalid("archive decoder input accounting"))?)
+        })?;
+        if decoded != *document { return Err(Error::Invalid("staged archive verification")); }
+        Ok(())
+    })
+}
+
+/// Publish already validated bytes only after an independently read staging
+/// copy is identical and passes the caller's format-specific verification.
+/// The caller retains and accounts for `bytes` until this function returns.
+pub(crate) fn publish_encoded(path: &Path, bytes: &Vec<u8>, validation: &Limits,
+    token: &Cancellation, admit: &mut dyn FnMut(u64, u64) -> Result<()>,
+    verify: &mut dyn FnMut(&Vec<u8>, &mut dyn FnMut(u64, u64) -> Result<()>) -> Result<()>) -> Result<()> {
+    prepare_encoded(path, bytes, validation, token, admit, verify)?.publish(token)
+}
+
+pub(crate) fn prepare_encoded(path: &Path, bytes: &Vec<u8>, validation: &Limits,
+    token: &Cancellation, admit: &mut dyn FnMut(u64, u64) -> Result<()>,
+    verify: &mut dyn FnMut(&Vec<u8>, &mut dyn FnMut(u64, u64) -> Result<()>) -> Result<()>) -> Result<PreparedArchive> {
+    let encoded = bytes.capacity() as u64;
+    cancel(token)?;
     let parent = path
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -120,7 +187,7 @@ pub(crate) fn save_with_admission(path: &Path, document: &Document, limits: &Lim
         .write(true)
         .open(&staging.0)
         .map_err(io)?;
-    file.write_all(&bytes).map_err(io)?;
+    file.write_all(bytes).map_err(io)?;
     file.flush().map_err(io)?;
     file.sync_all().map_err(io)?;
     drop(file);
@@ -128,15 +195,10 @@ pub(crate) fn save_with_admission(path: &Path, document: &Document, limits: &Lim
     let (reread, ()) = read_bounded_reserved(&staging.0, &validation, |size| admit(encoded, size))?;
     let live = encoded.checked_add(reread.capacity() as u64).ok_or(Error::Overflow("archive readback capacity"))?;
     admit(live, 0)?;
-    if reread != bytes {
+    if reread != *bytes {
         return Err(Error::Invalid("staged archive verification"));
     }
-    let decoded = crate::container::decode_with_admission(&reread, &validation, &mut |estimated| {
-        admit(live, estimated.checked_sub(reread.len() as u64)
-            .ok_or(Error::Invalid("archive decoder input accounting"))?)
-    })?;
-    if decoded != *document { return Err(Error::Invalid("staged archive verification")); }
-    drop(decoded);
+    verify(&reread, admit)?;
     drop(reread);
     admit(encoded, 0)?;
     cancel(token)?;
@@ -153,20 +215,13 @@ pub(crate) fn save_with_admission(path: &Path, document: &Document, limits: &Lim
                     _ => Error::Io(format!("archive publication ownership: {error:?}")),
                 },
             )?;
-        let expected: [u8; 32] = Sha256::digest(&bytes).into();
+        let expected: [u8; 32] = Sha256::digest(bytes).into();
         if held.len() != bytes.len() as u64 || held.fingerprint() != expected {
             return Err(Error::Invalid("staged archive publication fingerprint"));
         }
         cancel(token)?;
-        held.publish(&destination, token)
-            .map_err(|error| match error.kind {
-                om9_native_owner::FailureKind::Canceled => Error::Canceled,
-                _ => Error::Io(format!("archive held-file publication: {error:?}")),
-            })?;
+        return Ok(PreparedArchive { held, destination, staging });
     }
     #[cfg(not(windows))]
-    fs::rename(&staging.0, path).map_err(io)?;
-    // Rename accepted the new file. Drop removes only the now-absent staging
-    // name and never treats postacceptance cleanup as a rollback.
-    Ok(())
+    Ok(PreparedArchive { destination: path.to_path_buf(), staging })
 }

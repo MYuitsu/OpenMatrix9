@@ -112,6 +112,9 @@ impl Pending {
     }
 }
 impl Controller {
+    pub(super) fn annotation_wants_point(&self) -> bool {
+        self.annotation_pending.as_ref().is_some_and(|pending| !pending.editing() && !pending.text_stage())
+    }
     pub fn begin_annotation(&mut self, feature: &str) -> Result<()> {
         let index = FEATURES
             .iter()
@@ -233,8 +236,7 @@ impl Controller {
             return self.commit_annotation_edit(p.feature, source, record);
         }
         if p.feature == FEATURES[11] {
-            record.style.validate()?;
-            self.annotation_style = record.style;
+            self.set_annotation_style(record.style)?;
             self.events.emit(
                 crate::command_events::EventKind::Finished,
                 p.feature,

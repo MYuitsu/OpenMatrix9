@@ -250,6 +250,103 @@
         "implementation/evidence/M02/OM9-L3-02-03-006/OM9-L4-02-03-006-06-acceptance.md"
       ],
       "acceptance": "Two accepted end snaps yield transient alignment guides and an inferred intersection; clearing or cancelling removes every guide without a document write."
+    },
+    "standalone_verification_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The Line prompt in Looking Down returns the guide-curve source in Wireframe and a source-free SmartTrack guide when a shaded mesh occludes that intersection.",
+      "tests": ["om9-app osnap_ui::shaded_mesh_hides_the_smarttrack_curve_reference"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md"]
+    },
+    "guide_junction_selection_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "SmartTrack resolves a nearby guide junction before falling back to projection along a single guide. The same inference supplies the viewport Line point and the loaded SDK query. Projection remains available beyond 3,000 mm along the guide.",
+      "tests": [
+        "om9-scene osnap::smarttrack_two_anchors_follow_a_rotated_cplane",
+        "om9-app osnap_ui::smarttrack_pauses_over_a_source_before_capturing_it",
+        "om9-app plugin_native::native_plugin_smarttrack_two_anchors_follow_rotated_cplane"
+      ],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#smarttrack-guide-junction-selection-on-2026-11-18"]
+    },
+    "hover_capture_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A resolved source End shows its marker immediately. SmartTrack captures it after the UI tooltip delay. Leaving the viewport restarts the dwell, and following the acquired guide supplies the verified Line start with one Undo entry on commit.",
+      "tests": ["om9-app osnap_ui::smarttrack_pauses_over_a_source_before_capturing_it"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#smarttrack-hover-capture-on-2026-11-18"]
+    },
+    "end_direction_snap_radius_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Candidate selection uses screen distance and direction reconciliation uses source endpoints in the document tolerance. At the tested corner, moving a second endpoint outside the 8 px aperture leaves the first End positional. The list and derivative work are bounded.",
+      "tests": ["om9-scene osnap::source_end_direction_does_not_change_at_the_snap_aperture", "om9-app osnap_ui::brep_end_tracking_keeps_a_shared_tangent_and_refuses_a_corner_direction"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#smarttrack-direction-at-the-edge-of-the-snap-aperture"]
+    },
+    "brep_end_join_directions_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The exact source query reconciles directions at BRep End locations within document tolerance. A reopened planar BRep keeps a shared direction at its collinear join and only the position at a sharp corner. The resulting tangent guide supplies the committed Line start. Durable edge incidence mapping remains open.",
+      "tests": ["om9-app osnap_ui::brep_end_tracking_keeps_a_shared_tangent_and_refuses_a_corner_direction"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#smarttrack-direction-at-brep-edge-joins"]
+    },
+    "curve_end_guide_directions_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A validated curve End can carry a world tangent. SmartTrack adds nonduplicate tangent and command-plane perpendicular guides and retains an issued End direction across SDK invocations. The placed arc fixture commits a Line using both displayed directions. Ambiguous multi-edge vertex directions and physical Matrix9 comparison remain open.",
+      "tests": ["om9-app osnap_ui::smarttrack_arc_end_supplies_placed_tangent_and_perpendicular_guides", "om9-scene osnap::rational_curve_end_direction_is_evaluated_in_world_space", "om9-app plugin_native::native_plugin_smarttrack_retains_the_curve_end_direction"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#smarttrack-directions-from-a-curve-end"]
+    },
+    "temporary_guide_perpendicular_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "Perp one-shot with the master off picks the true foot on an elevated transient guide and leaves the override armed at other guide positions. Line uses the marker with one Undo. The SDK returns an issued guide hit without a document source, and rejects it as a retained source anchor.",
+      "tests": ["om9-app osnap_ui::perpendicular_one_shot_can_pick_a_smarttrack_guide", "om9-app plugin_native::native_plugin_smarttrack_free_guide_does_not_claim_a_source"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#perp-on-a-temporary-smarttrack-guide"]
+    },
+    "elevated_guide_view_selection_2026_11_18": {
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The guide pick uses the viewport projection and retains the source height. An elevated guide supplies the same 3D point to the marker and committed Line. Free guide results remain ephemeral and carry no source binding.",
+      "tests": ["om9-app osnap_ui::smarttrack_keeps_the_visible_guide_at_source_height", "om9-app plugin_native::native_plugin_smarttrack_free_guide_does_not_claim_a_source"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#smarttrack-guide-selection-above-the-command-plane"]
+    },
+    "installed_directional_guide_options_2026_11_18": {
+      "status": "REFERENCE_FACTORY_DEFAULT_TRACED_MANUAL_UI_PENDING",
+      "scope": "The installed Rhino 5 factory enables the SmartTrack tangent and perpendicular guide option and disables Smart ortho and Parallels. The shipped Matrix90 schemes omit these overrides. The live capture lifecycle requires comparison.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#directional-smarttrack-reference"]
+    },
+    "installed_smarttrack_defaults_2026_11_18": {
+      "status": "REFERENCE_FACTORY_DEFAULT_TRACED_MANUAL_UI_PENDING",
+      "scope": "The installed Rhino 5 factory uses gray #C8C8C8 solid lines and a 300 ms SmartTrack dwell. The shipped Matrix90 scheme disables SmartTrack and omits appearance and dwell overrides. The running Matrix9 session remains to be observed.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#installed-rhino-5-defaults-for-apparent-intersection-and-smarttrack"]
+    },
+    "guide_lifetime_2026_11_18": {
+      "date": "2026-11-18",
+      "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "A snap accepted with tracking off contributes no guides. Replacing a cancelled Line prompt with Polyline and moving an endpoint source with Polyline still open both expire visible guides before the pointer returns.",
+      "tests": ["om9-app osnap_ui::smarttrack_disabled_does_not_keep_accepted_snap_anchors", "om9-app osnap_ui::smarttrack_guides_expire_before_the_pointer_returns_to_the_viewport"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#smarttrack-guide-lifetime-2026-11-18"]
+    },
+    "windows_guide_point_2026_11_18": {
+      "status": "SCOPED_WINDOWS_DESKTOP_VALIDATED_MANUAL_UI_PENDING",
+      "scope": "The Windows End hover produced a guide. Moving off the source showed SmartTrack and the accepted Line start retained the exact source Y/Z. One Undo removed that Line, and the guides disappeared when the command finished.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#standard-windows-smarttrack-guide-supplies-an-exact-line-start"]
+    },
+    "sdk_source_anchors_2026_11_18": {
+      "status": "AUTOMATED_SDK_TARGET_VALIDATED",
+      "scope": "A loaded native plugin retains an issued Point hit, retries SmartTrack in fresh invocations and resolves the source curve. A changed publication or CPlane refuses the old token. Undo does not revive it. A free guide cannot supply a source anchor.",
+      "tests": ["plugin_native::native_plugin_smarttrack_reuses_a_source_anchor_until_its_scene_changes", "plugin_native::native_plugin_smarttrack_free_guide_does_not_claim_a_source"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#sdk-smarttrack-source-anchors-2026-11-18"]
+    },
+    "snaps_menu_audit_2026_11_17": {
+      "date": "2026-11-17",
+      "status": "STATIC_AUDIT_GAPS_OPEN_IMPLEMENTATION_NOT_STARTED",
+      "plan": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "receipt": "docs/validation/2026-11-17-snaps-menu-audit.json",
+      "gap_ids": [
+        "G11"
+      ],
+      "current_complete_menu_acceptance": false,
+      "tests_this_audit": "NOT_RUN_USER_DEFERRED_TO_FINAL_P07",
+      "historical_evidence_preserved": true,
+      "human_gate_promoted": false,
+      "qualification": "Historical technical_scope_complete is limited to its recorded fixtures; it is not current whole-menu acceptance"
     }
   }
 }

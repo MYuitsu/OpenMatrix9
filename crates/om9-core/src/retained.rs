@@ -268,6 +268,9 @@ pub enum RecordDisposition {
     Edited,
     Deleted,
     RetainedOnly,
+    /// A derived partial selection deliberately excludes this native record.
+    /// It remains in the inventory so the native writer can omit it explicitly.
+    Excluded,
 }
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -468,7 +471,7 @@ impl SourceRecord {
                     self.host,
                     Some(HostRef::Object(_) | HostRef::DefinitionMember { .. })
                 )
-                || self.disposition == RecordDisposition::RetainedOnly)
+                || matches!(self.disposition, RecordDisposition::RetainedOnly | RecordDisposition::Excluded))
         {
             return Err(Error::Invalid("entity baseline binding kind"));
         }
@@ -496,7 +499,7 @@ impl SourceRecord {
                 return Err(Error::Invalid("native UUID used as host identity"));
             }
         }
-        if self.disposition == RecordDisposition::RetainedOnly {
+        if matches!(self.disposition, RecordDisposition::RetainedOnly | RecordDisposition::Excluded) {
             if self.host.is_some() || self.baseline_sha256.is_some() {
                 return Err(Error::Invalid("retained-only host binding"));
             }
@@ -537,6 +540,245 @@ pub struct ImportNamespace {
     #[serde(default)]
     pub import_mode: Option<ImportMode>,
     pub records: Vec<SourceRecord>,
+}
+
+/// Resolve native records reachable from selected host bindings within each
+/// namespace. This computes dependency closure only; callers must still
+/// decide how to project unselected records and preserve the original source.
+pub fn selected_retained_closure(
+    document: &Document,
+    selected: &BTreeSet<HostRef>,
+    limits: &Limits,
+) -> Result<BTreeMap<ImportNamespaceId, Vec<NativeRecordKey>>> {
+    if selected.is_empty() || document.import_namespaces.is_empty() { return Ok(BTreeMap::new()); }
+    let count = document.import_namespaces.values().try_fold(0usize, |n, ns| {
+        n.checked_add(ns.records.len()).ok_or(Error::Overflow("selected native records"))
+    })?;
+    let mut usage = Usage { nodes: u64::try_from(count).map_err(|_| Error::Overflow("selected native records"))?, ..Usage::default() };
+    usage.add(Usage::btree::<NativeRecordKey, usize>(count)?, limits)?;
+    usage.add(Usage::btree::<NativeRecordKey, ()>(count)?, limits)?;
+    usage.add(Usage::array::<NativeRecordKey>(count)?, limits)?;
+    usage.add(Usage::array::<NativeRecordKey>(count)?, limits)?;
+    usage.add(Usage::btree::<ImportNamespaceId, Vec<NativeRecordKey>>(document.import_namespaces.len())?, limits)?;
+    let mut result = BTreeMap::new();
+    for namespace in document.import_namespaces.values() {
+        let mut index = BTreeMap::new();
+        let mut pending = Vec::new();
+        let mut found = BTreeSet::new();
+        pending.try_reserve_exact(namespace.records.len()).map_err(|_| Error::Budget("selected native dependencies"))?;
+        for (position, record) in namespace.records.iter().enumerate() {
+            if index.insert(record.key, position).is_some() { return Err(Error::Invalid("duplicate native namespace record")); }
+            if record.host.is_some_and(|host| selected.contains(&host)) && found.insert(record.key) { pending.push(record.key); }
+        }
+        // The retained writer cannot currently remap the original settings and
+        // opaque references around a removed primary-source layer. Keep the
+        // complete layer table for any namespace contributing selected data.
+        if !pending.is_empty() {
+            for record in &namespace.records {
+                if record.key.kind == NativeRecordKind::Layer && found.insert(record.key) { pending.push(record.key); }
+            }
+        }
+        while let Some(key) = pending.pop() {
+            let record = &namespace.records[*index.get(&key).ok_or(Error::Missing("native namespace dependency"))?];
+            for relation in &record.relations {
+                if !index.contains_key(&relation.target) { return Err(Error::Missing("native namespace dependency")); }
+                if found.insert(relation.target) { pending.push(relation.target); }
+            }
+        }
+        if !found.is_empty() { result.insert(namespace.id, found.into_iter().collect()); }
+    }
+    Ok(result)
+}
+
+/// Retained inventory for a derived selection, using original host identities.
+/// Publication or paste must separately validate and remap those identities.
+#[derive(Debug, Clone)]
+pub struct RetainedSelection {
+    pub resources: BTreeMap<ResourceId, Resource>,
+    pub sources: BTreeMap<SourceId, RetainedSource>,
+    pub namespaces: BTreeMap<ImportNamespaceId, ImportNamespace>,
+}
+
+/// Destination identities prepared by the same paste that inserts the hosts.
+#[derive(Debug, Clone, Default)]
+pub struct RetainedHostRemap {
+    pub objects: BTreeMap<ObjectId, ObjectId>,
+    pub definitions: BTreeMap<DefinitionId, DefinitionId>,
+    pub layers: BTreeMap<LayerId, LayerId>,
+}
+
+impl RetainedSelection {
+    pub fn storage_usage(&self, limits: &Limits) -> Result<Usage> {
+        let mut usage = Usage::btree::<ResourceId, Resource>(self.resources.len())?;
+        usage.add(Usage::btree::<SourceId, RetainedSource>(self.sources.len())?, limits)?;
+        usage.add(Usage::btree::<ImportNamespaceId, ImportNamespace>(self.namespaces.len())?, limits)?;
+        for (id, resource) in &self.resources {
+            if *id != resource.id { return Err(Error::Invalid("retained resource map key")); }
+            usage.add(resource.validate(limits)?, limits)?;
+        }
+        for (id, source) in &self.sources {
+            if *id != source.id { return Err(Error::Invalid("retained source map key")); }
+            usage.add(source.validate(&self.resources, limits)?, limits)?;
+        }
+        for (id, namespace) in &self.namespaces {
+            if *id != namespace.id || !self.sources.contains_key(&namespace.source) { return Err(Error::Invalid("retained namespace map key")); }
+            usage.add(namespace.owned_usage(limits)?, limits)?;
+        }
+        Ok(usage)
+    }
+
+    pub(crate) fn apply(self, document: &mut Document, limits: &Limits) -> Result<()> {
+        self.validate_hosts(document, limits)?;
+        for (id, resource) in self.resources {
+            if document.resources.insert(id, resource).is_some() { return Err(Error::Invalid("retained resource collision")); }
+        }
+        for (id, source) in self.sources {
+            if document.retained_sources.insert(id, source).is_some() { return Err(Error::Invalid("retained source collision")); }
+        }
+        for (id, namespace) in self.namespaces {
+            if document.import_namespaces.insert(id, namespace).is_some() { return Err(Error::Invalid("retained namespace collision")); }
+        }
+        Ok(())
+    }
+    /// Remap into an already prepared destination candidate. Preserve original
+    /// native baselines and mark rebound hosts edited: identity remapping alone
+    /// cannot prove that every native field still matches the original source.
+    pub fn remap(self, candidate: &Document, maps: &RetainedHostRemap, limits: &Limits) -> Result<Self> {
+        let selection = self.remap_for_transaction(maps, limits)?;
+        selection.validate_hosts(candidate, limits)?;
+        Ok(selection)
+    }
+
+    /// Assign identities before transaction admission. The staged candidate
+    /// must later validate every binding after its host insertions are applied.
+    pub fn remap_for_transaction(mut self, maps: &RetainedHostRemap, limits: &Limits) -> Result<Self> {
+        let mut held = Usage::default();
+        let records = self.namespaces.values().try_fold(0usize, |n, ns| {
+            n.checked_add(ns.records.len()).ok_or(Error::Overflow("retained remap records"))
+        })?;
+        held.add(Usage::btree::<HostIdentity, ()>(records)?, limits)?;
+        held.add(Usage::btree::<ResourceId, ResourceId>(self.resources.len())?, limits)?;
+        held.add(Usage::btree::<SourceId, SourceId>(self.sources.len())?, limits)?;
+        held.add(Usage::btree::<ResourceId, Resource>(self.resources.len())?, limits)?;
+        held.add(Usage::btree::<SourceId, RetainedSource>(self.sources.len())?, limits)?;
+        held.add(Usage::btree::<ImportNamespaceId, ImportNamespace>(self.namespaces.len())?, limits)?;
+        let mut occupied = BTreeSet::new();
+        let mut resource_ids = BTreeMap::new();
+        let mut resources = BTreeMap::new();
+        for (old, mut resource) in self.resources {
+            let id = ResourceId::new();
+            if resources.contains_key(&id) { return Err(Error::Invalid("retained resource identity collision")); }
+            resource.id = id;
+            resource_ids.insert(old, id);
+            resources.insert(id, resource);
+        }
+        let mut source_ids = BTreeMap::new();
+        let mut sources = BTreeMap::new();
+        for (old, mut source) in self.sources {
+            let id = SourceId::new();
+            if sources.contains_key(&id) { return Err(Error::Invalid("retained source identity collision")); }
+            source.id = id;
+            source.resource = *resource_ids.get(&source.resource).ok_or(Error::Missing("retained resource remap"))?;
+            source_ids.insert(old, id);
+            sources.insert(id, source);
+        }
+        let mut namespaces = BTreeMap::new();
+        for (_, mut namespace) in self.namespaces {
+            namespace.id = ImportNamespaceId::new();
+            if namespaces.contains_key(&namespace.id) {
+                return Err(Error::Invalid("retained namespace identity collision"));
+            }
+            namespace.source = *source_ids.get(&namespace.source).ok_or(Error::Missing("retained source remap"))?;
+            for record in &mut namespace.records {
+                let Some(host) = record.host else { continue; };
+                let mapped = match host {
+                    HostRef::Object(id) => HostRef::Object(*maps.objects.get(&id).ok_or(Error::Missing("retained object remap"))?),
+                    HostRef::Definition(id) => HostRef::Definition(*maps.definitions.get(&id).ok_or(Error::Missing("retained definition remap"))?),
+                    HostRef::Layer(id) => HostRef::Layer(*maps.layers.get(&id).ok_or(Error::Missing("retained layer remap"))?),
+                    HostRef::DefinitionMember { definition, object } => HostRef::DefinitionMember {
+                        definition: *maps.definitions.get(&definition).ok_or(Error::Missing("retained member definition remap"))?,
+                        object: *maps.objects.get(&object).ok_or(Error::Missing("retained member remap"))?,
+                    },
+                };
+                if !occupied.insert(mapped.identity()) { return Err(Error::Invalid("retained host already bound")); }
+                record.host = Some(mapped);
+                if record.disposition == RecordDisposition::Unchanged {
+                    record.disposition = RecordDisposition::Edited;
+                } else if record.disposition != RecordDisposition::Edited {
+                    return Err(Error::Invalid("retained remapped disposition"));
+                }
+            }
+            namespaces.insert(namespace.id, namespace);
+        }
+        self.resources = resources;
+        self.sources = sources;
+        self.namespaces = namespaces;
+        Ok(self)
+    }
+
+    pub fn validate_hosts(&self, candidate: &Document, limits: &Limits) -> Result<()> {
+        let mut held = candidate.storage_usage(limits)?;
+        let count = candidate.import_namespaces.values().chain(self.namespaces.values()).try_fold(0usize, |n, namespace| {
+            n.checked_add(namespace.records.len()).ok_or(Error::Overflow("retained host validation"))
+        })?;
+        held.add(Usage::btree::<HostIdentity, ()>(count)?, limits)?;
+        let lookup = HostLookup::build(&candidate.entities, &candidate.definitions, &candidate.layers, limits, held)?;
+        let mut occupied: BTreeSet<_> = candidate.import_namespaces.values().flat_map(|namespace| namespace.records.iter())
+            .filter_map(|record| record.host.map(HostRef::identity)).collect();
+        for namespace in self.namespaces.values() {
+            for record in &namespace.records {
+                let Some(host) = record.host else { continue; };
+                if !occupied.insert(host.identity()) { return Err(Error::Invalid("retained host already bound")); }
+                let version = record.entity_baseline.map_or(0, |baseline| baseline.geometry_hash_version);
+                lookup.hash(host, version, record.definition_hash_version)?.ok_or(Error::Missing("retained remapped host"))?;
+            }
+        }
+        Ok(())
+    }
+}
+
+pub fn project_retained_selection(document: &Document, selected: &BTreeSet<HostRef>, limits: &Limits) -> Result<RetainedSelection> {
+    let closure = selected_retained_closure(document, selected, limits)?;
+    if closure.is_empty() {
+        return Ok(RetainedSelection { resources: BTreeMap::new(), sources: BTreeMap::new(), namespaces: BTreeMap::new() });
+    }
+    let mut usage = Usage::default();
+    usage.add(Usage::btree::<ResourceId, Resource>(closure.len())?, limits)?;
+    usage.add(Usage::btree::<SourceId, RetainedSource>(closure.len())?, limits)?;
+    usage.add(Usage::btree::<ImportNamespaceId, ImportNamespace>(closure.len())?, limits)?;
+    for keys in closure.values() { usage.add(Usage::btree::<NativeRecordKey, ()>(keys.len())?, limits)?; }
+    for id in closure.keys() {
+        let namespace = document.import_namespaces.get(id).ok_or(Error::Missing("selected native namespace"))?;
+        let source = document.retained_sources.get(&namespace.source).ok_or(Error::Missing("selected retained source"))?;
+        let resource = document.resources.get(&source.resource).ok_or(Error::Missing("selected retained resource"))?;
+        usage.add(namespace.owned_usage(limits)?, limits)?;
+        usage.add(source.units.usage(limits)?, limits)?;
+        usage.add(resource.validate(limits)?, limits)?;
+    }
+    let mut projection = RetainedSelection { resources: BTreeMap::new(), sources: BTreeMap::new(), namespaces: BTreeMap::new() };
+    for (id, keys) in closure {
+        let mut namespace = document.import_namespaces[&id].clone();
+        let included: BTreeSet<_> = keys.into_iter().collect();
+        for record in &mut namespace.records {
+            if included.contains(&record.key) {
+                if matches!(record.disposition, RecordDisposition::Deleted | RecordDisposition::Excluded)
+                    || record.host.is_some_and(|host| !selected.contains(&host)) {
+                    return Err(Error::Unsupported("selected native dependency host not captured"));
+                }
+            } else {
+                record.host = None;
+                record.baseline_sha256 = None;
+                record.entity_baseline = None;
+                record.definition_hash_version = 0;
+                record.disposition = RecordDisposition::Excluded;
+            }
+        }
+        let source = &document.retained_sources[&namespace.source];
+        projection.resources.entry(source.resource).or_insert_with(|| document.resources[&source.resource].clone());
+        projection.sources.entry(source.id).or_insert_with(|| source.clone());
+        projection.namespaces.insert(id, namespace);
+    }
+    Ok(projection)
 }
 impl ImportNamespace {
     pub(crate) fn owned_usage(&self, l: &Limits) -> Result<Usage> {
@@ -948,6 +1190,71 @@ mod indexed_reconciliation_tests {
         original.validate(&limits).unwrap();
         derived.validate(&limits).unwrap();
     }
+    #[test]
+    fn selected_native_closure_follows_relations_without_other_records() {
+        let limits = Limits::default();
+        let (mut document, object, namespace) = fixture(&limits);
+        let records = &mut document.import_namespaces.get_mut(&namespace).unwrap().records;
+        let selected_key = records[0].key;
+        let dependency = NativeRecordKey { kind: NativeRecordKind::Material, id: uuid::Uuid::new_v4(), native_index: None };
+        let unrelated = NativeRecordKey { kind: NativeRecordKind::Light, id: uuid::Uuid::new_v4(), native_index: None };
+        records[0].relations.push(NativeRelation { role: "material".into(), target: dependency });
+        let mut required = SourceRecord::retained(dependency, "material");
+        required.relations.push(NativeRelation { role: "cycle".into(), target: selected_key });
+        records.push(required);
+        records.push(SourceRecord::retained(unrelated, "light"));
+        let selected = BTreeSet::from([HostRef::Object(object)]);
+        let closure = selected_retained_closure(&document, &selected, &limits).unwrap();
+        assert_eq!(closure[&namespace].iter().copied().collect::<BTreeSet<_>>(), BTreeSet::from([selected_key, dependency]));
+        let projection = project_retained_selection(&document, &selected, &limits).unwrap();
+        let excluded = projection.namespaces[&namespace].records.iter().find(|record| record.key == unrelated).unwrap();
+        assert_eq!(excluded.disposition, RecordDisposition::Excluded);
+        assert!(excluded.host.is_none());
+        let mut projected_document = document.clone();
+        projected_document.resources = projection.resources;
+        projected_document.retained_sources = projection.sources;
+        projected_document.import_namespaces = projection.namespaces;
+        projected_document.validate(&limits).unwrap();
+        let projection = project_retained_selection(&document, &selected, &limits).unwrap();
+        let mut candidate = Document::new("remapped selection");
+        let mut copied = document.entities[&object].clone();
+        copied.id = ObjectId::new();
+        let new_object = copied.id;
+        candidate.entities.insert(new_object, copied);
+        let mut remap = RetainedHostRemap::default();
+        remap.objects.insert(object, new_object);
+        let projection = projection.remap(&candidate, &remap, &limits).unwrap();
+        let rebound = projection.namespaces.values().next().unwrap().records.iter().find(|record| record.key == selected_key).unwrap();
+        assert_eq!(rebound.host, Some(HostRef::Object(new_object)));
+        assert_eq!(rebound.disposition, RecordDisposition::Edited);
+        assert_eq!(rebound.baseline_sha256, document.import_namespaces[&namespace].records[0].baseline_sha256);
+        candidate.resources = projection.resources;
+        candidate.retained_sources = projection.sources;
+        candidate.import_namespaces = projection.namespaces;
+        candidate.validate(&limits).unwrap();
+        let projection = project_retained_selection(&document, &selected, &limits).unwrap()
+            .remap_for_transaction(&remap, &limits).unwrap();
+        let target = Document::new("transaction target");
+        let target_id = target.id;
+        let mut coordinator = crate::transaction::TransactionCoordinator::new(
+            crate::transaction::World::new(vec![target], &limits).unwrap(), limits,
+        ).unwrap();
+        let request = crate::transaction::TransactionRequest::new("insert retained bag", vec![
+            crate::transaction::Mutation::Insert { document: target_id, entity: candidate.entities[&new_object].clone() },
+            crate::transaction::Mutation::RetainedSelectionInsert { document: target_id, expected_revision: 1, selection: Box::new(projection) },
+        ]);
+        let prepared = coordinator.prepare(request).unwrap();
+        coordinator.commit(prepared).unwrap();
+        assert_eq!(coordinator.world().documents[&target_id].retained_sources.len(), 1);
+        coordinator.undo().unwrap();
+        assert!(coordinator.world().documents[&target_id].retained_sources.is_empty());
+        assert!(coordinator.world().documents[&target_id].entities.is_empty());
+        coordinator.redo().unwrap();
+        assert_eq!(coordinator.world().documents[&target_id].retained_sources.len(), 1);
+        document.import_namespaces.get_mut(&namespace).unwrap().records.pop();
+        document.import_namespaces.get_mut(&namespace).unwrap().records.pop();
+        assert!(matches!(selected_retained_closure(&document, &selected, &limits), Err(Error::Missing("native namespace dependency"))));
+    }
     fn member_fixture() -> (Document, ObjectId, DefinitionId, ImportNamespaceId) {
         let (mut d, object, ns) = fixture(&Limits::default());
         let entity = d.entities.remove(&object).unwrap();
@@ -1147,7 +1454,7 @@ impl ImportBundle {
             || self.namespace.records.iter().any(|r| {
                 matches!(
                     r.disposition,
-                    RecordDisposition::Edited | RecordDisposition::Deleted
+                    RecordDisposition::Edited | RecordDisposition::Deleted | RecordDisposition::Excluded
                 )
             })
         {

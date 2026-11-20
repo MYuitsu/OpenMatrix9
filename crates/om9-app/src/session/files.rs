@@ -13,7 +13,7 @@ const PATH_BYTES: usize = 32768;
 fn rebuild_empty_native_displays(coordinator: &om9_core::transaction::TransactionCoordinator,
     document: &Document, displays: &mut om9_core::legacy_v4::LegacyDisplays,
     archive: &mut om9_core::transaction::ExternalMemoryReservation, held: Usage,
-    check: &impl Fn() -> Result<()>) -> Result<()> {
+    check: &impl Fn() -> Result<()>, cancel: Option<&om9_core::transaction::Cancellation>) -> Result<()> {
     use om9_core::geometry::{Mesh, NativeBrep, NativeBrepRepresentation, NativeBrepSource, NativeBrepSourceIdentity};
     let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
     let sources = || document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
@@ -64,7 +64,7 @@ fn rebuild_empty_native_displays(coordinator: &om9_core::transaction::Transactio
     for (source, display) in &mut displays.native {
         if !display.display().vertices.is_empty() && !display.display().faces.is_empty() { continue; }
         let tolerance = document.effective_tolerance()?.absolute_mm;
-        *display = rebuild_native_display(coordinator, source, tolerance, archive, held, check)?;
+        *display = rebuild_native_display(coordinator, source, tolerance, archive, held, check, cancel)?;
     }
     Ok(())
 }
@@ -73,11 +73,24 @@ fn rebuild_empty_native_displays(coordinator: &om9_core::transaction::Transactio
 pub(super) fn rebuild_native_display(coordinator: &om9_core::transaction::TransactionCoordinator,
     source: &om9_core::geometry::NativeBrepSource, tolerance: f64,
     archive: &mut om9_core::transaction::ExternalMemoryReservation, held: Usage,
-    check: &impl Fn() -> Result<()>) -> Result<om9_core::geometry::NativeBrepRepresentation> {
+    check: &impl Fn() -> Result<()>, cancel: Option<&om9_core::transaction::Cancellation>) -> Result<om9_core::geometry::NativeBrepRepresentation> {
         use om9_core::{budget::memory::MemoryClass, geometry::{Mesh, NativeBrepRepresentation}};
         let limits = *coordinator.limits();
         let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
         check()?;
+        if let Some(cancel) = cancel.filter(|_| option_env!("OM9_NATIVE_BREP_WORKER_SHA256").is_some()) {
+            let host = crate::brep_restore_host::NativeBrepRestoreHost::admit_packaged(om9_native_owner::ProcessLimits::default())?;
+            let restored = host.restore_display(coordinator, source, tolerance,
+                om9_kernel::creation::DEFAULT_DEFLECTION_MM, 0.3, held, cancel)?;
+            let (original, display, mut owner) = restored.into_parts(coordinator)?;
+            if original.identity() != source.identity() || !display.matches(source) {
+                return Err(Error::Invalid("native BRep display source"));
+            }
+            check()?;
+            let allocated = owner.bytes().checked_sub(owner.pending_bytes()).ok_or(Error::Overflow("native display reservation"))?;
+            archive.transfer_allocated_from(&mut owner, allocated)?;
+            return Ok(display);
+        }
         let mut scratch = coordinator.reserve_external_memory_with_held(MemoryClass::Kernel, 1, physical(), held)?;
         let refused = std::cell::RefCell::new(None);
         let candidate = om9_kernel::brep::from_3dm_with_angle_admitted(source.payload(), tolerance,
@@ -130,7 +143,7 @@ pub(super) fn rebuild_native_display(coordinator: &om9_core::transaction::Transa
 #[cfg(not(feature = "occt-brep"))]
 fn rebuild_empty_native_displays(coordinator: &om9_core::transaction::TransactionCoordinator, document: &Document,
     displays: &mut om9_core::legacy_v4::LegacyDisplays, _: &mut om9_core::transaction::ExternalMemoryReservation,
-    held: Usage, check: &impl Fn() -> Result<()>) -> Result<()> {
+    held: Usage, check: &impl Fn() -> Result<()>, _: Option<&om9_core::transaction::Cancellation>) -> Result<()> {
     use om9_core::geometry::NativeBrepSourceIdentity;
     check()?;
     let has_native = document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
@@ -166,11 +179,192 @@ struct PreparedFileOpen {
     path: PathBuf,
     diagnostics: Vec<String>,
     _owners: FileOpenOwners,
+    #[cfg(feature = "occt-brep")]
+    _brep_owners: Option<crate::brep_restore_host::BoundBrepOwners>,
+    #[cfg(feature = "occt-brep")]
+    brep_archive_cache: Option<Arc<BrepArchiveCache>>,
+}
+
+#[cfg(feature = "occt-brep")]
+pub(crate) struct PreparedNamedBrepOpen {
+    initial: super::PreparedInitialScene,
+    reservation: om9_core::transaction::ExternalMemoryReservation,
+    context: om9_core::transaction::OperationContext,
+    diagnostics: Vec<String>,
+    cache: Arc<BrepArchiveCache>,
+    _owners: crate::brep_restore_host::BoundBrepOwners,
+    _proof: super::project_state::ValidatedProjectResources,
+    object_count: usize,
+    layer_count: usize,
+}
+
+#[cfg(feature = "occt-brep")]
+impl PreparedNamedBrepOpen {
+    pub(crate) fn object_count(&self) -> usize { self.object_count }
+    pub(crate) fn layer_count(&self) -> usize { self.layer_count }
+}
+
+/// Immutable verified input retained for rebuilding the same source packets
+/// when a reopened BRep document is edited and saved again.
+#[cfg(feature = "occt-brep")]
+pub(crate) struct BrepArchiveCache {
+    bytes: BrepCacheBytes,
+    bindings: Vec<[u8; 32]>,
+    pub(super) previous: Option<Arc<BrepArchiveCache>>,
+    _owner: om9_core::transaction::ExternalMemoryReservation,
+}
+#[cfg(feature = "occt-brep")]
+enum BrepCacheBytes { Owned(Vec<u8>), Shared(Arc<[u8]>) }
+#[cfg(feature = "occt-brep")]
+impl BrepCacheBytes {
+    fn as_slice(&self) -> &[u8] { match self { Self::Owned(bytes) => bytes, Self::Shared(bytes) => bytes } }
+    pub(super) fn same_shared(&self, other: &Self) -> bool {
+        matches!((self, other), (Self::Shared(left), Self::Shared(right)) if Arc::ptr_eq(left, right))
+    }
+}
+
+#[cfg(feature = "occt-brep")]
+impl BrepArchiveCache {
+    pub(super) fn same_shared_archive(&self, other: &Self) -> bool { self.bytes.same_shared(&other.bytes) }
+}
+
+#[cfg(feature = "occt-brep")]
+pub(crate) fn shared_brep_archive_cache(coordinator: &TransactionCoordinator, document: &Document,
+    bytes: Arc<[u8]>, mut owner: om9_core::transaction::ExternalMemoryReservation, held: Usage) -> Result<Arc<BrepArchiveCache>> {
+    if !owner.belongs_to(&coordinator.external_memory_account()) || owner.bytes().saturating_sub(owner.pending_bytes()) < bytes.len() as u64 {
+        return Err(Error::Invalid("BRep archive cache owner"));
+    }
+    let geometry = || document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
+        .map(|entity| &entity.geometry).chain(document.results.values().map(|result| &result.geometry_snapshot));
+    let count = geometry().filter(|item| matches!(item, Geometry::Brep(_))).count();
+    let native_count = geometry().filter(|item| matches!(item, Geometry::NativeBrep(_))).count();
+    let total = count.checked_add(native_count).ok_or(Error::Overflow("BRep archive cache sources"))?;
+    if total == 0 || total as u64 > coordinator.limits().max_nodes { return Err(Error::Invalid("BRep archive cache sources")); }
+    let base = (std::mem::size_of::<BrepArchiveCache>() + 2 * std::mem::size_of::<usize>()) as u64;
+    let planned = base.checked_add(Usage::array::<[u8; 32]>(count)?.bytes).ok_or(Error::Overflow("BRep archive cache"))?;
+    let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+    coordinator.grow_external_memory_with_held(&mut owner, planned, physical(), held)?;
+    let mut bindings = Vec::new();
+    bindings.try_reserve_exact(count).map_err(|_| Error::Budget("BRep archive cache"))?;
+    for item in geometry() {
+        if let Geometry::Brep(source) = item { bindings.push(source.canonical_fingerprints().1); }
+    }
+    bindings.sort_unstable(); bindings.dedup();
+    let actual = (bytes.len() as u64).checked_add(base)
+        .and_then(|n| n.checked_add(Usage::array::<[u8; 32]>(bindings.capacity()).ok()?.bytes))
+        .ok_or(Error::Overflow("BRep archive cache"))?;
+    if actual > owner.bytes() {
+        let extra = actual - owner.bytes();
+        coordinator.grow_external_memory_with_held(&mut owner, extra, physical(), held)?;
+    }
+    owner.set_allocated_bytes(actual)?;
+    owner.shrink_to(actual)?;
+    Ok(Arc::new(BrepArchiveCache { bytes: BrepCacheBytes::Shared(bytes), bindings, previous: None, _owner: owner }))
+}
+
+/// Immutable document and accounted source proofs captured from a Controller
+/// for background v6 staging. Publication still requires the live owner.
+#[cfg(feature = "occt-brep")]
+pub struct BrepSaveCapture {
+    peer: om9_core::transaction::TransactionPreparationPeer,
+    document: DocumentId,
+    sources: Vec<om9_kernel::brep::RegisteredTopologySource>,
+    cached: Option<Arc<BrepArchiveCache>>,
+    held: Usage,
+    _metadata: om9_core::transaction::ExternalMemoryReservation,
+}
+#[cfg(feature = "occt-brep")]
+impl BrepSaveCapture {
+    pub fn prepare(self, host: &crate::brep_restore_host::BrepRestoreHost, path: &Path,
+        cancel: &om9_core::transaction::Cancellation) -> Result<crate::brep_restore_host::PreparedBrepSave> {
+        let coordinator = self.peer.coordinator();
+        let document = coordinator.world().documents.get(&self.document).ok_or(Error::Stale("BRep save document"))?;
+        let caches = std::iter::successors(self.cached.as_deref(), |cache| cache.previous.as_deref())
+            .map(|cache| cache.bytes.as_slice());
+        host.capture_and_prepare_document_candidate_with_archives(coordinator, path, document, &self.sources,
+            caches, self.held, cancel)
+    }
+
+    pub fn encode_document(&self, host: &crate::brep_restore_host::BrepRestoreHost,
+        document: &Document, cancel: &om9_core::transaction::Cancellation) -> Result<crate::brep_restore_host::ReservedBrepArchive> {
+        if document.id != self.document { return Err(Error::Stale("BRep selection document")); }
+        let caches = std::iter::successors(self.cached.as_deref(), |cache| cache.previous.as_deref())
+            .map(|cache| cache.bytes.as_slice());
+        host.capture_and_encode_document_with_archives(self.peer.coordinator(), document, &self.sources,
+            caches, self.held, cancel)
+    }
+}
+
+#[cfg(all(feature = "occt-brep", feature = "test-fixtures"))]
+impl Controller {
+    pub fn test_brep_archive_cache_count(&self) -> usize {
+        std::iter::successors(self.brep_archive_cache.as_deref(), |entry| entry.previous.as_deref()).count()
+    }
 }
 struct FileOpenOwners {
     _metadata: om9_core::transaction::ExternalMemoryReservation,
     _current_scene: om9_core::transaction::ExternalMemoryReservation,
     _peer_metadata: Option<om9_core::transaction::ExternalMemoryReservation>,
+    _source_file: Option<std::fs::File>,
+}
+
+#[cfg(feature = "occt-brep")]
+fn is_brep_v6(path: &Path) -> Result<bool> {
+    use std::io::Read;
+    let mut file = std::fs::File::open(path).map_err(|error| Error::Io(error.to_string()))?;
+    let mut header = [0u8; 12];
+    let mut offset = 0;
+    while offset < header.len() {
+        let n = file.read(&mut header[offset..]).map_err(|error| Error::Io(error.to_string()))?;
+        if n == 0 { return Ok(false); }
+        offset += n;
+    }
+    Ok(crate::brep_restore_host::is_brep_archive(&header))
+}
+
+/// Read one locked input owner under a memory receipt; the handle remains
+/// alive until publication so ordinary writes or replacement cannot race it.
+#[cfg(feature = "occt-brep")]
+fn read_locked_brep_file(peer: &om9_core::transaction::TransactionCoordinator, path: &Path,
+    limits: &om9_core::budget::Limits, held: Usage, cancel: &om9_core::transaction::Cancellation)
+    -> Result<(std::fs::File, Vec<u8>, om9_core::transaction::ExternalMemoryReservation)> {
+    use std::io::Read;
+    use om9_core::budget::memory::MemoryClass;
+    if cancel.is_canceled() { return Err(Error::Canceled); }
+    #[cfg(not(windows))]
+    { let _ = (peer, path, limits, held); return Err(Error::Unsupported("BRep file lock requires Windows")); }
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+        let mut file = std::fs::OpenOptions::new().read(true).share_mode(1).open(path)
+            .map_err(|error| Error::Io(error.to_string()))?;
+        let metadata = file.metadata().map_err(|error| Error::Io(error.to_string()))?;
+        if !metadata.is_file() { return Err(Error::Invalid("BRep archive file")); }
+        let size = metadata.len();
+        if size > limits.max_bytes { return Err(Error::Budget("BRep archive file")); }
+        let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let mut owner = peer.reserve_external_memory_with_held(MemoryClass::CpuCache, size.max(1), physical(), held)?;
+        let mut bytes = Vec::new();
+        bytes.try_reserve_exact(usize::try_from(size).map_err(|_| Error::Overflow("BRep archive file"))?)
+            .map_err(|_| Error::Budget("BRep archive file"))?;
+        if bytes.capacity() as u64 > owner.bytes() {
+            let extra = bytes.capacity() as u64 - owner.bytes();
+            peer.grow_external_memory_with_held(&mut owner, extra, physical(), held)?;
+        }
+        owner.set_allocated_bytes(bytes.capacity() as u64)?;
+        let mut buffer = [0u8; 64 * 1024];
+        loop {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            let n = file.read(&mut buffer).map_err(|error| Error::Io(error.to_string()))?;
+            if n == 0 { break; }
+            if bytes.len().checked_add(n).is_none_or(|next| next as u64 > size) { return Err(Error::Stale("BRep archive file changed")); }
+            bytes.extend_from_slice(&buffer[..n]);
+        }
+        if bytes.len() as u64 != size || file.metadata().map_err(|error| Error::Io(error.to_string()))?.len() != size {
+            return Err(Error::Stale("BRep archive file changed"));
+        }
+        Ok((file, bytes, owner))
+    }
 }
 pub(super) struct FileOpenWorker {
     token: FileToken,
@@ -188,6 +382,19 @@ impl Drop for FileOpenWorker {
 struct ReservedFilePath {
     path: PathBuf,
     reservation: om9_core::transaction::ExternalMemoryReservation,
+}
+
+#[cfg(feature = "occt-brep")]
+pub(super) struct FileSaveWorker {
+    token: FileToken,
+    destination: Option<ReservedFilePath>,
+    hash: [u8; 32],
+    cancel: om9_core::transaction::Cancellation,
+    receiver: std::sync::mpsc::Receiver<Result<crate::brep_restore_host::PreparedBrepSave>>,
+}
+#[cfg(feature = "occt-brep")]
+impl Drop for FileSaveWorker {
+    fn drop(&mut self) { self.cancel.cancel(); }
 }
 
 #[cfg(test)]
@@ -324,6 +531,33 @@ mod file_memory_tests {
         drop(opened);
         assert_eq!(peer.external_reserved_bytes(MemoryClass::CpuCache),0);
         std::fs::remove_file(target).unwrap();
+    }
+
+    #[test]
+    fn malformed_embedded_project_state_does_not_replace_document() {
+        let mut controller = fixture();
+        let original = controller.document().id;
+        let mut replacement = Document::with_template_tolerance("invalid project state");
+        let resource = om9_core::resource::Resource::from_bytes(
+            super::super::project_state::PROJECT_STATE_RESOURCE,
+            om9_core::resource::ResourceKind::OpaqueBinary,
+            b"{invalid", controller.coordinator.limits(),
+        ).unwrap();
+        replacement.resources.insert(resource.id, resource);
+        assert!(controller.restore_master_document(replacement).is_err());
+        assert_eq!(controller.document().id, original);
+    }
+
+    #[test]
+    fn corrupt_embedded_bag_archive_does_not_replace_document() {
+        let mut controller = fixture();
+        let original = controller.document().id;
+        let selected = controller.document().entities.values().cloned().collect();
+        let mut manager = crate::project_manager::ProjectManager::new("project");
+        manager.capture_archive(0, selected, controller.document(), b"invalid archive".to_vec()).unwrap();
+        let replacement = Document::with_template_tolerance("replacement");
+        assert!(controller.restore_jobbag_document(replacement, &manager).is_err());
+        assert_eq!(controller.document().id, original);
     }
 
     #[test]
@@ -611,6 +845,26 @@ impl Controller {
             }
         }
     }
+
+    /// Stage the workspace manager only after the user chooses Save. The
+    /// metadata transaction changes the document revision, so mint a fresh
+    /// file token after the validated mutation and before continuing Save.
+    pub fn stage_project_for_unsaved_save(&mut self, token: FileToken, manager: &crate::project_manager::ProjectManager) -> Result<FileToken> {
+        self.file_phase(token, FilePhase::Unsaved)?;
+        let serial = self.file.serial.checked_add(1).ok_or(Error::Overflow("file response serial"))?;
+        self.store_project_manager(manager)?;
+        let (context, _) = match self.coordinator.capture_context(None) {
+            Ok(context) => context,
+            Err(error) => {
+                self.file.operation = None;
+                self.release_file_storage();
+                return Err(error);
+            }
+        };
+        let next = FileToken { context, owner: self.file_owner(), serial };
+        self.reissue_file_phase(next, FilePhase::Unsaved);
+        Ok(next)
+    }
     fn after_replacement_permission(&mut self, token: FileToken) -> Result<FileOutcome> {
         self.validate_file_operation(token)?;
         match self.file.operation.as_ref().expect("checked").intent {
@@ -764,7 +1018,19 @@ impl Controller {
         };
         let hash = self.current_file_hash()?;
         let path = self.reserve_file_path(path)?;
+        #[cfg(feature = "occt-brep")]
+        if self.document().entities.values().chain(self.document().definitions.values().flat_map(|definition| &definition.members))
+            .map(|entity| &entity.geometry).chain(self.document().results.values().map(|result| &result.geometry_snapshot))
+            .any(|geometry| matches!(geometry, Geometry::Brep(_) | Geometry::NativeBrep(_))) {
+            guard()?;
+            return self.start_brep_file_save(token, path, hash);
+        }
         self.save_archive_for_batch_guard(&path.path, 0, guard)?;
+        self.finish_file_save(token, path, hash, intent, next)
+    }
+
+    fn finish_file_save(&mut self, token: FileToken, path: ReservedFilePath, hash: [u8; 32],
+        intent: FileIntent, next: Option<FileToken>) -> Result<FileOutcome> {
         let path = self.accept_file_path_owner(path);
         self.file.path = Some(path);
         self.release_file_storage();
@@ -796,10 +1062,157 @@ impl Controller {
             }
         }
     }
+
+    #[cfg(feature = "occt-brep")]
+    fn start_brep_file_save(&mut self, token: FileToken, destination: ReservedFilePath, hash: [u8; 32]) -> Result<FileOutcome> {
+        if self.file_save_worker.is_some() || self.file_open_worker.is_some() || self.is_running() { return Err(Error::Busy); }
+        let next = self.next_file_token(token)?;
+        next.serial.checked_add(1).ok_or(Error::Overflow("file response serial"))?;
+        let path_bytes = destination.path.capacity() as u64;
+        let capture = self.capture_brep_save_sources(Usage { bytes: path_bytes, ..Usage::default() })?;
+        let host = crate::brep_restore_host::BrepRestoreHost::admit_packaged(om9_native_owner::ProcessLimits::default())?;
+        let worker_path = self.reserve_file_path(self.copy_file_path(&destination.path)?)?;
+        let cancel = om9_core::transaction::Cancellation::default();
+        let worker_cancel = cancel.clone();
+        let (sender, receiver) = std::sync::mpsc::sync_channel(1);
+        std::thread::Builder::new().name("om9-brep-save".into()).spawn(move || {
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(||
+                capture.prepare(&host, &worker_path.path, &worker_cancel)))
+                .unwrap_or_else(|_| Err(Error::Io("BRep save worker panicked".into())));
+            let _ = sender.send(result);
+        }).map_err(|error| Error::Io(format!("BRep save worker start: {error}")))?;
+        self.publish_file_phase(next, FilePhase::SavePreparing, None);
+        self.file_save_worker = Some(FileSaveWorker { token: next, destination: Some(destination), hash, cancel, receiver });
+        Ok(FileOutcome::Pending)
+    }
+
+    pub fn file_save_worker_pending(&self) -> bool {
+        #[cfg(feature = "occt-brep")]
+        { self.file_save_worker.is_some() }
+        #[cfg(not(feature = "occt-brep"))]
+        { false }
+    }
+
+    #[cfg(feature = "occt-brep")]
+    pub fn poll_file_save_worker(&mut self) -> Option<Result<FileOutcome>> {
+        let mut worker = self.file_save_worker.take()?;
+        let result = match worker.receiver.try_recv() {
+            Ok(result) => result,
+            Err(std::sync::mpsc::TryRecvError::Empty) => { self.file_save_worker = Some(worker); return None; }
+            Err(std::sync::mpsc::TryRecvError::Disconnected) => Err(Error::Io("BRep save worker exited".into())),
+        };
+        let outcome = (|| {
+            if worker.cancel.is_canceled() { return Err(Error::Canceled); }
+            self.file_phase(worker.token, FilePhase::SavePreparing)?;
+            let intent = self.file.operation.as_ref().expect("checked").intent;
+            let next = if matches!(intent, FileIntent::WindowClose | FileIntent::Command(FileKind::New | FileKind::Open)) {
+                Some(self.next_file_token(worker.token)?)
+            } else { None };
+            let prepared = result?;
+            prepared.publish(&self.coordinator, &worker.cancel)?;
+            self.finish_file_save(worker.token, worker.destination.take().expect("save destination"), worker.hash, intent, next)
+        })();
+        if outcome.is_err() && self.file.operation.as_ref().is_some_and(|operation| operation.token == worker.token) {
+            if let Ok(next) = self.next_file_token(worker.token) {
+                self.publish_file_phase(next, FilePhase::SavePath, None);
+            } else {
+                self.file.operation = None;
+                self.release_file_storage();
+            }
+        }
+        Some(outcome)
+    }
+
+    #[cfg(not(feature = "occt-brep"))]
+    pub fn poll_file_save_worker(&mut self) -> Option<Result<FileOutcome>> { None }
+
     /// Save a batch result using the same admission as interactive Save.
     pub fn save_archive_for_batch(&self, path: &Path) -> Result<()> {
         self.save_archive_for_batch_guard(path, path.as_os_str().len() as u64, || Ok(()))
     }
+
+    /// Capture all distinct attested BRep sources in the current document for
+    /// off-thread staging. Unattested canonical sources are refused before
+    /// starting the worker; no file or document is changed by this method.
+    #[cfg(feature = "occt-brep")]
+    pub fn capture_brep_save_sources(&self, extra: Usage) -> Result<BrepSaveCapture> {
+        self.capture_brep_sources_for_document(self.document(), extra)
+    }
+
+    /// Capture source proofs for a detached projection of the current document.
+    /// Its owning selection operation must still be revalidated at publication.
+    #[cfg(feature = "occt-brep")]
+    pub fn capture_brep_sources_for_document(&self, document: &Document, extra: Usage) -> Result<BrepSaveCapture> {
+        use om9_core::budget::memory::MemoryClass;
+        use om9_kernel::brep::{RegisteredTopologySource, SharedTopologyProof};
+        if document.id != self.document || document.revision != self.document().revision {
+            return Err(Error::Stale("BRep selection document"));
+        }
+        let limits = *self.coordinator.limits();
+        let mut held = self.scene_cache_usage()?;
+        held.add(extra, &limits)?;
+        let geometry = || document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
+            .map(|entity| &entity.geometry).chain(document.results.values().map(|result| &result.geometry_snapshot));
+        let count = geometry().filter(|item| matches!(item, Geometry::Brep(_) | Geometry::NativeBrep(_))).count();
+        if count == 0 { return Err(Error::Invalid("BRep save sources")); }
+        if count as u64 > limits.max_nodes { return Err(Error::Budget("BRep save sources")); }
+        if let Some(cache) = &self.brep_archive_cache {
+            let covered = geometry().all(|item| match item {
+                Geometry::Brep(source) => std::iter::successors(Some(cache.as_ref()), |entry| entry.previous.as_deref())
+                    .any(|entry| entry.bindings.binary_search(&source.canonical_fingerprints().1).is_ok()),
+                Geometry::NativeBrep(_) => true,
+                _ => true,
+            });
+            if covered {
+                let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+                let metadata = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, 1, physical, held)?;
+                let peer = self.coordinator.capture_transaction_preparation_peer(held)?;
+                return Ok(BrepSaveCapture { peer, document: self.document, sources: Vec::new(),
+                    cached: Some(Arc::clone(cache)), held, _metadata: metadata });
+            }
+        }
+        let planned = Usage::array::<RegisteredTopologySource>(count)?.bytes
+            .checked_add(Usage::btree::<[u8; 32], ()>(count)?.bytes)
+            .ok_or(Error::Overflow("BRep save source metadata"))?.max(1);
+        let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        let mut metadata = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, planned, physical(), held)?;
+        let mut sources = Vec::new();
+        sources.try_reserve_exact(count).map_err(|_| Error::Budget("BRep save source metadata"))?;
+        let actual = Usage::array::<RegisteredTopologySource>(sources.capacity())?.bytes
+            .checked_add(Usage::btree::<[u8; 32], ()>(count)?.bytes)
+            .ok_or(Error::Overflow("BRep save source metadata"))?.max(1);
+        if actual > metadata.bytes() {
+            let extra = actual - metadata.bytes();
+            self.coordinator.grow_external_memory_with_held(&mut metadata, extra, physical(), held)?;
+        }
+        metadata.set_allocated_bytes(actual)?;
+        let mut seen = std::collections::BTreeSet::new();
+        for item in geometry() {
+            let source = match item {
+                Geometry::Brep(source) => source,
+                Geometry::NativeBrep(_) => continue,
+                _ => continue,
+            };
+            if !seen.insert(source.canonical_fingerprints().1) { continue; }
+            if std::iter::successors(self.brep_archive_cache.as_deref(), |cache| cache.previous.as_deref())
+                .any(|cache| cache.bindings.binary_search(&source.canonical_fingerprints().1).is_ok()) { continue; }
+            let proof = self.topology_cache.as_ref().and_then(|cache| cache.find_shared_source(self.document(), source))
+                .or_else(|| self.coordinator.first_current_evidence::<SharedTopologyProof>(self.document,
+                    |_, proof, _| proof.shares_canonical_allocations(source)))
+                .ok_or(Error::Missing("BRep save topology proof"))?;
+            if proof.verify_unchanged_source(&self.coordinator).is_err() && !proof.rebind_shared_source(&self.coordinator)? {
+                return Err(Error::Stale("BRep save topology proof"));
+            }
+            sources.push(super::topology_remesh::capture_proof_source(self, proof)?);
+        }
+        drop(seen);
+        let retained = Usage::array::<RegisteredTopologySource>(sources.capacity())?.bytes.max(1);
+        metadata.set_allocated_bytes(retained)?;
+        metadata.shrink_to(retained)?;
+        let peer = self.coordinator.capture_transaction_preparation_peer(held)?;
+        Ok(BrepSaveCapture { peer, document: self.document, sources, cached: self.brep_archive_cache.clone(), held, _metadata: metadata })
+    }
+
     fn save_archive_for_batch_guard(&self, path: &Path, path_bytes: u64, guard: impl FnOnce() -> Result<()>) -> Result<()> {
         let limits = *self.coordinator.limits();
         let mut auxiliary = self.scene_cache_usage()?;
@@ -964,6 +1377,7 @@ impl Controller {
         mut reservation: om9_core::transaction::ExternalMemoryReservation,
     ) -> Result<(Self, om9_core::transaction::ExternalMemoryReservation)> {
         let limits = *self.coordinator.limits();
+        self.validate_replacement_project_state(&document, auxiliary)?;
         let mut estimated = Self::candidate_controller_overhead(Usage::default(), &limits)?;
         estimated.add(document.validation_peak_estimate(&limits, true)?, &limits)?;
         estimated.add(Scene::candidate_preflight_scratch(&document, &limits)?, &limits)?;
@@ -981,6 +1395,147 @@ impl Controller {
         }
         let candidate = Self::new_with_held(document, limits, held)?;
         Ok((candidate, reservation))
+    }
+
+    /// Prepare and publish an already bound experimental BRep document. The
+    /// caller owns external input in `extra_held`; source guards remain live
+    /// until the replacement coordinator and scene have taken ownership.
+    #[cfg(feature = "occt-brep")]
+    pub(crate) fn named_brep_replacement_hold(&self) -> Result<Usage> {
+        self.replacement_hold(Usage::default())
+    }
+
+    #[cfg(feature = "occt-brep")]
+    pub(crate) fn prepare_named_brep_replacement(peer: &TransactionCoordinator,
+        bound: crate::brep_restore_host::BoundBrepDocument, proof: super::project_state::ValidatedProjectResources,
+        archive: Arc<[u8]>, input_owner: om9_core::transaction::ExternalMemoryReservation,
+        held: Usage, auxiliary: Usage, cancel: &om9_core::transaction::Cancellation) -> Result<PreparedNamedBrepOpen> {
+        use om9_core::budget::memory::MemoryClass;
+        let result = (|| {
+            let check = || if cancel.is_canceled() { Err(Error::Canceled) } else { Ok(()) };
+            check()?;
+            let cache = shared_brep_archive_cache(peer, bound.document(), archive, input_owner, auxiliary)?;
+            let object_count = bound.document().entities.len();
+            let layer_count = bound.document().layer_order.len();
+            let (document, owners, context) = bound.into_replacement_parts();
+            if peer.capture_context(None)?.0 != context { return Err(Error::Stale("BRep replacement context")); }
+            let limits = *peer.limits();
+            let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+            let mut reservation = peer.reserve_external_memory_with_held(MemoryClass::CpuCache, 1, physical(), auxiliary)?;
+            let restored = Archive::restore_document_with_admission(document, &limits, &std::collections::BTreeSet::new(), |needed| {
+                check()?;
+                if needed > reservation.bytes() {
+                    let extra = needed - reservation.bytes();
+                    peer.grow_external_memory_with_held(&mut reservation, extra, physical(), auxiliary)?;
+                }
+                reservation.recheck_pending()
+            })?;
+            proof.verify(&restored.document)?;
+            let mut overhead = Self::candidate_controller_overhead(Usage::default(), &limits)?;
+            overhead.add(Scene::candidate_preflight_scratch(&restored.document, &limits)?, &limits)?;
+            let planning = peer.reserve_external_memory_with_held(MemoryClass::CpuCache, overhead.bytes.max(1), physical(), auxiliary)?;
+            let store = peer.representation_store();
+            let scene_peak = Scene::candidate_scene_peak_with_representations(&restored.document, &limits,
+                &store.lock().unwrap_or_else(|error| error.into_inner()))?;
+            drop((store, planning));
+            let extra = overhead.bytes.checked_add(scene_peak).ok_or(Error::Overflow("BRep replacement scene"))?;
+            if extra != 0 { peer.grow_external_memory_with_held(&mut reservation, extra, physical(), auxiliary)?; }
+            let initial = Self::prepare_initial_scene(restored.document, limits, held, |coordinator, _| {
+                check()?;
+                coordinator.adopt_external_captures(peer)?;
+                coordinator.share_brep_representations_for_replacement(peer, auxiliary, check)?;
+                let mut scene_held = auxiliary;
+                scene_held.add(Workspace::startup_usage()?, &limits)?;
+                Ok(scene_held)
+            })?;
+            check()?;
+            Ok(PreparedNamedBrepOpen { initial, reservation, context, diagnostics: restored.diagnostics,
+                cache, _owners: owners, _proof: proof, object_count, layer_count })
+        })();
+        if result.is_err() { peer.prune_orphaned_brep_representations(); }
+        result
+    }
+
+    #[cfg(feature = "occt-brep")]
+    pub(crate) fn publish_named_brep_replacement(&mut self, prepared: PreparedNamedBrepOpen,
+        cancel: &om9_core::transaction::Cancellation) -> Result<()> {
+        let result = (|| {
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            if self.coordinator.capture_context(None)?.0 != prepared.context { return Err(Error::Stale("BRep replacement context")); }
+            let PreparedNamedBrepOpen { initial, reservation, diagnostics, cache, _owners, _proof, .. } = prepared;
+            let mut candidate = Self::from_prepared_initial(initial)?;
+            if !diagnostics.is_empty() { candidate.file.saved = None; }
+            candidate.file.diagnostics = diagnostics;
+            candidate.brep_archive_cache = Some(cache);
+            if cancel.is_canceled() { return Err(Error::Canceled); }
+            self.publish_reserved_replacement(reservation, candidate, om9_core::changes::ChangeCause::Replace, Usage::default())?;
+            drop((_owners, _proof));
+            Ok(())
+        })();
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
+    }
+
+    #[cfg(feature = "occt-brep")]
+    pub(crate) fn replace_bound_brep_document(&mut self, bound: crate::brep_restore_host::BoundBrepDocument,
+        extra_held: Usage, cancel: &om9_core::transaction::Cancellation) -> Result<()> {
+        let result = (|| {
+            use om9_core::budget::memory::MemoryClass;
+            let (document, owners, context) = bound.into_replacement_parts();
+            let check = || -> Result<()> {
+                if cancel.is_canceled() { return Err(Error::Canceled); }
+                if self.coordinator.capture_context(None)?.0 != context { return Err(Error::Stale("BRep replacement context")); }
+                Ok(())
+            };
+            check()?;
+            let limits = *self.coordinator.limits();
+            let held = self.replacement_hold(extra_held)?;
+            let mut auxiliary = self.scene_cache_usage()?;
+            auxiliary.add(extra_held, &limits)?;
+            let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+            let mut reservation = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, 1, physical(), auxiliary)?;
+            let restored = Archive::restore_document_with_admission(document, &limits, &std::collections::BTreeSet::new(), |needed| {
+                check()?;
+                if needed > reservation.bytes() {
+                    let extra = needed - reservation.bytes();
+                    self.coordinator.grow_external_memory_with_held(&mut reservation, extra, physical(), auxiliary)?;
+                }
+                reservation.recheck_pending()
+            })?;
+            check()?;
+            self.validate_replacement_project_state(&restored.document, auxiliary)?;
+            let mut overhead = Self::candidate_controller_overhead(Usage::default(), &limits)?;
+            overhead.add(Scene::candidate_preflight_scratch(&restored.document, &limits)?, &limits)?;
+            let planning = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, overhead.bytes.max(1), physical(), auxiliary)?;
+            let store = self.coordinator.representation_store();
+            let scene_peak = Scene::candidate_scene_peak_with_representations(&restored.document, &limits,
+                &store.lock().unwrap_or_else(|error| error.into_inner()))?;
+            drop((store, planning));
+            let extra = overhead.bytes.checked_add(scene_peak).ok_or(Error::Overflow("BRep replacement scene"))?;
+            if extra != 0 { self.coordinator.grow_external_memory_with_held(&mut reservation, extra, physical(), auxiliary)?; }
+            let mut candidate = Self::new_with_held_and_setup(restored.document, limits, held, |coordinator, _| {
+                check()?;
+                coordinator.adopt_external_captures(&self.coordinator)?;
+                coordinator.share_brep_representations_for_replacement(&self.coordinator, auxiliary, check)?;
+                let mut scene_held = auxiliary;
+                scene_held.add(Workspace::startup_usage()?, &limits)?;
+                Ok(scene_held)
+            })?;
+            if !restored.diagnostics.is_empty() { candidate.file.saved = None; }
+            candidate.file.diagnostics = restored.diagnostics;
+            check()?;
+            self.publish_reserved_replacement(reservation, candidate, om9_core::changes::ChangeCause::Replace, extra_held)?;
+            drop(owners);
+            Ok(())
+        })();
+        if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
+        result
+    }
+
+    #[cfg(all(feature = "occt-brep", feature = "test-fixtures"))]
+    pub fn test_replace_bound_brep_document(&mut self, bound: crate::brep_restore_host::BoundBrepDocument,
+        extra_held: Usage, cancel: &om9_core::transaction::Cancellation) -> Result<()> {
+        self.replace_bound_brep_document(bound, extra_held, cancel)
     }
     fn replace_with_new(&mut self, token: FileToken) -> Result<FileOutcome> {
         self.replace_with_new_guard(token, || Ok(()))
@@ -1057,12 +1612,16 @@ impl Controller {
         let cancel = Arc::new(std::sync::atomic::AtomicBool::new(false));
         let worker_cancel = cancel.clone();
         let (sender, receiver) = std::sync::mpsc::sync_channel(1);
-        let owners = FileOpenOwners { _metadata: metadata, _current_scene: current_scene, _peer_metadata: peer_metadata };
+        let owners = FileOpenOwners { _metadata: metadata, _current_scene: current_scene, _peer_metadata: peer_metadata, _source_file: None };
         std::thread::Builder::new().name("om9-open-scene".into()).spawn(move || {
             let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
                 Self::prepare_file_open_on_worker(&peer, path, limits, held, auxiliary, &worker_cancel, owners, name_from_path)
             })).unwrap_or_else(|_| Err(Error::Io("Open worker panicked".into())));
-            let _ = sender.send(result);
+            if let Err(unsent) = sender.send(result) {
+                drop(unsent);
+                #[cfg(feature = "occt-brep")]
+                peer.prune_orphaned_brep_representations();
+            }
         }).map_err(|error| Error::Io(format!("Open worker start: {error}")))?;
         self.publish_file_phase(next, FilePhase::OpenPreparing, None);
         self.file_open_worker = Some(FileOpenWorker { token: next, scene_publication, selection_revision,
@@ -1071,13 +1630,18 @@ impl Controller {
     }
 
     fn prepare_file_open_on_worker(peer: &TransactionCoordinator, path: PathBuf, limits: Limits,
-        held: Usage, auxiliary: Usage, cancel: &std::sync::atomic::AtomicBool, owners: FileOpenOwners,
+        held: Usage, auxiliary: Usage, cancel: &Arc<std::sync::atomic::AtomicBool>, owners: FileOpenOwners,
         name_from_path: bool) -> Result<PreparedFileOpen> {
         use om9_core::budget::memory::MemoryClass;
         use std::sync::atomic::Ordering;
         let check = || if cancel.load(Ordering::Acquire) { Err(Error::Canceled) } else { Ok(()) };
+        let project_cancel = om9_core::transaction::Cancellation::from_shared_flag(cancel.clone());
         let physical = || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
         check()?;
+        #[cfg(feature = "occt-brep")]
+        if is_brep_v6(&path)? {
+            return Self::prepare_brep_file_open_on_worker(peer, path, limits, held, auxiliary, cancel, owners, name_from_path);
+        }
         let (mut reservation, restored, mut displays) = Archive::open_restored_retaining_displays(
             &path, &limits.remaining_after(held)?, &std::collections::BTreeSet::new(),
             |bytes| { check()?; peer.reserve_external_memory_with_held(MemoryClass::CpuCache, bytes.max(1), physical(), auxiliary) },
@@ -1095,7 +1659,8 @@ impl Controller {
             },
         )?;
         check()?;
-        rebuild_empty_native_displays(peer, &restored.document, &mut displays, &mut reservation, auxiliary, &check)?;
+        super::project_state::validate_replacement_project_state_on(peer, &restored.document, auxiliary, Some(&project_cancel))?;
+        rebuild_empty_native_displays(peer, &restored.document, &mut displays, &mut reservation, auxiliary, &check, Some(&project_cancel))?;
         let mut extra = Usage { bytes: path.capacity() as u64, ..Usage::default() };
         extra.add(Usage::array::<String>(restored.diagnostics.capacity())?, &limits)?;
         for diagnostic in &restored.diagnostics {
@@ -1130,7 +1695,97 @@ impl Controller {
         #[cfg(feature = "occt-brep")]
         super::topology_remesh::prepare_open_scene_wires(&mut initial, &mut reservation, auxiliary, cancel)?;
         check()?;
-        Ok(PreparedFileOpen { initial, reservation, path, diagnostics: restored.diagnostics, _owners: owners })
+        Ok(PreparedFileOpen { initial, reservation, path, diagnostics: restored.diagnostics, _owners: owners,
+            #[cfg(feature = "occt-brep")]
+            _brep_owners: None,
+            #[cfg(feature = "occt-brep")]
+            brep_archive_cache: None })
+    }
+
+    #[cfg(feature = "occt-brep")]
+    fn prepare_brep_file_open_on_worker(peer: &TransactionCoordinator, path: PathBuf, limits: Limits,
+        held: Usage, auxiliary: Usage, cancel: &Arc<std::sync::atomic::AtomicBool>, mut owners: FileOpenOwners,
+        name_from_path: bool) -> Result<PreparedFileOpen> {
+        use om9_core::budget::memory::MemoryClass;
+        let result = (|| {
+        let token = om9_core::transaction::Cancellation::from_shared_flag(cancel.clone());
+        let check = || if token.is_canceled() { Err(Error::Canceled) } else { Ok(()) };
+        let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+        check()?;
+        let host = crate::brep_restore_host::BrepRestoreHost::admit_packaged(om9_native_owner::ProcessLimits::default())?;
+        let (file, bytes, mut input_owner) = read_locked_brep_file(peer, &path, &limits.remaining_after(held)?, auxiliary, &token)?;
+        let bound = host.restore_bound_archive(peer, &bytes, true, auxiliary, &token)?;
+        let geometry = || bound.document().entities.values().chain(bound.document().definitions.values().flat_map(|definition| &definition.members))
+            .map(|entity| &entity.geometry).chain(bound.document().results.values().map(|result| &result.geometry_snapshot));
+        let count = geometry().filter(|item| matches!(item, Geometry::Brep(_))).count();
+        let base = (std::mem::size_of::<BrepArchiveCache>() + 2 * std::mem::size_of::<usize>()) as u64;
+        let planned = base.checked_add(Usage::array::<[u8; 32]>(count)?.bytes).ok_or(Error::Overflow("BRep archive cache"))?;
+        peer.grow_external_memory_with_held(&mut input_owner, planned, physical(), auxiliary)?;
+        let mut bindings = Vec::new();
+        bindings.try_reserve_exact(count).map_err(|_| Error::Budget("BRep archive cache"))?;
+        for item in geometry() {
+            if let Geometry::Brep(source) = item { bindings.push(source.canonical_fingerprints().1); }
+        }
+        bindings.sort_unstable(); bindings.dedup();
+        let allocation = (bytes.capacity() as u64).checked_add(base)
+            .and_then(|n| n.checked_add(Usage::array::<[u8; 32]>(bindings.capacity()).ok()?.bytes))
+            .ok_or(Error::Overflow("BRep archive cache"))?;
+        if allocation > input_owner.bytes() {
+            let extra = allocation - input_owner.bytes();
+            peer.grow_external_memory_with_held(&mut input_owner, extra, physical(), auxiliary)?;
+        }
+        input_owner.set_allocated_bytes(allocation)?;
+        input_owner.shrink_to(allocation)?;
+        let cache = Arc::new(BrepArchiveCache { bytes: BrepCacheBytes::Owned(bytes), bindings, previous: None, _owner: input_owner });
+        let (document, brep_owners, context) = bound.into_replacement_parts();
+        owners._source_file = Some(file);
+        check()?;
+        if peer.capture_context(None)?.0 != context { return Err(Error::Stale("BRep replacement context")); }
+        let mut reservation = peer.reserve_external_memory_with_held(MemoryClass::CpuCache, 1, physical(), auxiliary)?;
+        let restored = Archive::restore_document_with_admission(document, &limits, &std::collections::BTreeSet::new(), |needed| {
+            check()?;
+            if needed > reservation.bytes() {
+                let extra = needed - reservation.bytes();
+                peer.grow_external_memory_with_held(&mut reservation, extra, physical(), auxiliary)?;
+            }
+            reservation.recheck_pending()
+        })?;
+        super::project_state::validate_replacement_project_state_on(peer, &restored.document, auxiliary, Some(&token))?;
+        let mut document = restored.document;
+        if name_from_path && let Some(name) = path.file_name() {
+            let bounded: String = name.to_string_lossy().chars().take(240).collect();
+            if !bounded.is_empty() { document.name = bounded; }
+        }
+        let mut extra = Usage { bytes: path.capacity() as u64, ..Usage::default() };
+        extra.add(Usage::array::<String>(restored.diagnostics.capacity())?, &limits)?;
+        for diagnostic in &restored.diagnostics { extra.add(Usage { bytes: diagnostic.capacity() as u64, ..Usage::default() }, &limits)?; }
+        let overhead = Self::candidate_controller_overhead(extra, &limits)?.bytes;
+        if overhead != 0 { peer.grow_external_memory_with_held(&mut reservation, overhead, physical(), auxiliary)?; }
+        let id = document.id;
+        let mut initial = Self::prepare_initial_scene(document, limits, held, |coordinator, _| {
+            check()?;
+            coordinator.adopt_external_captures(peer)?;
+            coordinator.share_brep_representations_for_replacement(peer, auxiliary, check)?;
+            let mut scene_held = auxiliary;
+            scene_held.add(Workspace::startup_usage()?, &limits)?;
+            let document = coordinator.world().documents.get(&id).ok_or(Error::Missing("replacement document"))?;
+            let scratch = Scene::candidate_preflight_scratch(document, &limits)?;
+            let planning = coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, scratch.bytes.max(1), physical(), scene_held)?;
+            let representations = coordinator.representation_store();
+            let peak = Scene::candidate_scene_peak_with_representations(document, &limits,
+                &representations.lock().unwrap_or_else(|error| error.into_inner()))?;
+            drop((representations, planning));
+            if peak != 0 { coordinator.grow_external_memory_with_held(&mut reservation, peak, physical(), scene_held)?; }
+            check()?;
+            Ok(scene_held)
+        })?;
+        super::topology_remesh::prepare_open_scene_wires(&mut initial, &mut reservation, auxiliary, cancel)?;
+        check()?;
+        Ok(PreparedFileOpen { initial, reservation, path, diagnostics: restored.diagnostics, _owners: owners,
+            _brep_owners: Some(brep_owners), brep_archive_cache: Some(cache) })
+        })();
+        if result.is_err() { peer.prune_orphaned_brep_representations(); peer.prune_orphaned_native_representations(); }
+        result
     }
 
     pub fn file_open_worker_pending(&self) -> bool { self.file_open_worker.is_some() }
@@ -1150,14 +1805,22 @@ impl Controller {
                 || self.selection_state().revision != worker.selection_revision || self.sub_revision() != worker.sub_revision {
                 return Err(Error::Stale("Open scene context"));
             }
-            let PreparedFileOpen { initial, reservation, path, diagnostics, _owners } = result?;
+            let PreparedFileOpen { initial, reservation, path, diagnostics, _owners,
+                #[cfg(feature = "occt-brep")]
+                _brep_owners,
+                #[cfg(feature = "occt-brep")]
+                brep_archive_cache } = result?;
             let mut candidate = Self::from_prepared_initial(initial)?;
+            #[cfg(feature = "occt-brep")]
+            { candidate.brep_archive_cache = brep_archive_cache; }
             candidate.file.path = Some(path);
             if !diagnostics.is_empty() { candidate.file.saved = None; }
             candidate.file.diagnostics = diagnostics;
             self.publish_reserved_file_replacement(reservation, candidate)?;
             Ok(FileOutcome::Replaced)
         })();
+        #[cfg(feature = "occt-brep")]
+        if outcome.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
         if outcome.is_err() && self.file.operation.as_ref().is_some_and(|operation| operation.token == worker.token) {
             if let Ok(next) = self.next_file_token(worker.token) {
                 self.publish_file_phase(next, FilePhase::OpenPath, None);
@@ -1246,7 +1909,7 @@ impl Controller {
             },
         )?;
         rebuild_empty_native_displays(&self.coordinator, &restored.document, &mut legacy_displays,
-            &mut archive_reservation, auxiliary, &|| Ok(()))?;
+            &mut archive_reservation, auxiliary, &|| Ok(()), None)?;
         let mut extra = path_usage;
         extra.add(
             Usage::array::<String>(restored.diagnostics.capacity())?,
@@ -1278,6 +1941,7 @@ impl Controller {
                 document.name = bounded;
             }
         }
+        self.validate_replacement_project_state(&document, auxiliary)?;
         // The candidate controller builds its scene in a separate account.
         // Hold its estimated planner and construction peak on the shared
         // account too, before either phase starts.
@@ -1339,7 +2003,12 @@ impl Controller {
         }
         if let Some(worker) = self.file_open_worker.take() {
             worker.cancel.store(true, std::sync::atomic::Ordering::Release);
+            drop(worker);
+            #[cfg(feature = "occt-brep")]
+            self.coordinator.prune_orphaned_brep_representations();
         }
+        #[cfg(feature = "occt-brep")]
+        drop(self.file_save_worker.take());
         self.file.operation = None;
         self.release_file_storage();
         Ok(())

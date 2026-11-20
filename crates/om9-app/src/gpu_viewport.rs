@@ -179,6 +179,7 @@ pub struct GpuViewport {
     /// Camera revision of the last rendered frame; the pass is skipped when it did not change.
     last_revision: Option<u64>,
     display_mode: DisplayMode,
+    grid_visibility: crate::display::GridVisibility,
     last_mode: Option<DisplayMode>,
     last_camera: Option<om9_scene::camera::Camera>,
     /// Scene epoch and CPlane revision of the last rendered frame: new geometry must repaint even when the
@@ -320,6 +321,7 @@ pub struct RefinementKey {
     preview: u64,
     hidden_sources: HiddenSources,
     mode: DisplayMode,
+    grid: crate::display::GridVisibility,
     size: (u32, u32),
     generation: u64,
 }
@@ -329,13 +331,13 @@ impl RefinementKey {
         self.document == other.document && self.scene == other.scene && self.scene_publication == other.scene_publication
             && self.selection == other.selection && self.cplane == other.cplane
             && self.preview == other.preview && self.hidden_sources == other.hidden_sources
-            && self.size == other.size && self.mode == other.mode
+            && self.size == other.size && self.mode == other.mode && self.grid == other.grid
     }
     pub(crate) fn same_input_basis(self, other: Self) -> bool {
         self.document == other.document && self.scene == other.scene && self.scene_publication == other.scene_publication && self.camera == other.camera
             && self.selection == other.selection && self.cplane == other.cplane
             && self.preview == other.preview && self.hidden_sources == other.hidden_sources
-            && self.size == other.size && self.mode == other.mode
+            && self.size == other.size && self.mode == other.mode && self.grid == other.grid
     }
 }
 
@@ -714,7 +716,7 @@ impl Default for ViewportRenderRequest {
         }
     }
 }
-type OverlayKey = (om9_core::identity::DocumentId, u64, u64, u64, u32, u64, HiddenSources, uuid::Uuid, Option<uuid::Uuid>);
+type OverlayKey = (om9_core::identity::DocumentId, u64, u64, u64, u32, u64, HiddenSources, uuid::Uuid, Option<uuid::Uuid>, crate::display::GridVisibility);
 
 #[cfg(test)]
 mod presentation_snapshot_tests {
@@ -1107,7 +1109,7 @@ mod presentation_snapshot_tests {
 fn overlay_matches(actual: OverlayKey, wanted: OverlayKey, moving: bool) -> bool {
     actual == wanted || (moving
         && actual.0 == wanted.0 && actual.1 == wanted.1 && actual.2 == wanted.2
-        && actual.3 == wanted.3 && actual.4 == wanted.4 && actual.6 == wanted.6 && actual.7 == wanted.7 && actual.8 == wanted.8)
+        && actual.3 == wanted.3 && actual.4 == wanted.4 && actual.6 == wanted.6 && actual.7 == wanted.7 && actual.8 == wanted.8 && actual.9 == wanted.9)
 }
 #[cfg(test)]
 mod overlay_cache_tests {
@@ -1116,7 +1118,7 @@ mod overlay_cache_tests {
 
     #[test]
     fn moving_overlay_can_reuse_point_scale_but_never_stale_hidden_sources() {
-        let key = (DocumentId::new(), 1, 2, 3, 4, 5, None, uuid::Uuid::new_v4(), None);
+        let key = (DocumentId::new(), 1, 2, 3, 4, 5, None, uuid::Uuid::new_v4(), None, crate::display::GridVisibility::default());
         let mut zoomed = key;
         zoomed.5 += 1;
         assert!(overlay_matches(key, zoomed, true));
@@ -1126,6 +1128,9 @@ mod overlay_cache_tests {
         let mut replacement = key;
         replacement.7 = uuid::Uuid::new_v4();
         assert!(!overlay_matches(key, replacement, true));
+        let mut hidden_grid = key;
+        hidden_grid.9.lines = false;
+        assert!(!overlay_matches(key, hidden_grid, true));
     }
 }
 struct ViewOverlays {
@@ -1388,6 +1393,7 @@ impl GpuViewport {
             texture_id: None,
             last_revision: None,
             display_mode: DisplayMode::Shaded,
+            grid_visibility: Default::default(),
             last_mode: None,
             last_camera: None,
             last_epoch: None,
@@ -2077,6 +2083,12 @@ impl GpuViewport {
     pub fn set_display_mode(&mut self, mode: DisplayMode) {
         self.display_mode = mode;
     }
+    pub(crate) fn set_grid_visibility(&mut self, grid: crate::display::GridVisibility) {
+        if self.grid_visibility != grid {
+            self.grid_visibility = grid;
+            self.last_revision = None;
+        }
+    }
     pub fn displayed_scene_stamp(&self) -> Option<(om9_core::identity::DocumentId, u64)> {
         self.published_id.and(self.displayed_scene)
     }
@@ -2096,7 +2108,7 @@ impl GpuViewport {
             key.document == scene.document.id && key.scene == scene.epoch && key.scene_publication == scene.publication_id()
                 && key.selection == selection && key.preview == preview
                 && key.cplane == cplane && key.hidden_sources == hidden_sources && key.size == self.size
-                && key.mode == mode
+                && key.mode == mode && key.grid == self.grid_visibility
         })
     }
     pub fn refinement_ms(&self) -> Option<f64> {
@@ -2355,6 +2367,7 @@ impl GpuViewport {
             hidden_sources,
             scene.publication,
             temporary,
+            self.grid_visibility,
         );
         // Orbit/pan preserve point size; moving zoom reuses its last point markers until settling.
         let overlay_valid = self.overlays.as_ref().is_some_and(|o| overlay_matches(o.key, key, self.moving));
@@ -2375,6 +2388,7 @@ impl GpuViewport {
                         && o.key.6 == key.6
                         && o.key.7 == key.7
                         && o.key.8 == key.8
+                        && o.key.9 == key.9
                         && o.fixed.pending_upload_bytes() == 0
                         && o.moving.pending_upload_bytes() == 0
                         && o.ghost.pending_upload_bytes() == 0
@@ -2406,6 +2420,7 @@ impl GpuViewport {
                             point_size,
                             samples,
                             share_world,
+                            key.9,
                         );
                         let selected_guides = if share_world {
                             om9_render::overlay::OverlayBatch::on_top(state.device.clone(), state.queue.clone(), samples)
@@ -2673,6 +2688,7 @@ impl GpuViewport {
                 preview: preview_revision,
                 hidden_sources,
                 mode: self.display_mode,
+                grid: self.grid_visibility,
                 size: (width, height),
                 generation: self.request.generation,
             });
@@ -3402,6 +3418,7 @@ fn build_lines(
     point_size: f64,
     samples: u32,
     share_world: bool,
+    visibility: crate::display::GridVisibility,
 ) -> (
     om9_render::overlay::OverlayBatch,
     om9_render::overlay::OverlayBatch,
@@ -3419,7 +3436,9 @@ fn build_lines(
     // Grid first, so coplanar curves are visible over it.
     if let Ok(grid) = om9_scene::grid::Grid::new(cplane) {
         for line in grid.lines {
-            fixed.line(line.start, line.end, line.color.map(|x| x as f32 / 255.));
+            if if line.axis { visibility.axes } else { visibility.lines } {
+                fixed.line(line.start, line.end, line.color.map(|x| x as f32 / 255.));
+            }
         }
     }
     if let Some(scene) = scene {

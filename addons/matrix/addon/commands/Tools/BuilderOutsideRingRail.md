@@ -5,7 +5,7 @@ Tạo đường rail ngoài quanh ring rail theo độ dày đỉnh / bên / đ�
 - **Mã lệnh:** `BuilderOutsideRingRail`
 - **Vị trí:** menu Tools, ô số 3
 - **Icon:** `Resources/icons/tools-minimal/BuilderOutsideRingRail.svg`
-- **Gọi bằng dòng lệnh:** `BuilderOutsideRingRail`, `OutsideRingRail`
+- **Gọi bằng dòng lệnh:** `BuilderOutsideRingRail`, `OutsideRingRail`, `gvOutsideRingRail`
 - **Cách chạy:** từng bước trên dòng lệnh, kèm bảng BUILDERS; Enter để tạo, Esc để huỷ
 
 ## Cách dùng
