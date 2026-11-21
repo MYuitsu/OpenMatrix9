@@ -1719,6 +1719,7 @@ fn surface_buffers(
 ) -> Result<RenderBuffers> {
     const SAMPLES: usize = SURFACE_SAMPLES;
     let (vertex_count, edge_count) = surface_buffer_usage_for(surface, interior, usage, l)?;
+    let evaluate = om9_core::surface_kernel::point_evaluator(surface, l)?;
     let [u0, u1] = surface.domain[0];
     let [v0, v1] = surface.domain[1];
     let mut vertices = display_vector(vertex_count, "surface display vertices")?;
@@ -1726,7 +1727,7 @@ fn surface_buffers(
         let u = u0 + (u1 - u0) * i as f64 / (SAMPLES - 1) as f64;
         for j in 0..SAMPLES {
             let v = v0 + (v1 - v0) * j as f64 / (SAMPLES - 1) as f64;
-            vertices.push(om9_core::surface_kernel::evaluate(surface, u, v, l)?);
+            vertices.push(evaluate(u, v)?);
         }
     }
     let mut triangles = display_vector(2 * (SAMPLES - 1) * (SAMPLES - 1), "surface display triangles")?;
@@ -1763,7 +1764,7 @@ fn surface_buffers(
                 for i in 0..SAMPLES {
                     let varying = start + (end - start) * i as f64 / (SAMPLES - 1) as f64;
                     let (u, v) = if axis == 0 { (fixed, varying) } else { (varying, fixed) };
-                    vertices.push(om9_core::surface_kernel::evaluate(surface, u, v, l)?);
+                    vertices.push(evaluate(u, v)?);
                     if i > 0 { edges.push([(first + i - 1) as u32, (first + i) as u32]); }
                 }
             }

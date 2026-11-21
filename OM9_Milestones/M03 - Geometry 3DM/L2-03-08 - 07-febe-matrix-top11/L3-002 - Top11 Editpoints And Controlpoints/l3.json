@@ -316,6 +316,11 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "top11_routes_2026_11_21": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "Both grip modes preserved document history on activation. The 96 by 96 surface edit passed its existing timing bound.",
+      "evidence": "docs/validation/2026-11-21-top11.md"
+    },
     "mixed_selection_grips_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-mixed-selection.md", "scope": "Compatible curve and surface grips remain available when incompatible objects are also selected.", "limitations": "Original Matrix behavior, arbitrary combinations and physical desktop acceptance remain open."},
     "grip_gesture_lifetime_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-grip-gesture-lifetime.md", "scope": "Grip drags cancel when captured source, selection, view, camera, viewport, CPlane, mode or focus changes; Escape cancels without a transaction.", "limitations": "Simulated egui input only; OS focus/GPU and human desktop acceptance remain open."},
     "grip_viewport_plane_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-grip-viewport-plane.md", "scope": "Grip drag uses the clicked view CPlane; simulated four-view line and surface tests include a tilted plane and safe parallel-ray refusal.", "limitations": "Physical desktop/GPU, view changes during drag and full Top11 acceptance remain open."},

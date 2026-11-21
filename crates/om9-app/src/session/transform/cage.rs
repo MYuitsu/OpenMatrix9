@@ -98,12 +98,12 @@ fn rest_of(entity: &Entity) -> Result<Option<[Point3; 8]>> {
     Ok(Some(found))
 }
 
-fn is_cage(entity: &Entity) -> bool {
+pub(in crate::session) fn is_cage(entity: &Entity) -> bool {
     rest_of(entity).ok().flatten().is_some()
 }
 
 /// The cage an object is attached to, when `entity` carries the back pointer.
-fn link_of(entity: &Entity) -> Option<ObjectId> {
+pub(in crate::session) fn link_of(entity: &Entity) -> Option<ObjectId> {
     let value = slot(entity)?;
     let text = value.get("cage")?.as_str()?;
     Uuid::parse_str(text).ok().map(ObjectId)

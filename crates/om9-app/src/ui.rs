@@ -23,6 +23,7 @@ mod channel_cutters;
 mod addons_window;
 mod builder_panel;
 mod ring_rail_library;
+mod ring_rail_toolbar;
 mod session_dialog;
 mod chrome;
 mod projects;
@@ -2133,7 +2134,7 @@ impl MatrixApp {
             self.f6_providers,
         )?;
         let kind = match prefill.selection.len() {
-            0 => om9_core::builder::BuilderKind::RingRail,
+            0 => return self.controller.top11_invoke(om9_core::top11::Top11Action::RingRail).map(|_| ()),
             1 => om9_core::builder::BuilderKind::RailProfile,
             _ => om9_core::builder::BuilderKind::RailSweep,
         };
@@ -5918,7 +5919,9 @@ impl MatrixApp {
                 self.top11_grip_drag_ui(ui, &response, &view, viewport);
             }
         }
-        self.builder_handles_ui(ui, &response, &view, viewport, rect);
+        if self.builder_ui.rail_toolbar.is_none() || !self.controller.ring_rail_is_open() {
+            self.builder_handles_ui(ui, &response, &view, viewport, rect);
+        }
         if published_scene_current {
             self.selection_band(ui, &response, &view, viewport, rect);
         } else if self.band_view == Some(id) {

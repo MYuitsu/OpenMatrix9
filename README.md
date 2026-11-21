@@ -1,6 +1,10 @@
 # OpenMatrix9
 
+Top11 Ring Rail opens below Projects at USA size 7. Its region picker includes VNM and the main green arrow places the rail. [Windows screenshots and test results](docs/validation/2026-11-22-ring-rail-toolbar.md).
+
 The workspace uses the left MAIN MENU and its Top11 row for command icons; the duplicate horizontal toolbar strip is hidden and its 67-point allocation is returned to the canvas. A real window observation and 77 focused layout/File interaction checks are recorded in the [layout evidence](docs/validation/2026-11-17-left-main-menu-only.md); full milestone UI sign-off remains open.
+
+The eleven Top11 actions were exercised in Windows desktop sessions with and without the Matrix add-on. The [command mapping and validation](docs/validation/2026-11-21-top11.md) records the secondary buttons, retained BRep edits, Trim options and Ring Rail result.
 
 Ring Rail uses one Rust core for the left Top11 and Tools icons, with VNM mm, Stuller-backed US/quarter input, inch conversion and center placement. Shared Yes/No/Cancel and recorded edits now queue supported dependent History updates in one guarded transaction and one Undo. The focused worker batch passed 39 checks. [Evidence and limits](docs/validation/2026-11-17-ring-rail-shared-input.md) keep the real desktop/package acceptance, custom shape/library and additional verified regions open.
 

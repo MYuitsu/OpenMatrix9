@@ -316,3 +316,105 @@ fn mirror_axis_default_copies_and_cancel_is_non_mutating() {
     c.cancel();
     assert_eq!(c.document().entities.len(), 1);
 }
+
+#[test]
+fn rotate_copy_secondary_survives_post_selection() {
+    use om9_core::top11::Top11Action;
+    let mut doc = Document::with_template_tolerance("Rotate Copy");
+    let point = Entity::new("point", Geometry::Point([2., 0., 0.]), None);
+    let id = point.id;
+    doc.entities.insert(id, point);
+    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    c.top11_alternate(Top11Action::Rotate).unwrap();
+    c.top11_accept_object(id).unwrap();
+    c.submit("").unwrap();
+    c.submit("W0,0,0").unwrap();
+    c.submit("90").unwrap();
+    assert_eq!(c.document().entities.len(), 2);
+    c.undo().unwrap();
+    assert_eq!(c.document().entities.len(), 1);
+}
+
+#[test]
+fn trim_options_compute_fractions_on_the_original_line() {
+    use om9_core::geometry::Curve;
+    for (option, start, end) in [
+        ("ExtendLines=Yes", [4., 3., 0.], [4., 6., 0.]),
+        ("ApparentIntersections=Yes", [4., -2., 5.], [4., 2., 5.]),
+    ] {
+        let mut doc = Document::with_template_tolerance("Trim options");
+        let line = |a, b| Entity::new("line", Geometry::Curve(Curve::Line { start: a, end: b, domain: [0.,1.] }), None);
+        let target = line([0.;3], [10.,0.,0.]);
+        let cutter = line(start, end);
+        let ids = [target.id, cutter.id];
+        doc.entities.insert(ids[0], target);
+        doc.entities.insert(ids[1], cutter);
+        let mut c = Controller::new(doc, Limits::default()).unwrap();
+        c.activate_view("Looking Down").unwrap();
+        c.select_objects(&ids).unwrap();
+        let before = c.document().clone();
+        c.submit(&format!("Trim {option}")).unwrap();
+        c.top11_trim_many_accept_pick(ids[0], [2.,0.,0.]).unwrap();
+        c.submit("").unwrap();
+        let Geometry::Curve(Curve::Line { start, end, .. }) = &c.document().entities[&ids[0]].geometry else { panic!("retained line"); };
+        assert!((start[0]-4.).abs()<1e-7 && (end[0]-10.).abs()<1e-7);
+        assert_eq!((start[2],end[2]), (0.,0.));
+        c.undo().unwrap();
+        assert_eq!(c.document(), &before);
+    }
+}
+
+#[test]
+fn explode_dimension_keeps_editable_text_then_explodes_the_glyph() {
+    use om9_core::{annotation::{Annotation, Kind, SLOT, Style}, top11::Top11Action};
+    let limits = Limits::default();
+    let annotation = Annotation { kind:Kind::Aligned, points:vec![[0.;3],[10.,0.,0.]],
+        text_point:[5.,4.,0.], text:Some("O".into()), x:[1.,0.,0.], y:[0.,1.,0.],
+        rotation_degrees:0., style:Style::default() };
+    let mut dim = Entity::new("dim", annotation.geometry(&limits).unwrap(), None);
+    dim.extensions.insert(SLOT.into(),annotation.extension(&limits).unwrap());
+    let mut doc = Document::with_template_tolerance("dimension");
+    let id = dim.id;
+    doc.entities.insert(id,dim);
+    let mut c = Controller::new(doc,limits).unwrap();
+    let before = c.document().clone();
+    c.select_objects(&[id]).unwrap();
+    c.top11_invoke(Top11Action::Explode).unwrap();
+    let txt = c.document().entities.values().find(|e| Annotation::read(e).is_ok_and(|a| a.kind==Kind::Text)).unwrap().id;
+    c.select_objects(&[txt]).unwrap();
+    c.submit("Explode").unwrap();
+    assert!(c.document().entities.values().all(|e| matches!(e.geometry,Geometry::Curve(_)) && !e.extensions.contains_key(SLOT)));
+    assert_eq!(c.selected().len(),2, "inner and outer contours");
+    for id in c.selected() {
+        let Geometry::Curve(om9_core::geometry::Curve::Polycurve { segments, .. }) =
+            &c.document().entities[id].geometry else { panic!("closed glyph contour"); };
+        assert!(segments.iter().any(|c| matches!(c, om9_core::geometry::Curve::Nurbs(n) if n.degree >= 2)));
+    }
+    c.undo().unwrap(); c.undo().unwrap();
+    assert_eq!(c.document(), &before);
+}
+
+#[test]
+fn exploding_a_cage_releases_objects_and_keeps_edges_and_faces() {
+    let limits = Limits::default();
+    let corners = om9_core::cage::box_corners([0.;3], [4.,5.,6.]);
+    let mesh = om9_core::cage::box_mesh(corners);
+    let object = Entity::new("caged mesh", Geometry::Mesh(mesh), None);
+    let id = object.id;
+    let mut document = Document::with_template_tolerance("cage");
+    document.entities.insert(id,object);
+    let mut c = Controller::new(document,limits).unwrap();
+    c.select_objects(&[id]).unwrap();
+    c.submit("Cage").unwrap();
+    let before = c.document().clone();
+    let cage = *before.entities.keys().find(|key| **key!=id).unwrap();
+    c.select_objects(&[cage]).unwrap();
+    c.submit("Explode").unwrap();
+    let after = c.document();
+    assert_eq!(after.entities.values().filter(|e| matches!(e.geometry, Geometry::Surface(_))).count(), 6);
+    assert_eq!(after.entities.values().filter(|e| matches!(e.geometry, Geometry::Curve(_))).count(), 12);
+    assert!(after.entities.values().all(|e| !e.extensions.contains_key(om9_core::model::CAGE_EXTENSION_SLOT)));
+    assert_eq!(after.entities[&id].geometry, before.entities[&id].geometry);
+    c.undo().unwrap();
+    assert_eq!(c.document(), &before);
+}

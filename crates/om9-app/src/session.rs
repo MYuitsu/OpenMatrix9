@@ -4978,7 +4978,7 @@ mod solid_text_stages;
 mod surface_commands;
 mod surface_edit;
 mod top11;
-pub use top11::GripPick;
+pub use top11::{GripPick, Top11Result};
 pub use properties::{FIELDS, FieldState, PropertyEdit, PropertyField};
 pub const LINE: &str = "OM9-CURVE-002";
 pub const ZOOM_EXTENTS: &str = "ViewZoomZoomExtents";
@@ -5330,6 +5330,8 @@ pub struct Controller {
     gumball_drag_strength: f64,
     /// Pending Top 11 point command (OM9-L2-03-08).
     top11_pending: Option<self::top11::Top11Pending>,
+    trim_extend_lines: bool,
+    trim_apparent_view: Option<om9_scene::camera::Camera>,
     dupedge_pending: Option<CommandContext>,
     #[cfg(feature = "occt-brep")]
     dupedge_session_id: uuid::Uuid,
@@ -5852,6 +5854,8 @@ impl Controller {
             gumball_snappy: false,
             gumball_drag_strength: 1.0,
             top11_pending: None,
+            trim_extend_lines: false,
+            trim_apparent_view: None,
             dupedge_pending: None,
             #[cfg(feature = "occt-brep")]
             dupedge_session_id: uuid::Uuid::nil(),
@@ -6890,7 +6894,8 @@ impl Controller {
         // The Top 11 toolbar owns the same action ids: a published feature id
         // dispatches the action the icon click runs, not a second implementation.
         if let Some(action) = if feature == "OM9-TOOLS-001" { Some(om9_core::top11::Top11Action::RingRail) }
-            else { om9_core::top11::Top11Action::from_feature(feature) } {
+            else { om9_core::top11::Top11Action::from_feature(feature)
+                .or_else(|| om9_core::top11::Top11Action::from_catalog(feature)) } {
             if self.is_running() {
                 return Err(Error::Busy);
             }
@@ -7668,11 +7673,18 @@ impl Controller {
         {
             return result.map(|_| DispatchOutcome::Command);
         }
+        // Matrix distinguishes typed Explode (including block instances) from its toolbar macro.
+        if !self.is_running() && text.trim().eq_ignore_ascii_case("Explode") {
+            return self.top11_submit("Explode").expect("known Top11 command").map(DispatchOutcome::Top11);
+        }
         // An installed, enabled add-on takes the command name over from OM9's own command
         // (disable or remove the add-on to get the built-in back).
         if !self.is_running()
             && let Some(code) = self.addon_code(text.trim())
         {
+            if let Some(action) = om9_core::top11::Top11Action::from_catalog(&code) {
+                return self.top11_invoke(action).map(DispatchOutcome::Top11);
+            }
             return self.run_addon_command(&code).map(|_| DispatchOutcome::Command);
         }
         if let Some(command) = self::metal::parse_command(text)? {

@@ -98,7 +98,7 @@ fn title_popup_has_reference_actions_instead_of_the_old_three_entry_stub() {
     );
     let first = menu.iter().position(|s| s == "Maximize").unwrap();
     assert_eq!(
-        &menu[first..first + 8],
+        &menu[first..first + 11],
         &[
             "Maximize",
             "Wireframe",
@@ -107,7 +107,10 @@ fn title_popup_has_reference_actions_instead_of_the_old_three_entry_stub() {
             "Ghosted",
             "X-Ray",
             "Technical",
-            "Art Color"
+            "Artistic",
+            "Pen",
+            "Art Color",
+            "Art Color Wires",
         ]
     );
     assert_eq!(app.controller.workspace.active, ViewId::LookingDown);

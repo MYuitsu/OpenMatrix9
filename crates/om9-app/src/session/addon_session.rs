@@ -1764,7 +1764,8 @@ impl Controller {
             return Ok(false);
         };
         let t = text.trim();
-        if t.is_empty() {
+        if t.is_empty() || (t.eq_ignore_ascii_case("Apply")
+            && matches!(session.code.as_str(), "BuilderRingRail" | "TopIconRingRail")) {
             self.session_step(Input::Enter)?;
             return Ok(true);
         }

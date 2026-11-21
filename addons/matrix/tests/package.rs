@@ -231,6 +231,11 @@ fn generate() -> Generated {
                     }
                 }
             }
+            if matches!(code, "BuilderRingRail" | "TopIconRingRail") {
+                let usage = page.find("\n## ").expect("command usage section") + 1;
+                page.truncate(usage);
+                page.push_str(include_str!("../../tools/ring-rail-usage.md"));
+            }
             pages.insert(PathBuf::from(format!("commands/{menu}/{code}.md")), page);
             index.entry(menu).or_default().push(format!(
                 "| `{code}` | [{label}](commands/{menu}/{code}.md) | {} |",

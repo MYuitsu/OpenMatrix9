@@ -20,6 +20,7 @@ const WARN: Color32 = Color32::from_rgb(255, 150, 120);
 
 #[derive(Default)]
 pub(crate) struct BuilderUi {
+    pub rail_toolbar: Option<super::ring_rail_toolbar::RailToolbar>,
     pub rail_library_open: bool,
     pub rail_name: String,
     pub rail_edit_curve: Option<om9_core::geometry::Curve>,
@@ -251,6 +252,7 @@ impl MatrixApp {
         camera: &Camera,
         viewport: Viewport,
     ) {
+        if self.builder_ui.rail_toolbar.is_some() && self.controller.ring_rail_is_open() { return; }
         if let Some(preview) = self.controller.builder()
             .and_then(|session| session.preview_for_document(self.controller.document()))
             && let om9_core::geometry::Geometry::Brep(brep) = &preview.geometry {

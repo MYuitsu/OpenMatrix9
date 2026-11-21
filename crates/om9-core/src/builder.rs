@@ -455,11 +455,11 @@ impl BuilderSession {
                     BuilderField::choice(
                         "standard",
                         "Standard",
-                        ["VNM", "vnm_circumference", "explicit", "US", "iso", "diameter_inches", "circumference_inches"].into_iter(),
+                        ["VNM", "vnm_circumference", "explicit", "US", "britain", "japan", "swiss", "european", "france", "german", "iso", "diameter_inches", "circumference_inches"].into_iter(),
                         "VNM",
                     ),
                     BuilderField { name: "us_size", label: "Size",
-                        domain: OptionDomain::Number { dimension: Dimension::Ratio, min: Some(0.001), min_inclusive: true, max: Some(1000.), step: None },
+                        domain: OptionDomain::Number { dimension: Dimension::Ratio, min: Some(0.), min_inclusive: true, max: Some(1000.), step: None },
                         value: Value::ratio(18.)? },
                     rail_center_field("center_x_mm", "Center X"),
                     rail_center_field("center_y_mm", "Center Y"),

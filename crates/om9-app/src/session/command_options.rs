@@ -276,7 +276,11 @@ impl Controller {
             ("CenterY", "CenterY=", "center_y_mm", "rr_center_y"),
             ("CenterZ", "CenterZ=", "center_z_mm", "rr_center_z"),
         ] {
-            let value = text(field, key).unwrap_or_default();
+            let value = match (name, self.ring_rail_size()) {
+                ("SizeSystem", Some((system, _))) => system.to_owned(),
+                ("RingSize", Some((_, size))) => size.to_string(),
+                _ => text(field, key).unwrap_or_default(),
+            };
             let mut option = descriptor("ring_rail", name, prefix);
             option.kind = if name == "SizeSystem" { Kind::Text } else { Kind::Number };
             option.value = if name == "SizeSystem" { CommandValue::Text(Some(value.clone())) }
@@ -749,6 +753,8 @@ impl Controller {
                 }
                 _ => CommandValue::None,
             },
+            "top11" if name == "ExtendLines" => CommandValue::Flag(self.trim_extend_lines),
+            "top11" if name == "ApparentIntersections" => CommandValue::Flag(self.trim_apparent_view.is_some()),
             "top11" => match &self.top11_pending {
                 Some(super::top11::Top11Pending::SplitMany { shrink: Some(value), .. }) if name == "Shrink" => CommandValue::Flag(*value),
                 Some(super::top11::Top11Pending::SplitIso { shrink, .. }) if name == "Shrink" => CommandValue::Flag(*shrink),
@@ -879,6 +885,8 @@ impl Controller {
             }};
         }
         match owner {
+            "top11" if name == "ExtendLines" => { flag!(self.trim_extend_lines); }
+            "top11" if name == "ApparentIntersections" => { flag!(self.trim_apparent_view.is_some()); }
             "top11" if name == "Shrink" => {
                 if let Some(super::top11::Top11Pending::SplitIso { shrink, .. }) = &self.top11_pending {
                     flag!(*shrink);

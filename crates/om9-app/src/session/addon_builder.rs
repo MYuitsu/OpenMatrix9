@@ -55,12 +55,17 @@ pub struct AddonBuilder {
 impl AddonBuilder {
     /// Ring Rail adapters keep the physical size while switching input systems.
     fn adjust_ring_size(&mut self, key: &str, value: &SettingValue) -> Result<()> {
-        if self.code != "BuilderRingRail" || key != "rr_size_system" || self.values.get(key) == Some(value) { return Ok(()); }
+        let size_key = match (self.code.as_str(), key) {
+            ("BuilderRingRail", "rr_size_system") => "rr_ring_size",
+            ("TopIconRingRail", "t11_size_system") => "t11_ring_size",
+            _ => return Ok(()),
+        };
+        if self.values.get(key) == Some(value) { return Ok(()); }
         let (Some(SettingValue::Str(previous)), Some(SettingValue::Float(size)), SettingValue::Str(next)) =
-            (self.values.get(key), self.values.get("rr_ring_size"), value) else { return Err(Error::Invalid("ring size settings")); };
+            (self.values.get(key), self.values.get(size_key), value) else { return Err(Error::Invalid("ring size settings")); };
         let diameter = om9_core::ring_size::rail_diameter_mm(previous, *size)?;
         let size = om9_core::ring_size::rail_size_for_diameter(next, diameter)?;
-        self.values.insert("rr_ring_size".into(), SettingValue::Float(size));
+        self.values.insert(size_key.into(), SettingValue::Float(size));
         Ok(())
     }
     /// The current value of a setting.

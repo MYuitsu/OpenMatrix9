@@ -2,8 +2,7 @@
 //! MCP document lifecycle tools: new, open, save and full report.
 use super::{NO_DOCUMENT, Server, message, required_str};
 use crate::session::Controller;
-use om9_archive::Archive;
-use om9_core::{model::Document, transaction::Cancellation};
+use om9_core::model::Document;
 use serde_json::{Value, json};
 use std::{
     fs::File,
@@ -31,7 +30,7 @@ impl Server {
 
     pub(super) fn open_document(&mut self, args: &Value) -> Result<Value, String> {
         let path = path_arg(args, "path")?;
-        let mut controller = Controller::from_file(&path, self.limits).map_err(message)?;
+        let mut controller = Controller::open_archive_for_batch(&path, self.limits).map_err(message)?;
         controller.record_changes();
         self.controller = Some(controller);
         self.path = Some(path);
@@ -49,13 +48,7 @@ impl Server {
         };
         {
             let controller = self.controller.as_ref().ok_or(NO_DOCUMENT)?;
-            Archive::save(
-                &path,
-                controller.document(),
-                &self.limits,
-                &Cancellation::default(),
-            )
-            .map_err(message)?;
+            controller.save_archive_for_batch(&path).map_err(message)?;
         }
         self.path = Some(path.clone());
         let bytes = std::fs::metadata(&path).map(|meta| meta.len()).unwrap_or(0);

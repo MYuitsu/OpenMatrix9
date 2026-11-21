@@ -339,3 +339,35 @@ fn a_builder_ring_sweep_refuses_an_open_rail_and_accepts_a_custom_closed_one() {
         Err(Error::Invalid("ring rail not closed"))
     );
 }
+
+#[test]
+fn picker_regions_round_trip_each_size_and_reject_values_between_ticks() {
+    use std::f64::consts::PI;
+    use om9_core::ring_size::{rail_size_steps, rail_diameter_mm, rail_size_for_diameter};
+    for (system, sample, diameter) in [("britain", 13., 16.7), ("japan", 0., 12.67),
+        ("swiss", 12., 52. / PI), ("european", 52., 52. / PI), ("france", 52.5, 52.5 / PI),
+        ("german", 16.5, 16.5), ("us", 7., 17.32)] {
+        assert!((rail_diameter_mm(system, sample).unwrap() - diameter).abs() < 1e-10);
+        let mut doc = Document::with_template_tolerance(system);
+        let mut builder = BuilderSession::new(BuilderKind::RingRail, &doc, &[]).unwrap();
+        let standard = if system == "us" { "US" } else { system };
+        builder.set_field("standard", om9_core::request::Value::Choice(standard.into())).unwrap();
+        builder.set_field("us_size", om9_core::request::Value::ratio(sample).unwrap()).unwrap();
+        builder.refresh(&doc, &registry()).unwrap();
+        let plan = builder.plan(&doc).unwrap();
+        let Geometry::Curve(Curve::Circle { radius, .. }) = &plan.entity.geometry else { panic!("circle") };
+        assert!((2. * radius - diameter).abs() < 1e-10);
+        doc.entities.insert(plan.entity.id, plan.entity.clone());
+        doc.history.recipes.insert(plan.recipe.id, plan.recipe.clone());
+        let mut restored = BuilderSession::from_history(BuilderKind::RingRail, &doc, plan.entity.id, &plan.recipe).unwrap();
+        restored.refresh(&doc, &registry()).unwrap();
+        assert_eq!(restored.preview().unwrap().geometry, plan.entity.geometry);
+        let (lo, hi, step) = rail_size_steps(system).unwrap();
+        for q in (lo..=hi).step_by(step) {
+            let size = q as f64 / 4.;
+            let diameter = rail_diameter_mm(system, size).unwrap();
+            assert_eq!(rail_size_for_diameter(system, diameter).unwrap(), size);
+            assert!(rail_diameter_mm(system, size + 0.1).is_err());
+        }
+    }
+}

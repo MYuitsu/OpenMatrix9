@@ -344,8 +344,12 @@ fn grips_expose_edit_and_control_points_in_world_space() {
     let (document, ids) = doc_with(vec![entity]);
     let control = grip_points(&document, &ids, GripMode::Control, &limits).unwrap();
     let edit = grip_points(&document, &ids, GripMode::Edit, &limits).unwrap();
-    assert_eq!(control.len(), 8);
-    assert_eq!(edit.len(), 8);
+    for corners in [&control, &edit] {
+        assert_eq!(corners.len(), 4);
+        for point in [[5.,0.,0.],[15.,0.,0.],[15.,10.,0.],[5.,10.,0.]] {
+            assert!(corners.contains(&point), "missing placed joint {point:?}");
+        }
+    }
     assert_eq!(control[0], [5.0, 0.0, 0.0]);
     let nurbs = om9_core::curve_build::interpolate(
         &[[0.0; 3], [2.0, 3.0, 0.0], [5.0, 2.0, 0.0], [8.0, 0.0, 0.0]],
@@ -663,7 +667,7 @@ fn circle_and_polycurve_grips_are_editable() {
     let (mut document, ids) = doc_with(vec![entity]);
     document.tolerance = Some(om9_core::history::Tolerance::om9_template());
     let handles = grip_handles(&document, &ids, GripMode::Control, &limits).unwrap();
-    assert_eq!(handles.len(), 4);
+    assert_eq!(handles.len(), 3);
     let geometry = move_grip_geometry(&document, handles[1], [5.0, 1.0, 0.0], &limits).unwrap();
     let Geometry::Curve(Curve::Polycurve { segments, .. }) = geometry else {
         panic!("polycurve grip lost the polycurve");
@@ -672,6 +676,8 @@ fn circle_and_polycurve_grips_are_editable() {
         panic!("first segment is not a line");
     };
     assert!((end[1] - 1.0).abs() < 1e-9);
+    let Curve::Line { start, .. } = &segments[1] else { panic!("second segment"); };
+    assert_eq!(end, start);
 }
 
 #[test]

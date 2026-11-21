@@ -316,6 +316,11 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "top11_routes_2026_11_21": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "Move, Mirror and Rotate share their handlers. Physical right-click Rotate and Mirror produced independent reflected and rotated circles.",
+      "evidence": "docs/validation/2026-11-21-top11.md"
+    },
     "rotate_direction_scale_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-copy-rotate-direction-scale.md", "scope": "Rotate reference direction is normalized before projection; signed extreme scales, preview and commit checked.", "limitations": "Near-axis conditioning and physical desktop input remain open."},
     "mirror_plane_scale_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-mirror-plane-scale.md", "scope": "Two- and three-point mirror direction normalization handles tested small/large definitions; point and BRep preview/commit verified.", "limitations": "Near-collinear angles, wider geometry, physical input and desktop GPU acceptance remain open."},
     "inactive_view_input_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-inactive-view-cplane.md", "scope": "Move, Mirror and Rotate preview and click use pointed viewport CPlane; tested Project snap and parallel-ray refusal.", "limitations": "Other CPlanes, input devices, GPU and desktop acceptance remain open."},

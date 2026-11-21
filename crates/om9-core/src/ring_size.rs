@@ -19,6 +19,12 @@ pub fn rail_system_label(id: &str) -> &str {
         "vnm_circumference" => "VNM (Việt Nam) — inside circumference (mm)",
         "US" | "us" => "US / Canada (Stuller)",
         "explicit" | "diameter" => "Inside diameter (mm)",
+        "britain" => "Britain",
+        "japan" => "Japan",
+        "swiss" => "Swiss",
+        "european" => "European",
+        "france" => "France",
+        "german" => "German",
         "iso" => "Inside circumference (mm)",
         "diameter_inches" => "Inside diameter (inch)",
         "circumference_inches" => "Inside circumference (inch)",
@@ -26,10 +32,35 @@ pub fn rail_system_label(id: &str) -> &str {
     }
 }
 
+/// The named sizes shown by the Matrix region picker, expressed in quarter units.
+pub fn rail_size_steps(system: &str) -> Option<(i32, i32, usize)> {
+    Some(match system {
+        "US" | "us" => (4, 60, 1),
+        "britain" => (4, 134, 2),
+        "japan" => (0, 144, 4),
+        "swiss" => (4, 163, 1),
+        "european" => (164, 320, 4),
+        "france" => (164, 323, 1),
+        "german" => (53, 90, 1),
+        _ => return None,
+    })
+}
+
+fn regional_diameter(system: &str, size: f64) -> f64 {
+    match system {
+        "britain" => 11.5 + 0.4 * size,
+        "japan" => 12.67 + size / 3.,
+        "swiss" => (40. + size) / std::f64::consts::PI,
+        "european" | "france" => size / std::f64::consts::PI,
+        "german" => size,
+        _ => unreachable!("named region"),
+    }
+}
+
 /// Shared Ring Rail input conversion. US quarter sizes interpolate the frozen
 /// Stuller half-size table; custom dimensions are converted to world millimetres.
 pub fn rail_diameter_mm(system: &str, size: f64) -> Result<f64> {
-    if !size.is_finite() || size <= 0.0 { return Err(Error::Invalid("ring size")); }
+    if !size.is_finite() || size < 0.0 { return Err(Error::Invalid("ring size")); }
     let diameter = match system.trim().to_ascii_lowercase().as_str() {
         "us" | "usa" => {
             if !(1.0..=15.0).contains(&size) || (size * 4.0 - (size * 4.0).round()).abs() > 1e-8 {
@@ -39,6 +70,14 @@ pub fn rail_diameter_mm(system: &str, size: f64) -> Result<f64> {
             let a = (US_HALF_DIAMETERS_MM[index] * 100.).round();
             let b = (US_HALF_DIAMETERS_MM[(index + 1).min(28)] * 100.).round();
             (a + (b - a) * ((size - 1.) * 2.).fract()).round() / 100.0
+        }
+        region if let Some((lo, hi, step)) = rail_size_steps(region) => {
+            let quarter = size * 4.;
+            if quarter < lo as f64 || quarter > hi as f64
+                || (quarter - quarter.round()).abs() > 1e-8 || (quarter.round() as i32 - lo) % step as i32 != 0 {
+                return Err(Error::Invalid("regional ring size"));
+            }
+            regional_diameter(region, size)
         }
         "diameter" | "explicit" | "vnm" => size,
         "iso" | "circumference" | "vnm_circumference" => size / std::f64::consts::PI,
@@ -61,6 +100,12 @@ pub fn rail_size_for_diameter(system: &str, diameter_mm: f64) -> Result<f64> {
             (4..=60).map(|quarter| quarter as f64 / 4.).min_by(|a, b|
                 (rail_diameter_mm("us", *a).unwrap() - diameter_mm).abs().total_cmp(&(rail_diameter_mm("us", *b).unwrap() - diameter_mm).abs()))
                 .ok_or(Error::Invalid("US ring size"))
+        }
+        region if let Some((lo, hi, step)) = rail_size_steps(region) => {
+            (lo..=hi).step_by(step).map(|q| q as f64 / 4.).min_by(|a, b|
+                (regional_diameter(region, *a) - diameter_mm).abs()
+                    .total_cmp(&(regional_diameter(region, *b) - diameter_mm).abs()))
+                .ok_or(Error::Invalid("regional ring size"))
         }
         "diameter" | "explicit" | "vnm" => Ok(diameter_mm),
         "iso" | "circumference" | "vnm_circumference" => Ok(diameter_mm * std::f64::consts::PI),

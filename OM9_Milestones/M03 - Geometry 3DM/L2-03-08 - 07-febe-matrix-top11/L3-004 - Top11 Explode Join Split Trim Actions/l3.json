@@ -326,6 +326,11 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "top11_routes_2026_11_21": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "Validated source-based retained Join/Split/Trim, glyph contours, cage release, secondary Split and Trim options.",
+      "evidence": "docs/validation/2026-11-21-top11.md"
+    },
     "native_brep_availability_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-native-brep-availability.md", "scope": "Unsupported retained-native-BRep topology operations are disabled for selected objects with an explicit reason.", "limitations": "This does not implement native BRep topology editing or establish real 3DM and desktop behavior."},
     "line_endpoint_tolerance_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-line-endpoint-tolerance.md", "scope": "Split and Trim honor document tolerance for nonparallel finite line endpoint approaches; CMD and toolbar controller paths, Undo/Redo, .om9 and a 3DM Split fixture passed.", "limitations": "General intersections, extreme precision and physical desktop acceptance remain open."},
     "short_line_3dm_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-short-line-3dm.md", "scope": "Selected short Line and Split-cutter 3DM roundtrips use disclosed, validated degree-one NURBS metadata.", "limitations": "Marked-line Preserve editing, arbitrary nested placement, external editor and desktop acceptance remain open."},

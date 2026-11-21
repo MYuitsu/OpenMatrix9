@@ -52,17 +52,11 @@ fn install_and_move() {
     ));
     host.register_runtime(RuntimeKind::Native, Box::new(NativeRuntime::new()));
     host.startup(&Startup::default());
-    assert!(
-        host.install_zip(
-            &tmp.join("t.zip"),
-            &InstallOptions {
-                enable: true,
-                ..Default::default()
-            }
-        )
-        .unwrap()
-        .enabled
-    );
+    let installed = host.install_zip(
+        &tmp.join("t.zip"),
+        &InstallOptions { enable: true, ..Default::default() },
+    ).unwrap();
+    assert!(installed.enabled, "{:?}", installed.warnings);
     let sel = json!([{"id": "1", "kind": "mesh", "name": "m", "bbox": [[0, 0, 0], [1, 1, 1]]}]);
     let mut state = Value::Null;
     let mut step = |input: Value| -> Value {
@@ -86,5 +80,6 @@ fn install_and_move() {
     assert_eq!(r["done"], true);
     assert_eq!(r["transform"]["matrices"][0][3], 3.0);
     assert_eq!(r["transform"]["keep_original"], false);
+    host.disable("om9_transform").unwrap();
     fs::remove_dir_all(&tmp).unwrap();
 }

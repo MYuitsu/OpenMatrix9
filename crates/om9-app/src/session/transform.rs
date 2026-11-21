@@ -27,7 +27,7 @@ use om9_scene::camera::CPlane;
 use super::Controller;
 mod advanced;
 pub use advanced::{CurveOrientation, TransformOptions};
-mod cage;
+pub(super) mod cage;
 mod flow;
 mod rows;
 pub use cage::{CAGE, CAGE_EDIT, RELEASE_CAGE};

@@ -17,6 +17,9 @@ impl Controller {
                 .filter(|_| Self::availability(feature).is_ok())
                 .and_then(|key| self.addon_code(key))
         }) {
+            if let Some(action) = om9_core::top11::Top11Action::from_catalog(&code) {
+                return self.top11_invoke(action).map(|_| ());
+            }
             return self.run_addon_command(&code);
         }
         Self::availability(feature)?;

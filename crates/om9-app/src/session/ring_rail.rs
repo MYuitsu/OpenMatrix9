@@ -32,6 +32,59 @@ impl Controller {
             .map(|session| Frontend::Direct(session.output(), session.revision()))
     }
 
+    /// Read the same settings edited by the command line, including older standalone add-ons.
+    pub fn ring_rail_size(&self) -> Option<(&str, f64)> {
+        use om9_addons::settings::SettingValue;
+        if let Some(builder) = &self.addon_builder {
+            let SettingValue::Str(system) = builder.value(&builder.find("SizeSystem")?.key)? else { return None };
+            let SettingValue::Float(size) = builder.value(&builder.find("RingSize")?.key)? else { return None };
+            return Some((system, *size));
+        }
+        let builder = self.builder.as_ref()?;
+        let system = builder.field("standard")?.selected_choice()?;
+        let size = builder.field(if system == "explicit" { "diameter_mm" } else { "us_size" })?.numeric()?;
+        Some((system, size))
+    }
+
+    /// Change both fields together. Switching from a custom diameter outside a region's
+    /// table must still allow choosing a valid size in that region.
+    pub fn set_ring_rail_size(&mut self, system: &str, size: f64) -> Result<()> {
+        use om9_addons::settings::SettingValue;
+        use om9_core::{request::Value, units::LengthMm};
+        if !self.ring_rail_is_open() || self.ring_rail_confirmation_pending() || self.ring_rail_history_pending() {
+            return Err(Error::Busy);
+        }
+        let diameter = om9_core::ring_size::rail_diameter_mm(system, size)?;
+        if self.ring_rail_size().is_some_and(|(current, value)| value == size
+            && (current.eq_ignore_ascii_case(system) || (current == "explicit" && system == "diameter"))) {
+            return Ok(());
+        }
+        if let Some(builder) = &mut self.addon_builder {
+            let mut changes = Vec::new();
+            for (option, value) in [("SizeSystem", SettingValue::Str(system.into())), ("RingSize", SettingValue::Float(size))] {
+                let spec = builder.find(option).ok_or(Error::Missing("Ring Rail option"))?;
+                let value = spec.validate(&value).map_err(|e| Error::Io(e.to_string()))?;
+                changes.push((spec.key.clone(), value));
+            }
+            builder.values.extend(changes);
+            builder.revision += 1;
+            self.refresh_builder_preview();
+            return Ok(());
+        }
+        if !self.builder_editable() { return Err(Error::Invalid("builder input locked")); }
+        let mut candidate = self.builder.clone().ok_or(Error::Missing("Ring Rail builder"))?;
+        let id = match system { "us" => "US", "vnm" => "VNM", "diameter" => "explicit", other => other };
+        candidate.set_field("diameter_mm", Value::length(LengthMm::try_new(diameter)?))?;
+        candidate.set_field("standard", Value::Choice(id.into()))?;
+        candidate.set_field("us_size", Value::ratio(size)?)?;
+        let previous = self.builder.replace(candidate);
+        if let Err(error) = self.builder_refresh() {
+            self.builder = previous;
+            return Err(error);
+        }
+        Ok(())
+    }
+
     /// The durable current-rail pointer is part of the same transaction as its source.
     /// Old drawings without a pointer use an unambiguous recorded rail or explicit pick.
     pub fn current_ring_rail(&self) -> Result<Option<ObjectId>> {

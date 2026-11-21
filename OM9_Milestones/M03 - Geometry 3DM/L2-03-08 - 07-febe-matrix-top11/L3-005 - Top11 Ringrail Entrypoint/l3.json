@@ -131,6 +131,16 @@
     "scope": "No M03 L4 assigned"
   },
   "runtime_implementation": {
+    "region_toolbar_2026_11_22": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "Compact Top11 bar, confirmed region and native desktop placement from USA size 7 to VNM 17.32 mm.",
+      "evidence": "docs/validation/2026-11-22-ring-rail-toolbar.md"
+    },
+    "top11_routes_2026_11_21": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "The Tools and standalone Ring Rail routes both produced a curve from the Top11 entry.",
+      "evidence": "docs/validation/2026-11-21-top11.md"
+    },
     "date": "2026-10-31",
     "status": "AUTOMATED_PARTIAL_MANUAL_UI_PENDING",
     "target": "standalone M04 builder",

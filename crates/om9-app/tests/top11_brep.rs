@@ -2,6 +2,8 @@
 //! BRep mirror through the Top 11 adapter (OCCT kernel feature).
 #![cfg(feature = "occt-brep")]
 
+#[path = "common/top11_sources.rs"]
+mod top11_sources;
 use om9_app::{command_options::CommandOptionInterface, session::Controller};
 use om9_core::{
     budget::Limits,
@@ -25,30 +27,32 @@ fn box_brep() -> om9_core::brep::Brep {
 
 #[test]
 fn trim_closed_curve_with_brep_cutter_at_seam_keeps_correct_interval() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::{curve_ops,top11::Top11Action};
     let limits=Limits::default();let body=creation::primitive(Primitive::Box{x_mm:6.,y_mm:20.,z_mm:2.},creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();
     for kind in 0..5 {for toolbar in [false,true] {
         let curve=if kind==0 {Curve::Circle{center:[0.;3],x:[1.,0.,0.],y:[0.,1.,0.],radius:5.,domain:[0.,std::f64::consts::TAU],angle_domain:None}} else {let mut n=om9_core::curve_build::ellipse([0.;3],[1.,0.,0.],[0.,1.,0.],5.,5.,&limits).unwrap();n.reversed=kind==2||kind==4;let curve=Curve::Nurbs(n);if kind>=3 {let(f,_,d)=om9_core::curve_surface_ops::closest_point_on_curve(&curve,[-1.,24_f64.sqrt(),0.],&limits).unwrap();assert!(d<1e-7);curve_ops::set_seam(&curve,f,1e-9,&limits).unwrap()}else{curve}};
-        let target=Entity::new("closed",Geometry::Curve(curve),None);let mut cutter=Entity::new("box",Geometry::Brep(body.clone()),None);cutter.placement=Transform::translation([-1.,-10.,-1.]);let ids=[target.id,cutter.id];
-        let mut doc=Document::with_template_tolerance("closed curve brep seam");doc.entities.insert(ids[0],target);doc.entities.insert(ids[1],cutter);let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();
+        let target=Entity::new("closed",Geometry::Curve(curve),None);let mut cutter=Entity::new("box",fixtures.brep(body.clone()),None);cutter.placement=Transform::translation([-1.,-10.,-1.]);let ids=[target.id,cutter.id];
+        let mut doc=Document::with_template_tolerance("closed curve brep seam");doc.entities.insert(ids[0],target);doc.entities.insert(ids[1],cutter);let mut c=fixtures.controller(doc,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();
         if toolbar {c.top11_invoke(Top11Action::Trim).unwrap_or_else(|e|panic!("invoke kind={kind} {e:?}"));}else{c.submit("Trim").unwrap_or_else(|e|panic!("invoke kind={kind} {e:?}"));}let d=5./2_f64.sqrt();c.top11_trim_many_accept_pick(ids[0],[d,d,0.]).unwrap_or_else(|e|panic!("pick kind={kind} {e:?}"));c.submit("").unwrap();
         let after=c.document().clone();let pieces:Vec<_>=after.entities.iter().filter(|(id,_)|**id!=ids[1]).collect();assert_eq!(pieces.len(),1);let Geometry::Curve(curve)=&pieces[0].1.geometry else{panic!("curve")};
         let ends=curve_ops::curve_endpoints(curve,&limits).unwrap();for p in [[5.,0.],[-1.,24_f64.sqrt()]]{assert!(ends.iter().any(|q|(q[0]-p[0]).hypot(q[1]-p[1])<1e-6),"kind={kind} {ends:?}");}
         let expected=5.*(std::f64::consts::TAU-(-0.2_f64).acos());assert!((curve_ops::arc_length(curve,&limits).unwrap()-expected).abs()<1e-5);
-        let path=std::env::temp_dir().join(format!("om9-trim-brep-seam-{}.om9",uuid::Uuid::new_v4()));om9_archive::Archive::save(&path,&after,&limits,&om9_core::transaction::Cancellation::default()).unwrap();assert_eq!(om9_archive::Archive::open(&path,&limits).unwrap(),after);std::fs::remove_file(path).unwrap();c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);
+        let path=std::env::temp_dir().join(format!("om9-trim-brep-seam-{}.om9",uuid::Uuid::new_v4()));let reopened = top11_sources::round_trip(&c, &path, limits);assert_eq!(reopened,after);std::fs::remove_file(path).unwrap();c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);
     }}
 }
 
 #[test]
 fn brep_cutter_splits_long_line_near_endpoint_without_losing_faces() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::top11::Top11Action;
     let limits=Limits::default();let brep=creation::primitive(Primitive::Box{x_mm:0.05,y_mm:2.,z_mm:2.},creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();
     let curve=Curve::Line{start:[-0.05,1.,1.],end:[999_999.95,1.,1.],domain:[0.,1.]};
     let fractions=om9_kernel::intersect::curve_brep_fractions(&brep,&curve,0.001,&limits).unwrap();assert_eq!(fractions.len(),2,"{fractions:?}");
     for toolbar in [false,true] {
-        let target=Entity::new("long line",Geometry::Curve(curve.clone()),None);let id=target.id;let cutter=Entity::new("box",Geometry::Brep(brep.clone()),None);let cutter_id=cutter.id;
+        let target=Entity::new("long line",Geometry::Curve(curve.clone()),None);let id=target.id;let cutter=Entity::new("box",fixtures.brep(brep.clone()),None);let cutter_id=cutter.id;
         let mut doc=Document::with_template_tolerance("near endpoint brep");doc.entities.insert(id,target);doc.entities.insert(cutter_id,cutter);
-        let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&[id]).unwrap();let before=c.document().clone();
+        let mut c=fixtures.controller(doc,limits).unwrap();c.select_objects(&[id]).unwrap();let before=c.document().clone();
         if toolbar {c.top11_invoke(Top11Action::Split).unwrap();}else{c.submit("Split").unwrap();}c.top11_accept_object(cutter_id).unwrap();c.submit("").unwrap();
         let after=c.document().clone();assert_eq!(after.entities.len(),4);
         let mut lengths:Vec<_>=after.entities.iter().filter(|(id,_)|**id!=cutter_id).map(|(_,e)|match &e.geometry{Geometry::Curve(curve)=>om9_core::curve_ops::arc_length(curve,&limits).unwrap(),_=>panic!("curve")}).collect();
@@ -152,8 +156,7 @@ fn split_isocurve_preserves_rational_surface_under_affine_placement() {
         for i in 0..3 { assert!((a[i] - b[i]).abs() < 1e-10); }
     }
     let path = std::env::temp_dir().join(format!("om9-isocurve-{}.om9", uuid::Uuid::new_v4()));
-    om9_archive::Archive::save(&path, c.document(), &limits, &om9_core::transaction::Cancellation::default()).unwrap();
-    let loaded = om9_archive::Archive::open(&path, &limits).unwrap();
+    let loaded = top11_sources::round_trip(&c, &path, limits);
     std::fs::remove_file(path).unwrap(); assert_eq!(&loaded, c.document());
     c.undo().unwrap(); assert_eq!(c.document(), &before);
 }
@@ -195,8 +198,7 @@ fn split_isocurve_shrink_yes_restricts_rational_surface_exactly() {
     }
     let after = c.document().clone();
     let path = std::env::temp_dir().join(format!("om9-isocurve-shrink-{}.om9", uuid::Uuid::new_v4()));
-    om9_archive::Archive::save(&path, &after, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
-    let loaded = om9_archive::Archive::open(&path, &limits).unwrap();
+    let loaded = top11_sources::round_trip(&c, &path, limits);
     std::fs::remove_file(path).unwrap(); assert_eq!(loaded, after);
     c.undo().unwrap(); assert_eq!(c.document(), &before);
     c.redo().unwrap(); assert_eq!(c.document(), &after);
@@ -204,15 +206,16 @@ fn split_isocurve_shrink_yes_restricts_rational_surface_exactly() {
 
 #[test]
 fn split_isocurve_on_placed_single_face_brep_preserves_area_and_undo() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     for direction in ["U", "V", "Both"] {
         let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
         let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-        let mut target = Entity::new("face", Geometry::Brep(face), None);
+        let mut target = Entity::new("face", fixtures.brep(face), None);
         target.placement = Transform::translation([20., 30., 5.]);
         let id = target.id;
         let mut doc = Document::with_template_tolerance("split BRep isocurve"); doc.entities.insert(id, target);
-        let mut c = Controller::new(doc, limits).unwrap();
+        let mut c = fixtures.controller(doc, limits).unwrap();
         let before = c.document().clone();
         c.select_objects(&[id]).unwrap(); c.submit("Split").unwrap();
         assert!(c.command_options().iter().any(|o| o.id.name() == "Isocurve"));
@@ -237,8 +240,7 @@ fn split_isocurve_on_placed_single_face_brep_preserves_area_and_undo() {
         let after = c.document().clone();
         if direction == "Both" {
             let path = std::env::temp_dir().join(format!("om9-brep-isocurve-{}.om9", uuid::Uuid::new_v4()));
-            om9_archive::Archive::save(&path, &after, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
-            let loaded = om9_archive::Archive::open(&path, &limits).unwrap();
+            let loaded = top11_sources::round_trip(&c, &path, limits);
             std::fs::remove_file(path).unwrap(); assert_eq!(loaded, after);
         }
         c.undo().unwrap(); assert_eq!(c.document(), &before);
@@ -248,13 +250,14 @@ fn split_isocurve_on_placed_single_face_brep_preserves_area_and_undo() {
 
 #[test]
 fn split_brep_isocurve_shrink_restricts_underlying_surface() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_app::command_options::CommandValue;
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
     let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let target = Entity::new("face", Geometry::Brep(face), None); let id = target.id;
+    let target = Entity::new("face", fixtures.brep(face), None); let id = target.id;
     let mut doc = Document::with_template_tolerance("BRep isocurve shrink"); doc.entities.insert(id, target);
-    let mut c = Controller::new(doc, limits).unwrap(); let before = c.document().clone();
+    let mut c = fixtures.controller(doc, limits).unwrap(); let before = c.document().clone();
     c.select_objects(&[id]).unwrap(); c.submit("Split").unwrap(); c.submit("Isocurve").unwrap(); c.submit("Both").unwrap();
     let shrink = c.command_options().into_iter().find(|o| o.id.name() == "Shrink").unwrap();
     assert_eq!(shrink.value, CommandValue::Flag(false)); c.activate_command_option(shrink.id).unwrap();
@@ -296,7 +299,7 @@ fn shrink_brep_nurbs_face_preserves_exact_geometry() {
         assert!((area_a - area_b).abs() < 1e-6);
         let uv = [(after[0] + after[1]) / 2., (after[2] + after[3]) / 2.];
         let point = om9_core::surface_kernel::evaluate(&surface, uv[0], uv[1], &limits).unwrap();
-        let distance = om9_kernel::measurement::distance(&Geometry::Brep(result), Transform::identity(),
+        let distance = om9_kernel::measurement::distance(&Geometry::Brep(result.into_canonical_and_representation().0), Transform::identity(),
             &Geometry::Point(point), Transform::identity(), &limits).unwrap().millimetres;
         assert!(distance < 1e-6, "{distance}");
     }
@@ -304,15 +307,16 @@ fn shrink_brep_nurbs_face_preserves_exact_geometry() {
 
 #[test]
 fn split_isocurve_preserves_trimmed_face_hole() {
+    let mut fixtures = top11_sources::Displays::default();
     use std::f64::consts::{PI, TAU};
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
-    let target = Entity::new("face", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let target = Entity::new("face", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     let cutter = Entity::new("circle", Geometry::Curve(Curve::Circle { center: [5., 10., 0.], x: [1., 0., 0.], y: [0., 1., 0.], radius: 2., domain: [0., TAU], angle_domain: None }), None);
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("isocurve trimmed hole");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits).unwrap();
+    let mut c = fixtures.controller(doc, limits).unwrap();
     c.select_objects(&ids).unwrap(); c.submit("Trim").unwrap(); c.accept_world_point([5., 10., 0.]).unwrap(); c.submit("").unwrap();
     let before = c.document().clone();
     let trimmed = &c.document().entities[&ids[0]];
@@ -334,15 +338,16 @@ fn split_isocurve_preserves_trimmed_face_hole() {
 
 #[test]
 fn split_brep_isocurve_shrink_keeps_trimmed_hole_and_persistence() {
+    let mut fixtures = top11_sources::Displays::default();
     use std::f64::consts::{PI, TAU};
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
-    let target = Entity::new("face", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let target = Entity::new("face", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     let cutter = Entity::new("circle", Geometry::Curve(Curve::Circle { center: [5., 10., 0.], x: [1., 0., 0.], y: [0., 1., 0.], radius: 2., domain: [0., TAU], angle_domain: None }), None);
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("shrink hole");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits).unwrap();
+    let mut c = fixtures.controller(doc, limits).unwrap();
     c.select_objects(&ids).unwrap(); c.submit("Trim").unwrap(); c.accept_world_point([5., 10., 0.]).unwrap(); c.submit("").unwrap();
     let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap(); c.submit("Split").unwrap(); c.submit("Isocurve").unwrap(); c.submit("Both").unwrap(); c.submit("Shrink=Yes").unwrap();
@@ -362,20 +367,20 @@ fn split_brep_isocurve_shrink_keeps_trimmed_hole_and_persistence() {
     assert!((distance - 2.).abs() < 1e-6, "{distance}");
     let after = c.document().clone();
     let path = std::env::temp_dir().join(format!("om9-brep-shrink-hole-{}.om9", uuid::Uuid::new_v4()));
-    om9_archive::Archive::save(&path, &after, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
-    let loaded = om9_archive::Archive::open(&path, &limits).unwrap(); std::fs::remove_file(path).unwrap(); assert_eq!(loaded, after);
+    let loaded = top11_sources::round_trip(&c, &path, limits); std::fs::remove_file(path).unwrap(); assert_eq!(loaded, after);
     c.undo().unwrap(); assert_eq!(c.document(), &before); c.redo().unwrap(); assert_eq!(c.document(), &after);
 }
 
 #[test]
 fn split_brep_isocurve_shrink_preserves_nonuniform_placement() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
-    let mut target = Entity::new("scaled face", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let mut target = Entity::new("scaled face", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     target.placement = Transform([[2., 0., 0., 30.], [0., 0.5, 0., -7.], [0., 0., 3., 4.], [0., 0., 0., 1.]]);
     let id = target.id;
     let mut doc = Document::with_template_tolerance("scaled BRep shrink"); doc.entities.insert(id, target);
-    let mut c = Controller::new(doc, limits).unwrap(); let before = c.document().clone();
+    let mut c = fixtures.controller(doc, limits).unwrap(); let before = c.document().clone();
     c.select_objects(&[id]).unwrap(); c.submit("Split").unwrap(); c.submit("Isocurve").unwrap(); c.submit("Both").unwrap(); c.submit("Shrink=Yes").unwrap();
     c.accept_world_point([36., -3.5, 4.]).unwrap();
     assert_eq!(c.document().entities.len(), 4);
@@ -396,15 +401,16 @@ fn split_brep_isocurve_shrink_preserves_nonuniform_placement() {
 
 #[test]
 fn split_isocurve_on_cylindrical_brep_keeps_exact_area() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let body = creation::primitive(Primitive::Cylinder { radius_mm: 5., height_mm: 10. }, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let body_measure = creation::measure(&body, &limits).unwrap();
     let side = (0..body_measure.faces).map(|index| om9_kernel::editing::extract_face(&body, index, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap())
         .find(|face| (creation::measure(face, &limits).unwrap().area_mm2 - 100. * std::f64::consts::PI).abs() < 1e-5).unwrap();
-    let target = Entity::new("cylinder wall", Geometry::Brep(side), None);
+    let target = Entity::new("cylinder wall", fixtures.brep(side), None);
     let id = target.id;
     let mut doc = Document::with_template_tolerance("cylinder isocurve"); doc.entities.insert(id, target);
-    let mut c = Controller::new(doc, limits).unwrap();
+    let mut c = fixtures.controller(doc, limits).unwrap();
     let before = c.document().clone();
     c.select_objects(&[id]).unwrap(); c.submit("Split").unwrap(); c.submit("Isocurve").unwrap(); c.submit("U").unwrap();
     assert!(!c.command_options().iter().any(|o| o.id.name() == "Shrink"));
@@ -420,14 +426,15 @@ fn split_isocurve_on_cylindrical_brep_keeps_exact_area() {
 
 #[test]
 fn split_isocurve_viewport_refines_cylinder_hit_along_ray() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let body = creation::primitive(Primitive::Cylinder { radius_mm: 5., height_mm: 10. }, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let side = (0..creation::measure(&body, &limits).unwrap().faces)
         .map(|i| om9_kernel::editing::extract_face(&body, i, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap())
         .find(|face| (creation::measure(face, &limits).unwrap().area_mm2 - 100. * std::f64::consts::PI).abs() < 1e-5).unwrap();
-    let target = Entity::new("wall", Geometry::Brep(side), None); let id = target.id;
+    let target = Entity::new("wall", fixtures.brep(side), None); let id = target.id;
     let mut doc = Document::with_template_tolerance("isocurve ray"); doc.entities.insert(id, target);
-    let mut c = Controller::new(doc, limits).unwrap(); let before = c.document().clone();
+    let mut c = fixtures.controller(doc, limits).unwrap(); let before = c.document().clone();
     c.select_objects(&[id]).unwrap(); c.submit("Split").unwrap(); c.submit("Isocurve").unwrap(); c.submit("U").unwrap();
     let a = 5. / 2_f64.sqrt();
     let ray = om9_scene::camera::Ray { origin: [10., 10., 0.], direction: [a - 10., a - 10., 5.] };
@@ -479,13 +486,14 @@ fn split_isocurve_viewport_refines_typed_nurbs_hit_along_ray() {
 
 #[test]
 fn split_isocurve_on_nonuniformly_placed_brep_uses_world_point() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
-    let mut target = Entity::new("scaled face", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let mut target = Entity::new("scaled face", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     target.placement = Transform([[2., 0., 0., 30.], [0., 0.5, 0., -7.], [0., 0., 3., 4.], [0., 0., 0., 1.]]);
     let id = target.id;
     let mut doc = Document::with_template_tolerance("scaled BRep isocurve"); doc.entities.insert(id, target);
-    let mut c = Controller::new(doc, limits).unwrap();
+    let mut c = fixtures.controller(doc, limits).unwrap();
     let before = c.document().clone();
     c.select_objects(&[id]).unwrap(); c.submit("Split").unwrap(); c.submit("Isocurve").unwrap(); c.submit("Both").unwrap();
     c.accept_world_point([36., -3.5, 4.]).unwrap();
@@ -502,15 +510,16 @@ fn split_isocurve_on_nonuniformly_placed_brep_uses_world_point() {
 
 #[test]
 fn split_does_not_offer_isocurve_for_polysurface_or_multiple_targets() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
-    let solid = Entity::new("box", Geometry::Brep(box_brep()), None);
+    let solid = Entity::new("box", fixtures.brep(box_brep()), None);
     let a = Entity::new("a", Geometry::Surface(om9_core::surface_kernel::plane([0., 0., 0.], [1., 0., 0.], [0., 1., 0.], 10., 20., &limits).unwrap()), None);
     let b = Entity::new("b", a.geometry.clone(), None);
-    let cylinder = Entity::new("periodic solid", Geometry::Brep(creation::primitive(Primitive::Cylinder { radius_mm: 5., height_mm: 10. }, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let cylinder = Entity::new("periodic solid", fixtures.brep(creation::primitive(Primitive::Cylinder { radius_mm: 5., height_mm: 10. }, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     let ids = [solid.id, a.id, b.id, cylinder.id];
     let mut doc = Document::with_template_tolerance("isocurve availability");
     for entity in [solid, a, b, cylinder] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits).unwrap();
+    let mut c = fixtures.controller(doc, limits).unwrap();
     for (selection, shrink_expected) in [(&ids[..1], true), (&ids[1..3], true), (&ids[3..], false)] {
         c.select_objects(selection).unwrap(); c.submit("Split").unwrap();
         assert!(!c.command_options().iter().any(|o| o.id.name() == "Isocurve"));
@@ -521,12 +530,13 @@ fn split_does_not_offer_isocurve_for_polysurface_or_multiple_targets() {
 
 #[test]
 fn split_placed_surface_with_two_cutters_is_atomic_and_undoable() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::top11::Top11Action;
     let limits = Limits::default();
     for toolbar in [false, true] {
         let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
         let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-        let mut target = Entity::new("face", Geometry::Brep(face), None);
+        let mut target = Entity::new("face", fixtures.brep(face), None);
         target.placement = Transform::translation([20., 4., 2.]);
         let mut a = Entity::new("a", Geometry::Curve(Curve::Line { start: [3., -1., 0.], end: [3., 21., 0.], domain: [0., 1.] }), None);
         let mut b = Entity::new("b", Geometry::Curve(Curve::Line { start: [7., -1., 0.], end: [7., 21., 0.], domain: [0., 1.] }), None);
@@ -535,7 +545,7 @@ fn split_placed_surface_with_two_cutters_is_atomic_and_undoable() {
         let ids = [target.id, a.id, b.id];
         let mut doc = Document::with_template_tolerance("split face");
         for entity in [target, a, b] { doc.entities.insert(entity.id, entity); }
-        let mut c = Controller::new(doc, limits.clone()).unwrap();
+        let mut c = fixtures.controller(doc, limits.clone()).unwrap();
         let before = c.document().clone();
         if toolbar {
             c.select_objects(&[ids[0]]).unwrap();
@@ -615,6 +625,7 @@ fn split_mixed_targets_skips_missed_face_and_cancel_is_nonmutating() {
 
 #[test]
 fn split_cutters_shrink_mixed_surface_targets_in_one_transaction() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_app::command_options::CommandValue;
     let limits = Limits::default();
     for select_after_command in [false, true] {
@@ -622,13 +633,13 @@ fn split_cutters_shrink_mixed_surface_targets_in_one_transaction() {
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
     let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let a = Entity::new("typed", Geometry::Surface(typed), None);
-    let b = Entity::new("face", Geometry::Brep(face), None);
+    let b = Entity::new("face", fixtures.brep(face), None);
     let curve = Entity::new("curve", Geometry::Curve(Curve::Line { start: [0., 10., 0.], end: [10., 10., 0.], domain: [0., 1.] }), None);
     let cutter = Entity::new("cutter", Geometry::Curve(Curve::Line { start: [5., -1., 0.], end: [5., 21., 0.], domain: [0., 1.] }), None);
     let ids = [a.id, b.id, curve.id, cutter.id];
     let mut doc = Document::with_template_tolerance("split cutter shrink mixed");
     for e in [a,b,curve,cutter] { doc.entities.insert(e.id,e); }
-    let mut c = Controller::new(doc, limits).unwrap(); let before = c.document().clone();
+    let mut c = fixtures.controller(doc, limits).unwrap(); let before = c.document().clone();
     if select_after_command {
         c.submit("Split").unwrap();
         for id in &ids[..3] { c.top11_accept_object(*id).unwrap(); }
@@ -664,26 +675,26 @@ fn split_cutters_shrink_mixed_surface_targets_in_one_transaction() {
     assert_eq!((faces,curves),(4,2)); assert!((area-400.).abs() < 1e-6);
     let after = c.document().clone();
     let path = std::env::temp_dir().join(format!("om9-cutter-shrink-{}.om9", uuid::Uuid::new_v4()));
-    om9_archive::Archive::save(&path, &after, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
-    let loaded = om9_archive::Archive::open(&path, &limits).unwrap(); std::fs::remove_file(path).unwrap(); assert_eq!(loaded, after);
+    let loaded = top11_sources::round_trip(&c, &path, limits); std::fs::remove_file(path).unwrap(); assert_eq!(loaded, after);
     c.undo().unwrap(); assert_eq!(c.document(), &before); c.redo().unwrap(); assert_eq!(c.document(), &after);
     }
 }
 
 #[test]
 fn split_cutter_shrink_fails_atomically_after_preparing_curve() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
     let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let curve = Geometry::Curve(Curve::Line { start: [5., 10., -5.], end: [5., 10., 5.], domain: [0., 1.] });
     let mut a = Entity::new("first", curve.clone(), None);
     let mut b = Entity::new("second", curve.clone(), None);
-    if a.id < b.id { b.geometry = Geometry::Brep(face.clone()); } else { a.geometry = Geometry::Brep(face.clone()); }
-    let cutter = Entity::new("overlap", Geometry::Brep(face), None);
+    if a.id < b.id { b.geometry = fixtures.brep(face.clone()); } else { a.geometry = fixtures.brep(face.clone()); }
+    let cutter = Entity::new("overlap", fixtures.brep(face), None);
     let ids = [a.id,b.id,cutter.id];
     let mut doc = Document::with_template_tolerance("split shrink atomic failure");
     for entity in [a,b,cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits).unwrap(); let before = c.document().clone();
+    let mut c = fixtures.controller(doc, limits).unwrap(); let before = c.document().clone();
     c.select_objects(&ids[..2]).unwrap(); c.submit("Split").unwrap(); c.submit("Shrink=Yes").unwrap();
     c.top11_accept_object(ids[2]).unwrap(); assert!(c.submit("").is_err());
     assert_eq!(c.document(), &before); assert_eq!(c.coordinator().undo_len(), 0); assert!(c.is_running());
@@ -712,16 +723,17 @@ fn split_shrink_option_carries_into_isocurve_mode() {
 
 #[test]
 fn split_missed_cutter_does_not_mutate() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     for solid in [false, true] {
         let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
         let brep = if solid { box_brep() } else { creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap() };
-        let target = Entity::new("target", Geometry::Brep(brep), None);
+        let target = Entity::new("target", fixtures.brep(brep), None);
         let cutter = Entity::new("cutter", Geometry::Curve(Curve::Line { start: [30., -1., 0.], end: [30., 21., 0.], domain: [0., 1.] }), None);
         let ids = [target.id, cutter.id];
         let mut doc = Document::with_template_tolerance("split errors");
         for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-        let mut c = Controller::new(doc, limits.clone()).unwrap();
+        let mut c = fixtures.controller(doc, limits.clone()).unwrap();
         c.select_objects(&[ids[0]]).unwrap();
         let before = c.document().clone();
         c.submit("Split").unwrap();
@@ -737,12 +749,13 @@ fn split_missed_cutter_does_not_mutate() {
 
 #[test]
 fn split_joined_faces_preserves_existing_seam_and_undo() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let face = |points| creation::planar(&creation::Profile::new(points).unwrap(), creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let left = face(vec![[0., 0., 0.], [5., 0., 0.], [5., 20., 0.], [0., 20., 0.]]);
     let right = face(vec![[5., 0., 0.], [10., 0., 0.], [10., 20., 0.], [5., 20., 0.]]);
     let joined = om9_kernel::editing::sew(&left, &right, 0.001, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let target = Entity::new("joined", Geometry::Brep(joined), None);
+    let target = Entity::new("joined", fixtures.brep(joined), None);
     let cutter = Entity::new("cutter", Geometry::Curve(Curve::Line { start: [-1., 10., 0.], end: [11., 10., 0.], domain: [0., 1.] }), None);
     let limited = Limits { max_outputs: 1, ..limits };
     assert!(om9_kernel::measurement::split_boundary_by_geometry(
@@ -752,7 +765,7 @@ fn split_joined_faces_preserves_existing_seam_and_undo() {
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("split joined faces");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap();
     c.submit("Split").unwrap();
@@ -775,17 +788,18 @@ fn split_joined_faces_preserves_existing_seam_and_undo() {
 
 #[test]
 fn split_joined_faces_with_shrink_preserves_shared_topology() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let face = |points| creation::planar(&creation::Profile::new(points).unwrap(), creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let left = face(vec![[0., 0., 0.], [5., 0., 0.], [5., 20., 0.], [0., 20., 0.]]);
     let right = face(vec![[5., 0., 0.], [10., 0., 0.], [10., 20., 0.], [5., 20., 0.]]);
     let joined = om9_kernel::editing::sew(&left, &right, 0.001, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let target = Entity::new("joined", Geometry::Brep(joined), None);
+    let target = Entity::new("joined", fixtures.brep(joined), None);
     let cutter = Entity::new("cutter", Geometry::Curve(Curve::Line { start: [-1., 10., 0.], end: [11., 10., 0.], domain: [0., 1.] }), None);
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("split shrink joined");
     for entity in [target,cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits).unwrap(); let before = c.document().clone();
+    let mut c = fixtures.controller(doc, limits).unwrap(); let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap(); c.submit("Split").unwrap();
     assert!(c.command_options().iter().any(|o| o.id.name() == "Shrink"));
     c.submit("Shrink=Yes").unwrap(); c.top11_accept_object(ids[1]).unwrap(); c.submit("").unwrap();
@@ -809,17 +823,18 @@ fn split_joined_faces_with_shrink_preserves_shared_topology() {
 
 #[test]
 fn split_shrink_nonplanar_shell_with_surface_cutter() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let face = |points| creation::planar(&creation::Profile::new(points).unwrap(), creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let bottom = face(vec![[0., 0., 0.], [5., 0., 0.], [5., 20., 0.], [0., 20., 0.]]);
     let wall = face(vec![[5., 0., 0.], [5., 0., 5.], [5., 20., 5.], [5., 20., 0.]]);
     let joined = om9_kernel::editing::sew(&bottom, &wall, 0.001, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let cutter = face(vec![[-1., 10., -1.], [6., 10., -1.], [6., 10., 6.], [-1., 10., 6.]]);
-    let target = Entity::new("fold", Geometry::Brep(joined), None);
-    let cutting = Entity::new("plane", Geometry::Brep(cutter), None);
+    let target = Entity::new("fold", fixtures.brep(joined), None);
+    let cutting = Entity::new("plane", fixtures.brep(cutter), None);
     let ids = [target.id, cutting.id]; let mut doc = Document::with_template_tolerance("nonplanar shell shrink");
     for entity in [target,cutting] { doc.entities.insert(entity.id,entity); }
-    let mut c = Controller::new(doc, limits).unwrap(); let before = c.document().clone();
+    let mut c = fixtures.controller(doc, limits).unwrap(); let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap(); c.submit("Split").unwrap(); c.submit("Shrink=Yes").unwrap();
     c.top11_accept_object(ids[1]).unwrap(); c.submit("").unwrap();
     let pieces: Vec<_> = c.document().entities.values().filter(|e| e.id != ids[1]).collect();
@@ -840,6 +855,7 @@ fn split_shrink_nonplanar_shell_with_surface_cutter() {
 
 #[test]
 fn split_joined_faces_along_existing_seam_separates_the_faces() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     for surface_cutter in [false, true] {
     for shrink in [false, true] {
@@ -847,9 +863,9 @@ fn split_joined_faces_along_existing_seam_separates_the_faces() {
     let left = face(vec![[0., 0., 0.], [5., 0., 0.], [5., 20., 0.], [0., 20., 0.]]);
     let right = face(vec![[5., 0., 0.], [10., 0., 0.], [10., 20., 0.], [5., 20., 0.]]);
     let joined = om9_kernel::editing::sew(&left, &right, 0.001, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let target = Entity::new("joined", Geometry::Brep(joined), None);
+    let target = Entity::new("joined", fixtures.brep(joined), None);
     let geometry = if surface_cutter {
-        Geometry::Brep(face(vec![[5., -1., -2.], [5., 21., -2.], [5., 21., 2.], [5., -1., 2.]]))
+        fixtures.brep(face(vec![[5., -1., -2.], [5., 21., -2.], [5., 21., 2.], [5., -1., 2.]]))
     } else {
         Geometry::Curve(Curve::Line { start: [5., -1., 0.], end: [5., 21., 0.], domain: [0., 1.] })
     };
@@ -857,7 +873,7 @@ fn split_joined_faces_along_existing_seam_separates_the_faces() {
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("split existing seam");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap(); c.submit("Split").unwrap();
     if shrink { c.submit("Shrink=Yes").unwrap(); }
@@ -877,17 +893,18 @@ fn split_joined_faces_along_existing_seam_separates_the_faces() {
 
 #[test]
 fn split_rejects_overlapping_surface_cutter_atomically() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let face = |points| creation::planar(&creation::Profile::new(points).unwrap(), creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let left = face(vec![[0., 0., 0.], [5., 0., 0.], [5., 20., 0.], [0., 20., 0.]]);
     let right = face(vec![[5., 0., 0.], [10., 0., 0.], [10., 20., 0.], [5., 20., 0.]]);
     let joined = om9_kernel::editing::sew(&left, &right, 0.001, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let target = Entity::new("joined", Geometry::Brep(joined), None);
-    let cutter = Entity::new("overlap", Geometry::Brep(left), None);
+    let target = Entity::new("joined", fixtures.brep(joined), None);
+    let cutter = Entity::new("overlap", fixtures.brep(left), None);
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("overlap");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits).unwrap();
+    let mut c = fixtures.controller(doc, limits).unwrap();
     let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap(); c.submit("Split").unwrap();
     c.top11_accept_object(ids[1]).unwrap();
@@ -899,17 +916,18 @@ fn split_rejects_overlapping_surface_cutter_atomically() {
 
 #[test]
 fn split_partial_seam_does_not_disconnect_a_joined_surface() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let face = |points| creation::planar(&creation::Profile::new(points).unwrap(), creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let left = face(vec![[0., 0., 0.], [5., 0., 0.], [5., 20., 0.], [0., 20., 0.]]);
     let right = face(vec![[5., 0., 0.], [10., 0., 0.], [10., 20., 0.], [5., 20., 0.]]);
     let joined = om9_kernel::editing::sew(&left, &right, 0.001, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let target = Entity::new("joined", Geometry::Brep(joined), None);
+    let target = Entity::new("joined", fixtures.brep(joined), None);
     let cutter = Entity::new("partial seam", Geometry::Curve(Curve::Line { start: [5., 0., 0.], end: [5., 10., 0.], domain: [0., 1.] }), None);
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("partial seam");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits).unwrap();
+    let mut c = fixtures.controller(doc, limits).unwrap();
     let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap(); c.submit("Split").unwrap();
     c.top11_accept_object(ids[1]).unwrap(); assert!(c.submit("").is_err());
@@ -919,18 +937,19 @@ fn split_partial_seam_does_not_disconnect_a_joined_surface() {
 
 #[test]
 fn split_seam_and_crossing_cutter_make_four_regions_in_one_undo() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let face = |points| creation::planar(&creation::Profile::new(points).unwrap(), creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let left = face(vec![[0., 0., 0.], [5., 0., 0.], [5., 20., 0.], [0., 20., 0.]]);
     let right = face(vec![[5., 0., 0.], [10., 0., 0.], [10., 20., 0.], [5., 20., 0.]]);
     let joined = om9_kernel::editing::sew(&left, &right, 0.001, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let target = Entity::new("joined", Geometry::Brep(joined), None);
+    let target = Entity::new("joined", fixtures.brep(joined), None);
     let seam = Entity::new("seam", Geometry::Curve(Curve::Line { start: [5., -1., 0.], end: [5., 21., 0.], domain: [0., 1.] }), None);
     let cross = Entity::new("cross", Geometry::Curve(Curve::Line { start: [-1., 10., 0.], end: [11., 10., 0.], domain: [0., 1.] }), None);
     let ids = [target.id, seam.id, cross.id];
     let mut doc = Document::with_template_tolerance("seam and cross");
     for entity in [target, seam, cross] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap(); c.submit("Split").unwrap();
     c.top11_accept_object(ids[1]).unwrap(); c.top11_accept_object(ids[2]).unwrap(); c.submit("").unwrap();
@@ -947,16 +966,17 @@ fn split_seam_and_crossing_cutter_make_four_regions_in_one_undo() {
 
 #[test]
 fn split_closed_polysurface_by_plane_keeps_connected_open_regions() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[-1., -1., 2.], [3., -1., 2.], [3., 4., 2.], [-1., 4., 2.]]).unwrap();
-    let mut target = Entity::new("box", Geometry::Brep(box_brep()), None);
-    let mut cutter = Entity::new("plane", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let mut target = Entity::new("box", fixtures.brep(box_brep()), None);
+    let mut cutter = Entity::new("plane", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     target.placement = Transform::translation([10., -5., 3.]);
     cutter.placement = target.placement;
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("split box boundary");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap();
     c.submit("Split").unwrap();
@@ -974,8 +994,7 @@ fn split_closed_polysurface_by_plane_keeps_connected_open_regions() {
     }
     let after = c.document().clone();
     let path = std::env::temp_dir().join(format!("om9-split-polysurface-{}.om9", uuid::Uuid::new_v4()));
-    om9_archive::Archive::save(&path, &after, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
-    let loaded = om9_archive::Archive::open(&path, &limits).unwrap();
+    let loaded = top11_sources::round_trip(&c, &path, limits);
     std::fs::remove_file(path).unwrap();
     assert_eq!(loaded, after);
     c.undo().unwrap();
@@ -986,13 +1005,14 @@ fn split_closed_polysurface_by_plane_keeps_connected_open_regions() {
 
 #[test]
 fn split_box_boundary_with_shrink_keeps_connected_regions() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[-1., -1., 2.], [3., -1., 2.], [3., 4., 2.], [-1., 4., 2.]]).unwrap();
-    let target = Entity::new("box", Geometry::Brep(box_brep()), None);
-    let cutter = Entity::new("plane", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let target = Entity::new("box", fixtures.brep(box_brep()), None);
+    let cutter = Entity::new("plane", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     let ids = [target.id,cutter.id]; let mut doc = Document::with_template_tolerance("box shrink");
     for entity in [target,cutter] { doc.entities.insert(entity.id,entity); }
-    let mut c = Controller::new(doc, limits).unwrap(); let before = c.document().clone();
+    let mut c = fixtures.controller(doc, limits).unwrap(); let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap(); c.submit("Split").unwrap(); c.submit("Shrink=Yes").unwrap();
     c.top11_accept_object(ids[1]).unwrap(); c.submit("").unwrap();
     let pieces: Vec<_> = c.document().entities.values().filter(|e| e.id != ids[1]).collect();
@@ -1011,22 +1031,22 @@ fn split_box_boundary_with_shrink_keeps_connected_regions() {
     }
     let after = c.document().clone();
     let path = std::env::temp_dir().join(format!("om9-box-shrink-{}.om9", uuid::Uuid::new_v4()));
-    om9_archive::Archive::save(&path, &after, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
-    let loaded = om9_archive::Archive::open(&path,&limits).unwrap(); std::fs::remove_file(path).unwrap(); assert_eq!(loaded, after);
+    let loaded = top11_sources::round_trip(&c, &path, limits); std::fs::remove_file(path).unwrap(); assert_eq!(loaded, after);
     c.undo().unwrap(); assert_eq!(c.document(),&before); c.redo().unwrap(); assert_eq!(c.document(),&after);
 }
 
 #[test]
 fn split_sphere_boundary_by_plane_produces_two_hemispheres() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let sphere = creation::primitive(Primitive::Sphere { radius_mm: 5. }, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let profile = creation::Profile::new(vec![[-6., -6., 0.], [6., -6., 0.], [6., 6., 0.], [-6., 6., 0.]]).unwrap();
-    let target = Entity::new("sphere", Geometry::Brep(sphere), None);
-    let cutter = Entity::new("plane", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let target = Entity::new("sphere", fixtures.brep(sphere), None);
+    let cutter = Entity::new("plane", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("split sphere boundary");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap();
     c.submit("Split").unwrap();
@@ -1046,15 +1066,16 @@ fn split_sphere_boundary_by_plane_produces_two_hemispheres() {
 
 #[test]
 fn split_surface_with_brep_cutter_produces_two_faces() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
     let cutter_profile = creation::Profile::new(vec![[5., -1., -2.], [5., 21., -2.], [5., 21., 2.], [5., -1., 2.]]).unwrap();
-    let target = Entity::new("target", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
-    let cutter = Entity::new("cutter", Geometry::Brep(creation::planar(&cutter_profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let target = Entity::new("target", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let cutter = Entity::new("cutter", fixtures.brep(creation::planar(&cutter_profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("split surface with surface");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&[ids[0]]).unwrap();
     c.submit("Split").unwrap();
@@ -1072,13 +1093,14 @@ fn split_surface_with_brep_cutter_produces_two_faces() {
 
 #[test]
 fn trim_line_and_placed_face_through_command_and_toolbar_with_undo() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::top11::Top11Action;
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
     for toolbar in [false, true] {
         let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
         let mut doc = Document::with_template_tolerance("trim placed face");
-        let mut target = Entity::new("face", Geometry::Brep(face), None);
+        let mut target = Entity::new("face", fixtures.brep(face), None);
         target.placement = Transform::translation([20., 4., 2.]);
         let mut cutter = Entity::new("cutter", Geometry::Curve(Curve::Line {
             start: [0., -5., 0.], end: [0., 25., 0.], domain: [0., 1.],
@@ -1087,7 +1109,7 @@ fn trim_line_and_placed_face_through_command_and_toolbar_with_undo() {
         let (target_id, cutter_id) = (target.id, cutter.id);
         doc.entities.insert(target_id, target);
         doc.entities.insert(cutter_id, cutter);
-        let mut c = Controller::new(doc, limits.clone()).unwrap();
+        let mut c = fixtures.controller(doc, limits.clone()).unwrap();
         let before = c.document().clone();
         if toolbar {
             c.select_objects(&[target_id, cutter_id]).unwrap();
@@ -1120,19 +1142,20 @@ fn trim_line_and_placed_face_through_command_and_toolbar_with_undo() {
 
 #[test]
 fn trim_face_missed_cutter_and_cancel_leave_document_untouched() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
     for x in [3., 30.] {
         let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
         let mut doc = Document::with_template_tolerance("trim face cancel");
-        let target = Entity::new("face", Geometry::Brep(face), None);
+        let target = Entity::new("face", fixtures.brep(face), None);
         let cutter = Entity::new("cutter", Geometry::Curve(Curve::Line {
             start: [x, -5., 0.], end: [x, 25., 0.], domain: [0., 1.],
         }), None);
         let ids = [target.id, cutter.id];
         doc.entities.insert(target.id, target);
         doc.entities.insert(cutter.id, cutter);
-        let mut c = Controller::new(doc, limits.clone()).unwrap();
+        let mut c = fixtures.controller(doc, limits.clone()).unwrap();
         c.select_objects(&ids).unwrap();
         let before = c.document().clone();
         if x == 3. {
@@ -1190,6 +1213,7 @@ fn trim_surface_with_multiple_curves_removes_regions_repeatedly_with_undo() {
 
 #[test]
 fn trim_surface_and_curve_repartitions_in_both_edit_orders() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::top11::Top11Action;
     use om9_core::geometry::NurbsSurface;
     let limits = Limits::default();
@@ -1199,14 +1223,14 @@ fn trim_surface_and_curve_repartitions_in_both_edit_orders() {
             Geometry::Surface(NurbsSurface { degree: [1, 1], size: [2, 2],
                 poles: vec![[0., 0., 0.], [0., 20., 0.], [10., 0., 0.], [10., 20., 0.]], weights: vec![1.; 4],
                 knots: [vec![0., 0., 1., 1.], vec![0., 0., 1., 1.]], domain: [[0., 1.], [0., 1.]], periodic: [false, false], reversed: false })
-        } else { Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()) };
+        } else { fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()) };
         let face = Entity::new("face", geometry, None);
         let vertical = Entity::new("vertical", Geometry::Curve(Curve::Line { start: [5., -1., 0.], end: [5., 21., 0.], domain: [0., 1.] }), None);
         let horizontal = Entity::new("horizontal", Geometry::Curve(Curve::Line { start: [-1., 10., 0.], end: [11., 10., 0.], domain: [0., 1.] }), None);
         let ids = [face.id, vertical.id, horizontal.id];
         let mut doc = Document::with_template_tolerance("mixed trim order");
         for entity in [face, vertical, horizontal] { doc.entities.insert(entity.id, entity); }
-        let mut c = Controller::new(doc, limits.clone()).unwrap();
+        let mut c = fixtures.controller(doc, limits.clone()).unwrap();
         let before = c.document().clone();
         c.select_objects(&ids).unwrap();
         c.top11_invoke(Top11Action::Trim).unwrap();
@@ -1238,16 +1262,17 @@ fn trim_surface_and_curve_repartitions_in_both_edit_orders() {
 
 #[test]
 fn trim_two_intersecting_surfaces_recomputes_after_each_removal() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let first = creation::Profile::new(vec![[-5., -5., 0.], [5., -5., 0.], [5., 5., 0.], [-5., 5., 0.]]).unwrap();
     let second = creation::Profile::new(vec![[-5., 0., -5.], [5., 0., -5.], [5., 0., 5.], [-5., 0., 5.]]).unwrap();
     for (pick_first, pick_other) in [(true, false), (false, false), (true, true), (false, true)] {
-        let a = Entity::new("horizontal", Geometry::Brep(creation::planar(&first, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
-        let b = Entity::new("vertical", Geometry::Brep(creation::planar(&second, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+        let a = Entity::new("horizontal", fixtures.brep(creation::planar(&first, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+        let b = Entity::new("vertical", fixtures.brep(creation::planar(&second, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
         let ids = [a.id, b.id];
         let mut doc = Document::with_template_tolerance("mutual surfaces");
         for entity in [a, b] { doc.entities.insert(entity.id, entity); }
-        let mut c = Controller::new(doc, limits.clone()).unwrap();
+        let mut c = fixtures.controller(doc, limits.clone()).unwrap();
         let before = c.document().clone();
         c.select_objects(&ids).unwrap();
         c.submit("Trim").unwrap();
@@ -1313,6 +1338,7 @@ fn trim_two_typed_surfaces_can_be_selected_after_command() {
 
 #[test]
 fn trim_three_surfaces_recomputes_other_targets() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let profiles = [
         vec![[-5., -5., 0.], [5., -5., 0.], [5., 5., 0.], [-5., 5., 0.]],
@@ -1324,10 +1350,10 @@ fn trim_three_surfaces_recomputes_other_targets() {
     for (index, points) in profiles.into_iter().enumerate() {
         let profile = creation::Profile::new(points).unwrap();
         let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-        let entity = Entity::new(format!("face {index}"), Geometry::Brep(face), None);
+        let entity = Entity::new(format!("face {index}"), fixtures.brep(face), None);
         ids.push(entity.id); doc.entities.insert(entity.id, entity);
     }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&ids).unwrap(); c.submit("Trim").unwrap();
     c.top11_trim_many_accept_pick(ids[0], [2., 2., 0.]).unwrap();
@@ -1342,6 +1368,7 @@ fn trim_three_surfaces_recomputes_other_targets() {
 
 #[test]
 fn trim_multiple_surfaces_and_curve_in_both_orders() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::geometry::NurbsSurface;
     let limits = Limits::default();
     let horizontal = creation::Profile::new(vec![[-5., -5., 0.], [5., -5., 0.], [5., 5., 0.], [-5., 5., 0.]]).unwrap();
@@ -1352,9 +1379,9 @@ fn trim_multiple_surfaces_and_curve_in_both_orders() {
             knots: [vec![0., 0., 1., 1.], vec![0., 0., 1., 1.]], domain: [[0., 1.], [0., 1.]], periodic: [false, false], reversed: false,
         });
         let ag = if typed { surface(vec![[-5., -5., 0.], [-5., 5., 0.], [5., -5., 0.], [5., 5., 0.]]) }
-            else { Geometry::Brep(creation::planar(&horizontal, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()) };
+            else { fixtures.brep(creation::planar(&horizontal, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()) };
         let bg = if typed { surface(vec![[-5., 0., -5.], [-5., 0., 5.], [5., 0., -5.], [5., 0., 5.]]) }
-            else { Geometry::Brep(creation::planar(&vertical, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()) };
+            else { fixtures.brep(creation::planar(&vertical, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()) };
         let mut a = Entity::new("horizontal", ag, None);
         let mut b = Entity::new("vertical", bg, None);
         let mut curve = Entity::new("curve", Geometry::Curve(Curve::Line { start: [0., -6., 0.], end: [0., 6., 0.], domain: [0., 1.] }), None);
@@ -1364,7 +1391,7 @@ fn trim_multiple_surfaces_and_curve_in_both_orders() {
         let ids = [a.id, b.id, curve.id];
         let mut doc = Document::with_template_tolerance("mixed multiple surfaces");
         for entity in [a, b, curve] { doc.entities.insert(entity.id, entity); }
-        let mut c = Controller::new(doc, limits.clone()).unwrap();
+        let mut c = fixtures.controller(doc, limits.clone()).unwrap();
         let before = c.document().clone();
         c.select_objects(&ids).unwrap(); c.submit("Trim").unwrap();
         assert!(ids.iter().all(|id| c.top11_trim_many_has_target(*id)));
@@ -1394,16 +1421,17 @@ fn trim_multiple_surfaces_and_curve_in_both_orders() {
 
 #[test]
 fn trim_face_and_surface_sessions_report_no_change_on_empty_finish() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_app::session::DispatchOutcome;
     let limits=Limits::default();
     let face=|points| creation::planar(&creation::Profile::new(points).unwrap(),creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();
-    let a=Entity::new("base",Geometry::Brep(face(vec![[0.,0.,0.],[10.,0.,0.],[10.,10.,0.],[0.,10.,0.]])),None);
+    let a=Entity::new("base",fixtures.brep(face(vec![[0.,0.,0.],[10.,0.,0.],[10.,10.,0.],[0.,10.,0.]])),None);
     let line=Entity::new("line",Geometry::Curve(Curve::Line{start:[5.,-1.,0.],end:[5.,11.,0.],domain:[0.,1.]}),None);
-    let crossing=Entity::new("crossing",Geometry::Brep(face(vec![[0.,5.,-5.],[10.,5.,-5.],[10.,5.,5.],[0.,5.,5.]])),None);
+    let crossing=Entity::new("crossing",fixtures.brep(face(vec![[0.,5.,-5.],[10.,5.,-5.],[10.,5.,5.],[0.,5.,5.]])),None);
     let ids=[a.id,line.id,crossing.id];let mut doc=Document::with_template_tolerance("trim no change");
     for e in [a,line,crossing] {doc.entities.insert(e.id,e);}
     for selection in [&ids[..2],&[ids[0],ids[2]][..]] {
-        let mut c=Controller::new(doc.clone(),limits.clone()).unwrap();c.select_objects(selection).unwrap();let before=c.document().clone();let undo=c.coordinator().undo_len();
+        let mut c=fixtures.controller(doc.clone(),limits.clone()).unwrap();c.select_objects(selection).unwrap();let before=c.document().clone();let undo=c.coordinator().undo_len();
         c.submit("Trim").unwrap();let DispatchOutcome::Top11(result)=c.submit_effect("").unwrap() else {panic!("missing feedback")};
         assert_eq!(result.message(),"Trim: no changes");assert!(!c.is_running());assert_eq!(c.document(),&before);assert_eq!(c.coordinator().undo_len(),undo);
     }
@@ -1411,19 +1439,20 @@ fn trim_face_and_surface_sessions_report_no_change_on_empty_finish() {
 
 #[test]
 fn trim_multiface_brep_and_curve_keeps_original_face_boundary() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let left = creation::Profile::new(vec![[0., 0., 0.], [5., 0., 0.], [5., 20., 0.], [0., 20., 0.]]).unwrap();
     let right = creation::Profile::new(vec![[5., 0., 0.], [10., 0., 0.], [10., 20., 0.], [5., 20., 0.]]).unwrap();
     let left = creation::planar(&left, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let right = creation::planar(&right, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let original = om9_kernel::editing::sew(&left, &right, 1e-6, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let face = Entity::new("two faces", Geometry::Brep(original), None);
+    let face = Entity::new("two faces", fixtures.brep(original), None);
     let vertical = Entity::new("vertical", Geometry::Curve(Curve::Line { start: [2., -1., 0.], end: [2., 21., 0.], domain: [0., 1.] }), None);
     let horizontal = Entity::new("horizontal", Geometry::Curve(Curve::Line { start: [-1., 10., 0.], end: [11., 10., 0.], domain: [0., 1.] }), None);
     let ids = [face.id, vertical.id, horizontal.id];
     let mut doc = Document::with_template_tolerance("preserve authored face seam");
     for entity in [face, vertical, horizontal] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&ids).unwrap(); c.submit("Trim").unwrap();
     c.top11_trim_many_accept_pick(ids[0], [1., 1., 0.]).unwrap();
@@ -1449,6 +1478,7 @@ fn trim_multiface_brep_and_curve_keeps_original_face_boundary() {
 
 #[test]
 fn trim_multiface_brep_with_other_surface_and_curve_preserves_seam() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let face = |points| creation::planar(&creation::Profile::new(points).unwrap(), creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let left = face(vec![[0., 0., 0.], [5., 0., 0.], [5., 20., 0.], [0., 20., 0.]]);
@@ -1457,13 +1487,13 @@ fn trim_multiface_brep_with_other_surface_and_curve_preserves_seam() {
     let crossing_left = face(vec![[0., 10., -5.], [5., 10., -5.], [5., 10., 5.], [0., 10., 5.]]);
     let crossing_right = face(vec![[5., 10., -5.], [10., 10., -5.], [10., 10., 5.], [5., 10., 5.]]);
     let crossing = om9_kernel::editing::sew(&crossing_left, &crossing_right, 1e-6, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let a = Entity::new("multi", Geometry::Brep(multi), None);
-    let b = Entity::new("crossing", Geometry::Brep(crossing), None);
+    let a = Entity::new("multi", fixtures.brep(multi), None);
+    let b = Entity::new("crossing", fixtures.brep(crossing), None);
     let curve = Entity::new("curve", Geometry::Curve(Curve::Line { start: [2., -1., 0.], end: [2., 21., 0.], domain: [0., 1.] }), None);
     let ids = [a.id, b.id, curve.id];
     let mut doc = Document::with_template_tolerance("mixed multi-face Trim");
     for entity in [a, b, curve] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&ids).unwrap(); c.submit("Trim").unwrap();
     assert!(ids.iter().all(|id| c.top11_trim_many_has_target(*id)));
@@ -1495,16 +1525,17 @@ fn trim_multiface_brep_with_other_surface_and_curve_preserves_seam() {
 
 #[test]
 fn trim_solid_boundary_with_surface_and_undo() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let solid = creation::primitive(Primitive::Box { x_mm: 10., y_mm: 10., z_mm: 10. }, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
     let profile = creation::Profile::new(vec![[5., -5., -5.], [5., 15., -5.], [5., 15., 15.], [5., -5., 15.]]).unwrap();
     let cutter = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let a = Entity::new("box", Geometry::Brep(solid), None);
-    let b = Entity::new("cutting face", Geometry::Brep(cutter), None);
+    let a = Entity::new("box", fixtures.brep(solid), None);
+    let b = Entity::new("cutting face", fixtures.brep(cutter), None);
     let ids = [a.id, b.id];
     let mut doc = Document::with_template_tolerance("trim solid boundary");
     for entity in [a, b] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.submit("Trim").unwrap();
     for id in ids { c.top11_accept_object(id).unwrap(); }
@@ -1528,14 +1559,15 @@ fn trim_solid_boundary_with_surface_and_undo() {
 
 #[test]
 fn trim_solid_boundary_with_line_through_shared_session() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let solid = creation::primitive(Primitive::Box { x_mm: 10., y_mm: 10., z_mm: 10. }, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let a = Entity::new("box", Geometry::Brep(solid), None);
+    let a = Entity::new("box", fixtures.brep(solid), None);
     let line = Entity::new("line", Geometry::Curve(Curve::Line { start: [5., 0., -1.], end: [5., 0., 11.], domain: [0., 1.] }), None);
     let ids = [a.id, line.id];
     let mut doc = Document::with_template_tolerance("solid line Trim");
     for entity in [a, line] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&ids).unwrap();
     c.top11_invoke(om9_core::top11::Top11Action::Trim).unwrap();
@@ -1550,15 +1582,16 @@ fn trim_solid_boundary_with_line_through_shared_session() {
 
 #[test]
 fn trim_two_intersecting_solids_updates_selected_boundary() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let solid = creation::primitive(Primitive::Box { x_mm: 10., y_mm: 10., z_mm: 10. }, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let a = Entity::new("first", Geometry::Brep(solid.clone()), None);
-    let mut b = Entity::new("second", Geometry::Brep(solid), None);
+    let a = Entity::new("first", fixtures.brep(solid.clone()), None);
+    let mut b = Entity::new("second", fixtures.brep(solid), None);
     b.placement = Transform::translation([5., 5., 5.]);
     let ids = [a.id, b.id];
     let mut doc = Document::with_template_tolerance("two solid Trim");
     for entity in [a, b] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&ids).unwrap(); c.submit("Trim").unwrap();
     assert!(c.top11_trim_many_has_target(ids[0]));
@@ -1582,6 +1615,7 @@ fn trim_two_intersecting_solids_updates_selected_boundary() {
 
 #[test]
 fn trim_curved_solid_boundary_preserves_expected_area_and_undo() {
+    let mut fixtures = top11_sources::Displays::default();
     use std::f64::consts::PI;
     let limits = Limits::default();
     for (primitive, z, pick, normal, expected, expected_distance) in [
@@ -1592,14 +1626,14 @@ fn trim_curved_solid_boundary_preserves_expected_area_and_undo() {
         let profile = creation::Profile::new(vec![[-10., -10., z], [10., -10., z], [10., 10., z], [-10., 10., z]]).unwrap();
         let cutter = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
         for placed in [false, true] {
-            let mut a = Entity::new("solid", Geometry::Brep(solid.clone()), None);
-            let mut b = Entity::new("plane", Geometry::Brep(cutter.clone()), None);
+            let mut a = Entity::new("solid", fixtures.brep(solid.clone()), None);
+            let mut b = Entity::new("plane", fixtures.brep(cutter.clone()), None);
             let placement = if placed { Transform::translation([20., -5., 3.]) } else { Transform::identity() };
             a.placement = placement; b.placement = placement;
             let ids = [a.id, b.id];
             let mut doc = Document::with_template_tolerance("curved solid Trim");
             for entity in [a, b] { doc.entities.insert(entity.id, entity); }
-            let mut c = Controller::new(doc, limits.clone()).unwrap();
+            let mut c = fixtures.controller(doc, limits.clone()).unwrap();
             let before = c.document().clone();
             c.select_objects(&ids).unwrap(); c.submit("Trim").unwrap();
             let ray = om9_scene::camera::Ray { origin: placement.point([0., 0., 30.]).unwrap(), direction: [1., 0., 0.] };
@@ -1624,14 +1658,12 @@ fn trim_curved_solid_boundary_preserves_expected_area_and_undo() {
             assert!((distance - expected_distance).abs() < 1e-5, "distance {distance} vs {expected_distance}");
             c.submit("").unwrap();
             let path = std::env::temp_dir().join(format!("om9-trim-curved-{}.om9", uuid::Uuid::new_v4()));
-            om9_archive::Archive::save(&path, c.document(), &limits, &om9_core::transaction::Cancellation::default()).unwrap();
-            let loaded = om9_archive::Archive::open(&path, &limits).unwrap();
+            let loaded = top11_sources::round_trip(&c, &path, limits);
             std::fs::remove_file(path).unwrap();
             assert_eq!(&loaded, c.document());
-            let reopened = Controller::new(loaded, limits.clone()).unwrap();
-            let Geometry::Brep(reopened_brep) = &reopened.document().entities[&ids[0]].geometry else { panic!("BRep") };
+            let Geometry::Brep(reopened_brep) = &loaded.entities[&ids[0]].geometry else { panic!("BRep") };
             assert!((creation::measure(reopened_brep, &limits).unwrap().area_mm2 - expected).abs() < 1e-5);
-            assert_eq!(reopened.document().entities[&ids[0]].placement, placement);
+            assert_eq!(loaded.entities[&ids[0]].placement, placement);
             c.undo().unwrap();
             assert_eq!(c.document(), &before);
             c.redo().unwrap();
@@ -1643,16 +1675,17 @@ fn trim_curved_solid_boundary_preserves_expected_area_and_undo() {
 
 #[test]
 fn trim_disjoint_surfaces_fails_without_a_transaction() {
+    let mut fixtures = top11_sources::Displays::default();
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[-5., -5., 0.], [5., -5., 0.], [5., 5., 0.], [-5., 5., 0.]]).unwrap();
     let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
-    let a = Entity::new("first", Geometry::Brep(face.clone()), None);
-    let mut b = Entity::new("second", Geometry::Brep(face), None);
+    let a = Entity::new("first", fixtures.brep(face.clone()), None);
+    let mut b = Entity::new("second", fixtures.brep(face), None);
     b.placement = Transform::translation([0., 0., 5.]);
     let ids = [a.id, b.id];
     let mut doc = Document::with_template_tolerance("disjoint surfaces");
     for entity in [a, b] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits).unwrap();
+    let mut c = fixtures.controller(doc, limits).unwrap();
     c.select_objects(&ids).unwrap();
     let before = c.document().clone();
     assert!(c.submit("Trim").is_err());
@@ -1662,17 +1695,18 @@ fn trim_disjoint_surfaces_fails_without_a_transaction() {
 
 #[test]
 fn trim_face_inside_closed_circle_preserves_the_exact_hole() {
+    let mut fixtures = top11_sources::Displays::default();
     use std::f64::consts::{PI, TAU};
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
-    let target = Entity::new("face", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let target = Entity::new("face", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     let cutter = Entity::new("circle", Geometry::Curve(Curve::Circle {
         center: [5., 10., 0.], x: [1., 0., 0.], y: [0., 1., 0.], radius: 2., domain: [0., TAU], angle_domain: None,
     }), None);
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("trim circular hole");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&ids).unwrap();
     c.submit("Trim").unwrap();
@@ -1686,10 +1720,11 @@ fn trim_face_inside_closed_circle_preserves_the_exact_hole() {
 
 #[test]
 fn trim_translated_face_by_translated_circle_keeps_exact_area() {
+    let mut fixtures = top11_sources::Displays::default();
     use std::f64::consts::{PI, TAU};
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
-    let mut target = Entity::new("face", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let mut target = Entity::new("face", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     target.placement = Transform::translation([30., -7., 4.]);
     let mut cutter = Entity::new("circle", Geometry::Curve(Curve::Circle {
         center: [5., 10., 0.], x: [1., 0., 0.], y: [0., 1., 0.], radius: 2., domain: [0., TAU], angle_domain: None,
@@ -1698,7 +1733,7 @@ fn trim_translated_face_by_translated_circle_keeps_exact_area() {
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("trim translated circular hole");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     c.select_objects(&ids).unwrap();
     c.submit("Trim").unwrap();
     c.accept_world_point([35., 3., 4.]).unwrap();
@@ -1709,10 +1744,11 @@ fn trim_translated_face_by_translated_circle_keeps_exact_area() {
 
 #[test]
 fn trim_nonuniformly_placed_face_by_circle_preserves_local_area() {
+    let mut fixtures = top11_sources::Displays::default();
     use std::f64::consts::{PI, TAU};
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
-    let mut target = Entity::new("face", Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
+    let mut target = Entity::new("face", fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()), None);
     target.placement = Transform([[2., 0., 0., 30.], [0., 1., 0., -7.], [0., 0., 1., 4.], [0., 0., 0., 1.]]);
     let mut cutter = Entity::new("circle", Geometry::Curve(Curve::Circle {
         center: [5., 10., 0.], x: [1., 0., 0.], y: [0., 1., 0.], radius: 2., domain: [0., TAU], angle_domain: None,
@@ -1721,7 +1757,7 @@ fn trim_nonuniformly_placed_face_by_circle_preserves_local_area() {
     let ids = [target.id, cutter.id];
     let mut doc = Document::with_template_tolerance("trim affine circular hole");
     for entity in [target, cutter] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, limits.clone()).unwrap();
+    let mut c = fixtures.controller(doc, limits.clone()).unwrap();
     let before = c.document().clone();
     c.select_objects(&ids).unwrap();
     c.submit("Trim").unwrap();
@@ -1743,11 +1779,12 @@ fn trim_nonuniformly_placed_face_by_circle_preserves_local_area() {
 
 #[test]
 fn trim_curve_piercing_surface_or_brep_keeps_surface_and_recomputes() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::geometry::NurbsSurface;
     let limits = Limits::default();
     let profile = creation::Profile::new(vec![[0., 0., 0.], [10., 0., 0.], [10., 20., 0.], [0., 20., 0.]]).unwrap();
     let surfaces = [
-        Geometry::Brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()),
+        fixtures.brep(creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap()),
         Geometry::Surface(NurbsSurface {
             degree: [1, 1], size: [2, 2], poles: vec![[0., 0., 0.], [0., 20., 0.], [10., 0., 0.], [10., 20., 0.]],
             weights: vec![1.; 4], knots: [vec![0., 0., 1., 1.], vec![0., 0., 1., 1.]],
@@ -1762,7 +1799,7 @@ fn trim_curve_piercing_surface_or_brep_keeps_surface_and_recomputes() {
         }), None);
         let ids = [face.id, line.id];
         for entity in [face, line] { doc.entities.insert(entity.id, entity); }
-        let mut c = Controller::new(doc, limits.clone()).unwrap();
+        let mut c = fixtures.controller(doc, limits.clone()).unwrap();
         let before = c.document().clone();
         c.submit("Trim").unwrap();
         c.top11_accept_object(ids[0]).unwrap();
@@ -1797,14 +1834,15 @@ fn brep_intersection_can_include_endpoints_without_changing_split_filter() {
 
 #[test]
 fn trim_curve_crossing_solid_brep_can_remove_the_interior_segment() {
+    let mut fixtures = top11_sources::Displays::default();
     let mut doc = Document::with_template_tolerance("trim curve through solid");
-    let solid = Entity::new("box", Geometry::Brep(box_brep()), None);
+    let solid = Entity::new("box", fixtures.brep(box_brep()), None);
     let line = Entity::new("line", Geometry::Curve(Curve::Line {
         start: [1., 1., -2.], end: [1., 1., 6.], domain: [0., 1.],
     }), None);
     let ids = [solid.id, line.id];
     for entity in [solid, line] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    let mut c = fixtures.controller(doc, Limits::default()).unwrap();
     let before = c.document().clone();
     c.select_objects(&ids).unwrap();
     c.submit("Trim").unwrap();
@@ -1824,13 +1862,14 @@ fn trim_curve_crossing_solid_brep_can_remove_the_interior_segment() {
 }
 
 fn controller_with_box() -> (Controller, om9_core::identity::ObjectId) {
+    let mut fixtures = top11_sources::Displays::default();
     let mut document = Document::new("top11-brep");
-    let mut entity = Entity::new("box", Geometry::Brep(box_brep()), None);
+    let mut entity = Entity::new("box", fixtures.brep(box_brep()), None);
     entity.placement = Transform::translation([5.0, 0.0, 0.0]);
     let id = entity.id;
     document.entities.insert(id, entity);
     (
-        Controller::new(document, Limits::default()).expect("controller"),
+        fixtures.controller(document, Limits::default()).expect("controller"),
         id,
     )
 }
@@ -1862,14 +1901,15 @@ fn top11_explode_brep_creates_faces_in_one_undo() {
 
 #[test]
 fn explode_retained_native_brep_uses_exact_converted_faces() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::top11::Top11Action;
     let limits = Limits::default();
     let native = om9_kernel::brep::to_3dm(&box_brep(), 0.001, &limits).unwrap();
     for toolbar in [false, true] {
-        let mut source = Entity::new("retained box", Geometry::NativeBrep(native.clone()), None);
+        let mut source = Entity::new("retained box", fixtures.native(native.clone()), None);
         source.placement = Transform::translation([5., 0., 0.]); let id = source.id;
         let mut doc = Document::with_template_tolerance("retained explode"); doc.entities.insert(id, source);
-        let mut c = Controller::new(doc, limits).unwrap(); c.select_objects(&[id]).unwrap();
+        let mut c = fixtures.controller(doc, limits).unwrap(); c.select_objects(&[id]).unwrap();
         let before = c.document().clone();
         if toolbar { c.top11_invoke(Top11Action::Explode).unwrap(); } else { c.submit("Explode").unwrap(); }
         assert!(!c.document().entities.contains_key(&id)); assert_eq!(c.document().entities.len(), 6);
@@ -1882,14 +1922,15 @@ fn explode_retained_native_brep_uses_exact_converted_faces() {
         assert!((area - 52.).abs() < 1e-6, "{area}");
         let after = c.document().clone();
         let path = std::env::temp_dir().join(format!("om9-native-explode-{}.om9", uuid::Uuid::new_v4()));
-        om9_archive::Archive::save(&path, &after, &limits, &om9_core::transaction::Cancellation::default()).unwrap();
-        assert_eq!(om9_archive::Archive::open(&path, &limits).unwrap(), after); std::fs::remove_file(path).unwrap();
+        let reopened = top11_sources::round_trip(&c, &path, limits);
+        assert_eq!(reopened, after); std::fs::remove_file(path).unwrap();
         c.undo().unwrap(); assert_eq!(c.document(), &before); c.redo().unwrap(); assert_eq!(c.document(), &after);
     }
 }
 
 #[test]
 fn explode_single_face_rejects_without_mutating_document() {
+    let mut fixtures = top11_sources::Displays::default();
     let face = om9_kernel::editing::extract_face(
         &box_brep(),
         0,
@@ -1898,10 +1939,10 @@ fn explode_single_face_rejects_without_mutating_document() {
     )
     .unwrap();
     let mut doc = Document::new("single face");
-    let entity = Entity::new("face", Geometry::Brep(face), None);
+    let entity = Entity::new("face", fixtures.brep(face), None);
     let id = entity.id;
     doc.entities.insert(id, entity);
-    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    let mut c = fixtures.controller(doc, Limits::default()).unwrap();
     c.select_objects(&[id]).unwrap();
     let before = c.document().clone();
     assert!(c.submit("Explode").is_err());
@@ -1911,6 +1952,7 @@ fn explode_single_face_rejects_without_mutating_document() {
 
 #[test]
 fn top11_join_adjacent_brep_faces_and_undo() {
+    let mut fixtures = top11_sources::Displays::default();
     let source = box_brep();
     let mut doc = Document::with_template_tolerance("join adjacent faces");
     let mut ids = Vec::new();
@@ -1922,12 +1964,12 @@ fn top11_join_adjacent_brep_faces_and_undo() {
             &Limits::default(),
         )
         .unwrap();
-        let mut entity = Entity::new("face", Geometry::Brep(face), None);
+        let mut entity = Entity::new("face", fixtures.brep(face), None);
         entity.placement = Transform::translation([5., 0., 0.]);
         ids.push(entity.id);
         doc.entities.insert(entity.id, entity);
     }
-    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    let mut c = fixtures.controller(doc, Limits::default()).unwrap();
     c.select_objects(&ids).unwrap();
     c.top11_invoke(om9_core::top11::Top11Action::Join).unwrap();
     assert_eq!(c.document().entities.len(), 1);
@@ -1950,6 +1992,7 @@ fn top11_join_adjacent_brep_faces_and_undo() {
 
 #[test]
 fn top11_join_disconnected_faces_keeps_both_without_undo() {
+    let mut fixtures = top11_sources::Displays::default();
     let source = box_brep();
     let mut doc = Document::with_template_tolerance("disconnected faces");
     let mut ids = Vec::new();
@@ -1961,11 +2004,11 @@ fn top11_join_disconnected_faces_keeps_both_without_undo() {
             &Limits::default(),
         )
         .unwrap();
-        let entity = Entity::new("face", Geometry::Brep(face), None);
+        let entity = Entity::new("face", fixtures.brep(face), None);
         ids.push(entity.id);
         doc.entities.insert(entity.id, entity);
     }
-    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    let mut c = fixtures.controller(doc, Limits::default()).unwrap();
     c.select_objects(&ids).unwrap();
     let before = c.document().clone();
     assert!(c.submit("Join").is_err());
@@ -1975,6 +2018,7 @@ fn top11_join_disconnected_faces_keeps_both_without_undo() {
 
 #[test]
 fn top11_join_faces_with_different_placements_and_undo() {
+    let mut fixtures = top11_sources::Displays::default();
     let source = box_brep();
     let limits = Limits::default();
     let face_a =
@@ -1990,14 +2034,14 @@ fn top11_join_faces_with_different_placements_and_undo() {
         &limits,
     )
     .unwrap();
-    let a = Entity::new("face a", Geometry::Brep(face_a), None);
-    let mut b = Entity::new("face b", Geometry::Brep(shifted), None);
+    let a = Entity::new("face a", fixtures.brep(face_a), None);
+    let mut b = Entity::new("face b", fixtures.brep(shifted), None);
     b.placement = Transform::translation([5., 0., 0.]);
     let ids = [a.id, b.id];
     let mut doc = Document::with_template_tolerance("join placed faces");
     doc.entities.insert(a.id, a);
     doc.entities.insert(b.id, b);
-    let mut c = Controller::new(doc, limits).unwrap();
+    let mut c = fixtures.controller(doc, limits).unwrap();
     c.select_objects(&ids).unwrap();
     c.submit("Join").unwrap();
     let joined = c.document().entities.values().next().unwrap();
@@ -2021,6 +2065,7 @@ fn top11_join_faces_with_different_placements_and_undo() {
 
 #[test]
 fn top11_join_without_document_tolerance_is_atomic() {
+    let mut fixtures = top11_sources::Displays::default();
     let source = box_brep();
     let mut doc = Document::new("missing tolerance");
     let mut ids = Vec::new();
@@ -2032,11 +2077,11 @@ fn top11_join_without_document_tolerance_is_atomic() {
             &Limits::default(),
         )
         .unwrap();
-        let entity = Entity::new("face", Geometry::Brep(face), None);
+        let entity = Entity::new("face", fixtures.brep(face), None);
         ids.push(entity.id);
         doc.entities.insert(entity.id, entity);
     }
-    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    let mut c = fixtures.controller(doc, Limits::default()).unwrap();
     c.select_objects(&ids).unwrap();
     let before = c.document().clone();
     assert!(c.submit("Join").is_err());
@@ -2046,6 +2091,7 @@ fn top11_join_without_document_tolerance_is_atomic() {
 
 #[test]
 fn top11_join_three_faces_finds_connected_order_and_undo_redo() {
+    let mut fixtures = top11_sources::Displays::default();
     let source = box_brep();
     let mut doc = Document::with_template_tolerance("three faces");
     let mut ids = Vec::new();
@@ -2057,11 +2103,11 @@ fn top11_join_three_faces_finds_connected_order_and_undo_redo() {
             &Limits::default(),
         )
         .unwrap();
-        let entity = Entity::new("face", Geometry::Brep(face), None);
+        let entity = Entity::new("face", fixtures.brep(face), None);
         ids.push(entity.id);
         doc.entities.insert(entity.id, entity);
     }
-    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    let mut c = fixtures.controller(doc, Limits::default()).unwrap();
     c.select_objects(&ids).unwrap();
     c.submit("Join").unwrap();
     assert_eq!(c.document().entities.len(), 1);
@@ -2082,6 +2128,7 @@ fn top11_join_three_faces_finds_connected_order_and_undo_redo() {
 
 #[test]
 fn top11_join_three_faces_with_disconnected_member_is_atomic() {
+    let mut fixtures = top11_sources::Displays::default();
     let source = box_brep();
     let mut doc = Document::with_template_tolerance("disconnected member");
     let mut ids = Vec::new();
@@ -2093,14 +2140,14 @@ fn top11_join_three_faces_with_disconnected_member_is_atomic() {
             &Limits::default(),
         )
         .unwrap();
-        let mut entity = Entity::new("face", Geometry::Brep(face), None);
+        let mut entity = Entity::new("face", fixtures.brep(face), None);
         if index == 1 {
             entity.placement = Transform::translation([100., 0., 0.]);
         }
         ids.push(entity.id);
         doc.entities.insert(entity.id, entity);
     }
-    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    let mut c = fixtures.controller(doc, Limits::default()).unwrap();
     c.select_objects(&ids).unwrap();
     let before = c.document().clone();
     assert!(c.submit("Join").is_err());
@@ -2189,6 +2236,7 @@ fn brep_mirror_copy_leaves_the_source_in_place() {
 
 #[test]
 fn brep_can_be_a_cutting_object_for_split() {
+    let mut fixtures = top11_sources::Displays::default();
     let mut document = Document::with_template_tolerance("brep-cutter");
     let line = Entity::new(
         "line",
@@ -2201,10 +2249,10 @@ fn brep_can_be_a_cutting_object_for_split() {
     );
     let line_id = line.id;
     document.entities.insert(line_id, line);
-    let box_entity = Entity::new("box", Geometry::Brep(box_brep()), None);
+    let box_entity = Entity::new("box", fixtures.brep(box_brep()), None);
     let box_id = box_entity.id;
     document.entities.insert(box_id, box_entity);
-    let mut c = Controller::new(document, Limits::default()).unwrap();
+    let mut c = fixtures.controller(document, Limits::default()).unwrap();
     c.select_objects(&[line_id]).unwrap();
     c.top11_invoke(om9_core::top11::Top11Action::Split).unwrap();
     c.top11_accept_object(box_id).unwrap();
@@ -2216,7 +2264,8 @@ fn brep_can_be_a_cutting_object_for_split() {
 
 #[test]
 fn split_periodic_nurbs_with_brep_cutter_keeps_exact_pieces() {
-    use om9_core::{curve_ops,geometry::NurbsCurve,top11::Top11Action,transaction::Cancellation};
+    let mut fixtures = top11_sources::Displays::default();
+    use om9_core::{curve_ops,geometry::NurbsCurve,top11::Top11Action};
     let limits=Limits::default();
     let body=creation::primitive(Primitive::Box{x_mm:10.,y_mm:20.,z_mm:10.},creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();
     let mut n=NurbsCurve{degree:2,poles:vec![[-8.,5.,5.],[18.,5.,5.],[18.,15.,5.],[-8.,15.,5.],[-8.,5.,5.],[18.,5.,5.]],
@@ -2224,9 +2273,9 @@ fn split_periodic_nurbs_with_brep_cutter_keeps_exact_pieces() {
     for reversed in [false,true] {for shifted in [false,true] {for toolbar in [false,true] {
         n.reversed=reversed;let mut curve=Curve::Nurbs(n.clone());if shifted {curve=curve_ops::set_seam(&curve,0.31,1e-9,&limits).unwrap();}
         let mut target=Entity::new("periodic",Geometry::Curve(curve.clone()),None);target.placement=Transform::translation([3.,-2.,1.]);
-        let mut cutter=Entity::new("box",Geometry::Brep(body.clone()),None);cutter.placement=target.placement;
+        let mut cutter=Entity::new("box",fixtures.brep(body.clone()),None);cutter.placement=target.placement;
         let ids=[target.id,cutter.id];let mut doc=Document::with_template_tolerance("periodic BRep split");
-        doc.entities.insert(target.id,target);doc.entities.insert(cutter.id,cutter);let mut c=Controller::new(doc,limits).unwrap();
+        doc.entities.insert(target.id,target);doc.entities.insert(cutter.id,cutter);let mut c=fixtures.controller(doc,limits).unwrap();
         c.select_objects(&[ids[0]]).unwrap();let before=c.document().clone();
         if toolbar {c.top11_invoke(Top11Action::Split).unwrap();} else {c.submit("Split").unwrap();}
         c.top11_accept_object(ids[1]).unwrap();c.submit("").unwrap();assert_eq!(c.selected().len(),4);
@@ -2236,13 +2285,14 @@ fn split_periodic_nurbs_with_brep_cutter_keeps_exact_pieces() {
             for i in 0..=10 {let p=curve_ops::point_at(piece,i as f64/10.,&limits).unwrap();
                 assert!(om9_core::curve_surface_ops::closest_point_on_curve(&curve,p,&limits).unwrap().2<1e-6);}}
         let after=c.document().clone();let path=std::env::temp_dir().join(format!("om9-periodic-brep-split-{}.om9",uuid::Uuid::new_v4()));
-        om9_archive::Archive::save(&path,&after,&limits,&Cancellation::default()).unwrap();assert_eq!(om9_archive::Archive::open(&path,&limits).unwrap(),after);std::fs::remove_file(path).unwrap();
+        let reopened = top11_sources::round_trip(&c, &path, limits);assert_eq!(reopened,after);std::fs::remove_file(path).unwrap();
         c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);
     }}}
 }
 
 #[test]
 fn trim_periodic_nurbs_against_brep_removes_picked_interval() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::{curve_ops,geometry::NurbsCurve,top11::Top11Action};
     let limits=Limits::default();
     let body=creation::primitive(Primitive::Box{x_mm:10.,y_mm:20.,z_mm:10.},creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();
@@ -2251,9 +2301,9 @@ fn trim_periodic_nurbs_against_brep_removes_picked_interval() {
     for reversed in [false,true] {for shifted in [false,true] {for toolbar in [false,true] {
         n.reversed=reversed;let mut curve=Curve::Nurbs(n.clone());if shifted {curve=curve_ops::set_seam(&curve,0.31,1e-9,&limits).unwrap();}
         let p=curve_ops::point_at(&curve,0.25,&limits).unwrap();
-        let a=Entity::new("periodic",Geometry::Curve(curve.clone()),None);let b=Entity::new("box",Geometry::Brep(body.clone()),None);let ids=[a.id,b.id];
+        let a=Entity::new("periodic",Geometry::Curve(curve.clone()),None);let b=Entity::new("box",fixtures.brep(body.clone()),None);let ids=[a.id,b.id];
         let mut doc=Document::with_template_tolerance("periodic BRep trim");doc.entities.insert(a.id,a);doc.entities.insert(b.id,b);
-        let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();
+        let mut c=fixtures.controller(doc,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();
         if toolbar {c.top11_invoke(Top11Action::Trim).unwrap();} else {c.submit("Trim").unwrap();}
         c.top11_trim_many_accept_pick(ids[0],p).unwrap();c.submit("").unwrap();
         let results:Vec<_>=c.document().entities.values().filter_map(|e|if let Geometry::Curve(curve)=&e.geometry {Some(curve)} else {None}).collect();
@@ -2284,6 +2334,7 @@ fn trim_surface_inside_periodic_nurbs_boundary() {
 
 #[test]
 fn placed_brep_cuts_a_differently_placed_line() {
+    let mut fixtures = top11_sources::Displays::default();
     let mut document = Document::with_template_tolerance("placed brep cutter");
     let mut line = Entity::new(
         "line",
@@ -2296,12 +2347,12 @@ fn placed_brep_cuts_a_differently_placed_line() {
     );
     line.placement = Transform::translation([10., 0., 0.]);
     let line_id = line.id;
-    let mut cutter = Entity::new("box", Geometry::Brep(box_brep()), None);
+    let mut cutter = Entity::new("box", fixtures.brep(box_brep()), None);
     cutter.placement = Transform::translation([11., 0., 0.]);
     let cutter_id = cutter.id;
     document.entities.insert(line_id, line);
     document.entities.insert(cutter_id, cutter);
-    let mut c = Controller::new(document, Limits::default()).unwrap();
+    let mut c = fixtures.controller(document, Limits::default()).unwrap();
     c.select_objects(&[line_id]).unwrap();
     c.top11_invoke(om9_core::top11::Top11Action::Split).unwrap();
     c.top11_accept_object(cutter_id).unwrap();
@@ -2339,12 +2390,13 @@ fn placed_brep_cuts_a_differently_placed_line() {
 
 #[test]
 fn brep_mirror_accepts_a_non_rigid_placement() {
+    let mut fixtures = top11_sources::Displays::default();
     let mut document = Document::new("brep-non-rigid");
-    let mut entity = Entity::new("box", Geometry::Brep(box_brep()), None);
+    let mut entity = Entity::new("box", fixtures.brep(box_brep()), None);
     entity.placement = Transform::scale([2.0, 1.0, 1.0]).unwrap();
     let id = entity.id;
     document.entities.insert(id, entity);
-    let mut c = Controller::new(document, Limits::default()).unwrap();
+    let mut c = fixtures.controller(document, Limits::default()).unwrap();
     c.select_objects(&[id]).unwrap();
     c.top11_mirror(true).unwrap();
     c.accept_world_point([0.0, -5.0, 0.0]).unwrap();
@@ -2438,6 +2490,7 @@ fn exact_brep_intersection_handles_nurbs_and_polycurve_targets() {
 
 #[test]
 fn explode_mixed_group_preserves_membership_and_atomic_history() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::geometry::Mesh;
     use om9_core::model::Group;
     use om9_core::top11::Top11Action;
@@ -2445,18 +2498,18 @@ fn explode_mixed_group_preserves_membership_and_atomic_history() {
         let line=|start,end|Curve::Line{start,end,domain:[0.,1.]};
         let curve=Entity::new("curve",Geometry::Curve(Curve::Polycurve{segments:vec![line([0.,0.,0.],[1.,0.,0.]),line([1.,0.,0.],[2.,0.,0.])],reversed:false}),None);
         let mesh=Entity::new("mesh",Geometry::Mesh(Mesh{vertices:vec![[0.,0.,0.],[1.,0.,0.],[0.,1.,0.],[3.,0.,0.],[4.,0.,0.],[3.,1.,0.]],faces:vec![vec![0,1,2],vec![3,4,5]],normals:vec![],colors:vec![],corner_uvs:vec![]}),None);
-        let solid=Entity::new("solid",Geometry::Brep(box_brep()),None);
+        let solid=Entity::new("solid",fixtures.brep(box_brep()),None);
         let other=Entity::new("other",Geometry::Point([9.,9.,9.]),None);
         let ids=[curve.id,mesh.id,solid.id];let other_id=other.id;
         let mut doc=Document::with_template_tolerance("mixed explode groups");for e in [curve,mesh,solid,other] {doc.entities.insert(e.id,e);}
         let group=Group::new("mixed",vec![ids[0],ids[1],ids[2],other_id]);let group_id=group.id;doc.groups.insert(group_id,group);
-        let mut c=Controller::new(doc,Limits::default()).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();
+        let mut c=fixtures.controller(doc,Limits::default()).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();
         if via_toolbar {c.top11_invoke(Top11Action::Explode).unwrap();}else{c.submit("Explode").unwrap();}
         let after=c.document().clone();assert_eq!(after.entities.len(),11);let members=&after.groups[&group_id].members;assert_eq!(members.len(),11);assert!(after.entities.keys().all(|id|members.contains(id)));assert!(ids.iter().all(|id|!members.contains(id)));
         assert_eq!(after.entities.values().filter(|e|matches!(e.geometry,Geometry::Curve(_))).count(),2);
         assert_eq!(after.entities.values().filter(|e|matches!(e.geometry,Geometry::Mesh(_))).count(),2);
         assert_eq!(after.entities.values().filter(|e|matches!(e.geometry,Geometry::Brep(_))).count(),6);
-        let path=std::env::temp_dir().join(format!("om9-mixed-explode-{}.om9",uuid::Uuid::new_v4()));om9_archive::Archive::save(&path,&after,&Limits::default(),&om9_core::transaction::Cancellation::default()).unwrap();let loaded=om9_archive::Archive::open(&path,&Limits::default()).unwrap();std::fs::remove_file(path).unwrap();assert_eq!(loaded,after);
+        let path=std::env::temp_dir().join(format!("om9-mixed-explode-{}.om9",uuid::Uuid::new_v4()));let loaded = top11_sources::round_trip(&c, &path, Limits::default());std::fs::remove_file(path).unwrap();assert_eq!(loaded,after);
         c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);
     }
 }
@@ -2472,19 +2525,20 @@ fn join_adjacent_nurbs_surfaces_through_cmd_and_toolbar() {
         let mut doc=Document::with_template_tolerance("surface join");doc.entities.insert(a.id,a);doc.entities.insert(b.id,b);let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();
         if via_toolbar {c.top11_invoke(Top11Action::Join).unwrap();}else{c.submit("Join").unwrap();}
         let after=c.document().clone();assert_eq!(after.entities.len(),1);let joined=after.entities.values().next().unwrap();let Geometry::Brep(brep)=&joined.geometry else{panic!("expected BRep")};let m=creation::measure(brep,&limits).unwrap();assert_eq!(m.faces,2);assert_eq!(m.shells,1);assert!((m.area_mm2-12.).abs()<1e-6);assert_eq!(m.naked_edges,6);
-        let path=std::env::temp_dir().join(format!("om9-join-surfaces-{}.om9",uuid::Uuid::new_v4()));om9_archive::Archive::save(&path,&after,&limits,&om9_core::transaction::Cancellation::default()).unwrap();let loaded=om9_archive::Archive::open(&path,&limits).unwrap();std::fs::remove_file(path).unwrap();assert_eq!(loaded,after);c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);
+        let path=std::env::temp_dir().join(format!("om9-join-surfaces-{}.om9",uuid::Uuid::new_v4()));let loaded = top11_sources::round_trip(&c, &path, limits);std::fs::remove_file(path).unwrap();assert_eq!(loaded,after);c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);
     }
 }
 
 #[test]
 fn join_mixed_surfaces_and_brep_finds_connected_order() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::top11::Top11Action;
     let limits=Limits::default();let surface=om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],2.,3.,&limits).unwrap();
     let mut a=Entity::new("a",Geometry::Surface(surface.clone()),None);a.placement=Transform::translation([10.,0.,0.]);
     let face=om9_kernel::measurement::surface_to_face(&surface,Transform::identity(),creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();
-    let mut b=Entity::new("b",Geometry::Brep(face),None);b.placement=Transform::translation([12.,0.,0.]);
+    let mut b=Entity::new("b",fixtures.brep(face),None);b.placement=Transform::translation([12.,0.,0.]);
     let mut c=Entity::new("c",Geometry::Surface(surface),None);c.placement=Transform::translation([14.,0.,0.]);
-    let ids=[a.id,c.id,b.id];let mut doc=Document::with_template_tolerance("mixed join");for e in [a,b,c]{doc.entities.insert(e.id,e);}let mut controller=Controller::new(doc,limits).unwrap();controller.select_objects(&ids).unwrap();let before=controller.document().clone();controller.top11_invoke(Top11Action::Join).unwrap();let after=controller.document().clone();let Geometry::Brep(result)=&after.entities.values().next().unwrap().geometry else{panic!("BRep")};let m=creation::measure(result,&limits).unwrap();assert_eq!(m.faces,3);assert_eq!(m.shells,1);assert_eq!(m.naked_edges,8);assert!((m.area_mm2-18.).abs()<1e-6);controller.undo().unwrap();assert_eq!(controller.document(),&before);controller.redo().unwrap();assert_eq!(controller.document(),&after);
+    let ids=[a.id,c.id,b.id];let mut doc=Document::with_template_tolerance("mixed join");for e in [a,b,c]{doc.entities.insert(e.id,e);}let mut controller=fixtures.controller(doc,limits).unwrap();controller.select_objects(&ids).unwrap();let before=controller.document().clone();controller.top11_invoke(Top11Action::Join).unwrap();let after=controller.document().clone();let Geometry::Brep(result)=&after.entities.values().next().unwrap().geometry else{panic!("BRep")};let m=creation::measure(result,&limits).unwrap();assert_eq!(m.faces,3);assert_eq!(m.shells,1);assert_eq!(m.naked_edges,8);assert!((m.area_mm2-18.).abs()<1e-6);controller.undo().unwrap();assert_eq!(controller.document(),&before);controller.redo().unwrap();assert_eq!(controller.document(),&after);
 }
 
 #[test]
@@ -2496,14 +2550,15 @@ fn join_surface_disconnected_refuses_atomically() {
 
 #[test]
 fn join_adjacent_curved_rational_surfaces_preserves_geometry() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::geometry::NurbsSurface;
     use om9_core::top11::Top11Action;
     let limits=Limits::default();
     let surface=|y:f64|NurbsSurface{degree:[2,1],size:[3,2],poles:vec![[0.,y,0.],[0.,y+1.,0.],[1.,y,1.],[1.,y+1.,1.],[2.,y,0.],[2.,y+1.,0.]],weights:vec![1.,1.,0.7,0.7,1.2,1.2],knots:[vec![0.,0.,0.,1.,1.,1.],vec![0.,0.,1.,1.]],domain:[[0.,1.],[0.,1.]],periodic:[false,false],reversed:false};
     for toolbar in [false,true] {
-        let a=Entity::new("a",Geometry::Surface(surface(0.)),None);let b=Entity::new("b",Geometry::Surface(surface(1.)),None);let ids=[a.id,b.id];let mut doc=Document::with_template_tolerance("curved join");doc.entities.insert(a.id,a);doc.entities.insert(b.id,b);let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();
+        let a=Entity::new("a",Geometry::Surface(surface(0.)),None);let b=Entity::new("b",Geometry::Surface(surface(1.)),None);let ids=[a.id,b.id];let mut doc=Document::with_template_tolerance("curved join");doc.entities.insert(a.id,a);doc.entities.insert(b.id,b);let mut c=fixtures.controller(doc,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();
         if toolbar {c.top11_invoke(Top11Action::Join).unwrap();}else{c.submit("Join").unwrap();}let after=c.document().clone();let Geometry::Brep(result)=&after.entities.values().next().unwrap().geometry else{panic!("BRep")};let measured=creation::measure(result,&limits).unwrap();assert_eq!(measured.faces,2);assert_eq!(measured.shells,1);assert_eq!(measured.naked_edges,6);
-        for y in [0.,1.] {for (u,v) in [(0.2,0.3),(0.5,0.5),(0.8,0.7)] {let p=om9_core::surface_kernel::evaluate(&surface(y),u,v,&limits).unwrap();let origin=[p[0],p[1],p[2]+3.];let mut matched=false;for index in 0..2 {let face=om9_kernel::editing::extract_face(result,index,creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();if let Ok(hit)=om9_kernel::measurement::surface_ray_hit(&Geometry::Brep(face),Transform::identity(),origin,[0.,0.,-1.],p,1e-8,&limits) {if p.iter().zip(hit).all(|(a,b)|(a-b).abs()<1e-7){matched=true;}}}assert!(matched,"{p:?}");}}
+        for y in [0.,1.] {for (u,v) in [(0.2,0.3),(0.5,0.5),(0.8,0.7)] {let p=om9_core::surface_kernel::evaluate(&surface(y),u,v,&limits).unwrap();let origin=[p[0],p[1],p[2]+3.];let mut matched=false;for index in 0..2 {let face=om9_kernel::editing::extract_face(result,index,creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();if let Ok(hit)=om9_kernel::measurement::surface_ray_hit(&fixtures.brep(face),Transform::identity(),origin,[0.,0.,-1.],p,1e-8,&limits) {if p.iter().zip(hit).all(|(a,b)|(a-b).abs()<1e-7){matched=true;}}}assert!(matched,"{p:?}");}}
         c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);
     }
 }
@@ -2515,7 +2570,7 @@ fn join_surface_gap_uses_document_tolerance_without_partial_commit() {
     for (gap,success,toolbar) in [(0.0005,true,false),(0.0005,true,true),(0.002,false,false),(0.002,false,true)] {
         let s=om9_core::surface_kernel::plane([0.,0.,0.],[1.,0.,0.],[0.,1.,0.],2.,3.,&limits).unwrap();let mut a=Entity::new("a",Geometry::Surface(s.clone()),None);a.placement=Transform::translation([10.,0.,0.]);let mut b=Entity::new("b",Geometry::Surface(s),None);b.placement=Transform::translation([12.+gap,0.,0.]);let ids=[a.id,b.id];let mut d=Document::with_template_tolerance("surface tolerance");d.entities.insert(a.id,a);d.entities.insert(b.id,b);let mut c=Controller::new(d,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();
         let result=if toolbar {c.top11_invoke(Top11Action::Join).map(|_|())}else{c.submit("Join").map(|_|())};
-        if success {result.unwrap();let after=c.document().clone();let Geometry::Brep(b)=&after.entities.values().next().unwrap().geometry else{panic!("BRep")};let m=creation::measure(b,&limits).unwrap();assert_eq!(m.faces,2);assert_eq!(m.shells,1);assert!((m.area_mm2-(12.+3.*gap)).abs()<1e-6,"area {} gap {gap}",m.area_mm2); let bounds:Vec<_>=(0..2).map(|i|{let f=om9_kernel::editing::extract_face(b,i,creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();om9_kernel::measurement::face_underlying_bounds(&f,&limits).unwrap()}).collect(); assert!(bounds.iter().all(|v|*v==[0.,1.,0.,1.]));c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);}else{assert!(result.is_err());assert_eq!(c.document(),&before);assert_eq!(c.coordinator().undo_len(),0);}
+        if success {result.unwrap();let after=c.document().clone();let Geometry::Brep(b)=&after.entities.values().next().unwrap().geometry else{panic!("BRep")};let m=creation::measure(b,&limits).unwrap();assert_eq!(m.faces,2);assert_eq!(m.shells,1);assert!((m.area_mm2-12.).abs()<1e-6,"area {} gap {gap}",m.area_mm2); let bounds:Vec<_>=(0..2).map(|i|{let f=om9_kernel::editing::extract_face(b,i,creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();om9_kernel::measurement::face_underlying_bounds(&f,&limits).unwrap()}).collect(); assert!(bounds.iter().all(|v|*v==[0.,1.,0.,1.]));c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);}else{assert!(result.is_err());assert_eq!(c.document(),&before);assert_eq!(c.coordinator().undo_len(),0);}
     }
 }
 
@@ -2541,7 +2596,7 @@ fn join_repeated_periodic_surfaces_at_closed_boundary() {
     let limits=Limits::default();let rows=[[0.,0.],[2.,0.],[2.,2.],[0.,2.],[0.,0.],[2.,0.]];let mut poles=Vec::new();let mut weights=Vec::new();for (i,[x,y]) in rows.into_iter().enumerate(){for z in [0.,2.] {poles.push([x,y,z]);weights.push([1.,0.7,1.2,0.9,1.,0.7][i]);}}
     let surface=NurbsSurface{degree:[2,1],size:[6,2],poles,weights,knots:[vec![-2.,-1.,0.,1.,2.,3.,4.,5.,6.],vec![0.,0.,1.,1.]],domain:[[0.,4.],[0.,1.]],periodic:[true,false],reversed:false};
     let single=om9_kernel::measurement::surface_to_face(&surface,Transform::identity(),creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();let area=creation::measure(&single,&limits).unwrap().area_mm2;
-    for toolbar in [false,true] {let a=Entity::new("a",Geometry::Surface(surface.clone()),None);let mut b=Entity::new("b",Geometry::Surface(surface.clone()),None);b.placement=Transform::translation([0.,0.,2.]);let ids=[a.id,b.id];let mut doc=Document::with_template_tolerance("periodic join");doc.entities.insert(a.id,a);doc.entities.insert(b.id,b);let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();if toolbar{c.top11_invoke(Top11Action::Join).unwrap();}else{c.submit("Join").unwrap();}let after=c.document().clone();let Geometry::Brep(b)=&after.entities.values().next().unwrap().geometry else{panic!("BRep")};let m=creation::measure(b,&limits).unwrap();assert_eq!(m.faces,2);assert_eq!(m.shells,1);assert_eq!(m.naked_edges,2);assert_eq!(m.edges,5);assert!((m.area_mm2-2.*area).abs()<1e-6);let path=std::env::temp_dir().join(format!("om9-periodic-surface-{}.om9",uuid::Uuid::new_v4()));om9_archive::Archive::save(&path,&after,&limits,&om9_core::transaction::Cancellation::default()).unwrap();let loaded=om9_archive::Archive::open(&path,&limits).unwrap();std::fs::remove_file(path).unwrap();assert_eq!(loaded,after);for doc in [&after,&loaded] {let Geometry::Brep(joined)=&doc.entities.values().next().unwrap().geometry else{panic!("BRep")};for index in 0..2 {let face=om9_kernel::editing::extract_face(joined,index,creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();assert_eq!(om9_kernel::measurement::face_periodicity(&face,&limits).unwrap(),[true,false]);}}c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);}
+    for toolbar in [false,true] {let a=Entity::new("a",Geometry::Surface(surface.clone()),None);let mut b=Entity::new("b",Geometry::Surface(surface.clone()),None);b.placement=Transform::translation([0.,0.,2.]);let ids=[a.id,b.id];let mut doc=Document::with_template_tolerance("periodic join");doc.entities.insert(a.id,a);doc.entities.insert(b.id,b);let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();if toolbar{c.top11_invoke(Top11Action::Join).unwrap();}else{c.submit("Join").unwrap();}let after=c.document().clone();let Geometry::Brep(b)=&after.entities.values().next().unwrap().geometry else{panic!("BRep")};let m=creation::measure(b,&limits).unwrap();assert_eq!(m.faces,2);assert_eq!(m.shells,1);assert_eq!(m.naked_edges,2);assert_eq!(m.edges,5);assert!((m.area_mm2-2.*area).abs()<1e-6);let path=std::env::temp_dir().join(format!("om9-periodic-surface-{}.om9",uuid::Uuid::new_v4()));let loaded = top11_sources::round_trip(&c, &path, limits);std::fs::remove_file(path).unwrap();assert_eq!(loaded,after);for doc in [&after,&loaded] {let Geometry::Brep(joined)=&doc.entities.values().next().unwrap().geometry else{panic!("BRep")};for index in 0..2 {let face=om9_kernel::editing::extract_face(joined,index,creation::DEFAULT_DEFLECTION_MM,&limits).unwrap();assert_eq!(om9_kernel::measurement::face_periodicity(&face,&limits).unwrap(),[true,false]);}}c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);}
 }
 
 #[test]
@@ -2549,4 +2604,77 @@ fn join_uncertified_periodic_surface_refuses_without_mutation() {
     use om9_core::geometry::NurbsSurface;
     let limits=Limits::default();let rows=[[0.,0.],[2.,0.],[2.,2.],[0.,2.],[0.,0.],[2.1,0.]];let mut poles=Vec::new();for [x,y] in rows {for z in [0.,2.] {poles.push([x,y,z]);}}
     let surface=NurbsSurface{degree:[2,1],size:[6,2],poles,weights:vec![1.;12],knots:[vec![-2.,-1.,0.,1.,2.,3.,4.,5.,6.],vec![0.,0.,1.,1.]],domain:[[0.,4.],[0.,1.]],periodic:[true,false],reversed:false};let a=Entity::new("invalid periodic",Geometry::Surface(surface.clone()),None);let mut b=Entity::new("other",Geometry::Surface(surface),None);b.placement=Transform::translation([0.,0.,2.]);let ids=[a.id,b.id];let mut doc=Document::with_template_tolerance("invalid periodic");doc.entities.insert(a.id,a);doc.entities.insert(b.id,b);let mut c=Controller::new(doc,limits).unwrap();c.select_objects(&ids).unwrap();let before=c.document().clone();assert!(c.submit("Join").is_err());assert_eq!(c.document(),&before);assert_eq!(c.coordinator().undo_len(),0);
+}
+
+#[test]
+fn retained_face_can_join_split_and_trim_from_its_source() {
+    let limits = Limits::default();
+    let profile = creation::Profile::new(vec![[0.,0.,0.],[4.,0.,0.],[4.,4.,0.],[0.,4.,0.]]).unwrap();
+    let face = creation::planar(&profile, creation::DEFAULT_DEFLECTION_MM, &limits).unwrap();
+    let retained = om9_kernel::brep::to_3dm(&face, 0.001, &limits).unwrap();
+    for command in ["Join", "Split", "Trim"] {
+        let mut fixtures = top11_sources::Displays::default();
+        let a = Entity::new("retained face", fixtures.native(retained.clone()), None);
+        let b = if command == "Join" {
+            let mut neighbor = Entity::new("neighbor", fixtures.native(retained.clone()), None);
+            neighbor.placement = Transform::translation([4.,0.,0.]);
+            neighbor
+        } else {
+            Entity::new("cutter", Geometry::Curve(om9_core::geometry::Curve::Line {
+                start:[2.,-1.,0.], end:[2.,5.,0.], domain:[0.,1.]
+            }), None)
+        };
+        let ids = [a.id,b.id];
+        let mut document = Document::with_template_tolerance(command);
+        for entity in [a,b] { document.entities.insert(entity.id, entity); }
+        let mut c = fixtures.controller(document, limits).unwrap();
+        let before = c.document().clone();
+        if command == "Split" {
+            c.select_objects(&ids[..1]).unwrap();
+            c.submit(command).unwrap();
+            c.top11_accept_object(ids[1]).unwrap();
+            c.submit("").unwrap();
+        } else {
+            c.select_objects(&ids).unwrap();
+            c.submit(command).unwrap();
+            if command == "Trim" {
+                c.top11_trim_many_accept_pick(ids[0], [1.,2.,0.]).unwrap();
+                c.submit("").unwrap();
+            }
+        }
+        let outputs: Vec<_> = c.document().entities.values().filter_map(|entity| match &entity.geometry {
+            Geometry::Brep(body) => Some(creation::measure(body,&limits).unwrap()),
+            _ => None
+        }).collect();
+        let (faces, area) = match command { "Join" => (2,32.), "Split" => (2,16.), _ => (1,8.) };
+        assert_eq!(outputs.iter().map(|m| m.faces).sum::<usize>(),faces, "{command}");
+        assert!((outputs.iter().map(|m| m.area_mm2).sum::<f64>() - area).abs()<1e-6, "{command}");
+        c.undo().unwrap();
+        assert_eq!(c.document(), &before);
+    }
+}
+
+#[test]
+fn extend_lines_partitions_the_placed_face_with_a_short_external_cutter() {
+    let limits = Limits::default();
+    let plane = om9_core::surface_kernel::plane([0.;3],[1.,0.,0.],[0.,1.,0.],4.,4.,&limits).unwrap();
+    let mut face = Entity::new("face", Geometry::Surface(plane), None);
+    face.placement = Transform::translation([10.,0.,0.]);
+    let cutter = Entity::new("short cutter", Geometry::Curve(om9_core::geometry::Curve::Line {
+        start:[12.,7.,0.], end:[12.,8.,0.], domain:[0.,1.]
+    }), None);
+    let ids = [face.id, cutter.id];
+    let mut doc = Document::with_template_tolerance("extend cutter");
+    for entity in [face, cutter] { doc.entities.insert(entity.id,entity); }
+    let mut c = Controller::new(doc, limits).unwrap();
+    let before = c.document().clone();
+    c.select_objects(&ids).unwrap();
+    c.submit("Trim ExtendLines=Yes").unwrap();
+    c.top11_trim_many_accept_pick(ids[0], [11.,2.,0.]).unwrap();
+    c.submit("").unwrap();
+    let Geometry::Brep(kept) = &c.document().entities[&ids[0]].geometry else { panic!("trimmed face") };
+    assert!((creation::measure(kept,&limits).unwrap().area_mm2-8.).abs()<1e-6);
+    assert_eq!(c.document().entities[&ids[1]], before.entities[&ids[1]]);
+    c.undo().unwrap();
+    assert_eq!(c.document(), &before);
 }

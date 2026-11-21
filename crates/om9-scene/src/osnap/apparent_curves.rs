@@ -19,6 +19,69 @@ const IMAGE_TOLERANCE_PX: f64 = 1e-6;
 const MAX_PROJECTION_PIECES: usize = 127;
 const MAX_IMAGE_PAIRS: usize = 128;
 
+/// Intersect projected source curves and return traversal fractions on the target.
+pub fn trim_view_fractions(
+    target: &Curve, cutter: &Curve, camera: &Camera, extend_line: bool,
+    tolerance: f64, limits: &Limits,
+) -> Result<Vec<f64>> {
+    target.validate(limits)?;
+    cutter.validate(limits)?;
+    let mut pairs = MAX_IMAGE_PAIRS.min(usize::try_from(limits.max_nodes).unwrap_or(usize::MAX));
+    trim_projected_parts(target, cutter, camera, extend_line, tolerance, limits, &mut pairs)
+}
+
+fn trim_projected_parts(target: &Curve, cutter: &Curve, camera: &Camera, extend_line: bool,
+    tolerance: f64, limits: &Limits, pairs_left: &mut usize) -> Result<Vec<f64>> {
+    if let Curve::Polycurve { segments, reversed } = target {
+        let mut hits = Vec::new();
+        for (index, segment) in segments.iter().enumerate() {
+            for local in trim_projected_parts(segment, cutter, camera, extend_line, tolerance, limits, pairs_left)? {
+                let fraction = (index as f64 + local) / segments.len() as f64;
+                hits.push(if *reversed { 1. - fraction } else { fraction });
+            }
+        }
+        return Ok(hits);
+    }
+    if let Curve::Polycurve { segments, .. } = cutter {
+        let mut hits = Vec::new();
+        for segment in segments {
+            hits.extend(trim_projected_parts(target, segment, camera, false, tolerance, limits, pairs_left)?);
+        }
+        return Ok(hits);
+    }
+    // Uniform image scale cancels out of the two projected source parameters.
+    let viewport = Viewport { origin: [0.; 2], size: [1024.; 2] };
+    let projector = camera.projector(viewport)?;
+    let capture = |curve| ProjectedCurve::capture(curve, Transform::identity(), camera, &projector, limits, &|| false);
+    let (Some(a), Some(b)) = (capture(target)?, capture(cutter)?) else {
+        return Ok(Vec::new());
+    };
+    let pairs = a.pieces.len().saturating_mul(b.pieces.len());
+    *pairs_left = pairs_left.checked_sub(pairs).ok_or(Error::Budget("Trim projected curve pairs"))?;
+    let mut fractions = Vec::new();
+    for first in &a.pieces {
+        for second in &b.pieces {
+            let extended;
+            let cutting = if extend_line && matches!(cutter, Curve::Line { .. }) {
+                extended = om9_core::top11::extended_trim_line(&first.image, &second.image, IMAGE_TOLERANCE_PX)?;
+                &extended
+            } else { &second.image };
+            let hits = curve_curve_intersections_cancellable(&first.image, cutting, IMAGE_TOLERANCE_PX, limits, &|| false)?;
+            for hit in hits {
+                let fraction = first.source_fraction(camera.projection, hit.first_fraction)?;
+                let mapped = if let Curve::Circle { domain, angle_domain, .. } = target {
+                    let point = om9_core::curve_ops::point_at(&a.world, fraction, limits)?;
+                    let (_, angle) = source_intersection_witness(target, Transform::identity(), fraction, point, tolerance, limits)?;
+                    let [lo, hi] = angle_domain.unwrap_or(*domain);
+                    (angle - lo) / (hi - lo)
+                } else { fraction };
+                fractions.push(mapped);
+            }
+        }
+    }
+    Ok(fractions)
+}
+
 struct ProjectedCurve {
     world: Curve,
     pieces: Vec<ProjectedPiece>,

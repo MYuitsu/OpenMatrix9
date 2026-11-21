@@ -1019,9 +1019,7 @@ impl Controller {
         let hash = self.current_file_hash()?;
         let path = self.reserve_file_path(path)?;
         #[cfg(feature = "occt-brep")]
-        if self.document().entities.values().chain(self.document().definitions.values().flat_map(|definition| &definition.members))
-            .map(|entity| &entity.geometry).chain(self.document().results.values().map(|result| &result.geometry_snapshot))
-            .any(|geometry| matches!(geometry, Geometry::Brep(_) | Geometry::NativeBrep(_))) {
+        if self.document_has_brep_sources() {
             guard()?;
             return self.start_brep_file_save(token, path, hash);
         }
@@ -1126,9 +1124,24 @@ impl Controller {
     #[cfg(not(feature = "occt-brep"))]
     pub fn poll_file_save_worker(&mut self) -> Option<Result<FileOutcome>> { None }
 
+    #[cfg(feature = "occt-brep")]
+    fn document_has_brep_sources(&self) -> bool {
+        self.document().entities.values().chain(self.document().definitions.values().flat_map(|definition| &definition.members))
+            .map(|entity| &entity.geometry).chain(self.document().results.values().map(|result| &result.geometry_snapshot))
+            .any(|geometry| matches!(geometry, Geometry::Brep(_) | Geometry::NativeBrep(_)))
+    }
+
     /// Save a batch result using the same admission as interactive Save.
     pub fn save_archive_for_batch(&self, path: &Path) -> Result<()> {
-        self.save_archive_for_batch_guard(path, path.as_os_str().len() as u64, || Ok(()))
+        let path_bytes = path.as_os_str().as_encoded_bytes().len() as u64;
+        #[cfg(feature = "occt-brep")]
+        if self.document_has_brep_sources() {
+            let capture = self.capture_brep_save_sources(Usage { bytes: path_bytes, ..Usage::default() })?;
+            let host = crate::brep_restore_host::BrepRestoreHost::admit_packaged(Default::default())?;
+            let cancel = om9_core::transaction::Cancellation::default();
+            return capture.prepare(&host, path, &cancel)?.publish(&self.coordinator, &cancel);
+        }
+        self.save_archive_for_batch_guard(path, path_bytes, || Ok(()))
     }
 
     /// Capture all distinct attested BRep sources in the current document for

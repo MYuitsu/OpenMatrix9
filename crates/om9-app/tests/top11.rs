@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
+#[path = "common/top11_sources.rs"]
+mod top11_sources;
 use om9_app::session::{Controller, LINE};
 use om9_core::{
     budget::Limits,
@@ -389,8 +391,9 @@ fn copy_repeat_direction_uses_scale_safe_previous_vector() {
 
 #[test]
 fn native_brep_toolbar_disables_unavailable_topology_operations() {
+    let mut fixtures = top11_sources::Displays::default();
     use om9_core::geometry::{Curve, Mesh, NativeBrep};
-    let native = || Entity::new("native", Geometry::NativeBrep(NativeBrep {
+    let mut native = || Entity::new("native", fixtures.native(NativeBrep {
         display: std::sync::Arc::new(Mesh { vertices: vec![[0., 0., 0.], [2., 0., 0.], [0., 2., 0.]], faces: vec![vec![0, 1, 2]], normals: vec![], colors: vec![], corner_uvs: vec![] }),
         payload: vec![1, 2, 3].into(), crc: 0,
     }), None);
@@ -399,15 +402,20 @@ fn native_brep_toolbar_disables_unavailable_topology_operations() {
     let ids = [first.id, second.id, curve.id];
     let mut doc = Document::with_template_tolerance("native BRep availability");
     for entity in [first, second, curve] { doc.entities.insert(entity.id, entity); }
-    let mut c = Controller::new(doc, Limits::default()).unwrap();
+    let mut c = fixtures.controller(doc, Limits::default()).unwrap();
     for selection in [&ids[..1], &ids[..2], &[ids[0], ids[2]][..]] {
         c.select_objects(selection).unwrap();
         let before = c.document().clone();
         let states = c.top11_availability();
         for action in [Top11Action::Join, Top11Action::Split, Top11Action::Trim] {
             let state = states.iter().find(|s| s.action == action).unwrap();
-            assert!(!state.enabled, "{action:?} incorrectly enabled for native BRep selection {selection:?}");
-            assert!(!state.reason.is_empty());
+            let supported = cfg!(feature = "occt-brep") && match action {
+                Top11Action::Split => true,
+                Top11Action::Join => selection == &ids[..2],
+                Top11Action::Trim => selection.len() >= 2,
+                _ => unreachable!(),
+            };
+            assert_eq!(state.enabled, supported, "{action:?} for {selection:?}");
         }
         let explode = states.iter().find(|s| s.action == Top11Action::Explode).unwrap();
         assert_eq!(explode.enabled, cfg!(feature = "occt-brep"));
@@ -1955,8 +1963,10 @@ fn ringrail_scene_budget_refusal_is_atomic() {
     let mut doc=Document::with_template_tolerance("ringrail scene budget");let leaf=Definition::new("leaf",(0..8).map(|i|Entity::new("point",Geometry::Point([i as f64,0.,0.]),None)).collect());let mut def_id=leaf.id;doc.definitions.insert(def_id,leaf);
     for _ in 0..3 {let def=Definition::new("nested",(0..8).map(|_|Entity::new("child",Geometry::Instance(def_id),None)).collect());def_id=def.id;doc.definitions.insert(def_id,def);}
     let root=Entity::new("root",Geometry::Instance(def_id),None);doc.entities.insert(root.id,root);
-    let mut c=Controller::new(doc,Limits{max_bytes:3_000_000,..Limits::default()}).unwrap();let before=c.document().clone();let scene_count=c.scene().unwrap().objects.len();
-    c.top11_invoke(Top11Action::RingRail).unwrap();let result=c.builder_apply();
+    let mut c=Controller::new(doc,Limits{max_bytes:16_000_000,..Limits::default()}).unwrap();let before=c.document().clone();let scene_count=c.scene().unwrap().objects.len();
+    c.top11_invoke(Top11Action::RingRail).unwrap();
+    let _pressure = c.coordinator().reserve_remaining_external_memory_with_held(om9_core::budget::memory::MemoryClass::Kernel, None, c.scene_cache_usage().unwrap()).unwrap();
+    let result=c.builder_apply();
     assert!(result.is_err(),"limited scene budget must refuse this fixture");
     assert_eq!(c.document(),&before,"failed builder must not commit");assert_eq!(c.scene().unwrap().objects.len(),scene_count);assert_eq!(c.coordinator().undo_len(),0);assert!(c.builder().is_some());
 }
@@ -1968,10 +1978,13 @@ fn ringrail_scene_budget_boundaries_never_report_error_after_commit() {
     for _ in 0..3 {let def=Definition::new("nested",(0..8).map(|_|Entity::new("child",Geometry::Instance(def_id),None)).collect());def_id=def.id;doc.definitions.insert(def_id,def);}
     let root=Entity::new("root",Geometry::Instance(def_id),None);doc.entities.insert(root.id,root);
     let mut refused=0;let mut committed=0;
-    for budget in [3_000_000,3_500_000,4_000_000,5_000_000,6_000_000,8_000_000,12_000_000] {
-        let mut c=Controller::new(doc.clone(),Limits{max_bytes:budget,..Limits::default()}).unwrap();let before=c.document().clone();let before_count=c.scene().unwrap().objects.len();
-        c.top11_invoke(Top11Action::RingRail).unwrap();let result=c.builder_apply();
-        if result.is_err() {refused+=1;assert_eq!(c.document(),&before,"post-commit error at {budget}: {result:?}");assert_eq!(c.scene().unwrap().objects.len(),before_count);assert_eq!(c.coordinator().undo_len(),0);}
+    for headroom in [0, 500_000, 4_000_000, 12_000_000] {
+        let mut c=Controller::new(doc.clone(),Limits{max_bytes:24_000_000,..Limits::default()}).unwrap();let before=c.document().clone();let before_count=c.scene().unwrap().objects.len();
+        c.top11_invoke(Top11Action::RingRail).unwrap();
+        let mut pressure = c.coordinator().reserve_remaining_external_memory_with_held(om9_core::budget::memory::MemoryClass::Kernel, None, c.scene_cache_usage().unwrap()).unwrap();
+        pressure.shrink_to(pressure.bytes().saturating_sub(headroom).max(1)).unwrap();
+        let result=c.builder_apply();
+        if result.is_err() {refused+=1;assert_eq!(c.document(),&before,"post-commit error with {headroom} bytes available: {result:?}");assert_eq!(c.scene().unwrap().objects.len(),before_count);assert_eq!(c.coordinator().undo_len(),0);}
         else {committed+=1;assert_eq!(c.document().entities.len(),before.entities.len()+1);assert!(c.scene().unwrap().objects.len()>before_count);}
     }
     assert!(refused>0&&committed>0,"test must cover refusal and commit");
@@ -4051,15 +4064,23 @@ fn mirror_mesh_preserves_face_boundaries_and_corner_uvs() {
 
 #[test]
 fn mirror_hatch_light_and_native_brep_preserves_payloads_and_attributes() {
-    use om9_core::{geometry::{Hatch,Light,Mesh,NativeBrep},transaction::Cancellation};
+    let mut fixtures = top11_sources::Displays::default();
+    use om9_core::{geometry::{Hatch,Light,Mesh}};
     let limits=Limits::default();let mesh=Mesh{vertices:vec![[1.,0.,0.],[3.,0.,0.],[1.,2.,0.]],faces:vec![vec![0,1,2]],normals:vec![],colors:vec![],corner_uvs:vec![]};
-    let geometries=[Geometry::Hatch(Hatch{display:mesh.clone(),loops:vec![vec![[1.,0.,0.],[3.,0.,0.],[1.,2.,0.]]],pattern:Some("test".into()),color:[10,20,30,255]}),
+    let mut geometries=vec![Geometry::Hatch(Hatch{display:mesh.clone(),loops:vec![vec![[1.,0.,0.],[3.,0.,0.],[1.,2.,0.]]],pattern:Some("test".into()),color:[10,20,30,255]}),
         Geometry::Light(Light{display:[1.,0.,0.],location:[1.,0.,2.],direction:[1.,2.,-1.],diffuse:[30,40,50,255],intensity:2.,style:1}),
-        Geometry::NativeBrep(NativeBrep{display: std::sync::Arc::new(mesh),payload:vec![1,2,3,4].into(),crc:0})];
+    ];
+    #[cfg(feature = "occt-brep")]
+    {
+        let body = om9_kernel::creation::primitive(om9_kernel::creation::Primitive::Box {
+            x_mm: 3., y_mm: 3., z_mm: 1.,
+        }, 0.05, &limits).unwrap();
+        geometries.push(fixtures.native(om9_kernel::brep::to_3dm(&body, 0.001, &limits).unwrap()));
+    }
     for geometry in geometries {for copy in [false,true] {for toolbar in [false,true] {
         let mut entity=Entity::new("mirror",geometry.clone(),None);entity.placement=Transform::translation([4.,1.,0.]);let id=entity.id;
         let mut doc=Document::with_template_tolerance("mirror retained objects");doc.entities.insert(id,entity);
-        let mut c=Controller::new(doc,limits).unwrap();select(&mut c,&[id]);let before=c.document().clone();
+        let mut c=fixtures.controller(doc,limits).unwrap();select(&mut c,&[id]);let before=c.document().clone();
         assert!(c.top11_availability().iter().any(|state|state.action==Top11Action::Mirror && state.enabled));
         if toolbar {c.top11_invoke(Top11Action::Mirror).unwrap();} else {c.submit("Mirror").unwrap();}
         if !copy {c.submit("Copy=No").unwrap();}c.submit("YAxis").unwrap();
@@ -4076,7 +4097,7 @@ fn mirror_hatch_light_and_native_brep_preserves_payloads_and_attributes() {
         let screen=camera.project(pick,viewport).unwrap().unwrap().screen;
         let hit=c.scene().unwrap().pick(screen,&camera,viewport,3.,om9_scene::scene::PickIntent::Select).unwrap().expect("reflected pick");assert_eq!(hit.root,result);
         let path=std::env::temp_dir().join(format!("om9-mirror-retained-{}.om9",uuid::Uuid::new_v4()));
-        om9_archive::Archive::save(&path,&after,&limits,&Cancellation::default()).unwrap();assert_eq!(om9_archive::Archive::open(&path,&limits).unwrap(),after);std::fs::remove_file(path).unwrap();
+        let reopened = top11_sources::round_trip(&c, &path, limits);assert_eq!(reopened,after);std::fs::remove_file(path).unwrap();
         c.undo().unwrap();assert_eq!(c.document(),&before);c.redo().unwrap();assert_eq!(c.document(),&after);
     }}}
 }
@@ -4148,6 +4169,7 @@ fn duplicate_scene_budget_refusal_leaves_document_and_scene_unchanged() {
     let mut doc=Document::with_template_tolerance("duplicate scene budget");let leaf=Definition::new("leaf",(0..8).map(|i|Entity::new("point",Geometry::Point([i as f64,0.,0.]),None)).collect());let mut def_id=leaf.id;doc.definitions.insert(def_id,leaf);
     for _ in 0..3 {let def=Definition::new("nested",(0..8).map(|_|Entity::new("child",Geometry::Instance(def_id),None)).collect());def_id=def.id;doc.definitions.insert(def_id,def);}
     let root=Entity::new("root",Geometry::Instance(def_id),None);let id=root.id;doc.entities.insert(id,root);
-    let mut c=Controller::new(doc,Limits{max_bytes:3_000_000,..Limits::default()}).unwrap();select(&mut c,&[id]);let before=c.document().clone();let scene_count=c.scene().unwrap().objects.len();let undo=c.coordinator().undo_len();
+    let mut c=Controller::new(doc,Limits{max_bytes:16_000_000,..Limits::default()}).unwrap();select(&mut c,&[id]);let before=c.document().clone();let scene_count=c.scene().unwrap().objects.len();let undo=c.coordinator().undo_len();
+    let _pressure = c.coordinator().reserve_remaining_external_memory_with_held(om9_core::budget::memory::MemoryClass::Kernel, None, c.scene_cache_usage().unwrap()).unwrap();
     let result=c.top11_duplicate_in_place();assert!(result.is_err(),"result={result:?} entities={} scene={:?}",c.document().entities.len(),c.scene().map(|s|s.objects.len()));assert_eq!(c.document(),&before);assert_eq!(c.scene().unwrap().objects.len(),scene_count);assert_eq!(c.coordinator().undo_len(),undo);
 }

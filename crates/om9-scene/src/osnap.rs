@@ -15,7 +15,7 @@ use om9_core::{
 };
 
 mod apparent_curves;
-pub use apparent_curves::{apparent_curve_intersections, apparent_curve_intersections_with_parameter_map};
+pub use apparent_curves::{trim_view_fractions, apparent_curve_intersections, apparent_curve_intersections_with_parameter_map};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SnapKind {

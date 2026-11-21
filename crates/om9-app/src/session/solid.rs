@@ -5189,37 +5189,37 @@ impl Controller {
         let source = self.coordinator.register_reserved_brep_candidate(candidate, &mut reservation, held)?;
         Ok((source, reservation))
     }
-    pub(super) fn reserve_solid_guard_vector(&self, count: usize)
-        -> Result<(Vec<om9_core::transaction::ExternalMemoryReservation>, om9_core::transaction::ExternalMemoryReservation)> {
+    pub(super) fn reserve_solid_guard_vector<T>(&self, count: usize)
+        -> Result<(Vec<T>, om9_core::transaction::ExternalMemoryReservation)> {
         self.reserve_solid_guard_vector_with_held(count, self.scene_cache_usage()?)
     }
-    pub(super) fn reserve_solid_guard_vector_with_held(&self, count: usize, held: om9_core::budget::Usage)
-        -> Result<(Vec<om9_core::transaction::ExternalMemoryReservation>, om9_core::transaction::ExternalMemoryReservation)> {
-        use om9_core::{budget::{Usage, memory::MemoryClass}, transaction::ExternalMemoryReservation};
+    pub(super) fn reserve_solid_guard_vector_with_held<T>(&self, count: usize, held: om9_core::budget::Usage)
+        -> Result<(Vec<T>, om9_core::transaction::ExternalMemoryReservation)> {
+        use om9_core::budget::{Usage, memory::MemoryClass};
         let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
-        let bytes = Usage::array::<ExternalMemoryReservation>(count)?.bytes.max(1);
+        let bytes = Usage::array::<T>(count)?.bytes.max(1);
         let mut storage = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, bytes, physical, held)?;
         let mut guards = Vec::new();
         guards.try_reserve_exact(count).map_err(|_| Error::Budget("solid source guards"))?;
-        let actual = Usage::array::<ExternalMemoryReservation>(guards.capacity())?.bytes.max(1);
+        let actual = Usage::array::<T>(guards.capacity())?.bytes.max(1);
         if actual > storage.bytes() {
             self.coordinator.grow_external_memory_with_held(&mut storage, actual - bytes, physical, held)?;
         }
         storage.set_allocated_bytes(actual)?;
         Ok((guards, storage))
     }
-    pub(super) fn grow_solid_guard_vector(&self, guards: &mut Vec<om9_core::transaction::ExternalMemoryReservation>,
+    pub(super) fn grow_solid_guard_vector<T>(&self, guards: &mut Vec<T>,
         storage: &mut Option<om9_core::transaction::ExternalMemoryReservation>, additional: usize) -> Result<()> {
-        use om9_core::{budget::{Usage, memory::MemoryClass}, transaction::ExternalMemoryReservation};
+        use om9_core::budget::{Usage, memory::MemoryClass};
         let required = guards.len().checked_add(additional).ok_or(Error::Overflow("solid source guards"))?;
         if required <= guards.capacity() { return Ok(()); }
         let held = self.scene_cache_usage()?;
         let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
-        let bytes = Usage::array::<ExternalMemoryReservation>(required)?.bytes.max(1);
+        let bytes = Usage::array::<T>(required)?.bytes.max(1);
         // The old backing allocation stays charged during Vec reallocation.
         let mut next = self.coordinator.reserve_external_memory_with_held(MemoryClass::CpuCache, bytes, physical, held)?;
         guards.try_reserve_exact(required - guards.len()).map_err(|_| Error::Budget("solid source guards"))?;
-        let actual = Usage::array::<ExternalMemoryReservation>(guards.capacity())?.bytes.max(1);
+        let actual = Usage::array::<T>(guards.capacity())?.bytes.max(1);
         if actual > next.bytes() {
             self.coordinator.grow_external_memory_with_held(&mut next, actual - bytes, physical, held)?;
         }
@@ -6552,48 +6552,7 @@ impl Controller {
         if !height.is_finite() || height <= 0.0 || height > f32::MAX as f64 {
             return Err(Error::Invalid("text height must be finite and positive"));
         }
-        use skrifa::{
-            FontRef, MetadataProvider,
-            instance::{LocationRef, Size},
-            outline::DrawSettings,
-        };
-        let font = FontRef::new(epaint_default_fonts::UBUNTU_LIGHT)
-            .map_err(|_| Error::Invalid("embedded font"))?;
-        let outlines = font.outline_glyphs();
-        let charmap = font.charmap();
-        let glyph_metrics = font.glyph_metrics(Size::new(height as f32), LocationRef::default());
-        let mut contours: Vec<Vec<om9_core::geometry::Point3>> = Vec::new();
-        let mut pen_x = 0.0f64;
-        for character in text.chars() {
-            let Some(glyph_id) = charmap.map(character) else {
-                continue;
-            };
-            let Some(glyph) = outlines.get(glyph_id) else {
-                continue;
-            };
-            let mut pen = TextPen::default();
-            glyph
-                .draw(
-                    DrawSettings::unhinted(Size::new(height as f32), LocationRef::default()),
-                    &mut pen,
-                )
-                .map_err(|_| Error::Invalid("text outline"))?;
-            if pen.current.len() > 2 {
-                pen.contours.push(pen.current);
-            }
-            for mut contour in pen.contours {
-                for point in &mut contour {
-                    point[0] += pen_x;
-                }
-                contours.push(contour);
-            }
-            pen_x += glyph_metrics
-                .advance_width(glyph_id)
-                .unwrap_or(height as f32 * 0.5) as f64;
-        }
-        if contours.is_empty() {
-            return Err(Error::Invalid("text produced no contour"));
-        }
+        let contours = super::solid_geometry::text_contours(text, height)?;
         let extrude = height * 0.2;
         let depth: Vec<usize> = contours
             .iter()

@@ -305,7 +305,17 @@ pub fn edit_point(surface: &NurbsSurface, i: usize, j: usize, limits: &Limits) -
 
 /// The surface point `S(u, v)` with rational weights applied.
 pub fn evaluate(surface: &NurbsSurface, u: f64, v: f64, limits: &Limits) -> Result<Point3> {
+    point_evaluator(surface, limits)?(u, v)
+}
+
+/// Validate the immutable surface once when sampling a display grid.
+pub fn point_evaluator<'a>(surface: &'a NurbsSurface, limits: &Limits)
+    -> Result<impl Fn(f64, f64) -> Result<Point3> + 'a> {
     surface.validate(limits)?;
+    Ok(move |u, v| evaluate_point(surface, u, v))
+}
+
+fn evaluate_point(surface: &NurbsSurface, u: f64, v: f64) -> Result<Point3> {
     check_parameter(surface, 0, u)?;
     check_parameter(surface, 1, v)?;
     let nu = basis_row(surface, 0, u)?;

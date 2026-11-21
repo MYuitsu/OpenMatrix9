@@ -316,6 +316,11 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "top11_routes_2026_11_21": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "Duplicate reused the Copy controller in both profiles and produced an independent object.",
+      "evidence": "docs/validation/2026-11-21-top11.md"
+    },
     "copy_direction_scale_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-copy-rotate-direction-scale.md", "scope": "Nonzero small offsets and scale-safe last direction/distance tested through preview and commit.", "limitations": "Additional geometry and physical desktop input remain open."},
     "inactive_view_input_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-inactive-view-cplane.md", "scope": "Copy pointer, preview and click use the pointed viewport CPlane; tested four directions.", "limitations": "Other CPlanes, input devices, GPU and desktop acceptance remain open."},
     "projected_preview_input_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-projected-snap-preview.md", "scope": "Transform preview and click share the constrained, snapped and projected viewport input; egui fixture covers Move.", "limitations": "Copy-specific projected snap and inactive viewport cases remain unverified."},

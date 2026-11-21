@@ -1,4 +1,21 @@
 {
+  "top11_ring_rail_toolbar_2026_11_22": {
+    "stage": "ui-menu",
+    "status": "WINDOWS_REGION_PICKER_AND_FRONT_CIRCLE_VERIFIED",
+    "scope": "Top11 compact controls under Projects, staged region choice, VNM diameter or circumference and green-arrow placement.",
+    "evidence": "docs/validation/2026-11-22-ring-rail-toolbar.md",
+    "next_document": "docs/validation/command-source-viewport-checklist.md",
+    "next_action": "Continue separate shape-library and replacement acceptance with user drawings."
+  },
+  "top11_routes_2026_11_21": {
+    "stage": "feature-port",
+    "status": "WINDOWS_COMMAND_ROUTES_VERIFIED",
+    "scope": "Eleven Top11 actions in standalone and Matrix-enabled Windows desktop sessions, secondary actions, annotation and cage Explode, retained BRep Join/Split/Trim and Ring Rail.",
+    "evidence": "docs/validation/2026-11-21-top11.md",
+    "tests": "376 scoped regression cases and 31 add-on cases passed. Eleven commands ran in each of two Windows desktop profiles. The six-face BRep archive reopened and rendered in four views.",
+    "next_document": "docs/validation/command-source-viewport-checklist.md",
+    "next_action": "Broaden external Rhino 5 document and viewport-mode evidence as additional fixtures become available."
+  },
   "options_typography_2026_11_20": {
     "stage": "ui-menu",
     "status": "WINDOWS_BUILD_EGUI_AND_DESKTOP_VERIFIED",

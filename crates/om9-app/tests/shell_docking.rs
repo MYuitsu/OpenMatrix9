@@ -380,3 +380,68 @@ fn the_left_rail_and_command_line_keep_their_documented_bounds() {
     assert_eq!(app.view_rects.len(), 4);
     assert!(app.view_rects.contains_key(&ViewId::Perspective));
 }
+
+
+#[test]
+fn ring_rail_toolbar_places_the_confirmed_region_size() {
+    use om9_core::geometry::{Curve, Geometry};
+
+    let mut app = MatrixApp::new(Document::with_template_tolerance("Top11 Ring Rail")).unwrap();
+    let ctx = egui::Context::default();
+    let before = app.controller.document().clone();
+    let settle = |app: &mut MatrixApp| {
+        for _ in 0..8 { frame(app, &ctx, vec![]); }
+        frame(app, &ctx, vec![])
+    };
+    let text_at = |out: &egui::FullOutput, name: &str| -> Pos2 {
+        out.shapes.iter().find_map(|shape| {
+            let egui::Shape::Text(text) = &shape.shape else { return None };
+            let center = text.pos + text.galley.size() / 2.;
+            (text.galley.text() == name && shape.clip_rect.contains(center)).then_some(center)
+        }).unwrap_or_else(|| {
+            let matching: Vec<_> = out.shapes.iter().filter_map(|item| match &item.shape {
+                egui::Shape::Text(text) if text.galley.text().contains(name) => Some((text.pos, item.clip_rect)),
+                _ => None,
+            }).collect();
+            panic!("missing visible {name}: {matching:?}");
+        })
+    };
+    settle(&mut app);
+    let ring = ctx.data(|data| data.get_temp::<Rect>(egui::Id::new(("top11-sidebar", "RingRail")))).unwrap();
+    click(&mut app, &ctx, ring.center());
+    let out = settle(&mut app);
+    let region = text_at(&out, "USA");
+    assert_eq!(app.controller.ring_rail_size(), Some(("US", 7.)));
+    click(&mut app, &ctx, region);
+    let out = settle(&mut app);
+    for name in ["Britain", "Japan", "Swiss", "European", "France", "German", "Custom Ring Size"] { text_at(&out, name); }
+    click(&mut app, &ctx, text_at(&out, "VNM"));
+    assert_eq!(app.controller.ring_rail_size(), Some(("US", 7.)));
+    let out = settle(&mut app);
+    let arrow_after = |out: &egui::FullOutput, label: &str| {
+        let anchor = text_at(out, label);
+        out.shapes.iter().find_map(|item| {
+            let egui::Shape::Text(text) = &item.shape else { return None };
+            let center = text.pos + text.galley.size() / 2.;
+            (text.galley.text() == "▶" && item.clip_rect.contains(center)
+                && (center.y - anchor.y).abs() < 6. && center.x > anchor.x).then_some(center)
+        }).expect("visible green arrow in the requested row")
+    };
+    click(&mut app, &ctx, arrow_after(&out, "Set Region"));
+    assert_eq!(app.controller.ring_rail_size(), Some(("VNM", 17.32)));
+    app.controller.submit("RingSize=20").unwrap();
+    assert_eq!(app.controller.document(), &before);
+    let out = settle(&mut app);
+    click(&mut app, &ctx, arrow_after(&out, "VNM"));
+    let entity = app.controller.document().entities.values().next().expect("placed Ring Rail");
+    let Geometry::Curve(Curve::Circle {radius, center, x, y, ..}) = &entity.geometry else { panic!("Front circle") };
+    assert_eq!((*radius, *center, *x, *y), (10., [0.; 3], [0.,0.,1.], [1.,0.,0.]));
+    assert_eq!(app.controller.coordinator().undo_len(), 1);
+    let after = app.controller.document().clone();
+    let out = settle(&mut app);
+    text_at(&out, "VNM");
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.document(), &before);
+    app.controller.redo().unwrap();
+    assert_eq!(app.controller.document(), &after);
+}

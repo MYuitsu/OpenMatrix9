@@ -9,7 +9,15 @@ impl MatrixApp {
         let Some(action) = Top11Action::from_icon(icon) else {
             return;
         };
-        match self.controller.top11_invoke(action) {
+        let result = self.controller.top11_invoke(action);
+        if action == Top11Action::RingRail && result.is_ok() {
+            self.open_ring_rail_toolbar();
+        }
+        self.top11_feedback(action, result);
+    }
+
+    pub(super) fn top11_feedback(&mut self, action: Top11Action, result: om9_core::Result<crate::session::Top11Result>) {
+        match result {
             Ok(result) => {
                 let message = result.message();
                 self.status.info(&message);

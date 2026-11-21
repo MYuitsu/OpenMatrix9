@@ -13,9 +13,12 @@ use om9_core::{
 };
 use std::collections::BTreeSet;
 
+mod candidate;
+use candidate::Top11Candidate;
+
 /// Mirrored copies plus replacement geometry for the delete-input option.
 type MirrorBatch = (Vec<Entity>, Vec<(ObjectId, Geometry)>, Vec<(ObjectId, Transform)>,
-    Vec<om9_core::transaction::ExternalMemoryReservation>, Option<om9_core::transaction::ExternalMemoryReservation>);
+    Vec<Top11Candidate>, Option<om9_core::transaction::ExternalMemoryReservation>);
 
 /// What a Top 11 toolbar result means for the status line.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -63,6 +66,7 @@ pub enum Top11Pending {
     SelectObjects {
         action: Top11Action,
         split_point: bool,
+        alternate: bool,
         explode_blocks: bool,
     },
     Duplicate {
@@ -229,6 +233,9 @@ impl Top11Pending {
     }
     /// Command-line options available for the current Top11 action and stage.
     pub fn option_tokens(&self) -> Vec<(&'static str, &'static str)> {
+        if matches!(self, Self::SelectObjects { action: Top11Action::Trim, .. } | Self::TrimMutual { completed: 0, .. }) {
+            return vec![("ExtendLines", "ExtendLines"), ("ApparentIntersections", "ApparentIntersections")];
+        }
         if let Self::SplitMany {
             cutters,
             isocurve_allowed,
@@ -436,6 +443,9 @@ fn child_entity(source: &Entity, geometry: Geometry) -> Entity {
     entity
 }
 
+mod explode_special;
+use explode_special::{annotation_parts, cage_parts};
+
 fn dot(a: Point3, b: Point3) -> f64 {
     a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 }
@@ -569,6 +579,41 @@ impl Controller {
         }
         Ok(wire)
     }
+    /// A retained 3DM is converted in a private candidate. The document keeps
+    /// its original source, placement and undo stamp until the edit commits.
+    fn top11_exact_entity<'a>(&self, entity: &'a Entity) -> Result<std::borrow::Cow<'a, Entity>> {
+        if let Geometry::NativeBrep(native) = &entity.geometry {
+            #[cfg(feature = "occt-brep")]
+            {
+                let limits = self.coordinator.limits();
+                let body = om9_kernel::brep::from_3dm(native.payload(),
+                    self.document().effective_tolerance()?.absolute_mm,
+                    om9_kernel::creation::DEFAULT_DEFLECTION_MM, limits)
+                    .map_err(|error| Error::Io(format!("Top11 retained BRep: {error}")))?;
+                let topology = om9_kernel::creation::measure(&body, limits)
+                    .map_err(|error| Error::Io(format!("Top11 retained topology: {error}")))?;
+                if topology.faces == 0 || topology.faces != body.topology().faces.len() {
+                    return Err(Error::Invalid("Top11 retained face topology"));
+                }
+                let mut candidate = entity.clone();
+                candidate.geometry = Geometry::Brep(body.into_canonical_and_representation().0);
+                return Ok(std::borrow::Cow::Owned(candidate));
+            }
+            #[cfg(not(feature = "occt-brep"))]
+            { let _ = native; return Err(Error::Unsupported("retained BRep requires OCCT")); }
+        }
+        Ok(std::borrow::Cow::Borrowed(entity))
+    }
+
+    #[cfg(feature = "occt-brep")]
+    fn top11_deflection(&self, id: ObjectId) -> Result<f64> {
+        if self.document().entities.get(&id).is_some_and(|e| matches!(e.geometry, Geometry::NativeBrep(_) | Geometry::Surface(_))) {
+            Ok(om9_kernel::creation::DEFAULT_DEFLECTION_MM)
+        } else {
+            self.solid_output_deflection(id)
+        }
+    }
+
     pub fn top11_context(&self) -> Top11Context {
         Top11Context::capture(self.document(), &self.selection, self.is_running())
     }
@@ -659,6 +704,7 @@ impl Controller {
                 let mut actionable=false;
                 let all_supported=self.selection.iter().all(|id| {
                     self.document().entities.get(id).is_some_and(|e| match &e.geometry {
+                        _ if e.extensions.contains_key(om9_core::annotation::SLOT) => {actionable=true;true}
                         Geometry::Curve(_) | Geometry::Mesh(_) => {actionable=true;true}
                         Geometry::Brep(_) if cfg!(feature="occt-brep") => {actionable=true;true}
                         Geometry::NativeBrep(_) if cfg!(feature="occt-brep") => {actionable=true;true}
@@ -681,7 +727,7 @@ impl Controller {
                     };
                 }
             }
-            if !self.is_running() && has_native_brep && (matches!(item.action, Top11Action::Join | Top11Action::Split | Top11Action::Trim) || (item.action == Top11Action::Explode && !cfg!(feature="occt-brep"))) {
+            if !cfg!(feature="occt-brep") && !self.is_running() && has_native_brep && matches!(item.action, Top11Action::Join | Top11Action::Split | Top11Action::Trim | Top11Action::Explode) {
                 *item = Top11Availability {
                     action: item.action,
                     enabled: false,
@@ -1001,8 +1047,9 @@ impl Controller {
                 .entities
                 .get(&target)
                 .ok_or(Error::Missing("split surface"))?;
+            let exact = self.top11_exact_entity(entity)?;
             om9_kernel::measurement::surface_ray_hit(
-                &entity.geometry,
+                &exact.geometry,
                 entity.placement,
                 ray.origin,
                 ray.direction,
@@ -1332,7 +1379,7 @@ impl Controller {
                 if cutter.id == target.id {
                     continue;
                 }
-                match self.cutter_fractions_between(target, cutter, true) {
+                match self.cutter_fractions_between(target, cutter, true, true) {
                     Ok(hit) => cuts.extend(hit),
                     Err(Error::Invalid("cutting object has no intersection")) => {}
                     Err(Error::Unsupported("curve may overlap surface")) => {}
@@ -1358,8 +1405,11 @@ impl Controller {
     }
 
     fn start_trim_mutual(&mut self) -> Result<Top11Result> {
-        let objects: Vec<_> = self
-            .selection
+        self.start_trim_objects(&self.selection.iter().copied().collect::<Vec<_>>())
+    }
+
+    fn start_trim_objects(&mut self, ids: &[ObjectId]) -> Result<Top11Result> {
+        let objects: Vec<_> = ids
             .iter()
             .map(|id| {
                 self.document()
@@ -1368,6 +1418,8 @@ impl Controller {
                     .ok_or(Error::Missing("trim object"))
             })
             .collect::<Result<_>>()?;
+        let exact = objects.into_iter().map(|entity| self.top11_exact_entity(entity)).collect::<Result<Vec<_>>>()?;
+        let objects: Vec<&Entity> = exact.iter().map(AsRef::as_ref).collect();
         #[cfg(feature = "occt-brep")]
         let mut curve_targets_only = false;
         #[cfg(not(feature = "occt-brep"))]
@@ -1423,13 +1475,10 @@ impl Controller {
                 })
             {
                 let face = faces[0];
-                let cutters: Vec<_> = objects
-                    .iter()
-                    .filter(|e| e.id != face.id)
-                    .map(|e| (&e.geometry, e.placement))
-                    .collect();
+                let owned_cutters = self.trim_face_cutters(face, objects.iter().map(|e| &**e))?;
+                let cutters: Vec<_> = owned_cutters.iter().map(|(g, p)| (g.as_ref(), *p)).collect();
                 let deflection = match &face.geometry {
-                    Geometry::Brep(brep) => self.solid_output_deflection(face.id)?,
+                    Geometry::Brep(_) => self.top11_deflection(face.id)?,
                     _ => om9_kernel::creation::DEFAULT_DEFLECTION_MM,
                 };
                 let merge_regions = match &face.geometry {
@@ -1508,18 +1557,52 @@ impl Controller {
     }
 
     #[cfg(feature = "occt-brep")]
+    fn trim_face_cutters<'a>(&self, face: &Entity, objects: impl Iterator<Item = &'a Entity>)
+        -> Result<Vec<(std::borrow::Cow<'a, Geometry>, Transform)>> {
+        use std::borrow::Cow;
+        let mut world_bounds = None;
+        objects.filter(|e| e.id != face.id).map(|cutter| {
+            if self.trim_extend_lines && let Geometry::Curve(line @ Curve::Line { .. }) = &cutter.geometry {
+                if world_bounds.is_none() {
+                    let (min, max) = match &face.geometry {
+                        Geometry::Brep(body) => {
+                            let b = om9_kernel::creation::measure(body, self.coordinator.limits())
+                                .map_err(|e| Error::Io(format!("Trim face bounds: {e}")))?.bounds_mm;
+                            ([b[0],b[1],b[2]], [b[3],b[4],b[5]])
+                        }
+                        _ => {
+                            let b = om9_core::utilities::bounds(&face.geometry).ok_or(Error::Missing("Trim face bounds"))?;
+                            (b.min, b.max)
+                        }
+                    };
+                    let mut corners = om9_core::cage::box_corners(min, max);
+                    for p in &mut corners { *p = face.placement.point(*p)?; }
+                    world_bounds = Some(corners);
+                }
+                let line = top11::bake_curve(line, cutter.placement)?;
+                let extended = top11::extended_trim_line_to_box(&line, world_bounds.unwrap(),
+                    self.document().effective_tolerance()?.absolute_mm)?;
+                Ok((Cow::Owned(Geometry::Curve(extended)), Transform::identity()))
+            } else {
+                Ok((Cow::Borrowed(&cutter.geometry), cutter.placement))
+            }
+        }).collect()
+    }
+
+    #[cfg(feature = "occt-brep")]
     fn trim_original_world(
         &self,
         entity: &Entity,
         brep: &om9_core::brep::CanonicalBrep,
     ) -> Result<om9_core::brep::Brep> {
-        let world = if entity.placement == Transform::identity() {
+        let registered = self.coordinator.brep_representation(brep).is_ok();
+        let world = if entity.placement == Transform::identity() && registered {
             self.coordinator.materialize_brep_with_held(brep, self.scene_cache_usage()?)?
         } else {
             om9_kernel::transform_ops::transform_brep(
                 brep,
                 &entity.placement,
-                self.solid_output_deflection(entity.id)?,
+                self.top11_deflection(entity.id)?,
                 self.coordinator.limits(),
             )
             .map_err(|error| Error::Io(format!("Trim original edges: {error}")))?
@@ -1544,16 +1627,13 @@ impl Controller {
             if matches!(face.geometry, Geometry::Curve(_)) {
                 continue;
             }
-            let cutters: Vec<_> = objects
-                .iter()
-                .filter(|cutter| cutter.id != face.id)
-                .map(|cutter| (&cutter.geometry, cutter.placement))
-                .collect();
+            let owned_cutters = self.trim_face_cutters(face, objects.iter().map(|e| &**e))?;
+                let cutters: Vec<_> = owned_cutters.iter().map(|(g, p)| (g.as_ref(), *p)).collect();
             if cutters.is_empty() {
                 continue;
             }
             let deflection = match &face.geometry {
-                Geometry::Brep(brep) => self.solid_output_deflection(face.id)?,
+                Geometry::Brep(_) => self.top11_deflection(face.id)?,
                 Geometry::Surface(_) => om9_kernel::creation::DEFAULT_DEFLECTION_MM,
                 _ => return Err(Error::Invalid("mutual surface Trim expects surfaces")),
             };
@@ -1658,7 +1738,7 @@ impl Controller {
             #[cfg(not(feature = "occt-brep"))]
             {
                 let _ = (point, picked);
-                Err::<(_, _, _, _, _, Option<om9_core::transaction::ExternalMemoryReservation>), _>(Error::Unsupported(
+                Err::<(_, _, _, _, _, Option<Top11Candidate>), _>(Error::Unsupported(
                     "surface Trim needs the OCCT kernel feature",
                 ))
             }
@@ -1744,7 +1824,7 @@ impl Controller {
                     None
                 };
                 let (local, guard) = match local {
-                    Some(body) => { let (source, guard) = self.reserve_solid_candidate(body)?; (Some(source), Some(guard)) },
+                    Some(body) => { let (source, guard) = self.reserve_top11_candidate(body)?; (Some(source), Some(guard)) },
                     None => (None, None),
                 };
                 let mut next: Vec<Entity> = objects
@@ -1753,9 +1833,7 @@ impl Controller {
                     .map(|id| {
                         self.document()
                             .entities
-                            .get(id)
-                            .cloned()
-                            .ok_or(Error::Missing("trim surface"))
+                            .get(id).ok_or(Error::Missing("trim surface")).and_then(|e| self.top11_exact_entity(e).map(|exact| exact.into_owned()))
                     })
                     .collect::<Result<_>>()?;
                 if let Some(local) = &local {
@@ -1879,9 +1957,7 @@ impl Controller {
                 .map(|id| {
                     self.document()
                         .entities
-                        .get(id)
-                        .cloned()
-                        .ok_or(Error::Missing("trim object"))
+                        .get(id).ok_or(Error::Missing("trim object")).and_then(|e| self.top11_exact_entity(e).map(|exact| exact.into_owned()))
                 })
                 .collect::<Result<_>>()?;
             next.extend(replacements.iter().cloned());
@@ -2055,7 +2131,7 @@ impl Controller {
                     None
                 };
                 let (local, mut guard) = match local {
-                    Some(body) => { let (source, guard) = self.reserve_solid_candidate(body)?; (Some(source), Some(guard)) },
+                    Some(body) => { let (source, guard) = self.reserve_top11_candidate(body)?; (Some(source), Some(guard)) },
                     None => (None, None),
                 };
                 let source = self.document().stamp(target)?;
@@ -2065,9 +2141,7 @@ impl Controller {
                     .map(|id| {
                         self.document()
                             .entities
-                            .get(id)
-                            .cloned()
-                            .ok_or(Error::Missing("trim object"))
+                            .get(id).ok_or(Error::Missing("trim object")).and_then(|e| self.top11_exact_entity(e).map(|exact| exact.into_owned()))
                     })
                     .collect::<Result<_>>()?;
                 if let Some(local) = &local {
@@ -2229,9 +2303,7 @@ impl Controller {
                 .map(|id| {
                     self.document()
                         .entities
-                        .get(id)
-                        .cloned()
-                        .ok_or(Error::Missing("trim object"))
+                        .get(id).ok_or(Error::Missing("trim object")).and_then(|e| self.top11_exact_entity(e).map(|exact| exact.into_owned()))
                 })
                 .collect::<Result<_>>()?;
             next.extend(replacements.iter().cloned());
@@ -2239,16 +2311,13 @@ impl Controller {
             let next_fractions = self.mutual_trim_fractions(&refs)?;
             #[cfg(feature = "occt-brep")]
             let next_partition = if let Some(face) = next.iter().find(|e| e.id == face_id) {
-                let cutters: Vec<_> = next
-                    .iter()
-                    .filter(|e| e.id != face_id)
-                    .map(|e| (&e.geometry, e.placement))
-                    .collect();
+                let owned_cutters = self.trim_face_cutters(face, next.iter())?;
+                let cutters: Vec<_> = owned_cutters.iter().map(|(g, p)| (g.as_ref(), *p)).collect();
                 if cutters.is_empty() {
                     None
                 } else {
                     let deflection = match &face.geometry {
-                        Geometry::Brep(brep) => self.solid_output_deflection(face.id)?,
+                        Geometry::Brep(_) => self.top11_deflection(face.id)?,
                         _ => om9_kernel::creation::DEFAULT_DEFLECTION_MM,
                     };
                     match om9_kernel::measurement::split_surface_by_geometry(
@@ -2649,6 +2718,7 @@ impl Controller {
             Top11Pending::SelectObjects {
                 action,
                 split_point,
+                alternate,
                 explode_blocks,
             } => {
                 if self.selection.is_empty() {
@@ -2659,7 +2729,9 @@ impl Controller {
                 }
                 self.top11_pending = None;
                 let result = self.top11_invoke_route(action,explode_blocks).and_then(|result| {
-                    if split_point {
+                    if alternate {
+                        self.top11_apply_alternate(action)
+                    } else if split_point {
                         self.top11_split_point_mode()
                     } else {
                         Ok(result)
@@ -2669,6 +2741,7 @@ impl Controller {
                     self.top11_pending = Some(Top11Pending::SelectObjects {
                         action,
                         split_point,
+                        alternate,
                         explode_blocks,
                     });
                 }
@@ -2790,11 +2863,13 @@ impl Controller {
                 .entities
                 .get(&target)
                 .ok_or(Error::Missing("split curve"))?;
+            let exact = self.top11_exact_entity(entity)?;
+            let entity = exact.as_ref();
             #[cfg(feature = "occt-brep")]
             if matches!(entity.geometry, Geometry::Surface(_) | Geometry::Brep(_)) {
                 let limits = self.coordinator.limits();
                 let deflection = match &entity.geometry {
-                    Geometry::Brep(_) => self.solid_output_deflection(entity.id)?,
+                    Geometry::Brep(_) => self.top11_deflection(entity.id)?,
                     _ => om9_kernel::creation::DEFAULT_DEFLECTION_MM,
                 };
                 let tools: Vec<_> = cutters
@@ -2805,9 +2880,10 @@ impl Controller {
                             .entities
                             .get(id)
                             .ok_or(Error::Missing("cutting object"))?;
-                        Ok((&cutter.geometry, cutter.placement))
+                        self.top11_exact_entity(cutter)
                     })
                     .collect::<Result<_>>()?;
+                let tools: Vec<_> = tools.iter().map(|e| (&e.geometry, e.placement)).collect();
                 let result = match &entity.geometry {
                     Geometry::Brep(_) => om9_kernel::measurement::split_boundary_by_geometry(
                         &entity.geometry,
@@ -2870,7 +2946,7 @@ impl Controller {
                         )
                         .map_err(|error| Error::Io(format!("Split surface transform: {error}")))?
                     };
-                    let (candidate, guard) = self.reserve_solid_candidate(local)?;
+                    let (candidate, guard) = self.reserve_top11_candidate(local)?;
                     guards.push(guard);
                     let child = child_entity(entity, Geometry::Brep(candidate));
                     selected.push(child.id);
@@ -3052,7 +3128,49 @@ impl Controller {
 
     /// Run an immediate Top 11 action or start its point prompt.
     pub fn top11_invoke(&mut self, action: Top11Action) -> Result<Top11Result> {
+        if self.is_running() { return Err(Error::Busy); }
+        if action != Top11Action::RingRail {
+            self.cancel_addon_builder();
+            self.cancel_addon_session();
+        }
+        if action == Top11Action::Trim {
+            self.trim_extend_lines = false;
+            self.trim_apparent_view = None;
+        }
         self.top11_invoke_route(action,false)
+    }
+
+    pub fn top11_alternate(&mut self, action: Top11Action) -> Result<Top11Result> {
+        if !matches!(action, Top11Action::Mirror | Top11Action::Rotate | Top11Action::Split) {
+            return Err(Error::Unsupported("Top 11 secondary action"));
+        }
+        if action == Top11Action::Split && !self.selection.is_empty() &&
+            (self.selection.len() != 1 || !self.selection.iter().all(|id|
+                matches!(self.document().entities[id].geometry, Geometry::Curve(_)))) {
+            return Err(Error::Invalid("Split Point requires one curve"));
+        }
+        let start = self.top11_invoke(action)?;
+        if let Some(Top11Pending::SelectObjects { alternate, split_point, .. }) = &mut self.top11_pending {
+            *alternate = true;
+            *split_point = action == Top11Action::Split;
+            return Ok(start);
+        }
+        self.top11_apply_alternate(action)
+    }
+
+    fn top11_apply_alternate(&mut self, action: Top11Action) -> Result<Top11Result> {
+        match action {
+            Top11Action::Mirror => self.top11_accept_point([0.; 3]),
+            Top11Action::Rotate => {
+                let Some(Top11Pending::Rotate { copy, .. }) = &mut self.top11_pending else {
+                    return Err(Error::Invalid("rotate copy session"));
+                };
+                *copy = true;
+                Ok(Top11Result::Awaiting { label: action.label(), prompt: "pick rotation center" })
+            }
+            Top11Action::Split => self.top11_split_point_mode(),
+            _ => Err(Error::Unsupported("Top 11 secondary action")),
+        }
     }
 
     fn top11_invoke_route(&mut self, action: Top11Action, explode_blocks: bool) -> Result<Top11Result> {
@@ -3064,6 +3182,7 @@ impl Controller {
             self.top11_pending = Some(Top11Pending::SelectObjects {
                 action,
                 split_point: false,
+                alternate: false,
                 explode_blocks,
             });
             return Ok(Top11Result::Awaiting {
@@ -3128,6 +3247,7 @@ impl Controller {
                 }).collect();
                 let mut pieces = Vec::new();
                 let mut replacements = std::collections::BTreeMap::new();
+                let mut removed_cages = BTreeSet::new();
                 for id in &originals {
                     let first=pieces.len();
                     let entity = self
@@ -3136,6 +3256,13 @@ impl Controller {
                         .get(id)
                         .ok_or(Error::Missing("object"))?;
                     match &entity.geometry {
+                        _ if entity.extensions.contains_key(om9_core::annotation::SLOT) => {
+                            pieces.extend(annotation_parts(entity, self.coordinator.limits())?);
+                        }
+                        Geometry::Mesh(mesh) if super::transform::cage::is_cage(entity) => {
+                            pieces.extend(cage_parts(entity, mesh)?);
+                            removed_cages.insert(*id);
+                        }
                         Geometry::Curve(_) | Geometry::Mesh(_) => pieces.extend(top11::explode_entities(
                             self.document(),
                             &BTreeSet::from([*id]),
@@ -3173,11 +3300,11 @@ impl Controller {
                                     let face = om9_kernel::editing::extract_face(
                                         brep,
                                         index,
-                                        self.solid_output_deflection(entity.id)?,
+                                        self.top11_deflection(entity.id)?,
                                         limits,
                                     )
                                     .map_err(|error| Error::Io(format!("BRep explode: {error}")))?;
-                                    let (candidate, guard) = self.reserve_solid_candidate(face)?;
+                                    let (candidate, guard) = self.reserve_top11_candidate(face)?;
                                     guards.push(guard);
                                     pieces.push(child_entity(entity, Geometry::Brep(candidate)));
                                 }
@@ -3217,6 +3344,18 @@ impl Controller {
                         })
                     })
                     .collect::<Result<_>>()?;
+                if !removed_cages.is_empty() {
+                    let detached = |entity: &Entity| super::transform::cage::link_of(entity)
+                        .is_some_and(|id| removed_cages.contains(&id));
+                    for entity in &mut pieces {
+                        if detached(entity) { entity.extensions.remove(om9_core::model::CAGE_EXTENSION_SLOT); }
+                    }
+                    for entity in self.document().entities.values().filter(|e| detached(e) && !replacements.contains_key(&e.id)) {
+                        let mut extensions = entity.extensions.clone();
+                        extensions.remove(om9_core::model::CAGE_EXTENSION_SLOT);
+                        mutations.push(Mutation::Extensions { source: self.document().stamp(entity.id)?, extensions });
+                    }
+                }
                 mutations.extend(pieces.into_iter().map(|entity| Mutation::Insert {
                     document: self.document,
                     entity,
@@ -3254,8 +3393,9 @@ impl Controller {
             Top11Action::Join => {
                 let result = (|| {
                 let originals: Vec<ObjectId> = self.selection.iter().copied().collect();
-                let (joined, mut guard): (Entity, Option<om9_core::transaction::ExternalMemoryReservation>) = if context.selected >= 2 && context.breps + context.surfaces == context.selected
-                    && (context.surfaces > 0 || context.breps > 2) {
+                let (joined, mut guard): (Entity, Option<Top11Candidate>) = if context.selected >= 2 && context.breps + context.surfaces == context.selected
+                    && (context.surfaces > 0 || context.breps > 2 || originals.iter().any(|id|
+                        matches!(self.document().entities[id].geometry, Geometry::NativeBrep(_)))) {
                     #[cfg(feature = "occt-brep")]
                     {
                         let (entity, guard) = self.join_many_breps(&originals)?;
@@ -3279,8 +3419,8 @@ impl Controller {
                         };
                         let limits = self.coordinator.limits();
                         let tolerance = self.document().effective_tolerance()?.absolute_mm;
-                        let first_profile = self.solid_output_deflection(first.id)?;
-                        let second_profile = self.solid_output_deflection(second.id)?;
+                        let first_profile = self.top11_deflection(first.id)?;
+                        let second_profile = self.top11_deflection(second.id)?;
                         let output_profile = first_profile.min(second_profile);
                         let world_a = if first.placement == Transform::identity() {
                             self.coordinator.materialize_brep_with_held(a, self.scene_cache_usage()?)?
@@ -3337,7 +3477,7 @@ impl Controller {
                             )
                             .map_err(|e| Error::Io(format!("BRep join: {e}")))?
                         };
-                        let (source, guard) = self.reserve_solid_candidate(local)?;
+                        let (source, guard) = self.reserve_top11_candidate(local)?;
                         (child_entity(first, Geometry::Brep(source)), Some(guard))
                     }
                     #[cfg(not(feature = "occt-brep"))]
@@ -3385,7 +3525,7 @@ impl Controller {
                     let isocurve_allowed = if self.selection.len() == 1 {
                         let entity =
                             &self.document().entities[self.selection.iter().next().unwrap()];
-                        match &entity.geometry {
+                        match &self.top11_exact_entity(entity)?.geometry {
                             Geometry::Surface(_) => true,
                             #[cfg(feature = "occt-brep")]
                             Geometry::Brep(brep) => {
@@ -3400,7 +3540,7 @@ impl Controller {
                     let mut has_surface = false;
                     let mut shrink_supported = true;
                     for id in &self.selection {
-                        match &self.document().entities[id].geometry {
+                        match &self.top11_exact_entity(&self.document().entities[id])?.geometry {
                             Geometry::Curve(_) => {}
                             Geometry::Surface(surface) => {
                                 has_surface = true;
@@ -3506,7 +3646,11 @@ impl Controller {
                 })
             }
             Top11Action::RingRail => {
-                self.begin_builder(om9_core::builder::BuilderKind::RingRail)?;
+                if let Some(code) = self.addon_code("TopIconRingRail").or_else(|| self.addon_code("BuilderRingRail")) {
+                    self.run_addon_command(&code)?;
+                } else {
+                    self.begin_builder(om9_core::builder::BuilderKind::RingRail)?;
+                }
                 Ok(Top11Result::Awaiting {
                     label: "Ring Rail",
                     prompt: "builder panel",
@@ -3529,10 +3673,10 @@ impl Controller {
             .get(&target)
             .ok_or(Error::Missing("split surface"))?;
         #[cfg(feature = "occt-brep")]
-        if matches!(&entity.geometry, Geometry::Brep(_)) {
-            let entity = entity.clone();
+        if matches!(&entity.geometry, Geometry::Brep(_) | Geometry::NativeBrep(_)) {
+            let entity = self.top11_exact_entity(entity)?.into_owned();
             let limits = *self.coordinator.limits();
-            let deflection = self.solid_output_deflection(entity.id)?;
+            let deflection = self.top11_deflection(entity.id)?;
             let tolerance = if enforce_tolerance {
                 Some(self.document().effective_tolerance()?.absolute_mm)
             } else {
@@ -3577,7 +3721,7 @@ impl Controller {
                     om9_kernel::transform_ops::transform_brep(&face, &inverse, deflection, &limits)
                         .map_err(|error| Error::Io(format!("Split isocurve transform: {error}")))?
                 };
-                let (candidate, guard) = self.reserve_solid_candidate(local)?;
+                let (candidate, guard) = self.reserve_top11_candidate(local)?;
                 guards.push(guard);
                 let child = child_entity(&entity, Geometry::Brep(candidate));
                 ids.push(child.id);
@@ -3716,11 +3860,13 @@ impl Controller {
             Top11Pending::SelectObjects {
                 action,
                 split_point,
+                alternate,
                 explode_blocks,
             } => {
                 self.top11_pending = Some(Top11Pending::SelectObjects {
                     action,
                     split_point,
+                alternate,
                     explode_blocks,
                 });
                 Err(Error::Invalid("select an object"))
@@ -4126,6 +4272,7 @@ impl Controller {
             Top11Pending::SelectObjects {
                 action,
                 split_point,
+                alternate,
                 explode_blocks,
             } => {
                 let mut ids: Vec<ObjectId> = self.selection.iter().copied().collect();
@@ -4136,6 +4283,7 @@ impl Controller {
                 self.top11_pending = Some(Top11Pending::SelectObjects {
                     action,
                     split_point,
+                alternate,
                     explode_blocks,
                 });
                 result?;
@@ -4184,7 +4332,7 @@ impl Controller {
                     if targets.iter().any(|target| {
                         matches!(
                             self.document().entities[target].geometry,
-                            Geometry::Surface(_) | Geometry::Brep(_)
+                            Geometry::Surface(_) | Geometry::Brep(_) | Geometry::NativeBrep(_)
                         )
                     }) {
                         let cutter = self
@@ -4194,7 +4342,7 @@ impl Controller {
                             .ok_or(Error::Missing("cutting object"))?;
                         return if matches!(
                             cutter.geometry,
-                            Geometry::Curve(_) | Geometry::Surface(_) | Geometry::Brep(_)
+                            Geometry::Curve(_) | Geometry::Surface(_) | Geometry::Brep(_) | Geometry::NativeBrep(_)
                         ) {
                             Ok(())
                         } else {
@@ -4421,7 +4569,7 @@ impl Controller {
         let cutter = self.document().entities.get(&cutter).ok_or(Error::Missing("cutting object"))?;
         let Geometry::Curve(curve) = &target.geometry else { return Err(Error::Missing("target curve")); };
         let closed = top11::curve_closed_for_cut(curve, self.coordinator.limits())?;
-        self.cutter_fractions_between(target, cutter, closed)
+        self.cutter_fractions_between(target, cutter, closed, true)
     }
 
     fn cutter_fractions_for_entity(
@@ -4438,7 +4586,7 @@ impl Controller {
             return Err(Error::Missing("target curve"));
         };
         let closed = top11::curve_closed_for_cut(curve, self.coordinator.limits())?;
-        self.cutter_fractions_between(target_entity, cutter_entity, closed)
+        self.cutter_fractions_between(target_entity, cutter_entity, closed, false)
     }
 
     fn cutter_fractions_between(
@@ -4446,15 +4594,24 @@ impl Controller {
         target_entity: &Entity,
         cutter_entity: &Entity,
         include_endpoints: bool,
+        trim: bool,
     ) -> Result<Vec<f64>> {
         let Geometry::Curve(target_curve) = &target_entity.geometry else {
             return Err(Error::Missing("target curve"));
         };
         let tolerance = self.document().effective_tolerance()?.absolute_mm;
         let world_target = top11::bake_curve(target_curve, target_entity.placement)?;
-        let mut fractions: Vec<f64> = match &cutter_entity.geometry {
+        let exact = self.top11_exact_entity(cutter_entity)?;
+        let mut fractions: Vec<f64> = match &exact.geometry {
             Geometry::Curve(cutter_curve) => {
                 let cutter_curve = top11::bake_curve(cutter_curve, cutter_entity.placement)?;
+                if trim && let Some(camera) = &self.trim_apparent_view {
+                    om9_scene::osnap::trim_view_fractions(&world_target, &cutter_curve, camera,
+                        self.trim_extend_lines, tolerance, self.coordinator.limits())?
+                } else {
+                let cutter_curve = if trim && self.trim_extend_lines && matches!(cutter_curve, Curve::Line { .. }) {
+                    top11::extended_trim_line(&world_target, &cutter_curve, tolerance)?
+                } else { cutter_curve };
                 om9_core::curve_surface_ops::curve_curve_intersections(
                     &world_target,
                     &cutter_curve,
@@ -4464,6 +4621,7 @@ impl Controller {
                 .into_iter()
                 .map(|hit| hit.first_fraction)
                 .collect()
+                }
             }
             Geometry::Surface(surface) => {
                 let Geometry::Surface(surface) = top11::bake_geometry(
@@ -4494,7 +4652,7 @@ impl Controller {
                         transformed = om9_kernel::transform_ops::transform_brep(
                             brep,
                             &cutter_entity.placement,
-                            self.solid_output_deflection(cutter_entity.id)?,
+                            self.top11_deflection(cutter_entity.id)?,
                             self.coordinator.limits(),
                         )
                         .map_err(|error| Error::Io(format!("BRep cutter transform: {error}")))?;
@@ -4544,7 +4702,7 @@ impl Controller {
         let mut fractions = Vec::new();
         for cutter in cutters {
             let cutter = self.document().entities.get(cutter).ok_or(Error::Missing("cutting object"))?;
-            match self.cutter_fractions_between(entity, cutter, closed) {
+            match self.cutter_fractions_between(entity, cutter, closed, false) {
                 Ok(hit) => fractions.extend(hit),
                 Err(Error::Invalid("cutting object has no intersection")) => {},
                 Err(error) => return Err(error),
@@ -4665,7 +4823,7 @@ impl Controller {
                     om9_kernel::transform_ops::transform_brep(
                         brep,
                         &entity.placement,
-                        self.solid_output_deflection(entity.id)?,
+                        self.top11_deflection(entity.id)?,
                         self.coordinator.limits(),
                     )
                     .map_err(|error| Error::Io(format!("BRep mirror: {error}")))?
@@ -4678,7 +4836,7 @@ impl Controller {
                 )
                 .map_err(|error| Error::Io(format!("BRep mirror: {error}")))?;
                 if copy {
-                    let (source, guard) = self.reserve_solid_candidate(reflected)?;
+                    let (source, guard) = self.reserve_top11_candidate(reflected)?;
                     guards.push(guard);
                     copies.push(child_entity(entity, Geometry::Brep(source)));
                 } else {
@@ -4697,7 +4855,7 @@ impl Controller {
                         )
                         .map_err(|error| Error::Io(format!("BRep mirror: {error}")))?
                     };
-                    let (source, guard) = self.reserve_solid_candidate(local)?;
+                    let (source, guard) = self.reserve_top11_candidate(local)?;
                     guards.push(guard);
                     replacements.push((id, Geometry::Brep(source)));
                 }
@@ -4717,7 +4875,7 @@ impl Controller {
     }
 
     #[cfg(feature = "occt-brep")]
-    fn join_many_breps(&self, ids: &[ObjectId]) -> Result<(Entity, om9_core::transaction::ExternalMemoryReservation)> {
+    fn join_many_breps(&self, ids: &[ObjectId]) -> Result<(Entity, Top11Candidate)> {
         let limits = self.coordinator.limits();
         let tolerance = self.document().effective_tolerance()?.absolute_mm;
         let first = self
@@ -4735,13 +4893,15 @@ impl Controller {
                 .entities
                 .get(id)
                 .ok_or(Error::Missing("BRep"))?;
-            let (world, profile) = match &entity.geometry {
+            let retained = matches!(entity.geometry, Geometry::NativeBrep(_));
+            let exact = self.top11_exact_entity(entity)?;
+            let (world, profile) = match &exact.geometry {
                 Geometry::Surface(surface) => (om9_kernel::measurement::surface_to_face(
                     surface,entity.placement,om9_kernel::creation::DEFAULT_DEFLECTION_MM,limits,
                 ).map_err(|e| Error::Io(format!("surface join: {e}")))?, om9_kernel::creation::DEFAULT_DEFLECTION_MM),
-                Geometry::Brep(brep) if entity.placement == Transform::identity() => (self.coordinator.materialize_brep_with_held(brep, self.scene_cache_usage()?)?, self.solid_output_deflection(entity.id)?),
+                Geometry::Brep(brep) if entity.placement == Transform::identity() && !retained => (self.coordinator.materialize_brep_with_held(brep, self.scene_cache_usage()?)?, self.top11_deflection(entity.id)?),
                 Geometry::Brep(brep) => {
-                    let profile = self.solid_output_deflection(entity.id)?;
+                    let profile = self.top11_deflection(entity.id)?;
                     (om9_kernel::transform_ops::transform_brep(
                         brep, &entity.placement, profile, limits,
                     ).map_err(|e| Error::Io(format!("BRep join: {e}")))?, profile)
@@ -4807,7 +4967,7 @@ impl Controller {
             )
             .map_err(|e| Error::Io(format!("BRep join: {e}")))?
         };
-        let (source, guard) = self.reserve_solid_candidate(local)?;
+        let (source, guard) = self.reserve_top11_candidate(local)?;
         Ok((child_entity(first, Geometry::Brep(source)), guard))
     }
 
@@ -4889,6 +5049,8 @@ impl Controller {
             ids.iter().copied().collect()
         };
         if !copy && self.source_mutations_update_join_history(&mutations) {
+            let guards = guards.into_iter().map(|candidate| candidate.reservation
+                .ok_or(Error::Missing("Mirror source reservation"))).collect::<Result<Vec<_>>>()?;
             return self.request_join_history_edit_worker_with_guards(TransactionRequest::new(Top11Action::Mirror.command(), mutations), guards, guard_storage);
         }
         if guards.is_empty() {
@@ -4910,7 +5072,7 @@ impl Controller {
         self.commit_top11_inner(action, mutations, selection, None)
     }
     fn commit_top11_inner(&mut self, action: Top11Action, mutations: Vec<Mutation>, selection: Option<Vec<ObjectId>>,
-        reservations: Option<&mut [om9_core::transaction::ExternalMemoryReservation]>) -> Result<()> {
+        reservations: Option<&mut [Top11Candidate]>) -> Result<()> {
         // Source edits supported by History are routed through its worker before reaching
         // this ordinary publication path. Refuse any remaining edit or replacement of an
         // update-enabled parent rather than silently leaving dependent curves stale.
@@ -4924,9 +5086,28 @@ impl Controller {
         let old_scene=self.scene.as_ref().ok_or(Error::Missing("top11 scene"))?;
         if old_scene.epoch!=self.coordinator.epoch() {return Err(Error::Stale("top11 scene"));}
         let held = self.scene_cache_usage()?;
+        #[cfg(feature = "occt-brep")]
+        let proof_owners: std::collections::BTreeMap<_, _> = mutations.iter().filter_map(|mutation| match mutation {
+            Mutation::Insert { entity, .. } => Some((entity.id, &entity.geometry)),
+            Mutation::Geometry { source, geometry } => Some((source.object, geometry)),
+            _ => None,
+        }).filter_map(|(id, geometry)| match geometry {
+            Geometry::Brep(source) => Some((source.canonical_fingerprints().1, id)),
+            _ => None,
+        }).collect();
         let request = TransactionRequest::new(action.command(), mutations);
+        #[cfg(feature = "occt-brep")]
+        let mut proofs = Vec::new();
         let prepared = match reservations {
-            Some(guards) => self.coordinator.prepare_with_reserved_brep_mutations(request, held, guards)?,
+            Some(candidates) => {
+                let mut guards = Vec::with_capacity(candidates.len());
+                for candidate in candidates {
+                    guards.push(candidate.reservation.take().ok_or(Error::Missing("Top11 source reservation"))?);
+                    #[cfg(feature = "occt-brep")]
+                    proofs.push(candidate.proof.take().ok_or(Error::Missing("Top11 topology proof"))?);
+                }
+                self.coordinator.prepare_with_reserved_brep_mutations(request, held, &mut guards)?
+            },
             None => self.coordinator.prepare_with_held_usage(request, held)?,
         };
         let candidate=prepared.candidate_world().documents.get(&self.document)
@@ -4940,6 +5121,21 @@ impl Controller {
         if receipt.published {
             if unchanged { self.clear_scene(); }
             self.sync_published(om9_core::changes::ChangeCause::Edit);
+            #[cfg(feature = "occt-brep")]
+            for (identity, proof, storage) in proofs {
+                if let Some(id) = proof_owners.get(&identity) {
+                    let retained = self.document().stamp(*id).and_then(|stamp| {
+                        let shared = self.prepare_shared_topology_proof(stamp, proof, storage)?;
+                        let history = self.retain_current_topology_proof(shared.clone());
+                        let cache = self.cache_topology_proof(shared);
+                        history.or(cache)
+                    });
+                    if let Err(error) = retained {
+                        self.events.emit(crate::command_events::EventKind::Warn, action.command(),
+                            &format!("Could not retain BRep save evidence: {error}"), None);
+                    }
+                }
+            }
             if let Some(ids) = selection {
                 // An edit may produce hidden, locked or non-renderable members.
                 // The document is already committed: do not report its success as
@@ -4964,8 +5160,41 @@ impl Controller {
     }
 
     /// Parse a Matrix command name or `top11 <action> [values]`.
+    fn trim_option(&mut self, token: &str) -> Option<Result<Top11Result>> {
+        let (name, value) = token.split_once('=').map_or((token, None), |(k,v)| (k, Some(v)));
+        let apparent = match name.to_ascii_lowercase().as_str() {
+            "extendlines" => false,
+            "apparentintersections" | "useapparentintersections" => true,
+            _ => return None,
+        };
+        let old = (self.trim_extend_lines, self.trim_apparent_view.clone());
+        let enabled = match value.map(str::to_ascii_lowercase).as_deref() {
+            None => !(if apparent { old.1.is_some() } else { old.0 }),
+            Some("yes" | "on" | "true") => true,
+            Some("no" | "off" | "false") => false,
+            _ => return Some(Err(Error::Invalid("Trim option expects Yes or No"))),
+        };
+        if apparent {
+            self.trim_apparent_view = enabled.then(|| self.workspace.views[&self.workspace.active].camera.clone());
+        } else {
+            self.trim_extend_lines = enabled;
+        }
+        if let Some(Top11Pending::TrimMutual { objects, .. }) = &self.top11_pending {
+            let result = self.start_trim_objects(&objects.clone());
+            if result.is_err() { (self.trim_extend_lines, self.trim_apparent_view) = old; }
+            return Some(result);
+        }
+        Some(Ok(Top11Result::Awaiting { label: "Trim", prompt: "select objects (Enter to continue)" }))
+    }
+
     pub fn top11_submit(&mut self, text: &str) -> Option<Result<Top11Result>> {
         let text = text.trim();
+        if matches!(self.top11_pending, Some(Top11Pending::SelectObjects { action: Top11Action::Trim, .. }
+            | Top11Pending::TrimMutual { completed: 0, .. }))
+            && let Some(result) = self.trim_option(text)
+        {
+            return Some(result);
+        }
         if text.is_empty() {
             return None;
         }
@@ -5287,8 +5516,10 @@ impl Controller {
                     Ok(result) => result,
                     Err(error) => return Some(Err(error)),
                 };
-                if let Some(Top11Pending::Rotate { copy, .. }) = self.top11_pending.as_mut() {
-                    *copy = value;
+                match &mut self.top11_pending {
+                    Some(Top11Pending::Rotate { copy, .. }) => *copy = value,
+                    Some(Top11Pending::SelectObjects { alternate, .. }) => *alternate = value,
+                    _ => {}
                 }
                 Ok(result)
             }
@@ -5311,6 +5542,17 @@ impl Controller {
                 self.top11_split_point_mode()
             }
             Top11Action::Trim if values.len() >= 2 => self.top11_trim(values[0], values[1]),
+            Top11Action::Trim => {
+                if self.is_running() { return Some(Err(Error::Busy)); }
+                self.trim_extend_lines = false;
+                self.trim_apparent_view = None;
+                for option in &option_words {
+                    if let Err(error) = self.trim_option(option).unwrap_or(Err(Error::Invalid("unknown Trim option"))) {
+                        return Some(Err(error));
+                    }
+                }
+                self.top11_invoke_route(action, false)
+            }
             _ => self.top11_invoke_route(action,action==Top11Action::Explode),
         })
     }

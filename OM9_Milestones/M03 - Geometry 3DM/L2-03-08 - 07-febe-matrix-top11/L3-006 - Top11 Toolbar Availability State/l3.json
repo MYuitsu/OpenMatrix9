@@ -316,6 +316,11 @@
   "readiness_state": "SPEC_HARDENED_RUNTIME_UNVERIFIED",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "top11_routes_2026_11_21": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "The published IDs and catalog keys use the standalone availability and command implementations in both tested profiles.",
+      "evidence": "docs/validation/2026-11-21-top11.md"
+    },
     "native_brep_availability_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-native-brep-availability.md", "scope": "Retained-native-BRep topology buttons show disabled with a reason; placement transforms stay enabled.", "limitations": "Native topology editing, actual 3DM input and desktop acceptance remain open."},
     "mixed_join_availability_2026_10_31": {"status": "PARTIAL_CHECKS_PASSED", "evidence": "docs/validation/2026-10-31-top11-mixed-selection.md", "scope": "Curve Join is disabled for mixed selections containing incompatible objects, with atomic command refusal.", "limitations": "Original Matrix behavior and physical desktop acceptance remain open."},
     "remove_selection_2026_10_28": {

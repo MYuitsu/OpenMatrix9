@@ -594,7 +594,18 @@ impl MatrixApp {
         } else {
             format!("{}: {}", action.label(), state.reason)
         };
+        let secondary = match action {
+            om9_core::top11::Top11Action::Mirror => Some("Mirror World Center"),
+            om9_core::top11::Top11Action::Rotate => Some("Rotate Copy"),
+            om9_core::top11::Top11Action::Split => Some("Split with Point"),
+            _ => None,
+        };
+        let tooltip = secondary.map_or(tooltip.clone(), |label| format!("{tooltip}\nRight-click: {label}"));
         let response = self.icon(ui, name, state.enabled, &tooltip);
+        if response.secondary_clicked() && secondary.is_some() {
+            let result = self.controller.top11_alternate(action);
+            self.top11_feedback(action, result);
+        }
         if response.clicked() {
             self.top11_action(name);
         }
@@ -728,6 +739,12 @@ impl MatrixApp {
         response
     }
     fn feature_icon(&mut self, ui: &mut egui::Ui, id: &str, name: &str) {
+        if let Some(action) = om9_core::top11::Top11Action::from_catalog(name)
+            .or_else(|| om9_core::top11::Top11Action::from_icon(name))
+        {
+            self.top11_icon(ui, action.icon());
+            return;
+        }
         if name == "RhinoOptions" {
             if self.icon(ui, name, true, "Options").clicked() {
                 self.invoke(name, InvocationOrigin::Menu);
@@ -1139,11 +1156,12 @@ impl MatrixApp {
     /// fields, the preview summary, Apply/Reset/Cancel, the profile library button and the
     /// handle read-outs.
     fn builder_slot_ui(&mut self, ui: &mut egui::Ui) {
-        if self.builder_panel_ui(ui) {
+        if self.ring_rail_toolbar_ui(ui) || self.builder_panel_ui(ui) {
             self.builder_slot_rect = Some(ui.min_rect());
             return;
         }
         self.builder_slot_rect = Some(ui.available_rect_before_wrap());
+        if self.controller.builder().is_none() { return; }
         ui.horizontal_wrapped(|ui| {
             ui.label(egui::RichText::new("BUILDERS").strong());
             for (kind, active) in self.controller.builder_tabs() {
@@ -2573,7 +2591,7 @@ mod chrome_tests {
     }
 
     #[test]
-    fn native_brep_top11_buttons_are_visible_but_not_clickable() {
+    fn native_brep_top11_buttons_follow_kernel_capability() {
         use om9_core::{
             geometry::{Geometry, Mesh, NativeBrep},
             model::Entity,
@@ -2606,7 +2624,7 @@ mod chrome_tests {
             |ui| {
                 let split = app.top11_icon(ui, "Split");
                 assert!(split.rect.is_positive());
-                assert_eq!(split.sense, egui::Sense::hover());
+                assert_eq!(split.sense, if cfg!(feature = "occt-brep") { egui::Sense::click() } else { egui::Sense::hover() });
                 let explode = app.top11_icon(ui, "Explode");
                 assert!(explode.rect.is_positive());
                 assert_eq!(

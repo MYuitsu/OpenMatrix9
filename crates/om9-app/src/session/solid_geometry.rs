@@ -8,7 +8,7 @@ use super::*;
 use om9_kernel::editing;
 #[cfg(feature = "occt-brep")]
 #[derive(Default)]
-pub(super) struct TextPen {
+struct TextPen {
     pub(super) contours: Vec<Vec<om9_core::geometry::Point3>>,
     pub(super) current: Vec<om9_core::geometry::Point3>,
 }
@@ -67,6 +67,58 @@ impl skrifa::outline::OutlinePen for TextPen {
             self.current.clear();
         }
     }
+}
+
+pub(super) fn for_each_text_glyph<P: skrifa::outline::OutlinePen + Default>(text: &str, height: f64,
+    strict: bool, mut consume: impl FnMut(P, f64)) -> Result<()> {
+    use skrifa::{
+        FontRef, MetadataProvider,
+        instance::{LocationRef, Size},
+        outline::DrawSettings,
+    };
+    let font = FontRef::new(epaint_default_fonts::UBUNTU_LIGHT)
+        .map_err(|_| Error::Invalid("embedded font"))?;
+    let outlines = font.outline_glyphs();
+    let charmap = font.charmap();
+    let glyph_metrics = font.glyph_metrics(Size::new(height as f32), LocationRef::default());
+    let mut pen_x = 0.0f64;
+    for character in text.chars() {
+        let Some(glyph_id) = charmap.map(character) else {
+            if strict { return Err(Error::Unsupported("missing annotation glyph")); }
+            continue;
+        };
+        let Some(glyph) = outlines.get(glyph_id) else {
+            if strict && !character.is_whitespace() { return Err(Error::Unsupported("missing annotation outline")); }
+            pen_x += glyph_metrics.advance_width(glyph_id).unwrap_or_default() as f64;
+            continue;
+        };
+        let mut pen = P::default();
+        glyph
+            .draw(
+                DrawSettings::unhinted(Size::new(height as f32), LocationRef::default()),
+                &mut pen,
+            )
+            .map_err(|_| Error::Invalid("text outline"))?;
+        consume(pen, pen_x);
+        pen_x += glyph_metrics
+            .advance_width(glyph_id)
+            .unwrap_or(height as f32 * 0.5) as f64;
+    }
+    Ok(())
+}
+
+#[cfg(feature = "occt-brep")]
+pub(super) fn text_contours(text: &str, height: f64) -> Result<Vec<Vec<Point3>>> {
+    let mut contours = Vec::new();
+    for_each_text_glyph(text, height, false, |mut pen: TextPen, offset| {
+        if pen.current.len() > 2 { pen.contours.push(pen.current); }
+        for mut contour in pen.contours {
+            for point in &mut contour { point[0] += offset; }
+            contours.push(contour);
+        }
+    })?;
+    if contours.is_empty() { return Err(Error::Invalid("text produced no contour")); }
+    Ok(contours)
 }
 
 #[cfg(feature = "occt-brep")]

@@ -123,6 +123,16 @@
     ]
   },
   "runtime_implementation": {
+    "region_toolbar_2026_11_22": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "Compact Top11 bar, confirmed region and native desktop placement from USA size 7 to VNM 17.32 mm.",
+      "evidence": "docs/validation/2026-11-22-ring-rail-toolbar.md"
+    },
+    "top11_routes_2026_11_21": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "All eleven feature IDs ran through live Windows controllers in standalone and Matrix-enabled profiles.",
+      "evidence": "docs/validation/2026-11-21-top11.md"
+    },
     "feature_id_dispatch_2026_11_01": {
       "status": "PARTIAL_CHECKS_PASSED",
       "evidence": "docs/validation/2026-11-01-command-checklist-audit.md",

@@ -214,6 +214,16 @@
     "special_manual_flags": []
   },
   "runtime_implementation": {
+    "region_toolbar_2026_11_22": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "Compact Top11 bar, confirmed region and native desktop placement from USA size 7 to VNM 17.32 mm.",
+      "evidence": "docs/validation/2026-11-22-ring-rail-toolbar.md"
+    },
+    "top11_routes_2026_11_21": {
+      "status": "SCOPED_WINDOWS_VALIDATED",
+      "scope": "The Tools and standalone Ring Rail routes both produced a curve from the Top11 entry.",
+      "evidence": "docs/validation/2026-11-21-top11.md"
+    },
     "status": "PARTIAL_RING_RAIL_REPLACEMENT_DEPENDENT_WORKER",
     "scope": "One Ring Rail core serves the left Tools and Top11 icons. Shared Yes/No/Cancel uses a persisted current pointer and source/frontend guards. Edited/replaced rail and supported dependent features publish through one History worker transaction with one Undo.",
     "evidence": "docs/validation/2026-11-17-ring-rail-shared-input.md",

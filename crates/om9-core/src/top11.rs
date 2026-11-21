@@ -129,6 +129,16 @@ impl Top11Action {
             .find(|action| action.label().eq_ignore_ascii_case(label))
     }
 
+    /// Resolve the Matrix menu catalog key (distinct from the authored SVG name).
+    pub fn from_catalog(code: &str) -> Option<Self> {
+        let name = code.strip_prefix("TopIcon")?;
+        match name {
+            "EditPointsOn" => Some(Self::EditPoints),
+            "ControlPointsOn" => Some(Self::ControlPoints),
+            _ => Self::from_icon(name),
+        }
+    }
+
     pub fn from_icon(icon: &str) -> Option<Self> {
         Self::ALL
             .into_iter()
@@ -1496,6 +1506,34 @@ fn intersection_fractions(
     }
     Ok(fractions)
 }
+
+/// Limit an infinite line cutter to a conservative interval covering the target.
+pub fn extended_trim_line(target: &Curve, cutter: &Curve, tolerance: f64) -> Result<Curve> {
+    let bounds = crate::utilities::bounds(&Geometry::Curve(target.clone()))
+        .ok_or(Error::Invalid("empty Trim target"))?;
+    extended_trim_line_to_box(cutter, crate::cage::box_corners(bounds.min, bounds.max), tolerance)
+}
+
+pub fn extended_trim_line_to_box(cutter: &Curve, corners: [Point3; 8], tolerance: f64) -> Result<Curve> {
+    let Curve::Line { start, end, .. } = cutter else {
+        return Err(Error::Invalid("Trim extension requires a line cutter"));
+    };
+    let delta: Point3 = std::array::from_fn(|i| end[i] - start[i]);
+    let length = delta[0].hypot(delta[1]).hypot(delta[2]);
+    if !length.is_finite() || length == 0. {
+        return Err(Error::Invalid("degenerate Trim cutter"));
+    }
+    let unit = delta.map(|v| v / length);
+    let (mut lo, mut hi) = (0_f64, length);
+    for corner in corners {
+        let distance: f64 = (0..3).map(|i| (corner[i] - start[i]) * unit[i]).sum();
+        lo = lo.min(distance);
+        hi = hi.max(distance);
+    }
+    let point = |t: f64| std::array::from_fn(|i| start[i] + t * unit[i]);
+    Ok(Curve::Line { start: point(lo - tolerance), end: point(hi + tolerance), domain: [0., 1.] })
+}
+
 
 /// Sort intersection fractions and merge only cuts within tolerance along the placed curve.
 pub fn normalize_cut_fractions(
