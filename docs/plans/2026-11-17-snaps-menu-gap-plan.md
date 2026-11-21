@@ -1,6 +1,8 @@
 # Kế hoạch hoàn thiện menu SNAPS
 
-Ngày audit: 2026-11-17. Target: standalone Rust OM9 trên Windows. Phạm vi là panel **SNAPS trong ảnh người dùng**, đối chiếu milestone, manual đã chuẩn hóa, VB6/Ghidra và code hiện tại. Đây là kết quả audit và kế hoạch; chưa sửa hành vi sản phẩm, chưa chạy kiểm thử sản phẩm trong lượt này.
+Kế hoạch bắt đầu ngày 2026-11-17 cho panel **SNAPS** của OM9 standalone trên Windows.
+
+**Đã chốt SNAPS trên Windows ngày 2026-11-21 theo yêu cầu người dùng.** P00–P06 đã triển khai. P07 ghi kết quả kiểm thử hồi quy, phép đo Matrix9 và 4/4 bài M02-UI bằng Computer Use. Các ca phối hợp Grid Snap + Ortho và Planar + Project đã kiểm trên OM9. Phép đối chiếu trực tiếp hai tổ hợp trên Matrix9 và kiểm thử macOS thuộc phạm vi riêng. [Biên bản chốt P07](../validation/2026-11-17-snaps-p07.md#windows-snaps-plan-closeout)
 
 OM9 đã có engine Osnap, marker/tooltip, one-shot, SmartTrack cơ bản, Ortho/Planar/Project và nhiều sửa lỗi Surface Snap gần đây. Phần thiếu đáng ưu tiên là O-Snap tổng và mặc định End/Mid, Grid Snap cùng bốn bước, Between, luồng chọn Surface/Polysurface và các constraint đúng theo Matrix. Không cần viết lại engine hoặc dựng một picking engine thứ hai.
 
@@ -73,7 +75,7 @@ Manual có những câu Intersection/Tangent mang tính workflow và mô tả ap
 
 ## Thứ tự triển khai
 
-**Theo yêu cầu người dùng: làm xong P00–P06 rồi mới test một đợt P07.** Mỗi package mô tả kết quả cần đạt, không kèm một batch test riêng. Không thêm harness chẩn đoán hoặc benchmark chỉ để lặp lại implementation. Bảng dưới ghi thứ tự triển khai. Kết quả và điều kiện nghiệm thu hiện tại nằm ở [Bước kế tiếp](#bước-kế-tiếp).
+**Theo yêu cầu người dùng: làm xong P00–P06 rồi mới test một đợt P07.** Mỗi package mô tả kết quả cần đạt, không kèm một batch test riêng. Không thêm harness chẩn đoán hoặc benchmark chỉ để lặp lại implementation. Bảng dưới ghi thứ tự triển khai. [Kết quả xác nhận](#kết-quả-xác-nhận)
 
 | Package | Công việc và đầu ra review được | Phụ thuộc / gap |
 |---|---|---|
@@ -99,28 +101,30 @@ Tái dùng `om9-scene/tests/osnap.rs`, `om9-app/tests/snap_panel_modes.rs`, `osn
 
 Build dùng target hiện có `L:/om9-target`, `-j 2`, không tạo target thứ ba hoặc thay executable đang được người dùng mở. Nếu file đang khóa, ghi blocker và dùng đúng artifact kiểm được; không tự dừng app. Chạy `tools/public_source_audit.py`; sau validation batch dùng công cụ prune theo AGENTS. Native adapter thay đổi thì thêm SDK/runtime check đúng adapter, không mở rộng thành full unrelated workspace suite. macOS chỉ được ghi đạt khi có execution riêng.
 
-Tiêu chí đóng: không còn control im lặng/no-op trong phạm vi đã triển khai; các geometry claims có kiểm nguồn; state/CMD/SDK/preview/click nhất quán; receipt ghi commit và working-tree fingerprint, command/result, fixture scope và giới hạn. Human gate vẫn pending cho tới khi có review thật. Các historical L4 và receipt ngày 22-10 được giữ nguyên; audit này không tái chứng nhận chúng.
+P07 ghi kết quả kiểm nguồn hình học, tính nhất quán giữa CMD, SDK, preview và điểm commit, cùng phạm vi của từng fixture. Người dùng yêu cầu chốt phần SNAPS của kế hoạch sau lượt kiểm Windows. Các cổng nghiệm thu chung của milestone có phạm vi riêng. [Biên bản chốt P07](../validation/2026-11-17-snaps-p07.md#windows-snaps-plan-closeout)
 
-## Bước kế tiếp
+<a id="bước-kế-tiếp"></a>
 
-| Mục còn mở | Bằng chứng hiện có | Điều kiện xác nhận |
+## Kết quả xác nhận
+
+| Mục | Bằng chứng | Kết quả |
 |---|---|---|
-| Matrix9 `Int` và Project | Cửa sổ đang có `apparent-crossing.3dm` và lịch sử CMD xác nhận đã đọc tệp. Lần kiểm lại mở được cửa sổ nhưng F2 và chuột phải O-Snap không phản hồi. | Ghi trạng thái ban đầu của tùy chọn giao biểu kiến, cue Int và tọa độ World thực đo khi Project tắt và bật. Đối chiếu thêm hai tệp có thứ tự Line khác nhau ở cùng pixel. [Phép đo Matrix9](#kiểm-trực-tiếp-trên-matrix9) |
-| M02-UI | Ngày 2026-11-19, người dùng xác nhận chung các lệnh SNAPS đã thử hoạt động tốt. Kết quả mới ghi thêm bằng chứng tự động riêng cho Point, Near, Quad, Center, Tangent và Perpendicular. | Xác nhận theo phạm vi người dùng đã thử. [Kết quả review và kiểm thử](../validation/2026-11-17-snaps-p07.md#user-review-and-remaining-snap-routes) |
-| Grid Snap đứng riêng tại nửa bước âm | Với bước 0,5 mm tại X `-2.25`, OM9 lưu `-2.5`, mã Rhino 5 tính `-2.0`. Hai quy tắc kết hợp đã duyệt được kiểm riêng. | Chờ quyết định về cách làm tròn khi chỉ bật Grid Snap. [Phép đo và phép làm tròn](../validation/2026-11-17-snaps-p07.md#standalone-grid-snap-negative-half-step) |
-| Int tại các cặp cách đều sau nhập 3DM | Một tệp nhập năm lần cho hai kết quả tại cùng pixel. Sau khi Open hai tệp đối chứng, Rhino 5 đưa ba Line vào Int theo thứ tự ngược với thứ tự đọc từ tệp. | Chờ quyết định áp dụng thứ tự đó cho các cặp bằng nhau và xác nhận trên hai tệp Matrix9. [Kết quả OM9](../validation/2026-11-17-snaps-p07.md#repeatability-of-int-after-3dm-import), [Truy vết Rhino 5](../validation/2026-11-17-snaps-p07.md#rhino-5-ordinary-3dm-open-order-in-int) |
+| Matrix9 `Int` và Project | Người dùng đo trên Matrix9 tại tâm hình chiếu bằng `_EvaluatePt`. CMD trả World `(0,0,8)` khi Project tắt và `(0,0,0)` khi bật. Hai ảnh đều hiện cue `Int`. Cả hai tệp đối chứng ba Line cũng đã có lượt đúng pixel. | Phép đo World và mặc định bật đã xác nhận trong Matrix9. OM9 dùng cùng mặc định và đã kiểm lúc bật riêng Int. [Tọa độ Matrix9](../validation/2026-11-17-snaps-p07.md#matrix9-world-coordinates-with-project-off-and-on) · [Mặc định OM9](../validation/2026-11-17-snaps-p07.md#om9-starts-with-apparent-intersections-enabled) |
+| M02-UI | Ngày 2026-11-21, Computer Use kiểm 4/4 mục trên OM9 Windows gồm panel, one-shot, SmartTrack với Tab và Project. | Đạt trong lượt Computer Use. [Kết quả desktop](../validation/2026-11-17-snaps-p07.md#four-m02-ui-snaps-checks-using-computer-use) |
+| Grid Snap đứng riêng tại nửa bước âm | Với bước 0,5 mm và X thô `-2.25`, Matrix9 đo được `-2.0`. OM9 trước bản sửa lưu `-2.5`, sau bản sửa preview và lưu `-2.0`. | Đã áp dụng và kiểm lại trong viewport OM9. [Kiểm hồi quy](../validation/2026-11-17-snaps-p07.md#om9-matches-the-matrix9-standalone-grid-snap-tie) |
+| Int tại các cặp cách đều sau nhập 3DM | Ở cùng một tâm chiếu, OM9 so khoảng cách từ con trỏ đến Line nguồn. Khi cách đều, giao thật được ưu tiên. Hai mẫu khác thứ tự Line đều có kết quả Matrix9 `(0,0,2)` tại đúng tâm. | Đã áp dụng cho các cặp đoạn thẳng thiếu thứ tự tạo của OM9. [Kiểm lại bằng Import](../validation/2026-11-17-snaps-p07.md#om9-int-after-repeated-import-of-the-two-rhino-5-archives) · [Kết quả Matrix9](../validation/2026-11-17-snaps-p07.md#both-ordered-3dm-samples-at-the-exact-crossing-in-matrix9) |
 
-Ngày 2026-11-19, lượt P07 gộp trên checkout hiện tại đạt **286 ca**. Phạm vi gồm hình học nguồn, viewport/CMD, SDK chạy với gói SnapDemo, add-on Matrix Polyline và lưu–mở lại BRep rồi bắt điểm trên mặt. Lượt chạy kiểm cả nguồn trong block lồng, che khuất trước Project trong Shaded và Tangent/Perpendicular trên vành trụ. Nhóm kiểm thử bổ sung về cắt đường đạt 33 ca. Phép đo trên Matrix9 và nghiệm thu thủ công M02-UI còn mở. [Lượt P07 hiện tại](../validation/2026-11-17-snaps-p07.md#grouped-p07-after-the-nurbs-knot-trim-fix)
+Ngày 2026-11-20, lượt kiểm P07 trên commit `103261a86` đạt **288 ca** sau khi cập nhật kỳ vọng thứ tự menu viewport và chạy lại nhóm đó. Phạm vi gồm hình học nguồn, viewport/CMD, SDK chạy với gói SnapDemo, add-on Matrix Polyline và lưu–mở lại BRep rồi bắt điểm trên mặt. Nhóm kiểm thử bổ sung về cắt đường đạt 33 ca. Ngày 2026-11-21, lượt chốt chạy lại 35 ca tập trung trên phần SNAPS hiện tại. [Lượt P07](../validation/2026-11-17-snaps-p07.md#p07-on-commit-103261a86) · [Lượt chốt Windows](../validation/2026-11-17-snaps-p07.md#windows-snaps-plan-closeout)
 
 Bản Windows OM9 kiểm thử ngày 2026-11-19 xác minh lại bằng chuột thật trong viewport. Cùng một pixel ở Looking Down cho `(-8,6,8)` khi Project tắt và `(-8,6,0)` khi bật. Phím E khi CMD rảnh hiện `End ONE-SHOT`, Escape hủy ngay. Bản vẽ đã lưu còn hai Line nguồn và sẵn sàng để kiểm trực tiếp M02-UI. [Bản dựng và kết quả Windows](../validation/2026-11-17-snaps-p07.md#windows-snaps-review-build)
 
 Đối chiếu hai cửa sổ đang mở thấy cùng bố cục 10 điều khiển hàng trên và 11 hàng dưới. Cả hai hiển thị bước `0.5` đã chọn khi Grid Snap tắt. Trên bản OM9 kiểm thử, chọn `0.25` mm và bật Grid Snap làm cùng một pixel nhận World `(4.75,3,0)`. Undo khôi phục hai Line nguồn. [Panel và điểm World](../validation/2026-11-17-snaps-p07.md#snaps-panel-comparison-and-025-mm-desktop-pick)
 
-Đối chiếu kết quả chạy gộp P07 với từng package bên dưới. Phần tham chiếu còn mở là tùy chọn giao điểm biểu kiến ban đầu và tọa độ World trên Matrix9 khi bật và tắt Project, kể cả ca các cặp giao cùng pixel. Phần nghiệm thu M02-UI còn mở là xác nhận trực tiếp màu active/dim và tooltip, vòng đời one-shot, SmartTrack và hành vi Project trên OM9. Các xác nhận của người dùng về Elevator và On Surface đã được ghi riêng. [Nghiệm thu theo package](../validation/2026-11-17-snaps-p07.md#p07-current-worktree-acceptance-audit)
+Computer Use đã kiểm trực tiếp màu active/dim và tooltip, vòng đời one-shot, SmartTrack với Tab và Project trên bản OM9 Windows ngày 2026-11-21. Các xác nhận của người dùng về Elevator và On Surface được ghi riêng. [Kết quả desktop](../validation/2026-11-17-snaps-p07.md#four-m02-ui-snaps-checks-using-computer-use) · [Nghiệm thu theo package](../validation/2026-11-17-snaps-p07.md#p07-current-worktree-acceptance-audit)
 
 **Trạng thái nghiệm thu ngày 2026-11-18.** Lượt P07 gộp đạt 261 ca. Người dùng đã kiểm xong Ctrl+Click Elevator với Line bắt đầu ở Z=2 và kết thúc tại `(9,10,8)`. Bản sửa lịch sử Elevator qua kiểm thử tự động và đã build trên Windows. On Polysurface đã qua ca chuột trái, chuột phải và click ngoài Box. Người dùng đã thử On Surface chuột trái và xác nhận viền cầu mịn sau cập nhật. Lượt kiểm tự động trên Windows xác minh On Surface chuột phải và điểm cuối sau một click ngoài Sphere. Bản Windows hiện tại đã hiển thị đủ 21 tooltip, giữ trạng thái Project giữa hai layout và bắt đúng End/Mid qua bốn viewport. Còn đối chiếu Matrix9 cho giao điểm biểu kiến và các ràng buộc kết hợp, rồi xác nhận M02-UI. [Kết quả theo package](../validation/2026-11-17-snaps-p07.md#p00p07-acceptance-audit-2026-11-18) · [On Surface chuột phải](../validation/2026-11-17-snaps-p07.md#windows-right-button-on-surface-on-the-standard-build) · [Panel và bốn viewport](../validation/2026-11-17-snaps-p07.md#standard-windows-snaps-panel-and-cross-view-line-replay)
 
-Đã truy vết Rhino 5 gốc bật giao điểm biểu kiến và dùng đường SmartTrack xám liền. Scheme Matrix90 đi kèm để Rhino quyết định hai giá trị đó. Ghi trạng thái ban đầu của `Snap to apparent intersections` trong Matrix9 trước khi đổi. Tạo hình học thử trực tiếp bằng CMD trong bản vẽ thử. Người dùng đã gặp hộp thoại phiên bản RDK mới hơn khi mở tệp mẫu. [Bằng chứng cấu hình gốc](../validation/2026-11-17-snaps-p07.md#installed-rhino-5-defaults-for-apparent-intersection-and-smarttrack)
+Rhino 5 gốc bật giao điểm biểu kiến và dùng đường SmartTrack xám liền. Hai scheme Matrix9 đi kèm kế thừa các giá trị này. Đã đối chiếu lại mã khởi tạo Rhino và khóa cấu hình khi kiểm mặc định `Use apparent intersections`. [Bằng chứng cấu hình gốc](../validation/2026-11-17-snaps-p07.md#matrix9-factory-apparent-intersection-setting-recheck)
 
 Đã build bản Windows có phần lịch sử CMD mới. Ca Between xác minh tọa độ midpoint trong log trùng điểm đầu Line. Ca On Surface giữ dòng chọn mặt, click trượt và hủy ràng buộc sau khi hoàn tất Line. Ca On Polysurface giữ lỗi chọn Sphere và dòng nhận Box sau khi vẽ Line với cả hai đầu ở Z=10. [Bằng chứng lịch sử CMD](../validation/2026-11-17-snaps-p07.md#between-and-surface-targets-in-command-history)
 
@@ -138,7 +142,7 @@ Ba lần click cùng vị trí trong OM9 trên Windows xác nhận Grid Snap 0,5
 
 Mã Rhino 5 dùng điểm đã bắt lưới để chọn hướng Ortho. Ở ca 45° dưới đây, nó chiếu vị trí con trỏ gốc lên hướng đã chọn rồi tìm giao với vạch lưới gần nhất. [Truy vết Grid Snap và Ortho](../validation/2026-11-17-snaps-p07.md#rhino-5-native-grid-snap-and-ortho-composition)
 
-Ở đúng nửa bước lưới âm, với bước 0,5 mm và X thô `-2.25`, replay OM9 đo được X `-2.5` khi chỉ bật Grid Snap. Nhánh Grid Snap gốc của Rhino 5 tính ra `-2.0`. Khi bật thêm Ortho, OM9 đã nhận `-2.0` theo quy tắc được duyệt. Chờ quyết định cho Grid Snap đứng riêng. [Phép đo OM9 và truy vết phép làm tròn](../validation/2026-11-17-snaps-p07.md#standalone-grid-snap-negative-half-step)
+Ở đúng nửa bước lưới âm, chỉ bật Grid Snap với bước 0,5 mm và X thô `-2.25` cho X `-2.0` trên cả Matrix9 lẫn OM9 sau bản sửa. Replay xác nhận preview, điểm cuối Line đã lưu và Undo. [Tọa độ World trong hai ứng dụng](../validation/2026-11-17-snaps-p07.md#om9-matches-the-matrix9-standalone-grid-snap-tie)
 
 Ở phần giao 3D, OM9 giữ được giao điểm của hai Line khi một cặp Line/NURBS chồng nhau ở cao độ khác nhưng cùng nằm dưới con trỏ. Ca replay đối chiếu hai đối tượng nguồn và tọa độ điểm đầu Line. [Bằng chứng P04/P07](../validation/2026-11-17-snaps-p07.md#isolated-intersection-beside-a-line-and-nurbs-overlap)
 
@@ -146,7 +150,11 @@ Decompile Matrix90 và disassembly Rhino 5 xác định thứ tự ở nhánh nh
 
 ### Kiểm trực tiếp trên Matrix9
 
-Ngày 2026-11-19, cửa sổ Matrix9 hiển thị sẵn `apparent-crossing.3dm` và CMD báo đã đọc thành công. Có thể đo ngay trên hai đường ở Top. Lượt tự động quan sát được viewport nhưng click CMD và Int chưa làm đổi trạng thái giao diện. [Trạng thái bản vẽ tham chiếu](../validation/2026-11-17-snaps-p07.md#matrix9-fixture-opens-in-the-native-viewport)
+Ngày 2026-11-19, cửa sổ Matrix9 hiển thị `apparent-crossing.3dm` và CMD báo đã đọc thành công. Lượt tự động quan sát được viewport nhưng click CMD và Int chưa làm đổi trạng thái giao diện. Lượt khởi động ngày 2026-11-20 chưa mở được Matrix9 sau hộp thoại quyền Windows. Ba tệp mẫu dùng cho hai phép đối chiếu Int vẫn còn sẵn. [Trạng thái bản vẽ tham chiếu](../validation/2026-11-17-snaps-p07.md#matrix9-fixture-opens-in-the-native-viewport)
+
+Ngày 2026-11-21, tệp cũ hiện thông báo RDK mới hơn trên Matrix9. Để đo, dùng các bản `-rhino5.3dm` đã ghi lại ở định dạng v5 với bảng dữ liệu RDK bị loại bỏ. Bộ đọc native xác nhận tệp hai Line giữ đúng hai cao độ và hai tệp ba Line giữ đúng thứ tự ban đầu. [Tệp hai Line](../../build/standalone-validation/ui-artifacts/2026-11-18-snaps-matrix9-fixtures/apparent-crossing-rhino5.3dm) · [Kiểm tra tệp mới](../validation/2026-11-17-snaps-p07.md#rhino-5-fixtures-without-the-rdk-user-table)
+
+Người dùng mở thành công tệp hai Line mới và đo bằng `_EvaluatePt` tại tâm trong Top. Project tắt trả World `(0,0,8)` mm. Project bật trả World `(0,0,0)` mm. Cue `Int` hiện ở cả hai trạng thái. [Kết quả đọc từ hai ảnh CMD](../validation/2026-11-17-snaps-p07.md#matrix9-world-coordinates-with-project-off-and-on)
 
 **Int.** Chọn Looking Down với CPlane World Top. Vẽ hai đoạn bằng `_Line`. Nhập từng đầu mút ở prompt tương ứng.
 
@@ -166,7 +174,7 @@ Ca Perspective bổ sung dùng giao điểm lệch trục nhìn để phân bi�
 
 OM9 đã kiểm được phần lấy tham số nguồn Perspective bằng `Near` trên cùng hai đoạn, kể cả khi mặt phẳng cắt gần che một đầu đoạn. Công thức dùng chung cho snap và chọn cạnh. Ca này xác minh phần ánh xạ về đoạn nguồn dùng cho giao biểu kiến. [Kiểm thử OM9](../validation/2026-11-17-snaps-p07.md#source-parameters-for-projected-segments)
 
-Bản thử OM9 có **Snap to apparent intersections** trong menu chuột phải của O-Snap và lệnh `ApparentIntersections On/Off`. Tùy chọn đang tắt lúc khởi động. Ca Perspective đã xác minh điểm World khi bật và tắt Project, cùng thao tác dịch con trỏ để đổi nguồn. Bộ xử lý nền đã qua ca cung, NURBS và đoạn thẳng. Trên Windows OM9, cùng một pixel ở Looking Down cho World `(-8,6,8)` khi Project tắt và `(-8,6,0)` khi bật. Phép đo Matrix9 còn mở. [Replay cung/NURBS](../validation/2026-11-17-snaps-p07.md#apparent-intersection-on-arcs-and-rational-nurbs) · [Readback Windows](../validation/2026-11-17-snaps-p07.md#windows-apparent-int-with-project-on-and-off)
+Bản thử OM9 có **Snap to apparent intersections** trong menu chuột phải của O-Snap và lệnh `ApparentIntersections On/Off`. Tùy chọn đang tắt lúc khởi động. Ca Perspective đã xác minh điểm World khi bật và tắt Project, cùng thao tác dịch con trỏ để đổi nguồn. Bộ xử lý nền đã qua ca cung, NURBS và đoạn thẳng. Trên Windows OM9, cùng một pixel ở Looking Down cho World `(-8,6,8)` khi Project tắt và `(-8,6,0)` khi bật. Hai cao độ này khớp kết quả người dùng đo trên mẫu hai Line ở Matrix9. [Replay cung/NURBS](../validation/2026-11-17-snaps-p07.md#apparent-intersection-on-arcs-and-rational-nurbs) · [Readback Windows](../validation/2026-11-17-snaps-p07.md#windows-apparent-int-with-project-on-and-off) · [Tọa độ Matrix9](../validation/2026-11-17-snaps-p07.md#matrix9-world-coordinates-with-project-off-and-on)
 
 Replay Perspective bổ sung giao điểm biểu kiến trên phần NURBS còn nhìn thấy khi một trong các điểm điều khiển ở sau camera. Line nhận World `(6,0,37/3)` khi tắt Project và `(6,0,0)` khi bật. Ca scene kiểm thêm đường đảo chiều và loại giao điểm bị mặt phẳng cắt gần che. [Kết quả P04](../validation/2026-11-17-snaps-p07.md#apparent-int-on-a-partly-visible-perspective-curve)
 
@@ -202,11 +210,15 @@ Replay viewport với block scale không đều và thành viên xoay 90° xác 
 
 Trong Shaded, mesh ở `Z=5` vẫn để lộ điểm nguồn ở `Z=8`, nên Project nhận điểm ở `Z=0`. Mesh ở `Z=10` che cả hai nguồn, giữ Line chờ điểm đầu và giữ one-shot. Gói SnapDemo xác nhận cùng kết quả. [Kiểm tra che khuất trước Project](../validation/2026-11-17-snaps-p07.md#apparent-intersection-checks-shaded-visibility-before-project)
 
-Hai tệp Rhino 5 đã sẵn sàng để mở riêng bằng Open. Bộ đọc 3DM xác nhận cả hai có cùng ba đoạn theo hai thứ tự trên. Nếu hai lượt Matrix9 cho cùng một Z khi đã bật giao biểu kiến, lặp ca bằng ba Line mới tạo trong CMD để đối chiếu thứ tự tạo trong phiên. [Tệp ngang trước](../../build/standalone-validation/ui-artifacts/2026-11-18-snaps-matrix9-fixtures/coincident-true-and-apparent.3dm) · [Tệp dọc trước](../../build/standalone-validation/ui-artifacts/2026-11-18-snaps-matrix9-fixtures/coincident-vertical-first.3dm) · [Đọc lại tệp](../validation/2026-11-17-snaps-p07.md#ordered-rhino-5-fixtures-for-competing-pairs)
+Hai tệp Rhino 5 đã sẵn sàng để mở riêng bằng Open. Bộ đọc 3DM xác nhận cả hai có cùng ba đoạn theo hai thứ tự trên. Nếu hai lượt Matrix9 cho cùng một Z khi đã bật giao biểu kiến, lặp ca bằng ba Line mới tạo trong CMD để đối chiếu thứ tự tạo trong phiên. [Tệp ngang trước](../../build/standalone-validation/ui-artifacts/2026-11-18-snaps-matrix9-fixtures/coincident-true-and-apparent-rhino5.3dm) · [Tệp dọc trước](../../build/standalone-validation/ui-artifacts/2026-11-18-snaps-matrix9-fixtures/coincident-vertical-first-rhino5.3dm) · [Đọc lại tệp](../validation/2026-11-17-snaps-p07.md#rhino-5-fixtures-without-the-rdk-user-table)
 
-Trong OM9, năm lần nhập cùng một tệp 3DM dọc-trước giữ nguyên ba đoạn. Khi bật giao biểu kiến và tắt Project, bốn lần nhận Z=8 và một lần nhận Z=2 tại cùng pixel. Khi tắt giao biểu kiến, cả năm lần nhận Z=2. Quy tắc dùng thứ tự đọc từ tệp để phân xử các cặp cùng khoảng cách đang chờ duyệt. [Kết quả nhập lại](../validation/2026-11-17-snaps-p07.md#repeatability-of-int-after-3dm-import)
+Để xác nhận ca cách đều sau Open, bật lại cả ba đường bằng `_Show`, chọn Top, bật riêng Int và **Use apparent intersections**, tắt Project, Planar và Grid Snap. Chạy `_-RunPythonScript` với `matrix9-exact-int-pick-anchor.py`. Click một lần gần giao điểm để chọn pixel, rồi giữ nguyên chuột khi script canh tâm chiếu vào pixel đó. Khi `_EvaluatePt` hiện `Label=Off` và cue Int hiện ở dấu xanh, click lần hai tại chỗ. Chỉ đối chiếu dòng World của lượt có `EXACT INT PIXEL: YES`. Lặp trên tệp còn lại với cùng cài đặt. [Script kiểm pixel](../../build/standalone-validation/ui-artifacts/2026-11-18-snaps-matrix9-fixtures/matrix9-exact-int-pick-anchor.py)
 
-Mã Rhino 5 cho thấy Open thêm mỗi Line vào đầu danh sách mà Int duyệt. Ở đúng tâm giao trong World Top, với Project và Planar tắt, tệp ngang trước dự kiến cho `Z=8` còn tệp dọc trước dự kiến cho `Z=2` khi bật giao biểu kiến. Khi tắt giao biểu kiến, cả hai dự kiến cho `Z=2`. Đây là kết quả truy vết mã, phép đo World trên cửa sổ Matrix9 vẫn mở. [Đường Open và Int](../validation/2026-11-17-snaps-p07.md#rhino-5-ordinary-3dm-open-order-in-int)
+Tệp dọc-trước đã có lượt đúng pixel `(1121,344)` và tệp ngang-trước đúng pixel `(1137,338)`. Cả hai đều cho World `(0,0,2)` mm. Hai pixel thuộc hai khung nhìn và đều trùng tâm chiếu tương ứng. Khi kiểm lại, chạy `_Zoom _Extents` trong Top trước nếu đang zoom sát giữa các đoạn. [Kết quả click đúng pixel](../validation/2026-11-17-snaps-p07.md#both-ordered-3dm-samples-at-the-exact-crossing-in-matrix9)
+
+Trước bản sửa, năm lần nhập tệp dọc-trước vào OM9 cho bốn lượt Z=8 và một lượt Z=2 tại cùng pixel khi bật giao biểu kiến và tắt Project. Quy tắc đã duyệt so khoảng cách màn hình từ con trỏ tới đường nguồn khi các điểm giao trùng vị trí chiếu. Kết quả khi click tâm là Z=2 ở cả hai tệp. Rê về đường dọc cho Z=8 và rê về đường ngang cho Z=2. [Lỗi trước bản sửa](../validation/2026-11-17-snaps-p07.md#repeatability-of-int-after-3dm-import) · [Kiểm lại hai tệp](../validation/2026-11-17-snaps-p07.md#om9-int-after-repeated-import-of-the-two-rhino-5-archives)
+
+Truy vết mã Rhino 5 cho thấy Open thêm mỗi Line vào đầu danh sách mà Int duyệt. Dự đoán ban đầu cho lượt bật giao biểu kiến là tệp ngang trước nhận `Z=8` và tệp dọc trước nhận `Z=2`. Phép đo `_EvaluatePt` trực tiếp tại đúng pixel cho `Z=2` ở cả hai tệp khi tắt Project. OM9 áp dụng kết quả đo trực tiếp. [Đường Open và Int](../validation/2026-11-17-snaps-p07.md#rhino-5-ordinary-3dm-open-order-in-int) · [Phép đo Matrix9](../validation/2026-11-17-snaps-p07.md#both-ordered-3dm-samples-at-the-exact-crossing-in-matrix9)
 
 Tệp `.om9` v5 đã giữ thứ tự tạo qua một lượt mở và lưu bằng bản OM9 Windows cũ. Bản mới mở lại đúng bảy đối tượng, hình học và thứ tự tạo của bản vẽ thử. [Kiểm thử qua hai phiên bản](../validation/2026-11-17-snaps-p07.md#v5-compatibility-for-apparent-int-creation-order)
 
@@ -233,16 +245,20 @@ Ca BRep đã cắt đã qua luồng Save As v6 và Open của ứng dụng với
 
 Ca NativeBrep v7 kiểm Sphere đã xoay và scale không đều. Wireframe lẫn Shaded bắt đúng điểm trên mặt nguồn. Save As rồi Open giữ nguyên Sphere và Line vừa tạo. [Surface Snap trên tệp v7](../validation/2026-11-17-snaps-p07.md#surface-snap-on-a-native-sphere-reopened-from-v7)
 
-### Các mục còn chờ xác nhận M02-UI
+<a id="các-mục-còn-chờ-xác-nhận-m02-ui"></a>
+
+### Kết quả và cách kiểm lại M02-UI
 
 Người dùng đã xác nhận chung các lệnh SNAPS đã thử hoạt động tốt. Các bước dưới đây lưu lại cách tái hiện từng bài. [Xác nhận của người dùng và kết quả kiểm bổ sung](../validation/2026-11-17-snaps-p07.md#user-review-and-remaining-snap-routes)
 
-Dùng cửa sổ OM9 `snaps-between-reference.om9` đang mở với nút O-Snap dài và hai Line lệch cao độ trong Looking Down. **Project** ở đây là nút chiếu điểm trong panel SNAPS. Elevator và On Surface đã có xác nhận của người dùng ở lượt trước. [Bản vẽ OM9](../../build/standalone-validation/ui-artifacts/2026-11-18-snaps-current-desktop/snaps-between-reference.om9) · [Xác nhận trước](../validation/2026-11-17-snaps-p07.md#windows-desktop-handoff-for-elevator-and-polysurface)
+Dùng cửa sổ OM9 `snaps-between-reference.om9` với nút O-Snap dài và hai Line lệch cao độ trong Looking Down. Bản Windows build từ `103261a86` đã mở tệp này bằng hồ sơ thử riêng. Lượt kiểm chuột và bàn phím đã xác nhận nút tổng, lần bắt End sau click trượt, lịch sử F2, đường dẫn SmartTrack, khóa hướng bằng Tab và sự thay đổi cao độ của Line khi đổi Project. **Project** ở đây là nút chiếu điểm trong panel SNAPS. Elevator và On Surface đã có xác nhận của người dùng ở lượt trước. [Bản vẽ OM9](../../build/standalone-validation/ui-artifacts/2026-11-18-snaps-current-desktop/snaps-between-reference.om9) · [Kiểm trên Windows](../validation/2026-11-17-snaps-p07.md#windows-desktop-on-commit-103261a86) · [Xác nhận trước](../validation/2026-11-17-snaps-p07.md#windows-desktop-handoff-for-elevator-and-polysurface)
 
-- [ ] [Panel và tooltip](#1-panel-và-tooltip)
-- [ ] [One-shot và CMD](#2-one-shot-và-cmd)
-- [ ] [SmartTrack và khóa hướng Tab](#3-smarttrack-và-khóa-hướng-tab)
-- [ ] [Project khi bắt giao biểu kiến](#4-project-khi-bắt-giao-biểu-kiến)
+Lượt Computer Use ngày 2026-11-21 đạt cả bốn mục sau trên OM9 Windows. [Kết quả desktop](../validation/2026-11-17-snaps-p07.md#four-m02-ui-snaps-checks-using-computer-use)
+
+- [x] [Panel và tooltip](#1-panel-và-tooltip)
+- [x] [One-shot và CMD](#2-one-shot-và-cmd)
+- [x] [SmartTrack và khóa hướng Tab](#3-smarttrack-và-khóa-hướng-tab)
+- [x] [Project khi bắt giao biểu kiến](#4-project-khi-bắt-giao-biểu-kiến)
 
 **Chuẩn bị.** Chọn cửa sổ có tên `OpenMatrix9 — snaps-between-reference.om9`. Trong **Looking Down** (viewport trên trái), tìm hai đường tạo thành dấu cộng phía trên trái của gốc lưới. Đường ngang nằm ở `Z=2`, đường dọc nằm ở `Z=8`, và tâm hình chiếu của chúng là `(-8,6)`. Nếu còn lệnh đang chạy, nhấn `Esc` đến khi CMD hiện `Command:`. Bấm icon **Line** trong nhóm **Curve** hoặc **Đường cong** khi bước thử yêu cầu mở Line. Sau mỗi Line thử đã vẽ, nhấn `Ctrl+Z` một lần và kiểm tra bản vẽ còn đúng hai đường nguồn. Các thao tác kiểm thử dùng bản vẽ đã mở sẵn và không cần lưu tệp.
 
@@ -257,10 +273,10 @@ Dùng cửa sổ OM9 `snaps-between-reference.om9` đang mở với nút O-Snap 
 #### 2. One-shot và CMD
 
 1. Tắt **Grid Snap**, **Ortho**, **Planar**, **Project** và **SmartTrack** nếu đang bật. Khi CMD hiện `Command:`, click một vùng trống của Looking Down để viewport nhận bàn phím. Nhấn `E` một lần. **Đạt** khi thấy chữ vàng `End ONE-SHOT` ở góc trên trái của viewport và ô CMD vẫn trống. Nhấn `Esc` một lần để xóa chỉ báo.
-2. Bấm icon **Line**. CMD phải hiện `Start of line:` và sẵn sàng nhập. Click một điểm trống trong Looking Down, chẳng hạn phía dưới bên phải của gốc lưới. CMD chuyển sang `End of line:`. Giữ chuột trong viewport và nhấn `E`.
+2. Bấm icon **Line**. CMD phải hiện prompt `Start of line` với tùy chọn `BothSides` và sẵn sàng nhập. Click một điểm trống trong Looking Down, chẳng hạn phía dưới bên phải của gốc lưới. CMD chuyển sang `End of line:`. Giữ chuột trong viewport và nhấn `E`.
 3. Click một chỗ trống khác, xa hai đường nguồn và xa điểm đầu vừa đặt. **Đạt** khi Line vẫn chờ `End of line:`, chưa tạo đường mới và `End ONE-SHOT` còn hiện.
 4. Rê đến đầu bên trái của đường ngang nguồn. Đợi marker **End**, rồi click. **Đạt** khi đầu cuối của Line mới nằm ở đầu đường nguồn, CMD trở về `Command:` và one-shot biến mất.
-5. Nhấn `F2` để mở **Command History**. Tìm các dòng của lượt vừa chạy, gồm `Command: Line`, `Start of line:` và `End of line:`. Nhấn `F2` để đóng lịch sử, rồi Undo Line thử một lần.
+5. Nhấn `F2` để mở **Command History**. Tìm các dòng của lượt vừa chạy, gồm `Command: Line`, prompt `Start of line`, `End of line:` và thông báo không tìm thấy End khi click trượt. Nhấn `F2` để đóng lịch sử, rồi Undo Line thử một lần.
 
 #### 3. SmartTrack và khóa hướng Tab
 

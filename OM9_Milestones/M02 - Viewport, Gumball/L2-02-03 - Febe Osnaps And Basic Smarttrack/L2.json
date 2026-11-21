@@ -183,6 +183,37 @@
       "scope": "Two Rhino 5 files contain identical three-Line geometry with opposite horizontal and vertical iterator order. The native reader verifies archive version and ordering. The normal OM9 importer verifies both sets of endpoints.",
       "evidence": ["docs/validation/2026-11-17-snaps-p07.md#ordered-rhino-5-fixtures-for-competing-pairs"]
     },
+    "snaps_p07_matrix9_two_line_world_2026_11_21": {
+      "status": "TWO_LINE_PROJECT_WORLD_CONFIRMED_IN_MATRIX9",
+      "scope": "The user observed Int at the apparent crossing in the Rhino 5 Top viewport. EvaluatePt returned World (0,0,8) mm with Project off and (0,0,0) mm with Project on. Both three-Line 3DM archive orders returned (0,0,2) mm at the verified exact crossing with Project off.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#matrix9-world-coordinates-with-project-off-and-on", "docs/validation/2026-11-17-snaps-p07.md#both-ordered-3dm-samples-at-the-exact-crossing-in-matrix9"]
+    },
+    "snaps_p07_om9_imported_line_intersections_2026_11_21": {
+      "status": "WINDOWS_NATIVE_IMPORT_AND_SIMULATED_VIEWPORT_VALIDATED",
+      "scope": "Five fresh imports of each Rhino 5 sample return Z=2 at the exact center, Z=8 toward the vertical Line and Z=2 toward the horizontal Line. Project commits Z=0 at center. Both scene and viewport validate source attribution and the viewport test checks committed Line geometry and Undo.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#om9-int-after-repeated-import-of-the-two-rhino-5-archives"]
+    },
+    "matrix9_factory_apparent_intersections_2026_11_21": {
+      "status": "FACTORY_DEFAULT_ON_CONFIRMED_IN_MATRIX9_CMD_AND_SHIPPED_SCHEMES",
+      "scope": "The Rhino 5 factory initializes the same field bound to extend_to_apparent_int to true. Both shipped Matrix9 schemes inherit that default. The user's Matrix9 CMD readback reported On for both factory and current profile.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#matrix9-factory-apparent-intersection-setting-recheck"]
+    },
+    "snaps_m02_ui_computer_use_2026_11_21": {
+      "status": "SCOPED_WINDOWS_DESKTOP_CHECKS_PASSED",
+      "scope": "On the current Windows build, Computer Use checked active and dimmed snaps, End and Int tooltips, idle End one-shot with cancel, an End miss and retry during Line, F2 history and SmartTrack guide capture and cleanup.",
+      "closeout": "The user requested closeout of the Windows SNAPS plan on 2026-11-21.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#four-m02-ui-snaps-checks-using-computer-use", "docs/validation/2026-11-17-snaps-p07.md#windows-snaps-plan-closeout"]
+    },
+    "om9_default_apparent_intersections_2026_11_21": {
+      "status": "OM9_APP_DEFAULT_AND_SIMULATED_VIEWPORT_VALIDATED",
+      "scope": "A fresh OM9 window starts with the apparent-intersection option on. After selecting Int, a simulated viewport pick finds the projected crossing and commits the expected source point in Wireframe and Shaded. The context menu still toggles the option.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#om9-starts-with-apparent-intersections-enabled"]
+    },
+    "snaps_p07_post_commit_windows_2026_11_20": {
+      "status": "WINDOWS_POST_COMMIT_P07_REVALIDATED_MATRIX9_PENDING",
+      "scope": "On commit 103261a86, 288 distinct P07 cases passed across source geometry, viewport, CMD, loaded SDK, packaged Polyline and worker-backed BRep reopen. The Matrix9 World readback and equal-distance Int rule for imported 3DM remain open.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#p07-on-commit-103261a86"]
+    },
     "snaps_p07_grouped_current_windows_2026_11_19": {
       "status": "WINDOWS_AUTOMATED_REVALIDATED_MANUAL_UI_PENDING",
       "scope": "The grouped Windows run passed 286 cases across source, viewport, CMD, SDK, packaged Polyline and worker-backed BRep reopen. It includes nested member paths, Shaded visibility and directional snaps on a cylinder rim. Another 33 core trim tests passed. Direct Matrix9 readback and M02-UI remain open.",

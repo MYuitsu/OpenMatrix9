@@ -58,6 +58,18 @@ fn viewport_center(app: &MatrixApp) -> Pos2 {
     app.view_rects[&ViewId::Perspective].center()
 }
 
+fn set_apparent_intersections(app: &mut MatrixApp, context: &egui::Context, enabled: bool) {
+    app.focus_command_editor();
+    frame(app, context, vec![]);
+    let option = if enabled { "on" } else { "off" };
+    let command = format!("ApparentIntersections {option}");
+    frame(app, context, vec![Event::Text(command.clone())]);
+    frame(app, context, vec![Event::Key {
+        key: Key::Enter, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::NONE,
+    }]);
+    assert!(app.status_line().contains(&command));
+}
+
 #[test]
 fn project_projects_to_the_active_cplane_without_changing_it() {
     let mut controller = Controller::new(Document::new("project"), Limits::default()).unwrap();
@@ -334,6 +346,69 @@ fn grid_ortho_and_planar_use_the_rotated_input_plane_in_mm() {
         let local = plane.to_local(WorldPoint::try_new(result).unwrap()).unwrap().xyz();
         assert!(local.into_iter().zip(expected).all(|(actual, expected)| (actual - expected).abs() < 1e-9),
             "input={input:?}, expected={expected:?}, actual={local:?}");
+    }
+}
+
+#[test]
+fn standalone_grid_snap_half_step_matches_matrix9() {
+    use om9_core::geometry::{Curve, Geometry};
+    use om9_scene::camera::{CPlane, Camera, Viewport};
+
+    let mut app = MatrixApp::new(Document::with_template_tolerance("Grid Snap half-step")).unwrap();
+    let context = egui::Context::default();
+    let view_id = ViewId::LookingDown;
+    app.controller.workspace.active = view_id;
+    app.set_object_snaps_enabled(false);
+    app.set_smarttrack_enabled(false);
+    app.controller.set_grid_snap(true);
+    app.controller.set_grid_snap_step_mm(0.5);
+    assert!(!app.controller.ortho() && !app.controller.planar() && !app.controller.project());
+    for _ in 0..3 { frame(&mut app, &context, vec![]); }
+
+    let rect = app.view_rects[&view_id];
+    let viewport = Viewport {
+        origin: [f64::from(rect.min.x), f64::from(rect.min.y)],
+        size: [f64::from(rect.width()), f64::from(rect.height())],
+    };
+    let plane = CPlane::world_xy();
+    // Eight pixels per millimetre makes the pick and its neighbors exactly representable.
+    let camera = Camera::orthographic([0., 0., 30.], [0.; 3], [0., 1., 0.], viewport.size[1] / 8.).unwrap();
+    let view = app.controller.workspace.views.get_mut(&view_id).unwrap();
+    view.camera = camera.clone();
+    view.cplane = plane;
+    let project = |world| {
+        let [x, y] = camera.project(world, viewport).unwrap().unwrap().screen;
+        Pos2::new(x as f32, y as f32)
+    };
+    let before = app.controller.document().clone();
+    for (raw_x, expected_x) in [(-2.375, -2.5), (-2.25, -2.), (-2.125, -2.), (2.25, 2.5)] {
+        let raw = [raw_x, 0., 0.];
+        let expected = [expected_x, 0., 0.];
+        let cursor = project(raw);
+        let pixel = [f64::from(cursor.x), f64::from(cursor.y)];
+        let traced = camera.ray(pixel, viewport).unwrap().intersect_plane(plane).unwrap().unwrap();
+        assert_eq!(traced, raw);
+
+        app.controller.submit("Line").unwrap();
+        app.controller.submit("0,0,0").unwrap();
+        let output = render_frame(&mut app, &context, vec![Event::PointerMoved(cursor)]);
+        assert!(output.shapes.iter().any(|shape| matches!(&shape.shape,
+            egui::Shape::LineSegment { points, stroke }
+                if stroke.color == egui::Color32::from_rgb(0, 130, 85)
+                    && points[0].distance(project([0.; 3])) < 0.05
+                    && points[1].distance(project(expected)) < 0.05
+        )), "preview for raw X={raw_x} must reach X={expected_x}");
+        click(&mut app, &context, cursor);
+        let mut entities = app.controller.document().entities.values();
+        let Geometry::Curve(Curve::Line { start, end, .. }) = entities.next().unwrap().geometry else {
+            panic!("expected one Line after clicking raw X={raw_x}");
+        };
+        assert_eq!(start, [0.; 3]);
+        assert_eq!(end, expected, "raw X={raw_x}");
+        assert!(entities.next().is_none());
+        assert_eq!(app.controller.coordinator().undo_len(), 1);
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
     }
 }
 
@@ -1790,6 +1865,7 @@ fn intersection_keeps_isolated_hit_among_overlaps_and_refuses_projected_crossing
     for _ in 0..3 {
         frame(&mut app, &context, vec![]);
     }
+    set_apparent_intersections(&mut app, &context, false);
     let before = app.controller.document().clone();
     let rect = app.view_rects[&ViewId::LookingDown];
     let viewport = Viewport {
@@ -1969,6 +2045,124 @@ fn apparent_intersection_keeps_the_selected_perspective_source_before_project() 
         assert!(start.into_iter().zip(expected_start)
             .all(|(actual, expected)| (actual - expected).abs() < point_tolerance), "{start:?}");
         assert_eq!(app.controller.coordinator().undo_len(), 1);
+    }
+}
+
+fn check_unordered_line_intersections(mut app: MatrixApp) {
+    use om9_core::geometry::{Curve, Geometry};
+    use om9_scene::{camera::{Camera, Viewport}, osnap::{self, SnapSettings}};
+    use std::{thread, time::{Duration, Instant}};
+
+    let before = app.controller.document().clone();
+    let undo_before = app.controller.coordinator().undo_len();
+    assert_eq!(before.entities.len(), 3);
+    assert!(before.entities.values().all(|entity| entity.creation_order.is_none()));
+    assert!(before.entities.values().all(|entity| matches!(entity.geometry, Geometry::Curve(Curve::Line { .. }))));
+
+    let context = egui::Context::default();
+    let view_id = ViewId::LookingDown;
+    app.controller.workspace.active = view_id;
+    for _ in 0..3 { frame(&mut app, &context, vec![]); }
+    let rect = app.view_rects[&view_id];
+    let viewport = Viewport {
+        origin: [f64::from(rect.min.x), f64::from(rect.min.y)],
+        size: [f64::from(rect.width()), f64::from(rect.height())],
+    };
+    let camera = Camera::orthographic([0., 0., 50.], [0.; 3], [0., 1., 0.], viewport.size[1] / 10.).unwrap();
+    app.controller.workspace.views.get_mut(&view_id).unwrap().camera = camera.clone();
+    let center = camera.project([0., 0., 2.], viewport).unwrap().unwrap().screen;
+    assert_eq!(camera.project([0., 0., 8.], viewport).unwrap().unwrap().screen, center);
+    assert_eq!(center.map(|coordinate| f64::from(coordinate as f32)), center);
+
+    app.focus_command_editor();
+    frame(&mut app, &context, vec![]);
+    frame(&mut app, &context, vec![Event::Text("ApparentIntersections On".into())]);
+    frame(&mut app, &context, vec![Event::Key {
+        key: Key::Enter, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::NONE,
+    }]);
+    assert!(app.status_line().contains("ApparentIntersections on"), "{}", app.status_line());
+
+    for (offset, z, apparent, project) in [
+        ([0., 0.], 2., false, false),
+        ([0., 4.], 8., true, false),
+        ([4., 0.], 2., false, false),
+        ([0., 0.], 2., false, true),
+    ] {
+        let screen = [center[0] + offset[0], center[1] + offset[1]];
+        let cursor = Pos2::new(screen[0] as f32, screen[1] as f32);
+        let expected_world = [0., 0., z];
+        let expected_start = [0., 0., if project { 0. } else { z }];
+        let settings = SnapSettings {
+            one_shot: Some(SnapKind::Intersection), apparent_intersections: true, ..Default::default()
+        };
+        let hits = osnap::candidates(app.controller.scene().unwrap(), &camera, viewport, screen, settings, None).unwrap();
+        let [direct] = hits.as_slice() else { panic!("expected one Int at {offset:?}: {hits:?}") };
+        assert_eq!(direct.world, expected_world);
+        assert_eq!(direct.apparent, apparent);
+
+        app.controller.set_project(project);
+        app.controller.submit("Line").unwrap();
+        app.set_snap_override(Some(SnapKind::Intersection));
+        frame(&mut app, &context, vec![Event::PointerMoved(cursor)]);
+        let deadline = Instant::now() + Duration::from_secs(10);
+        let hit = loop {
+            if let Some(hit) = app.snap_candidate() { break hit.clone(); }
+            assert!(Instant::now() < deadline, "{offset:?}: {}", app.status_line());
+            thread::sleep(Duration::from_millis(5));
+            frame(&mut app, &context, vec![]);
+        };
+        assert_eq!(hit.kind, SnapKind::Intersection);
+        assert_eq!(hit.world, expected_world, "{offset:?}");
+        assert_eq!(hit.apparent, apparent, "{offset:?}");
+        let source = &before.entities[&hit.source.as_ref().unwrap().root];
+        assert!(matches!(source.geometry, Geometry::Curve(Curve::Line { start, .. }) if start[2] == z));
+        assert!(hit.second_source.is_some());
+
+        click(&mut app, &context, cursor);
+        assert_eq!(app.snap_override(), None);
+        app.controller.submit("5,6,0").unwrap();
+        let committed = app.controller.document().entities.values().find(|entity| !before.entities.contains_key(&entity.id)).unwrap();
+        assert!(matches!(committed.geometry, Geometry::Curve(Curve::Line { start, end, .. })
+            if start == expected_start && end == [5., 6., 0.]));
+        assert_eq!(app.controller.coordinator().undo_len(), undo_before + 1);
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &before);
+    }
+}
+
+#[test]
+fn unordered_line_intersections_use_source_distance_then_true_intersection() {
+    use om9_core::{geometry::{Curve, Geometry}, identity::ObjectId, model::Entity};
+
+    let lines = [
+        ([-10., 0., 2.], [10., 0., 2.]),
+        ([0., -10., 8.], [0., 10., 8.]),
+        ([-8., -8., 2.], [8., 8., 2.]),
+    ];
+    for order in [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]] {
+        let mut document = Document::with_template_tolerance("unordered source lines");
+        for (index, line) in order.into_iter().enumerate() {
+            let (start, end) = lines[line];
+            let mut entity = Entity::new("source line", Geometry::Curve(Curve::Line { start, end, domain: [0., 1.] }), None);
+            entity.id = ObjectId(uuid::Uuid::from_u128(index as u128 + 1));
+            document.entities.insert(entity.id, entity);
+        }
+        check_unordered_line_intersections(MatrixApp::new(document).unwrap());
+    }
+}
+
+#[test]
+#[ignore = "needs the two local Rhino 5 fixtures and a configured native exchange worker"]
+fn int_after_repeated_import_of_both_rhino5_archives() {
+    let fixtures = std::path::PathBuf::from(std::env::var_os("OM9_SNAPS_PAIR_ROOT").expect("Rhino 5 fixture directory"));
+    for file in ["coincident-true-and-apparent-rhino5.3dm", "coincident-vertical-first-rhino5.3dm"] {
+        let path = fixtures.join(file);
+        for _ in 0..5 {
+            let mut app = MatrixApp::new(Document::with_template_tolerance("imported source lines")).unwrap();
+            app.controller.import_3dm(&path).unwrap();
+            check_unordered_line_intersections(app);
+        }
+        println!("{file}: five fresh Imports verified");
     }
 }
 
@@ -2184,15 +2378,7 @@ fn competing_intersections_follow_line_creation_order_and_keep_an_exact_tie() {
         }
         app.controller.workspace.active = ViewId::LookingDown;
         for _ in 0..3 { frame(&mut app, &context, vec![]); }
-        if from_view {
-            app.focus_command_editor();
-            frame(&mut app, &context, vec![]);
-            frame(&mut app, &context, vec![Event::Text("ApparentIntersections On".into())]);
-            frame(&mut app, &context, vec![Event::Key {
-                key: Key::Enter, physical_key: None, pressed: true, repeat: false, modifiers: Modifiers::NONE,
-            }]);
-            assert!(app.status_line().contains("ApparentIntersections on"));
-        }
+        set_apparent_intersections(&mut app, &context, from_view);
         app.controller.submit("Line").unwrap();
         app.set_snap_override(Some(SnapKind::Intersection));
         let rect = app.view_rects[&ViewId::LookingDown];
@@ -2258,6 +2444,7 @@ fn intersection_keeps_isolated_hit_when_a_line_and_nurbs_may_overlap() {
     let context = egui::Context::default();
     app.controller.workspace.active = ViewId::LookingDown;
     for _ in 0..3 { frame(&mut app, &context, vec![]); }
+    set_apparent_intersections(&mut app, &context, false);
     let rect = app.view_rects[&ViewId::LookingDown];
     let viewport = Viewport {
         origin: [rect.min.x as f64, rect.min.y as f64],
@@ -2413,6 +2600,7 @@ fn brep_edge_and_line_intersection_snap_uses_both_sources() {
     frame(&mut app, &context, vec![]);
     frame(&mut app, &context, vec![]);
     app.controller.workspace.active = ViewId::LookingDown;
+    set_apparent_intersections(&mut app, &context, false);
     app.controller.submit("Line").unwrap();
     app.set_snap_override(Some(SnapKind::Intersection));
     let rect = app.view_rects[&ViewId::LookingDown];
@@ -2433,6 +2621,7 @@ fn brep_edge_and_line_intersection_snap_uses_both_sources() {
     };
     let first = preview.source.as_ref().unwrap().root;
     let second = preview.second_source.as_ref().unwrap().root;
+    assert!(!preview.apparent);
     assert!((first == box_id && second == line_id) || (first == line_id && second == box_id));
     assert!((0..3).all(|i| (preview.world[i] - [5., 0., 5.][i]).abs() <= 0.001));
     click(&mut app, &context, cursor);

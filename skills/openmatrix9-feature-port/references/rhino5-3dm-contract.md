@@ -28,3 +28,9 @@ Khi bảo trì hoặc kiểm tra, đọc `docs/validation/2026-10-09-modeling-ph
 ## Scope v2
 
 Các kết quả Phase1/FreeCAD và flatten-only limits kể trên là historical baseline. V2 RCORE-10/OM9-FILE-012 quyết định read/edit/retain/export và block instance representation mới; không giới hạn target bằng old importer chỉ để tái dùng code. Replay current-state 3DM, cold .om9, clipboard và metadata semantics trên executable mới.
+
+## Int sau khi nhập 3DM
+
+Quy tắc OM9 được người dùng duyệt ghi vào skill ngày 2026-11-21, áp dụng cho các cặp Line thiếu thứ tự tạo khi bật giao biểu kiến. Khi các điểm giao trùng vị trí chiếu, Int ưu tiên ứng viên có Line nguồn gần con trỏ hơn trên màn hình. Giao biểu kiến dùng khoảng cách tới Line nguồn đã chọn. Giao thật dùng khoảng cách tới Line gần hơn trong cặp. Khi khoảng cách bằng nhau, ưu tiên giao thật. Project chiếu điểm đã chọn lên CPlane sau bước chọn nguồn.
+
+Khi kiểm hồi quy, nhập cả hai mẫu Rhino 5 ba Line có thứ tự lưu ngang–dọc và dọc–ngang. Trong Looking Down, giữ cả ba Line hiển thị và tắt Project. Cả hai mẫu phải lưu World `(0,0,2)` mm khi click đúng tâm, `(0,0,8)` khi lệch 4 pixel về Line dọc, và `(0,0,2)` khi lệch 4 pixel về Line ngang. Bật Project rồi click đúng tâm phải lưu `(0,0,0)`. Kiểm tra nguồn của Int, điểm Line đã lưu và một lần Undo. Xem bằng chứng và đường dẫn hai tệp trong checkout OM9 tại `docs/validation/2026-11-17-snaps-p07.md#om9-int-after-repeated-import-of-the-two-rhino-5-archives`.

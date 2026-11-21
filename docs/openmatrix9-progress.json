@@ -37,7 +37,74 @@
   },
   "latest_snaps_implementation_2026_11_17": {
     "stage": "ui-menu",
-    "status": "IN_PROGRESS_PARTIALLY_VALIDATED",
+    "status": "WINDOWS_SNAPS_PLAN_CLOSED",
+    "windows_snaps_plan_closeout_2026_11_21": {
+      "scope": "The user requested closure of P00–P07 for standalone OM9 SNAPS on Windows after all four scoped desktop checks passed.",
+      "tests": "The final targeted Windows rerun passed 33 scene osnap tests and two app regressions for default apparent Int and standalone Grid Snap.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#windows-snaps-plan-closeout",
+      "remaining_scope": "Direct Matrix9 measurement of Grid Snap with Ortho and Planar with Project, macOS verification and broader M02 approval are separate from this closeout.",
+      "next_document": "docs/plans/2026-11-17-snaps-menu-gap-plan.md#kết-quả-xác-nhận",
+      "next_action": "Refer to the closed plan for any future SNAPS regression."
+    },
+    "p07_m02_ui_computer_use_2026_11_21": {
+      "status": "FOUR_SCOPED_WINDOWS_DESKTOP_CHECKS_PASSED",
+      "scope": "Computer Use passed the colors and tooltip, one-shot with F2, SmartTrack with Tab, and Project checks on the current Windows build. An identical Apparent Int click produced a selected Line height of 8.000 mm with Project off and 0.000 mm with Project on. Undo removed each trial Line. The original file fingerprint matched after the run.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#four-m02-ui-snaps-checks-using-computer-use",
+      "uncertainties": "The new result is a Computer Use desktop verification. The records of separately user-confirmed workflows retain their original scope.",
+      "next_document": "docs/plans/2026-11-17-snaps-menu-gap-plan.md",
+      "next_action": "Use the desktop record for the four checked items and track the remaining milestone review outside this fixture separately."
+    },
+    "p00_om9_default_apparent_intersections_2026_11_21": {
+      "status": "OM9_APP_DEFAULT_AND_SIMULATED_VIEWPORT_VALIDATED",
+      "scope": "The user approved matching Matrix9. OM9 starts with the apparent-intersection option enabled. Selecting Int in a fresh app snaps to the projected crossing of two placed Lines without an option command. In both Wireframe and Shaded it identifies both source paths, commits (6,2,8) mm with Project off and (6,2,0) with Project on, then undoes the Line. The Off and O-Snap context-menu cases pass, and the SDK retains explicit opt-in.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#om9-starts-with-apparent-intersections-enabled",
+      "skill_approval": "The user approved recording the startup default on 2026-11-21. The source and installed openmatrix9-workspace-contract skills link to references/grid-and-viewports.md#giao-điểm-biểu-kiến-khi-khởi-động.",
+      "uncertainties": "Viewport input was simulated.",
+      "next_document": "docs/plans/2026-11-17-snaps-menu-gap-plan.md#các-mục-còn-chờ-xác-nhận-m02-ui",
+      "next_action": "Continue the remaining M02-UI checks."
+    },
+    "p00_matrix9_factory_apparent_intersections_2026_11_21": {
+      "status": "FACTORY_DEFAULT_ON_CONFIRMED_IN_MATRIX9_CMD_AND_SHIPPED_SCHEMES",
+      "scope": "Rhino 5 constructor and Defaults export initialize the apparent-intersection field to true. The profile reader and writer bind the same field to extend_to_apparent_int. Fresh fingerprint checks and inspection of both shipped Matrix90 schemes verified that they leave this field to Rhino's factory default. The current-user Matrix90 and Matrix90PE scheme keys also lack an explicit override.",
+      "matrix9_cmd": "APPARENT INTERSECTIONS | Rhino factory: ON | Current profile: ON. The user ran the read-only probe in Matrix9.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#matrix9-factory-apparent-intersection-setting-recheck",
+      "next_document": "docs/plans/2026-11-17-snaps-menu-gap-plan.md#các-mục-còn-chờ-xác-nhận-m02-ui",
+      "next_action": "Continue the remaining M02-UI checks."
+    },
+    "p07_om9_imported_line_intersections_2026_11_21": {
+      "status": "WINDOWS_NATIVE_IMPORT_AND_SIMULATED_VIEWPORT_VALIDATED",
+      "scope": "At coincident screen crossings between Lines with unknown creation order, pointer distance to the supporting source Line decides first. A true intersection wins when source distances tie. Tested six fixed object-ID orders and five fresh imports of each of the two measured Rhino 5 archives. Both returned World Z=2 at center, Z=8 toward the vertical Line and Z=2 toward the horizontal Line. Project committed Z=0 at center. Scene query, source binding, Line commit and Undo were checked.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#om9-int-after-repeated-import-of-the-two-rhino-5-archives",
+      "skill_approval": "User approved recording this OM9 rule on 2026-11-21. The source and installed openmatrix9-feature-port skills route to references/rhino5-3dm-contract.md#int-sau-khi-nhập-3dm.",
+      "uncertainties": "The remaining human M02-UI checks are open. The Matrix9 factory setting is recorded under p00_matrix9_factory_apparent_intersections_2026_11_21.",
+      "next_doc": "docs/plans/2026-11-17-snaps-menu-gap-plan.md#các-mục-còn-chờ-xác-nhận-m02-ui",
+      "next_action": "Continue the remaining M02-UI checks. The separate standalone Grid Snap half-step is tracked under p02_standalone_grid_negative_half_step_2026_11_19."
+    },
+    "p07_matrix9_two_line_world_2026_11_21": {
+      "status": "TWO_LINE_PROJECT_WORLD_CONFIRMED_IN_MATRIX9",
+      "scope": "The user opened apparent-crossing-rhino5.3dm and supplied two Matrix9 Top screenshots of EvaluatePt with Label Off and the Int cue. World was (0,0,8) mm with Project off and (0,0,0) mm with Project on.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#matrix9-world-coordinates-with-project-off-and-on",
+      "vertical_first": "The Matrix9 Top window for coincident-vertical-first-rhino5.3dm showed World (0,0,2) mm with Project off and (0,0,0) mm with Project on in EvaluatePt. See docs/validation/2026-11-17-snaps-p07.md#matrix9-vertical-first-3dm-readback.",
+      "horizontal_first": "The Matrix9 Top window for coincident-true-and-apparent-rhino5.3dm showed World (0,0,2) mm in EvaluatePt with Int on and Project off. Both files returned Z=2 with Project off in the reported trials. See docs/validation/2026-11-17-snaps-p07.md#matrix9-horizontal-first-3dm-readback.",
+      "matrix9_live_modeling_aids": "The user's follow-up Options screenshot showed apparent intersections checked, Project, Planar and Grid Snap unchecked, and a 15 pixel snap radius. This is an observation of the active profile after the measurements.",
+      "matrix9_hidden_diagonal": "In the horizontal-first sample, hiding the diagonal still yielded World Z=2 at the apparent crossing of the two visible elevated Lines with Project off. Another reading with Project on gave Z=0. The Z=2 result alone does not identify the competing pair when the diagonal is visible.",
+      "matrix9_pointer_source_depth": "In Top with the diagonal hidden, apparent Int on and Project off, the live CMD returned Z=8 near the vertical Line and Z=2 near the horizontal Line at the same XY. See docs/validation/2026-11-17-snaps-p07.md#matrix9-apparent-int-from-each-source-line.",
+      "exact_pixel_probe": "Both first-run clicks missed the shared aligned target. A follow-up screenshot showed the guided marker green away from the current intersection and the guard rejecting clicks. The anchor revision aligns to a first click and includes current projection in the green-state check. See docs/validation/2026-11-17-snaps-p07.md#exact-click-setup-for-the-ordered-matrix9-samples.",
+      "exact_vertical_first": "The guided Matrix9 run accepted exact pixel (1121,344) and returned World (0,0,2) mm on the vertical-first file. The horizontal-first plain EvaluatePt returned the same coordinates without an exact-pixel receipt. See docs/validation/2026-11-17-snaps-p07.md#first-exact-pixel-readback-in-matrix9.",
+      "exact_horizontal_first": "The anchor run accepted exact pixel (1137,338) and returned World (0,0,2) mm in the horizontal-first file. Both ordered 3DM fixtures measured Z=2 at their projected crossing. See docs/validation/2026-11-17-snaps-p07.md#both-ordered-3dm-samples-at-the-exact-crossing-in-matrix9.",
+      "uncertainties": "The remaining human M02-UI checks are open. The shipped Matrix9 schemes and Rhino 5 executable establish the factory apparent-intersections default as On.",
+      "next_action": "See p07_om9_imported_line_intersections_2026_11_21 for the approved OM9 rule and repeat-import results."
+    },
+    "p07_post_commit_windows_2026_11_20": {
+      "status": "WINDOWS_POST_COMMIT_P07_REVALIDATED_MATRIX9_PENDING",
+      "scope": "On commit 103261a86, 288 distinct P07 cases and 33 additional curve trim cases passed after a title-menu test expectation was updated for Artistic and Pen. The default om9 binary passed cargo check.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#p07-on-commit-103261a86",
+      "matrix9_fixtures": "On 2026-11-21, all three Line fixtures were rewritten as version-50 archives with zero plug-in user tables after Matrix9 displayed an RDK version notice. Native inspection verified the ordered endpoints, millimeters and 0.001 mm tolerance. See docs/validation/2026-11-17-snaps-p07.md#rhino-5-fixtures-without-the-rdk-user-table.",
+      "desktop": "The default Windows build opened snaps-between-reference.om9 in a separate profile. Desktop input verified the O-Snap toggle, idle E and Escape, Line prompt focus, an End one-shot miss and retry, F2 history, SmartTrack guide capture and clear, Tab preview and commit, the displayed height change with Project and its state across both layouts. Each trial Line was undone. See docs/validation/2026-11-17-snaps-p07.md#windows-desktop-on-commit-103261a86.",
+      "uncertainties": "Matrix9 input from Computer Use was limited by Windows integrity. The user subsequently supplied the two-Line World readback. The initial apparent option, Grid Snap half-step rule, equal-distance Int rule for imported 3DM, and remaining M02-UI checks are open.",
+      "next_doc": "docs/plans/2026-11-17-snaps-menu-gap-plan.md#kiểm-trực-tiếp-trên-matrix9",
+      "next_action": "Compare both 3DM line orders with Project off in Matrix9. Apply the two compatibility rules once approved."
+    },
     "p07_remaining_snap_routes_2026_11_19": {
       "status": "WINDOWS_SIX_SNAP_ROUTES_VALIDATED",
       "scope": "The user confirmed the previously tried SNAPS commands. Point, Near, Quad, Center, Tangent and Perpendicular each match the World source through both the palette and the exact CMD one-shot. Tan now bypasses the fuzzy Distance suggestion while a point prompt is active.",
@@ -219,10 +286,14 @@
       "uncertainties": "Matrix9 numeric snap readback and human M02-UI review remain open."
     },
     "p02_standalone_grid_negative_half_step_2026_11_19": {
-      "status": "SOURCE_AND_OM9_REPLAY_VERIFIED_CHANGE_PENDING_APPROVAL",
-      "scope": "A calibrated Looking Down replay gives exact raw X=-2.25 with a 0.5 mm step. Grid Snap alone commits X=-2.5, Grid Snap plus Ortho commits X=-2.0, and typed input commits X=-2.25. Six Line picks each add one Undo. The Rhino 5 ordinary grid helper executes before the conditional Ortho branch and uses floor with a verified 0.5 constant.",
-      "evidence": "docs/validation/2026-11-17-snaps-p07.md#standalone-grid-snap-negative-half-step",
-      "uncertainties": "Decision on updating the standalone rule and live Matrix9 coordinate readback remain pending."
+      "status": "OM9_RULE_APPLIED_AND_SIMULATED_VIEWPORT_VALIDATED",
+      "scope": "The user approved matching Matrix9. The calibrated OM9 Looking Down viewport now previews and commits X=-2.0 from exact raw X=-2.25 with a 0.5 mm step and Grid Snap alone. Both neighboring negative inputs and the positive half-step pass, with one Undo per Line.",
+      "evidence": "docs/validation/2026-11-17-snaps-p07.md#om9-matches-the-matrix9-standalone-grid-snap-tie",
+      "recheck_2026_11_21": "The user's native Matrix9 CMD log at Top pixel (1121,457) records World (-2.25,0,0) with Grid Snap off and (-2.0,0,0) with only Grid Snap on at 0.5 mm. OM9's pre-change replay committed (-2.5,0,0) in the same half-step case.",
+      "skill_approval": "The user approved recording the half-step rule on 2026-11-21. The source and installed openmatrix9-workspace-contract skills link to references/grid-and-viewports.md#grid-snap-ở-đúng-nửa-bước.",
+      "uncertainties": "The post-change OM9 viewport uses simulated mouse input.",
+      "next_document": "docs/plans/2026-11-17-snaps-menu-gap-plan.md#các-mục-còn-chờ-xác-nhận-m02-ui",
+      "next_action": "Continue the remaining M02-UI review."
     },
     "p00_matrix9_fixture_native_viewport_open_2026_11_19": {
       "status": "NATIVE_FIXTURE_OPEN_WORLD_READBACK_PENDING",

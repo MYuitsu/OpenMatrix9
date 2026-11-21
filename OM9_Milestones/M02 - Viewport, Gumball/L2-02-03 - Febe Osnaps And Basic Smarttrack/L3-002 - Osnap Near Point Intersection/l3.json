@@ -234,6 +234,18 @@
     "remaining": [
       "Manual M02-UI review pending; no human sign-off is claimed."
     ],
+    "imported_line_intersection_2026_11_21": {
+      "status": "WINDOWS_NATIVE_IMPORT_AND_SIMULATED_VIEWPORT_VALIDATED",
+      "scope": "For straight source pairs without recorded creation order whose crossings share the same screen location, Int compares the screen distance to the supporting source Lines. Equal source distances favor the true intersection. Both Rhino 5 fixtures passed exact and offset clicks after repeated import.",
+      "tests": ["unordered_line_intersections_use_source_distance_then_true_intersection", "int_after_repeated_import_of_both_rhino5_archives"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#om9-int-after-repeated-import-of-the-two-rhino-5-archives"]
+    },
+    "application_default_apparent_intersection_2026_11_21": {
+      "status": "OM9_APP_DEFAULT_AND_SIMULATED_VIEWPORT_VALIDATED",
+      "scope": "Select Int in a fresh OM9 app to snap to an apparent crossing by default. The viewport regression checks the marker, both source paths, Project off and on, committed Line geometry and Undo. Explicit Off refuses the apparent crossing while allowing a true 3D crossing.",
+      "tests": ["osnap_ui::default_apparent_int_keeps_distinct_nested_occurrences_through_line_commit", "snap_panel_modes::intersection_keeps_isolated_hit_among_overlaps_and_refuses_projected_crossing", "chrome_actions::apparent_intersection_option_uses_the_osnap_context_menu"],
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#om9-starts-with-apparent-intersections-enabled"]
+    },
     "standalone_verification_2026_10_22": {
       "date": "2026-10-22",
       "status": "AUTOMATED_TARGET_VALIDATED",

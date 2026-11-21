@@ -5,7 +5,7 @@ use super::*;
 use std::sync::{Arc, atomic::{AtomicBool, Ordering}, mpsc};
 use om9_core::{budget::memory::MemoryClass, geometry::{Curve, Geometry, Transform},
     transaction::{CapturedDocument, ExternalMemoryReservation}};
-use om9_scene::osnap::{SnapCandidate, SnapSource};
+use om9_scene::osnap::{IntersectionPick, SnapCandidate, SnapSource, intersection_line_screen_distance};
 use super::edge_snap::{EdgeSnapSourceReceipt, EdgeSnapViewInput};
 
 #[derive(Clone)]
@@ -498,9 +498,9 @@ impl IntersectionJob {
                 }
                 let mut candidates = Vec::new();
                 let mut overlap = None;
-                let mut accepted = None;
+                let mut accepted: Option<IntersectionPick> = None;
                 let record_intersections = |hits: Vec<SnapCandidate>, candidates: &mut Vec<SnapCandidate>,
-                    accepted: &mut Option<SnapCandidate>| -> Result<()> {
+                    accepted: &mut Option<IntersectionPick>, lines: Option<[(&SnapSource, f64); 2]>| -> Result<()> {
                     if !apparent {
                         if candidates.len().saturating_add(hits.len()) > 1024 {
                             return Err(Error::Budget("intersection snap candidates"));
@@ -511,15 +511,14 @@ impl IntersectionJob {
                     }
                     for hit in hits {
                         if worker_cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
-                        if accepted.as_ref().is_some_and(|best| {
-                            !om9_scene::osnap::intersection_pick_is_closer(&hit, best, input.cursor)
-                        }) {
+                        let pick = IntersectionPick::new(hit, lines);
+                        if accepted.as_ref().is_some_and(|best| !pick.precedes(best, input.cursor)) {
                             continue;
                         }
                         if let Some(occlusion) = &occlusion {
-                            if occlusion.edge_occluded(&input.camera, input.viewport, &hit)? { continue; }
+                            if occlusion.edge_occluded(&input.camera, input.viewport, &pick.hit)? { continue; }
                         }
-                        *accepted = Some(hit);
+                        *accepted = Some(pick);
                     }
                     Ok(())
                 };
@@ -549,11 +548,18 @@ impl IntersectionJob {
                     let mut self_hits = self_candidates(curve, occurrence, &input, tolerance, &pair_limits,
                         &worker_cancel, &mut pair_work)?;
                     segment.map_parameters(&mut self_hits);
-                    record_intersections(self_hits, &mut candidates, &mut accepted)?;
+                    record_intersections(self_hits, &mut candidates, &mut accepted, None)?;
                     for other in index + 1..curves.len() {
                         if worker_cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
                         let second = curves[other];
                         let b = second.occurrence;
+                        let lines = match (curve, second.curve) {
+                            (Curve::Line { start, end, .. }, Curve::Line { start: c, end: d, .. })
+                                if apparent && [occurrence, b].iter().all(|source| {
+                                    source.edges.is_none() && document.entities[&source.source.root].creation_order.is_none()
+                                }) => Some([[*start, *end], [*c, *d]]),
+                            _ => None,
+                        };
                         let mut hits = match om9_scene::osnap::source_curve_intersection_candidates(curve, occurrence.transform, &occurrence.source,
                             second.curve, b.transform, &b.source, &input.camera, input.viewport, input.cursor,
                             input.settings.radius_px, tolerance, &pair_limits, &|| worker_cancel.load(Ordering::Acquire)) {
@@ -564,7 +570,9 @@ impl IntersectionJob {
                             }
                             result => result?,
                         };
-                        if apparent && accepted.is_none() && hits.is_empty() {
+                        if apparent && hits.is_empty() && accepted.as_ref().is_none_or(|best| {
+                            lines.is_some() && best.compares_line_sources()
+                        }) {
                             hits = om9_scene::osnap::apparent_curve_intersections_with_parameter_map(
                                 (curve, occurrence.transform, &occurrence.source), (second.curve, b.transform, &b.source),
                                 &input.camera, input.viewport, input.cursor, input.settings.radius_px,
@@ -574,7 +582,17 @@ impl IntersectionJob {
                         } else {
                             segment.map_parameters(&mut hits);
                         }
-                        record_intersections(hits, &mut candidates, &mut accepted)?;
+                        let line_distances = if !hits.is_empty() && let Some([a_line, b_line]) = lines {
+                            let screen_distance = |transform: Transform, [start, end]: [Point3; 2]| {
+                                intersection_line_screen_distance(&input.camera, input.viewport, input.cursor,
+                                    [transform.point(start)?, transform.point(end)?])
+                            };
+                            Some([
+                                (&occurrence.source, screen_distance(occurrence.transform, a_line)?),
+                                (&b.source, screen_distance(b.transform, b_line)?),
+                            ])
+                        } else { None };
+                        record_intersections(hits, &mut candidates, &mut accepted, line_distances)?;
                     }
                 }
                 drop(curves);
@@ -591,9 +609,9 @@ impl IntersectionJob {
                     if let Some(error) = failure { return Err(error); }
                 }
                 if worker_cancel.load(Ordering::Acquire) { return Err(Error::Canceled); }
-                if let Some(hit) = accepted {
+                if let Some(pick) = accepted {
                     candidates.try_reserve(1).map_err(|_| Error::Budget("intersection snap candidates"))?;
-                    candidates.push(hit);
+                    candidates.push(pick.hit);
                 }
                 if candidates.is_empty() && let Some(error) = overlap {
                     return Err(error);

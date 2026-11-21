@@ -143,6 +143,27 @@
       "scope": "The current isolated desktop build confirms the O-Snap menu route, panel Project toggle, Apparent Int cue at the same viewport pixel, active/dim icon feedback, and idle E followed by Escape. A two-Line drawing is staged for reviewer inspection.",
       "evidence": ["docs/validation/2026-11-17-snaps-p07.md#windows-snaps-review-build"]
     },
+    "snaps_p07_matrix9_two_line_world_2026_11_21": {
+      "status": "TWO_LINE_PROJECT_WORLD_CONFIRMED_IN_MATRIX9",
+      "scope": "The user's two Matrix9 screenshots show EvaluatePt in Top moving the accepted Int point from Z=8 to Z=0 when the SNAPS Project control is turned on, with the same XY. This matches the two-Line OM9 desktop result.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#matrix9-world-coordinates-with-project-off-and-on"]
+    },
+    "snaps_p07_om9_imported_int_project_2026_11_21": {
+      "status": "WINDOWS_NATIVE_IMPORT_AND_SIMULATED_VIEWPORT_VALIDATED",
+      "scope": "At the exact crossing after importing either Rhino 5 sample, the viewport resolves the source point at Z=2 and Project commits the Line start at Z=0 on World Top.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#om9-int-after-repeated-import-of-the-two-rhino-5-archives"]
+    },
+    "snaps_m02_ui_computer_use_2026_11_21": {
+      "status": "SCOPED_WINDOWS_DESKTOP_CHECKS_PASSED",
+      "scope": "Computer Use verified Project tooltip and state across both panel layouts, standalone Grid step selection with Grid off, the SmartTrack guide, visible Tab preview and commit against an unlocked control, and the 8 mm to 0 mm Project height change from the same apparent intersection. Undo restored the original drawing.",
+      "closeout": "The user requested closeout of the Windows SNAPS plan on 2026-11-21.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#four-m02-ui-snaps-checks-using-computer-use", "docs/validation/2026-11-17-snaps-p07.md#windows-snaps-plan-closeout"]
+    },
+    "snaps_p07_post_commit_windows_2026_11_20": {
+      "status": "WINDOWS_POST_COMMIT_P07_REVALIDATED_MATRIX9_PENDING",
+      "scope": "On commit 103261a86, 288 distinct P07 cases passed after the viewport title-menu test was updated to check Artistic and Pen. The Windows desktop follow-up verified Tab direction lock, SmartTrack guides and the Project height change in the four-view workspace. The standalone Grid Snap half-step rule and remaining M02-UI checks are open.",
+      "evidence": ["docs/validation/2026-11-17-snaps-p07.md#p07-on-commit-103261a86", "docs/validation/2026-11-17-snaps-p07.md#windows-desktop-on-commit-103261a86"]
+    },
     "snaps_p07_grouped_current_windows_2026_11_19": {
       "status": "WINDOWS_AUTOMATED_REVALIDATED_MANUAL_UI_PENDING",
       "scope": "P07 passed 286 tests on Windows. The two-Line OM9 scratch drawing and manual checklist cover palette appearance, tooltips, one-shot, CMD, SmartTrack, Tab and Project for M02-UI review.",

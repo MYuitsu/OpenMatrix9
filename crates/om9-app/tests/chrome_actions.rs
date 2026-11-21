@@ -369,7 +369,7 @@ fn active_osnap_master_frame(output: &egui::FullOutput, end: Pos2) -> Rect {
 fn apparent_intersection_option_uses_the_osnap_context_menu() {
     let (mut app, context, output) = startup();
     let master = active_osnap_master_frame(&output, snaps_icons(&output)[8].0).center();
-    for (master_enabled, status) in [(false, "ApparentIntersections on"), (true, "ApparentIntersections off")] {
+    for (master_enabled, status) in [(false, "ApparentIntersections off"), (true, "ApparentIntersections on")] {
         app.set_object_snaps_enabled(master_enabled);
         frame(&mut app, &context, vec![Event::PointerMoved(master)]);
         let opened = secondary_click(&mut app, &context, master);

@@ -7202,7 +7202,8 @@ impl Controller {
         let ortho_base = ortho.then_some(base).flatten();
         let grid_coordinate = |coordinate: f64| {
             let steps = coordinate / self.grid_snap_step_mm;
-            let nearest = if ortho_base.is_some() { (steps + 0.5).floor() } else { steps.round() };
+            // Rhino 5 sends grid half-steps toward positive infinity.
+            let nearest = (steps + 0.5).floor();
             nearest * self.grid_snap_step_mm
         };
         if self.grid_snap {

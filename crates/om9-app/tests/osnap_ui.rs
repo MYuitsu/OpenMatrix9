@@ -169,7 +169,7 @@ fn click(app: &mut MatrixApp, context: &egui::Context, at: Pos2) {
 }
 
 #[test]
-fn apparent_int_keeps_distinct_nested_occurrences_through_line_commit() {
+fn default_apparent_int_keeps_distinct_nested_occurrences_through_line_commit() {
     use om9_core::{budget::Limits, curve_ops::point_at, geometry::Transform, model::Definition};
     use om9_scene::{camera::Camera, workspace::DisplayMode};
 
@@ -207,15 +207,10 @@ fn apparent_int_keeps_distinct_nested_occurrences_through_line_commit() {
     app.controller.workspace.active = ViewId::LookingDown;
     frame(&mut app, &context, vec![]);
     frame(&mut app, &context, vec![]);
-    app.focus_command_editor();
-    frame(&mut app, &context, vec![]);
-    frame(
-        &mut app,
-        &context,
-        vec![Event::Text("ApparentIntersections On".into())],
-    );
-    frame(&mut app, &context, vec![key(egui::Key::Enter)]);
-    assert!(app.status_line().contains("ApparentIntersections on"));
+    assert!(!app.snap_enabled(SnapKind::Intersection));
+    app.set_snap_enabled(SnapKind::End, false);
+    app.set_snap_enabled(SnapKind::Mid, false);
+    app.set_snap_enabled(SnapKind::Intersection, true);
 
     let before = app.controller.document().clone();
     let expected_source = [6., 2., 8.];
@@ -226,7 +221,6 @@ fn apparent_int_keeps_distinct_nested_occurrences_through_line_commit() {
             view.camera = Camera::orthographic([6., 2., 30.], [6., 2., 0.], [0., 1., 0.], 60.).unwrap();
             app.controller.set_project(project);
             app.controller.submit("Line").unwrap();
-            app.set_snap_override(Some(SnapKind::Intersection));
             let cursor = screen_of(&app, expected_source);
             frame(&mut app, &context, vec![Event::PointerMoved(cursor)]);
             let hit = wait_snap(&mut app, &context, SnapKind::Intersection);
@@ -256,7 +250,7 @@ fn apparent_int_keeps_distinct_nested_occurrences_through_line_commit() {
             assert_eq!(app.controller.document(), &before);
 
             click(&mut app, &context, cursor);
-            assert_eq!(app.snap_override(), None);
+            assert!(app.snap_enabled(SnapKind::Intersection));
             app.controller.submit("15,4,0").unwrap();
             let expected_start = [6., 2., if project { 0. } else { 8. }];
             let after = app.controller.document();

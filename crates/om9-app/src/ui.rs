@@ -1247,6 +1247,7 @@ impl MatrixApp {
             snap_state: om9_scene::osnap::SnapState {
                 settings: om9_scene::osnap::SnapSettings {
                     enabled: om9_scene::osnap::SnapKind::End.bit() | om9_scene::osnap::SnapKind::Mid.bit(),
+                    apparent_intersections: true,
                     ..Default::default()
                 },
             },

@@ -39,6 +39,8 @@ Người dùng đồng ý ngày 2026-10-16: quyết định cửa sổ tối thi
 Read only the relevant reference:
 
 - [Grid and viewports](references/grid-and-viewports.md): finite cell counts, colors, per-view labels, CAD Wireframe/isocurves, display menus and single-view/4V behavior. Includes the user-approved Wireframe update of 2026-10-08 and verified limits.
+- [Grid Snap ở đúng nửa bước](references/grid-and-viewports.md#grid-snap-ở-đúng-nửa-bước): quy tắc làm tròn điểm chọn trong viewport theo Matrix9.
+- [Giao điểm biểu kiến khi khởi động](references/grid-and-viewports.md#giao-điểm-biểu-kiến-khi-khởi-động): mặc định của tùy chọn và cách dùng với Int.
 - [Command and Curve input](references/command-and-curve.md): transcript, pinned input, resizing, completion and supported Line/Polyline options.
 
 Keep original Matrix command names and share one implementation across menu, mouse and CMD. Use repository `OM9_Milestones` for feature details; the user explicitly says these specs are sufficient, so do not reread PDFs. Follow `openmatrix9-workflow` for progress and `openmatrix9-build-validation` for native validation. This contract supplements the UI skill; it does not prove full core/Curve completion.

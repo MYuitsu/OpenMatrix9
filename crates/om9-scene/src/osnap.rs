@@ -534,10 +534,66 @@ fn apparent_source_precedes(first: (f64, f64), second: (f64, f64), screen_slack:
     }
 }
 
+fn intersection_pixel_slack(cursor: [f64; 2]) -> f64 {
+    64. * f64::EPSILON * cursor[0].abs().max(cursor[1].abs()).max(1.)
+}
+
 /// Keep a previously accepted pair when two computed pixel distances coincide.
 pub fn intersection_pick_is_closer(new: &SnapCandidate, accepted: &SnapCandidate, cursor: [f64; 2]) -> bool {
-    let slack = 64. * f64::EPSILON * cursor[0].abs().max(cursor[1].abs()).max(1.);
-    new.distance_px + slack < accepted.distance_px
+    new.distance_px + intersection_pixel_slack(cursor) < accepted.distance_px
+}
+
+/// A competing Int hit and, for lines without a recorded creation order,
+/// the pointer distance to the source that supports the hit.
+pub struct IntersectionPick {
+    pub hit: SnapCandidate,
+    line_distance_px: Option<f64>,
+}
+
+impl IntersectionPick {
+    pub fn new(hit: SnapCandidate, lines: Option<[(&SnapSource, f64); 2]>) -> Self {
+        let line_distance_px = lines.map(|[(first, a), (second, b)]| {
+            if !hit.apparent || first == second {
+                a.min(b)
+            } else if hit.source.as_ref() == Some(first) {
+                a
+            } else {
+                b
+            }
+        });
+        Self { hit, line_distance_px }
+    }
+
+    pub fn compares_line_sources(&self) -> bool { self.line_distance_px.is_some() }
+
+    pub fn precedes(&self, accepted: &Self, cursor: [f64; 2]) -> bool {
+        if intersection_pick_is_closer(&self.hit, &accepted.hit, cursor) {
+            return true;
+        }
+        let slack = intersection_pixel_slack(cursor);
+        if intersection_pick_is_closer(&accepted.hit, &self.hit, cursor)
+            || (self.hit.screen[0] - accepted.hit.screen[0])
+                .hypot(self.hit.screen[1] - accepted.hit.screen[1]) > slack
+        {
+            return false;
+        }
+        let (Some(new), Some(old)) = (self.line_distance_px, accepted.line_distance_px) else {
+            return false;
+        };
+        new + slack < old || (new <= old + slack && !self.hit.apparent && accepted.hit.apparent)
+    }
+}
+
+/// Pixel distance to the visible part of a straight source, in pick space.
+pub fn intersection_line_screen_distance(
+    camera: &Camera, viewport: Viewport, cursor: [f64; 2], [start, end]: [Point3; 2],
+) -> Result<f64> {
+    let Some((point, _)) = closest_segment_on_screen(camera, viewport, cursor, start, end)? else {
+        return Ok(f64::INFINITY);
+    };
+    Ok(camera.project(point, viewport)?.map_or(f64::INFINITY, |point| {
+        (point.screen[0] - cursor[0]).hypot(point.screen[1] - cursor[1])
+    }))
 }
 
 /// Resolve a solver witness back onto the original placed source. A baked
@@ -1388,7 +1444,7 @@ fn candidates_in_plane_impl(
         .saturating_add(segments.len().saturating_mul(ellipses.len()))
         .saturating_add(ellipses.len().saturating_mul(ellipses.len().saturating_sub(1)) / 2);
     if pair_count > 100_000 { return Err(om9_core::Error::Budget("intersection snap pairs")); }
-    let mut accepted = None;
+    let mut accepted: Option<IntersectionPick> = None;
     if settings.apparent_intersections {
         segments.sort_by_key(|segment| std::cmp::Reverse(
             scene.document.entities.get(&segment.root).and_then(|entity| entity.creation_order),
@@ -1404,6 +1460,9 @@ fn candidates_in_plane_impl(
             if left.object_index == right.object_index {
                 continue;
             }
+            let compare_lines = settings.apparent_intersections && [left, right].iter().all(|segment| {
+                scene.document.entities[&segment.root].creation_order.is_none()
+            });
             let hits = match om9_core::curve_surface_ops::curve_curve_intersections(
                 &first, &world_line(right), tolerance, &scene.limits,
             ) {
@@ -1421,7 +1480,8 @@ fn candidates_in_plane_impl(
                     candidate.second_source = Some(snap_source(scene, &scene.objects[right.object_index]));
                 }
             }
-            if settings.apparent_intersections && accepted.is_none() && out.len() == before_pair
+            if settings.apparent_intersections && out.len() == before_pair
+                && accepted.as_ref().is_none_or(|best| compare_lines && best.compares_line_sources())
                 && let Some(hit) = apparent_segment_intersection_with_parameter_map(
                     ([left.a, left.b], &snap_source(scene, &scene.objects[left.object_index])),
                     ([right.a, right.b], &snap_source(scene, &scene.objects[right.object_index])),
@@ -1431,16 +1491,25 @@ fn candidates_in_plane_impl(
             {
                 out.push(hit);
             }
-            if settings.apparent_intersections {
+            if settings.apparent_intersections && out.len() > before_pair {
+                let lines = if compare_lines {
+                    Some([
+                        (snap_source(scene, &scene.objects[left.object_index]),
+                            intersection_line_screen_distance(camera, viewport, cursor, [left.a, left.b])?),
+                        (snap_source(scene, &scene.objects[right.object_index]),
+                            intersection_line_screen_distance(camera, viewport, cursor, [right.a, right.b])?),
+                    ])
+                } else { None };
                 for hit in out.drain(before_pair..) {
-                    if accepted.as_ref().is_none_or(|best| intersection_pick_is_closer(&hit, best, cursor)) {
-                        accepted = Some(hit);
+                    let pick = IntersectionPick::new(hit, lines.as_ref().map(|[(a, da), (b, db)]| [(a, *da), (b, *db)]));
+                    if accepted.as_ref().is_none_or(|best| pick.precedes(best, cursor)) {
+                        accepted = Some(pick);
                     }
                 }
             }
         }
     }
-    out.extend(accepted);
+    out.extend(accepted.map(|pick| pick.hit));
     for segment in &segments {
         for ellipse in &ellipses {
             for point in segment_ellipse_intersections(*segment, *ellipse, tolerance) {

@@ -11,6 +11,18 @@ Keep the grid unpickable, outside document geometry and excluded from model fit 
 
 Reference: user's finite grid screenshot (registry other_private_references key `matrix-finite-grid.png`; resolve docs/openmatrix9-reference-locations.json in checkout).
 
+## Grid Snap ở đúng nửa bước
+
+Người dùng duyệt ghi quy tắc này ngày 2026-11-21. Khi chỉ bật Grid Snap, bắt điểm chuột về vạch lưới gần nhất theo từng trục X và Y của CPlane. Khi điểm nằm đúng giữa hai vạch, chọn vạch có tọa độ lớn hơn trên trục đang xét, kể cả phía âm. Công thức là `floor(coordinate / step + 0.5) * step`.
+
+Với bước 0,5 mm trong Looking Down và CPlane World Top, X thô `−2,25 mm` bắt về `−2,0 mm`. X thô `+2,25 mm` bắt về `+2,5 mm`. Khi kiểm hồi quy, xác nhận điểm thô đúng nửa bước, preview và điểm cuối Line đã lưu trùng nhau, rồi Undo. Bằng chứng đo trực tiếp Matrix9 và replay OM9 nằm trong `docs/validation/2026-11-17-snaps-p07.md#om9-matches-the-matrix9-standalone-grid-snap-tie` của checkout.
+
+## Giao điểm biểu kiến khi khởi động
+
+Người dùng duyệt ghi quy tắc này ngày 2026-11-21. OM9 bật sẵn tùy chọn giao điểm biểu kiến khi khởi động, giống Matrix9. Tùy chọn có hiệu lực khi bật **Int** để bắt điểm tại nơi hai đường giao nhau trên màn hình. Người dùng có thể đổi tùy chọn qua menu chuột phải của O-Snap hoặc lệnh `ApparentIntersections On/Off`.
+
+Khi kiểm hồi quy, mở một phiên OM9 mới, bật Int và kiểm hai đường khác cao độ chỉ giao nhau trên màn hình. Viewport phải hiện `Apparent Int` và Line phải nhận đúng điểm nguồn. Bằng chứng nằm trong `docs/validation/2026-11-17-snaps-p07.md#om9-starts-with-apparent-intersections-enabled` của checkout.
+
 ## Viewport titles and layout
 
 Each native view has a small top-left label and a separate small dropdown arrow. Keep the original names: **Looking Down**, **Perspective**, **Side View**, **Through Finger**. Active label uses Matrix green; inactive labels use gray.
