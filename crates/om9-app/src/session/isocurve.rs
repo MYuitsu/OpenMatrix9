@@ -169,6 +169,38 @@ impl Controller {
     }
 
     #[cfg(feature="occt-brep")]
+    pub(super) fn extract_picked_native_boundary(
+        &self,
+        source: &om9_core::brep::Brep,
+        owner: &om9_core::model::Entity,
+    ) -> om9_core::Result<om9_core::brep::Brep> {
+        let pick = self
+            .native_isocurve_pick
+            .as_ref()
+            .filter(|p| p.reference.root == owner.id)
+            .ok_or(Error::Missing("Pick the boundary face in a viewport"))?;
+        self.validate_native_isocurve_pick(pick)?;
+        let (face, point) = om9_kernel::editing::extract_ray_face(
+            source,
+            pick.ray,
+            om9_kernel::creation::DEFAULT_DEFLECTION_MM,
+            self.coordinator.limits(),
+        )
+        .map_err(|e| Error::Io(format!("Boundary face: {e}")))?;
+        let hit = owner.placement.point(point)?;
+        let distance = (0..3)
+            .map(|i| (hit[i] - pick.world_reference[i]).powi(2))
+            .sum::<f64>()
+            .sqrt();
+        if !distance.is_finite() || distance > pick.world_limit {
+            return Err(Error::Invalid(
+                "Boundary face is outside the pick tolerance",
+            ));
+        }
+        Ok(face)
+    }
+
+    #[cfg(feature="occt-brep")]
     fn validate_native_isocurve_pick(&self,pick:&NativeIsocurvePick) -> Result<(),Error> {
         let scene=self.scene().ok_or(Error::Missing("NativeBrep face scene"))?;
         if scene.publication_id()!=pick.publication || self.sub_revision()!=pick.revision ||

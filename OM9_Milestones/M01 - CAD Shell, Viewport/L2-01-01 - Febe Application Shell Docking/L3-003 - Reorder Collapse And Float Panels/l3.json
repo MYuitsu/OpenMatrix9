@@ -198,5 +198,14 @@
       "id": "OM9-L4-01-01-003-05",
       "file": "M01 - CAD Shell, Viewport/L2-01-01 - Febe Application Shell Docking/L3-003 - Reorder Collapse And Float Panels/L4-05 - Acceptance Test/l4.json"
     }
-  ]
+  ],
+  "runtime_implementation": {
+    "dock_profiles_2026_11_22": {
+      "date": "2026-11-22",
+      "target": "standalone Rust OM9 on Windows",
+      "scope": "Windows pointer drags exercised both columns and floating workspace headers with in-panel actions.",
+      "evidence": "docs/validation/2026-11-22-dock-popup-theme.md",
+      "manual_gate_promoted": false
+    }
+  }
 }

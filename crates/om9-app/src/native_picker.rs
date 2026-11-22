@@ -197,3 +197,28 @@ pub fn pick_fixture_for_audit(
     let value = serde_json::json!({"pid":receipt.pid,"ui_thread":receipt.thread,"observed":receipt.observed,"accept_posted":receipt.accept_posted,"close_posted":receipt.close_posted,"destroyed":receipt.destroyed,"elapsed_ms":receipt.elapsed_ms,"returned_path":path,"phase":format!("{phase:?}"),"boundary":"owned PID/thread/root/modal/title; enabled IDOK child WM_COMMAND; real Show/GetResult; joined probe"});
     Ok((path, value))
 }
+
+pub(crate) fn pick_view_image(
+    parent: &eframe::Frame,
+    current: Option<&Path>,
+    alpha: &mut bool,
+) -> Result<Option<PathBuf>> {
+    #[cfg(windows)]
+    {
+        use raw_window_handle::{HasWindowHandle, RawWindowHandle};
+        let RawWindowHandle::Win32(handle) = parent
+            .window_handle()
+            .map_err(|e| Error::Io(e.to_string()))?
+            .as_raw()
+        else {
+            return Err(Error::Unsupported("Win32 capture picker parent"));
+        };
+        om9_native_owner::file_dialog::choose_view_image(handle.hwnd.get() as usize, current, alpha)
+            .map_err(|e| Error::Io(format!("Windows image dialog: {e}")))
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (parent, current, alpha);
+        Err(Error::Unsupported("native capture dialog on this platform"))
+    }
+}

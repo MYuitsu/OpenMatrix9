@@ -441,6 +441,13 @@ pub fn compute_regions(
     window: WindowSize,
     views: &[ViewId],
 ) -> Result<RegionPlan, RegionError> {
+    compute_visible_regions(layout, window, views, |_| true)
+}
+
+pub(crate) fn compute_visible_regions(
+    layout: &DockLayout, window: WindowSize, views: &[ViewId],
+    visible: impl Fn(crate::dock_layout::SectionId) -> bool,
+) -> Result<RegionPlan, RegionError> {
     let (width, height) = (window.width, window.height);
     if !valid_dimension(width) || !valid_dimension(height) {
         return Err(RegionError::InvalidWindow { width, height });
@@ -460,7 +467,7 @@ pub fn compute_regions(
         });
     }
 
-    let resolved = layout.resolve([width, height]);
+    let resolved = layout.resolve_visible([width, height], &visible);
     if !resolved.left_rail.is_finite() {
         return Err(RegionError::NonFinite {
             kind: RegionKind::LeftRail,
@@ -497,7 +504,7 @@ pub fn compute_regions(
     let right_requested = layout
         .right_sections()
         .into_iter()
-        .any(|id| layout.section(id).visible);
+        .any(|id| layout.section(id).visible && visible(id));
     if right_requested && right <= 0. {
         let reason = if width < NARROW_WINDOW_WIDTH {
             YieldReason::NarrowWindow

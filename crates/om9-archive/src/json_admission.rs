@@ -29,6 +29,8 @@ enum Location {
     Extensions,
     TrimExtension,
     TrimPayload,
+    CageExtension,
+    CagePayload,
 }
 impl Location {
     fn child(self, key: &str) -> Self {
@@ -42,6 +44,8 @@ impl Location {
             (Self::Entity, "extensions") => Self::Extensions,
             (Self::Extensions, "om9.trim.surface") => Self::TrimExtension,
             (Self::TrimExtension, "payload") => Self::TrimPayload,
+            (Self::Extensions, om9_core::model::TSPLINE_FROM_LINES_SLOT) => Self::CageExtension,
+            (Self::CageExtension, "payload") => Self::CagePayload,
             (Self::Definitions, _) => Self::Definition,
             (Self::Definition, "members") => Self::Members,
             _ => Self::Unknown,
@@ -169,7 +173,7 @@ impl<'de> Visitor<'de> for Node<'_, '_> {
         // It is already bounded by the document byte budget; names remain tight.
         let limit = if matches!(self.location, Location::TrimPayload) {
             om9_core::model::trim_surface_payload_limit(self.budget.limits) as u64
-        } else if self.field.as_deref() == Some("source") {
+        } else if matches!(self.location, Location::CagePayload) || self.field.as_deref() == Some("source") {
             self.budget.limits.max_bytes
         } else {
             self.budget.limits.max_name_bytes as u64

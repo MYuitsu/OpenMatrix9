@@ -153,6 +153,21 @@
     "OM9-L4-09-008-02"
   ],
   "runtime_implementation": {
+    "dust_marquire_2026_11_23": {
+      "status": "SCOPED_AUTOMATED_RUNTIME_VERIFIED",
+      "date": "2026-11-23",
+      "scope": "References for the six-sided girdle and table, crown and pavilion facets, and the offset culet.",
+      "evidence": "docs/features/OM9-L3-04-09-003.md"
+    },
+    "round_top_and_palette_2026_11_22": {
+      "status": "SCOPED_GEM_RUNTIME_VERIFIED",
+      "scope": "Round Brilliant has a 64-station girdle and an octagonal table. Mesh and B-rep boundary tests passed for the authored planar facets.",
+      "evidence": "docs/validation/2026-11-22-round-wire-palette.md"
+    },
+    "round_diamond_wireframe_2026_11_22": {
+      "scope": "Round Diamond table, girdle, crown and pavilion references derive from the same facet builder that supplies the mesh and BRep.",
+      "evidence": "docs/validation/2026-11-22-gem-placement.md#wireframe-round-diamond"
+    },
     "date": "2026-10-27",
     "status": "AUTOMATED_VERIFIED_AUTO_ONLY",
     "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",

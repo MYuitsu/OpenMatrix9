@@ -1,4 +1,121 @@
 {
+  "command_ui_events_2026_11_23": {
+    "stage": "ui-viewports",
+    "feature_ids": [
+      "OM9-L3-01-01-002",
+      "OM9-L3-01-02-004"
+    ],
+    "status": "validated",
+    "scope": "Idle viewport typing, command suggestions, protected CMD edits, document Undo and Redo, and four-view docking. Rechecked Extrude Tapered through the factory menu.",
+    "evidence": "docs/validation/2026-11-23-command-ui-events.md",
+    "tests": "Windows headless ui_events 37/37, f6_context 39/39, pinned_command 7/7, command_inline_options 9/9 and snap_panel_modes 48 passed with two ignored. Cargo linked the integration executables in L:/om9-target with -j 2. Ran them directly because the user window held debug/om9.exe open.",
+    "uncertainties": "Physical keyboard and IME delivery and desktop layout were outside this run. The supplemental 911x480 maximum left rail layout still clips Layers.",
+    "next_document": "docs/validation/2026-11-23-command-ui-events.md",
+    "next_action": "Replay Point with the physical keyboard at the next desktop acceptance run."
+  },
+  "dust_marquire_2026_11_23": {
+    "stage": "feature-port",
+    "feature_ids": ["OM9-GEM-001", "OM9-L3-04-09-001", "OM9-L3-04-09-002", "OM9-L3-04-09-003", "OM9-L3-04-09-008"],
+    "status": "validated",
+    "scope": "Dust Marquire in Gem Loader Diamond Cut, with one measured OM9 preset, a closed mesh and a six-sided table. Two pavilion tiers, facet references and table edge filtering.",
+    "outputs": ["crates/om9-core/src/gem/dust_marquire.rs", "crates/om9-app/src/session/gem.rs", "crates/om9-app/src/ui/gem.rs", "docs/features/OM9-L3-04-09-003.md"],
+    "tests": "Windows debug build with pinned BRep workers. gem_assets 26, gem_brep 4 and one Dust Marquire case each in gem_panel and ui_events passed. Public source audit passed.",
+    "evidence": "docs/features/OM9-L3-04-09-003.md#kiểm-chứng-2026-11-23",
+    "desktop_demo": "build/standalone-validation/ui-artifacts/2026-11-23-dust-marquire/OM9-Dust-Marquire.mp4",
+    "uncertainties": "Desktop recording verified gallery selection, size display, Apply and shaded display for the sample preset. OCCT can build this body, but the isolated BRep save worker rejects the source topology descriptor. The loader uses the tested closed mesh archive path.",
+    "skill_update": "Proposed Diamond Cut entry, measured OM9 preset and mesh body rule pending user approval.",
+    "next_document": "docs/features/OM9-L3-04-09-003.md",
+    "next_action": "Use the sample recording for M05 visual acceptance."
+  },
+  "f6_factory_routes_2026_11_22": {
+    "feature_id": "OM9-L2-03-09",
+    "status": "FACTORY_INVENTORY_COMPLETE_RUNTIME_PARTIAL",
+    "scope": "250 factory groups, 2281 rows, 1822 command occurrences, 371 exact scripts. 424 label/script pairs. With the Matrix package: 285 enabled in an empty document, 51 disabled with a specific reason, 88 without an active handler (77 distinct scripts). Both Surface Extrude Tapered entries share the CMD session. Signed height, corner geometry, bounded extrusion, deletion and three-curve viewport picking have automated evidence. Three factory entries now share ExtrudeCrvToPoint. Placed mixed inputs, off-axis geometry, ToBoundary, tangent joins, DeleteInput, cancellation and one Undo have automated evidence. Curve Direction handles editable curve selections and postselection. Native-domain reversal for primitive curves and rational NURBS, Cancel, Undo and pointer arrows have measured fixtures. Viewport to File exports unsaved geometry through the viewport GPU renderer; tests read six file formats and replay the F6 click. A native Windows test accepts and cancels the owned Save dialog. Windows F6/Curve/Line, Join, Clay Box, offset, grip SetPt, prong drop, three bezel profiles and the closed-mesh Boolean operations have targeted evidence. ReduceMesh preselection, asynchronous preview, triangle count and percent, UV seams, stale source, Cancel and Undo have measured fixtures. MeshOutline on selected render meshes, surfaces and BReps has F6, CMD, selection and Undo evidence. Fifteen native Rhino 5 scenarios match world contours or singular refusal. ShowSelected isolates hidden objects temporarily for viewport selection and restores preselection after commit or cancel. PtOffSelected has evidence in all four factory grip groups including an eight-corner cage and its captive. Seven Split Point variants share postselection and Undo. Box-mode T-Spline plane cages retain source face identity through archive reload, viewport picking, Delete and Duplicate. An egui replay verifies Ctrl+Shift+click, F6, scrolling, Delete Face(s), Undo and the Delete key. Edge Ring Select reuses the polygon strip traversal and selects the same four source edges from an interior or boundary seed. Box-mode Loop, Grow, Shrink, directional U/V and additive Paint use source component IDs. A viewport replay covers double-click edge loops and dragging across faces through Escape. All 2281 menu positions carry factory categories. All twelve tsManip style/selection combinations and Set Pivot route to the standalone gumball. Eighteen F6/CMD component cases verify exact world geometry and Undo on a rotated cage. A two-owner gesture, mouse cancellation, pivot in inches and numeric entry from a double-click have separate fixtures. From Lines geometry has independent endpoint, concave hole, cylinder cap, mesh fan repair, manual face, Box/Smooth identity and linear-source fixtures; the 3Crv F6 row, modal viewport chooser, archive reload, and source-face Delete/Duplicate now run through the standalone app. Both Extract Edges macros produce single-span limit isocurves on regular Box cages. Placed quadratic geometry and independently subdivided open boundaries are measured. Pointer replay covers offset preview, pick and Enter. Split Curves shares placed 3D curve intersections and exact local trimming. The p91 circle and two chords produce eight segments. Inch file/custom tolerance, Display, Cancel, edited-field OK, a stale result, and one Undo for seven pieces have fixtures. Real pointer drags verify Move, Rotate, axis/planar/uniform Scale, and Undo. Four Extrude Lines geometry cases feed a placed rectangular wire back to From Lines. BothSides and DeleteInput yield 8, 12, 16 and 12 new segments, including a reversed duplicate source. The shared Extrude Lines session takes signed distances and a two-point direction, preserves exact curve geometry through archive reload, and supports SetBasePoint, BothSides and DeleteInput. Solid produces capped exact BReps from closed planar profiles. Packaged archive Save/Open preserves the placed rectangular prism, cylinder and open arc. ToBoundary picks a single surface or a visible polysurface face, preserves input selection on cancellation and refuses incomplete rails at trim holes. Curved and tilted targets, both signs, folded-face crossings, closed-solid volumes and shaded viewport picking have fixtures. A reopened openNURBS box stops at Z=6 on its visible top face, with a one-step Undo. Nineteen Rhino 5 command invocations cover joined tangents, a 90-degree kink, extrusion object vs BRep, capped curves and ToBoundary. OM9 matches the 3/6 faces and 3/12 edges on the capped stadium with preserved volume. Pointer replay compares the Through Finger result to CMD. The eight-mode strip matches the compiled WPF button size, spacing and order. A mouse replay verifies pin, close, reload and reanchor. Popup anchoring, pin, edge clamping, grouped selected stones and metal qualities, surface grips, material assignment and project material round-trip have UI evidence.",
+    "evidence": "docs/validation/2026-11-22-f6-matrix9.md",
+    "routes": "docs/validation/2026-11-22-f6-routes.tsv",
+    "uncertainties": "An enabled route does not establish geometry or full UI parity. ExtrudeCrvToPoint requests another apex for a collinear straight edge where Rhino can emit a zero-area face. The UI regression suite has five pre-existing failures (31/36 pass). The cage grip footer uses the general Points label pending a same-selection Matrix9 comparison. Component macros, builder history and add-on scenarios need direct execution. Inclined rectangles match 12 Rhino cases. A whole inclined circle and an angular two-arc join still differ. Rhino also emits an invalid zero-segment PolyCurve when it fails to cap the inclined end.",
+    "next_document": "docs/plans/2026-11-22-f6-matrix9.md",
+    "next_action": "Route an inclined whole circle through four exact quadrants and compare the measured mid-rail stations, then verify angular two-arc joins. Implement mesh cutters against the measured open-quad MeshSplit/MeshTrim selection and geometry fixtures. The fourth factory entry (_ExtrudetoPoint) fails unchanged in a clean Rhino scheme; investigate Matrix-specific aliases before dispatching it. Curve Direction still needs 3DM round-trip coverage for non-uniform polycurve parent intervals. Vendor T-Splines wire object types and connector counts still need a runnable plug-in."
+  },
+  "round_diamond_wire_and_palette_2026_11_22": {
+    "approved_skill_rules": {
+      "approved_on": "2026-11-22",
+      "palette": "skills/openmatrix9-feature-port/references/feature-contract.md#gem-layer-palette",
+      "wireframe": "skills/openmatrix9-workspace-contract/references/grid-and-viewports.md#round-diamond-wireframe",
+      "verification": "Both rule references match their installed copies. Cross-links resolve and both skills passed quick_validate in the checkout and installation."
+    },
+    "feature_ids": ["OM9-L3-01-06-004", "OM9-L3-04-09-003", "OM9-L3-04-09-008"],
+    "status": "ROUND_TOP_WINDOWS_AND_PALETTE_ARCHIVE_VERIFIED",
+    "evidence": "docs/validation/2026-11-22-round-wire-palette.md",
+    "scope": "Round Brilliant trimmed facet isocurves and 64-station girdle, with group-based Gem and User layers. Round Top coverage is 93.0% with 91.7% precision at three reference pixels.",
+    "uncertainties": "Residual outline and isocurve differences, other cut profiles and human visual acceptance remain open.",
+    "next_document": "docs/validation/2026-11-22-round-wire-palette.md",
+    "next_action": "Review the Round Top and four-view images with the designer, then compare Oval against its own reference."
+  },
+  "wireframe_depth_2026_11_22": {
+    "feature_id": "OM9-L3-01-06-004",
+    "status": "WINDOWS_VIEWPORT_AND_GPU_READBACK_VERIFIED",
+    "scope": "Camera-relative width and intensity for model edges, curves and guides. Small-object ZoomExtents keeps the back of the object inside the clipping range.",
+    "evidence": "docs/validation/2026-11-22-wireframe-depth.md",
+    "uncertainties": "Original Rhino 5 stroke transfer function unknown. Gem facet topology parity and human visual acceptance remain open.",
+    "next_document": "docs/validation/2026-11-22-wireframe-depth.md",
+    "next_action": "Compare the Windows captures with the supplied Matrix9 views for visual acceptance of the line weights."
+  },
+  "gem_loader_skill_contract_2026_11_22": {
+    "stage": "feature-port",
+    "feature_ids": ["OM9-GEM-001", "OM9-L3-04-09-003"],
+    "status": "documentation_validated",
+    "scope": "User-approved Gem Loader contract for Matrix9 Cut–Shape catalogs, per-tab counts, shared boundary presets and the Depth % reference axis. The repository and installed feature-port rules match, and the UI theme skill links to them.",
+    "evidence": "docs/validation/matrix9-gem-loader-size-evidence.md",
+    "tests": "Skill validator passed for both copies of openmatrix9-feature-port and openmatrix9-ui-theme.",
+    "next_document": "skills/openmatrix9-feature-port/references/feature-contract.md#gem-loader-size-catalog",
+    "next_action": "Apply the catalog, page boundaries and reference-axis checks when changing the Gem Loader size picker."
+  },
+  "gem_panel_theme_2026_11_22": {
+    "stage": "standalone UI and build validation",
+    "status": "PRIMARY_GEM_PANELS_WINDOWS_VERIFIED",
+    "scope": "Shared readable Gem styles and persistent dock placement. Gem Loader uses a compact 320 × 525 first float, a five-column Shape gallery and a dial with the Matrix9 factory tab boundaries and 1,476 measurements across 57 catalogs, including six corner-to-corner variants.",
+    "evidence": "docs/validation/2026-11-22-dock-popup-theme.md#matrix9-size-catalog-and-tabs",
+    "uncertainties": "Windows covers Round and Oval pages and Triangle's alternate selector at standard DPI. Every catalog was compared as data. Per-variant native placement, original facet geometry parity and higher-DPI physical checks remain open.",
+    "next_document": "docs/validation/matrix9-gem-loader-size-evidence.md",
+    "next_action": "Use the mapped size catalog and recorded page boundaries for subsequent Gem Loader parity checks."
+  },
+  "dock_popup_theme_2026_11_22": {
+    "stage": "standalone UI and build validation",
+    "status": "WINDOWS_WORKSPACE_DRAGS_AND_PROFILE_RESTART_VERIFIED",
+    "scope": "Snaps, Info & Settings, Layers and Projects moved by native pointer from each dock into the canvas and back to the left. Tool panels share one host. Named profile and reset actions preserve the live command.",
+    "evidence": "docs/validation/2026-11-22-dock-popup-theme.md",
+    "uncertainties": "Both physical monitors were 96 DPI. 125% and 150% were exercised with egui replay. Human visual review is open.",
+    "next_document": "docs/validation/2026-11-22-dock-popup-theme.md",
+    "next_action": "Review the four workspace drag recordings and the recorded visual coverage in the validation note."
+  },
+  "gem_workflow_2026_11_22": {
+    "stage": "feature-port",
+    "feature_ids": [
+      "OM9-L3-04-09-003",
+      "OM9-L3-04-10-001",
+      "OM9-L3-04-10-007"
+    ],
+    "status": "PARTIAL_WINDOWS_AND_RUST_VALIDATED_M05_UI_OPEN",
+    "scope": "Host-owned Gem Loader with a clickable cut, shape and size gallery and round Pearl. Gem on Curve and Gem on Surface expose Builder controls for picks, live preview and adjustments. Arc-length clearance, persisted row editing and trim-aware NURBS placement.",
+    "evidence": "docs/validation/2026-11-22-gem-placement.md",
+    "windows_demo": "build/standalone-validation/ui-artifacts/2026-11-22-gems/combined-video/OpenMatrix9-Gem-Loader-Curve-Surface.mp4",
+    "windows_docking_demo": "build/standalone-validation/ui-artifacts/2026-11-22-gems/docking-video/OpenMatrix9-Gem-Dock-Curve-Surface.mp4",
+    "round_diamond_wireframe_comparison": {
+      "scope": "Rhino5 DrawBrepWires and native bridge were inspected. Matrix9 Round.3dm uses wire density 1. Round Diamond uses eightfold authored facets and a single BRep table; viewport mesh and preview omit table tessellation diagonals.",
+      "evidence": "docs/validation/2026-11-22-gem-placement.md#wireframe-round-diamond",
+      "tests": "98 core, app and OCCT tests passed. Windows Wireframe Top captured before and after on a 3.10 mm fixture.",
+      "uncertainty": "Girdle subdivision and individual face isocurve layout differ from the Matrix9 sample. Other cut/shape pairs were not visually compared in this run."
+    },
+    "illustrated_panels": {
+      "scope": "Gem on Curve and Gem on Surface use clickable source and parameter illustrations with the same Builder services.",
+      "evidence": "docs/validation/2026-11-22-gem-placement.md#ô-hình-trong-bảng-đặt-đá",
+      "tests": "21 Windows gem_placement tests passed. Desktop confirmed both source buttons and both adjustment flows across a left dock, right dock and floating panel."
+    },
+    "catalog_evidence": "docs/validation/2026-11-22-matrix9-gem-catalog.md",
+    "next_document": "docs/validation/2026-11-22-matrix9-gem-catalog.md",
+    "next_action": "Cross-check Loader preset order, XY orientation and authored shape variants with the verified local catalog. Curve Object/Browser and row handles, Surface per-face BRep placement and the remaining acceptance fixtures are open."
+  },
   "top11_ring_rail_toolbar_2026_11_22": {
     "stage": "ui-menu",
     "status": "WINDOWS_REGION_PICKER_AND_FRONT_CIRCLE_VERIFIED",

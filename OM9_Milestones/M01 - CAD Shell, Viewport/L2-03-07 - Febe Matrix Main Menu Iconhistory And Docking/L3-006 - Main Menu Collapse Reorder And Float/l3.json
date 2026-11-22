@@ -178,6 +178,13 @@
     }
   ],
   "runtime_implementation": {
+    "dock_profiles_2026_11_22": {
+      "date": "2026-11-22",
+      "target": "standalone Rust OM9 on Windows",
+      "scope": "Native pointer exercised Snaps, Info & Settings, Layers and Projects across the two docks and canvas.",
+      "evidence": "docs/validation/2026-11-22-dock-popup-theme.md",
+      "manual_gate_promoted": false
+    },
     "date": "2026-10-20",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

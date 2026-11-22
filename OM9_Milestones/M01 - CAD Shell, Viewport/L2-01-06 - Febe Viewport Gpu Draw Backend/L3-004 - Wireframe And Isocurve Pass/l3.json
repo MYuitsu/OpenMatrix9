@@ -208,6 +208,17 @@
     }
   ],
   "runtime_implementation": {
+    "round_top_and_palette_2026_11_22": {
+      "status": "WINDOWS_ROUND_TOP_COMPARED",
+      "scope": "Round-brilliant topology strokes and trimmed one-pixel isocurves, with a black Wireframe background. The Windows Top comparison covers 93.0% of reference wire pixels at a three-pixel tolerance.",
+      "evidence": "docs/validation/2026-11-22-round-wire-palette.md"
+    },
+    "camera_relative_strokes_2026_11_22": {
+      "status": "GPU_READBACK_AND_WINDOWS_CAPTURE_VERIFIED",
+      "evidence": "docs/validation/2026-11-22-wireframe-depth.md",
+      "scope": "Model-wire width and intensity, camera-relative depth, selected and unselected Windows viewport captures. Existing shared line buffers serve Wireframe and Shaded.",
+      "remaining": "Human comparison with Rhino 5 and Matrix9 reference images."
+    },
     "wire_owner_source_lifetime_2026_11_14": {
       "status": "IN_PROGRESS_COMPILE_ONLY",
       "scope": "Wire owners no longer retain a temporary BRep source candidate; they conservatively reserve topology for surviving display pins.",

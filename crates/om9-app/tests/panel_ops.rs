@@ -1058,12 +1058,17 @@ fn n34_menu_placement_has_exactly_one_door_in_the_ui() {
     // What the UI may call on the layout model, with the reason on record
     // (OM9-L4-01-01-003-05.single-door.json).
     let allowlist = [
+        ".clone(", // snapshot presentation for atomic profile changes
         ".section(",
         ".state(",
         ".left_sections(",
         ".right_sections(",
         ".floating_sections(",
         ".resolve(",
+        ".resolve_visible(", // compute actual columns for mounted tools
+        ".section_order(", // align the preview to the next rendered bar
+        ".register_tool(", // mount an owned tool when its session opens
+        ".select_hosted_panel(", // restore the newly mounted add-on command's identity
         ".apply_panel_op(",
         ".reset_to_default(",
         ".clamp_floats(",
@@ -1074,7 +1079,7 @@ fn n34_menu_placement_has_exactly_one_door_in_the_ui() {
     ];
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src");
     let mut calls = 0;
-    for name in ["ui.rs", "ui/chrome.rs", "ui/panel_audit.rs"] {
+    for name in ["ui.rs", "ui/chrome.rs", "ui/panel_audit.rs", "ui/tool_host.rs"] {
         let path = root.join(name);
         let text = std::fs::read_to_string(&path).expect("source file");
         for (number, line) in text.lines().enumerate() {

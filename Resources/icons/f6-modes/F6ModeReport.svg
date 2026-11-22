@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>F6 Report mode</title>
+  <rect x="6" y="3" width="20" height="26" rx="1.5" fill="#444b48" stroke="#c6cdc7" stroke-width="1.6"/>
+  <path d="M10 9h12m-12 5h12m-12 5h12m-12 5h8" fill="none" stroke="#d4dad4" stroke-width="2"/>
+</svg>

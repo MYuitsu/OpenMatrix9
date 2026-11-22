@@ -41,7 +41,7 @@ pub const BRIGHT_CUT_CHANNEL: &str = "BuilderBrightCutChannel";
 pub const BRIGHT_CUTTER: &str = "BuilderBrightCutter";
 
 /// The four row cutter builders.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
 pub enum RowTool {
     ChannelBuilder,
     MicroProng,

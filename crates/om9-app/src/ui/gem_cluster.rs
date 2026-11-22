@@ -46,21 +46,16 @@ impl MatrixApp {
 
     /// The builder window. Apply writes back the edited session first, so the transaction uses
     /// exactly the parameters the window shows.
-    pub(super) fn gem_cluster_window_ui(&mut self, ctx: &egui::Context) {
+    pub(super) fn gem_cluster_panel_ui(&mut self, ui: &mut egui::Ui) {
         let Some(session) = self.controller.gem_cluster_session().cloned() else {
             return;
         };
         let mut session = session;
-        let mut open = true;
+
         let mut apply = false;
         let mut cancel = false;
         let mut dirty = false;
-        egui::Window::new(session.tool.title())
-            .id(egui::Id::new(("om9-gem-cluster", session.tool.command())))
-            .open(&mut open)
-            .default_width(380.0)
-            .resizable(false)
-            .show(ctx, |ui| {
+        ui.scope(|ui| {
                 match &mut session.kind {
                     LayoutKind::Halo(params) => {
                         dirty |= halo_ui(ui, params, session.tool);
@@ -78,7 +73,7 @@ impl MatrixApp {
                     ui.label("Apply edits the existing layout and keeps the child GemIds.");
                 }
                 ui.horizontal(|ui| {
-                    if ui.button("Apply").clicked() {
+                    if ui.add(super::theme::primary_button("Apply")).clicked() {
                         apply = true;
                     }
                     if ui.button("Cancel").clicked() {
@@ -86,9 +81,6 @@ impl MatrixApp {
                     }
                 });
             });
-        if !open && !apply {
-            cancel = true;
-        }
         if cancel {
             self.controller.gem_cluster_cancel();
             self.status.info("Gem layout canceled");

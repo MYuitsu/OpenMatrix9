@@ -2,6 +2,8 @@
 //! F6 context actions. The adapter classifies the current selection and resolves labels and
 //! availability from the command registry; it never invents a command or a second selection
 //! backend. Builder prefill is a typed request handed to the owning provider.
+pub mod catalog;
+mod legacy_menu;
 use om9_core::{
     Error, Result,
     geometry::Point3,
@@ -55,25 +57,31 @@ impl Availability {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Action {
+    pub category: catalog::Category,
     pub id: String,
     pub label: String,
     pub availability: Availability,
+    pub cancel_first: bool,
 }
 
 impl Action {
-    fn enabled(id: &str, label: &str) -> Self {
+    pub(crate) fn enabled(id: &str, label: &str) -> Self {
         Self {
             id: id.to_owned(),
             label: label.to_owned(),
             availability: Availability::Enabled,
+            cancel_first: false,
+            category: catalog::Category::Menu,
         }
     }
 
-    fn disabled(id: &str, label: &str, reason: &str) -> Self {
+    pub(crate) fn disabled(id: &str, label: &str, reason: &str) -> Self {
         Self {
             id: id.to_owned(),
             label: label.to_owned(),
             availability: Availability::Disabled(reason.to_owned()),
+            cancel_first: false,
+            category: catalog::Category::Menu,
         }
     }
 
@@ -82,6 +90,8 @@ impl Action {
             id: id.to_owned(),
             label: label.to_owned(),
             availability: Availability::RegisteredDisabled(reason.to_owned()),
+            cancel_first: false,
+            category: catalog::Category::Menu,
         }
     }
 }
@@ -117,7 +127,9 @@ pub fn classify(document: &Document, selection: &BTreeSet<ObjectId>) -> ContextK
     }
     if entities
         .iter()
-        .all(|entity| entity.extension(GEM_EXTENSION_SLOT).is_some())
+        .all(|entity| entity.extension(GEM_EXTENSION_SLOT).is_some()
+            || matches!(entity.geometry, om9_core::geometry::Geometry::Instance(_))
+                && om9_core::gem::gem_record_in(document, entity.id).is_some())
     {
         return ContextKind::Gem;
     }
@@ -128,12 +140,8 @@ pub fn classify(document: &Document, selection: &BTreeSet<ObjectId>) -> ContextK
         return ContextKind::Curve;
     }
     if entities.iter().all(|entity| {
-        matches!(
-            entity.geometry,
-            om9_core::geometry::Geometry::Surface(_)
-                | om9_core::geometry::Geometry::Brep(_)
-                | om9_core::geometry::Geometry::NativeBrep(_)
-        )
+        matches!(&entity.geometry, om9_core::geometry::Geometry::Surface(_))
+            || matches!(&entity.geometry, om9_core::geometry::Geometry::Brep(b) if b.topology().faces.len() == 1)
     }) {
         return ContextKind::Surface;
     }
@@ -157,6 +165,24 @@ pub fn context(
 ) -> Context {
     let kind = classify(document, selection);
     let mut context = context_for_kind(kind, providers);
+    if providers.m05_gem {
+        use crate::session::gem_placement::{CURVE_ROW_SLOT, EDIT_CURVE_ROW, ON_CURVE, ON_SURFACE};
+        if selection.iter().any(|id|
+            document.entities.get(id).is_some_and(|entity| entity.extension(CURVE_ROW_SLOT).is_some()))
+        {
+            context.actions.push(Action::enabled(EDIT_CURVE_ROW, "Edit Gem on Curve"));
+        } else if kind == ContextKind::Curve && selection.len() == 1 {
+            context.actions.push(Action::enabled(ON_CURVE, "Gem on Curve"));
+        } else if kind == ContextKind::Surface && selection.len() == 1 && selection.first()
+            .and_then(|id| document.entities.get(id))
+            .is_some_and(|entity| matches!(entity.geometry, om9_core::geometry::Geometry::Surface(_)))
+        {
+            context.actions.push(Action::enabled(ON_SURFACE, "Gem on Surface"));
+        }
+        if matches!(kind, ContextKind::General | ContextKind::Gem) {
+            context.actions.push(Action::enabled("BuilderGemLoader", "Gem Loader"));
+        }
+    }
     if selection.is_empty() {
         context.actions.push(if providers.m04_builder {
             Action::enabled("OM9-TOOLS-001", "Ring Rail")
@@ -289,6 +315,22 @@ pub struct CustomMenu {
     pub version: u32,
     /// Command IDs only. The command engine stays the single owner of implementations.
     pub command_ids: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub entries: Vec<CustomEntry>,
+    /// A saved replacement may be empty when the user removed the whole group.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub replaced_groups: Vec<(catalog::Mode, String)>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CustomEntry {
+    #[serde(default)]
+    pub category: catalog::Category,
+    pub mode: catalog::Mode,
+    pub group: String,
+    pub global: bool,
+    pub label: String,
+    pub command: String,
 }
 
 impl Default for CustomMenu {
@@ -296,6 +338,8 @@ impl Default for CustomMenu {
         Self {
             version: 1,
             command_ids: Vec::new(),
+            entries: Vec::new(),
+            replaced_groups: Vec::new(),
         }
     }
 }
@@ -564,6 +608,8 @@ mod tests {
     fn a_custom_menu_keeps_order_and_disables_a_deleted_command() {
         let menu = CustomMenu {
             version: 1,
+            entries: vec![],
+            replaced_groups: vec![],
             command_ids: vec![
                 crate::session::POINT.to_owned(),
                 "DeletedCommand".to_owned(),

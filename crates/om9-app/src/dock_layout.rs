@@ -198,6 +198,7 @@ pub enum SectionId {
     Projects,
     /// Reserved by M01: builders open in the space below the Project Manager.
     BuilderSlot,
+    Tool(crate::tool_panel::ToolPanel),
 }
 
 impl SectionId {
@@ -223,11 +224,13 @@ impl SectionId {
             SectionId::Layers => "layers",
             SectionId::Projects => "projects",
             SectionId::BuilderSlot => "builder-slot",
+            SectionId::Tool(tool) => tool.key(),
         }
     }
 
     pub fn from_key(key: &str) -> Option<Self> {
         Self::ALL.into_iter().find(|id| id.key() == key)
+            .or_else(|| crate::tool_panel::ToolPanel::from_key(key).map(Self::Tool))
     }
 
     /// Title bar text exactly as the manual writes it.
@@ -241,6 +244,7 @@ impl SectionId {
             SectionId::Layers => "Layers",
             SectionId::Projects => "Projects",
             SectionId::BuilderSlot => "Builders",
+            SectionId::Tool(tool) => tool.title(),
         }
     }
 
@@ -255,6 +259,7 @@ impl SectionId {
             SectionId::Layers => "LAYERS",
             SectionId::Projects => "PROJECTS",
             SectionId::BuilderSlot => "BUILDERS",
+            SectionId::Tool(tool) => tool.title(),
         }
     }
 
@@ -276,7 +281,7 @@ impl SectionId {
             order: Self::ALL
                 .iter()
                 .position(|id| *id == self)
-                .unwrap_or_default() as u32,
+                .unwrap_or(Self::ALL.len()) as u32,
             height: SECTION_DEFAULT_HEIGHT,
             float: None,
             home: None,
@@ -297,8 +302,8 @@ impl FloatRect {
         Self {
             x: 480.,
             y: 160.,
-            width: 520.,
-            height: 320.,
+            width: 300.,
+            height: 420.,
         }
     }
 
@@ -364,11 +369,20 @@ fn default_section_height() -> f32 {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DockLayout {
     #[serde(default)]
+    pub f6_pinned: bool,
+    #[serde(default)]
     pub schema_version: u32,
     #[serde(default)]
     pub panels: BTreeMap<String, PanelState>,
     #[serde(default)]
     pub sections: BTreeMap<String, SectionState>,
+    /// An add-on builder occupies one live panel, but each command keeps its own placement.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub hosted_builders: BTreeMap<String, SectionState>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hosted_builder_key: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hosted_dialog_key: Option<String>,
 }
 
 impl Default for DockLayout {
@@ -383,6 +397,10 @@ impl DockLayout {
     pub fn matrix_default() -> Self {
         Self {
             schema_version: SCHEMA_VERSION,
+            f6_pinned: false,
+            hosted_builders: BTreeMap::new(),
+            hosted_builder_key: None,
+            hosted_dialog_key: None,
             panels: PanelId::ALL
                 .into_iter()
                 .map(|id| (id.key().to_owned(), id.default_state()))
@@ -518,9 +536,96 @@ impl DockLayout {
         self.dense_section_orders();
     }
 
+    /// Only opened tools acquire placement records. Older schema-v2 profiles have none.
+    pub fn register_tool(&mut self, tool: crate::tool_panel::ToolPanel) {
+        let id = SectionId::Tool(tool);
+        if !self.sections.contains_key(id.key()) {
+            let mut state = id.default_state();
+            state.height = 480.;
+            if let Some(size) = tool.initial_float_size() {
+                state.dock = DockSide::Floating;
+                state.float = Some(FloatRect { x: 350., y: 100., width: size[0], height: size[1] });
+            }
+            if tool == crate::tool_panel::ToolPanel::F6 {
+                if let Some(mut previous) = self.state(PanelId::CommandSearch).float {
+                    // Older command-search layouts had no mode strip or footer.
+                    previous.height = previous.height.max(300.);
+                    state.float = Some(previous);
+                }
+            }
+            state.order = self.section_order(state.dock).len() as u32;
+            self.sections.insert(id.key().to_owned(), state);
+        }
+    }
+
+    pub fn select_hosted_panel(&mut self, tool: crate::tool_panel::ToolPanel, key: &str) {
+        use crate::tool_panel::ToolPanel;
+        let current = match tool {
+            ToolPanel::HostedBuilder => &mut self.hosted_builder_key,
+            ToolPanel::SessionOptions => &mut self.hosted_dialog_key,
+            _ => return,
+        };
+        if current.as_deref() == Some(key) { return; }
+        let previous = current.replace(key.to_owned());
+        let id = SectionId::Tool(tool);
+        if let Some(previous) = previous {
+            self.hosted_builders.insert(previous, self.section(id));
+        }
+        self.sections.remove(id.key());
+        self.dense_section_orders();
+        self.register_tool(tool);
+        if let Some(saved) = self.hosted_builders.remove(key) {
+            let index = saved.order as usize;
+            self.place_tool_state(id, saved, index);
+            self.normalize();
+        } else if tool == ToolPanel::SessionOptions && key == "options/om9/tsSplitCurves"
+            && let Some(rect) = self.sections.get_mut(id.key()).and_then(|s|s.float.as_mut()) {
+            rect.width = 238.;
+            rect.height = 136.;
+        }
+    }
+
+    fn place_tool_state(&mut self, id: SectionId, state: SectionState, index: usize) {
+        let side = state.dock;
+        let mut order = self.section_order(side);
+        order.retain(|member| *member != id);
+        order.insert(index.min(order.len()), id);
+        self.sections.insert(id.key().to_owned(), state);
+        for (index, member) in order.into_iter().enumerate() {
+            self.section_mut(member).order = index as u32;
+        }
+        self.dense_section_orders();
+    }
+
+    /// Copy just this tool into the saved profile. Other menu moves stay session-local until
+    /// Set as Default. Anchor insertion to the next shared neighbour in that profile.
+    pub fn remember_tool(&mut self, live: &Self, tool: crate::tool_panel::ToolPanel) {
+        if tool == crate::tool_panel::ToolPanel::F6 { self.f6_pinned = live.f6_pinned; }
+        let key = match tool {
+            crate::tool_panel::ToolPanel::HostedBuilder => live.hosted_builder_key.as_deref(),
+            crate::tool_panel::ToolPanel::SessionOptions => live.hosted_dialog_key.as_deref(),
+            _ => None,
+        };
+        if let Some(key) = key { self.select_hosted_panel(tool, key); }
+        let id = SectionId::Tool(tool);
+        let state = live.section(id);
+        let saved_order: Vec<_> = self.section_order(state.dock).into_iter().filter(|other| *other != id).collect();
+        let index = live.section_order(state.dock).into_iter()
+            .skip_while(|other| *other != id).skip(1)
+            .find_map(|next| saved_order.iter().position(|other| *other == next))
+            .unwrap_or(saved_order.len());
+        self.place_tool_state(id, state, index);
+    }
+
+    fn members(&self) -> Vec<SectionId> {
+        SectionId::ALL.into_iter().chain(self.sections.keys().filter_map(|key|
+            crate::tool_panel::ToolPanel::from_key(key).map(SectionId::Tool)
+        )).collect()
+    }
+
     /// Menu order for one column: dense, complete and stable.
     pub fn section_order(&self, side: DockSide) -> Vec<SectionId> {
-        let mut members: Vec<(u32, SectionId)> = SectionId::ALL
+        let mut members: Vec<(u32, SectionId)> = self.members()
             .into_iter()
             .filter(|id| self.section(*id).dock == side)
             .map(|id| (self.section(id).order, id))
@@ -633,7 +738,7 @@ impl DockLayout {
             };
         }
         let known_sections: BTreeSet<&'static str> =
-            SectionId::ALL.into_iter().map(SectionId::key).collect();
+            self.members().into_iter().map(SectionId::key).collect();
         let unknown: Vec<String> = self
             .sections
             .keys()
@@ -644,7 +749,7 @@ impl DockLayout {
             self.sections.remove(&key);
             diagnostics.push(format!("menu section '{key}' is not recognized; removed"));
         }
-        for id in SectionId::ALL {
+        for id in self.members() {
             let state = self
                 .sections
                 .entry(id.key().to_owned())
@@ -734,19 +839,12 @@ impl DockLayout {
         // A stored home must be a slot its column can have. A document may carry
         // an index from a different arrangement; it is repaired to the documented
         // position with a diagnostic instead of surprising the user on DockHome.
-        let left_len = self.left_sections().len() as u32;
-        let right_len = self.right_sections().len() as u32;
-        for id in SectionId::ALL {
-            let Some(home) = self.section(id).home else {
-                continue;
-            };
-            let len = match home.side {
-                crate::panel_ops::ColumnSide::Left => left_len,
-                crate::panel_ops::ColumnSide::Right => right_len,
-            };
-            if home.index <= len {
-                continue;
-            }
+        // Other panels can leave the home column after this position was recorded.
+        // DockHome clamps to the current length at insertion time.
+        let last_possible_index = self.members().len().saturating_sub(1) as u32;
+        for id in self.members() {
+            let Some(home) = self.section(id).home else { continue; };
+            if home.index <= last_possible_index { continue; }
             let documented = SectionId::ALL
                 .iter()
                 .position(|candidate| *candidate == id)
@@ -811,7 +909,8 @@ impl DockLayout {
                 diagnostics.push(format!("{} was moved back inside the window", id.title()));
             }
         }
-        for id in SectionId::ALL {
+        for id in self.members() {
+            if matches!(id, SectionId::Tool(_)) { continue; }
             let state = self.section(id);
             let Some(rect) = state.float else {
                 continue;
@@ -829,6 +928,10 @@ impl DockLayout {
     /// input always resolves to the same regions and never returns a negative or
     /// overlapping size.
     pub fn resolve(&self, window: [f32; 2]) -> Regions {
+        self.resolve_visible(window, |_| true)
+    }
+
+    pub fn resolve_visible(&self, window: [f32; 2], visible: impl Fn(SectionId) -> bool) -> Regions {
         let width = if window[0].is_finite() {
             window[0].max(0.)
         } else {
@@ -854,7 +957,7 @@ impl DockLayout {
         let right_wanted = self
             .right_sections()
             .iter()
-            .any(|id| self.section(*id).visible)
+            .any(|id| self.section(*id).visible && visible(*id))
             && width >= NARROW_WINDOW_WIDTH;
         let mut right = if right_wanted {
             self.state(PanelId::RightDock)
@@ -978,6 +1081,10 @@ impl DockLayout {
     /// document failure.
     pub fn save(&self, path: &Path) -> Result<()> {
         let bytes = self.to_json()?;
+        Self::write_json(path, &bytes)
+    }
+
+    pub(crate) fn write_json(path: &Path, bytes: &str) -> Result<()> {
         let parent = path
             .parent()
             .filter(|parent| !parent.as_os_str().is_empty())
@@ -990,13 +1097,9 @@ impl DockLayout {
             .into_owned();
         let staging = parent.join(format!(".{name}.{}.tmp", uuid::Uuid::new_v4()));
         std::fs::write(&staging, bytes.as_bytes()).map_err(|error| Error::Io(error.to_string()))?;
-        let published = std::fs::rename(&staging, path);
-        if published.is_err() {
-            // Windows refuses rename over an existing file; the copy keeps the
-            // previous layout replaceable without ever deleting it first.
-            let copied = std::fs::copy(&staging, path);
+        if let Err(error) = std::fs::rename(&staging, path) {
             let _ = std::fs::remove_file(&staging);
-            copied.map_err(|error| Error::Io(error.to_string()))?;
+            return Err(Error::Io(error.to_string()));
         }
         Ok(())
     }

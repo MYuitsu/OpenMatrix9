@@ -4,6 +4,11 @@
   "milestone": "AFTER",
   "parent_l2_id": "OM9-L2-09-02",
   "title": "T-Spline Plane And Tube From Curves",
+  "runtime_implementation": {
+    "status": "PARTIAL_RUNTIME",
+    "evidence": "docs/validation/2026-11-22-f6-matrix9.md",
+    "scope": "tsPlane Box supports two corners, Center and XFaces/YFaces on the input plane. Smooth, 3Point, Vertical, symmetry and Tube from Curves remain open."
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "AFTER",
   "execution_stage": "AFTER",

@@ -77,6 +77,10 @@ fn texture(
 
 /// Draws one 45-degree line through a cleared frame and returns the resolved pixels.
 fn render_line(samples: u32, on_top: bool, depth_clear: f32) -> Option<Vec<u8>> {
+    render_fixture(samples, on_top, depth_clear, None)
+}
+
+fn render_fixture(samples: u32, on_top: bool, depth_clear: f32, wire_camera: Option<Camera>) -> Option<Vec<u8>> {
     let (device, queue) = gpu()?;
     let resolve = texture(&device, "AA resolve", wgpu::TextureFormat::Rgba8Unorm, 1);
     let resolve_view = resolve.create_view(&wgpu::TextureViewDescriptor::default());
@@ -137,10 +141,24 @@ fn render_line(samples: u32, on_top: bool, depth_clear: f32) -> Option<Vec<u8>> 
         far: 100.0,
     };
     let mut overlay = if on_top { OverlayBatch::on_top(device.clone(), queue.clone(), samples) } else { OverlayBatch::with_samples(device.clone(), queue.clone(), samples) };
-    overlay.line([-4.0, -4.0, 0.0], [4.0, 4.0, 0.0], [1.0, 1.0, 1.0, 1.0]);
+    if wire_camera.is_some() {
+        // Equal horizontal strokes above/below centre. Near and far swap on camera reversal.
+        for (y, z) in [(1.5, 2.), (-1.5, -2.)] {
+            overlay.wire([-2., y, z], [2., y, z], [0., 1., 0., 1.]);
+        }
+    } else {
+        overlay.line([-4.0, -4.0, 0.0], [4.0, 4.0, 0.0], [1.0, 1.0, 1.0, 1.0]);
+    }
     overlay.upload();
     // A single-sample attachment cannot have a resolve target; it is read back directly.
-    let readback_texture = if samples > 1 {
+    let readback_texture = if let Some(camera) = wire_camera {
+        let plane = OverlayBatch::wire_depth_plane(camera, [&overlay]);
+        let mut encoder = device.create_command_encoder(&Default::default());
+        overlay.encode_wires(&mut encoder, &colour_view, (samples > 1).then_some(&resolve_view),
+            &depth_view, camera, WIDTH, HEIGHT, Some(plane));
+        queue.submit([encoder.finish()]);
+        if samples > 1 { &resolve } else { &colour }
+    } else if samples > 1 {
         overlay.render_resolved(
             &colour_view,
             &resolve_view,
@@ -222,6 +240,37 @@ fn partial_coverage_pixels(pixels: &[u8]) -> usize {
         .iter()
         .filter(|pixel| (8..=247).contains(&pixel[0]))
         .count()
+}
+
+#[test]
+fn model_wire_width_and_intensity_follow_the_camera() {
+    for samples in [1, 4] {
+        for side in [1., -1.] {
+            for perspective in [false, true] {
+                let eye = [0., 0., side * 10.];
+                let camera = if perspective {
+                    Camera::perspective(eye, [0.; 3], [0., 1., 0.], 0.85)
+                } else {
+                    Camera::orthographic(eye, [0.; 3], [0., 1., 0.], 10.)
+                };
+                let Some(pixels) = render_fixture(samples, false, 1., Some(camera)) else {
+                    eprintln!("SKIP: GPU unavailable");
+                    return;
+                };
+                // Integrate one column away from both endpoints. Dividing by the expected
+                // stroke intensity measures covered width even when MSAA splits two pixels.
+                let column: Vec<_> = pixels.chunks_exact((4 * WIDTH) as usize)
+                    .map(|row| f32::from(row[(2 * WIDTH + 1) as usize])).collect();
+                let (upper, lower) = column.split_at(HEIGHT as usize / 2);
+                let (near, far) = if side > 0. { (upper, lower) } else { (lower, upper) };
+                let near_width = near.iter().sum::<f32>() / 255.;
+                let far_width = far.iter().sum::<f32>() / 166.;
+                eprintln!("samples={samples} perspective={perspective} eye_z={} widths={near_width:.2}/{far_width:.2}", eye[2]);
+                assert!((near_width - 2.).abs() < 0.27 && (far_width - 1.).abs() < 0.27);
+                assert!(near.iter().copied().fold(0., f32::max) > far.iter().copied().fold(0., f32::max));
+            }
+        }
+    }
 }
 
 #[test]

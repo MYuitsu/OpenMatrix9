@@ -43,7 +43,7 @@ pub const CUTTER_PAYLOAD_VERSION: u32 = 1;
 pub const CUTTER_CUT_SLOT: &str = om9_core::model::CUTTER_CUT_EXTENSION_SLOT;
 
 /// The two M07 cutter commands of this owner.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
 pub enum CutterTool {
     GemCutter,
     GemCutterLibrary,

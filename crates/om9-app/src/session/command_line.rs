@@ -7,6 +7,9 @@ use super::*;
 
 impl Controller {
     pub fn prompt(&self) -> String {
+        if let Some(direction)=&self.curve_direction {return direction.prompt().into();}
+        if let Some(capture)=&self.view_capture {return capture.prompt();}
+        if let Some(pending) = &self.isolated_selection { return pending.kind.prompt().into(); }
         if self.ring_rail_history_pending() { return "Ring Rail: updating dependent features (Esc to cancel)".into(); }
         if self.ring_rail_confirmation_pending() { return "You already have a Ring Rail. Replace it? Yes / No / Cancel".into(); }
         // A session whose context is gone asks for nothing: the prompt and the

@@ -18,6 +18,7 @@ pub(super) struct BooleanBuilderJob {
     scene: uuid::Uuid,
     selection_revision: u64,
     command_run: u64,
+    command: String,
     builder_revision: Option<u64>,
     preview: bool,
     commit_requested: bool,
@@ -30,7 +31,7 @@ impl BooleanBuilderJob {
             && c.scene.as_ref().is_some_and(|scene| scene.publication_id() == self.scene)
             && c.selection_state().revision == self.selection_revision && c.command_run == self.command_run
             && c.addon_builder.as_ref().map(|builder| builder.revision) == self.builder_revision
-            && session.code == "BuilderBooleanBuilder"
+            && session.code == self.command
             && session.boolean_sources.values().chain(session.boolean_preview_sources.values()).all(|stamp| c.document().resolve(stamp).is_ok())
             && c.boolean_definitions_current(&session.boolean_definitions)
             && c.boolean_definitions_current(&session.boolean_preview_definitions)
@@ -53,14 +54,19 @@ fn value_bytes(value: &serde_json::Value) -> Result<u64> {
     nested.checked_add(32).ok_or(Error::Overflow("Boolean event"))
 }
 
-fn calculate(event: Event, cancel: &Cancellation, preview: bool) -> Result<Reply> {
-    let objects: Vec<(String, SelectedMesh)> = serde_json::from_value(event.state.get("objects").cloned().ok_or(Error::Missing("Boolean objects"))?)
-        .map_err(|_| Error::Invalid("Boolean objects"))?;
+pub(super) fn calculate(event: &Event, cancel: &Cancellation, preview: bool, prepared: Option<Vec<(String, SelectedMesh)>>) -> Result<Reply> {
+    let objects = match prepared {
+        Some(meshes) => meshes,
+        None => serde_json::from_value(event.state.get("objects").cloned().ok_or(Error::Missing("Boolean objects"))?)
+            .map_err(|_| Error::Invalid("Boolean objects"))?,
+    };
     if objects.is_empty() { return Err(Error::Missing("Boolean objects")); }
-    let mut cutters: Vec<_> = event.selection.iter().filter(|s| !objects.iter().any(|(id, _)| *id == s.id)).collect();
+    let first: std::collections::BTreeSet<_> = objects.iter().map(|(id, _)| id.as_str()).collect();
+    let mut cutters: Vec<_> = event.selection.iter().filter(|s| !first.contains(s.id.as_str())).collect();
     cutters.sort_by(|a,b| a.id.cmp(&b.id));
     if cutters.is_empty() { return Err(Error::Missing("Boolean cutters")); }
-    if cutters.iter().any(|s| s.kind != "mesh" || s.gem.is_some() || s.mesh.as_ref().is_none_or(|m| m.triangles.is_empty())) {
+    let mesh_op = super::mesh_boolean::MeshBoolean::from_name(&event.command);
+    if cutters.iter().any(|s| (mesh_op.is_none() && (s.kind != "mesh" || s.gem.is_some())) || s.mesh.as_ref().is_none_or(|m| m.triangles.is_empty())) {
         return Err(Error::Invalid("Boolean cutter source mesh"));
     }
     let options = CsgOptions { tolerance: event.number("_om9_document_tolerance_mm", CsgOptions::default().tolerance), ..CsgOptions::default() };
@@ -106,14 +112,19 @@ fn calculate(event: Event, cancel: &Cancellation, preview: bool) -> Result<Reply
             let [a,b,c] = triangle.map(|index| om9_addon_abi::session::sub(mesh.vertices[index as usize], origin));
             volume += om9_addon_abi::session::dot(a, om9_addon_abi::session::cross(b,c)) / 6.0;
         }
-        reply.replace.push(Replacement { id, geo: Geo::Mesh { name: "Boolean".into(), vertices: mesh.vertices, triangles, meta: None, layer: None } });
+        let geo = Geo::Mesh { name: mesh_op.map_or("Boolean", |op| op.label()).into(), vertices: mesh.vertices, triangles, meta: None, layer: None };
+        if mesh_op.is_some() && event.flag("bb_keep_cutters", false) {
+            reply.create.push(geo);
+        } else {
+            reply.replace.push(Replacement { id, geo });
+        }
     }
     if !event.flag("bb_keep_cutters", false) { reply.delete = cutters.iter().map(|s| s.id.clone()).collect(); }
     if preview {
         reply.prompt = format!("Boolean Builder: {} objects × {} cutters. Mode in the builder, Enter", reply.replace.len(), cutters.len());
         reply.preview = lines;
     }
-    let message = format!("Boolean Builder: {} objects, {} cutters, volume {} mm³", reply.replace.len(), cutters.len(), om9_addon_abi::session::fmt(volume));
+    let message = format!("{}: {} objects, {} cutters, volume {} mm³", mesh_op.map_or("Boolean Builder", |op| op.label()), reply.replace.len() + reply.create.len(), cutters.len(), om9_addon_abi::session::fmt(volume));
     Ok(reply.say(message))
 }
 
@@ -165,7 +176,7 @@ impl Controller {
     }
 
     pub(super) fn request_boolean_builder_worker(&mut self, mut event: Event, preview: bool,
-        roots: Vec<om9_core::identity::ObjectId>, k: f64) -> Result<()> {
+        roots: Option<Vec<om9_core::identity::ObjectId>>, k: f64) -> Result<()> {
         if self.boolean_builder_worker.is_some() || self.boolean_builder_active.compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire).is_err() {
             return Err(Error::Busy);
         }
@@ -175,11 +186,22 @@ impl Controller {
         let document = self.coordinator.capture_tracked_document(self.document)?;
         let max_depth = self.coordinator.limits().max_depth;
         let tolerance = document.effective_tolerance()?.absolute_mm;
-        let selection_bytes = roots.iter().try_fold(0u64, |sum, id| {
+        let limits = *self.coordinator.limits();
+        let operands = if roots.is_none() { Some(super::mesh_boolean::Operands::read(&event)?) } else { None };
+        let selection_bytes = roots.iter().flatten().chain(operands.iter().flat_map(|op| op.ids())).try_fold(0u64, |sum, id| {
             let entity = document.entities.get(id).ok_or(Error::Missing("Boolean source"))?;
             let bytes = if let Some((mesh, _, _)) = super::addon_session::boolean_mesh_source(&document, entity, max_depth)? {
                 let faces = mesh.faces.iter().try_fold(0u64, |n, face| n.checked_add(face.len().saturating_sub(2) as u64).ok_or(Error::Overflow("Boolean input")))?;
                 (mesh.vertices.len() as u64).saturating_mul(24).saturating_add(faces.saturating_mul(12))
+            } else if operands.is_some() {
+                use om9_core::geometry::Geometry;
+                let source_bytes = match &entity.geometry {
+                    Geometry::Brep(b) => b.source().len() as u64,
+                    Geometry::NativeBrep(b) => b.storage_bytes()?,
+                    Geometry::Surface(s) => (s.poles.len() as u64).saturating_mul(32),
+                    _ => return Err(Error::Invalid("select a mesh, surface or polysurface")),
+                };
+                source_bytes.saturating_add((CsgOptions::default().max_triangles as u64).saturating_mul(84))
             } else { 0 };
             sum.checked_add(bytes).ok_or(Error::Overflow("Boolean input"))
         })?;
@@ -193,12 +215,15 @@ impl Controller {
         let (sender, receiver) = mpsc::sync_channel(1);
         let job = BooleanBuilderJob { receiver, cancel, authority: self.coordinator.authority(), epoch: self.coordinator.epoch(),
             scene, selection_revision: self.selection_state().revision, command_run: self.command_run,
-            builder_revision: self.addon_builder.as_ref().map(|builder| builder.revision), preview, commit_requested: false };
+            command: event.command.clone(), builder_revision: self.addon_builder.as_ref().map(|builder| builder.revision), preview, commit_requested: false };
         std::thread::Builder::new().name("om9-boolean-builder".into()).spawn(move || {
             let _permit = permit;
             let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                event.selection = prepare_selection(&document, &roots, k, tolerance, max_depth, &thread_cancel)?;
-                calculate(event, &thread_cancel, preview)
+                if let Some(operands) = operands {
+                    return operands.compute(&document, event, &limits, &thread_cancel);
+                }
+                event.selection = prepare_selection(&document, roots.as_deref().unwrap_or_default(), k, tolerance, max_depth, &thread_cancel)?;
+                calculate(&event, &thread_cancel, preview, None)
             }))
                 .unwrap_or(Err(Error::Io("Boolean worker panicked".into())))
                 .map(|reply| (reply, owner));
@@ -228,6 +253,7 @@ impl Controller {
             let created = self.commit_session_result(&code, &label, &reply, &seen)?;
             self.addon_messages.extend(reply.messages.iter().map(|message| self.tr.text(message)));
             self.addon_session = None;
+            if super::mesh_boolean::MeshBoolean::from_name(&code).is_some() { self.addon_last = Some(code.clone()); }
             if let Some(builder) = self.addon_builder.take_if(|builder| builder.interactive && builder.code == code) {
                 self.store_builder_values(&builder);
             }

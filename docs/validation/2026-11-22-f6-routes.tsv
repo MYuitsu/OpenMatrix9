@@ -1,0 +1,425 @@
+Factory command	Menu label	Built-in enabled	Built-in route or reason	Matrix add-on enabled	Matrix route or reason
+!_ClayFromCurve	Clay From Curve	false	No active OM9 handler for _ClayFromCurve	true	ClayooCreationFromCurve
+!_ClayLoft	Clay Loft Curves	false	No active OM9 handler for _ClayLoft	true	ClayooCreationLoft
+!_ClayMatch	Clay Match	false	No active OM9 handler for _ClayMatch	true	ClayooEditMatch
+!_ClayPipe	Clay Pipe	false	No active OM9 handler for _ClayPipe	true	ClayooCreationPipe
+!_ClayPipe	Clay Pipe Curves	false	No active OM9 handler for _ClayPipe	true	ClayooCreationPipe
+!_ClayRevolve	Clay Revolve	false	No active OM9 handler for _ClayRevolve	true	ClayooCreationRevolve
+!_ClaySweep1	Clay Sweep 1	false	No active OM9 handler for _ClaySweep1	true	ClayooCreationSweep1Rail
+!_ClaySweep2	Clay Sweep 2	false	No active OM9 handler for _ClaySweep2	true	ClayooCreationSweep2Rails
+!_Curve	Curve	true	OM9-CURVE-042	true	CurveFreeFormControlPoints
+!_GVRingRail	Ring Rail	true	OM9-TOOLS-001	true	BuilderRingRail
+!_InterpCurve	Interpcurve	true	OM9-CURVE-003	true	CurveFreeFormInterpolatePoints
+!_Rebuild	Rebuild Curve	true	OM9-CURVE-009	true	OthersCurveRebuild
+!_gvGemOnCrv	Gem on Curve	true	BuilderGemOnCrv	true	BuilderGemOnCrv
+!_split p	Split Point	true	split p	true	split p
+-_SetPt _XSet=_Yes _YSet=_No _ZSet=_No 0	Set Point X	false	Select curve edit or control points	false	Select curve edit or control points
+-_SetPt _YSet=_Yes _XSet=_No _ZSet=_No 0	Set Point Y	false	Select curve edit or control points	false	Select curve edit or control points
+-_SetPt _ZSet=_Yes _XSet=_No _YSet=_No 0	Set Point Z	false	Select curve edit or control points	false	Select curve edit or control points
+-_SetPt _ZSet=_Yes _YSet=_No _XSet=_No 0	Set Point Z	false	Select curve edit or control points	false	Select curve edit or control points
+-_tsExtractEdges _Enter _selnone _selLast	Extract Edges	false	Select T-Spline edges	false	Select T-Spline edges
+-_tsExtractEdges _Offset	Extract Edges Offset	false	Select T-Spline edges	false	Select T-Spline edges
+-_tsManip _Enabled=_On _Manipulator=_Rotate _SelectionMode=_Edge _Enter	Rotate	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Rotate _SelectionMode=_Face _Enter	Rotate	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Rotate _SelectionMode=_Object _Enter	Rotate	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Rotate _SelectionMode=_Vertex _Enter	Rotate	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Scale _SelectionMode=_Edge _Enter	Scale	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Scale _SelectionMode=_Face _Enter	Scale	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Scale _SelectionMode=_Object _Enter	Scale	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Scale _SelectionMode=_Vertex _Enter	Scale	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Translate _SelectionMode=_Edge _Enter	Edge	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Translate _SelectionMode=_Edge _Enter	Translate	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Translate _SelectionMode=_Face _Enter	Face	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Translate _SelectionMode=_Face _Enter	Translate	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Translate _SelectionMode=_Object _Enter	Object	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Translate _SelectionMode=_Object _Enter	Translate	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Translate _SelectionMode=_Vertex _Enter	Translate	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _Manipulator=_Translate _SelectionMode=_Vertex _Enter	Vertex	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsManip _Enabled=_On _SetPivot	Set Pivot	false	Select a T-Spline cage or its components	false	Select a T-Spline cage or its components
+-_tsSelection _GrowSelection	Grow Selection	false	Select T-Spline components	false	Select T-Spline components
+-_tsSelection _NextU	Select Next U	false	Select T-Spline components	false	Select T-Spline components
+-_tsSelection _PrevU	Select Previous U	false	Select T-Spline components	false	Select T-Spline components
+-_tsSelection _SelectLoop	Loop Select	false	Select T-Spline components	false	Select T-Spline components
+-_tsSelection _SelectRing	Ring Select	false	Select T-Spline edges	false	Select T-Spline edges
+-_tsSelection _ShrinkSelection	Shrink Selection	false	Select T-Spline components	false	Select T-Spline components
+-_tsSelection _TogglePaintMode	Paint Selection	false	Select T-Spline components to paint	false	Select T-Spline components to paint
+_-tsSelection _NextV	Select Next V	false	Select T-Spline components	false	Select T-Spline components
+_-tsSelection _PrevV	Select Previous V	false	Select T-Spline components	false	Select T-Spline components
+_Bend	Bend	true	OM9-TRANSFORM-007	true	TransformBend
+_Blend	Blend	true	OM9-CURVE-011	true	CurveBlendCurvesBlendCurves
+_BlendCRV	Blend w/ Handles	true	OM9-CURVE-012	true	CurveBlendCurvesBlendCrv
+_CSec	Cross Section	true	OM9-CURVE-043	true	CurveCrossSectionProfiles
+_CageEdit	Cage Edit	true	OM9-TRANSFORM-020	true	TransformCageEditingCageEdit
+_ChamferSrf	Chamfer Edge	true	OM9-SURFACE-023	true	SurfaceChamferSurfaces
+_Copy	Duplicate	true	OM9-TOP11-002	true	OM9-TOP11-002
+_CreateUVCrv	Create UV Curves	true	OM9-CURVE-025	true	CurveCurveFromObjectsCreateUVCurves
+_Curve	Curve	true	OM9-CURVE-042	true	CurveFreeFormControlPoints
+_Delete	Delete Face(s)	false	Select T-Spline faces	false	Select T-Spline faces
+_Dir	Curve Direction	true	Dir	true	Dir
+_DupBorder	Dup Border	true	OM9-CURVE-039	true	CurveCurveFromObjectsDuplicateBorder
+_DupEdge	Dup Edge	true	OM9-CURVE-040	true	CurveCurveFromObjectsDuplicateEdge
+_EditPtOn	Edit Points On	true	OM9-TOP11-003	true	OM9-TOP11-003
+_Explode	Explode	true	OM9-TOP11-005	true	OM9-TOP11-005
+_Export	Export	false	No active OM9 handler for _Export	false	No active OM9 handler for _Export
+_ExtractIsocurve	Extract IsoCurve	true	OM9-CURVE-019	true	CurveCurveFromObjectsExtractIsocurve
+_ExtrudeCRV	Extrude	true	OM9-SURFACE-117	true	OM9-SURFACE-117
+_ExtrudeCrv	Extrude	true	OM9-SURFACE-117	true	OM9-SURFACE-117
+_ExtrudeCrvTapered	Extrude Tapered	true	ExtrudeCrvTapered	true	ExtrudeCrvTapered
+_ExtrudeCrvToPoint	Extrude To Point	true	ExtrudeCrvToPoint	true	ExtrudeCrvToPoint
+_ExtrudeCrvToPoint	Extrude to Point	true	ExtrudeCrvToPoint	true	ExtrudeCrvToPoint
+_ExtrudetoPoint	Extrude To Point	false	No active OM9 handler for _ExtrudetoPoint	false	No active OM9 handler for _ExtrudetoPoint
+_FilletEdge	Fillet Edge	true	OM9-SOLID-007	true	OM9-SOLID-007
+_GVGemPositioner	MSR	true	OM9-GEM-033	true	BuilderGemPositioner
+_GVRingRail	Ring Rail	true	OM9-TOOLS-001	true	BuilderRingRail
+_Hide	Hide	false	Select objects first	false	Select objects first
+_InterpCrv	Interp Curve	true	OM9-CURVE-003	true	CurveFreeFormInterpolatePoints
+_Lock	Lock	false	Select objects first	false	Select objects first
+_Loft	Loft	true	OM9-SURFACE-109	true	SurfaceLoft
+_MeshBooleanDifference	Mesh Difference	true	MeshBooleanDifference	true	MeshBooleanDifference
+_MeshBooleanIntersection	Mesh Intersection	true	MeshBooleanIntersection	true	MeshBooleanIntersection
+_MeshBooleanUnion	Mesh Union	true	MeshBooleanUnion	true	MeshBooleanUnion
+_MeshOutline	Mesh Outline	true	MeshOutline	true	MeshOutline
+_MeshSplit	Mesh Split	false	No active OM9 handler for _MeshSplit	false	No active OM9 handler for _MeshSplit
+_MeshTrim	Mesh Trim	false	No active OM9 handler for _MeshTrim	false	No active OM9 handler for _MeshTrim
+_Mirror	Mirror	true	OM9-TOP11-004	true	OM9-TOP11-004
+_NetworkSrf	Curve Network	true	OM9-SURFACE-010	true	SurfaceCurveNetwork
+_Offset	Offset	true	OM9-CURVE-018	true	CurveOffsetCurve
+_Offset	Offset Curve	true	OM9-CURVE-018	true	CurveOffsetCurve
+_Offset _b	Offset Both Sides	false	Enable the Matrix curve tools for this offset preset	true	Offset _b
+_Offset _b _t	Offset Both Sides Pt	false	Enable the Matrix curve tools for this offset preset	true	Offset _b _t
+_Offset _t	Offset Through Pt	false	Enable the Matrix curve tools for this offset preset	true	Offset _t
+_Offset b	Offset Both Sides	false	Enable the Matrix curve tools for this offset preset	true	Offset b
+_Offset b t	Offset Both Sides Pt	false	Enable the Matrix curve tools for this offset preset	true	Offset b t
+_Offset t	Offset Through Pt	false	Enable the Matrix curve tools for this offset preset	true	Offset t
+_PictureFrame	Picture Frame	false	No active OM9 handler for _PictureFrame	false	No active OM9 handler for _PictureFrame
+_PlanarSrf	Make Surface	true	OM9-SURFACE-013	true	SurfacePlanarCurves
+_PointsOff	Control Points Off	true	PointsOff	true	PointsOff
+_PointsOff	Points Off	true	PointsOff	true	PointsOff
+_PointsOn	Control Points On	true	OM9-TOP11-001	true	OM9-TOP11-001
+_PointsOn	Edit Control Points	true	OM9-TOP11-001	true	OM9-TOP11-001
+_PointsOn	Points On	true	OM9-TOP11-001	true	OM9-TOP11-001
+_Project	Project to Surface	true	OM9-CURVE-016	true	CurveCurveFromObjectsProject
+_Pull	Pullback to Surface	true	OM9-CURVE-015	true	CurveCurveFromObjectsPullback
+_Rebuild	Rebuild Surface	true	OM9-CURVE-009	true	OthersCurveRebuild
+_ReduceMesh	Reduce Mesh	true	ReduceMesh	true	ReduceMesh
+_Rotate	Rotate	true	OM9-TOP11-007	true	OM9-TOP11-007
+_SetPt	Set Point	true	OM9-TRANSFORM-030	true	TransformSetPoints
+_SetPt	Set Point Select	true	OM9-TRANSFORM-030	true	TransformSetPoints
+_Show	Show	true	Show	true	Show
+_ShowSelected	ShowSelected	false	No hidden objects to show	false	No hidden objects to show
+_Split	Split	true	OM9-SURFACE-034	true	TopIconSplit
+_Split I	Split with IsoCurve	false	Select one object to split	false	Select one object to split
+_Split P	Split w Point	true	Split P	true	Split P
+_Split Point	Split Point	true	Split Point	true	Split Point
+_Split _I	Split with IsoCurve	false	Select one object to split	false	Select one object to split
+_Split _Point	Split Point	true	Split _Point	true	Split _Point
+_Split p	Split With Pt	true	Split p	true	Split p
+_Sweep1	Sweep 1	true	OM9-SURFACE-101	true	SurfaceSweepSweep1Rail
+_Sweep2	Sweep 2	true	OM9-SURFACE-003	true	SurfaceSweepSweep2Rails
+_Trim	Trim	true	OM9-TOP11-010	true	OM9-TOP11-010
+_Unlock	Unlock	true	Unlock	true	Unlock
+_Untrim	Untrim	true	OM9-SURFACE-017	true	SurfaceSurfaceEditToolsUntrim
+_VariableOffsetSrf	Variable Offset	true	OM9-SURFACE-026	true	SurfaceVariableOffsetSurface
+_ViewCapturetoFile	Viewport to File	true	ViewCapturetoFile	true	ViewCapturetoFile
+_arc	Arc	true	OM9-CURVE-007	true	CurveArcCenterStartAngle
+_arc s	Arc Direction	true	OM9-CURVE-008	true	CurveArcStartEndDirection
+_arcdir	Arc Direction	true	OM9-CURVE-008	true	CurveArcStartEndDirection
+_blend	Blend	true	OM9-CURVE-011	true	CurveBlendCurvesBlendCurves
+_blendcrv	Blend w/ Handles	true	OM9-CURVE-012	true	CurveBlendCurvesBlendCrv
+_blendcrv	Blend with Handles	true	OM9-CURVE-012	true	CurveBlendCurvesBlendCrv
+_chamfer	Chamfer	true	OM9-CURVE-022	true	CurveChamferCurves
+_circle	Cirlce	true	OM9-CURVE-005	true	CurveCircleCenterRadius
+_crv2view	Crv 2 View	true	OM9-CURVE-013	true	CurveCurveFrom2Views
+_crv2view	Crv 2 Views	true	OM9-CURVE-013	true	CurveCurveFrom2Views
+_crvseam	Adjust Curve Seam	true	OM9-CURVE-031	true	CurveCurveEditToolsAdjustClosedCurveSeam
+_csec	Cross Section	true	OM9-CURVE-043	true	CurveCrossSectionProfiles
+_curveboolean	Curve Boolean	true	OM9-CURVE-037	true	CurveCurveEditToolsCurveBoolean
+_divide	Divide	true	OM9-CURVE-036	true	OthersCurveDivideCurve
+_dupborder	Duplicate Border	true	OM9-CURVE-039	true	CurveCurveFromObjectsDuplicateBorder
+_dupedge	Duplicate Edge	true	OM9-CURVE-040	true	CurveCurveFromObjectsDuplicateEdge
+_editpton	Edit Points On	true	OM9-TOP11-003	true	OM9-TOP11-003
+_ellipse	Ellipse	true	OM9-CURVE-006	true	CurveEllipseFromCenter
+_extend	Extend	true	OM9-CURVE-027	true	CurveExtendCurveExtendCurve
+_extractsrf	Extract Surface	true	OM9-SOLID-006	true	OM9-SOLID-006
+_fillet	Fillet	true	OM9-CURVE-021	true	CurveFilletCurves
+_filletcorners	Fillet Corners	true	OM9-CURVE-023	true	CurveFilletCorners
+_fitcrv	Fit	true	OM9-CURVE-010	true	CurveCurveEditToolsRefitToTolerance
+_fitcrv	Fit Curve	true	OM9-CURVE-010	true	CurveCurveEditToolsRefitToTolerance
+_flowalongsrf	Flow Along Surface	true	OM9-TRANSFORM-028	true	TransformFlowAlongSurface
+_group	Group	false	Select at least two objects to group	false	Select at least two objects to group
+_gvAzureCutter	Edit Cutter	true	BuilderGemCutter	true	BuilderGemCutter
+_gvAzureCutter _CutterMode=_Azure	Azure Cutter	true	gvAzureCutter _CutterMode=_Azure	true	gvAzureCutter _CutterMode=_Azure
+_gvAzureCutter _CutterMode=_Gem	Gem Cutter	true	gvAzureCutter _CutterMode=_Gem	true	gvAzureCutter _CutterMode=_Gem
+_gvAzureCutter _CutterMode=_Gem 	Gem Cutter	true	gvAzureCutter _CutterMode=_Gem	true	gvAzureCutter _CutterMode=_Gem
+_gvBaguette	Baguette Gem	true	OM9-GEM-014	true	BuilderBaguette
+_gvBeadOnCrv	Edit Milgrain	false	Editing this existing builder requires its saved construction parameters	false	Editing this existing builder requires its saved construction parameters
+_gvBeadOnCrv	Milgrain	true	BuilderBeadOnCrv	true	BuilderBeadOnCrv
+_gvBezel	Bezel	true	BuilderBezel	true	BuilderBezel
+_gvBezel	Edit Bezel	false	Editing this existing builder requires its saved construction parameters	false	Editing this existing builder requires its saved construction parameters
+_gvBezel _BezelType=_Bezel	Bezel	false	Select a gemstone for the bezel	false	Select a gemstone for the bezel
+_gvBezel _BezelType=_GalleryRail	Gallery Rail	false	Select a gemstone for the bezel	false	Select a gemstone for the bezel
+_gvBezel _BezelType=_UnderBezel	Under Bezel	false	Select a gemstone for the bezel	false	Select a gemstone for the bezel
+_gvBezelCutter	Bezel Cutter	true	BuilderBezelCutter	true	BuilderBezelCutter
+_gvBrightCutChannel	Bright Cutters	true	BuilderBrightCutChannel	true	BuilderBrightCutChannel
+_gvBrightCutter	Bright Cutter	true	BuilderBrightCutter	true	BuilderBrightCutter
+_gvBuilderGemLoader	Gem Loader	true	OM9-GEM-001	true	BuilderGemLoader
+_gvBuilderGemReporter	Gem Reporter	true	BuilderGemReporter	true	BuilderGemReporter
+_gvBuilderHeadsLibrary	Open Head Library	false	No active OM9 handler for _gvBuilderHeadsLibrary	false	No active OM9 handler for _gvBuilderHeadsLibrary
+_gvBuilderRaisedBand	Raised Band	true	gvBuilderRaisedBand	true	gvBuilderRaisedBand
+_gvCenterObjects	Center Object(s)	false	Select objects first	false	Select objects first
+_gvChannelBorder	Channel Border	true	BuilderChannelBorderCurve	true	BuilderChannelBorderCurve
+_gvChannelBuilder	Channel Builder	true	BuilderChannelBuilder	true	BuilderChannelBuilder
+_gvClusterAdvanced	Cluster Builder	false	No active OM9 handler for _gvClusterAdvanced	false	No active OM9 handler for _gvClusterAdvanced
+_gvCustomRingRail	Edit Custom	false	No active OM9 handler for _gvCustomRingRail	false	No active OM9 handler for _gvCustomRingRail
+_gvCutRingRail	Cut to Rail	false	No active OM9 handler for _gvCutRingRail	true	OthersCuttoFingerRail
+_gvDisplay	Display	true	gvDisplay	true	gvDisplay
+_gvEmerald	Emerald Gem	true	OM9-GEM-013	true	BuilderEmerald
+_gvEternity	Eternity Ring	true	gvEternity	true	gvEternity
+_gvExtractIsocurve	Extract Angle IsoCrv	true	OM9-CURVE-044	true	CurveGVExtractIsocurve
+_gvFourSweep	Sweep Multi Rail	true	OM9-SURFACE-032	true	SurfaceSweepSweepMultiRail
+_gvGemControl	Gem Dir Control	true	BuilderGemControl	true	BuilderGemControl
+_gvGemCountOnCrv	Gem Count on Curve	true	BuilderGemCountOnCrv	true	BuilderGemCountOnCrv
+_gvGemGuides GobalToggle	Gem Guides Toggle	false	No active OM9 handler for _gvGemGuides GobalToggle	false	No active OM9 handler for _gvGemGuides GobalToggle
+_gvGemGuides _GobalToggle	Gem Guides Toggle	false	No active OM9 handler for _gvGemGuides _GobalToggle	false	No active OM9 handler for _gvGemGuides _GobalToggle
+_gvGemGuides _Information=_On _Enter	Gem Guide Info	false	No active OM9 handler for _gvGemGuides _Information=_On _Enter	false	No active OM9 handler for _gvGemGuides _Information=_On _Enter
+_gvGemGuides _Information=_On _Enter	Gem Guides Info	false	No active OM9 handler for _gvGemGuides _Information=_On _Enter	false	No active OM9 handler for _gvGemGuides _Information=_On _Enter
+_gvGemGuides _Reset _Enter	Gem Guides off	false	No active OM9 handler for _gvGemGuides _Reset _Enter	false	No active OM9 handler for _gvGemGuides _Reset _Enter
+_gvGemListOnCrv	Gem List on Curve	true	BuilderGemListOnCrv	true	BuilderGemListOnCrv
+_gvGemMap	Gem Map	true	BuilderGemMap	true	BuilderGemMap
+_gvGemOnCrv	Edit Gem on Curve	true	EditGemOnCurve	true	EditGemOnCurve
+_gvGemOnCrv	Gem on Curve	true	BuilderGemOnCrv	true	BuilderGemOnCrv
+_gvGemOnCrv _CuletDir=_Down _SpacingMethod=_Fixed	Gem on Curve Down	true	gvGemOnCrv _CuletDir=_Down _SpacingMethod=_Fixed	true	gvGemOnCrv _CuletDir=_Down _SpacingMethod=_Fixed
+_gvGemOnCrv _CuletDir=_F4 _SpacingMethod=_Fixed	Gem on Curve F4	true	gvGemOnCrv _CuletDir=_F4 _SpacingMethod=_Fixed	true	gvGemOnCrv _CuletDir=_F4 _SpacingMethod=_Fixed
+_gvGemOnCrv _CuletDir=_Object _SpacingMethod=_Fixed	Gem on Curve Obj	true	gvGemOnCrv _CuletDir=_Object _SpacingMethod=_Fixed	true	gvGemOnCrv _CuletDir=_Object _SpacingMethod=_Fixed
+_gvGemOnCrv _ObjectType=_Browser	Object on Curve	false	No active OM9 handler for _gvGemOnCrv _ObjectType=_Browser	false	No active OM9 handler for _gvGemOnCrv _ObjectType=_Browser
+_gvGemOnCrv _ObjectType=_Browser	Object on Curve Brw	false	No active OM9 handler for _gvGemOnCrv _ObjectType=_Browser	false	No active OM9 handler for _gvGemOnCrv _ObjectType=_Browser
+_gvGemOnCrv _ObjectType=_Object	Object on Curve Sel	false	No active OM9 handler for _gvGemOnCrv _ObjectType=_Object	false	No active OM9 handler for _gvGemOnCrv _ObjectType=_Object
+_gvGemOnCrvAdvanced	Gem on Curve Adv	true	BuilderGemOnCrvAdvanced	true	BuilderGemOnCrvAdvanced
+_gvGemPositioner	MSR	true	OM9-GEM-033	true	BuilderGemPositioner
+_gvGemProfile	Gem Profile	true	BuilderGemProfile	true	BuilderGemProfile
+_gvGemProfile	MSR	true	BuilderGemProfile	true	BuilderGemProfile
+_gvGemView	Gem View Off	false	No active OM9 handler for _gvGemView	false	No active OM9 handler for _gvGemView
+_gvGemView	Gem View On	false	No active OM9 handler for _gvGemView	false	No active OM9 handler for _gvGemView
+_gvGemsBetween2Crvs	Gems Between	true	BuilderGemBetweenTwoCurves	true	BuilderGemBetweenTwoCurves
+_gvHaloBuilder	Edit Halo	true	BuilderHalo	true	BuilderHalo
+_gvHaloBuilder	Halo Builder	true	BuilderHalo	true	BuilderHalo
+_gvHeadBuilder	Head Builder	true	BuilderHead	true	BuilderHead
+_gvIconHistory	Icon History	true	gvIconHistory	true	gvIconHistory
+_gvInfoAndSettings	Info and Settings	true	gvInfoAndSettings	true	gvInfoAndSettings
+_gvLayers	Layers	true	gvLayers	true	gvLayers
+_gvLineOnSurface	Line On Surface Edit	false	No active OM9 handler for _gvLineOnSurface	false	No active OM9 handler for _gvLineOnSurface
+_gvMain	Main Menu	true	gvMain	true	gvMain
+_gvMatchAttributes	Match Attributes	true	OthersMatchAttributes	true	OthersMatchAttributes
+_gvMergeProfiles	Merge Profiles	true	OM9-TOOLS-034	true	BuilderProfileMerge
+_gvMeshRepair	Mesh Repair	false	No active OM9 handler for _gvMeshRepair	true	BuilderMeshRepair
+_gvMetalPiece	Edit Metal Piece	false	Editing this existing builder requires its saved construction parameters	false	Editing this existing builder requires its saved construction parameters
+_gvMetalPiece	Metal Piece	true	BuilderMetalPiece	true	BuilderMetalPiece
+_gvMicroProngCutter	Micro Prong Cutter	true	BuilderMicroProngCutter	true	BuilderMicroProngCutter
+_gvOrientGems	Gem on Surface	true	BuilderGemOnSurface	true	BuilderGemOnSurface
+_gvOrientGems	Move On Surface	true	BuilderGemOnSurface	true	BuilderGemOnSurface
+_gvOrientOnSurface	Bead on Surface	true	BuilderBeadOnSurface	true	BuilderBeadOnSurface
+_gvOrientOnSurface _Mode=_Object	Object At F4	false	No active OM9 handler for _gvOrientOnSurface _Mode=_Object	false	No active OM9 handler for _gvOrientOnSurface _Mode=_Object
+_gvOrientonSurface	Bead on Surface	true	BuilderBeadOnSurface	true	BuilderBeadOnSurface
+_gvOutsideRingRail	Edit Outside	true	OM9-TOOLS-003	true	BuilderOutsideRingRail
+_gvOutsideRingRail	Outside Ring Rail	true	OM9-TOOLS-003	true	BuilderOutsideRingRail
+_gvPaveDialog Surface	Pave Dialog	false	No active OM9 handler for _gvPaveDialog Surface	false	No active OM9 handler for _gvPaveDialog Surface
+_gvPaveDialog _Surface	Pave Dialog	false	No active OM9 handler for _gvPaveDialog _Surface	false	No active OM9 handler for _gvPaveDialog _Surface
+_gvProfile	MSR	true	OM9-TOOLS-032	true	BuilderFourProfile
+_gvProfile _Enter _selPrev _gvBezel	Convert To Bezel	false	No active OM9 handler for _gvProfile _Enter _selPrev _gvBezel	false	No active OM9 handler for _gvProfile _Enter _selPrev _gvBezel
+_gvProfile _Enter _selPrev _gvProfileEndCap	Profile Cap	false	No active OM9 handler for _gvProfile _Enter _selPrev _gvProfileEndCap	false	No active OM9 handler for _gvProfile _Enter _selPrev _gvProfileEndCap
+_gvProfileEndCap	Edit	true	OM9-TOOLS-033	true	BuilderProfileEndCap
+_gvProfileEndCap	Profile Cap	true	OM9-TOOLS-033	true	BuilderProfileEndCap
+_gvProfilePlacer	Add Profiles	true	OM9-TOOLS-002	true	BuilderProfilePlacer
+_gvProfilePlacer	MSR	true	OM9-TOOLS-002	true	BuilderProfilePlacer
+_gvProfilePlacer	Profile Placer	true	OM9-TOOLS-002	true	BuilderProfilePlacer
+_gvProfilePlacer _EditShape	Edit Profile Shape	false	No active OM9 handler for _gvProfilePlacer _EditShape	false	No active OM9 handler for _gvProfilePlacer _EditShape
+_gvProfilePlacer _GetAProfile	Replace with Existing	false	No active OM9 handler for _gvProfilePlacer _GetAProfile	false	No active OM9 handler for _gvProfilePlacer _GetAProfile
+_gvProfileSweep	Profile Sweep	true	OM9-SURFACE-005	true	SurfaceSweepProfileSweep
+_gvProjectManager	Projects	true	gvProjectManager	true	gvProjectManager
+_gvProngAdder	Edit Prongs	false	Editing this existing builder requires its saved construction parameters	false	Editing this existing builder requires its saved construction parameters
+_gvProngAdder	Prong Adder	true	BuilderProngAdder	true	BuilderProngAdder
+_gvProngAdder	Prongs	true	BuilderProngAdder	true	BuilderProngAdder
+_gvProngAdder _Drop=1.5	Add Prongs	true	gvProngAdder _Drop=1.5	true	gvProngAdder _Drop=1.5
+_gvProngEditor	Edit Prong	true	BuilderProngEditor	true	BuilderProngEditor
+_gvProngEditor	Edit Single Prong	true	BuilderProngEditor	true	BuilderProngEditor
+_gvProngEditor	Prong Editor	true	BuilderProngEditor	true	BuilderProngEditor
+_gvProngPositioner	Prong Positioner	false	No active OM9 handler for _gvProngPositioner	false	No active OM9 handler for _gvProngPositioner
+_gvProngonSurface	Prong on Surface	true	BuilderProngOnSurface	true	BuilderProngOnSurface
+_gvProngonSurface _diameter=.55 _drop=.25 _height=.55 _taper=0  _fillet=70	Prong on Surface	false	No active OM9 handler for _gvProngonSurface _diameter=.55 _drop=.25 _height=.55 _taper=0  _fillet=70	false	No active OM9 handler for _gvProngonSurface _diameter=.55 _drop=.25 _height=.55 _taper=0  _fillet=70
+_gvPulltoRail	Pull to Ring Rail	true	BuilderPullToRail	true	BuilderPullToRail
+_gvReverseInputBoolean	Boolean	false	No active OM9 handler for _gvReverseInputBoolean	false	No active OM9 handler for _gvReverseInputBoolean
+_gvSignet	Edit	false	Select a Signet with construction history	false	Select a Signet with construction history
+_gvSignet	Signet Ring	true	gvSignet	true	gvSignet
+_gvSmartBlend	Smart Blend	false	No active OM9 handler for _gvSmartBlend	true	gvSmartBlend
+_gvSmartFlow AutoBase	SmartFlow AutoBase	false	No active OM9 handler for _gvSmartFlow AutoBase	false	No active OM9 handler for _gvSmartFlow AutoBase
+_gvSmartMSR	Smart MSR	false	No active OM9 handler for _gvSmartMSR	true	gvSmartMSR
+_gvSmartTarget	Smart Target	false	No active OM9 handler for _gvSmartTarget	true	gvSmartTarget
+_gvSmartTargetAdd	Smart Target Add	false	No active OM9 handler for _gvSmartTargetAdd	true	gvSmartTargetAdd
+_gvSmartTargetOnCrvEnd	Smart Target Curve End	false	No active OM9 handler for _gvSmartTargetOnCrvEnd	true	gvSmartTargetOnCrvEnd
+_gvSmartTargetOnCrvEnd	Smart Target on Curve	false	No active OM9 handler for _gvSmartTargetOnCrvEnd	true	gvSmartTargetOnCrvEnd
+_gvSnaps	Snaps	true	gvSnaps	true	gvSnaps
+_gvStylesLoad	Gem Style Load	true	OthersLoadStyle	true	OthersLoadStyle
+_gvStylesSave	Gem Style Save	true	OthersSaveStyle	true	OthersSaveStyle
+_gvSupportPositioner	MSR	false	No active OM9 handler for _gvSupportPositioner	false	No active OM9 handler for _gvSupportPositioner
+_gvSurfaceView	Surface View	false	No active OM9 handler for _gvSurfaceView	false	No active OM9 handler for _gvSurfaceView
+_gvSurfaceView	Surface View off	false	No active OM9 handler for _gvSurfaceView	false	No active OM9 handler for _gvSurfaceView
+_gvSweep2History	Sweep 2 History	true	OM9-SURFACE-104	true	OM9-SURFACE-104
+_gvSweepHistory	Sweep 1 History	true	OM9-SURFACE-102	true	OM9-SURFACE-102
+_gvTaperBagChannel	Bag Channel	true	BuilderTaperBagChannel	true	BuilderTaperBagChannel
+_gvcrv2viewhistory	Crv 2 View History	false	No active OM9 handler for _gvcrv2viewhistory	true	BuilderCrv2ViewHistory
+_gvcrv2viewhistory	Crv 2 Views History	false	No active OM9 handler for _gvcrv2viewhistory	true	BuilderCrv2ViewHistory
+_gvcutringrail	Cut to Rail	false	No active OM9 handler for _gvcutringrail	true	OthersCuttoFingerRail
+_gvprofileplacer l -selname "outside ring rail"	Profile Between 2 Rails	false	No active OM9 handler for _gvprofileplacer l -selname "outside ring rail"	false	No active OM9 handler for _gvprofileplacer l -selname "outside ring rail"
+_gvpulltorail	Pull to Rail	true	BuilderPullToRail	true	BuilderPullToRail
+_gvringrail	Ring Rail	true	OM9-TOOLS-001	true	BuilderRingRail
+_gvsmartflow	Smart Flow	true	OM9-TRANSFORM-011	true	gvSmartFlow
+_gvtsBezel	Edit	false	No active OM9 handler for _gvtsBezel	false	No active OM9 handler for _gvtsBezel
+_gvtsBezel	TSplines Bezel	false	No active OM9 handler for _gvtsBezel	false	No active OM9 handler for _gvtsBezel
+_gvtsUnderBezel	Edit	false	No active OM9 handler for _gvtsUnderBezel	false	No active OM9 handler for _gvtsUnderBezel
+_gvtsUnderBezel	TSplines Under Bezel	false	No active OM9 handler for _gvtsUnderBezel	false	No active OM9 handler for _gvtsUnderBezel
+_interpcrv	Interp Curve	true	OM9-CURVE-003	true	CurveFreeFormInterpolatePoints
+_join	Join	true	OM9-TOP11-008	true	OM9-TOP11-008
+_line	Line	true	OM9-CURVE-002	true	CurveLineSingleLine
+_loft	Loft	true	OM9-SURFACE-109	true	SurfaceLoft
+_match	Match	true	OM9-CURVE-052	true	CurveCurveEditToolsMatch
+_mirror	Mirror	true	OM9-TOP11-004	true	OM9-TOP11-004
+_networkSrf	Curve Network	true	OM9-SURFACE-010	true	SurfaceCurveNetwork
+_offset	Offset	true	OM9-CURVE-018	true	CurveOffsetCurve
+_offset _b	Offset Both Sides	false	Enable the Matrix curve tools for this offset preset	true	offset _b
+_offset _b _t	Offset Both Sides Pt	false	Enable the Matrix curve tools for this offset preset	true	offset _b _t
+_offset _t	Offset Through Pt	false	Enable the Matrix curve tools for this offset preset	true	offset _t
+_offsetcrvonsrf	Offset Crv on Srf	true	OM9-CURVE-020	true	CurveOffsetOffsetCrvOnSrf
+_offsetcrvonsrf _t	Offset Crv on Srf Pt	false	Enable the Matrix curve tools for this offset preset	true	offsetcrvonsrf _t
+_offsetsrf	Offset Surface	true	OM9-SURFACE-025	true	SurfaceOffsetSurface
+_pipe	Pipe	true	OM9-SOLID-011	true	OM9-SOLID-011
+_point	Point	true	OM9-CURVE-034	true	CurvePointObjectSinglePoint
+_pointsoff	Points Off	true	pointsoff	true	pointsoff
+_pointson	Control Points On	true	OM9-TOP11-001	true	OM9-TOP11-001
+_polygon	Polygon	true	OM9-CURVE-028	true	CurvePolygonCenterRadius
+_polyline	Polyline	true	OM9-CURVE-001	true	CurvePolylinePolyline
+_project	Project	true	OM9-CURVE-016	true	CurveCurveFromObjectsProject
+_project	Project to Surface	true	OM9-CURVE-016	true	CurveCurveFromObjectsProject
+_projecttocplane	Project To CPlane	true	OM9-TRANSFORM-010	true	TransformProjecttoCPlane
+_projecttocplane	Project to CPlane	true	OM9-TRANSFORM-010	true	TransformProjecttoCPlane
+_projecttocplane	Project to Cplane	true	OM9-TRANSFORM-010	true	TransformProjecttoCPlane
+_ptoffselected	Points Off Selected	false	No objects have points turned on	false	No objects have points turned on
+_pullback	Pullback to Surface	true	OM9-CURVE-015	true	OM9-CURVE-015
+_rebuild	Rebuild	true	OM9-CURVE-009	true	OthersCurveRebuild
+_rebuild	Rebuild Crv	true	OM9-CURVE-009	true	OthersCurveRebuild
+_rebuild	Rebuild Surface	true	OM9-CURVE-009	true	OthersCurveRebuild
+_rectangle	Rectangle	true	OM9-CURVE-004	true	CurveRectangleCornertoCorner
+_rotate	Rotate	true	OM9-TOP11-007	true	OM9-TOP11-007
+_scale	Scale 3D	true	OM9-TRANSFORM-001	true	TransformScaleScale3D
+_scale1d	Scale 1D	true	OM9-TRANSFORM-004	true	TransformScaleScale1D
+_scale2d	Scale 2D	true	OM9-TRANSFORM-002	true	TransformScaleScale2D
+_setPT	Set Point	true	OM9-TRANSFORM-030	true	TransformSetPoints
+_split	Split	true	OM9-SURFACE-034	true	TopIconSplit
+_split _p	Split Point	true	split _p	true	split _p
+_split p	Split Point	true	split p	true	split p
+_sweep2	Sweep 2	true	OM9-SURFACE-003	true	SurfaceSweepSweep2Rails
+_trim	Trim	true	OM9-TOP11-010	true	OM9-TOP11-010
+_tsAppend	ts Append	false	No active OM9 handler for _tsAppend	false	No active OM9 handler for _tsAppend
+_tsBevel	ts Bevel	false	No active OM9 handler for _tsBevel	false	No active OM9 handler for _tsBevel
+_tsBridge	ts Bridge	false	No active OM9 handler for _tsBridge	true	ClayooEditBridge
+_tsBridge	ts Bridge Edges	false	No active OM9 handler for _tsBridge	true	ClayooEditBridge
+_tsConvertToRhinosurf	Convert to Nurbs	false	No active OM9 handler for _tsConvertToRhinosurf	false	No active OM9 handler for _tsConvertToRhinosurf
+_tsCrease	Apply Crease	false	No active OM9 handler for _tsCrease	true	ClayooEditCrease
+_tsDuplicateFaces	Duplicate Face(s)	false	Select T-Spline faces	false	Select T-Spline faces
+_tsExtrude	ts Extrude	false	No active OM9 handler for _tsExtrude	true	ClayooEditExtrude
+_tsExtrudeLines	ts Extrude Lines	true	tsExtrudeLines	true	tsExtrudeLines
+_tsFillHole	Fill Hole	false	No active OM9 handler for _tsFillHole	true	ClayooEditFill
+_tsFlattenPoints	ts Flatten Points	false	No active OM9 handler for _tsFlattenPoints	false	No active OM9 handler for _tsFlattenPoints
+_tsFromLines	ts From Lines	true	tsFromLines	true	tsFromLines
+_tsInsertEdge	Insert Edge Exact	false	No active OM9 handler for _tsInsertEdge	false	No active OM9 handler for _tsInsertEdge
+_tsInsertEdge	Insert Edge Simple	false	No active OM9 handler for _tsInsertEdge	false	No active OM9 handler for _tsInsertEdge
+_tsInsertEdgeExact	Insert Edge Exact	false	No active OM9 handler for _tsInsertEdgeExact	false	No active OM9 handler for _tsInsertEdgeExact
+_tsInsertEdgeSimple	Insert Edge Simple	false	No active OM9 handler for _tsInsertEdgeSimple	false	No active OM9 handler for _tsInsertEdgeSimple
+_tsInsertPointExact	Insert Point Exact	false	No active OM9 handler for _tsInsertPointExact	false	No active OM9 handler for _tsInsertPointExact
+_tsInsertPointSimple	Insert Point Simple	false	No active OM9 handler for _tsInsertPointSimple	false	No active OM9 handler for _tsInsertPointSimple
+_tsLayout	ts Edit Layout	false	No active OM9 handler for _tsLayout	false	No active OM9 handler for _tsLayout
+_tsLoft	ts Loft	false	No active OM9 handler for _tsLoft	true	ClayooCreationLoft
+_tsMakeUniform	Make Uniform	false	No active OM9 handler for _tsMakeUniform	false	No active OM9 handler for _tsMakeUniform
+_tsMakeUniform	ts Make Uniform	false	No active OM9 handler for _tsMakeUniform	false	No active OM9 handler for _tsMakeUniform
+_tsMatch	ts Match	false	No active OM9 handler for _tsMatch	true	ClayooEditMatch
+_tsMerge	ts Merge Edges	false	No active OM9 handler for _tsMerge	false	No active OM9 handler for _tsMerge
+_tsPipe	ts Pipe	false	No active OM9 handler for _tsPipe	true	ClayooCreationPipe
+_tsPull	ts Pull	false	No active OM9 handler for _tsPull	true	ClayooEditWrap
+_tsRemoveCreases	Remove Crease	false	No active OM9 handler for _tsRemoveCreases	false	No active OM9 handler for _tsRemoveCreases
+_tsSkin	ts Skin	false	No active OM9 handler for _tsSkin	false	No active OM9 handler for _tsSkin
+_tsSlide	ts Slide	false	No active OM9 handler for _tsSlide	false	No active OM9 handler for _tsSlide
+_tsSmoothToggle	Smooth Toggle	false	No active OM9 handler for _tsSmoothToggle	false	No active OM9 handler for _tsSmoothToggle
+_tsSplitCurves	ts Split Curves	true	tsSplitCurves	true	tsSplitCurves
+_tsStandardize	ts Standardize	false	No active OM9 handler for _tsStandardize	false	No active OM9 handler for _tsStandardize
+_tsSubdivideFaceExact	Subdivide Exact	false	No active OM9 handler for _tsSubdivideFaceExact	false	No active OM9 handler for _tsSubdivideFaceExact
+_tsSubdivideFaceSimple	Subdivide Simple	false	No active OM9 handler for _tsSubdivideFaceSimple	true	ClayooEditDivide
+_tsThicken	ts Thicken	false	No active OM9 handler for _tsThicken	true	ClayooEditShell
+_tsUnweld	ts Unweld Edges	false	No active OM9 handler for _tsUnweld	true	ClayooEditWeld
+_tsWeight	ts Weight Points	false	No active OM9 handler for _tsWeight	false	No active OM9 handler for _tsWeight
+_tsWeld	ts Weld	false	No active OM9 handler for _tsWeld	true	ClayooEditWeld
+_ungroup	Ungroup	false	Select a grouped object	false	Select a grouped object
+noechho !_ClayPipe	Pipe Curves	false	No active OM9 handler for noechho !_ClayPipe	false	No active OM9 handler for noechho !_ClayPipe
+noecho !_-ClayProjectToPlane X enter	Set Edges to CPlane	false	No active OM9 handler for _-ClayProjectToPlane X enter	false	No active OM9 handler for _-ClayProjectToPlane X enter
+noecho !_-ClayProjectToPlane X enter	Set Points to CPlane	false	No active OM9 handler for _-ClayProjectToPlane X enter	false	No active OM9 handler for _-ClayProjectToPlane X enter
+noecho !_-ClayProjectToPlane y enter	Set Edges to Y Axis	false	No active OM9 handler for _-ClayProjectToPlane y enter	false	No active OM9 handler for _-ClayProjectToPlane y enter
+noecho !_-ClayProjectToPlane y enter	Set Points to Y Axis	false	No active OM9 handler for _-ClayProjectToPlane y enter	false	No active OM9 handler for _-ClayProjectToPlane y enter
+noecho !_-ClayProjectToPlane z enter	Set Edges to X Axis	false	No active OM9 handler for _-ClayProjectToPlane z enter	false	No active OM9 handler for _-ClayProjectToPlane z enter
+noecho !_-ClayProjectToPlane z enter	Set Points to X Axis	false	No active OM9 handler for _-ClayProjectToPlane z enter	false	No active OM9 handler for _-ClayProjectToPlane z enter
+noecho !_-ClayToNurbs KeepOriginal=Falso enter 	Convert to Nurbs	false	No active OM9 handler for _-ClayToNurbs KeepOriginal=Falso enter	false	No active OM9 handler for _-ClayToNurbs KeepOriginal=Falso enter
+noecho !_-ClayToNurbs enter	Convert to Nurbs & Keep	false	No active OM9 handler for _-ClayToNurbs enter	false	No active OM9 handler for _-ClayToNurbs enter
+noecho !_-claySymmetry p 0 0,1 enter	Y Axis Symmetry	false	No active OM9 handler for _-claySymmetry p 0 0,1 enter	false	No active OM9 handler for _-claySymmetry p 0 0,1 enter
+noecho !_-claySymmetry p 0 1,0 enter	X Axis Symmetry	false	No active OM9 handler for _-claySymmetry p 0 1,0 enter	false	No active OM9 handler for _-claySymmetry p 0 1,0 enter
+noecho !_-claySymmetry p 0 1,0 p 0 0,1 enter	Quad Symmetry	false	No active OM9 handler for _-claySymmetry p 0 1,0 p 0 0,1 enter	false	No active OM9 handler for _-claySymmetry p 0 1,0 p 0 0,1 enter
+noecho !_ClayAppendFace	Clay Append	false	No active OM9 handler for _ClayAppendFace	true	ClayooCreationAppendFace
+noecho !_ClayBezel	Clay Bezel	false	No active OM9 handler for _ClayBezel	true	ClayooCreationClayooBezel
+noecho !_ClayBezel	Clayoo Bezel	false	No active OM9 handler for _ClayBezel	true	ClayooCreationClayooBezel
+noecho !_ClayBox	Clay Box	false	No active OM9 handler for _ClayBox	true	ClayooPrimitivesBox
+noecho !_ClayBridge	Bridge Faces	false	No active OM9 handler for _ClayBridge	true	ClayooEditBridge
+noecho !_ClayCollapse	Weld Hole	false	No active OM9 handler for _ClayCollapse	true	ClayooEditCollapse
+noecho !_ClayCone	Clay Cone	false	No active OM9 handler for _ClayCone	true	ClayooPrimitivesCone
+noecho !_ClayConvertSurface	Convert to Clay Surface	false	No active OM9 handler for _ClayConvertSurface	true	ClayooCreationFromSurface
+noecho !_ClayConvertSurface Deleteinput=no	Convert to Clayoo (+ Keep Original)	false	No active OM9 handler for _ClayConvertSurface Deleteinput=no	false	No active OM9 handler for _ClayConvertSurface Deleteinput=no
+noecho !_ClayConvertSurface Deleteinput=yes	Convert to Clayoo	false	No active OM9 handler for _ClayConvertSurface Deleteinput=yes	false	No active OM9 handler for _ClayConvertSurface Deleteinput=yes
+noecho !_ClayConvertTspline	Convert to Clay Object	false	No active OM9 handler for _ClayConvertTspline	true	ClayooCreationFromTSplines
+noecho !_ClayCrease	Crease Edge	false	No active OM9 handler for _ClayCrease	true	ClayooEditCrease
+noecho !_ClayCylinder	Clay Cylinder	false	No active OM9 handler for _ClayCylinder	true	ClayooPrimitivesCylinder
+noecho !_ClayDivide	Divide Faces	false	No active OM9 handler for _ClayDivide	true	ClayooEditDivide
+noecho !_ClayEdit	Clayoo HUD      On ║ Off	false	No active OM9 handler for _ClayEdit	false	No active OM9 handler for _ClayEdit
+noecho !_ClayExtrude	Extrude Faces	false	No active OM9 handler for _ClayExtrude	true	ClayooEditExtrude
+noecho !_ClayFill	Fill Hole	false	No active OM9 handler for _ClayFill	true	ClayooEditFill
+noecho !_ClayFrom2Curves	Clay From 2 Curves	false	No active OM9 handler for _ClayFrom2Curves	true	ClayooCreationFrom2Curves
+noecho !_ClayFromCurve	Clay Surface From Curve	false	No active OM9 handler for _ClayFromCurve	true	ClayooCreationFromCurve
+noecho !_ClayGumballMode M	Translate	false	No active OM9 handler for _ClayGumballMode M	false	No active OM9 handler for _ClayGumballMode M
+noecho !_ClayGumballMode R	Rotate	false	No active OM9 handler for _ClayGumballMode R	false	No active OM9 handler for _ClayGumballMode R
+noecho !_ClayGumballMode S	Scale	false	No active OM9 handler for _ClayGumballMode S	false	No active OM9 handler for _ClayGumballMode S
+noecho !_ClayGumballToggle	Gumball           On ║ Off	false	No active OM9 handler for _ClayGumballToggle	false	No active OM9 handler for _ClayGumballToggle
+noecho !_ClayHotKeys	Hot Keys          On ║ Off	false	No active OM9 handler for _ClayHotKeys	false	No active OM9 handler for _ClayHotKeys
+noecho !_ClayLoft	Loft	false	No active OM9 handler for _ClayLoft	true	ClayooCreationLoft
+noecho !_ClayMatch	Match Edge	false	No active OM9 handler for _ClayMatch	true	ClayooEditMatch
+noecho !_ClayMultipleGumball	Multiple Gumballs	false	No active OM9 handler for _ClayMultipleGumball	false	No active OM9 handler for _ClayMultipleGumball
+noecho !_ClayOffset	Offset Faces	false	No active OM9 handler for _ClayOffset	true	ClayooEditOffset
+noecho !_ClayPipe	Pipe Curve	false	No active OM9 handler for _ClayPipe	true	ClayooCreationPipe
+noecho !_ClayPlane	Clay Plane	false	No active OM9 handler for _ClayPlane	true	ClayooPrimitivesPlane
+noecho !_ClayRevolve	Revolve	false	No active OM9 handler for _ClayRevolve	true	ClayooCreationRevolve
+noecho !_ClayRing	Clay Ring	false	No active OM9 handler for _ClayRing	true	ClayooSelectionSelectRing
+noecho !_ClayRing	Clayoo Ring	false	No active OM9 handler for _ClayRing	true	ClayooSelectionSelectRing
+noecho !_ClaySetSelectionMode E	Edge	false	No active OM9 handler for _ClaySetSelectionMode E	false	No active OM9 handler for _ClaySetSelectionMode E
+noecho !_ClaySetSelectionMode F	Face	false	No active OM9 handler for _ClaySetSelectionMode F	false	No active OM9 handler for _ClaySetSelectionMode F
+noecho !_ClaySetSelectionMode O	Object	false	No active OM9 handler for _ClaySetSelectionMode O	false	No active OM9 handler for _ClaySetSelectionMode O
+noecho !_ClaySetSelectionMode V	Vertex	false	No active OM9 handler for _ClaySetSelectionMode V	false	No active OM9 handler for _ClaySetSelectionMode V
+noecho !_ClayShell	Shell	false	No active OM9 handler for _ClayShell	true	ClayooEditShell
+noecho !_ClaySignetRing	Clay Signet	false	No active OM9 handler for _ClaySignetRing	true	ClayooCreationSignetRing
+noecho !_ClaySignetRing	Clay Signet Ring	false	No active OM9 handler for _ClaySignetRing	true	ClayooCreationSignetRing
+noecho !_ClaySignetRing	Clayoo Signet	false	No active OM9 handler for _ClaySignetRing	true	ClayooCreationSignetRing
+noecho !_ClaySphere	Clay Sphere	false	No active OM9 handler for _ClaySphere	true	ClayooPrimitivesSphere
+noecho !_ClaySplitSides	Insert Edge	false	No active OM9 handler for _ClaySplitSides	true	ClayooEditSplitSides
+noecho !_ClayToNurbs	Convert To Nurbs	false	No active OM9 handler for _ClayToNurbs	true	ClayooCreationToNurbs
+noecho !_ClayTorus	Clay Torus	false	No active OM9 handler for _ClayTorus	true	ClayooPrimitivesTorus
+noecho !_ClayUncrease	Uncrease Edge	false	No active OM9 handler for _ClayUncrease	false	No active OM9 handler for _ClayUncrease
+noecho !_ClayWeld	Weld Points	false	No active OM9 handler for _ClayWeld	true	ClayooEditWeld
+noecho !_Dir	Curve Direction	true	Dir	true	Dir
+noecho !_Rebuild	Rebuild Curve	true	OM9-CURVE-009	true	OthersCurveRebuild
+noecho !_Split	Split Curve	true	OM9-SURFACE-034	true	TopIconSplit
+noecho !_rebuild	Rebuild Curves	true	OM9-CURVE-009	true	OthersCurveRebuild
+noecho setactiveviewport "through finger" claysymmetry p 0 1,0 setactiveviewport "perspective" enter	Z Axis Symmetry	false	No active OM9 handler for setactiveviewport "through finger" claysymmetry p 0 1,0 setactiveviewport "perspective" enter	false	No active OM9 handler for setactiveviewport "through finger" claysymmetry p 0 1,0 setactiveviewport "perspective" enter
+noeco !_ClayInset	Inset Faces	false	No active OM9 handler for noeco !_ClayInset	false	No active OM9 handler for noeco !_ClayInset
+noeho !_-claySymmetry n enter	Break Symmetry	false	No active OM9 handler for noeho !_-claySymmetry n enter	false	No active OM9 handler for noeho !_-claySymmetry n enter

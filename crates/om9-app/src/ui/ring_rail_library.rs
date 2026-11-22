@@ -22,15 +22,18 @@ impl MatrixApp {
         });
         if selected != previous { let result = self.controller.select_ring_rail_shape(&selected); self.feedback(result); }
         if self.controller.ring_rail_selected_shape().is_some() { ui.small("Size sets the inner circumference; shape scales uniformly."); }
-        if !self.builder_ui.rail_library_open { return; }
-        let mut open = true;
+    }
+
+    pub(super) fn ring_rail_library_body(&mut self, ui: &mut egui::Ui) {
+        let names = self.controller.ring_rail_shape_names();
+        let editable = !self.controller.join_history_worker_pending()
+            && (self.controller.addon_builder().is_some() || self.controller.builder_editable());
         let mut add = false;
         let mut save = false;
         let mut choose = None;
         let mut edit = None;
         let mut discard = false;
-        egui::Window::new("Ring Rail shapes").id(egui::Id::new("ring-rail-shape-library"))
-            .open(&mut open).default_width(520.).vscroll(true).show(ui.ctx(), |ui| {
+        ui.scope(|ui| {
                 ui.label("Draw a closed curve in the Front view around F4, then select it.");
                 ui.horizontal(|ui| {
                     ui.label("Name");
@@ -103,8 +106,7 @@ impl MatrixApp {
             if result.is_ok() { self.builder_ui.rail_edit_curve = None; }
             self.feedback(result);
         }
-        if discard || !open { self.builder_ui.rail_edit_curve = None; self.builder_ui.rail_error = None; }
-        self.builder_ui.rail_library_open = open;
+        if discard { self.builder_ui.rail_edit_curve = None; self.builder_ui.rail_error = None; }
     }
 }
 

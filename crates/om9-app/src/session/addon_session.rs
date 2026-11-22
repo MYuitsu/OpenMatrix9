@@ -21,7 +21,7 @@ use om9_core::{
 use serde_json::Value;
 
 /// Samples drawn per previewed curve.
-const PREVIEW_SAMPLES: usize = 129;
+pub(super) const PREVIEW_SAMPLES: usize = 129;
 /// Most selected objects described to an add-on per step.
 const MAX_SELECTION: usize = 20_000;
 /// Most triangles sent with the selection to a `mesh_data` command per step.
@@ -98,6 +98,7 @@ pub(super) fn boolean_source_mesh(mesh: &Mesh, placement: &Transform, k: f64, to
 
 #[derive(Debug, Clone)]
 pub struct AddonSession {
+    extract_edges: Option<std::sync::Arc<super::tspline_edges::ExtractEdges>>,
     prompt_session: uuid::Uuid,
     prompt_revision: u64,
     pub code: String,
@@ -525,6 +526,10 @@ fn preview_lines(g: &Geo, k: f64, limits: &om9_core::budget::Limits) -> Vec<[Poi
     let strip =
         |pts: &[Point3]| -> Vec<[Point3; 2]> { pts.windows(2).map(|w| [w[0], w[1]]).collect() };
     match g {
+        Geo::Line { start, end } => {
+            let (a,b) = (doc(*start,k), doc(*end,k));
+            if a != b && a.iter().chain(&b).all(|v| v.is_finite()) { vec![[a,b]] } else { Vec::new() }
+        }
         Geo::Point { point } => {
             let p = doc(*point, k);
             let d = 0.3 / k;
@@ -1396,8 +1401,25 @@ impl Controller {
             .as_ref()
             .and_then(|h| h.lock().ok()?.command_info(code))
             .is_some_and(|i| i.command.brep_data);
+        self.start_interactive_session(code, label, owner, mesh_data, brep_data)
+    }
+
+    pub(super) fn start_mesh_outline(&mut self) -> Result<()> {
+        self.start_interactive_session("MeshOutline", "Mesh Outline", "om9".into(), false, false)
+    }
+
+    pub(super) fn start_reduce_mesh(&mut self) -> Result<()> {
+        self.start_interactive_session("ReduceMesh", "Reduce Mesh", "om9".into(), false, false)
+    }
+
+    pub(super) fn start_mesh_boolean(&mut self, op: super::mesh_boolean::MeshBoolean) -> Result<()> {
+        self.start_interactive_session(op.name(), op.label(), "om9".to_owned(), true, false)
+    }
+
+    pub(super) fn start_interactive_session(&mut self, code: &str, label: &str, owner: String, mesh_data: bool, brep_data: bool) -> Result<()> {
         self.cancel();
         self.addon_session = Some(AddonSession {
+            extract_edges: if code == super::tspline_edges::OFFSET && owner == "om9" { Some(std::sync::Arc::new(super::tspline_edges::ExtractEdges::capture(self)?)) } else { None },
             prompt_session: uuid::Uuid::new_v4(),
             prompt_revision: 0,
             code: code.to_owned(),
@@ -1452,9 +1474,26 @@ impl Controller {
             }
             return Err(Error::Stale("Boolean Builder source; restart command"));
         }
-        let capture_boolean_sources = session.code == "BuilderBooleanBuilder"
+        let mesh_op = super::mesh_boolean::MeshBoolean::from_name(&session.code);
+        let extrude_lines = matches!(session.code.as_str(),super::extrude_lines::CODE | super::extrude_lines::tapered::CODE) && session.owner == "om9";
+        let extrude_point = session.code == super::extrude_point::CODE && session.owner == "om9";
+        let from_lines = session.code == super::from_lines::CODE && session.owner == "om9";
+        let split_curves = session.code == super::split_curves::CODE && session.owner=="om9";
+        let reduce = session.code == "ReduceMesh";
+        let outline = session.code == "MeshOutline";
+        let ts_plane = session.code == "tsPlane" && session.owner == "om9";
+        let pick_edges = self.collecting_cage_edges();
+        if pick_edges && matches!(&input,Input::Option{name,..} if name=="Offset") {
+            if self.tspline_component_kind()!=Some(om9_scene::scene::PickKind::Edge) { return Err(Error::Invalid("Select T-Spline edges")); }
+            return self.extract_cage_edges(true);
+        }
+        let extract_edges = session.extract_edges.clone();
+        let ts_pivot = session.code == "tsManipSetPivot" && session.owner == "om9";
+        let ts_axis = super::tspline_manipulator::numeric_axis(&session.code).filter(|_| session.owner == "om9");
+        let mesh_groups = mesh_op.is_some_and(|op| op != super::mesh_boolean::MeshBoolean::Union);
+        let capture_boolean_sources = (session.code == "BuilderBooleanBuilder" || mesh_groups)
             && session.boolean_sources.is_empty() && matches!(input, Input::Enter);
-        let boolean_tolerance = if session.code == "BuilderBooleanBuilder" {
+        let boolean_tolerance = if mesh_op.is_some() || session.code == "BuilderBooleanBuilder" {
             Some(self.document().effective_tolerance()?.absolute_mm)
         } else { None };
         let candidate_sources = if capture_boolean_sources {
@@ -1486,7 +1525,7 @@ impl Controller {
                 (key, json)
             })
             .collect();
-        if session.code == "BuilderBooleanBuilder" {
+        if mesh_op.is_some() || session.code == "BuilderBooleanBuilder" {
             settings.insert("_om9_document_tolerance_mm".into(), Value::from(boolean_tolerance.expect("Boolean tolerance")));
         }
         if matches!(session.code.as_str(), "BuilderRingRail" | "TopIconRingRail")
@@ -1495,7 +1534,7 @@ impl Controller {
                 settings.insert("_om9_ring_rail_shape".into(), serde_json::to_value(shape).map_err(|_| Error::Invalid("custom Ring Rail shape"))?);
             }
         let current: Vec<_> = self.selection.iter().copied().collect();
-        let preview_definitions = if session.code == "BuilderBooleanBuilder" {
+        let preview_definitions = if session.code == "BuilderBooleanBuilder" || (mesh_groups && capture_boolean_sources) {
             Some(self.boolean_selection_definitions()?)
         } else { None };
         let accepted_definitions = if capture_boolean_sources { preview_definitions.clone() } else { None };
@@ -1522,7 +1561,14 @@ impl Controller {
             } else { Vec::new() };
         let worker = session.reply.state.get("objects").and_then(Value::as_array).is_some_and(|objects|
             worker_roots.iter().any(|id| !objects.iter().any(|object| object.get(0).and_then(Value::as_str) == Some(id.to_string().as_str()))));
-        let event = Event {
+        let selection = if mesh_op.is_some() && matches!(input, Input::Enter) {
+            self.selected_ordered().into_iter().map(|id| Selected { id: id.to_string(), ..Default::default() }).collect()
+        } else if worker || mesh_op.is_some() || reduce || extrude_point || extrude_lines || from_lines || split_curves || outline || ts_plane || ts_pivot || extract_edges.is_some() || pick_edges || ts_axis.is_some() {
+            Vec::new()
+        } else {
+            self.session_selection(k, session.mesh_data, session.brep_data, session.code == "BuilderBooleanBuilder")?
+        };
+        let mut event = Event {
             command: session.code.clone(),
             input,
             state: session.reply.state.clone(),
@@ -1531,31 +1577,70 @@ impl Controller {
                 x: plane.x,
                 y: plane.y,
             },
-            selection: if worker { Vec::new() } else { self.session_selection(k, session.mesh_data, session.brep_data, session.code == "BuilderBooleanBuilder")? },
+            selection,
             pick: session.pick.map(|p| mm(p, k)),
             settings,
         };
         if worker {
                 let preview = matches!(event.input, Input::Selection);
-                return self.request_boolean_builder_worker(event, preview, worker_roots, k);
+                return self.request_boolean_builder_worker(event, preview, Some(worker_roots), k);
             }
-        let bytes = serde_json::to_vec(&event).map_err(|e| Error::Io(e.to_string()))?;
-        let host = self
-            .addons
-            .clone()
-            .ok_or(Error::Unsupported("add-on host"))?;
-        let answer = host
-            .lock()
-            .map_err(|_| Error::Io("add-on host poisoned".into()))?
-            .session(&event.command, &bytes);
-        let reply: Reply = match answer {
-            Ok(bytes) => serde_json::from_slice(&bytes)
-                .map_err(|e| Error::Io(format!("{}: trả lời không hợp lệ: {e}", event.command)))?,
-            Err(e) => {
-                if !hover {
-                    self.cancel_addon_session();
+        let center_edges = if pick_edges && event.input==Input::Enter { Some(super::tspline_edges::ExtractEdges::capture(self)?) } else { None };
+        let reply: Reply = if pick_edges {
+            Reply { prompt:"Select T-Spline edges, Enter to extract".into(),want:Want::Objects,
+                options:vec![s::OptionToken::action("Offset")],done:center_edges.is_some(),..Default::default() }
+        } else if let Some(extract) = &extract_edges {
+            extract.step(self, &event)?
+        } else if let Some(axis) = ts_axis {
+            self.cage_number_step(axis, &event)?
+        } else if ts_pivot {
+            self.cage_pivot_step(&event)?
+        } else if ts_plane {
+            super::tspline_faces::plane_step(&event, self.coordinator.limits())?
+        } else if outline {
+            self.mesh_outline_step(&event.input)?
+        } else if extrude_point {
+            self.extrude_point_step(&event)?
+        } else if extrude_lines {
+            self.extrude_lines_step(&event)?
+        } else if from_lines {
+            self.from_lines_step(&event.input)?
+        } else if split_curves {
+            self.split_curves_step(&event.input)?
+        } else if reduce {
+            self.reduce_mesh_step(&event.input)?
+        } else if let Some(op) = mesh_op {
+            match op.step(&mut event)? {
+                Some(reply) => reply,
+                None if self.background_boolean_builder => {
+                    // Union has one selection stage and therefore no earlier accepted-source stamp.
+                    if let Some(session) = self.addon_session.as_mut() {
+                        session.boolean_source_tolerance = boolean_tolerance;
+                    }
+                    return self.request_boolean_builder_worker(event, false, None, k);
                 }
-                return Err(Error::Io(e));
+                None => super::mesh_boolean::Operands::read(&event)?.compute(
+                    self.document(), event.clone(), self.coordinator.limits(), &Default::default())?,
+            }
+        } else {
+            let bytes = serde_json::to_vec(&event).map_err(|e| Error::Io(e.to_string()))?;
+            let host = self
+                .addons
+                .clone()
+                .ok_or(Error::Unsupported("add-on host"))?;
+            let answer = host
+                .lock()
+                .map_err(|_| Error::Io("add-on host poisoned".into()))?
+                .session(&event.command, &bytes);
+            match answer {
+                Ok(bytes) => serde_json::from_slice(&bytes)
+                    .map_err(|e| Error::Io(format!("{}: trả lời không hợp lệ: {e}", event.command)))?,
+                Err(e) => {
+                    if !hover {
+                        self.cancel_addon_session();
+                    }
+                    return Err(Error::Io(e));
+                }
             }
         };
         if event.settings.contains_key("_om9_ring_rail_shape") && reply.error.is_none()
@@ -1567,8 +1652,9 @@ impl Controller {
             && let Some(session) = self.addon_session.as_mut() {
                 if let Some(definitions) = accepted_definitions { session.boolean_definitions = definitions; }
                 session.boolean_source_tolerance = boolean_tolerance;
+                let accepted: std::collections::BTreeSet<_> = objects.iter().filter_map(|entry| entry.get(0)?.as_str()).collect();
                 for (id, stamp) in candidate_sources {
-                    if objects.iter().any(|entry| entry.get(0).and_then(Value::as_str) == Some(id.to_string().as_str())) {
+                    if accepted.contains(id.to_string().as_str()) {
                         session.boolean_sources.insert(id, stamp);
                     }
                 }
@@ -1609,7 +1695,23 @@ impl Controller {
             let before_revision = self.document().revision;
             if !canonical_ring { self.addon_session = None; }
             self.addon_last = Some(code.clone());
-            let created = self.commit_session_result(&code, &label, &reply, &seen)?;
+            let created = if extrude_point || extrude_lines { reply.state.as_u64().unwrap_or_default() as usize } else if from_lines { 1 } else if split_curves { 0 } else if let Some(extract) = center_edges {
+                extract.publish_center(self,false)?
+            } else if let Some(extract) = extract_edges {
+                extract.finish_offset(self, &reply)?
+            } else if ts_axis.is_some() {
+                self.commit_cage_number(&reply)?;
+                0
+            } else if ts_pivot {
+                let Input::Point { point }=event.input else {return Err(Error::Missing("pivot point"))};
+                self.set_cage_pivot(point.map(|v|v/k))?;
+                0
+            } else if ts_plane {
+                self.commit_tspline_plane(&reply)?;
+                1
+            } else {
+                self.commit_session_result(&code, &label, &reply, &seen)?
+            };
             self.addon_session = None;
             // The command's panel closes with it, however it was finished (Enter in the
             // command line, right-click, Accept); its values become the next defaults.
@@ -1625,7 +1727,7 @@ impl Controller {
                 self.events.emit(
                     crate::command_events::EventKind::Finished,
                     &code,
-                    &if replacing_ring { if before_revision == self.document().revision { "Ring Rail unchanged".into() } else { "Ring Rail replaced".into() } } else { format!("created {created} objects") },
+                    &if split_curves { reply.messages.last().cloned().unwrap_or_default() } else if ts_axis.is_some() { "Manipulator applied".into() } else if ts_pivot { "Pivot placed".into() } else if replacing_ring { if before_revision == self.document().revision { "Ring Rail unchanged".into() } else { "Ring Rail replaced".into() } } else { format!("created {created} objects") },
                     Some(crate::command_events::EventOutcome::Committed),
                 );
             }
@@ -1642,6 +1744,7 @@ impl Controller {
             session.prompt_revision = session.prompt_revision.wrapping_add(1);
             session.rubber_from = reply.rubber_from.map(|p| doc(p, k));
             session.hover_lines.clear();
+            if extrude_point || extrude_lines { session.hover_at = None; }
             session.lines = lines;
             session.reply = reply;
         }
@@ -1699,7 +1802,35 @@ impl Controller {
         let Some(code) = self.addon_last.clone() else {
             return Ok(false);
         };
-        self.run_addon_command(&code)?;
+        if let Some(axis) = super::tspline_manipulator::numeric_axis(&code) {
+            self.start_cage_handle_entry(axis)?;
+        } else if code == super::tspline_edges::PICK {
+            self.start_edge_selection()?;
+        } else if code == super::tspline_edges::OFFSET {
+            self.extract_cage_edges(true)?;
+        } else if code == "tsManipSetPivot" {
+            self.start_cage_pivot()?;
+        } else if code == "tsPlane" {
+            self.start_tspline_plane()?;
+        } else if code == super::extrude_point::CODE {
+            self.start_extrude_point()?;
+        } else if code == super::extrude_lines::tapered::CODE {
+            self.start_tapered()?;
+        } else if code == super::extrude_lines::CODE {
+            self.start_extrude_lines()?;
+        } else if code == super::from_lines::CODE {
+            self.start_from_lines()?;
+        } else if code == super::split_curves::CODE {
+            self.start_split_curves()?;
+        } else if code == "ReduceMesh" {
+            self.start_reduce_mesh()?;
+        } else if code == "MeshOutline" {
+            self.start_mesh_outline()?;
+        } else if let Some(op) = super::mesh_boolean::MeshBoolean::from_name(&code) {
+            self.start_mesh_boolean(op)?;
+        } else {
+            self.run_addon_command(&code)?;
+        }
         Ok(true)
     }
 
@@ -1707,6 +1838,7 @@ impl Controller {
     /// window adds to what was picked before, instead of replacing it (the command reads the
     /// earlier picks from the selection).
     pub fn addon_collects_objects(&self) -> bool {
+        if self.isolated_selection.is_some() { return true; }
         self.addon_session
             .as_ref()
             .is_some_and(|s| matches!(s.reply.want, Want::Objects))
@@ -1724,6 +1856,36 @@ impl Controller {
 
     /// Called every frame: a session waiting for objects hears about selection changes.
     pub fn refresh_addon_session(&mut self) {
+        if self.addon_session.as_ref().and_then(|s|s.extract_edges.as_ref()).is_some_and(|edges|!edges.current(self)) {
+            self.cancel_addon_session();
+            self.addon_messages.push("Extract Edges Offset: source selection changed".into());
+            return;
+        }
+        if self.extrude_point.as_ref().is_some_and(|s| !s.current(self)) {
+            self.cancel_addon_session();
+            self.addon_messages.push("ExtrudeCrvToPoint: inputs changed".into());
+            return;
+        }
+        if self.extrude_lines.as_ref().is_some_and(|s| !s.current(self)) {
+            self.cancel_addon_session();
+            self.addon_messages.push("Extrude Lines: inputs changed".into());
+            return;
+        }
+        if self.from_lines.as_ref().is_some_and(|s|!s.current(self)) {
+            self.cancel_addon_session();
+            self.addon_messages.push("From Lines: inputs changed".into());
+            return;
+        }
+        if self.split_curves.as_ref().is_some_and(|s|!s.current(self)) {
+            self.cancel_addon_session();
+            self.addon_messages.push("Split Curves: inputs changed".into());
+            return;
+        }
+        if self.reduce_mesh.as_ref().is_some_and(|r| !r.sources_current(self.document())) {
+            self.cancel_addon_session();
+            self.addon_messages.push("Reduce Mesh: source changed".into());
+            return;
+        }
         if self.boolean_builder_worker_pending() { return; }
         let Some(s) = self.addon_session.as_ref() else {
             return;
@@ -1831,9 +1993,11 @@ impl Controller {
         // Coordinates and numbers belong to the session; another command name closes it.
         let k = self.document().page_unit.factor();
         let plane = self.input_plane();
-        let last = session.last_point.map(|p| mm(p, k));
+        let cage_coordinates = session.owner == "om9" && matches!(session.code.as_str(), "tsPlane" | "tsManipSetPivot" | super::tspline_edges::OFFSET | super::extrude_lines::CODE | super::extrude_lines::tapered::CODE | super::extrude_point::CODE);
+        let coordinate_unit = if cage_coordinates { 1.0 } else { k };
+        let last = session.last_point.map(|p| mm(p, coordinate_unit));
         let splane = s::Plane {
-            origin: mm(plane.origin, k),
+            origin: mm(plane.origin, coordinate_unit),
             x: plane.x,
             y: plane.y,
         };
@@ -1847,8 +2011,9 @@ impl Controller {
         if let Some(p) = s::parse_point(t, &splane, last)
             && matches!(session.reply.want, Want::Point)
         {
-            let point = doc(p, k);
-            self.session_step(Input::Point { point: p })?;
+            let point = doc(p, coordinate_unit);
+            let millimetres = if cage_coordinates { mm(p,k) } else { p };
+            self.session_step(Input::Point { point: millimetres })?;
             if let Some(s) = self.addon_session.as_mut() {
                 s.last_point = Some(point);
             }
@@ -1860,6 +2025,11 @@ impl Controller {
 
     /// Esc: close the session; nothing is created.
     pub fn cancel_addon_session(&mut self) -> bool {
+        self.reduce_mesh = None;
+        self.split_curves = None;
+        self.from_lines = None;
+        self.restore_extrude_inputs();
+        self.restore_extrude_point_inputs();
         if self.addon_session.as_ref().is_some_and(|session| matches!(session.code.as_str(), "BuilderRingRail" | "TopIconRingRail")) { self.ring_rail_replace = None; }
         self.cancel_boolean_builder_worker();
         match self.addon_session.take() {
@@ -1951,6 +2121,7 @@ impl Controller {
         NEW_BREPS.with(|c| c.borrow_mut().clear());
         let mut mutations = Vec::new();
         let mut created_ids = Vec::new();
+        let mut explicit_layers = std::collections::BTreeSet::new();
         for g in &reply.create {
             let (geometry, meta, name) = to_geometry(g, k)?;
             let layer = layer_of(g)
@@ -1972,11 +2143,15 @@ impl Controller {
                 entity.extensions.insert(GEM_EXTENSION_SLOT.to_owned(), x);
             }
             created_ids.push(entity.id);
+            if layer_of(g).is_some() { explicit_layers.insert(entity.id); }
             mutations.push(Mutation::Insert {
                 document: self.document,
                 entity,
             });
         }
+        let creation_count = mutations.len();
+        self.route_gem_inserts(&mut mutations, &explicit_layers)?;
+        let added_layer_count = mutations.len() - creation_count;
         let selected = |id: &str| -> Result<om9_core::identity::ObjectId> {
             self.selection
                 .iter()
@@ -2116,8 +2291,12 @@ impl Controller {
         }
         let scene = self.scene.as_ref().ok_or(Error::Missing("command scene"))?;
         if scene.epoch != self.coordinator.epoch() { return Err(Error::Stale("command scene")); }
-        let count = mutations.len();
+        let count = mutations.len() - added_layer_count;
         let undo_label = crate::icons::icon_name(code).unwrap_or(label).to_owned();
+        if code == "MeshOutline" {
+            self.publish_request_with_selection(TransactionRequest::new(&undo_label, mutations), Some(&created_ids))?;
+            return Ok(count);
+        }
         let touches_history = mutations.iter().any(|mutation| match mutation {
             Mutation::Geometry { source, .. } | Mutation::Placement { source, .. } | Mutation::Delete { source } =>
                 self.source_edits_update_join_history(std::slice::from_ref(&source.object)),

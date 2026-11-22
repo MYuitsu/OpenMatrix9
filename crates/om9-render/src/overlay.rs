@@ -23,6 +23,9 @@ struct LineVertex {
 struct Uniforms {
     view_projection: [[f32; 4]; 4],
     model: [[f32; 4]; 4],
+    depth_plane: [f32; 4],
+    viewport: [f32; 2],
+    padding: [f32; 2],
 }
 
 /// A line list that is rebuilt whenever the scene or the view changes.
@@ -30,6 +33,8 @@ pub struct OverlayBatch {
     device: wgpu::Device,
     queue: wgpu::Queue,
     pipeline: wgpu::RenderPipeline,
+    wire_pipeline: Option<wgpu::RenderPipeline>,
+    samples: u32,
     bind_layout: wgpu::BindGroupLayout,
     upload_cursor: usize,
     batch: LineBatch,
@@ -56,7 +61,12 @@ impl OverlayBatch {
         Self::with_depth_mode(device, queue, samples, true)
     }
 
-    fn with_depth_mode(device: wgpu::Device, queue: wgpu::Queue, samples: u32, on_top: bool) -> Self {
+    fn with_depth_mode(
+        device: wgpu::Device,
+        queue: wgpu::Queue,
+        samples: u32,
+        on_top: bool,
+    ) -> Self {
         let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("overlay lines"),
             source: wgpu::ShaderSource::Wgsl(
@@ -77,7 +87,9 @@ impl OverlayBatch {
                 fn vs_main(input: VertexIn) -> VertexOut {
                     var out: VertexOut;
                     out.clip = uniforms.view_projection * uniforms.model * vec4<f32>(input.position, 1.0);
+                    if input.colour.a == -1.0 { out.clip.z = -out.clip.w; }
                     out.colour = input.colour;
+                    out.colour.a = select(input.colour.a, 1.0, input.colour.a < 0.0);
                     return out;
                 }
 
@@ -139,7 +151,11 @@ impl OverlayBatch {
             depth_stencil: Some(wgpu::DepthStencilState {
                 format: wgpu::TextureFormat::Depth32Float,
                 depth_write_enabled: Some(false),
-                depth_compare: Some(if on_top { wgpu::CompareFunction::Always } else { wgpu::CompareFunction::LessEqual }),
+                depth_compare: Some(if on_top {
+                    wgpu::CompareFunction::Always
+                } else {
+                    wgpu::CompareFunction::LessEqual
+                }),
                 stencil: wgpu::StencilState::default(),
                 bias: wgpu::DepthBiasState::default(),
             }),
@@ -165,6 +181,8 @@ impl OverlayBatch {
             device,
             queue,
             pipeline,
+            wire_pipeline: None,
+            samples,
             bind_layout: layout,
             upload_cursor: 0,
             batch: LineBatch::default(),
@@ -194,6 +212,74 @@ impl OverlayBatch {
         self.batch.line(a, b, colour);
     }
 
+    /// Thin surface isocurve drawn only by the Wireframe pass.
+    pub fn isocurve(&mut self, a: [f64; 3], b: [f64; 3], mut colour: [f32; 4]) {
+        colour[3] = -1.0;
+        self.wire(a, b, colour);
+    }
+
+    /// The kernel's default plane frame is used in Shaded. Wireframe supplies
+    /// the gem's authored facet frame in its place.
+    pub fn shaded_isocurve(&mut self, a: [f64; 3], b: [f64; 3], mut colour: [f32; 4]) {
+        colour[3] = -2.0;
+        self.wire(a,b,colour);
+    }
+
+    /// Mark only model curves, edges and surface guides for Wireframe styling.
+    pub fn wire(&mut self, a: [f64; 3], b: [f64; 3], colour: [f32; 4]) {
+        let start = self.batch.vertices.len();
+        self.batch.line(a, b, colour);
+        if let Some(last) = self.batch.wires.last_mut()
+            && last.end == start
+        {
+            last.end += 2;
+        } else {
+            self.batch.wires.push(start..start + 2);
+        }
+        let bounds = self.batch.wire_bounds.get_or_insert([a, a]);
+        for i in 0..3 {
+            bounds[0][i] = bounds[0][i].min(a[i]).min(b[i]);
+            bounds[1][i] = bounds[1][i].max(a[i]).max(b[i]);
+        }
+    }
+
+    /// Normalize depth over visible model-wire bounds, including the live preview transform.
+    pub fn wire_depth_plane<'a>(
+        camera: Camera,
+        batches: impl IntoIterator<Item = &'a Self>,
+    ) -> [f32; 4] {
+        let direction = crate::normalize(crate::sub(camera.target, camera.eye));
+        let mut near = f64::INFINITY;
+        let mut far = f64::NEG_INFINITY;
+        for batch in batches {
+            let Some([min, max]) = batch.batch.wire_bounds else {
+                continue;
+            };
+            let project_column = |col: usize| {
+                (0..3)
+                    .map(|i| f64::from(direction[i]) * f64::from(batch.model[col][i]))
+                    .sum::<f64>()
+            };
+            let mut range = [project_column(3); 2];
+            for i in 0..3 {
+                let axis = project_column(i);
+                range[0] += (min[i] * axis).min(max[i] * axis);
+                range[1] += (min[i] * axis).max(max[i] * axis);
+            }
+            near = near.min(range[0]);
+            far = far.max(range[1]);
+        }
+        let eye = f64::from(crate::dot(camera.eye, direction));
+        near = near.max(eye + f64::from(camera.near));
+        far = far.min(eye + f64::from(camera.far));
+        let span = far - near;
+        if span <= 1e-6 * near.abs().max(far.abs()).max(1.) {
+            return [0., 0., 0., 0.5];
+        }
+        let axis = direction.map(|v| (f64::from(v) / span) as f32);
+        [axis[0], axis[1], axis[2], (-near / span) as f32]
+    }
+
     pub fn point(&mut self, point: [f64; 3], size: f64, colour: [f32; 4]) {
         self.batch.point(point, size, colour);
     }
@@ -221,11 +307,16 @@ impl OverlayBatch {
         let counts = self.counts.clone();
         let model = self.model;
         let on_top = self.on_top;
+        let wires = self.batch.wires.clone();
+        let bounds = self.batch.wire_bounds;
         Box::new(move || {
             let mut fork = Self::with_depth_mode(device, queue, samples, on_top);
             fork.buffers = buffers;
             fork.counts = counts;
             fork.model = model;
+            fork.batch.wires = wires;
+            fork.batch.wire_bounds = bounds;
+            fork.prepare_wire_pipeline();
             fork
         })
     }
@@ -235,7 +326,52 @@ impl OverlayBatch {
             std::array::from_fn(|column| std::array::from_fn(|row| row_major[row][column]));
     }
 
-    /// Uploads the current lines, split into buffers of at most 4M vertices (48 MB).
+    fn prepare_wire_pipeline(&mut self) {
+        if self.batch.wires.is_empty() || self.wire_pipeline.is_some() {
+            return;
+        }
+        let shader = self
+            .device
+            .create_shader_module(wgpu::ShaderModuleDescriptor {
+                label: Some("depth-cued model wires"),
+                source: wgpu::ShaderSource::Wgsl(include_str!("wire.wgsl").into()),
+            });
+        let layout = self
+            .device
+            .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("model wires"),
+                bind_group_layouts: &[Some(&self.bind_layout)],
+                immediate_size: 0,
+            });
+        self.wire_pipeline = Some(self.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("depth-cued model wires"),
+            layout: Some(&layout),
+            vertex: wgpu::VertexState {
+                module: &shader, entry_point: Some("wire"), compilation_options: Default::default(),
+                buffers: &[Some(wgpu::VertexBufferLayout {
+                    array_stride: (2 * std::mem::size_of::<LineVertex>()) as u64,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x4, 2 => Float32x3],
+                })],
+            },
+            primitive: wgpu::PrimitiveState { topology: wgpu::PrimitiveTopology::TriangleStrip, ..Default::default() },
+            depth_stencil: Some(wgpu::DepthStencilState {
+                format: wgpu::TextureFormat::Depth32Float,
+                depth_write_enabled: Some(true), depth_compare: Some(wgpu::CompareFunction::LessEqual),
+                stencil: Default::default(), bias: Default::default(),
+            }),
+            multisample: wgpu::MultisampleState { count: self.samples, ..Default::default() },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader, entry_point: Some("shade"), compilation_options: Default::default(),
+                targets: &[Some(wgpu::ColorTargetState {
+                    format: wgpu::TextureFormat::Rgba8Unorm, blend: None, write_mask: wgpu::ColorWrites::ALL,
+                })],
+            }),
+            multiview_mask: None, cache: None,
+        }));
+    }
+
+    /// Uploads the current lines in bounded chunks of complete segments.
     pub fn upload(&mut self) {
         self.upload_deferred();
         self.flush_uploads_budget(
@@ -244,6 +380,7 @@ impl OverlayBatch {
         );
     }
     pub fn upload_deferred(&mut self) {
+        self.prepare_wire_pipeline();
         self.buffers.clear();
         self.counts.clear();
         self.upload_cursor = 0;
@@ -263,10 +400,14 @@ impl OverlayBatch {
     }
     /// Allocated sizes of the currently held GPU vertex buffers.
     pub fn gpu_buffer_capacity_bytes(&self) -> u64 {
-        self.buffers.iter().fold(0u64, |total, buffer| total.saturating_add(buffer.size()))
+        self.buffers
+            .iter()
+            .fold(0u64, |total, buffer| total.saturating_add(buffer.size()))
     }
     /// Actual vertex-buffer handles held by this batch, for opt-in GPU diagnostics.
-    pub fn gpu_buffer_handles(&self) -> &[wgpu::Buffer] { &self.buffers }
+    pub fn gpu_buffer_handles(&self) -> &[wgpu::Buffer] {
+        &self.buffers
+    }
     pub fn flush_uploads_budget(
         &mut self,
         max_bytes: usize,
@@ -370,6 +511,30 @@ impl OverlayBatch {
         width: u32,
         height: u32,
     ) -> Option<wgpu::Buffer> {
+        self.encode_wires(
+            encoder,
+            colour_view,
+            resolve_view,
+            depth_view,
+            camera,
+            width,
+            height,
+            None,
+        )
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub fn encode_wires(
+        &mut self,
+        encoder: &mut wgpu::CommandEncoder,
+        colour_view: &wgpu::TextureView,
+        resolve_view: Option<&wgpu::TextureView>,
+        depth_view: &wgpu::TextureView,
+        camera: Camera,
+        width: u32,
+        height: u32,
+        depth_plane: Option<[f32; 4]>,
+    ) -> Option<wgpu::Buffer> {
         self.flush_uploads_budget(
             usize::MAX,
             std::time::Instant::now() + std::time::Duration::from_secs(3600),
@@ -382,6 +547,9 @@ impl OverlayBatch {
                 camera.view_projection(width as f32 / height.max(1) as f32),
             ),
             model: self.model,
+            depth_plane: depth_plane.unwrap_or_default(),
+            viewport: [width as f32, height as f32],
+            padding: [0.; 2],
         };
         use wgpu::util::DeviceExt;
         let buffer = self
@@ -423,11 +591,36 @@ impl OverlayBatch {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
-            pass.set_pipeline(&self.pipeline);
             pass.set_bind_group(0, &bind_group, &[]);
+            let mut base = 0;
             for (buffer, count) in self.buffers.iter().zip(self.counts.iter()) {
                 pass.set_vertex_buffer(0, buffer.slice(..));
-                pass.draw(0..*count, 0..1);
+                let end = base + *count as usize;
+                let mut cursor = base;
+                if let (Some(_), Some(wire)) = (depth_plane, &self.wire_pipeline) {
+                    let first = self.batch.wires.partition_point(|run| run.end <= base);
+                    for run in self.batch.wires[first..]
+                        .iter()
+                        .take_while(|run| run.start < end)
+                    {
+                        let start = run.start.max(base);
+                        if cursor < start {
+                            pass.set_pipeline(&self.pipeline);
+                            pass.draw((cursor - base) as u32..(start - base) as u32, 0..1);
+                        }
+                        cursor = run.end.min(end);
+                        pass.set_pipeline(wire);
+                        pass.draw(
+                            0..4,
+                            ((start - base) / 2) as u32..((cursor - base) / 2) as u32,
+                        );
+                    }
+                }
+                if cursor < end {
+                    pass.set_pipeline(&self.pipeline);
+                    pass.draw((cursor - base) as u32..*count, 0..1);
+                }
+                base = end;
             }
         }
         Some(buffer)
@@ -447,11 +640,15 @@ fn matrix_to_columns(matrix: [f32; 16]) -> [[f32; 4]; 4] {
 #[derive(Default)]
 pub struct LineBatch {
     vertices: Vec<LineVertex>,
+    wires: Vec<std::ops::Range<usize>>,
+    wire_bounds: Option<[[f64; 3]; 2]>,
 }
 
 impl LineBatch {
     pub fn clear(&mut self) {
         self.vertices.clear();
+        self.wires.clear();
+        self.wire_bounds = None;
     }
 
     pub fn line(&mut self, a: [f64; 3], b: [f64; 3], colour: [f32; 4]) {

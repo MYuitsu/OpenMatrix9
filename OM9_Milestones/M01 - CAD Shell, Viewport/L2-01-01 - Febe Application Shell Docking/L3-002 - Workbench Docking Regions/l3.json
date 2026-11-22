@@ -200,6 +200,19 @@
     }
   ],
   "runtime_implementation": {
+    "command_ui_events_2026_11_23": {
+      "date": "2026-11-23",
+      "status": "validated",
+      "scope": "At 1280 × 800 the menu, 90-point CMD panel and canvas meet without a horizontal toolbar gap. The test checks the left rail, both viewport columns and history and input row geometry.",
+      "evidence": "docs/validation/2026-11-23-command-ui-events.md"
+    },
+    "dock_profiles_2026_11_22": {
+      "date": "2026-11-22",
+      "target": "standalone Rust OM9 on Windows",
+      "scope": "Right-hand tools yield on the portrait monitor and return to the right dock when the workspace widens.",
+      "evidence": "docs/validation/2026-11-22-dock-popup-theme.md",
+      "manual_gate_promoted": false
+    },
     "left_default_width": {
       "date": "2026-10-20",
       "status": "DEFAULT_WIDTH_VALIDATED_MANUAL_UI_PENDING",

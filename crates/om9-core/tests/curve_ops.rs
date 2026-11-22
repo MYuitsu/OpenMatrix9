@@ -534,3 +534,171 @@ fn delete_control_point_rejects_periodic_curve() {
     let n = NurbsCurve { degree: 2, poles: vec![[0.,0.,0.],[1.,2.,0.],[3.,2.,0.],[4.,0.,0.]], weights: vec![1.;4], knots: vec![0.,0.,0.,0.5,1.,1.,1.], domain: [0.,1.], periodic: true, reversed: false, seam: None };
     assert!(delete_control_point(&Curve::Nurbs(n), 1, &Limits::default()).is_err());
 }
+
+mod from_lines_paths {
+    use om9_core::{
+        Error, budget::Limits, curve_ops::linear_path::placed_vertices,
+        geometry::{Curve, NurbsCurve, Transform},
+    };
+
+    #[test]
+    fn trims_rational_linear_path_before_world_placement_and_nested_reverse() {
+        let curve = Curve::Nurbs(NurbsCurve {
+            degree: 1,
+            poles: vec![[0., 0., 0.], [3., 0., 0.], [3., 6., 0.]],
+            weights: vec![1., 2., 1.],
+            knots: vec![0., 0., 2., 5., 5.],
+            domain: [1., 3.5],
+            reversed: true,
+            periodic: false,
+            seam: None,
+        });
+        let parent = Curve::Polycurve {
+            segments: vec![curve],
+            reversed: true,
+        };
+        let world = Transform::translation([10., -2., 5.])
+            .compose(Transform::scale([2., 3., 1.]).unwrap())
+            .unwrap();
+        let p = placed_vertices(&parent, world, 0.001, &Limits::default(), &mut || Ok(())).unwrap();
+        assert_eq!(p, [[14., -2., 5.], [16., -2., 5.], [16., 4., 5.]]);
+    }
+    #[test]
+    fn closed_polyline_starts_at_its_moved_seam_and_refuses_non_linear_sources() {
+        let c = Curve::Nurbs(NurbsCurve {
+            degree: 1,
+            poles: vec![[0., 0., 0.], [2., 0., 0.], [2., 2., 0.], [0., 0., 0.]],
+            weights: vec![1.; 4],
+            knots: vec![0., 0., 1., 2., 3., 3.],
+            domain: [0., 3.],
+            reversed: true,
+            periodic: false,
+            seam: Some(1.5),
+        });
+        let vertices = |c: &Curve| {
+            placed_vertices(
+                c,
+                Transform::identity(),
+                0.001,
+                &Limits::default(),
+                &mut || Ok(()),
+            )
+        };
+        assert_eq!(
+            vertices(&c).unwrap(),
+            [
+                [2., 1., 0.],
+                [2., 0., 0.],
+                [0., 0., 0.],
+                [2., 2., 0.],
+                [2., 1., 0.]
+            ]
+        );
+        let arc = Curve::Circle {
+            center: [0.; 3],
+            x: [1., 0., 0.],
+            y: [0., 1., 0.],
+            radius: 1.,
+            domain: [0., std::f64::consts::TAU],
+            angle_domain: None,
+        };
+        assert!(matches!(vertices(&arc), Err(Error::Unsupported(_))));
+        assert!(
+            placed_vertices(
+                &c,
+                Transform::identity(),
+                0.001,
+                &Limits::default(),
+                &mut || Err(Error::Stale("cancelled"))
+            )
+            .is_err()
+        );
+    }
+}
+
+#[test]
+fn extrude_lines_keeps_nested_reversals_and_exact_arc_stations() {
+    let limits = Limits::default();
+    let [a, b, c, d] = [[-1., 0., 0.], [0., 0., 0.], [2., 0., 0.], [3., 0., 0.]];
+    let arc = arc_through(c, [1., 1., 0.], b).unwrap();
+    let nested = Curve::Polycurve {
+        segments: vec![line(d, c), arc.clone()],
+        reversed: true,
+    };
+    let profile = Curve::Polycurve {
+        segments: vec![line(a, b), nested],
+        reversed: true,
+    };
+    let pieces = om9_core::curve_ops::extrude_lines::profile_segments(&profile, &limits).unwrap();
+    assert_eq!(pieces.len(), 3);
+    assert_eq!(pieces[1], arc);
+    for (piece, [start, end]) in pieces.iter().zip([[d, c], [c, b], [b, a]]) {
+        let ends = curve_endpoints(piece, &limits).unwrap();
+        assert!(close(ends[0], start, 1e-10) && close(ends[1], end, 1e-10));
+    }
+}
+
+#[test]
+fn dir_flip_preserves_rhino_native_samples_and_flips_parameter_domain() {
+    use om9_core::{curve_ops::reverse_curve_for_dir, geometry::NurbsCurve};
+    let limits = Limits::default();
+    let source = Curve::Nurbs(NurbsCurve {
+        degree: 2,
+        poles: vec![[0., 0., 0.], [1., 2., 0.], [4., 1., 0.]],
+        weights: vec![1., 0.7, 1.],
+        knots: vec![2., 2., 2., 8., 8., 8.],
+        domain: [2., 8.],
+        reversed: false,
+        periodic: false,
+        seam: None,
+    });
+    let flipped = reverse_curve_for_dir(&source, &limits).unwrap();
+    assert!(matches!(&flipped, Curve::Nurbs(n) if n.domain == [-8., -2.]));
+    let measured = [
+        [4., 1., 0.],
+        [2.830985915492957, 1.225352112676056, 0.],
+        [1.5882352941176472, 1.1176470588235294, 0.],
+        [0.5774647887323943, 0.6619718309859153, 0.],
+        [0., 0., 0.],
+    ];
+    for (i, p) in measured.into_iter().enumerate() {
+        assert!(close(
+            point_at(&flipped, i as f64 / 4., &limits).unwrap(),
+            p,
+            1e-12
+        ));
+    }
+    assert_eq!(reverse_curve_for_dir(&flipped, &limits).unwrap(), source);
+    let circle = Curve::Circle {
+        center: [0.; 3],
+        x: [1., 0., 0.],
+        y: [0., 1., 0.],
+        radius: 4.,
+        domain: [2., 8.],
+        angle_domain: Some([0., std::f64::consts::TAU]),
+    };
+    let line = Curve::Line {
+        start: [0.; 3],
+        end: [5., 0., 0.],
+        domain: [2., 8.],
+    };
+    for original in [circle, line] {
+        let result = reverse_curve_for_dir(&original, &limits).unwrap();
+        assert!(
+            matches!(&result,Curve::Circle{domain,..} | Curve::Line{domain,..} if *domain==[-8.,-2.])
+        );
+        for i in 0..=8 {
+            let u = i as f64 / 8.;
+            assert!(close(
+                point_at(&original, 1. - u, &limits).unwrap(),
+                point_at(&result, u, &limits).unwrap(),
+                1e-11
+            ));
+        }
+        assert!(close(
+            tangent_at(&original, 1., &limits).unwrap().map(|v| -v),
+            tangent_at(&result, 0., &limits).unwrap(),
+            1e-11
+        ));
+    }
+}

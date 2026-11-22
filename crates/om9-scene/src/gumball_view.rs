@@ -120,6 +120,7 @@ pub struct GumballView {
     pub mode: Mode,
     /// World length of an axis handle; the rings use it as a radius.
     pub size: f64,
+    tspline: bool,
 }
 
 impl GumballView {
@@ -128,6 +129,7 @@ impl GumballView {
             frame,
             mode,
             size: 1.0,
+            tspline: false,
         }
     }
 
@@ -136,6 +138,16 @@ impl GumballView {
             frame,
             mode,
             size: size.max(1e-6),
+            tspline: false,
+        }
+    }
+
+    /// The T-Splines HUD uses one style at a time, full rotation rings,
+    /// and scale boxes on the positive axes (Matrix Book 2, pp. 50–51).
+    pub fn tspline(frame: Frame, mode: Mode, size: f64) -> Self {
+        Self {
+            tspline: true,
+            ..Self::with_size(frame, mode, size)
         }
     }
 
@@ -155,6 +167,15 @@ impl GumballView {
                 Handle::Rotate(Axis::X),
                 Handle::Rotate(Axis::Y),
                 Handle::Rotate(Axis::Z),
+            ],
+            Mode::Scale if self.tspline => vec![
+                Handle::Scale(Axis::X),
+                Handle::Scale(Axis::Y),
+                Handle::Scale(Axis::Z),
+                Handle::ScalePlane(Plane::XY),
+                Handle::ScalePlane(Plane::YZ),
+                Handle::ScalePlane(Plane::ZX),
+                Handle::ScaleUniform,
             ],
             Mode::Scale => vec![
                 Handle::Scale(Axis::X),
@@ -179,7 +200,7 @@ impl GumballView {
                     // Move arrows run along +axis. The scale leader is one dotted line across the whole axis,
                     // from the arrow tip through the pivot to the box on the negative side, which is how the
                     // Matrix 8 figure draws it.
-                    let (from, to) = if self.mode == Mode::Move {
+                    let (from, to) = if self.mode == Mode::Move || self.tspline {
                         (
                             self.frame.origin,
                             add(self.frame.origin, scale(direction, self.size)),
@@ -196,7 +217,7 @@ impl GumballView {
                         end: to,
                     });
                 }
-                if self.mode == Mode::Move {
+                if self.mode == Mode::Move || self.tspline {
                     for plane in [Plane::XY, Plane::YZ, Plane::ZX] {
                         let (u, v) = self.frame.plane_basis(plane);
                         // The plane indicator sits in the positive quadrant between its two axes.
@@ -205,7 +226,11 @@ impl GumballView {
                             add(scale(u, self.size * 0.32), scale(v, self.size * 0.32)),
                         );
                         segments.push(Segment {
-                            handle: Handle::MovePlane(plane),
+                            handle: if self.mode == Mode::Move {
+                                Handle::MovePlane(plane)
+                            } else {
+                                Handle::ScalePlane(plane)
+                            },
                             start: corner,
                             end: corner,
                         });
@@ -223,10 +248,11 @@ impl GumballView {
                     let u = scale(self.frame.axis(first), -1.0);
                     let v = scale(self.frame.axis(second), -1.0);
                     let radius = self.size * 0.6;
-                    let steps = 24;
+                    let steps = if self.tspline { 96 } else { 24 };
+                    let increment = std::f64::consts::FRAC_PI_2 / 24.;
                     for step in 0..steps {
-                        let start = step as f64 / steps as f64 * std::f64::consts::FRAC_PI_2;
-                        let end = (step + 1) as f64 / steps as f64 * std::f64::consts::FRAC_PI_2;
+                        let start = step as f64 * increment;
+                        let end = (step + 1) as f64 * increment;
                         let point = |angle: f64| {
                             add(
                                 self.frame.origin,
@@ -264,7 +290,7 @@ impl GumballView {
                     // Hide the axis that points at the camera (its box would sit on the pivot).
                     dot(self.frame.axis(axis), direction).abs() < 0.93
                 }
-                Handle::MovePlane(plane) => {
+                Handle::MovePlane(plane) | Handle::ScalePlane(plane) => {
                     // Keep the indicator that faces the camera, drop the ones seen edge-on.
                     dot(self.frame.plane_normal(plane), direction).abs() > 0.5
                 }
@@ -284,7 +310,7 @@ impl GumballView {
                                 (start[0] - end[0]).hypot(start[1] - end[1]) >= 1.0
                             })
                 }
-                Handle::MoveFree => true,
+                Handle::MoveFree | Handle::ScaleUniform => true,
             };
             if keep {
                 kept.push(segment);
@@ -329,12 +355,19 @@ impl GumballView {
         tolerance_px: f64,
     ) -> Result<Option<(f64, Handle)>> {
         let mut best: Option<(f64, Handle)> = None;
-        if self.mode == Mode::Move
+        if (self.mode == Mode::Move || self.tspline && self.mode == Mode::Scale)
             && let Some(centre) = self.screen_point(camera, viewport, self.frame.origin)?
         {
             let d = (pointer[0] - centre[0]).hypot(pointer[1] - centre[1]);
             if d <= tolerance_px.min(5.0) {
-                return Ok(Some((d, Handle::MoveFree)));
+                return Ok(Some((
+                    d,
+                    if self.mode == Mode::Move {
+                        Handle::MoveFree
+                    } else {
+                        Handle::ScaleUniform
+                    },
+                )));
             }
         }
         for segment in self.visible_segments(camera, viewport) {
@@ -385,6 +418,9 @@ impl GumballView {
         pointer: [f64; 2],
         tolerance_px: f64,
     ) -> Result<Option<(f64, Handle)>> {
+        if self.tspline {
+            return self.nearest_in_view(camera, viewport, pointer, tolerance_px);
+        }
         let mut best: Option<(f64, Handle)> = None;
         for segment in self.segments() {
             let Some(start) = self.screen_point(camera, viewport, segment.start)? else {
@@ -412,6 +448,11 @@ impl GumballView {
         pointer: [f64; 2],
         tolerance_px: f64,
     ) -> Result<Option<Handle>> {
+        if self.tspline {
+            return Ok(self
+                .nearest_in_view(camera, viewport, pointer, tolerance_px)?
+                .map(|(_, handle)| handle));
+        }
         let mut best: Option<(f64, Handle)> = None;
         for segment in self.segments() {
             let Some(start) = self.screen_point(camera, viewport, segment.start)? else {
@@ -500,6 +541,32 @@ impl GumballView {
                 let angle = dot(cross(v0, v1), normal).atan2(dot(v0, v1));
                 Drag::Angle(angle)
             }
+            Handle::ScalePlane(plane) => {
+                let normal = self.frame.plane_normal(plane);
+                let Some(start) = plane_hit(origin, normal, start_ray.origin, start_ray.direction)
+                else {
+                    return Ok(None);
+                };
+                let Some(end) = plane_hit(origin, normal, end_ray.origin, end_ray.direction) else {
+                    return Ok(None);
+                };
+                let axis = sub(start, origin);
+                let factor = dot(sub(end, origin), axis) / dot(axis, axis);
+                if !factor.is_finite() || factor <= 0. {
+                    return Ok(None);
+                }
+                Drag::Factor(factor)
+            }
+            Handle::ScaleUniform => {
+                // The centre has no radial lever arm. Dragging right or up grows
+                // the selection; using the reverse displacement undoes that scale.
+                let factor = ((to[0] - from[0] - to[1] + from[1]) / 90.).exp2();
+                if !factor.is_finite() || factor <= 0. {
+                    return Ok(None);
+                }
+                Drag::Factor(factor)
+            }
+
             Handle::Scale(axis) => {
                 let direction = self.frame.axis(axis);
                 let Some(start) =

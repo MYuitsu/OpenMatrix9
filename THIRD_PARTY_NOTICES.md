@@ -51,6 +51,9 @@ LGPL declaration does not relicense this vendor document. The source URL,
 byte count, SHA256 and verified download identity are in `ref/rhino5/SOURCES.json`.
 This exception does not cover recovered code, vendor SDKs, images or Matrix manuals.
 
+The Rust scene crate uses i_overlay 9.2.0 for polygon union. Upstream distributes it
+under MIT OR Apache-2.0. [iOverlay upstream](https://github.com/iShape-Rust/iOverlay)
+
 The publication audit records technical exclusions and checks. It does not
 establish ownership of every implementation detail or certify freedom from
 copyright, trademark, contract or patent claims.

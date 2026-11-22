@@ -80,27 +80,7 @@ fn slot(entity: &Entity) -> Option<serde_json::Value> {
     serde_json::from_str(&extension.payload).ok()
 }
 
-/// The corners the cage was created with, when `entity` is a cage.
-fn rest_of(entity: &Entity) -> Result<Option<[Point3; 8]>> {
-    let Some(value) = slot(entity) else {
-        return Ok(None);
-    };
-    let Some(rest) = value.get("rest") else {
-        return Ok(None);
-    };
-    let corners: Vec<Point3> =
-        serde_json::from_value(rest.clone()).map_err(|_| Error::Invalid("cage rest payload"))?;
-    if corners.len() != 8 {
-        return Err(Error::Invalid("cage rest payload"));
-    }
-    let mut found = [[0.0; 3]; 8];
-    found.copy_from_slice(&corners);
-    Ok(Some(found))
-}
-
-pub(in crate::session) fn is_cage(entity: &Entity) -> bool {
-    rest_of(entity).ok().flatten().is_some()
-}
+pub(in crate::session) use cage_kernel::is_cage;
 
 /// The cage an object is attached to, when `entity` carries the back pointer.
 pub(in crate::session) fn link_of(entity: &Entity) -> Option<ObjectId> {
@@ -130,7 +110,7 @@ fn entity_of(controller: &Controller, id: ObjectId) -> Result<&Entity> {
 }
 
 /// The world-space corners of the cage mesh, so a moved cage object still presents its corners.
-fn world_corners(controller: &Controller, id: ObjectId) -> Result<[Point3; 8]> {
+pub(in crate::session) fn world_corners(controller: &Controller, id: ObjectId) -> Result<[Point3; 8]> {
     let entity = entity_of(controller, id)?;
     let Geometry::Mesh(mesh) = &entity.geometry else {
         return Err(Error::Invalid("cage mesh"));
@@ -296,40 +276,42 @@ pub(super) fn edit(
     let (cage, live) = resolve_cage(controller)?;
     let before = cage_kernel::cage_from_corners(live, &limits)?;
     let after = before.with_corner(corner, offset)?;
-    let targets = attached(controller, cage)?;
-    let mut mutations = Vec::with_capacity(targets.len() + 1);
-    for id in targets {
-        let (geometry, placement, source) = {
-            let entity = entity_of(controller, id)?;
-            (
-                entity.geometry.clone(),
-                entity.placement,
-                controller.document().stamp(id)?,
-            )
-        };
-        let moved =
-            om9_core::deform::apply_placed_map(&geometry, &placement, &limits, &mut |point| {
-                cage_kernel::displacement(&before, &after, point, &limits)
-            })?;
-        mutations.push(Mutation::Geometry {
-            source,
-            geometry: moved,
-        });
-    }
-    let (placement, source) = {
-        let entity = entity_of(controller, cage)?;
-        (entity.placement, controller.document().stamp(cage)?)
-    };
-    let inverse = om9_core::top11::inverse_affine(placement)?;
-    let mut local = [[0.0; 3]; 8];
-    for (slot, value) in local.iter_mut().zip(after.corners()?) {
-        *slot = inverse.point(value)?;
-    }
-    mutations.push(Mutation::Geometry {
-        source,
-        geometry: Geometry::Mesh(cage_kernel::box_mesh(local)),
-    });
+    let edits = changed_geometries(controller, cage, &before, &after)?;
+    let mutations = edits.into_iter().map(|(id, geometry)| Ok(Mutation::Geometry {
+        source: controller.document().stamp(id)?, geometry,
+    })).collect::<Result<Vec<_>>>()?;
     controller.commit_transform_geometry_mutations(name, mutations)
+}
+
+pub(in crate::session) fn corner_grip_edits(controller: &Controller, id: ObjectId,
+    positions: &[(usize, Point3)]) -> Result<Vec<(ObjectId, Geometry)>> {
+    let mut corners = world_corners(controller, id)?;
+    let limits = controller.coordinator.limits();
+    let before = cage_kernel::cage_from_corners(corners, limits)?;
+    for &(index, point) in positions {
+        *corners.get_mut(index).ok_or(Error::Invalid("cage corner grip"))? = point;
+    }
+    let after = cage_kernel::cage_from_corners(corners, limits)?;
+    changed_geometries(controller, id, &before, &after)
+}
+
+fn changed_geometries(controller: &Controller, cage: ObjectId, before: &cage_kernel::Cage,
+    after: &cage_kernel::Cage) -> Result<Vec<(ObjectId, Geometry)>> {
+    let limits = controller.coordinator.limits();
+    let targets = attached(controller, cage)?;
+    let mut result = Vec::with_capacity(targets.len()+1);
+    for id in targets {
+        let entity = entity_of(controller, id)?;
+        let moved = om9_core::deform::apply_placed_map(&entity.geometry, &entity.placement, limits, &mut |p| {
+            cage_kernel::displacement(before, after, p, limits)
+        })?;
+        result.push((id, moved));
+    }
+    let inverse = om9_core::top11::inverse_affine(entity_of(controller, cage)?.placement)?;
+    let mut local = after.corners()?;
+    for corner in &mut local { *corner = inverse.point(*corner)?; }
+    result.push((cage, Geometry::Mesh(cage_kernel::box_mesh(local))));
+    Ok(result)
 }
 
 /// `ReleaseFromCage`: drop the back pointer from the selection, or from every object attached to

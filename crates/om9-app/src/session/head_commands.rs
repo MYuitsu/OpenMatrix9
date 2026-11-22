@@ -92,7 +92,7 @@ pub fn from_alias(text: &str) -> Option<&'static str> {
     let wanted = text.trim().to_ascii_lowercase();
     let wanted = match wanted.as_str() {
         "headbuilder" | "head builder" | "heads" | "gvheadbuilder" => HEAD_BUILDER,
-        "bezelbuilder" | "bezel builder" | "bezel" | "gvbezelbuilder" => BEZEL_BUILDER,
+        "bezelbuilder" | "bezel builder" | "bezel" | "gvbezelbuilder" | "gvbezel" => BEZEL_BUILDER,
         "scallopbezel" | "scallop bezel" | "bezelcutter" | "bezel cutter" | "gvbezeltcutter"
         | "gvbezelcutter" => BEZEL_CUTTER,
         _ => return None,

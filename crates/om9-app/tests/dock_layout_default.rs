@@ -152,6 +152,12 @@ fn d1_reset_after_every_placement_kind_recreates_the_baseline() {
     let panels = &document["documented_panels"];
     for (key, expected) in panels.as_object().unwrap() {
         let state = layout.state(panel(key));
+        if key == "toolbar" {
+            // The command strip moved into Main Menu after the original fixture.
+            assert_eq!(state.size, 0.);
+            assert!(!state.visible);
+            continue;
+        }
         assert_eq!(state.size, expected.as_f64().unwrap() as f32, "{key}");
         if key == "right-dock" {
             // The documented baseline keeps the optional right column hidden;

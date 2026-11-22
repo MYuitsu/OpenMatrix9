@@ -32,7 +32,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 /// The builder modes this owner implements. Each one maps to the command recorded on the
 /// history node, so reopening the feature uses the same producer.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
 pub enum BuilderKind {
     RingRail,
     RailProfile,

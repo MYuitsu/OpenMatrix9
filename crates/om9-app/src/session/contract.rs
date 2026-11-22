@@ -73,6 +73,16 @@ impl super::Controller {
     /// Drop selected objects that no longer exist (OM9-L3-01-03-010). Returns
     /// true when the selection changed, which is the caller's redraw signal.
     pub fn prune_selection(&mut self) -> bool {
+        let document = &self.coordinator.world().documents[&self.document];
+        let previous = self.grip_owners.len();
+        self.grip_owners.retain(|id, (generation, _)| {
+            document.entities.get(id).is_some_and(|e| e.generation == *generation
+                && (matches!(e.geometry, om9_core::geometry::Geometry::Curve(_) | om9_core::geometry::Geometry::Surface(_)) || super::transform::cage::is_cage(e)))
+        });
+        if previous != self.grip_owners.len() {
+            self.grip_selection.retain(|(owner, _)| self.grip_owners.contains_key(owner));
+            self.grip_revision = self.grip_revision.wrapping_add(1);
+        }
         let stale: Vec<om9_core::identity::ObjectId> = {
             let document = self.document();
             self.selection

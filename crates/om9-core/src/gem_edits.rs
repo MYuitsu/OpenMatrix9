@@ -147,6 +147,16 @@ impl GemEdit {
         if !spec.cut.shapes().contains(&spec.shape) {
             return Err(Error::Invalid("gem shape for cut"));
         }
+        if spec.cut != base.cut
+            && (matches!(spec.cut, GemCut::Cabochon | GemCut::Pearl)
+                || matches!(base.cut, GemCut::Cabochon | GemCut::Pearl))
+        {
+            let height = base.depth_mm() - base.girdle_mm;
+            let crown_share = spec.cut.default_crown_share();
+            spec.crown_height_mm = height * crown_share;
+            spec.pavilion_depth_mm = height * (1.0 - crown_share);
+            spec.facet_count = spec.cut.default_facet_count();
+        }
         if self.length_mm.is_some() || self.width_mm.is_some() {
             let length = self.length_mm.unwrap_or(spec.length_mm);
             let width = self.width_mm.unwrap_or(spec.width_mm);
@@ -604,7 +614,7 @@ pub struct WeightFormula {
 /// 3.52 g/cm³. The reporter scales it by the row's material density before comparing, because a
 /// ruby of the same girdle is heavier by the density ratio, not by a different trade factor.
 pub fn weight_formula(spec: &GemSpec) -> Option<WeightFormula> {
-    if spec.cut == GemCut::Cabochon || spec.profile.is_some() {
+    if matches!(spec.cut, GemCut::Cabochon | GemCut::Pearl) || spec.profile.is_some() {
         return None;
     }
     let (name, factor) = match spec.shape {
@@ -613,10 +623,12 @@ pub fn weight_formula(spec: &GemSpec) -> Option<WeightFormula> {
         GemShape::Marquise => ("marquise", 0.00565),
         GemShape::Pear => ("pear", 0.0058),
         GemShape::Heart => ("heart", 0.0059),
-        GemShape::Trillion => ("trillion", 0.0057),
-        GemShape::Emerald | GemShape::Octagon => ("step cut", 0.0080),
+        GemShape::Trillion | GemShape::TrillionStraight | GemShape::Triangle => ("trillion", 0.0057),
+        GemShape::Emerald | GemShape::EmeraldSquare | GemShape::Octagon => ("step cut", 0.0080),
         GemShape::Baguette => ("baguette", 0.0085),
-        GemShape::Square | GemShape::Princess | GemShape::Cushion => ("square", 0.0080),
+        GemShape::Square | GemShape::Princess | GemShape::Cushion | GemShape::CushionSquare
+        | GemShape::Radiant | GemShape::RadiantSquare => ("square", 0.0080),
+        GemShape::Calf | GemShape::HalfMoon | GemShape::Bullet | GemShape::DustMarquire => return None,
     };
     let carat = spec.length_mm * spec.width_mm * spec.depth_mm() * factor;
     if !carat.is_finite() || carat <= 0.0 {

@@ -113,6 +113,30 @@
     ]
   },
   "runtime_implementation": {
+    "f6_tapered_2026_11_23": "Two Surface F6 entries and CMD share ExtrudeCrvTapered. Checked independent signed-height, angle, Sharp/Round/Smooth and bounded-face geometry, selected profiles, world-space preview/pick, DeleteInput and single Undo. Inclined rectangles match twelve geometry fixtures. A whole inclined circle and an angular two-arc join still differ from Rhino 5.14. Surface/Solid menu preset parity remains unverified. See docs/validation/2026-11-22-f6-matrix9.md#extrudecrvtapered-om9.",
+    "extrude_to_point_f6_2026_11_23": {
+      "entry": "Three original F6 curve-to-point entries and CMD share the OM9 point session.",
+      "geometry": "Ruled BRep, off-axis apex, optional cap for a closed planar profile, selected boundary face, tangent joins and one transaction for multiple source curves.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#extrude-to-point",
+      "remaining": "The separate Surface/Curve spelling ExtrudetoPoint has no verified provider. Tapered extrusion is still pending."
+    },
+    "curve_direction_2026_11_23": {
+      "verified": "Two factory scripts in four curve groups route through Dir. F6 clicks and CMD cover individual flips, FlipAll, double flip, Escape, postselection, signed domains and Undo. The reference includes twelve Rhino command cases and three viewport image pairs.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#curve-direction",
+      "remaining": "79 distinct scripts without an active handler. Non-uniform polycurve parent domains in 3DM and surface-direction controls remain open."
+    },
+    "viewport_to_file_2026_11_23": {
+      "verified": "Factory General/Empty and Surface/Empty share the capture command with the Display toolbar and CMD. GPU integration covers unsaved geometry, six image formats, dimensions, scale, grid, world axes, CPlane axes and transparent Wireframe/Shaded output. The owned Windows dialog accepts and cancels.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#viewport-to-file",
+      "remaining": "At the viewport capture checkpoint 81 distinct factory scripts lacked a handler. See the subsequent Curve Direction record for the updated count."
+    },
+    "factory_review_2026_11_22": {
+      "verification": "All 2281 row categories retained. Three closed-mesh Boolean routes share F6 and CMD. Reduce Mesh options, preview, UV seams, Cancel and Undo verified. MeshOutline projects and unions the selected render meshes in the active viewport. Its world contours match 15 Rhino 5 scenarios including one singular refusal. ShowSelected uses a temporary hidden-only picking scene and the existing layer transaction. Selective grip display is verified from four factory contexts. Seven Split Point aliases support postselection. Box-mode cage face deletion and duplication preserve polygon identity across archive reload. Edge Ring Select expands across opposite source edges from an interior or boundary seed. Loop, Grow, Shrink, directional U/V and additive Paint have exact selection and egui evidence on authored box cages. Three whole-cage manipulator macros share the existing drag and Undo path; viewport replay measures translation, rotation and scale. Nine component manipulator macros and Set Pivot have coordinate, typed and mouse evidence, including 18 F6/CMD cases on a placed cage. Both Extract Edges macros have analytical and subdivided reference curves plus viewport picking, offset preview and Undo evidence. Split Curves has a three-curve menu replay, an eight-piece closed network, a placed near-miss in inches, custom tolerance, Display, Cancel and one Undo. From Lines now has a shared interactive session, face removal and candidate selection in the four viewports, and archive evidence for a 400-face cage. Extrude Lines runs from the 3Crv row and CMD. Through Finger replay measures an extrusion and the two-point Direction stage. Exact curved rails survive archive reload. Solid caps each eligible closed planar profile; placed rectangular and circular solids retain topology, bounds and volume through the packaged Save/Open path. ToBoundary uses the clicked face for exact rail sections and capped solid cuts. A shaded box and a sloping surface have viewport replay. SplitAtTangents produces 3 or 6 faces and 3 or 12 edges on a solid stadium, matching Rhino 5 with a distance or a boundary. 82 distinct scripts remain unresolved with the Matrix package. Eight mode buttons and closing a pinned popup have mouse and layout-reload evidence. Floating placement, pin, surface grip routing, selected gem/metal reports and material assignment with project archive round-trip have egui evidence.",
+      "status": "PARTIAL_RUNTIME",
+      "plan": "docs/plans/2026-11-22-f6-matrix9.md",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md",
+      "routes": "docs/validation/2026-11-22-f6-routes.tsv"
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",
@@ -131,10 +155,10 @@
     "remaining": [
       "Manual M02-UI review of F6 grouping, click dispatch, pin and disabled tooltips.",
       "macOS runtime is unverified.",
-      "M03/M04/M05 providers are absent; their actions are registered disabled."
+      "Per-row M03/M04/M05 coverage and remaining provider gaps are recorded in the 2026-11-22 F6 route inventory."
     ],
     "manual_gate": "M02-UI",
-    "technical_scope_complete": true,
+    "technical_scope_complete": false,
     "latest_verification": {
       "date": "2026-10-22",
       "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",

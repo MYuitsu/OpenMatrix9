@@ -433,7 +433,7 @@ fn top11_duplicate_key(key: &str) -> bool {
     )
 }
 
-fn child_entity(source: &Entity, geometry: Geometry) -> Entity {
+pub(super) fn child_entity(source: &Entity, geometry: Geometry) -> Entity {
     let mut entity = source.clone();
     entity.id = ObjectId::new();
     entity.generation = 1;
@@ -636,6 +636,10 @@ impl Controller {
                     reason: "",
                 };
             }
+            if !self.is_running() && matches!(item.action, Top11Action::ControlPoints | Top11Action::EditPoints)
+                && self.selection.iter().any(|id| self.has_cage_grips(*id)) {
+                *item = Top11Availability { action: item.action, enabled: true, reason: "" };
+            }
             if matches!(item.action, Top11Action::Split | Top11Action::Trim) {
                 let context = self.top11_context();
                 if !context.running && context.selected > 1 && context.curves == context.selected {
@@ -751,31 +755,86 @@ impl Controller {
     }
 
     pub fn top11_grip_mode(&self) -> Option<GripMode> {
-        self.top11_grip
+        if self.isolating_objects() { return None; }
+        let mut mode = None;
+        for id in self.grip_owners.keys() {
+            if let Some(active) = self.grip_owner_mode(*id) {
+                if active == GripMode::Control { return Some(active); }
+                mode = Some(active);
+            }
+        }
+        mode
+    }
+
+    pub(crate) fn grip_owner_mode(&self, id: ObjectId) -> Option<GripMode> {
+        let &(generation, mode) = self.grip_owners.get(&id)?;
+        let entity = self.document().entities.get(&id)?;
+        (entity.generation == generation && self.document().permissions(id, false).ok()?.selectable)
+            .then_some(mode)
+    }
+
+    pub(crate) fn grip_display_revision(&self) -> u64 { self.grip_revision }
+
+    pub(super) fn clear_grip_owners(&mut self) {
+        self.grip_owners.clear();
+        self.grip_selection.clear();
+        self.grip_revision = self.grip_revision.wrapping_add(1);
+    }
+
+    pub(super) fn turn_off_owner_grips(&mut self, ids: &[ObjectId]) {
+        for id in ids { self.grip_owners.remove(id); }
+        self.grip_selection.retain(|(id, _)| self.grip_owners.contains_key(id));
+        self.grip_revision = self.grip_revision.wrapping_add(1);
     }
 
     pub fn top11_grip_points(&self) -> Result<Vec<Point3>> {
-        match self.top11_grip {
-            Some(mode) => top11::grip_points(
-                self.document(),
-                &self.selection,
-                mode,
-                self.coordinator.limits(),
-            ),
-            None => Ok(Vec::new()),
-        }
+        Ok(self.top11_grip_handles()?.into_iter().map(|handle| handle.point).collect())
     }
 
     pub fn top11_grip_handles(&self) -> Result<Vec<top11::GripHandle>> {
-        match self.top11_grip {
-            Some(mode) => top11::grip_handles(
-                self.document(),
-                &self.selection,
-                mode,
-                self.coordinator.limits(),
-            ),
-            None => Ok(Vec::new()),
+        if self.isolating_objects() { return Ok(Vec::new()); }
+        let mut cages = Vec::new();
+        let owners = self.grip_owners.keys().filter_map(|id| {
+            let mode = self.grip_owner_mode(*id)?;
+            let entity = &self.document().entities[id];
+            if let Geometry::Mesh(mesh) = &entity.geometry {
+                cages.push((*id, mode, entity.placement, mesh));
+                None
+            } else { Some((*id, mode)) }
+        });
+        let mut handles = top11::grip_handles_for_owners(self.document(), owners, self.coordinator.limits())?;
+        for (object, mode, placement, mesh) in cages {
+            for (index, p) in om9_core::cage::mesh_corners(mesh)?.into_iter().enumerate() {
+                handles.push(top11::GripHandle { object, mode, index, point: placement.point(p)? });
+            }
         }
+        Ok(handles)
+    }
+
+    pub(crate) fn has_cage_grips(&self, id: ObjectId) -> bool {
+        self.document().entities.get(&id).is_some_and(super::transform::cage::is_cage)
+    }
+
+    fn moved_grip_geometries(&self, moves: &[(top11::GripHandle, Point3)]) -> Result<Vec<(ObjectId, Geometry)>> {
+        if !moves.iter().any(|(handle, _)| self.has_cage_grips(handle.object)) {
+            return top11::move_grips_geometry(self.document(), moves, self.coordinator.limits());
+        }
+        let mut cages = std::collections::BTreeMap::<ObjectId, Vec<(usize, Point3)>>::new();
+        let mut other = Vec::new();
+        for &(handle, point) in moves {
+            if self.has_cage_grips(handle.object) {
+                cages.entry(handle.object).or_default().push((handle.index, point));
+            } else { other.push((handle, point)); }
+        }
+        let mut edits = top11::move_grips_geometry(self.document(), &other, self.coordinator.limits())?;
+        let mut touched: BTreeSet<_> = edits.iter().map(|(id,_)| *id).collect();
+        for (owner, positions) in cages {
+            for (id, geometry) in super::transform::cage::corner_grip_edits(self, owner, &positions)? {
+                if !touched.insert(id) { return Err(Error::Invalid("cage and captive edited together")); }
+                edits.push((id, geometry));
+            }
+        }
+        Ok(edits)
     }
 
     /// Commit one grip drag as a geometry edit.
@@ -784,6 +843,7 @@ impl Controller {
         handle: top11::GripHandle,
         world: Point3,
     ) -> Result<Top11Result> {
+        if self.has_cage_grips(handle.object) { return self.top11_move_grips(&[(handle, world)]); }
         let geometry =
             top11::move_grip_geometry(self.document(), handle, world, self.coordinator.limits())?;
         let source = self.document().stamp(handle.object)?;
@@ -819,7 +879,7 @@ impl Controller {
         let mut groups: std::collections::BTreeMap<ObjectId, BTreeSet<usize>> =
             std::collections::BTreeMap::new();
         for handle in handles {
-            if !current.contains(handle)
+            if handle.mode != GripMode::Control || !current.contains(handle)
                 || !groups
                     .entry(handle.object)
                     .or_default()
@@ -889,7 +949,7 @@ impl Controller {
 
     /// Whether at least one grip is picked (the gumball then acts on grips).
     pub fn grips_selected(&self) -> bool {
-        self.top11_grip.is_some() && !self.grip_selection.is_empty()
+        self.top11_grip_mode().is_some() && !self.grip_selection.is_empty()
     }
 
     /// Whether this grip is picked.
@@ -938,13 +998,39 @@ impl Controller {
         self.grip_edit_preview(&moves)
     }
 
-    /// Sample the curves produced by moving `moves`, in world space, for a drag preview.
+    /// Sample edited curves and draw the twelve live cage edges in world space.
     pub fn grip_edit_preview(&self, moves: &[(top11::GripHandle, Point3)]) -> Vec<Vec<Point3>> {
         let limits = self.coordinator.limits();
+        let mut out = Vec::new();
+        let mut other = Vec::new();
+        let mut cages = std::collections::BTreeMap::new();
+        let moves = if moves.iter().any(|(h, _)| self.has_cage_grips(h.object)) {
+            for &(handle, position) in moves {
+                if self.has_cage_grips(handle.object) {
+                    let corners = match cages.entry(handle.object) {
+                        std::collections::btree_map::Entry::Occupied(entry) => entry.into_mut(),
+                        std::collections::btree_map::Entry::Vacant(entry) => {
+                            let Ok(points) = super::transform::cage::world_corners(self, handle.object) else { return out; };
+                            entry.insert(points)
+                        }
+                    };
+                    let Some(corner) = corners.get_mut(handle.index) else { return out; };
+                    *corner = position;
+                } else { other.push((handle, position)); }
+            }
+            for corners in cages.values() {
+                // Toggling a single U/V/W index bit joins adjacent box corners.
+                for (index, point) in corners.iter().enumerate() {
+                    for axis in [1, 2, 4] {
+                        if index & axis == 0 { out.push(vec![*point, corners[index | axis]]); }
+                    }
+                }
+            }
+            &other
+        } else { moves };
         let Ok(edited) = top11::move_grips_geometry(self.document(), moves, limits) else {
             return Vec::new();
         };
-        let mut out = Vec::new();
         for (id, geometry) in edited {
             let (Some(entity), om9_core::geometry::Geometry::Curve(curve)) =
                 (self.document().entities.get(&id), &geometry)
@@ -979,7 +1065,7 @@ impl Controller {
                 return Err(Error::Invalid("stale or duplicate grip"));
             }
         }
-        let edited = top11::move_grips_geometry(self.document(), moves, self.coordinator.limits())?;
+        let edited = self.moved_grip_geometries(moves)?;
         let mut mutations = Vec::with_capacity(edited.len());
         let mut ids = Vec::with_capacity(edited.len());
         for (id, geometry) in edited {
@@ -3193,7 +3279,7 @@ impl Controller {
         let context = self.top11_context();
         let availability = if matches!(
             action,
-            Top11Action::RingRail
+            Top11Action::RingRail | Top11Action::EditPoints | Top11Action::ControlPoints
                 | Top11Action::Explode
                 | Top11Action::Join
                 | Top11Action::Split
@@ -3600,13 +3686,31 @@ impl Controller {
                 } else {
                     GripMode::Control
                 };
-                let next = if self.top11_grip == Some(mode) {
-                    None
-                } else {
-                    Some(mode)
-                };
-                self.top11_grip = next;
-                self.grip_selection.clear();
+                let owners: Vec<_> = self.selection.iter().filter_map(|id| {
+                    let entity = self.document().entities.get(id)?;
+                    (matches!(entity.geometry, Geometry::Curve(_) | Geometry::Surface(_)) || super::transform::cage::is_cage(entity))
+                        .then_some((*id, entity.generation))
+                }).collect();
+                if owners.is_empty() { return Err(Error::Unsupported("grips need a curve or surface")); }
+                let turn_off = owners.iter().all(|(id, generation)| {
+                    self.grip_owners.get(id) == Some(&(*generation, mode))
+                });
+                let next = (!turn_off).then_some(mode);
+                if !turn_off {
+                    let additional = owners.iter().filter(|(id, _)| !self.grip_owners.contains_key(id)).count();
+                    let count = self.grip_owners.len().checked_add(additional).ok_or(Error::Overflow("grip owners"))?;
+                    if count as u64 > self.coordinator.limits().max_outputs { return Err(Error::Budget("grip owners")); }
+                    if additional > 0 {
+                        let mut held = self.scene_cache_usage()?;
+                        held.add(om9_core::budget::Usage::btree::<ObjectId, (u64, GripMode)>(additional)?, self.coordinator.limits())?;
+                    }
+                }
+                self.grip_selection.retain(|(owner, _)| !self.selection.contains(owner));
+                for (id, generation) in owners {
+                    if turn_off { self.grip_owners.remove(&id); }
+                    else { self.grip_owners.insert(id, (generation, mode)); }
+                }
+                self.grip_revision = self.grip_revision.wrapping_add(1);
                 Ok(Top11Result::GripMode {
                     label: action.label(),
                     mode: next,
@@ -5124,12 +5228,7 @@ impl Controller {
             #[cfg(feature = "occt-brep")]
             for (identity, proof, storage) in proofs {
                 if let Some(id) = proof_owners.get(&identity) {
-                    let retained = self.document().stamp(*id).and_then(|stamp| {
-                        let shared = self.prepare_shared_topology_proof(stamp, proof, storage)?;
-                        let history = self.retain_current_topology_proof(shared.clone());
-                        let cache = self.cache_topology_proof(shared);
-                        history.or(cache)
-                    });
+                    let retained = self.retain_published_brep_proof(*id, proof, storage);
                     if let Err(error) = retained {
                         self.events.emit(crate::command_events::EventKind::Warn, action.command(),
                             &format!("Could not retain BRep save evidence: {error}"), None);
@@ -5613,8 +5712,7 @@ impl Controller {
 
     pub fn clear_top11(&mut self) {
         self.top11_pending = None;
-        self.top11_grip = None;
-        self.grip_selection.clear();
+        self.clear_grip_owners();
     }
 }
 

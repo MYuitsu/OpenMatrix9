@@ -30,7 +30,7 @@ label = "Divide"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooDivide"]
+aliases = ["ClayooDivide", "ClayDivide"]
 summary = "Chia mặt đang chọn (hoặc tất cả) thành 4."
 steps = ["Chọn vật SubD (lồng).", "Enter."]
 
@@ -40,7 +40,7 @@ label = "Split Sides"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooSplitSides", "InsertEdge"]
+aliases = ["ClayooSplitSides", "InsertEdge", "ClaySplitSides"]
 summary = "Chèn vòng cạnh mới qua vòng mặt tại cạnh bấm."
 steps = ["Chọn vật SubD (lồng).", "Gõ vị trí (0–1).", "Bấm cạnh."]
 
@@ -50,7 +50,7 @@ label = "Inset"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooInset"]
+aliases = ["ClayooInset", "ClayInset"]
 summary = "Thụt mặt vào trong (tạo viền)."
 steps = ["Chọn vật SubD (lồng).", "Làm trên các mặt đang chọn (lệnh Select …), nếu không thì bấm chọn một mặt.", "Gõ lượng thụt."]
 
@@ -70,7 +70,7 @@ label = "Offset"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooOffset"]
+aliases = ["ClayooOffset", "ClayOffset"]
 summary = "Dời các đỉnh theo pháp tuyến."
 steps = ["Chọn vật SubD (lồng).", "Gõ khoảng."]
 
@@ -80,7 +80,7 @@ label = "Extrude"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooExtrude", "tsExtrude"]
+aliases = ["ClayooExtrude", "tsExtrude", "ClayExtrude"]
 summary = "Đùn mặt ra theo pháp tuyến, tạo thành vách."
 steps = ["Chọn vật SubD (lồng).", "Làm trên các mặt đang chọn (lệnh Select …), nếu không thì bấm chọn một mặt.", "Gõ khoảng đùn."]
 
@@ -90,7 +90,7 @@ label = "Bridge"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooBridge"]
+aliases = ["ClayooBridge", "ClayBridge"]
 summary = "Nối hai lỗ hở (hoặc hai nhóm mặt đang chọn) bằng dải mặt."
 steps = ["Chọn vật SubD (lồng).", "Gõ số đoạn."]
 
@@ -100,7 +100,7 @@ label = "Append Face"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooAppend"]
+aliases = ["ClayooAppend", "ClayAppendFace"]
 summary = "Thêm một mặt từ cạnh hở."
 steps = ["Chọn vật SubD (lồng).", "Bấm gần cạnh hở.", "Bấm điểm mặt mới vươn tới."]
 
@@ -110,7 +110,7 @@ label = "SubD Pipe"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooPipe"]
+aliases = ["ClayooPipe", "ClayPipe"]
 summary = "Ống SubD theo đường cong."
 steps = ["Chọn đường cong.", "Gõ bán kính."]
 
@@ -120,7 +120,7 @@ label = "Crease"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooCrease", "tsCrease"]
+aliases = ["ClayooCrease", "tsCrease", "ClayCrease"]
 summary = "Làm sắc cạnh (giữ sắc khi Subdivision Level)."
 steps = ["Chọn vật SubD (lồng).", "Action=Add/Remove, Pick=Loop/Edge.", "Bấm cạnh (hoặc Enter: viền các mặt đang chọn)."]
 options = ["Action", "Pick"]
@@ -151,7 +151,7 @@ label = "Collapse"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooCollapse"]
+aliases = ["ClayooCollapse", "ClayCollapse"]
 summary = "Thu các mặt đang chọn (hoặc mặt bấm) về một điểm."
 steps = ["Chọn vật SubD (lồng).", "Làm trên các mặt đang chọn (lệnh Select …), nếu không thì bấm chọn một mặt."]
 
@@ -161,7 +161,7 @@ label = "Match"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooMatch"]
+aliases = ["ClayooMatch", "ClayMatch"]
 summary = "Khớp viền hở của lồng vào một đường cong."
 steps = ["Chọn vật SubD và đường cong.", "Enter."]
 
@@ -172,7 +172,7 @@ handler = "om9_addon_session"
 interactive = true
 builder = true
 mesh_data = true
-aliases = ["ClayooWeld", "tsWeld"]
+aliases = ["ClayooWeld", "tsWeld", "ClayWeld"]
 summary = "Hàn các đỉnh trùng (và gộp các vật SubD đã chọn)."
 steps = ["Chọn vật SubD.", "Enter."]
 
@@ -193,7 +193,7 @@ label = "SubD Box"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooBox", "tsBox"]
+aliases = ["ClayooBox", "tsBox", "ClayBox"]
 summary = "Hộp SubD."
 steps = ["Bấm hai góc đáy.", "Gõ chiều cao."]
 
@@ -203,7 +203,7 @@ label = "SubD Sphere"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooSphere", "tsSphere"]
+aliases = ["ClayooSphere", "tsSphere", "ClaySphere"]
 summary = "Cầu SubD."
 steps = ["Bấm tâm.", "Gõ bán kính."]
 
@@ -213,7 +213,7 @@ label = "SubD Cylinder"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooCylinder", "tsCylinder"]
+aliases = ["ClayooCylinder", "tsCylinder", "ClayCylinder"]
 summary = "Trụ SubD."
 steps = ["Bấm tâm đáy.", "Gõ bán kính, chiều cao."]
 
@@ -223,7 +223,7 @@ label = "SubD Cone"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooCone", "tsCone"]
+aliases = ["ClayooCone", "tsCone", "ClayCone"]
 summary = "Nón SubD."
 steps = ["Bấm tâm đáy.", "Gõ bán kính, chiều cao."]
 
@@ -233,7 +233,7 @@ label = "SubD Torus"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooTorus", "tsTorus"]
+aliases = ["ClayooTorus", "tsTorus", "ClayTorus"]
 summary = "Xuyến SubD."
 steps = ["Bấm tâm.", "Gõ bán kính lớn, bán kính ống."]
 
@@ -243,7 +243,7 @@ label = "SubD Plane"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooPlane", "tsPlane"]
+aliases = ["ClayooPlane", "tsPlane", "ClayPlane"]
 summary = "Mặt phẳng SubD."
 steps = ["Bấm hai góc."]
 
@@ -253,7 +253,7 @@ label = "SubD Sweep 1 Rail"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooSweep1"]
+aliases = ["ClayooSweep1", "ClaySweep1"]
 summary = "Quét SubD theo một ray."
 steps = ["Chọn ray và profile.", "Enter."]
 
@@ -263,7 +263,7 @@ label = "SubD Sweep 2 Rails"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooSweep2"]
+aliases = ["ClayooSweep2", "ClaySweep2"]
 summary = "Quét SubD theo hai ray."
 steps = ["Chọn hai ray và profile.", "Enter."]
 
@@ -273,7 +273,7 @@ label = "SubD Loft"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooLoft"]
+aliases = ["ClayooLoft", "ClayLoft"]
 summary = "Loft SubD qua các tiết diện."
 steps = ["Chọn tiết diện theo thứ tự.", "Enter."]
 
@@ -293,7 +293,7 @@ label = "SubD Revolve"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooRevolve"]
+aliases = ["ClayooRevolve", "ClayRevolve"]
 summary = "Xoay profile thành SubD."
 steps = ["Chọn profile.", "Bấm hai điểm trục."]
 
@@ -303,7 +303,7 @@ label = "SubD from Curve"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooFromCurve"]
+aliases = ["ClayooFromCurve", "ClayFromCurve"]
 summary = "Tấm SubD từ đường kín (hoặc dải từ đường hở)."
 steps = ["Chọn đường cong.", "Enter."]
 
@@ -313,7 +313,7 @@ label = "SubD from 2 Curves"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooFrom2Curves"]
+aliases = ["ClayooFrom2Curves", "ClayFrom2Curves"]
 summary = "SubD giữa hai đường cong."
 steps = ["Chọn hai đường cong.", "Enter."]
 
@@ -323,7 +323,7 @@ label = "Fill"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooFill", "tsFillHole"]
+aliases = ["ClayooFill", "tsFillHole", "ClayFill"]
 summary = "Lấp các lỗ hở của lồng."
 steps = ["Chọn vật SubD (lồng).", "Enter."]
 
@@ -333,7 +333,7 @@ label = "Shell"
 handler = "om9_addon_session"
 interactive = true
 mesh_data = true
-aliases = ["ClayooShell", "tsThicken"]
+aliases = ["ClayooShell", "tsThicken", "ClayShell"]
 summary = "Làm dày lồng thành khối có thành."
 steps = ["Chọn vật SubD (lồng).", "Gõ độ dày."]
 
@@ -353,7 +353,7 @@ label = "SubD from Surface"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["ClayooFromSurface"]
+aliases = ["ClayooFromSurface", "ClayConvertSurface"]
 summary = "Lồng SubD trên mặt NURBS."
 steps = ["Chọn mặt NURBS.", "Enter."]
 
@@ -364,7 +364,7 @@ handler = "om9_addon_session"
 interactive = true
 builder = true
 mesh_data = true
-aliases = ["ClayooFromTSplines"]
+aliases = ["ClayooFromTSplines", "ClayConvertTspline"]
 summary = "Đổi lưới (T-Splines đã xuất lưới) thành lồng SubD."
 steps = ["Chọn lưới.", "Enter."]
 
@@ -386,7 +386,7 @@ handler = "om9_addon_session"
 interactive = true
 builder = true
 mesh_data = true
-aliases = ["ClayooToNurbs", "tsConvert"]
+aliases = ["ClayooToNurbs", "tsConvert", "ClayToNurbs"]
 summary = "Đổi lồng dạng lưới đều thành mặt NURBS."
 steps = ["Chọn vật SubD (lồng).", "Enter."]
 

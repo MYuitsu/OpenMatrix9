@@ -19,7 +19,7 @@ use windows::{
             SIGDN_FILESYSPATH,
         },
     },
-    core::{HRESULT, PCWSTR, PWSTR, w},
+    core::{Interface,HRESULT, PCWSTR, PWSTR, w},
 };
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Mode {
@@ -33,6 +33,7 @@ pub enum DialogFilter {
     Om9,
     ThreeDm,
     Stl,
+    ViewImage,
     /// OM9 add-on package (Tools › Install Add-on from Disk…).
     AddonZip,
     ProjectArchive,
@@ -189,12 +190,36 @@ pub fn choose_fixture_for_audit(
 ) -> Result<Option<PathBuf>, DialogError> {
     choose_impl(parent, mode, Some(fixture), DialogFilter::Om9, true)
 }
+pub fn choose_view_image(
+    parent: usize,
+    current: Option<&Path>,
+    alpha: &mut bool,
+) -> Result<Option<PathBuf>, DialogError> {
+    choose_custom(
+        parent,
+        Mode::Save,
+        current,
+        DialogFilter::ViewImage,
+        false,
+        Some(alpha),
+    )
+}
 fn choose_impl(
     parent: usize,
     mode: Mode,
     current: Option<&Path>,
     filter: DialogFilter,
     audit_prefill: bool,
+) -> Result<Option<PathBuf>, DialogError> {
+    choose_custom(parent, mode, current, filter, audit_prefill, None)
+}
+fn choose_custom(
+    parent: usize,
+    mode: Mode,
+    current: Option<&Path>,
+    filter: DialogFilter,
+    audit_prefill: bool,
+    alpha: Option<&mut bool>,
 ) -> Result<Option<PathBuf>, DialogError> {
     use windows_sys::Win32::{
         System::Threading::{GetCurrentProcessId, GetCurrentThreadId},
@@ -264,6 +289,7 @@ fn choose_impl(
                 w!("stl"),
                 "Untitled.stl",
             ),
+            DialogFilter::ViewImage => (w!("Save Viewport Image"),w!("PNG image"),w!("*.png"),w!("png"),"Viewport.png"),
             DialogFilter::AddonZip => (
                 w!("Install OM9 add-on"),
                 w!("OM9 add-on package"),
@@ -281,8 +307,14 @@ fn choose_impl(
         };
         dialog.SetTitle(title).map_err(|e| native("SetTitle", e))?;
         if filter != DialogFilter::ProjectFolder {
+            let first=COMDLG_FILTERSPEC {pszName:filter_name,pszSpec:filter_spec};
+            let formats=[first,COMDLG_FILTERSPEC{pszName:w!("JPEG image"),pszSpec:w!("*.jpg;*.jpeg")},
+                COMDLG_FILTERSPEC{pszName:w!("Windows bitmap"),pszSpec:w!("*.bmp")},
+                COMDLG_FILTERSPEC{pszName:w!("PCX image"),pszSpec:w!("*.pcx")},
+                COMDLG_FILTERSPEC{pszName:w!("TIFF image"),pszSpec:w!("*.tif;*.tiff")},
+                COMDLG_FILTERSPEC{pszName:w!("Targa image"),pszSpec:w!("*.tga")}];
             dialog
-                .SetFileTypes(&[COMDLG_FILTERSPEC { pszName: filter_name, pszSpec: filter_spec }])
+                .SetFileTypes(if filter==DialogFilter::ViewImage {&formats} else {&formats[..1]})
                 .map_err(|e| native("SetFileTypes", e))?;
             dialog.SetDefaultExtension(extension).map_err(|e| native("SetDefaultExtension", e))?;
         }
@@ -301,6 +333,7 @@ fn choose_impl(
             let extension_text = match filter {
                 DialogFilter::ThreeDm => "3dm",
                 DialogFilter::Stl => "stl",
+                DialogFilter::ViewImage => "png",
                 DialogFilter::AddonZip => "zip",
                 DialogFilter::ProjectArchive => "om9project",
                 DialogFilter::ProjectFolder => "",
@@ -326,6 +359,11 @@ fn choose_impl(
                 .SetFileName(PCWSTR(name.as_ptr()))
                 .map_err(|e| native("SetFileName", e))?;
         }
+        let custom=if let Some(initial)=alpha.as_deref() {
+            let custom=dialog.cast::<windows::Win32::UI::Shell::IFileDialogCustomize>().map_err(|e|native("Customize image dialog",e))?;
+            custom.AddCheckButton(101,w!("Transparent background"),*initial).map_err(|e|native("Add transparency option",e))?;
+            Some(custom)
+        } else {None};
         if !show_result(dialog.Show(Some(HWND(parent as _))))? {
             return Ok(None);
         }
@@ -335,6 +373,9 @@ fn choose_impl(
                 .map_err(|e| native("GetDisplayName", e))?,
         );
         let path = path.path()?;
+        if let (Some(custom),Some(alpha))=(custom,alpha) {
+            *alpha=custom.GetCheckButtonState(101).map_err(|e|native("Read transparency option",e))?.as_bool();
+        }
         if audit_prefill {
             admit_fixture_reply(current.expect("audit fixture"), &path)?;
         }
@@ -382,30 +423,18 @@ mod tests {
         assert!(admit_fixture_reply(expected, Path::new("C:/unexpected.om9")).is_err());
         assert!(admit_fixture_reply(expected, Path::new("H:/owned/other.om9")).is_err());
     }
-    #[test]
-    #[ignore = "requires an interactive Windows desktop; run with --ignored"]
-    fn real_stl_save_dialog_accepts_an_owned_fixture() {
-        use crate::dialog_probe::{DialogKind, ModalCancelProbe};
+    fn fixture_owner() -> windows::Win32::Foundation::HWND {
         use windows::{
-            Win32::{
-                Foundation::HWND,
-                UI::WindowsAndMessaging::{
-                    CreateWindowExW, DestroyWindow, WINDOW_EX_STYLE, WS_OVERLAPPED,
-                },
-            },
+            Win32::UI::WindowsAndMessaging::{CreateWindowExW, WINDOW_EX_STYLE, WS_OVERLAPPED},
             core::w,
         };
-        let directory = std::env::temp_dir().join(format!("om9-stl-dialog-{}", std::process::id()));
-        let _ = std::fs::remove_dir_all(&directory);
-        std::fs::create_dir_all(&directory).expect("dialog directory");
-        let target = directory.join("audit.stl");
         // SAFETY: A system STATIC window owned by this thread; the dialog API only
         // receives its HWND and the window is destroyed before the test returns.
-        let owner: HWND = unsafe {
+        unsafe {
             CreateWindowExW(
                 WINDOW_EX_STYLE(0),
                 w!("STATIC"),
-                w!("om9 stl dialog owner"),
+                w!("om9 test dialog owner"),
                 WS_OVERLAPPED,
                 0,
                 0,
@@ -417,7 +446,47 @@ mod tests {
                 None,
             )
         }
-        .expect("hidden owner window");
+        .expect("hidden owner window")
+    }
+    #[test]
+    #[ignore = "requires the Windows desktop and an owned native dialog"]
+    fn real_view_image_dialog_accepts_and_cancels() {
+        use crate::dialog_probe::{DialogKind, ModalCancelProbe};
+        use windows::Win32::UI::WindowsAndMessaging::DestroyWindow;
+        let directory = std::env::temp_dir().join(format!("om9-capture-picker-{}", std::process::id()));
+        std::fs::create_dir(&directory).unwrap();
+        let target = directory.join("probe.png");
+        let owner = fixture_owner();
+        for accept in [false, true] {
+            let probe = if accept {
+                ModalCancelProbe::arm_accept(owner.0 as usize, DialogKind::SaveViewImage)
+            } else {
+                ModalCancelProbe::arm(owner.0 as usize, DialogKind::SaveViewImage)
+            }
+            .unwrap();
+            let mut alpha = true;
+            let path = choose_view_image(owner.0 as usize, Some(&target), &mut alpha).unwrap();
+            let receipt = probe.finish().unwrap();
+            assert!(receipt.observed && receipt.destroyed);
+            assert_eq!(path, accept.then(|| target.clone()));
+            assert!(alpha);
+        }
+        // SAFETY: fixture_owner created this HWND on this thread.
+        unsafe {
+            DestroyWindow(owner).unwrap();
+        }
+        std::fs::remove_dir(directory).unwrap();
+    }
+    #[test]
+    #[ignore = "requires an interactive Windows desktop; run with --ignored"]
+    fn real_stl_save_dialog_accepts_an_owned_fixture() {
+        use crate::dialog_probe::{DialogKind, ModalCancelProbe};
+        use windows::Win32::UI::WindowsAndMessaging::DestroyWindow;
+        let directory = std::env::temp_dir().join(format!("om9-stl-dialog-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&directory);
+        std::fs::create_dir_all(&directory).expect("dialog directory");
+        let target = directory.join("audit.stl");
+        let owner=fixture_owner();
         let probe = ModalCancelProbe::arm_accept(owner.0 as usize, DialogKind::SaveStl)
             .expect("owned dialog probe");
         let result = choose_stl(owner.0 as usize, Mode::Save, Some(&target));

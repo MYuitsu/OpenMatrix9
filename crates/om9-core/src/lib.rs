@@ -9,6 +9,7 @@ pub mod brep;
 pub mod brep_kernel;
 pub mod budget;
 pub mod cage;
+pub mod cage_isocurve;
 pub mod capability;
 pub mod changes;
 pub mod command_schema;

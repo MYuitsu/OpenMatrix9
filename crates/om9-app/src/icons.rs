@@ -23,6 +23,12 @@ macro_rules! icon {
     };
 }
 const PALETTE: &[Icon] = &[
+    icon!("F6ModeGeneral", "", "", "f6-modes/F6ModeGeneral.svg"),
+    icon!("F6ModeSurface", "", "", "f6-modes/F6ModeSurface.svg"),
+    icon!("F6ModeTSplines", "", "", "f6-modes/F6ModeTSplines.svg"),
+    icon!("F6ModeUser", "", "", "f6-modes/F6ModeUser.svg"),
+    icon!("F6ModeReport", "", "", "f6-modes/F6ModeReport.svg"),
+    icon!("F6ModeMaterials", "", "", "f6-modes/F6ModeMaterials.svg"),
     icon!(
         "Display Rendered Viewport",
         "ToolbarDisplayRendered",
@@ -3404,7 +3410,7 @@ fn lookup(name: &str) -> Option<&'static Icon> {
         for icon in PALETTE.iter().chain(MENU_PALETTE).chain(SIDEBAR_PALETTE) {
             for key in [
                 Some(icon.name),
-                Some(icon.command_key),
+                (!icon.command_key.is_empty()).then_some(icon.command_key),
                 (!icon.feature.is_empty()).then_some(icon.feature),
             ]
             .into_iter()
@@ -3452,6 +3458,7 @@ pub fn icon_name(name: &str) -> Option<&'static str> {
 /// is reused on every subsequent frame; failed authored SVGs cache a fallback.
 #[derive(Default)]
 pub struct Icons {
+    context: Option<egui::Context>,
     textures: BTreeMap<&'static str, Option<egui::TextureHandle>>,
 }
 impl Icons {
@@ -3470,6 +3477,11 @@ impl Icons {
             fallback(ui, rect, opacity);
             return;
         };
+        // A texture ID is local to its egui context, including offscreen replay.
+        if self.context.as_ref() != Some(ui.ctx()) {
+            self.textures.clear();
+            self.context = Some(ui.ctx().clone());
+        }
         let texture = self.textures.entry(icon.name).or_insert_with(|| {
             raster(icon.svg).map(|image| {
                 ui.ctx().load_texture(

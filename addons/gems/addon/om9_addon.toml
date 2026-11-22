@@ -19,7 +19,7 @@ label = "Gem Loader"
 handler = "om9_addon_session"
 interactive = true
 builder = true
-aliases = ["gvLoader", "GemLoader"]
+aliases = ["gvLoader", "gvBuilderGemLoader", "GemLoader"]
 summary = "Nạp đá theo kiểu cắt và kích thước, bấm để đặt lên CPlane hoặc thay cho đá đang chọn."
 steps = ["Chọn Gem Loader trong menu Gems (hoặc gõ GemLoader).", "Chọn Cut, Length, Width, Material ở bảng BUILDERS hoặc trên dòng lệnh (Cut=oval, Length=7).", "Bấm vào viewport để đặt từng viên; U hoặc Undo bỏ viên vừa đặt.", "Enter: tạo các viên đã đặt. Không bấm điểm nào thì đá đặt ở gốc CPlane; nếu đang chọn đá thì thay đá đó bằng kiểu mới."]
 options = ["Cut: kiểu cắt (Round, Oval, Princess, Cushion, Emerald, Asscher, Baguette, Marquise, Pear, Heart, Trillion, Radiant, Cabochon).", "Length / Width: kích thước (mm). Width = 0 dùng tỉ lệ chuẩn của kiểu cắt.", "Material: chất liệu (tính carat).", "Undo: bỏ điểm vừa đặt."]

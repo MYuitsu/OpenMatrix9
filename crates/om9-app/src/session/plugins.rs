@@ -56,6 +56,14 @@ fn project_change(batch: &om9_core::changes::ChangeBatch) -> om9_plugin_host::Pr
         changes,
     }
 }
+fn plugin_selection_error(error: Error) -> Error {
+    match error {
+        Error::Budget("root selection count") => Error::Budget("plugin selection"),
+        Error::Permission("selected root") => Error::Permission("plugin selected root"),
+        other => other,
+    }
+}
+
 fn plugin_error(error: impl std::fmt::Display) -> Error {
     Error::Io(format!("plugin: {error}"))
 }
@@ -650,7 +658,7 @@ impl Controller {
             let staged_selection = run.selection.clone();
             let before = self.coordinator.capture_retained_document(self.document)?;
             if let Some(request) = run.request {
-                self.publish_plugin_request(request, staged_selection.as_deref())?;
+                self.publish_request_with_selection(request, staged_selection.as_deref()).map_err(plugin_selection_error)?;
             } else if let Some(ids) = staged_selection.as_deref() {
                 self.apply_plugin_selection_now(ids)?;
             }
@@ -713,11 +721,7 @@ impl Controller {
     /// `select_objects` uses: a canonical, selectable root with pick geometry.
     fn prepare_plugin_selection(&self, scene: &Scene, ids: &[ObjectId])
         -> Result<super::selection_memory::ReservedRootSelection> {
-        self.prepare_root_selection(scene, ids, true).map_err(|error| match error {
-            Error::Budget("root selection count") => Error::Budget("plugin selection"),
-            Error::Permission("selected root") => Error::Permission("plugin selected root"),
-            other => other,
-        })
+        self.prepare_root_selection(scene, ids, true).map_err(plugin_selection_error)
     }
 
     fn apply_plugin_selection(&mut self, selection: super::selection_memory::ReservedRootSelection) {
@@ -743,19 +747,29 @@ impl Controller {
 
     /// Prepare the candidate, validate the staged selection against the scene that will
     /// be published, then commit. A bad selection refuses the command before publication.
-    fn publish_plugin_request(
+    pub(super) fn publish_request_with_selection(
         &mut self,
         request: TransactionRequest,
         selection: Option<&[ObjectId]>,
+    ) -> Result<()> {
+        self.publish_request_with_reserved_selection(request, selection, None)
+    }
+
+    pub(super) fn publish_request_with_reserved_selection(
+        &mut self,
+        request: TransactionRequest,
+        selection: Option<&[ObjectId]>,
+        guards: Option<&mut [om9_core::transaction::ExternalMemoryReservation]>,
     ) -> Result<()> {
         let old_scene = self.scene.as_ref().ok_or(Error::Missing("plugin scene"))?;
         if old_scene.epoch != self.coordinator.epoch() {
             return Err(Error::Stale("plugin scene"));
         }
         let old_usage = self.scene_cache_usage()?;
-        let mut prepared = self
-            .coordinator
-            .prepare_with_held_usage(request, old_usage)?;
+        let mut prepared = match guards {
+            Some(guards) => self.coordinator.prepare_with_reserved_brep_mutations(request, old_usage, guards)?,
+            None => self.coordinator.prepare_with_held_usage(request, old_usage)?,
+        };
         let candidate = prepared
             .candidate_world()
             .documents
@@ -767,7 +781,7 @@ impl Controller {
             &self.coordinator.world().documents[&self.document],
         ) {
             let staged = match selection {
-                Some(ids) => Some(self.prepare_plugin_selection(old_scene, ids)?),
+                Some(ids) => Some(self.prepare_root_selection(old_scene, ids, true)?),
                 None => None,
             };
             self.coordinator.commit(prepared)?;
@@ -784,7 +798,7 @@ impl Controller {
             |_| Ok(()),
         )?;
         let staged = match selection {
-            Some(ids) => Some(self.prepare_plugin_selection(&candidate_scene.scene, ids)?),
+            Some(ids) => Some(self.prepare_root_selection(&candidate_scene.scene, ids, true)?),
             None => None,
         };
         let receipt = self.coordinator.commit(prepared)?;

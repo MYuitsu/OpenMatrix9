@@ -5,8 +5,7 @@ use crate::viewport_menu::{DisplayPreset, ENTRIES, MenuAction};
 const SNAP_STEPS: [f64; 4] = [0.1, 0.25, 0.5, 1.0];
 
 pub(super) fn style_dialog(ui: &mut egui::Ui) {
-    use egui::{Color32, FontId, Stroke, TextStyle};
-    let ink = Color32::from_rgb(24, 32, 46);
+    use egui::{FontId, TextStyle};
     let heading = super::typography::semibold(ui.ctx(), 17.);
     let style = ui.style_mut();
     style.text_styles.insert(TextStyle::Heading, heading);
@@ -16,10 +15,7 @@ pub(super) fn style_dialog(ui: &mut egui::Ui) {
     style.spacing.item_spacing = egui::vec2(8., 4.);
     style.spacing.button_padding = egui::vec2(6., 2.);
     style.spacing.interact_size.y = 22.;
-    style.visuals.override_text_color = Some(ink);
-    style.visuals.weak_text_color = Some(Color32::from_rgb(76, 88, 106));
-    style.visuals.selection.bg_fill = Color32::from_rgb(216, 231, 250);
-    style.visuals.selection.stroke = Stroke::new(1., Color32::from_rgb(30, 63, 109));
+
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize, serde::Deserialize)]

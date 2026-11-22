@@ -88,6 +88,77 @@ pub(super) const PROVIDERS: &[(&str, TokenProvider)] = &[
 
 impl CommandOptionInterface for Controller {
     fn command_options(&self) -> Vec<CommandOption> {
+        if let Some(direction) = &self.curve_direction {
+            return direction.option().map_or_else(Vec::new, |token| {
+                let mut options = vec![descriptor("curve_direction", token, token)];
+                options[0].id.run = self.command_run;
+                assign_shortcuts(&mut options);
+                options
+            });
+        }
+        if let Some(session) = &self.view_capture {
+            if session.stage == crate::viewport_capture::Stage::Path {
+                let mut options = vec![descriptor("view_capture", "Browse", "Browse")];
+                options[0].id.run = self.command_run;
+                assign_shortcuts(&mut options);
+                return options;
+            }
+            if session.stage != crate::viewport_capture::Stage::Settings {
+                return Vec::new();
+            }
+            let settings = &session.settings;
+            let mut options = Vec::new();
+            for (label, value, cmd) in [
+                (
+                    "Width",
+                    settings
+                        .width
+                        .map_or_else(|| "Viewport".into(), |v| v.to_string()),
+                    "Width=",
+                ),
+                (
+                    "Height",
+                    settings
+                        .height
+                        .map_or_else(|| "Viewport".into(), |v| v.to_string()),
+                    "Height=",
+                ),
+                ("Scale", settings.scale.to_string(), "Scale="),
+            ] {
+                let mut option = descriptor("view_capture", label, cmd);
+                option.label = format!("{label}={value}");
+                option.id.run = self.command_run;
+                options.push(option);
+            }
+            for (name, current, on, off) in [
+                ("DrawGrid", settings.grid, "DrawGrid=Yes", "DrawGrid=No"),
+                (
+                    "DrawWorldAxes",
+                    settings.world_axes,
+                    "DrawWorldAxes=Yes",
+                    "DrawWorldAxes=No",
+                ),
+                (
+                    "DrawCPlaneAxes",
+                    settings.cplane_axes,
+                    "DrawCPlaneAxes=Yes",
+                    "DrawCPlaneAxes=No",
+                ),
+                (
+                    "TransparentBackground",
+                    settings.transparent,
+                    "TransparentBackground=Yes",
+                    "TransparentBackground=No",
+                ),
+            ] {
+                let mut option = descriptor("view_capture", name, if current { off } else { on });
+                option.label = if current { on } else { off }.into();
+                option.id.run = self.command_run;
+                options.push(option);
+            }
+            assign_shortcuts(&mut options);
+            return options;
+        }
         if self.ring_rail_history_pending() { return Vec::new(); }
         if self.ring_rail_confirmation_pending() {
             let mut options = vec![descriptor("ring_rail_replace", "Yes", "Yes"), descriptor("ring_rail_replace", "No", "No"), descriptor("ring_rail_replace", "Cancel", "Cancel")];

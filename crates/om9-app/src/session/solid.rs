@@ -5174,6 +5174,72 @@ impl Controller {
         self.commit_solid_result_inner(feature, name, mutations, select, None, Some(reservations), Some(wire))
     }
 
+    /// Capture the topology IDs of the body actually inserted so Save/Open can
+    /// bind its faces and edges back to the same canonical source.
+    pub(super) fn reserve_attested_brep_candidate(
+        &self,
+        output: om9_core::brep::Brep,
+    ) -> Result<(om9_core::brep::CanonicalBrep, om9_core::transaction::ExternalMemoryReservation,
+        om9_kernel::brep::TopologyAttestation, om9_core::transaction::ExternalMemoryReservation)> {
+        let held = self.scene_cache_usage()?;
+        let limits = self.coordinator.limits();
+        let physical =
+            || om9_native_owner::physical_memory().map(|s| (s.total_bytes, s.available_bytes));
+        let source_bytes = output.storage_usage(limits)?.bytes;
+        let mut input = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::Kernel,
+            source_bytes,
+            physical(),
+            held,
+        )?;
+        input.set_allocated_bytes(source_bytes)?;
+        let mut storage = self.coordinator.reserve_external_memory_with_held(
+            om9_core::budget::memory::MemoryClass::CpuCache,
+            1,
+            physical(),
+            held,
+        )?;
+        let snapshot = om9_kernel::brep::capture_source_topology(
+            output.source(),
+            output.display().deflection_mm,
+            self.viewport_detail.angular(),
+            limits,
+            |live, pending| {
+                let needed = live
+                    .checked_add(pending)
+                    .ok_or(Error::Overflow("BRep topology capture"))?;
+                if needed > storage.bytes() {
+                    let extra = needed - storage.bytes();
+                    self.coordinator.grow_external_memory_with_held(
+                        &mut storage,
+                        extra,
+                        physical(),
+                        held,
+                    )?;
+                }
+                storage.set_allocated_bytes(live)?;
+                storage.recheck_pending()
+            },
+        )
+        .map_err(|error| Error::Io(format!("BRep topology capture: {error}")))?;
+        drop(output);
+        drop(input);
+        let (body, proof) = snapshot.into_parts();
+        let proof_bytes = proof.storage_bytes()?;
+        let bytes = body
+            .storage_usage(limits)?
+            .bytes
+            .checked_add(proof_bytes)
+            .ok_or(Error::Overflow("BRep output topology"))?;
+        storage.set_allocated_bytes(bytes)?;
+        storage.shrink_to(bytes)?;
+        let proof_storage = storage.split_off(proof_bytes)?;
+        let source = self
+            .coordinator
+            .register_reserved_brep_candidate(body, &mut storage, held)?;
+        Ok((source, storage, proof, proof_storage))
+    }
+
     pub(super) fn reserve_solid_candidate(&self, candidate: om9_core::brep::Brep)
         -> Result<(om9_core::brep::CanonicalBrep, om9_core::transaction::ExternalMemoryReservation)> {
         let held = self.scene_cache_usage()?;
@@ -6426,12 +6492,11 @@ impl Controller {
             let Geometry::Curve(curve) = &source.geometry else {
                 return Err(Error::Invalid("extrude needs a curve"));
             };
-            let inverse = om9_core::top11::inverse_affine(source.placement)?;
-            let local_direction = std::array::from_fn(|i| (0..3).map(|j| inverse.0[i][j] * direction[j]).sum());
             let operation_limits = self.coordinator.limits().remaining_after(staged_usage)?;
-            let brep = om9_kernel::extrusion::solid(
+            let brep = om9_kernel::extrusion::placed_solid(
                 curve,
-                local_direction,
+                source.placement,
+                direction,
                 creation::DEFAULT_DEFLECTION_MM,
                 &operation_limits,
             )

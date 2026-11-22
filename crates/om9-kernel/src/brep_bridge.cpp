@@ -525,39 +525,47 @@ extern "C" int om9_occt_brep_snapshot_grouped(const char* source, size_t source_
 // single shell and promoted to a solid. The gem asset owns the mesh; this adapter only makes the
 // same authored boundary editable as OCCT topology. An open or non-manifold mesh is refused rather
 // than repaired into a fake solid.
-extern "C" int om9_occt_brep_from_triangles(
-    const double* points, size_t point_count, const uint32_t* triangles, size_t triangle_count,
+extern "C" int om9_occt_brep_from_facets(
+    const double* points, size_t point_count, const uint32_t* indices, size_t index_count,
+    const size_t* face_sizes, size_t face_count,
     double tolerance, double deflection, size_t max_points, size_t max_nodes, size_t max_bytes,
     Om9BrepSink sink, void* context, char* message, int capacity) {
  try {
-  if (!sink || !points || !triangles || point_count < 4 || triangle_count < 4 ||
+  if (!sink || !points || !indices || point_count < 4 || face_count < 4 ||
       !std::isfinite(tolerance) || tolerance <= 0 || !std::isfinite(deflection) || deflection <= 0)
    throw std::invalid_argument("invalid mesh BRep input");
-  if (point_count > max_points / 3 || triangle_count > max_nodes)
+  if (point_count > max_points / 3 || face_count > max_nodes || index_count > max_bytes / sizeof(uint32_t))
    throw std::length_error("mesh BRep budget");
   for (size_t i = 0; i < point_count; ++i)
    if (!std::isfinite(points[i * 3]) || !std::isfinite(points[i * 3 + 1]) ||
        !std::isfinite(points[i * 3 + 2]))
     throw std::invalid_argument("mesh BRep point is not finite");
-  for (size_t i = 0; i < triangle_count * 3; ++i)
-   if (triangles[i] >= point_count) throw std::invalid_argument("mesh BRep corner out of range");
+  for (size_t i = 0; i < index_count; ++i)
+   if (indices[i] >= point_count) throw std::invalid_argument("mesh BRep corner out of range");
 
   BRepBuilderAPI_Sewing sewing(std::min(tolerance, 1.0e-5));
-  for (size_t i = 0; i < triangle_count; ++i) {
-   const uint32_t a = triangles[i * 3];
-   const uint32_t b = triangles[i * 3 + 1];
-   const uint32_t c = triangles[i * 3 + 2];
-   if (a == b || b == c || a == c) throw std::invalid_argument("mesh BRep degenerate triangle");
+  size_t offset = 0;
+  for (size_t i = 0; i < face_count; ++i) {
+   const size_t size = face_sizes ? face_sizes[i] : 3;
+   if (size < 3 || size > 32 || size > index_count - offset)
+    throw std::invalid_argument("mesh BRep facet corner count");
    BRepBuilderAPI_MakePolygon polygon;
-   polygon.Add(gp_Pnt(points[a * 3], points[a * 3 + 1], points[a * 3 + 2]));
-   polygon.Add(gp_Pnt(points[b * 3], points[b * 3 + 1], points[b * 3 + 2]));
-   polygon.Add(gp_Pnt(points[c * 3], points[c * 3 + 1], points[c * 3 + 2]));
+   const uint32_t* face_indices = indices + offset;
+   for (size_t j = 0; j < size; ++j) {
+    const uint32_t index = face_indices[j];
+    if (std::find(face_indices, face_indices + j, index) != face_indices + j)
+     throw std::invalid_argument("mesh BRep degenerate facet");
+    const size_t vertex = size_t(index) * 3;
+    polygon.Add(gp_Pnt(points[vertex], points[vertex + 1], points[vertex + 2]));
+   }
+   offset += size;
    polygon.Close();
-   if (!polygon.IsDone()) throw std::runtime_error("mesh BRep triangle wire failed");
+   if (!polygon.IsDone()) throw std::runtime_error("mesh BRep facet wire failed");
    BRepBuilderAPI_MakeFace face(polygon.Wire(), Standard_True);
    if (!face.IsDone()) throw std::runtime_error("mesh BRep planar face failed");
    sewing.Add(face.Face());
   }
+  if (offset != index_count) throw std::invalid_argument("mesh BRep unused facet indices");
   sewing.Perform();
   TopoDS_Shape sewed = sewing.SewedShape();
   if (sewed.IsNull()) throw std::runtime_error("mesh BRep sewing produced no shape");

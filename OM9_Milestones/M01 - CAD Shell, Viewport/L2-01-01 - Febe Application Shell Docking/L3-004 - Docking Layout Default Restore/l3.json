@@ -200,6 +200,13 @@
     }
   ],
   "runtime_implementation": {
+    "dock_profiles_2026_11_22": {
+      "date": "2026-11-22",
+      "target": "standalone Rust OM9 on Windows",
+      "scope": "Reset Layout resets the current named profile.",
+      "evidence": "docs/validation/2026-11-22-dock-popup-theme.md",
+      "manual_gate_promoted": false
+    },
     "left_default_width": {
       "date": "2026-10-20",
       "status": "DEFAULT_WIDTH_VALIDATED_MANUAL_UI_PENDING",

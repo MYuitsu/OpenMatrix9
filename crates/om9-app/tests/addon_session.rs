@@ -2445,6 +2445,289 @@ fn surfaces_round_trip_through_the_document() {
 /// SubD: a cage from the add-on keeps its faces through the document, so a face selection
 /// made by one command is used by the next (Paint Selection → Extrude → Subdivision Level).
 #[test]
+fn f6_mesh_booleans_use_ordered_sets_make_meshes_and_undo() {
+    use om9_app::ui::MatrixApp;
+    use om9_core::{cage::box_mesh, model::Entity};
+
+    fn finish(c: &mut Controller) -> om9_core::Result<()> {
+        c.submit("")?;
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(15);
+        while c.boolean_builder_worker_pending() {
+            if let Some(result) = c.poll_boolean_builder_worker() {
+                return result;
+            }
+            assert!(
+                std::time::Instant::now() < deadline,
+                "mesh Boolean worker stalled"
+            );
+            std::thread::yield_now();
+        }
+        Ok(())
+    }
+
+    let tmp = std::env::temp_dir().join(format!("om9-mesh-boolean-{}", uuid::Uuid::new_v4()));
+    fs::create_dir_all(&tmp).unwrap();
+    let package = host(&tmp);
+    let features = features();
+    let names: Vec<_> = features
+        .iter()
+        .map(|(id, command)| FeatureName {
+            id,
+            command: command.as_deref(),
+        })
+        .collect();
+    let box_at = |name: &str, lo: f64, hi: f64| {
+        let corners = std::array::from_fn(|i| {
+            std::array::from_fn(|axis| if i & (1 << axis) != 0 { hi } else { lo })
+        });
+        Entity::new(name, Geometry::Mesh(box_mesh(corners)), None)
+    };
+    let mut doc = Document::with_template_tolerance("mesh Boolean sets");
+    let a = box_at("A", 0., 2.);
+    let b = box_at("B", 1., 4.);
+    let far = box_at("far", 10., 11.);
+    let (a_id, b_id, far_id) = (a.id, b.id, far.id);
+    for entity in [a, b, far] {
+        doc.entities.insert(entity.id, entity);
+    }
+    let mut app = MatrixApp::new(doc).unwrap();
+    app.f6_mode = om9_app::f6::catalog::Mode::Surface;
+    let original = app.controller.document().clone();
+    for installed in [false, true] {
+        if installed {
+            app.controller.attach_addons(package.clone(), &names);
+        }
+        for from_f6 in [true, false] {
+            for (script, first, second, volume) in [
+                ("_MeshBooleanUnion", a_id, b_id, 34.),
+                ("_MeshBooleanDifference", a_id, b_id, 7.),
+                ("_MeshBooleanDifference", b_id, a_id, 26.),
+                ("_MeshBooleanIntersection", a_id, b_id, 1.),
+            ] {
+                let c = &mut app.controller;
+                let picks = [first, second];
+                c.select_objects(if script == "_MeshBooleanUnion" {
+                    &picks
+                } else {
+                    &picks[..1]
+                })
+                .unwrap();
+                if from_f6 {
+                    let action = app
+                        .f6_context()
+                        .actions
+                        .into_iter()
+                        .find(|row| row.id.eq_ignore_ascii_case(script.trim_start_matches('_')))
+                        .expect("Boolean row in the Surface mode for selected meshes");
+                    assert!(
+                        action.availability.enabled(),
+                        "{script}: {:?}",
+                        action.availability
+                    );
+                    app.controller
+                        .dispatch(&action.id, InvocationOrigin::F6)
+                        .unwrap();
+                } else {
+                    app.controller.submit(script).unwrap();
+                }
+                let c = &mut app.controller;
+                if script != "_MeshBooleanUnion" {
+                    c.submit("").unwrap();
+                    assert_eq!(c.document(), &original);
+                    c.select_objects(&[second]).unwrap();
+                    c.refresh_addon_session();
+                }
+                finish(c).unwrap();
+                assert_eq!(c.document().entities.len(), 2);
+                let out = c
+                    .document()
+                    .entities
+                    .values()
+                    .find(|e| e.id != far_id)
+                    .unwrap();
+                let Geometry::Mesh(mesh) = &out.geometry else {
+                    panic!("expected mesh")
+                };
+                let observed = om9_core::cutters::volume_mm3(mesh).expect("closed mesh");
+                assert!(
+                    (observed - volume).abs() < 1e-6,
+                    "{script}: {observed} != {volume}"
+                );
+                c.undo().unwrap();
+                assert_eq!(c.document(), &original);
+            }
+        }
+    }
+    let c = &mut app.controller;
+    c.select_objects(&[a_id, b_id]).unwrap();
+    c.submit("_MeshBooleanIntersection").unwrap();
+    c.submit("").unwrap();
+    c.select_objects(&[far_id]).unwrap();
+    c.refresh_addon_session();
+    assert!(finish(c).is_err());
+    assert_eq!(c.document(), &original);
+    c.cancel();
+    assert_eq!(c.coordinator().undo_len(), 0);
+    c.select_objects(&[a_id]).unwrap();
+    c.submit("_MeshBooleanDifference").unwrap();
+    c.submit("DeleteInput=No").unwrap();
+    c.submit("").unwrap();
+    c.select_objects(&[b_id]).unwrap();
+    finish(c).unwrap();
+    for id in [a_id, b_id, far_id] {
+        assert_eq!(c.document().entities[&id], original.entities[&id]);
+    }
+    assert_eq!(c.document().entities.len(), 4);
+    c.undo().unwrap();
+    assert_eq!(c.document(), &original);
+
+    c.select_objects(&[a_id]).unwrap();
+    c.submit("_MeshBooleanDifference").unwrap();
+    c.submit("").unwrap();
+    c.center_selected().unwrap();
+    let edited = c.document().clone();
+    c.select_objects(&[b_id]).unwrap();
+    assert!(matches!(finish(c), Err(om9_core::Error::Stale(_))));
+    assert_eq!(c.document(), &edited);
+    c.cancel();
+    c.undo().unwrap();
+    assert_eq!(c.document(), &original);
+    c.select_objects(&[a_id, b_id]).unwrap();
+    c.submit("_MeshBooleanUnion").unwrap();
+    c.submit("").unwrap();
+    assert!(c.boolean_builder_worker_pending());
+    c.cancel_boolean_builder_worker();
+    c.cancel();
+    assert_eq!(c.document(), &original);
+    assert_eq!(c.coordinator().undo_len(), 0);
+    #[cfg(feature = "occt-brep")]
+    {
+        for input in ["Box", "1,1,1", "3,3,1", "2"] {
+            c.submit(input).unwrap();
+        }
+        let cad_id = *c
+            .document()
+            .entities
+            .keys()
+            .find(|id| !original.entities.contains_key(id))
+            .expect("native BRep box");
+        assert!(matches!(
+            c.document().entities[&cad_id].geometry,
+            Geometry::Brep(_)
+        ));
+        let with_box = c.document().clone();
+        c.select_objects(&[a_id]).unwrap();
+        c.submit("_MeshBooleanIntersection").unwrap();
+        c.submit("").unwrap();
+        c.select_objects(&[cad_id]).unwrap();
+        finish(c).unwrap();
+        let Geometry::Mesh(mesh) = &c.document().entities[&a_id].geometry else {
+            panic!("mesh output")
+        };
+        assert!((om9_core::cutters::volume_mm3(mesh).unwrap() - 1.).abs() < 1e-6);
+        c.undo().unwrap();
+        assert_eq!(c.document(), &with_box);
+    }
+    fs::remove_dir_all(tmp).unwrap();
+}
+
+#[test]
+fn f6_factory_clay_box_and_cmd_macro_build_the_same_mesh() {
+    use om9_app::{f6::catalog::CATALOG, ui::MatrixApp};
+    let tmp = std::env::temp_dir().join(format!("om9-f6-subd-{}", uuid::Uuid::new_v4()));
+    fs::create_dir(&tmp).unwrap();
+    let feats = features();
+    let names: Vec<_> = feats
+        .iter()
+        .map(|(id, command)| FeatureName {
+            id,
+            command: command.as_deref(),
+        })
+        .collect();
+    let mut app = MatrixApp::new(Document::with_template_tolerance("Clay Box")).unwrap();
+    app.controller.attach_addons(host(&tmp), &names);
+    if let Ok(path) = std::env::var("OM9_F6_MATRIX_AUDIT") {
+        let plain = MatrixApp::new(Document::new("without add-on")).unwrap();
+        let mut rows = std::collections::BTreeMap::new();
+        for (label, script) in &CATALOG.actions {
+            if script.is_empty() {
+                continue;
+            }
+            let columns = [&plain, &app].map(|a| {
+                let row = a.resolve_f6_action(script, label);
+                let enabled = row.availability.enabled();
+                let detail = row.availability.reason().unwrap_or(&row.id);
+                format!("{enabled}\t{detail}")
+            });
+            rows.insert((script, label), columns.join("\t"));
+        }
+        let mut report = String::from(
+            "Factory command\tMenu label\tBuilt-in enabled\tBuilt-in route or reason\tMatrix add-on enabled\tMatrix route or reason\n",
+        );
+        for ((script, label), cols) in rows {
+            report.push_str(&format!("{script}\t{label}\t{cols}\n"));
+        }
+        fs::write(path, report).unwrap();
+    }
+    let script = "noecho !_ClayBox";
+    let action = app.resolve_f6_action(script, "Clay Box");
+    assert!(action.cancel_first && action.availability.enabled());
+    assert_eq!(action.id, "ClayooPrimitivesBox");
+    let mut results = Vec::new();
+    for from_f6 in [true, false] {
+        if from_f6 {
+            app.controller
+                .dispatch(&action.id, InvocationOrigin::F6)
+                .unwrap();
+        } else {
+            app.controller.submit(script).unwrap();
+        }
+        app.controller.session_point([0., 0., 0.]).unwrap();
+        app.controller.session_point([4., 4., 0.]).unwrap();
+        app.controller.submit("4").unwrap();
+        let Geometry::Mesh(mesh) = &app
+            .controller
+            .document()
+            .entities
+            .values()
+            .next()
+            .unwrap()
+            .geometry
+        else {
+            panic!("SubD box mesh")
+        };
+        assert_eq!(mesh.faces.len(), 48);
+        results.push(mesh.clone());
+        app.controller.undo().unwrap();
+        assert!(app.controller.document().entities.is_empty());
+    }
+    assert_eq!(results[0], results[1]);
+    for s in ["Line","0,0,0","10,0,0"] { app.controller.submit(s).unwrap(); }
+    let source=*app.controller.document().entities.keys().next().unwrap();
+    app.controller.select_objects(&[source]).unwrap();
+    let preset=app.resolve_f6_action("_Offset _b _t","Offset Both Sides Pt");
+    assert!(preset.availability.enabled());
+    app.controller.dispatch(&preset.id,InvocationOrigin::F6).unwrap();
+    app.controller.session_point([5.,3.,0.]).unwrap();
+    let doc=app.controller.document();
+    assert_eq!(doc.entities.len(),3);
+    let mut sides=Vec::new();
+    for (id,entity) in &doc.entities {
+        if *id==source {continue;}
+        let Geometry::Curve(curve)=&entity.geometry else {panic!("offset curve")};
+        let pts=om9_core::surface_kernel::sample_curve(curve,5,&Default::default()).unwrap();
+        assert!(pts.iter().all(|p|(p[1]-pts[0][1]).abs()<1e-8));
+        sides.push(pts[0][1]);
+    }
+    sides.sort_by(f64::total_cmp);
+    assert!((sides[0]+3.).abs()<1e-8 && (sides[1]-3.).abs()<1e-8);
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.document().entities.len(),1);
+    drop(app);
+    fs::remove_dir_all(tmp).unwrap();
+}
+
+#[test]
 fn subd_face_selection_survives_the_document() {
     let tmp = std::env::temp_dir().join(format!("om9-app-subd-{}", std::process::id()));
     let _ = fs::remove_dir_all(&tmp);
@@ -3093,6 +3376,7 @@ fn sweep2_through_the_window_with_right_clicks() {
     let p1 = curve(&mut app, &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
     app.controller.clear_selection();
     app.controller.select_objects(&[ra, rb]).unwrap();
+    app.focus_command_editor();
     let r = run(&mut app, serde_json::json!([{"text": "Sweep2"}, {"key": "Enter"}]));
     for s in r["steps"].as_array().unwrap() {
         eprintln!("step {}: prompt={} command={}", s["step"], s["prompt"], s["command"]);
@@ -3148,6 +3432,7 @@ fn sweep2_options_window_ok_creates_the_surface() {
     let p1 = curve(&mut app, &[[-15.0, -20.0, 0.0], [-3.0, -21.0, 6.0], [8.0, -22.0, 0.0]]);
     app.controller.clear_selection();
     app.controller.select_objects(&[ra, rb]).unwrap();
+    app.focus_command_editor();
     let r = run(&mut app, serde_json::json!([{"text": "Sweep2"}, {"key": "Enter"}]));
     // Picking the cross section: no window yet.
     assert!(r["steps"][2]["dialog"].is_null(), "{}", r["steps"][2]);
@@ -3174,6 +3459,19 @@ fn sweep2_options_window_ok_creates_the_surface() {
         om9_app::ui_replay::screenshot(&mut app, size, 1.0, 40, &out).unwrap();
         eprintln!("screenshot: {}", out.display());
     }
+    // Move the running add-on editor through both columns without rebuilding its source selection.
+    use om9_app::{dock_layout::{DockSide, SectionId}, tool_panel::ToolPanel};
+    let section = SectionId::Tool(ToolPanel::SessionOptions);
+    let selection = last["selection"].clone();
+    for side in [DockSide::Left, DockSide::Right] {
+        assert!(app.dock_menu_section(section, side));
+        let moved = run(&mut app, serde_json::json!([{"wait": 2}]));
+        assert_eq!(moved["steps"][1]["dialog"], last["dialog"]);
+        assert_eq!(moved["steps"][1]["selection"], selection);
+    }
+    assert!(app.float_menu_section(section, om9_app::dock_layout::FloatRect { x: 350., y: 100., width: 410., height: 450. }));
+    let moved = run(&mut app, serde_json::json!([{"wait": 2}]));
+    let last = &moved["steps"][1];
     let check = at(last, "Dialog:MaintainHeight");
     assert!(check.is_array(), "no checkbox: {}", last["controls"]);
     let r = run(&mut app, serde_json::json!([{"click": check}, {"wait": 2}]));
@@ -3349,6 +3647,7 @@ fn text_rounded_solids_in_the_window() {
     let size = [1400.0f32, 900.0];
     // "Text" typed, as the menu names it, runs the add-on (Windows fonts, panel), not OM9's
     // older built-in Text.
+    app.focus_command_editor();
     let r = om9_app::ui_replay::replay_app(&mut app, size, 1.0, &[serde_json::json!({"text": "Text"}), serde_json::json!({"key": "Enter"})]).unwrap();
     eprintln!("after typing: {}", r["steps"][2]["command"]);
     assert!(app.controller.addon_builder().is_some(), "the Text panel: {}", r["steps"][2]["prompt"]);

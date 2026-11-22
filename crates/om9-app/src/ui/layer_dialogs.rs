@@ -92,11 +92,10 @@ impl MatrixApp {
         let mut painted = false;
         let mut color_valid = true;
         // The token owns mutations, while one reusable area owns UI layout state.
-        egui::Modal::new(egui::Id::new("owned-layer-dialog"))
-            .frame(egui::Frame::popup(&ctx.style_of(egui::Theme::Light)))
+        super::theme::modal(ctx, egui::Id::new("owned-layer-dialog"))
             .show(ctx, |ui| {
                 painted = !ui.is_sizing_pass();
-                *ui.visuals_mut() = egui::Visuals::light();
+
                 ui.set_width(320.);
                 ui.heading(title);
                 ui.separator();

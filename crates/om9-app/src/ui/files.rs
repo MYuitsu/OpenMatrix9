@@ -245,7 +245,7 @@ mod tests {
             let mut output = ctx.run_ui(egui::RawInput {
                 screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(900., 600.))),
                 focused: true, events, ..Default::default()
-            }, |ui| app.stl_progress_ui(ui.ctx()));
+            }, |ui| app.stl_progress_ui(ui));
             output.textures_delta.clear();
         };
         for _ in 0..3 { frame(&mut app, vec![]); }
@@ -733,11 +733,10 @@ impl MatrixApp {
         let mut cancel = false;
         let mut overwrite = None;
         let mut browse = false;
-        egui::Modal::new(egui::Id::new("owned-file-operation"))
-            .frame(egui::Frame::popup(&ctx.style_of(egui::Theme::Light)))
+        super::theme::modal(ctx, egui::Id::new("owned-file-operation"))
             .show(ctx, |ui| {
                 painted = !ui.is_sizing_pass();
-                *ui.visuals_mut() = egui::Visuals::light();
+
                 ui.set_width(360.);
                 ui.heading(match phase {
                     FilePhase::Unsaved => "Save changes?",
@@ -950,21 +949,16 @@ impl MatrixApp {
         }
     }
 
-    pub(super) fn stl_progress_ui(&mut self, ctx: &egui::Context) {
+    pub(super) fn stl_progress_ui(&mut self, ui: &mut egui::Ui) {
         let Some(job) = &self.stl_job else { return };
-        egui::Window::new("STL Export Progress")
-            .id(egui::Id::new("stl-export-progress"))
-            .anchor(egui::Align2::RIGHT_BOTTOM, [-12., -48.])
-            .collapsible(false)
-            .resizable(false)
-            .show(ctx, |ui| {
+        ui.scope(|ui| {
                 ui.horizontal(|ui| {
                     ui.spinner();
                     let canceling = job.canceling();
                     ui.label(if canceling { "Cancelling STL…" } else { "Exporting STL…" });
                     let cancel = ui.add_enabled(!canceling, egui::Button::new("Cancel"));
                     #[cfg(test)]
-                    ctx.data_mut(|data| data.insert_temp(egui::Id::new("stl-worker-cancel-rect"), cancel.rect));
+                    ui.ctx().data_mut(|data| data.insert_temp(egui::Id::new("stl-worker-cancel-rect"), cancel.rect));
                     if cancel.clicked() {
                         job.cancel();
                     }
@@ -997,18 +991,13 @@ impl MatrixApp {
         ctx.request_repaint();
     }
 
-    pub(super) fn stl_profile_ui(&mut self, ctx: &egui::Context) {
+    pub(super) fn stl_profile_ui(&mut self, ui: &mut egui::Ui) {
         let Some(mut tolerance) = self.stl_profile_draft else { return };
-        let mut open = true;
+        let ctx = ui.ctx().clone();
         let mut accept = false;
         let mut cancel = false;
         let mut angle = self.stl_angle_draft;
-        egui::Window::new("STL Export")
-            .id(egui::Id::new("stl-profile"))
-            .open(&mut open)
-            .collapsible(false)
-            .resizable(false)
-            .show(ctx, |ui| {
+        ui.scope(|ui| {
                 ui.horizontal(|ui| {
                     ui.label("Requested linear tolerance (mm):");
                     ui.add(egui::DragValue::new(&mut tolerance).speed(0.0001).max_decimals(12));
@@ -1036,7 +1025,7 @@ impl MatrixApp {
             self.stl_request = true;
             self.stl_profile_draft = None;
             self.status.info("Choose an STL destination");
-        } else if cancel || !open {
+        } else if cancel {
             self.cancel_stl_export_options();
             self.focus_cmd = true;
             self.status.info("STL export cancelled");
@@ -1151,23 +1140,18 @@ impl MatrixApp {
 
     /// Gumball settings menu: axes, Smooth/Snappy, drag strength, pivot reset and
     /// the documented defaults. Opened from the Info & Settings alignment icon.
-    pub(super) fn gumball_settings_ui(&mut self, ctx: &egui::Context) {
+    pub(super) fn gumball_settings_ui(&mut self, ui: &mut egui::Ui) {
         use crate::session::GumballAlignment;
         if !self.gumball_settings_open {
             return;
         }
-        let mut open = true;
+
         let mut alignment = self.controller.gumball_alignment();
         let mut snappy = self.controller.gumball_snappy();
         let mut strength = self.controller.gumball_drag_strength() * 100.0;
         let mut reset_pivot = false;
         let mut restore = false;
-        egui::Window::new("Gumball settings")
-            .id(egui::Id::new("gumball-settings"))
-            .open(&mut open)
-            .resizable(false)
-            .collapsible(false)
-            .show(ctx, |ui| {
+        ui.scope(|ui| {
                 ui.label("Alignment");
                 ui.horizontal(|ui| {
                     for (label, mode) in [
@@ -1213,7 +1197,6 @@ impl MatrixApp {
                 self.controller.relocate_gumball(None);
             }
         }
-        self.gumball_settings_open = open;
     }
 
     pub(super) fn update_file_title(&mut self, ctx: &egui::Context) {

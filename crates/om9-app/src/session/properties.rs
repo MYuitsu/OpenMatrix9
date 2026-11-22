@@ -75,6 +75,7 @@ pub const FIELDS: [FieldState; 7] = [
 /// that could be forgotten.
 #[derive(Debug, Clone, PartialEq)]
 pub enum PropertyEdit {
+    Material(om9_core::identity::MaterialId),
     Label(String),
     Color(Option<[u8; 4]>),
     Visible(bool),
@@ -87,6 +88,10 @@ impl PropertyEdit {
     /// Apply this edit to one attributes record.
     pub fn apply(self, attributes: &mut Attributes, label: &mut String) {
         match self {
+            PropertyEdit::Material(id) => {
+                attributes.material = Some(id);
+                attributes.material_source = 1;
+            }
             PropertyEdit::Label(value) => *label = value,
             PropertyEdit::Color(color) => attributes.color = color,
             PropertyEdit::Visible(value) => attributes.visible = value,

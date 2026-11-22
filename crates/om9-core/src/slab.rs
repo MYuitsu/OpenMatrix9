@@ -77,7 +77,7 @@ pub fn source_plane_normal(points: &[Point3], preferred: Point3) -> Result<Point
     if points.len() < 2 || points.len() > 1024 {
         return Err(Error::Invalid("Slab source points"));
     }
-    source_plane_normal_impl(points, preferred)
+    planar_hull_normal(points, Some(preferred))
 }
 
 /// Infer a plane from the entire validated NURBS control hull, rather than
@@ -88,14 +88,14 @@ pub fn nurbs_source_plane_normal(
     limits: &crate::budget::Limits,
 ) -> Result<Point3> {
     nurbs.validate(limits)?;
-    source_plane_normal_impl(&nurbs.poles, preferred)
+    planar_hull_normal(&nurbs.poles, Some(preferred))
 }
 
-fn source_plane_normal_impl(points: &[Point3], preferred: Point3) -> Result<Point3> {
+pub(crate) fn planar_hull_normal(points: &[Point3], preferred: Option<Point3>) -> Result<Point3> {
     if points.len() < 2 {
         return Err(Error::Invalid("Slab source points"));
     }
-    finite(preferred)?;
+    if let Some(preferred) = preferred { finite(preferred)?; }
     let base = points[0];
     let sub = |a: Point3, b: Point3| std::array::from_fn::<_, 3, _>(|i| a[i] - b[i]);
     let mut direction = [0.; 3];
@@ -131,6 +131,7 @@ fn source_plane_normal_impl(points: &[Point3], preferred: Point3) -> Result<Poin
         }
     }
     if magnitude <= len * 1e-9 {
+        let preferred = preferred.ok_or(Error::Invalid("collinear control hull"))?;
         let dot = (0..3).map(|i| preferred[i] * u[i]).sum::<f64>();
         normal = std::array::from_fn(|i| preferred[i] - dot * u[i]);
         magnitude = normal[0].hypot(normal[1]).hypot(normal[2]);
@@ -139,7 +140,7 @@ fn source_plane_normal_impl(points: &[Point3], preferred: Point3) -> Result<Poin
         return Err(Error::Invalid("Slab source plane is ambiguous"));
     }
     normal = normal.map(|x| x / magnitude);
-    if (0..3).map(|i| normal[i] * preferred[i]).sum::<f64>() < 0. {
+    if preferred.is_some_and(|p| (0..3).map(|i| normal[i] * p[i]).sum::<f64>() < 0.) {
         normal = normal.map(|x| -x);
     }
     for p in points {

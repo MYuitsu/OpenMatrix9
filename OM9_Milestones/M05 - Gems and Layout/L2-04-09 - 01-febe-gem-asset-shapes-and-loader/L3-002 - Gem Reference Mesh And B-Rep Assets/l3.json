@@ -153,6 +153,12 @@
     "OM9-L4-09-002-02"
   ],
   "runtime_implementation": {
+    "dust_marquire_2026_11_23": {
+      "status": "SCOPED_AUTOMATED_RUNTIME_VERIFIED",
+      "date": "2026-11-23",
+      "scope": "Closed mesh with 25 authored facets, a single six-sided B-rep table face and two pavilion tiers.",
+      "evidence": "docs/features/OM9-L3-04-09-003.md"
+    },
     "date": "2026-10-27",
     "status": "AUTOMATED_VERIFIED_AUTO_ONLY",
     "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",

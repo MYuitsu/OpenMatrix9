@@ -65,12 +65,12 @@ impl MatrixApp {
         }
     }
 
-    pub(super) fn gem_pave_window_ui(&mut self, ctx: &egui::Context) {
+    pub(super) fn gem_pave_panel_ui(&mut self, ui: &mut egui::Ui) {
         let Some(session) = self.controller.gem_pave_session().cloned() else {
             return;
         };
         let mut session = session;
-        let mut open = true;
+
         let mut apply = false;
         let mut cancel = false;
         let mut refresh = false;
@@ -82,12 +82,7 @@ impl MatrixApp {
         let mut style_name = session.style_name.clone();
         let mut apply_style = false;
         let mut save_style = false;
-        egui::Window::new(session.tool.title())
-            .id(egui::Id::new(("om9-gem-pave", session.tool.command())))
-            .open(&mut open)
-            .default_width(400.0)
-            .resizable(false)
-            .show(ctx, |ui| {
+        ui.scope(|ui| {
                 match &mut session.kind {
                     PaveKind::Stone(params) => {
                         dirty |= stone_ui(ui, params, session.tool, &mut session.quantity);
@@ -317,7 +312,7 @@ impl MatrixApp {
                 ui.separator();
                 ui.label(session.summary());
                 ui.horizontal(|ui| {
-                    apply = ui.button("Apply").clicked();
+                    apply = ui.add(super::theme::primary_button("Apply")).clicked();
                     if ui.button("Cancel").clicked() {
                         cancel = true;
                     }
@@ -336,7 +331,7 @@ impl MatrixApp {
             self.status.error(&error.to_string());
             return;
         }
-        if !open || cancel {
+        if cancel {
             self.controller.gem_pave_cancel();
             self.status.info("Pavé builder canceled");
             return;

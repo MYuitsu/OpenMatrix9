@@ -48,17 +48,82 @@ fn the_library_has_one_asset_for_every_cut_and_shape_combination() {
     for asset in library.assets() {
         assert!(keys.insert(asset.key.clone()), "duplicate {}", asset.key);
         assert!(!asset.sizes.is_empty());
-        assert!(
-            asset
-                .sizes
-                .windows(2)
-                .all(|pair| pair[0].span_mm() <= pair[1].span_mm())
-        );
         for size in &asset.sizes {
             size.validate().unwrap();
             asset.spec_for(size).unwrap();
         }
     }
+}
+
+#[test]
+fn matrix_loader_dials_keep_the_factory_order_counts_and_shared_boundaries() {
+    let library = GemLibrary::canonical();
+    let round = library.asset(GemShape::Round, GemCut::Diamond).unwrap();
+    let oval = library.asset(GemShape::Oval, GemCut::Diamond).unwrap();
+    let baguette = library.asset(GemShape::Baguette, GemCut::Diamond).unwrap();
+    let marquise = library.asset(GemShape::Marquise, GemCut::Diamond).unwrap();
+    for (asset, counts) in [(round, &[23, 22, 22][..]), (oval, &[13, 11]),
+        (baguette, &[20, 19, 19]), (marquise, &[21])]
+    {
+        assert_eq!(asset.size_page_count(), counts.len());
+        for (index, count) in counts.iter().enumerate() {
+            let range = asset.size_page_range(index + 1);
+            assert_eq!(range.len(), *count, "{}", asset.key);
+            if index > 0 {
+                assert_eq!(asset.size_page_range(index).end - 1, range.start);
+            }
+        }
+    }
+    let first = &round.sizes[round.size_page_range(1)];
+    let diameters: Vec<_> = first.iter().map(|s| s.length_mm).collect();
+    assert_eq!(diameters, [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,
+        2.0, 2.1, 2.2, 2.4, 2.5, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4]);
+    let first = &oval.sizes[oval.size_page_range(1)];
+    let dimensions: Vec<_> = first.iter().map(|s| [s.length_mm, s.width_mm]).collect();
+    assert_eq!(dimensions, [[4., 2.], [4.5, 2.5], [5., 3.], [5.3, 3.3], [5.8, 3.8],
+        [6., 4.], [6.1, 4.1], [6.2, 4.2], [6.5, 4.5], [6.6, 4.6],
+        [6.9, 4.9], [7., 5.], [7.2, 5.2]]);
+    assert_eq!(oval.sizes[oval.size_page_range(2).start], *first.last().unwrap());
+    assert_eq!(GemCut::ALL.map(|cut| cut.loader_shapes().len()), [20, 12, 10, 9, 1]);
+    let mut alternate_catalogs = 0;
+    for asset in library.assets().iter().filter(|asset| asset.has_corner_to_corner_sizes()) {
+        alternate_catalogs += 1;
+        assert_eq!(asset.sizes_for_axis(true).len(), asset.sizes.len());
+        for size in asset.sizes_for_axis(true) {
+            asset.spec_for(size).unwrap();
+        }
+    }
+    assert_eq!(alternate_catalogs, 6);
+    let triangle = library.asset(GemShape::Triangle, GemCut::Diamond).unwrap();
+    let size = triangle.sizes_for_axis(true)[0];
+    assert_eq!([size.length_mm, size.width_mm], [3.0, 2.602]);
+    assert!((size.depth_mm - 1.358775087308202).abs() < 1.0e-12);
+}
+
+#[test]
+fn dust_marquire_keeps_the_six_sided_table_and_both_pavilion_tiers() {
+    let library = GemLibrary::canonical();
+    let asset = library.asset(GemShape::DustMarquire, GemCut::Diamond).unwrap();
+    let spec = asset.spec_for(&asset.sizes[0]).unwrap();
+    let body = build_mesh(&spec).unwrap();
+    assert!(GemCut::Diamond.loader_shapes().contains(&spec.shape));
+    for (actual, expected) in body.extents_mm.into_iter().zip([11.52, 6.04643, 3.93127]) {
+        assert!((actual - expected).abs() < 1e-9);
+    }
+    assert_eq!(girdle_outline(&spec).unwrap().len(), 6);
+    assert_eq!(table_outline(&spec).unwrap(), body.mesh.vertices[..6]);
+    assert_eq!(body.authored_faces().unwrap().len(), 25);
+    assert_eq!(crown_facet(&spec, 5).unwrap().points.len(), 4);
+    assert!(crown_facet(&spec, 6).is_err());
+    assert_eq!(pavilion_facet(&spec, 5).unwrap().points.len(), 4);
+    assert_eq!(pavilion_facet(&spec, 11).unwrap().points.len(), 3);
+    assert_eq!(gem_reference(&spec, "culet").unwrap().points, [body.mesh.vertices[24]]);
+    let edges: std::collections::BTreeSet<_> = body.mesh.faces[..4].iter()
+        .flat_map(|face| face.iter().copied().zip(face.iter().copied().cycle().skip(1)))
+        .map(|(a, b)| (a.min(b), a.max(b)))
+        .filter(|&(a, b)| !om9_core::gem::gem_tessellation_edge(&body.mesh, a, b))
+        .collect();
+    assert_eq!(edges.len(), 6);
 }
 
 #[test]
@@ -146,7 +211,7 @@ fn an_unknown_cut_or_shape_tag_is_refused() {
 #[test]
 fn a_shape_outside_the_cut_family_is_refused() {
     let mut spec = diamond_round();
-    spec.shape = GemShape::Heart;
+    spec.shape = GemShape::Princess;
     spec.cut = GemCut::Cabochon;
     assert_eq!(spec.validate(), Err(Error::Invalid("gem shape for cut")));
 }
@@ -491,10 +556,10 @@ fn the_library_nearest_size_matches_by_short_axis() {
         .nearest_size(GemShape::Oval, GemCut::Diamond, 6.2)
         .unwrap();
     assert!((size.width_mm - 6.0).abs() < 0.51);
-    assert!(library.asset(GemShape::Heart, GemCut::Cabochon).is_none());
+    assert!(library.asset(GemShape::Princess, GemCut::Cabochon).is_none());
     assert!(
         library
-            .nearest_size(GemShape::Heart, GemCut::Cabochon, 6.0)
+            .nearest_size(GemShape::Princess, GemCut::Cabochon, 6.0)
             .is_none()
     );
 }
@@ -512,4 +577,55 @@ fn the_custom_profile_refuses_self_intersection_and_open_outlines() {
         GemSpec::from_profile(&line, GemCut::Gem, &params).err(),
         Some(Error::Invalid("gem profile has zero area"))
     );
+}
+
+#[test]
+fn round_pearl_presets_build_closed_symmetric_bodies() {
+    let library = GemLibrary::canonical();
+    let asset = library.asset(GemShape::Round, GemCut::Pearl).unwrap();
+    assert_eq!(GemCut::Pearl.shapes(), &[GemShape::Round]);
+    let size = asset.sizes.iter().find(|size| size.width_mm == 6.0).unwrap();
+    let spec = asset.spec_for(size).unwrap();
+    assert_eq!(spec.crown_height_mm, spec.pavilion_depth_mm);
+    let body = build_mesh(&spec).unwrap();
+    assert!(body.closed);
+    assert_eq!(body.extents_mm, [6.0; 3]);
+    assert!(om9_core::gem::table_outline(&spec).is_err());
+    let profile = om9_core::gem::profile_points(&spec).unwrap();
+    for (upper, lower) in profile.iter().zip(profile.iter().rev()) {
+        assert!((upper[0] - lower[0]).abs() < 1.0e-12);
+        assert!((upper[1] + lower[1]).abs() < 1.0e-12);
+    }
+}
+
+#[test]
+fn rounded_girdles_are_simple_and_marquise_ends_are_pointed() {
+    for shape in [GemShape::Cushion, GemShape::Pear, GemShape::Marquise] {
+        let spec = GemSpec::from_outer_dimensions(shape, GemCut::Diamond, 7.0, 4.0, 2.5).unwrap();
+        let outline = girdle_outline(&spec).unwrap();
+        let profile: Vec<_> = outline.iter().map(|p| [p[0], p[1]]).collect();
+        validate_profile(&profile).unwrap();
+        if shape == GemShape::Marquise {
+            for [x, y] in profile {
+                if (x.abs() - 3.5).abs() < 1.0e-12 {
+                    assert!(y.abs() < 1.0e-12);
+                }
+            }
+        }
+    }
+}
+#[test]
+fn round_wire_midpoints_use_trimmed_facets_across_mesh_tessellation() {
+    let spec = GemSpec::round(10.0, 6.223387).unwrap();
+    let gem = build_mesh(&spec).unwrap();
+    let mut triangles = Vec::new();
+    for (i, face) in gem.mesh.faces.iter().enumerate() {
+        for pair in face[1..].windows(2) { triangles.push(([face[0], pair[0], pair[1]],i as u32)); }
+    }
+    let guides = om9_core::gem::round_facet_isocurves(&gem.mesh.vertices,&triangles);
+    // One pair per planar facet, with four cardinal stars divided down their median.
+    assert_eq!(guides.len(), gem.authored_faces().unwrap().len()*2 + 12);
+    assert!(guides.iter().flatten().flatten().all(|v|v.is_finite()));
+    let edge = om9_core::gem::table_outline(&spec).unwrap()[0];
+    assert!((edge[0].hypot(edge[1])/5.0 - 0.53).abs()<0.002);
 }

@@ -63,9 +63,9 @@ pub fn builder_command(text: &str) -> Option<BuilderKind> {
         "ringresizer" | "ring resizer" | "gvringresizer" | "resizer" => {
             Some(BuilderKind::RingResizer)
         }
-        "eternityband" | "eternity band" | "eternity" => Some(BuilderKind::EternityBand),
-        "signetring" | "signet ring" | "signet" => Some(BuilderKind::SignetRing),
-        "raisedband" | "raised band" | "raised" => Some(BuilderKind::RaisedBand),
+        "gveternity" | "eternityband" | "eternity band" | "eternity" => Some(BuilderKind::EternityBand),
+        "gvsignet" | "signetring" | "signet ring" | "signet" => Some(BuilderKind::SignetRing),
+        "gvbuilderraisedband" | "raisedband" | "raised band" | "raised" => Some(BuilderKind::RaisedBand),
         "awardring" | "award ring" | "award" => Some(BuilderKind::AwardRing),
         _ => None,
     }

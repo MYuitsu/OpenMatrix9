@@ -89,11 +89,10 @@ impl MatrixApp {
         let unavailable = self.controller.ring_rail_replace_unavailable();
         let mut choice = None;
         let mut painted = false;
-        egui::Modal::new(egui::Id::new("ring-rail-replace"))
-            .frame(egui::Frame::popup(&ctx.style_of(egui::Theme::Light)))
+        super::theme::modal(ctx, egui::Id::new("ring-rail-replace"))
             .show(ctx, |ui| {
                 painted = !ui.is_sizing_pass();
-                *ui.visuals_mut() = egui::Visuals::light();
+
                 ui.set_width(340.);
                 ui.heading(self.controller.tr().text("Replace Ring Rail?"));
                 ui.label(format!("{}: {label}", self.controller.tr().text("Current Ring Rail")));
@@ -269,8 +268,14 @@ impl MatrixApp {
             }
         }
         if let Some(session) = self.controller.addon_session() {
+            let color = if let Some(profiles) = self.controller.extrude_profile_wires() {
+                for [a,b] in profiles {
+                    super::paint_line(painter,camera,viewport,a,b,[241,176,28,255],1.2);
+                }
+                [60,180,93,255]
+            } else { PREVIEW };
             for [a, c] in session.lines.iter().chain(&session.hover_lines) {
-                super::paint_line(painter, camera, viewport, *a, *c, PREVIEW, 1.2);
+                super::paint_line(painter, camera, viewport, *a, *c, color, 1.2);
             }
             if let (Some(from), Some(to)) = (session.rubber_from, self.preview_hover_point()) {
                 super::paint_line(painter, camera, viewport, from, to, RUBBER, 1.0);
@@ -281,6 +286,27 @@ impl MatrixApp {
         };
         for [a, c] in &b.preview.edges {
             super::paint_line(painter, camera, viewport, *a, *c, PREVIEW, 1.0);
+        }
+    }
+
+    pub(super) fn metal_binding_ui(&mut self, ui: &mut egui::Ui, id: om9_core::identity::MaterialId, name: &str, materials: &[(String,String)]) {
+        let mut binding = self.controller.bound_metal_material(id).map(str::to_owned);
+        let selected = binding.as_ref().and_then(|value|
+            materials.iter().find(|(candidate, _)| candidate.eq_ignore_ascii_case(value)))
+            .map(|(_, name)| name.as_str()).unwrap_or("Unassigned");
+        ui.horizontal_wrapped(|ui| {
+            ui.label(format!("{name} [{id}]"));
+            egui::ComboBox::from_id_salt(("metal-render-binding", id))
+                .selected_text(selected).show_ui(ui, |ui| {
+                    ui.selectable_value(&mut binding, None, "Unassigned");
+                    for (material_id, material_name) in materials {
+                        ui.selectable_value(&mut binding, Some(material_id.clone()), material_name);
+                    }
+                });
+        });
+        if binding.as_deref() != self.controller.bound_metal_material(id) {
+            let result = self.set_user_metal_binding(id, binding.as_deref());
+            self.feedback(result);
         }
     }
 
@@ -303,24 +329,7 @@ impl MatrixApp {
                     .map(|material| (material.id, material.name.clone())).collect();
                 if render_materials.is_empty() { ui.label("No render materials in this document."); }
                 for (id, name) in render_materials {
-                    let mut binding = self.controller.bound_metal_material(id).map(str::to_owned);
-                    let selected = binding.as_ref().and_then(|value|
-                        materials.iter().find(|(candidate, _)| candidate.eq_ignore_ascii_case(value)))
-                        .map(|(_, name)| name.as_str()).unwrap_or("Unassigned");
-                    ui.horizontal_wrapped(|ui| {
-                        ui.label(format!("{name} [{id}]"));
-                        egui::ComboBox::from_id_salt(("metal-render-binding", id))
-                            .selected_text(selected).show_ui(ui, |ui| {
-                                ui.selectable_value(&mut binding, None, "Unassigned");
-                                for (material_id, material_name) in &materials {
-                                    ui.selectable_value(&mut binding, Some(material_id.clone()), material_name);
-                                }
-                            });
-                    });
-                    if binding.as_deref() != self.controller.bound_metal_material(id) {
-                        let result = self.set_user_metal_binding(id, binding.as_deref());
-                        self.feedback(result);
-                    }
+                    self.metal_binding_ui(ui, id, &name, &materials);
                 }
             } else {
             let (mut reference, mut user) = self.controller.metal_panel_filters();

@@ -341,6 +341,8 @@ fn trim_display_fallback_warning_is_visible_without_hiding_errors() {
 #[test]
 fn invalid_command_stays_visible_in_the_status_surface_and_the_transcript() {
     let (mut app, context) = startup(None);
+    let editor = app.command_input_rect().expect("rendered command editor");
+    click(&mut app, &context, editor.center());
     frame(&mut app, &context, vec![Event::Text("NotACommand".into())]);
     frame(&mut app, &context, vec![key(Key::Enter)]);
     assert_eq!(app.status.kind(), StatusKind::Error);
@@ -350,12 +352,17 @@ fn invalid_command_stays_visible_in_the_status_surface_and_the_transcript() {
 
     frame(&mut app, &context, vec![key(Key::Escape)]);
     assert_eq!(app.status.kind(), StatusKind::Error);
-    frame(&mut app, &context, vec![Event::Text("Line".into())]);
-    frame(&mut app, &context, vec![key(Key::Enter)]);
-    frame(&mut app, &context, vec![Event::Text("0,0,0".into())]);
-    frame(&mut app, &context, vec![key(Key::Enter)]);
-    frame(&mut app, &context, vec![Event::Text("1,1,0".into())]);
-    frame(&mut app, &context, vec![key(Key::Enter)]);
+    for text in ["Line", "0,0,0", "1,1,0"] {
+        let editor = app.command_input_rect().unwrap();
+        click(&mut app, &context, editor.right_center() - Vec2::new(6., 0.));
+        frame(&mut app, &context, vec![key(Key::End)]);
+        frame(&mut app, &context, vec![Event::Text(text.into())]);
+        assert_eq!(app.transcript.draft(), text, "CMD draft before Enter: {:?}, focus {:?}", app.transcript.text(), context.memory(|m| m.focused()));
+        frame(&mut app, &context, vec![key(Key::Enter)]);
+        frame(&mut app, &context, vec![Event::Key {
+            key: Key::Enter, physical_key: None, pressed: false, repeat: false, modifiers: Modifiers::NONE,
+        }]);
+    }
     assert_eq!(app.controller.document().entities.len(), 1);
     assert_eq!(app.status.kind(), StatusKind::Error, "{message}");
 
@@ -444,4 +451,134 @@ fn ring_rail_toolbar_places_the_confirmed_region_size() {
     assert_eq!(app.controller.document(), &before);
     app.controller.redo().unwrap();
     assert_eq!(app.controller.document(), &after);
+}
+
+#[test]
+fn gem_loader_drag_keeps_the_preview_through_both_docks_and_the_canvas() {
+    use om9_app::session::{gem::{GemTool, LOADER}, InvocationOrigin};
+    use om9_app::tool_panel::ToolPanel;
+    let mut app = MatrixApp::new(Document::with_template_tolerance("gem dock replay")).unwrap();
+    let ctx = egui::Context::default();
+    let section = SectionId::Tool(ToolPanel::Gem(GemTool::Loader));
+    app.controller.dispatch(LOADER, InvocationOrigin::Menu).unwrap();
+    app.controller.submit("BRep=No").unwrap();
+    app.controller.gem_loader_point([2., 3., 0.]).unwrap();
+    let dimensions = app.controller.gem_session().unwrap().dimensions;
+    for _ in 0..5 { frame(&mut app, &ctx, vec![]); }
+    let press = |pos, pressed| Event::PointerButton {
+        pos, pressed, button: egui::PointerButton::Primary, modifiers: Modifiers::NONE,
+    };
+    let drag = |app: &mut MatrixApp, target: Pos2, escape: bool| {
+        let bar = app.section_rect(section.key()).unwrap().center();
+        frame(app, &ctx, vec![Event::PointerMoved(bar), press(bar, true)]);
+        frame(app, &ctx, vec![Event::PointerMoved(bar + Vec2::new(8., 0.))]);
+        frame(app, &ctx, vec![Event::PointerMoved(target)]);
+        assert_eq!(app.section_drag(), Some(section));
+        if escape { frame(app, &ctx, vec![key(Key::Escape)]); }
+        frame(app, &ctx, vec![press(target, false)]);
+        for _ in 0..3 { frame(app, &ctx, vec![]); }
+        let gem = app.controller.gem_session().expect("placement only changes presentation");
+        assert_eq!(gem.dimensions, dimensions);
+        assert_eq!(gem.points, [[2., 3., 0.]]);
+        assert!(app.controller.document().entities.is_empty());
+    };
+    let right = canvas_rect(&app).right_center() - Vec2::new(8., 0.);
+    drag(&mut app, right, true);
+    assert_eq!(app.dock.section(section).dock, DockSide::Left);
+    drag(&mut app, right, false);
+    assert_eq!(app.dock.section(section).dock, DockSide::Right);
+    let saved = app.dock.section(section);
+    for width in [1199., 1200.] {
+        for _ in 0..3 { frame_size(&mut app, &ctx, Vec2::new(width, 900.), vec![]); }
+        assert_eq!(app.dock.section(section), saved);
+        let center = app.section_rect(section.key()).unwrap().center();
+        assert_eq!(app.right_dock_rect.is_some_and(|rect| rect.contains(center)), width >= 1200.);
+    }
+    frame(&mut app, &ctx, vec![]);
+    let canvas = app.view_rects[&ViewId::Perspective].center();
+    drag(&mut app, canvas, false);
+    assert_eq!(app.dock.section(section).dock, DockSide::Floating);
+    drag(&mut app, Pos2::new(70., 190.), false);
+    assert_eq!(app.dock.section(section).dock, DockSide::Left);
+    use om9_app::layout_profiles::ProfileAction;
+    app.edit_layout_profile(ProfileAction::Create("Gem left")).unwrap();
+    app.edit_layout_profile(ProfileAction::Duplicate("Gem right")).unwrap();
+    assert!(app.dock_menu_section(section, DockSide::Right));
+    for name in ["Gem left", "Gem right"] {
+        app.edit_layout_profile(ProfileAction::Switch(name)).unwrap();
+        frame(&mut app, &ctx, vec![]);
+        assert_eq!(app.controller.gem_session().unwrap().points, [[2., 3., 0.]]);
+        assert_eq!(app.controller.gem_session().unwrap().dimensions, dimensions);
+        assert!(app.section_rect(section.key()).is_some());
+    }
+    app.controller.gem_apply().unwrap();
+    assert_eq!(app.controller.document().entities.len(), 1);
+    assert_eq!(app.controller.coordinator().undo_len(), 1);
+    app.controller.undo().unwrap();
+    assert!(app.controller.document().entities.is_empty());
+}
+
+#[test]
+fn switching_profiles_restores_actual_rail_and_command_dimensions() {
+    use om9_app::layout_profiles::ProfileAction;
+    let (mut app, ctx) = startup(None);
+    app.edit_layout_profile(ProfileAction::Create("Compact")).unwrap();
+    let compact = app.dock.state(PanelId::LeftRail).size;
+    let cmd = app.dock.state(PanelId::CommandLine).size;
+    app.edit_layout_profile(ProfileAction::Duplicate("Wide")).unwrap();
+    app.dock.set_size(PanelId::LeftRail, 405.);
+    app.dock.set_size(PanelId::CommandLine, 171.);
+    for (name, width, height) in [("Compact", compact, cmd), ("Wide", 405., 171.), ("Compact", compact, cmd)] {
+        app.edit_layout_profile(ProfileAction::Switch(name)).unwrap();
+        for _ in 0..3 { frame(&mut app, &ctx, vec![]); }
+        assert_near(app.left_rail_outer_px, width, 1.);
+        assert_near(app.dock.state(PanelId::CommandLine).size, height, 1.);
+    }
+}
+
+#[test]
+fn workspace_header_drags_keep_snap_project_layer_and_pending_line() {
+    for scale in [1.0, 1.25, 1.5] {
+        let (mut app, ctx) = startup(None);
+        let input_frame = |app: &mut MatrixApp, events| {
+            let mut raw = egui::RawInput {
+                screen_rect: Some(Rect::from_min_size(Pos2::ZERO, Vec2::new(1280., 900.))),
+                events,
+                ..Default::default()
+            };
+            raw.viewports.get_mut(&egui::ViewportId::ROOT).unwrap().native_pixels_per_point = Some(scale);
+            ctx.run_ui(raw, |ui| app.show(ui)).textures_delta.clear();
+        };
+        app.controller.set_grid_snap(true);
+        let row = app.project_manager.create_project("Bench", 0).unwrap();
+        app.project_manager.select(row).unwrap();
+        app.controller.submit("Line").unwrap();
+        app.controller.submit("2,3,0").unwrap();
+        let before = app.controller.document().clone();
+        for section in [SectionId::Snaps, SectionId::InfoSettings, SectionId::Layers, SectionId::Projects] {
+            for side in [DockSide::Right, DockSide::Floating, DockSide::Left] {
+                for _ in 0..3 { input_frame(&mut app, vec![]); }
+                let header = app.section_rect(section.key()).unwrap().center();
+                let to = match side {
+                    DockSide::Right => canvas_rect(&app).right_center() - Vec2::new(5., 0.),
+                    DockSide::Floating => app.view_rects[&ViewId::Perspective].center(),
+                    _ => Pos2::new(65., 190.),
+                };
+                let button = |pos, pressed| Event::PointerButton {
+                    pos, pressed, button: egui::PointerButton::Primary, modifiers: Modifiers::NONE,
+                };
+                input_frame(&mut app, vec![Event::PointerMoved(header), button(header, true)]);
+                input_frame(&mut app, vec![Event::PointerMoved(header + Vec2::new(9., 0.))]);
+                input_frame(&mut app, vec![Event::PointerMoved(to)]);
+                assert_eq!(app.section_drag(), Some(section));
+                assert!(app.drop_preview.as_ref().is_some_and(|preview| preview.indicator.is_some()));
+                input_frame(&mut app, vec![button(to, false)]);
+                assert_eq!(app.dock.section(section).dock, side);
+                assert!(app.controller.grid_snap());
+                assert_eq!(app.project_manager.active().id, row);
+                assert_eq!(app.controller.point_constraint_base().unwrap().xyz(), [2., 3., 0.]);
+                assert_eq!(app.controller.document(), &before);
+            }
+        }
+    }
 }

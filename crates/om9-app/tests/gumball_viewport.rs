@@ -642,3 +642,330 @@ fn dragging_the_scale_square_scales_the_selection() {
         "undo restores the placement"
     );
 }
+
+#[test]
+fn tspline_object_f6_and_cmd_activate_only_the_requested_handles_and_transform_the_cage() {
+    use om9_app::{f6::catalog::Mode as F6Mode, session::InvocationOrigin};
+    use om9_scene::{gumball_view::Mode, scene::Subelement};
+    let ctx = egui::Context::default();
+    let mut app = MatrixApp::new(Document::with_template_tolerance(
+        "F6 T-Spline object manipulator",
+    ))
+    .unwrap();
+    app.controller.submit("tsPlane").unwrap();
+    app.controller.submit("Center").unwrap();
+    app.controller.session_point([0.; 3]).unwrap();
+    app.controller.session_point([8., 6., 0.]).unwrap();
+    let id = *app.controller.selected().first().unwrap();
+    let original = app.controller.document().clone();
+    app.controller.workspace.active = ViewId::LookingDown;
+    app.f6_mode = F6Mode::TSplines;
+    frames(&mut app, &ctx, 4);
+    // The Object entry on a component returns to its owner and activates Translate.
+    app.controller
+        .select_subobject(id, Subelement::MeshFace(1))
+        .unwrap();
+    let object = app
+        .f6_context()
+        .actions
+        .into_iter()
+        .find(|r| r.label == "Object")
+        .unwrap();
+    app.controller
+        .dispatch(&object.id, InvocationOrigin::F6)
+        .unwrap();
+    assert!(app.controller.subselection().is_empty());
+    assert!(app.controller.selected().contains(&id));
+    for (label, mode) in [
+        ("Translate", Mode::Move),
+        ("Rotate", Mode::Rotate),
+        ("Scale", Mode::Scale),
+    ] {
+        for typed in [false, true] {
+            app.controller.select_objects(&[id]).unwrap();
+            if typed {
+                app.controller
+                    .submit(&format!(
+                        "-_tsManip _Enabled=_On _Manipulator=_{label} _SelectionMode=_Object _Enter"
+                    ))
+                    .unwrap();
+            } else {
+                let row = app
+                    .f6_context()
+                    .actions
+                    .into_iter()
+                    .find(|r| r.label == label)
+                    .unwrap();
+                assert!(row.availability.enabled());
+                app.controller
+                    .dispatch(&row.id, InvocationOrigin::F6)
+                    .unwrap();
+            }
+            assert_eq!(app.gumball_mode(), mode);
+            assert_eq!(app.controller.document(), &original);
+            frames(&mut app, &ctx, 2);
+            let view = ViewId::LookingDown;
+            let size = handle_size(&app, view);
+            assert_eq!(
+                app.gumball_scale_boxes(view).is_empty(),
+                mode != Mode::Scale
+            );
+            let r = size * 0.6;
+            let a = std::f64::consts::FRAC_1_SQRT_2 * r;
+            let (from, to, expected) = match mode {
+                Mode::Move => (
+                    [size * 0.8, 0., 0.],
+                    [size * 1.2, 0., 0.],
+                    [8. + 0.4 * size, 0., 0.],
+                ),
+                Mode::Rotate => (
+                    [a, a, 0.],
+                    [0., r, 0.],
+                    [
+                        8. * std::f64::consts::FRAC_1_SQRT_2,
+                        8. * std::f64::consts::FRAC_1_SQRT_2,
+                        0.,
+                    ],
+                ),
+                Mode::Scale => ([size, 0., 0.], [size * 1.3, 0., 0.], [8. * 1.3, 0., 0.]),
+            };
+            let start = screen_point(&app, view, from);
+            let end = screen_point(&app, view, to);
+            drag(&mut app, &ctx, Modifiers::NONE, start, end);
+            let entity = &app.controller.document().entities[&id];
+            let actual = entity.placement.point([8., 0., 0.]).unwrap();
+            assert!(
+                actual
+                    .iter()
+                    .zip(expected)
+                    .all(|(a, b)| (a - b).abs() < 0.05),
+                "{mode:?} typed {typed}: {actual:?}, expected {expected:?}"
+            );
+            assert_eq!(entity.geometry, original.entities[&id].geometry);
+            assert_eq!(app.controller.coordinator().undo_len(), 2);
+            app.controller.undo().unwrap();
+            assert_eq!(app.controller.document(), &original);
+        }
+    }
+
+    for uniform in [false, true] {
+        app.controller.select_objects(&[id]).unwrap();
+        app.controller
+            .submit("-_tsManip _Enabled=_On _Manipulator=_Scale _SelectionMode=_Object _Enter")
+            .unwrap();
+        frames(&mut app, &ctx, 2);
+        let view = ViewId::LookingDown;
+        let size = handle_size(&app, view);
+        let (start, end, factor, z) = if uniform {
+            let p = screen_point(&app, view, [0.; 3]);
+            (p, p + Vec2::new(45., 0.), 2f64.sqrt(), 3. * 2f64.sqrt())
+        } else {
+            (
+                screen_point(&app, view, [0.32 * size, 0.32 * size, 0.]),
+                screen_point(&app, view, [0.48 * size, 0.48 * size, 0.]),
+                1.5,
+                3.,
+            )
+        };
+        drag(&mut app, &ctx, Modifiers::NONE, start, end);
+        let actual = app.controller.document().entities[&id]
+            .placement
+            .point([8., 6., 3.])
+            .unwrap();
+        assert!(
+            actual
+                .iter()
+                .zip([8. * factor, 6. * factor, z])
+                .all(|(v, w)| (v - w).abs() < 0.05),
+            "uniform={uniform} {actual:?}"
+        );
+        assert_eq!(app.controller.coordinator().undo_len(), 2);
+        app.controller.undo().unwrap();
+        assert_eq!(app.controller.document(), &original);
+    }
+}
+
+#[test]
+fn cage_component_gestures_edit_only_unique_source_vertices_in_world_space() {
+    use om9_app::{f6::catalog::Mode as F6Mode, session::InvocationOrigin};
+    use om9_core::{
+        geometry::{Geometry, Transform},
+        gumball::{self, Axis, Drag, Handle, Plane},
+    };
+    use om9_scene::scene::Subelement::{MeshEdge, MeshFace, MeshVertex};
+    use std::collections::BTreeSet;
+    let mut app = MatrixApp::new(Document::with_template_tolerance(
+        "T-Spline partial mesh transforms",
+    ))
+    .unwrap();
+    for cmd in ["tsPlane", "XFaces=3", "YFaces=2"] {
+        app.controller.submit(cmd).unwrap();
+    }
+    app.controller.session_point([0.; 3]).unwrap();
+    app.controller.session_point([12., 8., 0.]).unwrap();
+    let id = *app.controller.selected().first().unwrap();
+    let mut doc = app.controller.document().clone();
+    let entity = doc.entities.get_mut(&id).unwrap();
+    entity.placement = Transform::translation([3., -4., 2.])
+        .compose(
+            gumball::rotation_about([0.; 3], [0., 0., 1.], std::f64::consts::FRAC_PI_2).unwrap(),
+        )
+        .unwrap();
+    let Geometry::Mesh(mesh) = &mut entity.geometry else {
+        panic!("mesh")
+    };
+    mesh.colors = vec![[1, 2, 3, 255]; mesh.vertices.len()];
+    mesh.corner_uvs = vec![[0.25, 0.75]; mesh.faces.len() * 4];
+    let placement = entity.placement;
+    let source = mesh.clone();
+    let mut second = entity.clone();
+    second.id = om9_core::identity::ObjectId::new();
+    let other = second.id;
+    second.placement = Transform::translation([-20., 3., 1.]);
+    doc.entities.insert(other, second);
+    let mut app = MatrixApp::new(doc.clone()).unwrap();
+    app.f6_mode = F6Mode::TSplines;
+    for (kind, picks, indices) in [
+        (
+            "Face",
+            vec![MeshFace(0), MeshFace(1)],
+            vec![0, 1, 2, 3, 4, 5],
+        ),
+        (
+            "Edge",
+            vec![MeshEdge { a: 0, b: 1 }, MeshEdge { a: 1, b: 2 }],
+            vec![0, 1, 2],
+        ),
+        ("Vertex", vec![MeshVertex(0), MeshVertex(4)], vec![0, 4]),
+    ] {
+        let chosen = BTreeSet::from_iter(indices.into_iter());
+        let mut min = [f64::INFINITY; 3];
+        let mut max = [f64::NEG_INFINITY; 3];
+        for &i in &chosen {
+            let p = placement.point(source.vertices[i]).unwrap();
+            for axis in 0..3 {
+                min[axis] = min[axis].min(p[axis]);
+                max[axis] = max[axis].max(p[axis]);
+            }
+        }
+        let center: [f64; 3] = std::array::from_fn(|i| (min[i] + max[i]) * 0.5);
+        for (op, handle, input) in [
+            (
+                "Translate",
+                Handle::MoveAxis(Axis::X),
+                Drag::WorldDelta([3., 0., 0.]),
+            ),
+            ("Rotate", Handle::Rotate(Axis::Z), Drag::Angle(0.6)),
+            ("Scale", Handle::ScalePlane(Plane::XY), Drag::Factor(1.4)),
+        ] {
+            for typed in [false, true] {
+                app.controller.select_objects(&[id]).unwrap();
+                app.controller.clear_subselection();
+                for pick in &picks {
+                    app.controller.select_subobject(id, pick.clone()).unwrap();
+                }
+                if typed {
+                    app.controller.submit(&format!("-_tsManip _Enabled=_On _Manipulator=_{op} _SelectionMode=_{kind} _Enter")).unwrap();
+                } else {
+                    let row = app
+                        .f6_context()
+                        .actions
+                        .into_iter()
+                        .find(|a| a.label == op)
+                        .unwrap();
+                    assert!(row.availability.enabled());
+                    app.controller
+                        .dispatch(&row.id, InvocationOrigin::F6)
+                        .unwrap();
+                }
+                let frame = app.controller.gumball_pivot().unwrap();
+                for i in 0..3 {
+                    assert!((frame.origin[i] - center[i]).abs() < 1e-10);
+                }
+                let mut session =
+                    gumball::Session::begin(frame, app.controller.gumball_targets(), false)
+                        .unwrap();
+                session.drag(handle, input).unwrap();
+                let delta = session.accumulated();
+                app.controller.preview_gumball(delta).unwrap();
+                assert!(!app.controller.cage_preview_edges().is_empty());
+                assert_eq!(app.controller.document(), &doc);
+                app.controller.clear_gumball_preview();
+                assert!(app.controller.cage_preview_edges().is_empty());
+                app.controller.commit_gumball(&session, op).unwrap();
+                let e = &app.controller.document().entities[&id];
+                assert_eq!(e.placement, placement);
+                let Geometry::Mesh(m) = &e.geometry else {
+                    panic!("mesh")
+                };
+                assert_eq!(
+                    (&m.faces, &m.colors, &m.corner_uvs),
+                    (&source.faces, &source.colors, &source.corner_uvs)
+                );
+                for (i, v) in m.vertices.iter().enumerate() {
+                    let p = placement.point(source.vertices[i]).unwrap();
+                    let expected = if chosen.contains(&i) {
+                        delta.point(p).unwrap()
+                    } else {
+                        p
+                    };
+                    let actual = placement.point(*v).unwrap();
+                    assert!(
+                        actual
+                            .iter()
+                            .zip(expected)
+                            .all(|(a, b)| (a - b).abs() < 1e-9),
+                        "{op} {kind} {i}"
+                    );
+                }
+                assert_eq!(
+                    app.controller.document().entities[&other],
+                    doc.entities[&other]
+                );
+                assert_eq!(app.controller.subselection().len(), picks.len());
+                assert_eq!(app.controller.coordinator().undo_len(), 1);
+                app.controller.undo().unwrap();
+                assert_eq!(app.controller.document(), &doc);
+            }
+        }
+    }
+    // One shared gesture on two owners with different local coordinate systems.
+    app.controller.select_objects(&[id, other]).unwrap();
+    for owner in [id, other] {
+        app.controller
+            .select_subobject(owner, MeshVertex(0))
+            .unwrap();
+    }
+    app.controller
+        .submit("-_tsManip _Enabled=_On _Manipulator=_Translate _SelectionMode=_Vertex _Enter")
+        .unwrap();
+    let mut gesture = gumball::Session::begin(
+        app.controller.gumball_pivot().unwrap(),
+        app.controller.gumball_targets(),
+        false,
+    )
+    .unwrap();
+    gesture
+        .drag(Handle::MoveFree, Drag::WorldDelta([1., 2., 3.]))
+        .unwrap();
+    app.controller
+        .commit_gumball(&gesture, "Translate")
+        .unwrap();
+    for owner in [id, other] {
+        let before = &doc.entities[&owner];
+        let after = &app.controller.document().entities[&owner];
+        let Geometry::Mesh(m) = &after.geometry else {
+            panic!("mesh")
+        };
+        let p = before.placement.point(source.vertices[0]).unwrap();
+        let q = after.placement.point(m.vertices[0]).unwrap();
+        assert!(
+            q.iter()
+                .zip([p[0] + 1., p[1] + 2., p[2] + 3.])
+                .all(|(a, b)| (a - b).abs() < 1e-9)
+        );
+    }
+    assert_eq!(app.controller.coordinator().undo_len(), 1);
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.document(), &doc);
+}

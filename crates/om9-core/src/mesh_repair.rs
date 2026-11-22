@@ -467,15 +467,34 @@ pub fn reduce_mesh_feature_aware(
         report.csg_split_events = csg.split_events;
         repaired
     };
-    let (mesh, _) = if report.boundary_edges > 0 {
-        fill_holes(&mesh, 16)
-    } else {
-        (mesh, 0)
-    };
-    let features = feature_edges(&mesh, feature_angle_deg);
-    if mesh.faces.len() <= target_faces {
-        return Ok((mesh, report));
-    }
+    // An open rim can be intentional. Reduction preserves the input domain.
+    let (vertices, faces) = collapse_to(
+        &mesh,
+        target_faces,
+        preserve_boundary,
+        feature_angle_deg,
+        10,
+        &BTreeSet::new(),
+        &Default::default(),
+        |_, _, _, _| {},
+    )?;
+    report.faces_after = faces.len();
+    Ok((compact(vertices, faces), report))
+}
+
+pub mod reduction;
+
+fn collapse_to(
+    mesh: &Mesh,
+    target_faces: usize,
+    preserve_boundary: bool,
+    feature_angle_deg: f64,
+    accuracy: u8,
+    seams: &BTreeSet<u32>,
+    cancel: &crate::transaction::Cancellation,
+    mut accepted: impl FnMut(&[Vec<u32>], u32, u32, f64),
+) -> Result<(Vec<Point3>, Vec<Vec<u32>>)> {
+    let features = feature_edges(mesh, feature_angle_deg);
     let mut vertices = mesh.vertices.clone();
     let mut faces = mesh.faces.clone();
     let mut quadrics = vec![Quadric::default(); vertices.len()];
@@ -488,6 +507,9 @@ pub fn reduce_mesh_feature_aware(
         }
     }
     while faces.len() > target_faces {
+        if cancel.is_canceled() {
+            return Err(Error::Canceled);
+        }
         let mut counts: BTreeMap<(u32, u32), usize> = BTreeMap::new();
         for face in &faces {
             for index in 0..face.len() {
@@ -497,97 +519,158 @@ pub fn reduce_mesh_feature_aware(
                 *counts.entry(key).or_default() += 1;
             }
         }
-        let mut candidates: Vec<(f64, u32, u32)> = counts
-            .iter()
-            .filter(|(edge, count)| {
-                let (a, b) = **edge;
-                (!preserve_boundary || **count > 1) && !features.contains(&(a, b))
-            })
-            .map(|(&(a, b), _)| {
-                let pa = vertices[a as usize];
-                let pb = vertices[b as usize];
-                let midpoint = [
-                    (pa[0] + pb[0]) / 2.0,
-                    (pa[1] + pb[1]) / 2.0,
-                    (pa[2] + pb[2]) / 2.0,
-                ];
-                let cost = quadrics[a as usize]
-                    .add(quadrics[b as usize])
-                    .evaluate(midpoint);
-                (cost, a, b)
-            })
-            .collect();
-        candidates.sort_by(|left, right| left.0.total_cmp(&right.0));
-        let mut collapsed = false;
-        for (_, keep, drop) in candidates {
-            let mut trial = faces.clone();
-            for face in &mut trial {
-                for index in face.iter_mut() {
-                    if *index == drop {
-                        *index = keep;
-                    }
+        let mut boundary = BTreeMap::<u32, Vec<u32>>::new();
+        let mut fixed = BTreeSet::new();
+        for (&(a, b), &count) in &counts {
+            if count == 1 {
+                boundary.entry(a).or_default().push(b);
+                boundary.entry(b).or_default().push(a);
+            } else if features.contains(&(a, b)) || count > 2 {
+                fixed.extend([a, b]);
+            }
+        }
+        if preserve_boundary {
+            for (&index, neighbors) in &boundary {
+                if !straight_rim_vertex(&vertices, index, neighbors) {
+                    fixed.insert(index);
                 }
             }
-            let before_normals = face_normals(&vertices, &faces);
-            let mut valid = true;
-            for (face_index, face) in trial.iter().enumerate() {
-                let mut unique = Vec::new();
-                for index in face.iter() {
-                    if !unique.contains(index) {
-                        unique.push(*index);
-                    }
-                }
-                if unique.len() < 3 || normal(&vertices, &unique).is_none() {
-                    valid = false;
-                    break;
-                }
-                if let (Some(old), Some((new, _))) = (
-                    before_normals.get(face_index).copied().flatten(),
-                    normal(&vertices, &unique),
-                ) && old[0] * new[0] + old[1] * new[1] + old[2] * new[2] < 0.0
-                {
-                    valid = false;
-                    break;
-                }
-            }
-            if !valid {
+        }
+        let mut candidates = Vec::new();
+        for (&(a, b), &count) in &counts {
+            if count > 2
+                || seams.contains(&a)
+                || seams.contains(&b)
+                || (fixed.contains(&a) && fixed.contains(&b))
+            {
                 continue;
             }
-            let pa = vertices[keep as usize];
-            let pb = vertices[drop as usize];
-            vertices[keep as usize] = [
-                (pa[0] + pb[0]) / 2.0,
-                (pa[1] + pb[1]) / 2.0,
-                (pa[2] + pb[2]) / 2.0,
-            ];
-            quadrics[keep as usize] = quadrics[keep as usize].add(quadrics[drop as usize]);
-            faces = trial;
-            let mut seen = BTreeSet::new();
-            faces.retain_mut(|face| {
-                let mut unique = Vec::new();
-                for index in face.iter() {
-                    if !unique.contains(index) {
-                        unique.push(*index);
-                    }
-                }
-                *face = unique;
-                if face.len() < 3 {
-                    return false;
-                }
-                let mut sorted = face.clone();
-                sorted.sort_unstable();
-                seen.insert(sorted)
-            });
-            collapsed = true;
-            break;
+            // A chord between rim vertices must never pinch the outline.
+            let a_on_rim = boundary.contains_key(&a);
+            let b_on_rim = boundary.contains_key(&b);
+            if a_on_rim && b_on_rim && count != 1 {
+                continue;
+            }
+            let (keep, drop) = if fixed.contains(&b) || (!fixed.contains(&a) && b_on_rim) {
+                (b, a)
+            } else {
+                (a, b)
+            };
+            if preserve_boundary && count != 1 && boundary.contains_key(&drop) {
+                continue;
+            }
+            let position = if fixed.contains(&keep)
+                || (preserve_boundary && boundary.contains_key(&keep))
+            {
+                vertices[keep as usize]
+            } else {
+                std::array::from_fn(|i| (vertices[a as usize][i] + vertices[b as usize][i]) / 2.0)
+            };
+            let cost = quadrics[a as usize]
+                .add(quadrics[b as usize])
+                .evaluate(position);
+            candidates.push((cost, keep, drop, position));
+        }
+        // Fast mode tests local batches in index order. Accurate mode compares
+        // all admissible edges and tests the least costly contraction first.
+        let batch = if accuracy == 10 {
+            candidates.len().max(1)
+        } else {
+            1usize << (accuracy - 1)
+        };
+        for chunk in candidates.chunks_mut(batch) {
+            chunk.sort_by(|left, right| left.0.total_cmp(&right.0));
+        }
+        let before_normals = face_normals(&vertices, &faces);
+        let mut collapsed = false;
+        for (_, keep, drop, position) in candidates {
+            if cancel.is_canceled() {
+                return Err(Error::Canceled);
+            }
+            let old = std::mem::replace(&mut vertices[keep as usize], position);
+            if let Some(trial) = collapse_faces(&vertices, &faces, &before_normals, keep, drop) {
+                accepted(&faces, keep, drop, if position == old { 0.0 } else { 0.5 });
+                quadrics[keep as usize] = quadrics[keep as usize].add(quadrics[drop as usize]);
+                faces = trial;
+                collapsed = true;
+                break;
+            }
+            vertices[keep as usize] = old;
         }
         if !collapsed {
             break;
         }
     }
-    if faces.len() > target_faces {
-        faces.truncate(target_faces);
+    Ok((vertices, faces))
+}
+
+fn straight_rim_vertex(vertices: &[Point3], index: u32, neighbors: &[u32]) -> bool {
+    let &[a, b] = neighbors else { return false };
+    let p = vertices[index as usize];
+    let u: Point3 = std::array::from_fn(|i| vertices[a as usize][i] - p[i]);
+    let v: Point3 = std::array::from_fn(|i| vertices[b as usize][i] - p[i]);
+    let dot: f64 = (0..3).map(|i| u[i] * v[i]).sum();
+    let squared = |x: Point3| x.iter().map(|v| v * v).sum::<f64>();
+    dot < 0.0 && dot * dot >= (1.0 - 1e-12) * squared(u) * squared(v)
+}
+
+fn collapse_faces(
+    vertices: &[Point3],
+    faces: &[Vec<u32>],
+    before: &[Option<Point3>],
+    keep: u32,
+    drop: u32,
+) -> Option<Vec<Vec<u32>>> {
+    let mut trial = Vec::with_capacity(faces.len());
+    let mut seen = BTreeSet::new();
+    let mut edges = BTreeMap::new();
+    let mut fan = BTreeMap::<u32, Vec<u32>>::new();
+    for (face, old_normal) in faces.iter().zip(before) {
+        let mut out: Vec<_> = face
+            .iter()
+            .map(|&i| if i == drop { keep } else { i })
+            .collect();
+        out.dedup();
+        if out.len() > 1 && out.first() == out.last() {
+            out.pop();
+        }
+        // An incident triangle disappears as its common edge contracts.
+        if out.len() < 3 {
+            continue;
+        }
+        let mut key = out.clone();
+        key.sort_unstable();
+        if key.windows(2).any(|v| v[0] == v[1]) || !seen.insert(key) {
+            return None;
+        }
+        if let Some(pos) = out.iter().position(|v| *v == keep) {
+            let a = out[(pos + out.len() - 1) % out.len()];
+            let b = out[(pos + 1) % out.len()];
+            fan.entry(a).or_default().push(b);
+            fan.entry(b).or_default().push(a);
+            let (new, _) = normal(vertices, &out)?;
+            let old = (*old_normal)?;
+            if (0..3).map(|i| new[i] * old[i]).sum::<f64>() <= 0.0 {
+                return None;
+            }
+        }
+        for (&a, &b) in out.iter().zip(out.iter().cycle().skip(1)) {
+            let edge = edges.entry((a.min(b), a.max(b))).or_insert((0usize, 0i32));
+            edge.0 += 1;
+            edge.1 += if a < b { 1 } else { -1 };
+            if edge.0 > 2 || (edge.0 == 2 && edge.1 != 0) {
+                return None;
+            }
+        }
+        trial.push(out);
     }
-    report.faces_after = faces.len();
-    Ok((compact(vertices, faces), report))
+    // The faces around the surviving vertex must form one disk or half disk.
+    let mut pending = vec![*fan.keys().next()?];
+    let mut visited = BTreeSet::new();
+    while let Some(id) = pending.pop() {
+        if visited.insert(id) {
+            pending.extend(&fan[&id]);
+        }
+    }
+    (visited.len() == fan.len()).then_some(trial)
 }

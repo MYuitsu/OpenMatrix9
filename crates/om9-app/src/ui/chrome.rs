@@ -6,14 +6,8 @@ use egui::{Align2, FontId, RichText};
 
 #[cfg(test)]
 const GREEN: Color32 = Color32::from_rgb(130, 180, 140);
-pub(super) const PANEL_BG: Color32 = super::command::COMMAND_BG;
-const PANEL_ALT: Color32 = Color32::from_rgb(0, 81, 38);
-const PANEL_EDGE: Color32 = Color32::from_rgb(35, 107, 72);
-pub(super) const PANEL_INK: Color32 = Color32::from_rgb(255, 244, 214);
-pub(super) const PANEL_MUTED: Color32 = Color32::from_rgb(205, 226, 210);
-const PANEL_TITLE: Color32 = Color32::from_rgb(253, 216, 128);
-const ACCENT: Color32 = Color32::from_rgb(45, 212, 191);
-const SELECTED_CARD: Color32 = Color32::from_rgb(18, 58, 42);
+pub(super) use super::theme::{DOCK as PANEL_BG, INK as PANEL_INK, MUTED as PANEL_MUTED};
+use super::theme::{HEADER as PANEL_ALT, EDGE as PANEL_EDGE, TITLE as PANEL_TITLE, SELECTED as SELECTED_CARD};
 const CATEGORY_COLORS: [Color32; 12] = [
     Color32::from_rgb(201, 173, 46),  // Curve: sampled from Matrix8 p14
     Color32::from_rgb(71, 186, 143),  // Surface
@@ -68,69 +62,22 @@ const TABS: [&str; 21] = [
     "Top 11",
 ];
 
-fn apply_dock_theme(ui: &mut egui::Ui) {
-    let visuals = ui.visuals_mut();
-    visuals.override_text_color = Some(PANEL_INK);
-    visuals.weak_text_color = Some(PANEL_MUTED);
-    visuals.disabled_alpha = 0.78;
-    visuals.panel_fill = PANEL_BG;
-    visuals.hyperlink_color = PANEL_TITLE;
-    visuals.selection.bg_fill = PANEL_EDGE;
-    visuals.selection.stroke = Stroke::new(1., PANEL_INK);
-    for widget in [
-        &mut visuals.widgets.noninteractive,
-        &mut visuals.widgets.inactive,
-        &mut visuals.widgets.hovered,
-        &mut visuals.widgets.active,
-        &mut visuals.widgets.open,
-    ] {
-        widget.fg_stroke = Stroke::new(1., PANEL_INK);
+#[derive(Clone, Copy)]
+pub(super) enum ProfileEditor { Create, Rename, Duplicate }
+
+impl ProfileEditor {
+    fn title(self) -> &'static str {
+        match self { Self::Create => "Create profile", Self::Rename => "Rename profile", Self::Duplicate => "Duplicate profile" }
     }
-    visuals.widgets.inactive.bg_fill = PANEL_ALT;
-    visuals.widgets.inactive.weak_bg_fill = PANEL_ALT;
-    visuals.widgets.hovered.bg_fill = PANEL_EDGE;
-    visuals.widgets.hovered.weak_bg_fill = PANEL_EDGE;
-    visuals.widgets.active.bg_fill = PANEL_EDGE;
-    visuals.widgets.active.weak_bg_fill = PANEL_EDGE;
 }
 
 impl MatrixApp {
     pub(super) fn configure_style(&mut self, ctx: &egui::Context) {
-        if self.style_ready {
-            return;
+        if !self.style_ready {
+            self.style_ready = true;
+            super::typography::configure_fonts(ctx);
+            theme::install(ctx);
         }
-        self.style_ready = true;
-        super::typography::configure_fonts(ctx);
-        let mut style = (*ctx.style_of(egui::Theme::Light)).clone();
-        style.visuals = egui::Visuals::light();
-        style.spacing.item_spacing = Vec2::new(2., 2.);
-        style.spacing.button_padding = Vec2::new(3., 1.);
-        style.spacing.interact_size = Vec2::new(18., 17.);
-        style
-            .text_styles
-            .insert(egui::TextStyle::Body, FontId::proportional(11.));
-        style
-            .text_styles
-            .insert(egui::TextStyle::Button, FontId::proportional(11.));
-        style
-            .text_styles
-            .insert(egui::TextStyle::Small, FontId::proportional(10.));
-        style
-            .text_styles
-            .insert(egui::TextStyle::Monospace, FontId::monospace(12.));
-        style.visuals.widgets.inactive.corner_radius = 4.into();
-        style.visuals.widgets.hovered.corner_radius = 4.into();
-        style.visuals.widgets.active.corner_radius = 4.into();
-        style.visuals.widgets.inactive.weak_bg_fill = Color32::from_rgb(238, 243, 248);
-        style.visuals.widgets.hovered.weak_bg_fill = Color32::from_rgb(220, 235, 250);
-        style.visuals.widgets.active.weak_bg_fill = Color32::from_rgb(199, 232, 227);
-        style.visuals.text_options.font_hinting = true;
-        style.visuals.text_options.subpixel_binning = true;
-        style.visuals.selection.bg_fill = ACCENT;
-        style.visuals.selection.stroke = Stroke::new(1., Color32::from_rgb(15, 23, 42));
-        style.visuals.window_corner_radius = 8.into();
-        ctx.set_theme(egui::ThemePreference::Light);
-        ctx.set_style_of(egui::Theme::Light, style);
     }
     pub(super) fn menu_ui(&mut self, ui: &mut egui::Ui) {
         self.menu_rects.clear();
@@ -261,12 +208,12 @@ impl MatrixApp {
                             if label.is_empty() { ui.separator(); continue; }
                             let enabled = kind.is_some() || action == 3 || (action != 0 && !self.controller.is_running());
                             let (rect, response) = ui.allocate_exact_size(egui::vec2(285., 29.), egui::Sense::click());
-                            if enabled && response.hovered() { ui.painter().rect_filled(rect, 0., Color32::from_rgb(220, 235, 250)); }
+                            if enabled && response.hovered() { ui.painter().rect_filled(rect, 0., theme::HOVER); }
                             if !icon.is_empty() {
                                 let icon_rect = egui::Rect::from_min_size(rect.min + egui::vec2(2., 2.), egui::vec2(25., 25.));
                                 self.icons.paint_with_opacity(ui, icon_rect, icon, if enabled {255} else {100});
                             }
-                            let color = if enabled { Color32::BLACK } else { Color32::GRAY };
+                            let color = if enabled { PANEL_INK } else { PANEL_MUTED };
                             ui.painter().text(rect.left_center() + egui::vec2(38., 0.), Align2::LEFT_CENTER, label, FontId::proportional(11.), color);
                             ui.painter().text(rect.right_center() - egui::vec2(8., 0.), Align2::RIGHT_CENTER, shortcut, FontId::proportional(11.), color);
                             if let Some(kind) = kind { self.file_menu_items.insert(kind, rect); }
@@ -407,6 +354,16 @@ impl MatrixApp {
                             }
                         }
                         ui.separator();
+                        ui.menu_button("Layout Profiles", |ui| self.layout_profiles_menu(ui));
+                        ui.menu_button("Workspace panels", |ui| {
+                            for id in SectionId::ALL {
+                                if id.is_reserved() { continue; }
+                                let mut visible = self.dock.section(id).visible;
+                                if ui.checkbox(&mut visible, id.title()).changed() {
+                                    self.set_workspace_panel_visible(id, visible);
+                                }
+                            }
+                        });
                         // Documented menu configuration commands.
                         ui.menu_button("Matrix Menus", |ui| {
                             if ui
@@ -496,6 +453,91 @@ impl MatrixApp {
             }
         });
     }
+    fn layout_profiles_menu(&mut self, ui: &mut egui::Ui) {
+        use crate::layout_profiles::ProfileAction;
+        let names: Vec<_> = self.layout_profiles.layouts.keys().cloned().collect();
+        let mut action = None;
+        for name in &names {
+            if ui.selectable_label(name == &self.layout_profiles.active, name).clicked() {
+                action = Some(ProfileAction::Switch(name));
+            }
+        }
+        ui.separator();
+        for edit in [ProfileEditor::Create, ProfileEditor::Rename, ProfileEditor::Duplicate] {
+            if ui.button(edit.title()).clicked() {
+                self.profile_name_input.clear();
+                self.profile_editor = Some(edit);
+                ui.close();
+            }
+        }
+        ui.menu_button("Startup profile", |ui| {
+            for name in &names {
+                if ui.selectable_label(name == &self.layout_profiles.startup, name).clicked() {
+                    action = Some(ProfileAction::Startup(name));
+                }
+            }
+        });
+        if ui.button("Reset Layout").clicked() { action = Some(ProfileAction::Reset); }
+        if let Some(action) = action {
+            match self.edit_layout_profile(action) {
+                Ok(()) => { self.profile_name_input.clear(); ui.close(); }
+                Err(e) => { ui.colored_label(theme::ERROR, e.to_string()); self.status.warning(&e.to_string()); }
+            }
+        }
+    }
+
+    pub(super) fn profile_editor_ui(&mut self, ctx: &egui::Context) {
+        let Some(edit) = self.profile_editor else { return; };
+        let mut accepted = false;
+        let mut cancelled = false;
+        let modal = theme::modal(ctx, egui::Id::new("layout-profile-editor")).show(ctx, |ui| {
+            ui.heading(edit.title());
+            ui.label("Profile name");
+            let field = ui.text_edit_singleline(&mut self.profile_name_input);
+            field.request_focus();
+            ui.horizontal(|ui| {
+                accepted = ui.add_enabled(!self.profile_name_input.trim().is_empty(), theme::apply_button("Save")).clicked();
+                cancelled = ui.button("Cancel").clicked();
+            });
+        });
+        if modal.is_top_modal {
+            accepted |= ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Enter));
+            cancelled |= ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::Escape));
+        }
+        if cancelled { self.profile_editor = None; }
+        else if accepted {
+            use crate::layout_profiles::ProfileAction;
+            let name = self.profile_name_input.trim().to_owned();
+            let action = match edit { ProfileEditor::Create => ProfileAction::Create(&name),
+                ProfileEditor::Rename => ProfileAction::Rename(&name), ProfileEditor::Duplicate => ProfileAction::Duplicate(&name) };
+            match self.edit_layout_profile(action) {
+                Ok(()) => self.profile_editor = None,
+                Err(e) => { self.status.warning(&e.to_string()); }
+            }
+        }
+    }
+
+    fn workspace_position_menu(&mut self, ui: &mut egui::Ui, id: SectionId) {
+        for (side, label) in [(DockSide::Left, "Dock left"), (DockSide::Right, "Dock right")] {
+            if ui.button(label).clicked() { self.dock_menu_section(id, side); ui.close(); }
+        }
+        if self.dock.section(id).dock == DockSide::Floating && ui.button("Dock home").clicked() {
+            self.close_float_menu(id); ui.close();
+        }
+        if ui.button("Float").clicked() {
+            if self.dock.section(id).dock != DockSide::Floating {
+                let center = ui.ctx().content_rect().center();
+                let rect = self.dock.section(id).float.unwrap_or_else(|| crate::panel_ops::float_drop_rect([center.x, center.y]));
+                self.float_menu_section(id, rect);
+            }
+            ui.close();
+        }
+    }
+
+    fn set_workspace_panel_visible(&mut self, id: SectionId, visible: bool) {
+        let _ = self.apply_panel_op(crate::panel_ops::PanelOp::SetVisible { section: id, visible });
+    }
+
     fn activate_view(&mut self, id: ViewId) {
         self.controller.workspace.active = id;
         if self.controller.workspace.maximized.is_some() {
@@ -508,12 +550,20 @@ impl MatrixApp {
     /// Title bar of one Matrix menu section. Left-click rolls it up, dragging
     /// reorders it inside its column, docks it to the right mirror column or
     /// floats it over the model — the documented Matrix menu behavior.
-    fn section(&mut self, ui: &mut egui::Ui, id: SectionId) -> bool {
+    pub(super) fn section(&mut self, ui: &mut egui::Ui, id: SectionId) -> bool {
         let state = self.dock.section(id);
-        let (rect, response) = ui.allocate_exact_size(
-            Vec2::new(ui.available_width(), 14.),
-            Sense::click_and_drag(),
-        );
+        let (row, _) = ui.allocate_exact_size(Vec2::new(ui.available_width(), 14.), Sense::hover());
+        let mut rect = row;
+        if id.is_movable() {
+            rect.max.x -= 36.;
+            let menu = ui.put(Rect::from_min_max(rect.right_top(), row.right_bottom() - Vec2::new(17., 0.)),
+                egui::Button::new("≡").small());
+            theme::menu(&menu).show(|ui| self.workspace_position_menu(ui, id));
+            if ui.put(Rect::from_min_max(row.right_top() - Vec2::new(16., 0.), row.right_bottom()), egui::Button::new("×").small()).clicked() {
+                self.set_workspace_panel_visible(id, false);
+            }
+        }
+        let response = ui.interact(rect, ui.id().with(("workspace-title",id.key())), Sense::click_and_drag());
         let accent = section_accent(id);
         ui.painter().rect_filled(rect, 4, PANEL_ALT);
         ui.painter().rect_filled(
@@ -541,8 +591,9 @@ impl MatrixApp {
             );
         }
         self.section_rects.insert(id.key(), rect);
-        self.panel_bars
-            .push((id, crate::panel_ops::ColumnSide::Left, rect));
+        if let Some(column) = crate::panel_ops::ColumnSide::from_dock_side(state.dock) {
+            self.panel_bars.push((id, column, rect));
+        }
         if response.clicked() {
             self.toggle_menu_section(id);
         }
@@ -615,7 +666,7 @@ impl MatrixApp {
     #[cfg(test)]
     fn subd_flyout(&mut self, ui: &mut egui::Ui, name: &str) {
         let response = self.icon(ui, name, true, name);
-        egui::Popup::menu(&response).width(260.).show(|ui| {
+        theme::menu(&response).width(260.).show(|ui| {
             ui.set_max_height(360.);
             egui::ScrollArea::vertical()
                 .id_salt(("subd-flyout", name))
@@ -647,7 +698,7 @@ impl MatrixApp {
             ui.painter().rect_stroke(
                 response.rect.shrink(1.5),
                 4,
-                Stroke::new(1.5, Color32::from_rgb(90, 190, 245)),
+                Stroke::new(1.5, theme::SNAP_ON),
                 egui::StrokeKind::Inside,
             );
         }
@@ -684,25 +735,11 @@ impl MatrixApp {
                 Sense::hover()
             },
         );
-        let fill = if !enabled {
-            PANEL_BG
-        } else if response.hovered() {
-            Color32::from_rgb(38, 62, 78)
-        } else {
-            Color32::from_rgb(24, 36, 48)
-        };
+        let fill = if !enabled { PANEL_BG } else if response.hovered() { theme::HOVER } else { theme::BODY };
         ui.painter().rect_filled(rect, 4, fill);
         ui.painter().rect_stroke(
-            rect.shrink(0.5),
-            4,
-            Stroke::new(
-                1.,
-                if enabled {
-                    Color32::from_rgb(72, 99, 121)
-                } else {
-                    Color32::from_rgb(49, 65, 81)
-                },
-            ),
+            rect.shrink(0.5), 4,
+            Stroke::new(1., if response.has_focus() { theme::ACCENT } else { theme::EDGE }),
             egui::StrokeKind::Inside,
         );
         // The icon fills more of its existing slot; no extra rows or dock
@@ -844,7 +881,7 @@ impl MatrixApp {
         })
     }
     pub(super) fn sidebar_ui(&mut self, ui: &mut egui::Ui) {
-        apply_dock_theme(ui);
+        ui.visuals_mut().panel_fill = PANEL_BG;
         // Reserve a narrow gutter: a floating bar covers the far-right menu
         // page buttons, Grid Snap and layer controls on narrow docks.
         ui.spacing_mut().scroll = egui::style::ScrollStyle {
@@ -868,7 +905,9 @@ impl MatrixApp {
                     if !self.dock.section(id).visible {
                         continue;
                     }
-                    if self.section(ui, id) {
+                    if let SectionId::Tool(tool) = id {
+                        self.tool_panel_ui(ui, tool, DockSide::Left);
+                    } else if self.section(ui, id) {
                         self.sidebar_section_ui(ui, id);
                     }
                 }
@@ -879,12 +918,20 @@ impl MatrixApp {
             scrolled.inner_rect.right_top() + Vec2::new(2., 0.),
             Vec2::new(4., scrolled.inner_rect.height()),
         ));
-        self.left_content_bottom = scrolled.inner_rect.bottom();
+        self.left_content_bottom = (scrolled.inner_rect.top() + scrolled.content_size.y - scrolled.state.offset.y)
+            .min(scrolled.inner_rect.bottom());
         self.sidebar_scroll = scrolled.state.offset.y;
+        if let Some(bar) = self.tool_host.reveal.iter().filter(|tool|
+            self.dock.section(SectionId::Tool(**tool)).dock == DockSide::Left
+        ).find_map(|tool| self.section_rect(tool.key())) {
+            let max_scroll = (scrolled.content_size.y - scrolled.inner_rect.height()).max(0.);
+            self.sidebar_scroll = (self.sidebar_scroll + bar.top() - scrolled.inner_rect.top()).clamp(0., max_scroll);
+            ui.ctx().request_repaint();
+        }
     }
     /// Body of one Matrix menu section. Builders open in the reserved area below
     /// Projects; the slot itself never owns a builder model.
-    fn sidebar_section_ui(&mut self, ui: &mut egui::Ui, id: SectionId) {
+    pub(super) fn sidebar_section_ui(&mut self, ui: &mut egui::Ui, id: SectionId) {
         match id {
             SectionId::IconHistory => {
                 ui.horizontal_wrapped(|ui| {
@@ -1145,8 +1192,9 @@ impl MatrixApp {
                 self.projects_ui(ui);
             }
 
+            SectionId::Tool(_) => unreachable!("tool bodies use the shared host"),
             SectionId::BuilderSlot => {
-                self.builder_slot_ui(ui);
+                self.builder_slot_rect = Some(ui.available_rect_before_wrap());
             }
         }
     }
@@ -1155,7 +1203,7 @@ impl MatrixApp {
     /// switches modes and each tab keeps its own parameters; the active tab paints its typed
     /// fields, the preview summary, Apply/Reset/Cancel, the profile library button and the
     /// handle read-outs.
-    fn builder_slot_ui(&mut self, ui: &mut egui::Ui) {
+    pub(super) fn builder_slot_ui(&mut self, ui: &mut egui::Ui) {
         if self.ring_rail_toolbar_ui(ui) || self.builder_panel_ui(ui) {
             self.builder_slot_rect = Some(ui.min_rect());
             return;
@@ -1310,7 +1358,7 @@ impl MatrixApp {
                 || self.controller.builder().is_some_and(|session| session.preview_for_document(self.controller.document()).is_some());
             #[cfg(not(feature = "occt-brep"))]
             let ready = true;
-            let apply = ui.add_enabled(editable && ready, egui::Button::new("Apply"));
+            let apply = ui.add_enabled(editable && ready, super::theme::apply_button("Apply"));
             #[cfg(test)]
             ui.ctx().memory_mut(|memory| {
                 memory
@@ -1347,14 +1395,11 @@ impl MatrixApp {
                 ui.label(format!("{} {:.2} mm", handle.label, handle.value));
             }
         });
-        self.builder_profile_window_ui(ui);
-        self.history_window_ui(ui);
-        self.builder_style_window_ui(ui);
     }
 
     /// The Matrix History report (`OM9-L3-03-13-003`, `-004`, `-005`): the recorded
     /// features, their state, the broken rows, and per-row Edit/Clear actions.
-    fn history_window_ui(&mut self, ui: &mut egui::Ui) {
+    pub(super) fn history_panel_ui(&mut self, ui: &mut egui::Ui) {
         if !self.history_window {
             return;
         }
@@ -1365,12 +1410,8 @@ impl MatrixApp {
         let mut chosen_update: Option<bool> = None;
         let mut edit: Option<om9_core::identity::ObjectId> = None;
         let mut clear: Option<om9_core::identity::ObjectId> = None;
-        let mut open = true;
-        egui::Window::new("History")
-            .id(egui::Id::new("om9-history-report"))
-            .open(&mut open)
-            .resizable(true)
-            .show(ui.ctx(), |ui| {
+
+        ui.scope(|ui| {
                 ui.horizontal(|ui| {
                     if ui.checkbox(&mut record, "Record").changed() {
                         chosen_record = Some(record);
@@ -1414,7 +1455,6 @@ impl MatrixApp {
                         }
                     });
             });
-        self.history_window = open;
         if let Some(value) = chosen_record {
             let result = self.controller.set_history_record(value).map(|_| ());
             self.feedback(result);
@@ -1442,7 +1482,7 @@ impl MatrixApp {
     /// parameters into the preview only, and a save field that snapshots the current session
     /// under a new user name. An entry for another mode stays visible but disabled, so the
     /// list explains a refusal instead of hiding it.
-    fn builder_style_window_ui(&mut self, ui: &mut egui::Ui) {
+    pub(super) fn builder_style_panel_ui(&mut self, ui: &mut egui::Ui) {
         if !self.builder_style_window {
             return;
         }
@@ -1455,13 +1495,8 @@ impl MatrixApp {
         let mut chosen: Option<String> = None;
         let mut saved: Option<String> = None;
         let mut matched = false;
-        let mut open = true;
-        egui::Window::new("Builder Styles")
-            .id(egui::Id::new("om9-builder-styles"))
-            .open(&mut open)
-            .resizable(false)
-            .default_width(260.0)
-            .show(ui.ctx(), |ui| {
+
+        ui.scope(|ui| {
                 for row in &rows {
                     ui.horizontal(|ui| {
                         // A missing or corrupt thumbnail paints the placeholder square with
@@ -1567,12 +1602,11 @@ impl MatrixApp {
                 }
             }
         }
-        self.builder_style_window = open;
     }
 
     /// The profile library window: one row per preset with the selected state and a Remove
     /// action. Choosing only changes the builder preview; the document is untouched.
-    fn builder_profile_window_ui(&mut self, ui: &mut egui::Ui) {
+    pub(super) fn builder_profile_panel_ui(&mut self, ui: &mut egui::Ui) {
         if !self.builder_profile_window {
             return;
         }
@@ -1580,12 +1614,8 @@ impl MatrixApp {
         let selected = self.controller.builder_selected_preset();
         let mut chosen: Option<String> = None;
         let mut removed: Option<String> = None;
-        let mut open = true;
-        egui::Window::new("Profile Library")
-            .id(egui::Id::new("om9-builder-profile-library"))
-            .open(&mut open)
-            .resizable(false)
-            .show(ui.ctx(), |ui| {
+
+        ui.scope(|ui| {
                 for preset in &presets {
                     ui.horizontal(|ui| {
                         let is_selected = selected == Some(*preset);
@@ -1612,7 +1642,6 @@ impl MatrixApp {
             let result = self.controller.builder_remove_preset(&name);
             self.feedback(result);
         }
-        self.builder_profile_window = open;
     }
     /// Historical component fixtures; the workspace uses the left MAIN MENU.
     #[cfg(test)]
@@ -1822,10 +1851,11 @@ impl MatrixApp {
     /// menus the user docked there. Each menu keeps the same title bar behavior
     /// (roll up, reorder, re-dock, float).
     pub(super) fn right_dock_ui(&mut self, ui: &mut egui::Ui) {
-        apply_dock_theme(ui);
+        ui.visuals_mut().panel_fill = PANEL_BG;
         ui.set_min_width(ui.available_width());
         self.right_dock_icon_rects.clear();
-        let sections = self.dock.right_sections();
+        let sections: Vec<_> = self.dock.right_sections().into_iter()
+            .filter(|id| self.dock.section(*id).visible && self.tool_visible(*id)).collect();
         if sections.is_empty() {
             ui.label(
                 RichText::new("Drag a menu title bar here to dock it")
@@ -1834,7 +1864,12 @@ impl MatrixApp {
             );
             return;
         }
+        egui::ScrollArea::vertical().id_salt("right-dock-scroll").show(ui, |ui| {
         for (index, id) in sections.iter().enumerate() {
+            if let SectionId::Tool(tool) = *id {
+                self.tool_panel_ui(ui, tool, DockSide::Right);
+                continue;
+            }
             let state = self.dock.section(*id);
             let mut move_by: Option<i32> = None;
             let mut toggle = false;
@@ -1869,6 +1904,8 @@ impl MatrixApp {
                 if down.clicked() {
                     move_by = Some(1);
                 }
+                ui.menu_button("≡", |ui| self.workspace_position_menu(ui, *id));
+                if ui.small_button("×").clicked() { self.set_workspace_panel_visible(*id, false); }
                 dock_left = ui
                     .small_button("◀")
                     .on_hover_text("Dock this menu back in the left column")
@@ -1913,90 +1950,7 @@ impl MatrixApp {
             self.sidebar_section_ui(ui, *id);
         }
         self.right_content_bottom = ui.min_rect().bottom();
-    }
-    /// Floating menus live in owned windows whose rectangle is layout state.
-    pub(super) fn float_menu_windows(&mut self, ctx: &egui::Context) {
-        for id in self.dock.floating_sections() {
-            let state = self.dock.section(id);
-            if !state.visible {
-                continue;
-            }
-            let stored = state
-                .float
-                .unwrap_or_else(FloatRect::command_search_default);
-            let mut open = true;
-            let mut dock_left = false;
-            let mut dock_right = false;
-            let work = self.work_area.map(|area| {
-                egui::Rect::from_min_size(
-                    egui::pos2(area.x, area.y),
-                    Vec2::new(area.width, area.height),
-                )
-            });
-            // The framework uses a pale active window header. Keep its title
-            // dark, with a cream inactive header for the same clear contrast.
-            let mut builder = egui::Window::new(RichText::new(id.title()).color(PANEL_BG))
-                .id(egui::Id::new(("om9-float-menu", id.key())))
-                .default_pos([stored.x, stored.y])
-                .default_size([stored.width, stored.height])
-                .frame(
-                    egui::Frame::window(&ctx.style_of(egui::Theme::Light))
-                        .fill(PANEL_BG)
-                        .stroke(Stroke::new(1., PANEL_EDGE)),
-                )
-                .title_frame(
-                    egui::Frame::window(&ctx.style_of(egui::Theme::Light))
-                        .fill(PANEL_INK)
-                        .stroke(Stroke::new(1., PANEL_EDGE)),
-                )
-                .open(&mut open);
-            if let Some(work) = work {
-                builder = builder.constrain_to(work);
-            }
-            let window = builder.show(ctx, |ui| {
-                apply_dock_theme(ui);
-                ui.horizontal(|ui| {
-                    dock_left = ui
-                        .small_button("◀ Dock left")
-                        .on_hover_text("Return this menu to the left column")
-                        .clicked();
-                    dock_right = ui
-                        .small_button("Dock right ▶")
-                        .on_hover_text("Dock this menu to the right mirror column")
-                        .clicked();
-                });
-                self.sidebar_section_ui(ui, id);
-            });
-            if let Some(window) = window {
-                let rect = window.response.rect;
-                if (rect.min.x - stored.x).abs() > 0.5
-                    || (rect.min.y - stored.y).abs() > 0.5
-                    || (rect.width() - stored.width).abs() > 0.5
-                    || (rect.height() - stored.height).abs() > 0.5
-                {
-                    // The readback goes through the same door as every other
-                    // placement operation (recovery included).
-                    self.readback_float(
-                        id,
-                        FloatRect {
-                            x: rect.min.x,
-                            y: rect.min.y,
-                            width: rect.width(),
-                            height: rect.height(),
-                        },
-                    );
-                }
-            }
-            if dock_left {
-                self.dock_menu_section(id, DockSide::Left);
-            } else if dock_right {
-                self.dock_menu_section(id, DockSide::Right);
-            } else if !open {
-                // Closing a floating menu returns it to the documented home
-                // column instead of losing it.
-                self.close_float_menu(id);
-            }
-        }
+        });
     }
     /// Always-visible status/error line. It shows the current state, keeps an
     /// unacknowledged failure on screen and never consumes Escape.
@@ -2450,7 +2404,7 @@ fn section_accent(id: SectionId) -> Color32 {
         SectionId::InfoSettings => CATEGORY_COLORS[3],
         SectionId::Layers => CATEGORY_COLORS[5],
         SectionId::Projects => CATEGORY_COLORS[0],
-        SectionId::BuilderSlot => CATEGORY_COLORS[3],
+        SectionId::BuilderSlot | SectionId::Tool(_) => CATEGORY_COLORS[3],
     }
 }
 

@@ -194,6 +194,18 @@ fn basic_preset_palette_cannot_be_customized_on_creation_or_restore() {
 }
 
 #[test]
+fn existing_gem_factory_rows_accept_their_original_stored_colors() {
+    let mut document = Document::new("original gem palette");
+    for (i, rgb) in [[89,139,194,255],[79,128,203,255],[122,167,206,255],[172,202,228,255]].into_iter().enumerate() {
+        let mut layer = Layer::preset(PresetSlot::new(5 + i as u8).unwrap());
+        layer.color = rgb;
+        document.layer_order.push(layer.id);
+        document.layers.insert(layer.id,layer);
+    }
+    assert!(document.validate(&Limits::default()).is_ok());
+}
+
+#[test]
 fn restored_custom_labels_cannot_collide_but_generic_import_names_can() {
     let limits = Limits::default();
     let mut d = Document::new("label policy");

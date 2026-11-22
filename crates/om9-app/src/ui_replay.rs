@@ -336,7 +336,7 @@ fn block_on<F: std::future::Future>(future: F) -> F::Output {
 }
 
 /// An offscreen GPU (any adapter, the software one included) for [`screenshot`].
-fn offscreen_gpu() -> Result<eframe::egui_wgpu::RenderState> {
+pub(crate) fn offscreen_gpu() -> Result<eframe::egui_wgpu::RenderState> {
     use eframe::{egui_wgpu, wgpu};
     let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
@@ -375,7 +375,15 @@ fn offscreen_gpu() -> Result<eframe::egui_wgpu::RenderState> {
 /// The whole window as the user sees it (menus, viewports, dialogs) after `frames` frames,
 /// written as a PNG. Uses the application's GPU state, or an offscreen one.
 pub fn screenshot(app: &mut MatrixApp, size: [f32; 2], dpi: f32, frames: usize, out: &std::path::Path) -> Result<()> {
-    use eframe::{egui_wgpu, wgpu};
+    screenshot_at_pointer(app, size, dpi, frames, None, out)
+}
+
+/// Render pointer-dependent previews using the same logical coordinates as the replay.
+pub fn screenshot_at_pointer(
+    app: &mut MatrixApp, size: [f32; 2], dpi: f32, frames: usize,
+    pointer: Option<Pos2>, out: &std::path::Path,
+) -> Result<()> {
+    use eframe::wgpu;
     if app.gpu_state.is_none() {
         app.gpu_state = Some(offscreen_gpu()?);
     }
@@ -391,6 +399,7 @@ pub fn screenshot(app: &mut MatrixApp, size: [f32; 2], dpi: f32, frames: usize, 
         std::thread::sleep(std::time::Duration::from_millis(30));
         let raw = RawInput {
             screen_rect: Some(Rect::from_min_size(Pos2::ZERO, extent)),
+            events: pointer.map(eframe::egui::Event::PointerMoved).into_iter().collect(),
             ..Default::default()
         };
         let mut output = context.run_ui(raw, |ui| app.show(ui));
@@ -407,8 +416,20 @@ pub fn screenshot(app: &mut MatrixApp, size: [f32; 2], dpi: f32, frames: usize, 
         last = Some(output);
     }
     let output = last.expect("a frame");
-    let prims = context.tessellate(output.shapes, ppp);
     let (w, h) = ((size[0] * ppp).round() as u32, (size[1] * ppp).round() as u32);
+    let pixels = paint_frame_pixels(&context, &state, output, [w,h], ppp, wgpu::Color::BLACK)?;
+    image::save_buffer(out, &pixels, w, h, image::ColorType::Rgba8).map_err(|e| Error::Io(e.to_string()))
+}
+
+/// Composite a widget draw list into RGBA pixels, including native viewport textures.
+pub(crate) fn paint_frame_pixels(context: &Context, state: &eframe::egui_wgpu::RenderState,
+    output: eframe::egui::FullOutput, [w,h]: [u32;2], ppp:f32, clear:eframe::wgpu::Color) -> Result<Vec<u8>> {
+    use eframe::{egui_wgpu,wgpu};
+    if w == 0 || h == 0 || w.max(h) > state.device.limits().max_texture_dimension_2d
+        || u64::from(w).div_ceil(64)*256*u64::from(h) > state.device.limits().max_buffer_size {
+        return Err(Error::Budget("capture dimensions exceed GPU limits"));
+    }
+    let prims = context.tessellate(output.shapes, ppp);
     let texture = state.device.create_texture(&wgpu::TextureDescriptor {
         label: Some("om9 screenshot"),
         size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
@@ -433,7 +454,7 @@ pub fn screenshot(app: &mut MatrixApp, size: [f32; 2], dpi: f32, frames: usize, 
                 view: &view,
                 depth_slice: None,
                 resolve_target: None,
-                ops: wgpu::Operations { load: wgpu::LoadOp::Clear(wgpu::Color::BLACK), store: wgpu::StoreOp::Store },
+                ops: wgpu::Operations { load: wgpu::LoadOp::Clear(clear), store: wgpu::StoreOp::Store },
             })],
             ..Default::default()
         });
@@ -461,7 +482,7 @@ pub fn screenshot(app: &mut MatrixApp, size: [f32; 2], dpi: f32, frames: usize, 
     buffer.slice(..).map_async(wgpu::MapMode::Read, move |r| {
         let _ = tx.send(r);
     });
-    let _ = state.device.poll(wgpu::PollType::wait_indefinitely());
+    state.device.poll(wgpu::PollType::wait_indefinitely()).map_err(|e| Error::Io(e.to_string()))?;
     rx.recv()
         .map_err(|e| Error::Io(e.to_string()))?
         .map_err(|e| Error::Io(e.to_string()))?;
@@ -469,11 +490,11 @@ pub fn screenshot(app: &mut MatrixApp, size: [f32; 2], dpi: f32, frames: usize, 
         .slice(..)
         .get_mapped_range()
         .map_err(|e| Error::Io(format!("{e:?}")))?;
-    let mut pixels = Vec::with_capacity((row * h) as usize);
+    let mut pixels = Vec::with_capacity(row as usize * h as usize);
     for line in mapped.chunks_exact(padded as usize) {
         pixels.extend_from_slice(&line[..row as usize]);
     }
     drop(mapped);
     buffer.unmap();
-    image::save_buffer(out, &pixels, w, h, image::ColorType::Rgba8).map_err(|e| Error::Io(e.to_string()))
+    Ok(pixels)
 }

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>F6 Materials mode</title>
+  <defs><radialGradient id="finish" cx="32%" cy="26%" r="78%"><stop offset="0" stop-color="#b1fff4"/><stop offset=".38" stop-color="#56ccc0"/><stop offset="1" stop-color="#197b79"/></radialGradient></defs>
+  <circle cx="16" cy="16" r="12" fill="url(#finish)" stroke="#66beb7" stroke-width="1.1"/>
+</svg>

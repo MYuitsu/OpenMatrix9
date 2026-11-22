@@ -16,12 +16,12 @@
 //! The original Matrix command names are preserved (`gvLoader`, `gvEmerald`, `gvBaguette`,
 //! `gvGemPositioner`) and are reachable from both the command line and the palette icons.
 
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::OnceLock};
 
 use om9_core::{
     Error, Result, curve_ops,
     gem::{
-        CustomGemParams, GemCut, GemId, GemInstance, GemLibrary, GemMesh, GemRecord, GemShape,
+        CustomGemParams, GemAsset, GemCut, GemId, GemInstance, GemLibrary, GemMesh, GemRecord, GemShape,
         GemSize, GemSpec, build_mesh, gem_record, gem_record_in, instance_count,
     },
     geometry::{Geometry, Point3, Transform},
@@ -32,6 +32,8 @@ use om9_core::{
 };
 
 use super::Controller;
+mod palette;
+pub(crate) use palette::gem_wire_profile;
 
 /// `Builder Gem Loader` palette icon / `gvLoader` command (`OM9-GEM-001`).
 pub const LOADER: &str = "OM9-GEM-001";
@@ -53,7 +55,7 @@ pub const PALETTE_EMERALD: &str = "Emerald";
 pub const PALETTE_POSITIONER: &str = "BuilderGemPositioner";
 
 /// The gem tool an open session represents.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
 pub enum GemTool {
     Loader,
     Custom,
@@ -108,7 +110,7 @@ pub fn handles(feature: &str) -> bool {
 /// The typed command names that reach the same services.
 pub fn command_name(text: &str) -> Option<&'static str> {
     match text.trim().to_ascii_lowercase().as_str() {
-        "gvloader" | "gemloader" | "gem loader" | "loadgem" | "gem" => Some(LOADER),
+        "gvbuildergemloader" | "gvloader" | "gemloader" | "gem loader" | "loadgem" | "gem" => Some(LOADER),
         "gvemerald" | "emeraldbuilder" | "emerald builder" => Some(EMERALD),
         "gvbaguette" | "baguettebuilder" | "baguette builder" => Some(BAGUETTE),
         "gvgempositioner" | "gempositioner" | "gem positioner" | "positiongem" => Some(POSITIONER),
@@ -120,6 +122,29 @@ pub fn command_name(text: &str) -> Option<&'static str> {
 
 /// Gem material defaults used by the property editor. The colour is a display default, not a
 /// material measurement.
+/// Loader and Surface accept the legacy add-on's shape selector under Cut= as well
+/// as the original cut family names.
+pub(super) fn loader_cut(value: &str, cut: GemCut, shape: GemShape) -> Result<(GemCut, GemShape)> {
+    if let Ok(family) = GemCut::from_tag(value) {
+        let selected = if family.shapes().contains(&shape) { shape } else { family.shapes()[0] };
+        return Ok((family, selected));
+    }
+    let tag = value.to_ascii_lowercase();
+    let (family, shape) = match tag.as_str() {
+        "cabochon_round" => (GemCut::Cabochon, GemShape::Round),
+        "cabochon_oval" => (GemCut::Cabochon, GemShape::Oval),
+        _ => {
+            let shape = GemShape::from_tag(value)?;
+            let family = if cut.shapes().contains(&shape) { cut } else { GemCut::Diamond };
+            (family, shape)
+        }
+    };
+    if !family.shapes().contains(&shape) {
+        return Err(Error::Invalid("gem shape for cut"));
+    }
+    Ok((family, shape))
+}
+
 pub fn material_color(material: &str) -> Option<[u8; 4]> {
     match material.trim().to_ascii_lowercase().as_str() {
         "" => None,
@@ -134,6 +159,13 @@ pub fn material_color(material: &str) -> Option<[u8; 4]> {
     }
 }
 
+pub(crate) const LOADER_GALLERY_COLUMNS: usize = 5;
+
+pub(crate) fn gem_library() -> &'static GemLibrary {
+    static LIBRARY: OnceLock<GemLibrary> = OnceLock::new();
+    LIBRARY.get_or_init(GemLibrary::canonical)
+}
+
 /// One open gem tool session. A session is the whole preview: no document object exists until
 /// Apply commits one transaction.
 #[derive(Debug, Clone)]
@@ -145,6 +177,8 @@ pub struct GemSession {
     pub size_index: usize,
     /// Selected page of the size dial (the manual calls it a size dial).
     pub size_page: usize,
+    pub(crate) loader_size_picker: bool,
+    pub(crate) loader_corner_to_corner: bool,
     /// Keep the selected gem's original size while changing shape/cut.
     pub keep_original: bool,
     /// Length, width and total depth in millimetres (the manual's custom controls).
@@ -163,6 +197,8 @@ pub struct GemSession {
     /// The positioner's starting record, so its preview/apply never depends on session order.
     pub target_record: Option<GemRecord>,
     pub origin: Point3,
+    pub points: Vec<Point3>,
+    pub custom_styles: Vec<om9_core::gem_edits::GemStyle>,
     pub moved: Point3,
     pub rotation_deg: [f64; 3],
     pub scale: f64,
@@ -176,8 +212,12 @@ pub struct GemSession {
 }
 
 impl GemSession {
+    pub(crate) fn allows_brep(&self) -> bool {
+        cfg!(feature = "occt-brep") && self.shape != GemShape::DustMarquire
+    }
+
     fn new(tool: GemTool, controller: &Controller) -> Result<Self> {
-        let library = GemLibrary::canonical();
+        let library = gem_library();
         let selection = controller.selected_ordered();
         let selected_gem = match selection.as_slice() {
             [id] => controller
@@ -194,6 +234,8 @@ impl GemSession {
             shape: GemShape::Round,
             size_index: 22,
             size_page: 1,
+            loader_size_picker: false,
+            loader_corner_to_corner: false,
             keep_original: false,
             dimensions: [6.0, 6.0, 3.9],
             girdle_mm: 0.15,
@@ -205,6 +247,11 @@ impl GemSession {
             target: None,
             target_record: None,
             origin: [0.0; 3],
+            points: Vec::new(),
+            custom_styles: if tool == GemTool::Loader {
+                om9_core::gem_edits::GemStyleStore::load_or_empty(&super::gem_edits::gem_style_path())
+                    .map(|store| store.styles).unwrap_or_default()
+            } else { Vec::new() },
             moved: [0.0; 3],
             rotation_deg: [0.0; 3],
             scale: 1.0,
@@ -229,18 +276,15 @@ impl GemSession {
                     session.girdle_mm = record.spec.girdle_mm;
                     session.corner_mm = record.spec.corner_mm;
                 }
-                if let Some(asset) = library.asset(session.shape, session.cut)
+                if session.replace.is_none()
+                    && let Some(asset) = library.asset(session.shape, session.cut)
                     && let Some(index) = asset
                         .sizes
                         .iter()
                         .position(|size| (size.span_mm() - 6.0).abs() < 1.0e-9)
                 {
-                    session.size_index = index;
-                    if let Some(size) = asset.sizes.get(session.size_index) {
-                        session.dimensions = [size.length_mm, size.width_mm, size.depth_mm];
-                    }
+                    session.select_loader_size(asset, index);
                 }
-                session.size_page = session.size_index / 12 + 1;
                 session.girdle_mm =
                     (session.dimensions[1].min(session.dimensions[0]) * 0.02).max(0.06);
                 session.corner_mm = session.shape.default_corner_ratio()
@@ -310,19 +354,73 @@ impl GemSession {
                 session.size_index = 0;
             }
         }
-        if let Some(asset) = library.asset(session.shape, session.cut) {
-            session.size_page =
-                session.size_index.min(asset.sizes.len().saturating_sub(1)) / 12 + 1;
-        }
         Ok(session)
+    }
+
+    pub(crate) fn select_loader_asset(&mut self, cut: GemCut, shape: GemShape) {
+        if self.cut == cut && self.shape == shape {
+            return;
+        }
+        let library = gem_library();
+        let Some(asset) = library.asset(shape, cut) else {
+            return;
+        };
+        let span = self.dimensions[0].min(self.dimensions[1]);
+        let Some((index, _)) = asset.sizes_for_axis(self.loader_corner_to_corner).iter().enumerate().min_by(|(_, a), (_, b)| {
+            (a.span_mm() - span).abs().total_cmp(&(b.span_mm() - span).abs())
+        }) else {
+            return;
+        };
+        self.cut = cut;
+        self.shape = shape;
+        self.select_loader_size(asset, index);
+    }
+
+    pub(crate) fn select_loader_size(&mut self, asset: &GemAsset, index: usize) {
+        let size = asset.sizes_for_axis(self.loader_corner_to_corner)[index];
+        self.size_index = index;
+        self.size_page = asset.size_page_for(index, self.size_page);
+        self.dimensions = [size.length_mm, size.width_mm, size.depth_mm];
+        if let Ok(spec) = asset.spec_for(&size) {
+            self.girdle_mm = spec.girdle_mm;
+        }
+        self.corner_mm = self.shape.default_corner_ratio() * size.span_mm();
+    }
+
+    pub(crate) fn toggle_loader_size_axis(&mut self, asset: &GemAsset) {
+        let current = asset.sizes_for_axis(self.loader_corner_to_corner);
+        let selected = current.iter().position(|size| {
+            self.dimensions == [size.length_mm, size.width_mm, size.depth_mm]
+        });
+        self.loader_corner_to_corner = !self.loader_corner_to_corner;
+        if let Some(index) = selected {
+            self.select_loader_size(asset, index);
+        }
+    }
+
+    pub fn load_custom_style(&mut self, name: &str) -> Result<()> {
+        let style = self.custom_styles.iter().find(|style| style.name == name)
+            .ok_or(Error::Missing("custom gem style"))?;
+        let gem = style.apply(&GemRecord::new(self.spec()?))?;
+        self.cut = gem.spec.cut;
+        self.shape = gem.spec.shape;
+        self.dimensions = [gem.spec.length_mm, gem.spec.width_mm, gem.spec.depth_mm()];
+        self.girdle_mm = gem.spec.girdle_mm;
+        self.corner_mm = gem.spec.corner_mm;
+        self.material = gem.material;
+        self.size_page = 1;
+        self.size_index = 0;
+        self.loader_size_picker = true;
+        Ok(())
     }
 
     /// The selected size of the library asset.
     pub fn size(&self) -> Option<GemSize> {
-        let library = GemLibrary::canonical();
+        let library = gem_library();
         let asset = library.asset(self.shape, self.cut)?;
-        let index = self.size_index.min(asset.sizes.len().saturating_sub(1));
-        asset.sizes.get(index).copied()
+        let sizes = asset.sizes_for_axis(self.loader_corner_to_corner);
+        let index = self.size_index.min(sizes.len().saturating_sub(1));
+        sizes.get(index).copied()
     }
 
     /// The typed gem the session would commit. This is also the preview: computing it does not
@@ -361,17 +459,11 @@ impl GemSession {
             spec.validate()?;
             return Ok(spec);
         }
-        let asset = GemLibrary::canonical()
+        let asset = gem_library()
             .asset(self.shape, self.cut)
-            .cloned()
             .ok_or(Error::Invalid("gem shape for cut"))?;
-        let mut spec = GemSpec::from_outer_dimensions(
-            self.shape,
-            self.cut,
-            self.dimensions[0],
-            self.dimensions[1],
-            self.dimensions[2],
-        )?;
+        let [length, width, depth] = self.dimensions;
+        let mut spec = GemSpec::from_outer_dimensions(self.shape, self.cut, length, width, depth)?;
         spec.facet_count = asset.facet_count;
         spec.pavilion_rows = asset.pavilion_rows;
         spec.bulge = asset.bulge;
@@ -381,7 +473,7 @@ impl GemSession {
         }
         // The typed depth is the total depth, so it must be re-split against the chosen girdle;
         // otherwise overriding the girdle thickness would silently change the total depth.
-        spec = spec.set_depth_mm(self.dimensions[2])?;
+        spec = spec.set_depth_mm(depth)?;
         spec.validate()?;
         Ok(spec)
     }
@@ -580,7 +672,9 @@ impl Controller {
         if !mesh.closed {
             return Err(Error::Invalid("gem mesh open"));
         }
-        let layer = session.layer.or(self.gem_layer()?);
+        let layer = session.layer.or_else(|| session.replace
+            .and_then(|id| self.document().entities.get(&id)?.attributes.layer));
+        let brep = session.brep && session.allows_brep();
         if let Some(target) = session.replace {
             let source = self.document().stamp(target)?;
             let entity = self
@@ -607,7 +701,7 @@ impl Controller {
             }
             let mut extensions = entity.extensions.clone();
             extensions.insert(GEM_EXTENSION_SLOT.to_owned(), record.as_extension()?);
-            let (geometry, mut reservation) = self.gem_geometry_with_guard(mesh, session.brep)?;
+            let (geometry, mut reservation) = self.gem_geometry_with_guard(mesh, brep)?;
             let mut mutations = vec![
                 Mutation::Geometry {
                     source,
@@ -628,24 +722,28 @@ impl Controller {
                 &session.material,
                 material_color(&session.material).unwrap_or([180, 180, 180, 255]),
             );
-            record.gem_id = GemId::new();
-            let (geometry, mut reservation) = self.gem_geometry_with_guard(mesh, session.brep)?;
-            let mut entity = Entity::new(
-                format!("{} {}", spec.shape.label(), spec.cut.label()),
-                geometry,
-                layer,
-            );
-            entity.placement = Transform::translation(session.origin);
-            entity
-                .extensions
-                .insert(GEM_EXTENSION_SLOT.to_owned(), record.as_extension()?);
-            self.commit_gem_with_guard(
-                "Gem loader",
-                vec![Mutation::Insert {
-                    document: self.document,
-                    entity,
-                }],
-                reservation.as_mut(),
+            let positions = if session.points.is_empty() {
+                std::slice::from_ref(&session.origin)
+            } else {
+                session.points.as_slice()
+            };
+            let mut mutations = Vec::with_capacity(positions.len());
+            let mut reservations = Vec::new();
+            for point in positions {
+                // Each B-rep reservation must describe one exclusive source. Cloning an
+                // admitted B-rep into a batch gives every mutation the same storage owner.
+                let (geometry, reservation) = self.gem_geometry_with_guard(mesh.clone(), brep)?;
+                let mut entity = Entity::new(
+                    format!("{} {}", spec.shape.label(), spec.cut.label()), geometry, layer,
+                );
+                entity.placement = Transform::translation(*point);
+                record.gem_id = GemId(entity.id);
+                entity.extensions.insert(GEM_EXTENSION_SLOT.to_owned(), record.as_extension()?);
+                mutations.push(Mutation::Insert { document: self.document, entity });
+                reservations.extend(reservation);
+            }
+            self.commit_gem_with_guards(
+                "Gem loader", mutations, (!reservations.is_empty()).then_some(reservations.as_mut_slice()),
             )
         }
     }
@@ -847,10 +945,13 @@ impl Controller {
         if result.is_err() { self.coordinator.prune_orphaned_brep_representations(); }
         result
     }
-    fn commit_gem_inner(&mut self, name: &str, mutations: Vec<Mutation>,
+    fn commit_gem_inner(&mut self, name: &str, mut mutations: Vec<Mutation>,
         reservations: Option<&mut [om9_core::transaction::ExternalMemoryReservation]>) -> Result<()> {
         if mutations.is_empty() {
             return Ok(());
+        }
+        if self.gem_session().and_then(|session| session.layer).is_none() {
+            self.route_gem_inserts(&mut mutations, &Default::default())?;
         }
         let old_scene = self.scene.as_ref().ok_or(Error::Missing("gem scene"))?;
         if old_scene.epoch != self.coordinator.epoch() {
@@ -1026,6 +1127,24 @@ impl Controller {
         self.gem_editor = None;
     }
 
+    pub fn gem_loader_accepts_point(&self) -> bool {
+        self.gem_session.as_ref().is_some_and(|session|
+            session.tool == GemTool::Loader && session.replace.is_none())
+    }
+
+    pub fn gem_loader_point(&mut self, point: Point3) -> Result<()> {
+        if !self.gem_loader_accepts_point() || !point.iter().all(|coordinate| coordinate.is_finite()) {
+            return Err(Error::Invalid("gem loader point"));
+        }
+        let limit = self.coordinator.limits().max_outputs;
+        let session = self.gem_session.as_mut().expect("active loader");
+        if session.points.len() as u64 >= limit {
+            return Err(Error::Budget("gem loader points"));
+        }
+        session.points.push(point);
+        Ok(())
+    }
+
     /// Command-line / Enter handling for an open gem tool. `None` means no gem tool is open.
     pub fn gem_text(&mut self, text: &str) -> Option<Result<()>> {
         self.gem_session.as_ref()?;
@@ -1037,6 +1156,27 @@ impl Controller {
         if lower == "cancel" || lower == "esc" || lower == "exit" {
             self.gem_cancel();
             return Some(Ok(()));
+        }
+        if lower == "onsurface" && self.gem_session.as_ref()?.tool == GemTool::Loader {
+            let source = self.gem_session.take().expect("active loader");
+            let result = source.spec().and_then(|spec| {
+                self.dispatch_gem_placement(super::gem_placement::ON_SURFACE)?;
+                self.gem_surface_set_gem(spec, source.material.clone());
+                Ok(())
+            });
+            if result.is_err() {
+                self.gem_session = Some(source);
+            }
+            return Some(result);
+        }
+        if self.gem_loader_accepts_point() {
+            if matches!(lower.as_str(), "u" | "undo") {
+                self.gem_session.as_mut()?.points.pop();
+                return Some(Ok(()));
+            }
+            if trimmed.contains(',') && !trimmed.contains('=') {
+                return Some(parse_point(trimmed).and_then(|point| self.gem_loader_point(point)));
+            }
         }
         if let Some(result) = self.gem_option(trimmed) {
             return Some(result);
@@ -1057,22 +1197,35 @@ impl Controller {
                     if !session.cut.shapes().contains(&shape) {
                         return Err(Error::Invalid("gem shape for cut"));
                     }
-                    session.shape = shape;
-                    session.size_index = 0;
-                    session.corner_mm = shape.default_corner_ratio()
-                        * session.dimensions[1].min(session.dimensions[0]);
+                    if session.tool == GemTool::Loader && shape == GemShape::DustMarquire {
+                        session.select_loader_asset(session.cut, shape);
+                    } else {
+                        session.shape = shape;
+                        session.size_index = 0;
+                        session.corner_mm = shape.default_corner_ratio()
+                            * session.dimensions[1].min(session.dimensions[0]);
+                    }
                 }
                 "cut" => {
-                    let cut = GemCut::from_tag(value)?;
-                    if !cut.shapes().contains(&session.shape) {
-                        return Err(Error::Invalid("gem shape for cut"));
+                    let (cut, shape) = if session.tool == GemTool::Loader {
+                        loader_cut(value, session.cut, session.shape)?
+                    } else {
+                        let cut = GemCut::from_tag(value)?;
+                        (cut, if cut.shapes().contains(&session.shape) { session.shape } else { cut.shapes()[0] })
+                    };
+                    if session.tool == GemTool::Loader && (cut == GemCut::Pearl || shape == GemShape::DustMarquire) {
+                        session.select_loader_asset(cut, shape);
+                    } else {
+                        session.cut = cut;
+                        session.shape = shape;
+                        session.size_index = 0;
+                        session.size_page = 1;
                     }
-                    session.cut = cut;
-                    session.size_index = 0;
+                    session.loader_size_picker = false;
                 }
                 "size" => {
                     let value = value.trim_end_matches("mm").trim();
-                    let (length, width) = match value.split_once('x') {
+                    let (length, width) = match value.split_once(['x', 'X', '×']) {
                         Some((length, width)) => (
                             length
                                 .trim()
@@ -1090,14 +1243,12 @@ impl Controller {
                             (diameter * session.shape.default_aspect(), diameter)
                         }
                     };
-                    // A typed size may be off the authored ladder; the dial still keeps the
-                    // nearest preset selected while the exact dimensions are used.
-                    let asset = GemLibrary::canonical()
+                    // Custom dimensions use the same reference depth ratio as the presets.
+                    let asset = gem_library()
                         .asset(session.shape, session.cut)
-                        .cloned()
                         .ok_or(Error::Invalid("gem shape for cut"))?;
-                    let index = asset
-                        .sizes
+                    let sizes = asset.sizes_for_axis(session.loader_corner_to_corner);
+                    let index = sizes
                         .iter()
                         .enumerate()
                         .min_by(|(_, a), (_, b)| {
@@ -1107,16 +1258,32 @@ impl Controller {
                         })
                         .map(|(index, _)| index)
                         .unwrap_or(0);
-                    let size = asset.sizes[index];
-                    session.size_index = index;
-                    session.size_page = index / 12 + 1;
-                    session.dimensions = [length, width, size.depth_mm];
+                    let size = sizes[index];
+                    session.select_loader_size(asset, index);
+                    let depth = if session.loader_corner_to_corner && asset.has_corner_to_corner_sizes() {
+                        length * (size.depth_mm / size.length_mm)
+                    } else {
+                        width * (size.depth_mm / size.width_mm)
+                    };
+                    session.dimensions = [length, width, depth];
+                }
+                "custom" if session.tool == GemTool::Loader => session.load_custom_style(value)?,
+                "percentage" | "percent" if session.tool == GemTool::Loader => {
+                    let percent = parse_mm(value.trim_end_matches('%'))?;
+                    let alternate = session.loader_corner_to_corner
+                        && gem_library().asset(session.shape, session.cut)
+                            .is_some_and(GemAsset::has_corner_to_corner_sizes);
+                    let span = session.dimensions[usize::from(!alternate)];
+                    session.dimensions[2] = span * percent / 100.0;
                 }
                 "length" => {
                     session.dimensions[0] = parse_mm(value)?;
                 }
                 "width" => {
-                    session.dimensions[1] = parse_mm(value)?;
+                    let width = parse_mm(value)?;
+                    session.dimensions[1] = if width == 0.0 && session.tool == GemTool::Loader {
+                        session.dimensions[0] / session.shape.default_aspect()
+                    } else { width };
                 }
                 "depth" => {
                     session.dimensions[2] = parse_mm(value)?;
@@ -1174,7 +1341,11 @@ impl Controller {
                     session.origin = parse_point(value)?;
                 }
                 "brep" => {
-                    session.brep = parse_bool(value)?;
+                    let brep = parse_bool(value)?;
+                    if brep && session.shape == GemShape::DustMarquire {
+                        return Err(Error::Unsupported("Dust Marquire uses a mesh body"));
+                    }
+                    session.brep = brep;
                 }
                 "layer" => {
                     let layer = layers
@@ -1217,7 +1388,7 @@ impl Controller {
         };
         Some(match session.tool {
             GemTool::Loader => format!(
-                "Gem Loader [{} · {} · {}] (Enter=Apply, Shape=, Cut=, Size=, Length=, Width=, Depth=, KeepOriginal=): ",
+                "Gem Loader [{} · {} · {}] (Enter=Apply, Shape=, Cut=, Size=, Length=, Width=, Depth=, Percentage=, KeepOriginal=, OnSurface): ",
                 session.cut.label(),
                 suffix,
                 session.size().map(|size| size.label()).unwrap_or_default()

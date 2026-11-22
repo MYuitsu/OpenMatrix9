@@ -299,6 +299,21 @@ def export_assets(ref_root,output_root,named_root=None,named_bindings=None,butto
     solid_count = sum(name in SOLID_ICONS for name in result['authored_symbols'])
     if solid_count:
         describe_solid_style(result, solid_count)
+    # F6 mode buttons select a panel mode and have no MainMenu command ID.
+    for mode in ('General', 'Surface', 'TSplines', 'User', 'Report', 'Materials'):
+        key = 'F6Mode' + mode
+        relative = f'icons/f6-modes/{key}.svg'
+        source = Path(__file__).resolve().parents[1] / 'Resources' / relative
+        svg_bytes = source.read_bytes()
+        target = output_root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if source.resolve() != target.resolve():
+            target.write_bytes(svg_bytes)
+        label = 'T-Splines' if mode == 'TSplines' else mode
+        dest[key] = {'image': relative, 'tooltip': label + ' mode', 'source': 'OpenMatrix9-authored-svg',
+                     'mapping': 'authored-panel-symbol', 'status': 'resolved'}
+        result['authored_symbols'][key] = {'symbol': key, 'mapping': 'authored-panel-symbol',
+                                          'sha256': hashlib.sha256(svg_bytes).hexdigest()}
     # Standalone toolbar artwork has its own generators and must survive a
     # main-menu export even though it is not listed in MainMenu.ini.
     for section in previous.sections():

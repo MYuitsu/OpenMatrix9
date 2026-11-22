@@ -38,6 +38,13 @@ impl BrepFixtures {
     }
 
     fn try_open(&mut self, document: Document) -> om9_core::Result<MatrixApp> {
+        let path = self.write(document);
+        let app = MatrixApp::from_file(&path);
+        std::fs::remove_file(path).unwrap();
+        app
+    }
+
+    fn write(&mut self, document: Document) -> std::path::PathBuf {
         use sha2::{Digest, Sha256};
         let template = include_bytes!("../../../implementation/evidence/M03/solid-ui-followup-2026-10-23/review-fixtures/Boolean2-D-after.om9");
         let start = u64::from_le_bytes(template[40..48].try_into().unwrap()) as usize;
@@ -55,9 +62,7 @@ impl BrepFixtures {
         fixture.extend_from_slice(&metadata);
         let path = std::env::temp_dir().join(format!("om9-osnap-fixture-{}.om9", uuid::Uuid::new_v4()));
         std::fs::write(&path, fixture).unwrap();
-        let app = MatrixApp::from_file(&path);
-        std::fs::remove_file(path).unwrap();
-        app
+        path
     }
 }
 
@@ -2186,4 +2191,74 @@ fn disabling_end_removes_the_marker_from_the_next_frame() {
     app.set_snap_enabled(SnapKind::End, true);
     frame(&mut app, &context, vec![Event::PointerMoved(at)]);
     assert_eq!(wait_snap(&mut app, &context, SnapKind::End).kind, SnapKind::End);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn extrude_lines_to_boundary_resolves_the_picked_3dm_face() {
+    let limits = Default::default();
+    let body = om9_kernel::brep::box_brep([8., 8., 2.], 0.05, &limits).unwrap();
+    let native = om9_kernel::brep::to_3dm(&body, 0.001, &limits).unwrap();
+    let mut fixtures = BrepFixtures::default();
+    let mut boundary = fixtures.native("Rhino box", native);
+    boundary.placement = om9_core::geometry::Transform::translation([-4., -4., 4.]);
+    let mut doc = Document::with_template_tolerance("3DM extrusion stop");
+    let source = Entity::new(
+        "curve",
+        Geometry::Curve(Curve::Line {
+            start: [-1., 0., 0.],
+            end: [1., 0., 0.],
+            domain: [0., 1.],
+        }),
+        doc.current_layer,
+    );
+    let id = source.id;
+    doc.entities.insert(source.id, source);
+    doc.entities.insert(boundary.id, boundary);
+    let path = fixtures.write(doc);
+    let mut app = MatrixApp::new(Document::with_template_tolerance("Untitled")).unwrap();
+    app.controller.begin_file_operation(om9_app::file_lifecycle::FileKind::Open).unwrap();
+    let token = app.controller.file_operation().unwrap().token();
+    let opened = app.controller.accept_file_path(token, &path);
+    std::fs::remove_file(path).unwrap();
+    opened.unwrap();
+    let before = app.controller.document().clone();
+    app.controller.activate_view("Looking Down").unwrap();
+    app.controller
+        .workspace
+        .views
+        .get_mut(&ViewId::LookingDown)
+        .unwrap()
+        .mode = om9_scene::workspace::DisplayMode::Shaded;
+    app.controller.select_objects(&[id]).unwrap();
+    app.controller.submit("tsExtrudeLines").unwrap();
+    app.controller.submit("ToBoundary").unwrap();
+    let ctx = egui::Context::default();
+    for _ in 0..3 {
+        frame(&mut app, &ctx, vec![]);
+    }
+    let pick = screen_of(&app, [2., 2., 6.]);
+    click(&mut app, &ctx, pick);
+    for _ in 0..4 {
+        frame(&mut app, &ctx, vec![]);
+    }
+    assert!(
+        app.controller.addon_session().is_none(),
+        "{} {:?}",
+        app.status_line(),
+        app.controller.addon_session().map(|s| &s.reply.messages)
+    );
+    let mut ends = Vec::new();
+    for id in app.controller.selected_ordered() {
+        if let Geometry::Curve(Curve::Line { start, end, .. }) =
+            &app.controller.document().entities[&id].geometry
+            && (start[0] - end[0]).abs() < 1e-7
+        {
+            ends.push(end[2]);
+        }
+    }
+    assert_eq!(ends.len(), 2);
+    assert!(ends.iter().all(|&z| (z - 6.).abs() < 1e-6), "{ends:?}");
+    app.controller.undo().unwrap();
+    assert_eq!(app.controller.document(), &before);
 }

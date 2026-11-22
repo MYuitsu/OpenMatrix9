@@ -15,6 +15,10 @@ tái dùng, **không** thay thế trạng thái nghiệm thu cả lệnh.
 
 | Lệnh / ID runtime | Đã triển khai, cần tái dùng | Còn phải bổ sung hoặc kiểm chứng | Trạng thái theo hợp đồng mới | Evidence |
 |---|---|---|---|---|
+| F6 / OM9-L2-03-09 | Đối chiếu 250 nhóm và 371 macro, lệnh chung cho menu và CMD. Click Polyline, tạo đường và Undo qua khung lệnh. | Các preset theo selection con, phần hình học còn thiếu và đối chiếu popup trên Windows. | MOT_PHAN | [Kết quả F6](2026-11-22-f6-matrix9.md) |
+| Gem Loader / OM9-L3-04-09-003 | Spec và thân procedural, preview không sửa tài liệu, F4 hoặc điểm viewport, Apply và Undo. Đối chiếu 57 bảng cỡ gốc. Round Diamond có mặt bàn bát giác thật và bỏ đường chéo chia lưới trong Wireframe, đã chụp Top trên Windows. Dust Marquire có mặt bàn lục giác và một preset OM9. | Kiểm từng biến thể trên giao diện, mẫu Custom, chia đoạn đai và bố trí isocurve theo mẫu gốc. | MOT_PHAN | [Wireframe](2026-11-22-gem-placement.md#wireframe-round-diamond) · [Bảng cỡ và tab](2026-11-22-dock-popup-theme.md#matrix9-size-catalog-and-tabs) · [Dust Marquire](../features/OM9-L3-04-09-003.md) |
+| Gem on Curve / OM9-L3-04-10-001 | Cung theo curve nguồn, khe girdle, preview, recipe và sửa F6 sau mở lại. Ô hình chọn nguồn và khe đã kiểm qua cửa sổ Windows. | Object/Browser, tay nắm còn lại, đường cong 3D và nghiệm thu desktop đầy đủ. | MOT_PHAN | [Kiểm chứng](2026-11-22-gem-placement.md) |
+| Gem on Surface / OM9-L3-04-10-007 | Tia camera, UV và trim NURBS nguồn, preview phiên, guard và Undo. Ô hình chọn nguồn và Offset đã kiểm qua cửa sổ Windows. | Mặt trong B-rep nhiều mặt, kiểm phím tắt và hai mức hiển thị. | MOT_PHAN | [Kiểm chứng](2026-11-22-gem-placement.md) |
 | Duplicate / Move / Mirror / Rotate | [x] Source placements, copies and Undo in both profiles. Secondary Mirror and Rotate exercised with the mouse. | External Rhino and broader viewport-mode coverage remain open. | MOT_PHAN | [Top11 Windows evidence](2026-11-21-top11.md) |
 | Edit Points On / Control Points On | [x] Both grip modes through the live command routes. Source edits and surface-grid timing in Rust integration tests. | External Rhino and broader viewport-mode coverage remain open. | MOT_PHAN | [Top11 Windows evidence](2026-11-21-top11.md) |
 | Explode / Join / Split / Trim | [x] Retained BRep source, exact output and area, glyph contours and cage release. View-projected curve and extended-line fixtures. | External Rhino and broader viewport-mode coverage remain open. | MOT_PHAN | [Top11 Windows evidence](2026-11-21-top11.md) |
@@ -148,3 +152,12 @@ Audit source và reference; không chạy product test trong lượt này. Các 
 | `Line` / hướng SmartTrack từ End của cung, `OM9-L3-02-03-006` | Cung đã co giãn không đều cho tiếp tuyến theo `(-3,1,0)` và đường dẫn vuông góc ở Z=12 mm. Hai marker trùng hai đầu Line, với một mục Undo. SDK giữ hướng của End qua lần gọi sau. | Kiểm bằng chuột thật, đối chiếu lúc đường dẫn xuất hiện trong Matrix9 và các đỉnh có nhiều cạnh. | [P07](2026-11-17-snaps-p07.md#smarttrack-directions-from-a-curve-end) |
 | `Line` / End tại chỗ nối cạnh BRep, `OM9-L3-02-03-006` | Trên BRep mở lại, hai cạnh cùng phương giữ tiếp tuyến tại `(4,2,12)`. Góc gãy ở `(0,0,12)` chỉ dùng vị trí. Marker trên đường dẫn và điểm đầu Line trùng nhau, một mục Undo. | Kiểm bằng chuột thật và các trường hợp cần định danh liên kết cạnh–đỉnh. | [P07](2026-11-17-snaps-p07.md#smarttrack-direction-at-brep-edge-joins) |
 | SmartTrack End tại mép vùng bắt điểm, `OM9-L3-02-03-006` | Hai đầu cạnh cách 0,005 mm, nằm trong dung sai 0,01 mm. Khi một đầu ra khỏi vùng 8 px, End vẫn chọn đúng điểm và góc gãy vẫn dùng vị trí. | Đối chiếu trên Matrix9 và kiểm bằng chuột Windows. | [P07](2026-11-17-snaps-p07.md#smarttrack-direction-at-the-edge-of-the-snap-aperture) |
+
+### CMD input and history on 2026-11-23
+
+| Lệnh | Bằng chứng hình học và thao tác | Giới hạn |
+|---|---|---|
+| Point, Line | egui chuyển chữ từ viewport vào CMD. Point mở lời nhắc tọa độ. Line tạo đoạn từ (0,0,0) đến (12,6,0), có đúng một mục Undo. Redo khôi phục cùng ID. Esc hủy đoạn đang chờ điểm cuối. | Kiểm lặp chuột và bàn phím vật lý trong đợt desktop. |
+| Extrude Tapered | Replay F6 đổi tùy chọn, hiển thị preview, bấm chiều cao trong Through Finger, kiểm vị trí ba kết quả và Undo một bước. | Các giới hạn đùn xiên của profile cong được theo dõi trong hồ sơ F6. |
+
+[Biên bản sáu ca UI](2026-11-23-command-ui-events.md)

@@ -7,7 +7,7 @@
 //! choice, as in Rhino's Simplify group. OK = Enter = right click, Cancel = Esc.
 use super::MatrixApp;
 use crate::session::{AddonDialog, DialogKind, DialogRow};
-use eframe::egui::{self, Align2, RichText};
+use eframe::egui::{self, RichText};
 use std::collections::BTreeMap;
 
 #[derive(Default)]
@@ -43,7 +43,7 @@ enum Act {
 }
 
 impl MatrixApp {
-    pub(super) fn session_dialog_ui(&mut self, ctx: &egui::Context) {
+    pub(super) fn sync_session_dialog(&mut self) {
         self.session_dialog.rects.clear();
         let Some(dialog) = self.controller.addon_dialog() else {
             if self.controller.addon_session().is_none() {
@@ -58,43 +58,22 @@ impl MatrixApp {
             self.session_dialog.hidden = None;
             self.session_dialog.drafts.clear();
         }
-        if self.session_dialog.hidden.as_deref() == Some(dialog.code.as_str()) {
-            return;
-        }
+    }
+
+    pub(super) fn session_options_ui(&mut self, ui: &mut egui::Ui) {
+        let Some(dialog) = self.controller.addon_dialog() else { return; };
         let vi = self.controller.tr().lang() == om9_addons::i18n::Lang::Vi;
-        let mut open = true;
-        let mut acts: Vec<Act> = Vec::new();
-        let area = ctx.content_rect();
-        // Opaque and light like the application's other windows (Rhino's dialogs are light
-        // too): the viewport must not show through the fields.
-        let style = ctx.style_of(egui::Theme::Light);
-        let frame = egui::Frame::window(&style)
-            .fill(egui::Color32::from_rgb(244, 244, 240))
-            .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(150, 125, 50)));
-        let window = egui::Window::new(RichText::new(&dialog.title).strong())
-            .frame(frame)
-            .id(egui::Id::new(("om9-addon-dialog", &dialog.code)))
-            .open(&mut open)
-            .collapsible(false)
-            .resizable(false)
-            .pivot(Align2::RIGHT_TOP)
-            .default_pos(egui::pos2(area.right() - 300.0, area.top() + 130.0))
-            .min_width(240.0);
-        let response = window.show(ctx, |ui| {
-            self.session_dialog_body(ui, &dialog, vi, &mut acts);
-        });
-        if let Some(r) = response {
-            self.session_dialog.rects
-                .insert("OptionsDialog".into(), r.response.rect);
-        }
-        if !open {
-            self.session_dialog.hidden = Some(dialog.code.clone());
-        }
+        let mut acts = Vec::new();
+        let response = ui.scope(|ui| self.session_dialog_body(ui, &dialog, vi, &mut acts));
+        self.session_dialog.rects.insert("OptionsDialog".into(), response.response.rect);
         for act in acts {
             let result = match act {
                 Act::Set(name, value) => {
-                    self.session_dialog.drafts.remove(&name);
-                    self.controller.set_addon_dialog_value(&name, &value)
+                    let result = self.controller.set_addon_dialog_value(&name, &value);
+                    if result.is_ok() {
+                        self.session_dialog.drafts.remove(&name);
+                    }
+                    result
                 }
                 Act::Ok => self.controller.submit_effect("").map(|_| ()),
                 Act::Cancel => {
@@ -104,8 +83,12 @@ impl MatrixApp {
                     Ok(())
                 }
             };
+            let failed = result.is_err();
             self.feedback(result);
             self.focus_cmd = true;
+            if failed && dialog.code == "tsSplitCurves" {
+                break;
+            }
         }
     }
 
@@ -116,81 +99,14 @@ impl MatrixApp {
         vi: bool,
         acts: &mut Vec<Act>,
     ) {
-        // Number options shown beside the choice they belong to (`RebuildPoints` → `Rebuild`).
-        let mut beside: BTreeMap<String, (String, String)> = BTreeMap::new();
-        for row in &dialog.rows {
-            if let DialogKind::Choice(choices) = &row.kind {
-                for (value, _) in choices {
-                    if let Some(n) = dialog.rows.iter().find(|r| {
-                        r.kind == DialogKind::Number
-                            && r.name.len() > value.len()
-                            && r.name[..value.len()].eq_ignore_ascii_case(value)
-                    }) {
-                        beside.insert(n.name.clone(), (row.name.clone(), value.clone()));
-                    }
-                }
-            }
+        if dialog.code == "tsSplitCurves" {
+            self.split_curve_controls(ui, dialog, vi, acts);
+            return;
         }
-        // Framed groups first (Rhino's "Rail curve options", "Cross-section curve options" …),
-        // each in the order the command gives.
-        let mut drawn: std::collections::BTreeSet<String> = beside.keys().cloned().collect();
-        drawn.insert("Preview".into());
-        for (title, names) in &dialog.groups {
-            let rows: Vec<&DialogRow> = names
-                .iter()
-                .filter_map(|n| dialog.rows.iter().find(|r| &r.name == n))
-                .filter(|r| !drawn.contains(&r.name))
-                .collect();
-            if rows.is_empty() {
-                continue;
-            }
-            ui.add_space(4.0);
-            egui::Frame::group(ui.style()).show(ui, |ui| {
-                ui.set_min_width(240.0);
-                if !title.is_empty() {
-                    ui.label(RichText::new(title).small().strong());
-                }
-                for row in rows {
-                    drawn.insert(row.name.clone());
-                    self.dialog_row(ui, dialog, row, &beside, vi, acts, false);
-                }
-            });
-        }
-        // The rest: checkboxes, choices, numbers, then buttons (Rhino's usual order).
-        let rest = |kind: fn(&DialogKind) -> bool| -> Vec<&DialogRow> {
-            dialog.rows.iter().filter(|r| kind(&r.kind) && !drawn.contains(&r.name)).collect()
-        };
-        for row in rest(|k| *k == DialogKind::Toggle) {
-            self.dialog_row(ui, dialog, row, &beside, vi, acts, false);
-        }
-        for row in rest(|k| matches!(k, DialogKind::Choice(_))) {
-            ui.add_space(4.0);
-            self.dialog_row(ui, dialog, row, &beside, vi, acts, true);
-        }
-        let numbers = rest(|k| *k == DialogKind::Number);
-        if !numbers.is_empty() {
-            ui.add_space(4.0);
-            egui::Grid::new(("om9-dialog-numbers", &dialog.code))
-                .num_columns(2)
-                .spacing([8.0, 4.0])
-                .show(ui, |ui| {
-                    for row in numbers {
-                        ui.add_enabled(dialog.enabled(&row.name), egui::Label::new(&row.label));
-                        ui.add_enabled_ui(dialog.enabled(&row.name), |ui| {
-                            ui.horizontal(|ui| self.number_with_note(ui, dialog, row, acts));
-                        });
-                        ui.end_row();
-                    }
-                });
-        }
-        let actions = rest(|k| *k == DialogKind::Action);
-        if !actions.is_empty() {
-            ui.add_space(4.0);
-            ui.horizontal_wrapped(|ui| {
-                for row in actions {
-                    self.dialog_row(ui, dialog, row, &beside, vi, acts, false);
-                }
-            });
+        if dialog.code == "ReduceMesh" {
+            self.reduce_mesh_controls(ui, dialog, vi, acts);
+        } else {
+            self.generic_dialog_controls(ui, dialog, vi, acts);
         }
         for line in &dialog.footer {
             ui.label(line);
@@ -202,8 +118,8 @@ impl MatrixApp {
             let ok = ui
                 .add_enabled(dialog.ready, egui::Button::new(RichText::new("OK").strong())
                         .min_size(egui::vec2(72.0, 0.0))
-                        .fill(egui::Color32::from_rgb(222, 228, 236))
-                        .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(120, 140, 170))))
+                        .fill(super::theme::SELECTED)
+                        .stroke(egui::Stroke::new(1.0, super::theme::EDGE)))
                 .on_hover_text(if vi { "Tạo (Enter hoặc chuột phải)" } else { "Create (Enter or right click)" });
             self.session_dialog.rects.insert("Dialog:OK".into(), ok.rect);
             if ok.clicked() {
@@ -212,12 +128,17 @@ impl MatrixApp {
             let cancel = ui
                 .add(egui::Button::new(if vi { "Huỷ" } else { "Cancel" })
                         .min_size(egui::vec2(72.0, 0.0))
-                        .fill(egui::Color32::from_rgb(232, 232, 228))
-                        .stroke(egui::Stroke::new(1.0, egui::Color32::from_rgb(160, 160, 155))))
+                        .fill(super::theme::HEADER)
+                        .stroke(egui::Stroke::new(1.0, super::theme::EDGE)))
                 .on_hover_text("Esc");
             self.session_dialog.rects.insert("Dialog:Cancel".into(), cancel.rect);
             if cancel.clicked() {
                 acts.push(Act::Cancel);
+            }
+            if let Some(row) = dialog.rows.iter().find(|r| r.name == "Preview" && r.kind == DialogKind::Action) {
+                let preview = ui.add(egui::Button::new(&row.label).min_size(egui::vec2(72., 0.)));
+                self.session_dialog.rects.insert("Dialog:Preview".into(), preview.rect);
+                if preview.clicked() { acts.push(Act::Set(row.name.clone(), String::new())); }
             }
             // Rhino's Preview button, beside OK and Cancel: shows or hides the result.
             if let Some(row) = dialog.rows.iter().find(|r| r.name == "Preview" && r.kind == DialogKind::Toggle) {
@@ -332,6 +253,96 @@ impl MatrixApp {
         }
     }
 
+    fn split_curve_controls(
+        &mut self,
+        ui: &mut egui::Ui,
+        dialog: &AddonDialog,
+        vi: bool,
+        acts: &mut Vec<Act>,
+    ) {
+        let Some(file) = dialog.rows.iter().find(|r| r.name == "UseFileTolerance") else {
+            return;
+        };
+        let Some(tolerance) = dialog.rows.iter().find(|r| r.name == "Tolerance") else {
+            return;
+        };
+        let mut use_file = file.value.eq_ignore_ascii_case("yes");
+        egui::Grid::new("tsSplitCurves fields")
+            .spacing([16., 5.])
+            .show(ui, |ui| {
+                let has_file = !dialog.notes.contains_key("UseFileTolerance");
+                let label = ui.add_enabled(
+                    has_file,
+                    egui::Label::new(if vi {
+                        "Dùng dung sai tài liệu"
+                    } else {
+                        "Use File Tolerance"
+                    })
+                    .sense(egui::Sense::click()),
+                );
+                let toggle = ui.allocate_ui_with_layout(
+                    egui::vec2(76., 18.), egui::Layout::right_to_left(egui::Align::Center),
+                    |ui| ui.add_enabled(has_file, egui::Checkbox::new(&mut use_file, "")).labelled_by(label.id),
+                ).inner;
+                self.session_dialog
+                    .rects
+                    .insert("Dialog:UseFileTolerance".into(), toggle.rect);
+                if label.clicked() {
+                    use_file = !use_file;
+                }
+                if toggle.changed() || label.clicked() {
+                    acts.push(Act::Set(
+                        file.name.clone(),
+                        if use_file { "Yes" } else { "No" }.into(),
+                    ));
+                }
+                ui.end_row();
+                ui.label(if vi { "Dung sai" } else { "Tolerance" });
+                ui.allocate_ui_with_layout(egui::vec2(76.,18.),egui::Layout::left_to_right(egui::Align::Center),|ui| {
+                    ui.add_enabled_ui(!use_file,|ui|self.number_field(ui,tolerance,acts));
+                });
+                ui.end_row();
+            });
+        ui.add_space(6.);
+        ui.horizontal(|ui| {
+            for (name, label) in [
+                ("OK", "OK"),
+                ("Display", if vi { "Hiển thị" } else { "Display" }),
+                ("Cancel", if vi { "Huỷ" } else { "Cancel" }),
+            ] {
+                let response = ui.add(egui::Button::new(label).min_size(egui::vec2(58., 0.)));
+                self.session_dialog
+                    .rects
+                    .insert(format!("Dialog:{name}"), response.rect);
+                if response.clicked() {
+                    // A click on OK/Display must include the current number edit even
+                    // when egui transfers focus after laying out the number field.
+                    if name != "Cancel"
+                        && !use_file
+                        && let Some((old, text)) = self.session_dialog.drafts.get("Tolerance")
+                        && text.trim() != old
+                        && !acts
+                            .iter()
+                            .any(|a| matches!(a,Act::Set(n,_) if n=="Tolerance"))
+                    {
+                        acts.push(Act::Set("Tolerance".into(), text.trim().into()));
+                    }
+                    if name == "Cancel" {
+                        acts.clear();
+                    }
+                    acts.push(match name {
+                        "OK" => Act::Ok,
+                        "Display" => Act::Set(name.into(), String::new()),
+                        _ => Act::Cancel,
+                    });
+                }
+            }
+        });
+        for line in &dialog.footer {
+            ui.label(line);
+        }
+    }
+
     /// Rhino: "Point count: (2) [5]", the current value before the field.
     fn number_with_note(&mut self, ui: &mut egui::Ui, dialog: &AddonDialog, row: &DialogRow, acts: &mut Vec<Act>) {
         if let Some(note) = dialog.notes.get(&row.name) {
@@ -341,6 +352,118 @@ impl MatrixApp {
     }
 
     /// A number field: typed, then committed with Enter or by leaving the field.
+    fn generic_dialog_controls(&mut self, ui: &mut egui::Ui, dialog: &AddonDialog, vi: bool, acts: &mut Vec<Act>) {
+        // Number options shown beside the choice they belong to (`RebuildPoints` → `Rebuild`).
+        let mut beside: BTreeMap<String, (String, String)> = BTreeMap::new();
+        for row in &dialog.rows {
+            if let DialogKind::Choice(choices) = &row.kind {
+                for (value, _) in choices {
+                    if let Some(n) = dialog.rows.iter().find(|r| {
+                        r.kind == DialogKind::Number
+                            && r.name.len() > value.len()
+                            && r.name[..value.len()].eq_ignore_ascii_case(value)
+                    }) {
+                        beside.insert(n.name.clone(), (row.name.clone(), value.clone()));
+                    }
+                }
+            }
+        }
+        // Framed groups first (Rhino's "Rail curve options", "Cross-section curve options" …),
+        // each in the order the command gives.
+        let mut drawn: std::collections::BTreeSet<String> = beside.keys().cloned().collect();
+        drawn.insert("Preview".into());
+        for (title, names) in &dialog.groups {
+            let rows: Vec<&DialogRow> = names
+                .iter()
+                .filter_map(|n| dialog.rows.iter().find(|r| &r.name == n))
+                .filter(|r| !drawn.contains(&r.name))
+                .collect();
+            if rows.is_empty() {
+                continue;
+            }
+            ui.add_space(4.0);
+            egui::Frame::group(ui.style()).show(ui, |ui| {
+                ui.set_min_width(240.0);
+                if !title.is_empty() {
+                    ui.label(RichText::new(title).small().strong());
+                }
+                for row in rows {
+                    drawn.insert(row.name.clone());
+                    self.dialog_row(ui, dialog, row, &beside, vi, acts, false);
+                }
+            });
+        }
+        // The rest: checkboxes, choices, numbers, then buttons (Rhino's usual order).
+        let rest = |kind: fn(&DialogKind) -> bool| -> Vec<&DialogRow> {
+            dialog.rows.iter().filter(|r| kind(&r.kind) && !drawn.contains(&r.name)).collect()
+        };
+        for row in rest(|k| *k == DialogKind::Toggle) {
+            self.dialog_row(ui, dialog, row, &beside, vi, acts, false);
+        }
+        for row in rest(|k| matches!(k, DialogKind::Choice(_))) {
+            ui.add_space(4.0);
+            self.dialog_row(ui, dialog, row, &beside, vi, acts, true);
+        }
+        let numbers = rest(|k| *k == DialogKind::Number);
+        if !numbers.is_empty() {
+            ui.add_space(4.0);
+            egui::Grid::new(("om9-dialog-numbers", &dialog.code))
+                .num_columns(2)
+                .spacing([8.0, 4.0])
+                .show(ui, |ui| {
+                    for row in numbers {
+                        ui.add_enabled(dialog.enabled(&row.name), egui::Label::new(&row.label));
+                        ui.add_enabled_ui(dialog.enabled(&row.name), |ui| {
+                            ui.horizontal(|ui| self.number_with_note(ui, dialog, row, acts));
+                        });
+                        ui.end_row();
+                    }
+                });
+        }
+        let actions = rest(|k| *k == DialogKind::Action);
+        if !actions.is_empty() {
+            ui.add_space(4.0);
+            ui.horizontal_wrapped(|ui| {
+                for row in actions {
+                    self.dialog_row(ui, dialog, row, &beside, vi, acts, false);
+                }
+            });
+        }
+    }
+
+    fn reduce_mesh_controls(&mut self, ui: &mut egui::Ui, dialog: &AddonDialog, vi: bool, acts: &mut Vec<Act>) {
+        let row = |name: &str| dialog.rows.iter().find(|r| r.name == name);
+        let Some(method) = row("Method") else { return };
+        for (value, field, label) in [
+            ("Count", "Polygons", if vi { "Giảm còn (tam giác)" } else { "Reduce to (polygons)" }),
+            ("Percent", "Percent", if vi { "Giảm theo (%)" } else { "Reduce by (%)" }),
+        ] {
+            ui.horizontal(|ui| {
+                let selected = method.value == value;
+                if ui.radio(selected, label).clicked() { acts.push(Act::Set("Method".into(), value.into())); }
+                if let Some(r) = row(field) {
+                    ui.add_enabled_ui(selected, |ui| self.number_field(ui, r, acts));
+                }
+            });
+        }
+        if let Some(r) = row("PlanarOnly") {
+            let mut on = r.value.eq_ignore_ascii_case("yes");
+            if ui.checkbox(&mut on, if vi { "Chỉ giảm vùng phẳng" } else { "Planar only" }).changed() {
+                acts.push(Act::Set(r.name.clone(), if on { "Yes" } else { "No" }.into()));
+            }
+        }
+        if let Some(r) = row("Accuracy") {
+            let mut accuracy = r.value.parse::<u8>().unwrap_or(8);
+            ui.horizontal(|ui| {
+                ui.label(if vi { "Nhanh" } else { "Fast" });
+                if ui.add(egui::Slider::new(&mut accuracy,1..=10).show_value(false)).changed() {
+                    acts.push(Act::Set(r.name.clone(),accuracy.to_string()));
+                }
+                ui.label(if vi { "Chính xác" } else { "Accurate" });
+            });
+        }
+    }
+
     fn number_field(&mut self, ui: &mut egui::Ui, row: &DialogRow, acts: &mut Vec<Act>) {
         let entry = self
             .session_dialog

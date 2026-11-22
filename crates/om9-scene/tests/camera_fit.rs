@@ -35,6 +35,15 @@ fn orthographic_fit_contains_a_10_by_20_by_30_box_with_margin() {
 }
 
 #[test]
+fn top_fit_keeps_both_depth_extremes_of_a_small_gem() {
+    let mut camera = Camera::orthographic([0., 0., 100.], [0.; 3], [0., 1., 0.], 41.).unwrap();
+    camera.fit_bounds([0.; 3], 1.55, 1.5, 1.1).unwrap();
+    for z in [-1.55, 1.55] {
+        assert!(camera.project([0., 0., z], viewport()).unwrap().is_some());
+    }
+}
+
+#[test]
 fn perspective_fit_contains_the_same_box() {
     let mut camera =
         Camera::perspective([35., -35., 35.], [0.; 3], [0., 0., 1.], 35f64.to_radians()).unwrap();

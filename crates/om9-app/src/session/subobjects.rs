@@ -102,6 +102,10 @@ impl Controller {
         if self.subselection.iter().any(|old| old.same_key(&reference)) {
             return Ok(());
         }
+        if let Some(group)=self.from_lines_display_faces(&reference)? {
+            let additions=group.into_iter().map(|i|SelectedSubobject{subset:Subelement::MeshFace(i),..reference.clone()}).collect();
+            return self.update_cage_subselection(additions, |_|true);
+        }
         self.append_subselection_owned(reference)?;
         self.dupedge_source_picks = Vec::new();
         self.dupedge_picks_reservation = None;
@@ -120,6 +124,12 @@ impl Controller {
             .iter()
             .position(|old| old.same_key(&reference))
         {
+            if let Some(group)=self.from_lines_display_faces(&reference)? {
+                return self.update_cage_subselection(Vec::new(),|p|{
+                    p.root!=reference.root || !p.path.is_empty() ||
+                        !matches!(p.subset,Subelement::MeshFace(i) if group.binary_search(&i).is_ok())
+                });
+            }
             self.subselection.remove(index);
             self.release_removed_subselection();
             self.dupedge_source_picks = Vec::new();
@@ -130,6 +140,44 @@ impl Controller {
             self.select_subobject_ref(reference)
         }
     }
+
+    fn from_lines_display_faces(&self,p:&SelectedSubobject)->Result<Option<Vec<u32>>>{
+        let Subelement::MeshFace(index)=p.subset else {return Ok(None)};
+        if !p.path.is_empty() {return Ok(None);}
+        let entity=&self.document().entities[&p.root];
+        if entity.extension(om9_core::model::TSPLINE_FROM_LINES_SLOT).is_none(){return Ok(None);}
+        let record=super::from_lines::CageRecord::read(entity)?;
+        let id=record.display_face_ids.get(index as usize).ok_or(Error::Stale("From Lines display face"))?;
+        let indices=record.display_face_ids.iter().enumerate().filter(|(_,f)|*f==id)
+            .map(|(i,_)|u32::try_from(i).map_err(|_|Error::Overflow("From Lines display face"))).collect::<Result<Vec<_>>>()?;
+        Ok(Some(indices))
+    }
+    /// The caller derived the replacement from validated cage polygons. Append first so
+    /// a failed reservation can restore the original keys and their order.
+    pub(super) fn update_cage_subselection(
+        &mut self,
+        additions: Vec<SelectedSubobject>,
+        keep: impl Fn(&SelectedSubobject) -> bool,
+    ) -> Result<()> {
+        let before = self.subselection.len();
+        let added = !additions.is_empty();
+        for reference in additions {
+            if let Err(error) = self.append_subselection_owned(reference) {
+                self.subselection.truncate(before);
+                self.release_removed_subselection();
+                return Err(error);
+            }
+        }
+        self.subselection.retain(keep);
+        if added || self.subselection.len() != before {
+            self.release_removed_subselection();
+            self.dupedge_source_picks = Vec::new();
+            self.dupedge_picks_reservation = None;
+            self.sub_revision = self.sub_revision.saturating_add(1);
+        }
+        Ok(())
+    }
+
     pub fn clear_subselection(&mut self) {
         let had_temporary = self.has_dupedge_temporary_picks();
         self.dupedge_source_picks = Vec::new();
@@ -255,6 +303,13 @@ fn validate_subset(
         } else {
             Err(Error::Stale("BRep topology identity"))
         };
+    }
+    // mesh_buffers emits a triangle for every source face and keeps that index on both
+    // triangles of each quad. Revalidating many picks can use the document face table.
+    if let (om9_core::geometry::Geometry::Mesh(mesh), Subelement::MeshFace(face), RenderBuffers::Mesh { .. }) =
+        (geometry, subset, object.buffers.as_ref())
+    {
+        return if (*face as usize) < mesh.faces.len() { Ok(()) } else { Err(Error::Stale("mesh face index")) };
     }
     let valid = match (subset, object.buffers.as_ref()) {
         (Subelement::MeshVertex(index), RenderBuffers::Mesh { vertices, .. }) => {

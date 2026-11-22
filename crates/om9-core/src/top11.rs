@@ -6,6 +6,7 @@
 //! placement and document records. This module owns the action catalogue, the
 //! availability rule and the pure entity/geometry builders; the host commits them in
 //! one transaction.
+pub mod split_network;
 use crate::{
     Error, Result,
     budget::Limits,
@@ -404,6 +405,131 @@ pub fn explode_entities(
     Ok(pieces)
 }
 
+/// Copy one source polygon and its vertex/corner channels without triangulation.
+fn copy_mesh_face(
+    mesh: &Mesh,
+    face: &[u32],
+    uv_offset: usize,
+    part: &mut Mesh,
+    remap: &mut BTreeMap<u32, u32>,
+) -> Result<()> {
+    let mut output = Vec::with_capacity(face.len());
+    for &old in face {
+        let new = match remap.entry(old) {
+            std::collections::btree_map::Entry::Occupied(entry) => *entry.get(),
+            std::collections::btree_map::Entry::Vacant(entry) => {
+                let new = u32::try_from(part.vertices.len())
+                    .map_err(|_| Error::Overflow("mesh vertex index"))?;
+                let i = old as usize;
+                part.vertices.push(mesh.vertices[i]);
+                if !mesh.normals.is_empty() {
+                    part.normals.push(mesh.normals[i]);
+                }
+                if !mesh.colors.is_empty() {
+                    part.colors.push(mesh.colors[i]);
+                }
+                *entry.insert(new)
+            }
+        };
+        output.push(new);
+    }
+    part.faces.push(output);
+    if !mesh.corner_uvs.is_empty() {
+        part.corner_uvs
+            .extend_from_slice(&mesh.corner_uvs[uv_offset..uv_offset + face.len()]);
+    }
+    Ok(())
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub enum MeshFaceSide {
+    Selected,
+    Remaining,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct MeshFaceSubset {
+    pub mesh: Mesh,
+    pub uv: Option<crate::rhino_semantics::MeshUv>,
+}
+
+/// Extract document polygons and preserve both mesh channels and independent texture seams.
+pub fn mesh_face_subset(
+    mesh: &Mesh,
+    selected: &BTreeSet<u32>,
+    side: MeshFaceSide,
+    mut texture: Option<crate::rhino_semantics::MeshUv>,
+    limits: &Limits,
+) -> Result<Option<MeshFaceSubset>> {
+    let mut usage = mesh.validate(limits)?;
+    if selected.is_empty() {
+        return Err(Error::Invalid("select mesh faces"));
+    }
+    if selected
+        .last()
+        .is_some_and(|&index| index as usize >= mesh.faces.len())
+    {
+        return Err(Error::Stale("mesh face index"));
+    }
+    let retained = match side {
+        MeshFaceSide::Selected => selected.len(),
+        MeshFaceSide::Remaining => mesh.faces.len() - selected.len(),
+    };
+    if retained == 0 {
+        return Ok(None);
+    }
+    let corners = retained
+        .checked_mul(4)
+        .ok_or(Error::Overflow("mesh corners"))?;
+    usage.add(crate::budget::Usage::array::<[u8; 192]>(corners)?, limits)?;
+    if let Some(uv) = &texture {
+        uv.validate(limits)?;
+        if (!uv.uvs.is_empty() && uv.uvs.len() != mesh.vertices.len())
+            || (!uv.corners.is_empty()
+                && uv.corners.len() != mesh.faces.iter().map(Vec::len).sum::<usize>())
+        {
+            return Err(Error::Invalid("mesh texture channel size"));
+        }
+    }
+    let mut part = Mesh {
+        vertices: Vec::new(),
+        faces: Vec::with_capacity(retained),
+        normals: Vec::new(),
+        colors: Vec::new(),
+        corner_uvs: Vec::new(),
+    };
+    let mut remap = BTreeMap::new();
+    let mut uv_offset = 0;
+    let mut texture_corners = Vec::new();
+    for (index, face) in mesh.faces.iter().enumerate() {
+        let index = u32::try_from(index).map_err(|_| Error::Overflow("mesh face index"))?;
+        if selected.contains(&index) == (side == MeshFaceSide::Selected) {
+            copy_mesh_face(mesh, face, uv_offset, &mut part, &mut remap)?;
+            if let Some(uv) = &texture
+                && !uv.corners.is_empty()
+            {
+                texture_corners.extend_from_slice(&uv.corners[uv_offset..uv_offset + face.len()]);
+            }
+        }
+        uv_offset += face.len();
+    }
+    if let Some(uv) = &mut texture {
+        uv.corners = texture_corners;
+        if !uv.uvs.is_empty() {
+            let mut mapped = vec![[0.; 2]; part.vertices.len()];
+            for (old, new) in remap {
+                mapped[new as usize] = uv.uvs[old as usize];
+            }
+            uv.uvs = mapped;
+        }
+    }
+    part.validate(limits)?;
+    Ok(Some(MeshFaceSubset {
+        mesh: part,
+        uv: texture,
+    }))
+}
+
 /// Separate face components connected by welded (shared-index) mesh edges.
 fn explode_mesh(mesh: &Mesh, limits: &Limits) -> Result<Vec<Mesh>> {
     mesh.validate(limits)?;
@@ -448,19 +574,7 @@ fn explode_mesh(mesh: &Mesh, limits: &Limits) -> Result<Vec<Mesh>> {
     for (index,face) in mesh.faces.iter().enumerate() {
         let key=root(&mut parent,index);
         let (part,map)=groups.entry(key).or_insert_with(||(Mesh{vertices:Vec::new(),faces:Vec::new(),normals:Vec::new(),colors:Vec::new(),corner_uvs:Vec::new()},BTreeMap::new()));
-        let mut output=Vec::with_capacity(face.len());
-        for old in face {
-            let new=if let Some(new)=map.get(old) {*new} else {
-                let new=u32::try_from(part.vertices.len()).map_err(|_| Error::Overflow("mesh vertex index"))?;
-                let i=*old as usize;part.vertices.push(mesh.vertices[i]);
-                if !mesh.normals.is_empty(){part.normals.push(mesh.normals[i]);}
-                if !mesh.colors.is_empty(){part.colors.push(mesh.colors[i]);}
-                map.insert(*old,new);new
-            };
-            output.push(new);
-        }
-        part.faces.push(output);
-        if !mesh.corner_uvs.is_empty(){part.corner_uvs.extend_from_slice(&mesh.corner_uvs[uv..uv+face.len()]);}
+        copy_mesh_face(mesh, face, uv, part, map)?;
         uv+=face.len();
     }
     // Isolated vertices are not assigned to any face component. Keep them once,
@@ -1270,10 +1384,20 @@ pub fn grip_handles(
     mode: GripMode,
     limits: &Limits,
 ) -> Result<Vec<GripHandle>> {
+    grip_handles_for_owners(document, ids.iter().map(|id| (*id, mode)), limits)
+}
+
+pub fn grip_handles_for_owners(
+    document: &Document,
+    owners: impl IntoIterator<Item = (ObjectId, GripMode)>,
+    limits: &Limits,
+) -> Result<Vec<GripHandle>> {
     let mut handles = Vec::new();
     let mut compatible = false;
-    for id in ids {
-        let entity = document.entities.get(id).ok_or(Error::Missing("object"))?;
+    let mut requested = false;
+    for (id, mode) in owners {
+        requested = true;
+        let entity = document.entities.get(&id).ok_or(Error::Missing("object"))?;
         let source: Vec<Point3> = match &entity.geometry {
             Geometry::Curve(curve) => {
                 compatible = true;
@@ -1306,14 +1430,14 @@ pub fn grip_handles(
                 continue;
             }
             handles.push(GripHandle {
-                object: *id,
+                object: id,
                 index,
                 mode,
                 point: entity.placement.point(*point)?,
             });
         }
     }
-    if !ids.is_empty() && !compatible { return Err(Error::Unsupported("grips need a curve or surface")); }
+    if requested && !compatible { return Err(Error::Unsupported("grips need a curve or surface")); }
     Ok(handles)
 }
 

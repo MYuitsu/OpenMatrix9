@@ -26,7 +26,7 @@ use om9_core::{
 };
 
 fn controller_with(entities: Vec<Entity>) -> Controller {
-    let mut document = Document::new("placement");
+    let mut document = Document::with_template_tolerance("placement");
     for entity in entities {
         document.entities.insert(entity.id, entity);
     }
@@ -88,7 +88,7 @@ fn place_on_line(controller: &mut Controller, line_id: ObjectId, spacing: &str) 
     controller
         .dispatch(ON_CURVE, InvocationOrigin::Cmd)
         .expect("gem on curve");
-    controller.submit(spacing).expect("spacing");
+    controller.submit(&spacing.replace("Spacing=", "Step=")).expect("spacing");
     controller.submit("").expect("apply");
     gem_ids(controller)
 }
@@ -103,14 +103,16 @@ fn the_row_previews_without_an_object_and_applies_in_one_transaction() {
         .dispatch(ON_CURVE, InvocationOrigin::Cmd)
         .expect("gem on curve");
     assert!(controller.is_running());
+    controller.submit("Size=6").unwrap();
+    controller.submit("Step=8").unwrap();
     let preview = controller.gem_placement_session().expect("session").preview_count();
-    assert_eq!(preview, 13, "100 mm at 8 mm spacing starts at 0 and ends at 96");
+    assert_eq!(preview, 13, "explicit 8 mm centre step starts at 0 and ends at 96");
     assert_eq!(
         controller.document().entities.len(),
         1,
         "a preview never inserts an object"
     );
-    controller.submit("Spacing=10").expect("spacing");
+    controller.submit("Step=10").expect("spacing");
     assert_eq!(
         controller.gem_placement_session().expect("session").preview_count(),
         11
@@ -184,16 +186,16 @@ fn cancel_drops_the_session_and_leaves_no_phantom() {
 }
 
 #[test]
-fn a_wrong_selection_is_a_typed_refusal_and_opens_nothing() {
-    let mut controller = controller_with(vec![line("a", [0.0, 0.0, 0.0], [10.0, 0.0, 0.0])]);
-    assert_eq!(
-        controller
-            .dispatch(ON_CURVE, InvocationOrigin::Cmd)
-            .expect_err("no selection"),
-        om9_core::Error::Invalid("gem on curve needs one curve")
-    );
-    assert!(!controller.is_running());
-    assert!(controller.gem_placement_session().is_none());
+fn the_command_can_pick_a_curve_after_starting() {
+    let path = line("a", [0.0, 0.0, 0.0], [10.0, 0.0, 0.0]);
+    let path_id = path.id;
+    let mut controller = controller_with(vec![path]);
+    controller.dispatch(ON_CURVE, InvocationOrigin::Cmd).unwrap();
+    assert!(controller.gem_placement_needs_target().is_some());
+    assert!(controller.submit("").is_err());
+    controller.gem_placement_pick_target(path_id).unwrap();
+    assert!(controller.gem_placement_needs_target().is_none());
+    assert!(controller.gem_placement_session().unwrap().preview_count() > 0);
 }
 
 #[test]
@@ -532,7 +534,7 @@ fn the_links_report_and_the_typed_command_reach_the_same_service() {
     // The typed Matrix command opens the same tool as the palette icon.
     controller.submit("gvGemOnCrv").expect("typed command");
     assert!(controller.is_running());
-    controller.submit("Spacing=20").expect("spacing");
+    controller.submit("Step=20").expect("spacing");
     controller.submit("").expect("apply");
     let gems = gem_ids(&controller);
     assert_eq!(gems.len(), 3);
@@ -547,4 +549,218 @@ fn the_links_report_and_the_typed_command_reach_the_same_service() {
     assert!(om9_core::model::extension_slot_known(
         om9_core::model::GEM_PLACEMENT_EXTENSION_SLOT
     ));
+}
+
+
+#[test]
+fn matrix_macro_fits_clearance_and_f6_edits_the_same_row() {
+    let path = line("row", [0., 0., 0.], [30., 0., 0.]);
+    let path_id = path.id;
+    let mut controller = controller_with(vec![path]);
+    controller
+        .submit("_gvGemOnCrv _SpacingMethod=_Fixed _Size=4 _Spacing=2")
+        .unwrap();
+    controller.gem_placement_pick_target(path_id).unwrap();
+    let first = controller.gem_placement_session().unwrap().plans[0].stations.as_slice();
+    assert_eq!(first.len(), 6);
+    assert!((first[1].arc_length_mm - first[0].arc_length_mm - 6.0).abs() < 1e-8);
+    controller.submit("").unwrap();
+    let before = gem_ids(&controller);
+    let filename = std::env::temp_dir().join(format!("om9-gem-row-{}.om9", ObjectId::new()));
+    controller.save_archive_for_batch(&filename).unwrap();
+    let reopened = Controller::from_file(&filename, Limits::default());
+    std::fs::remove_file(filename).unwrap();
+    let mut controller = reopened.unwrap();
+    controller.select_objects(&[before[0]]).unwrap();
+    controller.dispatch("EditGemOnCurve", InvocationOrigin::F6).unwrap();
+    controller.submit("End=60%").unwrap();
+    controller.submit("").unwrap();
+    let after = gem_ids(&controller);
+    assert_eq!(after.len(), 4);
+    assert!(after.iter().all(|id| before.contains(id)));
+    controller.undo().unwrap();
+    assert_eq!(gem_ids(&controller), before);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn gem_on_surface_uses_forward_source_ray_and_trim_and_commits_one_batch() {
+    use om9_core::rhino_semantics::{TrimmedSurface, set_trimmed_surface};
+    use om9_scene::camera::Ray;
+    let limits = Limits::default();
+    let mut entity = plane("source with a hole", 8.0);
+    let Geometry::Surface(surface) = &entity.geometry else { unreachable!() };
+    let [u, v] = surface.domain;
+    let uv = |a: f64, b: f64| [u[0] + a * (u[1] - u[0]), v[0] + b * (v[1] - v[0])];
+    let trim = TrimmedSurface {
+        underlying: surface.clone(),
+        outer: vec![uv(0., 0.), uv(1., 0.), uv(1., 1.), uv(0., 1.)],
+        inners: vec![vec![uv(0.4, 0.4), uv(0.4, 0.6), uv(0.6, 0.6), uv(0.6, 0.4)]],
+        reversed: false,
+    };
+    let hole = om9_core::surface_kernel::evaluate(surface, uv(0.5, 0.5)[0], uv(0.5, 0.5)[1], &limits).unwrap();
+    let target = om9_core::surface_kernel::evaluate(surface, uv(0.25, 0.75)[0], uv(0.25, 0.75)[1], &limits).unwrap();
+    set_trimmed_surface(&mut entity, &trim, &limits).unwrap();
+    let source = entity.id;
+    let mut controller = controller_with(vec![entity]);
+    controller.submit("_gvOrientGems").unwrap();
+    controller.gem_placement_pick_target(source).unwrap();
+    assert!(controller.gem_surface_manual());
+    let ray = |point: [f64; 3], direction: [f64; 3]| Ray {
+        origin: std::array::from_fn(|axis| point[axis] - 20.0 * direction[axis]),
+        direction,
+    };
+    assert!(controller.gem_surface_click(ray(hole, [0.,0.,-1.]), None).is_err());
+    for direction in [[0.,0.,-1.], [0.6,0.,-0.8]] {
+        controller.gem_surface_click(ray(target, direction), None).unwrap();
+    }
+    assert!(gem_ids(&controller).is_empty());
+    controller.submit("").unwrap();
+    let ids = gem_ids(&controller);
+    assert_eq!(ids.len(), 2);
+    for id in ids {
+        let point = controller.document().entities[&id].placement.point([0.;3]).unwrap();
+        assert!(point.iter().zip(target).all(|(actual, expected)| (*actual - expected).abs() < 1e-6));
+        assert_eq!(link(&controller, id).source, PlacementSource::Surface { id: source });
+    }
+    controller.undo().unwrap();
+    assert!(gem_ids(&controller).is_empty());
+}
+
+#[test]
+fn loader_uses_world_f4_and_placement_points_across_aliases() {
+    let mut controller = controller_with(Vec::new());
+    controller.set_cplane_origin_rotation([10.,15.,20.], 0.5).unwrap();
+    controller.submit("_gvBuilderGemLoader _BRep=No _Cut=oval _Width=0 _Percentage=125").unwrap();
+    controller.submit("").unwrap();
+    let id = gem_ids(&controller)[0];
+    assert_eq!(controller.document().entities[&id].placement.point([0.;3]).unwrap(), [0.;3]);
+    controller.undo().unwrap();
+    controller.dispatch("BuilderGemLoader", InvocationOrigin::F6).unwrap();
+    controller.submit("BRep=No").unwrap();
+    controller.gem_loader_point([2.,4.,6.]).unwrap();
+    controller.gem_loader_point([3.,5.,7.]).unwrap();
+    controller.submit("U").unwrap();
+    controller.submit("").unwrap();
+    let ids = gem_ids(&controller);
+    assert_eq!(ids.len(), 1);
+    assert_eq!(controller.document().entities[&ids[0]].placement.point([0.;3]).unwrap(), [2.,4.,6.]);
+}
+
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn viewport_click_selects_and_places_on_the_nurbs_source() {
+    use om9_app::{ui::MatrixApp, ui_replay::replay_app};
+    use serde_json::json;
+    let mut document = Document::with_template_tolerance("gem viewport placement");
+    let surface = om9_core::surface_kernel::plane(
+        [-20., -20., 0.],
+        [1., 0., 0.],
+        [0., 1., 0.],
+        40.,
+        40.,
+        &Limits::default(),
+    ).unwrap();
+    let entity = Entity::new("pick plane", Geometry::Surface(surface), None);
+    let source = entity.id;
+    document.entities.insert(source, entity);
+    let mut app = MatrixApp::new(document).unwrap();
+    let size = [1280., 800.];
+    let probe = replay_app(&mut app, size, 1.0, &[]).unwrap();
+    let view = probe["steps"][0]["views"].as_array().unwrap().iter()
+        .find(|view| view["view"] == om9_scene::workspace::ViewId::LookingDown.title())
+        .unwrap();
+    let rect: [f64; 4] = serde_json::from_value(view["rect"].clone()).unwrap();
+    let viewport = om9_scene::camera::Viewport { origin: [rect[0], rect[1]], size: [rect[2], rect[3]] };
+    let camera = &app.controller.workspace.views[&om9_scene::workspace::ViewId::LookingDown].camera;
+    let target = [1.0, 2.0, 0.0];
+    let screen = camera.project(target, viewport).unwrap().unwrap().screen;
+    app.controller.dispatch(ON_SURFACE, InvocationOrigin::F6).unwrap();
+    let replay = replay_app(&mut app, size, 1.0, &[json!({"click": screen}), json!({"click": screen})]).unwrap();
+    let final_frame = &replay["steps"][2];
+    let final_view = final_frame["views"].as_array().unwrap().iter()
+        .find(|view| view["view"] == final_frame["active_view"]).unwrap();
+    let rect: [f64; 4] = serde_json::from_value(final_view["rect"].clone()).unwrap();
+    let viewport = om9_scene::camera::Viewport { origin: [rect[0], rect[1]], size: [rect[2], rect[3]] };
+    let camera = app.controller.workspace.views
+        .values().find(|view| view.id.title() == final_frame["active_view"].as_str().unwrap()).unwrap().camera.clone();
+    let ray = camera.ray(screen, viewport).unwrap();
+    let t = -ray.origin[2] / ray.direction[2];
+    let expected: [f64; 3] = std::array::from_fn(|axis| ray.origin[axis] + t * ray.direction[axis]);
+    assert_eq!(app.controller.gem_placement_session().unwrap().preview_count(), 1);
+    assert!(gem_ids(&app.controller).is_empty());
+    app.controller.submit("").unwrap();
+    let gem = gem_ids(&app.controller)[0];
+    let entity = &app.controller.document().entities[&gem];
+    let point = entity.placement.point([0.; 3]).unwrap();
+    assert!(point.iter().zip(expected).all(|(actual, expected)| (*actual - expected).abs() < 1e-4),
+        "placement {point:?} differs from camera ray {expected:?}");
+    assert_eq!(link(&app.controller, gem).source, PlacementSource::Surface { id: source });
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn gem_builders_keep_source_ids_and_stations_across_hosts_at_three_scales() {
+    use eframe::egui;
+    use om9_app::{dock_layout::{DockSide, FloatRect, SectionId}, session::gem_placement::GemPlacementTool,
+        tool_panel::ToolPanel, ui::MatrixApp};
+    for scale in [1., 1.25, 1.5] {
+        for (tool, source) in [
+            (GemPlacementTool::OnCurve, line("path", [0.; 3], [30., 0., 0.])),
+            (GemPlacementTool::OnSurface, plane("mount", 8.)),
+        ] {
+            let id = source.id;
+            let mut doc = Document::with_template_tolerance("placement and dock");
+            doc.entities.insert(id, source);
+            let mut app = MatrixApp::new(doc).unwrap();
+            app.controller.select_objects(&[id]).unwrap();
+            app.controller.dispatch(tool.command(), InvocationOrigin::Cmd).unwrap();
+            if tool == GemPlacementTool::OnSurface {
+                app.controller.gem_surface_click(om9_scene::camera::Ray {
+                    origin: [12., 12., 50.], direction: [0., 0., -1.],
+                }, None).unwrap();
+            }
+            let ctx = egui::Context::default();
+            let frame = |app: &mut MatrixApp, width| {
+                let mut raw = egui::RawInput { screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO, egui::vec2(width, 850.))), ..Default::default() };
+                raw.viewports.get_mut(&egui::ViewportId::ROOT).unwrap().native_pixels_per_point = Some(scale);
+                ctx.run_ui(raw, |ui| app.show(ui)).textures_delta.clear();
+            };
+            let section = SectionId::Tool(ToolPanel::Placement(tool));
+            let preview = |app: &MatrixApp| {
+                let session = app.controller.gem_placement_session().unwrap();
+                if tool == GemPlacementTool::OnSurface { assert_eq!(session.surface.as_ref().unwrap().0, id); }
+                else { assert_eq!(session.curves[0].0, id); }
+                session.preview_stations().cloned().collect::<Vec<_>>()
+            };
+            let before = preview(&app);
+            assert!(!before.is_empty());
+            frame(&mut app, 1500.);
+            assert!(app.dock_menu_section(section, DockSide::Right));
+            for width in [1500., 1199., 1200.] {
+                frame(&mut app, width);
+                assert!(app.section_rect(section.key()).is_some());
+                assert_eq!(preview(&app), before);
+            }
+            assert!(app.float_menu_section(section, FloatRect {x: 420., y: 110., width: 390., height: 400.}));
+            frame(&mut app, 1500.);
+            assert_eq!(preview(&app), before);
+            assert!(app.dock_menu_section(section, DockSide::Left));
+            frame(&mut app, 1500.);
+            assert_eq!(preview(&app), before);
+            assert_eq!(app.controller.document().entities.len(), 1);
+            app.controller.submit("").unwrap();
+            assert_eq!(gem_ids(&app.controller).len(), before.len());
+            assert_eq!(app.controller.coordinator().undo_len(), 1);
+            app.controller.undo().unwrap();
+            assert_eq!(app.controller.document().entities.len(), 1);
+            app.controller.select_objects(&[id]).unwrap();
+            app.controller.dispatch(tool.command(), InvocationOrigin::Menu).unwrap();
+            app.controller.gem_placement_cancel();
+            assert!(app.controller.gem_placement_session().is_none());
+            assert_eq!(app.controller.document().entities.len(), 1);
+        }
+    }
 }

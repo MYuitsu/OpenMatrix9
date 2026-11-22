@@ -44,6 +44,8 @@ struct PresentationObject {
     leaf: om9_core::identity::ObjectId,
     transform: om9_core::geometry::Transform,
     color: [u8; 4],
+    gem_wire_color: Option<[u8; 4]>,
+    round_topology_edges: Option<usize>,
     visible: bool,
     buffers: om9_scene::scene::SceneBuffers,
 }
@@ -133,15 +135,24 @@ fn presentation_snapshot(
     }
     reservation.shrink_to(actual.max(1))?;
     for object in scene.objects.iter().filter(visible) {
+        let leaf = scene.entity_for(&scene.document, object)?;
+        let root = &scene.document.entities[&object.root];
+        let profile = crate::session::gem::gem_wire_profile(leaf);
+        let gem_wire_color = profile.map(|_| root.attributes.color.or_else(||
+            root.attributes.layer.and_then(|id| scene.document.layers.get(&id).map(|layer| layer.color))
+        ).unwrap_or(object.color));
+        let round_topology_edges = if profile == Some(true) {
+            Some(object.pick_brep_display(leaf)?.map_or(usize::MAX, |d| d.segments.len()))
+        } else { None };
         objects.push(PresentationObject { source: object.source, leaf_generation: object.leaf_generation,
             leaf_geometry_revision: object.leaf_geometry_revision, root: object.root, leaf: object.leaf, transform: object.transform,
-            color: object.color, visible: object.visible, buffers: object.buffers.clone() });
+            color: object.color, gem_wire_color, round_topology_edges, visible: object.visible, buffers: object.buffers.clone() });
     }
     if let Some((buffers, stamps, _)) = temporary {
         let root = stamps[0].object;
         objects.push(PresentationObject { source: stamps[0], leaf_generation: 0, leaf_geometry_revision: 0,
             root, leaf: root, transform: om9_core::geometry::Transform::identity(),
-            color: [40, 200, 150, 255], visible: true, buffers: buffers.clone() });
+            color: [40, 200, 150, 255], gem_wire_color: None, round_topology_edges: None, visible: true, buffers: buffers.clone() });
     }
     let scene = PresentationScene { document: scene.document.id, epoch: scene.epoch,
         publication: scene.publication_id(), objects };
@@ -180,6 +191,7 @@ pub struct GpuViewport {
     last_revision: Option<u64>,
     display_mode: DisplayMode,
     grid_visibility: crate::display::GridVisibility,
+    transparent_background: bool,
     last_mode: Option<DisplayMode>,
     last_camera: Option<om9_scene::camera::Camera>,
     /// Scene epoch and CPlane revision of the last rendered frame: new geometry must repaint even when the
@@ -1394,6 +1406,7 @@ impl GpuViewport {
             last_revision: None,
             display_mode: DisplayMode::Shaded,
             grid_visibility: Default::default(),
+            transparent_background: false,
             last_mode: None,
             last_camera: None,
             last_epoch: None,
@@ -2082,6 +2095,12 @@ impl GpuViewport {
     }
     pub fn set_display_mode(&mut self, mode: DisplayMode) {
         self.display_mode = mode;
+    }
+    pub(crate) fn set_transparent_background(&mut self, transparent:bool) {
+        if self.transparent_background != transparent {
+            self.transparent_background = transparent;
+            self.last_revision = None;
+        }
     }
     pub(crate) fn set_grid_visibility(&mut self, grid: crate::display::GridVisibility) {
         if self.grid_visibility != grid {
@@ -2866,13 +2885,13 @@ impl GpuViewport {
                 let mut ghost_instance = None;
                 let mut main_camera = None;
                 let mut ghost_camera = None;
-                if self.display_mode == DisplayMode::Wireframe {
+                if self.display_mode == DisplayMode::Wireframe || self.transparent_background {
                     let _pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                         label: Some("wireframe clear"),
                         color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                             view: &render_colour, depth_slice: None, resolve_target: resolve,
                             ops: wgpu::Operations {
-                                load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.05, g: 0.05, b: 0.08, a: 1.0 }),
+                                load: wgpu::LoadOp::Clear(if self.transparent_background {wgpu::Color::TRANSPARENT} else {wgpu::Color::BLACK}),
                                 store: wgpu::StoreOp::Store,
                             },
                         })],
@@ -2883,7 +2902,8 @@ impl GpuViewport {
                         }),
                         timestamp_writes: None, occlusion_query_set: None, multiview_mask: None,
                     });
-                } else {
+                }
+                if self.display_mode != DisplayMode::Wireframe {
                     main_camera = match gpu.batch.encode_pass(
                         encoder,
                         &render_colour,
@@ -2892,7 +2912,7 @@ impl GpuViewport {
                         camera,
                         width,
                         height,
-                        true,
+                        !self.transparent_background,
                     ) {
                         Ok(buffer) => Some(buffer),
                         Err(_) => return false,
@@ -2916,17 +2936,22 @@ impl GpuViewport {
                         ghost_instance = ghost.instance_snapshot_buffer();
                     }
                 }
-                let fixed_uniform = overlays.fixed.encode_pass(
+                let wire_plane = (self.display_mode == DisplayMode::Wireframe).then(|| {
+                    om9_render::overlay::OverlayBatch::wire_depth_plane(camera, [
+                        &world.fixed, &world.moving, &overlays.fixed, &overlays.moving,
+                    ])
+                });
+                let fixed_uniform = overlays.fixed.encode_wires(
                     encoder,
                     &render_colour,
                     resolve,
                     &depth,
                     camera,
                     width,
-                    height,
+                    height, wire_plane,
                 );
-                let world_uniform = world.fixed.encode_pass(
-                    encoder, &render_colour, resolve, &depth, camera, width, height,
+                let world_uniform = world.fixed.encode_wires(
+                    encoder, &render_colour, resolve, &depth, camera, width, height, wire_plane,
                 );
                 let world_ghost_uniform = if delta.0 != om9_core::geometry::Transform::identity().0 {
                     world.ghost.encode_pass(encoder, &render_colour, resolve, &depth, camera, width, height)
@@ -2942,20 +2967,20 @@ impl GpuViewport {
                         height,
                     )
                 } else { None };
-                let world_moving_uniform = world.moving.encode_pass(
-                    encoder, &render_colour, resolve, &depth, camera, width, height,
+                let world_moving_uniform = world.moving.encode_wires(
+                    encoder, &render_colour, resolve, &depth, camera, width, height, wire_plane,
                 );
-                let moving_uniform = overlays.moving.encode_pass(
+                let moving_uniform = overlays.moving.encode_wires(
                     encoder,
                     &render_colour,
                     resolve,
                     &depth,
                     camera,
                     width,
-                    height,
+                    height, wire_plane,
                 );
-                let world_guides_uniform = world.selected_guides.encode_pass(encoder, &render_colour, resolve, &depth, camera, width, height);
-                let guides_uniform = overlays.selected_guides.encode_pass(encoder, &render_colour, resolve, &depth, camera, width, height);
+                let world_guides_uniform = if wire_plane.is_none() { world.selected_guides.encode_pass(encoder, &render_colour, resolve, &depth, camera, width, height) } else { None };
+                let guides_uniform = if wire_plane.is_none() { overlays.selected_guides.encode_pass(encoder, &render_colour, resolve, &depth, camera, width, height) } else { None };
                 if timed {
                     let timer = self.timer.as_ref().unwrap();
                     timer.marker(encoder, &render_colour, true);
@@ -3238,6 +3263,28 @@ fn object_line_color(selected: bool) -> [f32; 4] {
     if selected { SELECTION_PINK } else { OBJECT_GREEN }
 }
 
+impl PresentationObject {
+    fn wire_color(&self, selected: bool) -> [f32;4] {
+        if !selected && let Some(rgba) = self.gem_wire_color { return rgba.map(|c| f32::from(c)/255.); }
+        object_line_color(selected)
+    }
+
+    fn draw_gem_isocurves(&self, out: &mut om9_render::overlay::OverlayBatch, color: [f32;4]) {
+        if self.round_topology_edges.is_some() && let om9_scene::scene::RenderBuffers::Mesh {vertices, triangles, ..} = self.buffers.as_ref() {
+            for [a,b] in om9_core::gem::round_facet_isocurves(vertices,triangles) {
+                if let (Ok(a), Ok(b)) = (self.transform.point(a),self.transform.point(b)) { out.isocurve(a,b,color); }
+            }
+        }
+    }
+
+    fn draw_mesh_edge(&self, out: &mut om9_render::overlay::OverlayBatch, index: usize,
+        a: [f64;3], b: [f64;3], color: [f32;4]) {
+        if self.round_topology_edges.is_some_and(|count| index >= count) {
+            out.shaded_isocurve(a,b,color);
+        } else { out.wire(a,b,color); }
+    }
+}
+
 // Display-only midpoint guides for the six rectangular faces of a tessellated box.
 // Face IDs keep the triangle diagonals out of the result and out of picking.
 fn box_face_guides(vertices: &[[f64; 3]], triangles: &[([u32; 3], u32)]) -> Option<Vec<[[f64; 3]; 2]>> {
@@ -3369,13 +3416,14 @@ fn build_shared_world_lines(
         selected_guides: build_selected_shape_lines(state, scene, selected, samples) };
     for object in scene.objects.iter().filter(|object| object.visible) {
         let picked = selected.contains(&object.root);
-        let color = object_line_color(picked);
+        let color = object.wire_color(picked);
         let out = if picked { &mut world.moving } else { &mut world.fixed };
+        object.draw_gem_isocurves(out,color);
         match object.buffers.as_ref() {
             RenderBuffers::Curve { points, .. } => {
                 for pair in points.windows(2) {
                     if let (Ok(a), Ok(b)) = (object.transform.point(pair[0]), object.transform.point(pair[1])) {
-                        out.line(a, b, color);
+                        out.wire(a, b, color);
                         if picked { world.ghost.line(a, b, [0.5, 0.5, 0.5, 1.]); }
                     }
                 }
@@ -3384,10 +3432,10 @@ fn build_shared_world_lines(
                 let box_guides = box_face_guides(vertices, triangles);
                 let sphere_guides = if box_guides.is_none() { sphere_guides(vertices, triangles) } else { None };
                 if sphere_guides.is_none() {
-                    for [a, b] in edges {
+                    for (index, [a, b]) in edges.iter().enumerate() {
                         if let (Some(a), Some(b)) = (vertices.get(*a as usize), vertices.get(*b as usize))
                             && let (Ok(a), Ok(b)) = (object.transform.point(*a), object.transform.point(*b)) {
-                            out.line(a, b, color);
+                            object.draw_mesh_edge(out, index, a, b, color);
                             if picked { world.ghost.line(a, b, [0.5, 0.5, 0.5, 1.]); }
                         }
                     }
@@ -3395,7 +3443,7 @@ fn build_shared_world_lines(
                 if let Some(guides) = box_guides.as_ref().or(sphere_guides.as_ref()) {
                     for [a, b] in guides {
                         if let (Ok(a), Ok(b)) = (object.transform.point(*a), object.transform.point(*b)) {
-                            out.line(a, b, color);
+                            out.wire(a, b, color);
                         }
                     }
                 }
@@ -3458,8 +3506,9 @@ fn build_lines(
                 RenderBuffers::Mesh { vertices, triangles, .. } if box_guides.is_none() => sphere_guides(vertices, triangles),
                 _ => None,
             };
-            let tint = object_line_color(picked);
+            let tint = object.wire_color(picked);
             let out = if picked { &mut moving } else { &mut fixed };
+            object.draw_gem_isocurves(out,tint);
             let draw = |batch: &mut om9_render::overlay::OverlayBatch, color| match object
                 .buffers
                 .as_ref()
@@ -3470,7 +3519,7 @@ fn build_lines(
                             object.transform.point(pair[0]),
                             object.transform.point(pair[1]),
                         ) {
-                            batch.line(a, b, color);
+                            batch.wire(a, b, color);
                         }
                     }
                 }
@@ -3484,13 +3533,13 @@ fn build_lines(
                 RenderBuffers::Mesh {
                     vertices, edges, ..
                 } if sphere_guides.is_none() => {
-                    for [a, b] in edges {
+                    for (index, [a, b]) in edges.iter().enumerate() {
                         if let (Some(a), Some(b)) =
                             (vertices.get(*a as usize), vertices.get(*b as usize))
                             && let (Ok(a), Ok(b)) =
                                 (object.transform.point(*a), object.transform.point(*b))
                         {
-                            batch.line(a, b, color);
+                            object.draw_mesh_edge(batch, index, a, b, color);
                         }
                     }
                 }
@@ -3500,7 +3549,7 @@ fn build_lines(
             if let Some(guides) = box_guides.as_ref().or(sphere_guides.as_ref()) {
                 for [a,b] in guides {
                     if let (Ok(a),Ok(b))=(object.transform.point(*a),object.transform.point(*b)) {
-                        out.line(a,b,tint);
+                        out.wire(a,b,tint);
                     }
                 }
             }

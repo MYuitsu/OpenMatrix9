@@ -181,6 +181,19 @@
     "OM9-L4-10-007-03"
   ],
   "runtime_implementation": {
+    "placement_illustrations_2026_11_22": {
+      "scope": "Clickable Surface source and illustrated Angle, Offset, Scale and Spacing buttons. Windows left dock and floating panel verified with source selection, Offset edit, placement, Apply and Undo.",
+      "evidence": "docs/validation/2026-11-22-gem-placement.md#ô-hình-trong-bảng-đặt-đá"
+    },
+    "gem_panel_theme_2026_11_22": {
+      "scope": "Windows 96 DPI. Readable dock and floating controls, four preview stones, Apply and one Undo.",
+      "evidence": "docs/validation/2026-11-22-dock-popup-theme.md#gem-panel-readability"
+    },
+    "gem_workflow_2026_11_22": {
+      "status": "PARTIAL_VALIDATED_M05_UI_OPEN",
+      "scope": "Gem menu and Builder controls for surface, guides, reference gems, Angle, Offset, Scale and Spacing. Viewport ray resolves trimmed NURBS UV and oriented normals. CMD Grid remains available.",
+      "evidence": "docs/validation/2026-11-22-gem-placement.md"
+    },
     "date": "2026-10-27",
     "status": "AUTOMATED_VERIFIED_MANUAL_UI_PENDING",
     "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=H:/OpenMatrix9/cargo-target; -j 2; app tests need the OCCT bin and VC runtime on PATH",

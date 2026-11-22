@@ -90,10 +90,12 @@ pub enum GemCut {
     Gem,
     /// Dome-topped cabochon cuts.
     Cabochon,
+    /// A round pearl with a domed top and underside.
+    Pearl,
 }
 
 impl GemCut {
-    pub const ALL: [Self; 4] = [Self::Diamond, Self::Simple, Self::Gem, Self::Cabochon];
+    pub const ALL: [Self; 5] = [Self::Diamond, Self::Simple, Self::Gem, Self::Cabochon, Self::Pearl];
 
     pub fn tag(self) -> &'static str {
         match self {
@@ -101,6 +103,7 @@ impl GemCut {
             Self::Simple => "simple",
             Self::Gem => "gem",
             Self::Cabochon => "cabochon",
+            Self::Pearl => "pearl",
         }
     }
     pub fn label(self) -> &'static str {
@@ -109,6 +112,7 @@ impl GemCut {
             Self::Simple => "Simple Cut",
             Self::Gem => "Gem Cut",
             Self::Cabochon => "Cabochon",
+            Self::Pearl => "Pearl",
         }
     }
     pub fn from_tag(tag: &str) -> Result<Self> {
@@ -117,10 +121,11 @@ impl GemCut {
             "simple" | "simple cut" | "simplecut" => Ok(Self::Simple),
             "gem" | "gem cut" | "gemcut" => Ok(Self::Gem),
             "cabochon" => Ok(Self::Cabochon),
+            "pearl" => Ok(Self::Pearl),
             _ => Err(Error::Invalid("gem cut")),
         }
     }
-    /// The shapes this cut offers, in the loader's display order.
+    /// Supported shapes, including procedural combinations accepted by older OM9 commands.
     pub fn shapes(self) -> &'static [GemShape] {
         match self {
             Self::Diamond => &[
@@ -136,6 +141,15 @@ impl GemCut {
                 GemShape::Marquise,
                 GemShape::Trillion,
                 GemShape::Heart,
+                GemShape::CushionSquare,
+                GemShape::EmeraldSquare,
+                GemShape::Radiant,
+                GemShape::RadiantSquare,
+                GemShape::Triangle,
+                GemShape::TrillionStraight,
+                GemShape::Calf,
+                GemShape::HalfMoon,
+                GemShape::DustMarquire,
             ],
             Self::Simple => &[
                 GemShape::Round,
@@ -144,6 +158,15 @@ impl GemCut {
                 GemShape::Baguette,
                 GemShape::Cushion,
                 GemShape::Square,
+                GemShape::Pear,
+                GemShape::Marquise,
+                GemShape::Trillion,
+                GemShape::Heart,
+                GemShape::Princess,
+                GemShape::EmeraldSquare,
+                GemShape::Radiant,
+                GemShape::TrillionStraight,
+                GemShape::Calf,
             ],
             Self::Gem => &[
                 GemShape::Round,
@@ -155,6 +178,9 @@ impl GemCut {
                 GemShape::Trillion,
                 GemShape::Pear,
                 GemShape::Marquise,
+                GemShape::Square,
+                GemShape::Heart,
+                GemShape::Triangle,
             ],
             Self::Cabochon => &[
                 GemShape::Round,
@@ -162,7 +188,34 @@ impl GemCut {
                 GemShape::Square,
                 GemShape::Cushion,
                 GemShape::Octagon,
+                GemShape::Pear,
+                GemShape::Marquise,
+                GemShape::Emerald,
+                GemShape::Heart,
+                GemShape::Bullet,
             ],
+            Self::Pearl => &[GemShape::Round],
+        }
+    }
+
+    /// Factory gallery order followed by OM9 additions.
+    pub fn loader_shapes(self) -> &'static [GemShape] {
+        use GemShape::*;
+        match self {
+            Self::Diamond => &[
+                Round, Oval, Cushion, CushionSquare, Princess, Pear, Marquise, Emerald,
+                Octagon, EmeraldSquare, Radiant, RadiantSquare, Heart, Trillion, Triangle,
+                TrillionStraight, Calf, HalfMoon, Baguette, DustMarquire,
+            ],
+            Self::Simple => &[
+                Round, Oval, Princess, Pear, Marquise, Emerald, EmeraldSquare, Radiant,
+                Heart, Trillion, TrillionStraight, Calf,
+            ],
+            Self::Gem => &[
+                Round, Oval, Cushion, Square, Pear, Marquise, Emerald, Heart, Trillion, Triangle,
+            ],
+            Self::Cabochon => &[Round, Oval, Cushion, Square, Pear, Marquise, Emerald, Heart, Bullet],
+            Self::Pearl => &[Round],
         }
     }
     /// The default facet count of the cut. A cabochon has no faceted crown ring.
@@ -172,8 +225,17 @@ impl GemCut {
             Self::Simple => 8,
             Self::Gem => 16,
             Self::Cabochon => 32,
+            Self::Pearl => 24,
         }
     }
+    pub(crate) fn default_crown_share(self) -> f64 {
+        match self {
+            Self::Cabochon => 1.0,
+            Self::Pearl => 0.5,
+            _ => 0.34,
+        }
+    }
+
     pub fn uses_pavilion_rows(self) -> bool {
         matches!(self, Self::Gem | Self::Simple)
     }
@@ -196,10 +258,21 @@ pub enum GemShape {
     Marquise,
     Trillion,
     Heart,
+    CushionSquare,
+    EmeraldSquare,
+    Radiant,
+    RadiantSquare,
+    Triangle,
+    TrillionStraight,
+    Calf,
+    HalfMoon,
+    Bullet,
+    #[serde(rename = "dust-marquire")]
+    DustMarquire,
 }
 
 impl GemShape {
-    pub const ALL: [Self; 12] = [
+    pub const ALL: [Self; 22] = [
         Self::Round,
         Self::Oval,
         Self::Emerald,
@@ -212,6 +285,16 @@ impl GemShape {
         Self::Marquise,
         Self::Trillion,
         Self::Heart,
+        Self::CushionSquare,
+        Self::EmeraldSquare,
+        Self::Radiant,
+        Self::RadiantSquare,
+        Self::Triangle,
+        Self::TrillionStraight,
+        Self::Calf,
+        Self::HalfMoon,
+        Self::Bullet,
+        Self::DustMarquire,
     ];
 
     pub fn tag(self) -> &'static str {
@@ -226,8 +309,18 @@ impl GemShape {
             Self::Princess => "princess",
             Self::Pear => "pear",
             Self::Marquise => "marquise",
+            Self::DustMarquire => "dust-marquire",
             Self::Trillion => "trillion",
             Self::Heart => "heart",
+            Self::CushionSquare => "cushion-square",
+            Self::EmeraldSquare => "emerald-square",
+            Self::Radiant => "radiant",
+            Self::RadiantSquare => "radiant-square",
+            Self::Triangle => "triangle",
+            Self::TrillionStraight => "trillion-straight",
+            Self::Calf => "calf",
+            Self::HalfMoon => "half-moon",
+            Self::Bullet => "bullet",
         }
     }
     pub fn label(self) -> &'static str {
@@ -242,51 +335,76 @@ impl GemShape {
             Self::Princess => "Princess",
             Self::Pear => "Pear",
             Self::Marquise => "Marquise",
+            Self::DustMarquire => "Dust Marquire",
             Self::Trillion => "Trillion",
             Self::Heart => "Heart",
+            Self::CushionSquare => "Cushion Square",
+            Self::EmeraldSquare => "Emerald Square",
+            Self::Radiant => "Radiant",
+            Self::RadiantSquare => "Radiant Square",
+            Self::Triangle => "Triangle",
+            Self::TrillionStraight => "Trillion Straight",
+            Self::Calf => "Calf",
+            Self::HalfMoon => "Half Moon",
+            Self::Bullet => "Bullet",
         }
     }
     pub fn from_tag(tag: &str) -> Result<Self> {
-        match tag.trim().to_ascii_lowercase().as_str() {
+        match tag.trim().to_ascii_lowercase().replace(' ', "-").as_str() {
             "round" | "circle" => Ok(Self::Round),
             "oval" => Ok(Self::Oval),
             "emerald" => Ok(Self::Emerald),
-            "baguette" | "baguette cut" => Ok(Self::Baguette),
+            "baguette" | "baguette-cut" | "baguette-straight" => Ok(Self::Baguette),
             "octagon" => Ok(Self::Octagon),
             "square" => Ok(Self::Square),
             "cushion" => Ok(Self::Cushion),
             "princess" => Ok(Self::Princess),
             "pear" => Ok(Self::Pear),
             "marquise" => Ok(Self::Marquise),
-            "trillion" | "triangle" => Ok(Self::Trillion),
+            "dust-marquire" | "dust-marquise" => Ok(Self::DustMarquire),
+            "trillion" | "trillion-curved" => Ok(Self::Trillion),
             "heart" => Ok(Self::Heart),
+            "cushion-square" => Ok(Self::CushionSquare),
+            "emerald-square" => Ok(Self::EmeraldSquare),
+            "radiant" => Ok(Self::Radiant),
+            "radiant-square" => Ok(Self::RadiantSquare),
+            "triangle" => Ok(Self::Triangle),
+            "trillion-straight" => Ok(Self::TrillionStraight),
+            "calf" => Ok(Self::Calf),
+            "half-moon" => Ok(Self::HalfMoon),
+            "bullet" => Ok(Self::Bullet),
             _ => Err(Error::Invalid("gem shape")),
         }
     }
     /// The default length/width ratio of the shape. A round stone is 1:1.
     pub fn default_aspect(self) -> f64 {
         match self {
-            Self::Round | Self::Square | Self::Princess | Self::Cushion | Self::Trillion => 1.0,
+            Self::Round | Self::Square | Self::Princess | Self::Cushion | Self::Trillion
+            | Self::CushionSquare | Self::EmeraldSquare | Self::RadiantSquare
+            | Self::Triangle | Self::TrillionStraight | Self::Calf | Self::Bullet => 1.0,
             Self::Oval => 1.30,
-            Self::Emerald => 1.35,
+            Self::Emerald | Self::Radiant => 1.35,
+            Self::HalfMoon => 1.73,
             Self::Baguette => 1.60,
             Self::Octagon => 1.20,
             Self::Pear => 1.50,
             Self::Marquise => 1.90,
+            Self::DustMarquire => dust_marquire::SAMPLE.length_mm / dust_marquire::SAMPLE.width_mm,
             Self::Heart => 1.05,
         }
     }
     /// The default corner cut as a ratio of the short side, for the step-cut silhouettes.
     pub fn default_corner_ratio(self) -> f64 {
         match self {
-            Self::Emerald => 0.22,
+            Self::Emerald | Self::EmeraldSquare => 0.22,
+            Self::Radiant | Self::RadiantSquare => 0.12,
             Self::Octagon => 0.29,
-            Self::Cushion => 0.18,
+            Self::Cushion | Self::CushionSquare => 0.18,
             _ => 0.0,
         }
     }
     pub fn is_round(self) -> bool {
-        self == Self::Round
+        matches!(self, Self::Round | Self::Bullet)
     }
 }
 
@@ -336,8 +454,11 @@ impl GemSpec {
         if half <= 0.0 || !self.crown_angle_deg.is_finite() {
             return 0.5;
         }
-        let value = 1.0 - self.crown_angle_deg.to_radians().tan() * self.crown_height_mm / half;
-        value.clamp(0.08, 0.92)
+        let slope = self.crown_angle_deg.to_radians().tan();
+        let inset = if round_brilliant::applies(self) || dust_marquire::applies(self) {
+            self.crown_height_mm / slope
+        } else { self.crown_height_mm * slope };
+        (1.0 - inset / half).clamp(0.08, 0.92)
     }
     pub fn aspect(&self) -> f64 {
         if self.width_mm > 0.0 {
@@ -377,6 +498,9 @@ impl GemSpec {
             if !(MIN_DIMENSION_MM..=MAX_DIMENSION_MM).contains(&value) {
                 return Err(Error::Invalid("gem dimension range"));
             }
+        }
+        if self.cut == GemCut::Pearl && (self.shape != GemShape::Round || self.profile.is_some()) {
+            return Err(Error::Invalid("pearl requires a round shape"));
         }
         if self.shape.is_round() && self.profile.is_none() {
             let tolerance = 1.0e-9 * self.width_mm.max(1.0);
@@ -548,8 +672,13 @@ impl GemSpec {
         width_mm: f64,
         depth_mm: f64,
     ) -> Result<Self> {
-        let facet_count = cut.default_facet_count();
-        let girdle_mm = (width_mm.min(length_mm) * 0.02).max(0.06);
+        let dust = shape == GemShape::DustMarquire;
+        let facet_count = if dust { 6 } else { cut.default_facet_count() };
+        let girdle_mm = if dust {
+            depth_mm * dust_marquire::GIRDLE_SHARE
+        } else {
+            (width_mm.min(length_mm) * 0.02).max(0.06)
+        };
         let mut spec = Self {
             shape,
             cut,
@@ -558,7 +687,7 @@ impl GemSpec {
             girdle_mm,
             crown_height_mm: 1.0,
             pavilion_depth_mm: 1.0,
-            crown_angle_deg: 34.5,
+            crown_angle_deg: if dust { (0.93614_f64 / 1.03305).atan().to_degrees() } else { 34.5 },
             facet_count,
             pavilion_rows: if cut.uses_pavilion_rows() { 2 } else { 0 },
             bulge: if cut == GemCut::Gem { 0.25 } else { 0.0 },
@@ -566,15 +695,15 @@ impl GemSpec {
             profile: None,
         };
         let stone = (depth_mm - girdle_mm).max(MIN_DIMENSION_MM);
-        spec.crown_height_mm = stone * 0.34;
-        spec.pavilion_depth_mm = if cut == GemCut::Cabochon {
-            0.0
+        let crown_share = if dust {
+            dust_marquire::CROWN_SHARE
+        } else if round_brilliant::applies(&spec) {
+            0.268
         } else {
-            stone * 0.66
+            cut.default_crown_share()
         };
-        if cut == GemCut::Cabochon {
-            spec.crown_height_mm = stone;
-        }
+        spec.crown_height_mm = stone * crown_share;
+        spec.pavilion_depth_mm = stone * (1.0 - crown_share);
         spec.validate()?;
         Ok(spec)
     }
@@ -855,9 +984,62 @@ pub struct GemAsset {
     pub pavilion_rows: u32,
     pub bulge: f64,
     pub sizes: Vec<GemSize>,
+    factory_weight_factor: Option<f64>,
+    corner_to_corner: Option<(Vec<GemSize>, f64)>,
 }
 
 impl GemAsset {
+    pub fn size_page_count(&self) -> usize {
+        match self.sizes.len() {
+            0..=22 => 1,
+            23..=44 => 2,
+            _ => 3,
+        }
+    }
+
+    /// The boundary preset appears at the end of one page and the start of the next.
+    pub fn size_page_range(&self, page: usize) -> std::ops::Range<usize> {
+        let count = self.sizes.len();
+        let pages = self.size_page_count();
+        let page = page.clamp(1, pages);
+        let boundary = |part| (count as f64 * part as f64 / pages as f64).round_ties_even() as usize;
+        let end = if page == pages { count } else { boundary(page) + 1 };
+        boundary(page - 1)..end
+    }
+
+    pub fn size_page_for(&self, index: usize, current_page: usize) -> usize {
+        if self.size_page_range(current_page).contains(&index) {
+            return current_page.clamp(1, self.size_page_count());
+        }
+        (1..=self.size_page_count())
+            .find(|&page| self.size_page_range(page).contains(&index))
+            .unwrap_or(1)
+    }
+
+    pub fn has_corner_to_corner_sizes(&self) -> bool {
+        self.corner_to_corner.is_some()
+    }
+
+    pub fn sizes_for_axis(&self, corner_to_corner: bool) -> &[GemSize] {
+        match &self.corner_to_corner {
+            Some((sizes, _)) if corner_to_corner => sizes,
+            _ => &self.sizes,
+        }
+    }
+
+    /// Diamond-basis estimate shown by the original size picker.
+    pub fn factory_carat(&self, size: GemSize, corner_to_corner: bool) -> Option<f64> {
+        let factor = match &self.corner_to_corner {
+            Some((_, factor)) if corner_to_corner => *factor,
+            _ => self.factory_weight_factor?,
+        };
+        Some(if self.shape == GemShape::Round {
+            size.length_mm.powi(3) * 0.0037515984
+        } else {
+            super::gem_edits::DIAMOND_DENSITY_G_CM3 * factor * size.length_mm * size.width_mm * size.depth_mm
+        })
+    }
+
     pub fn spec_for(&self, size: &GemSize) -> Result<GemSpec> {
         let mut spec = GemSpec::from_outer_dimensions(
             self.shape,
@@ -877,12 +1059,17 @@ impl GemAsset {
     }
 }
 
-/// The canonical, procedural gem library. The size ladders are OM9 defaults authored here;
-/// they are not copied from Matrix. Every listed value is millimetres.
+/// The canonical procedural gem library with dimensional presets in millimetres.
 #[derive(Debug, Clone, PartialEq)]
 pub struct GemLibrary {
     assets: Vec<GemAsset>,
 }
+
+mod matrix_sizes;
+mod dust_marquire;
+mod round_brilliant;
+mod facet_isocurves;
+pub use facet_isocurves::round_facet_isocurves;
 
 impl Default for GemLibrary {
     fn default() -> Self {
@@ -893,7 +1080,10 @@ impl Default for GemLibrary {
 impl GemLibrary {
     /// The authoring ladders. A `1.0` entry with one axis means a round diameter; the
     /// `(length, width)` entries are the elongated shapes.
-    fn ladder(shape: GemShape) -> Vec<GemSize> {
+    fn ladder(shape: GemShape, cut: GemCut) -> Vec<GemSize> {
+        if shape == GemShape::DustMarquire {
+            return vec![dust_marquire::SAMPLE];
+        }
         let round: &[f64] = &[
             1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5,
             3.75, 4.0, 4.25, 4.5, 4.75, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0,
@@ -908,7 +1098,7 @@ impl GemLibrary {
                 } else {
                     width * aspect
                 };
-                let depth = (width * 0.62).max(0.4);
+                let depth = if cut == GemCut::Pearl { width } else { (width * 0.62).max(0.4) };
                 GemSize::new(
                     (length * 100.0).round() / 100.0,
                     width,
@@ -928,7 +1118,8 @@ impl GemLibrary {
                 let key = format!("{}-{}", shape.tag(), cut.tag());
                 let name = format!("{} {}", shape.label(), cut.label());
                 let facet_count = match (cut, shape) {
-                    (GemCut::Cabochon, _) => 32,
+                    (_, GemShape::DustMarquire) => 6,
+                    (GemCut::Cabochon | GemCut::Pearl, _) => cut.default_facet_count(),
                     (_, GemShape::Emerald) | (_, GemShape::Baguette) => 8,
                     (_, GemShape::Trillion) => 12,
                     (GemCut::Simple, _) => 8,
@@ -942,6 +1133,9 @@ impl GemLibrary {
                     _ => 0,
                 };
                 let bulge = if cut == GemCut::Gem { 0.25 } else { 0.0 };
+                let (sizes, factory_weight_factor) = matrix_sizes::sizes(cut, shape)
+                    .map(|(sizes, factor)| (sizes, Some(factor)))
+                    .unwrap_or_else(|| (Self::ladder(shape, cut), None));
                 assets.push(GemAsset {
                     shape,
                     cut,
@@ -952,7 +1146,9 @@ impl GemLibrary {
                     facet_count,
                     pavilion_rows,
                     bulge,
-                    sizes: Self::ladder(shape),
+                    sizes,
+                    factory_weight_factor,
+                    corner_to_corner: matrix_sizes::corner_to_corner_sizes(cut, shape),
                 });
             }
         }
@@ -989,6 +1185,8 @@ impl GemLibrary {
 #[derive(Debug, Clone, PartialEq)]
 pub struct GemMesh {
     pub mesh: Mesh,
+    /// Planar authored facet loops when a facet exceeds the mesh's quad limit.
+    authored_faces: Option<Vec<Vec<u32>>>,
     /// Every undirected edge is shared by exactly two faces.
     pub closed: bool,
     /// Signed volume of the closed mesh, in mm^3.
@@ -997,10 +1195,35 @@ pub struct GemMesh {
     pub extents_mm: [f64; 3],
 }
 
+impl GemMesh {
+    /// Exact planar facet loops for the current mesh, if it still has the
+    /// connectivity produced by the builder.
+    pub fn authored_faces(&self) -> Option<&[Vec<u32>]> {
+        let facets = self.authored_faces.as_deref()?;
+        let mut mesh_faces = self.mesh.faces.iter().map(Vec::as_slice);
+        let matches = facets.iter().all(|face| {
+            if face.len() <= 4 {
+                mesh_faces.next() == Some(face.as_slice())
+            } else {
+                face[1..].windows(2).all(|edge| mesh_faces.next() == Some(&[face[0], edge[0], edge[1]]))
+            }
+        });
+        (matches && mesh_faces.next().is_none()).then_some(facets)
+    }
+}
+
 /// Build the procedural mesh of a validated spec. The result is a closed solid whose
 /// extents match `length_mm`, `width_mm` and `depth_mm` within tolerance.
 pub fn build_mesh(spec: &GemSpec) -> Result<GemMesh> {
     spec.validate()?;
+    if round_brilliant::applies(spec) {
+        let (vertices, faces) = round_brilliant::body(spec);
+        return finish_mesh(spec, vertices, faces);
+    }
+    if dust_marquire::applies(spec) {
+        let (vertices, faces) = dust_marquire::body(spec);
+        return finish_mesh(spec, vertices, faces);
+    }
     let outline = base_outline(spec)?;
     let points = outline.len();
     if points < 3 {
@@ -1036,34 +1259,32 @@ pub fn build_mesh(spec: &GemSpec) -> Result<GemMesh> {
     // Girdle band, shared by every cut family.
     ring_faces(&mut faces, &girdle_bottom_ring, &girdle_top_ring);
 
-    if spec.cut == GemCut::Cabochon {
-        // Dome from the girdle top to an apex, flat bottom face at the girdle bottom.
-        let rows = 6usize;
-        let mut previous = girdle_top_ring.clone();
-        for row in 1..rows {
-            let phi = std::f64::consts::FRAC_PI_2 * row as f64 / rows as f64;
-            let scale = phi.cos();
-            let z = girdle_top + spec.crown_height_mm * phi.sin();
-            let mut ring = Vec::with_capacity(points);
-            for p in &outline {
-                ring.push(push([p[0] * scale, p[1] * scale, z], &mut vertices));
+    if matches!(spec.cut, GemCut::Cabochon | GemCut::Pearl) {
+        let mut dome = |mut previous: Vec<u32>, base: f64, height: f64| {
+            for row in 1..DOME_ROWS {
+                let (scale, z) = dome_profile(row);
+                let ring: Vec<_> = outline.iter()
+                    .map(|p| push([p[0] * scale, p[1] * scale, base + z * height], &mut vertices))
+                    .collect();
+                ring_faces(&mut faces, &previous, &ring);
+                previous = ring;
             }
-            ring_faces(&mut faces, &previous, &ring);
-            previous = ring;
-        }
-        let apex = push([0.0, 0.0, top], &mut vertices);
-        for index in 0..points {
-            let a = previous[index];
-            let b = previous[(index + 1) % points];
-            faces.push(vec![a, b, apex]);
-        }
-        // Flat bottom.
-        for index in 1..points - 1 {
-            faces.push(vec![
-                girdle_bottom_ring[0],
-                girdle_bottom_ring[index + 1],
-                girdle_bottom_ring[index],
-            ]);
+            let apex = push([0.0, 0.0, base + height], &mut vertices);
+            for index in 0..points {
+                faces.push(vec![previous[index], previous[(index + 1) % points], apex]);
+            }
+        };
+        dome(girdle_top_ring, girdle_top, spec.crown_height_mm);
+        if spec.cut == GemCut::Pearl {
+            dome(girdle_bottom_ring, -girdle_top, -spec.pavilion_depth_mm);
+        } else {
+            for index in 1..points - 1 {
+                faces.push(vec![
+                    girdle_bottom_ring[0],
+                    girdle_bottom_ring[index + 1],
+                    girdle_bottom_ring[index],
+                ]);
+            }
         }
     } else {
         // Table ring and table face.
@@ -1112,6 +1333,10 @@ pub fn build_mesh(spec: &GemSpec) -> Result<GemMesh> {
         let _ = table_center;
     }
 
+    finish_mesh(spec, vertices, faces)
+}
+
+fn finish_mesh(spec: &GemSpec, vertices: Vec<Point3>, mut faces: Vec<Vec<u32>>) -> Result<GemMesh> {
     if faces.iter().any(|face| face.len() < 3) {
         return Err(Error::Invalid("gem mesh face"));
     }
@@ -1128,6 +1353,16 @@ pub fn build_mesh(spec: &GemSpec) -> Result<GemMesh> {
     }
     if !volume.is_finite() || volume <= 0.0 {
         return Err(Error::Invalid("gem mesh volume"));
+    }
+    let authored_faces = faces.iter().any(|face| face.len() > 4).then(|| faces.clone());
+    if authored_faces.is_some() {
+        faces = faces.into_iter().flat_map(|face| {
+            if face.len() > 4 {
+                (1..face.len() - 1).map(|i| vec![face[0], face[i], face[i + 1]]).collect()
+            } else {
+                vec![face]
+            }
+        }).collect();
     }
     let mesh = Mesh {
         vertices,
@@ -1158,10 +1393,22 @@ pub fn build_mesh(spec: &GemSpec) -> Result<GemMesh> {
     }
     Ok(GemMesh {
         mesh,
+        authored_faces,
         closed,
         volume_mm3: volume,
         extents_mm: extents,
     })
+}
+
+/// A diagonal added solely to represent a generated Round Diamond's planar
+/// table in a portable triangle/quad mesh. Keep it out of the gem wireframe.
+pub fn round_table_tessellation_edge(mesh: &Mesh, a: u32, b: u32) -> bool {
+    round_brilliant::mesh_table_diagonal(mesh, a, b)
+}
+
+/// Internal table diagonals in the portable gem mesh, excluded from wireframe.
+pub fn gem_tessellation_edge(mesh: &Mesh, a: u32, b: u32) -> bool {
+    round_table_tessellation_edge(mesh, a, b) || dust_marquire::table_diagonal(mesh, a, b)
 }
 
 /// Make every face traverse each shared edge opposite to its neighbour. The input is a closed
@@ -1285,6 +1532,9 @@ fn signed_volume(vertices: &[Point3], faces: &[Vec<u32>]) -> f64 {
 /// profile replaces the parametric base outline and is already centred.
 pub fn girdle_outline(spec: &GemSpec) -> Result<Vec<Point3>> {
     spec.validate()?;
+    if round_brilliant::applies(spec) {
+        return Ok(round_brilliant::girdle(spec).collect());
+    }
     let base = base_outline(spec)?;
     Ok(base.into_iter().map(|p| [p[0], p[1], 0.0]).collect())
 }
@@ -1292,12 +1542,28 @@ pub fn girdle_outline(spec: &GemSpec) -> Result<Vec<Point3>> {
 /// The table outline at the table plane (girdle top + crown height).
 pub fn table_outline(spec: &GemSpec) -> Result<Vec<Point3>> {
     spec.validate()?;
+    if round_brilliant::applies(spec) {
+        return Ok(round_brilliant::table(spec).collect());
+    }
+    if dust_marquire::applies(spec) {
+        return Ok(dust_marquire::table(spec).to_vec());
+    }
+    if spec.cut == GemCut::Pearl {
+        return Err(Error::Invalid("pearl has no table"));
+    }
     let ratio = spec.table_ratio();
     let z = spec.girdle_mm * 0.5 + spec.crown_height_mm;
     Ok(base_outline(spec)?
         .into_iter()
         .map(|p| [p[0] * ratio, p[1] * ratio, z])
         .collect())
+}
+
+const DOME_ROWS: usize = 6;
+
+fn dome_profile(row: usize) -> (f64, f64) {
+    let phi = std::f64::consts::FRAC_PI_2 * row as f64 / DOME_ROWS as f64;
+    (phi.cos(), phi.sin())
 }
 
 /// The 2D profile (radius, z) from the culet to the table centre. Downstream settings use
@@ -1307,7 +1573,17 @@ pub fn profile_points(spec: &GemSpec) -> Result<Vec<[f64; 2]>> {
     let radius = spec.width_mm.min(spec.length_mm) * 0.5;
     let girdle_top = spec.girdle_mm * 0.5;
     let mut points = vec![[0.0, -(girdle_top + spec.pavilion_depth_mm)]];
-    if spec.cut != GemCut::Cabochon {
+    if spec.cut == GemCut::Pearl {
+        for row in (1..DOME_ROWS).rev() {
+            let (scale, z) = dome_profile(row);
+            points.push([radius * scale, -girdle_top - spec.pavilion_depth_mm * z]);
+        }
+    } else if dust_marquire::applies(spec) {
+        points.push([
+            radius * dust_marquire::LOWER_SCALE,
+            -girdle_top - spec.pavilion_depth_mm * dust_marquire::LOWER_DEPTH,
+        ]);
+    } else if spec.cut != GemCut::Cabochon {
         let rows = if spec.cut.uses_pavilion_rows() {
             spec.pavilion_rows as usize
         } else {
@@ -1322,14 +1598,10 @@ pub fn profile_points(spec: &GemSpec) -> Result<Vec<[f64; 2]>> {
     }
     points.push([radius, -girdle_top]);
     points.push([radius, girdle_top]);
-    if spec.cut == GemCut::Cabochon {
-        let rows = 6usize;
-        for row in (1..rows).rev() {
-            let phi = std::f64::consts::FRAC_PI_2 * row as f64 / rows as f64;
-            points.push([
-                radius * phi.cos(),
-                girdle_top + spec.crown_height_mm * phi.sin(),
-            ]);
+    if matches!(spec.cut, GemCut::Cabochon | GemCut::Pearl) {
+        for row in 1..DOME_ROWS {
+            let (scale, z) = dome_profile(row);
+            points.push([radius * scale, girdle_top + spec.crown_height_mm * z]);
         }
         points.push([0.0, girdle_top + spec.crown_height_mm]);
     } else {
@@ -1381,7 +1653,11 @@ pub fn gem_reference(spec: &GemSpec, name: &str) -> Result<GemReferenceGeometry>
     if trimmed == "culet" {
         return Ok(GemReferenceGeometry {
             name: "culet".to_owned(),
-            points: vec![[0.0, 0.0, -(spec.girdle_mm * 0.5 + spec.pavilion_depth_mm)]],
+            points: vec![if dust_marquire::applies(spec) {
+                dust_marquire::culet(spec)
+            } else {
+                [0.0, 0.0, -(spec.girdle_mm * 0.5 + spec.pavilion_depth_mm)]
+            }],
             closed: false,
             normal: [0.0, 0.0, -1.0],
         });
@@ -1434,6 +1710,9 @@ pub fn gem_reference_for(record: &GemRecord, name: &str) -> Result<GemGeometryRe
 /// One crown facet: the quad between girdle vertex `index` and its table counterpart.
 pub fn crown_facet(spec: &GemSpec, index: usize) -> Result<GemReferenceGeometry> {
     spec.validate()?;
+    if round_brilliant::applies(spec) || dust_marquire::applies(spec) {
+        return authored_facet(spec, index, true);
+    }
     let girdle = girdle_outline(spec)?;
     let table = table_outline(spec)?;
     let n = girdle.len();
@@ -1454,8 +1733,11 @@ pub fn crown_facet(spec: &GemSpec, index: usize) -> Result<GemReferenceGeometry>
 /// One pavilion facet at the girdle edge `index` (or its first ring row).
 pub fn pavilion_facet(spec: &GemSpec, index: usize) -> Result<GemReferenceGeometry> {
     spec.validate()?;
-    if spec.cut == GemCut::Cabochon {
-        return Err(Error::Invalid("cabochon has no pavilion facet"));
+    if round_brilliant::applies(spec) || dust_marquire::applies(spec) {
+        return authored_facet(spec, index, false);
+    }
+    if matches!(spec.cut, GemCut::Cabochon | GemCut::Pearl) {
+        return Err(Error::Invalid("this gem has no pavilion facet"));
     }
     let girdle = girdle_outline(spec)?;
     let n = girdle.len();
@@ -1484,6 +1766,25 @@ pub fn pavilion_facet(spec: &GemSpec, index: usize) -> Result<GemReferenceGeomet
         closed: true,
         normal,
     })
+}
+
+fn authored_facet(spec: &GemSpec, index: usize, crown: bool) -> Result<GemReferenceGeometry> {
+    let gem = build_mesh(spec)?;
+    let faces = gem.authored_faces.as_deref().ok_or(Error::Invalid("gem facets"))?;
+    let (crown_start, pavilion_start) = if dust_marquire::applies(spec) {
+        (dust_marquire::CROWN_START, dust_marquire::PAVILION_START)
+    } else {
+        (round_brilliant::CROWN_START, round_brilliant::PAVILION_START)
+    };
+    let (range, name) = if crown {
+        (crown_start..pavilion_start, "crown")
+    } else {
+        (pavilion_start..faces.len(), "pavilion")
+    };
+    let face = faces[range].get(index).ok_or(Error::Invalid("gem facet index"))?;
+    let points: Vec<_> = face.iter().map(|&vertex| gem.mesh.vertices[vertex as usize]).collect();
+    let normal = facet_normal(&points)?;
+    Ok(GemReferenceGeometry { name: format!("{name}_facet:{index}"), points, closed: true, normal })
 }
 
 fn facet_normal(points: &[Point3]) -> Result<Point3> {
@@ -1517,7 +1818,7 @@ fn base_outline(spec: &GemSpec) -> Result<Vec<[f64; 2]>> {
     let half_y = spec.width_mm * 0.5;
     let count = spec.facet_count.clamp(3, 128) as usize;
     let unit: Vec<[f64; 2]> = match spec.shape {
-        GemShape::Round | GemShape::Oval => (0..count)
+        GemShape::Round | GemShape::Oval | GemShape::Bullet => (0..count)
             .map(|index| {
                 let angle = std::f64::consts::TAU * index as f64 / count as f64;
                 [angle.cos(), angle.sin()]
@@ -1526,7 +1827,8 @@ fn base_outline(spec: &GemSpec) -> Result<Vec<[f64; 2]>> {
         GemShape::Square | GemShape::Princess => {
             vec![[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]]
         }
-        GemShape::Emerald | GemShape::Octagon | GemShape::Baguette => {
+        GemShape::Emerald | GemShape::Octagon | GemShape::Baguette
+        | GemShape::EmeraldSquare | GemShape::Radiant | GemShape::RadiantSquare => {
             let corner = if spec.corner_mm > 0.0 {
                 spec.corner_mm / half_x.min(half_y)
             } else {
@@ -1534,10 +1836,23 @@ fn base_outline(spec: &GemSpec) -> Result<Vec<[f64; 2]>> {
             };
             rounded_rectangle(corner.clamp(0.0, 0.49))
         }
-        GemShape::Cushion => rounded_corners(0.35, 5),
+        GemShape::Cushion | GemShape::CushionSquare => rounded_corners(0.35, 5),
         GemShape::Pear => pear_outline(24),
         GemShape::Marquise => marquise_outline(24),
+        GemShape::DustMarquire => return Ok(dust_marquire::girdle(spec).map(|[x,y,_]| [x,y]).to_vec()),
         GemShape::Trillion => trillion_outline(8),
+        GemShape::Triangle => vec![[0.0, 1.0], [-1.0, -1.0], [1.0, -1.0]],
+        GemShape::TrillionStraight => vec![
+            [-0.05, 1.0], [-0.97, -0.92], [-0.93, -1.0], [0.93, -1.0],
+            [0.97, -0.92], [0.05, 1.0],
+        ],
+        GemShape::Calf => vec![[-0.6, 1.0], [-1.0, -0.1], [-0.6, -1.0], [1.0, -0.7], [1.0, 0.7]],
+        GemShape::HalfMoon => (0..=16)
+            .map(|index| {
+                let angle = std::f64::consts::PI * index as f64 / 16.0;
+                [angle.cos(), angle.sin()]
+            })
+            .collect(),
         GemShape::Heart => heart_outline(32),
     };
     let (min_x, max_x, min_y, max_y) = profile_bounds(&unit);
@@ -1585,9 +1900,9 @@ fn rounded_corners(radius: f64, per_corner: usize) -> Vec<[f64; 2]> {
     let mut points = Vec::new();
     for (cx, cy, start) in [
         (1.0 - radius, 1.0 - radius, 0.0),
-        (1.0 - radius, -1.0 + radius, -std::f64::consts::FRAC_PI_2),
-        (-1.0 + radius, -1.0 + radius, std::f64::consts::PI),
         (-1.0 + radius, 1.0 - radius, std::f64::consts::FRAC_PI_2),
+        (-1.0 + radius, -1.0 + radius, std::f64::consts::PI),
+        (1.0 - radius, -1.0 + radius, -std::f64::consts::FRAC_PI_2),
     ] {
         for step in 0..per_corner {
             let angle = start
@@ -1609,30 +1924,29 @@ fn pear_outline(count: usize) -> Vec<[f64; 2]> {
     let sweep = std::f64::consts::TAU - 2.0 * offset;
     let mut points = Vec::new();
     for index in 0..=count {
-        let angle = start - sweep * index as f64 / count as f64;
+        let angle = start + sweep * index as f64 / count as f64;
         points.push([
+            -(center[1] + radius * angle.sin()),
             center[0] + radius * angle.cos(),
-            center[1] + radius * angle.sin(),
         ]);
     }
-    points.push(tip);
+    points.push([-tip[1], tip[0]]);
     points
 }
 
 fn marquise_outline(count: usize) -> Vec<[f64; 2]> {
-    let width = 0.55;
-    let center_y = (1.0 - width * width) / 2.0;
-    let radius = 1.0 - center_y;
+    let half_width = 0.55;
+    let center_offset = (1.0 - half_width * half_width) / (2.0 * half_width);
+    let radius = center_offset + half_width;
+    let sweep = 1.0_f64.atan2(center_offset);
     let mut points = Vec::new();
     for index in 0..=count {
-        let angle =
-            std::f64::consts::FRAC_PI_2 - std::f64::consts::PI * index as f64 / count as f64;
-        points.push([radius * angle.cos(), center_y + radius * angle.sin()]);
+        let angle = -sweep + 2.0 * sweep * index as f64 / count as f64;
+        points.push([radius * angle.sin(), radius * angle.cos() - center_offset]);
     }
-    for index in 1..=count {
-        let angle =
-            -std::f64::consts::FRAC_PI_2 - std::f64::consts::PI * index as f64 / count as f64;
-        points.push([radius * angle.cos(), center_y + radius * angle.sin()]);
+    for index in (1..count).rev() {
+        let [x, y] = points[index];
+        points.push([x, -y]);
     }
     points
 }

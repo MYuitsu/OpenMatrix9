@@ -13,10 +13,108 @@ pub struct Poly {
     pub faces: Vec<Vec<u32>>,
 }
 
+pub mod selection;
+pub mod from_lines;
+
 pub type Edge = (u32, u32);
 
 pub fn edge(a: u32, b: u32) -> Edge {
     (a.min(b), a.max(b))
+}
+
+fn polygon_edge_faces(faces: &[Vec<u32>]) -> BTreeMap<Edge, Vec<usize>> {
+    let mut map: BTreeMap<Edge, Vec<usize>> = BTreeMap::new();
+    for (i, f) in faces.iter().enumerate() {
+        for k in 0..f.len() {
+            map.entry(edge(f[k], f[(k + 1) % f.len()]))
+                .or_default()
+                .push(i);
+        }
+    }
+    map
+}
+
+fn visit_quad_ring(faces: &[Vec<u32>], ef: &BTreeMap<Edge, Vec<usize>>, e: Edge, mut visit: impl FnMut(usize, Option<Edge>)) {
+    let mut seen = BTreeSet::new();
+    for &start in ef.get(&e).into_iter().flatten() {
+        let mut f = start;
+        let mut through = e;
+        loop {
+            if !seen.insert(f) {
+                break;
+            }
+            let face = &faces[f];
+            if face.len() != 4 {
+                visit(f, None);
+                break;
+            }
+            // The opposite edge of the quad.
+            let k = (0..4)
+                .find(|&k| edge(face[k], face[(k + 1) % 4]) == through)
+                .unwrap();
+            let opp = edge(face[(k + 2) % 4], face[(k + 3) % 4]);
+            visit(f, Some(opp));
+            let Some(next) = ef
+                .get(&opp)
+                .and_then(|l| l.iter().copied().find(|&g| g != f))
+            else {
+                break;
+            };
+            f = next;
+            through = opp;
+        }
+    }
+}
+
+/// Opposite edges across the connected strip of quads, including both open ends.
+pub fn edge_ring(faces: &[Vec<u32>], seed: Edge) -> BTreeSet<Edge> {
+    let mut edges = BTreeSet::new();
+    visit_quad_ring(faces, &polygon_edge_faces(faces), seed, |_, opposite| {
+        edges.insert(seed);
+        edges.extend(opposite);
+    });
+    edges
+}
+
+fn vertex_edges(incidence: &BTreeMap<Edge, Vec<usize>>) -> HashMap<u32, Vec<Edge>> {
+    let mut result = HashMap::<u32, Vec<Edge>>::new();
+    for &segment in incidence.keys() {
+        result.entry(segment.0).or_default().push(segment);
+        result.entry(segment.1).or_default().push(segment);
+    }
+    result
+}
+
+fn visit_edge_loop(
+    incidence: &BTreeMap<Edge, Vec<usize>>,
+    at_vertex: &HashMap<u32, Vec<Edge>>,
+    seed: Edge,
+    mut visit: impl FnMut(Edge),
+) {
+    let mut seen = BTreeSet::from([seed]);
+    visit(seed);
+    for mut vertex in [seed.1, seed.0] {
+        let mut previous = seed;
+        while let Some(incident) = at_vertex.get(&vertex) {
+            if incident.len() != 4 {
+                break;
+            }
+            let previous_faces = &incidence[&previous];
+            let mut opposite = incident.iter().copied().filter(|edge| {
+                *edge != previous
+                    && incidence[edge]
+                        .iter()
+                        .all(|face| !previous_faces.contains(face))
+            });
+            let Some(next) = opposite.next() else { break };
+            if opposite.next().is_some() || !seen.insert(next) {
+                break;
+            }
+            visit(next);
+            vertex = if next.0 == vertex { next.1 } else { next.0 };
+            previous = next;
+        }
+    }
 }
 
 impl Poly {
@@ -110,15 +208,7 @@ impl Poly {
 
     /// Edge → faces using it.
     pub fn edge_faces(&self) -> BTreeMap<Edge, Vec<usize>> {
-        let mut map: BTreeMap<Edge, Vec<usize>> = BTreeMap::new();
-        for (i, f) in self.faces.iter().enumerate() {
-            for k in 0..f.len() {
-                map.entry(edge(f[k], f[(k + 1) % f.len()]))
-                    .or_default()
-                    .push(i);
-            }
-        }
-        map
+        polygon_edge_faces(&self.faces)
     }
 
     /// Edges used by one face only (the open border).
@@ -186,36 +276,8 @@ impl Poly {
     /// Faces across from each other through quads, starting at the faces on `e` (a ring of
     /// faces crossing the edge ring of `e`).
     pub fn face_ring(&self, e: Edge) -> Vec<usize> {
-        let ef = self.edge_faces();
-        let mut out: Vec<usize> = Vec::new();
-        let mut seen = BTreeSet::new();
-        for &start in ef.get(&e).into_iter().flatten() {
-            let mut f = start;
-            let mut through = e;
-            loop {
-                if !seen.insert(f) {
-                    break;
-                }
-                out.push(f);
-                let face = &self.faces[f];
-                if face.len() != 4 {
-                    break;
-                }
-                // The opposite edge of the quad.
-                let k = (0..4)
-                    .find(|&k| edge(face[k], face[(k + 1) % 4]) == through)
-                    .unwrap();
-                let opp = edge(face[(k + 2) % 4], face[(k + 3) % 4]);
-                let Some(next) = ef
-                    .get(&opp)
-                    .and_then(|l| l.iter().copied().find(|&g| g != f))
-                else {
-                    break;
-                };
-                f = next;
-                through = opp;
-            }
-        }
+        let mut out = Vec::new();
+        visit_quad_ring(&self.faces, &self.edge_faces(), e, |face, _| out.push(face));
         out
     }
 
@@ -239,37 +301,8 @@ impl Poly {
     /// The edge loop through `e` (edges continuing straight across valence-4 vertices).
     pub fn edge_loop(&self, e: Edge) -> Vec<Edge> {
         let ef = self.edge_faces();
-        let mut vert_edges: HashMap<u32, Vec<Edge>> = HashMap::new();
-        for &k in ef.keys() {
-            vert_edges.entry(k.0).or_default().push(k);
-            vert_edges.entry(k.1).or_default().push(k);
-        }
-        let mut out = vec![e];
-        for (from, at) in [(e.0, e.1), (e.1, e.0)] {
-            let mut cur = at;
-            let _ = from;
-            let mut prev_edge = e;
-            for _ in 0..10_000 {
-                let es = &vert_edges[&cur];
-                if es.len() != 4 {
-                    break;
-                }
-                // The edge sharing no face with the one we came along.
-                let faces_prev: BTreeSet<usize> = ef[&prev_edge].iter().copied().collect();
-                let next = es
-                    .iter()
-                    .copied()
-                    .find(|&x| x != prev_edge && ef[&x].iter().all(|f| !faces_prev.contains(f)));
-                let Some(n) = next else { break };
-                if out.contains(&n) {
-                    break;
-                }
-                out.push(n);
-                let other = if n.0 == cur { n.1 } else { n.0 };
-                cur = other;
-                prev_edge = n;
-            }
-        }
+        let mut out = Vec::new();
+        visit_edge_loop(&ef, &vertex_edges(&ef), e, |segment| out.push(segment));
         out
     }
 

@@ -23,7 +23,7 @@ use om9_core::{
 };
 
 /// The command family owned by this module.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
 pub enum PaveTool {
     Auto,
     Manual,
@@ -727,7 +727,6 @@ impl Controller {
             .ok_or(Error::Missing("pave layout"))?;
         let host = session.surface.ok_or(Error::Missing("pave surface"))?;
         let layer = self.gem_layer()?;
-        self.ensure_layer_writable(layer)?;
         let host_entity = self
             .document()
             .entities
@@ -873,7 +872,6 @@ impl Controller {
             .as_ref()
             .ok_or(Error::Missing("pave sphere"))?;
         let layer = self.gem_layer()?;
-        self.ensure_layer_writable(layer)?;
         let document = self.document;
         let mut mutations = Vec::new();
         for instance in gems {

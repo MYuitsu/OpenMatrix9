@@ -75,6 +75,11 @@ impl MatrixApp {
                     error: None,
                 });
                 self.report_panel_ok(&report);
+                if let SectionId::Tool(tool) = op.section() && !matches!(op, PanelOp::SetFloatRect { .. } | PanelOp::SetHeight { .. }) {
+                    self.remember_tool(tool);
+                } else if self.named_layouts && !matches!(op, PanelOp::SetFloatRect { .. } | PanelOp::SetHeight { .. }) {
+                    let _ = self.save_dock_layout();
+                }
                 Ok(report)
             }
             Err(error) => {
@@ -133,7 +138,7 @@ impl MatrixApp {
             self.drop_preview = None;
             return;
         };
-        if !self.dock.section(section).visible {
+        if !self.dock.section(section).visible || !self.tool_visible(section) {
             self.cancel_section_drag(CancelReason::LayoutChanged);
             return;
         }
@@ -150,7 +155,31 @@ impl MatrixApp {
             .as_ref()
             .and_then(|drag| drag.last_pointer);
         let target = panel_ops::resolve_drop(&self.dock, section, last_pointer, &zones);
-        let indicator = panel_ops::drop_indicator(target, &zones, self.work_area);
+        let mut indicator = panel_ops::drop_indicator(target, &zones, self.work_area);
+        if let DropTarget::Place { side, index } = target {
+            let next = self.dock.section_order(side.dock_side()).into_iter().filter(|id| *id != section)
+                .skip(index).find_map(|id| zones.bars.iter().find(|(bar, column, _)| *bar == id && *column == side));
+            if let Some(line) = &mut indicator {
+                if let Some((_, _, bar)) = next {
+                    line.rect.y = bar.y - 1.5;
+                } else if let Some(zone) = match side { ColumnSide::Left => &zones.left, ColumnSide::Right => &zones.right } {
+                    line.rect.y = zone.content_bottom.min(zone.rect.bottom()) - 1.5;
+                }
+            }
+        }
+        let state = self.dock.section(section);
+        if let (
+            SectionId::Tool(tool),
+            DropTarget::Float { pointer } | DropTarget::FloatOutside { pointer },
+            Some(work),
+            Some(preview),
+        ) = (section, target, self.work_area, &mut indicator)
+        {
+            let [width, height] = tool.preferred_float_size().unwrap_or([360., state.height]);
+            let saved = state.float.unwrap_or(FloatRect { width, height, ..panel_ops::float_drop_rect(pointer) });
+            let rect = work.clamp(FloatRect { width: saved.width, height: saved.height, ..panel_ops::float_drop_rect(pointer) });
+            preview.rect = RegionRect::new(rect.x, rect.y, rect.width, rect.height);
+        }
         self.drop_preview = Some(DropPreview {
             section,
             target,
@@ -165,7 +194,7 @@ impl MatrixApp {
                 egui::pos2(indicator.rect.x, indicator.rect.y),
                 egui::Vec2::new(indicator.rect.width, indicator.rect.height),
             );
-            let colour = Color32::from_rgb(150, 55, 55);
+            let colour = super::theme::ACCENT;
             if indicator.line {
                 painter.rect_filled(rect, 0, colour);
             } else {
@@ -186,7 +215,20 @@ impl MatrixApp {
         self.drop_preview = None;
         match panel_ops::drop_op(section, target, self.work_area) {
             Ok(op) => {
-                let _ = self.apply_panel_op(op);
+                let op = match (section, op, indicator) {
+                    (_, PanelOp::Float { work, origin, .. }, Some(preview)) => {
+                        let r = preview.rect;
+                        let rect = FloatRect { x: r.x, y: r.y, width: r.width, height: r.height };
+                        if state.dock == DockSide::Floating {
+                            PanelOp::SetFloatRect { section, rect, work }
+                        } else { PanelOp::Float { section, rect, work, origin } }
+                    }
+                    _ => op,
+                };
+                if self.apply_panel_op(op).is_ok() && let PanelOp::SetFloatRect { section, .. } = op {
+                    if let SectionId::Tool(tool) = section { self.remember_tool(tool); }
+                    else if self.named_layouts { let _ = self.save_dock_layout(); }
+                }
             }
             Err(error) => {
                 self.report_panel_error(&error);
@@ -206,7 +248,7 @@ impl MatrixApp {
     fn report_panel_ok(&mut self, report: &PanelReport) {
         if report.notes.is_empty() {
             // A readback of a visible window move is not worth a message.
-            if matches!(report.outcome, PanelOutcome::FloatRectSet { .. }) {
+            if matches!(report.outcome, PanelOutcome::FloatRectSet { .. } | PanelOutcome::HeightSet { .. }) {
                 return;
             }
             let (text, _) = panel_message_outcome(&report.outcome);
@@ -428,7 +470,9 @@ impl MatrixApp {
             return;
         };
         self.float_resync = false;
+        if self.named_layouts { return; }
         for id in self.dock.floating_sections() {
+            if matches!(id, SectionId::Tool(_)) { continue; }
             let Some(rect) = self.dock.section(id).float else {
                 continue;
             };
@@ -1015,6 +1059,8 @@ impl MatrixApp {
 
 fn panel_message_outcome(outcome: &PanelOutcome) -> (String, MessageKind) {
     let text = match outcome {
+        PanelOutcome::VisibilitySet { section, visible } => format!("{} {}", section.title(), if *visible { "shown" } else { "hidden" }),
+        PanelOutcome::HeightSet { section, height } => format!("{} height {height}", section.title()),
         PanelOutcome::Collapsed { section, collapsed } => format!(
             "{} {}",
             section.title(),

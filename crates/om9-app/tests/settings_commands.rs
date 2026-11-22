@@ -70,6 +70,68 @@ fn line_curve(length: f64) -> Curve {
 }
 
 #[test]
+fn f6_bezel_presets_build_the_selected_section_and_restore_the_source() {
+    use om9_app::session::head_commands::HeadDraft;
+    use om9_core::settings::bezel::BezelMode;
+
+    let mut previews = Vec::new();
+    for (name, mode) in [
+        ("Bezel", BezelMode::Bezel),
+        ("UnderBezel", BezelMode::UnderBezel),
+        ("GalleryRail", BezelMode::GalleryRail),
+    ] {
+        let mut controller = gem_controller(&[[0., 0., 0.]]);
+        let source = controller.document().clone();
+        let script = format!("_gvBezel _BezelType=_{name}");
+        for from_f6 in [true, false] {
+            if from_f6 {
+                controller.dispatch(&script, InvocationOrigin::F6).unwrap();
+            } else {
+                controller.submit(&script).unwrap();
+            }
+            let HeadDraft::Bezel { params, bezel, .. } = &controller.head_pending().unwrap().draft
+            else { panic!("expected bezel preview") };
+            assert_eq!(params.mode, mode);
+            assert!(bezel.volume_mm3 > 0.);
+            let mesh = bezel.mesh.clone();
+            if from_f6 {
+                assert!(!previews.contains(&mesh));
+                previews.push(mesh.clone());
+            } else {
+                assert_eq!(previews.last(), Some(&mesh));
+            }
+            assert_eq!(controller.document(), &source);
+            controller.submit("Enter").unwrap();
+            let bodies = controller.document().entities.values()
+                .filter(|entity| entity.label == "Bezel").collect::<Vec<_>>();
+            assert_eq!(bodies.len(), 1);
+            assert_eq!(bodies[0].geometry, om9_core::geometry::Geometry::Mesh(mesh));
+            controller.undo().unwrap();
+            assert_eq!(controller.document(), &source);
+            let ids = source.entities.keys().copied().collect::<Vec<_>>();
+            controller.select_objects(&ids).unwrap();
+        }
+    }
+}
+
+#[test]
+fn f6_drop_preset_builds_prongs_from_selected_gems_in_one_undo() {
+    let mut controller=gem_controller(&[[0.,0.,0.],[2.5,0.,0.],[5.,0.,0.]]);
+    let sources=controller.document().clone();
+    controller.dispatch("_gvProngAdder _Drop=1.5",InvocationOrigin::F6).unwrap();
+    let draft=&controller.settings_pending().unwrap().draft;
+    let om9_app::session::settings_commands::SettingsDraft::Prongs{params,set,..}=draft else {panic!("prong builder")};
+    assert_eq!(params.drop_mm,1.5);
+    let count=set.count();
+    assert!(count>0);
+    assert_eq!(controller.document(),&sources);
+    controller.submit("").unwrap();
+    assert_eq!(controller.document().entities.len(),sources.entities.len()+count);
+    controller.undo().unwrap();
+    assert_eq!(controller.document(),&sources);
+}
+
+#[test]
 fn the_icon_stages_a_prong_set_and_enter_commits_one_body_per_prong() {
     let mut controller = gem_controller(&[[0.0, 0.0, 0.0], [2.5, 0.0, 0.0], [5.0, 0.0, 0.0]]);
     let before = controller.document().entities.len();

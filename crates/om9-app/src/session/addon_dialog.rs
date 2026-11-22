@@ -122,6 +122,7 @@ impl Controller {
     /// The options dialog of the running add-on command, when it has one now.
     pub fn addon_dialog(&self) -> Option<AddonDialog> {
         let session = self.addon_session.as_ref()?;
+        if matches!(session.code.as_str(), super::from_lines::CODE | super::extrude_lines::CODE | super::extrude_lines::tapered::CODE | super::extrude_point::CODE) {return None;}
         if self
             .addon_builder
             .as_ref()
@@ -207,10 +208,10 @@ impl Controller {
             return None;
         }
         let name = tr.command(&session.code, &session.label);
-        let title = match tr.lang() {
+        let title = if session.code == super::split_curves::CODE { session.label.clone() } else { match tr.lang() {
             om9_addons::i18n::Lang::Vi => format!("Tuỳ chọn {name}"),
             om9_addons::i18n::Lang::En => format!("{name} Options"),
-        };
+        }};
         let mut notes = std::collections::BTreeMap::new();
         let mut footer = Vec::new();
         let mut groups = Vec::new();
@@ -260,6 +261,9 @@ impl Controller {
             .find(|r| r.name == name)
             .ok_or(Error::Missing("dialog option"))?
             .clone();
+        if row.kind == DialogKind::Number && value.trim().is_empty() {
+            return Err(Error::Invalid("enter a number"));
+        }
         let owner = self
             .addon_session
             .as_ref()

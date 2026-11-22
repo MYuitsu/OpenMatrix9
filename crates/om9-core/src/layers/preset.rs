@@ -9,7 +9,7 @@ const NAMES: [&str; 32] = [
     "User 21", "User 22", "User 23", "User 24", "User 29", "User 30", "User 31", "User 32",
 ];
 const COLORS: [u32; 32] = [
-    0x229987, 0x319f49, 0x70c64b, 0xa0cf78, 0x598bc2, 0x4f80cb, 0x7aa7ce, 0xaccae4, 0xe23434,
+    0x229987, 0x319f49, 0x70c64b, 0xa0cf78, 0x003ca0, 0x4178cd, 0x82b4fa, 0xafd0ff, 0xe23434,
     0x70c133, 0x3468ff, 0x777777, 0x851ca1, 0xad423c, 0xca7135, 0xdfb126, 0xdf9098, 0xdabb7c,
     0xbd8735, 0xa5c14b, 0x47c7aa, 0x72c6cb, 0x607cab, 0x4d626a, 0x57b397, 0x586076, 0xc6bbb7,
     0x6c5578, 0x57536b, 0x1e555b, 0x0c343f, 0x1b3555,
@@ -51,6 +51,13 @@ impl PresetSlot {
         }
         let rgb = COLORS[(self.0 - 1) as usize];
         [(rgb >> 16) as u8, (rgb >> 8) as u8, rgb as u8, 255]
+    }
+
+    pub(crate) fn accepts_stored_color(self, rgba: [u8; 4]) -> bool {
+        if self.is_custom() || rgba == self.color() { return true; }
+        // Fixed Gem presets in older archives used this first-generation palette.
+        matches!((self.number(), rgba), (5,[89,139,194,255]) | (6,[79,128,203,255])
+            | (7,[122,167,206,255]) | (8,[172,202,228,255]))
     }
 }
 impl TryFrom<u8> for PresetSlot {

@@ -103,21 +103,24 @@ impl MatrixApp {
         });
     }
 
-    pub(super) fn ring_rail_toolbar_ui(&mut self, ui: &mut egui::Ui) -> bool {
-        let Some(mut bar) = self.builder_ui.rail_toolbar.take() else {
-            return false;
-        };
+    pub(super) fn sync_ring_rail_toolbar(&mut self) {
         let active = self.controller.ring_rail_is_open();
-        if bar.document != self.controller.document().id
+        if self.builder_ui.rail_toolbar.as_ref().is_some_and(|bar| bar.document != self.controller.document().id
             || (!active
                 && (!bar.placed
                     || self.controller.is_running()
                     || self.controller.builder().is_some()
                     || self.controller.addon_builder().is_some()
-                    || self.controller.metal_panel_open()))
-        {
-            return false;
+                    || self.controller.metal_panel_open()))) {
+            self.builder_ui.rail_toolbar = None;
         }
+    }
+
+    pub(super) fn ring_rail_toolbar_ui(&mut self, ui: &mut egui::Ui) -> bool {
+        let Some(mut bar) = self.builder_ui.rail_toolbar.take() else {
+            return false;
+        };
+        let active = self.controller.ring_rail_is_open();
         if active && let Some((id, size)) = self.controller.ring_rail_size() {
             bar.system = if id == "explicit" {
                 "diameter".into()
@@ -307,6 +310,7 @@ impl MatrixApp {
             }
         }
         if bar.reveal {
+            self.tool_host.reveal.insert(crate::tool_panel::ToolPanel::Builder(om9_core::builder::BuilderKind::RingRail));
             ui.scroll_to_rect(controls, Some(egui::Align::BOTTOM));
             bar.reveal = false;
         }

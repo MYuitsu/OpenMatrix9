@@ -160,6 +160,21 @@ impl Entity {
 /// A cage box created by `Transform > Create Cage` (the corners it was created with) and, on a
 /// caged object, the back pointer to that cage.
 pub const CAGE_EXTENSION_SLOT: &str = "om9.cage";
+/// Authored T-Spline box-mode cage. Mesh face indices are the editable control faces.
+pub const TSPLINE_BOX_CAGE_SLOT: &str = "om9.tspline.box_cage";
+/// The authored From Lines polygons and the logical face IDs behind the display mesh.
+pub const TSPLINE_FROM_LINES_SLOT: &str = "om9.tspline.from_lines";
+pub const TSPLINE_BOX_METADATA: &str = r#"{"representation":"polygon_cage"}"#;
+
+pub fn is_tspline_box_cage(entity: &Entity) -> bool {
+    matches!(entity.geometry, Geometry::Mesh(_))
+        && entity.extension(TSPLINE_BOX_CAGE_SLOT).is_some_and(|ext| {
+            ext.version == 1
+                && (ext.payload == TSPLINE_BOX_METADATA
+                    || serde_json::from_str::<serde_json::Value>(&ext.payload)
+                        .is_ok_and(|v| v["representation"] == "polygon_cage"))
+        })
+}
 /// A Smart Flow link on a flowed object: the base and target surfaces, whether the transport is
 /// rigid, the revision and the ACTIVE/BROKEN state.
 pub const FLOW_EXTENSION_SLOT: &str = "om9.flow";
@@ -167,6 +182,7 @@ pub const GEM_EXTENSION_SLOT: &str = "om9.gem";
 /// The curve/surface a placed gem follows (`OM9-L3-04-10-011`): the source object, the
 /// station, the source revision and the `ACTIVE`/`BROKEN`/`CONFLICT` state.
 pub const GEM_PLACEMENT_EXTENSION_SLOT: &str = "om9.gem.placement";
+pub const GEM_CURVE_ROW_SLOT: &str = "om9.gem.curve_row";
 /// The halo/cluster/baguette feature that owns a group of accent gems (`OM9-L3-04-11-007`):
 /// the typed layout parameters, the center stone or wall curves and the ordered child ids.
 pub const GEM_CLUSTER_EXTENSION_SLOT: &str = "om9.gem.cluster";
@@ -210,6 +226,7 @@ pub fn extension_slot_known(slot: &str) -> bool {
         slot,
         GEM_EXTENSION_SLOT
             | GEM_PLACEMENT_EXTENSION_SLOT
+            | GEM_CURVE_ROW_SLOT
             | GEM_CLUSTER_EXTENSION_SLOT
             | GEM_PAVE_EXTENSION_SLOT
             | crate::annotation::SLOT
@@ -221,6 +238,8 @@ pub fn extension_slot_known(slot: &str) -> bool {
             | FOUR_RAIL_PROFILE_EXTENSION_SLOT
             | MESH_UV_EXTENSION_SLOT
             | EXTRUSION_EXTENSION_SLOT
+            | TSPLINE_BOX_CAGE_SLOT
+            | TSPLINE_FROM_LINES_SLOT
             | CAGE_EXTENSION_SLOT
             | FLOW_EXTENSION_SLOT
             | SETTINGS_PRONG_SLOT
@@ -303,6 +322,8 @@ impl Extension {
     pub(crate) fn storage_usage_for_slot(&self, slot: &str, l: &Limits) -> Result<Usage> {
         if slot == TRIM_SURFACE_EXTENSION_SLOT {
             self.storage_usage(&Limits { max_name_bytes: trim_surface_payload_limit(l), ..*l })
+        } else if slot == TSPLINE_FROM_LINES_SLOT {
+            self.storage_usage(&Limits { max_name_bytes: usize::try_from(l.max_bytes).unwrap_or(usize::MAX), ..*l })
         } else { self.storage_usage(l) }
     }
     pub(crate) fn storage_usage(&self, l: &Limits) -> Result<Usage> {
@@ -913,6 +934,8 @@ impl Document {
                     Geometry::Surface(_) => return Err(Error::Invalid("trimmed surface underlying mismatch")),
                     _ => return Err(Error::Invalid("trimmed surface requires surface geometry")),
                 }
+            } else if slot == TSPLINE_FROM_LINES_SLOT {
+                crate::cage::from_lines::CageRecord::read_with_limits(e,l)?;
             } else {
                 crate::rhino_semantics::validate_extension(slot, &extension.payload, l)?;
             }
@@ -1572,7 +1595,7 @@ impl Document {
                 if !crate::layers::valid_label(slot, &layer.name) {
                     return Err(Error::Invalid("OM9 preset label"));
                 }
-                if !slot.is_custom() && layer.color != slot.color() {
+                if !slot.accepts_stored_color(layer.color) {
                     return Err(Error::Invalid("OM9 basic preset palette"));
                 }
                 // Generic imported layers may share display labels. An OM9

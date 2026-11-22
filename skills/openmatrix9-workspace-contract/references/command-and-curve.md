@@ -22,7 +22,7 @@ Click the CMD input to type an original command name while idle. Suggestions app
 
 Hide named-command suggestions during point input, interactive options or coordinate input, on no match, focus loss and workbench exit. When the popup is hidden, Up/Down recalls command history while preserving the current draft. Empty Enter repeats the last supported command when no tool is awaiting input.
 
-An idle viewport owns keyboard shortcuts. `E` arms End one-shot, and unbound keys leave the CMD draft empty. A command icon or start shortcut can focus CMD at a prompt that accepts input. For a command that picks an object and then asks for a parameter, the successful pick focuses CMD when the parameter prompt opens. Completing or canceling the command returns the keyboard to the viewport. [Approved viewport and CMD keyboard ownership](../../openmatrix9-ui/SKILL.md).
+An idle viewport handles keyboard shortcuts first. `E` arms End one-shot. With the app focused and no editor or dialog holding the keyboard, remaining printable text goes to CMD. A focused editor retains its text and IME input. The user approved this update on 2026-11-23. A command icon or start shortcut can focus CMD at a prompt that accepts input. For a command that picks an object and then asks for a parameter, the successful pick focuses CMD when the parameter prompt opens. Completing or canceling the command returns the keyboard to the viewport. [Approved viewport and CMD keyboard ownership](../../openmatrix9-ui/SKILL.md).
 
 ## Straight Line/Polyline
 

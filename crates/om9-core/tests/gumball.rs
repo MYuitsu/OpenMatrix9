@@ -49,6 +49,14 @@ fn handle_codes_round_trip_like_the_legacy_wire() {
         assert_eq!(Handle::from_code(handle.code()), Some(*handle));
     }
     assert_eq!(Handle::from_code(13), None);
+    for handle in [
+        Handle::ScalePlane(Plane::XY),
+        Handle::ScalePlane(Plane::YZ),
+        Handle::ScalePlane(Plane::ZX),
+        Handle::ScaleUniform,
+    ] {
+        assert_eq!(Handle::from_code(handle.code()), Some(handle));
+    }
     assert_eq!(Plane::XY.normal_axis(), Axis::Z);
     assert_eq!(Plane::YZ.normal_axis(), Axis::X);
     assert_eq!(Plane::ZX.normal_axis(), Axis::Y);

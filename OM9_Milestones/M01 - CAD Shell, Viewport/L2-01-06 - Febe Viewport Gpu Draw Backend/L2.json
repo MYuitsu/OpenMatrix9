@@ -90,6 +90,16 @@
     }
   ],
   "runtime_implementation": {
+    "round_top_and_palette_2026_11_22": {
+      "status": "WINDOWS_ROUND_TOP_COMPARED",
+      "scope": "Round-brilliant topology strokes and trimmed one-pixel isocurves, with a black Wireframe background. The Windows Top comparison covers 93.0% of reference wire pixels at a three-pixel tolerance.",
+      "evidence": "docs/validation/2026-11-22-round-wire-palette.md"
+    },
+    "wireframe_depth_2026_11_22": {
+      "owner": "OM9-L3-01-06-004",
+      "status": "GPU_READBACK_AND_WINDOWS_CAPTURE_VERIFIED",
+      "evidence": "docs/validation/2026-11-22-wireframe-depth.md"
+    },
     "remove_scene_high_water_2026_11_05": {
       "status": "PARTIAL_CHECKS_PASSED",
       "scope": "Remove obsolete shared scene high-water and scene-byte capture estimates; require registered scene ownership before STL capture. Preserve live owners, structural quantities and explicit remaining auxiliary-snapshot limitation.",

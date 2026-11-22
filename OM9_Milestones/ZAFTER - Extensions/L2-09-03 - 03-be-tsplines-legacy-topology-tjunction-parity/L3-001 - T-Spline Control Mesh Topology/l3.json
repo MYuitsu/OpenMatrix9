@@ -4,6 +4,11 @@
   "milestone": "AFTER",
   "parent_l2_id": "OM9-L2-09-03",
   "title": "T-Spline Control Mesh Topology",
+  "runtime_implementation": {
+    "status": "PARTIAL_RUNTIME",
+    "evidence": "docs/validation/2026-11-22-f6-matrix9.md",
+    "scope": "Persisted polygon cages support face deletion and duplication, including vertex channels and texture seams. Smooth evaluation and T-junction topology remain open."
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "AFTER",
   "execution_stage": "AFTER",

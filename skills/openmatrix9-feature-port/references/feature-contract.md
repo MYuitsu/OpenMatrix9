@@ -43,6 +43,25 @@ The historical Gem Loader section spans PDF176–177/printed402–403. For an un
 
 The package intentionally excludes its PDFs. Local files discovered during retrieval testing are registered in `docs/openmatrix9-reference-locations.json`; validate paths when used and update the project registry if files move. Resolve the current private paths from the registry; old Downloads/ref observations are not defaults. If a cited file is absent, record the exact missing page; do not invent values to claim fidelity. Menu wiring, feature identity and independent infrastructure may proceed without that page.
 
+### Gem layer palette
+
+Quy tắc OM9 được duyệt ngày 2026-11-22. Khi tạo gem theo mặc định, tra nhóm đá trong tài liệu hiện tại theo hình dạng, kiểu cắt, vật liệu và kích thước dài × rộng danh nghĩa (làm tròn tới 0,001 mm). Gem cùng nhóm dùng lại layer và màu của nhóm, kể cả sau khi mở lại tài liệu.
+
+Bốn nhóm đầu lần lượt dùng Gem 01 `#003CA0`, Gem 02 `#4178CD`, Gem 03 `#82B4FA` và Gem 04 `#AFD0FF`. Nhóm mới tiếp theo dùng User 01, rồi User 02 và các layer User tiếp theo. Ví dụ, khi tạo Round Diamond cỡ 2, 3, 4, 5, 6, 2 mm trong tài liệu mới, hai viên 2 mm đều thuộc Gem 01 và viên 6 mm thuộc User 01.
+
+Khi kiểm tra nét vẽ của viên đá, xem [Wireframe Round Diamond](../../openmatrix9-workspace-contract/references/grid-and-viewports.md#round-diamond-wireframe). Bằng chứng trong checkout OM9 nằm ở `docs/validation/2026-11-22-round-wire-palette.md`.
+
+### Gem Loader size catalog
+
+Quy tắc người dùng duyệt ngày 2026-11-22 cho `OM9-GEM-001` và `OM9-L3-04-09-003`.
+
+- Dùng bảng cỡ Matrix9 gốc của từng cặp **Cut–Shape** và chế độ đo. Giữ nguyên từng số đo theo mm và thứ tự gốc, kể cả các cỡ cùng chiều dài với chiều rộng khác nhau. Triangle và Trillion dùng bảng riêng khi bật chế độ đo đỉnh–đỉnh ở những biến thể có hỗ trợ.
+- Với bảng có `N` cỡ, dùng 1 tab khi `N ≤ 22`, 2 tab khi `23 ≤ N ≤ 44`, và 3 tab khi `N ≥ 45`. Chỉ số đầu là `0`, chỉ số cuối là `N − 1`. Với `P` tab, mỗi mốc trong bảng là `k × N / P` với `1 ≤ k < P`, làm tròn đến số nguyên gần nhất và làm tròn về số chẵn ở đúng điểm giữa như VB6. Mỗi tab lấy cả hai đầu của đoạn chỉ số. Cỡ cuối tab trước lặp lại thành cỡ đầu tab sau.
+- Tính **Depth %** bằng `100 × Depth / số đo trục quy chiếu`. Trục quy chiếu là đường kính của Round, Width trong chế độ dài–rộng, hoặc số đo đỉnh–đỉnh trong chế độ corner-to-corner. Khi nhập tỷ lệ, tính ngược `Depth = số đo trục quy chiếu × Depth % / 100`. Giữ độ chính xác của preset khi áp dụng và làm tròn theo định dạng hiển thị.
+- Kiểm tra số cỡ từng tab, thứ tự và cỡ chung ở ranh giới. Diamond Round có `23 / 22 / 22` cỡ với hai ranh giới Ø 3,40 và Ø 6,80 mm. Diamond Oval có `13 / 11` cỡ với ranh giới 7,20 × 5,20 mm. Oval 6,00 × 4,00 mm dùng Width 4,00 mm để tính độ sâu khoảng 2,4492 mm.
+
+Tra cứu nguồn và phạm vi đã kiểm tại `docs/validation/matrix9-gem-loader-size-evidence.md` và `docs/validation/2026-11-22-dock-popup-theme.md#matrix9-size-catalog-and-tabs` trong checkout.
+
 ## Distinct domains
 
 Clay Edit is `OM9-SUBD-001`/`ClayEdit`, not a T-Splines HUD feature. Conversion from T-Splines to Clayoo is a separate command (`OM9-SUBD-043`). Emboss and Matrix Art likewise use separate domain catalogs. Resolve IDs through the helper rather than guessing a filename from a menu label.

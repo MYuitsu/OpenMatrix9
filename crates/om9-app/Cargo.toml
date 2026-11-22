@@ -16,6 +16,7 @@ occt-brep = ["dep:om9-kernel", "om9-kernel/3dm-brep"]
 test-fixtures = []
 
 [dependencies]
+om9-addon-geom = { path = "../../addons/geom" }
 om9-core = { path = "../om9-core" }
 om9-command-options = { path = "../om9-command-options" }
 om9-sdk = { path = "../om9-sdk" }
@@ -35,7 +36,7 @@ serde_json.workspace = true
 sha2.workspace = true
 uuid.workspace = true
 eframe = { version = "=0.36.2", default-features = false, features = ["default_fonts", "wgpu", "__screenshot"] }
-image = { version = "=0.25.10", default-features = false, features = ["png", "jpeg"] }
+image = { version = "=0.25.10", default-features = false, features = ["png", "jpeg", "bmp", "tiff", "tga"] }
 resvg = { version = "=0.45.1", default-features = false }
 
 [target.'cfg(windows)'.dependencies]

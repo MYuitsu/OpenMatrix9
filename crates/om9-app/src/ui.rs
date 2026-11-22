@@ -5,7 +5,7 @@ use crate::{
     status_surface::{StatusKind, StatusSurface},
     transcript::Transcript,
     workbench_regions::{
-        CommandInputHost, RegionError, RegionPlan, RegionRect, WindowSize, compute_regions_for,
+        RegionError, RegionPlan, RegionRect, WindowSize,
         tile_views,
     },
 };
@@ -25,10 +25,15 @@ mod builder_panel;
 mod ring_rail_library;
 mod ring_rail_toolbar;
 mod session_dialog;
+mod from_lines;
 mod chrome;
+mod tool_host;
+mod theme;
+use crate::tool_panel::ToolPanel;
 mod projects;
 mod clipboard;
 mod command;
+mod f6_panel;
 mod gem;
 mod gem_cluster;
 mod gem_cutters;
@@ -65,6 +70,8 @@ mod selection_audit;
 mod top11;
 mod viewport_audit;
 mod viewport_menu;
+mod view_capture;
+mod curve_direction;
 use serde::Deserialize;
 use std::{collections::BTreeMap, path::PathBuf};
 impl TextBuffer for Transcript {
@@ -108,17 +115,6 @@ pub struct Feature {
     /// slot is inert; it must never repeat the primary action.
     #[serde(default)]
     pub right_click: Option<String>,
-}
-/// Adapter for the `CommandInputHost` seam toward `OM9-L2-01-02`. The CMD frame
-/// (`MatrixApp::transcript` plus `command_ui`) is built into every frame, so it
-/// is always attached. This says nothing about command dispatch or the Undo
-/// journal, which that module does not provide yet. BLOCKED_DEPENDENCY: when
-/// `OM9-L2-01-02` lands, replace this constant-true adapter with the real CMD host query.
-struct AttachedCmdFrame;
-impl CommandInputHost for AttachedCmdFrame {
-    fn command_input_ready(&self) -> bool {
-        true
-    }
 }
 /// Which menu column `icon` is drawing into, so only column icons are recorded.
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -515,6 +511,7 @@ pub struct MatrixApp {
     stl_profile_draft: Option<f64>,
     stl_angle_draft: f64,
     stl_selected_profile: Option<crate::session::StlExportProfile>,
+    capture_job: Option<view_capture::CaptureJob>,
     stl_capture: Option<crate::session::StlExportCapture>,
     stl_job: Option<crate::session::InteractiveStlExport>,
     /// Gumball settings popup opened from Info & Settings.
@@ -548,6 +545,8 @@ pub struct MatrixApp {
     addons_ui: addons_window::AddonsUi,
     builder_ui: builder_panel::BuilderUi,
     pub(crate) session_dialog: session_dialog::SessionDialogUi,
+    from_lines_popup: Option<(ViewId, egui::Pos2)>,
+    from_lines_face_count: Option<(om9_core::identity::DocumentId,u64,u64,usize)>,
     file_ime_composing: bool,
     file_f6_rects: BTreeMap<crate::file_lifecycle::FileKind, Rect>,
     /// Window title owned by this document's path/name and dirty marker.
@@ -620,6 +619,7 @@ pub struct MatrixApp {
     /// The subobject picked with Ctrl+Shift+click, and which kind that gesture looks for.
     sub_object: Option<crate::session::SelectedSubobject>,
     sub_object_kind: om9_scene::scene::PickKind,
+    cage_paint_stroke: Option<f6_panel::PaintStroke>,
     /// Object under the pointer, and where/when it was computed, so hovering does not pick every frame.
     hover_object: Option<om9_core::identity::ObjectId>,
     hover_job: Option<HoverJob>,
@@ -632,6 +632,11 @@ pub struct MatrixApp {
     fps: f32,
     adapter: String,
     pub f6_open: bool,
+    pub f6_mode: crate::f6::catalog::Mode,
+    f6_editor: Option<f6_panel::Editor>,
+    f6_group_cache: std::cell::Cell<Option<f6_panel::CachedGroup>>,
+    f6_report_cache: Option<f6_panel::SelectionReport>,
+    f6_material: Option<om9_core::identity::MaterialId>,
     pub f6_pinned: bool,
     pub f6_custom: crate::f6::CustomMenu,
     pub f6_providers: crate::f6::Providers,
@@ -648,6 +653,7 @@ pub struct MatrixApp {
     /// The menu currently being dragged, with the last finite pointer position
     /// (L3-003). Menu placement has exactly one mutation path:
     /// [`panel_audit::MatrixApp::apply_panel_op`].
+    tool_host: tool_host::ToolHost,
     section_drag: Option<panel_audit::SectionDrag>,
     /// The preview the user sees while dragging a title bar.
     pub drop_preview: Option<panel_audit::DropPreview>,
@@ -676,6 +682,11 @@ pub struct MatrixApp {
     /// Matrix dock layout owned by L2-01-01 (panels, sizes, visibility, floats).
     pub dock: DockLayout,
     dock_path: Option<PathBuf>,
+    layout_profiles: crate::layout_profiles::LayoutProfiles,
+    named_layouts: bool,
+    restore_panel_sizes: bool,
+    profile_name_input: String,
+    profile_editor: Option<chrome::ProfileEditor>,
     dock_dirty: bool,
     dock_window: [f32; 2],
     /// Layout warnings that must stay visible to the user (unknown version,
@@ -798,6 +809,7 @@ struct GumballBasis {
     epoch: u64,
     selection: u64,
     alt_held: bool,
+    subselection: u64,
 }
 #[derive(Clone)]
 struct GripDrag {
@@ -821,8 +833,8 @@ struct GripDrag {
 /// painted every frame, so recomputing a large surface edit grid each frame is wasteful.
 struct GripCache {
     revision: u64,
-    selection: Vec<om9_core::identity::ObjectId>,
-    mode: om9_core::top11::GripMode,
+    owners_revision: u64,
+    document: om9_core::identity::DocumentId,
     handles: Vec<om9_core::top11::GripHandle>,
 }
 pub struct UiAudit {
@@ -1204,6 +1216,7 @@ impl MatrixApp {
             stl_profile_draft: None,
             stl_angle_draft: 0.3,
             stl_selected_profile: None,
+            capture_job: None,
             stl_capture: None,
             stl_job: None,
             gumball_settings_open: false,
@@ -1233,6 +1246,8 @@ impl MatrixApp {
             addons_ui: Default::default(),
             builder_ui: Default::default(),
             session_dialog: Default::default(),
+            from_lines_popup: None,
+            from_lines_face_count: None,
             file_ime_composing: false,
             file_f6_rects: BTreeMap::new(),
             window_title: String::new(),
@@ -1300,6 +1315,7 @@ impl MatrixApp {
             ambiguous_slab_context: None,
             sub_object: None,
             sub_object_kind: om9_scene::scene::PickKind::Face,
+            cage_paint_stroke: None,
             hover_object: None,
             hover_job: None,
             hover_worker_active:std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false)),
@@ -1310,6 +1326,11 @@ impl MatrixApp {
             fps: 0.0,
             adapter: "headless-egui".into(),
             f6_open: false,
+            f6_mode: Default::default(),
+            f6_editor: None,
+            f6_group_cache: Default::default(),
+            f6_report_cache: None,
+            f6_material: None,
             f6_pinned: false,
             f6_custom: crate::f6::CustomMenu::default(),
             f6_providers: crate::f6::Providers {
@@ -1317,6 +1338,7 @@ impl MatrixApp {
                 m04_builder: true,
                 // M05 gem assets, loader, builders, positioner and Gem Properties.
                 m05_gem: true,
+                m05_gem_report: true,
                 ..Default::default()
             },
             sidebar_rect: None,
@@ -1328,6 +1350,7 @@ impl MatrixApp {
             toolbar_tab: 0,
             style_ready: false,
             section_rects: BTreeMap::new(),
+            tool_host: Default::default(),
             section_drag: None,
             drop_preview: None,
             work_area: None,
@@ -1345,6 +1368,11 @@ impl MatrixApp {
             viewport_title_arrows: BTreeMap::new(),
             dock,
             dock_path: None,
+            layout_profiles: Default::default(),
+            named_layouts: false,
+            restore_panel_sizes: false,
+            profile_name_input: String::new(),
+            profile_editor: None,
             dock_dirty: false,
             dock_window: [0., 0.],
             dock_diagnostics: Vec::new(),
@@ -1591,6 +1619,10 @@ impl MatrixApp {
             }
             None => Vec::new(),
         };
+        self.f6_editor = None;
+        self.f6_group_cache.set(None);
+        self.f6_report_cache = None;
+        self.f6_material = None;
         self.f6_custom = match self.controller.embedded_f6_state()? {
             Some(bytes) => {
                 let text = String::from_utf8(bytes).map_err(|_| Error::Invalid("F6 state text"))?;
@@ -1757,15 +1789,21 @@ impl MatrixApp {
         let Some(path) = self.dock_path.clone() else {
             return Vec::new();
         };
-        let (mut layout, diagnostics) = DockLayout::load(&path, &Limits::default());
+        let (profiles, named, diagnostics) = crate::layout_profiles::LayoutProfiles::load(&path);
+        let mut layout = profiles.layouts[&profiles.active].clone();
+        self.named_layouts = named;
+        self.layout_profiles = profiles;
         let mut reported = diagnostics;
         if let [width, height] = self.dock_window
-            && width > 0.
+            && !self.named_layouts && width > 0.
             && height > 0.
         {
             reported.extend(layout.clamp_floats([width, height]));
         }
         self.dock = layout;
+        self.f6_pinned = self.dock.f6_pinned;
+        self.f6_open |= self.f6_pinned;
+        self.restore_panel_sizes = true;
         self.dock_dirty = false;
         self.cancel_section_drag(crate::panel_ops::CancelReason::LayoutChanged);
         self.note_dock_diagnostics(&reported);
@@ -1780,7 +1818,11 @@ impl MatrixApp {
         let Some(path) = self.dock_path.clone() else {
             return Ok(());
         };
-        match self.dock.save(&path) {
+        let saved = if self.named_layouts {
+            self.layout_profiles.layouts.insert(self.layout_profiles.active.clone(), self.dock.clone());
+            self.layout_profiles.save(&path)
+        } else { self.dock.save(&path) };
+        match saved {
             Ok(()) => {
                 self.dock_dirty = false;
                 Ok(())
@@ -1792,6 +1834,28 @@ impl MatrixApp {
             }
         }
     }
+    pub fn edit_layout_profile(&mut self, action: crate::layout_profiles::ProfileAction<'_>) -> Result<()> {
+        use crate::layout_profiles::ProfileAction;
+        let change_layout = matches!(action, ProfileAction::Switch(_) | ProfileAction::Reset);
+        let mut next = self.layout_profiles.clone();
+        next.edit(&self.dock, action)?;
+        if let Some(path) = &self.dock_path { next.save(path)?; }
+        if change_layout {
+            self.cancel_section_drag(crate::panel_ops::CancelReason::LayoutChanged);
+            self.dock = next.layouts[&next.active].clone();
+            self.f6_pinned = self.dock.f6_pinned;
+            self.f6_open |= self.f6_pinned;
+            self.restore_panel_sizes = true;
+            if let Some(ctx) = &self.current_ui_context { ctx.memory_mut(|m| m.reset_areas()); }
+            self.float_resync = true;
+            self.dock_window = [0., 0.];
+        }
+        self.layout_profiles = next;
+        self.named_layouts = true;
+        self.dock_dirty = false;
+        Ok(())
+    }
+
     /// Restore the Matrix baseline layout. Document, undo journal, pending
     /// command draft and selection are untouched: only panel geometry resets.
     pub fn reset_dock_layout(&mut self, ctx: Option<&egui::Context>) {
@@ -1801,6 +1865,7 @@ impl MatrixApp {
             ctx.memory_mut(|memory| memory.reset_areas());
         }
         self.dock.reset_to_default();
+        self.restore_panel_sizes = true;
         self.dock_dirty = true;
         self.cancel_section_drag(crate::panel_ops::CancelReason::LayoutChanged);
         self.status.info("Layout reset to the Matrix default");
@@ -1833,6 +1898,7 @@ impl MatrixApp {
             ctx.memory_mut(|memory| memory.reset_areas());
         }
         self.dock.reset_to_default();
+        self.restore_panel_sizes = true;
         self.dock_dirty = false;
         self.cancel_section_drag(crate::panel_ops::CancelReason::LayoutChanged);
         self.status.info("Menus reset to the Matrix default");
@@ -1868,7 +1934,7 @@ impl MatrixApp {
     /// One-line summary of the current menu placement for tests and the status bar.
     pub fn menu_summary(&self) -> String {
         let names = |ids: Vec<SectionId>| -> String {
-            ids.into_iter()
+            ids.into_iter().filter(|id| self.tool_visible(*id))
                 .map(SectionId::title)
                 .collect::<Vec<_>>()
                 .join(", ")
@@ -1934,11 +2000,9 @@ impl MatrixApp {
     /// A usable plan replaces the previous one; a failure keeps the last good
     /// plan, changes no layout or scene state and is put on the status line.
     fn refresh_region_plan(&mut self, window: [f32; 2]) {
-        match compute_regions_for(
-            &self.dock,
-            WindowSize::from(window),
-            &self.controller.workspace,
-            &AttachedCmdFrame,
+        match crate::workbench_regions::compute_visible_regions(
+            &self.dock, WindowSize::from(window), &self.controller.workspace.visible_views(),
+            |id| self.tool_visible(id),
         ) {
             Ok(plan) => {
                 self.region_error = None;
@@ -1989,6 +2053,7 @@ impl MatrixApp {
             return;
         }
         self.dock_window = window;
+        if self.named_layouts { return; }
         let diagnostics = self.dock.clamp_floats(window);
         if !diagnostics.is_empty() {
             self.dock_dirty = true;
@@ -2014,14 +2079,15 @@ impl MatrixApp {
 
     /// The current F6 context resolved from the document selection and registry.
     pub fn f6_context(&self) -> crate::f6::Context {
-        crate::f6::context(
-            self.controller.document(),
-            self.controller.selected(),
-            self.f6_providers,
-        )
+        self.f6_actions()
     }
 
     fn invoke(&mut self, id: &str, origin: InvocationOrigin) {
+        if origin == InvocationOrigin::F6 && !self.f6_pinned {
+            self.f6_open = false;
+            self.focus_cmd = true;
+        }
+        if self.open_workspace_section(id) { return; }
         if self.controller.request_command_history(id) {
             return;
         }
@@ -2092,9 +2158,6 @@ impl MatrixApp {
             if id == crate::session::LINE {
                 self.append_running_prompt();
             }
-        }
-        if result.is_ok() && !self.f6_pinned {
-            self.f6_open = false;
         }
         match result {
             Ok(crate::session::DispatchOutcome::File(outcome)) => {
@@ -2656,6 +2719,18 @@ impl MatrixApp {
     fn submit_draft(&mut self) {
         use crate::command_options::CommandOptionInterface;
         let draft = self.transcript.draft().to_owned();
+        if ["F6","gvObjectActionsView","OM9-F6-001"].iter().any(|s|draft.trim().trim_start_matches('_').eq_ignore_ascii_case(s))
+            && let Some(ctx) = self.current_ui_context.clone() {
+            self.open_context_actions(&ctx);
+            self.transcript.record_command(&draft);
+            self.transcript.set_draft("");
+            return;
+        }
+        if self.open_workspace_section(&draft) {
+            self.transcript.record_command(&draft);
+            self.transcript.set_draft("");
+            return;
+        }
         if self.controller.request_command_history(&draft) {
             self.transcript.append_history(&prompt_echo("Command:", &draft));
             self.transcript.set_draft("");
@@ -2763,6 +2838,7 @@ impl MatrixApp {
             if self.request_history_ui(&ctx, draft.trim().eq_ignore_ascii_case("Redo")) {
                 self.transcript.record_command(&draft);
                 self.transcript.set_draft("");
+                self.focus_cmd = true;
             }
             return;
         }
@@ -2947,6 +3023,9 @@ impl MatrixApp {
     pub fn command_option_token_rect(&self, name: &str) -> Option<Rect> {
         self.cmd_token_rects.get(name).copied()
     }
+    pub fn session_dialog_control_rect(&self, name:&str)->Option<Rect> {
+        self.session_dialog.rects.get(name).copied()
+    }
     pub fn command_history_rect(&self) -> Option<Rect> {
         self.cmd_history_rect
     }
@@ -2955,11 +3034,12 @@ impl MatrixApp {
     }
     /// The gumball mode the viewport keeps when no modifier is held.
     pub fn set_gumball_mode(&mut self, mode: om9_scene::gumball_view::Mode) {
+        self.controller.clear_cage_manipulator();
         self.gumball_mode = mode;
     }
 
     pub fn gumball_mode(&self) -> om9_scene::gumball_view::Mode {
-        self.gumball_mode
+        self.controller.cage_manipulator_mode().unwrap_or(self.gumball_mode)
     }
 
     /// The object under the pointer, for tests and status lines.
@@ -3059,6 +3139,10 @@ impl MatrixApp {
         &self,
         view: ViewId,
     ) -> Vec<(om9_core::gumball::Handle, egui::Pos2)> {
+        let cage_mode = self.controller.cage_manipulator_mode();
+        if cage_mode.is_some_and(|m| m != om9_scene::gumball_view::Mode::Scale) {
+            return Vec::new();
+        }
         let Some(frame) = self.controller.gumball_pivot() else {
             return Vec::new();
         };
@@ -3079,11 +3163,12 @@ impl MatrixApp {
             return Vec::new();
         };
         let size = (world_per_pixel(&camera, viewport) * 90.0).max(1e-6);
-        let gumball = om9_scene::gumball_view::GumballView::with_size(
-            frame,
-            om9_scene::gumball_view::Mode::Scale,
-            size,
-        );
+        use om9_scene::gumball_view::{GumballView, Mode};
+        let gumball = if cage_mode.is_some() {
+            GumballView::tspline(frame, Mode::Scale, size)
+        } else {
+            GumballView::with_size(frame, Mode::Scale, size)
+        };
         gumball
             .visible_segments(&camera, viewport)
             .into_iter()
@@ -4015,7 +4100,7 @@ impl MatrixApp {
     /// command transcript or an open options popup cannot swallow it. A text draft keeps the key.
     fn delete_selection_from_input(&mut self, ctx: &egui::Context, raw: &mut egui::RawInput) {
         if self.controller.is_running()
-            || self.controller.selected().is_empty()
+            || (self.controller.selected().is_empty() && self.controller.subselection().is_empty())
             || !self.transcript.draft().is_empty()
             || self.controller.layer_dialog().is_some()
             || self.controller.file_operation().is_some()
@@ -4049,8 +4134,7 @@ impl MatrixApp {
         if self.delete_selected_control_grip() {
             return;
         }
-        let ids: Vec<_> = self.controller.selected().iter().copied().collect();
-        let result = self.controller.delete_objects(&ids).map(|_| ());
+        let result = self.controller.delete_current_selection();
         self.feedback(result);
     }
 
@@ -4091,6 +4175,13 @@ impl MatrixApp {
     }
 
     pub fn show(&mut self, ui: &mut egui::Ui) {
+        self.service_view_capture(ui.ctx());
+        if !self.controller.from_lines_choices().is_empty()
+            && ui.input_mut(|i| i.consume_key(Modifiers::NONE,Key::Escape)) {
+            self.from_lines_popup=None;
+            let result=self.controller.from_lines_dismiss_choices();
+            self.feedback(result);
+        }
         if self.undo_settings_draft.is_some()
             && !egui::Popup::is_any_open(ui.ctx())
             && ui.input_mut(|input| input.consume_key(Modifiers::NONE, Key::Escape))
@@ -4195,6 +4286,18 @@ impl MatrixApp {
                 ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
                 ui.disable();
             }
+        }
+        if self.controller.from_lines_pending() {
+            if let Some(result) = self.controller.poll_from_lines() { self.feedback(result); }
+            ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
+        }
+        if self.controller.split_curves_pending() {
+            if let Some(result) = self.controller.poll_split_curves() { self.feedback(result); }
+            ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
+        }
+        if self.controller.reduce_mesh_worker_pending() {
+            if let Some(result) = self.controller.poll_reduce_mesh() { self.feedback(result); }
+            ui.ctx().request_repaint_after(std::time::Duration::from_millis(16));
         }
         if self.controller.boolean_builder_worker_pending() {
             if self.boolean_builder_worker_draft.is_none() {
@@ -4469,6 +4572,11 @@ impl MatrixApp {
             self.cancel_stl_export_options();
             self.status.info("STL export cancelled after document change");
         }
+        if self.profile_editor.is_some() {
+            self.profile_editor_ui(ui.ctx());
+            ui.ctx().input_mut(|input| input.events.retain(|e| !matches!(e,
+                egui::Event::Key { .. } | egui::Event::Text(_) | egui::Event::Paste(_) | egui::Event::Ime(_))));
+        }
         // The export dialog owns Escape; it must not also clear the selection
         // or cancel a viewport gesture in the underlying workspace.
         if self.stl_profile_draft.is_some()
@@ -4504,7 +4612,7 @@ impl MatrixApp {
         self.passes += 1;
         self.addons_frame(ui.ctx());
         self.builder_frame();
-        self.session_dialog_ui(ui.ctx());
+        self.sync_session_dialog();
         self.sync_pictureframe_textures(ui.ctx());
         if self
             .camera_audit
@@ -4536,6 +4644,18 @@ impl MatrixApp {
             && !self.controller.is_running()
         {
             self.top11_action("ControlPoints");
+        }
+        if !self.viewport_menu_owns_frame && !self.focus_cmd && !ui.ctx().egui_wants_keyboard_input()
+            && self.controller.gem_surface_manual()
+        {
+            for (key, option) in [(Key::A, "A"), (Key::D, "D"), (Key::W, "W"),
+                (Key::S, "S"), (Key::Q, "Q"), (Key::E, "E")]
+            {
+                if ui.input_mut(|input| input.consume_key(Modifiers::NONE, key)) {
+                    let result = self.controller.submit(option);
+                    self.feedback(result);
+                }
+            }
         }
         let point_input = self.picking_points();
         let idle = !self.controller.is_running() && self.controller.addon_session().is_none();
@@ -4631,6 +4751,7 @@ impl MatrixApp {
         let stale_gesture = self.gumball_basis.as_ref().is_some_and(|basis| {
             basis.epoch != self.controller.coordinator().epoch()
                 || basis.selection != self.controller.selection_state().revision
+                || basis.subselection != self.controller.sub_revision()
                 || (!ui.input(|i| i.focused) && self.os_audit.is_none())
         });
         if stale_gesture {
@@ -4642,7 +4763,7 @@ impl MatrixApp {
             drag.epoch != self.controller.coordinator().epoch()
                 || drag.selection != self.controller.selection_state().revision
                 || self.controller.document().resolve(&drag.source).is_err()
-                || self.controller.top11_grip_mode() != Some(drag.handle.mode)
+                || self.controller.grip_owner_mode(drag.handle.object) != Some(drag.handle.mode)
                 || self.controller.workspace.active != drag.view
                 || self.controller.workspace.maximized != drag.maximized
                 || self
@@ -4771,7 +4892,8 @@ impl MatrixApp {
                 } else if self.controller.grips_selected() {
                     self.selected_grips.clear();
                     self.controller.select_grips(&[], crate::session::GripPick::Replace);
-                } else if !dragging && !self.controller.is_running() {
+                } else if !dragging && !self.controller.is_running() && self.controller.cage_paint_mode().is_none()
+                    && !self.controller.addon_session().is_some_and(|s| s.owner == "om9" && (s.code == "tsManipSetPivot" || crate::session::tspline_manipulator::numeric_axis(&s.code).is_some())) {
                     // No gesture in flight: Esc cancels the selection itself, which is the manual's rule.
                     self.controller.clear_selection();
                 }
@@ -4844,17 +4966,25 @@ impl MatrixApp {
             self.view_menu_capture = None;
             self.focus_cmd = self.controller.is_running() || self.controller.addon_session().is_some();
         }
-        if (self.controller.is_running() || self.controller.addon_session().is_some())
-            && ctx.memory(|m| m.focused().is_none())
+        let ime_pending = ctx.input(|i| i.events.iter().any(|e| matches!(e, egui::Event::Ime(_))));
+        let command_active = self.controller.is_running() || self.controller.addon_session().is_some();
+        // Viewport shortcuts have already consumed their matching text. Forward the
+        // remaining printable input to CMD only when no widget owns the keyboard.
+        if !self.viewport_menu_owns_frame
+            && !self.command_history_open
+            && !ime_pending
+            && !self.cmd_ime_composing
+            && !ctx.egui_wants_keyboard_input()
             && ctx.input(|i| {
-                i.events
-                    .iter()
-                    .any(|e| matches!(e, egui::Event::Text(_) | egui::Event::Paste(_)))
+                i.focused && i.events.iter().any(|event| match event {
+                    egui::Event::Text(text) => command_active || !text.trim().is_empty(),
+                    egui::Event::Paste(_) => command_active,
+                    _ => false,
+                })
             })
         {
             self.focus_cmd = true;
         }
-        let ime_pending = ctx.input(|i| i.events.iter().any(|e| matches!(e, egui::Event::Ime(_))));
         // Composition follows the OS lifecycle across focus changes. Opening a
         // File prompt must not turn a CMD candidate-confirm Enter into Save.
         ctx.input(|input| {
@@ -4907,7 +5037,7 @@ impl MatrixApp {
                 self.invoke(kind.feature_id(), InvocationOrigin::Menu);
             }
         }
-        let escape = !self.cmd_ime_composing
+        let escape = (self.section_drag().is_some() || (!self.memory_recovery_open && self.stl_profile_draft.is_none())) && !self.cmd_ime_composing
             && !self.layer_dialog_ime_composing
             && !self.file_ime_composing
             && !ime_pending
@@ -4934,10 +5064,12 @@ impl MatrixApp {
                 egui::Popup::close_all(&ctx);
                 self.view_menu_capture = None;
                 self.focus_cmd = self.controller.is_running() || self.controller.addon_session().is_some();
+            } else if self.f6_open && self.f6_editor.take().is_some() {
+                ctx.request_repaint();
+            } else if self.f6_open && !self.f6_pinned {
+                self.f6_open = false;
+                self.focus_cmd = true;
             } else {
-                if !self.f6_pinned {
-                    self.f6_open = false;
-                }
                 self.controller.cancel();
                 self.hover = None;
                 self.hover_view = None;
@@ -4950,14 +5082,30 @@ impl MatrixApp {
         self.configure_style(&ctx);
         self.enforce_min_window(&ctx);
         ui.set_style(ctx.style_of(egui::Theme::Light));
+        if std::mem::take(&mut self.restore_panel_sizes) {
+            ctx.data_mut(|data| {
+                for id in ["matrix-sidebar", "command", "matrix-right-dock"] {
+                    data.remove::<egui::containers::panel::PanelState>(egui::Id::new(id));
+                }
+            });
+        }
         let viewport = ui.max_rect().size();
+        self.command_history_shortcut(&ctx);
+        if !self.viewport_menu_owns_frame
+            && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::F6))
+        {
+            self.open_context_actions(&ctx);
+        }
+        self.file_f6_rects.clear();
+        self.sync_tools();
+        if !self.tool_host.reveal.is_empty() { ctx.request_discard("measure newly opened panels"); }
         self.refresh_region_plan([viewport.x, viewport.y]);
         // Floating menus are only pulled back inside a window the region check
         // accepts; a window below the minimum must not rewrite stored layout.
         if self.region_error.is_none() {
             self.sync_dock_window([viewport.x, viewport.y]);
         }
-        self.regions = self.dock.resolve([viewport.x, viewport.y]);
+        self.regions = self.dock.resolve_visible([viewport.x, viewport.y], |id| self.tool_visible(id));
         self.update_work_area(viewport);
         let regions = self.regions;
         self.dock_panel_rects.clear();
@@ -4971,7 +5119,7 @@ impl MatrixApp {
             .exact_size(21.)
             .frame(
                 egui::Frame::new()
-                    .fill(Color32::from_rgb(248, 250, 252))
+                    .fill(theme::HEADER)
                     .inner_margin(3),
             )
             .show(ui, |ui| {
@@ -4980,6 +5128,10 @@ impl MatrixApp {
                 }
                 self.menu_ui(ui);
             });
+        if self.restore_panel_sizes {
+            ctx.request_discard("apply selected workspace layout");
+            return;
+        }
         let left_panel = egui::Panel::left("matrix-sidebar")
             .default_size(regions.left_rail)
             .min_size(dock_layout::LEFT_RAIL_MIN)
@@ -5007,7 +5159,7 @@ impl MatrixApp {
         // user mean by 300), not the inner content width.
         self.left_rail_outer_px = left_panel.response.rect.width();
         self.sync_panel_size(PanelId::LeftRail, self.left_rail_outer_px);
-        egui::Panel::top("command")
+        let command_panel = egui::Panel::top("command")
             .default_size(regions.command_line)
             .min_size(dock_layout::COMMAND_MIN)
             .max_size(dock_layout::COMMAND_MAX)
@@ -5015,9 +5167,9 @@ impl MatrixApp {
             .frame(egui::Frame::new().fill(command::COMMAND_BG).inner_margin(3))
             .show(ui, |ui| {
                 ui.set_min_height(ui.available_height());
-                self.sync_panel_size(PanelId::CommandLine, ui.max_rect().height());
                 self.command_ui(ui);
             });
+        self.sync_panel_size(PanelId::CommandLine, command_panel.response.rect.height());
         // Commands live in the left MAIN MENU, including its Top 11 row.
         // Do not reserve a second tab/icon/view strip above the canvas.
         self.toolbar_rect = None;
@@ -5067,7 +5219,11 @@ impl MatrixApp {
                 self.status_message_rect = None;
                 self.status_summary_rect = None;
                 self.status_dismiss_rect = None;
-                self.status_bar_ui(ui);
+                // The Dismiss button must not resize the canvas under a pending CAD pick.
+                let row = ui.max_rect();
+                ui.set_min_size(row.size());
+                let mut content = ui.new_child(egui::UiBuilder::new().max_rect(row));
+                self.status_bar_ui(&mut content);
             });
         self.sync_smarttrack_basis();
         egui::CentralPanel::default()
@@ -5119,110 +5275,18 @@ impl MatrixApp {
                 }
                 ui.allocate_rect(rect, Sense::hover());
             });
-        self.command_history_ui(&ctx);
-        if !self.viewport_menu_owns_frame
-            && ctx.input_mut(|i| i.consume_key(Modifiers::NONE, Key::F6))
-        {
-            self.f6_open = !self.f6_open;
-        }
-        self.file_f6_rects.clear();
-        if self.f6_open {
-            let stored = self
-                .dock
-                .state(PanelId::CommandSearch)
-                .float
-                .unwrap_or_else(FloatRect::command_search_default);
-            let mut open = self.f6_open;
-            let stored = crate::f6::F6WindowPreference {
-                x: stored.x,
-                y: stored.y,
-                width: stored.width,
-                height: stored.height,
-                pinned: self.f6_pinned,
-            }
-            .clamp(ctx.content_rect());
-            let context = self.f6_context();
-            let custom = self.f6_custom.context();
-            let window = egui::Window::new("F6")
-                // A window named only by its title takes its identity from that
-                // title, so a translated or renamed title would move it (adapted
-                // from the pinned QymCAD window-identity guard).
-                .id(egui::Id::new("om9-command-search"))
-                .default_pos([stored.x, stored.y])
-                .default_size([stored.width, stored.height])
-                .open(&mut open)
-                .show(&ctx, |ui| {
-                    if self.viewport_menu_owns_frame {
-                        ui.disable();
-                    }
-                    ui.checkbox(&mut self.f6_pinned, "Pin");
-                    ui.separator();
-                    ui.label(format!("{} actions", context.title));
-                    for action in &context.actions {
-                        let response = ui.add_enabled(
-                            action.availability.enabled(),
-                            egui::Button::new(&action.label),
-                        );
-                        let response = if let Some(reason) = action.availability.reason() {
-                            response.on_hover_text(reason)
-                        } else {
-                            response
-                        };
-                        if action.availability.enabled() && response.clicked() {
-                            self.invoke(&action.id, InvocationOrigin::F6);
-                        }
-                    }
-                    if !custom.actions.is_empty() {
-                        ui.separator();
-                        ui.label("Custom");
-                        for action in &custom.actions {
-                            let response = ui.add_enabled(
-                                action.availability.enabled(),
-                                egui::Button::new(&action.label),
-                            );
-                            let response = if let Some(reason) = action.availability.reason() {
-                                response.on_hover_text(reason)
-                            } else {
-                                response
-                            };
-                            if action.availability.enabled() && response.clicked() {
-                                self.invoke(&action.id, InvocationOrigin::F6);
-                            }
-                        }
-                    }
-                    ui.separator();
-                    for kind in crate::file_lifecycle::FileKind::ALL {
-                        let response = ui.button(kind.label());
-                        self.file_f6_rects.insert(kind, response.rect);
-                        if response.clicked() {
-                            self.invoke(kind.feature_id(), InvocationOrigin::F6);
-                        }
-                    }
-                });
-            if let Some(window) = window {
-                let rect = window.response.rect;
-                if (rect.min.x - stored.x).abs() > 0.5
-                    || (rect.min.y - stored.y).abs() > 0.5
-                    || (rect.width() - stored.width).abs() > 0.5
-                    || (rect.height() - stored.height).abs() > 0.5
-                {
-                    self.dock.set_float(
-                        PanelId::CommandSearch,
-                        Some(FloatRect {
-                            x: rect.min.x,
-                            y: rect.min.y,
-                            width: rect.width(),
-                            height: rect.height(),
-                        }),
-                    );
-                    self.dock_dirty = true;
-                }
-            }
-            self.f6_open = self.f6_open && open;
-        }
         // Menus dragged out over the model float as owned windows; their
         // rectangle is part of the layout, so it survives the session.
-        self.float_menu_windows(&ctx);
+        // A sidebar button or CMD submission may have opened a panel after the dock pass.
+        // Repeat layout immediately so the first visible frame accepts pointer input.
+        let mounted = self.tool_host.active.clone();
+        let drawn = std::mem::take(&mut self.tool_host.drawn);
+        self.sync_tools();
+        self.tool_host.drawn = drawn;
+        if mounted != self.tool_host.active { ctx.request_discard("updated tool panels"); }
+        self.floating_tools(&ctx);
+        self.tool_host.active = mounted;
+        self.project_dialogs(&ctx);
         // Frame-level recovery of floating menus, then the drag/preview state of
         // the single door (L3-003).
         self.resync_floats();
@@ -5233,6 +5297,9 @@ impl MatrixApp {
             self.right_content_bottom,
         );
         self.panel_drag_frame(&ctx, zones);
+        if self.named_layouts && self.dock_dirty && ctx.input(|i| i.pointer.any_released()) {
+            let _ = self.save_dock_layout();
+        }
         if let Some((id, _)) = &self.view_menu_capture
             && !egui::Popup::is_id_open(&ctx, *id)
         {
@@ -5241,15 +5308,12 @@ impl MatrixApp {
         }
         self.layer_dialog_ui(&ctx);
         self.file_ui(&ctx);
-        self.gumball_settings_ui(&ctx);
         self.undo_settings_ui(&ctx);
         self.memory_recovery_ui(&ctx);
-        self.stl_profile_ui(&ctx);
-        self.stl_progress_ui(&ctx);
         self.persist_gumball_settings();
         self.os_audit_frame(&ctx);
         self.update_file_title(&ctx);
-        if self.focus_cmd
+        if self.focus_cmd && self.profile_editor.is_none()
             && !egui::Popup::is_any_open(&ctx)
             && self.controller.layer_dialog().is_none()
             && self.controller.file_operation().is_none()
@@ -5259,6 +5323,20 @@ impl MatrixApp {
         self.audit_receipt(&ctx);
         self.viewport_keyboard_free_previous = !ctx.egui_wants_keyboard_input()
             && !egui::Popup::is_any_open(&ctx) && !self.viewport_menu_owns_frame;
+        // Enter in the viewport finishes the running point command (Matrix/Rhino).
+        let addon_point_prompt = (self.controller.session_wants_coordinate() || self.controller.addon_collects_objects())
+            && self.between.is_none()
+            && self.viewport_keyboard_free_previous
+            && self.controller.file_operation().is_none()
+            && self.controller.layer_dialog().is_none();
+        if (self.controller.is_running() || addon_point_prompt)
+            && ui.ctx().memory(|memory| memory.focused().is_none())
+            && ui
+                .ctx()
+                .input_mut(|input| input.consume_key(Modifiers::NONE, Key::Enter))
+        {
+            self.submit_draft();
+        }
         if !ctx.input(|i| i.pointer.any_down()) {
             self.viewport_menu_pointer_guard = false;
         }
@@ -5907,22 +5985,32 @@ impl MatrixApp {
             painter.text(rect.min + Vec2::new(8., 56.), egui::Align2::LEFT_TOP,
                 "Preview không khả dụng — đang tính Boolean chính xác", egui::FontId::proportional(13.), Color32::LIGHT_YELLOW);
         }
-        if !temporary_boolean && self.controller.solid_boolean_two_hidden_sources().is_none() {
+        let cage_paint = self.controller.cage_paint_mode().filter(|_| !self.controller.is_running()
+            && self.controller.addon_session().is_none());
+        if let Some(kind) = cage_paint {
+            self.paint_cage_pointer(ui, &response, &view, viewport, rect, kind, published_scene_current);
+        } else {
+            self.cage_paint_stroke = None;
+        }
+        let editing_wire = self.controller.addon_session().is_some_and(|s|
+            matches!(s.code.as_str(),crate::session::from_lines::CODE | crate::session::extrude_lines::CODE | crate::session::extrude_lines::tapered::CODE | crate::session::extrude_point::CODE)
+            && s.reply.want != om9_addon_abi::session::Want::Objects);
+        if !temporary_boolean && !editing_wire && self.controller.solid_boolean_two_hidden_sources().is_none() {
             self.selection_frame(ui, id, &view, viewport, rect);
             self.object_info_label(ui, &view, viewport, rect);
             self.subselection_overlay(ui, &view, viewport, rect);
             self.top11_grip_overlay(ui, &view, viewport, rect);
-            if published_scene_current || self.gumball_session.is_some() {
+            if cage_paint.is_none() && (published_scene_current || self.gumball_session.is_some()) {
                 self.gumball_ui(ui, &response, &view, viewport, rect);
             }
-            if published_scene_current || self.grip_drag.is_some() {
+            if cage_paint.is_none() && (published_scene_current || self.grip_drag.is_some()) {
                 self.top11_grip_drag_ui(ui, &response, &view, viewport);
             }
         }
         if self.builder_ui.rail_toolbar.is_none() || !self.controller.ring_rail_is_open() {
             self.builder_handles_ui(ui, &response, &view, viewport, rect);
         }
-        if published_scene_current {
+        if published_scene_current && cage_paint.is_none() {
             self.selection_band(ui, &response, &view, viewport, rect);
         } else if self.band_view == Some(id) {
             self.band_start = None;
@@ -6005,7 +6093,20 @@ impl MatrixApp {
                 }
             }
         }
+        if self.controller.gem_surface_manual() && published_scene_current {
+            if let Some(pos) = response.hover_pos().filter(|_| !self.viewport_menu_owns_frame) {
+                let ray = view.camera.visible_ray([pos.x.into(), pos.y.into()], viewport).ok();
+                let snap = self.gem_surface_snap_point(&view, viewport, pos);
+                self.controller.gem_surface_hover(ray, snap);
+            } else if self.controller.workspace.active == id {
+                self.controller.gem_surface_hover(None, None);
+            }
+        }
         self.gem_preview_ui(ui, &view, viewport, rect);
+        self.gem_placement_preview_ui(ui, &view, viewport, rect);
+        if published_scene_current {
+            self.gem_curve_handles_ui(ui, id, &view, viewport, rect);
+        }
         self.gem_cluster_preview_ui(ui, &view, viewport, rect);
         self.gem_pave_preview_ui(ui, &view, viewport, rect);
         self.gem_cutters_preview_ui(ui, &view, viewport, rect);
@@ -6289,26 +6390,33 @@ impl MatrixApp {
                 self.hover_view = Some(id);
                 self.snap_view = self.snap.as_ref().map(|_| (id, view.camera.clone(), viewport));
                 self.update_smarttrack_hover(ui, id);
-                if let Some(elevator) = &self.elevator {
+                let extrude_axis = self.controller.extrude_distance_axis();
+                let height_axis = self.elevator.as_ref().map(|e| (e.base, e.normal)).or(extrude_axis);
+                if let Some((base, normal)) = height_axis {
                     let height = if let Some(candidate) = &self.snap {
-                        Some((0..3).map(|index| (candidate.world[index] - elevator.base[index]) * elevator.normal[index]).sum::<f64>())
+                        Some((0..3).map(|index| (candidate.world[index] - base[index]) * normal[index]).sum::<f64>())
                     } else if self.snap_state.settings.one_shot.is_none() {
                         view.camera.visible_ray([pos.x as f64, pos.y as f64], viewport).ok().and_then(|ray| {
-                            let offset: Point3 = std::array::from_fn(|index| elevator.base[index] - ray.origin[index]);
+                            let offset: Point3 = std::array::from_fn(|index| base[index] - ray.origin[index]);
                             let dot = |a: Point3, b: Point3| (0..3).map(|index| a[index] * b[index]).sum::<f64>();
-                            let nn = dot(elevator.normal, elevator.normal);
+                            let nn = dot(normal, normal);
                             let dd = dot(ray.direction, ray.direction);
-                            let nd = dot(elevator.normal, ray.direction);
+                            let nd = dot(normal, ray.direction);
                             let determinant = nn * dd - nd * nd;
                             if determinant <= 1e-12 * nn * dd { return None; }
-                            let height = (nd * dot(ray.direction, offset) - dd * dot(elevator.normal, offset)) / determinant;
+                            let height = (nd * dot(ray.direction, offset) - dd * dot(normal, offset)) / determinant;
                             let ray_distance = (dot(ray.direction, offset) + nd * height) / dd;
                             (height.is_finite() && ray_distance >= 0.).then_some(height)
                         })
                     } else { None };
-                    self.hover = height.map(|height| std::array::from_fn(|index| elevator.base[index] + height * elevator.normal[index]));
+                    self.hover = height.map(|height| std::array::from_fn(|index| base[index] + height * normal[index]));
                     if self.hover.is_none() && self.snap_state.settings.one_shot.is_none() {
-                        self.status.info("Elevator height is not visible in this view; choose another view or type a height");
+                        if extrude_axis.is_some() && self.elevator.is_none() {
+                            self.controller.clear_session_hover();
+                            self.status.info("View along extrusion axis: type a distance or pick in another viewport");
+                        } else {
+                            self.status.info("Elevator height is not visible in this view; choose another view or type a height");
+                        }
                     }
                 }
                 if let (Some(lock), Some(point)) = (&self.direction_lock, self.hover) {
@@ -6611,6 +6719,7 @@ impl MatrixApp {
             }
         }
         self.paint_builder_preview(&painter, &view.camera, viewport);
+        let wire_click=self.from_lines_view(ui,&painter,&view.camera,viewport,id,&response);
         let title_width = ui.fonts_mut(|fonts| {
             fonts
                 .layout_no_wrap(
@@ -6674,10 +6783,20 @@ impl MatrixApp {
             paint_world_datum(&painter, &view.camera, viewport, rect);
         }
         paint_view_marker(&painter, rect, id);
+        if wire_click { return; }
+        if self.controller.curve_direction.is_some() {
+            if published_scene_current && self.curve_direction_view(ui, &painter, &view.camera, viewport, &response) {
+                return;
+            }
+            if !published_scene_current && (response.clicked() || response.secondary_clicked()) {
+                return;
+            }
+        }
         if !self.viewport_menu_owns_frame && !ambiguous_popup_owns_pointer
             && response.hovered()
             && let Some(pos) = response.hover_pos()
         {
+            if cage_paint.is_some() && response.clicked() { return; }
             if response.secondary_clicked() && self.controller.addon_session().is_some() {
                 let result = self.controller.submit_effect("").map(|_| ());
                 self.feedback(result);
@@ -6725,6 +6844,30 @@ impl MatrixApp {
                 }
             } else if response.clicked() {
                 self.controller.workspace.active = id;
+                if published_scene_current && !self.controller.is_running() && self.controller.addon_session().is_none()
+                    && !ui.input(|i| i.modifiers.any())
+                    && let Some(mode)=self.controller.cage_manipulator_mode()
+                    && let Some(frame)=self.controller.gumball_pivot() {
+                    use om9_core::gumball::Handle;
+                    let size=(world_per_pixel(&view.camera,viewport)*90.).max(1e-6);
+                    let widget=om9_scene::gumball_view::GumballView::tspline(frame,mode,size);
+                    if let Ok(Some((_,handle)))=widget.nearest_in_view(&view.camera,viewport,[f64::from(pos.x),f64::from(pos.y)],8.) {
+                        if response.double_clicked() && let Handle::MoveAxis(axis)|Handle::Rotate(axis)|Handle::Scale(axis)=handle {
+                            let result=self.controller.start_cage_handle_entry(axis);
+                            if result.is_ok() {self.append_running_prompt(); self.focus_cmd=true;}
+                            self.feedback(result);
+                        }
+                        return;
+                    }
+                }
+                if let Some(result) = self.gem_viewport_click(ui, &view, viewport, pos) {
+                    if result.is_ok() {
+                        self.append_running_prompt();
+                        self.release_after_viewport_point(ui.ctx());
+                    }
+                    self.feedback(result);
+                    return;
+                }
                 if !ctrl_or_command(ui).1 && self.select_control_grip_at(
                     &view,
                     viewport,
@@ -6779,7 +6922,7 @@ impl MatrixApp {
                             self.feedback(result);
                         }
                     }
-                } else if self.controller.is_running() && !self.controller.boolean_builder_worker_preview() {
+                } else if self.controller.is_running() && !self.controller.isolating_objects() && !self.controller.boolean_builder_worker_preview() {
                     if self.controller.dupedge_needs_pick() {
                         let hits = self.controller.scene().ok_or(Error::Missing("DupEdge scene"))
                             .and_then(|scene| scene.pick_edge_candidates([pos.x as f64, pos.y as f64], &view.camera,
@@ -7661,10 +7804,26 @@ impl MatrixApp {
                     // Reuse it instead of intersecting the same mesh a second time.
                     let picked = candidates.as_ref().and_then(|list| list.first().copied());
                     let (shift, ctrl) = ctrl_or_command(ui);
-                    if shift && ctrl {
+                    let collecting_edges = self.controller.collecting_cage_edges();
+                    let cage_owner = picked.and_then(|id| self.controller.document().entities.get(&id)).is_some_and(om9_core::model::is_tspline_box_cage);
+                    let from_lines_owner = picked.and_then(|id| self.controller.document().entities.get(&id))
+                        .is_some_and(|e|e.extension(om9_core::model::TSPLINE_FROM_LINES_SLOT).is_some());
+                    if collecting_edges && !cage_owner { return; }
+                    let cage_pick = if collecting_edges { Some(om9_scene::scene::PickKind::Edge) }
+                        else { self.controller.cage_pick_kind().filter(|kind| self.controller.addon_session().is_none()
+                            && (cage_owner || from_lines_owner && *kind==om9_scene::scene::PickKind::Face)) };
+                    let boundary_face = self.controller.extrude_picking_boundary() && picked
+                        .and_then(|id| self.controller.document().entities.get(&id))
+                        .is_some_and(|e| matches!(&e.geometry, om9_core::geometry::Geometry::NativeBrep(_)) || matches!(&e.geometry, om9_core::geometry::Geometry::Brep(b) if b.topology().faces.len() > 1));
+                    let kind = if boundary_face { om9_scene::scene::PickKind::Face } else { cage_pick.unwrap_or(self.sub_object_kind) };
+                    let cage_double_click = response.double_clicked()
+                        && self.controller.addon_session().is_none()
+                        && kind == om9_scene::scene::PickKind::Edge
+                        && picked.and_then(|id| self.controller.document().entities.get(&id))
+                            .is_some_and(om9_core::model::is_tspline_box_cage);
+                    if boundary_face || (shift && ctrl) || cage_double_click || cage_pick.is_some() {
                         // Sub-object selection: pick the face, edge or vertex under the pointer and keep its
                         // persistent key next to the object it belongs to.
-                        let kind = self.sub_object_kind;
                         let hit = self.controller.scene().and_then(|scene| {
                             scene
                                 .pick_kind(
@@ -7679,11 +7838,12 @@ impl MatrixApp {
                                 .flatten()
                         });
                         if let Some(hit) = hit {
+                            if (boundary_face || cage_pick.is_some() || cage_double_click && !(shift && ctrl)) && (Some(hit.root) != picked || !hit.path.is_empty()) { return; }
                             let root = hit.root;
                             let subset = hit.subset.clone();
                             // Inside an add-on command the picks add up (edges of several
                             // objects, as Rhino collects them); otherwise the object alone.
-                            let picked = if self.controller.addon_session().is_some() {
+                            let picked = if self.controller.addon_session().is_some() || cage_pick.is_some() && shift {
                                 self.controller.select_root(Some(root), true)
                             } else {
                                 self.controller.select_objects(&[root])
@@ -7703,6 +7863,34 @@ impl MatrixApp {
                                 return;
                             }
                             let reference = crate::session::SelectedSubobject::from_hit(&hit);
+                            if cage_pick.is_some() && !cage_double_click && !(shift && ctrl) {
+                                if !collecting_edges && !shift && !ctrl { self.controller.clear_subselection(); }
+                                let result = if ctrl && self.controller.subselection().contains(&reference) {
+                                    self.controller.toggle_subobject_ref(reference.clone())
+                                } else if ctrl {
+                                    Ok(())
+                                } else {
+                                    self.controller.select_subobject_ref(reference.clone())
+                                };
+                                self.sub_object=self.controller.subselection().contains(&reference).then_some(reference);
+                                self.feedback(result);
+                                return;
+                            }
+                            if cage_double_click && self.controller.document().entities.get(&reference.root)
+                                .is_some_and(om9_core::model::is_tspline_box_cage)
+                                && reference.path.is_empty()
+                                && matches!(reference.subset, om9_scene::scene::Subelement::MeshEdge { .. })
+                            {
+                                if !self.controller.subselection().contains(&reference) && !shift {
+                                    self.controller.clear_subselection();
+                                }
+                                let result = self.controller.select_subobject_ref(reference.clone()).and_then(|_| {
+                                    self.controller.select_cage_components(om9_addon_geom::subd::selection::Operation::Loop)
+                                });
+                                self.sub_object = Some(reference);
+                                self.feedback(result);
+                                return;
+                            }
                             #[cfg(feature="occt-brep")]
                             let native_face_pick = matches!(reference.subset,om9_scene::scene::Subelement::MeshFace(_) | om9_scene::scene::Subelement::BrepFace(_))
                                 && reference.path.is_empty() && self.controller.document().entities.get(&reference.root)
@@ -8074,6 +8262,14 @@ impl MatrixApp {
         };
         let painter = ui.painter().with_clip_rect(rect);
         let green = Color32::from_rgb(90, 220, 130);
+        if !self.controller.cage_preview_edges().is_empty() {
+            for &[a,b] in self.controller.cage_preview_edges() {
+                if let (Ok(Some(a)),Ok(Some(b)))=(view.camera.project(a,viewport),view.camera.project(b,viewport)) {
+                    painter.line_segment([egui::pos2(a.screen[0] as f32,a.screen[1] as f32),egui::pos2(b.screen[0] as f32,b.screen[1] as f32)],Stroke::new(1.5,green));
+                }
+            }
+            return;
+        }
         for reference in self.controller.subselection().iter().chain(self.controller.dupedge_temporary_picks()) {
             let subset = &reference.subset;
             let Some(object) = scene
@@ -8342,7 +8538,8 @@ impl MatrixApp {
         }
         let modifiers = ui.input(|i| i.modifiers);
         // The stored mode breaks ties between overlapping handles. Alt toggles copy during a gesture.
-        let primary = self.gumball_mode;
+        let cage_mode = self.controller.cage_manipulator_mode();
+        let primary = cage_mode.unwrap_or(self.gumball_mode);
         let Some(frame) = self.controller.gumball_pivot() else {
             if self.gumball_session.is_some() {
                 self.cancel_gumball();
@@ -8351,21 +8548,32 @@ impl MatrixApp {
         };
         // Roughly ninety pixels of handle, independent of zoom and of the projection.
         let size = (world_per_pixel(&view.camera, viewport) * 90.0).max(1e-6);
-        // Matrix9 shows move, rotate and scale on one gumball: draw all three groups, and let the pointer
-        // pick the nearest handle at the press position.
-        let mut views = vec![
-            GumballView::with_size(frame, Mode::Move, size),
-            GumballView::with_size(frame, Mode::Rotate, size),
-            GumballView::with_size(frame, Mode::Scale, size),
-        ];
-        match primary {
-            Mode::Rotate => views.swap(0, 1),
-            Mode::Scale => views.swap(0, 2),
-            Mode::Move => {}
-        }
+        let views = if let Some(mode) = cage_mode {
+            vec![GumballView::tspline(frame, mode, size)]
+        } else {
+            // The ordinary Matrix gumball combines all handles. Its preferred
+            // mode wins ties when two handles project to the same position.
+            let mut modes = [Mode::Move, Mode::Rotate, Mode::Scale];
+            match primary {
+                Mode::Rotate => modes.swap(0, 1),
+                Mode::Scale => modes.swap(0, 2),
+                Mode::Move => {}
+            }
+            modes.into_iter().map(|mode| GumballView::with_size(frame, mode, size)).collect()
+        };
         let painter = ui.painter().with_clip_rect(rect);
 
-        let colour = gumball_colour;
+        let colour = |handle| {
+            use om9_core::gumball::Axis;
+            match (cage_mode,handle) {
+                (Some(_), Handle::MoveAxis(axis) | Handle::Scale(axis) | Handle::Rotate(axis)) => match axis {
+                    Axis::X => Color32::from_rgb(220,48,48),
+                    Axis::Y => Color32::from_rgb(40,185,65),
+                    Axis::Z => Color32::from_rgb(60,100,230),
+                },
+                _ => gumball_colour(handle),
+            }
+        };
         let to_pos = |point: [f64; 2]| egui::pos2(point[0] as f32, point[1] as f32);
         // Arcs first, arrows over them, boxes last: the rotation rings sit behind the arrow cluster.
         let mut draw_order: Vec<om9_scene::gumball_view::GumballView> =
@@ -8421,21 +8629,25 @@ impl MatrixApp {
                         let (start, tip) = (points[0], *points.last().expect("tip"));
                         // Dotted leader crossing the pivot to a hollow box on the far side, as drawn in the
                         // Matrix 8 manual.
-                        let dashes = dashed_line(start, tip, 4.0, 4.0);
-                        for [a, b] in dashes {
-                            painter.line_segment([a, b], Stroke::new(1.0, tint));
+                        let box_rect = Rect::from_center_size(tip, egui::vec2(8., 8.));
+                        if cage_mode.is_some() {
+                            painter.line_segment([start, tip], Stroke::new(1., tint));
+                            painter.rect_filled(box_rect, 0., tint);
+                        } else {
+                            for [a, b] in dashed_line(start, tip, 4., 4.) {
+                                painter.line_segment([a, b], Stroke::new(1., tint));
+                            }
+                            painter.rect_stroke(box_rect, 0., Stroke::new(1.5, tint), egui::StrokeKind::Inside);
                         }
-                        painter.rect_stroke(
-                            Rect::from_center_size(tip, egui::vec2(8.0, 8.0)),
-                            0.0,
-                            Stroke::new(1.5, tint),
-                            egui::StrokeKind::Inside,
-                        );
                     }
-                    Handle::MovePlane(plane) => {
+                    Handle::MovePlane(plane) | Handle::ScalePlane(plane) => {
                         // The "4" icon of the manual: a small grid standing for the two-axis plane, drawn in
                         // the colours of the two axes it moves along ("the two axises are indicated by their
                         // color").
+                        if cage_mode.is_some() {
+                            painter.circle_filled(points[0], 4.5, Color32::GRAY);
+                            continue;
+                        }
                         let (first, second) = plane_colours(plane);
                         let icon = Rect::from_center_size(points[0], egui::vec2(9.0, 9.0));
                         painter.rect_stroke(
@@ -8459,15 +8671,17 @@ impl MatrixApp {
                             Stroke::new(1.0, second),
                         );
                     }
-                    Handle::MoveFree => {}
+                    Handle::MoveFree | Handle::ScaleUniform => {}
                 }
             }
         }
         // The centre of the gumball, as in the manual.
-        if let Ok(Some(centre)) = active_centre(&views, &view.camera, viewport) {
+        if cage_mode != Some(Mode::Rotate)
+            && let Ok(Some(centre)) = active_centre(&views, &view.camera, viewport) {
             // "5 = Free Move Origin": a hollow square on the pivot with a dot inside.
             let origin = Rect::from_center_size(centre, egui::vec2(7.0, 7.0));
-            painter.rect_filled(origin, 0.0, Color32::from_rgb(30, 30, 30));
+            let fill = if cage_mode.is_some() { Color32::from_rgb(32, 174, 176) } else { Color32::from_rgb(30, 30, 30) };
+            painter.rect_filled(origin, 0., fill);
             painter.rect_stroke(
                 origin,
                 0.0,
@@ -8480,7 +8694,7 @@ impl MatrixApp {
         // egui can receive the press and initial motion in one frame and the
         // release in the next without emitting drag_started/drag_stopped. Use
         // only the press bound to the still-published image in this viewport.
-        let short_drag = if self.gumball_session.is_none() && (!self.controller.is_running() || self.controller.boolean_builder_worker_preview())
+        let short_drag = if self.gumball_session.is_none() && (!self.controller.is_running() || self.controller.isolating_objects() || self.controller.boolean_builder_worker_preview())
             && self.controller.workspace.active == view.id
             && !self.viewport_menu_owns_frame && !egui::Popup::is_any_open(ui.ctx())
             && !response.drag_stopped_by(egui::PointerButton::Primary)
@@ -8554,6 +8768,7 @@ impl MatrixApp {
                             epoch: self.controller.coordinator().epoch(),
                             selection: self.controller.selection_state().revision,
                             alt_held: modifiers.alt,
+                            subselection:self.controller.sub_revision(),
                         });
                     }
                     Err(error) => self.feedback(Err(error)),
@@ -8592,7 +8807,7 @@ impl MatrixApp {
             }
             let action = match self.gumball_handle {
                 Some(Handle::Rotate(_)) => "rotate",
-                Some(Handle::Scale(_)) => "scale",
+                Some(Handle::Scale(_) | Handle::ScalePlane(_) | Handle::ScaleUniform) => "scale",
                 Some(Handle::MoveAxis(_)) => "move",
                 _ => "move",
             };
@@ -8613,7 +8828,7 @@ impl MatrixApp {
             if let Some(session) = self.gumball_session.take() {
                 let name = match self.gumball_handle {
                     Some(Handle::Rotate(_)) => "Rotate",
-                    Some(Handle::Scale(_)) => "Scale",
+                    Some(Handle::Scale(_) | Handle::ScalePlane(_) | Handle::ScaleUniform) => "Scale",
                     _ => "Move",
                 };
                 let result = if session.is_copy() {
@@ -8643,7 +8858,7 @@ impl MatrixApp {
     /// Whether the pointer is placing a point: a running command, an add-on prompt waiting for
     /// a point, or a grip being dragged. Object snaps apply only then.
     fn picking_points(&self) -> bool {
-        (self.controller.is_running() && !self.controller.boolean_builder_worker_preview())
+        (self.controller.is_running() && !self.controller.isolating_objects() && !self.controller.boolean_builder_worker_preview())
             || self.controller.session_wants_point()
             || self.grip_drag.is_some()
     }
@@ -9233,6 +9448,7 @@ impl MatrixApp {
         snapped: Option<om9_scene::osnap::SnapCandidate>,
         alt: bool,
     ) -> Result<()> {
+        let mode = self.gumball_mode();
         let basis = self
             .gumball_basis
             .as_mut()
@@ -9242,6 +9458,7 @@ impl MatrixApp {
             || basis.view != self.controller.workspace.active
             || basis.epoch != self.controller.coordinator().epoch()
             || basis.selection != self.controller.selection_state().revision
+                || basis.subselection != self.controller.sub_revision()
         {
             return Err(Error::Stale("gumball gesture context"));
         }
@@ -9274,7 +9491,7 @@ impl MatrixApp {
             self.gumball_last = Some(pointer);
             return self.controller.preview_gumball(delta);
         }
-        let view = om9_scene::gumball_view::GumballView::new(*session.frame(), self.gumball_mode);
+        let view = om9_scene::gumball_view::GumballView::new(*session.frame(), mode);
         let mut input = snapped
             .as_ref()
             .map_or(pointer, |candidate| candidate.screen);
@@ -9316,7 +9533,7 @@ impl MatrixApp {
             return;
         };
         let source = *session.frame();
-        let query = om9_scene::gumball_view::GumballView::new(source, self.gumball_mode);
+        let query = om9_scene::gumball_view::GumballView::new(source, self.gumball_mode());
         let Ok(Some(Drag::Angle(angle))) = query.drag(
             &basis.camera,
             basis.viewport,
@@ -9865,18 +10082,14 @@ fn paint_line(
 }
 impl MatrixApp {
     /// Separate dock-style Object Health Report window (not a status line).
-    fn health_panel_ui(&mut self, ctx: &egui::Context) {
+    fn health_panel_ui(&mut self, ui: &mut egui::Ui) {
         if !self.health_panel_open {
             return;
         }
         let entries = self.controller.health_entries();
         let summary = self.controller.health_summary();
-        let mut open = true;
-        egui::Window::new("Object Health Report")
-            .id(egui::Id::new("om9-object-health-report"))
-            .open(&mut open)
-            .default_width(520.0)
-            .show(ctx, |ui| {
+
+        ui.scope(|ui| {
                 ui.label(summary);
                 ui.horizontal(|ui| {
                     ui.label("Feature angle");
@@ -9922,7 +10135,7 @@ impl MatrixApp {
                         }
                     });
             });
-        self.health_panel_open = open;
+
     }
 }
 impl MatrixApp {
@@ -9979,38 +10192,16 @@ impl eframe::App for MatrixApp {
         }
         self.attach_clipboard_shortcuts(frame);
         self.show(ui);
-        self.health_panel_ui(ui.ctx());
-        self.gem_window_ui(ui.ctx());
-        self.gem_cluster_window_ui(ui.ctx());
-        self.gem_pave_window_ui(ui.ctx());
-        self.gem_cutters_window_ui(ui.ctx());
-        self.row_cutters_window_ui(ui.ctx());
-        self.gem_edits_window_ui(ui.ctx());
-        // Enter in the viewport finishes the running point command (Matrix/Rhino).
-        let addon_point_prompt = self.controller.session_wants_coordinate()
-            && self.between.is_none()
-            && self.viewport_keyboard_free_previous
-            && self.controller.file_operation().is_none()
-            && self.controller.layer_dialog().is_none();
-        if (self.controller.is_running() || addon_point_prompt)
-            && ui.ctx().memory(|memory| memory.focused().is_none())
-            && ui
-                .ctx()
-                .input_mut(|input| input.consume_key(Modifiers::NONE, Key::Enter))
-        {
-            self.submit_draft();
-        }
         // Delete removes the selected objects when no text editor owns the keyboard.
         if !self.controller.is_running()
-            && !self.controller.selected().is_empty()
+            && (!self.controller.selected().is_empty() || !self.controller.subselection().is_empty())
             && ui.ctx().memory(|memory| memory.focused().is_none())
             && ui
                 .ctx()
                 .input_mut(|input| input.consume_key(Modifiers::NONE, Key::Delete))
         {
             if !self.delete_selected_control_grip() {
-                let ids: Vec<_> = self.controller.selected().iter().copied().collect();
-                let result = self.controller.delete_objects(&ids).map(|_| ());
+                let result = self.controller.delete_current_selection();
                 self.feedback(result);
             }
         }
@@ -10020,6 +10211,7 @@ impl eframe::App for MatrixApp {
         self.service_project_background(ui.ctx());
         self.service_project_file_picker(frame);
         self.service_stl_picker(ui.ctx(), frame);
+        self.service_view_capture_picker(ui.ctx(), frame);
         self.service_addon_picker(ui.ctx(), frame);
         if !self.light_motion_baseline
             && self.controller.viewport_detail() == crate::display::ViewportDetail::Light
@@ -10565,6 +10757,8 @@ fn gumball_colour(handle: om9_core::gumball::Handle) -> Color32 {
     match handle {
         Handle::MoveAxis(axis) | Handle::Scale(axis) | Handle::Rotate(axis) => axis_colour(axis),
         Handle::MovePlane(plane) => plane_colours(plane).0,
+        Handle::ScalePlane(_) => Color32::GRAY,
+        Handle::ScaleUniform => Color32::from_rgb(32, 174, 176),
         Handle::MoveFree => Color32::from_rgb(245, 245, 245),
     }
 }
@@ -12745,7 +12939,7 @@ mod tests {
             let mut output = ctx.run_ui(egui::RawInput {
                 screen_rect: Some(egui::Rect::from_min_size(egui::Pos2::ZERO, egui::vec2(900., 600.))),
                 focused: true, events, ..Default::default()
-            }, |ui| app.stl_profile_ui(ui.ctx()));
+            }, |ui| app.stl_profile_ui(ui));
             output.textures_delta.clear();
         }
         fn click(app: &mut MatrixApp, ctx: &egui::Context, pos: egui::Pos2) {

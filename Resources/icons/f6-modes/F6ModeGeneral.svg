@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>F6 General mode</title>
+  <rect x="3.5" y="3" width="25" height="26" rx="2" fill="#323738" stroke="#929a9b"/>
+  <circle cx="8" cy="9" r="2.2" fill="#efc91c"/><circle cx="8" cy="16" r="2.2" fill="#4caa58"/><circle cx="8" cy="23" r="2.2" fill="#468fe5"/>
+  <path d="M13 9h11m-11 7h11m-11 7h11" stroke="#e1e5df" stroke-width="2.4" stroke-linecap="round"/>
+</svg>

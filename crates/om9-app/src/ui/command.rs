@@ -37,7 +37,7 @@ fn apply_command_theme(ui: &mut egui::Ui) {
 }
 
 impl MatrixApp {
-    pub(super) fn command_history_ui(&mut self, ctx: &egui::Context) {
+    pub(super) fn command_history_shortcut(&mut self, ctx: &egui::Context) {
         if !self.viewport_menu_owns_frame {
             let shortcut = ctx.input_mut(|input| {
                 let pressed = input.events.iter().any(|event| {
@@ -51,15 +51,10 @@ impl MatrixApp {
                 self.command_history_open = !self.command_history_open;
             }
         }
-        if !self.command_history_open {
-            return;
-        }
+    }
+
+    pub(super) fn command_history_body(&mut self, ui: &mut egui::Ui) {
         let mut history = self.transcript.history();
-        egui::Window::new("Command History")
-            .id(egui::Id::new("om9-command-history"))
-            .open(&mut self.command_history_open)
-            .default_size([640., 280.])
-            .show(ctx, |ui| {
                 if self.viewport_menu_owns_frame {
                     ui.disable();
                 }
@@ -68,8 +63,9 @@ impl MatrixApp {
                         .font(egui::TextStyle::Monospace)
                         .desired_width(f32::INFINITY));
                 });
-            });
     }
+
+
 }
 
 pub(super) fn consume_command_shortcut(ctx: &egui::Context, shortcut: char) -> bool {
@@ -282,16 +278,15 @@ impl MatrixApp {
             }
         }
         if enter {
-            if suggestions_open {
+            if suggestions_open
+                && !self.cmd_suggestions.iter().any(|name| name.eq_ignore_ascii_case(&query))
+                && !self.controller.resolve_typed_command(&query)
+                    .is_some_and(|id| Controller::availability(id).is_ok())
+            {
                 let selected = self.cmd_suggestions[self.cmd_suggestion_index].clone();
-                if selected.eq_ignore_ascii_case(&query) {
-                    self.submit_draft();
-                } else {
-                    self.accept_command_suggestion(&selected);
-                }
-            } else {
-                self.submit_draft();
+                self.accept_command_suggestion(&selected);
             }
+            self.submit_draft();
         } else if !focused
             && !popup_open
             && self.transcript.draft().is_empty()
@@ -315,6 +310,19 @@ impl MatrixApp {
                 ))));
             state.store(&ctx, id);
             self.focus_cmd = false;
+        }
+
+        let cut = focused && ctx.input(|input| input.events.contains(&egui::Event::Cut));
+        if (focused || focus_requested)
+            && self.transcript.draft().is_empty()
+            && ctx.input(|input| input.events.iter().any(|event| {
+                matches!(event, egui::Event::Text(_) | egui::Event::Paste(_))
+            }))
+            && let Some(mut state) = TextEdit::load_state(&ctx, id)
+        {
+            // Start draft edit history against the current protected transcript.
+            state.clear_undoer();
+            state.store(&ctx, id);
         }
 
         let font = egui::TextStyle::Monospace.resolve(ui.style());
@@ -407,6 +415,15 @@ impl MatrixApp {
         }
         self.cmd_history_rect = Some(scrolled.inner_rect);
         let mut state = scrolled.inner.state;
+        if cut && let Some(range) = state.cursor.char_range()
+            && range.is_empty() && range.primary.index.0 < self.transcript.protected_chars()
+        {
+            // Ctrl+A/Cut can delete only the draft, while egui moves the caret to
+            // the beginning of the copied text. Leave the caret in the draft.
+            state.cursor.set_char_range(Some(CCursorRange::one(CCursor::new(
+                self.transcript.protected_chars(),
+            ))));
+        }
         let full_galley = scrolled.inner.galley;
         let full_origin = scrolled.inner.galley_pos;
         let history_chars = self.transcript.history().chars().count();
@@ -672,8 +689,6 @@ impl MatrixApp {
                 .order(egui::Order::Foreground)
                 .show(&ctx, |ui| {
                     egui::Frame::popup(ui.style())
-                        .fill(COMMAND_BG)
-                        .stroke(Stroke::new(1., COMMAND_GOLD.gamma_multiply(0.6)))
                         .show(ui, |ui| {
                             ui.set_min_width(rect.width().clamp(260., 420.));
                             for (index, name) in suggestions.iter().enumerate() {

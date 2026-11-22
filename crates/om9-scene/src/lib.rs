@@ -3,6 +3,7 @@
 #![forbid(unsafe_code)]
 pub mod affine;
 pub mod camera;
+pub mod mesh_outline;
 pub mod grid;
 pub mod gumball_view;
 pub mod osnap;

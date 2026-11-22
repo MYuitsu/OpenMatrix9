@@ -1,3 +1,6 @@
+<!-- rhino5-f6-mesh-outline-20261122 -->
+Batch `rhino5-f6-mesh-outline` passed one authored mesh fixture across 15 scenarios. OM9 matched the geometric paths in 14 cases and the native refusal in one. The test covers viewport depth, CPlane alignment and combined selection. One prepared exchange batch remains, `modeling-public-rhino5-generated-exchange` (4 fixtures, 7 objects). Packages 2–8 remain open. The total number of future batches is unknown. Next, run the prepared exchange batch when its fixture environment is available. [Evidence](2026-11-22-f6-matrix9.md#mesh-outline)
+
 <!-- snaps-native-v7-sphere-surface-20261119 -->
 Batch `snaps-native-v7-sphere-surface`, package 3. One authored sphere fixture passed after two executions. Wireframe and Shaded snapped to the restored native sphere, and v7 Save As and reopen preserved the source and Line. The first execution reached the 60-second test deadline in Save As. Save As took 82.0 seconds during the passing retry. One prepared exchange batch remains, `modeling-public-rhino5-generated-exchange` (4 fixtures and 7 objects). Packages 2–8 remain open and the total future count is unknown. Next, continue the prepared exchange batch when its fixture environment is available. [Evidence](2026-11-17-snaps-p07.md#surface-snap-on-a-native-sphere-reopened-from-v7)
 

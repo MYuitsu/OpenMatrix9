@@ -203,6 +203,7 @@ fn paste_that_retires_unicode_history_recomputes_layout_boundary_without_panicki
         app.transcript.append_history(&"h".repeat(4000));
     }
     app.transcript.append_history(&"x".repeat(700));
+    app.focus_command_editor();
     frame(&mut app, &ctx, vec![]);
     assert!(app.transcript.history().starts_with('中'));
     let draft = "é".repeat(1800);
@@ -270,7 +271,9 @@ fn dragging_from_pinned_suffix_to_history_selects_and_copies_the_same_document()
 fn ime_confirmation_enter_cannot_execute_provisional_command_or_coordinate() {
     let mut app = MatrixApp::new(Document::new("IME input")).unwrap();
     let ctx = egui::Context::default();
+    app.focus_command_editor();
     frame(&mut app, &ctx, vec![]);
+    assert!(ctx.memory(|m| m.has_focus(egui::Id::new("matrix-command-transcript"))));
     frame(
         &mut app,
         &ctx,

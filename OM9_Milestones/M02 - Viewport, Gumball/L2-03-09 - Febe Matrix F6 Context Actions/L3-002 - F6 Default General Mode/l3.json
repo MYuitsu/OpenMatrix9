@@ -189,6 +189,13 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
+    "factory_review_2026_11_22": {
+      "verification": "F6 General ShowSelected uses the ordinary viewport picker in a hidden-only scene. Enter shows the chosen roots in one undoable layer transaction. Esc restores the original scene and preselection.",
+      "status": "PARTIAL_RUNTIME",
+      "plan": "docs/plans/2026-11-22-f6-matrix9.md",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md",
+      "routes": "docs/validation/2026-11-22-f6-routes.tsv"
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

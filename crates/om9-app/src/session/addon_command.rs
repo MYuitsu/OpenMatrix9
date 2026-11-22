@@ -152,6 +152,9 @@ impl Controller {
     }
     /// Menu/icon/F6 gate: a built-in operation or a command an enabled add-on provides.
     pub fn is_available(&self, feature: &str) -> bool {
+        if feature == "OM9-UTIL-001" && self.curve_direction_unavailable().is_some() {
+            return false;
+        }
         if join_history_unavailable(feature) {
             return false;
         }
@@ -333,6 +336,7 @@ impl Controller {
         let scene = self.scene.as_ref().ok_or(Error::Missing("command scene"))?;
         if scene.epoch != self.coordinator.epoch() { return Err(Error::Stale("command scene")); }
         let created = mutations.len();
+        self.route_gem_inserts(&mut mutations, &Default::default())?;
         let held = self.scene_cache_usage()?;
         let undo_label = crate::icons::icon_name(code).unwrap_or(label).to_owned();
         let prepared = self

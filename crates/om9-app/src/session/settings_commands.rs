@@ -131,14 +131,14 @@ pub fn handles_command(feature: &str) -> bool {
 pub fn from_alias(text: &str) -> Option<&'static str> {
     let wanted = text.trim().to_ascii_lowercase();
     let wanted = match wanted.as_str() {
-        "prongbuilder" | "prong builder" | "prongadder" | "prong adder" => PRONG_BUILDER,
-        "prongeditor" | "prong editor" => PRONG_EDITOR,
-        "prongonsurface" | "prong on surface" => PRONG_ON_SURFACE,
-        "metalpiece" | "metal piece" | "metalfromgems" => METAL_PIECE,
-        "channelborder" | "channel border" | "channelbordercurve" => CHANNEL_BORDER,
-        "beadoncurve" | "bead on curve" | "beadoncrv" | "milgrain" => BEAD_ON_CURVE,
-        "beadonsurface" | "bead on surface" => BEAD_ON_SURFACE,
-        "pulltorail" | "pull to rail" => PULL_TO_RAIL,
+        "gvprongadder" | "prongbuilder" | "prong builder" | "prongadder" | "prong adder" => PRONG_BUILDER,
+        "gvprongeditor" | "prongeditor" | "prong editor" => PRONG_EDITOR,
+        "gvprongonsurface" | "prongonsurface" | "prong on surface" => PRONG_ON_SURFACE,
+        "gvmetalpiece" | "metalpiece" | "metal piece" | "metalfromgems" => METAL_PIECE,
+        "gvchannelborder" | "channelborder" | "channel border" | "channelbordercurve" => CHANNEL_BORDER,
+        "gvbeadoncrv" | "beadoncurve" | "bead on curve" | "beadoncrv" | "milgrain" => BEAD_ON_CURVE,
+        "gvorientonsurface" | "beadonsurface" | "bead on surface" => BEAD_ON_SURFACE,
+        "gvpulltorail" | "pulltorail" | "pull to rail" => PULL_TO_RAIL,
         _ => return None,
     };
     Some(wanted)
@@ -238,7 +238,7 @@ impl SettingsPending {
     pub fn prompt(&self) -> &'static str {
         match self.tool {
             SettingsTool::ProngBuilder => {
-                "Mode=, Diameter=, Height=, Nudge=, Ends=, Spacing=, or Enter"
+                "Mode=, Diameter=, Height=, Drop=, Nudge=, Ends=, Spacing=, or Enter"
             }
             SettingsTool::ProngEditor => "Diameter=, Height=, Angle=, Nudge=, Fillet=, or Enter",
             SettingsTool::ProngOnSurface => "Diameter=, Height=, Drop=, UV=, or Enter",
@@ -624,6 +624,7 @@ impl Controller {
                 ("Mode=", "Mode="),
                 ("Diameter=", "Diameter="),
                 ("Height=", "Height="),
+                ("Drop=", "Drop="),
                 ("Nudge=", "Nudge="),
                 ("Ends=", "Ends="),
                 ("Spacing=", "Spacing="),
@@ -732,6 +733,9 @@ impl Controller {
                 }
                 if let Some(value) = number(text, "height")? {
                     params.large_height_mm = value;
+                }
+                if let Some(value) = number(text, "drop")? {
+                    params.drop_mm = value;
                 }
                 if let Some(value) = number(text, "nudge")? {
                     params.nudge = value;

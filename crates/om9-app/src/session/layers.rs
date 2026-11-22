@@ -219,6 +219,9 @@ impl Controller {
         let mut usage = if self.selection_reservation.is_some() {
             om9_core::budget::Usage::default()
         } else { self.root_selection_usage()? };
+        if !self.grip_owners.is_empty() {
+            usage.add(om9_core::budget::Usage::btree::<ObjectId, (u64, om9_core::top11::GripMode)>(self.grip_owners.len())?, self.coordinator.limits())?;
+        }
         if let Some(pending) = &self.solid_pending {
             usage.add(pending.usage()?, self.coordinator.limits())?;
         }
@@ -272,13 +275,13 @@ impl Controller {
             .filter(|id| self.selection.contains(id))
             .copied()
             .collect();
-        for id in &self.selection {
-            if !ordered.contains(id) {
-                ordered.push(*id);
-            }
+        if ordered.len() < self.selection.len() {
+            let seen: std::collections::BTreeSet<_> = ordered.iter().copied().collect();
+            ordered.extend(self.selection.difference(&seen).copied());
         }
         ordered
     }
+    pub(crate) fn selection_revision(&self) -> u64 { self.selection_revision }
     pub fn clear_selection(&mut self) {
         self.clear_subselection();
         self.clear_gumball_preview();

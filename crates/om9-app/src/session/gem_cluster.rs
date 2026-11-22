@@ -9,7 +9,7 @@
 //! * `BuilderTaperBagBetweenTwoCurves` / `gvTaperBagBetweenTwoCurves` — one tapered baguette
 //!   between two walls (`-004`).
 //! * `BuilderGemBetweenTwoCurves` / `gvGemsBetween2Crvs` — stones touching both curves (`-005`).
-//! * `BuilderOrientToGem` / `gvOrientGems` — align a companion object to a gem (`-006`).
+//! * `BuilderOrientToGem` / `OrientToGem` — align a companion object to a gem (`-006`).
 //! * every committed layout stores one `om9.gem.cluster` feature, so re-running the builder
 //!   edits the existing children instead of stacking a second halo (`-007`).
 //!
@@ -43,11 +43,11 @@ pub const CHANNEL: &str = "BuilderTaperBagChannel";
 pub const TAPERED: &str = "BuilderTaperBagBetweenTwoCurves";
 /// `Gems Between 2 Curves` palette icon / `gvGemsBetween2Crvs` command.
 pub const BETWEEN: &str = "BuilderGemBetweenTwoCurves";
-/// `Orient to Gem` palette icon / `gvOrientGems` command.
+/// `Orient to Gem` palette icon / `OrientToGem` command.
 pub const ORIENT: &str = "BuilderOrientToGem";
 
 /// The builder an open session represents.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
 pub enum ClusterTool {
     Halo,
     Cluster,
@@ -77,7 +77,7 @@ impl ClusterTool {
             Self::Channel => "gvTaperBagChannel",
             Self::Tapered => "gvTaperBagBetweenTwoCurves",
             Self::Between => "gvGemsBetween2Crvs",
-            Self::Orient => "gvOrientGems",
+            Self::Orient => "OrientToGem",
         }
     }
     pub fn title(self) -> &'static str {
@@ -115,7 +115,7 @@ pub fn command_name(text: &str) -> Option<&'static str> {
         "gvtaperbagchannel" | "baguettechannel" | "baguette channel" => Some(CHANNEL),
         "gvtaperbagbetweentwocurves" | "taperbagbetweentwocurves" => Some(TAPERED),
         "gvgemsbetween2crvs" | "gemsbetween2curves" | "gems between 2 curves" => Some(BETWEEN),
-        "gvorientgems" | "orienttogem" | "orient to gem" => Some(ORIENT),
+        "orienttogem" | "orient to gem" | "om9-gem-009" => Some(ORIENT),
         _ => None,
     }
 }
@@ -570,7 +570,6 @@ impl Controller {
             return Err(Error::Budget("gem cluster accent count"));
         }
         let layer = self.gem_layer()?;
-        self.ensure_layer_writable(layer)?;
         let host = session.host.ok_or(Error::Missing("gem cluster host"))?;
         let host_entity = self
             .document()

@@ -190,6 +190,70 @@ fn loader_options_change_the_cut_shape_size_and_depth() {
 }
 
 #[test]
+fn gem_palette_reuses_groups_across_reopen_and_spills_into_user_layers() {
+    let mut c = controller();
+    fn place(c: &mut Controller, shape: &str, size: &str, material: &str) -> u8 {
+        let before: BTreeSet<_> = c.document().entities.keys().copied().collect();
+        c.dispatch(LOADER, InvocationOrigin::Cmd).unwrap();
+        for option in [format!("Shape={shape}"), format!("Size={size}"), format!("Material={material}"), "BRep=No".into()] {
+            c.submit(&option).unwrap();
+        }
+        c.submit("").unwrap();
+        let entity = c.document().entities.values().find(|e| !before.contains(&e.id)).unwrap();
+        assert!(entity.attributes.color.is_none());
+        c.document().layers[&entity.attributes.layer.unwrap()].preset_slot.unwrap().number()
+    }
+    assert_eq!(place(&mut c, "Round", "3", "Diamond"),5);
+    assert_eq!(place(&mut c, "Round", "4", "Diamond"),6);
+    assert_eq!(place(&mut c, "Round", "3.000", "Diamond"),5);
+    assert_eq!(place(&mut c, "Round", "3", "Ruby"),7);
+    assert_eq!(place(&mut c, "Oval", "4x3", "Diamond"),8);
+    let limits = Limits::default();
+    let bytes = om9_archive::Archive::encode(c.document(), &limits).unwrap();
+    let reopened = om9_archive::Archive::decode(&bytes, &limits).unwrap();
+    let mut c = Controller::new(reopened, limits).unwrap();
+    let before = c.document().layers.len();
+    assert_eq!(place(&mut c, "Round", "5", "Diamond"),9);
+    c.undo().unwrap();
+    assert_eq!(c.document().layers.len(),before);
+    c.redo().unwrap();
+    assert_eq!(place(&mut c, "Round", "5", "Diamond"),9);
+    assert_eq!(place(&mut c, "Round", "3", "Diamond"),5);
+    assert_eq!(place(&mut c, "Round", "6", "Diamond"),10);
+    let colors: Vec<_> = (5..=8).map(|slot| c.document().layers.values().find(|l| l.preset_slot.map(|s|s.number())==Some(slot)).unwrap().color).collect();
+    assert_eq!(colors, [[0,60,160,255],[65,120,205,255],[130,180,250,255],[175,208,255,255]]);
+}
+
+#[test]
+fn loader_size_selection_tracks_the_dial_page_boundaries() {
+    let mut controller = controller();
+    controller.dispatch(LOADER, InvocationOrigin::Cmd).unwrap();
+    for (command, index, page) in [
+        ("Size=1", 0, 1),
+        ("Size=3.4", 22, 1),
+        ("Size=3.5", 23, 2),
+        ("Size=6.8", 43, 2),
+        ("Size=7", 44, 3),
+        ("Size=6.8", 43, 3),
+        ("Size=11.2", 64, 3),
+    ] {
+        controller.submit(command).unwrap();
+        let session = controller.gem_session().unwrap();
+        assert_eq!(session.size_index, index);
+        assert_eq!(session.size_page, page);
+    }
+    controller.submit("Shape=Oval").unwrap();
+    controller.submit("Size=6×4").unwrap();
+    let spec = controller.gem_session().unwrap().spec().unwrap();
+    assert_eq!([spec.length_mm, spec.width_mm], [6.0, 4.0]);
+    assert!((spec.depth_mm() - 2.449197025885012).abs() < 1.0e-12);
+    controller.submit("Percentage=60").unwrap();
+    let spec = controller.gem_session().unwrap().spec().unwrap();
+    assert_eq!([spec.length_mm, spec.width_mm], [6.0, 4.0]);
+    assert!((spec.depth_mm() - 2.4).abs() < 1.0e-12);
+}
+
+#[test]
 fn a_bad_loader_option_is_refused_and_the_session_stays_open() {
     let mut controller = controller();
     controller
@@ -705,4 +769,73 @@ fn the_brep_option_keeps_the_portable_mesh_body() {
         controller.document().entities[&id].geometry,
         Geometry::Mesh(_)
     ));
+}
+
+#[test]
+fn dust_marquire_previews_and_reopens_with_its_named_shape_and_dimensions() {
+    for (origin, option) in [
+        (InvocationOrigin::Menu, "Shape=Dust Marquire"),
+        (InvocationOrigin::Cmd, "Cut=dust-marquire"),
+    ] {
+        let mut controller = controller();
+        controller.dispatch(LOADER, origin).unwrap();
+        controller.submit(option).unwrap();
+        let session = controller.gem_session().unwrap();
+        assert_eq!(session.shape, GemShape::DustMarquire);
+        assert_eq!(session.cut, GemCut::Diamond);
+        assert_eq!(session.dimensions, [11.52, 6.04643, 3.93127]);
+        assert!(session.preview().unwrap().closed);
+        assert!(controller.document().entities.is_empty());
+        assert!(controller.submit("BRep=Yes").is_err());
+        controller.submit("").unwrap();
+        let id = only_gem(&controller);
+        let spec = gem_record_in(controller.document(), id).unwrap().spec;
+        assert!((spec.girdle_mm - 0.20914).abs() < 1e-9);
+        assert!(matches!(controller.document().entities[&id].geometry, Geometry::Mesh(_)));
+        controller.undo().unwrap();
+        assert!(controller.document().entities.is_empty());
+        controller.redo().unwrap();
+        let path = std::env::temp_dir().join(format!("om9-dust-marquire-{id}.om9"));
+        controller.save_archive_for_batch(&path).unwrap();
+        let reopened = Controller::from_file(&path, Limits::default());
+        std::fs::remove_file(&path).unwrap();
+        assert_eq!(gem_record_in(reopened.unwrap().document(), id).unwrap().spec, spec);
+    }
+}
+
+#[test]
+fn loader_routes_pearl_to_the_same_preview_and_commit() {
+    let mut controller = controller();
+    controller.dispatch(LOADER, InvocationOrigin::Cmd).unwrap();
+    controller.submit("Cut=Pearl").unwrap();
+    controller.submit("Size=6.2").unwrap();
+    controller.submit("BRep=No").unwrap();
+    let session = controller.gem_session().unwrap();
+    assert_eq!(session.cut, GemCut::Pearl);
+    assert_eq!(session.preview().unwrap().extents_mm, [6.2; 3]);
+    controller.submit("").unwrap();
+    let gem = gem_record_in(controller.document(), only_gem(&controller)).unwrap();
+    assert_eq!(gem.spec.cut, GemCut::Pearl);
+    assert_eq!(gem.spec.depth_mm(), 6.2);
+}
+
+#[cfg(feature = "occt-brep")]
+#[test]
+fn loader_inserts_two_independent_brep_bodies_in_one_undo_step() {
+    let mut controller = controller();
+    controller.dispatch(LOADER, InvocationOrigin::Cmd).unwrap();
+    controller.submit("0,0,0").unwrap();
+    controller.submit("10,0,0").unwrap();
+    controller.submit("").unwrap();
+    let entities = &controller.document().entities;
+    assert_eq!(entities.len(), 2);
+    assert!(entities.values().all(|entity| matches!(entity.geometry, Geometry::Brep(_))));
+    let ids: Vec<_> = entities.keys()
+        .map(|id| gem_record_in(controller.document(), *id).unwrap().gem_id)
+        .collect();
+    assert_ne!(ids[0], ids[1]);
+    controller.undo().unwrap();
+    assert!(controller.document().entities.is_empty());
+    controller.redo().unwrap();
+    assert_eq!(controller.document().entities.len(), 2);
 }

@@ -57,7 +57,7 @@ impl Controller {
         {
             return Some(super::polyline::POLYLINE);
         }
-        if text.eq_ignore_ascii_case("interpcrv")
+        if text.eq_ignore_ascii_case("interpcurve") || text.eq_ignore_ascii_case("interpcrv")
             || text.eq_ignore_ascii_case(super::interp::INTERP)
         {
             return Some(super::interp::INTERP);
@@ -72,6 +72,7 @@ impl Controller {
         }
         if text.eq_ignore_ascii_case("arc_startpoint")
             || text.eq_ignore_ascii_case("arc startpoint")
+            || text.eq_ignore_ascii_case("arc s") || text.eq_ignore_ascii_case("arcdir")
             || text.eq_ignore_ascii_case("arcdirection")
             || text.eq_ignore_ascii_case(super::arc::ARC_START)
         {

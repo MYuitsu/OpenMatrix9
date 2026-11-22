@@ -86,12 +86,30 @@ fn every_window_of_the_application_carries_an_identity() {
                 continue;
             }
             let text = std::fs::read_to_string(&path).expect("file is readable");
-            windows += text.matches(OPENING).count();
+            windows += text.matches(OPENING).count() + text.matches("egui::Area::new(").count() + text.matches("egui::Modal::new(").count();
             let relative = path
                 .strip_prefix(&root)
                 .unwrap_or(&path)
                 .display()
                 .to_string();
+            if relative != "ui\\theme.rs" && relative != "ui/theme.rs" {
+                for opening in [OPENING, "egui::Modal::new(", "egui::Popup::menu(", "egui::Visuals::light()"] {
+                    offenders.extend(text.match_indices(opening)
+                        .map(|(at, _)| format!("{relative}:{} bypasses the OM9 theme", line_of(&text, at))));
+                }
+            }
+            // Custom Areas have pointer capture or attachment rules specific to their owner.
+            let file = relative.replace('\\', "/");
+            for (at, _) in text.match_indices("egui::Area::new(") {
+                let line = text[at..].lines().next().unwrap_or_default();
+                let approved = [
+                    ("ui.rs", "om9-pick-popup"), ("ui/tool_host.rs", "om9-floating-tool"),
+                    ("ui/command.rs", "command-suggestions"), ("ui/command.rs", "cmd-session-tokens"),
+                    ("ui/command.rs", "cmd-builder-tokens"), ("ui/addons_window.rs", "addon-drop-hint"),
+                    ("ui/gumball_gpu_tests.rs", "test-gumball-overlay"),
+                ].iter().any(|(owner, id)| file == *owner && line.contains(id));
+                if !approved { offenders.push(format!("{file}:{} unregistered Area", line_of(&text, at))); }
+            }
             offenders.extend(
                 windows_without_id(&text)
                     .into_iter()

@@ -60,21 +60,17 @@ impl MatrixApp {
     }
 
     /// The cutter window. `Apply` commits one transaction; `Cancel` drops the session.
-    pub(super) fn gem_cutters_window_ui(&mut self, ctx: &egui::Context) {
+    pub(super) fn gem_cutters_panel_ui(&mut self, ui: &mut egui::Ui) {
         let Some(mut session) = self.controller.gem_cutter_session().cloned() else {
             return;
         };
-        let mut open = true;
+
         let mut apply = false;
         let mut cancel = false;
         let mut dirty = false;
         let title = format!("{} ({} stone)", session.tool.label(), session.stones.len());
-        egui::Window::new(title)
-            .id(egui::Id::new(("om9-gem-cutters", session.tool.feature())))
-            .open(&mut open)
-            .default_width(410.0)
-            .resizable(false)
-            .show(ctx, |ui| {
+        ui.label(title);
+        ui.scope(|ui| {
                 ui.label(session.message.clone());
                 ui.separator();
                 match session.tool {
@@ -209,7 +205,7 @@ impl MatrixApp {
                 ui.separator();
                 ui.horizontal(|ui| {
                     cancel = ui.button("Cancel").clicked();
-                    apply = ui.button("Apply").clicked();
+                    apply = ui.add(super::theme::primary_button("Apply")).clicked();
                 });
             });
         if dirty {
@@ -225,7 +221,7 @@ impl MatrixApp {
             if let Err(error) = self.controller.gem_cutter_commit() {
                 self.controller.warn(&format!("{error:?}"));
             }
-        } else if cancel || !open {
+        } else if cancel {
             self.controller.gem_cutter_cancel();
         }
     }

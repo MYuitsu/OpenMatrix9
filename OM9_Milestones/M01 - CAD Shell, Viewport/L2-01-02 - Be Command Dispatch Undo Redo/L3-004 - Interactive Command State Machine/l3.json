@@ -194,5 +194,13 @@
     "rule": "Chỉ bề mặt plugin cần (dữ liệu/sự kiện/hành động) mới vào SDK v1; kernel hình học, UI và adapter host nội bộ không vào SDK.",
     "note": "State machine tương tác là host UI.",
     "api": []
+  },
+  "runtime_implementation": {
+    "command_ui_events_2026_11_23": {
+      "date": "2026-11-23",
+      "status": "validated",
+      "scope": "Idle viewport typing enters CMD after declared shortcuts. Replayed Point and Line commands, text and document Undo, Redo, Escape and protected clipboard edits.",
+      "evidence": "docs/validation/2026-11-23-command-ui-events.md"
+    }
   }
 }

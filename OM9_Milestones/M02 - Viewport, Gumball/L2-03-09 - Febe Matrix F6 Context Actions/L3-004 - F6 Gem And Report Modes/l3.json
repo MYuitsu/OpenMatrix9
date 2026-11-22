@@ -194,6 +194,13 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
+    "factory_review_2026_11_22": {
+      "verification": "Report counts selected categories and groups stones by shape, material, RGB, recorded dimensions and carat. Tested object and layer metal assignment, rebinding quality, changed selection, and surface grips. F6 Materials applies to two selected entities with archive round-trip and single Undo.",
+      "status": "PARTIAL_RUNTIME",
+      "plan": "docs/plans/2026-11-22-f6-matrix9.md",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md",
+      "routes": "docs/validation/2026-11-22-f6-routes.tsv"
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

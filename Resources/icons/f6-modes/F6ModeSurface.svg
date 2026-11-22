@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <title>F6 Surface mode</title>
+  <path d="M6 7q11 5 20-2l-2 20q-11 5-19-2Z" fill="#315c38" stroke="#70ba76" stroke-width="1.4"/>
+  <path d="M7 14q10 5 18-1m-10-5q-2 9-1 18" fill="none" stroke="#92c995" stroke-width="1.2"/>
+  <g fill="#b5e3a5"><circle cx="6" cy="7" r="2.1"/><circle cx="26" cy="5" r="2.1"/><circle cx="24" cy="25" r="2.1"/><circle cx="5" cy="23" r="2.1"/></g>
+</svg>

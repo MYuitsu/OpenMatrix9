@@ -167,6 +167,30 @@
     "OM9-L4-09-003-03"
   ],
   "runtime_implementation": {
+    "dust_marquire_2026_11_23": {
+      "status": "SCOPED_AUTOMATED_RUNTIME_VERIFIED",
+      "date": "2026-11-23",
+      "scope": "Dust Marquire appears in the Diamond Cut gallery and uses one OM9 sample preset.",
+      "evidence": "docs/features/OM9-L3-04-09-003.md"
+    },
+    "round_top_and_palette_2026_11_22": {
+      "status": "SCOPED_GEM_RUNTIME_VERIFIED",
+      "scope": "Gem groups reuse a layer by shape, cut, material and nominal length/width. New groups advance from Gem 01 through Gem 04 and then User. Mesh archive round trip, Undo and Redo checked.",
+      "evidence": "docs/validation/2026-11-22-round-wire-palette.md"
+    },
+    "round_diamond_wireframe_2026_11_22": {
+      "scope": "Round Diamond preview and committed BRep draw the facet boundaries. The BRep has a single octagonal table face, and the mesh wireframe omits its internal tessellation edges.",
+      "evidence": "docs/validation/2026-11-22-gem-placement.md#wireframe-round-diamond"
+    },
+    "gem_panel_theme_2026_11_22": {
+      "scope": "Compact five-column Gem Shape gallery and a size dial with original cut–shape presets, depth ratio and inclusive tab boundaries. Metadata comparison covers 51 regular and six corner-to-corner catalogs.",
+      "evidence": "docs/validation/2026-11-22-dock-popup-theme.md#matrix9-size-catalog-and-tabs"
+    },
+    "gem_workflow_2026_11_22": {
+      "status": "PARTIAL_VALIDATED_M05_UI_OPEN",
+      "scope": "Clickable shape thumbnails and paginated size presets for Diamond, Simple, Gem, Cabochon and round Pearl. F4 world placement, multi-point BRep ownership, percentage and transfer to Surface.",
+      "evidence": "docs/validation/2026-11-22-gem-placement.md"
+    },
     "date": "2026-10-27",
     "status": "AUTOMATED_VERIFIED_MANUAL_UI_PENDING",
     "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",

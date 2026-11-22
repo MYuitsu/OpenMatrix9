@@ -75,6 +75,12 @@ class AssetsTests(unittest.TestCase):
             report = export_assets(root, out)
             self.assertTrue(icon.is_file())
             ini = configparser.ConfigParser(); ini.read(out / 'menu/icons.ini')
+            for name in ('General', 'Surface', 'TSplines', 'User', 'Report', 'Materials'):
+                key = 'F6Mode' + name
+                entry = ini[key]
+                self.assertEqual(entry['mapping'], 'authored-panel-symbol')
+                icon_bytes = (out / entry['image']).read_bytes()
+                self.assertEqual(report['authored_symbols'][key]['sha256'], hashlib.sha256(icon_bytes).hexdigest())
             self.assertEqual(ini['ToolbarSculptBrush']['image'], 'icons/toolbar-sculpt/ToolbarSculptBrush.svg')
             self.assertEqual(report['authored_symbols']['ToolbarSculptBrush']['sha256'], hashlib.sha256(icon.read_bytes()).hexdigest())
             self.assertTrue(emboss.is_file())

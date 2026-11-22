@@ -15,6 +15,24 @@ use om9_core::metal_weight::{
 #[cfg(feature = "occt-brep")]
 use om9_core::metal_weight::{SolidMeasure, closed_solid_volume_mm3};
 use om9_core::model::Entity;
+use om9_core::identity::MaterialId;
+
+pub(crate) fn effective_render_material(
+    document: &om9_core::model::Document,
+    entity: &Entity,
+    parent_material: Option<MaterialId>,
+    has_parent: bool,
+) -> Result<Option<MaterialId>> {
+    match entity.attributes.material_source {
+        1 => Ok(entity.attributes.material),
+        3 if has_parent => Ok(parent_material),
+        0 | 3 => match entity.attributes.layer {
+            Some(layer) => Ok(document.layers.get(&layer).ok_or(Error::Missing("metal object layer"))?.material),
+            None => Ok(None),
+        },
+        _ => Err(Error::Unsupported("metal material source")),
+    }
+}
 
 /// Measure every solid occurrence under one selected root. Placements scale source
 /// volume by the absolute affine determinant; no display tessellation is used.
@@ -386,19 +404,7 @@ impl Controller {
                 if self.cancel.is_canceled() { return Err(Error::Canceled); }
                 self.count = self.count.checked_add(1).ok_or(Error::Overflow("metal weight occurrences"))?;
                 if self.count > self.limits.max_nodes { return Err(Error::Budget("metal weight occurrences")); }
-                let layer_material = || -> Result<Option<om9_core::identity::MaterialId>> {
-                    match e.attributes.layer {
-                        Some(id) => Ok(self.doc.layers.get(&id).ok_or(Error::Missing("metal object layer"))?.material),
-                        None => Ok(None),
-                    }
-                };
-                let effective = match e.attributes.material_source {
-                    0 => layer_material()?,
-                    1 => e.attributes.material,
-                    3 if has_parent => parent_material,
-                    3 => layer_material()?,
-                    _ => return Err(Error::Unsupported("metal material source")),
-                };
+                let effective = effective_render_material(self.doc, e, parent_material, has_parent)?;
                 let placement = parent.compose(e.placement)?;
                 self.path.try_reserve(1).map_err(|_| Error::Budget("metal occurrence path"))?;
                 self.path.push(e.id);

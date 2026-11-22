@@ -9705,6 +9705,36 @@
         "#FFFF05",
         "#FFFFFF"
       ]
+    },
+    "F6ModeGeneral": {
+      "symbol": "F6ModeGeneral",
+      "mapping": "authored-panel-symbol",
+      "sha256": "feaee02cc9804a9427c1638b80a4bef9738c7f9330da46c25e6f1a9cf32731ae"
+    },
+    "F6ModeSurface": {
+      "symbol": "F6ModeSurface",
+      "mapping": "authored-panel-symbol",
+      "sha256": "f1bc532a33b89ac274684eccec51a8cb04933279b6646c12f02c57be85a6308d"
+    },
+    "F6ModeTSplines": {
+      "symbol": "F6ModeTSplines",
+      "mapping": "authored-panel-symbol",
+      "sha256": "9b35b337a17608e8c86bda95158f168c118d6f81de87647894f0176cd770f77c"
+    },
+    "F6ModeUser": {
+      "symbol": "F6ModeUser",
+      "mapping": "authored-panel-symbol",
+      "sha256": "8b3bfb8a8d29bf6fe91639795797d0321d3e81ebcb0ca401bf82112e4c7cf470"
+    },
+    "F6ModeReport": {
+      "symbol": "F6ModeReport",
+      "mapping": "authored-panel-symbol",
+      "sha256": "a8dd5f6b4e50d8a08072a223ddf7fd1581efe806862761093bdbca2556c64f1e"
+    },
+    "F6ModeMaterials": {
+      "symbol": "F6ModeMaterials",
+      "mapping": "authored-panel-symbol",
+      "sha256": "3aba7be2cc16130e0a169479550b0d7e0a49053b0b719b8fcc608bbf39925a73"
     }
   },
   "curve_icon_style": {

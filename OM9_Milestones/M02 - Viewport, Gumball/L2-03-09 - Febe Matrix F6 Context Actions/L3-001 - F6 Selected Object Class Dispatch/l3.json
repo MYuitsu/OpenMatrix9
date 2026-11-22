@@ -187,6 +187,50 @@
     "tolerance_policy": "Use document absolute tolerance of M01; do not guess at source pin; pixel threshold calibrated for DPR."
   },
   "runtime_implementation": {
+    "f6_tapered_2026_11_23": "Two Surface F6 entries and CMD share ExtrudeCrvTapered. Checked independent signed-height, angle, Sharp/Round/Smooth and bounded-face geometry, selected profiles, world-space preview/pick, DeleteInput and single Undo. Inclined rectangles match twelve geometry fixtures. A whole inclined circle and an angular two-arc join still differ from Rhino 5.14. Surface/Solid menu preset parity remains unverified. See docs/validation/2026-11-22-f6-matrix9.md#extrudecrvtapered-om9.",
+    "extrude_to_point_f6_2026_11_23": {
+      "entry": "Three original F6 curve-to-point entries and CMD share the OM9 point session.",
+      "geometry": "Ruled BRep, off-axis apex, optional cap for a closed planar profile, selected boundary face, tangent joins and one transaction for multiple source curves.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#extrude-to-point",
+      "remaining": "The separate Surface/Curve spelling ExtrudetoPoint has no verified provider. Tapered extrusion is still pending."
+    },
+    "curve_direction_2026_11_23": {
+      "verified": "Two factory scripts in four curve groups route through Dir. F6 clicks and CMD cover individual flips, FlipAll, double flip, Escape, postselection, signed domains and Undo. The reference includes twelve Rhino command cases and three viewport image pairs.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#curve-direction",
+      "remaining": "79 distinct scripts without an active handler. Non-uniform polycurve parent domains in 3DM and surface-direction controls remain open."
+    },
+    "viewport_to_file_2026_11_23": {
+      "verified": "Factory General/Empty and Surface/Empty share the capture command with the Display toolbar and CMD. GPU integration covers unsaved geometry, six image formats, dimensions, scale, grid, world axes, CPlane axes and transparent Wireframe/Shaded output. The owned Windows dialog accepts and cancels.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#viewport-to-file",
+      "remaining": "At the viewport capture checkpoint 81 distinct factory scripts lacked a handler. See the subsequent Curve Direction record for the updated count."
+    },
+    "from_lines_geometry_2026_11_23": {
+      "verified": "Standalone geometry constructs automatic and manual faces, including a nested hole and a five-sided cap. Ray picking, separate vertex fans, and Box/Smooth parent polygon IDs have fixtures.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#from-lines",
+      "remaining": "The 3Crv row, viewport chooser, creation and one Undo have click replay. Box/Smooth parent face IDs survive archive reload and F6 face edits. Native tie-breaking, defaults and colour identity still await an installed T-Splines reference."
+    },
+    "split_curves_2026_11_23": {
+      "verified": "The TSplines/3Crv factory row opens the shared tsSplitCurves session. The tolerance dialog, Display, OK, Cancel and one Undo were replayed. The file and custom tolerances are tested in inches.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#split-curves",
+      "remaining": "The Surface/TwoProfiles row awaits an original profile fixture. Native Display rendering and closed single-touch behavior remain unmeasured."
+    },
+    "edge_extraction_2026_11_23": {
+      "verified": "Selection of a source cage edge exposes both Extract Edges factory macros. A plain viewport click collects edges when tsExtractEdges runs before selection. The direct macro selects the new curves. Offset captures its input generation and accepts a pointer or fraction, preview and Enter.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#extract-edge-curves",
+      "limits": "Regular uncreased quad cages and their open grid boundaries. The vendor plug-in's behavior at missing sides and its joining of adjacent edges remain unmeasured."
+    },
+    "extrude_lines_2026_11_23": {
+      "verified": "3Crv factory row, CMD and menu accept a shared working profile, signed distance and a two-point direction. Curved rails preserve exact geometry through archive reload. Solid caps a rectangle and circle in a mixed selection; the arc remains an exact curved rail. Save/Open, signed heights, BothSides and one Undo have runtime evidence. ToBoundary covers signed direction, curved rails, trim holes, selected polysurface faces and cancellation. SplitAtTangents matches measured Rhino 5 BRep face/edge counts and volume on a capped stadium with both distance and boundary input.",
+      "remaining": "The object types and connector counts returned by the original T-Splines plug-in remain unmeasured.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#extrude-lines"
+    },
+    "factory_review_2026_11_22": {
+      "verification": "All 250 groups retain a category per row; Split has five different categories across contexts. An actual NURBS surface control grip chooses its factory class and its own Report count; the curve grip test retains Set Point Z. Authored box cages route to CTMeshObject and their vertex, edge and face picks route to the corresponding T-Spline factory groups. From these groups, Loop, Grow, Shrink, face/edge U/V and face Paint exercise actual cage selections.",
+      "status": "PARTIAL_RUNTIME",
+      "plan": "docs/plans/2026-11-22-f6-matrix9.md",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md",
+      "routes": "docs/validation/2026-11-22-f6-routes.tsv"
+    },
     "date": "2026-10-22",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9",

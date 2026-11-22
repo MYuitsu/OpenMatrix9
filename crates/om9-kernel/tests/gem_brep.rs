@@ -5,6 +5,35 @@ use om9_core::gem::{CustomGemParams, GemCut, GemShape, GemSpec, build_mesh};
 use om9_kernel::brep::source_volume;
 use om9_kernel::gem::gem_brep;
 
+#[test]
+fn round_diamond_table_has_only_its_eight_boundary_edges() {
+    let limits = Limits::default();
+    for diameter in [1.0, 3.10, 11.20] {
+        let spec = GemSpec::round(diameter, diameter * 0.62234).unwrap();
+        let gem = build_mesh(&spec).unwrap();
+        let facets = gem.authored_faces().unwrap();
+        let mut portable_edges = std::collections::BTreeSet::new();
+        for face in gem.mesh.faces.iter().take(6) {
+            for (&a, &b) in face.iter().zip(face.iter().cycle().skip(1)) {
+                if !om9_core::gem::round_table_tessellation_edge(&gem.mesh, a, b) {
+                    portable_edges.insert([a.min(b), a.max(b)]);
+                }
+            }
+        }
+        assert_eq!(portable_edges.len(), 8);
+        let body = gem_brep(&gem, &limits).unwrap();
+        let display = body.display();
+        assert_eq!(display.faces.len(), facets.len());
+        let height = spec.girdle_mm * 0.5 + spec.crown_height_mm;
+        let table_edges: std::collections::BTreeSet<_> = display.segments.iter().filter_map(|&[a, b, edge]| {
+            let on_table = |i| (display.points[i as usize][2] - height).abs() < 1e-7;
+            (on_table(a) && on_table(b)).then_some(edge)
+        }).collect();
+        assert_eq!(table_edges.len(), 8, "only the octagonal boundary at Ø{diameter} mm");
+        assert_eq!(om9_kernel::brep::inspect_source(body.source(), &limits).unwrap()[0], facets.len() as u64);
+    }
+}
+
 fn specs() -> Vec<(&'static str, GemSpec)> {
     vec![
         ("round diamond", GemSpec::round(6.5, 3.95).expect("round")),
@@ -54,6 +83,25 @@ fn specs() -> Vec<(&'static str, GemSpec)> {
 }
 
 #[test]
+fn dust_marquire_has_a_single_hexagonal_table_face() {
+    let library = om9_core::gem::GemLibrary::canonical();
+    let asset = library.asset(GemShape::DustMarquire, GemCut::Diamond).unwrap();
+    let spec = asset.spec_for(&asset.sizes[0]).unwrap();
+    let gem = build_mesh(&spec).unwrap();
+    let limits = Limits::default();
+    let body = gem_brep(&gem, &limits).unwrap();
+    assert_eq!(body.display().faces.len(), 25);
+    let height = spec.girdle_mm * 0.5 + spec.crown_height_mm;
+    let display = body.display();
+    let table_edges: std::collections::BTreeSet<_> = display.segments.iter().filter_map(|&[a,b,edge]| {
+        let on_table = |i| (display.points[i as usize][2] - height).abs() < 1e-7;
+        (on_table(a) && on_table(b)).then_some(edge)
+    }).collect();
+    assert_eq!(table_edges.len(), 6);
+    assert!((source_volume(&body, &limits).unwrap() - gem.volume_mm3).abs() < 1e-6);
+}
+
+#[test]
 fn every_gem_cut_becomes_one_closed_editable_solid() {
     let limits = Limits::default();
     for (name, spec) in specs() {
@@ -69,7 +117,7 @@ fn every_gem_cut_becomes_one_closed_editable_solid() {
             gem.volume_mm3
         );
         assert!(
-            !brep.display.faces.is_empty(),
+            !brep.display().faces.is_empty(),
             "{name}: the B-Rep keeps the authored facets as faces"
         );
         assert!(

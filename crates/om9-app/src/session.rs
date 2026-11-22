@@ -4890,6 +4890,7 @@ mod pull;
 mod rebuild;
 mod rect;
 mod registry;
+pub mod context_presets;
 mod refit_srf;
 mod revolve;
 pub mod ring_tools;
@@ -4934,6 +4935,18 @@ mod addon_dialog;
 pub use addon_dialog::{AddonDialog, DialogKind, DialogRow, humanize};
 mod addon_session;
 mod boolean_builder_worker;
+pub(crate) mod mesh_boolean;
+mod reduce_mesh;
+mod split_curves;
+pub mod from_lines;
+pub(crate) mod extrude_lines;
+pub(crate) mod extrude_point;
+mod show_selected;
+pub(crate) mod curve_direction;
+mod mesh_outline;
+mod tspline_faces;
+mod tspline_edges;
+pub(crate) mod tspline_manipulator;
 pub use addon_session::AddonSession;
 mod addon_command;
 pub use addon_command::IconTarget;
@@ -5520,6 +5533,21 @@ pub struct Controller {
     metal_panel_object_materials: bool,
     metal_request_generation: u64,
     join_history_worker: Option<join_history_worker::JoinHistoryJob>,
+    reduce_mesh: Option<reduce_mesh::Reduction>,
+    split_curves: Option<split_curves::SplitCurves>,
+    from_lines: Option<from_lines::FromLines>,
+    extrude_lines: Option<extrude_lines::ExtrudeLines>,
+    extrude_point: Option<extrude_point::ExtrudePoint>,
+    extrude_point_defaults: extrude_point::Defaults,
+    pub(crate) view_capture: Option<crate::viewport_capture::Session>,
+    pub(crate) curve_direction: Option<curve_direction::Session>,
+    pub(crate) capture_settings: crate::viewport_capture::Settings,
+    extrude_lines_defaults: extrude_lines::Defaults,
+    taper_defaults: extrude_lines::tapered::Defaults,
+    cage_paint_mode: Option<(om9_core::identity::DocumentId, om9_scene::scene::PickKind)>,
+    cage_manipulator: Option<(om9_core::identity::DocumentId, om9_scene::gumball_view::Mode, om9_scene::scene::PickKind)>,
+    cage_preview_edges: Vec<[Point3; 2]>,
+    isolated_selection: Option<show_selected::IsolatedSelection>,
     boolean_builder_worker: Option<boolean_builder_worker::BooleanBuilderJob>,
     boolean_builder_active: Arc<std::sync::atomic::AtomicBool>,
     background_boolean_builder: bool,
@@ -5555,7 +5583,8 @@ pub struct Controller {
     settings_sequence: u64,
     last_settings_mass: Option<self::settings_commands::SettingsMassReport>,
     /// Active edit/control point display for the selected curves.
-    top11_grip: Option<om9_core::top11::GripMode>,
+    grip_owners: std::collections::BTreeMap<om9_core::identity::ObjectId, (u64, om9_core::top11::GripMode)>,
+    grip_revision: u64,
     /// Grips picked by click or window while grips are on: (object, grip index).
     grip_selection: Vec<(om9_core::identity::ObjectId, usize)>,
     /// The gumball transform being previewed on the selected grips.
@@ -6028,6 +6057,21 @@ impl Controller {
             metal_panel_object_materials: false,
             metal_request_generation: 0,
             join_history_worker: None,
+            reduce_mesh: None,
+            split_curves: None,
+            from_lines: None,
+            extrude_lines: None,
+            extrude_point: None,
+            extrude_point_defaults: Default::default(),
+            view_capture: None,
+            curve_direction: None,
+            capture_settings: Default::default(),
+            extrude_lines_defaults: Default::default(),
+            taper_defaults: Default::default(),
+            cage_paint_mode: None,
+            cage_manipulator: None,
+            cage_preview_edges: Vec::new(),
+            isolated_selection: None,
             boolean_builder_worker: None,
             boolean_builder_active: Arc::new(std::sync::atomic::AtomicBool::new(false)),
             background_boolean_builder: false,
@@ -6056,7 +6100,8 @@ impl Controller {
             settings_border: None,
             settings_sequence: 0,
             last_settings_mass: None,
-            top11_grip: None,
+            grip_owners: Default::default(),
+            grip_revision: 0,
             grip_selection: Vec::new(),
             grip_preview: None,
             subselection: Vec::new(),
@@ -6178,6 +6223,16 @@ impl Controller {
         reservation: om9_core::transaction::ExternalMemoryReservation) -> Result<()> {
         let shared = self.prepare_shared_topology_proof(stamp, proof, reservation)?;
         self.cache_topology_proof(shared)
+    }
+    #[cfg(feature = "occt-brep")]
+    fn retain_published_brep_proof(&mut self, id: om9_core::identity::ObjectId,
+        proof: om9_kernel::brep::TopologyAttestation,
+        storage: om9_core::transaction::ExternalMemoryReservation) -> Result<()> {
+        let stamp = self.document().stamp(id)?;
+        let shared = self.prepare_shared_topology_proof(stamp, proof, storage)?;
+        let history = self.retain_current_topology_proof(shared.clone());
+        let cache = self.cache_topology_proof(shared);
+        history.or(cache)
     }
     #[cfg(feature = "occt-brep")]
     fn prepare_shared_topology_proof(&self, stamp: om9_core::identity::SourceStamp,
@@ -6514,6 +6569,8 @@ impl Controller {
         &self.recent
     }
     pub fn is_running(&self) -> bool {
+        if self.view_capture.is_some() || self.curve_direction.is_some() { return true; }
+        if self.isolated_selection.is_some() { return true; }
         if self.boolean_builder_worker.is_some() { return true; }
         if self.history_worker.is_some() { return true; }
         if self.join_history_worker.is_some() { return true; }
@@ -6619,6 +6676,10 @@ impl Controller {
     /// Drop a session whose context is gone. Returns true when one was dropped,
     /// so a caller (the window, the command line) can report the cancellation.
     pub fn cancel_if_stale(&mut self) -> bool {
+        if self.isolated_selection.is_some() && !self.isolated_selection_current() {
+            self.restore_isolated_selection();
+            return true;
+        }
         if self.dupedge_pending.as_ref().is_some_and(|context| self.validate_context(context).is_err()) {
             #[cfg(feature = "occt-brep")]
             drop(self.dupedge_source_view_job.take());
@@ -6635,8 +6696,13 @@ impl Controller {
         false
     }
     pub fn availability(feature: &str) -> Result<()> {
-        if matches!(feature, "OM9-TOOLS-001" | "OM9-TOP11-011") { return Ok(()); }
-        if self::gem::handles(feature) {
+        if matches!(feature, "OM9-VIEW-005" | "OM9-UTIL-001")
+            || feature.eq_ignore_ascii_case("ViewCaptureToFile") || feature.eq_ignore_ascii_case("Dir")
+        {
+            return Ok(());
+        }
+        if matches!(feature, "OM9-TOOLS-001" | "OM9-TOP11-011" | "OM9-TSPLINE-048" | "tsPlane" | "OM9-TSPLINE-055" | "tsDuplicateFaces" | "OM9-TSPLINE-067" | "tsExtractEdges" | "OM9-TSPLINE-069" | "tsSplitCurves" | "tsFromLines" | "OM9-TSPLINE-072" | "tsExtrudeLines" | "OM9-TSPLINE-073") { return Ok(()); }
+        if self::gem::handles(feature) || feature == self::gem_placement::EDIT_CURVE_ROW {
             return Ok(());
         }
         // The placement family (`OM9-L2-04-10`) is a normal command; its selection is
@@ -6877,6 +6943,9 @@ impl Controller {
         // Command Line always belongs to the run the user just started
         // (OM9-L3-03-20-005).
         self.last_measurement = None;
+        if let Some(preset) = context_presets::ContextPreset::parse(feature) {
+            return preset.start(self,feature,origin);
+        }
         if let Some(result) = self.dispatch_history_feature(feature) {
             return result.map(|_| DispatchOutcome::Command);
         }
@@ -6949,7 +7018,7 @@ impl Controller {
         if !self.is_running() {
             return CmdPhase::Idle;
         }
-        if self.dupedge_pending.is_some() { return CmdPhase::AwaitEnd; }
+        if self.isolated_selection.is_some() || self.dupedge_pending.is_some() || self.curve_direction.is_some() || self.view_capture.is_some() { return CmdPhase::AwaitEnd; }
         if self.top11_pending.is_some() {
             return CmdPhase::AwaitPoint;
         }
@@ -7265,6 +7334,17 @@ impl Controller {
         plane.point([local[0], local[1], 0.])
     }
     pub fn cancel(&mut self) {
+        if let Some(direction) = self.curve_direction.take() {
+            if self.validate_context(&direction.context).is_ok() {
+                let _ = self.select_objects(&direction.context.selection);
+            }
+            return;
+        }
+        if let Some(capture)=self.view_capture.take(){capture.cancel.cancel();return;}
+        if self.cage_paint_mode.take().is_some() && !self.is_running() && self.addon_session.is_none() {
+            return;
+        }
+        if self.isolated_selection.is_some() { self.restore_isolated_selection(); return; }
         self.ring_rail_replace = None;
         if self.boolean_builder_worker_pending() { self.cancel_boolean_builder_worker(); return; }
         if self.join_history_worker_pending() { self.cancel_join_history_worker(); return; }
@@ -7361,8 +7441,7 @@ impl Controller {
                 Some(crate::command_events::EventOutcome::Cancelled),
             );
         }
-        self.top11_grip = None;
-        self.grip_selection.clear();
+        self.clear_grip_owners();
         if let Some(pending) = self.surface_pending.take() {
             self.events.emit(
                 crate::command_events::EventKind::Finished,
@@ -7557,6 +7636,30 @@ impl Controller {
         self.submit_effect(text).map(|_| ())
     }
     pub fn submit_effect(&mut self, text: &str) -> Result<DispatchOutcome> {
+        let trimmed = text.trim_start();
+        let script = trimmed.strip_prefix("noecho ").unwrap_or(trimmed);
+        let text = if self.file_operation().is_some() || self.layer_dialog().is_some() {
+            text
+        } else if let Some(command) = script.strip_prefix("!_") {
+            if self.is_running() { self.cancel(); }
+            command.trim_start()
+        } else if !self.is_running() {
+            script.trim_start_matches('_')
+        } else { text };
+        if self.curve_direction.is_some() {return self.direction_input(text).map(|_| DispatchOutcome::Command);}
+        if self.view_capture.is_some() {return self.capture_input(text).map(|_|DispatchOutcome::Command);}
+        if let Some((command,tail))=text.trim().split_once(char::is_whitespace)
+            && command.trim_start_matches('_').eq_ignore_ascii_case("-ViewCaptureToFile") {
+            return self.start_capture_macro(tail).map(|_|DispatchOutcome::Command);
+        }
+        if let Some(pending) = &self.isolated_selection {
+            match text.trim().to_ascii_lowercase().as_str() {
+                "" | "enter" => self.finish_isolated_selection()?,
+                "esc" | "cancel" => self.cancel(),
+                _ => return Err(Error::Invalid(pending.kind.prompt())),
+            }
+            return Ok(DispatchOutcome::Command);
+        }
         if self.request_command_history(text) {
             return Ok(DispatchOutcome::Command);
         }
@@ -7676,6 +7779,12 @@ impl Controller {
         // Matrix distinguishes typed Explode (including block instances) from its toolbar macro.
         if !self.is_running() && text.trim().eq_ignore_ascii_case("Explode") {
             return self.top11_submit("Explode").expect("known Top11 command").map(DispatchOutcome::Top11);
+        }
+        if context_presets::ContextPreset::parse(text).is_some() {
+            return self.dispatch_effect(text,InvocationOrigin::Cmd);
+        }
+        if let Some(result) = self.dispatch_shared_gem(text) {
+            return result.map(|_| DispatchOutcome::Command);
         }
         // An installed, enabled add-on takes the command name over from OM9's own command
         // (disable or remove the add-on to get the built-in back).
@@ -9668,6 +9777,11 @@ impl Controller {
     /// their cached image is stale.
     pub fn preview_gumball(&mut self, delta: om9_core::geometry::Transform) -> Result<()> {
         delta.validate()?;
+        if self.cage_component_mode().is_some() {
+            self.cage_preview_edges = self.preview_cage_vertices(delta)?;
+            self.preview_revision = self.preview_revision.saturating_add(1);
+            return Ok(());
+        }
         if self.grips_selected() {
             // Grips move, not whole objects: the viewport previews the edited grips.
             self.grip_preview = Some(delta);
@@ -9697,6 +9811,10 @@ impl Controller {
 
     /// Drops the transient transform, leaving the document as it was before the drag.
     pub fn clear_gumball_preview(&mut self) {
+        if !self.cage_preview_edges.is_empty() {
+            self.cage_preview_edges.clear();
+            self.preview_revision = self.preview_revision.saturating_add(1);
+        }
         self.grip_preview = None;
         if let Some(scene) = self.scene.as_mut() {
             let mut changed = false;

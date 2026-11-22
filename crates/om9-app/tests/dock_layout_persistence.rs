@@ -404,3 +404,89 @@ fn fixture_design_pair_is_present() {
         .join("../../implementation/design/M01/OM9-L3-01-01-005/api.md");
     assert!(api.exists(), "{}", api.display());
 }
+
+#[test]
+fn schema_two_accepts_independent_tool_placements_and_recovers_an_offscreen_tool() {
+    use om9_app::{tool_panel::ToolPanel, session::{gem::GemTool, gem_placement::GemPlacementTool}};
+    let legacy = DockLayout::matrix_default().to_json().unwrap();
+    let (mut layout, warnings) = DockLayout::from_bytes(legacy.as_bytes()).unwrap();
+    assert!(warnings.is_empty());
+    let loader = ToolPanel::Gem(GemTool::Loader);
+    let curve = ToolPanel::Placement(GemPlacementTool::OnCurve);
+    for tool in [loader, curve] { layout.register_tool(tool); }
+    let section = SectionId::Tool(loader);
+    layout.apply_panel_op(PanelOp::Place { section, side: ColumnSide::Right, index: 0 }).unwrap();
+    layout.apply_panel_op(PanelOp::ToggleCollapsed { section }).unwrap();
+    layout.set_section_height(section, 450.);
+    let floating = SectionId::Tool(curve);
+    layout.float_section(floating, FloatRect {x: 5100., y: 1900., width: 480., height: 400.});
+    let (mut restored, warnings) = DockLayout::from_bytes(layout.to_json().unwrap().as_bytes()).unwrap();
+    assert!(warnings.is_empty(), "{warnings:?}");
+    assert_eq!(restored.section(section), layout.section(section));
+    restored.clamp_floats([1280., 720.]);
+    assert_eq!(restored.section(floating), layout.section(floating), "a smaller monitor preserves the preferred rectangle");
+    assert_eq!(restored.section(section), layout.section(section));
+    restored.reset_to_default();
+    assert_eq!(restored.to_json().unwrap(), legacy);
+}
+
+#[test]
+fn named_profiles_migrate_switch_restart_and_reset_independently() {
+    use om9_app::{layout_profiles::ProfileAction::*, panel_ops::PanelOp, tool_panel::ToolPanel};
+    use om9_app::session::gem::GemTool;
+    let path = temp_path("named-v2");
+    let make_app = || {
+        let mut app = MatrixApp::new(Document::new("layout profile")).unwrap();
+        app.set_dock_layout_path(Some(path.clone()));
+        let notes = app.load_dock_layout();
+        assert!(notes.is_empty(), "{notes:?}");
+        app
+    };
+    let mut legacy = DockLayout::default();
+    legacy.set_section_collapsed(SectionId::Layers, true);
+    legacy.save(&path).unwrap();
+    let mut app = make_app();
+    app.edit_layout_profile(Rename("Jewelry")).unwrap();
+    assert!(app.dock.section(SectionId::Layers).collapsed);
+    let loader = SectionId::Tool(ToolPanel::Gem(GemTool::Loader));
+    app.dock.register_tool(ToolPanel::Gem(GemTool::Loader));
+    assert!(app.dock_menu_section(loader, DockSide::Right));
+    assert!(app.dock_menu_section(SectionId::Snaps, DockSide::Right));
+    let jewelry = app.dock.clone();
+    app.edit_layout_profile(Duplicate("Projects")).unwrap();
+    assert!(app.dock_menu_section(SectionId::Snaps, DockSide::Left));
+    app.apply_panel_op(PanelOp::SetVisible { section: SectionId::Display, visible: false }).unwrap();
+    app.edit_layout_profile(Startup("Projects")).unwrap();
+    let projects = app.dock.clone();
+    app.edit_layout_profile(Switch("Jewelry")).unwrap();
+    assert_eq!(app.dock, jewelry);
+    assert!(app.edit_layout_profile(Rename("Projects")).is_err());
+    let mut reopened = make_app();
+    assert_eq!(reopened.dock, projects);
+    reopened.edit_layout_profile(Reset).unwrap();
+    assert_eq!(reopened.dock, DockLayout::default());
+    reopened.edit_layout_profile(Switch("Jewelry")).unwrap();
+    assert_eq!(reopened.dock, jewelry);
+    assert_eq!(make_app().dock, DockLayout::default());
+    std::fs::remove_file(path).unwrap();
+}
+
+#[test]
+fn all_tool_ids_round_trip_in_each_column_and_float() {
+    use om9_app::{panel_ops::PanelOp, tool_panel::ToolPanel};
+    let mut layout = DockLayout::default();
+    for &tool in ToolPanel::ALL {
+        assert_eq!(ToolPanel::from_key(tool.key()), Some(tool));
+        layout.register_tool(tool);
+        let section = SectionId::Tool(tool);
+        for side in [ColumnSide::Right, ColumnSide::Left] {
+            layout.apply_panel_op(PanelOp::Place { section, side, index: 0 }).unwrap();
+            assert_eq!(layout.section_order(side.dock_side())[0], section);
+        }
+        layout.float_section(section, FloatRect { x: 400., y: 200., width: 320., height: 280. });
+    }
+    let (saved, notes) = DockLayout::from_bytes(layout.to_json().unwrap().as_bytes()).unwrap();
+    assert!(notes.is_empty(), "{notes:?}");
+    assert_eq!(saved, layout);
+    assert_eq!(saved.floating_sections().len(), ToolPanel::ALL.len());
+}

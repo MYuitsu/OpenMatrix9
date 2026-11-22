@@ -51,6 +51,7 @@ pub enum DialogKind {
     Open,
     Save,
     SaveStl,
+    SaveViewImage,
 }
 impl DialogKind {
     fn title(self) -> &'static str {
@@ -58,6 +59,7 @@ impl DialogKind {
             Self::Open => "Open OpenMatrix9 document",
             Self::Save => "Save OpenMatrix9 document",
             Self::SaveStl => "Export STL",
+            Self::SaveViewImage => "Save Viewport Image",
         }
     }
 }

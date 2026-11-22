@@ -106,7 +106,7 @@ impl MatrixApp {
         let (fill, border, mark) = if active {
             (
                 Color32::from_rgb(31, 66, 96),
-                Color32::from_rgb(90, 190, 245),
+                super::theme::SNAP_ON,
                 Color32::from_rgb(213, 231, 255),
             )
         } else {

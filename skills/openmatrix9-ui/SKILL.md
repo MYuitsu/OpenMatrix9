@@ -13,9 +13,17 @@ description: "Implement or review the Matrix9 interface described by OpenMatrix9
 4. Dùng authored assets và palette/meaning đã duyệt; không trích thương mại để ship. Runtime không phụ thuộc ref/manuals/đường dẫn máy này. Missing reference tra `docs/openmatrix9-reference-locations.json`, không tự thay bằng screenshot QymCAD.
 5. [Build-validation](../openmatrix9-build-validation/SKILL.md) kiểm actual app/screenshot/pointer/DPI/lifecycle. Old Qt/Coin/FreeCAD fixtures chỉ là baseline nguồn port. Sync milestone và ledger đúng evidence.
 
+Dùng [openmatrix9-ui-theme](../openmatrix9-ui-theme/SKILL.md) cho mọi yêu cầu OM9 liên quan đến popup, dialog, menu nổi, dock, Builder hoặc khả năng đọc của theme.
+
 [Command/grid theme](references/command-grid-theme.md) và workspace references giữ Command xanh, canvas đen, finite world grid, titles/dropdowns, pinned copyable CMD và Line/Polyline interaction đã duyệt. Defaults/unknowns không lấy từ upstream. UI giống hình không chứng minh solver đã hoạt động.
 
-**Quyền bàn phím của viewport và CMD (2026-11-18).** Khi không có lệnh đang chạy, viewport xử lý bàn phím theo cơ chế phím tắt. Phím chưa gán không đi vào CMD. Bấm `E` gọi End Snap một lần cho điểm kế tiếp, kể cả khi End thường trực đang tắt. Đổi nhóm icon, chuyển viewport, đóng menu tiêu đề và chọn đối tượng thông thường vẫn giữ phím tắt. Icon hoặc phím tắt khởi động lệnh đưa focus vào CMD theo prompt. Nếu lệnh yêu cầu chọn đối tượng rồi nhập tham số, chuyển focus sang CMD khi chọn xong đối tượng và tới bước nhập. Sau click nhận điểm trong viewport, kể cả điểm trả từ worker, trả bàn phím cho viewport trừ bước đang yêu cầu nhập như Elevator height. Khi lệnh kết thúc hoặc bị hủy, trả bàn phím cho viewport. Người dùng vẫn có thể bấm trực tiếp vào ô CMD để chủ động nhập lệnh hoặc tham số.
+**Quyền bàn phím của viewport và CMD (2026-11-18, cập nhật 2026-11-23).** Viewport xử lý phím tắt trước. Khi cửa sổ có focus và không có ô nhập hoặc hộp thoại giữ bàn phím, văn bản từ phím chưa gán đi vào CMD. Ô nhập đang hoạt động giữ phím và dữ liệu ghép chữ IME. Bấm `E` gọi End Snap một lần cho điểm kế tiếp, kể cả khi End thường trực đang tắt. Đổi nhóm icon, chuyển viewport, đóng menu tiêu đề và chọn đối tượng thông thường vẫn giữ phím tắt. Icon hoặc phím tắt khởi động lệnh đưa focus vào CMD theo prompt. Nếu lệnh yêu cầu chọn đối tượng rồi nhập tham số, chuyển focus sang CMD khi chọn xong đối tượng và tới bước nhập. Sau click nhận điểm trong viewport, kể cả điểm trả từ worker, trả bàn phím cho viewport trừ bước đang yêu cầu nhập như Elevator height. Khi lệnh kết thúc hoặc bị hủy, trả bàn phím cho viewport. Người dùng vẫn có thể bấm trực tiếp vào ô CMD để chủ động nhập lệnh hoặc tham số.
+
+## Kéo bảng và đổi profile bố cục (người dùng duyệt 2026-11-22)
+
+Khi kéo bảng giữa dock trái, dock phải và cửa sổ nổi, hoặc khi đổi profile bố cục, chỉ thay đổi cách sắp xếp giao diện. Lệnh đang chạy phải tiếp tục ở đúng bước với các điểm đã chọn. Giữ nguyên trạng thái làm việc của workspace, gồm các chế độ Snap, lớp hiện hành và dự án đang chọn.
+
+Ví dụ, nếu lệnh `Line` đang chờ điểm thứ hai, sau khi kéo bảng hoặc đổi profile, lệnh vẫn chờ điểm thứ hai và dùng đúng điểm đầu đã chọn. Xem bằng chứng trong checkout tại `docs/validation/2026-11-22-dock-popup-theme.md`.
 
 ## Command: icon, mặc định và tham số
 

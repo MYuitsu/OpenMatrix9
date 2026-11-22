@@ -143,6 +143,16 @@
     "OM9-L4-09-001-02"
   ],
   "runtime_implementation": {
+    "dust_marquire_2026_11_23": {
+      "status": "SCOPED_AUTOMATED_RUNTIME_VERIFIED",
+      "date": "2026-11-23",
+      "scope": "Persistent dust-marquire shape tag, measured sample dimensions and Diamond Cut library entry.",
+      "evidence": "docs/features/OM9-L3-04-09-003.md"
+    },
+    "round_diamond_wireframe_2026_11_22": {
+      "scope": "Authored eightfold Round Diamond with an octagonal table, main facets, stars and scalloped girdle. The requested dimensions still control the finished solid.",
+      "evidence": "docs/validation/2026-11-22-gem-placement.md#wireframe-round-diamond"
+    },
     "date": "2026-10-27",
     "status": "AUTOMATED_VERIFIED_AUTO_ONLY",
     "target": "Standalone Rust OM9; Windows x64; CARGO_TARGET_DIR=L:/om9-target; -j 2",

@@ -16,6 +16,7 @@ dẫn về quy tắc chung này.
 |---|---|---|
 | Bắt đầu, tiếp tục, hỏi đã làm tới đâu | `openmatrix9-workflow` | Ledger tiến độ, bằng chứng code/test, bản đồ giai đoạn |
 | Menu, sidebar, icon, màn hình khởi động, viewport | `openmatrix9-ui` | Thiết kế/kế hoạch đã có, INI/RUI, đúng form VB6 và đặc tả UI |
+| Theme, popup, dock, bảng nổi và Builder | `openmatrix9-ui-theme` | Palette dùng chung, chữ và nút dễ đọc ở cả hai dock và dạng nổi |
 | Nghiệp vụ workspace đã duyệt: grid, Command, viewport | `openmatrix9-workspace-contract` | Quy tắc theo nhóm workspace và ảnh Matrix do người dùng cung cấp |
 | Một event/hàm gốc chưa rõ | `openmatrix9-native-mapping` | Guide đối chiếu địa chỉ, đúng procedure VB6 và đúng hàm Ghidra |
 | Một chức năng trang sức/hình học | `openmatrix9-feature-port` | Mã `OM9-*`, milestone spec của chức năng, migration/backend requirements; manual chỉ cho unknown |

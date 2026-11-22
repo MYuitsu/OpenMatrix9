@@ -860,6 +860,132 @@ fn assemble(
     Ok(placement)
 }
 
+/// Which quantity a fitted Gem on Curve row can adjust.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+pub enum RowFit {
+    #[default]
+    Spacing,
+    SizeGems,
+    Fixed,
+}
+
+/// Gem on Curve layout. Clearance is measured along the path between consecutive
+/// stone footprints. Other placement commands can still use explicit centre steps.
+pub fn fit_gem_row(
+    curve: &Curve,
+    start_spec: &GemSpec,
+    end_spec: Option<&GemSpec>,
+    params: &CurveParams,
+    gap: f64,
+    fit: RowFit,
+    taper_gap: bool,
+    limits: &Limits,
+) -> Result<CurvePlacement> {
+    if !gap.is_finite() || gap < 0.0 {
+        return Err(Error::Invalid("gem clearance"));
+    }
+    let total = curve_ops::arc_length(curve, limits)?;
+    let start = params.start_mm;
+    let end = params.end_mm.unwrap_or(total);
+    if !start.is_finite() || !end.is_finite() || start < 0.0 || end > total || end <= start {
+        return Err(Error::Invalid("gem row range"));
+    }
+    let span = end - start;
+    let closed = curve_ops::is_closed(curve, 1e-9 * total.max(1.0), limits)?;
+    let cyclic = closed && start == 0.0 && end == total;
+    let last = end_spec.unwrap_or(start_spec);
+    start_spec.validate()?;
+    last.validate()?;
+    let extent_at = |spec: &GemSpec| -> Result<[f64; 2]> {
+        let (sin, cos) = params.rotation_deg.to_radians().sin_cos();
+        let outline = crate::gem::girdle_outline(spec)?;
+        let (lo, hi) = outline.iter().map(|point| point[0] * cos - point[1] * sin)
+            .fold((f64::INFINITY, f64::NEG_INFINITY), |(low, high), value|
+                (low.min(value), high.max(value)));
+        Ok([lo, hi])
+    };
+    let first_extent = extent_at(start_spec)?;
+    let last_extent = extent_at(last)?;
+    let mean = (first_extent[1] - first_extent[0] + last_extent[1] - last_extent[0]) * 0.5;
+    let estimated = if cyclic { span / (mean + gap) } else { span / (mean + gap) + 1.0 };
+    if !estimated.is_finite() || estimated > MAX_STATIONS.min(limits.max_outputs as usize) as f64 {
+        return Err(Error::Budget("gem row stations"));
+    }
+    let mut count = (estimated + estimated * 1.0e-12).floor().max(1.0) as usize;
+    let profile_points = start_spec.profile.as_ref().map_or(0, Vec::len);
+    let bytes_per_station = std::mem::size_of::<GemStation>() + std::mem::size_of::<GemSpec>()
+        + std::mem::size_of::<PathSample>() + profile_points * std::mem::size_of::<[f64; 2]>() * 2;
+    if count as u64 > limits.max_bytes / bytes_per_station as u64 {
+        return Err(Error::Budget("gem row station storage"));
+    }
+    let (specs, mut pitches) = loop {
+        let mut specs = if count == 1 { vec![start_spec.clone()] } else { taper_specs(start_spec, last, count)? };
+        let extents = specs.iter().map(extent_at).collect::<Result<Vec<_>>>()?;
+        let n = if cyclic && count > 1 { count } else { count - 1 };
+        let nominal = (0..n).map(|index| {
+            extents[index][1] - extents[(index + 1) % count][0]
+        }).collect::<Vec<_>>();
+        let bodies: f64 = nominal.iter().sum();
+        let clearances = nominal.iter().map(|width| if taper_gap { gap * width / mean } else { gap })
+            .collect::<Vec<_>>();
+        let required: f64 = clearances.iter().sum();
+        if bodies + required > span + span * 1.0e-12 && count > 1 {
+            count -= 1;
+            continue;
+        }
+        let scale = if fit == RowFit::SizeGems && n > 0 { (span - required) / bodies } else { 1.0 };
+        if scale != 1.0 {
+            for spec in &mut specs {
+                *spec = scale_gem_spec(spec, scale)?;
+            }
+        }
+        let extra = if fit == RowFit::Spacing && n > 0 {
+            (span - bodies - required) / n as f64
+        } else { 0.0 };
+        let pitches = nominal.iter().zip(clearances).map(|(body, clearance)| body * scale + clearance + extra)
+            .collect::<Vec<_>>();
+        break (specs, pitches);
+    };
+    let used: f64 = pitches.iter().sum();
+    let mut position = if count == 1 && !cyclic {
+        (start + end) * 0.5
+    } else if fit == RowFit::Fixed && !cyclic {
+        start + (span - used) * 0.5
+    } else { start };
+    pitches.push(0.0);
+    let mut samples = Vec::with_capacity(count);
+    for pitch in pitches.into_iter().take(count) {
+        let fraction = curve_ops::parameter_at_length(curve, position.min(end), limits)?;
+        samples.push(PathSample {
+            fraction,
+            arc_length_mm: position.min(end),
+            point: curve_ops::point_at(curve, fraction, limits)?,
+            tangent: curve_ops::tangent_at(curve, fraction, limits)?,
+        });
+        position += pitch;
+    }
+    assemble(None, params, total, closed, [start, end], &samples, &specs)
+}
+
+pub fn scale_gem_spec(spec: &GemSpec, factor: f64) -> Result<GemSpec> {
+    if !factor.is_finite() || factor <= 0.0 {
+        return Err(Error::Invalid("gem scale"));
+    }
+    let mut result = spec.clone();
+    result.length_mm *= factor;
+    result.width_mm *= factor;
+    result.girdle_mm = (result.girdle_mm * factor).max(crate::gem::MIN_DIMENSION_MM);
+    result.corner_mm *= factor;
+    if let Some(profile) = &mut result.profile {
+        for point in profile {
+            *point = point.map(|coordinate| coordinate * factor);
+        }
+    }
+    result = result.set_depth_mm(spec.depth_mm() * factor)?;
+    result.validate()?;
+    Ok(result)
+}
+
 /// Build the one station at a given arc length on a curve (`OM9-L3-04-10-008`).
 ///
 /// This is the primitive a link-based follow uses: the gem keeps its recorded arc length,

@@ -246,7 +246,7 @@ impl<'a> Target<'a> {
 }
 
 /// Signed distance `h` along `dir` from `o` to the triangle (any sign), and its unit normal.
-fn ray_triangle(o: Vec3, dir: Vec3, a: Vec3, b: Vec3, c: Vec3) -> Option<(f64, Vec3)> {
+pub(crate) fn ray_triangle(o: Vec3, dir: Vec3, a: Vec3, b: Vec3, c: Vec3) -> Option<(f64, Vec3)> {
     let e1 = sub(b, a);
     let e2 = sub(c, a);
     let pv = cross(dir, e2);

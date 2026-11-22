@@ -46,12 +46,12 @@ fn bounds_center_group_and_ungroup_are_undoable() {
 #[cfg(feature = "occt-brep")]
 #[test]
 fn center_brep_uses_source_bounds_and_existing_placement() {
-    let limits = Limits::default();
-    let brep = om9_kernel::brep::sphere_brep(5., 0.4, &limits).unwrap();
-    let mut entity = Entity::new("sphere", Geometry::Brep(brep), None);
-    entity.placement = om9_core::geometry::Transform::translation([10., -3., 7.]);
-    let id = entity.id;
-    let mut controller = controller(vec![entity]);
+    let mut controller = Controller::new(Document::with_template_tolerance("center BRep"), Limits::default()).unwrap();
+    for command in ["Sphere", "0,0,0", "5"] { controller.submit(command).unwrap(); }
+    let id = *controller.document().entities.keys().next().unwrap();
+    assert!(matches!(controller.document().entities[&id].geometry, Geometry::Brep(_)));
+    controller.select_objects(&[id]).unwrap();
+    for command in ["Move", "0,0,0", "10,-3,7"] { controller.submit(command).unwrap(); }
     controller.select_objects(&[id]).unwrap();
     controller.center_selected().unwrap();
     let placement = controller.document().entities[&id].placement;

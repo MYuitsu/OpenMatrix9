@@ -7,6 +7,9 @@
 //! segment-uniform one already used by `surface_kernel::sample_curve`: global fraction
 //! `f` maps to segment `floor(f * segments)` and the local fraction inside that segment.
 //! The mapping is documented here because split/trim/divide must agree with sampling.
+
+pub mod extrude_lines;
+pub mod linear_path;
 use crate::{
     Error, Result,
     budget::Limits,
@@ -454,6 +457,41 @@ pub fn reverse_curve(curve: &Curve, limits: &Limits) -> Result<Curve> {
             }
         }
     })
+}
+
+/// Reverse a curve for Rhino Dir. Native parameter `t` moves to `-t`.
+/// Composite curves retain their stored segments and their individual intervals.
+pub fn reverse_curve_for_dir(curve: &Curve, limits: &Limits) -> Result<Curve> {
+    fn reflect_parameters(curve: &mut Curve) {
+        match curve {
+            Curve::Line { domain, .. } | Curve::Circle { domain, .. } => {
+                *domain = [-domain[1], -domain[0]];
+            }
+            Curve::Nurbs(n) => {
+                // Reflect the entire basis, including knots outside a trimmed interval.
+                // reverse_curve already toggled traversal. Keep the new orientation
+                // when exchanging that reversed traversal for a reflected basis.
+                n.poles.reverse();
+                n.weights.reverse();
+                n.knots.reverse();
+                for knot in &mut n.knots {
+                    *knot = -*knot;
+                }
+                n.domain = [-n.domain[1], -n.domain[0]];
+                n.seam = n.seam.map(|t| -t);
+                n.reversed = !n.reversed;
+            }
+            Curve::Polycurve { segments, .. } => {
+                for segment in segments {
+                    reflect_parameters(segment);
+                }
+            }
+        }
+    }
+    let mut flipped = reverse_curve(curve, limits)?;
+    reflect_parameters(&mut flipped);
+    flipped.validate(limits)?;
+    Ok(flipped)
 }
 
 /// Apply a polycurve's `reversed` flag so the result traverses forward.
@@ -2241,26 +2279,8 @@ pub(crate) fn fuse_smooth_control_polycurve(
     if before.len() < 2 || before.len() != after.len() {
         return Ok(None);
     }
-    let vector = |v: Point3| -> Point3 {
-        std::array::from_fn(|r| (0..3).map(|c| placement.0[r][c] * v[c]).sum())
-    };
-    let smooth = |first: &Curve, second: &Curve| -> Result<bool> {
-        let end = curve_endpoints(first, limits)?[1];
-        let start = curve_endpoints(second, limits)?[0];
-        if !joint_within(end, start, placement, tolerance)? {
-            return Ok(false);
-        }
-        let (Ok(a), Ok(b)) = (
-            tangent_at(first, 1.0, limits),
-            tangent_at(second, 0.0, limits),
-        ) else {
-            return Ok(false);
-        };
-        let (Ok(a), Ok(b)) = (unit(vector(a)), unit(vector(b))) else {
-            return Ok(false);
-        };
-        Ok(dot(a, b).clamp(-1.0, 1.0).acos() <= angular_tolerance)
-    };
+    let smooth =
+        |a: &Curve, b: &Curve| tangent_joint(a, b, placement, tolerance, angular_tolerance, limits);
     for pair in before.windows(2) {
         if !smooth(&pair[0], &pair[1])? {
             return Ok(None);
@@ -2273,8 +2293,46 @@ pub(crate) fn fuse_smooth_control_polycurve(
     {
         return Ok(None);
     }
+    fuse_clamped_segments(&after, 0.0, limits)
+}
+
+fn tangent_joint(
+    first: &Curve,
+    second: &Curve,
+    placement: Transform,
+    tolerance: f64,
+    angular_tolerance: f64,
+    limits: &Limits,
+) -> Result<bool> {
+    let vector = |v: Point3| -> Point3 {
+        std::array::from_fn(|r| (0..3).map(|c| placement.0[r][c] * v[c]).sum())
+    };
+    let end = curve_endpoints(first, limits)?[1];
+    let start = curve_endpoints(second, limits)?[0];
+    if !joint_within(end, start, placement, tolerance)? {
+        return Ok(false);
+    }
+    let (Ok(a), Ok(b)) = (
+        tangent_at(first, 1.0, limits),
+        tangent_at(second, 0.0, limits),
+    ) else {
+        return Ok(false);
+    };
+    let (Ok(a), Ok(b)) = (unit(vector(a)), unit(vector(b))) else {
+        return Ok(false);
+    };
+    Ok(dot(a, b).clamp(-1.0, 1.0).acos() <= angular_tolerance)
+}
+
+/// Join the exact rational pieces on adjacent parameter intervals. The optional
+/// endpoint allowance accounts for roundoff converting trigonometric arc ends.
+fn fuse_clamped_segments(
+    segments: &[Curve],
+    roundoff: f64,
+    limits: &Limits,
+) -> Result<Option<Curve>> {
     let mut parts = Vec::new();
-    for part in &after {
+    for part in segments {
         let candidate = match part {
             Curve::Line { start, end, .. } => line_to_nurbs(*start, *end, limits)?,
             Curve::Circle {
@@ -2350,7 +2408,10 @@ pub(crate) fn fuse_smooth_control_polycurve(
         .try_reserve_exact(knot_count)
         .map_err(|_| Error::Budget("fused curve knots"))?;
     for (i, part) in parts.iter().enumerate() {
-        if i > 0 && *poles.last().unwrap() != part.poles[0] {
+        if i > 0
+            && *poles.last().unwrap() != part.poles[0]
+            && (roundoff == 0. || distance(*poles.last().unwrap(), part.poles[0]) > roundoff)
+        {
             return Ok(None);
         }
         let factor = if i == 0 {

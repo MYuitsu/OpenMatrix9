@@ -4,6 +4,11 @@
   "milestone": "AFTER",
   "parent_l2_id": "OM9-L2-09-01",
   "title": "T-Splines Select Vertex Edge Face Object Mode",
+  "runtime_implementation": {
+    "status": "PARTIAL_RUNTIME",
+    "evidence": "docs/validation/2026-11-22-f6-matrix9.md",
+    "scope": "Box-mode vertex, edge and face selection resolves the corresponding factory group. Ring traverses opposite quad edges. Loop extends from an edge or adjacent face/vertex pair. Grow/Shrink, directional U/V and additive paint are exercised against source IDs. An egui replay covers double-click and multi-face drag. Switching from Face to Edge via F6 clears the old pick and the next plain click selects a cage edge."
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "AFTER",
   "execution_stage": "AFTER",

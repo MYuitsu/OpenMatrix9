@@ -724,7 +724,8 @@ extern "C" int om9_occt_cap(const char* source, size_t length, double tolerance,
    chain.push_back(TopoDS::Edge(naked(first)));
    used[first] = true;
    TopoDS_Vertex start_vertex, end_vertex;
-   TopExp::Vertices(chain.front(), start_vertex, end_vertex);
+   // Traverse the edges as oriented on the shell. A reversed edge starts at its last parameter.
+   TopExp::Vertices(chain.front(), start_vertex, end_vertex, true);
    if (start_vertex.IsNull() || end_vertex.IsNull())
     throw std::runtime_error("cap: naked edge has no vertex");
    while (!end_vertex.IsSame(start_vertex)) {
@@ -733,7 +734,7 @@ extern "C" int om9_occt_cap(const char* source, size_t length, double tolerance,
      if (used[i]) continue;
      const TopoDS_Edge& edge = TopoDS::Edge(naked(i));
      TopoDS_Vertex v1, v2;
-     TopExp::Vertices(edge, v1, v2);
+     TopExp::Vertices(edge, v1, v2, true);
      if (v1.IsSame(end_vertex) || v2.IsSame(end_vertex)) {
       const bool reverse = v2.IsSame(end_vertex);
       chain.push_back(reverse ? TopoDS::Edge(edge.Reversed()) : edge);
@@ -1183,6 +1184,20 @@ extern "C" int om9_occt_isocurve_ray_face_bounds(const char* source, size_t leng
  } catch (const Standard_Failure& e) { if (message && capacity>0) std::snprintf(message,capacity,"%s",e.what()); return 2;
  } catch (const std::exception& e) { if (message && capacity>0) std::snprintf(message,capacity,"%s",e.what()); return 1;
  } catch (...) { if (message && capacity>0) std::snprintf(message,capacity,"Unknown isocurve ray failure"); return 2; }
+}
+
+// Snapshot the trimmed face resolved by the same exact viewport ray as ExtractIsocurve.
+extern "C" int om9_occt_extract_ray_face(const char* source, size_t length,
+ const double* origin, const double* direction, const double* reference, double tolerance,
+ double max_distance, double* resolved, double deflection, size_t max_points, size_t max_nodes,
+ size_t max_bytes, Om9BrepSink sink, void* context, char* message, int capacity) {
+ try {
+  const auto face=isocurve_ray_face(source,length,max_nodes,origin,direction,reference,tolerance,
+                                    max_distance,resolved,nullptr,0.,0.);
+  return om9_emit_brep_snapshot(face,deflection,max_points,max_nodes,max_bytes,sink,context,message,capacity);
+ } catch (const Standard_Failure& e) { if (message && capacity>0) std::snprintf(message,capacity,"%s",e.GetMessageString()); return 2;
+ } catch (const std::exception& e) { if (message && capacity>0) std::snprintf(message,capacity,"%s",e.what()); return 1;
+ } catch (...) { if (message && capacity>0) std::snprintf(message,capacity,"Boundary face extraction failed"); return 2; }
 }
 
 static void emit_face_isocurve(const TopoDS_Face& face, int along_u, double value,

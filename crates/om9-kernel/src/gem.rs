@@ -5,7 +5,7 @@
 //! This adapter converts the same boundary into one OCCT solid so kernel operations (boolean,
 //! fillet, measurement) can act on a real B-Rep without a second geometry source.
 use crate::KernelError;
-use crate::brep::from_mesh;
+use crate::brep::{from_mesh, from_planar_facets};
 use om9_core::brep::Brep;
 use om9_core::budget::Limits;
 use om9_core::gem::GemMesh;
@@ -24,5 +24,10 @@ pub fn gem_brep(gem: &GemMesh, limits: &Limits) -> Result<Brep, KernelError> {
     }
     // A gem is small and dense: the sewing tolerance must stay well below the smallest authored
     // feature (0.05 mm) and the deflection controls only display tessellation.
-    from_mesh(&gem.mesh, GEM_BREP_DEFLECTION_MM, limits)
+    if let Some(faces) = gem.authored_faces() {
+        gem.mesh.validate(limits).map_err(|error| KernelError::InvalidInput(error.to_string()))?;
+        from_planar_facets(&gem.mesh.vertices, faces, GEM_BREP_DEFLECTION_MM, limits)
+    } else {
+        from_mesh(&gem.mesh, GEM_BREP_DEFLECTION_MM, limits)
+    }
 }

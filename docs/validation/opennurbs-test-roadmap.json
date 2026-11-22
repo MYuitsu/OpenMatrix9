@@ -1,4 +1,32 @@
 {
+  "rhino5_f6_mesh_outline_20261122": {
+    "batch": "rhino5-f6-mesh-outline",
+    "status": "native_world_contours_and_expected_refusal_verified",
+    "fixture_count": 1,
+    "passed_fixtures": 1,
+    "scenario_count": 15,
+    "successful_curve_scenarios": 14,
+    "expected_refusals": 1,
+    "scope": "Active viewport outline of an authored tilted patch, including overlapping and disjoint translated copies. Native Rhino 5 and OM9 matched curve counts and geometric paths or the singular refusal.",
+    "prepared_pending_batches": 1,
+    "pending_batch_ids": [
+      "modeling-public-rhino5-generated-exchange"
+    ],
+    "pending_batch_fixture_count": 4,
+    "pending_batch_object_count": 7,
+    "unclosed_packages": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "remaining_total_test_batches": null,
+    "next_action": "Continue the prepared public Rhino 5 exchange batch when its fixture environment is available. The F6 ledger tracks the independent command comparisons.",
+    "evidence": "docs/validation/2026-11-22-f6-matrix9.md#mesh-outline"
+  },
   "snaps_native_v7_sphere_surface_20261119": {
     "batch": "snaps-native-v7-sphere-surface",
     "package": 3,

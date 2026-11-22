@@ -54,6 +54,8 @@ fn project_commands_open_the_expected_surface_from_cmd() {
         app.dock.set_section_collapsed(SectionId::Projects, true);
         let context = egui::Context::default();
         for _ in 0..3 { frame(&mut app, &context); }
+        let editor = app.command_input_rect().unwrap();
+        click(&mut app, &context, editor.center());
         frame_with_events(&mut app, &context, vec![egui::Event::Text(command.into())]);
         frame_with_events(&mut app, &context, vec![egui::Event::Key {
             key: egui::Key::Enter, physical_key: None, pressed: true, repeat: false, modifiers: egui::Modifiers::NONE,
@@ -534,6 +536,8 @@ fn manager_overview_opens_and_named_bags_toggle() {
     let toggle = app.project_action_rects["toggle-named"].center();
     click(&mut app, &context, toggle);
     assert!(app.project_bag_rects.is_empty());
+    frame(&mut app, &context);
+    let toggle = app.project_action_rects["toggle-named"].center();
     click(&mut app, &context, toggle);
     assert!(app.project_bag_rects.contains_key("Master"));
     let manager = app.project_action_rects["manager"].center();

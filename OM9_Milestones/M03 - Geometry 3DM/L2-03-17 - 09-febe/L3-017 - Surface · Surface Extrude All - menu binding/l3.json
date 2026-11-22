@@ -534,6 +534,13 @@
   "readiness_state": "RUNTIME_VERIFIED_MANUAL_UI_PENDING",
   "acceptance_category": "UI_COMMAND",
   "runtime_implementation": {
+    "f6_tapered_2026_11_23": "Two Surface F6 entries and CMD share ExtrudeCrvTapered. Checked independent signed-height, angle, Sharp/Round/Smooth and bounded-face geometry, selected profiles, world-space preview/pick, DeleteInput and single Undo. Inclined rectangles match twelve geometry fixtures. A whole inclined circle and an angular two-arc join still differ from Rhino 5.14. Surface/Solid menu preset parity remains unverified. See docs/validation/2026-11-22-f6-matrix9.md#extrudecrvtapered-om9.",
+    "extrude_to_point_f6_2026_11_23": {
+      "entry": "Three original F6 curve-to-point entries and CMD share the OM9 point session.",
+      "geometry": "Ruled BRep, off-axis apex, optional cap for a closed planar profile, selected boundary face, tangent joins and one transaction for multiple source curves.",
+      "evidence": "docs/validation/2026-11-22-f6-matrix9.md#extrude-to-point",
+      "remaining": "The separate Surface/Curve spelling ExtrudetoPoint has no verified provider. Tapered extrusion is still pending."
+    },
     "date": "2026-10-23",
     "status": "AUTOMATED_TARGET_VALIDATED_MANUAL_UI_PENDING",
     "target": "standalone Rust OM9, Windows x64",

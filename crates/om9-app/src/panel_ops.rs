@@ -164,6 +164,8 @@ pub enum FloatOrigin {
 /// One placement operation. Every mutation of menu placement is one of these.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 pub enum PanelOp {
+    SetVisible { section: SectionId, visible: bool },
+    SetHeight { section: SectionId, height: f32 },
     ToggleCollapsed {
         section: SectionId,
     },
@@ -198,6 +200,8 @@ pub enum PanelOp {
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize)]
 pub enum PanelOutcome {
+    VisibilitySet { section: SectionId, visible: bool },
+    HeightSet { section: SectionId, height: f32 },
     Collapsed {
         section: SectionId,
         collapsed: bool,
@@ -361,7 +365,11 @@ pub fn resolve_drop(
     if let Some(window) = &zones.window
         && !DropZones::contains(window, pointer)
     {
-        return DropTarget::FloatOutside { pointer };
+        return if matches!(dragged, SectionId::Tool(_)) {
+            DropTarget::Cancel { reason: CancelReason::NoTarget }
+        } else {
+            DropTarget::FloatOutside { pointer }
+        };
     }
     if let Some(right) = &zones.right
         && DropZones::contains(&right.rect, pointer)
@@ -629,6 +637,14 @@ impl DockLayout {
 
     fn apply_checked(&mut self, op: PanelOp) -> Result<PanelReport, PanelOpError> {
         match op {
+            PanelOp::SetVisible { section, visible } => {
+                self.set_section_visible(section, visible);
+                Ok(PanelReport { outcome: PanelOutcome::VisibilitySet { section, visible }, notes: Vec::new() })
+            }
+            PanelOp::SetHeight { section, height } => {
+                self.set_section_height(section, height);
+                Ok(PanelReport { outcome: PanelOutcome::HeightSet { section, height: self.section(section).height }, notes: Vec::new() })
+            }
             PanelOp::ToggleCollapsed { section } => {
                 let state = self.toggle_section(section);
                 Ok(PanelReport {
@@ -976,9 +992,7 @@ impl DockLayout {
             }
         }
         seen.sort_unstable();
-        let mut expected: Vec<&'static str> = dock_layout::SectionId::ALL
-            .iter()
-            .map(|id| id.key())
+        let mut expected: Vec<&str> = self.sections.keys().map(String::as_str)
             .collect();
         expected.sort_unstable();
         debug_assert_eq!(seen, expected, "every menu has exactly one column");
@@ -1027,7 +1041,7 @@ fn insert_at(layout: &mut DockLayout, section: SectionId, side: ColumnSide, inde
 impl PanelOp {
     pub fn section(self) -> SectionId {
         match self {
-            PanelOp::ToggleCollapsed { section }
+            PanelOp::SetVisible { section, .. } | PanelOp::SetHeight { section, .. } | PanelOp::ToggleCollapsed { section }
             | PanelOp::Move { section, .. }
             | PanelOp::Place { section, .. }
             | PanelOp::Dock { section, .. }

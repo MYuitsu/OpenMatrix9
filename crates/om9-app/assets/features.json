@@ -2681,7 +2681,7 @@
   {
     "id": "OM9-GEM-009",
     "name": "Orient to Gem",
-    "command": "gvOrientGems",
+    "command": "OrientToGem",
     "module": "Placing Gems"
   },
   {

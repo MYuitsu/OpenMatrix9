@@ -1063,3 +1063,54 @@ fn join_sweep_respects_tolerance_on_all_axes_and_tiny_separation() {
     let entities=vec![Entity::new("a",Geometry::Curve(tiny(0.,1e-200)),None),Entity::new("b",Geometry::Curve(tiny(2e-200,3e-200)),None)];
     let (document,ids)=doc_with(entities); assert!(join_entities(&document,&ids,0.,&limits).is_err());
 }
+
+#[test]
+fn deleting_source_faces_keeps_quads_and_corner_channels() {
+    let mesh = Mesh {
+        vertices: vec![
+            [0., 0., 0.],
+            [1., 0., 0.],
+            [1., 1., 0.],
+            [0., 1., 0.],
+            [2., 0., 0.],
+            [2., 1., 0.],
+        ],
+        faces: vec![vec![0, 1, 2, 3], vec![1, 4, 5, 2]],
+        colors: (0..6).map(|i| [i, 0, 0, 255]).collect(),
+        normals: (0..6).map(|i| [f64::from(i), 0., 1.]).collect(),
+        corner_uvs: (0..8).map(|i| [f64::from(i), 0.]).collect(),
+    };
+    let limits = Limits::default();
+    use om9_core::top11::{MeshFaceSide, mesh_face_subset};
+    let uv = om9_core::rhino_semantics::MeshUv {
+        uvs: (0..6).map(|i| [0., f64::from(i)]).collect(),
+        corners: (0..8).map(|i| [0., f64::from(i + 10)]).collect(),
+        material: "gold".into(),
+        pbr: Default::default(),
+    };
+    let remove = |indices| {
+        mesh_face_subset(
+            &mesh,
+            &indices,
+            MeshFaceSide::Remaining,
+            Some(uv.clone()),
+            &limits,
+        )
+    };
+    let subset = remove(BTreeSet::from([0])).unwrap().unwrap();
+    let mapped = subset.uv.unwrap();
+    assert_eq!(mapped.corners, uv.corners[4..]);
+    assert_eq!(mapped.uvs, [1, 4, 5, 2].map(|i| uv.uvs[i]));
+    assert_eq!(mapped.material, "gold");
+    let part = subset.mesh;
+    assert_eq!(part.faces, [vec![0, 1, 2, 3]]);
+    assert_eq!(part.corner_uvs, mesh.corner_uvs[4..]);
+    for (i, &old) in [1, 4, 5, 2].iter().enumerate() {
+        assert_eq!(part.vertices[i], mesh.vertices[old]);
+        assert_eq!(part.colors[i], mesh.colors[old]);
+        assert_eq!(part.normals[i], mesh.normals[old]);
+    }
+    assert_eq!(remove(BTreeSet::from([0, 1])).unwrap(), None);
+    assert!(remove(BTreeSet::from([0, 2])).is_err());
+    assert!(remove(BTreeSet::new()).is_err());
+}

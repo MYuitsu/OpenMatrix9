@@ -34,21 +34,22 @@ impl MatrixApp {
     /// Return the cached grip handles, recomputing only when the document revision,
     /// selection or grip mode changed. The overlay runs every frame.
     fn grip_handles_cached(&self) -> Option<std::cell::Ref<'_, Vec<GripHandle>>> {
-        let mode = self.controller.top11_grip_mode()?;
+        self.controller.top11_grip_mode()?;
         let revision = self.controller.document().revision;
-        let selection: Vec<_> = self.controller.selected().iter().copied().collect();
+        let owners_revision = self.controller.grip_display_revision();
+        let document = self.controller.document().id;
         let stale = {
             let cache = self.grip_cache.borrow();
             cache.as_ref().is_none_or(|cache| {
-                cache.revision != revision || cache.selection != selection || cache.mode != mode
+                cache.revision != revision || cache.owners_revision != owners_revision || cache.document != document
             })
         };
         if stale {
             let handles = self.controller.top11_grip_handles().ok()?;
             *self.grip_cache.borrow_mut() = Some(GripCache {
                 revision,
-                selection,
-                mode,
+                owners_revision,
+                document,
                 handles,
             });
         }
@@ -69,7 +70,7 @@ impl MatrixApp {
         }
         let revision = self.controller.document().revision;
         self.selected_grips = self.controller.selected_grips().into_iter().map(|h| (h, revision)).collect();
-        let Some(handle) = self.grip_at(view, viewport, screen) else {
+        let Some(handle) = self.grip_at(view, viewport, screen).filter(|h| h.mode == om9_core::top11::GripMode::Control) else {
             if !additive && (self.controller.is_running() || self.controller.session_wants_point()) {
                 self.selected_grips.clear();
                 self.controller.select_grips(&[], crate::session::GripPick::Replace);
@@ -124,17 +125,13 @@ impl MatrixApp {
         viewport: Viewport,
         rect: Rect,
     ) {
-        let Some(mode) = self.controller.top11_grip_mode() else {
+        let Some(_) = self.controller.top11_grip_mode() else {
             return;
         };
         let Some(handles) = self.grip_handles_cached() else {
             return;
         };
         let painter = ui.painter().with_clip_rect(rect);
-        let colour = match mode {
-            om9_core::top11::GripMode::Edit => Color32::from_rgb(235, 150, 40),
-            om9_core::top11::GripMode::Control => Color32::from_rgb(70, 200, 235),
-        };
         let picked_colour = Color32::from_rgb(255, 230, 0);
         let gumball = self.controller.grip_preview();
         let drag_offset = self.grip_drag.as_ref().map(|drag| {
@@ -171,6 +168,10 @@ impl MatrixApp {
             }
         }
         for handle in handles.iter() {
+            let colour = match handle.mode {
+                om9_core::top11::GripMode::Edit => Color32::from_rgb(235, 150, 40),
+                om9_core::top11::GripMode::Control => Color32::from_rgb(70, 200, 235),
+            };
             let picked = self.controller.grip_is_selected(handle);
             let in_drag = self
                 .grip_drag

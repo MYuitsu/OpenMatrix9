@@ -18,6 +18,7 @@ pub(super) struct BoundsCache {
     epoch: u64,
     scene_publication: uuid::Uuid,
     selection: std::collections::BTreeSet<ObjectId>,
+    components: Option<u64>,
     centre: Option<om9_core::geometry::Point3>,
 }
 
@@ -150,6 +151,15 @@ pub fn parse_restore_defaults(text: &str) -> bool {
 impl Controller {
     /// The objects the gumball acts on: the published selection, in document order.
     pub fn gumball_targets(&self) -> Vec<ObjectId> {
+        if self.cage_component_mode().is_some() {
+            return self
+                .subselection()
+                .iter()
+                .map(|p| p.root)
+                .collect::<std::collections::BTreeSet<_>>()
+                .into_iter()
+                .collect();
+        }
         self.selection.iter().copied().collect()
     }
 
@@ -189,47 +199,54 @@ impl Controller {
         }
         let scene = self.scene.as_ref()?;
         let cached = self.gumball_bounds_cache.borrow();
+        let components = self.cage_component_mode().map(|_| self.sub_revision());
         let centre = if let Some(cache) = cached.as_ref().filter(|cache| {
             cache.document == scene.document.id
                 && cache.epoch == scene.epoch
                 && cache.scene_publication == scene.publication_id()
+                && cache.components == components
                 && cache.selection == self.selection
         }) {
             cache.centre
         } else {
             drop(cached);
-            let (mut min, mut max) = ([f64::INFINITY; 3], [f64::NEG_INFINITY; 3]);
-            let mut found = false;
-            for object in &scene.objects {
-                if !self.selection.contains(&object.root) || !object.visible || !object.editable {
-                    continue;
-                }
-                let points = match object.buffers.as_ref() {
-                    RenderBuffers::Points { points, .. } | RenderBuffers::Curve { points, .. } => {
-                        points
+            let centre = if components.is_some() {
+                self.cage_component_center()
+            } else {
+                let (mut min, mut max) = ([f64::INFINITY; 3], [f64::NEG_INFINITY; 3]);
+                let mut found = false;
+                for object in &scene.objects {
+                    if !self.selection.contains(&object.root) || !object.visible || !object.editable
+                    {
+                        continue;
                     }
-                    RenderBuffers::Mesh { vertices, .. } => vertices,
-                };
-                let Ok(transform) = object.display_transform() else {
-                    continue;
-                };
-                for point in points {
-                    let Ok(world) = transform.point(*point) else {
+                    let points = match object.buffers.as_ref() {
+                        RenderBuffers::Points { points, .. }
+                        | RenderBuffers::Curve { points, .. } => points,
+                        RenderBuffers::Mesh { vertices, .. } => vertices,
+                    };
+                    let Ok(transform) = object.display_transform() else {
                         continue;
                     };
-                    for i in 0..3 {
-                        min[i] = min[i].min(world[i]);
-                        max[i] = max[i].max(world[i]);
+                    for point in points {
+                        let Ok(world) = transform.point(*point) else {
+                            continue;
+                        };
+                        for i in 0..3 {
+                            min[i] = min[i].min(world[i]);
+                            max[i] = max[i].max(world[i]);
+                        }
+                        found = true;
                     }
-                    found = true;
                 }
-            }
-            let centre = found.then(|| std::array::from_fn(|i| min[i] * 0.5 + max[i] * 0.5));
+                found.then(|| std::array::from_fn(|i| min[i] * 0.5 + max[i] * 0.5))
+            };
             *self.gumball_bounds_cache.borrow_mut() = Some(BoundsCache {
                 document: scene.document.id,
                 epoch: scene.epoch,
                 scene_publication: scene.publication_id(),
                 selection: self.selection.clone(),
+                components,
                 centre,
             });
             centre
@@ -332,6 +349,9 @@ impl Controller {
             return Ok(());
         }
         self.validate_gumball_targets(session)?;
+        if self.cage_component_mode().is_some() {
+            return self.commit_cage_vertices(session.accumulated(), name);
+        }
         if self.grips_selected() {
             return self.commit_gumball_grips(session);
         }
@@ -351,6 +371,9 @@ impl Controller {
             return Ok(());
         }
         self.validate_gumball_targets(session)?;
+        if self.cage_component_mode().is_some() {
+            return self.commit_cage_vertices(session.accumulated(), name);
+        }
         if self.grips_selected() {
             // Grips cannot be copied: the gesture moves them.
             return self.commit_gumball_grips(session);
@@ -397,12 +420,21 @@ impl Controller {
     }
 
     fn validate_gumball_targets(&self, session: &gumball::Session) -> Result<()> {
-        if session.targets().len() != self.selection.len()
-            || session
-                .targets()
-                .iter()
-                .any(|id| !self.selection.contains(id))
-        {
+        let same_targets = if self.cage_component_mode().is_some() {
+            let ids = self.gumball_targets();
+            ids.len() == session.targets().len()
+                && session
+                    .targets()
+                    .iter()
+                    .all(|id| ids.binary_search(id).is_ok())
+        } else {
+            self.selection.len() == session.targets().len()
+                && session
+                    .targets()
+                    .iter()
+                    .all(|id| self.selection.contains(id))
+        };
+        if !same_targets {
             return Err(Error::Stale("gumball selection"));
         }
         let scene = self.scene.as_ref().ok_or(Error::Missing("gumball scene"))?;

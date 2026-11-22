@@ -6,12 +6,28 @@
 //! and the rational tensor evaluation that maps a cage parameter to a world point. The legacy
 //! C entry points, the capture/binding lifecycle and the parameter inversion stay behind —
 //! inversion needs the native solver, so it is refused by name rather than approximated.
+pub mod from_lines;
+
 use crate::{
     Error, Result,
     budget::Limits,
     curve_build::basis,
     geometry::{Point3, finite},
 };
+
+/// A cage owner carries its eight rest corners. A captive carries only the owner's ID
+/// in the same extension slot.
+pub fn is_cage(entity: &crate::model::Entity) -> bool {
+    #[derive(serde::Deserialize)]
+    struct RestCorners {
+        #[serde(rename = "rest")]
+        _corners: [Point3; 8],
+    }
+    matches!(entity.geometry, crate::geometry::Geometry::Mesh(_))
+        && entity.extensions.get(crate::model::CAGE_EXTENSION_SLOT).is_some_and(|ext| {
+            serde_json::from_str::<RestCorners>(&ext.payload).is_ok()
+        })
+}
 
 /// The owning scale of a cage trigger region. Only the region record is portable here; the
 /// falloff weighting lives in the native adapter.

@@ -4,7 +4,7 @@
 use om9_core::{
     Error,
     gem::{
-        GemCut, GemId, GemRecord, GemShape, GemSpec,
+        GemCut, GemId, GemRecord, GemShape, GemSpec, build_mesh,
     },
     gem_edits::{
         DIAMOND_DENSITY_G_CM3, GEM_STYLE_FILE_SCHEMA, GemEdit, GemStyle, GemStyleStore,
@@ -67,7 +67,7 @@ fn a_round_stone_collapses_two_diameters_and_refuses_a_cut_shape_mismatch() {
     );
     let shape_mismatch = GemEdit {
         cut: Some(GemCut::Cabochon),
-        shape: Some(GemShape::Heart),
+        shape: Some(GemShape::Princess),
         ..GemEdit::default()
     };
     assert_eq!(
@@ -306,4 +306,22 @@ fn the_map_numbers_the_scene_in_order_and_refuses_a_bad_point() {
         gem_map(&bad).expect_err("bad point"),
         Error::Invalid("gem map point")
     );
+}
+
+#[test]
+fn loading_a_domed_cut_style_rebuilds_the_depth_split() {
+    let base = gem(round(6.0));
+    for (cut, pavilion_share) in [(GemCut::Cabochon, 0.0), (GemCut::Pearl, 0.5)] {
+        let edit = GemEdit {
+            cut: Some(cut),
+            length_mm: Some(5.0),
+            width_mm: Some(5.0),
+            depth_mm: Some(5.0),
+            ..GemEdit::default()
+        };
+        let spec = edit.spec(&base.spec).unwrap();
+        assert_eq!(spec.cut, cut);
+        assert!((spec.pavilion_depth_mm - (5.0 - spec.girdle_mm) * pavilion_share).abs() < 1.0e-12);
+        assert!(build_mesh(&spec).unwrap().closed);
+    }
 }

@@ -119,11 +119,11 @@ pub fn command_name(text: &str) -> Option<&'static str> {
     match text.trim().to_ascii_lowercase().as_str() {
         "gvgemcontrol" | "gemcontrol" | "gem control" => Some(CONTROL),
         "gvmatchattributes" | "matchattributes" | "match attributes" => Some(MATCH),
-        "gvsavestyle" | "savestyle" | "save style" | "save gem style" => Some(SAVE_STYLE),
-        "gvloadstyle" | "loadstyle" | "load style" | "load gem style" => Some(LOAD_STYLE),
+        "gvstylessave" | "gvsavestyle" | "savestyle" | "save style" | "save gem style" => Some(SAVE_STYLE),
+        "gvstylesload" | "gvloadstyle" | "loadstyle" | "load style" | "load gem style" => Some(LOAD_STYLE),
         "gvgemupdate" | "gemupdate" | "gem update" => Some(UPDATE),
         "gvgemmap" | "gemmap" | "gem map" => Some(MAP),
-        "gvgemreport" | "gemreport" | "gem report" | "gemreporter" => Some(REPORTER),
+        "gvbuildergemreporter" | "gvgemreport" | "gemreport" | "gem report" | "gemreporter" => Some(REPORTER),
         "gvgemhistory" | "gemhistory" | "gem attribute history" => Some(HISTORY),
         _ => None,
     }
@@ -191,12 +191,16 @@ impl GemEditsSession {
     }
 }
 
+pub(super) fn gem_style_path() -> PathBuf {
+    std::env::var_os("OM9_GEM_STYLE_FILE")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from(DEFAULT_STYLE_FILE))
+}
+
 /// Open the tool for the current selection.
 pub fn open(controller: &Controller, tool: GemEditsTool) -> Result<GemEditsSession> {
     let selection = controller.selected_ordered();
-    let style_path = std::env::var_os("OM9_GEM_STYLE_FILE")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from(DEFAULT_STYLE_FILE));
+    let style_path = gem_style_path();
     let mut session = GemEditsSession {
         tool,
         targets: Vec::new(),

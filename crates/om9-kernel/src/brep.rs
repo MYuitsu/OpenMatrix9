@@ -119,11 +119,13 @@ unsafe extern "C" {
         include_edge_bindings: c_int, optimize_export_sphere: c_int,
         message: *mut c_char, capacity: c_int,
     ) -> c_int;
-    fn om9_occt_brep_from_triangles(
+    fn om9_occt_brep_from_facets(
         points: *const f64,
         point_count: usize,
-        triangles: *const [u32; 3],
-        triangle_count: usize,
+        indices: *const u32,
+        index_count: usize,
+        face_sizes: *const usize,
+        face_count: usize,
         tolerance: f64,
         deflection: f64,
         max_points: usize,
@@ -1428,32 +1430,63 @@ pub fn from_triangles(
     deflection_mm: f64,
     limits: &Limits,
 ) -> Result<Brep, KernelError> {
+    from_facet_indices(points, triangles.as_flattened(), None, triangles.len(), deflection_mm, limits)
+}
+
+pub(crate) fn from_planar_facets(
+    points: &[[f64; 3]], faces: &[Vec<u32>], deflection_mm: f64, limits: &Limits,
+) -> Result<Brep, KernelError> {
+    let invalid = || KernelError::InvalidInput("mesh BRep facet corners".into());
+    let count = faces.iter().try_fold(0usize, |sum, face| {
+        if !(3..=32).contains(&face.len()) {
+            return Err(invalid());
+        }
+        sum.checked_add(face.len()).ok_or_else(invalid)
+    })?;
+    let bytes = count.checked_mul(size_of::<u32>()).and_then(|n| n.checked_add(std::mem::size_of_val(faces)))
+        .ok_or_else(|| KernelError::InvalidInput("mesh BRep facet budget".into()))?;
+    if bytes as u64 > limits.max_bytes || faces.len() as u64 > limits.max_nodes {
+        return Err(KernelError::InvalidInput("mesh BRep facet budget".into()));
+    }
+    let mut indices = Vec::new();
+    let mut sizes = Vec::new();
+    let budget = |_| KernelError::InvalidInput("mesh BRep facet budget".into());
+    indices.try_reserve_exact(count).map_err(budget)?;
+    sizes.try_reserve_exact(faces.len()).map_err(budget)?;
+    indices.extend(faces.iter().flatten().copied());
+    sizes.extend(faces.iter().map(Vec::len));
+    from_facet_indices(points, &indices, Some(&sizes), faces.len(), deflection_mm, limits)
+}
+
+fn from_facet_indices(
+    points: &[[f64; 3]], indices: &[u32], face_sizes: Option<&[usize]>, face_count: usize,
+    deflection_mm: f64, limits: &Limits,
+) -> Result<Brep, KernelError> {
     if points.len() < 4
-        || triangles.len() < 4
+        || face_count < 4
         || !deflection_mm.is_finite()
         || deflection_mm <= 0.
         || points.len() as u64 > limits.max_points
-        || triangles.len() as u64 > limits.max_nodes
+        || face_count as u64 > limits.max_nodes
     {
         return Err(KernelError::InvalidInput("mesh BRep input budget".into()));
     }
-    if triangles
-        .iter()
-        .any(|t| t.iter().any(|corner| *corner as usize >= points.len()))
-    {
+    if indices.iter().any(|corner| *corner as usize >= points.len()) {
         return Err(KernelError::InvalidInput(
             "mesh BRep corner out of range".into(),
         ));
     }
     snapshot_via(deflection_mm, limits, |sink, context, message, capacity| {
-        // SAFETY: both flat arrays are live for the synchronous complete call and the adapter only
-        // copies from them.
+        // SAFETY: the arrays remain live throughout the synchronous native call.
+        // A null sizes pointer denotes consecutive groups of exactly three indices.
         unsafe {
-            om9_occt_brep_from_triangles(
+            om9_occt_brep_from_facets(
                 points.as_ptr().cast::<f64>(),
                 points.len(),
-                triangles.as_ptr(),
-                triangles.len(),
+                indices.as_ptr(),
+                indices.len(),
+                face_sizes.map_or(std::ptr::null(), |sizes| sizes.as_ptr()),
+                face_count,
                 MESH_BREP_TOLERANCE_MM,
                 deflection_mm,
                 bound(limits.max_points),

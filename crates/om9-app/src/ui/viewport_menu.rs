@@ -10,11 +10,7 @@ impl MatrixApp {
         view: ViewId,
         response: &Response,
     ) {
-        let popup = egui::Popup::menu(response).width(236.).frame(
-            egui::Frame::popup(ui.style())
-                .fill(egui::Color32::from_rgb(248, 248, 248))
-                .stroke(egui::Stroke::new(1., egui::Color32::from_gray(160))),
-        );
+        let popup = super::theme::menu(response).width(236.);
         let popup_id = popup.get_id();
         let opening = response.clicked();
         if response.clicked() {
@@ -33,7 +29,7 @@ impl MatrixApp {
             .filter(|(id, _)| *id == popup_id)
             .map(|(_, capture)| capture.clone());
         popup.show(|ui| {
-            *ui.visuals_mut() = egui::Visuals::light();
+
             ui.set_min_width(236.);
             ui.set_max_width(236.);
             self.viewport_menu_owns_frame = true;

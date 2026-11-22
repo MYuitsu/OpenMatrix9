@@ -180,11 +180,11 @@ fn loader(e: &Event, kind: LoaderKind) -> Reply {
             } else {
                 create.push(placed_stone(
                     &gem,
-                    &plane_frame(e, e.plane.origin),
+                    &Frame::new([0.0; 3], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]),
                     source,
                     &material,
                 ));
-                what = format!("{} placed at the CPlane origin", gem.name());
+                what = format!("{} placed at F4", gem.name());
             }
             let mut r = Reply::finish(create).say(format!(
                 "{label}: {what} ({} ct each)",
@@ -208,7 +208,7 @@ fn loader(e: &Event, kind: LoaderKind) -> Reply {
     } else if !selected.is_empty() {
         format!("Enter replaces the {} selected stones", selected.len())
     } else {
-        "Enter places one at the CPlane origin".into()
+        "Enter places one at F4".into()
     };
     let mut options = Vec::new();
     if !st.points.is_empty() {

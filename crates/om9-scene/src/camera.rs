@@ -366,7 +366,7 @@ impl Camera {
         camera.validate()?;
         Ok(camera)
     }
-    fn basis(&self) -> Result<[Point3; 3]> {
+    pub(crate) fn basis(&self) -> Result<[Point3; 3]> {
         let forward = unit(sub(self.target, self.eye))?;
         let right = unit(cross(forward, unit(self.up)?))?;
         let up = unit(cross(right, forward))?;
@@ -606,6 +606,10 @@ impl Camera {
             Projection::Perspective { .. } => {}
         }
         next.fit_clip(radius)?;
+        // A parallel fit retains its eye distance. A narrow perspective fit can
+        // also place the eye many radii away. Keep the far side inside the slab.
+        let offset = sub(next.eye, center);
+        next.far_mm = next.far_mm.max(dot(offset, offset).sqrt() + radius * margin);
         next.revision = self
             .revision
             .checked_add(1)

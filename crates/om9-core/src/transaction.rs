@@ -5269,9 +5269,18 @@ impl TransactionCoordinator {
             }
             if let Some(source) = mutation.source() {
                 let d = base.document(source.document)?;
-                d.resolve(&source)?;
-                if !d.permissions(source.object, false)?.editable {
-                    return Err(Error::Permission("source edit"));
+                let entity = d.resolve(&source)?;
+                if !d.permissions_for_entity(entity, false)?.editable {
+                    // Unlocking an object must still satisfy every inherited permission.
+                    // Admit only a write that clears the lock bit and preserves all other fields.
+                    let unlock_only = if let Mutation::Attributes { attributes, .. } = mutation
+                        && entity.attributes.locked && !attributes.locked
+                        && d.permissions_for_attributes(attributes,false)?.editable {
+                        let mut unlocked = entity.attributes.clone();
+                        unlocked.locked = false;
+                        unlocked == *attributes
+                    } else { false };
+                    if !unlock_only { return Err(Error::Permission("source edit")); }
                 }
                 if !writes.insert((source.document, source.object, mutation.write_field())) {
                     return Err(Error::Invalid("conflicting source writes"));

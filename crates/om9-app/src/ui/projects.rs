@@ -739,7 +739,7 @@ impl MatrixApp {
         self.project_action_rects.clear();
         self.project_bag_rects.clear();
         egui::Frame::new()
-            .fill(Color32::from_rgb(76, 78, 77))
+            .fill(super::theme::BODY)
             .inner_margin(2.)
             .show(ui, |ui| {
                 ui.spacing_mut().item_spacing = Vec2::new(3., 3.);
@@ -913,8 +913,6 @@ impl MatrixApp {
                     self.project_action_rects.insert("named-strip", named.inner_rect);
                 }
             });
-        self.project_metadata_ui(ui.ctx());
-        self.project_dialogs(ui.ctx());
         self.persist_project_catalog();
     }
 
@@ -1499,16 +1497,16 @@ impl MatrixApp {
         Some(id)
     }
 
-    fn project_dialogs(&mut self, context: &egui::Context) {
+    pub(super) fn project_dialogs(&mut self, context: &egui::Context) {
         let draft_current = self.project_draft.as_ref().is_some_and(|draft| {
             draft.generation == self.project_manager_generation && draft.id == self.project_manager.active().id
         });
         if let Some(mut editor) = self.project_directory_editor.take() {
             let mut save = false;
             let mut cancel = false;
-            egui::Modal::new(egui::Id::new("project-directory-editor")).show(context, |ui| {
+            super::theme::modal(context, egui::Id::new("project-directory-editor")).show(context, |ui| {
                 ui.heading(match editor.kind { DirectoryKind::Customer => "Customer", DirectoryKind::Designer => "Designer", DirectoryKind::Status => "Status" });
-                if !draft_current { ui.colored_label(Color32::RED, "The project or catalog changed. Cancel this editor."); }
+                if !draft_current { ui.colored_label(super::theme::ERROR, "The project or catalog changed. Cancel this editor."); }
                 let name = ui.text_edit_singleline(&mut editor.name);
                 self.project_action_rects.insert("directory-editor-name", name.rect);
                 ui.horizontal(|ui| {
@@ -1529,9 +1527,9 @@ impl MatrixApp {
         if let Some((mut name, generation)) = self.project_new_name.take() {
             let mut create = false;
             let mut cancel = false;
-            egui::Modal::new(egui::Id::new("new-project-dialog")).show(context, |ui| {
+            super::theme::modal(context, egui::Id::new("new-project-dialog")).show(context, |ui| {
                 ui.heading("Create project");
-                if generation != self.project_manager_generation { ui.colored_label(Color32::RED, "The project catalog changed. Copy the name, then cancel."); }
+                if generation != self.project_manager_generation { ui.colored_label(super::theme::ERROR, "The project catalog changed. Copy the name, then cancel."); }
                 let field = ui.text_edit_singleline(&mut name);
                 self.project_action_rects.insert("new-project-name", field.rect);
                 ui.horizontal(|ui| {
@@ -1551,7 +1549,7 @@ impl MatrixApp {
             let mut confirm = false;
             let mut cancel = false;
             let mut retry = false;
-            egui::Modal::new(egui::Id::new("project-confirmation")).show(context, |ui| {
+            super::theme::modal(context, egui::Id::new("project-confirmation")).show(context, |ui| {
                 ui.label(match confirmation {
                     ProjectConfirmation::Delete(_) => "Remove this project from the catalog? Files on disk are kept.",
                     ProjectConfirmation::ResetTimer(_) => "Reset this project's timer?",
@@ -2300,12 +2298,8 @@ impl MatrixApp {
         });
     }
 
-    fn project_metadata_ui(&mut self, context: &egui::Context) {
-        let mut open = self.project_manager_open;
-        let size = context.content_rect().size();
-        egui::Window::new("Project Manager").id(egui::Id::new("project-manager-overview"))
-            .default_size(size * 0.85).min_size(Vec2::new(550., 350.))
-            .open(&mut open).resizable(true).show(context, |ui| {
+    pub(super) fn project_metadata_ui(&mut self, ui: &mut egui::Ui) {
+        ui.scope(|ui| {
             if let Some(worker) = &self.project_export_worker {
                 ui.horizontal(|ui| {
                     ui.label("Exporting archive…");
@@ -2319,7 +2313,7 @@ impl MatrixApp {
                 });
             }
             if let Some(error) = self.project_catalog_error.clone() {
-                ui.colored_label(Color32::RED, format!("Catalog not saved/opened: {error}"));
+                ui.colored_label(super::theme::ERROR, format!("Catalog not saved/opened: {error}"));
                 if self.project_catalog_ready && ui.button("Retry saving catalog").clicked() {
                     self.project_catalog_attempted = None;
                     self.persist_project_catalog();
@@ -2342,7 +2336,7 @@ impl MatrixApp {
             ui.separator();
             // Reserve space for wrapping actions and keep the footer inside
             // the visible screen even while egui sizes the window initially.
-            let body_height = (ui.available_height() - 100.).clamp(100., (size.y - 240.).max(100.));
+            let body_height = (ui.available_height() - 100.).clamp(100., (ui.ctx().content_rect().height() - 240.).max(100.));
             ui.horizontal_top(|ui| {
                 let grid_width = (ui.available_width() - 180.).max(150.);
                 ui.allocate_ui_with_layout(Vec2::new(grid_width, body_height), egui::Layout::top_down(egui::Align::Min), |ui| {
@@ -2388,7 +2382,7 @@ impl MatrixApp {
                     ui.strong("Text Search");
                     let search = ui.text_edit_singleline(&mut self.project_search);
                     self.project_action_rects.insert("manager-search", search.rect);
-                    if let Err(error) = self.project_filters.compile() { ui.colored_label(Color32::RED, format!("{error}")); }
+                    if let Err(error) = self.project_filters.compile() { ui.colored_label(super::theme::ERROR, format!("{error}")); }
                     ui.separator(); ui.strong("Search Filters");
                     let filter_scroll = egui::ScrollArea::vertical().id_salt("manager-overview-filters").max_height((body_height - 70.).max(50.)).show(ui, |ui| {
                         let filters = &mut self.project_filters;
@@ -2456,20 +2450,18 @@ impl MatrixApp {
                 if let Some(path) = self.project_catalog_path.as_deref().and_then(std::path::Path::parent) { ui.label(format!("Projects Location: {}", path.display())); }
             });
         });
-        self.project_manager_open = open;
-        if !open { self.project_draft = None; }
-        if self.project_manager_open && self.project_draft.is_some() { self.project_details_ui(context); }
+
     }
 
-    fn project_details_ui(&mut self, context: &egui::Context) {
-        let mut open = true;
+    pub(super) fn project_details_ui(&mut self, ui: &mut egui::Ui) {
+        let context = ui.ctx().clone();
         let draft_current = self.project_draft.as_ref().is_some_and(|draft| {
             draft.generation == self.project_manager_generation && draft.id == self.project_manager.active().id
         });
         if !draft_current { self.project_files_tab = false; }
-        egui::Window::new("Project details").id(egui::Id::new("project-metadata")).default_size(Vec2::new(740., 580.)).open(&mut open).resizable(true).show(context, |ui| {
+        ui.scope(|ui| {
             if let Some(error) = self.project_catalog_error.clone() {
-                ui.colored_label(Color32::RED, format!("Catalog not saved/opened: {error}"));
+                ui.colored_label(super::theme::ERROR, format!("Catalog not saved/opened: {error}"));
                 if self.project_catalog_ready && ui.button("Retry saving catalog").clicked() {
                     self.project_catalog_attempted = None;
                     self.persist_project_catalog();
@@ -2478,7 +2470,7 @@ impl MatrixApp {
             if draft_current { ui.heading(&self.project_manager.active().name); }
             else {
                 ui.heading("Project draft");
-                ui.colored_label(Color32::RED, "The project or catalog changed. Copy any needed edits, then cancel this draft.");
+                ui.colored_label(super::theme::ERROR, "The project or catalog changed. Copy any needed edits, then cancel this draft.");
             }
             if draft_current {
                 let timer = ui.label(project_timer_text(self.project_manager.active()));
@@ -2559,7 +2551,6 @@ impl MatrixApp {
                 } else if !cancel { self.project_draft = Some(draft); }
             } else { ui.label("Choose a project to edit its Info."); }
         });
-        if !open { self.project_draft = None; }
     }
 
     fn project_files_preview_ui(&mut self, ui: &mut egui::Ui) {

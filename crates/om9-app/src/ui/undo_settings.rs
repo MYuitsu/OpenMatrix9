@@ -526,12 +526,8 @@ impl MatrixApp {
         let clear_solid_draft = matches!(&self.memory_recovery_target, Some(MemoryRecoveryTarget::DirectSolid { input, .. } | MemoryRecoveryTarget::Sphere { input, .. } | MemoryRecoveryTarget::SphereSelection { input, .. } | MemoryRecoveryTarget::Box { input, .. }) if self.transcript.draft() == input.as_str());
         let clear_dupedge_draft = matches!(&self.memory_recovery_target, Some(MemoryRecoveryTarget::DupEdge { draft, input, .. })
             if !input.is_empty() && self.transcript.draft()==draft && (draft.trim().eq_ignore_ascii_case("DupEdge") || draft.trim().eq_ignore_ascii_case("OM9-CURVE-040")));
-        egui::Window::new("Not enough memory")
-            .id(egui::Id::new("memory-recovery"))
-            .open(&mut open)
-            .collapsible(false)
-            .resizable(false)
-            .show(ctx, |ui| {
+        let modal = super::theme::modal(ctx, egui::Id::new("memory-recovery")).show(ctx, |ui| {
+                ui.heading("Not enough memory");
                 ui.label("The operation could not be completed because memory is limited.");
                 ui.label(format!("Undo steps available: {}", self.controller.coordinator().undo_len()));
                 ui.label(format!("Allow removing oldest Undo steps until {command} can continue?"));
@@ -550,6 +546,7 @@ impl MatrixApp {
                     done = cancel.clicked() || (self.memory_recovery_running && cancel.is_pointer_button_down_on());
                 });
             });
+        done |= modal.is_top_modal && ctx.input_mut(|input| input.consume_key(egui::Modifiers::NONE, egui::Key::Escape));
         if discard {
             self.memory_recovery_running = true;
             self.memory_recovery_removed = 0;
@@ -701,10 +698,9 @@ impl MatrixApp {
         let detail_width = width - tree_width - 32.;
         let id = egui::Id::new("undo-settings");
         let top = ((available.y - height - 90.) * 0.5).max(0.);
-        egui::Modal::new(id)
+        super::theme::modal(ctx, id)
             .area(egui::Modal::default_area(id).anchor(egui::Align2::CENTER_TOP, egui::vec2(0., top)))
             .backdrop_color(Color32::from_black_alpha(68))
-            .frame(egui::Frame::popup(&ctx.style_of(egui::Theme::Light)).fill(Color32::from_rgb(250, 252, 255)))
             .show(ctx, |ui| {
                 options::style_dialog(ui);
                 ui.set_width(width);

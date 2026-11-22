@@ -2819,7 +2819,7 @@ fn apparent_intersection_uses_cylinder_rim_before_project() {
 }
 
 #[test]
-fn idle_viewport_keys_stay_out_of_command_input() {
+fn idle_viewport_shortcut_precedes_printable_command_input() {
     use om9_core::{geometry::Geometry, model::Entity};
 
     let context = egui::Context::default();
@@ -2840,9 +2840,12 @@ fn idle_viewport_keys_stay_out_of_command_input() {
     frame(&mut app, &context, vec![Event::Key { key: Key::E, physical_key: None,
         pressed: true, repeat: false, modifiers: Modifiers::NONE }, Event::Text("e".into())]);
     assert_eq!(app.snap_override(), Some(SnapKind::End));
-    frame(&mut app, &context, vec![Event::Text("x".into())]);
     assert_eq!(app.transcript.draft(), "");
     assert!(context.memory(|memory| memory.focused().is_none()));
+
+    frame(&mut app, &context, vec![Event::Text("x".into())]);
+    assert_eq!(app.transcript.draft(), "x");
+    assert!(context.memory(|memory| memory.has_focus(egui::Id::new("matrix-command-transcript"))));
     assert!(!app.controller.is_running());
 }
 

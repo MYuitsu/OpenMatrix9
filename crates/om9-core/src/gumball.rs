@@ -81,6 +81,8 @@ pub enum Handle {
     MoveFree,
     Rotate(Axis),
     Scale(Axis),
+    ScalePlane(Plane),
+    ScaleUniform,
 }
 
 impl Handle {
@@ -91,6 +93,9 @@ impl Handle {
             Self::MoveFree => 6,
             Self::Rotate(axis) => 7 + axis.code(),
             Self::Scale(axis) => 10 + axis.code(),
+            // Extended T-Splines handles live outside the legacy handle range.
+            Self::ScalePlane(plane) => 0x100 + plane.code() - 3,
+            Self::ScaleUniform => 0x103,
         }
     }
     pub fn from_code(code: u32) -> Option<Self> {
@@ -100,6 +105,8 @@ impl Handle {
             6 => Self::MoveFree,
             7..=9 => Self::Rotate(Axis::from_code(code - 7)?),
             10..=12 => Self::Scale(Axis::from_code(code - 10)?),
+            0x100..=0x102 => Self::ScalePlane(Plane::from_code(code - 0x100 + 3)?),
+            0x103 => Self::ScaleUniform,
             _ => return None,
         })
     }
@@ -209,6 +216,18 @@ pub fn transform(frame: &Frame, handle: Handle, drag: Drag) -> Result<Transform>
         (Handle::Rotate(axis), Drag::Angle(angle)) => {
             rotation_about(frame.origin, frame.axis(axis), angle)
         }
+        (Handle::ScalePlane(plane), Drag::Factor(factor)) => {
+            let (u, v) = frame.plane_basis(plane);
+            scaling_along(frame.origin, u, factor)?.compose(scaling_along(frame.origin, v, factor)?)
+        }
+        (Handle::ScaleUniform, Drag::Factor(factor)) => {
+            let mut t = Transform::identity();
+            for axis in [frame.x, frame.y, frame.z] {
+                t = t.compose(scaling_along(frame.origin, axis, factor)?)?;
+            }
+            Ok(t)
+        }
+
         (Handle::Scale(axis), Drag::Factor(factor)) => {
             scaling_along(frame.origin, frame.axis(axis), factor)
         }

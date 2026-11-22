@@ -36,6 +36,24 @@ unsafe extern "C" {
         prepare:unsafe extern "C" fn(*mut c_void,usize)->c_int,
         sink:unsafe extern "C" fn(*mut c_void,c_int,*const f64,*const f64,usize,*const f64,usize)->c_int,
         context:*mut c_void,message:*mut c_char,capacity:c_int)->c_int;
+    fn om9_occt_extract_ray_face(
+        source: *const u8,
+        length: usize,
+        origin: *const f64,
+        direction: *const f64,
+        reference: *const f64,
+        tolerance: f64,
+        max_distance: f64,
+        resolved: *mut f64,
+        deflection: f64,
+        max_points: usize,
+        max_nodes: usize,
+        max_bytes: usize,
+        sink: NativeSink,
+        context: *mut c_void,
+        message: *mut c_char,
+        capacity: c_int,
+    ) -> c_int;
     fn om9_occt_isocurve_face_bounds(source:*const u8,length:usize,max_nodes:usize,triangle:*const f64,
         witness_deflection:f64,tolerance:f64,bounds:*mut f64,
         message:*mut c_char,capacity:c_int)->c_int;
@@ -577,6 +595,56 @@ pub fn face_isocurve_bounds_from_source(source:&str,witness:Option<IsocurveFaceW
         witness.map_or(0.,|w|w.deflection),witness.map_or(0.,|w|w.tolerance),bounds.as_mut_ptr(),message.as_mut_ptr(),message.len() as c_int)};
     if status!=0 {return Err(EditingError::Kernel(unsafe {std::ffi::CStr::from_ptr(message.as_ptr())}.to_string_lossy().into_owned()));}
     Ok([[bounds[0],bounds[1]],[bounds[2],bounds[3]]])
+}
+
+/// Extract a single trimmed native face using the front hit near the recorded display pick.
+pub fn extract_ray_face(
+    shape: &dyn BrepSourceAccess,
+    ray: IsocurveFaceRay,
+    deflection: f64,
+    limits: &Limits,
+) -> Result<(Brep, Point3), EditingError> {
+    let held = shape
+        .validate_source(limits)
+        .map_err(|e| EditingError::Invalid(e.to_string()))?;
+    let available = limits
+        .remaining_after(held)
+        .map_err(|e| EditingError::Budget(e.to_string()))?;
+    let deflection = checked_deflection(deflection)?;
+    if ray.witness.is_some() {
+        return Err(EditingError::Invalid("expected native viewport ray".into()));
+    }
+    let budget = snapshot_budget(&available);
+    let mut resolved = [0.; 3];
+    let face = snapshot_via(
+        deflection,
+        &available,
+        |sink, context, message, capacity| {
+            // The native call borrows the source and arrays and reports a point in the same local frame.
+            unsafe {
+                om9_occt_extract_ray_face(
+                    shape.source().as_ptr(),
+                    shape.source().len(),
+                    ray.origin.as_ptr(),
+                    ray.direction.as_ptr(),
+                    ray.reference.as_ptr(),
+                    ray.tolerance,
+                    ray.max_distance,
+                    resolved.as_mut_ptr(),
+                    deflection,
+                    budget.points,
+                    budget.nodes,
+                    budget.bytes,
+                    sink,
+                    context,
+                    message,
+                    capacity,
+                )
+            }
+        },
+    )
+    .map_err(EditingError::from)?;
+    Ok((face, resolved))
 }
 
 /// Inspect the exact face nearest `reference` on a local-space ray. The caller

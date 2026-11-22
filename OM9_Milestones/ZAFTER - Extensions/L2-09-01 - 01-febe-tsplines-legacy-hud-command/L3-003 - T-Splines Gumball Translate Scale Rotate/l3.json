@@ -4,6 +4,11 @@
   "milestone": "AFTER",
   "parent_l2_id": "OM9-L2-09-01",
   "title": "T-Splines Gumball Translate Scale Rotate",
+  "runtime_implementation": {
+    "status": "PARTIAL_RUNTIME",
+    "evidence": "docs/validation/2026-11-22-f6-matrix9.md",
+    "scope": "Object mode on authored Box cages reuses the standalone gumball transaction. F6 and typed Translate, Rotate and Scale are verified through a viewport drag with coordinate and Undo checks. Planar and uniform scale handles have independent drag fixtures. Component editing, Set Pivot and numeric Handle/Style entry now have separate runtime fixtures. Coplanar box cages provide the source polygons; native T-junction and smooth-display parity remain open."
+  },
   "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
   "target_implementation_milestone": "AFTER",
   "execution_stage": "AFTER",

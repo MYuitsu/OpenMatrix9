@@ -10,6 +10,9 @@ impl Controller {
         feature: &str,
         _origin: InvocationOrigin,
     ) -> Result<()> {
+        if let Some(result) = self.dispatch_shared_gem(feature) {
+            return result;
+        }
         // An enabled add-on that provides the command (by its code, or by the catalog code of
         // the icon bound to this built-in feature) runs instead of the built-in.
         if let Some(code) = self.addon_code(feature).or_else(|| {
@@ -49,6 +52,9 @@ impl Controller {
         }
         if super::gem_cluster::handles(feature) {
             return self.dispatch_gem_cluster(feature);
+        }
+        if let Some(cluster) = super::gem_cluster::command_name(feature) {
+            return self.dispatch_gem_cluster(cluster);
         }
         if super::gem_pave::PaveTool::handles(feature) {
             return self.dispatch_gem_pave(feature);

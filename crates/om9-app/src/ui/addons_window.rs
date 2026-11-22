@@ -233,19 +233,12 @@ impl MatrixApp {
                 }
             }
         }
-        if self.addons_ui.open {
-            let mut open = true;
-            let mut actions = Vec::new();
-            egui::Window::new("Add-ons")
-                .id(egui::Id::new("om9-addons"))
-                .open(&mut open)
-                .default_width(560.)
-                .default_height(520.)
-                .vscroll(true)
-                .show(ctx, |ui| self.addons_window_body(ui, &mut actions));
-            self.addons_ui.open = open;
-            self.apply_addon_actions(actions);
-        }
+    }
+
+    pub(super) fn addons_panel_ui(&mut self, ui: &mut egui::Ui) {
+        let mut actions = Vec::new();
+        self.addons_window_body(ui, &mut actions);
+        self.apply_addon_actions(actions);
     }
 
     fn addon_rows(&self) -> Vec<RowView> {

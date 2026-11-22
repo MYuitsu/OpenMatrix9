@@ -24,6 +24,10 @@ Khi implement/port/sửa command, bắt buộc làm đồng bộ binding icon đ
 
 ## Nghiệp vụ đã duyệt cần đọc theo feature
 
+- Khi tạo gem, áp dụng [quy tắc cấp màu theo nhóm đá](references/feature-contract.md#gem-layer-palette).
+
+- Gem Loader `OM9-GEM-001`: đọc [quy tắc bảng cỡ, tab và Depth %](references/feature-contract.md#gem-loader-size-catalog) khi sửa bộ chọn cỡ hoặc cách áp kích thước. Người dùng duyệt ghi quy tắc ngày 2026-11-22.
+
 - Boolean Builder mesh preview: compute on a cancellable host worker, allow cutter selection while pending, and let Enter promote an in-flight valid result to one undoable commit. Verified headless scope and limits: `docs/validation/2026-11-17-boolean-preview-cache.md#host-worker-for-mesh-preview`. User approved recording on 2026-11-17.
 
 - Boolean Two Objects trong MatrixApp: năm chế độ preview tính trên worker; khi preview mới bị stale hoặc thiếu quota, preview cũ được giữ. Fixture hộp kiểm XOR, preview rỗng, commit và Undo/Redo; người dùng duyệt ghi phạm vi đã kiểm. Chưa suy rộng sang mọi topology hoặc desktop/GPU. Bằng chứng: `docs/validation/2026-11-14-boolean-two-ui-worker.md`.
@@ -106,6 +110,7 @@ Khi implement/port/sửa command, bắt buộc làm đồng bộ binding icon đ
 - ExtractWireframe cấp phát danh sách cạnh/kết quả: trong các kiểm tra đã thực hiện, lỗi allocator được nhận diện là thiếu bộ nhớ để áp dụng luồng thử lại sau đồng ý; số lượng hoặc kích thước vượt giới hạn biểu diễn bị từ chối riêng. Chưa ép lỗi allocator xuyên suốt lệnh desktop; lỗi ở mô-đun khác hoặc qua adapter native chưa được chứng nhận. Người dùng duyệt ghi phạm vi này ngày 2026-11-12. Bằng chứng: `docs/validation/2026-11-12-memory-recovery-choice.md`.
 - ExtractWireframe dựng đường biên mặt NURBS: trong kiểm tra ở mức bộ tính, cấp phát hàng cơ sở, điểm, trọng số và bản sao knot bị từ chối được báo là thiếu bộ nhớ để lệnh dùng luồng thử lại sau đồng ý; kích thước không biểu diễn được bị từ chối riêng. Chưa gây lỗi allocator xuyên suốt desktop hoặc chứng nhận mọi cấp phát/native. Người dùng duyệt ghi phạm vi này ngày 2026-11-12. Bằng chứng: `docs/validation/2026-11-12-memory-recovery-choice.md`.
 - Length đo cạnh B-rep: trong fixture đã kiểm, nếu không xác minh được cạnh hiển thị với cạnh nguồn thì từ chối đo; bản vẽ và Redo được giữ. Người dùng duyệt ghi quy tắc OM9 ngày 2026-11-11; không suy rộng sang mọi B-rep hoặc hành vi Matrix gốc. Bằng chứng và giới hạn: `docs/validation/2026-11-11-length-reopened-edge.md`.
+- Extrude Tapered trong F6 và CMD giữ cùng tùy chọn DraftAngle, FlipAngle, Corners, Solid và DeleteInput. Khi đùn nhiều đường, một lần Undo khôi phục toàn bộ. Người dùng duyệt ngày 2026-11-23. Bằng chứng và giới hạn trong `docs/validation/2026-11-22-f6-matrix9.md#extrudecrvtapered-om9`.
 - ExtrudeCrv: trong các fixture chữ nhật đã kiểm, kết quả giữ placement của curve và chiều cao theo hướng làm việc; Undo/Redo khôi phục document. Người dùng duyệt ghi phạm vi này ngày 2026-11-12; không suy rộng sang mọi curve, phép biến đổi hoặc hành vi Matrix gốc. Bằng chứng và giới hạn: `docs/validation/2026-11-12-extrude-curve-placement.md`.
 - Text và Boolean Two Objects `OM9-SOLID-008/004`: [solid-prompt-contract](references/solid-prompt-contract.md). Text/Height; Boolean chọn hai BRep, preview năm kết quả và ẩn tạm đầu vào, Next/nhấp viewport, Enter xác nhận, DeleteInput No/Yes; người dùng duyệt lưu 2026-10-28.
 - Boolean Difference `OM9-SOLID-001`: [solid-prompt-contract](references/solid-prompt-contract.md). Chọn và hợp nhóm target/cutter, `DeleteInput` mặc định No, Undo/Cancel không tạo transaction; người dùng duyệt lưu 2026-10-28.

@@ -113,31 +113,26 @@ impl MatrixApp {
     }
 
     /// The key window of an open Gem Map or Gem Reporter.
-    pub(super) fn gem_edits_window_ui(&mut self, ctx: &egui::Context) {
+    pub(super) fn gem_edits_panel_ui(&mut self, ui: &mut egui::Ui) {
         let tool = self
             .controller
             .gem_edits_session()
             .map(|session| session.tool);
         match tool {
-            Some(GemEditsTool::Map) => self.gem_map_window(ctx),
-            Some(GemEditsTool::Reporter) => self.gem_report_window(ctx),
+            Some(GemEditsTool::Map) => self.gem_map_window(ui),
+            Some(GemEditsTool::Reporter) => self.gem_report_window(ui),
             _ => {}
         }
     }
 
-    fn gem_map_window(&mut self, ctx: &egui::Context) {
+    fn gem_map_window(&mut self, ui: &mut egui::Ui) {
         let rows = self.controller.gem_map_rows();
         if rows.is_empty() {
             return;
         }
-        let mut open = true;
+
         let mut close = false;
-        egui::Window::new(format!("Gem Map · {} stone(s)", rows.len()))
-            .id(egui::Id::new("om9-gem-map"))
-            .collapsible(false)
-            .resizable(true)
-            .open(&mut open)
-            .show(ctx, |ui| {
+        ui.scope(|ui| {
                 ui.label("Numbers match the viewport markers. Sizes are girdle L × W in mm.");
                 egui::ScrollArea::vertical()
                     .max_height(260.0)
@@ -150,26 +145,18 @@ impl MatrixApp {
                     close = true;
                 }
             });
-        if close || !open {
+        if close {
             self.controller.gem_edits_cancel();
         }
     }
 
-    fn gem_report_window(&mut self, ctx: &egui::Context) {
+    fn gem_report_window(&mut self, ui: &mut egui::Ui) {
         let Some(report) = self.controller.gem_report_data() else {
             return;
         };
-        let mut open = true;
+
         let mut close = false;
-        egui::Window::new(format!(
-            "Gem Reporter · {} stone(s) · {:.3} ct",
-            report.total_count, report.total_carat
-        ))
-        .id(egui::Id::new("om9-gem-report"))
-        .collapsible(false)
-        .resizable(true)
-        .open(&mut open)
-        .show(ctx, |ui| {
+        ui.scope(|ui| {
             egui::ScrollArea::vertical()
                 .max_height(280.0)
                 .show(ui, |ui| {
@@ -208,7 +195,7 @@ impl MatrixApp {
                 close = true;
             }
         });
-        if close || !open {
+        if close {
             self.controller.gem_edits_cancel();
         }
     }

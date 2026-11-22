@@ -1682,7 +1682,13 @@ fn cache_entity(entity: &Entity, usage: &mut Usage, limits: &Limits, representat
             Err(error) => return Err(error),
         }
     }
-    Ok((cache(&entity.geometry,usage,limits,representations)?,fallback))
+    let mut buffers = cache(&entity.geometry, usage, limits, representations)?;
+    if let (Geometry::Mesh(mesh), RenderBuffers::Mesh { edges, .. }) = (&entity.geometry, &mut buffers)
+        && entity.extensions.contains_key(om9_core::model::GEM_EXTENSION_SLOT)
+    {
+        edges.retain(|&[a, b]| !om9_core::gem::gem_tessellation_edge(mesh, a, b));
+    }
+    Ok((buffers, fallback))
 }
 /// Tessellate a NURBS surface for display and picking only. The exact surface
 /// remains the document geometry; this grid is never written back.
@@ -2062,6 +2068,52 @@ impl RootBrepRepresentation {
 }
 impl Scene {
     pub fn publication_id(&self) -> uuid::Uuid { self.publication_id }
+
+    /// Only the visible owners of enabled control/edit points can be picked
+    /// during PtOffSelected. Use the published geometry and its permissions.
+    pub fn grip_owner_selection_snapshot(&self, owns_points: impl Fn(ObjectId) -> bool) -> Result<Self> {
+        let mut snapshot = self.try_render_snapshot()?;
+        for object in &mut snapshot.objects {
+            object.visible &= object.selectable && owns_points(object.root);
+            object.selectable &= object.visible;
+            object.editable = false;
+            object.reference_snappable = false;
+            object.reference_unlocked = false;
+        }
+        snapshot.publication_id = uuid::Uuid::new_v4();
+        Ok(snapshot)
+    }
+
+    /// A private picking scene for ShowSelected. Only the root's Hidden bit is
+    /// lifted. Inherited visibility, locks and member permissions still apply.
+    pub fn hidden_selection_snapshot(&self) -> Result<Self> {
+        let mut snapshot = self.try_render_snapshot()?;
+        for object in &mut snapshot.objects {
+            let mut entity = self.document.resolve(&object.source)?;
+            let attrs = &entity.attributes;
+            let layer = self.document.layer_permissions(attrs.layer, false)?;
+            let mut visible = attrs.hidden && attrs.visible && layer.visible;
+            let mut selectable = visible && attrs.selectable && !attrs.locked && layer.selectable;
+            for id in &object.path {
+                let Geometry::Instance(definition) = entity.geometry else {
+                    return Err(Error::Stale("hidden selection occurrence"));
+                };
+                entity = self.document.definitions.get(&definition)
+                    .and_then(|d| d.members.iter().find(|m| m.id == *id))
+                    .ok_or(Error::Stale("hidden selection member"))?;
+                let member = self.document.permissions_for_entity(entity, false)?;
+                visible &= member.visible;
+                selectable &= member.selectable;
+            }
+            object.visible = visible;
+            object.selectable = selectable;
+            object.editable = false;
+            object.reference_snappable = false;
+            object.reference_unlocked = false;
+        }
+        snapshot.publication_id = uuid::Uuid::new_v4();
+        Ok(snapshot)
+    }
     fn shared_buffer_is_consistent(&self, index: usize) -> Result<bool> {
         let object = self.objects.get(index).ok_or(Error::Invalid("scene buffer index"))?;
         let mut shared = false;
