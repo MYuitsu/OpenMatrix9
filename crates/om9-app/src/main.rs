@@ -79,7 +79,7 @@ fn import_3dm(source: &Path, target: &Path) -> Result<()> {
         Document::with_template_tolerance("3DM import"),
         limits,
     )?;
-    let diagnostics = controller.import_3dm(source)?;
+    let diagnostics = controller.import_3dm_for_batch(source)?;
     controller.save_archive_for_batch(target)?;
     report_with_limits(controller.document(), &diagnostics, &limits)
 }

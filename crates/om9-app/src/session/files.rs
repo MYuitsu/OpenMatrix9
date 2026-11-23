@@ -2031,10 +2031,32 @@ impl Controller {
     pub fn import_3dm(&mut self, source: &std::path::Path) -> Result<Vec<String>> {
         self.import_3dm_with_clipboard_metadata(source, None)
     }
+
+    /// Batch conversion preserves Rhino BRep bytes in the project. Editable
+    /// conversion belongs to the interactive kernel path and needs topology
+    /// evidence before the resulting canonical source can be saved.
+    pub fn import_3dm_for_batch(&mut self, source: &Path) -> Result<Vec<String>> {
+        self.import_3dm_with_brep_mode(source, None, om9_exchange::BrepMode::RetainOpaque)
+    }
+
     pub(super) fn import_3dm_with_clipboard_metadata(
         &mut self,
         source: &std::path::Path,
         metadata: Option<&om9_exchange::three_dm::ThreeDmLayerSnapshot>,
+    ) -> Result<Vec<String>> {
+        let mode = if cfg!(feature = "occt-brep") {
+            om9_exchange::BrepMode::EditableBestEffort
+        } else {
+            om9_exchange::BrepMode::RetainOpaque
+        };
+        self.import_3dm_with_brep_mode(source, metadata, mode)
+    }
+
+    fn import_3dm_with_brep_mode(
+        &mut self,
+        source: &Path,
+        metadata: Option<&om9_exchange::three_dm::ThreeDmLayerSnapshot>,
+        brep: om9_exchange::BrepMode,
     ) -> Result<Vec<String>> {
         let host = crate::three_dm_host::ThreeDmHost::configured()?;
         let document = self.document;
@@ -2047,7 +2069,7 @@ impl Controller {
             source,
             &om9_exchange::ImportOptions {
                 mode: om9_exchange::ImportMode::Geometry,
-                brep: if cfg!(feature = "occt-brep") { om9_exchange::BrepMode::EditableBestEffort } else { om9_exchange::BrepMode::RetainOpaque },
+                brep,
                 ..Default::default()
             },
             metadata,

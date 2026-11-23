@@ -74,7 +74,7 @@ export OM9_OPENNURBS_ZLIB="$(dirname "$(find "$native" -name libzlib.a -print -q
 # Bundle-only load paths. Rebind dependencies to the paired dylibs in the app.
 relocate() {
   local file="$1" prefix="$2" dep id=""
-  lipo -verify_arch arm64 "$file"
+  lipo "$file" -verify_arch arm64
   if [[ "$file" == *.dylib ]]; then
     id="$(otool -D "$file" | tail -n +2)"
     install_name_tool -id "@rpath/${file##*/}" "$file"
