@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-/// A point-in-time physical-memory sample (Windows, Linux), excluding swap and VRAM.
+/// A point-in-time physical-memory sample, excluding swap and dedicated VRAM.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PhysicalMemory {
     pub total_bytes: u64,
@@ -8,6 +8,7 @@ pub struct PhysicalMemory {
 
 pub use om9_core::budget::memory::CommitMemory;
 
+#[cfg(windows)]
 fn commit_from_pages(limit: usize, used: usize, page_size: usize) -> Option<CommitMemory> {
     if limit == 0 || used > limit || page_size == 0 { return None; }
     let page_size = u64::try_from(page_size).ok()?;
@@ -93,9 +94,59 @@ fn meminfo(text: &str) -> Option<PhysicalMemory> {
     (total > 0 && available <= total).then_some(PhysicalMemory { total_bytes: total, available_bytes: available })
 }
 
-#[cfg(not(any(windows, target_os = "linux")))]
+#[cfg(target_os = "macos")]
+pub fn physical_memory() -> Option<PhysicalMemory> {
+    use std::mem::{MaybeUninit, offset_of, size_of};
+
+    unsafe extern "C" {
+        fn mach_port_deallocate(task: libc::mach_port_t, name: libc::mach_port_t) -> libc::kern_return_t;
+    }
+
+    let mut total = 0u64;
+    let mut size = size_of::<u64>();
+    let mut stats = MaybeUninit::<libc::vm_statistics64>::zeroed();
+    let mut count = libc::HOST_VM_INFO64_COUNT;
+    // SAFETY: sysctl writes at most the supplied byte count to total. Mach
+    // receives aligned storage with its count in integer_t units. Release the
+    // host send right after the call, including when the query fails.
+    #[allow(deprecated)]
+    let page_size = unsafe {
+        if libc::sysctlbyname(c"hw.memsize".as_ptr(), (&mut total as *mut u64).cast(),
+            &mut size, std::ptr::null_mut(), 0) != 0 || size != size_of::<u64>() || total == 0
+        {
+            return None;
+        }
+        let host = libc::mach_host_self();
+        let status = libc::host_statistics64(host, libc::HOST_VM_INFO64, stats.as_mut_ptr().cast(), &mut count);
+        mach_port_deallocate(libc::mach_task_self(), host);
+        let required_bytes = offset_of!(libc::vm_statistics64, external_page_count) + size_of::<libc::natural_t>();
+        if status != libc::KERN_SUCCESS || (count as usize) * size_of::<libc::integer_t>() < required_bytes {
+            return None;
+        }
+        let page_size = libc::sysconf(libc::_SC_PAGESIZE);
+        (page_size > 0).then_some(page_size as u64)?
+    };
+    // SAFETY: zeroed integer storage with the required stats fields filled.
+    let stats = unsafe { stats.assume_init() };
+    // Free already includes speculative pages. Account for pageable file-backed
+    // memory without counting speculative pages twice or including anonymous memory.
+    let free = u64::from(stats.free_count);
+    let file_backed = u64::from(stats.external_page_count.saturating_sub(stats.speculative_count));
+    let available = (free + file_backed).checked_mul(page_size)?.min(total);
+    Some(PhysicalMemory { total_bytes: total, available_bytes: available })
+}
+
+#[cfg(not(any(windows, target_os = "linux", target_os = "macos")))]
 pub fn physical_memory() -> Option<PhysicalMemory> {
     None
+}
+
+#[cfg(all(test, target_os = "macos"))]
+#[test]
+fn macos_reports_physical_memory() {
+    let sample = physical_memory().expect("physical memory sample");
+    assert!(sample.total_bytes >= 1024 * 1024);
+    assert!(sample.available_bytes <= sample.total_bytes);
 }
 
 #[cfg(test)]

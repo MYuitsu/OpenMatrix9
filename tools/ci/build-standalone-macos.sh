@@ -142,10 +142,16 @@ for executable in "$bin"/*; do
   lipo "$executable" -verify_arch arm64
 done
 codesign --force --sign - "$app"
-codesign --verify --deep --strict "$app"
-codesign --verify --strict "$matrix/libom9_matrix.dylib"
-python3 tools/ci/smoke_all_in_one.py --app "$bin/om9" --addon-tool "$release/om9-addon" --system-addons "$addons"
 dist="$root/packages"
 mkdir "$dist"
-ditto -c -k --keepParent "$app" "$dist/OpenMatrix9-$version-All-in-One-macOS-arm64.zip"
+zip="$dist/OpenMatrix9-$version-All-in-One-macOS-arm64.zip"
+ditto -c -k --keepParent "$app" "$zip"
 (cd "$dist"; shasum -a 256 ./*.zip > SHA256SUMS.txt; shasum -a 256 -c SHA256SUMS.txt)
+extracted="$root/extracted"
+ditto -x -k "$zip" "$extracted"
+extracted_app="$extracted/OpenMatrix9.app"
+extracted_addons="$extracted_app/Contents/Resources/addons"
+codesign --verify --deep --strict "$extracted_app"
+codesign --verify --strict "$extracted_addons/om9_matrix/libom9_matrix.dylib"
+python3 tools/ci/smoke_all_in_one.py --app "$extracted_app/Contents/MacOS/om9" \
+  --addon-tool "$release/om9-addon" --system-addons "$extracted_addons"
