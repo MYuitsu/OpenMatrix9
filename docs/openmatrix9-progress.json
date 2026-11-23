@@ -1,4 +1,17 @@
 {
+  "all_in_one_2026_11_23": {
+    "stage": "build-validation",
+    "feature_ids": [
+      "OM9-M00-L2-07"
+    ],
+    "status": "validated",
+    "scope": "All-in-one Windows x64 and macOS arm64 with isolated workers, native 3DM exchange, OM9 Matrix and Ring Sizes.",
+    "evidence": "docs/validation/2026-11-23-all-in-one.md",
+    "tests": "Apple Silicon run #13 and Windows run #95 passed BRep save/reopen, Rhino 3DM round-trip and system add-on loading from their extracted ZIPs at 787afe9c. Both uploaded artifact and inner ZIP digests matched the downloaded files. The Apple Silicon run passed strict ad hoc signature verification and 1 memory, 4 verified-file, 9 process-owner and 6 atomic-save checks.",
+    "uncertainties": "Apple Developer ID signing, notarization and physical desktop verification are outside this batch. Desktop geometry clipboard integration still uses the Windows OLE adapter.",
+    "next_document": "docs/validation/2026-11-23-all-in-one.md",
+    "next_action": "Use the recorded smoke and checksums as the baseline for a future physical Apple Silicon desktop and distribution check."
+  },
   "command_ui_events_2026_11_23": {
     "stage": "ui-viewports",
     "feature_ids": [

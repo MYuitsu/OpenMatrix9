@@ -44,6 +44,17 @@
   ],
   "gate_id": "G00-07",
   "gate_registry": "implementation/evidence/M00/G00-INDEX.json",
+  "runtime_implementation": {
+    "all_in_one_2026_11_23": {
+      "status": "PACKAGED_RUNTIME_SMOKE_VERIFIED",
+      "source_commit": "787afe9c13cf6be51f2b60369f32005c9b0af65e",
+      "scope": "Windows x64 and macOS 15 Apple Silicon all-in-one packages. Extracted Box BRep save and reopen, native 3DM round-trip and OM9 Matrix and Ring Sizes loading.",
+      "evidence": ["docs/validation/2026-11-23-all-in-one.md"],
+      "windows_run": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/45115225948",
+      "macos_run": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/45115225929",
+      "manual_gate_promoted": false
+    }
+  },
   "sdk_integration_plan": {
     "recorded_at": "2026-10-21",
     "state": "PLANNED_REQUIREMENTS_ONLY",
