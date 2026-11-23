@@ -18,7 +18,7 @@ jobs:
       - name: Install Linux build and smoke-test dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libssl-dev uuid-dev libxkbcommon-dev libwayland-dev \
+          sudo apt-get install -y libssl-dev libxkbcommon-dev libwayland-dev \
             libx11-dev libxcb1-dev libvulkan1 mesa-vulkan-drivers patchelf ninja-build xvfb xdotool
       - name: Pin Rust
         run: |

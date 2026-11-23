@@ -142,8 +142,18 @@ fn main() {
             "cargo:rustc-link-search=native={}",
             opennurbs_zlib.display()
         );
-        println!("cargo:rustc-link-lib=static=opennurbsStatic");
-        println!("cargo:rustc-link-lib=static=zlib");
+        if linux {
+            // Load the bundled zlib before openNURBS so GNU ld sees its allocator
+            // references when it scans the openNURBS archive.
+            println!("cargo:rustc-link-lib=static:+whole-archive=zlib");
+            println!("cargo:rustc-link-lib=static=opennurbsStatic");
+            let uuid = opennurbs_library.join("android_uuid");
+            println!("cargo:rustc-link-search=native={}", uuid.display());
+            println!("cargo:rustc-link-lib=static=android_uuid");
+        } else {
+            println!("cargo:rustc-link-lib=static=opennurbsStatic");
+            println!("cargo:rustc-link-lib=static=zlib");
+        }
         if msvc {
             for library in ["Shlwapi", "Usp10", "shell32", "advapi32", "Gdi32", "User32"] {
                 println!("cargo:rustc-link-lib=dylib={library}");
@@ -152,8 +162,6 @@ fn main() {
             for framework in ["CoreGraphics", "CoreText", "Foundation"] {
                 println!("cargo:rustc-link-lib=framework={framework}");
             }
-        } else if linux {
-            println!("cargo:rustc-link-lib=dylib=uuid");
         }
     }
     // GetProcessMemoryInfo, used by the lifetime probe.

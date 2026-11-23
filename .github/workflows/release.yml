@@ -82,8 +82,9 @@ jobs:
               cd "$artifact"
               test "$(find . -maxdepth 1 -type f | wc -l)" -eq 2
               test -s "$asset"
-              sha256sum --strict --check SHA256SUMS.txt
-              test "$(awk '{sub(/^[*]/, "", $2); sub(/^\.\//, "", $2); print $2}' SHA256SUMS.txt)" = "$asset"
+              sed 's/\r$//' SHA256SUMS.txt > normalized-sums.txt
+              test "$(awk '{sub(/^[*]/, "", $2); sub(/^\.\//, "", $2); print $2}' normalized-sums.txt)" = "$asset"
+              sha256sum --strict --check normalized-sums.txt
             )
             mv "$artifact/$asset" dist/
           }
