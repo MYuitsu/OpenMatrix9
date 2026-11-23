@@ -196,6 +196,14 @@
     "api": []
   },
   "runtime_implementation": {
+    "macos_geometry_clipboard_2026_11_23": {
+      "status": "APPLE_SILICON_PACKAGED_CLIPBOARD_VERIFIED",
+      "source_commit": "933e355a6f14d2ece5e060c45ad066ffc8bd615a",
+      "scope": "AppKit Copy, Copy as 3DM and Paste with a Box BRep and point into independent documents. Single-step Undo and Redo for each paste.",
+      "evidence": ["docs/validation/2026-11-23-macos-geometry-clipboard.md"],
+      "release": "https://github.com/MYuitsu/OpenMatrix9/releases/tag/macos-v0.3.6-202610211407-clipboard.1",
+      "manual_gate_promoted": false
+    },
     "command_ui_events_2026_11_23": {
       "date": "2026-11-23",
       "status": "validated",

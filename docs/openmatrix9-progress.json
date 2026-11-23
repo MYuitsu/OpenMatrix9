@@ -1,4 +1,15 @@
 {
+  "macos_geometry_clipboard_2026_11_23": {
+    "stage": "build-validation",
+    "feature_ids": ["OM9-L3-01-02-004", "OM9-L2-01-13"],
+    "status": "validated",
+    "scope": "macOS AppKit geometry pasteboard and Command shortcuts for Copy, Copy as 3DM and Paste. The existing model and transaction handlers own selection and Undo.",
+    "evidence": "docs/validation/2026-11-23-macos-geometry-clipboard.md",
+    "tests": "Apple Silicon run #15 passed both clipboard formats, BRep and point geometry, Undo/Redo and shortcut classification from commit 933e355a. Windows Controller clipboard regressions 25/25 and native clipboard unit tests 4 passed with 3 interactive tests skipped. Public GitHub Downloads returned the same ZIP SHA-256 as CI.",
+    "uncertainties": "Physical desktop and Rhino for Mac interoperation require separate evidence. The package uses an ad hoc signature.",
+    "next_document": "docs/validation/2026-11-23-macos-geometry-clipboard.md",
+    "next_action": "Use the published macOS clipboard build as the baseline for desktop or Rhino interoperability verification."
+  },
   "all_in_one_2026_11_23": {
     "stage": "build-validation",
     "feature_ids": [
