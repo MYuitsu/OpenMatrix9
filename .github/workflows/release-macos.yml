@@ -22,12 +22,13 @@ jobs:
         run: |
           rustup toolchain install 1.98.1 --profile minimal
           rustup override set 1.98.1
-      - name: Check Darwin memory and file ownership
+      - name: Check Darwin memory, process and file ownership
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/om9-target
         run: |
           cargo test --locked -j 2 -p om9-native-owner --lib macos_reports_physical_memory
           cargo test --locked -j 2 -p om9-native-owner --test verified_file
+          cargo test --locked -j 2 -p om9-native-owner --test process_owner
           cargo test --locked -j 2 -p om9-archive --test atomic_save
       - name: Identify native toolchain
         id: toolchain
@@ -37,7 +38,7 @@ jobs:
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: build/ci/macos/dependencies
-          key: om9-macos-15-arm64-${{ steps.toolchain.outputs.xcode }}-${{ hashFiles('native/**', 'tools/ci/build-standalone-macos.sh', 'tools/patches/occt-8.0.1-offset-d3.patch') }}
+          key: om9-macos-15-arm64-${{ steps.toolchain.outputs.xcode }}-${{ hashFiles('native/**', 'tools/ci/build-native-macos.sh', 'tools/patches/occt-8.0.1-offset-d3.patch') }}
       - name: Build pinned OCCT and openNURBS
         if: steps.native-cache.outputs.cache-hit != 'true'
         env:

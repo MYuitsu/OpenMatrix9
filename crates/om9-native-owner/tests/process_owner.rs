@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-#![cfg(windows)]
+#![cfg(any(windows, target_os = "macos"))]
 use om9_core::transaction::Cancellation;
 use om9_native_owner::{FailureKind, NativeProgram, ProcessLimits};
 use sha2::{Digest, Sha256};
@@ -31,9 +31,23 @@ fn admitted_program_returns_owned_bounded_bytes_and_actual_job_peak_with_no_live
         "xin chào|quote\"slash\\"
     );
     assert_eq!(result.stderr, b"fixture diagnostics");
-    assert!(result.stats.pid > 0 && result.stats.peak_committed_bytes > 0);
+    assert!(result.stats.pid > 0);
+    #[cfg(windows)]
+    assert!(result.stats.peak_committed_bytes > 0);
     assert_eq!(result.stats.active_processes, 0);
     assert!(result.stats.exited);
+}
+
+#[cfg(target_os = "macos")]
+#[test]
+fn worker_budget_does_not_limit_the_parent_process_map() {
+    let parent_data = vec![42u8; 160 * 1024 * 1024];
+    let result = program()
+        .run(&args(&["echo", "bounded worker"]), &ProcessLimits::default(), &Cancellation::default())
+        .unwrap();
+    assert_eq!(result.stdout, b"bounded worker");
+    assert_eq!(result.stats.active_processes, 0);
+    std::hint::black_box(parent_data);
 }
 #[test]
 fn wrong_binary_fingerprint_and_invalid_limits_reject_before_process_creation() {
@@ -123,6 +137,7 @@ fn large_bounded_pipe_output_preserves_bytes_and_rejects_overflow() {
     assert_eq!(error.stats.unwrap().active_processes, 0);
 }
 #[test]
+#[cfg(windows)]
 fn process_committed_memory_is_limited_before_native_entry_and_failure_is_not_success() {
     let limits = ProcessLimits {
         native_committed_bytes: 32 * 1024 * 1024,
@@ -137,6 +152,7 @@ fn process_committed_memory_is_limited_before_native_entry_and_failure_is_not_su
     assert_eq!(stats.active_processes, 0);
 }
 #[test]
+#[cfg(windows)]
 fn descendant_creation_is_denied_by_the_declared_single_process_job() {
     let result = program()
         .run(

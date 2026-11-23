@@ -26,7 +26,7 @@ mod verified_file;
 #[cfg(target_os = "macos")]
 mod macos;
 #[cfg(target_os = "macos")]
-pub use macos::open_regular_read_locked;
+pub use macos::{exec_with_data_limit, open_regular_read_locked};
 #[cfg(windows)]
 mod windows;
 #[cfg(windows)]

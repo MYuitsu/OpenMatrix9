@@ -77,7 +77,9 @@ fn nonblocking(pipe: &impl AsRawFd) -> Result<()> {
     // SAFETY: fd belongs to the live pipe. F_GETFL/F_SETFL use scalar options.
     let flags = unsafe { libc::fcntl(fd, libc::F_GETFL) };
     if flags == -1 || unsafe { libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK) } == -1 {
-        return Err(io(std::io::Error::last_os_error()));
+        return Err(Failure::new(FailureKind::Io(format!(
+            "configure worker pipe: {}", std::io::Error::last_os_error(),
+        ))));
     }
     Ok(())
 }
@@ -100,6 +102,36 @@ fn drain(pipe: &mut impl Read, output: &mut Vec<u8>, limit: usize) -> Result<boo
     }
 }
 
+/// Run inside the bundled launcher after it starts with its own small VM map.
+/// A fork of the CAD app can already exceed the worker limit before exec.
+pub fn exec_with_data_limit(program: &Path, args: &[OsString], bytes: u64) -> std::io::Error {
+    if !program.is_absolute() || bytes == 0 {
+        return std::io::Error::new(ErrorKind::InvalidInput, "native worker image or data limit");
+    }
+    let mut limit = libc::rlimit { rlim_cur: 0, rlim_max: 0 };
+    // SAFETY: the initialized writable structure matches Darwin's rlimit ABI.
+    if unsafe { libc::getrlimit(libc::RLIMIT_DATA, &mut limit) } != 0 {
+        return std::io::Error::last_os_error();
+    }
+    limit.rlim_cur = limit.rlim_cur.min(bytes);
+    limit.rlim_max = limit.rlim_cur;
+    // SAFETY: the structure remains live for the call and only limits this launcher.
+    if unsafe { libc::setrlimit(libc::RLIMIT_DATA, &limit) } != 0 {
+        return std::io::Error::last_os_error();
+    }
+    Command::new(program).args(args).exec()
+}
+
+fn launcher() -> Result<PathBuf> {
+    let executable = std::env::current_exe().map_err(io)?;
+    let mut directory = executable.parent().ok_or_else(|| Failure::new(FailureKind::Invalid("worker launcher directory")))?;
+    // Cargo integration tests live in target/debug/deps, next to their bin directory.
+    if directory.ends_with("deps") {
+        directory = directory.parent().ok_or_else(|| Failure::new(FailureKind::Invalid("worker launcher directory")))?;
+    }
+    Ok(directory.join("om9-native-runner"))
+}
+
 pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLimits,
                   cancel: &Cancellation) -> Result<ProcessOutput> {
     use std::os::unix::fs::MetadataExt;
@@ -115,8 +147,10 @@ pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLi
     if NativeProgram::admit(&program.path, program.sha256).is_err() {
         return Err(Failure::new(FailureKind::Fingerprint));
     }
-    let mut command = Command::new(&program.path);
-    command.args(args).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
+    let data_limit = limits.native_committed_bytes;
+    let mut command = Command::new(launcher()?);
+    command.arg("--exec-bounded").arg(data_limit.to_string()).arg(&program.path).args(args)
+        .stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
         .process_group(0);
     // Do not inherit loader overrides from a developer shell.
     for (name, _) in std::env::vars_os() {
@@ -124,25 +158,10 @@ pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLi
             command.env_remove(name);
         }
     }
-    let data_limit = limits.native_committed_bytes;
-    // SAFETY: the post-fork callback only calls async-signal-safe system calls
-    // with stack data and returns an errno value on failure.
-    unsafe {
-        command.pre_exec(move || {
-            let mut limit = libc::rlimit { rlim_cur: 0, rlim_max: 0 };
-            if libc::getrlimit(libc::RLIMIT_DATA, &mut limit) != 0 {
-                return Err(std::io::Error::last_os_error());
-            }
-            limit.rlim_cur = data_limit.min(limit.rlim_max);
-            limit.rlim_max = limit.rlim_cur;
-            if libc::setrlimit(libc::RLIMIT_DATA, &limit) != 0 {
-                return Err(std::io::Error::last_os_error());
-            }
-            Ok(())
-        });
-    }
     let start = Instant::now();
-    let mut child = OwnedChild(command.spawn().map_err(io)?, false);
+    let mut child = OwnedChild(command.spawn().map_err(|error| Failure::new(FailureKind::Io(
+        format!("launch worker: {error}"),
+    )))?, false);
     let mut out = child.0.stdout.take().expect("piped stdout");
     let mut err = child.0.stderr.take().expect("piped stderr");
     nonblocking(&out)?;
@@ -176,6 +195,9 @@ pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLi
             thread::sleep(Duration::from_millis(2));
         }
     })();
+    if !child.1 {
+        exited = child.reap().is_ok();
+    }
     let stats = ProcessStats {
         pid: child.0.id(), peak_committed_bytes: peak,
         active_processes: u32::from(!exited), exited, elapsed: start.elapsed(),
