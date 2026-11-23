@@ -226,6 +226,11 @@ impl BrepCacheBytes {
 #[cfg(feature = "occt-brep")]
 impl BrepArchiveCache {
     pub(super) fn same_shared_archive(&self, other: &Self) -> bool { self.bytes.same_shared(&other.bytes) }
+
+    pub(super) fn contains_archive(&self, bytes: &[u8]) -> bool {
+        std::iter::successors(Some(self), |cache| cache.previous.as_deref())
+            .any(|cache| cache.bytes.as_slice() == bytes)
+    }
 }
 
 #[cfg(feature = "occt-brep")]
@@ -1059,7 +1064,7 @@ impl Controller {
         let hash = self.current_file_hash()?;
         let path = self.reserve_file_path(path)?;
         #[cfg(feature = "occt-brep")]
-        if self.document_has_brep_sources() {
+        if Self::document_has_brep_sources(self.document()) {
             guard()?;
             return self.start_brep_file_save(token, path, hash);
         }
@@ -1165,9 +1170,9 @@ impl Controller {
     pub fn poll_file_save_worker(&mut self) -> Option<Result<FileOutcome>> { None }
 
     #[cfg(feature = "occt-brep")]
-    fn document_has_brep_sources(&self) -> bool {
-        self.document().entities.values().chain(self.document().definitions.values().flat_map(|definition| &definition.members))
-            .map(|entity| &entity.geometry).chain(self.document().results.values().map(|result| &result.geometry_snapshot))
+    pub(super) fn document_has_brep_sources(document: &Document) -> bool {
+        document.entities.values().chain(document.definitions.values().flat_map(|definition| &definition.members))
+            .map(|entity| &entity.geometry).chain(document.results.values().map(|result| &result.geometry_snapshot))
             .any(|geometry| matches!(geometry, Geometry::Brep(_) | Geometry::NativeBrep(_)))
     }
 
@@ -1175,7 +1180,7 @@ impl Controller {
     pub fn save_archive_for_batch(&self, path: &Path) -> Result<()> {
         let path_bytes = path.as_os_str().as_encoded_bytes().len() as u64;
         #[cfg(feature = "occt-brep")]
-        if self.document_has_brep_sources() {
+        if Self::document_has_brep_sources(self.document()) {
             let capture = self.capture_brep_save_sources(Usage { bytes: path_bytes, ..Usage::default() })?;
             let host = crate::brep_restore_host::BrepRestoreHost::admit_packaged(Default::default())?;
             let cancel = om9_core::transaction::Cancellation::default();

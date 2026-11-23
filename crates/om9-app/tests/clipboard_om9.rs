@@ -50,6 +50,32 @@ fn malformed_payload_does_not_modify_document_or_history() {
     assert_eq!(controller.coordinator().undo_len(), 0);
 }
 
+#[cfg(all(feature = "occt-brep", feature = "test-fixtures"))]
+#[test]
+fn exact_solid_clipboard_uses_the_brep_archive_and_keeps_the_pasted_source() {
+    let mut from = Controller::new(Document::with_template_tolerance("Box source"), Default::default()).unwrap();
+    from.submit("Box 4 5 6").unwrap();
+    let original = *from.document().entities.keys().next().unwrap();
+    from.select_objects(&[original]).unwrap();
+    let bytes = from.copy_selected_om9().unwrap();
+    assert_eq!(&bytes[8..12], &6u32.to_le_bytes());
+    assert_eq!(from.coordinator().undo_len(), 1);
+
+    let mut target = Controller::new(Document::with_template_tolerance("Box destination"), Default::default()).unwrap();
+    let ids = target.paste_om9(&bytes).unwrap();
+    assert_eq!(ids.len(), 1);
+    assert_ne!(ids[0], original);
+    assert!(matches!(target.document().entities[&ids[0]].geometry, Geometry::Brep(_)));
+    assert_eq!(target.coordinator().undo_len(), 1);
+    target.select_objects(&ids).unwrap();
+    let copied_again = target.copy_selected_om9().unwrap();
+    assert_eq!(&copied_again[8..12], &6u32.to_le_bytes());
+    target.undo().unwrap();
+    assert!(target.document().entities.is_empty());
+    target.redo().unwrap();
+    assert!(target.document().entities.contains_key(&ids[0]));
+}
+
 #[test]
 fn dependent_extension_is_refused_without_changing_document() {
     let mut document = Document::new("clipboard");

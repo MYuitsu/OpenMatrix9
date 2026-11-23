@@ -238,7 +238,8 @@ pub fn smoke_geometry_clipboard() -> Result<()> {
         (ClipboardAction::Copy, Format::Om9),
         (ClipboardAction::Copy3dm, Format::Rhino3dm),
     ] {
-        apply(&mut source, action)?;
+        apply(&mut source, action)
+            .map_err(|error| Error::Io(format!("macOS clipboard {action:?}: {error}")))?;
         let (format, _, _) = board.read().map_err(Error::Io)?;
         if format != expected_format
             || source.coordinator().undo_len() != source_undo
@@ -247,7 +248,8 @@ pub fn smoke_geometry_clipboard() -> Result<()> {
             return Err(Error::Invalid("clipboard smoke Copy output"));
         }
         let mut target = make_document("Clipboard destination")?;
-        apply(&mut target, ClipboardAction::Paste)?;
+        apply(&mut target, ClipboardAction::Paste)
+            .map_err(|error| Error::Io(format!("macOS clipboard Paste after {action:?}: {error}")))?;
         let document = target.document();
         if document.entities.len() != 2
             || document.entities.keys().any(|id| source_ids.contains(id))

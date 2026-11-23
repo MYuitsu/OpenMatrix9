@@ -428,6 +428,15 @@ impl Controller {
 
     fn copy_selected_om9_inner(&self, omit_project_state: bool, explicit_roots: Option<&[ObjectId]>) -> Result<Vec<u8>> {
         let capture = self.prepare_om9_selection(omit_project_state, explicit_roots)?;
+        #[cfg(feature = "occt-brep")]
+        if !omit_project_state && Self::document_has_brep_sources(capture.document()) {
+            let sources = self.capture_brep_sources_for_document(capture.document(), Usage::default())?;
+            let host = crate::brep_restore_host::BrepRestoreHost::admit_packaged(Default::default())?;
+            let cancel = om9_core::transaction::Cancellation::default();
+            let archive = sources.encode_document(&host, capture.document(), &cancel)?;
+            capture.revalidate(&self.coordinator)?;
+            return Ok(archive.into_parts().0);
+        }
         let bytes = om9_archive::Archive::encode(capture.document(), self.coordinator.limits())?;
         capture.revalidate(&self.coordinator)?;
         Ok(bytes)
@@ -476,7 +485,61 @@ impl Controller {
 
     /// Paste the archive as one transaction; unsupported dependencies never partially commit.
     pub fn paste_om9(&mut self, bytes: &[u8]) -> Result<Vec<ObjectId>> {
+        #[cfg(feature = "occt-brep")]
+        if crate::brep_restore_host::is_brep_archive(bytes) {
+            return self.paste_brep_om9(bytes);
+        }
         self.paste_om9_checked(bytes, None, false)
+    }
+
+    #[cfg(feature = "occt-brep")]
+    fn paste_brep_om9(&mut self, bytes: &[u8]) -> Result<Vec<ObjectId>> {
+        use om9_core::budget::memory::MemoryClass;
+
+        if self.is_running() {
+            return Err(Error::Busy);
+        }
+        let result = (|| {
+            let held = self.scene_cache_usage()?;
+            let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+            let size = bytes.len() as u64;
+            let _input = self.coordinator.reserve_external_memory_with_allocated(
+                MemoryClass::CpuCache, size, size, physical(), held,
+            )?;
+            let host = crate::brep_restore_host::BrepRestoreHost::admit_packaged(Default::default())?;
+            let cancel = om9_core::transaction::Cancellation::default();
+            let bound = host.restore_bound_archive(&self.coordinator, bytes, true, held, &cancel)?;
+
+            // Keep the verified archive packets so pasted solids can be saved or copied again.
+            let mut cache = None;
+            if !self.brep_archive_cache.as_ref().is_some_and(|existing| existing.contains_archive(bytes)) {
+                let mut owner = self.coordinator.reserve_external_memory_with_held(
+                    MemoryClass::CpuCache, size, physical(), held,
+                )?;
+                let archive = Arc::<[u8]>::from(bytes);
+                owner.set_allocated_bytes(size)?;
+                let mut staged = super::files::shared_brep_archive_cache(
+                    &self.coordinator, bound.document(), archive, owner, held,
+                )?;
+                Arc::get_mut(&mut staged).ok_or(Error::Invalid("shared staged BRep archive cache"))?
+                    .previous = self.brep_archive_cache.clone();
+                cache = Some(staged);
+            }
+            let (document, _owners, context) = bound.into_replacement_parts();
+            if self.coordinator.capture_context(None)?.0 != context {
+                return Err(Error::Stale("BRep clipboard context"));
+            }
+            let ids = self.paste_decoded_om9(document, None)?;
+            if let Some(cache) = cache {
+                self.brep_archive_cache = Some(cache);
+            }
+            Ok(ids)
+        })();
+        if result.is_err() {
+            self.coordinator.prune_orphaned_brep_representations();
+            self.coordinator.prune_orphaned_native_representations();
+        }
+        result
     }
 
     pub fn insert_jobbag_archive(&mut self, bytes: &[u8], snapshot: &crate::project_manager::Snapshot) -> Result<Vec<ObjectId>> {
