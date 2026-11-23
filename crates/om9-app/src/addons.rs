@@ -99,14 +99,21 @@ pub fn new_host(config: HostConfig) -> Host {
 /// Open the add-on host for the interactive application.
 ///
 /// - user repository and `userprefs.toml`: `OM9_CONFIG_DIR` or the per-version config folder;
-/// - system repository: `addons/` beside `om9.exe` (read-only, shipped with the package);
+/// - system repository: `addons/` beside the executable or in macOS bundle Resources;
 /// - `OM9_SAFE_MODE=1` starts without enabling any add-on and without rewriting preferences.
 pub fn open_host() -> Result<(SharedHost, Vec<String>), String> {
     let version = om9_version();
     let mut config = HostConfig::new(version, catalog()?, default_config_dir(version));
     config.system_dir = std::env::current_exe()
         .ok()
-        .and_then(|exe| exe.parent().map(|dir| dir.join("addons")))
+        .and_then(|exe| {
+            let directory = exe.parent()?;
+            #[cfg(target_os = "macos")]
+            if directory.ends_with("Contents/MacOS") {
+                return Some(directory.parent()?.join("Resources/addons"));
+            }
+            Some(directory.join("addons"))
+        })
         .filter(|dir| dir.is_dir());
     let mut host = new_host(config);
     let safe_mode = std::env::var("OM9_SAFE_MODE").is_ok_and(|v| v.trim() == "1");

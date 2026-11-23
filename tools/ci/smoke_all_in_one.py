@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 
 
-def smoke(app, addon_tool):
+def smoke(app, addon_tool, system_addons):
     environment = {
         key: value for key, value in os.environ.items()
         if not key.upper().startswith(("OM9_", "DYLD_"))
@@ -64,7 +64,7 @@ def smoke(app, addon_tool):
         if model.stat().st_size == 0 or reopened.stat().st_size == 0:
             raise RuntimeError("Empty 3DM round-trip")
         for addon in ("om9_matrix", "ring_sizes"):
-            run(addon_tool, "--system", app.parent / "addons", "--config",
+            run(addon_tool, "--system", system_addons, "--config",
                 workspace / "addon-test", "--catalog", catalog, "enable", addon, "--yes")
         print("All-in-one smoke passed: BRep save/open, native 3DM round-trip, Matrix and Ring Sizes")
 
@@ -73,5 +73,8 @@ if __name__ == "__main__":
     argument_parser = argparse.ArgumentParser(description=__doc__)
     argument_parser.add_argument("--app", type=Path, required=True)
     argument_parser.add_argument("--addon-tool", type=Path, required=True)
+    argument_parser.add_argument("--system-addons", type=Path)
     options = argument_parser.parse_args()
-    smoke(options.app.resolve(strict=True), options.addon_tool.resolve(strict=True))
+    app = options.app.resolve(strict=True)
+    system_addons = options.system_addons or app.parent / "addons"
+    smoke(app, options.addon_tool.resolve(strict=True), system_addons.resolve(strict=True))

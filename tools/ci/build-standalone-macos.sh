@@ -110,7 +110,7 @@ relocate "$bin/om9" '@loader_path/../Frameworks'
 
 cargo build --locked --release -j 2 -p om9-addon-matrix --lib
 cargo build --locked --release -j 2 -p om9-addons --features native --bin om9-addon
-addons="$bin/addons"
+addons="$resources/addons"
 matrix="$addons/om9_matrix"
 mkdir -p "$matrix"
 ditto addons/matrix/addon "$matrix"
@@ -139,7 +139,8 @@ with (app / "Contents/Info.plist").open("wb") as out:
 PY
 codesign --force --sign - "$app"
 codesign --verify --deep --strict "$app"
-python3 tools/ci/smoke_all_in_one.py --app "$bin/om9" --addon-tool "$release/om9-addon"
+codesign --verify --strict "$matrix/libom9_matrix.dylib"
+python3 tools/ci/smoke_all_in_one.py --app "$bin/om9" --addon-tool "$release/om9-addon" --system-addons "$addons"
 dist="$root/packages"
 mkdir "$dist"
 ditto -c -k --keepParent "$app" "$dist/OpenMatrix9-$version-All-in-One-macOS-arm64.zip"
