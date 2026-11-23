@@ -40,12 +40,12 @@ pub fn prepare_verified_mixed_document_candidate(path: &std::path::Path, bytes: 
 fn prepare_verified_candidate_version(path: &std::path::Path, bytes: &Vec<u8>, limits: &Limits,
     cancel: &om9_core::transaction::Cancellation, admit: &mut dyn FnMut(u64, u64) -> Result<()>,
     verify: &mut dyn FnMut(&[u8]) -> Result<()>, version: u32) -> Result<PreparedArchive> {
-    #[cfg(not(any(windows, target_os = "macos")))]
+    #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
     {
         let _ = (path, bytes, limits, cancel, admit, verify, version);
         return Err(Error::Unsupported("verified BRep staging on this platform"));
     }
-    #[cfg(any(windows, target_os = "macos"))]
+    #[cfg(any(windows, target_os = "macos", target_os = "linux"))]
     {
     if bytes.len() < 12 || &bytes[..8] != b"OM9\0\r\n\x1a\n"
         || u32::from_le_bytes(bytes[8..12].try_into().expect("header checked")) != version {

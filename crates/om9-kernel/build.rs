@@ -13,7 +13,8 @@ use std::path::PathBuf;
 fn main() {
     let msvc = env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc");
     let macos = env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("macos");
-    assert!(msvc || macos, "OCCT SDK setup supports Windows MSVC and macOS");
+    let linux = env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("linux");
+    assert!(msvc || macos || linux, "OCCT SDK setup supports Windows MSVC, macOS and Linux");
     let sdk = PathBuf::from(env::var("OM9_OCCT_SDK").unwrap_or_else(|_| {
         concat!(
             env!("CARGO_MANIFEST_DIR"),
@@ -33,7 +34,7 @@ fn main() {
         include.display()
     );
     assert!(
-        library.join(if macos { "libTKernel.dylib" } else { "TKernel.lib" }).exists(),
+        library.join(if macos { "libTKernel.dylib" } else if linux { "libTKernel.so" } else { "TKernel.lib" }).exists(),
         "OCCT import libraries missing at {}",
         library.display()
     );
@@ -76,12 +77,12 @@ fn main() {
             .map(PathBuf::from)
             .unwrap_or_else(|_| opennurbs_library.join("../zlib/Release"));
         assert!(
-            opennurbs_library.join(if macos { "libopennurbsStatic.a" } else { "opennurbsStatic.lib" }).exists(),
+            opennurbs_library.join(if msvc { "opennurbsStatic.lib" } else { "libopennurbsStatic.a" }).exists(),
             "opennurbsStatic.lib not found at {}; build build/native-brep first or set OM9_OPENNURBS_LIB",
             opennurbs_library.display()
         );
         assert!(
-            opennurbs_zlib.join(if macos { "libzlib.a" } else { "zlib.lib" }).exists(),
+            opennurbs_zlib.join(if msvc { "zlib.lib" } else { "libzlib.a" }).exists(),
             "zlib.lib not found at {}; set OM9_OPENNURBS_ZLIB",
             opennurbs_zlib.display()
         );
@@ -151,6 +152,8 @@ fn main() {
             for framework in ["CoreGraphics", "CoreText", "Foundation"] {
                 println!("cargo:rustc-link-lib=framework={framework}");
             }
+        } else if linux {
+            println!("cargo:rustc-link-lib=dylib=uuid");
         }
     }
     // GetProcessMemoryInfo, used by the lifetime probe.

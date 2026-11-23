@@ -1,0 +1,117 @@
+name: OpenMatrix9 cross-platform release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*', 'preview-v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: om9-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      prerelease: ${{ steps.metadata.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Check source and release metadata
+        id: metadata
+        run: |
+          python3 tools/public_source_audit.py
+          version=$(jq -er '.version | select(test("^[0-9]+[.][0-9]+[.][0-9]+(-[A-Za-z0-9.-]+)?$"))' release.json)
+          prerelease=$(jq -r '.prerelease | if type == "boolean" then . else error("expected boolean prerelease") end' release.json)
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            case "$GITHUB_REF_NAME" in
+              "v$version")
+                git merge-base --is-ancestor HEAD refs/remotes/origin/main ;;
+              "preview-v$version"-*)
+                test "$prerelease" = true ;;
+              *) echo "Tag must identify version $version" >&2; exit 1 ;;
+            esac
+          fi
+          printf 'version=%s\nprerelease=%s\n' "$version" "$prerelease" >> "$GITHUB_OUTPUT"
+
+  windows:
+    needs: source
+    uses: ./.github/workflows/release-windows.yml
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+
+  macos:
+    needs: source
+    uses: ./.github/workflows/release-macos.yml
+
+  linux:
+    needs: source
+    uses: ./.github/workflows/release-linux.yml
+
+  publish:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: [source, windows, macos, linux]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      actions: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.source.outputs.version }}
+      PRERELEASE: ${{ needs.source.outputs.prerelease }}
+    steps:
+      - name: Verify and gather the four tested downloads
+        run: |
+          mkdir dist
+          stage() {
+            local artifact="$1" asset="$2"
+            gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$artifact" --dir "$artifact"
+            (
+              cd "$artifact"
+              test "$(find . -maxdepth 1 -type f | wc -l)" -eq 2
+              test -s "$asset"
+              sha256sum --strict --check SHA256SUMS.txt
+              test "$(awk '{sub(/^[*]/, "", $2); sub(/^\.\//, "", $2); print $2}' SHA256SUMS.txt)" = "$asset"
+            )
+            mv "$artifact/$asset" dist/
+          }
+          stage om9-windows-all-in-one "OpenMatrix9-$VERSION-All-in-One-Windows-x64.zip"
+          stage om9-macos-arm64-all-in-one "OpenMatrix9-$VERSION-All-in-One-macOS-arm64.zip"
+          stage om9-linux-x64-all-in-one "OpenMatrix9-$VERSION-All-in-One-Linux-x64.tar.gz"
+          stage om9-release-files "OpenMatrix9-$VERSION-Standalone-Windows-x64.zip"
+          (cd dist; sha256sum -- * > SHA256SUMS.txt; sha256sum --strict --check SHA256SUMS.txt)
+      - name: Publish a single release with all platforms
+        run: |
+          publish_flags=()
+          if [[ "$PRERELEASE" == true ]]; then
+            publish_flags=(--prerelease --latest=false)
+          fi
+          cat > release-notes.md <<'NOTES'
+          The three all-in-one archives were built from the same commit and smoke-tested after extraction.
+
+          - **Windows x64** — extract the ZIP and run **Start-OM9.cmd**.
+          - **macOS 15+ Apple Silicon** — extract the ZIP and open **OpenMatrix9.app**. The app uses ad-hoc signing.
+          - **Ubuntu 24.04 x86_64** — extract the tar.gz and run **OpenMatrix9/om9** from a graphical session. Install the distribution's **zenity** package if needed for file dialogs.
+          - The standalone Windows ZIP remains available for existing launchers and workflows.
+
+          Verify the chosen archive against **SHA256SUMS.txt**.
+          NOTES
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --verify-tag --draft "${publish_flags[@]}" --title "OpenMatrix9 $GITHUB_REF_NAME" \
+            --notes-file release-notes.md dist/*
+          gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --draft=false "${publish_flags[@]}"
+          gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json url,isDraft,assets \
+            --jq '.url + "\n" + ([.assets[].name] | sort | join("\n"))' >> "$GITHUB_STEP_SUMMARY"

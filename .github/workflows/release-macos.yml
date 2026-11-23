@@ -1,9 +1,6 @@
 name: Build macOS OM9 all-in-one
 
-on:
-  push:
-    branches: [main, 'codex/release-*']
-  workflow_dispatch:
+on: workflow_call
 
 permissions:
   contents: read
@@ -39,7 +36,7 @@ jobs:
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: build/ci/macos/dependencies
-          key: om9-macos-15-arm64-${{ steps.toolchain.outputs.xcode }}-${{ hashFiles('native/**', 'tools/ci/build-native-macos.sh', 'tools/patches/occt-8.0.1-offset-d3.patch') }}
+          key: om9-macos-15-arm64-${{ steps.toolchain.outputs.xcode }}-${{ hashFiles('native/**', 'tools/ci/build-native-unix.sh', 'tools/patches/occt-8.0.1-offset-d3.patch') }}
       - name: Build pinned OCCT and openNURBS
         if: steps.native-cache.outputs.cache-hit != 'true'
         env:

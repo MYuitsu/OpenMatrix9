@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-//! Native workers run in their own Darwin process group. The parent monitors
-//! physical footprint and checks the kernel's lifetime peak before success.
+//! Native workers run in their own process group. The parent bounds output
+//! and checks the kernel's lifetime memory peak before accepting a result.
 use super::*;
 use std::{
     io::{ErrorKind, Read},
@@ -32,12 +32,26 @@ impl OwnedChild {
         self.0.id() as libc::pid_t
     }
 
-    fn reap(&mut self) -> std::io::Result<std::process::ExitStatus> {
+    fn reap(&mut self) -> std::io::Result<(std::process::ExitStatus, u64)> {
         // SAFETY: the unreaped child owns this dedicated process group ID.
         unsafe { libc::kill(-self.pid(), libc::SIGKILL); }
-        let status = self.0.wait()?;
+        #[cfg(target_os = "macos")]
+        let result = (self.0.wait()?, 0);
+        #[cfg(target_os = "linux")]
+        let result = loop {
+            let mut status = 0;
+            // SAFETY: wait4 writes to these owned buffers and reaps our own child.
+            let mut usage: libc::rusage = unsafe { std::mem::zeroed() };
+            if unsafe { libc::wait4(self.pid(), &mut status, 0, &mut usage) } >= 0 {
+                break (std::process::ExitStatus::from_raw(status), (usage.ru_maxrss as u64).saturating_mul(1024));
+            }
+            let error = std::io::Error::last_os_error();
+            if error.kind() != ErrorKind::Interrupted {
+                return Err(error);
+            }
+        };
         self.1 = true;
-        Ok(status)
+        Ok(result)
     }
 
     fn exited(&self) -> Result<bool> {
@@ -49,9 +63,15 @@ impl OwnedChild {
             let error = std::io::Error::last_os_error();
             return if error.kind() == ErrorKind::Interrupted { Ok(false) } else { Err(io(error)) };
         }
-        Ok(info.si_pid != 0)
+        #[cfg(target_os = "macos")]
+        let pid = info.si_pid;
+        // SAFETY: waitid filled the child-status variant or left the buffer zeroed.
+        #[cfg(target_os = "linux")]
+        let pid = unsafe { info.si_pid() };
+        Ok(pid != 0)
     }
 
+    #[cfg(target_os = "macos")]
     fn peak(&self) -> Option<u64> {
         // SAFETY: the writable rusage v4 object is the exact layout selected by
         // the flavor. The view is only used after a successful query.
@@ -61,6 +81,13 @@ impl OwnedChild {
                                   (&mut info as *mut libc::rusage_info_v4).cast())
         };
         (result == 0).then_some(info.ri_lifetime_max_phys_footprint.max(info.ri_phys_footprint))
+    }
+
+    #[cfg(target_os = "linux")]
+    fn peak(&self) -> Option<u64> {
+        let status = std::fs::read_to_string(format!("/proc/{}/status", self.pid())).ok()?;
+        let peak = status.lines().find_map(|line| line.strip_prefix("VmHWM:"))?;
+        peak.split_whitespace().next()?.parse::<u64>().ok()?.checked_mul(1024)
     }
 }
 
@@ -123,7 +150,7 @@ pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLi
         .process_group(0);
     // Do not inherit loader overrides from a developer shell.
     for (name, _) in std::env::vars_os() {
-        if name.as_encoded_bytes().starts_with(b"DYLD_") {
+        if name.as_encoded_bytes().starts_with(b"DYLD_") || name.as_encoded_bytes().starts_with(b"LD_") {
             command.env_remove(name);
         }
     }
@@ -159,14 +186,19 @@ pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLi
             if exited && out_done && err_done {
                 // Darwin keeps the lifetime footprint on the exited child
                 // until reap. Include allocations between parent samples.
-                let final_peak = child.peak().ok_or_else(|| Failure::new(
-                    FailureKind::Io("cannot read final Darwin worker footprint".into()),
-                ))?;
+                #[cfg(target_os = "macos")]
+                {
+                    let final_peak = child.peak().ok_or_else(|| Failure::new(
+                        FailureKind::Io("cannot read final Darwin worker footprint".into()),
+                    ))?;
+                    peak = peak.max(final_peak);
+                }
+                let (status, final_peak) = child.reap().map_err(io)?;
                 peak = peak.max(final_peak);
                 if peak > data_limit {
                     return Err(Failure::new(FailureKind::Invalid("native memory budget")));
                 }
-                return child.reap().map_err(io);
+                return Ok(status);
             }
             thread::sleep(Duration::from_millis(2));
         }

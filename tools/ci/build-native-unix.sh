@@ -2,10 +2,22 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-test "$(uname -sm)" = "Darwin arm64"
-export MACOSX_DEPLOYMENT_TARGET=15.0
+case "$(uname -sm)" in
+  'Darwin arm64')
+    platform=macos
+    export MACOSX_DEPLOYMENT_TARGET=15.0
+    cmake_platform=(-DCMAKE_OSX_ARCHITECTURES=arm64)
+    occt_platform=(-DCMAKE_INSTALL_NAME_DIR=@rpath -DCMAKE_SHARED_LINKER_FLAGS=-Wl,-headerpad_max_install_names)
+    ;;
+  'Linux x86_64')
+    platform=linux
+    cmake_platform=(-DCMAKE_POSITION_INDEPENDENT_CODE=ON)
+    occt_platform=()
+    ;;
+  *) echo 'Unsupported native release architecture' >&2; exit 1 ;;
+esac
 export CMAKE_BUILD_PARALLEL_LEVEL=2
-deps="$PWD/build/ci/macos/dependencies"
+deps="$PWD/build/ci/$platform/dependencies"
 mkdir -p "$deps"
 accuracy_patch="$PWD/tools/patches/occt-8.0.1-offset-d3.patch"
 occt="$deps/OCCT-8_0_1"
@@ -35,14 +47,14 @@ for name in json.hpp LICENSE.MIT; do
   curl --fail --location --silent --show-error --retry 3 \
     "https://raw.githubusercontent.com/nlohmann/json/v3.11.3/$key" -o "$json/$name"
 done
-cmake -S native -B "$native" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 \
+cmake -S native -B "$native" -G Ninja -DCMAKE_BUILD_TYPE=Release "${cmake_platform[@]}" \
   -DOM9_OPENNURBS_SOURCE="$open" -DOM9_JSON_SOURCE="$json"
 cmake --build "$native" --target om9-exchange-native --parallel 2
 
 cmake -S "$occt" -B "$deps/occt-build" -G Ninja \
-  -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 \
+  -DCMAKE_BUILD_TYPE=Release "${cmake_platform[@]}" \
   -DCMAKE_INSTALL_PREFIX="$sdk" -DINSTALL_DIR_LIB=lib -DINSTALL_DIR_INCLUDE=include/opencascade \
-  -DCMAKE_INSTALL_NAME_DIR=@rpath -DCMAKE_SHARED_LINKER_FLAGS=-Wl,-headerpad_max_install_names \
+  "${occt_platform[@]}" \
   -DBUILD_MODULE_FoundationClasses=OFF -DBUILD_MODULE_ModelingData=OFF \
   -DBUILD_MODULE_ModelingAlgorithms=OFF -DBUILD_MODULE_Visualization=OFF \
   -DBUILD_MODULE_ApplicationFramework=OFF -DBUILD_MODULE_DataExchange=OFF -DBUILD_MODULE_Draw=OFF \

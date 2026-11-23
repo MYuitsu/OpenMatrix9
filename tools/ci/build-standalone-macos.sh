@@ -30,9 +30,9 @@ json="$deps/nlohmann-json"
 native="$deps/native-exchange"
 
 case "${1:-}" in
-  --native-only) exec bash tools/ci/build-native-macos.sh ;;
+  --native-only) exec bash tools/ci/build-native-unix.sh ;;
   --bundle-only) ;;
-  "") bash tools/ci/build-native-macos.sh ;;
+  "") bash tools/ci/build-native-unix.sh ;;
   *) echo "Usage: $0 [--native-only | --bundle-only]" >&2; exit 2 ;;
 esac
 cp -P "$sdk"/lib/*.dylib "$frameworks/"

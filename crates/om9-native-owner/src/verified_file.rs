@@ -11,9 +11,9 @@ use std::path::Path;
 /// after native cold inspection; native CRT readers use independent handles.
 #[derive(Debug)]
 pub struct VerifiedFile {
-    #[cfg(any(windows, target_os = "macos"))]
+    #[cfg(any(windows, target_os = "macos", target_os = "linux"))]
     file: std::fs::File,
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
     path: std::path::PathBuf,
     #[cfg(windows)]
     metadata: platform::Snapshot,
@@ -30,9 +30,9 @@ impl PublishedNewFile {
     pub fn rollback(self) -> Result<()> {
         #[cfg(windows)]
         { platform::rollback(&self.0) }
-        #[cfg(target_os = "macos")]
-        { macos::rollback(&self.0) }
-        #[cfg(not(any(windows, target_os = "macos")))]
+        #[cfg(any(target_os = "macos", target_os = "linux"))]
+        { posix::rollback(&self.0) }
+        #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
         { Err(Failure::new(FailureKind::Invalid("verified file rollback requires a supported platform"))) }
     }
 }
@@ -47,13 +47,13 @@ impl VerifiedFile {
         {
             platform::open(path, max_bytes, cancel)
         }
-        #[cfg(target_os = "macos")]
-        { macos::open(path, max_bytes, cancel) }
-        #[cfg(not(any(windows, target_os = "macos")))]
+        #[cfg(any(target_os = "macos", target_os = "linux"))]
+        { posix::open(path, max_bytes, cancel) }
+        #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
         {
             let _ = (path, max_bytes);
             Err(Failure::new(FailureKind::Invalid(
-                "verified file publication requires Windows",
+                "verified file publication on this platform",
             )))
         }
     }
@@ -77,13 +77,13 @@ impl VerifiedFile {
         {
             platform::publish(&self, destination, cancel, true)
         }
-        #[cfg(target_os = "macos")]
-        { macos::publish(&self, destination, cancel, true) }
-        #[cfg(not(any(windows, target_os = "macos")))]
+        #[cfg(any(target_os = "macos", target_os = "linux"))]
+        { posix::publish(&self, destination, cancel, true) }
+        #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
         {
             let _ = destination;
             Err(Failure::new(FailureKind::Invalid(
-                "verified file publication requires Windows",
+                "verified file publication on this platform",
             )))
         }
     }
@@ -93,9 +93,9 @@ impl VerifiedFile {
         if cancel.is_canceled() { return Err(Failure::new(FailureKind::Canceled)); }
         #[cfg(windows)]
         { platform::publish(&self, destination, cancel, false) }
-        #[cfg(target_os = "macos")]
-        { macos::publish(&self, destination, cancel, false) }
-        #[cfg(not(any(windows, target_os = "macos")))]
+        #[cfg(any(target_os = "macos", target_os = "linux"))]
+        { posix::publish(&self, destination, cancel, false) }
+        #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
         { let _ = destination; Err(Failure::new(FailureKind::Invalid("verified file publication requires a supported platform"))) }
     }
 
@@ -105,21 +105,21 @@ impl VerifiedFile {
         if cancel.is_canceled() { return Err(Failure::new(FailureKind::Canceled)); }
         #[cfg(windows)]
         { platform::publish(&self, destination, cancel, false)?; Ok(PublishedNewFile(self)) }
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", target_os = "linux"))]
         {
             let mut file = self;
-            macos::publish(&file, destination, cancel, false)?;
+            posix::publish(&file, destination, cancel, false)?;
             file.path = destination.to_path_buf();
             Ok(PublishedNewFile(file))
         }
-        #[cfg(not(any(windows, target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
         { let _ = destination; Err(Failure::new(FailureKind::Invalid("verified file publication requires a supported platform"))) }
     }
 }
 
-#[cfg(target_os = "macos")]
-#[path = "verified_macos.rs"]
-mod macos;
+#[cfg(any(target_os = "macos", target_os = "linux"))]
+#[path = "verified_unix.rs"]
+mod posix;
 
 #[cfg(windows)]
 mod platform {

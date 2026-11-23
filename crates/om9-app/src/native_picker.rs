@@ -3,7 +3,7 @@
 use crate::file_lifecycle::FilePhase;
 use om9_core::{Error, Result};
 use std::path::{Path, PathBuf};
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 use om9_native_owner::file_dialog::{self, Kind};
 #[cfg(windows)]
 pub fn arm_cancel_probe(
@@ -53,7 +53,7 @@ pub fn pick(
         .map_err(|_| Error::Io("native file picker panicked".into()))?
         .map_err(|error| Error::Io(format!("Windows file dialog: {error}")))
     }
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
     {
         let _ = parent;
         let save = match phase {
@@ -63,7 +63,7 @@ pub fn pick(
         };
         file_dialog::choose(Kind::Document, save, current, None).map_err(Error::Io)
     }
-    #[cfg(not(any(windows, target_os = "macos")))]
+    #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
     {
         let _ = (parent, phase, current);
         Err(Error::Unsupported("native file chooser on this platform"))
@@ -93,7 +93,7 @@ pub fn pick_3dm(
     .map_err(|_| Error::Io("native 3DM picker panicked".into()))?
     .map_err(|error| Error::Io(format!("Windows 3DM dialog: {error}")))
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 pub fn pick_3dm(
     _parent: &eframe::Frame,
     save: bool,
@@ -101,7 +101,7 @@ pub fn pick_3dm(
 ) -> Result<Option<PathBuf>> {
     file_dialog::choose(Kind::ThreeDm, save, current, None).map_err(Error::Io)
 }
-#[cfg(not(any(windows, target_os = "macos")))]
+#[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
 pub fn pick_3dm(
     _parent: &eframe::Frame,
     _save: bool,
@@ -129,11 +129,11 @@ pub fn pick_stl(parent: &eframe::Frame, current: Option<&Path>) -> Result<Option
     .map_err(|_| Error::Io("native STL picker panicked".into()))?
     .map_err(|error| Error::Io(format!("Windows STL dialog: {error}")))
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 pub fn pick_stl(_parent: &eframe::Frame, current: Option<&Path>) -> Result<Option<PathBuf>> {
     file_dialog::choose(Kind::Stl, true, current, None).map_err(Error::Io)
 }
-#[cfg(not(any(windows, target_os = "macos")))]
+#[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
 pub fn pick_stl(_parent: &eframe::Frame, _current: Option<&Path>) -> Result<Option<PathBuf>> {
     Err(Error::Unsupported("native STL chooser on this platform"))
 }
@@ -150,11 +150,11 @@ pub fn pick_project_archive(parent: &eframe::Frame, save: bool) -> Result<Option
         .map_err(|_| Error::Io("native project picker panicked".into()))?
         .map_err(|error| Error::Io(format!("Windows project dialog: {error}")))
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 pub fn pick_project_archive(_parent: &eframe::Frame, save: bool) -> Result<Option<PathBuf>> {
     file_dialog::choose(Kind::ProjectArchive, save, None, None).map_err(Error::Io)
 }
-#[cfg(not(any(windows, target_os = "macos")))]
+#[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
 pub fn pick_project_archive(_parent: &eframe::Frame, _save: bool) -> Result<Option<PathBuf>> {
     Err(Error::Unsupported("native project chooser on this platform"))
 }
@@ -169,11 +169,11 @@ pub fn pick_project_folder(parent: &eframe::Frame) -> Result<Option<PathBuf>> {
         .map_err(|_| Error::Io("native folder picker panicked".into()))?
         .map_err(|error| Error::Io(format!("Windows folder dialog: {error}")))
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 pub fn pick_project_folder(_parent: &eframe::Frame) -> Result<Option<PathBuf>> {
     file_dialog::choose(Kind::ProjectFolder, false, None, None).map_err(Error::Io)
 }
-#[cfg(not(any(windows, target_os = "macos")))]
+#[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
 pub fn pick_project_folder(_parent: &eframe::Frame) -> Result<Option<PathBuf>> {
     Err(Error::Unsupported("native project folder chooser on this platform"))
 }
@@ -189,11 +189,11 @@ pub fn pick_addon_zip(parent: &eframe::Frame) -> Result<Option<PathBuf>> {
         .map_err(|_| Error::Io("native add-on picker panicked".into()))?
         .map_err(|error| Error::Io(format!("Windows add-on dialog: {error}")))
 }
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 pub fn pick_addon_zip(_parent: &eframe::Frame) -> Result<Option<PathBuf>> {
     file_dialog::choose(Kind::Addon, false, None, None).map_err(Error::Io)
 }
-#[cfg(not(any(windows, target_os = "macos")))]
+#[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
 pub fn pick_addon_zip(_parent: &eframe::Frame) -> Result<Option<PathBuf>> {
     Err(Error::Unsupported("native add-on chooser on this platform"))
 }
@@ -252,12 +252,12 @@ pub(crate) fn pick_view_image(
         om9_native_owner::file_dialog::choose_view_image(handle.hwnd.get() as usize, current, alpha)
             .map_err(|e| Error::Io(format!("Windows image dialog: {e}")))
     }
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
     {
         let _ = parent;
         file_dialog::choose(Kind::ViewImage, true, current, Some(alpha)).map_err(Error::Io)
     }
-    #[cfg(not(any(windows, target_os = "macos")))]
+    #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
     {
         let _ = (parent, current, alpha);
         Err(Error::Unsupported("native capture dialog on this platform"))

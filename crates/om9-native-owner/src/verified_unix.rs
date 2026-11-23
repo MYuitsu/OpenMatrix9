@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-//! Retain a verified regular staging file and publish with an atomic Darwin
+//! Retain a verified regular staging file and publish with an atomic
 //! rename. Locks coordinate cooperating processes. The stage must be owned
 //! by the app and is not a security boundary against the same user.
 use super::*;
@@ -98,10 +98,15 @@ pub(super) fn publish(file: &VerifiedFile, destination: &Path, cancel: &Cancella
         }
     }
     verify(file, cancel)?;
-    let flags = if replace { 0 } else { libc::RENAME_EXCL };
-    // SAFETY: both paths are live C strings. RENAME_EXCL delegates the
-    // no-replace check to the atomic filesystem operation.
-    if unsafe { libc::renamex_np(from.as_ptr(), to.as_ptr(), flags) } != 0 {
+    // SAFETY: both paths are live C strings. No-replace is enforced by the kernel.
+    #[cfg(target_os = "macos")]
+    let renamed = unsafe { libc::renamex_np(from.as_ptr(), to.as_ptr(), if replace { 0 } else { libc::RENAME_EXCL }) };
+    #[cfg(target_os = "linux")]
+    let renamed = unsafe { libc::renameat2(
+        libc::AT_FDCWD, from.as_ptr(), libc::AT_FDCWD, to.as_ptr(),
+        if replace { 0 } else { libc::RENAME_NOREPLACE },
+    ) };
+    if renamed != 0 {
         return Err(io(std::io::Error::last_os_error()));
     }
     Ok(())

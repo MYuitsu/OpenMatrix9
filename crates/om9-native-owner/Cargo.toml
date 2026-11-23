@@ -10,9 +10,11 @@ om9-core = { path = "../om9-core" }
 sha2.workspace = true
 serde_json.workspace = true
 
+[target.'cfg(any(target_os = "macos", target_os = "linux"))'.dependencies]
+libc = "=0.2.190"
+
 [target.'cfg(target_os = "macos")'.dependencies]
 block2 = "=0.6.2"
-libc = "=0.2.190"
 objc2 = "=0.6.5"
 objc2-app-kit = { version = "=0.3.2", default-features = false, features = ["std", "block2", "NSApplication", "NSButton", "NSCell", "NSControl", "NSEvent", "NSOpenPanel", "NSPanel", "NSPasteboard", "NSPasteboardItem", "NSResponder", "NSSavePanel", "NSView", "NSWindow"] }
 objc2-foundation = { version = "=0.3.2", default-features = false, features = ["std", "NSArray", "NSData", "NSString", "NSURL"] }

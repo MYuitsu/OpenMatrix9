@@ -315,11 +315,11 @@ struct FileOpenOwners {
 
 struct FileOpenSource {
     _file: std::fs::File,
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
     initial: std::fs::Metadata,
 }
 
-#[cfg(all(feature = "occt-brep", target_os = "macos"))]
+#[cfg(all(feature = "occt-brep", any(target_os = "macos", target_os = "linux")))]
 impl FileOpenSource {
     fn recheck(&self, path: &Path) -> Result<()> {
         use std::os::unix::fs::MetadataExt;
@@ -338,9 +338,9 @@ impl FileOpenSource {
 #[cfg(feature = "occt-brep")]
 fn is_brep_v6(path: &Path) -> Result<bool> {
     use std::io::Read;
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
     let mut file = om9_native_owner::open_regular_read_locked(path).map_err(|error| Error::Io(error.to_string()))?;
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(not(any(target_os = "macos", target_os = "linux")))]
     let mut file = std::fs::File::open(path).map_err(|error| Error::Io(error.to_string()))?;
     let mut header = [0u8; 12];
     let mut offset = 0;
@@ -354,7 +354,7 @@ fn is_brep_v6(path: &Path) -> Result<bool> {
 
 /// Read a locked snapshot and retain its handle until document publication.
 /// Darwin locks are advisory, so the held file and its name are also rechecked.
-#[cfg(all(feature = "occt-brep", any(windows, target_os = "macos")))]
+#[cfg(all(feature = "occt-brep", any(windows, target_os = "macos", target_os = "linux")))]
 fn read_locked_brep_file(peer: &om9_core::transaction::TransactionCoordinator, path: &Path,
     limits: &om9_core::budget::Limits, held: Usage, cancel: &om9_core::transaction::Cancellation)
     -> Result<(FileOpenSource, Vec<u8>, om9_core::transaction::ExternalMemoryReservation)> {
@@ -366,7 +366,7 @@ fn read_locked_brep_file(peer: &om9_core::transaction::TransactionCoordinator, p
         use std::os::windows::fs::OpenOptionsExt;
         std::fs::OpenOptions::new().read(true).share_mode(1).open(path)
     }.map_err(|error| Error::Io(error.to_string()))?;
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
     let mut file = om9_native_owner::open_regular_read_locked(path)
         .map_err(|error| Error::Io(error.to_string()))?;
     let metadata = file.metadata().map_err(|error| Error::Io(error.to_string()))?;
@@ -396,15 +396,15 @@ fn read_locked_brep_file(peer: &om9_core::transaction::TransactionCoordinator, p
     }
     let source = FileOpenSource {
         _file: file,
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", target_os = "linux"))]
         initial: metadata,
     };
-    #[cfg(target_os = "macos")]
+    #[cfg(any(target_os = "macos", target_os = "linux"))]
     source.recheck(path)?;
     Ok((source, bytes, owner))
 }
 
-#[cfg(all(feature = "occt-brep", not(any(windows, target_os = "macos"))))]
+#[cfg(all(feature = "occt-brep", not(any(windows, target_os = "macos", target_os = "linux"))))]
 fn read_locked_brep_file(_peer: &om9_core::transaction::TransactionCoordinator, _path: &Path,
     _limits: &om9_core::budget::Limits, _held: Usage, _cancel: &om9_core::transaction::Cancellation)
     -> Result<(FileOpenSource, Vec<u8>, om9_core::transaction::ExternalMemoryReservation)> {
@@ -1868,7 +1868,7 @@ impl Controller {
                 _brep_owners,
                 #[cfg(feature = "occt-brep")]
                 brep_archive_cache } = result?;
-            #[cfg(all(feature = "occt-brep", target_os = "macos"))]
+            #[cfg(all(feature = "occt-brep", any(target_os = "macos", target_os = "linux")))]
             if let Some(source) = &_owners._source_file {
                 source.recheck(&path)?;
             }

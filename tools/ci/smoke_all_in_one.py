@@ -12,7 +12,7 @@ import tempfile
 def smoke(app, addon_tool, system_addons):
     environment = {
         key: value for key, value in os.environ.items()
-        if not key.upper().startswith(("OM9_", "DYLD_"))
+        if not key.upper().startswith(("OM9_", "DYLD_", "LD_"))
     }
     if os.name == "nt":
         system = Path(os.environ["SystemRoot"])

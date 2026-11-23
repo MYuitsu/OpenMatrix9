@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-#![cfg(any(windows, target_os = "macos"))]
+#![cfg(any(windows, target_os = "macos", target_os = "linux"))]
 use om9_core::transaction::Cancellation;
 use om9_native_owner::{FailureKind, VerifiedFile};
 #[cfg(windows)]
@@ -25,7 +25,7 @@ impl Drop for Folder {
     }
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 #[test]
 fn darwin_snapshot_shares_reads_and_refuses_symlinks_and_locked_writers() {
     let folder = Folder::new();

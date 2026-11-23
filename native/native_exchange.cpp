@@ -29,6 +29,10 @@
 #endif
 #elif defined(__APPLE__)
 #include <CommonCrypto/CommonDigest.h>
+#elif defined(__linux__)
+#include <openssl/evp.h>
+#endif
+#ifndef _WIN32
 #include <sys/file.h>
 #include <unistd.h>
 #endif
@@ -989,7 +993,7 @@ struct SourceHash {
   void finish(unsigned char* digest) {
     require(BCryptFinishHash(hash, digest, 32, 0) >= 0, "source SHA256 finish");
   }
-#else
+#elif defined(__APPLE__)
   CC_SHA256_CTX state{};
   SourceHash() { require(CC_SHA256_Init(&state) == 1, "source SHA256 provider"); }
   void update(unsigned char* data, size_t size) {
@@ -997,6 +1001,17 @@ struct SourceHash {
   }
   void finish(unsigned char* digest) {
     require(CC_SHA256_Final(digest, &state) == 1, "source SHA256 finish");
+  }
+#elif defined(__linux__)
+  std::unique_ptr<EVP_MD_CTX, decltype(&EVP_MD_CTX_free)> state{EVP_MD_CTX_new(), EVP_MD_CTX_free};
+  SourceHash() {
+    require(state && EVP_DigestInit_ex(state.get(), EVP_sha256(), nullptr) == 1, "source SHA256 provider");
+  }
+  void update(unsigned char* data, size_t size) {
+    require(EVP_DigestUpdate(state.get(), data, size) == 1, "source SHA256 update");
+  }
+  void finish(unsigned char* digest) {
+    require(EVP_DigestFinal_ex(state.get(), digest, nullptr) == 1, "source SHA256 finish");
   }
 #endif
   SourceHash(const SourceHash&)=delete; SourceHash& operator=(const SourceHash&)=delete;

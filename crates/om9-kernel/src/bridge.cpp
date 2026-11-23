@@ -49,6 +49,8 @@
 #include <psapi.h>
 #elif defined(__APPLE__)
 #include <mach/mach.h>
+#elif defined(__linux__)
+#include <unistd.h>
 #endif
 
 #include <chrono>
@@ -198,6 +200,14 @@ int om9_occt_working_set(double* bytes) {
     return kKernelFailure;
   }
   *bytes = static_cast<double>(info.resident_size);
+#elif defined(__linux__)
+  std::ifstream statm("/proc/self/statm");
+  long pages = 0;
+  const long page_size = sysconf(_SC_PAGESIZE);
+  if (!(statm >> pages >> pages) || page_size <= 0) {
+    return kKernelFailure;
+  }
+  *bytes = static_cast<double>(pages) * page_size;
 #endif
   return kOk;
 }

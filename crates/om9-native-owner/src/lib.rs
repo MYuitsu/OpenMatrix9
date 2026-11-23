@@ -20,6 +20,9 @@ pub mod file_dialog;
 #[cfg(target_os = "macos")]
 #[path = "file_dialog_macos.rs"]
 pub mod file_dialog;
+#[cfg(target_os = "linux")]
+#[path = "file_dialog_linux.rs"]
+pub mod file_dialog;
 #[cfg(windows)]
 pub mod clipboard;
 #[cfg(target_os = "macos")]
@@ -28,10 +31,10 @@ pub mod clipboard;
 #[cfg(any(windows, target_os = "macos"))]
 mod clipboard_types;
 mod verified_file;
-#[cfg(target_os = "macos")]
-mod macos;
-#[cfg(target_os = "macos")]
-pub use macos::open_regular_read_locked;
+#[cfg(any(target_os = "macos", target_os = "linux"))]
+mod unix_process;
+#[cfg(any(target_os = "macos", target_os = "linux"))]
+pub use unix_process::open_regular_read_locked;
 #[cfg(windows)]
 mod windows;
 #[cfg(windows)]
@@ -227,15 +230,15 @@ impl NativeProgram {
         {
             windows::run(&self.path, args, limits, cancel)
         }
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", target_os = "linux"))]
         {
-            macos::run(self, args, limits, cancel)
+            unix_process::run(self, args, limits, cancel)
         }
-        #[cfg(not(any(windows, target_os = "macos")))]
+        #[cfg(not(any(windows, target_os = "macos", target_os = "linux")))]
         {
             let _ = (args, limits, cancel);
             Err(Failure::new(FailureKind::Invalid(
-                "native process containment requires Windows",
+                "native process containment on this platform",
             )))
         }
     }

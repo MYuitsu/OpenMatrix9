@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-#![cfg(any(windows, target_os = "macos"))]
+#![cfg(any(windows, target_os = "macos", target_os = "linux"))]
 use om9_core::transaction::Cancellation;
 use om9_native_owner::{FailureKind, NativeProgram, ProcessLimits};
 use sha2::{Digest, Sha256};
@@ -38,7 +38,7 @@ fn admitted_program_returns_owned_bounded_bytes_and_actual_job_peak_with_no_live
     assert!(result.stats.exited);
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 #[test]
 fn worker_budget_does_not_limit_the_parent_process_map() {
     let parent_data = vec![42u8; 160 * 1024 * 1024];
@@ -50,7 +50,7 @@ fn worker_budget_does_not_limit_the_parent_process_map() {
     std::hint::black_box(parent_data);
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "linux"))]
 #[test]
 fn physical_footprint_over_budget_stops_and_reaps_worker() {
     let limits = ProcessLimits {
