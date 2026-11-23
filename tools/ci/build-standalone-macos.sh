@@ -94,7 +94,7 @@ while IFS= read -r -d '' lib; do
 done < <(find "$frameworks" -type f -name '*.dylib' -print0)
 cp "$native/om9-exchange-native" "$bin/"
 relocate "$bin/om9-exchange-native" '@loader_path/../Frameworks'
-shasum -a 256 "$bin/om9-exchange-native" | cut -d ' ' -f 1 > "$bin/om9-exchange-native.sha256"
+shasum -a 256 "$bin/om9-exchange-native" | cut -d ' ' -f 1 > "$resources/om9-exchange-native.sha256"
 cargo build --locked --release -j 2 -p om9-kernel --features isolated-brep-worker \
   --bin om9-brep-restore-worker --bin om9-native-brep-worker
 release="$CARGO_TARGET_DIR/release"
@@ -137,6 +137,10 @@ with (app / "Contents/Info.plist").open("wb") as out:
                       CFBundleVersion=version.split("-")[0],
                       LSMinimumSystemVersion="15.0", NSHighResolutionCapable=True), out)
 PY
+# Contents/MacOS must hold executables only. Resources seal the addon and digest data.
+for executable in "$bin"/*; do
+  lipo "$executable" -verify_arch arm64
+done
 codesign --force --sign - "$app"
 codesign --verify --deep --strict "$app"
 codesign --verify --strict "$matrix/libom9_matrix.dylib"

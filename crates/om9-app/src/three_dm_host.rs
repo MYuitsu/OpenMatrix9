@@ -71,9 +71,9 @@ impl ThreeDmHost {
         Self::admit(Path::new(&path), parse_fingerprint(&text)?)
     }
 
-    /// Packaged layout: `om9-exchange-native.exe` plus its `.sha256` sibling next to the
-    /// application executable (or in `bin/`). The digest file is part of the signed layout; this
-    /// function never trusts a digest selected by a document.
+    /// Packaged layout: the native exchange executable beside the application.
+    /// Its .sha256 file is adjacent on Windows and stored in Resources in a
+    /// macOS app. This function never trusts a digest selected by a document.
     pub fn from_application_layout() -> Result<Self> {
         let executable = std::env::current_exe().map_err(|error| Error::Io(error.to_string()))?;
         let directory = executable
@@ -94,7 +94,12 @@ impl ThreeDmHost {
             if !program.is_file() {
                 continue;
             }
-            let digest = program.with_extension("sha256");
+            let mut digest = program.with_extension("sha256");
+            if cfg!(target_os = "macos") && candidate.ends_with("Contents/MacOS") {
+                digest = candidate.parent()
+                    .ok_or(Error::Missing("application contents directory"))?
+                    .join("Resources/om9-exchange-native.sha256");
+            }
             let text =
                 std::fs::read_to_string(&digest).map_err(|error| Error::Io(error.to_string()))?;
             return Self::admit(&program, parse_fingerprint(&text)?);
