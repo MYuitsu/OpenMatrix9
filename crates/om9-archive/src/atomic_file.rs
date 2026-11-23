@@ -26,7 +26,7 @@ impl Drop for Staging {
 /// Fully verified staging file. Dropping it leaves the destination untouched.
 /// The caller must revalidate its operation context before calling `publish`.
 pub struct PreparedArchive {
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     held: om9_native_owner::VerifiedFile,
     destination: PathBuf,
     staging: Staging,
@@ -34,12 +34,12 @@ pub struct PreparedArchive {
 impl PreparedArchive {
     pub fn publish(self, token: &Cancellation) -> Result<()> {
         cancel(token)?;
-        #[cfg(windows)]
+        #[cfg(any(windows, target_os = "macos"))]
         self.held.publish(&self.destination, token).map_err(|error| match error.kind {
             om9_native_owner::FailureKind::Canceled => Error::Canceled,
             _ => Error::Io(format!("archive held-file publication: {error:?}")),
         })?;
-        #[cfg(not(windows))]
+        #[cfg(not(any(windows, target_os = "macos")))]
         fs::rename(&self.staging.0, &self.destination).map_err(io)?;
         Ok(())
     }
@@ -202,7 +202,7 @@ pub(crate) fn prepare_encoded(path: &Path, bytes: &Vec<u8>, validation: &Limits,
     drop(reread);
     admit(encoded, 0)?;
     cancel(token)?;
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     {
         use om9_native_owner::VerifiedFile;
         use sha2::{Digest, Sha256};
@@ -222,6 +222,6 @@ pub(crate) fn prepare_encoded(path: &Path, bytes: &Vec<u8>, validation: &Limits,
         cancel(token)?;
         return Ok(PreparedArchive { held, destination, staging });
     }
-    #[cfg(not(windows))]
+    #[cfg(not(any(windows, target_os = "macos")))]
     Ok(PreparedArchive { destination: path.to_path_buf(), staging })
 }

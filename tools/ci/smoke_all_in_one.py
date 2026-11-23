@@ -53,11 +53,14 @@ def smoke(app, addon_tool, system_addons):
             json.dumps(request).encode() + b"\n" for request in requests
         ))
         replies = [json.loads(line) for line in replies.splitlines()]
-        if len(replies) != len(commands) or not project.is_file():
-            raise RuntimeError(f"Incomplete OM9 BRep replay: {replies!r}")
-        for reply in replies:
+        if len(replies) != len(commands):
+            raise RuntimeError(f"Incomplete OM9 BRep replay: {len(replies)} replies")
+        for (name, _), reply in zip(commands, replies):
             if "error" in reply or reply["result"].get("isError"):
-                raise RuntimeError(f"OM9 BRep replay failed: {reply!r}")
+                raise RuntimeError(f"OM9 BRep replay failed at {name}: {reply!r}")
+        state = json.loads(replies[-1]["result"]["content"][0]["text"])
+        if not project.is_file() or state["objects_total"] != 1 or state["objects"][0]["kind"] != "Brep":
+            raise RuntimeError(f"Expected a reopened Box BRep: {state!r}")
 
         run(app, "--export-3dm", project, model)
         run(app, "--import-3dm", model, reopened)
