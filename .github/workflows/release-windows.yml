@@ -64,6 +64,31 @@ jobs:
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/om9-target
         run: ./tools/ci/build-addons-windows.ps1
+      - name: Assemble the Windows all-in-one package
+        shell: pwsh
+        run: |
+          . ./tools/ci/msvc.ps1
+          Initialize-OM9Msvc
+          python tools/ci/package_standalone.py --root build/ci/standalone --all-in-one
+          if ($LASTEXITCODE -ne 0) { throw 'All-in-one packaging failed' }
+      - name: Smoke-test the Windows all-in-one
+        shell: pwsh
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/om9-target
+        run: |
+          $zip = Get-ChildItem -LiteralPath build/ci/standalone/all-in-one -Filter '*.zip'
+          if (@($zip).Count -ne 1) { throw 'Expected exactly one all-in-one ZIP' }
+          $test = Join-Path $env:RUNNER_TEMP 'om9-all-in-one-smoke'
+          Expand-Archive -LiteralPath $zip.FullName -DestinationPath $test
+          python tools/ci/smoke_all_in_one.py --app "$test/OpenMatrix9/om9.exe" --addon-tool "$env:CARGO_TARGET_DIR/release/om9-addon.exe"
+          if ($LASTEXITCODE -ne 0) { throw 'All-in-one runtime smoke failed' }
+      - name: Keep Windows all-in-one
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: om9-windows-all-in-one
+          path: build/ci/standalone/all-in-one/*
+          if-no-files-found: error
+          retention-days: 30
       - name: Keep add-on packages
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
@@ -75,7 +100,9 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
-          subject-path: build/ci/standalone/packages/*.zip
+          subject-path: |
+            build/ci/standalone/packages/*.zip
+            build/ci/standalone/all-in-one/*.zip
       - name: Keep built release files
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:

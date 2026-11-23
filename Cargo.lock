@@ -2025,6 +2025,7 @@ version = "0.1.0"
 dependencies = [
  "ash",
  "clipboard-win",
+ "libc",
  "om9-core",
  "serde_json",
  "sha2",

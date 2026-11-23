@@ -86,7 +86,11 @@ impl ThreeDmHost {
     /// launchers whose executable directory is not the layout root.
     pub fn from_directory(directory: &Path) -> Result<Self> {
         for candidate in [directory.to_path_buf(), directory.join("bin")] {
-            let program = candidate.join("om9-exchange-native.exe");
+            let program = candidate.join(if cfg!(windows) {
+                "om9-exchange-native.exe"
+            } else {
+                "om9-exchange-native"
+            });
             if !program.is_file() {
                 continue;
             }
@@ -95,7 +99,7 @@ impl ThreeDmHost {
                 std::fs::read_to_string(&digest).map_err(|error| Error::Io(error.to_string()))?;
             return Self::admit(&program, parse_fingerprint(&text)?);
         }
-        Err(Error::Missing("om9-exchange-native.exe layout"))
+        Err(Error::Missing("om9-exchange-native application layout"))
     }
 
     /// Packaged layout first, environment seam second. A deployment that forbids an environment

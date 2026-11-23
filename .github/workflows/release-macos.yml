@@ -1,0 +1,35 @@
+name: Build macOS OM9 all-in-one
+
+on:
+  push:
+    branches: [main, 'codex/release-*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apple-silicon:
+    runs-on: macos-15
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Audit public source
+        run: python3 tools/public_source_audit.py
+      - name: Pin Rust
+        run: |
+          rustup toolchain install 1.98.1 --profile minimal
+          rustup override set 1.98.1
+      - name: Build and smoke-test Apple Silicon all-in-one
+        env:
+          CARGO_TARGET_DIR: ${{ runner.temp }}/om9-target
+        run: bash tools/ci/build-standalone-macos.sh
+      - name: Keep macOS all-in-one
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: om9-macos-arm64-all-in-one
+          path: build/ci/macos/packages/*
+          if-no-files-found: error
+          retention-days: 30

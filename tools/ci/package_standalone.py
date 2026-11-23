@@ -9,6 +9,8 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import tempfile
+import tomllib
 import zipfile
 
 SOURCE = Path(__file__).resolve().parents[2]
@@ -27,13 +29,13 @@ def dependencies(path):
 
 def copy_dependency_closure(runtime, candidates, system, read_dependencies=dependencies):
     """App-local dependencies take precedence over a developer machine's system CRT."""
-    pending = list(runtime.glob("*.exe"))
+    pending = list(runtime.glob("*.exe")) + list(runtime.glob("addons/*/*.dll"))
     visited = set()
     while pending:
         binary = pending.pop()
-        if binary.name.lower() in visited:
+        if binary in visited:
             continue
-        visited.add(binary.name.lower())
+        visited.add(binary)
         for name in read_dependencies(binary):
             key = name.lower()
             if key.startswith(("api-ms-win-", "ext-ms-win-")):
@@ -72,6 +74,22 @@ def vendor_archive(path, staging):
             archive = stack.enter_context(zipfile.ZipFile(inner))
 
 
+def write_package(runtime, output, filename):
+    output.mkdir(exist_ok=False)
+    package_path = output / filename
+    with zipfile.ZipFile(package_path, "w", zipfile.ZIP_DEFLATED) as archive:
+        for path in sorted(runtime.rglob("*")):
+            if path.is_symlink():
+                raise RuntimeError("Linked runtime payload")
+            if path.is_file():
+                archive.write(path, "OpenMatrix9/" + path.relative_to(runtime).as_posix())
+    with zipfile.ZipFile(package_path) as archive:
+        if archive.testzip():
+            raise RuntimeError("Damaged standalone ZIP")
+    (output / "SHA256SUMS.txt").write_text(f"{sha(package_path)}  {package_path.name}\n", encoding="ascii")
+    return package_path
+
+
 def package(root, source=SOURCE, environ=None):
     environ = os.environ if environ is None else environ
     paths = json.loads((root / "build-paths.json").read_text(encoding="utf-8-sig"))
@@ -104,6 +122,14 @@ def package(root, source=SOURCE, environ=None):
     runtime = root / "runtime/OpenMatrix9"
     runtime.mkdir(parents=True, exist_ok=False)
     shutil.copy2(paths["binary"], runtime / "om9.exe")
+    expected_workers = {"om9-brep-restore-worker.exe", "om9-native-brep-worker.exe"}
+    workers = {Path(path).name: Path(path) for path in paths["workers_paths"]}
+    if set(workers) != expected_workers or set(paths["workers_sha256"]) != expected_workers:
+        raise RuntimeError("Both isolated BRep workers are required")
+    for name, binary in workers.items():
+        if sha(binary) != paths["workers_sha256"][name]:
+            raise RuntimeError(f"Worker fingerprint mismatch: {name}")
+        shutil.copy2(binary, runtime / name)
     for name in ("om9-exchange-native.exe", "om9-exchange-native.sha256", "om9-exchange-native.manifest.json"):
         shutil.copy2(native / name, runtime / name)
     candidates = {p.name.lower(): p for directory in (Path(paths["sdk"]) / "bin", Path(paths["crt"]))
@@ -156,19 +182,9 @@ def package(root, source=SOURCE, environ=None):
                              if environ.get("GITHUB_ACTIONS") == "true" else None))
     (runtime / "release-validation.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
     verify_manifest(runtime, files)
-    output = root / "packages"
-    output.mkdir(exist_ok=False)
-    package_path = output / f"OpenMatrix9-{release['version']}-Standalone-Windows-x64.zip"
-    with zipfile.ZipFile(package_path, "w", zipfile.ZIP_DEFLATED) as archive:
-        for path in sorted(runtime.rglob("*")):
-            if path.is_symlink():
-                raise RuntimeError("Linked runtime payload")
-            if path.is_file():
-                archive.write(path, "OpenMatrix9/" + path.relative_to(runtime).as_posix())
-    with zipfile.ZipFile(package_path) as archive:
-        if archive.testzip():
-            raise RuntimeError("Damaged standalone ZIP")
-    (output / "SHA256SUMS.txt").write_text(f"{sha(package_path)}  {package_path.name}\n", encoding="ascii")
+    package_path = write_package(
+        runtime, root / "packages", f"OpenMatrix9-{release['version']}-Standalone-Windows-x64.zip"
+    )
     evidence = root / "evidence"
     evidence.mkdir()
     shutil.copy2(runtime / "release-validation.json", evidence / "release-validation.json")
@@ -176,7 +192,72 @@ def package(root, source=SOURCE, environ=None):
     return package_path
 
 
+def bundle_all_in_one(root, source=SOURCE, environ=None):
+    environ = os.environ if environ is None else environ
+    standalone = root / "runtime/OpenMatrix9"
+    record = json.loads((standalone / "release-validation.json").read_text(encoding="utf-8"))
+    verify_manifest(standalone, record["files"])
+    addons = root / "addons"
+    checksums = {
+        name: digest
+        for digest, name in (line.split(maxsplit=1) for line in
+                             (addons / "SHA256SUMS.txt").read_text(encoding="ascii").splitlines())
+    }
+    expected = {"om9_matrix", "ring_sizes"}
+    with tempfile.TemporaryDirectory(prefix="all-in-one-", dir=root) as work:
+        runtime = Path(work) / "OpenMatrix9"
+        shutil.copytree(standalone, runtime)
+        versions = {}
+        for name, digest in sorted(checksums.items()):
+            if not re.fullmatch(r"[A-Za-z0-9_.+-]+\.zip", name) or sha(addons / name) != digest:
+                raise RuntimeError(f"Add-on package fingerprint mismatch: {name}")
+            with zipfile.ZipFile(addons / name) as archive:
+                manifest = tomllib.loads(archive.read("om9_addon.toml").decode("utf-8"))
+                addon_id = manifest["id"]
+                if addon_id not in expected or addon_id in versions:
+                    raise RuntimeError(f"Unexpected or duplicate bundled add-on: {addon_id}")
+                target = runtime / "addons" / addon_id
+                for member in archive.infolist():
+                    parts = member.filename.split("/")
+                    if not all(re.fullmatch(r"[^:\\\\]+", part) and part not in (".", "..")
+                               for part in parts) or member.is_dir():
+                        raise RuntimeError(f"Unsafe add-on member: {member.filename}")
+                    path = target.joinpath(*parts)
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    with archive.open(member) as stream, path.open("xb") as output:
+                        shutil.copyfileobj(stream, output)
+                versions[addon_id] = manifest["version"]
+        if versions.keys() != expected:
+            raise RuntimeError("Matrix add-on and Ring Sizes library are required")
+        # Loadable add-ons may import additional app-local dependencies.
+        paths = json.loads((root / "build-paths.json").read_text(encoding="utf-8-sig"))
+        candidates = {p.name.lower(): p for directory in
+                      (Path(paths["sdk"]) / "bin", Path(paths["crt"]), root / "thirdparty-runtime", runtime)
+                      for p in directory.glob("*.dll")}
+        copy_dependency_closure(runtime, candidates, Path(environ["SystemRoot"]) / "System32")
+        with (runtime / "README.txt").open("a", encoding="utf-8") as readme:
+            readme.write("\nOM9 Matrix and Ring Sizes are included in the system add-on repository.\n"
+                         "Use Tools > Add-ons to enable them on a new profile.\n")
+        record["package_kind"] = "all-in-one"
+        record["system_addons"] = versions
+        record["files"] = {p.relative_to(runtime).as_posix(): sha(p)
+                           for p in runtime.rglob("*")
+                           if p.is_file() and p != runtime / "release-validation.json"}
+        (runtime / "release-validation.json").write_text(
+            json.dumps(record, indent=2) + "\n", encoding="utf-8"
+        )
+        verify_manifest(runtime, record["files"])
+        path = write_package(
+            runtime, root / "all-in-one",
+            f"OpenMatrix9-{record['version']}-All-in-One-Windows-x64.zip",
+        )
+        print(json.dumps({"package": str(path), "sha256": sha(path), "addons": versions}))
+        return path
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, required=True)
-    package(parser.parse_args().root.resolve())
+    parser.add_argument("--all-in-one", action="store_true")
+    args = parser.parse_args()
+    (bundle_all_in_one if args.all_in_one else package)(args.root.resolve())

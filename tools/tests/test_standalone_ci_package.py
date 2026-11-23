@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Exercise dependency closure and payload integrity independently of a developer SDK."""
 import importlib.util
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -83,6 +84,48 @@ class StandalonePackageTests(unittest.TestCase):
             (root / "om9.exe").write_bytes(b"changed")
             with self.assertRaisesRegex(RuntimeError, "payload changed"):
                 package.verify_manifest(root, files)
+
+
+    def test_all_in_one_contains_the_standalone_and_system_addons(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            standalone = root / "runtime/OpenMatrix9"
+            standalone.mkdir(parents=True)
+            (standalone / "om9.exe").write_bytes(b"app")
+            (standalone / "README.txt").write_text("Windows standalone\n", encoding="utf-8")
+            files = {path.name: package.sha(path) for path in standalone.iterdir()}
+            (standalone / "release-validation.json").write_text(
+                json.dumps({"version": "1.2.3", "files": files}), encoding="utf-8"
+            )
+            (root / "build-paths.json").write_text(
+                json.dumps({"sdk": str(root / "sdk"), "crt": str(root / "crt")}),
+                encoding="utf-8",
+            )
+            addons = root / "addons"
+            addons.mkdir()
+            sums = []
+            for addon in ("om9_matrix", "ring_sizes"):
+                path = addons / f"{addon}.zip"
+                with zipfile.ZipFile(path, "w") as archive:
+                    archive.writestr("om9_addon.toml", f'id = "{addon}"\nversion = "1.0.0"\n')
+                sums.append(f"{package.sha(path)}  {path.name}")
+            sums_path = addons / "SHA256SUMS.txt"
+            sums_path.write_text("\n".join(sums) + "\n", encoding="ascii")
+
+            from unittest.mock import patch
+            with patch.object(package, "copy_dependency_closure"):
+                result = package.bundle_all_in_one(root, environ={"SystemRoot": str(root)})
+            with zipfile.ZipFile(result) as archive:
+                self.assertEqual(archive.read("OpenMatrix9/om9.exe"), b"app")
+                receipt = json.loads(archive.read("OpenMatrix9/release-validation.json"))
+                self.assertEqual(receipt["system_addons"], {"om9_matrix": "1.0.0", "ring_sizes": "1.0.0"})
+                for addon in receipt["system_addons"]:
+                    self.assertIn(f"addons/{addon}/om9_addon.toml", receipt["files"])
+            package.verify_manifest(standalone, files)
+
+            sums_path.write_text("0" * 64 + "  om9_matrix.zip\n", encoding="ascii")
+            with self.assertRaisesRegex(RuntimeError, "fingerprint mismatch"):
+                package.bundle_all_in_one(root, environ={"SystemRoot": str(root)})
 
 
 if __name__ == "__main__":

@@ -78,14 +78,14 @@ public:
   }
 private:
   explicit NativeSourceArchive(const std::filesystem::path& path):path_(path),held_(std::make_unique<File>(path,true)) {
-    const auto n=_filelengthi64(_fileno(held_->value));require(n>0&&static_cast<uintmax_t>(n)<=max_archive_bytes,"retained source file-byte budget");
+    const auto n=held_file_size(held_->value);require(n>0&&static_cast<uintmax_t>(n)<=max_archive_bytes,"retained source file-byte budget");
     sha256_=source_sha256(held_->value,static_cast<uintmax_t>(n));
   }
   size_t position(const ON_BinaryArchive& a) const {const auto p=a.CurrentPosition();require(p<=bytes_.size(),"retained cursor bounds");return static_cast<size_t>(p);}
   void check_span(NativeArchiveSpan span) const {require(span.begin<=span.end&&span.end<=bytes_.size(),"retained byte-span bounds");}
   void read_owned_bytes() {
-    const auto n=_filelengthi64(_fileno(held_->value));require(n>0&&static_cast<uintmax_t>(n)<=max_archive_bytes,"retained source byte budget");
-    bytes_.resize(static_cast<size_t>(n));owned_usage_=bytes_.size();require(_fseeki64(held_->value,0,SEEK_SET)==0,"retained source rewind");
+    const auto n=held_file_size(held_->value);require(n>0&&static_cast<uintmax_t>(n)<=max_archive_bytes,"retained source byte budget");
+    bytes_.resize(static_cast<size_t>(n));owned_usage_=bytes_.size();require(std::fseek(held_->value,0,SEEK_SET)==0,"retained source rewind");
     require(std::fread(bytes_.data(),1,bytes_.size(),held_->value)==bytes_.size()&&!std::ferror(held_->value),"retained owned source bytes");
   }
   static unsigned table_type(ON__UINT32 code) {
@@ -167,7 +167,7 @@ private:
     if(record.native_component_type==9){const auto* light=ON_Light::Cast(record.object.get());require(light&&light->m_light_id==record.id,"retained light identity correspondence");record.wire_index=light->m_light_index;}
   }
   void read_wire_owners() {
-    require(_fseeki64(held_->value,0,SEEK_SET)==0,"retained raw native rewind");const int errors=ON_GetErrorCount(),warnings=ON_GetWarningCount();
+    require(std::fseek(held_->value,0,SEEK_SET)==0,"retained raw native rewind");const int errors=ON_GetErrorCount(),warnings=ON_GetWarningCount();
     ON_BinaryFile a(ON::archive_mode::read3dm,held_->value);a.SetReferencedComponentIndexMapping(false);a.SetShouldSerializeUserDataDefault(true);
     int version=0;ON_String comments;require(a.Read3dmStartSection(&version,comments)&&version==50,"retained wire-span codec currently requires version50");tables_.push_back({0,0,position(a)});
     auto start=position(a);require(a.Read3dmProperties(properties_),"retained native properties owner");tables_.push_back({TCODE_PROPERTIES_TABLE,start,position(a)});
@@ -321,7 +321,7 @@ inline void retained_write_assembled(const NativeSourceArchive& source,const std
   const int errors=ON_GetErrorCount(),warnings=ON_GetWarningCount();require(assembled.size()<=max_archive_bytes-20&&final.SeekFromStart(0)&&final.WriteByte(assembled.size(),assembled.data())&&final.Write3dmEndMark(),"retained assembly SDK EOF");
   const auto bytes=final.CurrentPosition();require(bytes==assembled.size()+20&&bytes<=final.SizeOfArchive()&&bytes<=max_archive_bytes,"retained exact EOF/output budget");
   require(final.CriticalErrorCount()==0&&ON_GetErrorCount()==errors&&ON_GetWarningCount()==warnings,"retained assembly native diagnostic");source.revalidate_bytes();
-  PrivateFile file(destination);require(std::fwrite(final.Buffer(),1,static_cast<size_t>(bytes),file.value)==bytes&&!std::ferror(file.value)&&std::fflush(file.value)==0&&_commit(_fileno(file.value))==0,"retained private archive write/sync");const int close_result=std::fclose(file.value);file.value=nullptr;require(close_result==0,"retained private archive close");file.complete=true;
+  PrivateFile file(destination);require(std::fwrite(final.Buffer(),1,static_cast<size_t>(bytes),file.value)==bytes&&!std::ferror(file.value)&&std::fflush(file.value)==0&&sync_file(file.value)==0,"retained private archive write/sync");const int close_result=std::fclose(file.value);file.value=nullptr;require(close_result==0,"retained private archive close");file.complete=true;
   // The caller still owes independent cold structural/current-state/opaque
   // verification. This function never emits a success receipt or publishes.
 }
@@ -395,7 +395,7 @@ struct RetainedRequest {
   std::map<unsigned,std::vector<size_t>> order;
   NativeSourceArchive* primary=nullptr;size_t total_usage=0;
   explicit RetainedRequest(const std::filesystem::path& p):path(std::filesystem::absolute(p)),held(std::make_unique<File>(path,true)) {
-    const auto n=_filelengthi64(_fileno(held->value));require(n>0&&static_cast<uintmax_t>(n)<=max_packet_bytes,"retained request byte budget");request_bytes=static_cast<size_t>(n);
+    const auto n=held_file_size(held->value);require(n>0&&static_cast<uintmax_t>(n)<=max_packet_bytes,"retained request byte budget");request_bytes=static_cast<size_t>(n);
     request_sha256=source_sha256(held->value,request_bytes);std::string bytes(request_bytes,'\0');require(std::fread(bytes.data(),1,bytes.size(),held->value)==bytes.size()&&std::fgetc(held->value)==EOF&&!std::ferror(held->value),"retained held request read");
     Preflight preflight;require(J::sax_parse(bytes,&preflight),"retained request preflight");value=J::parse(bytes);revalidate();validate_shape();acquire();validate_order();
   }
@@ -699,7 +699,7 @@ inline void retained_new_mm_archive(const RetainedRequest& request,const std::fi
   retained_selected_table(archive,request,11);retained_selected_table(archive,request,12);
   empty(&ON_BinaryArchive::BeginWrite3dmHistoryRecordTable,&ON_BinaryArchive::EndWrite3dmHistoryRecordTable);
   require(archive.Write3dmEndMark()&&archive.CurrentPosition()==archive.SizeOfArchive()&&archive.CurrentPosition()<=max_archive_bytes,"retained new_mm exact EOF/budget");
-  request.revalidate();PrivateFile file(destination);const auto bytes=static_cast<size_t>(archive.CurrentPosition());require(std::fwrite(archive.Buffer(),1,bytes,file.value)==bytes&&!std::ferror(file.value)&&std::fflush(file.value)==0&&_commit(_fileno(file.value))==0,"retained new_mm private write/sync");const int close=std::fclose(file.value);file.value=nullptr;require(close==0,"retained new_mm private close");file.complete=true;
+  request.revalidate();PrivateFile file(destination);const auto bytes=static_cast<size_t>(archive.CurrentPosition());require(std::fwrite(archive.Buffer(),1,bytes,file.value)==bytes&&!std::ferror(file.value)&&std::fflush(file.value)==0&&sync_file(file.value)==0,"retained new_mm private write/sync");const int close=std::fclose(file.value);file.value=nullptr;require(close==0,"retained new_mm private close");file.complete=true;
 }
 inline J retained_ack(const RetainedRequest& request,const char* status) {
   auto n=[&](unsigned type){return request.order.contains(type)?request.order.at(type).size():0;};
@@ -711,7 +711,7 @@ inline J write_retained(const std::filesystem::path& packet_path,const std::file
   if(request.primary){std::map<ON__UINT32,std::vector<unsigned char>> replacements;for(const auto type:{5u,11u,12u})replacements.emplace(retained_table_code(type),retained_table_fragment(retained_table_code(type),[&](ON_BinaryArchive& a){if(request.order.contains(type))for(const auto i:request.order.at(type))retained_write_row(a,request.live[i]);}));retained_write_assembled(*request.primary,replacements,destination);}
   else retained_new_mm_archive(request,destination);
   require(ON_GetErrorCount()==errors&&ON_GetWarningCount()==warnings,"retained current writer native warning/error");request.revalidate();
-  File output(destination,true);const auto bytes=_filelengthi64(_fileno(output.value));require(bytes>0&&static_cast<uintmax_t>(bytes)<=max_archive_bytes,"retained written file byte budget");
+  File output(destination,true);const auto bytes=held_file_size(output.value);require(bytes>0&&static_cast<uintmax_t>(bytes)<=max_archive_bytes,"retained written file byte budget");
   auto report=retained_ack(request,"written_retained_current");report["request_sha256"]=request.request_sha256;report["output_bytes"]=bytes;report["output_sha256"]=source_sha256(output.value,static_cast<uintmax_t>(bytes));return report;
 }
 

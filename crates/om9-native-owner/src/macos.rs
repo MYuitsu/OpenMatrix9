@@ -1,0 +1,183 @@
+// SPDX-License-Identifier: LGPL-2.1-or-later
+//! Native workers run in their own Darwin process group. Data-segment limits
+//! and physical-footprint sampling supplement the bounded OM9 worker packets.
+use super::*;
+use std::{
+    io::{ErrorKind, Read},
+    os::{fd::AsRawFd, unix::process::{CommandExt, ExitStatusExt}},
+    process::{Child, Command, Stdio},
+    thread,
+    time::Instant,
+};
+
+struct OwnedChild(Child, bool);
+
+impl OwnedChild {
+    fn pid(&self) -> libc::pid_t {
+        self.0.id() as libc::pid_t
+    }
+
+    fn reap(&mut self) -> std::io::Result<std::process::ExitStatus> {
+        // SAFETY: the unreaped child owns this dedicated process group ID.
+        unsafe { libc::kill(-self.pid(), libc::SIGKILL); }
+        let status = self.0.wait()?;
+        self.1 = true;
+        Ok(status)
+    }
+
+    fn exited(&self) -> Result<bool> {
+        // SAFETY: a live writable siginfo_t receives status for our owned
+        // child. WNOWAIT keeps the child ID reserved until group cleanup.
+        let mut info: libc::siginfo_t = unsafe { std::mem::zeroed() };
+        if unsafe { libc::waitid(libc::P_PID, self.pid() as libc::id_t, &mut info,
+                                 libc::WNOHANG | libc::WEXITED | libc::WNOWAIT) } == -1 {
+            let error = std::io::Error::last_os_error();
+            return if error.kind() == ErrorKind::Interrupted { Ok(false) } else { Err(io(error)) };
+        }
+        Ok(info.si_pid != 0)
+    }
+
+    fn peak(&self) -> Option<u64> {
+        // SAFETY: the writable rusage v4 object is the exact layout selected by
+        // the flavor. The view is only used after a successful query.
+        let mut info: libc::rusage_info_v4 = unsafe { std::mem::zeroed() };
+        let result = unsafe {
+            libc::proc_pid_rusage(self.pid(), libc::RUSAGE_INFO_V4,
+                                  (&mut info as *mut libc::rusage_info_v4).cast())
+        };
+        (result == 0).then_some(info.ri_lifetime_max_phys_footprint.max(info.ri_phys_footprint))
+    }
+}
+
+impl Drop for OwnedChild {
+    fn drop(&mut self) {
+        if !self.1 {
+            let _ = self.reap();
+        }
+    }
+}
+
+fn nonblocking(pipe: &impl AsRawFd) -> Result<()> {
+    let fd = pipe.as_raw_fd();
+    // SAFETY: fd belongs to the live pipe. F_GETFL/F_SETFL use scalar options.
+    let flags = unsafe { libc::fcntl(fd, libc::F_GETFL) };
+    if flags == -1 || unsafe { libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK) } == -1 {
+        return Err(io(std::io::Error::last_os_error()));
+    }
+    Ok(())
+}
+
+fn drain(pipe: &mut impl Read, output: &mut Vec<u8>, limit: usize) -> Result<bool> {
+    let mut buffer = [0; 8192];
+    loop {
+        let count = match pipe.read(&mut buffer) {
+            Ok(0) => return Ok(true),
+            Ok(n) => n,
+            Err(error) if error.kind() == ErrorKind::WouldBlock => return Ok(false),
+            Err(error) if error.kind() == ErrorKind::Interrupted => continue,
+            Err(error) => return Err(io(error)),
+        };
+        if count > limit.saturating_sub(output.len()) {
+            return Err(Failure::new(FailureKind::OutputBudget));
+        }
+        output.try_reserve_exact(count).map_err(|_| Failure::new(FailureKind::OutputBudget))?;
+        output.extend_from_slice(&buffer[..count]);
+    }
+}
+
+pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLimits,
+                  cancel: &Cancellation) -> Result<ProcessOutput> {
+    use std::os::unix::fs::MetadataExt;
+    let held = program._image.metadata().map_err(io)?;
+    let named = std::fs::symlink_metadata(&program.path).map_err(io)?;
+    if !named.is_file() || (held.dev(), held.ino(), held.len(), held.ctime(), held.ctime_nsec())
+        != (named.dev(), named.ino(), named.len(), named.ctime(), named.ctime_nsec())
+    {
+        return Err(Failure::new(FailureKind::Fingerprint));
+    }
+    // Rehash the current bundled image before launch. The application bundle is
+    // a trusted installed input. A native child never chooses an executable.
+    if NativeProgram::admit(&program.path, program.sha256).is_err() {
+        return Err(Failure::new(FailureKind::Fingerprint));
+    }
+    let mut command = Command::new(&program.path);
+    command.args(args).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
+        .process_group(0);
+    // Do not inherit loader overrides from a developer shell.
+    for (name, _) in std::env::vars_os() {
+        if name.as_encoded_bytes().starts_with(b"DYLD_") {
+            command.env_remove(name);
+        }
+    }
+    let data_limit = limits.native_committed_bytes;
+    // SAFETY: the post-fork callback only calls async-signal-safe system calls
+    // with stack data and returns an errno value on failure.
+    unsafe {
+        command.pre_exec(move || {
+            let mut limit = libc::rlimit { rlim_cur: 0, rlim_max: 0 };
+            if libc::getrlimit(libc::RLIMIT_DATA, &mut limit) != 0 {
+                return Err(std::io::Error::last_os_error());
+            }
+            limit.rlim_cur = data_limit.min(limit.rlim_max);
+            limit.rlim_max = limit.rlim_cur;
+            if libc::setrlimit(libc::RLIMIT_DATA, &limit) != 0 {
+                return Err(std::io::Error::last_os_error());
+            }
+            Ok(())
+        });
+    }
+    let start = Instant::now();
+    let mut child = OwnedChild(command.spawn().map_err(io)?, false);
+    let mut out = child.0.stdout.take().expect("piped stdout");
+    let mut err = child.0.stderr.take().expect("piped stderr");
+    nonblocking(&out)?;
+    nonblocking(&err)?;
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let mut peak = 0;
+    let mut exited = false;
+    let result = (|| {
+        loop {
+            if cancel.is_canceled() {
+                return Err(Failure::new(FailureKind::Canceled));
+            }
+            if start.elapsed() >= limits.deadline {
+                return Err(Failure::new(FailureKind::Deadline));
+            }
+            if let Some(sample) = child.peak() {
+                peak = peak.max(sample);
+            }
+            if peak > data_limit {
+                return Err(Failure::new(FailureKind::Invalid("native memory budget")));
+            }
+            exited = child.exited()?;
+            let out_done = drain(&mut out, &mut stdout, limits.stdout_bytes)?;
+            let err_done = drain(&mut err, &mut stderr, limits.stderr_bytes)?;
+            if exited && out_done && err_done {
+                // There are no writers left. Reap our child without a blocking
+                // wait on untrusted work. Disarm the group guard after wait.
+                return child.reap().map_err(io);
+            }
+            thread::sleep(Duration::from_millis(2));
+        }
+    })();
+    let stats = ProcessStats {
+        pid: child.0.id(), peak_committed_bytes: peak,
+        active_processes: u32::from(!exited), exited, elapsed: start.elapsed(),
+    };
+    match result {
+        Ok(status) => {
+            if status.success() {
+                Ok(ProcessOutput { stdout, stderr, stats })
+            } else {
+                let code = status.code().or_else(|| status.signal()).unwrap_or(1) as u32;
+                Err(Failure { kind: FailureKind::NativeExit(code), stats: Some(stats), stderr })
+            }
+        }
+        Err(mut error) => {
+            error.stats = Some(stats);
+            error.stderr = stderr;
+            Err(error)
+        }
+    }
+}

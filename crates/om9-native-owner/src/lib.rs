@@ -20,6 +20,8 @@ pub mod file_dialog;
 #[cfg(windows)]
 pub mod clipboard;
 mod verified_file;
+#[cfg(target_os = "macos")]
+mod macos;
 #[cfg(windows)]
 mod windows;
 #[cfg(windows)]
@@ -215,7 +217,11 @@ impl NativeProgram {
         {
             windows::run(&self.path, args, limits, cancel)
         }
-        #[cfg(not(windows))]
+        #[cfg(target_os = "macos")]
+        {
+            macos::run(self, args, limits, cancel)
+        }
+        #[cfg(not(any(windows, target_os = "macos")))]
         {
             let _ = (args, limits, cancel);
             Err(Failure::new(FailureKind::Invalid(

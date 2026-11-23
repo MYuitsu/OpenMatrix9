@@ -11,6 +11,9 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
+    let msvc = env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc");
+    let macos = env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("macos");
+    assert!(msvc || macos, "OCCT SDK setup supports Windows MSVC and macOS");
     let sdk = PathBuf::from(env::var("OM9_OCCT_SDK").unwrap_or_else(|_| {
         concat!(
             env!("CARGO_MANIFEST_DIR"),
@@ -30,7 +33,7 @@ fn main() {
         include.display()
     );
     assert!(
-        library.join("TKernel.lib").exists(),
+        library.join(if macos { "libTKernel.dylib" } else { "TKernel.lib" }).exists(),
         "OCCT import libraries missing at {}",
         library.display()
     );
@@ -73,12 +76,12 @@ fn main() {
             .map(PathBuf::from)
             .unwrap_or_else(|_| opennurbs_library.join("../zlib/Release"));
         assert!(
-            opennurbs_library.join("opennurbsStatic.lib").exists(),
+            opennurbs_library.join(if macos { "libopennurbsStatic.a" } else { "opennurbsStatic.lib" }).exists(),
             "opennurbsStatic.lib not found at {}; build build/native-brep first or set OM9_OPENNURBS_LIB",
             opennurbs_library.display()
         );
         assert!(
-            opennurbs_zlib.join("zlib.lib").exists(),
+            opennurbs_zlib.join(if macos { "libzlib.a" } else { "zlib.lib" }).exists(),
             "zlib.lib not found at {}; set OM9_OPENNURBS_ZLIB",
             opennurbs_zlib.display()
         );
@@ -102,7 +105,7 @@ fn main() {
         println!("cargo:rerun-if-env-changed=OM9_OPENNURBS_LIB");
         println!("cargo:rerun-if-env-changed=OM9_OPENNURBS_ZLIB");
     }
-    if env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc") {
+    if msvc {
         build.flag("/EHa");
     }
     build.compile("om9_occt_bridge");
@@ -140,12 +143,21 @@ fn main() {
         );
         println!("cargo:rustc-link-lib=static=opennurbsStatic");
         println!("cargo:rustc-link-lib=static=zlib");
-        for library in ["Shlwapi", "Usp10", "shell32", "advapi32", "Gdi32", "User32"] {
-            println!("cargo:rustc-link-lib=dylib={library}");
+        if msvc {
+            for library in ["Shlwapi", "Usp10", "shell32", "advapi32", "Gdi32", "User32"] {
+                println!("cargo:rustc-link-lib=dylib={library}");
+            }
+        } else if macos {
+            for framework in ["CoreGraphics", "CoreText", "Foundation"] {
+                println!("cargo:rustc-link-lib=framework={framework}");
+            }
         }
     }
     // GetProcessMemoryInfo, used by the lifetime probe.
-    println!("cargo:rustc-link-lib=dylib=psapi");
+    if msvc {
+        println!("cargo:rustc-link-lib=dylib=psapi");
+    }
+    println!("cargo:rerun-if-env-changed=OM9_OCCT_SDK");
     println!("cargo:rerun-if-env-changed=OCCT_INCLUDE_DIR");
     println!("cargo:rerun-if-env-changed=OCCT_LIB_DIR");
     println!("cargo:rerun-if-changed=src/bridge.cpp");

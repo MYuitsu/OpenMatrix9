@@ -44,8 +44,12 @@
 #include <gp_Dir.hxx>
 #include <gp_Pnt.hxx>
 
+#ifdef _WIN32
 #include <windows.h>
 #include <psapi.h>
+#elif defined(__APPLE__)
+#include <mach/mach.h>
+#endif
 
 #include <chrono>
 #include <array>
@@ -180,11 +184,21 @@ int om9_occt_working_set(double* bytes) {
   if (bytes == nullptr) {
     return kInvalidInput;
   }
+#ifdef _WIN32
   PROCESS_MEMORY_COUNTERS info;
   if (!GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info))) {
     return kKernelFailure;
   }
   *bytes = static_cast<double>(info.WorkingSetSize);
+#elif defined(__APPLE__)
+  mach_task_basic_info_data_t info{};
+  mach_msg_type_number_t count = MACH_TASK_BASIC_INFO_COUNT;
+  if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
+                reinterpret_cast<task_info_t>(&info), &count) != KERN_SUCCESS) {
+    return kKernelFailure;
+  }
+  *bytes = static_cast<double>(info.resident_size);
+#endif
   return kOk;
 }
 

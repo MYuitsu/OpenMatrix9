@@ -19,12 +19,18 @@
 #include <string>
 #include <vector>
 #include <fcntl.h>
+#include <sys/stat.h>
+#ifdef _WIN32
 #include <io.h>
 #include <share.h>
-#include <sys/stat.h>
 #include <bcrypt.h>
 #ifdef OM9_NATIVE_MEMORY_PROFILE
 #include <psapi.h>
+#endif
+#elif defined(__APPLE__)
+#include <CommonCrypto/CommonDigest.h>
+#include <sys/file.h>
+#include <unistd.h>
 #endif
 
 namespace {
@@ -37,7 +43,7 @@ constexpr uintmax_t max_packet_bytes = 16 * 1024 * 1024, max_archive_bytes = 64 
 constexpr const char* default_layer = "ffffffff-ffff-4fff-8fff-ffffffffffff";
 std::string operation_record = "arguments";
 void require(bool yes, const char* message) { if (!yes) throw std::runtime_error(message); }
-#ifdef OM9_NATIVE_MEMORY_PROFILE
+#if defined(OM9_NATIVE_MEMORY_PROFILE) && defined(_WIN32)
 void memory_sample(const char* stage) {
   PROCESS_MEMORY_COUNTERS_EX counters{}; counters.cb = sizeof(counters);
   if (GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&counters), sizeof(counters)))
@@ -48,11 +54,36 @@ void memory_sample(const char* stage) {
 void memory_sample(const char*) {}
 #endif
 struct Library { Library() { ON::Begin(); } ~Library() { ON::End(); } };
+int64_t held_file_size(FILE* file) {
+#ifdef _WIN32
+  return _filelengthi64(_fileno(file));
+#else
+  struct stat info{};
+  return fstat(fileno(file), &info) == 0 && S_ISREG(info.st_mode) ? info.st_size : -1;
+#endif
+}
+int sync_file(FILE* file) {
+#ifdef _WIN32
+  return _commit(_fileno(file));
+#else
+  return fsync(fileno(file));
+#endif
+}
 struct File {
   FILE* value=nullptr;
   explicit File(const std::filesystem::path& p,bool deny_writes=false) {
+#ifdef _WIN32
     if(deny_writes) { int fd=-1; require(_wsopen_s(&fd,p.c_str(),_O_RDONLY|_O_BINARY,_SH_DENYWR,_S_IREAD)==0,"open held native archive"); value=_fdopen(fd,"rb"); if(!value)_close(fd); }
     else value=ON::OpenFile(p.c_str(),L"rb");
+#else
+    const int fd = open(p.c_str(), O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+    require(fd >= 0, "open native archive");
+    struct stat info{};
+    if (fstat(fd, &info) == 0 && S_ISREG(info.st_mode)
+        && (!deny_writes || flock(fd, LOCK_SH | LOCK_NB) == 0))
+      value = fdopen(fd, "rb");
+    if (!value) close(fd);
+#endif
     require(value,"open native archive");
   }
   ~File() { if(value)ON::CloseFile(value); }
@@ -64,10 +95,22 @@ struct PrivateFile {
   FILE* value=nullptr;
   bool complete=false;
   explicit PrivateFile(const std::filesystem::path& p) : path(p) {
+#ifdef _WIN32
     int fd=-1;
     require(_wsopen_s(&fd,p.c_str(),_O_WRONLY|_O_CREAT|_O_EXCL|_O_BINARY,_SH_DENYRW,_S_IREAD|_S_IWRITE)==0,"exclusive private output creation");
     value=_fdopen(fd,"wb");
-    if(!value) { _close(fd); std::error_code ignored; std::filesystem::remove(path,ignored); throw std::runtime_error("private output stream"); }
+    if (!value) _close(fd);
+#else
+    const int fd = open(p.c_str(), O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOFOLLOW, 0600);
+    require(fd >= 0, "exclusive private output creation");
+    value = fdopen(fd, "wb");
+    if (!value) close(fd);
+#endif
+    if (!value) {
+      std::error_code ignored;
+      std::filesystem::remove(path, ignored);
+      throw std::runtime_error("private output stream");
+    }
   }
   ~PrivateFile() { if(value)std::fclose(value); if(!complete) { std::error_code ignored; std::filesystem::remove(path,ignored); } }
   PrivateFile(const PrivateFile&)=delete;
@@ -120,7 +163,7 @@ J packet(const std::filesystem::path& path) {
   // Hold one read handle that denies concurrent writers for both passes.
   // Parsing from FILE* avoids keeping a full packet string alongside the DOM.
   File input(path, true);
-  const auto size = _filelengthi64(_fileno(input.value));
+  const auto size = held_file_size(input.value);
   require(size > 0 && static_cast<uintmax_t>(size) <= max_packet_bytes, "packet byte budget");
   memory_sample("packet_open");
   {
@@ -129,12 +172,12 @@ J packet(const std::filesystem::path& path) {
     require(!std::ferror(input.value), "packet read error");
   }
   memory_sample("preflight_done");
-  require(_fseeki64(input.value, 0, SEEK_SET) == 0, "rewind packet");
+  require(std::fseek(input.value, 0, SEEK_SET) == 0, "rewind packet");
   PacketStreamBuf buffer(input.value); std::istream stream(&buffer);
   J result = J::parse(stream);
   require(!std::ferror(input.value), "packet read error");
   memory_sample("dom_ready");
-  require(_filelengthi64(_fileno(input.value)) == size, "packet changed while reading");
+  require(held_file_size(input.value) == size, "packet changed while reading");
   return result;
 }
 void fields(const J& j, std::initializer_list<const char*> names) {
@@ -933,27 +976,44 @@ using Type = ON_ModelComponent::Type;
 using Table = ON_3dmArchiveTableType;
 size_t source_record_count=0;
 struct SourceHash {
+#ifdef _WIN32
   BCRYPT_ALG_HANDLE algorithm=nullptr; BCRYPT_HASH_HANDLE hash=nullptr;
   SourceHash() {
     require(BCryptOpenAlgorithmProvider(&algorithm,BCRYPT_SHA256_ALGORITHM,nullptr,0)>=0,"source SHA256 provider");
     if(BCryptCreateHash(algorithm,&hash,nullptr,0,nullptr,0,0)<0) { BCryptCloseAlgorithmProvider(algorithm,0); algorithm=nullptr; throw std::runtime_error("source SHA256 hash"); }
   }
   ~SourceHash() { if(hash)BCryptDestroyHash(hash); if(algorithm)BCryptCloseAlgorithmProvider(algorithm,0); }
+  void update(unsigned char* data, size_t size) {
+    require(BCryptHashData(hash, data, static_cast<ULONG>(size), 0) >= 0, "source SHA256 update");
+  }
+  void finish(unsigned char* digest) {
+    require(BCryptFinishHash(hash, digest, 32, 0) >= 0, "source SHA256 finish");
+  }
+#else
+  CC_SHA256_CTX state{};
+  SourceHash() { require(CC_SHA256_Init(&state) == 1, "source SHA256 provider"); }
+  void update(unsigned char* data, size_t size) {
+    require(CC_SHA256_Update(&state, data, static_cast<CC_LONG>(size)) == 1, "source SHA256 update");
+  }
+  void finish(unsigned char* digest) {
+    require(CC_SHA256_Final(digest, &state) == 1, "source SHA256 finish");
+  }
+#endif
   SourceHash(const SourceHash&)=delete; SourceHash& operator=(const SourceHash&)=delete;
 };
 std::string source_sha256(FILE* file,uintmax_t expected_bytes) {
-  require(_filelengthi64(_fileno(file))>=0&&static_cast<uintmax_t>(_filelengthi64(_fileno(file)))==expected_bytes,"source held-byte size changed");
-  require(_fseeki64(file,0,SEEK_SET)==0,"rewind held source for SHA256"); SourceHash hash; unsigned char buffer[8192]{}; uintmax_t bytes=0;
+  require(held_file_size(file)>=0&&static_cast<uintmax_t>(held_file_size(file))==expected_bytes,"source held-byte size changed");
+  require(std::fseek(file,0,SEEK_SET)==0,"rewind held source for SHA256"); SourceHash hash; unsigned char buffer[8192]{}; uintmax_t bytes=0;
   for(;;) { const auto n=std::fread(buffer,1,sizeof(buffer),file); require(!std::ferror(file),"read held source SHA256");
     require(n<=max_archive_bytes-bytes,"source SHA256 byte budget"); bytes+=n;
-    if(n)require(BCryptHashData(hash.hash,buffer,static_cast<ULONG>(n),0)>=0,"source SHA256 update");
+    if(n)hash.update(buffer,n);
     if(n<sizeof(buffer))break;
   }
-  require(bytes==expected_bytes&&static_cast<uintmax_t>(_filelengthi64(_fileno(file)))==expected_bytes,"source held-byte size changed");
-  unsigned char digest[32]{}; require(BCryptFinishHash(hash.hash,digest,sizeof(digest),0)>=0,"source SHA256 finish");
+  require(bytes==expected_bytes&&static_cast<uintmax_t>(held_file_size(file))==expected_bytes,"source held-byte size changed");
+  unsigned char digest[32]{}; hash.finish(digest);
   std::string result; result.reserve(64); constexpr char hex[]="0123456789abcdef";
   for(const auto b:digest) { result.push_back(hex[b>>4]); result.push_back(hex[b&15]); }
-  require(_fseeki64(file,0,SEEK_SET)==0,"rewind held source after SHA256"); return result;
+  require(std::fseek(file,0,SEEK_SET)==0,"rewind held source after SHA256"); return result;
 }
 J source_resolution(const std::filesystem::path& path) {
   auto input=packet(path); fields(input,{"schema_version","model_mm_per_unit","page_mm_per_unit","definition_mm_per_unit"});
@@ -1523,11 +1583,11 @@ J source_settings(const ON_3dmSettings& s,int version,unsigned opennurbs_version
     {"unrepresented_sections",J::array({"render_mesh","analysis_mesh","annotation","render_settings","grid_defaults","earth_anchor","io_settings","view_print_settings"})}};
 }
 J inventory_source(const std::filesystem::path& path,const J* resolution=nullptr,ON_ManifestMap* retained_reference_map=nullptr,FILE* retained_held_file=nullptr) {
-  const auto file_bytes=retained_held_file?static_cast<uintmax_t>(_filelengthi64(_fileno(retained_held_file))):std::filesystem::file_size(path); require(file_bytes>0&&file_bytes<=max_archive_bytes,"source archive file-byte budget");
+  const auto file_bytes=retained_held_file?static_cast<uintmax_t>(held_file_size(retained_held_file)):std::filesystem::file_size(path); require(file_bytes>0&&file_bytes<=max_archive_bytes,"source archive file-byte budget");
   source_record_count=0; const int initial_errors=ON_GetErrorCount(),initial_warnings=ON_GetWarningCount();
   SourceInventory out(resolution);auto owned_file=retained_held_file?std::unique_ptr<File>{}:std::make_unique<File>(path,resolution!=nullptr);
   auto* file=retained_held_file?retained_held_file:owned_file->value;
-  require(_fseeki64(file,0,SEEK_SET)==0,"source archive held-file rewind");
+  require(std::fseek(file,0,SEEK_SET)==0,"source archive held-file rewind");
   const auto source_hash=resolution?source_sha256(file,file_bytes):std::string();
   ON_BinaryFile archive(ON::archive_mode::read3dm,file);
   archive.SetShouldSerializeUserDataDefault(true); int version=0; ON_String comment;
@@ -1581,7 +1641,7 @@ J inventory_source(const std::filesystem::path& path,const J* resolution=nullptr
   }
   out.result["table_receipts"].push_back(J{{"table","user_tables"},{"read_records",user_tables},{"retained_records",user_tables},{"derived_records",0},{"crc_errors",0},{"recoverable_errors",0},{"critical_errors",0}});
   operation_record="source end mark"; size_t endmark_bytes=0; require(archive.Read3dmEndMark(&endmark_bytes),"source complete archive end mark required"); table_receipt(out,archive,Table::end_mark,"end_mark",0);
-  const auto final_bytes=retained_held_file?static_cast<uintmax_t>(_filelengthi64(_fileno(file))):std::filesystem::file_size(path);
+  const auto final_bytes=retained_held_file?static_cast<uintmax_t>(held_file_size(file)):std::filesystem::file_size(path);
   require(endmark_bytes==file_bytes&&archive.CurrentPosition()==file_bytes&&final_bytes==file_bytes,"source truncated/trailing/changed archive bytes");
   require(archive.BadCRCCount()==0&&archive.CriticalErrorCount()==0,"source native CRC/critical errors");
   require(ON_GetErrorCount()==initial_errors&&ON_GetWarningCount()==initial_warnings,"source native read warning/error or silent record repair");
@@ -1595,17 +1655,21 @@ J inventory_source(const std::filesystem::path& path,const J* resolution=nullptr
 }
 #include "retained_merge.hpp"
 }
-int wmain(int argc,wchar_t** argv) {
+#ifdef _WIN32
+int wmain(int argc, wchar_t** argv) {
+#else
+int main(int argc, char** argv) {
+#endif
   try {
-    require(argc>=2,"usage: om9-exchange-native --write packet.json private.3dm | --inspect model.3dm"); const std::wstring mode(argv[1]); J result;
-    if(mode==L"--write") { require(argc==4,"--write requires packet and unique private output"); operation_record="packet preflight"; auto p=packet(std::filesystem::path(argv[2])); Library library; Writer writer; result=writer.write(p,std::filesystem::path(argv[3])); }
-    else if(mode==L"--expected-brep-fingerprints") { require(argc==3,"--expected-brep-fingerprints requires held packet"); operation_record="expected BRep packet"; const auto p=packet(std::filesystem::path(argv[2])); Library library; result=expected_brep_fingerprints(p); }
-    else if(mode==L"--inventory-source") { require(argc==3,"--inventory-source requires archive"); operation_record="source archive"; Library library; result=inventory_source(std::filesystem::path(argv[2])); }
-    else if(mode==L"--project-source") { require(argc==4,"--project-source requires held archive and resolution packet"); operation_record="source resolution preflight"; const auto resolution=source_resolution(std::filesystem::path(argv[3])); Library library; result=inventory_source(std::filesystem::path(argv[2]),&resolution); }
-    else if(mode==L"--prepare-retained-source") { require(argc==3,"--prepare-retained-source requires archive"); operation_record="retained source preparation"; Library library; result=prepare_retained_source(std::filesystem::path(argv[2])); }
-    else if(mode==L"--write-retained") { require(argc==4,"--write-retained requires strict request and exclusive private output"); operation_record="retained request"; Library library; result=write_retained(std::filesystem::path(argv[2]),std::filesystem::path(argv[3])); }
-    else if(mode==L"--inspect-retained-current") { require(argc==4,"--inspect-retained-current requires strict request and private output"); operation_record="cold retained current request"; Library library; result=inspect_retained_current(std::filesystem::path(argv[2]),std::filesystem::path(argv[3])); }
-    else { require(mode==L"--inspect" && argc==3,"unsupported command/options"); operation_record="inspect archive"; Library library; result=inspect(std::filesystem::path(argv[2])); }
+    require(argc>=2,"usage: om9-exchange-native --write packet.json private.3dm | --inspect model.3dm"); const auto mode = std::filesystem::path(argv[1]).string(); J result;
+    if(mode=="--write") { require(argc==4,"--write requires packet and unique private output"); operation_record="packet preflight"; auto p=packet(std::filesystem::path(argv[2])); Library library; Writer writer; result=writer.write(p,std::filesystem::path(argv[3])); }
+    else if(mode=="--expected-brep-fingerprints") { require(argc==3,"--expected-brep-fingerprints requires held packet"); operation_record="expected BRep packet"; const auto p=packet(std::filesystem::path(argv[2])); Library library; result=expected_brep_fingerprints(p); }
+    else if(mode=="--inventory-source") { require(argc==3,"--inventory-source requires archive"); operation_record="source archive"; Library library; result=inventory_source(std::filesystem::path(argv[2])); }
+    else if(mode=="--project-source") { require(argc==4,"--project-source requires held archive and resolution packet"); operation_record="source resolution preflight"; const auto resolution=source_resolution(std::filesystem::path(argv[3])); Library library; result=inventory_source(std::filesystem::path(argv[2]),&resolution); }
+    else if(mode=="--prepare-retained-source") { require(argc==3,"--prepare-retained-source requires archive"); operation_record="retained source preparation"; Library library; result=prepare_retained_source(std::filesystem::path(argv[2])); }
+    else if(mode=="--write-retained") { require(argc==4,"--write-retained requires strict request and exclusive private output"); operation_record="retained request"; Library library; result=write_retained(std::filesystem::path(argv[2]),std::filesystem::path(argv[3])); }
+    else if(mode=="--inspect-retained-current") { require(argc==4,"--inspect-retained-current requires strict request and private output"); operation_record="cold retained current request"; Library library; result=inspect_retained_current(std::filesystem::path(argv[2]),std::filesystem::path(argv[3])); }
+    else { require(mode=="--inspect" && argc==3,"unsupported command/options"); operation_record="inspect archive"; Library library; result=inspect(std::filesystem::path(argv[2])); }
     operation_record="serialize owned result"; const auto bytes=result.dump(); require(bytes.size()<=16*1024*1024,"inventory stdout byte budget"); std::cout<<bytes<<'\n'; return 0;
   } catch(const std::bad_alloc&) { std::cerr<<"OM9 native exchange ("<<operation_record<<"): allocation refused\n"; return 1; }
   catch(const std::exception& error) { std::cerr<<"OM9 native exchange ("<<operation_record<<"): "<<error.what()<<'\n'; return 1; }

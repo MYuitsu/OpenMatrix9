@@ -44,6 +44,12 @@ $env:OM9_OPENNURBS_LIB = $openLibrary.DirectoryName
 $env:OM9_OPENNURBS_ZLIB = $openZlib.DirectoryName
 Push-Location $source
 try {
+    & cargo build --locked --release -p om9-kernel --features isolated-brep-worker --bin om9-brep-restore-worker --bin om9-native-brep-worker -j 2
+    if ($LASTEXITCODE -ne 0) { throw 'BRep worker build failed' }
+    $restoreWorker = Join-Path $env:CARGO_TARGET_DIR 'release/om9-brep-restore-worker.exe'
+    $nativeWorker = Join-Path $env:CARGO_TARGET_DIR 'release/om9-native-brep-worker.exe'
+    $env:OM9_BREP_WORKER_SHA256 = (Get-FileHash -LiteralPath $restoreWorker).Hash.ToLowerInvariant()
+    $env:OM9_NATIVE_BREP_WORKER_SHA256 = (Get-FileHash -LiteralPath $nativeWorker).Hash.ToLowerInvariant()
     & cargo build --locked --release -p om9-app --bin om9 -j 2
     if ($LASTEXITCODE -ne 0) { throw 'Standalone Rust application build failed' }
 } finally { Pop-Location }
@@ -52,6 +58,11 @@ if (-not $crt) { throw 'MSVC x64 redistributable CRT missing' }
 [ordered]@{
     target = 'om9-app/om9'; features = @('occt-brep'); workers = 2
     binary = Join-Path $env:CARGO_TARGET_DIR 'release/om9.exe'
+    workers_paths = @($restoreWorker, $nativeWorker)
+    workers_sha256 = [ordered]@{
+        'om9-brep-restore-worker.exe' = $env:OM9_BREP_WORKER_SHA256
+        'om9-native-brep-worker.exe' = $env:OM9_NATIVE_BREP_WORKER_SHA256
+    }
     native = Join-Path $Root 'native-exchange'
     sdk = $sdk; patch_root = $patchRoot; crt = $crt.FullName
     opennurbs_source = $env:OM9_OPENNURBS_INCLUDE
