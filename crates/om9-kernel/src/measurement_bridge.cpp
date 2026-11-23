@@ -264,7 +264,7 @@ extern "C" int om9_occt_trimmed_surface_face_source(const Om9MeasurePart* source
     const gp_Pnt2d a(uv[2*i],uv[2*i+1]),b(uv[2*j],uv[2*j+1]);
     if (!std::isfinite(a.X()) || !std::isfinite(a.Y()) || !std::isfinite(b.X()) || !std::isfinite(b.Y()))
      throw std::invalid_argument("trimmed face: non-finite UV");
-    const Handle(Geom2d_Curve) curve=GCE2d_MakeSegment(a,b).Value();
+    const Handle(Geom2d_Curve) curve(GCE2d_MakeSegment(a,b).Value().get());
     BRepBuilderAPI_MakeEdge make_edge(curve,surface);
     if (!make_edge.IsDone()) throw std::invalid_argument("trimmed face: invalid edge");
     TopoDS_Edge edge=make_edge.Edge();
