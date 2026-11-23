@@ -32,26 +32,12 @@ impl OwnedChild {
         self.0.id() as libc::pid_t
     }
 
-    fn reap(&mut self) -> std::io::Result<(std::process::ExitStatus, u64)> {
+    fn reap(&mut self) -> std::io::Result<std::process::ExitStatus> {
         // SAFETY: the unreaped child owns this dedicated process group ID.
         unsafe { libc::kill(-self.pid(), libc::SIGKILL); }
-        #[cfg(target_os = "macos")]
-        let result = (self.0.wait()?, 0);
-        #[cfg(target_os = "linux")]
-        let result = loop {
-            let mut status = 0;
-            // SAFETY: wait4 writes to these owned buffers and reaps our own child.
-            let mut usage: libc::rusage = unsafe { std::mem::zeroed() };
-            if unsafe { libc::wait4(self.pid(), &mut status, 0, &mut usage) } >= 0 {
-                break (std::process::ExitStatus::from_raw(status), (usage.ru_maxrss as u64).saturating_mul(1024));
-            }
-            let error = std::io::Error::last_os_error();
-            if error.kind() != ErrorKind::Interrupted {
-                return Err(error);
-            }
-        };
+        let status = self.0.wait()?;
         self.1 = true;
-        Ok(result)
+        Ok(status)
     }
 
     fn exited(&self) -> Result<bool> {
@@ -65,8 +51,8 @@ impl OwnedChild {
         }
         #[cfg(target_os = "macos")]
         let pid = info.si_pid;
-        // SAFETY: waitid filled the child-status variant or left the buffer zeroed.
         #[cfg(target_os = "linux")]
+        // SAFETY: waitid filled the child-status variant or left the buffer zeroed.
         let pid = unsafe { info.si_pid() };
         Ok(pid != 0)
     }
@@ -148,6 +134,23 @@ pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLi
     let mut command = Command::new(&program.path);
     command.args(args).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
         .process_group(0);
+    #[cfg(target_os = "linux")]
+    {
+        // Linux applies RLIMIT_DATA to brk and writable private mmap. Set the
+        // ceiling in the child only, before exec. A wait4 peak can include the
+        // parent's pre-exec mappings, so telemetry uses post-exec VmHWM.
+        let limit = libc::rlimit { rlim_cur: data_limit, rlim_max: data_limit };
+        // SAFETY: the hook uses only setrlimit and errno in the child before exec.
+        unsafe {
+            command.pre_exec(move || {
+                if libc::setrlimit(libc::RLIMIT_DATA, &limit) == 0 {
+                    Ok(())
+                } else {
+                    Err(std::io::Error::last_os_error())
+                }
+            });
+        }
+    }
     // Do not inherit loader overrides from a developer shell.
     for (name, _) in std::env::vars_os() {
         if name.as_encoded_bytes().starts_with(b"DYLD_") || name.as_encoded_bytes().starts_with(b"LD_") {
@@ -193,8 +196,7 @@ pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLi
                     ))?;
                     peak = peak.max(final_peak);
                 }
-                let (status, final_peak) = child.reap().map_err(io)?;
-                peak = peak.max(final_peak);
+                let status = child.reap().map_err(io)?;
                 if peak > data_limit {
                     return Err(Failure::new(FailureKind::Invalid("native memory budget")));
                 }

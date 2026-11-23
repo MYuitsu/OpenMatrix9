@@ -1,4 +1,24 @@
-# Windows standalone release build
+# OpenMatrix9 cross-platform release
+
+[release.yml](../../.github/workflows/release.yml) builds Windows x64,
+macOS 15 Apple Silicon and Ubuntu 24.04 x86_64 from one commit. Each
+platform runs independently and uploads its smoke-tested all-in-one archive.
+The tagged publish job waits for every platform, checks the artifacts from
+the same run and publishes one GitHub Release with a shared SHA-256 manifest.
+The existing Windows standalone ZIP is also included.
+
+Push the exact version tag from reviewed history on main. With prerelease
+metadata, a tag of the form `preview-v<version>-<suffix>` can publish a preview
+from a candidate commit. Main, PR and manual runs retain Actions artifacts.
+
+On Windows, extract the ZIP and run `Start-OM9.cmd`. On Apple Silicon, extract
+the ZIP and open `OpenMatrix9.app`. On Ubuntu 24.04 x86_64, extract the tar.gz
+and run `OpenMatrix9/om9` from a graphical session. Linux uses system display
+and Vulkan drivers, and Zenity for file dialogs. The Linux archive carries
+the pinned OCCT libraries, the openNURBS-backed exchange executable, both
+BRep workers and the Matrix and Ring Sizes add-ons.
+
+## Windows standalone build
 
 `.github/workflows/release-windows.yml` builds the root Rust workspace on Windows 2022
 with Rust 1.98.1 and the default `occt-brep` feature. `build-standalone-windows.ps1`
@@ -21,16 +41,9 @@ wrong native fingerprints or a mismatched patch receipt fail packaging. OS DLLs
 and Windows API sets are not redistributed. No third-party DLL is copied from
 a developer machine's PATH or System32.
 
-CI continues to audit/build/package only: its manifest explicitly records
-`validation_kind: build_only` and `tests_executed: false`. Source commit, executable
-and every payload SHA256, Rust version, SDK/patch and Cargo.lock are recorded.
-Local regression and clean-PATH loader checks are separate evidence.
-
-Both the product and standalone-native jobs must succeed before tagged publication.
-Branch/PR/manual runs retain Actions artifacts; they do not create releases. A
-matching version tag on main is still required. The publish job verifies the
-same-run ZIP checksum and expected portable asset name before creating a release.
-The older FreeCAD updater does not receive a renamed standalone package.
+The standalone package retains its build-identity manifest. The all-in-one
+job also runs BRep Save/Open, the 3DM round-trip and bundled add-on checks from
+the extracted ZIP. Windows provenance attestations cover both ZIPs.
 
 For a local product build (preserve existing build output; choose a fresh root):
 
