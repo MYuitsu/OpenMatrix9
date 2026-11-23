@@ -19,7 +19,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libssl-dev libxkbcommon-dev libxkbcommon-x11-0 libwayland-dev \
-            libx11-dev libxcb1-dev libvulkan1 mesa-vulkan-drivers patchelf ninja-build xvfb xdotool
+            libx11-dev libxcb1-dev libvulkan1 mesa-vulkan-drivers patchelf ninja-build xvfb
       - name: Pin Rust
         run: |
           printf 'CARGO_TARGET_DIR=%s/om9-target\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
@@ -56,24 +56,17 @@ jobs:
           path: build/ci/linux/packages/*
           if-no-files-found: error
           retention-days: 30
-      - name: Launch the extracted Linux desktop
-        env:
-          WGPU_BACKEND: vulkan
+      - name: Check Linux desktop initialization on the software-only runner
         run: |
           app="$GITHUB_WORKSPACE/build/ci/linux/extracted/OpenMatrix9/om9"
           config=$(mktemp -d)
+          driver=(/usr/share/vulkan/icd.d/lvp_icd*.json)
+          test -f "${driver[0]}"
+          status=0
           env -u LD_LIBRARY_PATH -u LD_PRELOAD OM9_CONFIG_DIR="$config" \
-            xvfb-run -a bash -euc '
-              "$1" &
-              pid=$!
-              trap "kill $pid 2>/dev/null || true; wait $pid || true" EXIT
-              for attempt in {1..120}; do
-                kill -0 "$pid" || { wait "$pid"; exit 1; }
-                if xdotool search --onlyvisible --pid "$pid" . >/dev/null 2>&1; then
-                  exit 0
-                fi
-                sleep 0.5
-              done
-              echo "No visible OM9 window after 60 seconds" >&2
-              exit 1
-            ' -- "$app"
+            WGPU_BACKEND=vulkan VK_DRIVER_FILES="${driver[0]}" \
+            timeout 30s xvfb-run -a "$app" > "$config/startup.log" 2>&1 || status=$?
+          cat "$config/startup.log"
+          test "$status" -eq 1
+          grep -F 'could not start (renderer)' "$config/startup.log"
+          grep -F 'hardware GPU adapter required; CPU/software rendering is disabled' "$config/startup.log"

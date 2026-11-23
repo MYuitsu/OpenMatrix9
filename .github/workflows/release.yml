@@ -104,7 +104,7 @@ jobs:
 
           - **Windows x64** — extract the ZIP and run **Start-OM9.cmd**.
           - **macOS 15+ Apple Silicon** — extract the ZIP and open **OpenMatrix9.app**. The app uses ad-hoc signing.
-          - **Ubuntu 24.04 x86_64** — extract the tar.gz and run **OpenMatrix9/om9** from a graphical session. Install the distribution's **zenity** package if needed for file dialogs.
+          - **Ubuntu 24.04 x86_64** — extract the tar.gz and run **OpenMatrix9/om9** from a graphical session with a supported hardware GPU. Install the distribution's **zenity** package if needed for file dialogs.
           - The standalone Windows ZIP remains available for existing launchers and workflows.
 
           Verify the chosen archive against **SHA256SUMS.txt**.
