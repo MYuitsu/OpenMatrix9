@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-#![cfg(windows)]
+#![cfg(any(windows, target_os = "macos"))]
 use om9_core::transaction::Cancellation;
 use om9_native_owner::{FailureKind, VerifiedFile};
+#[cfg(windows)]
 use sha2::{Digest, Sha256};
 use std::{fs, path::PathBuf};
 
@@ -24,7 +25,24 @@ impl Drop for Folder {
     }
 }
 
+#[cfg(target_os = "macos")]
 #[test]
+fn darwin_snapshot_shares_reads_and_refuses_symlinks_and_locked_writers() {
+    let folder = Folder::new();
+    let path = folder.file("model.om9", b"contents");
+    let link = folder.0.join("link.om9");
+    std::os::unix::fs::symlink(&path, &link).unwrap();
+    assert!(om9_native_owner::open_regular_read_locked(&link).is_err());
+    let writer = fs::OpenOptions::new().write(true).open(&path).unwrap();
+    writer.try_lock().unwrap();
+    assert!(om9_native_owner::open_regular_read_locked(&path).is_err());
+    drop(writer);
+    let _reader = om9_native_owner::open_regular_read_locked(&path).unwrap();
+    let _other_reader = om9_native_owner::open_regular_read_locked(&path).unwrap();
+}
+
+#[test]
+#[cfg(windows)]
 fn bounded_fingerprint_keeps_one_handle_and_denies_content_or_name_changes() {
     let folder = Folder::new();
     let content = vec![b'a'; 200_000];
@@ -69,6 +87,7 @@ fn publish_new_never_replaces_a_destination_created_after_admission() {
 }
 
 #[test]
+#[cfg(windows)]
 fn published_new_file_can_rollback_only_its_owned_handle() {
     let folder = Folder::new();
     let staged = folder.file("private.3dm", b"new");
@@ -104,6 +123,7 @@ fn invalid_size_nonregular_missing_and_early_cancel_never_admit_a_file() {
 }
 
 #[test]
+#[cfg(windows)]
 fn guard_drop_releases_write_delete_and_rename_denials_without_changing_bytes() {
     let folder = Folder::new();
     let staged = folder.file("private.3dm", b"file");
@@ -145,6 +165,7 @@ fn readonly_or_directory_target_and_cancel_keep_the_good_destination() {
 }
 
 #[test]
+#[cfg(windows)]
 fn existing_writer_prevents_fingerprint_admission_and_missing_target_publishes() {
     let folder = Folder::new();
     let staged = folder.file("tệp riêng (quoted 'name').3dm", b"UTF-8 names and spaces");
@@ -161,6 +182,7 @@ fn existing_writer_prevents_fingerprint_admission_and_missing_target_publishes()
 }
 
 #[test]
+#[cfg(windows)]
 fn invalid_relative_or_quoted_windows_paths_are_rejected_without_touching_target() {
     let folder = Folder::new();
     let staged = folder.file("private.3dm", b"new");
@@ -185,6 +207,7 @@ fn invalid_relative_or_quoted_windows_paths_are_rejected_without_touching_target
 }
 
 #[test]
+#[cfg(windows)]
 fn reparse_point_staged_file_and_target_are_rejected_when_symlinks_are_available() {
     let folder = Folder::new();
     let target = folder.file("link-target.3dm", b"prior");
@@ -211,6 +234,7 @@ fn reparse_point_staged_file_and_target_are_rejected_when_symlinks_are_available
 }
 
 #[test]
+#[cfg(windows)]
 fn cancellation_during_streaming_hash_releases_the_held_file() {
     let folder = Folder::new();
     let staged = folder.file("large-private.3dm", b"initial");

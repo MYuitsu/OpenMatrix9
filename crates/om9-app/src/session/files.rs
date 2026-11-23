@@ -305,12 +305,37 @@ struct FileOpenOwners {
     _metadata: om9_core::transaction::ExternalMemoryReservation,
     _current_scene: om9_core::transaction::ExternalMemoryReservation,
     _peer_metadata: Option<om9_core::transaction::ExternalMemoryReservation>,
-    _source_file: Option<std::fs::File>,
+    _source_file: Option<FileOpenSource>,
+}
+
+struct FileOpenSource {
+    _file: std::fs::File,
+    #[cfg(target_os = "macos")]
+    initial: std::fs::Metadata,
+}
+
+#[cfg(all(feature = "occt-brep", target_os = "macos"))]
+impl FileOpenSource {
+    fn recheck(&self, path: &Path) -> Result<()> {
+        use std::os::unix::fs::MetadataExt;
+        let identity = |m: &std::fs::Metadata| {
+            (m.dev(), m.ino(), m.len(), m.ctime(), m.ctime_nsec())
+        };
+        let held = self._file.metadata().map_err(|error| Error::Io(error.to_string()))?;
+        let named = std::fs::symlink_metadata(path).map_err(|error| Error::Io(error.to_string()))?;
+        if !named.is_file() || identity(&self.initial) != identity(&held) || identity(&held) != identity(&named) {
+            return Err(Error::Stale("BRep archive file changed"));
+        }
+        Ok(())
+    }
 }
 
 #[cfg(feature = "occt-brep")]
 fn is_brep_v6(path: &Path) -> Result<bool> {
     use std::io::Read;
+    #[cfg(target_os = "macos")]
+    let mut file = om9_native_owner::open_regular_read_locked(path).map_err(|error| Error::Io(error.to_string()))?;
+    #[cfg(not(target_os = "macos"))]
     let mut file = std::fs::File::open(path).map_err(|error| Error::Io(error.to_string()))?;
     let mut header = [0u8; 12];
     let mut offset = 0;
@@ -322,50 +347,65 @@ fn is_brep_v6(path: &Path) -> Result<bool> {
     Ok(crate::brep_restore_host::is_brep_archive(&header))
 }
 
-/// Read one locked input owner under a memory receipt; the handle remains
-/// alive until publication so ordinary writes or replacement cannot race it.
-#[cfg(feature = "occt-brep")]
+/// Read a locked snapshot and retain its handle until document publication.
+/// Darwin locks are advisory, so the held file and its name are also rechecked.
+#[cfg(all(feature = "occt-brep", any(windows, target_os = "macos")))]
 fn read_locked_brep_file(peer: &om9_core::transaction::TransactionCoordinator, path: &Path,
     limits: &om9_core::budget::Limits, held: Usage, cancel: &om9_core::transaction::Cancellation)
-    -> Result<(std::fs::File, Vec<u8>, om9_core::transaction::ExternalMemoryReservation)> {
+    -> Result<(FileOpenSource, Vec<u8>, om9_core::transaction::ExternalMemoryReservation)> {
     use std::io::Read;
     use om9_core::budget::memory::MemoryClass;
     if cancel.is_canceled() { return Err(Error::Canceled); }
-    #[cfg(not(windows))]
-    { let _ = (peer, path, limits, held); return Err(Error::Unsupported("BRep file lock requires Windows")); }
     #[cfg(windows)]
-    {
+    let mut file = {
         use std::os::windows::fs::OpenOptionsExt;
-        let mut file = std::fs::OpenOptions::new().read(true).share_mode(1).open(path)
-            .map_err(|error| Error::Io(error.to_string()))?;
-        let metadata = file.metadata().map_err(|error| Error::Io(error.to_string()))?;
-        if !metadata.is_file() { return Err(Error::Invalid("BRep archive file")); }
-        let size = metadata.len();
-        if size > limits.max_bytes { return Err(Error::Budget("BRep archive file")); }
-        let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
-        let mut owner = peer.reserve_external_memory_with_held(MemoryClass::CpuCache, size.max(1), physical(), held)?;
-        let mut bytes = Vec::new();
-        bytes.try_reserve_exact(usize::try_from(size).map_err(|_| Error::Overflow("BRep archive file"))?)
-            .map_err(|_| Error::Budget("BRep archive file"))?;
-        if bytes.capacity() as u64 > owner.bytes() {
-            let extra = bytes.capacity() as u64 - owner.bytes();
-            peer.grow_external_memory_with_held(&mut owner, extra, physical(), held)?;
-        }
-        owner.set_allocated_bytes(bytes.capacity() as u64)?;
-        let mut buffer = [0u8; 64 * 1024];
-        loop {
-            if cancel.is_canceled() { return Err(Error::Canceled); }
-            let n = file.read(&mut buffer).map_err(|error| Error::Io(error.to_string()))?;
-            if n == 0 { break; }
-            if bytes.len().checked_add(n).is_none_or(|next| next as u64 > size) { return Err(Error::Stale("BRep archive file changed")); }
-            bytes.extend_from_slice(&buffer[..n]);
-        }
-        if bytes.len() as u64 != size || file.metadata().map_err(|error| Error::Io(error.to_string()))?.len() != size {
-            return Err(Error::Stale("BRep archive file changed"));
-        }
-        Ok((file, bytes, owner))
+        std::fs::OpenOptions::new().read(true).share_mode(1).open(path)
+    }.map_err(|error| Error::Io(error.to_string()))?;
+    #[cfg(target_os = "macos")]
+    let mut file = om9_native_owner::open_regular_read_locked(path)
+        .map_err(|error| Error::Io(error.to_string()))?;
+    let metadata = file.metadata().map_err(|error| Error::Io(error.to_string()))?;
+    if !metadata.is_file() { return Err(Error::Invalid("BRep archive file")); }
+    let size = metadata.len();
+    if size > limits.max_bytes { return Err(Error::Budget("BRep archive file")); }
+    let physical = || om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
+    let mut owner = peer.reserve_external_memory_with_held(MemoryClass::CpuCache, size.max(1), physical(), held)?;
+    let mut bytes = Vec::new();
+    bytes.try_reserve_exact(usize::try_from(size).map_err(|_| Error::Overflow("BRep archive file"))?)
+        .map_err(|_| Error::Budget("BRep archive file"))?;
+    if bytes.capacity() as u64 > owner.bytes() {
+        let extra = bytes.capacity() as u64 - owner.bytes();
+        peer.grow_external_memory_with_held(&mut owner, extra, physical(), held)?;
     }
+    owner.set_allocated_bytes(bytes.capacity() as u64)?;
+    let mut buffer = [0u8; 64 * 1024];
+    loop {
+        if cancel.is_canceled() { return Err(Error::Canceled); }
+        let n = file.read(&mut buffer).map_err(|error| Error::Io(error.to_string()))?;
+        if n == 0 { break; }
+        if bytes.len().checked_add(n).is_none_or(|next| next as u64 > size) { return Err(Error::Stale("BRep archive file changed")); }
+        bytes.extend_from_slice(&buffer[..n]);
+    }
+    if bytes.len() as u64 != size || file.metadata().map_err(|error| Error::Io(error.to_string()))?.len() != size {
+        return Err(Error::Stale("BRep archive file changed"));
+    }
+    let source = FileOpenSource {
+        _file: file,
+        #[cfg(target_os = "macos")]
+        initial: metadata,
+    };
+    #[cfg(target_os = "macos")]
+    source.recheck(path)?;
+    Ok((source, bytes, owner))
 }
+
+#[cfg(all(feature = "occt-brep", not(any(windows, target_os = "macos"))))]
+fn read_locked_brep_file(_peer: &om9_core::transaction::TransactionCoordinator, _path: &Path,
+    _limits: &om9_core::budget::Limits, _held: Usage, _cancel: &om9_core::transaction::Cancellation)
+    -> Result<(FileOpenSource, Vec<u8>, om9_core::transaction::ExternalMemoryReservation)> {
+    Err(Error::Unsupported("BRep archive file ownership on this platform"))
+}
+
 pub(super) struct FileOpenWorker {
     token: FileToken,
     scene_publication: uuid::Uuid,
@@ -1823,6 +1863,10 @@ impl Controller {
                 _brep_owners,
                 #[cfg(feature = "occt-brep")]
                 brep_archive_cache } = result?;
+            #[cfg(all(feature = "occt-brep", target_os = "macos"))]
+            if let Some(source) = &_owners._source_file {
+                source.recheck(&path)?;
+            }
             let mut candidate = Self::from_prepared_initial(initial)?;
             #[cfg(feature = "occt-brep")]
             { candidate.brep_archive_cache = brep_archive_cache; }

@@ -17,11 +17,16 @@ use std::{
 pub mod dialog_probe;
 #[cfg(windows)]
 pub mod file_dialog;
+#[cfg(target_os = "macos")]
+#[path = "file_dialog_macos.rs"]
+pub mod file_dialog;
 #[cfg(windows)]
 pub mod clipboard;
 mod verified_file;
 #[cfg(target_os = "macos")]
 mod macos;
+#[cfg(target_os = "macos")]
+pub use macos::open_regular_read_locked;
 #[cfg(windows)]
 mod windows;
 #[cfg(windows)]

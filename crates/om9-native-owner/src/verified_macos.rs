@@ -7,9 +7,9 @@ use crate::io;
 use sha2::{Digest, Sha256};
 use std::{
     ffi::CString,
-    fs::{File, Metadata, OpenOptions},
+    fs::{File, Metadata},
     io::{Read, Seek, SeekFrom},
-    os::{fd::AsRawFd, unix::{ffi::OsStrExt, fs::{MetadataExt, OpenOptionsExt}}},
+    os::unix::{ffi::OsStrExt, fs::MetadataExt},
 };
 
 fn invalid(reason: &'static str) -> Failure {
@@ -66,16 +66,7 @@ fn name(path: &Path) -> Result<CString> {
 
 pub(super) fn open(path: &Path, max_bytes: u64, cancel: &Cancellation) -> Result<VerifiedFile> {
     name(path)?;
-    let file = OpenOptions::new()
-        .read(true)
-        .custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK | libc::O_CLOEXEC)
-        .open(path)
-        .map_err(io)?;
-    // SAFETY: the descriptor belongs to the live file. A worker can also
-    // hold a shared lock on an admitted read-only input.
-    if unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_SH | libc::LOCK_NB) } != 0 {
-        return Err(io(std::io::Error::last_os_error()));
-    }
+    let file = crate::open_regular_read_locked(path).map_err(io)?;
     let (sha256, bytes) = fingerprint(&file, max_bytes, cancel)?;
     if !same_file(&file.metadata().map_err(io)?, &std::fs::symlink_metadata(path).map_err(io)?) {
         return Err(Failure::new(FailureKind::Fingerprint));

@@ -10,6 +10,21 @@ use std::{
     time::Instant,
 };
 
+/// Open a regular input without following the final symlink. The shared lock
+/// coordinates cooperating readers and writers for the life of the handle.
+pub fn open_regular_read_locked(path: &Path) -> std::io::Result<File> {
+    use std::{fs::OpenOptions, os::unix::fs::OpenOptionsExt};
+    let file = OpenOptions::new()
+        .read(true)
+        .custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK | libc::O_CLOEXEC)
+        .open(path)?;
+    if !file.metadata()?.is_file() {
+        return Err(std::io::Error::new(ErrorKind::InvalidInput, "expected a regular file"));
+    }
+    file.try_lock_shared()?;
+    Ok(file)
+}
+
 struct OwnedChild(Child, bool);
 
 impl OwnedChild {

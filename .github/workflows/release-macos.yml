@@ -22,10 +22,12 @@ jobs:
         run: |
           rustup toolchain install 1.98.1 --profile minimal
           rustup override set 1.98.1
-      - name: Check Darwin physical memory reporting
+      - name: Check Darwin memory and file ownership
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/om9-target
-        run: cargo test --locked -j 2 -p om9-native-owner --lib macos_reports_physical_memory
+        run: |
+          cargo test --locked -j 2 -p om9-native-owner --lib macos_reports_physical_memory
+          cargo test --locked -j 2 -p om9-native-owner --test verified_file
       - name: Build and smoke-test Apple Silicon all-in-one
         env:
           CARGO_TARGET_DIR: ${{ runner.temp }}/om9-target
