@@ -9,8 +9,6 @@ jobs:
   linux-x64:
     runs-on: ubuntu-24.04
     timeout-minutes: 140
-    env:
-      CARGO_TARGET_DIR: ${{ runner.temp }}/om9-target
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -24,6 +22,7 @@ jobs:
             libx11-dev libxcb1-dev libvulkan1 mesa-vulkan-drivers patchelf ninja-build xvfb xdotool
       - name: Pin Rust
         run: |
+          printf 'CARGO_TARGET_DIR=%s/om9-target\n' "$RUNNER_TEMP" >> "$GITHUB_ENV"
           rustup toolchain install 1.98.1 --profile minimal
           rustup override set 1.98.1
       - name: Check Linux process and file ownership
