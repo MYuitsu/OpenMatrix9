@@ -45,9 +45,9 @@ public:
     for(size_t cursor=span.begin;cursor<span.end;) {
       const auto n=std::min<size_t>(8192,span.end-cursor);
       std::copy_n(bytes_.data()+cursor,n,buffer);
-      require(BCryptHashData(hash.hash,buffer,static_cast<ULONG>(n),0)>=0,"retained byte-span SHA256 update");cursor+=n;
+      hash.update(buffer,n);cursor+=n;
     }
-    unsigned char digest[32]{};require(BCryptFinishHash(hash.hash,digest,sizeof(digest),0)>=0,"retained byte-span SHA256 finish");
+    unsigned char digest[32]{};hash.finish(digest);
     std::string result;result.reserve(64);constexpr char hex[]="0123456789abcdef";
     for(const auto b:digest){result.push_back(hex[b>>4]);result.push_back(hex[b&15]);}return result;
   }
