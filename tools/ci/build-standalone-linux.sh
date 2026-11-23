@@ -27,6 +27,16 @@ export OM9_OPENNURBS_INCLUDE="$deps/opennurbs"
 export OM9_OPENNURBS_LIB="$(dirname "$(find "$native" -name libopennurbsStatic.a -print -quit)")"
 export OM9_OPENNURBS_ZLIB="$(dirname "$(find "$native" -name libzlib.a -print -quit)")"
 cp -P "$OM9_OCCT_SDK"/lib/*.so* "$lib/"
+# winit opens the XKB libraries at runtime, so ldd cannot discover them from om9.
+for dependency in libxkbcommon-x11-0:libxkbcommon-x11.so.0 \
+  libxkbcommon0:libxkbcommon.so.0 libxcb-xkb1:libxcb-xkb.so.1; do
+  package="${dependency%%:*}"
+  soname="${dependency#*:}"
+  path="$(dpkg-query -L "$package" | awk -F/ -v name="$soname" '$NF == name')"
+  test -f "$path"
+  cp -L "$path" "$lib/$soname"
+  cp "/usr/share/doc/$package/copyright" "$app/$package-copyright"
+done
 while IFS= read -r -d '' library; do
   patchelf --set-rpath '$ORIGIN' "$library"
 done < <(find "$lib" -type f -print0)
