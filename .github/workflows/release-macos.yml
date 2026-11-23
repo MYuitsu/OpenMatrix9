@@ -30,6 +30,7 @@ jobs:
           cargo test --locked -j 2 -p om9-native-owner --test verified_file
           cargo test --locked -j 2 -p om9-native-owner --test process_owner
           cargo test --locked -j 2 -p om9-archive --test atomic_save
+          cargo test --locked -j 2 -p om9-native-owner --lib clipboard_shortcuts_use_command
       - name: Identify native toolchain
         id: toolchain
         run: echo "xcode=$(xcodebuild -version | shasum -a 256 | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"

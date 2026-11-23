@@ -32,6 +32,8 @@ mod theme;
 use crate::tool_panel::ToolPanel;
 mod projects;
 mod clipboard;
+#[cfg(target_os = "macos")]
+pub use clipboard::smoke_geometry_clipboard;
 mod command;
 mod f6_panel;
 mod gem;
@@ -409,9 +411,9 @@ enum MemoryRecoveryTarget {
 pub struct MatrixApp {
     pub controller: Controller,
     live_mcp: Option<crate::mcp::live::LiveHost>,
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     clipboard_shortcut_hook: Option<om9_native_owner::clipboard::ShortcutHook>,
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "macos"))]
     clipboard_hook_attempted: bool,
     object_info_cache: std::cell::RefCell<object_info::Cache>,
     object_info_async: object_info::AsyncCache,
@@ -1161,9 +1163,9 @@ impl MatrixApp {
             project_file_pending: None,
             pending_jobbag_open: None,
             controller,
-            #[cfg(windows)]
+            #[cfg(any(windows, target_os = "macos"))]
             clipboard_shortcut_hook: None,
-            #[cfg(windows)]
+            #[cfg(any(windows, target_os = "macos"))]
             clipboard_hook_attempted: false,
             gumball_mode: om9_scene::gumball_view::Mode::Move,
             primary_press_scene: None,
@@ -10190,7 +10192,7 @@ impl eframe::App for MatrixApp {
         if let Some(log) = self.interaction_log.as_mut() {
             log.record(serde_json::json!({"event":"native_previous_cpu","cpu_ms":frame.info().cpu_usage.map(|s|s*1000.)}));
         }
-        self.attach_clipboard_shortcuts(frame);
+        self.attach_clipboard_shortcuts(frame, ui.ctx());
         self.show(ui);
         // Delete removes the selected objects when no text editor owns the keyboard.
         if !self.controller.is_running()

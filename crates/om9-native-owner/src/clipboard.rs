@@ -22,14 +22,10 @@ use windows::{
     core::w,
 };
 
-const MAGIC: &[u8; 8] = b"OM9CLIP1";
-const MAX_BYTES: usize = 512 * 1024 * 1024;
+pub use crate::clipboard_types::{Format, Shortcut};
+use crate::clipboard_types::MAX_BYTES;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Format {
-    Om9,
-    Rhino3dm,
-}
+const MAGIC: &[u8; 8] = b"OM9CLIP1";
 
 struct Ole;
 impl Ole {
@@ -667,13 +663,6 @@ pub struct ShortcutHook {
     hwnd: windows_sys::Win32::Foundation::HWND,
     shared: std::sync::Arc<std::sync::Mutex<Vec<Shortcut>>>,
     callback_ref: *const std::sync::Mutex<Vec<Shortcut>>,
-}
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum Shortcut {
-    Copy,
-    Copy3dm,
-    Paste,
 }
 
 unsafe extern "system" fn shortcut_proc(

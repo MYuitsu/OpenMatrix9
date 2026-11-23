@@ -241,12 +241,12 @@ impl MatrixApp {
                     }
                     "Edit" => {
                         let can_copy = !self.controller.is_running() && !self.controller.selected().is_empty();
-                        for (label, action, enabled) in [
-                            ("Copy\tCtrl+C", super::clipboard::ClipboardAction::Copy, can_copy),
-                            ("Copy as 3DM\tCtrl+Shift+C", super::clipboard::ClipboardAction::Copy3dm, can_copy),
-                            ("Paste\tCtrl+V", super::clipboard::ClipboardAction::Paste, !self.controller.is_running()),
+                        for (action, enabled) in [
+                            (super::clipboard::ClipboardAction::Copy, can_copy),
+                            (super::clipboard::ClipboardAction::Copy3dm, can_copy),
+                            (super::clipboard::ClipboardAction::Paste, !self.controller.is_running()),
                         ] {
-                            if ui.add_enabled(enabled, egui::Button::new(label)).clicked() {
+                            if ui.add_enabled(enabled, egui::Button::new(action.menu_label())).clicked() {
                                 self.clipboard_action(action);
                                 ui.close();
                             }

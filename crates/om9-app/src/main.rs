@@ -256,6 +256,10 @@ fn run() -> std::result::Result<(), om9_app::startup::StartupFailure> {
         // CMD and reads typed state instead of screenshots.
         Some("--mcp") if args.len() == 1 => document_stage(om9_app::mcp::serve_stdio()),
         Some("--mcp-live") if args.len() == 1 => document_stage(om9_app::mcp::live::serve_stdio()),
+        #[cfg(target_os = "macos")]
+        Some("--smoke-geometry-clipboard") if args.len() == 1 => {
+            document_stage(om9_app::ui::smoke_geometry_clipboard())
+        }
         // Headless viewport capture: one PNG per workspace camera, no window or egui.
         Some("--render") if args.len() == 3 || args.len() == 4 => {
             let size = if args.len() == 4 {

@@ -22,6 +22,11 @@ pub mod file_dialog;
 pub mod file_dialog;
 #[cfg(windows)]
 pub mod clipboard;
+#[cfg(target_os = "macos")]
+#[path = "clipboard_macos.rs"]
+pub mod clipboard;
+#[cfg(any(windows, target_os = "macos"))]
+mod clipboard_types;
 mod verified_file;
 #[cfg(target_os = "macos")]
 mod macos;

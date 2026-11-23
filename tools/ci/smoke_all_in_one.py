@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 
 
@@ -69,6 +70,8 @@ def smoke(app, addon_tool, system_addons):
         for addon in ("om9_matrix", "ring_sizes"):
             run(addon_tool, "--system", system_addons, "--config",
                 workspace / "addon-test", "--catalog", catalog, "enable", addon, "--yes")
+        if sys.platform == "darwin":
+            print(run(app, "--smoke-geometry-clipboard").decode().strip())
         print("All-in-one smoke passed: BRep save/open, native 3DM round-trip, Matrix and Ring Sizes")
 
 
