@@ -39,6 +39,14 @@
     ],
     "release_evidence_status": "NOT_VERIFIED"
   },
+  "runtime_implementation": {
+    "status": "PUBLISHED_RUNTIME_SMOKE_VERIFIED",
+    "workflow": ".github/workflows/release.yml",
+    "workflow_run": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/45149973934",
+    "evidence": ["docs/validation/2026-11-23-cross-platform-release.md"],
+    "verified": "One versioned run verified four package checksums and published the archives together after the three platform jobs passed.",
+    "manual_gate_promoted": false
+  },
   "execution_design": null,
   "task_ids": [
     "OM9-M00-L4-07-03-01",

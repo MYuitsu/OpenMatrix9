@@ -13,7 +13,8 @@ from a candidate commit. Main, PR and manual runs retain Actions artifacts.
 
 On Windows, extract the ZIP and run `Start-OM9.cmd`. On Apple Silicon, extract
 the ZIP and open `OpenMatrix9.app`. On Ubuntu 24.04 x86_64, extract the tar.gz
-and run `OpenMatrix9/om9` from a graphical session. Linux uses system display
+and run `OpenMatrix9/om9` from a graphical session with a supported hardware
+GPU. Linux uses system display
 and Vulkan drivers, and Zenity for file dialogs. The Linux archive carries
 the pinned OCCT libraries, the openNURBS-backed exchange executable, both
 BRep workers and the Matrix and Ring Sizes add-ons.

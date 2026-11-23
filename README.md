@@ -1,6 +1,8 @@
 # OpenMatrix9
 
-The all-in-one builds include the native runtime, 3DM and BRep workers, OM9 Matrix and Ring Sizes. Extract the complete ZIP. On Windows x64, open `Start-OM9.cmd`. On Apple Silicon with macOS 15 or later, the ZIP contains `OpenMatrix9.app`. Use Tools → Add-ons to enable the supplied add-ons in a new profile. [Downloads and build verification](docs/validation/2026-11-23-all-in-one.md)
+One GitHub Release carries the all-in-one archives for Windows x64, macOS 15 Apple Silicon and Ubuntu 24.04 x86_64. Each archive includes the native runtime, 3DM and BRep workers, OM9 Matrix and Ring Sizes. Use Tools → Add-ons to enable the supplied add-ons in a new profile. [GitHub Release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/preview-v0.3.6-202610211407-cross-platform.8) · [Build verification](docs/validation/2026-11-23-cross-platform-release.md)
+
+Extract the complete archive. On Windows, open `Start-OM9.cmd`. On Apple Silicon, open `OpenMatrix9.app`. On Ubuntu, run `OpenMatrix9/om9` from a graphical session with a hardware GPU. Linux uses Zenity for file dialogs.
 
 The Apple Silicon clipboard build supports Copy (⌘C), Copy as 3DM (⇧⌘C) and Paste (⌘V) through AppKit. [macOS GitHub Release](https://github.com/MYuitsu/OpenMatrix9/releases/tag/macos-v0.3.6-202610211407-clipboard.1) · [Clipboard verification](docs/validation/2026-11-23-macos-geometry-clipboard.md)
 

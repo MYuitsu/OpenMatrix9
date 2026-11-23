@@ -45,6 +45,15 @@
   "gate_id": "G00-07",
   "gate_registry": "implementation/evidence/M00/G00-INDEX.json",
   "runtime_implementation": {
+    "cross_platform_release_2026_11_23": {
+      "status": "PUBLISHED_RUNTIME_SMOKE_VERIFIED",
+      "source_commit": "c2b91d0d67c70caa34dea846bbfdfeef9b845599",
+      "scope": "One release for Windows x64, macOS 15 Apple Silicon and Ubuntu 24.04 x86_64 with verified extracted archives and public SHA-256 checks.",
+      "evidence": ["docs/validation/2026-11-23-cross-platform-release.md"],
+      "workflow_run": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/45149973934",
+      "release": "https://github.com/MYuitsu/OpenMatrix9/releases/tag/preview-v0.3.6-202610211407-cross-platform.8",
+      "manual_gate_promoted": false
+    },
     "all_in_one_2026_11_23": {
       "status": "PACKAGED_RUNTIME_SMOKE_VERIFIED",
       "source_commit": "787afe9c13cf6be51f2b60369f32005c9b0af65e",

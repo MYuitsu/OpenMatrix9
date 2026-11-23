@@ -1,4 +1,15 @@
 {
+  "cross_platform_release_2026_11_23": {
+    "stage": "build-validation",
+    "feature_ids": ["OM9-M00-L2-07", "OM9-M00-L3-07-02", "OM9-M00-L3-07-03"],
+    "status": "validated",
+    "scope": "One tagged GitHub Actions workflow builds and smoke-tests Windows x64, macOS 15 Apple Silicon and Ubuntu 24.04 x86_64 all-in-one packages, then publishes one prerelease.",
+    "evidence": "docs/validation/2026-11-23-cross-platform-release.md",
+    "tests": "Run #8 passed all six jobs at c2b91d0d67c70caa34dea846bbfdfeef9b845599. Extracted archives passed BRep save/reopen, native 3DM round-trip and bundled add-on loading. macOS passed both clipboard formats with Undo/Redo. Linux passed 9 process-owner, 4 verified-file and 6 atomic-save tests and the classified software GPU startup probe. All four public archives matched the published SHA-256 manifest.",
+    "uncertainties": "A physical Linux hardware-GPU session and macOS Developer ID notarization remain outside this evidence.",
+    "next_document": "docs/validation/2026-11-23-cross-platform-release.md",
+    "next_action": "Use the verified release and receipts for a physical Linux desktop validation."
+  },
   "macos_geometry_clipboard_2026_11_23": {
     "stage": "build-validation",
     "feature_ids": ["OM9-L3-01-02-004", "OM9-L2-01-13"],

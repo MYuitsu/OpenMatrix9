@@ -4,7 +4,7 @@
   "milestone": "M00",
   "parent_l2_id": "OM9-M00-L2-07",
   "title": "Linux optional & packaged OCCT",
-  "planning_state": "SPEC_ONLY_NOT_IMPLEMENTED",
+  "planning_state": "IMPLEMENTED_PACKAGED_SMOKE_VERIFIED_HARDWARE_UI_OPEN",
   "specification": {
     "l3_id": "OM9-M00-L3-07-02",
     "module_id": "OM9-M00-L2-07",
@@ -31,7 +31,15 @@
         "file": "M00 - Feasibility, Legal/L2-07 - Reproducible/L3-02 - Linux optional & packaged OCCT/L4-03 - Đánh giá binary asset updates - versioning/l4.json"
       }
     ],
-    "release_evidence_status": "NOT_VERIFIED"
+    "release_evidence_status": "PACKAGED_RUNTIME_SMOKE_VERIFIED"
+  },
+  "runtime_implementation": {
+    "target": "Ubuntu 24.04 x86_64",
+    "archive": "tar.gz",
+    "evidence": ["docs/validation/2026-11-23-cross-platform-release.md"],
+    "workflow_run": "https://github.com/MYuitsu/OpenMatrix9/actions/runs/45149973934",
+    "verified": "Extracted BRep save and reopen, native 3DM exchange, system add-ons, worker budgets, verified file ownership, atomic save, and the software GPU startup diagnostic.",
+    "desktop_evidence": "Interactive hardware-GPU rendering requires a separate run."
   },
   "execution_design": null,
   "task_ids": [
