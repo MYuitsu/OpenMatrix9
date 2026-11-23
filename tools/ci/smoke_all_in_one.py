@@ -14,7 +14,7 @@ def smoke(app, addon_tool):
         if not key.upper().startswith(("OM9_", "DYLD_"))
     }
     if os.name == "nt":
-        system = Path(environment["SystemRoot"])
+        system = Path(os.environ["SystemRoot"])
         environment["PATH"] = os.pathsep.join(map(str, [system / "System32", system]))
     else:
         environment["PATH"] = "/usr/bin:/bin"

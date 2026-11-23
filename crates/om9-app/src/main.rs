@@ -74,34 +74,14 @@ fn create_fixture(path: &Path) -> Result<()> {
 }
 /// Import a Rhino 3DM through the admitted native reader and save the resulting OM9 project.
 fn import_3dm(source: &Path, target: &Path) -> Result<()> {
-    let host = om9_app::three_dm_host::ThreeDmHost::configured()?;
-    let document = Document::with_template_tolerance("3DM import");
-    let id = document.id;
     let limits = om9_app::document_limits();
-    let mut coordinator =
-        TransactionCoordinator::new(World::new(vec![document], &limits)?, limits)?;
-    if let Some(total) = om9_native_owner::physical_memory_bytes() {
-        coordinator.constrain_managed_ram(total, om9_core::budget::Usage::default())?;
-    }
-    let receipt = host.import(&mut coordinator, id, source, &Cancellation::default())?;
-    let document = coordinator
-        .world()
-        .documents
-        .get(&id)
-        .ok_or(Error::Missing("imported document"))?;
-    // The serializer and verification copy share the same account as the
-    // imported document; lease only the remaining admitted headroom.
-    let document_usage = document.validate(&limits)?;
-    let physical = om9_native_owner::physical_memory().map(|sample| (sample.total_bytes, sample.available_bytes));
-    let reservation = coordinator.reserve_remaining_external_memory_with_held(
-        om9_core::budget::memory::MemoryClass::CpuCache, physical, om9_core::budget::Usage::default(),
+    let mut controller = om9_app::session::Controller::new(
+        Document::with_template_tolerance("3DM import"),
+        limits,
     )?;
-    let mut archive_limits = limits;
-    archive_limits.max_bytes = document_usage.bytes.checked_add(reservation.bytes())
-        .ok_or(Error::Overflow("save memory budget"))?;
-    Archive::save(target, document, &archive_limits, &Cancellation::default())?;
-    drop(reservation);
-    report_with_limits(document, &receipt.diagnostics, &limits)
+    let diagnostics = controller.import_3dm(source)?;
+    controller.save_archive_for_batch(target)?;
+    report_with_limits(controller.document(), &diagnostics, &limits)
 }
 
 /// Export the current OM9 project through the admitted native writer.
