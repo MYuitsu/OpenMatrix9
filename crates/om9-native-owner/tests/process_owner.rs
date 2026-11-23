@@ -49,6 +49,20 @@ fn worker_budget_does_not_limit_the_parent_process_map() {
     assert_eq!(result.stats.active_processes, 0);
     std::hint::black_box(parent_data);
 }
+
+#[cfg(target_os = "macos")]
+#[test]
+fn physical_footprint_over_budget_stops_and_reaps_worker() {
+    let limits = ProcessLimits {
+        native_committed_bytes: 32 * 1024 * 1024,
+        ..ProcessLimits::default()
+    };
+    let failure = program().run(&args(&["allocate"]), &limits, &Cancellation::default()).unwrap_err();
+    assert_eq!(failure.kind, FailureKind::Invalid("native memory budget"));
+    let stats = failure.stats.unwrap();
+    assert!(stats.peak_committed_bytes > limits.native_committed_bytes);
+    assert_eq!(stats.active_processes, 0);
+}
 #[test]
 fn wrong_binary_fingerprint_and_invalid_limits_reject_before_process_creation() {
     assert!(

@@ -9,17 +9,6 @@ fn stats(s: &ProcessStats) -> serde_json::Value {
 }
 fn main() {
     let args: Vec<_> = std::env::args_os().skip(1).collect();
-    #[cfg(target_os = "macos")]
-    if args.first().is_some_and(|arg| arg == "--exec-bounded") {
-        let bytes = args.get(1).and_then(|n| n.to_str()).and_then(|n| n.parse::<u64>().ok());
-        if let (Some(bytes), Some(program)) = (bytes, args.get(2)) {
-            let error = om9_native_owner::exec_with_data_limit(Path::new(program), &args[3..], bytes);
-            eprintln!("bounded worker startup: {error}");
-        } else {
-            eprintln!("invalid bounded worker arguments");
-        }
-        std::process::exit(125);
-    }
     if args.len() < 5 || args[0] != "--program" || args[2] != "--sha256" || args[4] != "--" {
         eprintln!("usage: om9-native-runner --program absolute.exe --sha256 hex -- arguments");
         std::process::exit(2);

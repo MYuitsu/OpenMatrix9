@@ -69,9 +69,6 @@ shasum -a 256 "$bin/om9-exchange-native" | cut -d ' ' -f 1 > "$resources/om9-exc
 cargo build --locked --release -j 2 -p om9-kernel --features isolated-brep-worker \
   --bin om9-brep-restore-worker --bin om9-native-brep-worker
 release="$CARGO_TARGET_DIR/release"
-cargo build --locked --release -j 2 -p om9-native-owner --bin om9-native-runner
-cp "$release/om9-native-runner" "$bin/"
-relocate "$bin/om9-native-runner" '@loader_path/../Frameworks'
 for worker in om9-brep-restore-worker om9-native-brep-worker; do
   cp "$release/$worker" "$bin/"
   relocate "$bin/$worker" '@loader_path/../Frameworks'

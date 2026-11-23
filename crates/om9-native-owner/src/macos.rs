@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
-//! Native workers run in their own Darwin process group. Data-segment limits
-//! and physical-footprint sampling supplement the bounded OM9 worker packets.
+//! Native workers run in their own Darwin process group. The parent monitors
+//! physical footprint and checks the kernel's lifetime peak before success.
 use super::*;
 use std::{
     io::{ErrorKind, Read},
@@ -102,36 +102,6 @@ fn drain(pipe: &mut impl Read, output: &mut Vec<u8>, limit: usize) -> Result<boo
     }
 }
 
-/// Run inside the bundled launcher after it starts with its own small VM map.
-/// A fork of the CAD app can already exceed the worker limit before exec.
-pub fn exec_with_data_limit(program: &Path, args: &[OsString], bytes: u64) -> std::io::Error {
-    if !program.is_absolute() || bytes == 0 {
-        return std::io::Error::new(ErrorKind::InvalidInput, "native worker image or data limit");
-    }
-    let mut limit = libc::rlimit { rlim_cur: 0, rlim_max: 0 };
-    // SAFETY: the initialized writable structure matches Darwin's rlimit ABI.
-    if unsafe { libc::getrlimit(libc::RLIMIT_DATA, &mut limit) } != 0 {
-        return std::io::Error::last_os_error();
-    }
-    limit.rlim_cur = limit.rlim_cur.min(bytes);
-    limit.rlim_max = limit.rlim_cur;
-    // SAFETY: the structure remains live for the call and only limits this launcher.
-    if unsafe { libc::setrlimit(libc::RLIMIT_DATA, &limit) } != 0 {
-        return std::io::Error::last_os_error();
-    }
-    Command::new(program).args(args).exec()
-}
-
-fn launcher() -> Result<PathBuf> {
-    let executable = std::env::current_exe().map_err(io)?;
-    let mut directory = executable.parent().ok_or_else(|| Failure::new(FailureKind::Invalid("worker launcher directory")))?;
-    // Cargo integration tests live in target/debug/deps, next to their bin directory.
-    if directory.ends_with("deps") {
-        directory = directory.parent().ok_or_else(|| Failure::new(FailureKind::Invalid("worker launcher directory")))?;
-    }
-    Ok(directory.join("om9-native-runner"))
-}
-
 pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLimits,
                   cancel: &Cancellation) -> Result<ProcessOutput> {
     use std::os::unix::fs::MetadataExt;
@@ -148,9 +118,8 @@ pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLi
         return Err(Failure::new(FailureKind::Fingerprint));
     }
     let data_limit = limits.native_committed_bytes;
-    let mut command = Command::new(launcher()?);
-    command.arg("--exec-bounded").arg(data_limit.to_string()).arg(&program.path).args(args)
-        .stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
+    let mut command = Command::new(&program.path);
+    command.args(args).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped())
         .process_group(0);
     // Do not inherit loader overrides from a developer shell.
     for (name, _) in std::env::vars_os() {
@@ -188,8 +157,15 @@ pub(super) fn run(program: &NativeProgram, args: &[OsString], limits: &ProcessLi
             let out_done = drain(&mut out, &mut stdout, limits.stdout_bytes)?;
             let err_done = drain(&mut err, &mut stderr, limits.stderr_bytes)?;
             if exited && out_done && err_done {
-                // There are no writers left. Reap our child without a blocking
-                // wait on untrusted work. Disarm the group guard after wait.
+                // Darwin keeps the lifetime footprint on the exited child
+                // until reap. Include allocations between parent samples.
+                let final_peak = child.peak().ok_or_else(|| Failure::new(
+                    FailureKind::Io("cannot read final Darwin worker footprint".into()),
+                ))?;
+                peak = peak.max(final_peak);
+                if peak > data_limit {
+                    return Err(Failure::new(FailureKind::Invalid("native memory budget")));
+                }
                 return child.reap().map_err(io);
             }
             thread::sleep(Duration::from_millis(2));
