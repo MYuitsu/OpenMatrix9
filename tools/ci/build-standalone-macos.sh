@@ -32,20 +32,8 @@ occt="$deps/OCCT-8_0_1"
 accuracy_patch="$PWD/tools/patches/occt-8.0.1-offset-d3.patch"
 patch_digest=$(python3 -c 'import json; print(json.load(open("native/occt/pin.json"))["accuracy_patch"]["sha256"])')
 printf '%s  %s\n' "$patch_digest" "$accuracy_patch" | shasum -a 256 -c -
-(cd "$occt"; patch -p1 -i "$accuracy_patch")
+git -C "$occt" apply --ignore-space-change "$accuracy_patch"
 sdk="$deps/occt-sdk"
-cmake -S "$occt" -B "$deps/occt-build" -G Ninja \
-  -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 \
-  -DCMAKE_INSTALL_PREFIX="$sdk" -DINSTALL_DIR_LIB=lib -DINSTALL_DIR_INCLUDE=include/opencascade \
-  -DCMAKE_INSTALL_NAME_DIR=@rpath -DCMAKE_SHARED_LINKER_FLAGS=-Wl,-headerpad_max_install_names \
-  -DBUILD_MODULE_FoundationClasses=OFF -DBUILD_MODULE_ModelingData=OFF \
-  -DBUILD_MODULE_ModelingAlgorithms=OFF -DBUILD_MODULE_Visualization=OFF \
-  -DBUILD_MODULE_ApplicationFramework=OFF -DBUILD_MODULE_DataExchange=OFF -DBUILD_MODULE_Draw=OFF \
-  '-DBUILD_ADDITIONAL_TOOLKITS=TKernel;TKMath;TKG2d;TKG3d;TKGeomBase;TKBRep;TKTopAlgo;TKGeomAlgo;TKPrim;TKBO;TKBool;TKMesh;TKFillet;TKOffset;TKShHealing' \
-  -DUSE_FREETYPE=OFF -DUSE_TBB=OFF -DUSE_JEMALLOC=OFF -DBUILD_TESTING=OFF
-cmake --build "$deps/occt-build" --parallel 2
-cmake --install "$deps/occt-build"
-cp -P "$sdk"/lib/*.dylib "$frameworks/"
 
 # Build both the pinned openNURBS library and the standalone native exchange tool.
 pin=eb92af3ba1806b0a34a99aba0d3bda83e3d46083
@@ -64,6 +52,20 @@ native="$deps/native-exchange"
 cmake -S native -B "$native" -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 \
   -DOM9_OPENNURBS_SOURCE="$open" -DOM9_JSON_SOURCE="$json"
 cmake --build "$native" --target om9-exchange-native --parallel 2
+
+cmake -S "$occt" -B "$deps/occt-build" -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES=arm64 \
+  -DCMAKE_INSTALL_PREFIX="$sdk" -DINSTALL_DIR_LIB=lib -DINSTALL_DIR_INCLUDE=include/opencascade \
+  -DCMAKE_INSTALL_NAME_DIR=@rpath -DCMAKE_SHARED_LINKER_FLAGS=-Wl,-headerpad_max_install_names \
+  -DBUILD_MODULE_FoundationClasses=OFF -DBUILD_MODULE_ModelingData=OFF \
+  -DBUILD_MODULE_ModelingAlgorithms=OFF -DBUILD_MODULE_Visualization=OFF \
+  -DBUILD_MODULE_ApplicationFramework=OFF -DBUILD_MODULE_DataExchange=OFF -DBUILD_MODULE_Draw=OFF \
+  '-DBUILD_ADDITIONAL_TOOLKITS=TKernel;TKMath;TKG2d;TKG3d;TKGeomBase;TKBRep;TKTopAlgo;TKGeomAlgo;TKPrim;TKBO;TKBool;TKMesh;TKFillet;TKOffset;TKShHealing' \
+  -DUSE_FREETYPE=OFF -DUSE_TBB=OFF -DUSE_JEMALLOC=OFF -DBUILD_TESTING=OFF
+cmake --build "$deps/occt-build" --parallel 2
+cmake --install "$deps/occt-build"
+cp -P "$sdk"/lib/*.dylib "$frameworks/"
+
 export OM9_OCCT_SDK="$sdk"
 export OM9_OPENNURBS_INCLUDE="$open"
 export OM9_OPENNURBS_LIB="$(dirname "$(find "$native" -name libopennurbsStatic.a -print -quit)")"
